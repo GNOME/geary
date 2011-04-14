@@ -3,18 +3,29 @@ BUILD_ROOT = 1
 
 VALAC := valac
 
-APPS := console syntax
+APPS := console syntax lsmbox
 
 ENGINE_SRC := \
+	src/engine/Engine.vala \
+	src/engine/Interfaces.vala \
+	src/engine/Message.vala \
 	src/engine/state/Machine.vala \
 	src/engine/state/MachineDescriptor.vala \
 	src/engine/state/Mapping.vala \
 	src/engine/imap/ClientConnection.vala \
 	src/engine/imap/ClientSession.vala \
+	src/engine/imap/Mailbox.vala \
 	src/engine/imap/Parameter.vala \
 	src/engine/imap/Tag.vala \
 	src/engine/imap/Command.vala \
 	src/engine/imap/Commands.vala \
+	src/engine/imap/FetchCommand.vala \
+	src/engine/imap/ResponseCode.vala \
+	src/engine/imap/Response.vala \
+	src/engine/imap/StatusResponse.vala \
+	src/engine/imap/ServerData.vala \
+	src/engine/imap/Status.vala \
+	src/engine/imap/CommandResponse.vala \
 	src/engine/imap/Serializable.vala \
 	src/engine/imap/Serializer.vala \
 	src/engine/imap/Deserializer.vala \
@@ -27,7 +38,10 @@ CONSOLE_SRC := \
 SYNTAX_SRC := \
 	src/tests/syntax.vala
 
-ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC)
+LSMBOX_SRC := \
+	src/tests/lsmbox.vala
+
+ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC)
 
 EXTERNAL_PKGS := \
 	gio-2.0 \
@@ -50,5 +64,10 @@ console: $(ENGINE_SRC) $(CONSOLE_SRC) Makefile
 syntax: $(ENGINE_SRC) $(SYNTAX_SRC) Makefile
 	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(SYNTAX_SRC) \
+		-o $@
+
+lsmbox: $(ENGINE_SRC) $(LSMBOX_SRC) Makefile
+	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+		$(ENGINE_SRC) $(LSMBOX_SRC) \
 		-o $@
 

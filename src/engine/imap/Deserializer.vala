@@ -148,7 +148,7 @@ public class Geary.Imap.Deserializer {
     public Mode get_mode() {
         switch (fsm.get_state()) {
             case State.LITERAL_DATA:
-                return Mode.LINE;
+                return Mode.BLOCK;
             
             case State.FAILED:
                 return Mode.FAILED;
@@ -184,6 +184,10 @@ public class Geary.Imap.Deserializer {
         current_string = null;
     }
     
+    private void clear_string_parameter() {
+        current_string = null;
+    }
+    
     private void save_literal_parameter() {
         if (current_literal == null)
             return;
@@ -196,8 +200,9 @@ public class Geary.Imap.Deserializer {
         current.add(param);
     }
     
-    private void push() {
-        ListParameter child = new ListParameter(current);
+    // ListParameter's parent *must* be current
+    private void push(ListParameter child) {
+        assert(child.get_parent() == current);
         current.add(child);
         
         current = child;
@@ -206,7 +211,7 @@ public class Geary.Imap.Deserializer {
     private State pop() {
         ListParameter? parent = current.get_parent();
         if (parent == null) {
-            warning("Attempt to close unopened list");
+            warning("Attempt to close unopened list/response code");
             
             return State.FAILED;
         }
@@ -224,7 +229,9 @@ public class Geary.Imap.Deserializer {
         }
         
         if (!is_current_string_empty() || current_literal != null || literal_length_remaining > 0) {
-            warning("Unfinished parameter");
+            warning("Unfinished parameter: string=%s literal=%s %ld remaining", 
+                (!is_current_string_empty()).to_string(), (current_literal != null).to_string(),
+                literal_length_remaining);
             
             return State.FAILED;
         }
@@ -245,6 +252,13 @@ public class Geary.Imap.Deserializer {
         // look for opening characters to special parameter formats, otherwise jump to atom
         // handler (i.e. don't drop this character in the case of atoms)
         switch (*((unichar *) user)) {
+            case '[':
+                // open response code
+                ResponseCode response_code = new ResponseCode(current);
+                push(response_code);
+                
+                return State.START_PARAM;
+            
             case '{':
                 return State.LITERAL;
             
@@ -253,12 +267,14 @@ public class Geary.Imap.Deserializer {
             
             case '(':
                 // open list
-                push();
+                ListParameter list = new ListParameter(current);
+                push(list);
                 
                 return State.START_PARAM;
             
             case ')':
-                // close list
+            case ']':
+                // close list or response code
                 return pop();
             
             default:
@@ -275,12 +291,8 @@ public class Geary.Imap.Deserializer {
         
         unichar ch = *((unichar *) user);
         
-        // drop everything above 0x7F
-        if (ch > 0x7F)
-            return state;
-        
-        // drop control characters
-        if (ch.iscntrl())
+        // drop everything above 0x7F and control characters
+        if (ch > 0x7F || ch.iscntrl())
             return state;
         
         // tags and atoms have different special characters
@@ -300,8 +312,9 @@ public class Geary.Imap.Deserializer {
             return State.START_PARAM;
         }
         
-        // close-parens after an atom indicates end-of-list
-        if (state == State.ATOM && ch == ')') {
+        // close-parens/close-square-bracket after an atom indicates end-of-list/end-of-response
+        // code
+        if (state == State.ATOM && (ch == ')' || ch == ']')) {
             save_string_parameter();
             
             return pop();
@@ -322,12 +335,8 @@ public class Geary.Imap.Deserializer {
     private uint on_quoted_char(uint state, uint event, void *user) {
         unichar ch = *((unichar *) user);
         
-        // drop anything above 0x7F
-        if (ch > 0x7F)
-            return State.QUOTED;
-        
-        // drop NUL, CR, and LF
-        if (ch == '\0' || ch == '\r' || ch == '\n')
+        // drop anything above 0x7F, NUL, CR, and LF
+        if (ch > 0x7F || ch == '\0' || ch == '\r' || ch == '\n')
             return State.QUOTED;
         
         // look for escaped characters
@@ -376,6 +385,8 @@ public class Geary.Imap.Deserializer {
                 
                 return State.FAILED;
             }
+            
+            clear_string_parameter();
             
             return State.LITERAL_DATA_BEGIN;
         }

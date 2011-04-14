@@ -4,7 +4,10 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-errordomain Geary.ImapError {
-    PARSE_ERROR;
+public errordomain Geary.ImapError {
+    PARSE_ERROR,
+    TYPE_ERROR,
+    SERVER_ERROR,
+    NOT_CONNECTED
 }
 

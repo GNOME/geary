@@ -59,7 +59,7 @@ public class Geary.State.Machine {
         assert(event < descriptor.event_count);
         assert(state < descriptor.state_count);
         
-        Mapping? mapping = transitions[state, event];
+        unowned Mapping? mapping = transitions[state, event];
         
         Transition transition = (mapping != null) ? mapping.transition : default_transition;
         if (transition == null) {

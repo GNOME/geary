@@ -18,6 +18,8 @@ public class Geary.Imap.ClientConnection {
     private bool flow_controlled = true;
     private Deserializer des = new Deserializer();
     private uint8[] block_buffer = new uint8[4096];
+    private int tag_counter = 0;
+    private char tag_prefix = 'a';
     
     public virtual signal void connected() {
     }
@@ -31,7 +33,13 @@ public class Geary.Imap.ClientConnection {
     public virtual signal void sent_command(Command cmd) {
     }
     
-    public virtual signal void received_response(RootParameters params) {
+    public virtual signal void received_status_response(StatusResponse status_response) {
+    }
+    
+    public virtual signal void received_server_data(ServerData server_data) {
+    }
+    
+    public virtual signal void received_bad_response(RootParameters root, ImapError err) {
     }
     
     public virtual signal void receive_failed(Error err) {
@@ -47,23 +55,24 @@ public class Geary.Imap.ClientConnection {
         des.parameters_ready.connect(on_parameters_ready);
     }
     
-    private void on_parameters_ready(RootParameters params) {
-        received_response(params);
+    ~ClientConnection() {
+        // TODO: Close connection as gracefully as possible
     }
     
-    /*
-    public void connect(Cancellable? cancellable = null) throws Error {
-        if (cx != null)
-            throw new IOError.EXISTS("Already connected to %s", to_string());
+    // Generates a unique tag for the IMAP connection in the form of "<a-z><000-999>".
+    public Tag generate_tag() {
+        // watch for odometer rollover
+        if (++tag_counter >= 1000) {
+            tag_counter = 0;
+            if (tag_prefix == 'z')
+                tag_prefix = 'a';
+            else
+                tag_prefix++;
+        }
         
-        cx = socket_client.connect_to_host(host_specifier, default_port, cancellable);
-        iouts = new Imap.OutputStream(cx.output_stream);
-        dins = new DataInputStream(cx.input_stream);
-        dins.set_newline_type(DataStreamNewlineType.CR_LF);
-        
-        connected();
+        // TODO This could be optimized, but we'll leave it for now.
+        return new Tag("%c%03d".printf(tag_prefix, tag_counter));
     }
-    */
     
     public async void connect_async(Cancellable? cancellable = null) throws Error {
         if (cx != null)
@@ -75,23 +84,6 @@ public class Geary.Imap.ClientConnection {
         
         connected();
     }
-    
-    /*
-    public void disconnect(Cancellable? cancellable = null) throws Error {
-        if (cx == null)
-            return;
-        
-        dins.close(cancellable);
-        iouts.close(cancellable);
-        cx.close(cancellable);
-        
-        dins = null;
-        iouts = null;
-        cx = null;
-        
-        disconnected();
-    }
-    */
     
     public async void disconnect_async(Cancellable? cancellable = null)
         throws Error {
@@ -167,6 +159,20 @@ public class Geary.Imap.ClientConnection {
             next_deserialize_step();
     }
     
+    private void on_parameters_ready(RootParameters root) {
+        try {
+            bool is_status_response;
+            ServerResponse response = ServerResponse.from_server(root, out is_status_response);
+            
+            if (is_status_response)
+                received_status_response((StatusResponse) response);
+            else
+                received_server_data((ServerData) response);
+        } catch (ImapError err) {
+            received_bad_response(root, err);
+        }
+    }
+    
     public void xoff() throws Error {
         check_for_connection();
         
@@ -179,17 +185,6 @@ public class Geary.Imap.ClientConnection {
         ins_cancellable.cancel();
         ins_cancellable = new Cancellable();
     }
-    
-    /*
-    public void send(Command command, Cancellable? cancellable = null) throws Error {
-        if (cx == null)
-            throw new IOError.CLOSED("Not connected to %s", to_string());
-        
-        command.serialize(iouts, cancellable);
-        
-        sent_command(command);
-    }
-    */
     
     /**
      * Convenience method for send_async.begin().

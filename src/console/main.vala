@@ -17,7 +17,6 @@ class ImapConsole : Gtk.Window {
     private uint statusbar_ctx = 0;
     private uint statusbar_msg_id = 0;
     
-    private Geary.Imap.ClientSession session = new Geary.Imap.ClientSession();
     private Geary.Imap.ClientConnection? cx = null;
     
     public ImapConsole() {
@@ -72,6 +71,25 @@ class ImapConsole : Gtk.Window {
         status(err.message);
     }
     
+    private static string[] cmdnames = {
+        "noop",
+        "nop",
+        "capabililties",
+        "caps",
+        "connect",
+        "disconnect",
+        "login",
+        "logout",
+        "bye",
+        "list",
+        "examine",
+        "fetch",
+        "help",
+        "exit",
+        "quit",
+        "gmail"
+    };
+    
     private void exec(string input) {
         string[] lines = input.strip().split(";");
         foreach (string line in lines) {
@@ -90,6 +108,8 @@ class ImapConsole : Gtk.Window {
             
             clear_status();
             
+            // TODO: Need to break out the command delegates into their own objects with the
+            // human command-names and usage and exec()'s and such; this isn't a long-term approach
             try {
                 switch (cmd) {
                     case "noop":
@@ -128,6 +148,15 @@ class ImapConsole : Gtk.Window {
                         examine(cmd, args);
                     break;
                     
+                    case "fetch":
+                        fetch(cmd, args);
+                    break;
+                    
+                    case "help":
+                        foreach (string cmdname in cmdnames)
+                            print_console_line(cmdname);
+                    break;
+                    
                     case "exit":
                     case "quit":
                         quit(cmd, args);
@@ -164,7 +193,7 @@ class ImapConsole : Gtk.Window {
     private void capabilities(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
-        cx.send_async.begin(new Geary.Imap.CapabilityCommand(session), Priority.DEFAULT, null,
+        cx.send_async.begin(new Geary.Imap.CapabilityCommand(cx.generate_tag()), Priority.DEFAULT, null,
             on_capabilities);
     }
     
@@ -180,7 +209,7 @@ class ImapConsole : Gtk.Window {
     private void noop(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
-        cx.send_async.begin(new Geary.Imap.NoopCommand(session), Priority.DEFAULT, null,
+        cx.send_async.begin(new Geary.Imap.NoopCommand(cx.generate_tag()), Priority.DEFAULT, null,
             on_noop);
     }
     
@@ -211,9 +240,12 @@ class ImapConsole : Gtk.Window {
             status("Connected");
         
             cx.sent_command.connect(on_sent_command);
-            cx.received_response.connect(on_received_response);
-            cx.xon();
+            cx.received_status_response.connect(on_received_status_response);
+            cx.received_server_data.connect(on_received_server_data);
+            cx.received_bad_response.connect(on_received_bad_response);
             
+            // start transmission and reception
+            cx.xon();
         } catch (Error err) {
             cx = null;
             
@@ -234,6 +266,10 @@ class ImapConsole : Gtk.Window {
             status("Disconnected");
             
             cx.sent_command.disconnect(on_sent_command);
+            cx.received_status_response.disconnect(on_received_status_response);
+            cx.received_server_data.connect(on_received_server_data);
+            cx.received_bad_response.disconnect(on_received_bad_response);
+            
             cx = null;
         } catch (Error err) {
             exception(err);
@@ -244,12 +280,13 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "user pass");
         
         status("Logging in...");
-        cx.post(new Geary.Imap.LoginCommand(session, args[0], args[1]), on_logged_in);
+        cx.post(new Geary.Imap.LoginCommand(cx.generate_tag(), args[0], args[1]), on_logged_in);
     }
     
     private void on_logged_in(Object? source, AsyncResult result) {
         try {
             cx.finish_post(result);
+            status("Login completed");
         } catch (Error err) {
             exception(err);
         }
@@ -259,7 +296,7 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 0, null);
         
         status("Logging out...");
-        cx.post(new Geary.Imap.LogoutCommand(session), on_logout);
+        cx.post(new Geary.Imap.LogoutCommand(cx.generate_tag()), on_logout);
     }
     
     private void on_logout(Object? source, AsyncResult result) {
@@ -275,7 +312,7 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
         status("Listing...");
-        cx.post(new Geary.Imap.ListCommand.wildcarded(session, args[0], args[1]), on_list);
+        cx.post(new Geary.Imap.ListCommand.wildcarded(cx.generate_tag(), args[0], args[1]), on_list);
     }
     
     private void on_list(Object? source, AsyncResult result) {
@@ -291,7 +328,7 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 1, "<mailbox>");
         
         status("Opening %s read-only".printf(args[0]));
-        cx.post(new Geary.Imap.ExamineCommand(session, args[0]), on_examine);
+        cx.post(new Geary.Imap.ExamineCommand(cx.generate_tag(), args[0]), on_examine);
     }
     
     private void on_examine(Object? source, AsyncResult result) {
@@ -303,8 +340,31 @@ class ImapConsole : Gtk.Window {
         }
     }
     
+    private void fetch(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 2, "<message-span> <data-item>");
+        
+        status("Fetching %s".printf(args[0]));
+        cx.post(new Geary.Imap.FetchCommand(cx.generate_tag(), args[0],
+            { Geary.Imap.FetchDataItem.decode(args[1]) }), on_fetch);
+    }
+    
+    private void on_fetch(Object? source, AsyncResult result) {
+        try {
+            cx.finish_post(result);
+            status("Fetched");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
     private void quit(string cmd, string[] args) throws Error {
         Gtk.main_quit();
+    }
+    
+    private void print_console_line(string text) {
+        append_to_console("[C] ");
+        append_to_console(text);
+        append_to_console("\n");
     }
     
     private void on_sent_command(Geary.Imap.Command cmd) {
@@ -313,9 +373,23 @@ class ImapConsole : Gtk.Window {
         append_to_console("\n");
     }
     
-    private void on_received_response(Geary.Imap.RootParameters params) {
+    private void on_received_status_response(Geary.Imap.StatusResponse status_response) {
         append_to_console("[R] ");
-        append_to_console(params.to_string());
+        append_to_console(status_response.to_string());
+        append_to_console("\n");
+    }
+    
+    private void on_received_server_data(Geary.Imap.ServerData server_data) {
+        append_to_console("[D] ");
+        append_to_console(server_data.to_string());
+        append_to_console("\n");
+    }
+    
+    private void on_received_bad_response(Geary.Imap.RootParameters root, Geary.ImapError err) {
+        append_to_console("[E] ");
+        append_to_console(err.message);
+        append_to_console(": ");
+        append_to_console(root.to_string());
         append_to_console("\n");
     }
     

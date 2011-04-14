@@ -7,24 +7,24 @@
 public class Geary.Imap.CapabilityCommand : Command {
     public const string NAME = "capability";
     
-    public CapabilityCommand(ClientSession session) {
-        base (new Tag.generated(session), NAME);
+    public CapabilityCommand(Tag tag) {
+        base (tag, NAME);
     }
 }
 
 public class Geary.Imap.NoopCommand : Command {
     public const string NAME = "noop";
     
-    public NoopCommand(ClientSession session) {
-        base (new Tag.generated(session), NAME);
+    public NoopCommand(Tag tag) {
+        base (tag, NAME);
     }
 }
 
 public class Geary.Imap.LoginCommand : Command {
     public const string NAME = "login";
     
-    public LoginCommand(ClientSession session, string user, string pass) {
-        base (new Tag.generated(session), NAME, { user, pass });
+    public LoginCommand(Tag tag, string user, string pass) {
+        base (tag, NAME, { user, pass });
     }
     
     public override string to_string() {
@@ -35,28 +35,28 @@ public class Geary.Imap.LoginCommand : Command {
 public class Geary.Imap.LogoutCommand : Command {
     public const string NAME = "logout";
     
-    public LogoutCommand(ClientSession session) {
-        base (new Tag.generated(session), NAME);
+    public LogoutCommand(Tag tag) {
+        base (tag, NAME);
     }
 }
 
 public class Geary.Imap.ListCommand : Command {
     public const string NAME = "list";
     
-    public ListCommand(ClientSession session, string mailbox) {
-        base (new Tag.generated(session), NAME, { "", mailbox });
+    public ListCommand(Tag tag, string mailbox) {
+        base (tag, NAME, { "", mailbox });
     }
     
-    public ListCommand.wildcarded(ClientSession session, string reference, string mailbox) {
-        base (new Tag.generated(session), NAME, { reference, mailbox });
+    public ListCommand.wildcarded(Tag tag, string reference, string mailbox) {
+        base (tag, NAME, { reference, mailbox });
     }
 }
 
 public class Geary.Imap.ExamineCommand : Command {
     public const string NAME = "examine";
     
-    public ExamineCommand(ClientSession session, string mailbox) {
-        base (new Tag.generated(session), NAME, { mailbox });
+    public ExamineCommand(Tag tag, string mailbox) {
+        base (tag, NAME, { mailbox });
     }
 }
 

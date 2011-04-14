@@ -9,7 +9,7 @@ public class Geary.Imap.Command : RootParameters {
     public string name { get; private set; }
     public string[]? args { get; private set; }
     
-    public Command(Tag tag, string name, string[]? args = null) requires (!tag.is_untagged()) {
+    public Command(Tag tag, string name, string[]? args = null) requires (tag.is_tagged()) {
         this.tag = tag;
         this.name = name;
         this.args = args;

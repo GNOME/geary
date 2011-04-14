@@ -25,16 +25,6 @@ public class Geary.Imap.Serializer {
         return get_content_length() > 0;
     }
     
-    // TODO: Remove
-    public void push_nil() throws Error {
-        douts.put_string("nil", null);
-    }
-    
-    // TODO: Remove
-    public void push_token(string str) throws Error {
-        douts.put_string(str, null);
-    }
-    
     public void push_string(string str) throws Error {
         douts.put_string(str, null);
     }

@@ -4,9 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Imap.Parameter : Serializable {
+public abstract class Geary.Imap.Parameter : Object, Serializable {
     public abstract void serialize(Serializer ser) throws Error;
     
+    // to_string() returns a representation of the Parameter suitable for logging and debugging,
+    // but should not be relied upon for wire or persistent representation.
     public abstract string to_string();
 }
 
@@ -93,50 +95,48 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return list.size;
     }
     
+    public new Parameter? get(int index) {
+        return list.get(index);
+    }
+    
+    public Parameter get_as(int index, Type type) throws ImapError {
+        assert(type.is_a(typeof(Parameter)));
+        
+        if (index >= list.size)
+            throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
+        
+        Parameter param = list.get(index);
+        if (!param.get_type().is_a(type))
+            throw new ImapError.TYPE_ERROR("Parameter %d is not of type %s", index, type.name());
+        
+        return param;
+    }
+    
     public Gee.List<Parameter> get_all() {
         return list.read_only_view;
     }
     
-    /*
-    public Parameter? get_next(ref int index, Type type, bool optional) throws ImapError {
-        assert(type.is_a(Parameter));
-        
-        if (index >= list.size) {
-            if (!optional)
-                throw new ImapError.PARSE_ERROR;
-            
-            return null;
-        }
-        
-        Parameter param = list.get(index);
-        if (!(typeof(param).is_a(type)) {
-            if (!optional)
-                throw new ImapError.PARSE_ERROR;
-            
-            return null;
-        }
-        
-        index++;
-        
-        return param;
+    // This replaces all existing parameters with those from the supplied list
+    public void copy(ListParameter src) {
+        list.clear();
+        list.add_all(src.get_all());
     }
-    */
     
     protected string stringize_list() {
-        string str = "";
+        StringBuilder builder = new StringBuilder();
         
         int length = list.size;
         for (int ctr = 0; ctr < length; ctr++) {
-            str += list[ctr].to_string();
+            builder.append(list[ctr].to_string());
             if (ctr < (length - 1))
-                str += " ";
+                builder.append_c(' ');
         }
         
-        return str;
+        return builder.str;
     }
     
     public override string to_string() {
-        return "%d:(%s)".printf(list.size, stringize_list());
+        return "(%s)".printf(stringize_list());
     }
     
     protected void serialize_list(Serializer ser) throws Error {
@@ -160,24 +160,11 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         base (null, initial);
     }
     
-    /*
-    public bool is_status_response() {
-        if (get_count() < 2)
-            return false;
+    public RootParameters.clone(RootParameters root) {
+        base (null);
         
-        StringParameter? strparam = get_all().get(1) as StringParameter;
-        if (strparam == null)
-            return false;
-        
-        try {
-            Status.decode(strparam.value);
-        } catch (Error err) {
-            return false;
-        }
-        
-        return true;
+        base.copy(root);
     }
-    */
     
     public override string to_string() {
         return stringize_list();
