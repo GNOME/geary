@@ -21,7 +21,7 @@ ENGINE_SRC := \
 	src/engine/imap/Commands.vala \
 	src/engine/imap/FetchCommand.vala \
 	src/engine/imap/ResponseCode.vala \
-	src/engine/imap/Response.vala \
+	src/engine/imap/ServerResponse.vala \
 	src/engine/imap/StatusResponse.vala \
 	src/engine/imap/ServerData.vala \
 	src/engine/imap/Status.vala \
