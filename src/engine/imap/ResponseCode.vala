@@ -13,10 +13,10 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         return "[%s]".printf(stringize_list());
     }
     
-    public override void serialize(Serializer ser) throws Error {
-        ser.push_string("[");
+    public override async void serialize(Serializer ser) throws Error {
+        ser.push_ascii('[');
         serialize_list(ser);
-        ser.push_string("]");
+        ser.push_ascii(']');
     }
 }
 

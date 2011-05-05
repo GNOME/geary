@@ -4,8 +4,20 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+/**
+ * The Deserializer performs asynchronous I/O on a supplied input stream and transforms the raw
+ * bytes into IMAP Parameters (which can then be converted into ServerResponses or ServerData).
+ * The Deserializer will only begin reading from the stream when xon() is called.  Calling xoff()
+ * will flow control the stream, halting reading without closing the stream itself.  Since all
+ * results from the Deserializer are reported via signals, those signals should be connected to
+ * prior to calling xon(), or the caller risks missing early messages.  (Note that since 
+ * Deserializer uses async I/O, this isn't technically possible unless the signals are connected
+ * after the Idle loop has a chance to run; however, this is an implementation detail and shouldn't
+ * be relied upon.)
+ */
+
 public class Geary.Imap.Deserializer {
-    public enum Mode {
+    private enum Mode {
         LINE,
         BLOCK,
         FAILED
@@ -67,18 +79,31 @@ public class Geary.Imap.Deserializer {
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
+    private DataInputStream dins;
     private Geary.State.Machine fsm;
     private ListParameter current;
     private RootParameters root = new RootParameters();
     private StringBuilder? current_string = null;
     private LiteralParameter? current_literal = null;
     private long literal_length_remaining = 0;
+    private uint8[] block_buffer = new uint8[4096];
+    private bool flow_controlled = true;
+    private int ins_priority = Priority.DEFAULT;
+    
+    public signal void flow_control(bool xon);
     
     public signal void parameters_ready(RootParameters root);
     
-    public signal void failed();
+    public signal void eos();
     
-    public Deserializer() {
+    public signal void receive_failure(Error err);
+    
+    public signal void deserialize_failure();
+    
+    public Deserializer(InputStream ins) {
+        dins = new DataInputStream(ins);
+        dins.set_newline_type(DataStreamNewlineType.CR_LF);
+        
         current = root;
         
         Geary.State.Mapping[] mappings = {
@@ -104,22 +129,100 @@ public class Geary.Imap.Deserializer {
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
     }
     
+    public void xon(int priority = Priority.DEFAULT) {
+        if (!flow_controlled || get_mode() == Mode.FAILED)
+            return;
+        
+        flow_controlled = false;
+        ins_priority = priority;
+        
+        next_deserialize_step();
+        
+        flow_control(true);
+    }
+    
+    public void xoff() {
+        if (flow_controlled || get_mode() == Mode.FAILED)
+            return;
+        
+        flow_controlled = true;
+        
+        flow_control(false);
+    }
+    
+    private void next_deserialize_step() {
+        switch (get_mode()) {
+            case Mode.LINE:
+                dins.read_line_async.begin(ins_priority, null, on_read_line);
+            break;
+            
+            case Mode.BLOCK:
+                assert(literal_length_remaining > 0);
+                long count = long.min(block_buffer.length, literal_length_remaining);
+                dins.read_async.begin(block_buffer[0:count], ins_priority, null, on_read_block);
+            break;
+            
+            default:
+                assert_not_reached();
+        }
+    }
+    
+    private void on_read_line(Object? source, AsyncResult result) {
+        try {
+            string? line = dins.read_line_async.end(result);
+            if (line == null) {
+                eos();
+                
+                return;
+            }
+            
+            push_line(line);
+        } catch (Error err) {
+            receive_failure(err);
+            
+            return;
+        }
+        
+        if (!flow_controlled)
+            next_deserialize_step();
+    }
+    
+    private void on_read_block(Object? source, AsyncResult result) {
+        try {
+            ssize_t read = dins.read_async.end(result);
+            if (read == 0) {
+                eos();
+                
+                return;
+            }
+            
+            push_data(block_buffer[0:read]);
+        } catch (Error err) {
+            receive_failure(err);
+            
+            return;
+        }
+        
+        if (!flow_controlled)
+            next_deserialize_step();
+    }
+    
     // Push a line (without the CRLF!).
-    public Mode push_line(string line) {
+    private Mode push_line(string line) {
         assert(get_mode() == Mode.LINE);
         
         int index = 0;
         unichar ch;
         while (line.get_next_char(ref index, out ch)) {
             if (fsm.issue(Event.CHAR, &ch) == State.FAILED) {
-                failed();
+                deserialize_failure();
                 
                 return Mode.FAILED;
             }
         }
         
         if (fsm.issue(Event.EOL) == State.FAILED) {
-            failed();
+            deserialize_failure();
             
             return Mode.FAILED;
         }
@@ -127,17 +230,13 @@ public class Geary.Imap.Deserializer {
         return get_mode();
     }
     
-    public long get_max_data_length() {
-        return literal_length_remaining;
-    }
-    
     // Push a block of literal data
-    public Mode push_data(uint8[] data) {
+    private Mode push_data(owned uint8[] data) {
         assert(get_mode() == Mode.BLOCK);
         
         LiteralData literal_data = LiteralData(data);
         if (fsm.issue(Event.DATA, &literal_data) == State.FAILED) {
-            failed();
+            deserialize_failure();
             
             return Mode.FAILED;
         }
@@ -145,7 +244,7 @@ public class Geary.Imap.Deserializer {
         return get_mode();
     }
     
-    public Mode get_mode() {
+    private Mode get_mode() {
         switch (fsm.get_state()) {
             case State.LITERAL_DATA:
                 return Mode.BLOCK;

@@ -45,12 +45,9 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
         cx.received_bad_response.connect(on_received_bad_response);
-        cx.receive_failed.connect(on_receive_failed);
+        cx.receive_failure.connect(on_receive_failed);
         
         yield cx.connect_async(cancellable);
-        
-        // start receiving traffic from the server
-        cx.xon();
         
         // wait for the initial OK response from the server
         cb_queue.offer(new CommandCallback(connect_async.callback));

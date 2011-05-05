@@ -51,7 +51,7 @@ public class Geary.State.Machine {
         this.logging = logging;
     }
     
-    public bool get_logging() {
+    public bool is_logging() {
         return logging;
     }
     
@@ -61,7 +61,7 @@ public class Geary.State.Machine {
         
         unowned Mapping? mapping = transitions[state, event];
         
-        Transition transition = (mapping != null) ? mapping.transition : default_transition;
+        Transition? transition = (mapping != null) ? mapping.transition : default_transition;
         if (transition == null) {
             string msg = "%s: No transition defined at %s for %s".printf(to_string(),
                 descriptor.get_state_string(state), descriptor.get_event_string(event));
@@ -86,7 +86,7 @@ public class Geary.State.Machine {
         assert(locked);
         locked = false;
         
-        if (get_logging()) {
+        if (is_logging()) {
             message("%s: State transition from %s to %s due to event %s", to_string(),
                 descriptor.get_state_string(old_state), descriptor.get_state_string(state),
                 descriptor.get_event_string(event));

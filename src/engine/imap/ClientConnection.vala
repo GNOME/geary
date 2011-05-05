@@ -12,12 +12,8 @@ public class Geary.Imap.ClientConnection {
     private uint16 default_port;
     private SocketClient socket_client = new SocketClient();
     private SocketConnection? cx = null;
-    private DataInputStream? dins = null;
-    private int ins_priority = Priority.DEFAULT;
-    private Cancellable ins_cancellable = new Cancellable();
-    private bool flow_controlled = true;
-    private Deserializer des = new Deserializer();
-    private uint8[] block_buffer = new uint8[4096];
+    private Serializer? ser = null;
+    private Deserializer? des = null;
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     
@@ -25,9 +21,6 @@ public class Geary.Imap.ClientConnection {
     }
     
     public virtual signal void disconnected() {
-    }
-    
-    public virtual signal void flow_control(bool xon) {
     }
     
     public virtual signal void sent_command(Command cmd) {
@@ -42,7 +35,13 @@ public class Geary.Imap.ClientConnection {
     public virtual signal void received_bad_response(RootParameters root, ImapError err) {
     }
     
-    public virtual signal void receive_failed(Error err) {
+    public virtual signal void recv_closed() {
+    }
+    
+    public virtual signal void receive_failure(Error err) {
+    }
+    
+    public virtual signal void deserialize_failure() {
     }
     
     public ClientConnection(string host_specifier, uint16 default_port) {
@@ -51,8 +50,6 @@ public class Geary.Imap.ClientConnection {
         
         socket_client.set_tls(true);
         socket_client.set_tls_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
-        
-        des.parameters_ready.connect(on_parameters_ready);
     }
     
     ~ClientConnection() {
@@ -79,10 +76,16 @@ public class Geary.Imap.ClientConnection {
             throw new IOError.EXISTS("Already connected to %s", to_string());
         
         cx = yield socket_client.connect_to_host_async(host_specifier, default_port, cancellable);
-        dins = new DataInputStream(cx.input_stream);
-        dins.set_newline_type(DataStreamNewlineType.CR_LF);
+        ser = new Serializer(new BufferedOutputStream(cx.output_stream));
+        des = new Deserializer(new BufferedInputStream(cx.input_stream));
+        des.parameters_ready.connect(on_parameters_ready);
+        des.receive_failure.connect(on_receive_failure);
+        des.deserialize_failure.connect(on_deserialize_failure);
+        des.eos.connect(on_eos);
         
         connected();
+        
+        des.xon();
     }
     
     public async void disconnect_async(Cancellable? cancellable = null)
@@ -93,70 +96,10 @@ public class Geary.Imap.ClientConnection {
         yield cx.close_async(Priority.DEFAULT, cancellable);
         
         cx = null;
-        dins = null;
+        ser = null;
+        des = null;
         
         disconnected();
-    }
-    
-    public void xon(int priority = Priority.DEFAULT) throws Error {
-        check_for_connection();
-        
-        if (!flow_controlled)
-            return;
-        
-        flow_controlled = false;
-        ins_priority = priority;
-        
-        next_deserialize_step();
-        
-        flow_control(true);
-    }
-    
-    private void next_deserialize_step() {
-        switch (des.get_mode()) {
-            case Deserializer.Mode.LINE:
-                dins.read_line_async.begin(ins_priority, ins_cancellable, on_read_line);
-            break;
-            
-            case Deserializer.Mode.BLOCK:
-                long count = long.min(block_buffer.length, des.get_max_data_length());
-                dins.read_async.begin(block_buffer[0:count], ins_priority, ins_cancellable,
-                    on_read_block);
-            break;
-            
-            default:
-                error("Failed");
-        }
-    }
-    
-    private void on_read_line(Object? source, AsyncResult result) {
-        try {
-            string line = dins.read_line_async.end(result);
-            des.push_line(line);
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED))
-                receive_failed(err);
-            
-            return;
-        }
-        
-        if (!flow_controlled)
-            next_deserialize_step();
-    }
-    
-    private void on_read_block(Object? source, AsyncResult result) {
-        try {
-            ssize_t read = dins.read_async.end(result);
-            des.push_data(block_buffer[0:read]);
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED))
-                receive_failed(err);
-            
-            return;
-        }
-        
-        if (!flow_controlled)
-            next_deserialize_step();
     }
     
     private void on_parameters_ready(RootParameters root) {
@@ -173,17 +116,16 @@ public class Geary.Imap.ClientConnection {
         }
     }
     
-    public void xoff() throws Error {
-        check_for_connection();
-        
-        if (flow_controlled)
-            return;
-        
-        // turn off the spigot
-        // TODO: Don't cancel the read, merely don't post the next window
-        flow_controlled = true;
-        ins_cancellable.cancel();
-        ins_cancellable = new Cancellable();
+    private void on_receive_failure(Error err) {
+        receive_failure(err);
+    }
+    
+    private void on_deserialize_failure() {
+        deserialize_failure();
+    }
+    
+    private void on_eos() {
+        recv_closed();
     }
     
     /**
@@ -206,45 +148,14 @@ public class Geary.Imap.ClientConnection {
         Cancellable? cancellable = null) throws Error {
         check_for_connection();
         
-        Serializer ser = new Serializer();
         cmd.serialize(ser);
-        assert(ser.has_content());
         
-        yield write_all_async(ser, priority, cancellable);
+        // TODO: At this point, we flush each command as it's written; at some point we'll have
+        // a queuing strategy that means serialized data is pushed out to the wire only at certain
+        // times
+        yield ser.flush_async(priority, cancellable);
         
         sent_command(cmd);
-    }
-    
-    public async void send_multiple_async(Gee.List<Command> cmds, int priority = Priority.DEFAULT,
-        Cancellable? cancellable = null) throws Error {
-        if (cmds.size == 0)
-            return;
-        
-        check_for_connection();
-        
-        Serializer ser = new Serializer();
-        foreach (Command cmd in cmds)
-            cmd.serialize(ser);
-        assert(ser.has_content());
-        
-        yield write_all_async(ser, priority, cancellable);
-        
-        // Variable named due to this bug: https://bugzilla.gnome.org/show_bug.cgi?id=596861
-        foreach (Command cmd2 in cmds)
-            sent_command(cmd2);
-    }
-    
-    // Can't pass the raw buffer due to this bug: https://bugzilla.gnome.org/show_bug.cgi?id=639054
-    private async void write_all_async(Serializer ser, int priority, Cancellable? cancellable)
-        throws Error {
-        ssize_t index = 0;
-        size_t length = ser.get_content_length();
-        while (index < length) {
-            index += yield cx.output_stream.write_async(ser.get_content()[index:length],
-                priority, cancellable);
-            if (index < length)
-                debug("PARTIAL WRITE TO %s: %lu/%lu bytes", to_string(), index, length);
-        }
     }
     
     private void check_for_connection() throws Error {

@@ -4,6 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+MainLoop? main_loop = null;
+
 void print(int depth, Gee.List<Geary.Imap.Parameter> params) {
     string pad = string.nfill(depth * 4, ' ');
     
@@ -24,6 +26,10 @@ void on_params_ready(Geary.Imap.RootParameters root) {
     print(0, root.get_all());
 }
 
+void on_eos() {
+    main_loop.quit();
+}
+
 int main(string[] args) {
     if (args.length < 2) {
         stderr.printf("usage: syntax <imap command>\n");
@@ -31,8 +37,7 @@ int main(string[] args) {
         return 1;
     }
     
-    Geary.Imap.Deserializer des = new Geary.Imap.Deserializer();
-    des.parameters_ready.connect(on_params_ready);
+    main_loop = new MainLoop();
     
     // turn argument into single line for deserializer
     string line = "";
@@ -41,10 +46,19 @@ int main(string[] args) {
         if (ctr < (args.length - 1))
             line += " ";
     }
+    line += "\r\n";
+    
+    MemoryInputStream mins = new MemoryInputStream();
+    mins.add_data(line.data, null);
+    
+    Geary.Imap.Deserializer des = new Geary.Imap.Deserializer(mins);
+    des.parameters_ready.connect(on_params_ready);
+    des.eos.connect(on_eos);
     
     stdout.printf("INPUT: >%s<\n", line);
-    Geary.Imap.Deserializer.Mode mode = des.push_line(line);
-    stdout.printf("INPUT MODE: %s\n", mode.to_string());
+    des.xon();
+    
+    main_loop.run();
     
     return 0;
 }

@@ -5,6 +5,6 @@
  */
 
 public interface Geary.Imap.Serializable {
-    public abstract void serialize(Serializer ser) throws Error;
+    public abstract async void serialize(Serializer ser) throws Error;
 }
 

@@ -5,7 +5,7 @@
  */
 
 public abstract class Geary.Imap.Parameter : Object, Serializable {
-    public abstract void serialize(Serializer ser) throws Error;
+    public abstract async void serialize(Serializer ser) throws Error;
     
     // to_string() returns a representation of the Parameter suitable for logging and debugging,
     // but should not be relied upon for wire or persistent representation.
@@ -31,7 +31,7 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
         return value;
     }
     
-    public override void serialize(Serializer ser) throws Error {
+    public override async void serialize(Serializer ser) throws Error {
         ser.push_string(value);
     }
 }
@@ -61,10 +61,10 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
         return "{literal/%ldb}".printf(size);
     }
     
-    public override void serialize(Serializer ser) throws Error {
+    public override async void serialize(Serializer ser) throws Error {
         ser.push_string("{%ld}".printf(size));
         ser.push_eol();
-        ser.push_input_stream_literal_data(mins);
+        yield ser.push_input_stream_literal_data_async(mins);
         
         // seek to start
         mins.seek(0, SeekType.SET);
@@ -148,10 +148,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         }
     }
     
-    public override void serialize(Serializer ser) throws Error {
-        ser.push_string("(");
+    public override async void serialize(Serializer ser) throws Error {
+        ser.push_ascii('(');
         serialize_list(ser);
-        ser.push_string(")");
+        ser.push_ascii(')');
     }
 }
 
@@ -170,7 +170,7 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         return stringize_list();
     }
     
-    public override void serialize(Serializer ser) throws Error {
+    public override async void serialize(Serializer ser) throws Error {
         serialize_list(ser);
         ser.push_eol();
     }
