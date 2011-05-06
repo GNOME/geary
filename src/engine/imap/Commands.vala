@@ -60,3 +60,19 @@ public class Geary.Imap.ExamineCommand : Command {
     }
 }
 
+public class Geary.Imap.SelectCommand : Command {
+    public const string NAME = "select";
+    
+    public SelectCommand(Tag tag, string mailbox) {
+        base (tag, NAME, { mailbox });
+    }
+}
+
+public class Geary.Imap.CloseCommand : Command {
+    public const string NAME = "close";
+    
+    public CloseCommand(Tag tag) {
+        base (tag, NAME);
+    }
+}
+

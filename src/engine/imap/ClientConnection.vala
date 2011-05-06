@@ -88,8 +88,7 @@ public class Geary.Imap.ClientConnection {
         des.xon();
     }
     
-    public async void disconnect_async(Cancellable? cancellable = null)
-        throws Error {
+    public async void disconnect_async(Cancellable? cancellable = null) throws Error {
         if (cx == null)
             return;
         

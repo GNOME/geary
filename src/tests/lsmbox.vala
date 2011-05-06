@@ -14,9 +14,11 @@ int count = 0;
 
 async void async_start() {
     try {
-        yield sess.connect_async(user, pass);
+        yield sess.connect_async();
+        yield sess.login_async(user, pass);
         
-        Geary.Folder folder = yield sess.open(mailbox);
+        Geary.Folder folder = yield sess.select_async(mailbox);
+        
         Geary.MessageStream? mstream = folder.read(start, count);
         
         bool ok = false;
@@ -32,6 +34,11 @@ async void async_start() {
         
         if (!ok)
             debug("Unable to examine mailbox %s", mailbox);
+        
+        yield sess.close_mailbox_async();
+        
+        yield sess.logout_async();
+        yield sess.disconnect_async();
     } catch (Error err) {
         debug("Error: %s", err.message);
     }

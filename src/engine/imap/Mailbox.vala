@@ -5,7 +5,8 @@
  */
 
 public class Geary.Imap.Mailbox : Object, Geary.Folder {
-    private string name;
+    public string name { get; private set; }
+    
     private ClientSession sess;
     
     internal Mailbox(string name, ClientSession sess) {

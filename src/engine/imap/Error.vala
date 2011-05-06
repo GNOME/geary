@@ -8,6 +8,8 @@ public errordomain Geary.ImapError {
     PARSE_ERROR,
     TYPE_ERROR,
     SERVER_ERROR,
-    NOT_CONNECTED
+    NOT_CONNECTED,
+    COMMAND_FAILED,
+    UNAUTHENTICATED
 }
 

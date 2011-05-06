@@ -4,7 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public delegate uint Geary.State.Transition(uint state, uint event, void *user);
+public delegate uint Geary.State.Transition(uint state, uint event, void *user = null,
+    Object? object = null, Error? err = null);
 
 public class Geary.State.Mapping {
     public uint state;
@@ -21,7 +22,7 @@ public class Geary.State.Mapping {
 namespace Geary.State {
 
 // A utility Transition for nop transitions (i.e. it merely returns the state passed in).
-public uint nop(uint state, uint event, void *user) {
+public uint nop(uint state, uint event) {
     return state;
 }
 

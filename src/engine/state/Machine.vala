@@ -55,7 +55,7 @@ public class Geary.State.Machine {
         return logging;
     }
     
-    public uint issue(uint event, void *user = null) {
+    public uint issue(uint event, void *user = null, Object? object = null, Error? err = null) {
         assert(event < descriptor.event_count);
         assert(state < descriptor.state_count);
         
@@ -63,8 +63,8 @@ public class Geary.State.Machine {
         
         Transition? transition = (mapping != null) ? mapping.transition : default_transition;
         if (transition == null) {
-            string msg = "%s: No transition defined at %s for %s".printf(to_string(),
-                descriptor.get_state_string(state), descriptor.get_event_string(event));
+            string msg = "%s: No transition defined for %s@%s".printf(to_string(),
+                descriptor.get_event_string(event), descriptor.get_state_string(state));
             
             if (get_abort_on_no_transition())
                 error(msg);
@@ -80,19 +80,26 @@ public class Geary.State.Machine {
         locked = true;
         
         uint old_state = state;
-        state = transition(state, event, user);
+        state = transition(state, event, user, object, err);
         assert(state < descriptor.state_count);
         
         assert(locked);
         locked = false;
         
         if (is_logging()) {
-            message("%s: State transition from %s to %s due to event %s", to_string(),
-                descriptor.get_state_string(old_state), descriptor.get_state_string(state),
-                descriptor.get_event_string(event));
+            message("%s: %s@%s -> %s", to_string(), descriptor.get_event_string(event),
+                descriptor.get_state_string(old_state), descriptor.get_state_string(state));
         }
         
         return state;
+    }
+    
+    public string get_state_string(uint state) {
+        return descriptor.get_state_string(state);
+    }
+    
+    public string get_event_string(uint event) {
+        return descriptor.get_event_string(event);
     }
     
     public string to_string() {
