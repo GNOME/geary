@@ -21,5 +21,9 @@ public class Geary.Imap.Command : RootParameters {
                 add(new StringParameter(arg));
         }
     }
+    
+    public bool has_name(string name) {
+        return this.name.down() == name.down();
+    }
 }
 
