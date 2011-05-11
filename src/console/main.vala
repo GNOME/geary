@@ -190,6 +190,18 @@ class ImapConsole : Gtk.Window {
         check_args(cmd, args, count, usage);
     }
     
+    private void check_min_args(string cmd, string[] args, int min_count, string? usage) throws CommandException {
+        if (args.length < min_count)
+            throw new CommandException.USAGE("usage: %s %s", cmd, usage != null ? usage : "");
+    }
+    
+    private void check_min_connected(string cmd, string[] args, int min_count, string? usage) throws CommandException {
+        if (cx == null)
+            throw new CommandException.STATE("'connect' required");
+        
+        check_min_args(cmd, args, min_count, usage);
+    }
+    
     private void capabilities(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
@@ -338,11 +350,15 @@ class ImapConsole : Gtk.Window {
     }
     
     private void fetch(string cmd, string[] args) throws Error {
-        check_connected(cmd, args, 2, "<message-span> <data-item>");
+        check_min_connected(cmd, args, 2, "<message-span> <data-item...>");
         
         status("Fetching %s".printf(args[0]));
-        cx.post(new Geary.Imap.FetchCommand(cx.generate_tag(), args[0],
-            { Geary.Imap.FetchDataItem.decode(args[1]) }), on_fetch);
+        
+        Geary.Imap.FetchDataItem[] data_items = new Geary.Imap.FetchDataItem[0];
+        for (int ctr = 1; ctr < args.length; ctr++)
+            data_items += Geary.Imap.FetchDataItem.decode(args[ctr]);
+        
+        cx.post(new Geary.Imap.FetchCommand(cx.generate_tag(), args[0], data_items), on_fetch);
     }
     
     private void on_fetch(Object? source, AsyncResult result) {
