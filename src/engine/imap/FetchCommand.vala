@@ -4,6 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+// TODO: Support body[section]<partial> and body.peek[section]<partial> forms
 public enum Geary.Imap.FetchDataItem {
     UID,
     FLAGS,
@@ -117,6 +118,29 @@ public enum Geary.Imap.FetchDataItem {
     
     public static FetchDataItem from_parameter(StringParameter strparam) throws ImapError {
         return decode(strparam.value);
+    }
+    
+    public FetchDataDecoder? get_decoder() {
+        switch (this) {
+            case UID:
+                return new UIDDecoder();
+            
+            case FLAGS:
+                return new FlagsDecoder();
+            
+            case ENVELOPE:
+                return new EnvelopeDecoder();
+            
+            case INTERNALDATE:
+                return new InternalDateDecoder();
+            
+            case RFC822_SIZE:
+                return new RFC822SizeDecoder();
+            
+            
+            default:
+                return null;
+        }
     }
 }
 

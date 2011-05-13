@@ -6,11 +6,12 @@
 
 public class Geary.Message {
     public int msg_num { get; private set; }
-    public string from { get; private set; }
-    public string subject { get; private set; }
-    public string sent { get; private set; }
+    public Geary.RFC822.MailboxAddresses from { get; private set; }
+    public Geary.RFC822.Subject subject { get; private set; }
+    public Geary.RFC822.Date sent { get; private set; }
     
-    public Message(int msg_num, string from, string subject, string sent) {
+    public Message(int msg_num, Geary.RFC822.MailboxAddresses from, Geary.RFC822.Subject subject,
+        Geary.RFC822.Date sent) {
         this.msg_num = msg_num;
         this.from = from;
         this.subject = subject;
@@ -18,7 +19,7 @@ public class Geary.Message {
     }
     
     public string to_string() {
-        return "[%d] %s: %s (%s)".printf(msg_num, from, subject, sent);
+        return "[%d] %s: %s (%s)".printf(msg_num, from.to_string(), subject.to_string(), sent.to_string());
     }
 }
 

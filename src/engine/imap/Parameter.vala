@@ -12,19 +12,65 @@ public abstract class Geary.Imap.Parameter : Object, Serializable {
     public abstract string to_string();
 }
 
+public class Geary.Imap.NilParameter : Geary.Imap.Parameter {
+    public const string VALUE = "NIL";
+    
+    private static NilParameter? _instance = null;
+    
+    public static NilParameter instance {
+        get {
+             if (_instance == null)
+                _instance = new NilParameter();
+            
+            return _instance;
+        }
+    }
+    
+    private NilParameter() {
+    }
+    
+    public static bool is_nil(string str) {
+        return String.ascii_equali(VALUE, str);
+    }
+    
+    public override async void serialize(Serializer ser) throws Error {
+        ser.push_nil();
+    }
+    
+    public override string to_string() {
+        return VALUE;
+    }
+}
+
 public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public string value { get; private set; }
+    public string? nullable_value {
+        get {
+            return String.is_empty(value) ? null : value;
+        }
+    }
     
-    public StringParameter(string value) requires (!is_empty_string(value)) {
+    public StringParameter(string value) requires (!String.is_empty(value)) {
         this.value = value;
     }
     
-    public StringParameter.NIL() {
-        this.value = "nil";
+    public bool equals_cs(string value) {
+        return this.value == value;
     }
     
-    public bool is_nil() {
-        return value.down() == "nil";
+    public bool equals_ci(string value) {
+        return this.value.down() == value.down();
+    }
+    
+    // TODO: This does not check that the value is a properly-formed integer.  This should be
+    // added later.
+    public int as_int() throws ImapError {
+        return int.parse(value);
+    }
+    
+    // TODO: This does not check that the value is a properly-formed long.
+    public long as_long() throws ImapError {
+        return long.parse(value);
     }
     
     public override string to_string() {
@@ -99,17 +145,59 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return list.get(index);
     }
     
+    public Parameter get_required(int index) throws ImapError {
+        Parameter? param = list.get(index);
+        if (param == null)
+            throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
+        
+        return param;
+    }
+    
     public Parameter get_as(int index, Type type) throws ImapError {
         assert(type.is_a(typeof(Parameter)));
         
-        if (index >= list.size)
-            throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
-        
-        Parameter param = list.get(index);
+        Parameter param = get_required(index);
         if (!param.get_type().is_a(type))
             throw new ImapError.TYPE_ERROR("Parameter %d is not of type %s", index, type.name());
         
         return param;
+    }
+    
+    public Parameter? get_as_nullable(int index, Type type) throws ImapError {
+        assert(type.is_a(typeof(Parameter)));
+        
+        Parameter param = get_required(index);
+        if (param is NilParameter)
+            return null;
+        
+        if (!param.get_type().is_a(type))
+            throw new ImapError.TYPE_ERROR("Parameter %d is not of type %s", index, type.name());
+        
+        return param;
+    }
+    
+    public StringParameter get_as_string(int index) throws ImapError {
+        return (StringParameter) get_as(index, typeof(StringParameter));
+    }
+    
+    public StringParameter? get_as_nullable_string(int index) throws ImapError {
+        return (StringParameter?) get_as_nullable(index, typeof(StringParameter));
+    }
+    
+    public ListParameter get_as_list(int index) throws ImapError {
+        return (ListParameter) get_as(index, typeof(ListParameter));
+    }
+    
+    public ListParameter? get_as_nullable_list(int index) throws ImapError {
+        return (ListParameter?) get_as_nullable(index, typeof(ListParameter));
+    }
+    
+    public LiteralParameter get_as_literal(int index) throws ImapError {
+        return (LiteralParameter) get_as(index, typeof(LiteralParameter));
+    }
+    
+    public LiteralParameter? get_as_nullable_literal(int index) throws ImapError {
+        return (LiteralParameter?) get_as_nullable(index, typeof(LiteralParameter));
     }
     
     public Gee.List<Parameter> get_all() {

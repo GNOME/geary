@@ -12,6 +12,7 @@ ENGINE_SRC := \
 	src/engine/state/Machine.vala \
 	src/engine/state/MachineDescriptor.vala \
 	src/engine/state/Mapping.vala \
+	src/engine/common/MessageData.vala \
 	src/engine/imap/ClientConnection.vala \
 	src/engine/imap/ClientSession.vala \
 	src/engine/imap/Mailbox.vala \
@@ -26,10 +27,15 @@ ENGINE_SRC := \
 	src/engine/imap/ServerData.vala \
 	src/engine/imap/Status.vala \
 	src/engine/imap/CommandResponse.vala \
+	src/engine/imap/FetchResults.vala \
+	src/engine/imap/FetchDataDecoder.vala \
+	src/engine/imap/MessageData.vala \
 	src/engine/imap/Serializable.vala \
 	src/engine/imap/Serializer.vala \
 	src/engine/imap/Deserializer.vala \
 	src/engine/imap/Error.vala \
+	src/engine/rfc822/MailboxAddress.vala \
+	src/engine/rfc822/MessageData.vala \
 	src/engine/util/string.vala
 
 CONSOLE_SRC := \

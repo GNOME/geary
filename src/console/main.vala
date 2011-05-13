@@ -102,7 +102,7 @@ class ImapConsole : Gtk.Window {
             string[] args = new string[0];
             for (int ctr = 1; ctr < tokens.length; ctr++) {
                 string arg = tokens[ctr].strip();
-                if (!is_empty_string(arg))
+                if (!String.is_empty(arg))
                     args += arg;
             }
             

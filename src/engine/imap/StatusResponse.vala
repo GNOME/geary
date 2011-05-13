@@ -45,7 +45,7 @@ public class Geary.Imap.StatusResponse : ServerResponse {
             start_index++;
         }
         
-        return !is_empty_string(builder.str) ? builder.str : null;
+        return !String.is_empty(builder.str) ? builder.str : null;
     }
 }
 

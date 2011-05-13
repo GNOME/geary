@@ -258,7 +258,7 @@ public class Geary.Imap.Deserializer {
     }
     
     private bool is_current_string_empty() {
-        return (current_string == null) || is_empty_string(current_string.str);
+        return (current_string == null) || String.is_empty(current_string.str);
     }
     
     private void append_to_string(unichar ch) {
@@ -279,7 +279,11 @@ public class Geary.Imap.Deserializer {
         if (is_current_string_empty())
             return;
         
-        save_parameter(new StringParameter(current_string.str));
+        if (NilParameter.is_nil(current_string.str))
+            save_parameter(NilParameter.instance);
+        else
+            save_parameter(new StringParameter(current_string.str));
+        
         current_string = null;
     }
     

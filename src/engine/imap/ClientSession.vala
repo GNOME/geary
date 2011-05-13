@@ -279,7 +279,7 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
-        fsm.set_logging(true);
+        fsm.set_logging(false);
     }
     
     public Tag? generate_tag() {

@@ -42,6 +42,10 @@ public class Geary.Imap.Serializer {
         douts.put_byte(' ', null);
     }
     
+    public void push_nil() throws Error {
+        douts.put_string(NilParameter.VALUE, null);
+    }
+    
     public void push_eol() throws Error {
         douts.put_string("\r\n", null);
     }
