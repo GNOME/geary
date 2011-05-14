@@ -17,6 +17,8 @@
  */
 
 public class Geary.Imap.Deserializer {
+    private const size_t MAX_BLOCK_READ_SIZE = 4096;
+    
     private enum Mode {
         LINE,
         BLOCK,
@@ -67,26 +69,18 @@ public class Geary.Imap.Deserializer {
         '(', ')', '{', '%', '\"', '\\', '+'
     };
     
-    private struct LiteralData {
-        public unowned uint8[] data;
-        
-        public LiteralData(owned uint8[] data) {
-            this.data = data;
-        }
-    }
-    
     private static Geary.State.MachineDescriptor machine_desc = new Geary.State.MachineDescriptor(
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
     private DataInputStream dins;
     private Geary.State.Machine fsm;
-    private ListParameter current;
+    private ListParameter context;
     private RootParameters root = new RootParameters();
     private StringBuilder? current_string = null;
-    private LiteralParameter? current_literal = null;
-    private long literal_length_remaining = 0;
-    private uint8[] block_buffer = new uint8[4096];
+    private size_t literal_length_remaining = 0;
+    private Geary.Memory.GrowableBuffer? block_buffer = null;
+    private unowned uint8[]? current_buffer = null;
     private bool flow_controlled = true;
     private int ins_priority = Priority.DEFAULT;
     
@@ -104,7 +98,7 @@ public class Geary.Imap.Deserializer {
         dins = new DataInputStream(ins);
         dins.set_newline_type(DataStreamNewlineType.CR_LF);
         
-        current = root;
+        context = root;
         
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_or_atom_char),
@@ -158,8 +152,14 @@ public class Geary.Imap.Deserializer {
             
             case Mode.BLOCK:
                 assert(literal_length_remaining > 0);
-                long count = long.min(block_buffer.length, literal_length_remaining);
-                dins.read_async.begin(block_buffer[0:count], ins_priority, null, on_read_block);
+                
+                if (block_buffer == null)
+                    block_buffer = new Geary.Memory.GrowableBuffer();
+                
+                current_buffer = block_buffer.allocate(
+                    size_t.min(MAX_BLOCK_READ_SIZE, literal_length_remaining));
+                
+                dins.read_async.begin(current_buffer, ins_priority, null, on_read_block);
             break;
             
             default:
@@ -189,14 +189,17 @@ public class Geary.Imap.Deserializer {
     
     private void on_read_block(Object? source, AsyncResult result) {
         try {
-            ssize_t read = dins.read_async.end(result);
-            if (read == 0) {
+            size_t bytes_read = dins.read_async.end(result);
+            if (bytes_read == 0) {
                 eos();
                 
                 return;
             }
             
-            push_data(block_buffer[0:read]);
+            // adjust the current buffer's size to the amount that was actually read in
+            block_buffer.adjust(current_buffer, bytes_read);
+            
+            push_data(bytes_read);
         } catch (Error err) {
             receive_failure(err);
             
@@ -231,11 +234,10 @@ public class Geary.Imap.Deserializer {
     }
     
     // Push a block of literal data
-    private Mode push_data(owned uint8[] data) {
+    private Mode push_data(size_t bytes_read) {
         assert(get_mode() == Mode.BLOCK);
         
-        LiteralData literal_data = LiteralData(data);
-        if (fsm.issue(Event.DATA, &literal_data) == State.FAILED) {
+        if (fsm.issue(Event.DATA, &bytes_read) == State.FAILED) {
             deserialize_failure();
             
             return Mode.FAILED;
@@ -268,13 +270,6 @@ public class Geary.Imap.Deserializer {
         current_string.append_unichar(ch);
     }
     
-    private void append_to_literal(uint8[] data) {
-        if (current_literal == null)
-            current_literal = new LiteralParameter(data);
-        else
-            current_literal.add(data);
-    }
-    
     private void save_string_parameter() {
         if (is_current_string_empty())
             return;
@@ -292,49 +287,45 @@ public class Geary.Imap.Deserializer {
     }
     
     private void save_literal_parameter() {
-        if (current_literal == null)
-            return;
-        
-        save_parameter(current_literal);
-        current_literal = null;
+        save_parameter(new LiteralParameter(block_buffer));
+        block_buffer = null;
     }
     
     private void save_parameter(Parameter param) {
-        current.add(param);
+        context.add(param);
     }
     
-    // ListParameter's parent *must* be current
+    // ListParameter's parent *must* be current context
     private void push(ListParameter child) {
-        assert(child.get_parent() == current);
-        current.add(child);
+        assert(child.get_parent() == context);
+        context.add(child);
         
-        current = child;
+        context = child;
     }
     
     private State pop() {
-        ListParameter? parent = current.get_parent();
+        ListParameter? parent = context.get_parent();
         if (parent == null) {
             warning("Attempt to close unopened list/response code");
             
             return State.FAILED;
         }
         
-        current = parent;
+        context = parent;
         
         return State.START_PARAM;
     }
     
     private State flush_params() {
-        if (current != root) {
+        if (context != root) {
             warning("Unclosed list in parameters");
             
             return State.FAILED;
         }
         
-        if (!is_current_string_empty() || current_literal != null || literal_length_remaining > 0) {
-            warning("Unfinished parameter: string=%s literal=%s %ld remaining", 
-                (!is_current_string_empty()).to_string(), (current_literal != null).to_string(),
-                literal_length_remaining);
+        if (!is_current_string_empty() || literal_length_remaining > 0) {
+            warning("Unfinished parameter: string=%s literal remaining=%lu", 
+                (!is_current_string_empty()).to_string(), literal_length_remaining);
             
             return State.FAILED;
         }
@@ -342,7 +333,7 @@ public class Geary.Imap.Deserializer {
         parameters_ready(root);
         
         root = new RootParameters();
-        current = root;
+        context = root;
         
         return State.TAG;
     }
@@ -357,7 +348,7 @@ public class Geary.Imap.Deserializer {
         switch (*((unichar *) user)) {
             case '[':
                 // open response code
-                ResponseCode response_code = new ResponseCode(current);
+                ResponseCode response_code = new ResponseCode(context);
                 push(response_code);
                 
                 return State.START_PARAM;
@@ -370,7 +361,7 @@ public class Geary.Imap.Deserializer {
             
             case '(':
                 // open list
-                ListParameter list = new ListParameter(current);
+                ListParameter list = new ListParameter(context);
                 push(list);
                 
                 return State.START_PARAM;
@@ -482,9 +473,9 @@ public class Geary.Imap.Deserializer {
             if (is_current_string_empty())
                 return State.FAILED;
             
-            literal_length_remaining = long.parse(current_string.str);
+            literal_length_remaining = (size_t) long.parse(current_string.str);
             if (literal_length_remaining < 0) {
-                warning("Negative literal data length %ld", literal_length_remaining);
+                warning("Negative literal data length %lu", literal_length_remaining);
                 
                 return State.FAILED;
             }
@@ -508,12 +499,11 @@ public class Geary.Imap.Deserializer {
     }
     
     private uint on_literal_data(uint state, uint event, void *user) {
-        LiteralData *literal_data = (LiteralData *) user;
+        size_t *bytes_read = (size_t *) user;
         
-        assert(literal_data.data.length <= literal_length_remaining);
-        literal_length_remaining -= literal_data.data.length;
+        assert(*bytes_read <= literal_length_remaining);
+        literal_length_remaining -= *bytes_read;
         
-        append_to_literal(literal_data.data);
         if (literal_length_remaining > 0)
             return State.LITERAL_DATA;
             

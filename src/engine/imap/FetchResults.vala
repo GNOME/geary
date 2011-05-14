@@ -21,7 +21,7 @@ public class Geary.Imap.FetchResults {
         this.msg_num = msg_num;
     }
     
-    public static FetchResults decode(ServerData data) throws ImapError {
+    private static FetchResults decode_data(ServerData data) throws ImapError {
         StringParameter msg_num = (StringParameter) data.get_as(1, typeof(StringParameter));
         StringParameter cmd = (StringParameter) data.get_as(2, typeof(StringParameter));
         ListParameter list = (ListParameter) data.get_as(3, typeof(ListParameter));
@@ -53,10 +53,10 @@ public class Geary.Imap.FetchResults {
         return results;
     }
     
-    public static FetchResults[] decode_command_response(CommandResponse response) throws ImapError {
+    public static FetchResults[] decode(CommandResponse response) throws ImapError {
         FetchResults[] array = new FetchResults[0];
         foreach (ServerData data in response.server_data)
-            array += decode(data);
+            array += decode_data(data);
         
         return array;
     }

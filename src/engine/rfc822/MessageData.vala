@@ -57,13 +57,9 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
     }
     
     public override string to_string() {
-        return addrs.size > 0 ? emit() : "(no addresses)";
-    }
-    
-    public override string emit() {
         switch (addrs.size) {
             case 0:
-                return "";
+                return "(no addresses)";
             
             case 1:
                 return addrs[0].to_string();
@@ -79,6 +75,24 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
                 
                 return builder.str;
         }
+    }
+}
+
+public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+    public Header(Geary.Memory.AbstractBuffer buffer) {
+        base ("RFC822.Header", buffer);
+    }
+}
+
+public class Geary.RFC822.Text : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+    public Text(Geary.Memory.AbstractBuffer buffer) {
+        base ("RFC822.Text", buffer);
+    }
+}
+
+public class Geary.RFC822.Full : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+    public Full(Geary.Memory.AbstractBuffer buffer) {
+        base ("RFC822.Full", buffer);
     }
 }
 

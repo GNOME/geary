@@ -42,15 +42,15 @@ public abstract class Geary.Imap.FetchDataDecoder {
         throw new ImapError.TYPE_ERROR("Data item \"%s\" of unknown type", param.to_string());
     }
     
-    public virtual MessageData decode_string(StringParameter param) throws ImapError {
+    protected virtual MessageData decode_string(StringParameter param) throws ImapError {
         throw new ImapError.TYPE_ERROR("%s does not accept a string parameter", data_item.to_string());
     }
     
-    public virtual MessageData decode_list(ListParameter list) throws ImapError {
+    protected virtual MessageData decode_list(ListParameter list) throws ImapError {
         throw new ImapError.TYPE_ERROR("%s does not accept a list parameter", data_item.to_string());
     }
     
-    public virtual MessageData decode_literal(LiteralParameter literal) throws ImapError {
+    protected virtual MessageData decode_literal(LiteralParameter literal) throws ImapError {
         throw new ImapError.TYPE_ERROR("%s does not accept a literal parameter", data_item.to_string());
     }
 }
@@ -60,7 +60,7 @@ public class Geary.Imap.UIDDecoder : Geary.Imap.FetchDataDecoder {
         base (FetchDataItem.UID);
     }
     
-    public override MessageData decode_string(StringParameter stringp) throws ImapError {
+    protected override MessageData decode_string(StringParameter stringp) throws ImapError {
         return new UID(stringp.as_int());
     }
 }
@@ -70,7 +70,7 @@ public class Geary.Imap.FlagsDecoder : Geary.Imap.FetchDataDecoder {
         base (FetchDataItem.FLAGS);
     }
     
-    public override MessageData decode_list(ListParameter listp) throws ImapError {
+    protected override MessageData decode_list(ListParameter listp) throws ImapError {
         Gee.List<Flag> flags = new Gee.ArrayList<Flag>();
         for (int ctr = 0; ctr < listp.get_count(); ctr++)
             flags.add(new Flag(listp.get_as_string(ctr).value));
@@ -84,7 +84,7 @@ public class Geary.Imap.InternalDateDecoder : Geary.Imap.FetchDataDecoder {
         base (FetchDataItem.INTERNALDATE);
     }
     
-    public override MessageData decode_string(StringParameter stringp) throws ImapError {
+    protected override MessageData decode_string(StringParameter stringp) throws ImapError {
         return new InternalDate(stringp.value);
     }
 }
@@ -94,7 +94,7 @@ public class Geary.Imap.RFC822SizeDecoder : Geary.Imap.FetchDataDecoder {
         base (FetchDataItem.RFC822_SIZE);
     }
     
-    public override MessageData decode_string(StringParameter stringp) throws ImapError {
+    protected override MessageData decode_string(StringParameter stringp) throws ImapError {
         return new RFC822Size(stringp.as_long());
     }
 }
@@ -105,7 +105,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     // TODO: This doesn't handle group lists (see Johnson, p.268)
-    public override MessageData decode_list(ListParameter listp) throws ImapError {
+    protected override MessageData decode_list(ListParameter listp) throws ImapError {
         StringParameter sent = listp.get_as_string(0);
         StringParameter subject = listp.get_as_string(1);
         ListParameter from = listp.get_as_list(2);
@@ -144,6 +144,36 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         }
         
         return new Geary.RFC822.MailboxAddresses(list);
+    }
+}
+
+public class Geary.Imap.RFC822HeaderDecoder : Geary.Imap.FetchDataDecoder {
+    public RFC822HeaderDecoder() {
+        base (FetchDataItem.RFC822_HEADER);
+    }
+    
+    protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
+        return new Geary.Imap.RFC822Header(literalp.get_buffer());
+    }
+}
+
+public class Geary.Imap.RFC822TextDecoder : Geary.Imap.FetchDataDecoder {
+    public RFC822TextDecoder() {
+        base (FetchDataItem.RFC822_TEXT);
+    }
+    
+    protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
+        return new Geary.Imap.RFC822Text(literalp.get_buffer());
+    }
+}
+
+public class Geary.Imap.RFC822FullDecoder : Geary.Imap.FetchDataDecoder {
+    public RFC822FullDecoder() {
+        base (FetchDataItem.RFC822);
+    }
+    
+    protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
+        return new Geary.Imap.RFC822Full(literalp.get_buffer());
     }
 }
 

@@ -83,37 +83,28 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
 }
 
 public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
-    private MemoryInputStream mins = new MemoryInputStream();
-    private long size = 0;
+    private Geary.Memory.AbstractBuffer buffer;
     
-    public LiteralParameter(uint8[]? initial = null) {
-        if (initial != null)
-            add(initial);
+    public LiteralParameter(Geary.Memory.AbstractBuffer buffer) {
+        this.buffer = buffer;
     }
     
-    public void add(uint8[] data) {
-        if (data.length == 0)
-            return;
-        
-        mins.add_data(data, null);
-        size += data.length;
+    public size_t get_size() {
+        return buffer.get_size();
     }
     
-    public long get_size() {
-        return size;
+    public Geary.Memory.AbstractBuffer get_buffer() {
+        return buffer;
     }
     
     public override string to_string() {
-        return "{literal/%ldb}".printf(size);
+        return "{literal/%lub}".printf(get_size());
     }
     
     public override async void serialize(Serializer ser) throws Error {
-        ser.push_string("{%ld}".printf(size));
+        ser.push_string("{%lu}".printf(get_size()));
         ser.push_eol();
-        yield ser.push_input_stream_literal_data_async(mins);
-        
-        // seek to start
-        mins.seek(0, SeekType.SET);
+        yield ser.push_input_stream_literal_data_async(buffer.get_input_stream());
     }
 }
 

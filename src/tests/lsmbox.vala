@@ -17,7 +17,7 @@ async void async_start() {
         yield sess.connect_async();
         yield sess.login_async(user, pass);
         
-        Geary.Folder folder = yield sess.select_async(mailbox);
+        Geary.Folder folder = yield sess.examine_async(mailbox);
         
         Geary.MessageStream? mstream = folder.read(start, count);
         

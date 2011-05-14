@@ -82,10 +82,6 @@ public class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData
     }
     
     public override string to_string() {
-        return emit();
-    }
-    
-    public override string emit() {
         StringBuilder builder = new StringBuilder();
         foreach (Flag flag in list) {
             if (!String.is_empty(builder.str))
@@ -142,23 +138,23 @@ public class Geary.Imap.Envelope : Geary.Common.MessageData, Geary.Imap.MessageD
     public override string to_string() {
         return "[%s] %s: \"%s\"".printf(sent.to_string(), from.to_string(), subject.to_string());
     }
-    
-    public override string emit() {
-        return to_string();
+}
+
+public class Geary.Imap.RFC822Header : Geary.RFC822.Header, Geary.Imap.MessageData {
+    public RFC822Header(Geary.Memory.AbstractBuffer buffer) {
+        base (buffer);
     }
 }
 
-/*
-public class Geary.Imap.BodyStructure : Geary.Imap.Primitive {
+public class Geary.Imap.RFC822Text : Geary.RFC822.Text, Geary.Imap.MessageData {
+    public RFC822Text(Geary.Memory.AbstractBuffer buffer) {
+        base (buffer);
+    }
 }
 
-public class Geary.Imap.RFC822Header : Geary.Imap.Primitive {
+public class Geary.Imap.RFC822Full : Geary.RFC822.Full, Geary.Imap.MessageData {
+    public RFC822Full(Geary.Memory.AbstractBuffer buffer) {
+        base (buffer);
+    }
 }
-
-public class Geary.Imap.RFC822Text : Geary.Imap.Primitive {
-}
-
-public class Geary.Imap.RFC822 : Geary.Imap.Primitive {
-}
-*/
 

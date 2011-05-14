@@ -137,6 +137,14 @@ public enum Geary.Imap.FetchDataItem {
             case RFC822_SIZE:
                 return new RFC822SizeDecoder();
             
+            case RFC822_HEADER:
+                return new RFC822HeaderDecoder();
+            
+            case RFC822_TEXT:
+                return new RFC822TextDecoder();
+            
+            case RFC822:
+                return new RFC822FullDecoder();
             
             default:
                 return null;

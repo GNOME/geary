@@ -16,11 +16,6 @@ public abstract class Geary.Common.MessageData {
      * serialization.
      */
     public abstract string to_string();
-    
-    /**
-     * emit() is intended for sending the data on the wire in a textual format.
-     */
-    public abstract string emit();
 }
 
 public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData {
@@ -31,10 +26,6 @@ public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData 
     }
     
     public override string to_string() {
-        return value;
-    }
-    
-    public override string emit() {
         return value;
     }
 }
@@ -49,10 +40,6 @@ public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData {
     public override string to_string() {
         return value.to_string();
     }
-    
-    public override string emit() {
-        return value.to_string();
-    }
 }
 
 public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData {
@@ -65,9 +52,19 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData {
     public override string to_string() {
         return value.to_string();
     }
+}
+
+public abstract class Geary.Common.BlockMessageData : Geary.Common.MessageData {
+    public string data_name { get; private set; }
+    public Geary.Memory.AbstractBuffer buffer { get; private set; }
     
-    public override string emit() {
-        return value.to_string();
+    public BlockMessageData(string data_name, Geary.Memory.AbstractBuffer buffer) {
+        this.data_name = data_name;
+        this.buffer = buffer;
+    }
+    
+    public override string to_string() {
+        return "%s (%lub)".printf(data_name, buffer.get_size());
     }
 }
 

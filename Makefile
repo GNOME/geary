@@ -3,7 +3,7 @@ BUILD_ROOT = 1
 
 VALAC := valac
 
-APPS := console syntax lsmbox
+APPS := console syntax lsmbox readmail
 
 ENGINE_SRC := \
 	src/engine/Engine.vala \
@@ -36,7 +36,8 @@ ENGINE_SRC := \
 	src/engine/imap/Error.vala \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
-	src/engine/util/string.vala
+	src/engine/util/String.vala \
+	src/engine/util/Memory.vala
 
 CONSOLE_SRC := \
 	src/console/main.vala
@@ -47,7 +48,10 @@ SYNTAX_SRC := \
 LSMBOX_SRC := \
 	src/tests/lsmbox.vala
 
-ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC)
+READMAIL_SRC := \
+	src/tests/readmail.vala
+
+ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC)
 
 EXTERNAL_PKGS := \
 	gio-2.0 \
@@ -75,5 +79,10 @@ syntax: $(ENGINE_SRC) $(SYNTAX_SRC) Makefile
 lsmbox: $(ENGINE_SRC) $(LSMBOX_SRC) Makefile
 	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(LSMBOX_SRC) \
+		-o $@
+
+readmail: $(ENGINE_SRC) $(READMAIL_SRC) Makefile
+	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+		$(ENGINE_SRC) $(READMAIL_SRC) \
 		-o $@
 

@@ -39,7 +39,7 @@ private class Geary.Imap.MessageStreamImpl : Object, Geary.MessageStream {
         
         Gee.List<Message> msgs = new Gee.ArrayList<Message>();
         
-        FetchResults[] results = FetchResults.decode_command_response(resp);
+        FetchResults[] results = FetchResults.decode(resp);
         foreach (FetchResults res in results) {
             Envelope envelope = (Envelope) res.get_data(FetchDataItem.ENVELOPE);
             msgs.add(new Message(res.msg_num, envelope.from, envelope.subject, envelope.sent));
