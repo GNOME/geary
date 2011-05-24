@@ -18,13 +18,13 @@ async void async_start() {
         yield sess.examine_async(mailbox);
         
         Geary.Imap.FetchCommand fetch = new Geary.Imap.FetchCommand(sess.generate_tag(),
-            "%d".printf(msg_num), { Geary.Imap.FetchDataItem.RFC822 });
+            "%d".printf(msg_num), { Geary.Imap.FetchDataType.RFC822 });
         Geary.Imap.CommandResponse resp = yield sess.send_command_async(fetch);
         Geary.Imap.FetchResults[] results = Geary.Imap.FetchResults.decode(resp);
         
         assert(results.length == 1);
         Geary.RFC822.Full? full =
-            results[0].get_data(Geary.Imap.FetchDataItem.RFC822) as Geary.RFC822.Full;
+            results[0].get_data(Geary.Imap.FetchDataType.RFC822) as Geary.RFC822.Full;
         assert(full != null);
         
         DataInputStream dins = new DataInputStream(full.buffer.get_input_stream());

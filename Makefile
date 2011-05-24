@@ -3,7 +3,7 @@ BUILD_ROOT = 1
 
 VALAC := valac
 
-APPS := console syntax lsmbox readmail
+APPS := console syntax lsmbox readmail watchmbox
 
 ENGINE_SRC := \
 	src/engine/Engine.vala \
@@ -20,20 +20,22 @@ ENGINE_SRC := \
 	src/engine/imap/Tag.vala \
 	src/engine/imap/Command.vala \
 	src/engine/imap/Commands.vala \
-	src/engine/imap/FetchCommand.vala \
 	src/engine/imap/ResponseCode.vala \
 	src/engine/imap/ServerResponse.vala \
 	src/engine/imap/StatusResponse.vala \
 	src/engine/imap/ServerData.vala \
+	src/engine/imap/ServerDataType.vala \
+	src/engine/imap/FetchDataType.vala \
 	src/engine/imap/Status.vala \
 	src/engine/imap/CommandResponse.vala \
-	src/engine/imap/FetchResults.vala \
-	src/engine/imap/FetchDataDecoder.vala \
 	src/engine/imap/MessageData.vala \
 	src/engine/imap/Serializable.vala \
 	src/engine/imap/Serializer.vala \
 	src/engine/imap/Deserializer.vala \
 	src/engine/imap/Error.vala \
+	src/engine/imap/decoders/FetchDataDecoder.vala \
+	src/engine/imap/decoders/FetchResults.vala \
+	src/engine/imap/decoders/NoopResults.vala \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/String.vala \
@@ -51,7 +53,10 @@ LSMBOX_SRC := \
 READMAIL_SRC := \
 	src/tests/readmail.vala
 
-ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC)
+WATCHMBOX_SRC := \
+	src/tests/watchmbox.vala
+
+ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC) $(WATCHMBOX_SRC)
 
 EXTERNAL_PKGS := \
 	gio-2.0 \
@@ -84,5 +89,10 @@ lsmbox: $(ENGINE_SRC) $(LSMBOX_SRC) Makefile
 readmail: $(ENGINE_SRC) $(READMAIL_SRC) Makefile
 	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(READMAIL_SRC) \
+		-o $@
+
+watchmbox: $(ENGINE_SRC) $(WATCHMBOX_SRC) Makefile
+	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+		$(ENGINE_SRC) $(WATCHMBOX_SRC) \
 		-o $@
 

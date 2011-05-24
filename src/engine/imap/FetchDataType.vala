@@ -5,7 +5,7 @@
  */
 
 // TODO: Support body[section]<partial> and body.peek[section]<partial> forms
-public enum Geary.Imap.FetchDataItem {
+public enum Geary.Imap.FetchDataType {
     UID,
     FLAGS,
     INTERNALDATE,
@@ -66,7 +66,7 @@ public enum Geary.Imap.FetchDataItem {
         }
     }
     
-    public static FetchDataItem decode(string value) throws ImapError {
+    public static FetchDataType decode(string value) throws ImapError {
         switch (value.down()) {
             case "uid":
                 return UID;
@@ -116,7 +116,7 @@ public enum Geary.Imap.FetchDataItem {
         return new StringParameter(to_string());
     }
     
-    public static FetchDataItem from_parameter(StringParameter strparam) throws ImapError {
+    public static FetchDataType from_parameter(StringParameter strparam) throws ImapError {
         return decode(strparam.value);
     }
     
@@ -148,27 +148,6 @@ public enum Geary.Imap.FetchDataItem {
             
             default:
                 return null;
-        }
-    }
-}
-
-public class Geary.Imap.FetchCommand : Command {
-    public const string NAME = "fetch";
-    
-    public FetchCommand(Tag tag, string msg_span, FetchDataItem[] data_items) {
-        base (tag, NAME);
-        
-        add(new StringParameter(msg_span));
-        
-        assert(data_items.length > 0);
-        if (data_items.length == 1) {
-            add(data_items[0].to_parameter());
-        } else {
-            ListParameter data_item_list = new ListParameter(this);
-            foreach (FetchDataItem data_item in data_items)
-                data_item_list.add(data_item.to_parameter());
-            
-            add(data_item_list);
         }
     }
 }

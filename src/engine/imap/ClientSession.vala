@@ -5,6 +5,10 @@
  */
 
 public class Geary.Imap.ClientSession : Object, Geary.Account {
+    // 30 min keepalive required to maintain session; back off by 30 sec for breathing room
+    public const int MIN_KEEPALIVE_SEC = (30 * 60) - 30;
+    public const int DEFAULT_KEEPALIVE_SEC = 60;
+    
     // Need this because delegates with targets cannot be stored in ADTs.
     private class CommandCallback {
         public SourceFunc callback;
@@ -149,12 +153,25 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     private Gee.Queue<CommandCallback> cb_queue = new Gee.LinkedList<CommandCallback>();
     private Gee.Queue<CommandResponse> cmd_response_queue = new Gee.LinkedList<CommandResponse>();
     private CommandResponse current_cmd_response = new CommandResponse();
-
+    private uint keepalive_id = 0;
+    
     // state used only during connect and disconnect
     private bool awaiting_connect_response = false;
     private ServerData? connect_response = null;
     private AsyncParams? connect_params = null;
     private AsyncParams? disconnect_params = null;
+    
+    public virtual signal void unsolicited_expunged(MessageNumber msg) {
+    }
+    
+    public virtual signal void unsolicited_exists(int exists) {
+    }
+    
+    public virtual signal void unsolicitied_recent(int recent) {
+    }
+    
+    public virtual signal void unsolicited_flags(FetchResults flags) {
+    }
     
     public ClientSession(string server, uint default_port) {
         this.server = server;
@@ -420,6 +437,75 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         debug("Login to %s failed", to_full_string());
         
         return State.NOAUTH;
+    }
+    
+    //
+    // keepalives (nop idling to keep the session alive and to periodically receive notifications
+    // of changes)
+    //
+    
+    /**
+     * Returns true if keepalives are activated, false if already enabled.
+     */
+    public bool enable_keepalives(int seconds = DEFAULT_KEEPALIVE_SEC) {
+        if (keepalive_id != 0)
+            return false;
+        
+        keepalive_id = Timeout.add_seconds(seconds, on_keepalive);
+        
+        return true;
+    }
+    
+    /**
+     * Returns true if keepalives are disactivated, false if already disabled.
+     */
+    public bool disable_keepalives() {
+        if (keepalive_id == 0)
+            return false;
+        
+        Source.remove(keepalive_id);
+        keepalive_id = 0;
+        
+        return true;
+    }
+    
+    private bool on_keepalive() {
+        send_command_async.begin(new NoopCommand(generate_tag()), null, on_keepalive_completed);
+        
+        return true;
+    }
+    
+    private void on_keepalive_completed(Object? source, AsyncResult result) {
+        NoopResults results;
+        try {
+            results = NoopResults.decode(send_command_async.end(result));
+        } catch (Error err) {
+            message("Keepalive error: %s", err.message);
+            
+            return;
+        }
+        
+        if (results.status_response.status != Status.OK) {
+            debug("Keepalive failed: %s", results.status_response.to_string());
+            
+            return;
+        }
+        
+        if (results.expunged != null) {
+            foreach (MessageNumber msg in results.expunged)
+                unsolicited_expunged(msg);
+        }
+        
+        if (results.has_exists())
+            unsolicited_exists(results.exists);
+        
+        if (results.has_recent())
+            unsolicitied_recent(results.recent);
+        
+        if (results.flags != null) {
+            foreach (FetchResults flags in results.flags)
+                unsolicited_flags(flags);
+        }
     }
     
     //
@@ -739,7 +825,9 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     }
     
     private uint on_ignored_transition(uint state, uint event) {
+#if VERBOSE_SESSION
         debug("Ignored transition: %s@%s", fsm.get_event_string(event), fsm.get_state_string(state));
+#endif
         
         return state;
     }
@@ -813,15 +901,21 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     //
     
     private void on_network_connected() {
+#if VERBOSE_SESSION
         debug("Connected to %s", server);
+#endif
     }
     
     private void on_network_disconnected() {
+#if VERBOSE_SESSION
         debug("Disconnected from %s", server);
+#endif
     }
     
     private void on_network_sent_command(Command cmd) {
+#if VERBOSE_SESSION
         debug("Sent command %s", cmd.to_string());
+#endif
     }
     
     private void on_received_status_response(StatusResponse status_response) {

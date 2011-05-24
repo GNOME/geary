@@ -32,7 +32,7 @@ private class Geary.Imap.MessageStreamImpl : Object, Geary.MessageStream {
     
     public async Gee.List<Message>? read(Cancellable? cancellable = null) throws Error {
         CommandResponse resp = yield sess.send_command_async(new FetchCommand(sess.generate_tag(),
-            span, { FetchDataItem.ENVELOPE }), cancellable);
+            span, { FetchDataType.ENVELOPE }), cancellable);
         
         if (resp.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR(resp.status_response.text);
@@ -41,7 +41,7 @@ private class Geary.Imap.MessageStreamImpl : Object, Geary.MessageStream {
         
         FetchResults[] results = FetchResults.decode(resp);
         foreach (FetchResults res in results) {
-            Envelope envelope = (Envelope) res.get_data(FetchDataItem.ENVELOPE);
+            Envelope envelope = (Envelope) res.get_data(FetchDataType.ENVELOPE);
             msgs.add(new Message(res.msg_num, envelope.from, envelope.subject, envelope.sent));
         }
         

@@ -15,13 +15,13 @@
 public class Geary.Imap.FetchResults {
     public int msg_num { get; private set; }
     
-    private Gee.Map<FetchDataItem, MessageData> map = new Gee.HashMap<FetchDataItem, MessageData>();
+    private Gee.Map<FetchDataType, MessageData> map = new Gee.HashMap<FetchDataType, MessageData>();
     
     public FetchResults(int msg_num) {
         this.msg_num = msg_num;
     }
     
-    private static FetchResults decode_data(ServerData data) throws ImapError {
+    public static FetchResults decode_data(ServerData data) throws ImapError {
         StringParameter msg_num = (StringParameter) data.get_as(1, typeof(StringParameter));
         StringParameter cmd = (StringParameter) data.get_as(2, typeof(StringParameter));
         ListParameter list = (ListParameter) data.get_as(3, typeof(ListParameter));
@@ -38,7 +38,7 @@ public class Geary.Imap.FetchResults {
         // and the structured data itself
         for (int ctr = 0; ctr < list.get_count(); ctr += 2) {
             StringParameter data_item_param = (StringParameter) list.get_as(ctr, typeof(StringParameter));
-            FetchDataItem data_item = FetchDataItem.decode(data_item_param.value);
+            FetchDataType data_item = FetchDataType.decode(data_item_param.value);
             FetchDataDecoder? decoder = data_item.get_decoder();
             if (decoder == null) {
                 debug("Unable to decode fetch response for \"%s\": No decoder available",
@@ -54,6 +54,8 @@ public class Geary.Imap.FetchResults {
     }
     
     public static FetchResults[] decode(CommandResponse response) throws ImapError {
+        assert(response.is_sealed());
+        
         FetchResults[] array = new FetchResults[0];
         foreach (ServerData data in response.server_data)
             array += decode_data(data);
@@ -61,11 +63,11 @@ public class Geary.Imap.FetchResults {
         return array;
     }
     
-    public void set_data(FetchDataItem data_item, MessageData primitive) {
+    public void set_data(FetchDataType data_item, MessageData primitive) {
         map.set(data_item, primitive);
     }
     
-    public MessageData? get_data(FetchDataItem data_item) {
+    public MessageData? get_data(FetchDataType data_item) {
         return map.get(data_item);
     }
     

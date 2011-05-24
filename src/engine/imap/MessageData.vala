@@ -26,6 +26,12 @@ public class Geary.Imap.UID : Geary.Common.IntMessageData, Geary.Imap.MessageDat
     }
 }
 
+public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.MessageData {
+    public MessageNumber(int value) {
+        base (value);
+    }
+}
+
 public class Geary.Imap.Flag {
     public static Flag ANSWERED = new Flag("\\answered");
     public static Flag DELETED = new Flag("\\deleted");

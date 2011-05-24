@@ -76,3 +76,24 @@ public class Geary.Imap.CloseCommand : Command {
     }
 }
 
+public class Geary.Imap.FetchCommand : Command {
+    public const string NAME = "fetch";
+    
+    public FetchCommand(Tag tag, string msg_span, FetchDataType[] data_items) {
+        base (tag, NAME);
+        
+        add(new StringParameter(msg_span));
+        
+        assert(data_items.length > 0);
+        if (data_items.length == 1) {
+            add(data_items[0].to_parameter());
+        } else {
+            ListParameter data_item_list = new ListParameter(this);
+            foreach (FetchDataType data_item in data_items)
+                data_item_list.add(data_item.to_parameter());
+            
+            add(data_item_list);
+        }
+    }
+}
+
