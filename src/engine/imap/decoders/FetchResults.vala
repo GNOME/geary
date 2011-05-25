@@ -22,9 +22,9 @@ public class Geary.Imap.FetchResults {
     }
     
     public static FetchResults decode_data(ServerData data) throws ImapError {
-        StringParameter msg_num = (StringParameter) data.get_as(1, typeof(StringParameter));
-        StringParameter cmd = (StringParameter) data.get_as(2, typeof(StringParameter));
-        ListParameter list = (ListParameter) data.get_as(3, typeof(ListParameter));
+        StringParameter msg_num = data.get_as_string(1);
+        StringParameter cmd = data.get_as_string(2);
+        ListParameter list = data.get_as_list(3);
         
         // verify this is a FETCH response
         if (!cmd.equals_ci("fetch")) {
@@ -37,7 +37,7 @@ public class Geary.Imap.FetchResults {
         // walk the list for each returned fetch data item, which is paired by its data item name
         // and the structured data itself
         for (int ctr = 0; ctr < list.get_count(); ctr += 2) {
-            StringParameter data_item_param = (StringParameter) list.get_as(ctr, typeof(StringParameter));
+            StringParameter data_item_param = list.get_as_string(ctr);
             FetchDataType data_item = FetchDataType.decode(data_item_param.value);
             FetchDataDecoder? decoder = data_item.get_decoder();
             if (decoder == null) {
@@ -53,12 +53,18 @@ public class Geary.Imap.FetchResults {
         return results;
     }
     
-    public static FetchResults[] decode(CommandResponse response) throws ImapError {
+    public static FetchResults[] decode(CommandResponse response) {
         assert(response.is_sealed());
         
         FetchResults[] array = new FetchResults[0];
-        foreach (ServerData data in response.server_data)
-            array += decode_data(data);
+        foreach (ServerData data in response.server_data) {
+            try {
+                array += decode_data(data);
+            } catch (ImapError ierr) {
+                // drop bad data on the ground
+                continue;
+            }
+        }
         
         return array;
     }

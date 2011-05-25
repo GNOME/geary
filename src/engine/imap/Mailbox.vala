@@ -35,7 +35,7 @@ private class Geary.Imap.MessageStreamImpl : Object, Geary.MessageStream {
             span, { FetchDataType.ENVELOPE }), cancellable);
         
         if (resp.status_response.status != Status.OK)
-            throw new ImapError.SERVER_ERROR(resp.status_response.text);
+            throw new ImapError.SERVER_ERROR("Server error: %s", resp.to_string());
         
         Gee.List<Message> msgs = new Gee.ArrayList<Message>();
         

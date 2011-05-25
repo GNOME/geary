@@ -883,17 +883,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         Idle.add(params.cb);
     }
     
-    public async Geary.Folder open(string name, Cancellable? cancellable = null) throws Error {
-        if (cx == null)
-            throw new IOError.CLOSED("Not connected to %s", server);
-        
-        assert(current_mailbox == null);
-        
-        yield send_command_async(new ExamineCommand(cx.generate_tag(), name), cancellable);
-        
-        current_mailbox = new Mailbox(name, this);
-        
-        return current_mailbox;
+    public async Geary.Folder open(string mailbox, Cancellable? cancellable = null) throws Error {
+        return yield examine_async(mailbox, cancellable);
     }
     
     //

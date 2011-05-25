@@ -48,7 +48,7 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
         return addrs.size;
     }
     
-    public MailboxAddress? get(int index) {
+    public MailboxAddress? get_at(int index) {
         return addrs.get(index);
     }
     

@@ -2,8 +2,9 @@ PROGRAM = geary
 BUILD_ROOT = 1
 
 VALAC := valac
+VALAFLAGS := -g --save-temps --enable-checking --fatal-warnings
 
-APPS := console syntax lsmbox readmail watchmbox
+APPS := geary console syntax lsmbox readmail watchmbox
 
 ENGINE_SRC := \
 	src/engine/Engine.vala \
@@ -41,6 +42,15 @@ ENGINE_SRC := \
 	src/engine/util/String.vala \
 	src/engine/util/Memory.vala
 
+CLIENT_SRC := \
+	src/client/main.vala \
+	src/client/YorbaApplication.vala \
+	src/client/GearyApplication.vala \
+	src/client/ui/MainWindow.vala \
+	src/client/ui/MessageListView.vala \
+	src/client/ui/MessageListStore.vala \
+	src/client/util/Intl.vala
+
 CONSOLE_SRC := \
 	src/console/main.vala
 
@@ -56,12 +66,14 @@ READMAIL_SRC := \
 WATCHMBOX_SRC := \
 	src/tests/watchmbox.vala
 
-ALL_SRC := $(ENGINE_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC) $(WATCHMBOX_SRC)
+ALL_SRC := $(ENGINE_SRC) $(CLIENT_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC) $(WATCHMBOX_SRC)
 
 EXTERNAL_PKGS := \
 	gio-2.0 \
 	gee-1.0 \
-	gtk+-2.0
+	gtk+-2.0 \
+	unique-1.0 \
+	posix
 
 .PHONY: all
 all: $(APPS)
@@ -71,28 +83,33 @@ clean:
 	rm -f $(ALL_SRC:.vala=.c)
 	rm -f $(APPS)
 
+geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+		$(ENGINE_SRC) $(CLIENT_SRC) \
+		-o $@
+
 console: $(ENGINE_SRC) $(CONSOLE_SRC) Makefile
-	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(CONSOLE_SRC) \
 		-o $@
 
 syntax: $(ENGINE_SRC) $(SYNTAX_SRC) Makefile
-	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(SYNTAX_SRC) \
 		-o $@
 
 lsmbox: $(ENGINE_SRC) $(LSMBOX_SRC) Makefile
-	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(LSMBOX_SRC) \
 		-o $@
 
 readmail: $(ENGINE_SRC) $(READMAIL_SRC) Makefile
-	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(READMAIL_SRC) \
 		-o $@
 
 watchmbox: $(ENGINE_SRC) $(WATCHMBOX_SRC) Makefile
-	$(VALAC) --save-temps -g $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(WATCHMBOX_SRC) \
 		-o $@
 

@@ -39,7 +39,8 @@ public abstract class Geary.Imap.FetchDataDecoder {
         if (literalp != null)
             return decode_literal(literalp);
         
-        throw new ImapError.TYPE_ERROR("Data item \"%s\" of unknown type", param.to_string());
+        // bad news; this means this function isn't handling a Parameter type properly
+        assert_not_reached();;
     }
     
     protected virtual MessageData decode_string(StringParameter param) throws ImapError {
@@ -104,13 +105,12 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         base (FetchDataType.ENVELOPE);
     }
     
-    // TODO: This doesn't handle group lists (see Johnson, p.268)
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
         StringParameter sent = listp.get_as_string(0);
         StringParameter subject = listp.get_as_string(1);
         ListParameter from = listp.get_as_list(2);
         ListParameter sender = listp.get_as_list(3);
-        ListParameter? reply_to = listp.get_as_list(4);
+        ListParameter reply_to = listp.get_as_list(4);
         ListParameter? to = listp.get_as_nullable_list(5);
         ListParameter? cc = listp.get_as_nullable_list(6);
         ListParameter? bcc = listp.get_as_nullable_list(7);
@@ -126,7 +126,9 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             new Geary.RFC822.MessageID(message_id.value));
     }
     
-    private Geary.RFC822.MailboxAddresses parse_addresses(ListParameter listp) throws ImapError {
+    // TODO: This doesn't handle group lists (see Johnson, p.268) -- this will throw an
+    // ImapError.TYPE_ERROR if this occurs.
+    private Geary.RFC822.MailboxAddresses? parse_addresses(ListParameter listp) throws ImapError {
         Gee.List<Geary.RFC822.MailboxAddress> list = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
         for (int ctr = 0; ctr < listp.get_count(); ctr++) {
             ListParameter fields = listp.get_as_list(ctr);

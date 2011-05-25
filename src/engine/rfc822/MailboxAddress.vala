@@ -16,7 +16,8 @@ public class Geary.RFC822.MailboxAddress {
         this.source_route = source_route;
         this.mailbox = mailbox;
         this.domain = domain;
-        this.address = "%s@%s".printf(mailbox, domain);
+        
+        address = "%s@%s".printf(mailbox, domain);
     }
     
     /**
