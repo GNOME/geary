@@ -2,7 +2,7 @@ PROGRAM = geary
 BUILD_ROOT = 1
 
 VALAC := valac
-VALAFLAGS := -g --save-temps --enable-checking --fatal-warnings
+VALAFLAGS := -g --save-temps --enable-checking --fatal-warnings --vapidir=vapi
 
 APPS := geary console syntax lsmbox readmail watchmbox
 
@@ -49,7 +49,8 @@ CLIENT_SRC := \
 	src/client/ui/MainWindow.vala \
 	src/client/ui/MessageListView.vala \
 	src/client/ui/MessageListStore.vala \
-	src/client/util/Intl.vala
+	src/client/util/Intl.vala \
+	src/client/util/Date.vala
 
 CONSOLE_SRC := \
 	src/console/main.vala
@@ -73,7 +74,11 @@ EXTERNAL_PKGS := \
 	gee-1.0 \
 	gtk+-2.0 \
 	unique-1.0 \
-	posix
+	posix \
+	gmime-2.4
+
+VAPI_FILES := \
+	vapi/gmime-2.4.vapi
 
 .PHONY: all
 all: $(APPS)
@@ -83,7 +88,7 @@ clean:
 	rm -f $(ALL_SRC:.vala=.c)
 	rm -f $(APPS)
 
-geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile
+geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile $(VAPI_FILES)
 	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
 		$(ENGINE_SRC) $(CLIENT_SRC) \
 		-o $@

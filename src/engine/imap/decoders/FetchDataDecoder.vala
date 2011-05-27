@@ -117,7 +117,8 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         StringParameter? in_reply_to = listp.get_as_nullable_string(8);
         StringParameter message_id = listp.get_as_string(9);
         
-        return new Envelope(new Geary.RFC822.Date(sent.value), new Geary.RFC822.Subject(subject.value),
+        return new Envelope(new Geary.RFC822.Date(sent.value),
+            new Geary.RFC822.Subject(subject.value),
             parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null, 
             (cc != null) ? parse_addresses(cc) : null,

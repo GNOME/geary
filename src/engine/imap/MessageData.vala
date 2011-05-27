@@ -101,8 +101,8 @@ public class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData
 }
 
 public class Geary.Imap.InternalDate : Geary.RFC822.Date, Geary.Imap.MessageData {
-    public InternalDate(string value) {
-        base (value);
+    public InternalDate(string iso8601) throws ImapError {
+        base (iso8601);
     }
 }
 

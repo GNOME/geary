@@ -1,0 +1,9 @@
+GMime cheader_filename="gmime/gmime.h" lower_case_cprefix="g_mime_"
+
+g_mime_message_get_date.date is_out="1"
+g_mime_message_get_date.tz_offset is_out="1"
+g_mime_param_next name="get_next"
+g_mime_signer_next name="get_next"
+
+g_mime_utils_header_decode_date type_name="time_t"
+g_mime_utils_header_decode_date.tz_offset is_out="1" nullable="1"

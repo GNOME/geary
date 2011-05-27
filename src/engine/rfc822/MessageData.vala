@@ -19,9 +19,21 @@ public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC8
     }
 }
 
-public class Geary.RFC822.Date : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
-    public Date(string value) {
-        base (value);
+public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData {
+    public string original { get; private set; }
+    public DateTime value { get; private set; }
+    
+    public Date(string iso8601) throws ImapError {
+        time_t tm = GMime.utils_header_decode_date(iso8601, null);
+        if (tm == 0)
+            throw new ImapError.PARSE_ERROR("Unable to parse \"%s\": not ISO-8601 date", iso8601);
+        
+        value = new DateTime.from_unix_utc(tm);
+        original = iso8601;
+    }
+    
+    public override string to_string() {
+        return original;
     }
 }
 

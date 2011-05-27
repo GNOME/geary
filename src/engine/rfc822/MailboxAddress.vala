@@ -28,6 +28,14 @@ public class Geary.RFC822.MailboxAddress {
         return String.is_empty(name) ? "<%s>".printf(address) : "%s <%s>".printf(name, address);
     }
     
+    /**
+     * Returns a human-readable pretty address, showing only the name, but if unavailable, the
+     * mailbox name (that is, the account name without the domain).
+     */
+    public string get_short_address() {
+        return name ?? mailbox;
+    }
+    
     public string to_string() {
         return get_full_address();
     }

@@ -62,6 +62,8 @@ public class Geary.Imap.FetchResults {
                 array += decode_data(data);
             } catch (ImapError ierr) {
                 // drop bad data on the ground
+                debug("Dropping FETCH data \"%s\": %s", data.to_string(), ierr.message);
+                
                 continue;
             }
         }
