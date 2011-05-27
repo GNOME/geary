@@ -28,7 +28,7 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageD
         if (tm == 0)
             throw new ImapError.PARSE_ERROR("Unable to parse \"%s\": not ISO-8601 date", iso8601);
         
-        value = new DateTime.from_unix_utc(tm);
+        value = new DateTime.from_unix_local(tm);
         original = iso8601;
     }
     

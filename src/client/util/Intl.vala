@@ -5,9 +5,11 @@
  */
 
 // TODO: This fakes internationalization support until fully integrated.
-public string _(string text) {
+public unowned string _(string text) {
     return text;
 }
+
+public const string TRANSLATABLE = "TRANSLATABLE";
 
 namespace Intl {
 }
