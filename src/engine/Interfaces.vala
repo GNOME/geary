@@ -5,11 +5,16 @@
  */
 
 public interface Geary.Account : Object {
-    public abstract async Folder open(string name, Cancellable? cancellable = null) throws Error;
+    public abstract async Gee.Collection<string> list(string parent, Cancellable? cancellable = null)
+        throws Error;
+    
+    public abstract async Folder open(string folder, Cancellable? cancellable = null) throws Error;
 }
 
 public interface Geary.Folder : Object {
     public abstract MessageStream? read(int low, int count);
+    
+    public abstract async void close(Cancellable? cancellable = null) throws Error;
 }
 
 public interface Geary.MessageStream : Object {

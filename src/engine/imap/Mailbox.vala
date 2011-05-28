@@ -8,14 +8,24 @@ public class Geary.Imap.Mailbox : Object, Geary.Folder {
     public string name { get; private set; }
     
     private ClientSession sess;
+    private bool is_closed = false;
     
     internal Mailbox(string name, ClientSession sess) {
         this.name = name;
         this.sess = sess;
     }
     
+    ~Mailbox() {
+        assert(is_closed);
+    }
+    
     public MessageStream? read(int low, int count) {
         return new MessageStreamImpl(sess, low, count);
+    }
+    
+    public async void close(Cancellable? cancellable = null) throws Error {
+        yield sess.close_mailbox_async(cancellable);
+        is_closed = true;
     }
 }
 

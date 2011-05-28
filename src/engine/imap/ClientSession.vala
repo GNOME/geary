@@ -644,8 +644,6 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         
         if (params.err != null)
             throw params.err;
-        
-        debug("Closed mailbox");
     }
     
     private uint on_close_mailbox(uint state, uint event, void *user, Object? object) {
@@ -666,6 +664,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     }
     
     private uint on_closed_mailbox(uint state, uint event) {
+        current_mailbox = null;
+        
         return State.AUTHORIZED;
     }
     
@@ -864,7 +864,7 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         return new AsyncCommandResponse(cmd_response, user, null);
     }
     
-    private void generic_issue_command_completed(AsyncResult result, Event ok_event, Event error_event) {
+    private bool generic_issue_command_completed(AsyncResult result, Event ok_event, Event error_event) {
         AsyncCommandResponse async_response = issue_command_async.end(result);
         
         assert(async_response.user != null);
@@ -873,14 +873,33 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         params.cmd_response = async_response.cmd_response;
         params.err = async_response.err;
         
+        bool success;
         if (async_response.err != null) {
             fsm.issue(Event.SEND_ERROR, null, null, async_response.err);
+            success = false;
         } else {
             issue_status(async_response.cmd_response.status_response.status, ok_event, error_event,
                 params);
+            success = true;
         }
         
         Idle.add(params.cb);
+        
+        return success;
+    }
+    
+    //
+    // Geary.Account
+    //
+    
+    public async Gee.Collection<string> list(string parent, Cancellable? cancellable = null) throws Error {
+        string specifier = String.is_empty(parent) ? "/" : parent;
+        specifier += (specifier.has_suffix("/")) ? "%" : "/%";
+        
+        ListResults results = ListResults.decode(yield send_command_async(
+            new ListCommand(generate_tag(), specifier), cancellable));
+        
+        return results.get_names();
     }
     
     public async Geary.Folder open(string mailbox, Cancellable? cancellable = null) throws Error {

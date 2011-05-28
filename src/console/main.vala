@@ -10,6 +10,8 @@ errordomain CommandException {
 }
 
 class ImapConsole : Gtk.Window {
+    private static const int KEEPALIVE_SEC = 60 * 10;
+    
     private Gtk.TextView console = new Gtk.TextView();
     private Gtk.Entry cmdline = new Gtk.Entry();
     private Gtk.Statusbar statusbar = new Gtk.Statusbar();
@@ -82,12 +84,14 @@ class ImapConsole : Gtk.Window {
         "logout",
         "bye",
         "list",
+        "xlist",
         "examine",
         "fetch",
         "help",
         "exit",
         "quit",
-        "gmail"
+        "gmail",
+        "keepalive"
     };
     
     private void exec(string input) {
@@ -144,6 +148,10 @@ class ImapConsole : Gtk.Window {
                         list(cmd, args);
                     break;
                     
+                    case "xlist":
+                        xlist(cmd, args);
+                    break;
+                    
                     case "examine":
                         examine(cmd, args);
                     break;
@@ -166,6 +174,10 @@ class ImapConsole : Gtk.Window {
                         string[] fake_args = new string[1];
                         fake_args[0] = "imap.gmail.com:993";
                         connect_cmd("connect", fake_args);
+                    break;
+                    
+                    case "keepalive":
+                        keepalive(cmd, args);
                     break;
                     
                     default:
@@ -333,6 +345,14 @@ class ImapConsole : Gtk.Window {
         }
     }
     
+    private void xlist(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 2, "<reference> <mailbox>");
+        
+        status("Xlisting...");
+        cx.post(new Geary.Imap.XListCommand.wildcarded(cx.generate_tag(), args[0], args[1]),
+            on_list);
+    }
+    
     private void examine(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 1, "<mailbox>");
         
@@ -372,6 +392,35 @@ class ImapConsole : Gtk.Window {
     
     private void quit(string cmd, string[] args) throws Error {
         Gtk.main_quit();
+    }
+    
+    private bool keepalive_on = false;
+    
+    private void keepalive(string cmd, string[] args) throws Error {
+        if (keepalive_on) {
+            status("Keepalive already active.");
+            
+            return;
+        }
+        
+        check_connected(cmd, args, 0, null);
+        
+        keepalive_on = true;
+        Timeout.add_seconds(KEEPALIVE_SEC, on_keepalive);
+        
+        status("Keepalive on.");
+    }
+    
+    private bool on_keepalive() {
+        try {
+            noop("noop", new string[0]);
+        } catch (Error err) {
+            status("Keepalive failed, halted: %s".printf(err.message));
+            
+            keepalive_on = false;
+        }
+        
+        return keepalive_on;
     }
     
     private void print_console_line(string text) {

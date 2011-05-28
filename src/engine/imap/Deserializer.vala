@@ -53,22 +53,6 @@ public class Geary.Imap.Deserializer {
         return ((Event) event).to_string();
     }
     
-    // Atom specials includes space and close-parens, but those are handled in particular ways while
-    // in the ATOM state, so they're not included here.  Also note that while documentation
-    // indicates that the backslash cannot be used in an atom, they *are* used for message flags
-    // and thus must be special-cased in the code.
-    private static unichar[] atom_specials = {
-        '(', '{', '%', '*', '\"'
-    };
-    
-    // Tag specials are like atom specials but include the continuation character ('+').  Like atom
-    // specials, the space is treated in a particular way, but unlike atom, the close-parens
-    // character is not.  Also, the star character is allowed, although technically only correct
-    // in the context of a status response; it's the responsibility of higher layers to catch this.
-    private static unichar[] tag_specials = {
-        '(', ')', '{', '%', '\"', '\\', '+'
-    };
-    
     private static Geary.State.MachineDescriptor machine_desc = new Geary.State.MachineDescriptor(
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
@@ -385,14 +369,12 @@ public class Geary.Imap.Deserializer {
         
         unichar ch = *((unichar *) user);
         
-        // drop everything above 0x7F and control characters
-        if (ch > 0x7F || ch.iscntrl())
+        // Atom specials includes space and close-parens, but those are handled in particular ways
+        // while in the ATOM state, so they're excluded here.  Like atom specials, the space is 
+        // treated in a particular way for tags, but unlike atom, the close-parens character is not.
+        if (state == State.TAG && DataFormat.is_tag_special(ch, " "))
             return state;
-        
-        // tags and atoms have different special characters
-        if (state == State.TAG && (ch in tag_specials))
-            return state;
-        else if (state == State.ATOM && (ch in atom_specials))
+        else if (state == State.ATOM && DataFormat.is_atom_special(ch, " )"))
             return state;
         
         // message flag indicator is only legal at start of atom

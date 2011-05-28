@@ -52,6 +52,18 @@ public class Geary.Imap.ListCommand : Command {
     }
 }
 
+public class Geary.Imap.XListCommand : Command {
+    public const string NAME = "xlist";
+    
+    public XListCommand(Tag tag, string mailbox) {
+        base (tag, NAME, { "", mailbox });
+    }
+    
+    public XListCommand.wildcarded(Tag tag, string reference, string mailbox) {
+        base (tag, NAME, { reference, mailbox });
+    }
+}
+
 public class Geary.Imap.ExamineCommand : Command {
     public const string NAME = "examine";
     

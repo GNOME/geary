@@ -50,7 +50,7 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
         }
     }
     
-    public StringParameter(string value) requires (!String.is_empty(value)) {
+    public StringParameter(string value) {
         this.value = value;
     }
     

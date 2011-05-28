@@ -1,3 +1,5 @@
+# Only geary is built by default.  Use "make all" to build command-line tools.
+
 PROGRAM = geary
 BUILD_ROOT = 1
 
@@ -16,6 +18,7 @@ ENGINE_SRC := \
 	src/engine/common/MessageData.vala \
 	src/engine/imap/ClientConnection.vala \
 	src/engine/imap/ClientSession.vala \
+	src/engine/imap/DataFormat.vala \
 	src/engine/imap/Mailbox.vala \
 	src/engine/imap/Parameter.vala \
 	src/engine/imap/Tag.vala \
@@ -34,9 +37,11 @@ ENGINE_SRC := \
 	src/engine/imap/Serializer.vala \
 	src/engine/imap/Deserializer.vala \
 	src/engine/imap/Error.vala \
+	src/engine/imap/Flag.vala \
 	src/engine/imap/decoders/FetchDataDecoder.vala \
 	src/engine/imap/decoders/FetchResults.vala \
 	src/engine/imap/decoders/NoopResults.vala \
+	src/engine/imap/decoders/ListResults.vala \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/String.vala \
@@ -49,6 +54,8 @@ CLIENT_SRC := \
 	src/client/ui/MainWindow.vala \
 	src/client/ui/MessageListView.vala \
 	src/client/ui/MessageListStore.vala \
+	src/client/ui/FolderListView.vala \
+	src/client/ui/FolderListStore.vala \
 	src/client/util/Intl.vala \
 	src/client/util/Date.vala
 
@@ -80,6 +87,11 @@ EXTERNAL_PKGS := \
 VAPI_FILES := \
 	vapi/gmime-2.4.vapi
 
+geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile $(VAPI_FILES)
+	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+		$(ENGINE_SRC) $(CLIENT_SRC) \
+		-o $@
+
 .PHONY: all
 all: $(APPS)
 
@@ -87,11 +99,6 @@ all: $(APPS)
 clean: 
 	rm -f $(ALL_SRC:.vala=.c)
 	rm -f $(APPS)
-
-geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile $(VAPI_FILES)
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
-		$(ENGINE_SRC) $(CLIENT_SRC) \
-		-o $@
 
 console: $(ENGINE_SRC) $(CONSOLE_SRC) Makefile
 	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \

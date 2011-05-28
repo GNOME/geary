@@ -32,46 +32,7 @@ public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.
     }
 }
 
-public class Geary.Imap.Flag {
-    public static Flag ANSWERED = new Flag("\\answered");
-    public static Flag DELETED = new Flag("\\deleted");
-    public static Flag DRAFT = new Flag("\\draft");
-    public static Flag FLAGGED = new Flag("\\flagged");
-    public static Flag RECENT = new Flag("\\recent");
-    public static Flag SEEN = new Flag("\\seen");
-    
-    public string value { get; private set; }
-    
-    public Flag(string value) {
-        this.value = value;
-    }
-    
-    public bool is_system() {
-        return value[0] == '\\';
-    }
-    
-    public bool has_value(string value) {
-        return this.value.down() == value.down();
-    }
-    
-    public bool equals(Flag flag) {
-        return (flag == this) ? true : flag.has_value(value);
-    }
-    
-    public string to_string() {
-        return value;
-    }
-    
-    public static uint hash_func(void *flag) {
-        return str_hash(((Flag *) flag)->value);
-    }
-    
-    public static bool equal_func(void *a, void *b) {
-        return ((Flag *) a)->equals((Flag *) b);
-    }
-}
-
-public class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData {
+public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData {
     private Gee.Set<Flag> list;
     
     public Flags(Gee.Collection<Flag> flags) {
@@ -97,6 +58,18 @@ public class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData
         }
         
         return builder.str;
+    }
+}
+
+public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
+    public MessageFlags(Gee.Collection<MessageFlag> flags) {
+        base (flags);
+    }
+}
+
+public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
+    public MailboxAttributes(Gee.Collection<MailboxAttribute> attrs) {
+        base (attrs);
     }
 }
 

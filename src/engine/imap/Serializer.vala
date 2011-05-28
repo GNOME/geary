@@ -35,7 +35,26 @@ public class Geary.Imap.Serializer {
     }
     
     public void push_string(string str) throws Error {
-        douts.put_string(str, null);
+        // see if need to convert to quoted string, only emitting it if required
+        switch (DataFormat.is_quoting_required(str)) {
+            case DataFormat.Quoting.OPTIONAL:
+                douts.put_string(str);
+            break;
+            
+            case DataFormat.Quoting.REQUIRED:
+                string quoted;
+                DataFormat.Quoting requirement = DataFormat.convert_to_quoted(str, out quoted);
+                debug("str=%s quoted=%s", str, quoted);
+                assert(requirement == DataFormat.Quoting.REQUIRED);
+                
+                douts.put_string(quoted);
+            break;
+            
+            case DataFormat.Quoting.UNALLOWED:
+            default:
+                // TODO: Not handled currently
+                assert_not_reached();
+        }
     }
     
     public void push_space() throws Error {

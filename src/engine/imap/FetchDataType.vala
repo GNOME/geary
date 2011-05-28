@@ -126,7 +126,7 @@ public enum Geary.Imap.FetchDataType {
                 return new UIDDecoder();
             
             case FLAGS:
-                return new FlagsDecoder();
+                return new MessageFlagsDecoder();
             
             case ENVELOPE:
                 return new EnvelopeDecoder();

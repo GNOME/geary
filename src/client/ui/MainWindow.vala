@@ -21,8 +21,11 @@ public class MainWindow : Gtk.Window {
     
     private MessageListStore message_list_store = new MessageListStore();
     private MessageListView message_list_view;
+    private FolderListStore folder_list_store = new FolderListStore();
+    private FolderListView folder_list_view;
     private Gtk.UIManager ui = new Gtk.UIManager();
     private Geary.Engine? engine = null;
+    private Geary.Account? account = null;
     
     public MainWindow() {
         title = GearyApplication.PROGRAM_NAME;
@@ -42,6 +45,9 @@ public class MainWindow : Gtk.Window {
         
         message_list_view = new MessageListView(message_list_store);
         
+        folder_list_view = new FolderListView(folder_list_store);
+        folder_list_view.folder_selected.connect(on_folder_selected);
+        
         create_layout();
     }
     
@@ -53,20 +59,17 @@ public class MainWindow : Gtk.Window {
     
     private async void do_login(string user, string pass) {
         try {
-            Geary.Account? account = yield engine.login("imap.gmail.com", user, pass);
+            account = yield engine.login("imap.gmail.com", user, pass);
             if (account == null)
                 error("Unable to login");
             
-            Geary.Folder folder = yield account.open("inbox");
-            
-            Geary.MessageStream? msg_stream = folder.read(1, 100);
-            if (msg_stream == null)
-                error("Unable to read from folder");
-            
-            Gee.List<Geary.Message>? msgs = yield msg_stream.read();
-            if (msgs != null && msgs.size > 0) {
-                foreach (Geary.Message msg in msgs)
-                    message_list_store.append_message(msg);
+            Gee.Collection<string>? folders = yield account.list("/");
+            if (folders != null) {
+                debug("%d folders found", folders.size);
+                foreach (string folder in folders)
+                    folder_list_store.add_folder(folder);
+            } else {
+                debug("no folders");
             }
         } catch (Error err) {
             error("%s", err.message);
@@ -115,11 +118,23 @@ public class MainWindow : Gtk.Window {
         // main menu
         main_layout.pack_start(ui.get_widget("/MenuBar"), false, false, 0);
         
+        // three-pane display: folder list on left, message list on right, separated with grippable
+        // pane
+        Gtk.HPaned paned = new Gtk.HPaned();
+        
+        // folder list
+        Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
+        folder_list_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        folder_list_scrolled.add_with_viewport(folder_list_view);
+        paned.pack1(folder_list_scrolled, false, false);
+        
         // message list
         Gtk.ScrolledWindow message_list_scrolled = new Gtk.ScrolledWindow(null, null);
         message_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_list_scrolled.add_with_viewport(message_list_view);
-        main_layout.pack_end(message_list_scrolled, true, true, 0);
+        paned.pack2(message_list_scrolled, true, false);
+        
+        main_layout.pack_end(paned, true, true, 0);
         
         add(main_layout);
     }
@@ -138,6 +153,36 @@ public class MainWindow : Gtk.Window {
             "website", GearyApplication.WEBSITE,
             "website-label", GearyApplication.WEBSITE_LABEL
         );
+    }
+    
+    private void on_folder_selected(string folder) {
+        do_select_folder.begin(folder, on_select_folder_completed);
+    }
+    
+    private async void do_select_folder(string folder_name) throws Error {
+        message_list_store.clear();
+        
+        Geary.Folder folder = yield account.open(folder_name);
+        
+        Geary.MessageStream? msg_stream = folder.read(1, 100);
+        if (msg_stream == null)
+            error("Unable to read from folder");
+        
+        Gee.List<Geary.Message>? msgs = yield msg_stream.read();
+        if (msgs != null && msgs.size > 0) {
+            foreach (Geary.Message msg in msgs)
+                message_list_store.append_message(msg);
+        }
+        
+        yield folder.close();
+    }
+    
+    private void on_select_folder_completed(Object? source, AsyncResult result) {
+        try {
+            do_select_folder.end(result);
+        } catch (Error err) {
+            debug("Unable to select folder: %s", err.message);
+        }
     }
 }
 

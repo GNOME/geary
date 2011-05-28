@@ -27,7 +27,7 @@ public class Geary.Imap.FetchResults {
         ListParameter list = data.get_as_list(3);
         
         // verify this is a FETCH response
-        if (!cmd.equals_ci("fetch")) {
+        if (!cmd.equals_ci(FetchCommand.NAME)) {
             throw new ImapError.TYPE_ERROR("Unable to decode fetch response \"%s\": Not marked as fetch response",
                 data.to_string());
         }

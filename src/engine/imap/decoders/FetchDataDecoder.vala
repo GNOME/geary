@@ -66,17 +66,17 @@ public class Geary.Imap.UIDDecoder : Geary.Imap.FetchDataDecoder {
     }
 }
 
-public class Geary.Imap.FlagsDecoder : Geary.Imap.FetchDataDecoder {
-    public FlagsDecoder() {
+public class Geary.Imap.MessageFlagsDecoder : Geary.Imap.FetchDataDecoder {
+    public MessageFlagsDecoder() {
         base (FetchDataType.FLAGS);
     }
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
         Gee.List<Flag> flags = new Gee.ArrayList<Flag>();
         for (int ctr = 0; ctr < listp.get_count(); ctr++)
-            flags.add(new Flag(listp.get_as_string(ctr).value));
+            flags.add(new MessageFlag(listp.get_as_string(ctr).value));
         
-        return new Flags(flags);
+        return new MessageFlags(flags);
     }
 }
 
