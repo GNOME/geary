@@ -44,7 +44,6 @@ public class Geary.Imap.Serializer {
             case DataFormat.Quoting.REQUIRED:
                 string quoted;
                 DataFormat.Quoting requirement = DataFormat.convert_to_quoted(str, out quoted);
-                debug("str=%s quoted=%s", str, quoted);
                 assert(requirement == DataFormat.Quoting.REQUIRED);
                 
                 douts.put_string(quoted);

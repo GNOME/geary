@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-namespace String {
+namespace Geary.String {
 
 public inline bool is_empty(string? str) {
     return (str == null || str[0] == 0);

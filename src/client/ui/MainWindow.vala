@@ -66,8 +66,7 @@ public class MainWindow : Gtk.Window {
             Gee.Collection<string>? folders = yield account.list("/");
             if (folders != null) {
                 debug("%d folders found", folders.size);
-                foreach (string folder in folders)
-                    folder_list_store.add_folder(folder);
+                folder_list_store.add_folders(folders);
             } else {
                 debug("no folders");
             }
@@ -164,17 +163,11 @@ public class MainWindow : Gtk.Window {
         
         Geary.Folder folder = yield account.open(folder_name);
         
-        Geary.MessageStream? msg_stream = folder.read(1, 100);
-        if (msg_stream == null)
-            error("Unable to read from folder");
-        
-        Gee.List<Geary.Message>? msgs = yield msg_stream.read();
+        Gee.List<Geary.Message>? msgs = yield folder.read(1, 100);
         if (msgs != null && msgs.size > 0) {
             foreach (Geary.Message msg in msgs)
                 message_list_store.append_message(msg);
         }
-        
-        yield folder.close();
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {

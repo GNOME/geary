@@ -4,10 +4,26 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.ClientSession : Object, Geary.Account {
+public class Geary.Imap.ClientSession {
     // 30 min keepalive required to maintain session; back off by 30 sec for breathing room
     public const int MIN_KEEPALIVE_SEC = (30 * 60) - 30;
     public const int DEFAULT_KEEPALIVE_SEC = 60;
+    
+    public enum Context {
+        UNCONNECTED,
+        UNAUTHORIZED,
+        AUTHORIZED,
+        SELECTED,
+        EXAMINED,
+        IN_PROGRESS
+    }
+    
+    public enum DisconnectReason {
+        LOCAL_CLOSE,
+        LOCAL_ERROR,
+        REMOTE_CLOSE,
+        REMOTE_ERROR
+    }
     
     // Need this because delegates with targets cannot be stored in ADTs.
     private class CommandCallback {
@@ -149,7 +165,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     private uint default_port;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
-    private Mailbox? current_mailbox = null;
+    private string? current_mailbox = null;
+    private bool current_mailbox_readonly = false;
     private Gee.Queue<CommandCallback> cb_queue = new Gee.LinkedList<CommandCallback>();
     private Gee.Queue<CommandResponse> cmd_response_queue = new Gee.LinkedList<CommandResponse>();
     private CommandResponse current_cmd_response = new CommandResponse();
@@ -160,6 +177,26 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     private ServerData? connect_response = null;
     private AsyncParams? connect_params = null;
     private AsyncParams? disconnect_params = null;
+    
+    public virtual signal void connected() {
+    }
+    
+    public virtual signal void authorized() {
+    }
+    
+    public virtual signal void logged_out() {
+    }
+    
+    public virtual signal void disconnected(DisconnectReason reason) {
+    }
+    
+    /**
+     * If the mailbox name is null it indicates the type of state change that has occurred
+     * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
+     * ignored.
+     */
+    public virtual signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly) {
+    }
     
     public virtual signal void unsolicited_expunged(MessageNumber msg) {
     }
@@ -247,6 +284,7 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
             new Geary.State.Mapping(State.SELECTED, Event.RECV_ERROR, on_recv_error),
             
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.SEND_CMD, on_send_command),
+            new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CLOSE_MAILBOX, Geary.State.nop),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CLOSED_MAILBOX, on_closed_mailbox),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CLOSE_MAILBOX_FAILED, on_close_mailbox_failed),
@@ -301,6 +339,47 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     
     public Tag? generate_tag() {
         return (cx != null) ? cx.generate_tag() : null;
+    }
+    
+    public string? get_current_mailbox() {
+        return current_mailbox;
+    }
+    
+    public bool is_current_mailbox_readonly() {
+        return current_mailbox_readonly;
+    }
+    
+    public Context get_context(out string? current_mailbox) {
+        current_mailbox = null;
+        
+        switch (fsm.get_state()) {
+            case State.DISCONNECTED:
+            case State.LOGGED_OUT:
+            case State.LOGGING_OUT:
+            case State.DISCONNECTING:
+            case State.BROKEN:
+                return Context.UNCONNECTED;
+            
+            case State.NOAUTH:
+                return Context.UNAUTHORIZED;
+            
+            case State.AUTHORIZED:
+                return Context.AUTHORIZED;
+            
+            case State.SELECTED:
+                current_mailbox = this.current_mailbox;
+                
+                return current_mailbox_readonly ? Context.EXAMINED : Context.SELECTED;
+            
+            case State.CONNECTING:
+            case State.AUTHORIZING:
+            case State.SELECTING:
+            case State.CLOSING_MAILBOX:
+                return Context.IN_PROGRESS;
+            
+            default:
+                assert_not_reached();
+        }
     }
     
     //
@@ -372,8 +451,10 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         try {
             StringParameter status_param = (StringParameter) connect_response.get_as(
                 1, typeof(StringParameter));
-            issue_status(Status.from_parameter(status_param), Event.CONNECTED, Event.CONNECT_DENIED,
-                connect_response);
+            if (issue_status(Status.from_parameter(status_param), Event.CONNECTED, Event.CONNECT_DENIED,
+                connect_response)) {
+                connected();
+            }
         } catch (ImapError imap_err) {
             connect_params.err = imap_err;
             fsm.issue(Event.CONNECT_DENIED);
@@ -426,7 +507,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     }
     
     private void on_login_completed(Object? source, AsyncResult result) {
-        generic_issue_command_completed(result, Event.LOGIN_SUCCESS, Event.LOGIN_FAILED);
+        if (generic_issue_command_completed(result, Event.LOGIN_SUCCESS, Event.LOGIN_FAILED))
+            authorized();
     }
     
     private uint on_login_success(uint state, uint event, void *user) {
@@ -445,15 +527,22 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     //
     
     /**
-     * Returns true if keepalives are activated, false if already enabled.
+     * If seconds is negative or zero, keepalives will be disabled.  (This is not recommended.)
+     *
+     * Although keepalives can be enabled at any time, if they're enabled and trigger sending
+     * a command prior to connection, error signals may be fired.
      */
-    public bool enable_keepalives(int seconds = DEFAULT_KEEPALIVE_SEC) {
+    public void enable_keepalives(int seconds = DEFAULT_KEEPALIVE_SEC) {
+        if (seconds <= 0) {
+            disable_keepalives();
+            
+            return;
+        }
+        
         if (keepalive_id != 0)
-            return false;
+            Source.remove(keepalive_id);
         
         keepalive_id = Timeout.add_seconds(seconds, on_keepalive);
-        
-        return true;
     }
     
     /**
@@ -556,16 +645,18 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     // select/examine
     //
     
-    public async Mailbox select_async(string mailbox, Cancellable? cancellable = null) throws Error {
+    public async string select_async(string mailbox, Cancellable? cancellable = null) throws Error {
         return yield select_examine_async(mailbox, true, cancellable);
     }
     
-    public async Mailbox examine_async(string mailbox, Cancellable? cancellable = null) throws Error {
+    public async string examine_async(string mailbox, Cancellable? cancellable = null) throws Error {
         return yield select_examine_async(mailbox, false, cancellable);
     }
     
-    private async Mailbox select_examine_async(string mailbox, bool is_select, Cancellable? cancellable)
+    public async string select_examine_async(string mailbox, bool is_select, Cancellable? cancellable)
         throws Error {
+        string? old_mailbox = current_mailbox;
+        
         SelectParams params = new SelectParams(mailbox, is_select, cancellable,
             select_examine_async.callback);
         fsm.issue(Event.SELECT, null, params);
@@ -576,7 +667,11 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         if (params.err != null)
             throw params.err;
         
+        // TODO: We may want to move this signal into the async completion handler rather than
+        // fire it here because async callbacks are scheduled on the event loop and their order
+        // of execution is not guaranteed
         assert(current_mailbox != null);
+        current_mailbox_changed(old_mailbox, current_mailbox, current_mailbox_readonly);
         
         return current_mailbox;
     }
@@ -586,7 +681,7 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         
         SelectParams params = (SelectParams) object;
         
-        if (current_mailbox != null && current_mailbox.name == params.mailbox)
+        if (current_mailbox != null && current_mailbox == params.mailbox)
             return state;
         
         // TODO: Currently don't handle situation where one mailbox is selected and another is
@@ -615,7 +710,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         SelectParams params = (SelectParams) object;
         
         assert(current_mailbox == null);
-        current_mailbox = new Mailbox(params.mailbox, this);
+        current_mailbox = params.mailbox;
+        current_mailbox_readonly = !params.is_select;
         
         return State.SELECTED;
     }
@@ -636,6 +732,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     //
     
     public async void close_mailbox_async(Cancellable? cancellable = null) throws Error {
+        string? old_mailbox = current_mailbox;
+        
         AsyncParams params = new AsyncParams(cancellable, close_mailbox_async.callback);
         fsm.issue(Event.CLOSE_MAILBOX, null, params);
         
@@ -644,6 +742,16 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         
         if (params.err != null)
             throw params.err;
+        
+        assert(current_mailbox == null);
+        
+        // possible for a close_mailbox to occur when already closed, but don't fire signal in
+        // that case
+        //
+        // TODO: See note in select_examine_async() for why it might be better to fire this signal
+        // in the async completion handler rather than here
+        if (old_mailbox != null)
+            current_mailbox_changed(old_mailbox, null, false);
     }
     
     private uint on_close_mailbox(uint state, uint event, void *user, Object? object) {
@@ -674,7 +782,7 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         
         AsyncParams params = (AsyncParams) object;
         params.err = new ImapError.COMMAND_FAILED("Unable to close mailbox \"%s\": %s",
-            current_mailbox.name, params.cmd_response.to_string());
+            current_mailbox, params.cmd_response.to_string());
         
         return State.SELECTED;
     }
@@ -710,7 +818,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     }
     
     private void on_logout_completed(Object? source, AsyncResult result) {
-        generic_issue_command_completed(result, Event.LOGOUT_SUCCESS, Event.LOGOUT_FAILED);
+        if (generic_issue_command_completed(result, Event.LOGOUT_SUCCESS, Event.LOGOUT_FAILED))
+            logged_out();
     }
     
     private uint on_logged_out(uint state, uint event, void *user) {
@@ -751,6 +860,8 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         try {
             cx.disconnect_async.end(result);
             fsm.issue(Event.DISCONNECTED);
+            
+            disconnected(DisconnectReason.LOCAL_CLOSE);
         } catch (Error err) {
             fsm.issue(Event.SEND_ERROR, null, null, err);
             disconnect_params.err = err;
@@ -780,8 +891,15 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         debug("Send error on %s: %s", to_full_string(), err.message);
         
         cx = null;
+        Idle.add(on_fire_send_error_signal);
         
         return State.BROKEN;
+    }
+    
+    private bool on_fire_send_error_signal() {
+        disconnected(DisconnectReason.LOCAL_ERROR);
+        
+        return false;
     }
     
     private uint on_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
@@ -789,8 +907,15 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         debug("Receive error on %s: %s", to_full_string(), err.message);
         
         cx = null;
+        Idle.add(on_fire_recv_error_signal);
         
         return State.BROKEN;
+    }
+    
+    private bool on_fire_recv_error_signal() {
+        disconnected(DisconnectReason.REMOTE_ERROR);
+        
+        return false;
     }
     
     // This handles the situation where the user submits a command before the connection has been
@@ -836,8 +961,10 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
     // command submission
     //
     
-    private void issue_status(Status status, Event ok_event, Event error_event, Object? object) {
+    private bool issue_status(Status status, Event ok_event, Event error_event, Object? object) {
         fsm.issue((status == Status.OK) ? ok_event : error_event, null, object);
+        
+        return (status == Status.OK);
     }
     
     private async AsyncCommandResponse issue_command_async(Command cmd, Object? user = null,
@@ -886,24 +1013,6 @@ public class Geary.Imap.ClientSession : Object, Geary.Account {
         Idle.add(params.cb);
         
         return success;
-    }
-    
-    //
-    // Geary.Account
-    //
-    
-    public async Gee.Collection<string> list(string parent, Cancellable? cancellable = null) throws Error {
-        string specifier = String.is_empty(parent) ? "/" : parent;
-        specifier += (specifier.has_suffix("/")) ? "%" : "/%";
-        
-        ListResults results = ListResults.decode(yield send_command_async(
-            new ListCommand(generate_tag(), specifier), cancellable));
-        
-        return results.get_names();
-    }
-    
-    public async Geary.Folder open(string mailbox, Cancellable? cancellable = null) throws Error {
-        return yield examine_async(mailbox, cancellable);
     }
     
     //

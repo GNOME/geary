@@ -18,6 +18,7 @@ ENGINE_SRC := \
 	src/engine/common/MessageData.vala \
 	src/engine/imap/ClientConnection.vala \
 	src/engine/imap/ClientSession.vala \
+	src/engine/imap/ClientSessionManager.vala \
 	src/engine/imap/DataFormat.vala \
 	src/engine/imap/Mailbox.vala \
 	src/engine/imap/Parameter.vala \
@@ -45,7 +46,8 @@ ENGINE_SRC := \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/String.vala \
-	src/engine/util/Memory.vala
+	src/engine/util/Memory.vala \
+	src/engine/util/Delegate.vala
 
 CLIENT_SRC := \
 	src/client/main.vala \

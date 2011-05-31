@@ -41,6 +41,11 @@ public class FolderListStore : Gtk.TreeStore {
         set(iter, Column.NAME, folder);
     }
     
+    public void add_folders(Gee.Collection<string> folders) {
+        foreach (string folder in folders)
+            add_folder(folder);
+    }
+    
     public string? get_folder_at(Gtk.TreePath path) {
         Gtk.TreeIter iter;
         if (!get_iter(out iter, path))

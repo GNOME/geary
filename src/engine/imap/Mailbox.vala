@@ -6,42 +6,49 @@
 
 public class Geary.Imap.Mailbox : Object, Geary.Folder {
     public string name { get; private set; }
+    public bool is_readonly { get; private set; }
     
-    private ClientSession sess;
-    private bool is_closed = false;
+    private ClientSession? session;
+    private Geary.Delegate.DestructorNotifier<Mailbox>? dtor_notifier;
     
-    internal Mailbox(string name, ClientSession sess) {
-        this.name = name;
-        this.sess = sess;
+    internal Mailbox(ClientSession session, Geary.Delegate.DestructorNotifier<Mailbox>? dtor_notifier) {
+        this.session = session;
+        this.dtor_notifier = dtor_notifier;
+        
+        name = session.get_current_mailbox();
+        is_readonly = session.is_current_mailbox_readonly();
+        
+        session.current_mailbox_changed.connect(on_session_mailbox_changed);
+        session.logged_out.connect(on_session_logged_out);
+        session.disconnected.connect(on_session_disconnected);
     }
     
     ~Mailbox() {
-        assert(is_closed);
-    }
-    
-    public MessageStream? read(int low, int count) {
-        return new MessageStreamImpl(sess, low, count);
-    }
-    
-    public async void close(Cancellable? cancellable = null) throws Error {
-        yield sess.close_mailbox_async(cancellable);
-        is_closed = true;
-    }
-}
-
-private class Geary.Imap.MessageStreamImpl : Object, Geary.MessageStream {
-    private ClientSession sess;
-    private string span;
-    
-    public MessageStreamImpl(ClientSession sess, int low, int count) {
-        assert(count > 0);
+        if (session != null) {
+            session.current_mailbox_changed.disconnect(on_session_mailbox_changed);
+            session.logged_out.disconnect(on_session_logged_out);
+            session.disconnected.disconnect(on_session_disconnected);
+        }
         
-        this.sess = sess;
-        span = (count > 1) ? "%d:%d".printf(low, low + count - 1) : "%d".printf(low);
+        if (dtor_notifier != null)
+            dtor_notifier(this);
     }
     
-    public async Gee.List<Message>? read(Cancellable? cancellable = null) throws Error {
-        CommandResponse resp = yield sess.send_command_async(new FetchCommand(sess.generate_tag(),
+    internal ClientSession? get_client_session() {
+        return session;
+    }
+    
+    public bool is_closed() {
+        return (session == null);
+    }
+    
+    public async Gee.List<Message>? read(int low, int count, Cancellable? cancellable = null) throws Error {
+        if (is_closed())
+            throw new IOError.NOT_FOUND("Folder closed");
+        
+        string span = (count > 1) ? "%d:%d".printf(low, low + count - 1) : "%d".printf(low);
+        
+        CommandResponse resp = yield session.send_command_async(new FetchCommand(session.generate_tag(),
             span, { FetchDataType.ENVELOPE }), cancellable);
         
         if (resp.status_response.status != Status.OK)
@@ -56,6 +63,40 @@ private class Geary.Imap.MessageStreamImpl : Object, Geary.MessageStream {
         }
         
         return msgs;
+    }
+    
+    private void close(Geary.Folder.CloseReason reason) {
+        if (session == null)
+            return;
+        
+        session = null;
+        closed(reason);
+    }
+    
+    private void on_session_mailbox_changed(string? old_mailbox, string? new_mailbox, bool readonly) {
+        // this always mean one thing: this object is no longer valid
+        close(CloseReason.FOLDER_CLOSED);
+    }
+    
+    private void on_session_logged_out() {
+        close(CloseReason.LOCAL_CLOSE);
+    }
+    
+    private void on_session_disconnected(ClientSession.DisconnectReason reason) {
+        switch (reason) {
+            case ClientSession.DisconnectReason.LOCAL_CLOSE:
+            case ClientSession.DisconnectReason.LOCAL_ERROR:
+                close(CloseReason.LOCAL_CLOSE);
+            break;
+            
+            case ClientSession.DisconnectReason.REMOTE_CLOSE:
+            case ClientSession.DisconnectReason.REMOTE_ERROR:
+                close(CloseReason.REMOTE_CLOSE);
+            break;
+            
+            default:
+                assert_not_reached();
+        }
     }
 }
 

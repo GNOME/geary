@@ -12,12 +12,15 @@ public interface Geary.Account : Object {
 }
 
 public interface Geary.Folder : Object {
-    public abstract MessageStream? read(int low, int count);
+    public enum CloseReason {
+        LOCAL_CLOSE,
+        REMOTE_CLOSE,
+        FOLDER_CLOSED
+    }
     
-    public abstract async void close(Cancellable? cancellable = null) throws Error;
-}
-
-public interface Geary.MessageStream : Object {
-    public abstract async Gee.List<Message>? read(Cancellable? cancellable = null) throws Error;
+    public signal void closed(CloseReason reason);
+    
+    public abstract async Gee.List<Message>? read(int low, int count, Cancellable? cancellable = null)
+        throws Error;
 }
 
