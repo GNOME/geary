@@ -64,13 +64,13 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     
     // TODO: This does not check that the value is a properly-formed integer.  This should be
     // added later.
-    public int as_int() throws ImapError {
-        return int.parse(value);
+    public int as_int(int clamp_min = int.MIN, int clamp_max = int.MAX) throws ImapError {
+        return int.parse(value).clamp(clamp_min, clamp_max);
     }
     
     // TODO: This does not check that the value is a properly-formed long.
-    public long as_long() throws ImapError {
-        return long.parse(value);
+    public long as_long(int clamp_min = int.MIN, int clamp_max = int.MAX) throws ImapError {
+        return long.parse(value).clamp(clamp_min, clamp_max);
     }
     
     public override string to_string() {

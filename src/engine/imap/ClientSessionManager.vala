@@ -31,8 +31,9 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
             session.enable_keepalives(keepalive_sec);
     }
     
-    public async Gee.Collection<string> list(string parent, Cancellable? cancellable = null) throws Error {
-        string specifier = String.is_empty(parent) ? "/" : parent;
+    public async Gee.Collection<Geary.FolderDetail> list(Geary.FolderDetail? parent,
+        Cancellable? cancellable = null) throws Error {
+        string specifier = (parent != null) ? parent.name : "/";
         specifier += (specifier.has_suffix("/")) ? "%" : "/%";
         
         ClientSession session = yield get_authorized_session(cancellable);
@@ -40,11 +41,14 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
         ListResults results = ListResults.decode(yield session.send_command_async(
             new ListCommand(session.generate_tag(), specifier), cancellable));
         
-        return results.get_names();
+        return results.get_all();
     }
     
     public async Geary.Folder open(string folder, Cancellable? cancellable = null) throws Error {
-        return new Mailbox(yield examine_async(folder, cancellable), on_destroying_mailbox);
+        SelectExamineResults results;
+        ClientSession session = yield examine_async(folder, out results, cancellable);
+        
+        return new Mailbox(session, results, on_destroying_mailbox);
     }
     
     private async ClientSession get_authorized_session(Cancellable? cancellable = null) throws Error {
@@ -67,18 +71,18 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
         return new_session;
     }
     
-    public async ClientSession select_async(string folder, Cancellable? cancellable = null)
-        throws Error {
-        return yield select_examine_async(folder, true, cancellable);
+    public async ClientSession select_async(string folder, out SelectExamineResults results,
+        Cancellable? cancellable = null) throws Error {
+        return yield select_examine_async(folder, true, out results, cancellable);
     }
     
-    public async ClientSession examine_async(string folder, Cancellable? cancellable = null)
-        throws Error {
-        return yield select_examine_async(folder, false, cancellable);
+    public async ClientSession examine_async(string folder, out SelectExamineResults results,
+        Cancellable? cancellable = null) throws Error {
+        return yield select_examine_async(folder, false, out results, cancellable);
     }
     
     public async ClientSession select_examine_async(string folder, bool is_select,
-        Cancellable? cancellable = null) throws Error {
+        out SelectExamineResults results, Cancellable? cancellable = null) throws Error {
         ClientSession.Context needed_context = (is_select) ? ClientSession.Context.SELECTED
             : ClientSession.Context.EXAMINED;
         foreach (ClientSession session in sessions) {
@@ -89,7 +93,7 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
         
         ClientSession authd = yield get_authorized_session(cancellable);
         
-        yield authd.select_examine_async(folder, is_select, cancellable);
+        results = yield authd.select_examine_async(folder, is_select, cancellable);
         
         return authd;
     }

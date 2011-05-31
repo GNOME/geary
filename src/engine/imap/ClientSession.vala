@@ -645,16 +645,18 @@ public class Geary.Imap.ClientSession {
     // select/examine
     //
     
-    public async string select_async(string mailbox, Cancellable? cancellable = null) throws Error {
+    public async SelectExamineResults select_async(string mailbox, Cancellable? cancellable = null) 
+        throws Error {
         return yield select_examine_async(mailbox, true, cancellable);
     }
     
-    public async string examine_async(string mailbox, Cancellable? cancellable = null) throws Error {
+    public async SelectExamineResults examine_async(string mailbox, Cancellable? cancellable = null)
+        throws Error {
         return yield select_examine_async(mailbox, false, cancellable);
     }
     
-    public async string select_examine_async(string mailbox, bool is_select, Cancellable? cancellable)
-        throws Error {
+    public async SelectExamineResults select_examine_async(string mailbox, bool is_select,
+        Cancellable? cancellable) throws Error {
         string? old_mailbox = current_mailbox;
         
         SelectParams params = new SelectParams(mailbox, is_select, cancellable,
@@ -673,7 +675,7 @@ public class Geary.Imap.ClientSession {
         assert(current_mailbox != null);
         current_mailbox_changed(old_mailbox, current_mailbox, current_mailbox_readonly);
         
-        return current_mailbox;
+        return SelectExamineResults.decode(params.cmd_response);
     }
     
     private uint on_select(uint state, uint event, void *user, Object? object) {

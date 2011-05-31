@@ -43,6 +43,7 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
     public static MessageFlag FLAGGED = new MessageFlag("\\flagged");
     public static MessageFlag RECENT = new MessageFlag("\\recent");
     public static MessageFlag SEEN = new MessageFlag("\\seen");
+    public static MessageFlag ALLOWS_NEW = new MessageFlag("\\*");
     
     public MessageFlag(string value) {
         base (value);
@@ -55,6 +56,7 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
     public static MailboxAttribute MARKED = new MailboxAttribute("\\marked");
     public static MailboxAttribute UNMARKED = new MailboxAttribute("\\unmarked");
     public static MailboxAttribute HAS_NO_CHILDREN = new MailboxAttribute("\\hasnochildren");
+    public static MailboxAttribute ALLOWS_NEW = new MailboxAttribute("\\*");
     
     public MailboxAttribute(string value) {
         base (value);

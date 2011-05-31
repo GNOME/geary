@@ -4,8 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.NoopResults {
-    public StatusResponse status_response { get; private set; }
+public class Geary.Imap.NoopResults : Geary.Imap.CommandResults {
     public Gee.List<MessageNumber>? expunged { get; private set; }
     /**
      * -1 if "exists" result not returned by server.
@@ -19,14 +18,15 @@ public class Geary.Imap.NoopResults {
     
     public NoopResults(StatusResponse status_response, Gee.List<MessageNumber>? expunged, int exists,
         Gee.List<FetchResults>? flags, int recent) {
-        this.status_response = status_response;
+        base (status_response);
+        
         this.expunged = expunged;
         this.exists = exists;
         this.flags = flags;
         this.recent = recent;
     }
     
-    public static NoopResults decode(CommandResponse response) throws ImapError {
+    public static NoopResults decode(CommandResponse response) {
         assert(response.is_sealed());
         
         Gee.List<MessageNumber> expunged = new Gee.ArrayList<MessageNumber>();
@@ -53,7 +53,7 @@ public class Geary.Imap.NoopResults {
                     break;
                     
                     case ServerDataType.FETCH:
-                        flags.add(FetchResults.decode_data(data));
+                        flags.add(FetchResults.decode_data(response.status_response, data));
                     break;
                     
                     default:

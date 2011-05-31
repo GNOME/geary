@@ -4,8 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.FolderDetail {
-    public string name { get; private set; }
+public class Geary.Imap.FolderDetail : Object, Geary.FolderDetail {
+    public string name { get; protected set; }
     public string delim { get; private set; }
     public MailboxAttributes attrs { get; private set; }
     
@@ -16,10 +16,12 @@ public class Geary.Imap.FolderDetail {
     }
 }
 
-public class Geary.Imap.ListResults {
+public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
     private Gee.HashMap<string, FolderDetail> map = new Gee.HashMap<string, FolderDetail>();
     
-    private ListResults(Gee.Collection<FolderDetail> details) {
+    public ListResults(StatusResponse status_response, Gee.Collection<FolderDetail> details) {
+        base (status_response);
+        
         foreach (FolderDetail detail in details)
             map.set(detail.name, detail);
     }
@@ -61,7 +63,7 @@ public class Geary.Imap.ListResults {
             }
         }
         
-        return new ListResults(details);
+        return new ListResults(response.status_response, details);
     }
     
     public Gee.Collection<string> get_names() {

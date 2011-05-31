@@ -34,15 +34,15 @@ public class FolderListStore : Gtk.TreeStore {
         set_column_types(Column.get_types());
     }
     
-    public void add_folder(string folder) {
+    public void add_folder(Geary.FolderDetail folder) {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        set(iter, Column.NAME, folder);
+        set(iter, Column.NAME, folder.name);
     }
     
-    public void add_folders(Gee.Collection<string> folders) {
-        foreach (string folder in folders)
+    public void add_folders(Gee.Collection<Geary.FolderDetail> folders) {
+        foreach (Geary.FolderDetail folder in folders)
             add_folder(folder);
     }
     

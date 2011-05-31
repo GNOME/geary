@@ -63,7 +63,8 @@ public class MainWindow : Gtk.Window {
             if (account == null)
                 error("Unable to login");
             
-            Gee.Collection<string>? folders = yield account.list("/");
+            // pull down the root-level folders
+            Gee.Collection<Geary.FolderDetail> folders = yield account.list(null);
             if (folders != null) {
                 debug("%d folders found", folders.size);
                 folder_list_store.add_folders(folders);

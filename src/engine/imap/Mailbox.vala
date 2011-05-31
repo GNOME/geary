@@ -5,18 +5,23 @@
  */
 
 public class Geary.Imap.Mailbox : Object, Geary.Folder {
-    public string name { get; private set; }
-    public bool is_readonly { get; private set; }
+    public string name { get; protected set; }
+    public int count { get; protected set; }
+    public bool is_readonly { get; protected set; }
     
     private ClientSession? session;
+    private SelectExamineResults select_results;
     private Geary.Delegate.DestructorNotifier<Mailbox>? dtor_notifier;
     
-    internal Mailbox(ClientSession session, Geary.Delegate.DestructorNotifier<Mailbox>? dtor_notifier) {
+    internal Mailbox(ClientSession session, SelectExamineResults results, 
+        Geary.Delegate.DestructorNotifier<Mailbox>? dtor_notifier) {
         this.session = session;
+        this.select_results = results;
         this.dtor_notifier = dtor_notifier;
         
         name = session.get_current_mailbox();
-        is_readonly = session.is_current_mailbox_readonly();
+        is_readonly = results.readonly;
+        count = results.exists;
         
         session.current_mailbox_changed.connect(on_session_mailbox_changed);
         session.logged_out.connect(on_session_logged_out);

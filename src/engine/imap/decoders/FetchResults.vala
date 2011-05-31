@@ -12,16 +12,18 @@
  * results for all messages specified.
  */
 
-public class Geary.Imap.FetchResults {
+public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
     public int msg_num { get; private set; }
     
     private Gee.Map<FetchDataType, MessageData> map = new Gee.HashMap<FetchDataType, MessageData>();
     
-    public FetchResults(int msg_num) {
+    public FetchResults(StatusResponse status_response, int msg_num) {
+        base (status_response);
+        
         this.msg_num = msg_num;
     }
     
-    public static FetchResults decode_data(ServerData data) throws ImapError {
+    public static FetchResults decode_data(StatusResponse status_response, ServerData data) throws ImapError {
         StringParameter msg_num = data.get_as_string(1);
         StringParameter cmd = data.get_as_string(2);
         ListParameter list = data.get_as_list(3);
@@ -32,7 +34,7 @@ public class Geary.Imap.FetchResults {
                 data.to_string());
         }
         
-        FetchResults results = new FetchResults(msg_num.as_int());
+        FetchResults results = new FetchResults(status_response, msg_num.as_int());
         
         // walk the list for each returned fetch data item, which is paired by its data item name
         // and the structured data itself
@@ -59,7 +61,7 @@ public class Geary.Imap.FetchResults {
         FetchResults[] array = new FetchResults[0];
         foreach (ServerData data in response.server_data) {
             try {
-                array += decode_data(data);
+                array += decode_data(response.status_response, data);
             } catch (ImapError ierr) {
                 // drop bad data on the ground
                 debug("Dropping FETCH data \"%s\": %s", data.to_string(), ierr.message);

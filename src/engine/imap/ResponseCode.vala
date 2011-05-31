@@ -9,6 +9,10 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         base (parent, initial);
     }
     
+    public ResponseCodeType get_code_type() throws ImapError {
+        return ResponseCodeType.from_parameter(get_as_string(0));
+    }
+    
     public override string to_string() {
         return "[%s]".printf(stringize_list());
     }
