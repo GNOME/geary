@@ -29,6 +29,7 @@ ENGINE_SRC := \
 	src/engine/imap/ResponseCodeType.vala \
 	src/engine/imap/ServerResponse.vala \
 	src/engine/imap/StatusResponse.vala \
+	src/engine/imap/StatusDataType.vala \
 	src/engine/imap/ServerData.vala \
 	src/engine/imap/ServerDataType.vala \
 	src/engine/imap/FetchDataType.vala \
@@ -46,6 +47,7 @@ ENGINE_SRC := \
 	src/engine/imap/decoders/NoopResults.vala \
 	src/engine/imap/decoders/ListResults.vala \
 	src/engine/imap/decoders/SelectExamineResults.vala \
+	src/engine/imap/decoders/StatusResults.vala \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/String.vala \

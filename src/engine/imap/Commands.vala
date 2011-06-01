@@ -109,3 +109,20 @@ public class Geary.Imap.FetchCommand : Command {
     }
 }
 
+public class Geary.Imap.StatusCommand : Command {
+    public const string NAME = "status";
+    
+    public StatusCommand(Tag tag, string mailbox, StatusDataType[] data_items) {
+        base (tag, NAME);
+        
+        add (new StringParameter(mailbox));
+        
+        assert(data_items.length > 0);
+        ListParameter data_item_list = new ListParameter(this);
+        foreach (StatusDataType data_item in data_items)
+            data_item_list.add(data_item.to_parameter());
+        
+        add(data_item_list);
+    }
+}
+
