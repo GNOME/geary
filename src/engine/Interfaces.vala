@@ -30,7 +30,10 @@ public interface Geary.Folder : Object {
     
     public signal void closed(CloseReason reason);
     
-    public abstract async Gee.List<Message>? read(int low, int count, Cancellable? cancellable = null)
+    public abstract async Gee.List<EmailHeader>? read(int low, int count, Cancellable? cancellable = null)
+        throws Error;
+    
+    public abstract async EmailBody fetch_body(EmailHeader header, Cancellable? cancellable = null)
         throws Error;
 }
 

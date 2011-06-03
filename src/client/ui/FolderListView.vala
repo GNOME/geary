@@ -5,7 +5,7 @@
  */
 
 public class FolderListView : Gtk.TreeView {
-    public signal void folder_selected(string folder);
+    public signal void folder_selected(string? folder);
     
     public FolderListView(FolderListStore store) {
         set_model(store);
@@ -24,11 +24,16 @@ public class FolderListView : Gtk.TreeView {
     
     private void on_selection_changed() {
         Gtk.TreeModel model;
-        Gtk.TreePath path = get_selection().get_selected_rows(out model).nth_data(0);
+        Gtk.TreePath? path = get_selection().get_selected_rows(out model).nth_data(0);
+        if (path == null) {
+            folder_selected(null);
+            
+            return;
+        }
         
         string? folder = get_store().get_folder_at(path);
-        
-        folder_selected(folder);
+        if (folder != null)
+            folder_selected(folder);
     }
 }
 

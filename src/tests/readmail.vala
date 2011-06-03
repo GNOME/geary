@@ -18,7 +18,7 @@ async void async_start() {
         yield sess.examine_async(mailbox);
         
         Geary.Imap.FetchCommand fetch = new Geary.Imap.FetchCommand(sess.generate_tag(),
-            "%d".printf(msg_num), { Geary.Imap.FetchDataType.RFC822 });
+            new Geary.Imap.MessageSet(msg_num), { Geary.Imap.FetchDataType.RFC822 });
         Geary.Imap.CommandResponse resp = yield sess.send_command_async(fetch);
         Geary.Imap.FetchResults[] results = Geary.Imap.FetchResults.decode(resp);
         

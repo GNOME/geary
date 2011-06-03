@@ -5,6 +5,8 @@
  */
 
 public class MessageListView : Gtk.TreeView {
+    public signal void message_selected(Geary.EmailHeader? email);
+    
     public MessageListView(MessageListStore store) {
         set_model(store);
         
@@ -15,6 +17,8 @@ public class MessageListView : Gtk.TreeView {
         append_column(create_column(MessageListStore.Column.SUBJECT, new Gtk.CellRendererText(),
             "text", 400));
         append_column(create_column(MessageListStore.Column.DATE, date_renderer, "text", 100));
+        
+        get_selection().changed.connect(on_selection_changed);
     }
     
     private static Gtk.TreeViewColumn create_column(MessageListStore.Column column,
@@ -29,6 +33,24 @@ public class MessageListView : Gtk.TreeView {
         }
         
         return view_column;
+    }
+    
+    public MessageListStore get_store() {
+        return (MessageListStore) get_model();
+    }
+    
+    private void on_selection_changed() {
+        Gtk.TreeModel model;
+        Gtk.TreePath? path = get_selection().get_selected_rows(out model).nth_data(0);
+        if (path == null) {
+            message_selected(null);
+            
+            return;
+        }
+        
+        Geary.EmailHeader? header = get_store().get_message_at(path);
+        if (header != null)
+            message_selected(header);
     }
 }
 

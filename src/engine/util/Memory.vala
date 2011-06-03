@@ -18,6 +18,20 @@ public abstract class Geary.Memory.AbstractBuffer {
      * destroyed after all InputStreams are destroyed or exhausted.
      */
     public abstract InputStream get_input_stream();
+    
+    /**
+     * Returns the contents of the buffer as though it was an ASCII (or 7-bit) string.  Note that
+     * this involves reading the entire buffer into memory.
+     */
+    public string to_ascii_string() {
+        uint8[] buffer = get_buffer();
+        
+        StringBuilder builder = new StringBuilder();
+        foreach (uint8 byte in buffer)
+            builder.append_c((char) byte);
+        
+        return builder.str;
+    }
 }
 
 public class Geary.Memory.Buffer : Geary.Memory.AbstractBuffer {

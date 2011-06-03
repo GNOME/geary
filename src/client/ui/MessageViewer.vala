@@ -4,9 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-namespace Geary.Delegate {
-
-public delegate void DestructorNotifier<G>(G object);
-
+public class MessageViewer : Gtk.TextView {
+    public MessageViewer() {
+    }
 }
 

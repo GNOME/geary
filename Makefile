@@ -11,7 +11,7 @@ APPS := geary console syntax lsmbox readmail watchmbox
 ENGINE_SRC := \
 	src/engine/Engine.vala \
 	src/engine/Interfaces.vala \
-	src/engine/Message.vala \
+	src/engine/Email.vala \
 	src/engine/state/Machine.vala \
 	src/engine/state/MachineDescriptor.vala \
 	src/engine/state/Mapping.vala \
@@ -21,6 +21,7 @@ ENGINE_SRC := \
 	src/engine/imap/ClientSessionManager.vala \
 	src/engine/imap/DataFormat.vala \
 	src/engine/imap/Mailbox.vala \
+	src/engine/imap/Email.vala \
 	src/engine/imap/Parameter.vala \
 	src/engine/imap/Tag.vala \
 	src/engine/imap/Command.vala \
@@ -36,6 +37,7 @@ ENGINE_SRC := \
 	src/engine/imap/Status.vala \
 	src/engine/imap/CommandResponse.vala \
 	src/engine/imap/MessageData.vala \
+	src/engine/imap/MessageSet.vala \
 	src/engine/imap/Serializable.vala \
 	src/engine/imap/Serializer.vala \
 	src/engine/imap/Deserializer.vala \
@@ -52,7 +54,7 @@ ENGINE_SRC := \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/String.vala \
 	src/engine/util/Memory.vala \
-	src/engine/util/Delegate.vala
+	src/engine/util/ReferenceSemantics.vala
 
 CLIENT_SRC := \
 	src/client/main.vala \
@@ -63,6 +65,8 @@ CLIENT_SRC := \
 	src/client/ui/MessageListStore.vala \
 	src/client/ui/FolderListView.vala \
 	src/client/ui/FolderListStore.vala \
+	src/client/ui/MessageViewer.vala \
+	src/client/ui/MessageBuffer.vala \
 	src/client/util/Intl.vala \
 	src/client/util/Date.vala
 

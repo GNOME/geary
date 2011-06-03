@@ -9,21 +9,24 @@ public class MessageListStore : Gtk.TreeStore {
         DATE,
         FROM,
         SUBJECT,
+        MESSAGE_OBJECT,
         N_COLUMNS;
         
         public static Column[] all() {
             return {
                 DATE,
                 FROM,
-                SUBJECT
+                SUBJECT,
+                MESSAGE_OBJECT
             };
         }
         
         public static Type[] get_types() {
             return {
-                typeof (string),        // DATE
-                typeof (string),        // FROM
-                typeof (string)         // SUBJECT
+                typeof (string),            // DATE
+                typeof (string),            // FROM
+                typeof (string),            // SUBJECT
+                typeof (Geary.EmailHeader)  // MESSAGE_OBJECT
             };
         }
         
@@ -38,6 +41,9 @@ public class MessageListStore : Gtk.TreeStore {
                 case SUBJECT:
                     return _("Subject");
                 
+                case MESSAGE_OBJECT:
+                    return "(hidden)";
+                
                 default:
                     assert_not_reached();
             }
@@ -48,12 +54,27 @@ public class MessageListStore : Gtk.TreeStore {
         set_column_types(Column.get_types());
     }
     
-    public void append_message(Geary.Message msg) {
+    public void append_header(Geary.EmailHeader header) {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        set(iter, Column.DATE, Date.pretty_print(msg.sent.value), Column.FROM, 
-            msg.from.get_at(0).get_short_address(), Column.SUBJECT, msg.subject.value);
+        set(iter,
+            Column.DATE, Date.pretty_print(header.sent.value),
+            Column.FROM, header.from.get_at(0).get_short_address(),
+            Column.SUBJECT, header.subject.value,
+            Column.MESSAGE_OBJECT, header
+        );
+    }
+    
+    public Geary.EmailHeader? get_message_at(Gtk.TreePath path) {
+        Gtk.TreeIter iter;
+        if (!get_iter(out iter, path))
+            return null;
+        
+        Geary.EmailHeader header;
+        get(iter, Column.MESSAGE_OBJECT, out header);
+        
+        return header;
     }
 }
 

@@ -5,40 +5,26 @@
  */
 
 MainLoop? main_loop = null;
-Geary.Imap.ClientSession? sess = null;
-string? user = null;
-string? pass = null;
+Geary.Imap.ClientSessionManager? sess = null;
 string? mailbox = null;
 int start = 0;
 int count = 0;
 
 async void async_start() {
     try {
-        yield sess.connect_async();
-        yield sess.login_async(user, pass);
-        
-        Geary.Folder folder = yield sess.examine_async(mailbox);
-        
-        Geary.MessageStream? mstream = folder.read(start, count);
+        Geary.Folder folder = yield sess.open(mailbox);
         
         bool ok = false;
-        if (mstream != null) {
-            Gee.List<Geary.Message>? msgs = yield mstream.read();
-            if (msgs != null && msgs.size > 0) {
-                foreach (Geary.Message msg in msgs)
-                    stdout.printf("%s\n", msg.to_string());
-                
-                ok = true;
-            }
+        Gee.List<Geary.EmailHeader>? msgs = yield folder.read(start, count);
+        if (msgs != null && msgs.size > 0) {
+            foreach (Geary.EmailHeader msg in msgs)
+                stdout.printf("%s\n", msg.to_string());
+            
+            ok = true;
         }
         
         if (!ok)
             debug("Unable to examine mailbox %s", mailbox);
-        
-        yield sess.close_mailbox_async();
-        
-        yield sess.logout_async();
-        yield sess.disconnect_async();
     } catch (Error err) {
         debug("Error: %s", err.message);
     }
@@ -55,13 +41,13 @@ int main(string[] args) {
     
     main_loop = new MainLoop();
     
-    user = args[1];
-    pass = args[2];
+    string user = args[1];
+    string pass = args[2];
     mailbox = args[3];
     start = int.parse(args[4]);
     count = int.parse(args[5]);
     
-    sess = new Geary.Imap.ClientSession("imap.gmail.com", 993);
+    sess = new Geary.Imap.ClientSessionManager("imap.gmail.com", 993, user, pass);
     async_start.begin();
     
     main_loop.run();

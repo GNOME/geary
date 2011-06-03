@@ -52,7 +52,7 @@ public class FolderListStore : Gtk.TreeStore {
             return null;
         
         string folder;
-        get(iter, 0, out folder);
+        get(iter, Column.NAME, out folder);
         
         return folder;
     }

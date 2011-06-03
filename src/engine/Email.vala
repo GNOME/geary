@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Message {
+public class Geary.EmailHeader : Object {
     public int msg_num { get; private set; }
     public Geary.RFC822.MailboxAddresses from { get; private set; }
     public Geary.RFC822.Subject subject { get; private set; }
     public Geary.RFC822.Date sent { get; private set; }
     
-    public Message(int msg_num, Geary.RFC822.MailboxAddresses from, Geary.RFC822.Subject subject,
+    public EmailHeader(int msg_num, Geary.RFC822.MailboxAddresses from, Geary.RFC822.Subject subject,
         Geary.RFC822.Date sent) {
         this.msg_num = msg_num;
         this.from = from;
@@ -20,6 +20,23 @@ public class Geary.Message {
     
     public string to_string() {
         return "[%d] %s: %s (%s)".printf(msg_num, from.to_string(), subject.to_string(), sent.to_string());
+    }
+}
+
+public class Geary.EmailBody : Object {
+    public EmailHeader header { get; private set; }
+    public string full { get; private set; }
+    
+    public EmailBody(EmailHeader header, string full) {
+        this.header = header;
+        this.full = full;
+    }
+    
+    /**
+     * This does not return the full body or any portion of it.  It's intended only for debugging.
+     */
+    public string to_string() {
+        return "email body (%d bytes)".printf(full.data.length);
     }
 }
 

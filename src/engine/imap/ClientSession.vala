@@ -204,7 +204,7 @@ public class Geary.Imap.ClientSession {
     public virtual signal void unsolicited_exists(int exists) {
     }
     
-    public virtual signal void unsolicitied_recent(int recent) {
+    public virtual signal void unsolicited_recent(int recent) {
     }
     
     public virtual signal void unsolicited_flags(FetchResults flags) {
@@ -589,7 +589,7 @@ public class Geary.Imap.ClientSession {
             unsolicited_exists(results.exists);
         
         if (results.has_recent())
-            unsolicitied_recent(results.recent);
+            unsolicited_recent(results.recent);
         
         if (results.flags != null) {
             foreach (FetchResults flags in results.flags)

@@ -23,9 +23,12 @@ public class MainWindow : Gtk.Window {
     private MessageListView message_list_view;
     private FolderListStore folder_list_store = new FolderListStore();
     private FolderListView folder_list_view;
+    private MessageViewer message_viewer = new MessageViewer();
+    private MessageBuffer message_buffer = new MessageBuffer();
     private Gtk.UIManager ui = new Gtk.UIManager();
     private Geary.Engine? engine = null;
     private Geary.Account? account = null;
+    private Geary.Folder? current_folder = null;
     
     public MainWindow() {
         title = GearyApplication.PROGRAM_NAME;
@@ -44,9 +47,12 @@ public class MainWindow : Gtk.Window {
         add_accel_group(ui.get_accel_group());
         
         message_list_view = new MessageListView(message_list_store);
+        message_list_view.message_selected.connect(on_message_selected);
         
         folder_list_view = new FolderListView(folder_list_store);
         folder_list_view.folder_selected.connect(on_folder_selected);
+        
+        message_viewer.set_buffer(message_buffer);
         
         create_layout();
     }
@@ -118,23 +124,34 @@ public class MainWindow : Gtk.Window {
         // main menu
         main_layout.pack_start(ui.get_widget("/MenuBar"), false, false, 0);
         
-        // three-pane display: folder list on left, message list on right, separated with grippable
-        // pane
-        Gtk.HPaned paned = new Gtk.HPaned();
+        Gtk.HPaned folder_paned = new Gtk.HPaned();
+        Gtk.VPaned messages_paned = new Gtk.VPaned();
         
         // folder list
         Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
         folder_list_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         folder_list_scrolled.add_with_viewport(folder_list_view);
-        paned.pack1(folder_list_scrolled, false, false);
         
         // message list
         Gtk.ScrolledWindow message_list_scrolled = new Gtk.ScrolledWindow(null, null);
         message_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_list_scrolled.add_with_viewport(message_list_view);
-        paned.pack2(message_list_scrolled, true, false);
         
-        main_layout.pack_end(paned, true, true, 0);
+        // message viewer
+        Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
+        message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        message_viewer_scrolled.add(message_viewer);
+        
+        // three-pane display: message list on top and current message on bottom separated by
+        // grippable
+        messages_paned.pack1(message_list_scrolled, true, false);
+        messages_paned.pack2(message_viewer_scrolled, true, false);
+        
+        // three-pane display: folder list on left and messages on right separated by grippable
+        folder_paned.pack1(folder_list_scrolled, false, false);
+        folder_paned.pack2(messages_paned, true, false);
+        
+        main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
     }
@@ -155,19 +172,25 @@ public class MainWindow : Gtk.Window {
         );
     }
     
-    private void on_folder_selected(string folder) {
+    private void on_folder_selected(string? folder) {
+        if (folder == null) {
+            message_list_store.clear();
+            
+            return;
+        }
+        
         do_select_folder.begin(folder, on_select_folder_completed);
     }
     
     private async void do_select_folder(string folder_name) throws Error {
         message_list_store.clear();
         
-        Geary.Folder folder = yield account.open(folder_name);
+        current_folder = yield account.open(folder_name);
         
-        Gee.List<Geary.Message>? msgs = yield folder.read(1, 100);
-        if (msgs != null && msgs.size > 0) {
-            foreach (Geary.Message msg in msgs)
-                message_list_store.append_message(msg);
+        Gee.List<Geary.EmailHeader>? headers = yield current_folder.read(1, 100);
+        if (headers != null && headers.size > 0) {
+            foreach (Geary.EmailHeader header in headers)
+                message_list_store.append_header(header);
         }
     }
     
@@ -176,6 +199,35 @@ public class MainWindow : Gtk.Window {
             do_select_folder.end(result);
         } catch (Error err) {
             debug("Unable to select folder: %s", err.message);
+        }
+    }
+    
+    private void on_message_selected(Geary.EmailHeader? header) {
+        if (header == null) {
+            message_buffer.set_text("");
+            
+            return;
+        }
+        
+        do_select_message.begin(header, on_select_message_completed);
+    }
+    
+    private async void do_select_message(Geary.EmailHeader header) throws Error {
+        if (current_folder == null) {
+            debug("Message %s selected with no folder selected", header.to_string());
+            
+            return;
+        }
+        
+        Geary.EmailBody body = yield current_folder.fetch_body(header);
+        message_buffer.set_text(body.full);
+    }
+    
+    private void on_select_message_completed(Object? source, AsyncResult result) {
+        try {
+            do_select_message.end(result);
+        } catch (Error err) {
+            debug("Unable to select message: %s", err.message);
         }
     }
 }

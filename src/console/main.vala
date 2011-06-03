@@ -378,7 +378,8 @@ class ImapConsole : Gtk.Window {
         for (int ctr = 1; ctr < args.length; ctr++)
             data_items += Geary.Imap.FetchDataType.decode(args[ctr]);
         
-        cx.post(new Geary.Imap.FetchCommand(cx.generate_tag(), args[0], data_items), on_fetch);
+        cx.post(new Geary.Imap.FetchCommand(cx.generate_tag(), 
+            new Geary.Imap.MessageSet.custom(args[0]), data_items), on_fetch);
     }
     
     private void on_fetch(Object? source, AsyncResult result) {

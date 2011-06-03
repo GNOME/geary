@@ -30,7 +30,7 @@ async void async_start() {
         
         sess.unsolicited_exists.connect(on_exists);
         sess.unsolicited_expunged.connect(on_expunged);
-        sess.unsolicitied_recent.connect(on_recent);
+        sess.unsolicited_recent.connect(on_recent);
         
         sess.enable_keepalives(5);
     } catch (Error err) {
