@@ -27,7 +27,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference, Geary.Folder {
     public async Gee.List<EmailHeader>? read(int low, int count, Cancellable? cancellable = null)
         throws Error {
         if (mailbox.is_closed())
-            throw new IOError.NOT_FOUND("Mailbox %s closed", mailbox.to_string());
+            throw new ImapError.NOT_SELECTED("Mailbox %s closed", mailbox.to_string());
         
         CommandResponse resp = yield mailbox.session.send_command_async(
             new FetchCommand(mailbox.session.generate_tag(), new MessageSet.range(low, count),
@@ -53,7 +53,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference, Geary.Folder {
         assert(header != null);
         
         if (mailbox.is_closed())
-            throw new IOError.NOT_FOUND("Folder closed");
+            throw new ImapError.NOT_SELECTED("Folder closed");
         
         CommandResponse resp = yield mailbox.session.send_command_async(
             new FetchCommand(mailbox.session.generate_tag(), new MessageSet(hdr.msg_num),

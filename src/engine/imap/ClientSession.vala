@@ -337,8 +337,11 @@ public class Geary.Imap.ClientSession {
         fsm.set_logging(false);
     }
     
-    public Tag? generate_tag() {
-        return (cx != null) ? cx.generate_tag() : null;
+    public Tag generate_tag() throws ImapError {
+        if (cx == null)
+            throw new ImapError.NOT_CONNECTED("Not connected to %s", to_string());
+        
+        return cx.generate_tag();
     }
     
     public string? get_current_mailbox() {
@@ -559,7 +562,15 @@ public class Geary.Imap.ClientSession {
     }
     
     private bool on_keepalive() {
-        send_command_async.begin(new NoopCommand(generate_tag()), null, on_keepalive_completed);
+        try {
+            send_command_async.begin(new NoopCommand(generate_tag()), null, on_keepalive_completed);
+        } catch (ImapError ierr) {
+            message("Unable to keepalive %s, halting attempts: %s", to_string(), ierr.message);
+            
+            keepalive_id = 0;
+            
+            return false;
+        }
         
         return true;
     }
@@ -610,7 +621,7 @@ public class Geary.Imap.ClientSession {
         if (cmd.has_name(LoginCommand.NAME) || cmd.has_name(LogoutCommand.NAME)
             || cmd.has_name(SelectCommand.NAME) || cmd.has_name(ExamineCommand.NAME)
             || cmd.has_name(CloseCommand.NAME)) {
-            throw new IOError.NOT_SUPPORTED("Use direct calls rather than commands");
+            throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands");
         }
         
         SendCommandParams params = new SendCommandParams(cmd, cancellable, send_command_async.callback);
@@ -937,7 +948,7 @@ public class Geary.Imap.ClientSession {
         assert(object != null);
         
         AsyncParams params = (AsyncParams) object;
-        params.err = new IOError.CLOSED("Connection to %s closing or closed", to_string());
+        params.err = new ImapError.NOT_CONNECTED("Connection to %s closing or closed", to_string());
         
         return state;
     }
@@ -973,7 +984,7 @@ public class Geary.Imap.ClientSession {
         Cancellable? cancellable = null) {
         if (cx == null) {
             return new AsyncCommandResponse(null, user,
-                new IOError.CLOSED("Not connected to %s", server));
+                new ImapError.NOT_CONNECTED("Not connected to %s", server));
         }
         
         try {

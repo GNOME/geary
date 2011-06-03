@@ -10,6 +10,8 @@ public errordomain Geary.ImapError {
     SERVER_ERROR,
     NOT_CONNECTED,
     COMMAND_FAILED,
-    UNAUTHENTICATED
+    UNAUTHENTICATED,
+    NOT_SUPPORTED,
+    NOT_SELECTED
 }
 

@@ -56,7 +56,9 @@ public class Geary.Imap.ClientConnection {
         // TODO: Close connection as gracefully as possible
     }
     
-    // Generates a unique tag for the IMAP connection in the form of "<a-z><000-999>".
+    /**
+     * Generates a unique tag for the IMAP connection in the form of "<a-z><000-999>".
+     */
     public Tag generate_tag() {
         // watch for odometer rollover
         if (++tag_counter >= 1000) {
@@ -71,9 +73,15 @@ public class Geary.Imap.ClientConnection {
         return new Tag("%c%03d".printf(tag_prefix, tag_counter));
     }
     
+    /**
+     * Returns silently if a connection is already established.
+     */
     public async void connect_async(Cancellable? cancellable = null) throws Error {
-        if (cx != null)
-            throw new IOError.EXISTS("Already connected to %s", to_string());
+        if (cx != null) {
+            debug("Already connected to %s", to_string());
+            
+            return;
+        }
         
         cx = yield socket_client.connect_to_host_async(host_specifier, default_port, cancellable);
         ser = new Serializer(new BufferedOutputStream(cx.output_stream));
@@ -159,7 +167,7 @@ public class Geary.Imap.ClientConnection {
     
     private void check_for_connection() throws Error {
         if (cx == null)
-            throw new IOError.CLOSED("Not connected to %s", to_string());
+            throw new ImapError.NOT_CONNECTED("Not connected to %s", to_string());
     }
     
     public string to_string() {
