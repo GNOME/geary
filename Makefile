@@ -4,7 +4,7 @@ PROGRAM = geary
 BUILD_ROOT = 1
 
 VALAC := valac
-VALAFLAGS := -g --save-temps --enable-checking --fatal-warnings --vapidir=vapi
+VALAFLAGS := -g --enable-checking --fatal-warnings --vapidir=vapi
 
 APPS := geary console syntax lsmbox readmail watchmbox
 
