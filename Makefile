@@ -88,6 +88,13 @@ WATCHMBOX_SRC := \
 ALL_SRC := $(ENGINE_SRC) $(CLIENT_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC) $(WATCHMBOX_SRC)
 
 EXTERNAL_PKGS := \
+	gio-2.0 >= 2.26.1 \
+	gee-1.0 >= 0.6.1 \
+	gtk+-2.0 >= 2.22.1 \
+	unique-1.0 >= 1.0.0 \
+	gmime-2.4 >= 2.4.14
+
+EXTERNAL_BINDINGS := \
 	gio-2.0 \
 	gee-1.0 \
 	gtk+-2.0 \
@@ -99,7 +106,8 @@ VAPI_FILES := \
 	vapi/gmime-2.4.vapi
 
 geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile $(VAPI_FILES)
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	pkg-config --exists --print-errors '$(EXTERNAL_PKGS)'
+	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
 		$(ENGINE_SRC) $(CLIENT_SRC) \
 		-o $@
 
@@ -109,30 +117,31 @@ all: $(APPS)
 .PHONY: clean
 clean: 
 	rm -f $(ALL_SRC:.vala=.c)
+	rm -f $(ALL_SRC:.vala=.vala.c)
 	rm -f $(APPS)
 
 console: $(ENGINE_SRC) $(CONSOLE_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
 		$(ENGINE_SRC) $(CONSOLE_SRC) \
 		-o $@
 
 syntax: $(ENGINE_SRC) $(SYNTAX_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
 		$(ENGINE_SRC) $(SYNTAX_SRC) \
 		-o $@
 
 lsmbox: $(ENGINE_SRC) $(LSMBOX_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
 		$(ENGINE_SRC) $(LSMBOX_SRC) \
 		-o $@
 
 readmail: $(ENGINE_SRC) $(READMAIL_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
 		$(ENGINE_SRC) $(READMAIL_SRC) \
 		-o $@
 
 watchmbox: $(ENGINE_SRC) $(WATCHMBOX_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach pkg,$(EXTERNAL_PKGS),--pkg=$(pkg)) \
+	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
 		$(ENGINE_SRC) $(WATCHMBOX_SRC) \
 		-o $@
 
