@@ -88,9 +88,9 @@ WATCHMBOX_SRC := \
 ALL_SRC := $(ENGINE_SRC) $(CLIENT_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC) $(WATCHMBOX_SRC)
 
 EXTERNAL_PKGS := \
-	gio-2.0 >= 2.26.1 \
+	gio-2.0 >= 2.28.0 \
 	gee-1.0 >= 0.6.1 \
-	gtk+-2.0 >= 2.22.1 \
+	gtk+-2.0 >= 2.22.0 \
 	unique-1.0 >= 1.0.0 \
 	gmime-2.4 >= 2.4.14
 
