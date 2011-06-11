@@ -6,9 +6,9 @@
 
 public class GearyApplication : YorbaApplication {
     // TODO: replace static strings with const strings when gettext is integrated properly
-    public const string PROGRAM_NAME = "Geary";
-    public static string PROGRAM_DESCRIPTION = _("Email Client");
-    public const string VERSION = "0.0.1";
+    public const string NAME = "Geary";
+    public static string DESCRIPTION = _("Email Client");
+    public const string VERSION = "0.0.0+trunk";
     public const string COPYRIGHT = "Copyright 2011 Yorba Foundation";
     public const string WEBSITE = "http://www.yorba.org";
     public static string WEBSITE_LABEL = _("Visit the Yorba web site");
@@ -33,7 +33,7 @@ along with Shotwell; if not, write to the Free Software Foundation, Inc.,
 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 """;
     
-    public static GearyApplication instance {
+    public new static GearyApplication instance {
         get {
             if (_instance == null)
                 _instance = new GearyApplication();
@@ -45,15 +45,23 @@ along with Shotwell; if not, write to the Free Software Foundation, Inc.,
     private static GearyApplication? _instance = null;
     
     private MainWindow main_window = new MainWindow();
-    private Geary.Engine engine = new Geary.Engine();
+    private Geary.Account? account = null;
     
     private GearyApplication() {
-        base ("org.yorba.geary");
+        base (NAME, "geary", "org.yorba.geary");
     }
     
     public override void startup() {
+        Geary.Credentials cred = new Geary.Credentials("imap.gmail.com", args[1], args[2]);
+        
+        try {
+            account = Geary.Engine.open(cred);
+        } catch (Error err) {
+            error("Unable to open mail database for %s: %s", cred.user, err.message);
+        }
+        
         main_window.show_all();
-        main_window.login(engine, args[1], args[2]);
+        main_window.start(account);
     }
     
     public override void activate() {

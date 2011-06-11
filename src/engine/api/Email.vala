@@ -23,11 +23,11 @@ public class Geary.EmailHeader : Object {
     }
 }
 
-public class Geary.EmailBody : Object {
+public class Geary.Email : Object {
     public EmailHeader header { get; private set; }
     public string full { get; private set; }
     
-    public EmailBody(EmailHeader header, string full) {
+    public Email(EmailHeader header, string full) {
         this.header = header;
         this.full = full;
     }
@@ -36,7 +36,7 @@ public class Geary.EmailBody : Object {
      * This does not return the full body or any portion of it.  It's intended only for debugging.
      */
     public string to_string() {
-        return "email body (%d bytes)".printf(full.data.length);
+        return "%s (%d bytes)".printf(header.to_string(), full.data.length);
     }
 }
 

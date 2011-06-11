@@ -5,7 +5,7 @@
  */
 
 public class FolderListView : Gtk.TreeView {
-    public signal void folder_selected(string? folder);
+    public signal void folder_selected(Geary.Folder? folder);
     
     public FolderListView(FolderListStore store) {
         set_model(store);
@@ -31,7 +31,7 @@ public class FolderListView : Gtk.TreeView {
             return;
         }
         
-        string? folder = get_store().get_folder_at(path);
+        Geary.Folder? folder = get_store().get_folder_at(path);
         if (folder != null)
             folder_selected(folder);
     }

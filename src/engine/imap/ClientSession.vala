@@ -5,9 +5,9 @@
  */
 
 public class Geary.Imap.ClientSession {
-    // 30 min keepalive required to maintain session; back off by 30 sec for breathing room
-    public const int MIN_KEEPALIVE_SEC = (30 * 60) - 30;
-    public const int DEFAULT_KEEPALIVE_SEC = 60;
+    // 30 min keepalive required to maintain session; back off by 5 min for breathing room
+    public const int MIN_KEEPALIVE_SEC = 25 * 60;
+    public const int DEFAULT_KEEPALIVE_SEC = 3 * 60;
     
     public enum Context {
         UNCONNECTED,

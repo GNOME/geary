@@ -4,12 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.FolderDetail : Object, Geary.FolderDetail {
-    public string name { get; protected set; }
+public class Geary.Imap.MailboxInformation {
+    public string name { get; private set; }
     public string delim { get; private set; }
     public MailboxAttributes attrs { get; private set; }
     
-    public FolderDetail(string name, string delim, MailboxAttributes attrs) {
+    public MailboxInformation(string name, string delim, MailboxAttributes attrs) {
         this.name = name;
         this.delim = delim;
         this.attrs = attrs;
@@ -17,19 +17,18 @@ public class Geary.Imap.FolderDetail : Object, Geary.FolderDetail {
 }
 
 public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
-    private Gee.HashMap<string, FolderDetail> map = new Gee.HashMap<string, FolderDetail>();
+    private Gee.Map<string, MailboxInformation> map;
     
-    public ListResults(StatusResponse status_response, Gee.Collection<FolderDetail> details) {
+    public ListResults(StatusResponse status_response, Gee.Map<string, MailboxInformation> map) {
         base (status_response);
         
-        foreach (FolderDetail detail in details)
-            map.set(detail.name, detail);
+        this.map = map;
     }
     
     public static ListResults decode(CommandResponse response) {
         assert(response.is_sealed());
         
-        Gee.List<FolderDetail> details = new Gee.ArrayList<FolderDetail>();
+        Gee.Map<string, MailboxInformation> map = new Gee.HashMap<string, MailboxInformation>();
         foreach (ServerData data in response.server_data) {
             try {
                 StringParameter cmd = data.get_as_string(1);
@@ -57,24 +56,25 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                     list.add(new MailboxAttribute(stringp.value));
                 }
                 
-                details.add(new FolderDetail(mailbox.value, delim.value, new MailboxAttributes(list)));
+                map.set(mailbox.value,
+                    new MailboxInformation(mailbox.value, delim.value, new MailboxAttributes(list)));
             } catch (ImapError ierr) {
                 debug("Unable to decode \"%s\": %s", data.to_string(), ierr.message);
             }
         }
         
-        return new ListResults(response.status_response, details);
+        return new ListResults(response.status_response, map);
     }
     
     public Gee.Collection<string> get_names() {
         return map.keys;
     }
     
-    public Gee.Collection<FolderDetail> get_all() {
+    public Gee.Collection<MailboxInformation> get_all() {
         return map.values;
     }
     
-    public FolderDetail? get_detail(string name) {
+    public MailboxInformation? get_info(string name) {
         return map.get(name);
     }
 }

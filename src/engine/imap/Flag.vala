@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Imap.Flag {
+public abstract class Geary.Imap.Flag : Comparable, Hashable {
     public string value { get; private set; }
     
     public Flag(string value) {
@@ -19,20 +19,20 @@ public abstract class Geary.Imap.Flag {
         return this.value.down() == value.down();
     }
     
-    public bool equals(Flag flag) {
+    public bool equals(Comparable b) {
+        Flag? flag = b as Flag;
+        if (flag == null)
+            return false;
+        
         return (flag == this) ? true : flag.equals_string(value);
+    }
+    
+    public uint get_hash() {
+        return str_hash(value.down());
     }
     
     public string to_string() {
         return value;
-    }
-    
-    public static uint hash_func(void *flag) {
-        return str_hash(((Flag *) flag)->value);
-    }
-    
-    public static bool equal_func(void *a, void *b) {
-        return ((Flag *) a)->equals((Flag *) b);
     }
 }
 

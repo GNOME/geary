@@ -6,12 +6,23 @@ BUILD_ROOT = 1
 VALAC := valac
 VALAFLAGS := -g --enable-checking --fatal-warnings --vapidir=vapi
 
-APPS := geary console syntax lsmbox readmail watchmbox
+APPS := geary console watchmbox
 
 ENGINE_SRC := \
 	src/engine/Engine.vala \
-	src/engine/Interfaces.vala \
-	src/engine/Email.vala \
+	src/engine/api/Account.vala \
+	src/engine/api/Email.vala \
+	src/engine/api/Folder.vala \
+	src/engine/api/Credentials.vala \
+	src/engine/api/EngineError.vala \
+	src/engine/sqlite/Database.vala \
+	src/engine/sqlite/Table.vala \
+	src/engine/sqlite/Row.vala \
+	src/engine/sqlite/MailDatabase.vala \
+	src/engine/sqlite/FolderTable.vala \
+	src/engine/sqlite/FolderRow.vala \
+	src/engine/sqlite/api/Account.vala \
+	src/engine/sqlite/api/Folder.vala \
 	src/engine/state/Machine.vala \
 	src/engine/state/MachineDescriptor.vala \
 	src/engine/state/Mapping.vala \
@@ -50,15 +61,22 @@ ENGINE_SRC := \
 	src/engine/imap/decoders/ListResults.vala \
 	src/engine/imap/decoders/SelectExamineResults.vala \
 	src/engine/imap/decoders/StatusResults.vala \
+	src/engine/imap/api/Account.vala \
+	src/engine/imap/api/Folder.vala \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
-	src/engine/util/String.vala \
 	src/engine/util/Memory.vala \
-	src/engine/util/ReferenceSemantics.vala
+	src/engine/util/ReferenceSemantics.vala \
+	src/engine/util/Trillian.vala
+
+COMMON_SRC := \
+	src/common/String.vala \
+	src/common/Interfaces.vala \
+	src/common/YorbaApplication.vala \
+	src/common/Date.vala
 
 CLIENT_SRC := \
 	src/client/main.vala \
-	src/client/YorbaApplication.vala \
 	src/client/GearyApplication.vala \
 	src/client/ui/MainWindow.vala \
 	src/client/ui/MessageListView.vala \
@@ -67,32 +85,23 @@ CLIENT_SRC := \
 	src/client/ui/FolderListStore.vala \
 	src/client/ui/MessageViewer.vala \
 	src/client/ui/MessageBuffer.vala \
-	src/client/util/Intl.vala \
-	src/client/util/Date.vala
+	src/client/util/Intl.vala
 
 CONSOLE_SRC := \
 	src/console/main.vala
 
-SYNTAX_SRC := \
-	src/tests/syntax.vala
-
-LSMBOX_SRC := \
-	src/tests/lsmbox.vala
-
-READMAIL_SRC := \
-	src/tests/readmail.vala
-
 WATCHMBOX_SRC := \
 	src/tests/watchmbox.vala
 
-ALL_SRC := $(ENGINE_SRC) $(CLIENT_SRC) $(CONSOLE_SRC) $(SYNTAX_SRC) $(LSMBOX_SRC) $(READMAIL_SRC) $(WATCHMBOX_SRC)
+ALL_SRC := $(ENGINE_SRC) $(COMMON_SRC) $(CLIENT_SRC) $(CONSOLE_SRC) $(WATCHMBOX_SRC)
 
 EXTERNAL_PKGS := \
 	gio-2.0 >= 2.26.1 \
 	gee-1.0 >= 0.6.1 \
 	gtk+-2.0 >= 2.22.1 \
 	unique-1.0 >= 1.0.0 \
-	gmime-2.4 >= 2.4.14
+	gmime-2.4 >= 2.4.14 \
+	sqlheavy-0.1 >= 0.0.1
 
 EXTERNAL_BINDINGS := \
 	gio-2.0 \
@@ -100,15 +109,16 @@ EXTERNAL_BINDINGS := \
 	gtk+-2.0 \
 	unique-1.0 \
 	posix \
-	gmime-2.4
+	gmime-2.4 \
+	sqlheavy-0.1
 
 VAPI_FILES := \
 	vapi/gmime-2.4.vapi
 
-geary: $(ENGINE_SRC) $(CLIENT_SRC) Makefile $(VAPI_FILES)
+geary: $(ENGINE_SRC) $(COMMON_SRC) $(CLIENT_SRC) Makefile $(VAPI_FILES)
 	pkg-config --exists --print-errors '$(EXTERNAL_PKGS)'
 	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
-		$(ENGINE_SRC) $(CLIENT_SRC) \
+		$(ENGINE_SRC) $(COMMON_SRC) $(CLIENT_SRC) \
 		-o $@
 
 .PHONY: all
@@ -120,28 +130,13 @@ clean:
 	rm -f $(ALL_SRC:.vala=.vala.c)
 	rm -f $(APPS)
 
-console: $(ENGINE_SRC) $(CONSOLE_SRC) Makefile
+console: $(ENGINE_SRC) $(COMMON_SRC) $(CONSOLE_SRC) Makefile
 	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
-		$(ENGINE_SRC) $(CONSOLE_SRC) \
+		$(ENGINE_SRC) $(COMMON_SRC) $(CONSOLE_SRC) \
 		-o $@
 
-syntax: $(ENGINE_SRC) $(SYNTAX_SRC) Makefile
+watchmbox: $(ENGINE_SRC) $(COMMON_SRC) $(WATCHMBOX_SRC) Makefile
 	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
-		$(ENGINE_SRC) $(SYNTAX_SRC) \
-		-o $@
-
-lsmbox: $(ENGINE_SRC) $(LSMBOX_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
-		$(ENGINE_SRC) $(LSMBOX_SRC) \
-		-o $@
-
-readmail: $(ENGINE_SRC) $(READMAIL_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
-		$(ENGINE_SRC) $(READMAIL_SRC) \
-		-o $@
-
-watchmbox: $(ENGINE_SRC) $(WATCHMBOX_SRC) Makefile
-	$(VALAC) $(VALAFLAGS) $(foreach binding,$(EXTERNAL_BINDINGS),--pkg=$(binding)) \
-		$(ENGINE_SRC) $(WATCHMBOX_SRC) \
+		$(ENGINE_SRC) $(COMMON_SRC) $(WATCHMBOX_SRC) \
 		-o $@
 

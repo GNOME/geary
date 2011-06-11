@@ -10,8 +10,8 @@ public class Geary.Imap.EmailHeader : Geary.EmailHeader {
     }
 }
 
-public class Geary.Imap.EmailBody : Geary.EmailBody {
-    public EmailBody(EmailHeader header, string full) {
+public class Geary.Imap.Email : Geary.Email {
+    public Email(EmailHeader header, string full) {
         base (header, full);
     }
 }

@@ -26,12 +26,11 @@ public class MainWindow : Gtk.Window {
     private MessageViewer message_viewer = new MessageViewer();
     private MessageBuffer message_buffer = new MessageBuffer();
     private Gtk.UIManager ui = new Gtk.UIManager();
-    private Geary.Engine? engine = null;
     private Geary.Account? account = null;
     private Geary.Folder? current_folder = null;
     
     public MainWindow() {
-        title = GearyApplication.PROGRAM_NAME;
+        title = GearyApplication.NAME;
         set_default_size(800, 600);
         
         try {
@@ -57,26 +56,34 @@ public class MainWindow : Gtk.Window {
         create_layout();
     }
     
-    public void login(Geary.Engine engine, string user, string pass) {
-        this.engine = engine;
-        
-        do_login.begin(user, pass);
+    ~MainWindow() {
+        if (account != null)
+            account.folders_added_removed.disconnect(on_folders_added_removed);
     }
     
-    private async void do_login(string user, string pass) {
+    public void start(Geary.Account account) {
+        this.account = account;
+        account.folders_added_removed.connect(on_folders_added_removed);
+        
+        do_start.begin();
+    }
+    
+    private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
+        Gee.Collection<Geary.Folder>? removed) {
+        if (added != null) {
+            folder_list_store.add_folders(added);
+            debug("%d folders added", added.size);
+        }
+    }
+    
+    private async void do_start() {
         try {
-            account = yield engine.login("imap.gmail.com", user, pass);
-            if (account == null)
-                error("Unable to login");
-            
             // pull down the root-level folders
-            Gee.Collection<Geary.FolderDetail> folders = yield account.list(null);
-            if (folders != null) {
-                debug("%d folders found", folders.size);
-                folder_list_store.add_folders(folders);
-            } else {
+            Gee.Collection<Geary.Folder> folders = yield account.list_async(null);
+            if (folders != null)
+                on_folders_added_removed(folders, null);
+            else
                 debug("no folders");
-            }
         } catch (Error err) {
             error("%s", err.message);
         }
@@ -162,7 +169,8 @@ public class MainWindow : Gtk.Window {
     
     private void on_about() {
         Gtk.show_about_dialog(this,
-            "program-name", GearyApplication.PROGRAM_NAME,
+            "program-name", GearyApplication.NAME,
+            "comments", GearyApplication.DESCRIPTION,
             "authors", GearyApplication.AUTHORS,
             "copyright", GearyApplication.COPYRIGHT,
             "license", GearyApplication.LICENSE,
@@ -172,22 +180,30 @@ public class MainWindow : Gtk.Window {
         );
     }
     
-    private void on_folder_selected(string? folder) {
+    private void on_folder_selected(Geary.Folder? folder) {
         if (folder == null) {
+            debug("no folder selected");
             message_list_store.clear();
             
             return;
         }
         
+        debug("Folder %s selected", folder.name);
+        
         do_select_folder.begin(folder, on_select_folder_completed);
     }
     
-    private async void do_select_folder(string folder_name) throws Error {
+    private async void do_select_folder(Geary.Folder folder) throws Error {
         message_list_store.clear();
         
-        current_folder = yield account.open(folder_name);
+        if (current_folder != null)
+            yield current_folder.close_async();
         
-        Gee.List<Geary.EmailHeader>? headers = yield current_folder.read(1, 100);
+        current_folder = folder;
+        
+        yield current_folder.open_async(true);
+        
+        Gee.List<Geary.EmailHeader>? headers = yield current_folder.read_async(1, 100);
         if (headers != null && headers.size > 0) {
             foreach (Geary.EmailHeader header in headers)
                 message_list_store.append_header(header);
@@ -219,8 +235,8 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        Geary.EmailBody body = yield current_folder.fetch_body(header);
-        message_buffer.set_text(body.full);
+        Geary.Email email = yield current_folder.fetch_async(header);
+        message_buffer.set_text(email.full);
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {

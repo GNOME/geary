@@ -4,21 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
-    private string server;
+public class Geary.Imap.ClientSessionManager {
+    private Credentials cred;
     private uint default_port;
-    private string user;
-    private string pass;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
-    private Gee.HashSet<MailboxContext> examined_contexts = new Gee.HashSet<MailboxContext>();
-    private Gee.HashSet<MailboxContext> selected_contexts = new Gee.HashSet<MailboxContext>();
+    private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
+    private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
     private int keepalive_sec = ClientSession.DEFAULT_KEEPALIVE_SEC;
     
-    public ClientSessionManager(string server, uint default_port, string user, string pass) {
-        this.server = server;
+    public ClientSessionManager(Credentials cred, uint default_port) {
+        this.cred = cred;
         this.default_port = default_port;
-        this.user = user;
-        this.pass = pass;
     }
     
     /**
@@ -33,9 +29,10 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
             session.enable_keepalives(keepalive_sec);
     }
     
-    public async Gee.Collection<Geary.FolderDetail> list(Geary.FolderDetail? parent,
+    public async Gee.Collection<Geary.Imap.MailboxInformation> list(string? parent_name,
         Cancellable? cancellable = null) throws Error {
-        string specifier = (parent != null) ? parent.name : "/";
+        // build a proper IMAP specifier
+        string specifier = parent_name ?? "/";
         specifier += (specifier.has_suffix("/")) ? "%" : "/%";
         
         ClientSession session = yield get_authorized_session(cancellable);
@@ -54,31 +51,31 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
         return yield select_examine_mailbox(path, false, cancellable);
     }
     
-    private async Mailbox select_examine_mailbox(string path, bool is_select,
+    public async Mailbox select_examine_mailbox(string path, bool is_select,
         Cancellable? cancellable = null) throws Error {
-        Gee.HashSet<MailboxContext> contexts = is_select ? selected_contexts : examined_contexts;
+        Gee.HashSet<SelectedContext> contexts = is_select ? selected_contexts : examined_contexts;
         
-        foreach (MailboxContext mailbox_context in contexts) {
-            if (mailbox_context.name == path)
-                return new Mailbox(mailbox_context);
+        foreach (SelectedContext context in contexts) {
+            if (context.name == path)
+                return new Mailbox(context);
         }
         
         SelectExamineResults results;
         ClientSession session = yield select_examine_async(path, is_select, out results, cancellable);
         
-        MailboxContext new_mailbox_context = new MailboxContext(session, results);
+        SelectedContext new_context = new SelectedContext(session, results);
         
         // Can't use the ternary operator due to this bug:
         // https://bugzilla.gnome.org/show_bug.cgi?id=599349
         if (is_select)
-            new_mailbox_context.freed.connect(on_selected_context_freed);
+            new_context.freed.connect(on_selected_context_freed);
         else
-            new_mailbox_context.freed.connect(on_examined_context_freed);
+            new_context.freed.connect(on_examined_context_freed);
         
-        bool added = contexts.add(new_mailbox_context);
+        bool added = contexts.add(new_context);
         assert(added);
         
-        return new Mailbox(new_mailbox_context);
+        return new Mailbox(new_context);
     }
     
     private void on_selected_context_freed(Geary.ReferenceSemantics semantics) {
@@ -90,22 +87,18 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
     }
     
     private void on_context_freed(Geary.ReferenceSemantics semantics, 
-        Gee.HashSet<MailboxContext> contexts) {
-        MailboxContext mailbox_context = (MailboxContext) semantics;
+        Gee.HashSet<SelectedContext> contexts) {
+        SelectedContext context = (SelectedContext) semantics;
         
-        debug("Mailbox %s freed, closing select/examine", mailbox_context.name);
+        debug("Mailbox %s freed, closing select/examine", context.name);
         
         // last reference to the Mailbox has been dropped, so drop the mailbox and move the
         // ClientSession back to the authorized state
-        bool removed = contexts.remove(mailbox_context);
+        bool removed = contexts.remove(context);
         assert(removed);
         
-        if (mailbox_context.session != null)
-            mailbox_context.session.close_mailbox_async.begin();
-    }
-    
-    public async Geary.Folder open(string folder, Cancellable? cancellable = null) throws Error {
-        return yield examine_mailbox(folder, cancellable);
+        if (context.session != null)
+            context.session.close_mailbox_async.begin();
     }
     
     private async ClientSession get_authorized_session(Cancellable? cancellable = null) throws Error {
@@ -115,13 +108,13 @@ public class Geary.Imap.ClientSessionManager : Object, Geary.Account {
                 return session;
         }
         
-        debug("Creating new session to %s", server);
+        debug("Creating new session to %s", cred.server);
         
-        ClientSession new_session = new ClientSession(server, default_port);
+        ClientSession new_session = new ClientSession(cred.server, default_port);
         new_session.disconnected.connect(on_disconnected);
         
         yield new_session.connect_async(cancellable);
-        yield new_session.login_async(user, pass, cancellable);
+        yield new_session.login_async(cred.user, cred.pass, cancellable);
         
         // do this after logging in
         new_session.enable_keepalives(keepalive_sec);

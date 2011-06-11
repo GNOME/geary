@@ -7,15 +7,20 @@
 public class FolderListStore : Gtk.TreeStore {
     public enum Column {
         NAME,
+        FOLDER_OBJECT,
         N_COLUMNS;
         
         public static Column[] all() {
-            return { NAME };
+            return {
+                NAME,
+                FOLDER_OBJECT
+            };
         }
         
         public static Type[] get_types() {
             return {
-                typeof (string)
+                typeof (string),
+                typeof (Geary.Folder)
             };
         }
         
@@ -23,6 +28,9 @@ public class FolderListStore : Gtk.TreeStore {
             switch (this) {
                 case NAME:
                     return _("Name");
+                
+                case FOLDER_OBJECT:
+                    return "(hidden)";
                 
                 default:
                     assert_not_reached();
@@ -34,25 +42,28 @@ public class FolderListStore : Gtk.TreeStore {
         set_column_types(Column.get_types());
     }
     
-    public void add_folder(Geary.FolderDetail folder) {
+    public void add_folder(Geary.Folder folder) {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        set(iter, Column.NAME, folder.name);
+        set(iter,
+            Column.NAME, folder.name,
+            Column.FOLDER_OBJECT, folder
+        );
     }
     
-    public void add_folders(Gee.Collection<Geary.FolderDetail> folders) {
-        foreach (Geary.FolderDetail folder in folders)
+    public void add_folders(Gee.Collection<Geary.Folder> folders) {
+        foreach (Geary.Folder folder in folders)
             add_folder(folder);
     }
     
-    public string? get_folder_at(Gtk.TreePath path) {
+    public Geary.Folder? get_folder_at(Gtk.TreePath path) {
         Gtk.TreeIter iter;
         if (!get_iter(out iter, path))
             return null;
         
-        string folder;
-        get(iter, Column.NAME, out folder);
+        Geary.Folder folder;
+        get(iter, Column.FOLDER_OBJECT, out folder);
         
         return folder;
     }
