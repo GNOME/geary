@@ -17,17 +17,21 @@ public class Geary.Imap.MailboxInformation {
 }
 
 public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
+    private Gee.List<MailboxInformation> list;
     private Gee.Map<string, MailboxInformation> map;
     
-    public ListResults(StatusResponse status_response, Gee.Map<string, MailboxInformation> map) {
+    public ListResults(StatusResponse status_response, Gee.Map<string, MailboxInformation> map,
+        Gee.List<MailboxInformation> list) {
         base (status_response);
         
         this.map = map;
+        this.list = list;
     }
     
     public static ListResults decode(CommandResponse response) {
         assert(response.is_sealed());
         
+        Gee.List<MailboxInformation> list = new Gee.ArrayList<MailboxInformation>();
         Gee.Map<string, MailboxInformation> map = new Gee.HashMap<string, MailboxInformation>();
         foreach (ServerData data in response.server_data) {
             try {
@@ -43,7 +47,7 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                     continue;
                 }
                 
-                Gee.Collection<MailboxAttribute> list = new Gee.ArrayList<MailboxAttribute>();
+                Gee.Collection<MailboxAttribute> attrlist = new Gee.ArrayList<MailboxAttribute>();
                 foreach (Parameter attr in attrs.get_all()) {
                     StringParameter? stringp = attr as StringParameter;
                     if (stringp == null) {
@@ -53,25 +57,32 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                         continue;
                     }
                     
-                    list.add(new MailboxAttribute(stringp.value));
+                    attrlist.add(new MailboxAttribute(stringp.value));
                 }
                 
-                map.set(mailbox.value,
-                    new MailboxInformation(mailbox.value, delim.value, new MailboxAttributes(list)));
+                MailboxInformation info = new MailboxInformation(mailbox.value, delim.value,
+                    new MailboxAttributes(attrlist));
+                
+                map.set(mailbox.value, info);
+                list.add(info);
             } catch (ImapError ierr) {
                 debug("Unable to decode \"%s\": %s", data.to_string(), ierr.message);
             }
         }
         
-        return new ListResults(response.status_response, map);
+        return new ListResults(response.status_response, map, list);
+    }
+    
+    public int get_count() {
+        return list.size;
     }
     
     public Gee.Collection<string> get_names() {
         return map.keys;
     }
     
-    public Gee.Collection<MailboxInformation> get_all() {
-        return map.values;
+    public Gee.List<MailboxInformation> get_all() {
+        return list;
     }
     
     public MailboxInformation? get_info(string name) {

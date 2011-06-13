@@ -6,29 +6,48 @@
 
 public class Geary.Sqlite.Folder : Object, Geary.Folder {
     private FolderRow row;
-    
-    public string name { get; protected set; }
-    public Trillian is_readonly { get; protected set; }
-    public Trillian supports_children { get; protected set; }
-    public Trillian has_children { get; protected set; }
-    public Trillian is_openable { get; protected set; }
+    private string name;
+    private Trillian readonly;
+    private Trillian supports_children;
+    private Trillian children;
+    private Trillian openable;
     
     internal Folder(FolderRow row) throws Error {
         this.row = row;
         
         name = row.name;
-        is_readonly = Trillian.UNKNOWN;
+        readonly = Trillian.UNKNOWN;
         supports_children = row.supports_children;
-        has_children = Trillian.UNKNOWN;
-        is_openable = row.is_openable;
+        children = Trillian.UNKNOWN;
+        openable = row.is_openable;
+    }
+    
+    public string get_name() {
+        return name;
+    }
+    
+    public Trillian is_readonly() {
+        return readonly;
+    }
+    
+    public Trillian does_support_children() {
+        return supports_children;
+    }
+    
+    public Trillian has_children() {
+        return children;
+    }
+    
+    public Trillian is_openable() {
+        return openable;
     }
     
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
-        is_readonly = Trillian.TRUE;
+        this.readonly = Trillian.TRUE;
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
-        is_readonly = Trillian.UNKNOWN;
+        this.readonly = Trillian.UNKNOWN;
     }
     
     public int get_message_count() throws Error {

@@ -188,7 +188,7 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        debug("Folder %s selected", folder.name);
+        debug("Folder %s selected", folder.get_name());
         
         do_select_folder.begin(folder, on_select_folder_completed);
     }

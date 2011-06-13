@@ -47,7 +47,7 @@ public class FolderListStore : Gtk.TreeStore {
         append(out iter, null);
         
         set(iter,
-            Column.NAME, folder.name,
+            Column.NAME, folder.get_name(),
             Column.FOLDER_OBJECT, folder
         );
     }

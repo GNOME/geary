@@ -43,6 +43,20 @@ public class Geary.Imap.ClientSessionManager {
         return results.get_all();
     }
     
+    public async Geary.Imap.MailboxInformation? fetch_async(string? parent_name, string folder_name,
+        Cancellable? cancellable = null) throws Error {
+        // build a proper IMAP specifier
+        string specifier = parent_name ?? "/";
+        specifier += (specifier.has_suffix("/")) ? folder_name : "/%s".printf(folder_name);
+        
+        ClientSession session = yield get_authorized_session(cancellable);
+        
+        ListResults results = ListResults.decode(yield session.send_command_async(
+            new ListCommand(session.generate_tag(), specifier), cancellable));
+        
+        return (results.get_count() > 0) ? results.get_all()[0] : null;
+    }
+    
     public async Mailbox select_mailbox(string path, Cancellable? cancellable = null) throws Error {
         return yield select_examine_mailbox(path, true, cancellable);
     }

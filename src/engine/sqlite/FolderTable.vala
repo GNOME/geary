@@ -57,6 +57,17 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         return rows;
     }
     
+    public async FolderRow? fetch_async(int64 parent_id, string name, Cancellable? cancellable = null)
+        throws Error {
+        SQLHeavy.Query query = db.prepare("SELECT * FROM FolderTable WHERE parent_id=? AND name=?");
+        query.bind_int64(0, parent_id);
+        query.bind_string(1, name);
+        
+        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        
+        return (!result.finished) ? new FolderRow.from_query_result(result) : null;
+    }
+    
     private SQLHeavy.Query create_query(SQLHeavy.Queryable? queryable = null) throws SQLHeavy.Error {
         SQLHeavy.Queryable q = queryable ?? db;
         SQLHeavy.Query query = q.prepare(

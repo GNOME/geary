@@ -10,6 +10,7 @@ APPS := geary console watchmbox
 
 ENGINE_SRC := \
 	src/engine/Engine.vala \
+	src/engine/EngineFolder.vala \
 	src/engine/api/Account.vala \
 	src/engine/api/Email.vala \
 	src/engine/api/Folder.vala \

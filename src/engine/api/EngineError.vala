@@ -6,6 +6,7 @@
 
 public errordomain Geary.EngineError {
     OPEN_REQUIRED,
-    ALREADY_OPEN
+    ALREADY_OPEN,
+    NOT_FOUND
 }
 

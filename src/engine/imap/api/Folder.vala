@@ -5,15 +5,13 @@
  */
 
 public class Geary.Imap.Folder : Object, Geary.Folder {
-    public string name { get; protected set; }
-    // This is only for when a context has been selected
-    public Trillian is_readonly { get; protected set; }
-    public Trillian supports_children { get; protected set; }
-    public Trillian has_children { get; protected set; }
-    public Trillian is_openable { get; protected set; }
-    
     private ClientSessionManager session_mgr;
     private MailboxInformation info;
+    private string name;
+    private Trillian readonly;
+    private Trillian supports_children;
+    private Trillian children;
+    private Trillian openable;
     private Mailbox? mailbox = null;
     
     internal Folder(ClientSessionManager session_mgr, MailboxInformation info) {
@@ -21,12 +19,32 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         this.info = info;
         
         name = info.name;
-        is_readonly = Trillian.UNKNOWN;
+        readonly = Trillian.UNKNOWN;
         supports_children = Trillian.from_boolean(!info.attrs.contains(MailboxAttribute.NO_INFERIORS));
         // \HasNoChildren is an optional attribute and lack of presence doesn't indiciate anything
-        has_children = info.attrs.contains(MailboxAttribute.HAS_NO_CHILDREN) ? Trillian.TRUE
+        children = info.attrs.contains(MailboxAttribute.HAS_NO_CHILDREN) ? Trillian.TRUE
             : Trillian.UNKNOWN;
-        is_openable = Trillian.from_boolean(!info.attrs.contains(MailboxAttribute.NO_SELECT));
+        openable = Trillian.from_boolean(!info.attrs.contains(MailboxAttribute.NO_SELECT));
+    }
+    
+    public string get_name() {
+        return name;
+    }
+    
+    public Trillian is_readonly() {
+        return readonly;
+    }
+    
+    public Trillian does_support_children() {
+        return supports_children;
+    }
+    
+    public Trillian has_children() {
+        return children;
+    }
+    
+    public Trillian is_openable() {
+        return openable;
     }
     
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
@@ -36,12 +54,12 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         mailbox = yield session_mgr.select_examine_mailbox(name, !readonly, cancellable);
         // hook up signals
         
-        this.is_readonly = Trillian.from_boolean(readonly);
+        this.readonly = Trillian.from_boolean(readonly);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
         mailbox = null;
-        is_readonly = Trillian.UNKNOWN;
+        readonly = Trillian.UNKNOWN;
     }
     
     public int get_message_count() throws Error {

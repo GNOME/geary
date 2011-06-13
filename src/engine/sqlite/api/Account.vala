@@ -29,17 +29,28 @@ public class Geary.Sqlite.Account : Object, Geary.Account, Geary.LocalAccount {
         return folders;
     }
     
+    public async Geary.Folder fetch_async(string? parent_folder, string folder_name,
+        Cancellable? cancellable = null) throws Error {
+        FolderRow? row =  yield folder_table.fetch_async(Row.INVALID_ID, folder_name, cancellable);
+        if (row == null)
+            throw new EngineError.NOT_FOUND("%s not found in local database", folder_name);
+        
+        return new Geary.Sqlite.Folder(row);
+    }
+    
     public async void create_async(Geary.Folder folder, Cancellable? cancellable = null) throws Error {
         yield folder_table.create_async(
-            new FolderRow(folder.name, folder.supports_children, folder.is_openable),
+            new FolderRow(folder.get_name(), folder.does_support_children(), folder.is_openable()),
             cancellable);
     }
     
     public async void create_many_async(Gee.Collection<Geary.Folder> folders,
         Cancellable? cancellable = null) throws Error {
         Gee.List<FolderRow> rows = new Gee.ArrayList<FolderRow>();
-        foreach (Geary.Folder folder in folders)
-            rows.add(new FolderRow(folder.name, folder.supports_children, folder.is_openable));
+        foreach (Geary.Folder folder in folders) {
+            rows.add(new FolderRow(folder.get_name(), folder.does_support_children(),
+                folder.is_openable()));
+        }
         
         yield folder_table.create_many_async(rows, cancellable);
     }

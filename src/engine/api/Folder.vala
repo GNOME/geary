@@ -11,17 +11,22 @@ public interface Geary.Folder : Object {
         FOLDER_CLOSED
     }
     
-    public abstract string name { get; protected set; }
-    public abstract Trillian is_readonly { get; protected set; }
-    public abstract Trillian supports_children { get; protected set; }
-    public abstract Trillian has_children { get; protected set; }
-    public abstract Trillian is_openable { get; protected set; }
-    
     public signal void opened();
     
     public signal void closed(CloseReason reason);
     
     public signal void updated();
+    
+    public abstract string get_name();
+    
+    // This is only for when a context has been selected
+    public abstract Trillian is_readonly();
+    
+    public abstract Trillian does_support_children();
+    
+    public abstract Trillian has_children();
+    
+    public abstract Trillian is_openable();
     
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     

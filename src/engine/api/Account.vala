@@ -16,6 +16,9 @@ public interface Geary.Account : Object {
     public abstract async Gee.Collection<Geary.Folder> list_async(string? parent_folder,
         Cancellable? cancellable = null) throws Error;
     
+    public abstract async Geary.Folder fetch_async(string? parent_folder, string folder_name,
+        Cancellable? cancellable = null) throws Error;
+    
     public abstract async void create_async(Geary.Folder folder, Cancellable? cancellable = null)
         throws Error;
     

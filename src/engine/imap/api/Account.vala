@@ -26,6 +26,16 @@ public class Geary.Imap.Account : Object, Geary.Account, Geary.NetworkAccount {
         return folders;
     }
     
+    public async Geary.Folder fetch_async(string? parent_folder, string folder_name,
+        Cancellable? cancellable = null) throws Error {
+        MailboxInformation? mbox = yield session_mgr.fetch_async(parent_folder, folder_name,
+            cancellable);
+        if (mbox == null)
+            throw new EngineError.NOT_FOUND("Folder %s not found on server", folder_name);
+        
+        return new Geary.Imap.Folder(session_mgr, mbox);
+    }
+    
     public async void create_async(Geary.Folder folder, Cancellable? cancellable = null) throws Error {
         // TODO
     }
