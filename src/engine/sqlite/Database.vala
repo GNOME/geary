@@ -15,6 +15,7 @@ public abstract class Geary.Sqlite.Database {
             db_file.get_parent().make_directory_with_parents();
         
         db = new SQLHeavy.VersionedDatabase(db_file.get_path(), schema_dir.get_path());
+        db.foreign_keys = true;
     }
     
     protected Geary.Sqlite.Table? get_table(string name, out SQLHeavy.Table heavy_table) {
@@ -27,8 +28,10 @@ public abstract class Geary.Sqlite.Database {
         return table_map.get(heavy_table);
     }
     
-    protected void add_table(Geary.Sqlite.Table table) {
+    protected Geary.Sqlite.Table add_table(Geary.Sqlite.Table table) {
         table_map.set(table.table, table);
+        
+        return table;
     }
 }
 

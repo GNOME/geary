@@ -18,49 +18,48 @@ public class Geary.Sqlite.Account : Object, Geary.Account, Geary.LocalAccount {
         folder_table = db.get_folder_table();
     }
     
-    public async Gee.Collection<Geary.Folder> list_async(string? parent_folder,
+    public async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
+        Cancellable? cancellable = null) throws Error {
+        yield folder_table.create_async(new FolderRow(folder_table, folder.get_name(), Row.INVALID_ID),
+            cancellable);
+    }
+    
+    public async void create_many_folders_async(Geary.Folder? parent, Gee.Collection<Geary.Folder> folders,
+        Cancellable? cancellable = null) throws Error {
+        Gee.List<FolderRow> rows = new Gee.ArrayList<FolderRow>();
+        foreach (Geary.Folder folder in folders)
+            rows.add(new FolderRow(db.get_folder_table(), folder.get_name(), Row.INVALID_ID));
+        
+        yield folder_table.create_many_async(rows, cancellable);
+    }
+    
+    public async Gee.Collection<Geary.Folder> list_folders_async(Geary.Folder? parent,
         Cancellable? cancellable = null) throws Error {
         Gee.List<FolderRow> rows = yield folder_table.list_async(Row.INVALID_ID, cancellable);
         
         Gee.Collection<Geary.Folder> folders = new Gee.ArrayList<Geary.Sqlite.Folder>();
         foreach (FolderRow row in rows)
-            folders.add(new Geary.Sqlite.Folder(row));
+            folders.add(new Geary.Sqlite.Folder(db, row));
         
         return folders;
     }
     
-    public async Geary.Folder fetch_async(string? parent_folder, string folder_name,
+    public async Geary.Folder fetch_folder_async(Geary.Folder? parent, string folder_name,
         Cancellable? cancellable = null) throws Error {
         FolderRow? row =  yield folder_table.fetch_async(Row.INVALID_ID, folder_name, cancellable);
         if (row == null)
-            throw new EngineError.NOT_FOUND("%s not found in local database", folder_name);
+            throw new EngineError.NOT_FOUND("\"%s\" not found in local database", folder_name);
         
-        return new Geary.Sqlite.Folder(row);
+        return new Geary.Sqlite.Folder(db, row);
     }
     
-    public async void create_async(Geary.Folder folder, Cancellable? cancellable = null) throws Error {
-        yield folder_table.create_async(
-            new FolderRow(folder.get_name(), folder.does_support_children(), folder.is_openable()),
-            cancellable);
-    }
-    
-    public async void create_many_async(Gee.Collection<Geary.Folder> folders,
-        Cancellable? cancellable = null) throws Error {
-        Gee.List<FolderRow> rows = new Gee.ArrayList<FolderRow>();
-        foreach (Geary.Folder folder in folders) {
-            rows.add(new FolderRow(folder.get_name(), folder.does_support_children(),
-                folder.is_openable()));
-        }
-        
-        yield folder_table.create_many_async(rows, cancellable);
-    }
-    
-    public async void remove_async(string folder, Cancellable? cancellable = null) throws Error {
+    public async void remove_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
+        throws Error {
         // TODO
     }
     
-    public async void remove_many_async(Gee.Set<string> folders, Cancellable? cancellable = null)
-        throws Error {
+    public async void remove_many_folders_async(Gee.Set<Geary.Folder> folders,
+        Cancellable? cancellable = null) throws Error {
         // TODO
     }
 }

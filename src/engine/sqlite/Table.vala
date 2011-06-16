@@ -18,5 +18,9 @@ public abstract class Geary.Sqlite.Table {
         this.gdb = gdb;
         this.table = table;
     }
+    
+    public string get_field_name(int col) throws SQLHeavy.Error {
+        return table.field_name(col);
+    }
 }
 

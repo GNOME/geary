@@ -11,8 +11,7 @@
  * 
  * Note that IMAP specifies that Flags and Attributes are *always* returned as a list, even if only
  * one is present, which is why these elements are MessageData but not the elements within the
- * lists (Flag, Attribute).  Obviously these classes are closely related, hence their presence
- * here.
+ * lists (Flag, Attribute).
  *
  * Also note that Imap.MessageData inherits from Common.MessageData.
  */

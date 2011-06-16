@@ -22,13 +22,14 @@ public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC8
 public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData {
     public string original { get; private set; }
     public DateTime value { get; private set; }
+    public time_t as_time_t { get; private set; }
     
     public Date(string iso8601) throws ImapError {
-        time_t tm = GMime.utils_header_decode_date(iso8601, null);
-        if (tm == 0)
+        as_time_t = GMime.utils_header_decode_date(iso8601, null);
+        if (as_time_t == 0)
             throw new ImapError.PARSE_ERROR("Unable to parse \"%s\": not ISO-8601 date", iso8601);
         
-        value = new DateTime.from_unix_local(tm);
+        value = new DateTime.from_unix_local(as_time_t);
         original = iso8601;
     }
     
@@ -50,18 +51,20 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
 }
 
 public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC822.MessageData {
+    public int size { get { return addrs.size; } }
+    
     private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();
     
     public MailboxAddresses(Gee.Collection<MailboxAddress> addrs) {
         this.addrs.add_all(addrs);
     }
     
-    public int get_count() {
-        return addrs.size;
+    public MailboxAddress? get(int index) {
+        return addrs.get(index);
     }
     
-    public MailboxAddress? get_at(int index) {
-        return addrs.get(index);
+    public Gee.Iterator<MailboxAddress> iterator() {
+        return addrs.iterator();
     }
     
     public Gee.List<MailboxAddress> get_all() {

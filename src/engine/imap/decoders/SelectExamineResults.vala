@@ -17,7 +17,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
      * -1 if not specified.
      */
     public int unseen { get; private set; }
-    public UID? uidvalidity { get; private set; }
+    public UID? uid_validity { get; private set; }
     public Flags? flags { get; private set; }
     public Flags? permanentflags { get; private set; }
     public bool readonly { get; private set; }
@@ -29,7 +29,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
         this.exists = exists;
         this.recent = recent;
         this.unseen = unseen;
-        this.uidvalidity = uidvalidity;
+        this.uid_validity = uid_validity;
         this.flags = flags;
         this.permanentflags = permanentflags;
         this.readonly = readonly;

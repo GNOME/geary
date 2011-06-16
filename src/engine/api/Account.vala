@@ -13,29 +13,26 @@ public interface Geary.Account : Object {
         folders_added_removed(added, removed);
     }
     
-    public abstract async Gee.Collection<Geary.Folder> list_async(string? parent_folder,
+    public abstract async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async Geary.Folder fetch_async(string? parent_folder, string folder_name,
+    public abstract async void create_many_folders_async(Geary.Folder? parent,
+        Gee.Collection<Geary.Folder> folders, Cancellable? cancellable = null) throws Error;
+    
+    public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.Folder? parent,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async void create_async(Geary.Folder folder, Cancellable? cancellable = null)
-        throws Error;
-    
-    public abstract async void create_many_async(Gee.Collection<Geary.Folder> folders,
+    public abstract async Geary.Folder fetch_folder_async(Geary.Folder? parent, string folder_name,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async void remove_async(string folder, Cancellable? cancellable = null)
+    public abstract async void remove_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
         throws Error;
     
-    public abstract async void remove_many_async(Gee.Set<string> folders, Cancellable? cancellable = null)
-        throws Error;
+    public abstract async void remove_many_folders_async(Gee.Set<Geary.Folder> folders,
+        Cancellable? cancellable = null) throws Error;
 }
 
 public interface Geary.NetworkAccount : Object, Geary.Account {
-    public signal void connectivity_changed(bool online);
-    
-    public abstract bool is_online();
 }
 
 public interface Geary.LocalAccount : Object, Geary.Account {

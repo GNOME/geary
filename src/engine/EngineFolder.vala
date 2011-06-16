@@ -26,25 +26,18 @@ private class Geary.EngineFolder : Object, Geary.Folder {
         return local_folder.get_name();
     }
     
-    public Trillian is_readonly() {
-        return local_folder.is_readonly();
+    public Geary.FolderProperties? get_properties() {
+        return null;
     }
     
-    public Trillian does_support_children() {
-        return local_folder.does_support_children();
-    }
-    
-    public Trillian has_children() {
-        return local_folder.has_children();
-    }
-    
-    public Trillian is_openable() {
-        return local_folder.is_openable();
+    public async void create_email_async(Geary.Email email, Geary.EmailOrdering ordering, 
+        Cancellable? cancellable) throws Error {
+        throw new EngineError.READONLY("Engine currently read-only");
     }
     
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
         if (net_folder == null) {
-            net_folder = yield net.fetch_async(null, local_folder.get_name(), cancellable);
+            net_folder = yield net.fetch_folder_async(null, local_folder.get_name(), cancellable);
             net_folder.updated.connect(on_net_updated);
         }
         
@@ -64,20 +57,17 @@ private class Geary.EngineFolder : Object, Geary.Folder {
         return 0;
     }
     
-    public async Gee.List<Geary.EmailHeader>? read_async(int low, int count,
+    public async Gee.List<Geary.Email> list_email_async(int low, int count, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
-        if (net_folder == null)
-            throw new EngineError.OPEN_REQUIRED("Folder %s not opened", get_name());
-        
-        return yield net_folder.read_async(low, count, cancellable);
+        return yield net_folder.list_email_async(low, count, fields, cancellable);
     }
     
-    public async Geary.Email fetch_async(Geary.EmailHeader header,
+    public async Geary.Email fetch_email_async(int num, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (net_folder == null)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", get_name());
         
-        return yield net_folder.fetch_async(header, cancellable);
+        return yield net_folder.fetch_email_async(num, fields, cancellable);
     }
     
     private void on_local_updated() {

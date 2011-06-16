@@ -34,6 +34,30 @@ public abstract class Geary.Memory.AbstractBuffer {
     }
 }
 
+public class Geary.Memory.StringBuffer : Geary.Memory.AbstractBuffer {
+    private string str;
+    
+    public StringBuffer(string str) {
+        this.str = str;
+    }
+    
+    public override size_t get_size() {
+        return str.data.length;
+    }
+    
+    public override size_t get_actual_size() {
+        return str.data.length;
+    }
+    
+    public override uint8[] get_buffer() {
+        return str.data;
+    }
+    
+    public override InputStream get_input_stream() {
+        return new MemoryInputStream.from_data(str.data, null);
+    }
+}
+
 public class Geary.Memory.Buffer : Geary.Memory.AbstractBuffer {
     private uint8[] buffer;
     private size_t filled;

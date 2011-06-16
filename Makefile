@@ -10,10 +10,14 @@ APPS := geary console watchmbox
 
 ENGINE_SRC := \
 	src/engine/Engine.vala \
+	src/engine/ImapEngine.vala \
 	src/engine/EngineFolder.vala \
 	src/engine/api/Account.vala \
 	src/engine/api/Email.vala \
+	src/engine/api/EmailProperties.vala \
+	src/engine/api/EmailOrdering.vala \
 	src/engine/api/Folder.vala \
+	src/engine/api/FolderProperties.vala \
 	src/engine/api/Credentials.vala \
 	src/engine/api/EngineError.vala \
 	src/engine/sqlite/Database.vala \
@@ -22,6 +26,10 @@ ENGINE_SRC := \
 	src/engine/sqlite/MailDatabase.vala \
 	src/engine/sqlite/FolderTable.vala \
 	src/engine/sqlite/FolderRow.vala \
+	src/engine/sqlite/MessageRow.vala \
+	src/engine/sqlite/MessageTable.vala \
+	src/engine/sqlite/MessageLocationRow.vala \
+	src/engine/sqlite/MessageLocationTable.vala \
 	src/engine/sqlite/api/Account.vala \
 	src/engine/sqlite/api/Folder.vala \
 	src/engine/state/Machine.vala \
@@ -33,7 +41,6 @@ ENGINE_SRC := \
 	src/engine/imap/ClientSessionManager.vala \
 	src/engine/imap/DataFormat.vala \
 	src/engine/imap/Mailbox.vala \
-	src/engine/imap/Email.vala \
 	src/engine/imap/Parameter.vala \
 	src/engine/imap/Tag.vala \
 	src/engine/imap/Command.vala \
@@ -63,7 +70,9 @@ ENGINE_SRC := \
 	src/engine/imap/decoders/SelectExamineResults.vala \
 	src/engine/imap/decoders/StatusResults.vala \
 	src/engine/imap/api/Account.vala \
+	src/engine/imap/api/EmailProperties.vala \
 	src/engine/imap/api/Folder.vala \
+	src/engine/imap/api/FolderProperties.vala \
 	src/engine/rfc822/MailboxAddress.vala \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/Memory.vala \

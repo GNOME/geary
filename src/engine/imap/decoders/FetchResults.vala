@@ -73,6 +73,10 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
         return array;
     }
     
+    public Gee.Set<FetchDataType> get_all_types() {
+        return map.keys;
+    }
+    
     public void set_data(FetchDataType data_item, MessageData primitive) {
         map.set(data_item, primitive);
     }

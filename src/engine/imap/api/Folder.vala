@@ -9,9 +9,7 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
     private MailboxInformation info;
     private string name;
     private Trillian readonly;
-    private Trillian supports_children;
-    private Trillian children;
-    private Trillian openable;
+    private Imap.FolderProperties properties;
     private Mailbox? mailbox = null;
     
     internal Folder(ClientSessionManager session_mgr, MailboxInformation info) {
@@ -20,11 +18,7 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         
         name = info.name;
         readonly = Trillian.UNKNOWN;
-        supports_children = Trillian.from_boolean(!info.attrs.contains(MailboxAttribute.NO_INFERIORS));
-        // \HasNoChildren is an optional attribute and lack of presence doesn't indiciate anything
-        children = info.attrs.contains(MailboxAttribute.HAS_NO_CHILDREN) ? Trillian.TRUE
-            : Trillian.UNKNOWN;
-        openable = Trillian.from_boolean(!info.attrs.contains(MailboxAttribute.NO_SELECT));
+        properties = new Imap.FolderProperties(null, info.attrs);
     }
     
     public string get_name() {
@@ -35,16 +29,8 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         return readonly;
     }
     
-    public Trillian does_support_children() {
-        return supports_children;
-    }
-    
-    public Trillian has_children() {
-        return children;
-    }
-    
-    public Trillian is_openable() {
-        return openable;
+    public Geary.FolderProperties? get_properties() {
+        return properties;
     }
     
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
@@ -55,11 +41,13 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         // hook up signals
         
         this.readonly = Trillian.from_boolean(readonly);
+        properties.uid_validity = mailbox.uid_validity;
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
         mailbox = null;
         readonly = Trillian.UNKNOWN;
+        properties.uid_validity = null;
     }
     
     public int get_message_count() throws Error {
@@ -69,20 +57,25 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         return mailbox.count;
     }
     
-    public async Gee.List<Geary.EmailHeader>? read_async(int low, int count,
+    public async void create_email_async(Geary.Email email, Geary.EmailOrdering ordring,
         Cancellable? cancellable = null) throws Error {
-        if (mailbox == null)
-            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
-        
-        return yield mailbox.read(low, count, cancellable);
+        throw new EngineError.READONLY("IMAP currently read-only");
     }
     
-    public async Geary.Email fetch_async(Geary.EmailHeader header,
+    public async Gee.List<Geary.Email> list_email_async(int low, int count, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        return yield mailbox.fetch(header, cancellable);
+        return yield mailbox.list_async(low, count, fields, cancellable);
+    }
+    
+    public async Geary.Email fetch_email_async(int msg_num, Geary.Email.Field fields,
+        Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+        
+        return yield mailbox.fetch_async(msg_num, fields, cancellable);
     }
     
     public string to_string() {

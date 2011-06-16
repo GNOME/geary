@@ -79,7 +79,7 @@ public class MainWindow : Gtk.Window {
     private async void do_start() {
         try {
             // pull down the root-level folders
-            Gee.Collection<Geary.Folder> folders = yield account.list_async(null);
+            Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null);
             if (folders != null)
                 on_folders_added_removed(folders, null);
             else
@@ -203,10 +203,11 @@ public class MainWindow : Gtk.Window {
         
         yield current_folder.open_async(true);
         
-        Gee.List<Geary.EmailHeader>? headers = yield current_folder.read_async(1, 100);
-        if (headers != null && headers.size > 0) {
-            foreach (Geary.EmailHeader header in headers)
-                message_list_store.append_header(header);
+        Gee.List<Geary.Email>? email = yield current_folder.list_email_async(1, 100,
+            Geary.Email.Field.ENVELOPE);
+        if (email != null && email.size > 0) {
+            foreach (Geary.Email envelope in email)
+                message_list_store.append_header(envelope);
         }
     }
     
@@ -218,25 +219,25 @@ public class MainWindow : Gtk.Window {
         }
     }
     
-    private void on_message_selected(Geary.EmailHeader? header) {
-        if (header == null) {
+    private void on_message_selected(Geary.Email? email) {
+        if (email == null) {
             message_buffer.set_text("");
             
             return;
         }
         
-        do_select_message.begin(header, on_select_message_completed);
+        do_select_message.begin(email, on_select_message_completed);
     }
     
-    private async void do_select_message(Geary.EmailHeader header) throws Error {
+    private async void do_select_message(Geary.Email email) throws Error {
         if (current_folder == null) {
-            debug("Message %s selected with no folder selected", header.to_string());
+            debug("Message %s selected with no folder selected", email.to_string());
             
             return;
         }
         
-        Geary.Email email = yield current_folder.fetch_async(header);
-        message_buffer.set_text(email.full);
+        Geary.Email text = yield current_folder.fetch_email_async(email.msg_num, Geary.Email.Field.BODY);
+        message_buffer.set_text(text.body.buffer.to_ascii_string());
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {

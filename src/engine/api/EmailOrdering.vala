@@ -4,11 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public errordomain Geary.EngineError {
-    OPEN_REQUIRED,
-    ALREADY_OPEN,
-    NOT_FOUND,
-    READONLY,
-    BAD_PARAMETERS
+public class Geary.EmailOrdering {
+    public int64 ordinal { get; private set; }
+    
+    public EmailOrdering(int64 ordinal) {
+        this.ordinal = ordinal;
+    }
 }
 

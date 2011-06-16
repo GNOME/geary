@@ -26,7 +26,7 @@ public class MessageListStore : Gtk.TreeStore {
                 typeof (string),            // DATE
                 typeof (string),            // FROM
                 typeof (string),            // SUBJECT
-                typeof (Geary.EmailHeader)  // MESSAGE_OBJECT
+                typeof (Geary.Email)        // MESSAGE_OBJECT
             };
         }
         
@@ -54,27 +54,27 @@ public class MessageListStore : Gtk.TreeStore {
         set_column_types(Column.get_types());
     }
     
-    public void append_header(Geary.EmailHeader header) {
+    public void append_header(Geary.Email envelope) {
         Gtk.TreeIter iter;
         append(out iter, null);
         
         set(iter,
-            Column.DATE, Date.pretty_print(header.sent.value),
-            Column.FROM, header.from.get_at(0).get_short_address(),
-            Column.SUBJECT, header.subject.value,
-            Column.MESSAGE_OBJECT, header
+            Column.DATE, Date.pretty_print(envelope.date.value),
+            Column.FROM, envelope.from[0].get_short_address(),
+            Column.SUBJECT, envelope.subject.value,
+            Column.MESSAGE_OBJECT, envelope
         );
     }
     
-    public Geary.EmailHeader? get_message_at(Gtk.TreePath path) {
+    public Geary.Email? get_message_at(Gtk.TreePath path) {
         Gtk.TreeIter iter;
         if (!get_iter(out iter, path))
             return null;
         
-        Geary.EmailHeader header;
-        get(iter, Column.MESSAGE_OBJECT, out header);
+        Geary.Email email;
+        get(iter, Column.MESSAGE_OBJECT, out email);
         
-        return header;
+        return email;
     }
 }
 

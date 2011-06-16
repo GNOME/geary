@@ -17,16 +17,21 @@ public interface Geary.Folder : Object {
     
     public signal void updated();
     
+    public virtual void notify_opened() {
+        opened();
+    }
+    
+    public virtual void notify_closed(CloseReason reason) {
+        closed(reason);
+    }
+    
+    public virtual void notify_updated() {
+        updated();
+    }
+    
     public abstract string get_name();
     
-    // This is only for when a context has been selected
-    public abstract Trillian is_readonly();
-    
-    public abstract Trillian does_support_children();
-    
-    public abstract Trillian has_children();
-    
-    public abstract Trillian is_openable();
+    public abstract Geary.FolderProperties? get_properties();
     
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     
@@ -34,10 +39,16 @@ public interface Geary.Folder : Object {
     
     public abstract int get_message_count() throws Error;
     
-    public abstract async Gee.List<Geary.EmailHeader>? read_async(int low, int count,
+    public abstract async void create_email_async(Geary.Email email, Geary.EmailOrdering ordering,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async Geary.Email fetch_async(Geary.EmailHeader header,
+    /**
+     * low is one-based.
+     */
+    public abstract async Gee.List<Geary.Email> list_email_async(int low, int count,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error;
+    
+    public abstract async Geary.Email fetch_email_async(int msg_num, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error;
 }
 

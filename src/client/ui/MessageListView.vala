@@ -5,7 +5,7 @@
  */
 
 public class MessageListView : Gtk.TreeView {
-    public signal void message_selected(Geary.EmailHeader? email);
+    public signal void message_selected(Geary.Email? email);
     
     public MessageListView(MessageListStore store) {
         set_model(store);
@@ -48,9 +48,9 @@ public class MessageListView : Gtk.TreeView {
             return;
         }
         
-        Geary.EmailHeader? header = get_store().get_message_at(path);
-        if (header != null)
-            message_selected(header);
+        Geary.Email? email = get_store().get_message_at(path);
+        if (email != null)
+            message_selected(email);
     }
 }
 

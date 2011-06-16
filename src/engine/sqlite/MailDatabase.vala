@@ -15,13 +15,29 @@ public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
     public Geary.Sqlite.FolderTable get_folder_table() {
         SQLHeavy.Table heavy_table;
         FolderTable? folder_table = get_table("FolderTable", out heavy_table) as FolderTable;
-        if (folder_table != null)
-            return folder_table;
         
-        folder_table = new FolderTable(this, heavy_table);
-        add_table(folder_table);
+        return (folder_table != null)
+            ? folder_table
+            : (FolderTable) add_table(new FolderTable(this, heavy_table));
+    }
+    
+    public Geary.Sqlite.MessageTable get_message_table() {
+        SQLHeavy.Table heavy_table;
+        MessageTable? message_table = get_table("MessageTable", out heavy_table) as MessageTable;
         
-        return folder_table;
+        return (message_table != null)
+            ? message_table
+            : (MessageTable) add_table(new MessageTable(this, heavy_table));
+    }
+    
+    public Geary.Sqlite.MessageLocationTable get_message_location_table() {
+        SQLHeavy.Table heavy_table;
+        MessageLocationTable? location_table = get_table("MessageLocationTable", out heavy_table)
+            as MessageLocationTable;
+        
+        return (location_table != null)
+            ? location_table
+            : (MessageLocationTable) add_table(new MessageLocationTable(this, heavy_table));
     }
 }
 

@@ -4,11 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public errordomain Geary.EngineError {
-    OPEN_REQUIRED,
-    ALREADY_OPEN,
-    NOT_FOUND,
-    READONLY,
-    BAD_PARAMETERS
+public abstract class Geary.FolderProperties : Object {
 }
 
