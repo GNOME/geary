@@ -304,69 +304,67 @@ namespace GMime {
 		[CCode (has_construct_function = false)]
 		protected InternetAddress ();
 		[CCode (cname = "internet_address_get_name")]
-		public static unowned string get_name (GMime.InternetAddress ia);
+		public unowned string get_name ();
 		[CCode (cname = "internet_address_set_name")]
-		public static void set_name (GMime.InternetAddress ia, string name);
+		public void set_name (string name);
 		[CCode (cname = "internet_address_to_string")]
-		public virtual void to_string (GMime.InternetAddress ia, bool encode);
+		public virtual string to_string (bool encoded);
 	}
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public class InternetAddressGroup : GMime.InternetAddress {
 		public weak GMime.InternetAddressList members;
-		[CCode (cname = "internet_address_group_new", type = "InternetAddress*", has_construct_function = false)]
+		[CCode (cname = "internet_address_group_new")]
 		public InternetAddressGroup (string name);
 		[CCode (cname = "internet_address_group_add_member")]
-		public static int add_member (GMime.InternetAddressGroup group, GMime.InternetAddress member);
+		public int add_member (GMime.InternetAddress member);
 		[CCode (cname = "internet_address_group_get_members")]
-		public static unowned GMime.InternetAddressList get_members (GMime.InternetAddressGroup group);
+		public GMime.InternetAddressList get_members ();
 		[CCode (cname = "internet_address_group_set_members")]
-		public static void set_members (GMime.InternetAddressGroup group, GMime.InternetAddressList members);
+		public void set_members (GMime.InternetAddressList members);
 	}
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public class InternetAddressList : GLib.Object {
 		public weak GLib.GenericArray array;
-		[CCode (cname = "internet_address_list_new", type = "InternetAddressList*", has_construct_function = false)]
+		[CCode (cname = "internet_address_list_new")]
 		public InternetAddressList ();
 		[CCode (cname = "internet_address_list_add")]
-		public static int add (GMime.InternetAddressList list, GMime.InternetAddress ia);
+		public int add (GMime.InternetAddress addr);
 		[CCode (cname = "internet_address_list_append")]
-		public static void append (GMime.InternetAddressList list, GMime.InternetAddressList append);
+		public void append (GMime.InternetAddressList append);
 		[CCode (cname = "internet_address_list_clear")]
-		public static void clear (GMime.InternetAddressList list);
+		public void clear ();
 		[CCode (cname = "internet_address_list_contains")]
-		public static bool contains (GMime.InternetAddressList list, GMime.InternetAddress ia);
+		public bool contains (GMime.InternetAddress addr);
 		[CCode (cname = "internet_address_list_get_address")]
-		public static unowned GMime.InternetAddress get_address (GMime.InternetAddressList list, int index);
+		public GMime.InternetAddress get_address (int index);
 		[CCode (cname = "internet_address_list_index_of")]
-		public static int index_of (GMime.InternetAddressList list, GMime.InternetAddress ia);
+		public int index_of (GMime.InternetAddress addr);
 		[CCode (cname = "internet_address_list_insert")]
-		public static void insert (GMime.InternetAddressList list, int index, GMime.InternetAddress ia);
+		public void insert (int index, GMime.InternetAddress addr);
 		[CCode (cname = "internet_address_list_length")]
-		public static int length (GMime.InternetAddressList list);
+		public int length ();
 		[CCode (cname = "internet_address_list_parse_string")]
-		public static unowned GMime.InternetAddressList parse_string (string str);
+		public static GMime.InternetAddressList parse_string (string str);
 		[CCode (cname = "internet_address_list_prepend")]
-		public static void prepend (GMime.InternetAddressList list, GMime.InternetAddressList prepend);
+		public void prepend (GMime.InternetAddressList prepend);
 		[CCode (cname = "internet_address_list_remove")]
-		public static bool remove (GMime.InternetAddressList list, GMime.InternetAddress ia);
+		public bool remove (GMime.InternetAddress addr);
 		[CCode (cname = "internet_address_list_remove_at")]
-		public static bool remove_at (GMime.InternetAddressList list, int index);
+		public bool remove_at (int index);
 		[CCode (cname = "internet_address_list_set_address")]
-		public static void set_address (GMime.InternetAddressList list, int index, GMime.InternetAddress ia);
+		public void set_address (int index, GMime.InternetAddress addr);
 		[CCode (cname = "internet_address_list_to_string")]
-		public static unowned string to_string (GMime.InternetAddressList list, bool encode);
-		[CCode (cname = "internet_address_list_writer")]
-		public static void writer (GMime.InternetAddressList list, GLib.StringBuilder str);
+		public string to_string (bool encode);
 	}
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public class InternetAddressMailbox : GMime.InternetAddress {
 		public weak string addr;
-		[CCode (cname = "internet_address_mailbox_new", type = "InternetAddress*", has_construct_function = false)]
+		[CCode (cname = "internet_address_mailbox_new")]
 		public InternetAddressMailbox (string name, string addr);
 		[CCode (cname = "internet_address_mailbox_get_addr")]
-		public static unowned string get_addr (GMime.InternetAddressMailbox mailbox);
+		public string get_addr ();
 		[CCode (cname = "internet_address_mailbox_set_addr")]
-		public static void set_addr (GMime.InternetAddressMailbox mailbox, string addr);
+		public void set_addr (string addr);
 	}
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public class Message : GMime.Object {

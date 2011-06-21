@@ -7,3 +7,20 @@ g_mime_signer_next name="get_next"
 
 g_mime_utils_header_decode_date type_name="time_t"
 g_mime_utils_header_decode_date.tz_offset is_out="1" nullable="1"
+
+GMime.InternetAddress hidden="1"
+internet_address_* hidden="1"
+GMime.InternetAddress.name hidden="1"
+
+GMime.InternetAddressGroup hidden="1"
+internet_address_group_* hidden="1"
+GMime.InternetAddressGroup.members hidden="1"
+
+GMime.InternetAddressList hidden="1"
+internet_address_list_* hidden="1"
+GMime.InternetAddressList.array hidden="1"
+
+GMime.InternetAddressMailbox hidden="1"
+internet_address_mailbox_* hidden="1"
+GMime.InternetAddressMailbox.addr hidden="1"
+
