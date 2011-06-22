@@ -93,8 +93,8 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             body = fetch_string_for(result, MessageTable.Column.BODY);
     }
     
-    public Geary.Email to_email(int msg_num) throws Error {
-        Geary.Email email = new Geary.Email(msg_num);
+    public Geary.Email to_email(Geary.EmailLocation location) throws Error {
+        Geary.Email email = new Geary.Email(location);
         
         email.date = (date != null) ? new RFC822.Date(date) : null;
         
@@ -145,10 +145,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
     }
     
     public RFC822.MailboxAddresses? unflatten_addresses(string? str) {
-        if (str == null)
-            return null;
-        
-        return null;
+        return String.is_empty(str) ? null : new RFC822.MailboxAddresses.from_rfc822_string(str);
     }
 }
 

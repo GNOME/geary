@@ -30,7 +30,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         uid_validity = context.uid_validity;
     }
     
-    public async Gee.List<Geary.Email>? list_async(int low, int count, Geary.Email.Field fields,
+    public async Gee.List<Geary.Email>? list_set_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
@@ -39,7 +39,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             throw new EngineError.BAD_PARAMETERS("No email fields specify for list");
         
         CommandResponse resp = yield context.session.send_command_async(
-            new FetchCommand(context.session.generate_tag(), new MessageSet.range(low, count),
+            new FetchCommand(context.session.generate_tag(), msg_set,
                 fields_to_fetch_data_types(fields)), cancellable);
         
         if (resp.status_response.status != Status.OK)
@@ -49,12 +49,13 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         FetchResults[] results = FetchResults.decode(resp);
         foreach (FetchResults res in results) {
-            Geary.Email email = new Geary.Email(res.msg_num);
+            // TODO: Add UID
+            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, 0));
             fetch_results_to_email(res, fields, email);
             msgs.add(email);
         }
         
-        return msgs;
+        return (msgs != null && msgs.size > 0) ? msgs : null;
     }
     
     public async Geary.Email fetch_async(int msg_num, Geary.Email.Field fields,
@@ -78,7 +79,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 results[0].msg_num, msg_num);
         }
         
-        Geary.Email email = new Geary.Email(msg_num);
+        // TODO: Add UID
+        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(results[0].msg_num, 0));
         fetch_results_to_email(results[0], fields, email);
         
         return email;

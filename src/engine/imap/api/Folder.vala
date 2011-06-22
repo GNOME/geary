@@ -57,25 +57,33 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         return mailbox.count;
     }
     
-    public async void create_email_async(Geary.Email email, Geary.EmailOrdering ordring,
+    public async void create_email_async(Geary.Email email, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         throw new EngineError.READONLY("IMAP currently read-only");
     }
     
-    public async Gee.List<Geary.Email> list_email_async(int low, int count, Geary.Email.Field fields,
+    public async Gee.List<Geary.Email>? list_email_async(int low, int count, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        return yield mailbox.list_async(low, count, fields, cancellable);
+        return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
     }
     
-    public async Geary.Email fetch_email_async(int msg_num, Geary.Email.Field fields,
+    public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+        
+        return yield mailbox.list_set_async(new MessageSet.sparse(by_position), fields, cancellable);
+    }
+    
+    public async Geary.Email fetch_email_async(int position, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        return yield mailbox.fetch_async(msg_num, fields, cancellable);
+        return yield mailbox.fetch_async(position, fields, cancellable);
     }
     
     public string to_string() {

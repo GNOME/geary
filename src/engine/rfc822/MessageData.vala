@@ -50,49 +50,6 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
     }
 }
 
-public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC822.MessageData {
-    public int size { get { return addrs.size; } }
-    
-    private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();
-    
-    public MailboxAddresses(Gee.Collection<MailboxAddress> addrs) {
-        this.addrs.add_all(addrs);
-    }
-    
-    public MailboxAddress? get(int index) {
-        return addrs.get(index);
-    }
-    
-    public Gee.Iterator<MailboxAddress> iterator() {
-        return addrs.iterator();
-    }
-    
-    public Gee.List<MailboxAddress> get_all() {
-        return addrs.read_only_view;
-    }
-    
-    public override string to_string() {
-        switch (addrs.size) {
-            case 0:
-                return "(no addresses)";
-            
-            case 1:
-                return addrs[0].to_string();
-            
-            default:
-                StringBuilder builder = new StringBuilder();
-                foreach (MailboxAddress addr in addrs) {
-                    if (!String.is_empty(builder.str))
-                        builder.append(", ");
-                    
-                    builder.append(addr.to_string());
-                }
-                
-                return builder.str;
-        }
-    }
-}
-
 public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
     public Header(Geary.Memory.AbstractBuffer buffer) {
         base ("RFC822.Header", buffer);

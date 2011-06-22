@@ -28,12 +28,12 @@ public class Geary.Imap.MessageSet {
         value = "%d:*".printf(low_msg_num);
     }
     
-    public MessageSet.scattered(int[] msg_nums) {
-        value = build_scattered_range(msg_nums);
+    public MessageSet.sparse(int[] msg_nums) {
+        value = build_sparse_range(msg_nums);
     }
     
-    public MessageSet.scattered_to_highest(int[] msg_nums) {
-        value = "%s:*".printf(build_scattered_range(msg_nums));
+    public MessageSet.sparse_to_highest(int[] msg_nums) {
+        value = "%s:*".printf(build_sparse_range(msg_nums));
     }
     
     public MessageSet.multirange(MessageSet[] msg_sets) {
@@ -50,7 +50,7 @@ public class Geary.Imap.MessageSet {
         value = builder.str;
     }
     
-    public MessageSet.multiscattered(MessageSet[] msg_sets) {
+    public MessageSet.multisparse(MessageSet[] msg_sets) {
         StringBuilder builder = new StringBuilder();
         for (int ctr = 0; ctr < msg_sets.length; ctr++) {
             unowned MessageSet msg_set = msg_sets[ctr];
@@ -68,7 +68,9 @@ public class Geary.Imap.MessageSet {
         value = custom;
     }
     
-    private static string build_scattered_range(int[] msg_nums) {
+    // TODO: It would be more efficient to look for runs in the numbers and form the set specifier
+    // with them.
+    private static string build_sparse_range(int[] msg_nums) {
         assert(msg_nums.length > 0);
         
         StringBuilder builder = new StringBuilder();

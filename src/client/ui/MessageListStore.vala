@@ -54,7 +54,8 @@ public class MessageListStore : Gtk.TreeStore {
         set_column_types(Column.get_types());
     }
     
-    public void append_header(Geary.Email envelope) {
+    // The Email should've been fetched with Geary.Email.Field.ENVELOPE, at least.
+    public void append_envelope(Geary.Email envelope) {
         Gtk.TreeIter iter;
         append(out iter, null);
         

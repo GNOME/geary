@@ -11,7 +11,20 @@ public class Geary.RFC822.MailboxAddress {
     public string domain { get; private set; }
     public string address { get; private set; }
     
-    public MailboxAddress(string? name, string? source_route, string mailbox, string domain) {
+    public MailboxAddress(string? name, string address) {
+        this.name = name;
+        this.address = address;
+        
+        source_route = null;
+        
+        int atsign = address.index_of_char('@');
+        if (atsign > 0) {
+            mailbox = address.slice(0, atsign);
+            domain = address.slice(atsign + 1, address.length);
+        }
+    }
+    
+    public MailboxAddress.imap(string? name, string? source_route, string mailbox, string domain) {
         this.name = name;
         this.source_route = source_route;
         this.mailbox = mailbox;
@@ -34,6 +47,10 @@ public class Geary.RFC822.MailboxAddress {
      */
     public string get_short_address() {
         return name ?? mailbox;
+    }
+    
+    public string to_rfc822_string() {
+        return get_full_address();
     }
     
     public string to_string() {

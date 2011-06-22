@@ -15,6 +15,9 @@ public interface Geary.Folder : Object {
     
     public signal void closed(CloseReason reason);
     
+    public signal void email_added_removed(Gee.List<Geary.Email>? added,
+        Gee.List<Geary.Email>? removed);
+    
     public signal void updated();
     
     public virtual void notify_opened() {
@@ -23,6 +26,11 @@ public interface Geary.Folder : Object {
     
     public virtual void notify_closed(CloseReason reason) {
         closed(reason);
+    }
+    
+    public virtual void notify_email_added_removed(Gee.List<Geary.Email>? added,
+        Gee.List<Geary.Email>? removed) {
+        email_added_removed(added, removed);
     }
     
     public virtual void notify_updated() {
@@ -39,16 +47,25 @@ public interface Geary.Folder : Object {
     
     public abstract int get_message_count() throws Error;
     
-    public abstract async void create_email_async(Geary.Email email, Geary.EmailOrdering ordering,
-        Cancellable? cancellable = null) throws Error;
+    public abstract async void create_email_async(Geary.Email email,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error;
     
     /**
      * low is one-based.
      */
-    public abstract async Gee.List<Geary.Email> list_email_async(int low, int count,
+    public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field fields, Cancellable? cancellable = null) throws Error;
     
-    public abstract async Geary.Email fetch_email_async(int msg_num, Geary.Email.Field fields,
+    /**
+     * All positions are one-based.
+     */
+    public abstract async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * position is one-based.
+     */
+    public abstract async Geary.Email fetch_email_async(int position, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error;
 }
 

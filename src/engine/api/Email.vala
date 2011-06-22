@@ -33,7 +33,7 @@ public class Geary.Email : Object {
         }
     }
     
-    public int msg_num { get; private set; }
+    public Geary.EmailLocation location { get; private set; }
     
     // DATE
     public Geary.RFC822.Date? date = null;
@@ -64,8 +64,8 @@ public class Geary.Email : Object {
     // PROPERTIES
     public Geary.EmailProperties? properties = null;
     
-    public Email(int msg_num) {
-        this.msg_num = msg_num;
+    public Email(Geary.EmailLocation location) {
+        this.location = location;
     }
     
     public string to_string() {

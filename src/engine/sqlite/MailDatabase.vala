@@ -39,5 +39,15 @@ public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
             ? location_table
             : (MessageLocationTable) add_table(new MessageLocationTable(this, heavy_table));
     }
+    
+    public Geary.Sqlite.ImapMessageLocationPropertiesTable get_imap_message_location_table() {
+        SQLHeavy.Table heavy_table;
+        ImapMessageLocationPropertiesTable? imap_location_table = get_table(
+            "ImapMessageLocationPropertiesTable", out heavy_table) as ImapMessageLocationPropertiesTable;
+        
+        return (imap_location_table != null)
+            ? imap_location_table
+            : (ImapMessageLocationPropertiesTable) add_table(new ImapMessageLocationPropertiesTable(this, heavy_table));
+    }
 }
 

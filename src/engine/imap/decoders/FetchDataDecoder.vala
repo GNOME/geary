@@ -138,7 +138,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             StringParameter mailbox = fields.get_as_string(2);
             StringParameter domain = fields.get_as_string(3);
             
-            Geary.RFC822.MailboxAddress addr = new Geary.RFC822.MailboxAddress(
+            Geary.RFC822.MailboxAddress addr = new Geary.RFC822.MailboxAddress.imap(
                 (name != null) ? name.nullable_value : null,
                 (source_route != null) ? source_route.nullable_value : null,
                 mailbox.value,

@@ -68,14 +68,6 @@ public class MainWindow : Gtk.Window {
         do_start.begin();
     }
     
-    private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
-        Gee.Collection<Geary.Folder>? removed) {
-        if (added != null) {
-            folder_list_store.add_folders(added);
-            debug("%d folders added", added.size);
-        }
-    }
-    
     private async void do_start() {
         try {
             // pull down the root-level folders
@@ -196,10 +188,13 @@ public class MainWindow : Gtk.Window {
     private async void do_select_folder(Geary.Folder folder) throws Error {
         message_list_store.clear();
         
-        if (current_folder != null)
+        if (current_folder != null) {
+            current_folder.email_added_removed.disconnect(on_email_added_removed);
             yield current_folder.close_async();
+        }
         
         current_folder = folder;
+        current_folder.email_added_removed.connect(on_email_added_removed);
         
         yield current_folder.open_async(true);
         
@@ -207,7 +202,7 @@ public class MainWindow : Gtk.Window {
             Geary.Email.Field.ENVELOPE);
         if (email != null && email.size > 0) {
             foreach (Geary.Email envelope in email)
-                message_list_store.append_header(envelope);
+                message_list_store.append_envelope(envelope);
         }
     }
     
@@ -236,7 +231,8 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        Geary.Email text = yield current_folder.fetch_email_async(email.msg_num, Geary.Email.Field.BODY);
+        Geary.Email text = yield current_folder.fetch_email_async(email.location.position,
+            Geary.Email.Field.BODY);
         message_buffer.set_text(text.body.buffer.to_ascii_string());
     }
     
@@ -245,6 +241,21 @@ public class MainWindow : Gtk.Window {
             do_select_message.end(result);
         } catch (Error err) {
             debug("Unable to select message: %s", err.message);
+        }
+    }
+    
+    private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
+        Gee.Collection<Geary.Folder>? removed) {
+        if (added != null) {
+            folder_list_store.add_folders(added);
+            debug("%d folders added", added.size);
+        }
+    }
+    
+    private void on_email_added_removed(Gee.List<Geary.Email>? added, Gee.List<Geary.Folder>? removed) {
+        if (added != null) {
+            foreach (Geary.Email email in added)
+                message_list_store.append_envelope(email);
         }
     }
 }

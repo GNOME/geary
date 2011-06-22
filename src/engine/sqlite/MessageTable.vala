@@ -82,7 +82,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         assert(fields != Geary.Email.Field.NONE);
         
         SQLHeavy.Query query = db.prepare(
-            "SELECT %s FROM MessageTable WHERE id = ?".printf(fields_to_columns(fields)));
+            "SELECT id, %s FROM MessageTable WHERE id = ?".printf(fields_to_columns(fields)));
         query.bind_int64(0, id);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
@@ -90,7 +90,6 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             return null;
         
         MessageRow row = new MessageRow.from_query_result(this, fields, results);
-        row.id = id;
         
         return row;
     }
@@ -99,34 +98,36 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         StringBuilder builder = new StringBuilder();
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             string? append = null;
-            switch (field) {
-                case Geary.Email.Field.DATE:
-                    append = "date_field, date_time_t";
-                break;
-                
-                case Geary.Email.Field.ORIGINATORS:
-                    append = "from_field, sender, reply_to";
-                break;
-                
-                case Geary.Email.Field.RECEIVERS:
-                    append = "to_field, cc, bcc";
-                break;
-                
-                case Geary.Email.Field.REFERENCES:
-                    append = "message_id, in_reply_to";
-                break;
-                
-                case Geary.Email.Field.SUBJECT:
-                    append = "subject";
-                break;
-                
-                case Geary.Email.Field.HEADER:
-                    append = "header";
-                break;
-                
-                case Geary.Email.Field.BODY:
-                    append = "body";
-                break;
+            if ((fields & field) != 0) {
+                switch (field) {
+                    case Geary.Email.Field.DATE:
+                        append = "date_field, date_time_t";
+                    break;
+                    
+                    case Geary.Email.Field.ORIGINATORS:
+                        append = "from_field, sender, reply_to";
+                    break;
+                    
+                    case Geary.Email.Field.RECEIVERS:
+                        append = "to_field, cc, bcc";
+                    break;
+                    
+                    case Geary.Email.Field.REFERENCES:
+                        append = "message_id, in_reply_to";
+                    break;
+                    
+                    case Geary.Email.Field.SUBJECT:
+                        append = "subject";
+                    break;
+                    
+                    case Geary.Email.Field.HEADER:
+                        append = "header";
+                    break;
+                    
+                    case Geary.Email.Field.BODY:
+                        append = "body";
+                    break;
+                }
             }
             
             if (append != null) {

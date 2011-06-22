@@ -15,7 +15,7 @@ ENGINE_SRC := \
 	src/engine/api/Account.vala \
 	src/engine/api/Email.vala \
 	src/engine/api/EmailProperties.vala \
-	src/engine/api/EmailOrdering.vala \
+	src/engine/api/EmailLocation.vala \
 	src/engine/api/Folder.vala \
 	src/engine/api/FolderProperties.vala \
 	src/engine/api/Credentials.vala \
@@ -30,6 +30,8 @@ ENGINE_SRC := \
 	src/engine/sqlite/MessageTable.vala \
 	src/engine/sqlite/MessageLocationRow.vala \
 	src/engine/sqlite/MessageLocationTable.vala \
+	src/engine/sqlite/ImapMessageLocationPropertiesTable.vala \
+	src/engine/sqlite/ImapMessageLocationPropertiesRow.vala \
 	src/engine/sqlite/api/Account.vala \
 	src/engine/sqlite/api/Folder.vala \
 	src/engine/state/Machine.vala \
@@ -70,10 +72,12 @@ ENGINE_SRC := \
 	src/engine/imap/decoders/SelectExamineResults.vala \
 	src/engine/imap/decoders/StatusResults.vala \
 	src/engine/imap/api/Account.vala \
+	src/engine/imap/api/EmailLocation.vala \
 	src/engine/imap/api/EmailProperties.vala \
 	src/engine/imap/api/Folder.vala \
 	src/engine/imap/api/FolderProperties.vala \
 	src/engine/rfc822/MailboxAddress.vala \
+	src/engine/rfc822/MailboxAddresses.vala \
 	src/engine/rfc822/MessageData.vala \
 	src/engine/util/Memory.vala \
 	src/engine/util/ReferenceSemantics.vala \

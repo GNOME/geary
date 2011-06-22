@@ -50,7 +50,7 @@ CREATE TABLE MessageLocationTable (
     id INTEGER PRIMARY KEY,
     message_id INTEGER REFERENCES MessageTable ON DELETE CASCADE,
     folder_id INTEGER REFERENCES FolderTable ON DELETE CASCADE,
-    ordering INTEGER
+    position INTEGER
 );
 
 CREATE INDEX MessageLocationTableMessageIDIndex ON MessageLocationTable(message_id);
@@ -91,4 +91,16 @@ CREATE TABLE ImapMessagePropertiesTable (
 );
 
 CREATE INDEX ImapMessagePropertiesTableMessageIDIndex ON ImapMessagePropertiesTable(message_id);
+
+--
+-- ImapMessageLocationPropertiesTable
+--
+
+CREATE TABLE ImapMessageLocationPropertiesTable (
+    id INTEGER PRIMARY KEY,
+    location_id INTEGER UNIQUE REFERENCES MessageLocationTable ON DELETE CASCADE,
+    uid INTEGER
+);
+
+CREATE INDEX ImapMessageLocationPropertiesTableLocationIDIndex ON ImapMessageLocationPropertiesTable(location_id);
 
