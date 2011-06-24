@@ -21,7 +21,7 @@ public class Geary.Sqlite.ImapMessageLocationPropertiesTable : Geary.Sqlite.Tabl
         SQLHeavy.Query query = db.prepare(
             "INSERT INTO ImapMessageLocationPropertiesTable (location_id, uid) VALUES (?, ?)");
         query.bind_int64(0, row.location_id);
-        query.bind_int64(1, row.uid);
+        query.bind_int64(1, row.uid.value);
         
         return yield query.execute_insert_async(cancellable);
     }
@@ -37,7 +37,29 @@ public class Geary.Sqlite.ImapMessageLocationPropertiesTable : Geary.Sqlite.Tabl
             return null;
         
         return new ImapMessageLocationPropertiesRow(this, result.fetch_int64(0), location_id,
-            result.fetch_int64(1));
+            new Geary.Imap.UID(result.fetch_int64(1)));
+    }
+    
+    public async bool search_uid_in_folder(Geary.Imap.UID uid, int64 folder_id,
+        out int64 message_id, Cancellable? cancellable = null) throws Error {
+        message_id = Row.INVALID_ID;
+        
+        SQLHeavy.Query query = db.prepare(
+            "SELECT MessageLocationTable.message_id "
+            + "FROM ImapMessageLocationPropertiesTable "
+            + "INNER JOIN MessageLocationTable "
+            + "WHERE MessageLocationTable.folder_id=? "
+            + "AND ImapMessageLocationPropertiesTable.location_id=MessageLocationTable.id "
+            + "AND ImapMessageLocationPropertiesTable.uid=?");
+        query.bind_int64(0, folder_id);
+        query.bind_int64(1, uid.value);
+        
+        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        
+        if (!result.finished)
+            message_id = result.fetch_int64(0);
+        
+        return !result.finished;
     }
 }
 

@@ -115,7 +115,12 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         ListParameter? cc = listp.get_as_nullable_list(6);
         ListParameter? bcc = listp.get_as_nullable_list(7);
         StringParameter? in_reply_to = listp.get_as_nullable_string(8);
-        StringParameter message_id = listp.get_as_string(9);
+        StringParameter? message_id = listp.get_as_string(9);
+        
+        // Although Message-ID is required to be returned by IMAP, it may be blank if the email
+        // does not supply it (optional according to RFC822); deal with this cognitive dissonance
+        if (String.is_empty(message_id.value))
+            message_id = null;
         
         return new Envelope(new Geary.RFC822.Date(sent.value),
             new Geary.RFC822.Subject(subject.value),
@@ -124,7 +129,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             (cc != null) ? parse_addresses(cc) : null,
             (bcc != null) ? parse_addresses(bcc) : null,
             (in_reply_to != null) ? new Geary.RFC822.MessageID(in_reply_to.value) : null,
-            new Geary.RFC822.MessageID(message_id.value));
+            (message_id != null) ? new Geary.RFC822.MessageID(message_id.value) : null);
     }
     
     // TODO: This doesn't handle group lists (see Johnson, p.268) -- this will throw an

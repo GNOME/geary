@@ -13,6 +13,18 @@ public interface Geary.Account : Object {
         folders_added_removed(added, removed);
     }
     
+    /**
+     * This method returns which Geary.Email.Field fields must be available in a Geary.Email to
+     * write (or save or store) the message to the backing medium.  Different implementations will
+     * have different requirements, which must be reconciled.
+     *
+     * In this case, Geary.Email.Field.NONE means "any".
+     *
+     * If a write operation is attempted on an email that does not have all these fields fulfilled,
+     * an EngineError.INCOMPLETE_MESSAGE will be thrown.
+     */
+    public abstract Geary.Email.Field get_required_fields_for_writing();
+    
     public abstract async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
         Cancellable? cancellable = null) throws Error;
     
@@ -30,11 +42,5 @@ public interface Geary.Account : Object {
     
     public abstract async void remove_many_folders_async(Gee.Set<Geary.Folder> folders,
         Cancellable? cancellable = null) throws Error;
-}
-
-public interface Geary.NetworkAccount : Object, Geary.Account {
-}
-
-public interface Geary.LocalAccount : Object, Geary.Account {
 }
 

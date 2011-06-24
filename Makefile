@@ -20,6 +20,8 @@ ENGINE_SRC := \
 	src/engine/api/FolderProperties.vala \
 	src/engine/api/Credentials.vala \
 	src/engine/api/EngineError.vala \
+	src/engine/api/RemoteInterfaces.vala \
+	src/engine/api/LocalInterfaces.vala \
 	src/engine/sqlite/Database.vala \
 	src/engine/sqlite/Table.vala \
 	src/engine/sqlite/Row.vala \

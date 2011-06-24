@@ -4,11 +4,15 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Account : Object, Geary.Account, Geary.NetworkAccount {
+public class Geary.Imap.Account : Object, Geary.Account, Geary.RemoteAccount {
     private ClientSessionManager session_mgr;
     
     public Account(Credentials cred, uint default_port) {
         session_mgr = new ClientSessionManager(cred, default_port);
+    }
+    
+    public Geary.Email.Field get_required_fields_for_writing() {
+        return Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
     }
     
     public async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,

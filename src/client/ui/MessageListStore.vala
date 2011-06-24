@@ -55,6 +55,8 @@ public class MessageListStore : Gtk.TreeStore {
     }
     
     // The Email should've been fetched with Geary.Email.Field.ENVELOPE, at least.
+    //
+    // TODO: Need to insert email's in their proper position, not merely append.
     public void append_envelope(Geary.Email envelope) {
         Gtk.TreeIter iter;
         append(out iter, null);

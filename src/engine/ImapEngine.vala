@@ -5,12 +5,18 @@
  */
 
 private class Geary.ImapEngine : Object, Geary.Account {
-    private NetworkAccount net;
+    private RemoteAccount remote;
     private LocalAccount local;
     
-    public ImapEngine(NetworkAccount net, LocalAccount local) {
-        this.net = net;
+    public ImapEngine(RemoteAccount remote, LocalAccount local) {
+        this.remote = remote;
         this.local = local;
+    }
+    
+    public Geary.Email.Field get_required_fields_for_writing() {
+        // Return the more restrictive of the two, which is the NetworkAccount's.
+        // TODO: This could be determined at runtime rather than fixed in stone here.
+        return Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
     }
     
     public async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
@@ -27,7 +33,7 @@ private class Geary.ImapEngine : Object, Geary.Account {
         
         Gee.Collection<Geary.Folder> engine_list = new Gee.ArrayList<Geary.Folder>();
         foreach (Geary.Folder local_folder in local_list)
-            engine_list.add(new EngineFolder(net, local, local_folder));
+            engine_list.add(new EngineFolder(remote, local, (LocalFolder) local_folder));
         
         background_update_folders.begin(parent, engine_list);
         
@@ -38,8 +44,9 @@ private class Geary.ImapEngine : Object, Geary.Account {
     
     public async Geary.Folder fetch_folder_async(Geary.Folder? parent, string folder_name,
         Cancellable? cancellable = null) throws Error {
-        Geary.Folder local_folder = yield local.fetch_folder_async(parent, folder_name, cancellable);
-        Geary.Folder engine_folder = new EngineFolder(net, local, local_folder);
+        LocalFolder local_folder = (LocalFolder) yield local.fetch_folder_async(parent, folder_name,
+            cancellable);
+        Geary.Folder engine_folder = new EngineFolder(remote, local, local_folder);
         
         return engine_folder;
     }
@@ -65,20 +72,20 @@ private class Geary.ImapEngine : Object, Geary.Account {
     
     private async void background_update_folders(Geary.Folder? parent,
         Gee.Collection<Geary.Folder> engine_folders) {
-        Gee.Collection<Geary.Folder> net_folders;
+        Gee.Collection<Geary.Folder> remote_folders;
         try {
-            net_folders = yield net.list_folders_async(parent);
-        } catch (Error neterror) {
-            error("Unable to retrieve folder list from server: %s", neterror.message);
+            remote_folders = yield remote.list_folders_async(parent);
+        } catch (Error remote_error) {
+            error("Unable to retrieve folder list from server: %s", remote_error.message);
         }
         
         Gee.Set<string> local_names = get_folder_names(engine_folders);
-        Gee.Set<string> net_names = get_folder_names(net_folders);
+        Gee.Set<string> remote_names = get_folder_names(remote_folders);
         
-        debug("%d local names, %d net names", local_names.size, net_names.size);
+        debug("%d local names, %d remote names", local_names.size, remote_names.size);
         
-        Gee.List<Geary.Folder>? to_add = get_excluded_folders(net_folders, local_names);
-        Gee.List<Geary.Folder>? to_remove = get_excluded_folders(engine_folders, net_names);
+        Gee.List<Geary.Folder>? to_add = get_excluded_folders(remote_folders, local_names);
+        Gee.List<Geary.Folder>? to_remove = get_excluded_folders(engine_folders, remote_names);
         
         debug("Adding %d, removing %d to/from local store", to_add.size, to_remove.size);
         
@@ -98,10 +105,10 @@ private class Geary.ImapEngine : Object, Geary.Account {
         Gee.Collection<Geary.Folder> engine_added = null;
         if (to_add != null) {
             engine_added = new Gee.ArrayList<Geary.Folder>();
-            foreach (Geary.Folder net_folder in to_add) {
+            foreach (Geary.Folder remote_folder in to_add) {
                 try {
-                    engine_added.add(new EngineFolder(net, local,
-                        yield local.fetch_folder_async(parent, net_folder.get_name())));
+                    engine_added.add(new EngineFolder(remote, local,
+                        (LocalFolder) yield local.fetch_folder_async(parent, remote_folder.get_name())));
                 } catch (Error convert_err) {
                     error("Unable to fetch local folder: %s", convert_err.message);
                 }

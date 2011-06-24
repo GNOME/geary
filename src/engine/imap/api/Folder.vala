@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Folder : Object, Geary.Folder {
+public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
     private ClientSessionManager session_mgr;
     private MailboxInformation info;
     private string name;
@@ -42,23 +42,32 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         
         this.readonly = Trillian.from_boolean(readonly);
         properties.uid_validity = mailbox.uid_validity;
+        
+        notify_opened();
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            return;
+        
         mailbox = null;
         readonly = Trillian.UNKNOWN;
         properties.uid_validity = null;
+        
+        notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    public int get_message_count() throws Error {
+    public async int get_email_count(Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
         return mailbox.count;
     }
     
-    public async void create_email_async(Geary.Email email, Geary.Email.Field fields,
-        Cancellable? cancellable = null) throws Error {
+    public async void create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+        
         throw new EngineError.READONLY("IMAP currently read-only");
     }
     
@@ -83,11 +92,9 @@ public class Geary.Imap.Folder : Object, Geary.Folder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
+        // TODO: If position out of range, throw EngineError.NOT_FOUND
+        
         return yield mailbox.fetch_async(position, fields, cancellable);
-    }
-    
-    public string to_string() {
-        return name;
     }
 }
 

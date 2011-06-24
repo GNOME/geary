@@ -18,6 +18,7 @@ CREATE INDEX FolderTableParentIndex ON FolderTable(parent_id);
 
 CREATE TABLE MessageTable (
     id INTEGER PRIMARY KEY,
+    fields INTEGER,
     
     date_field TEXT,
     date_time_t INTEGER,

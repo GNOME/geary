@@ -22,5 +22,9 @@ public abstract class Geary.Sqlite.Table {
     public string get_field_name(int col) throws SQLHeavy.Error {
         return table.field_name(col);
     }
+    
+    public string to_string() {
+        return table.name;
+    }
 }
 

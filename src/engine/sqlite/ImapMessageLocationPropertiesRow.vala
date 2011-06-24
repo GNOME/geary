@@ -7,10 +7,10 @@
 public class Geary.Sqlite.ImapMessageLocationPropertiesRow : Geary.Sqlite.Row {
     public int64 id { get; private set; }
     public int64 location_id { get; private set; }
-    public int64 uid { get; private set; }
+    public Geary.Imap.UID uid { get; private set; }
     
     public ImapMessageLocationPropertiesRow(ImapMessageLocationPropertiesTable table, int64 id,
-        int64 location_id, int64 uid) {
+        int64 location_id, Geary.Imap.UID uid) {
         base (table);
         
         this.id = id;

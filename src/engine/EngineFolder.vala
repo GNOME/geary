@@ -5,13 +5,13 @@
  */
 
 private class Geary.EngineFolder : Object, Geary.Folder {
-    private NetworkAccount net;
+    private RemoteAccount remote;
     private LocalAccount local;
-    private Geary.Folder local_folder;
-    private Geary.Folder net_folder;
+    private RemoteFolder remote_folder;
+    private LocalFolder local_folder;
     
-    public EngineFolder(NetworkAccount net, LocalAccount local, Geary.Folder local_folder) {
-        this.net = net;
+    public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
+        this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
         
@@ -30,152 +30,222 @@ private class Geary.EngineFolder : Object, Geary.Folder {
         return null;
     }
     
-    public async void create_email_async(Geary.Email email, Geary.Email.Field fields,
-        Cancellable? cancellable) throws Error {
+    public async void create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
         throw new EngineError.READONLY("Engine currently read-only");
     }
     
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
-        if (net_folder == null) {
-            net_folder = yield net.fetch_folder_async(null, local_folder.get_name(), cancellable);
-            net_folder.updated.connect(on_net_updated);
+        yield local_folder.open_async(readonly, cancellable);
+        
+        if (remote_folder == null) {
+            remote_folder = (RemoteFolder) yield remote.fetch_folder_async(null, local_folder.get_name(),
+                cancellable);
+            remote_folder.updated.connect(on_remote_updated);
         }
         
-        yield net_folder.open_async(readonly, cancellable);
+        yield remote_folder.open_async(readonly, cancellable);
+        
+        notify_opened();
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
-        if (net_folder != null) {
-            net_folder.updated.disconnect(on_net_updated);
-            yield net_folder.close_async(cancellable);
-        }
+        yield local_folder.close_async(cancellable);
         
-        net_folder = null;
+        if (remote_folder != null) {
+            remote_folder.updated.disconnect(on_remote_updated);
+            yield remote_folder.close_async(cancellable);
+            remote_folder = null;
+            
+            notify_closed(CloseReason.FOLDER_CLOSED);
+        }
     }
     
-    public int get_message_count() throws Error {
+    public async int get_email_count(Cancellable? cancellable = null) throws Error {
+        // TODO
         return 0;
     }
     
-    public async Gee.List<Geary.Email>? list_email_async(int low, int count, Geary.Email.Field fields,
-        Cancellable? cancellable = null) throws Error {
+    public async Gee.List<Geary.Email>? list_email_async(int low, int count,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         assert(low >= 1);
         assert(count >= 0);
         
         if (count == 0)
             return null;
         
-        Gee.List<Geary.Email>? local_list = yield local_folder.list_email_async(low, count, fields,
-            cancellable);
+        Gee.List<Geary.Email>? local_list = yield local_folder.list_email_async(low, count,
+            required_fields, cancellable);
         int local_list_size = (local_list != null) ? local_list.size : 0;
         debug("local list found %d", local_list_size);
         
-        if (net_folder != null && local_list_size != count) {
-            // go through the positions from (low) to (low + count) and see if they're not already
-            // present in local_list; whatever isn't present needs to be fetched
-            int[] needed_by_position = new int[0];
-            int position = low;
-            for (int index = 0; (index < count) && (position <= (low + count - 1)); position++) {
-                while ((index < local_list_size) && (local_list[index].location.position < position))
-                    index++;
-                
-                if (index >= local_list_size || local_list[index].location.position != position)
-                    needed_by_position += position;
-            }
+        if (remote_folder == null || local_list_size == count)
+            return local_list;
+        
+        // go through the positions from (low) to (low + count) and see if they're not already
+        // present in local_list; whatever isn't present needs to be fetched
+        int[] needed_by_position = new int[0];
+        int position = low;
+        for (int index = 0; (index < count) && (position <= (low + count - 1)); position++) {
+            while ((index < local_list_size) && (local_list[index].location.position < position))
+                index++;
             
-            if (needed_by_position.length != 0)
-                background_update_email_list.begin(needed_by_position, fields, cancellable);
+            if (index >= local_list_size || local_list[index].location.position != position)
+                needed_by_position += position;
         }
         
-        return local_list;
+        if (needed_by_position.length == 0)
+            return local_list;
+        
+        Gee.List<Geary.Email>? remote_list = yield remote_list_email(needed_by_position,
+            required_fields, cancellable);
+        
+        return combine_lists(local_list, remote_list);
     }
     
     public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         if (by_position.length == 0)
             return null;
         
         Gee.List<Geary.Email>? local_list = yield local_folder.list_email_sparse_async(by_position,
-            fields, cancellable);
+            required_fields, cancellable);
         int local_list_size = (local_list != null) ? local_list.size : 0;
         
-        if (net_folder != null && local_list_size != by_position.length) {
-            // go through the list looking for anything not already in the sparse by_position list
-            // to fetch from the server; since by_position is not guaranteed to be sorted, the local
-            // list needs to be searched each iteration.
-            //
-            // TODO: Optimize this, especially if large lists/sparse sets are supplied
-            int[] needed_by_position = new int[0];
-            foreach (int position in by_position) {
-                bool found = false;
-                if (local_list != null) {
-                    foreach (Geary.Email email in local_list) {
-                        if (email.location.position == position) {
-                            found = true;
-                            
-                            break;
-                        }
+        if (remote_folder == null || local_list_size == by_position.length)
+            return local_list;
+        
+        // go through the list looking for anything not already in the sparse by_position list
+        // to fetch from the server; since by_position is not guaranteed to be sorted, the local
+        // list needs to be searched each iteration.
+        //
+        // TODO: Optimize this, especially if large lists/sparse sets are supplied
+        int[] needed_by_position = new int[0];
+        foreach (int position in by_position) {
+            bool found = false;
+            if (local_list != null) {
+                foreach (Geary.Email email in local_list) {
+                    if (email.location.position == position) {
+                        found = true;
+                        
+                        break;
                     }
                 }
-                
-                if (!found)
-                    needed_by_position += position;
             }
             
-            if (needed_by_position.length != 0)
-                background_update_email_list.begin(needed_by_position, fields, cancellable);
+            if (!found)
+                needed_by_position += position;
         }
         
-        return local_list;
+        if (needed_by_position.length == 0)
+            return local_list;
+        
+        Gee.List<Geary.Email>? remote_list = yield remote_list_email(needed_by_position,
+            required_fields, cancellable);
+        
+        return combine_lists(local_list, remote_list);
     }
     
-    private async void background_update_email_list(int[] needed_by_position, Geary.Email.Field fields,
-        Cancellable? cancellable) {
+    private async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
+        Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
         debug("Background fetching %d emails for %s", needed_by_position.length, get_name());
         
-        Gee.List<Geary.Email>? net_list = null;
-        try {
-            net_list = yield net_folder.list_email_sparse_async(needed_by_position, fields,
-                cancellable);
-        } catch (Error net_err) {
-            message("Unable to fetch emails from server: %s", net_err.message);
-            
-            if (net_err is IOError.CANCELLED)
-                return;
-        }
+        Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_sparse_async(
+            needed_by_position, required_fields, cancellable);
         
-        if (net_list != null && net_list.size == 0)
-            net_list = null;
+        if (remote_list != null && remote_list.size == 0)
+            remote_list = null;
         
-        if (net_list != null)
-            notify_email_added_removed(net_list, null);
-        
-        if (net_list != null) {
-            foreach (Geary.Email email in net_list) {
-                try {
-                    yield local_folder.create_email_async(email, fields, cancellable);
-                } catch (Error local_err) {
-                    message("Unable to create email in local store: %s", local_err.message);
-                    
-                    if (local_err is IOError.CANCELLED)
-                        return;
+        // if any were fetched, store locally
+        // TODO: Bulk writing
+        if (remote_list != null) {
+            foreach (Geary.Email email in remote_list) {
+                bool exists_in_system = false;
+                if (email.message_id != null) {
+                    int count;
+                    exists_in_system = yield local.has_message_id_async(email.message_id, out count,
+                        cancellable);
+                }
+                
+                bool exists_in_folder = yield local_folder.is_email_associated_async(email,
+                    cancellable);
+                
+                // NOTE: Although this looks redundant, this is a complex decision case and laying
+                // it out like this helps explain the logic.  Also, this code relies on the fact
+                // that update_email_async() is a powerful call which might be broken down in the
+                // future (requiring a duplicate email be manually associated with the folder,
+                // for example), and so would like to keep this around to facilitate that.
+                if (!exists_in_system && !exists_in_folder) {
+                    // This case indicates the email is new to the local store OR has no
+                    // Message-ID and so a new copy must be stored.
+                    yield local_folder.create_email_async(email, cancellable);
+                } else if (exists_in_system && !exists_in_folder) {
+                    // This case indicates the email has been (partially) stored previously but
+                    // was not associated with this folder; update it (which implies association)
+                    yield local_folder.update_email_async(email, false, cancellable);
+                } else if (!exists_in_system && exists_in_folder) {
+                    // This case indicates the message doesn't have a Message-ID and can only be
+                    // identified by a folder-specific ID, so it can be updated in the folder
+                    // (This may result in multiple copies of the message stored locally.)
+                    yield local_folder.update_email_async(email, true, cancellable);
+                } else if (exists_in_system && exists_in_folder) {
+                    // This indicates the message is in the local store and was previously
+                    // associated with this folder, so merely update the local store
+                    yield local_folder.update_email_async(email, false, cancellable);
                 }
             }
         }
+        
+        return remote_list;
     }
     
     public async Geary.Email fetch_email_async(int num, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
-        if (net_folder == null)
+        if (remote_folder == null)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", get_name());
         
-        return yield net_folder.fetch_email_async(num, fields, cancellable);
+        try {
+            return yield local_folder.fetch_email_async(num, fields, cancellable);
+        } catch (Error err) {
+            // TODO: Better parsing of error; currently merely falling through and trying network
+            // for copy
+            debug("Unable to fetch email from local store: %s", err.message);
+        }
+        
+        // To reach here indicates either the local version does not have all the requested fields
+        // or it's simply not present.  If it's not present, want to ensure that the Message-ID
+        // is requested, as that's a good way to manage duplicate messages in the system
+        Geary.Email.Field available_fields;
+        bool is_present = yield local_folder.is_email_present_at(num, out available_fields, cancellable);
+        if (!is_present)
+            fields = fields.set(Geary.Email.Field.REFERENCES);
+        
+        // fetch from network
+        Geary.Email email = yield remote_folder.fetch_email_async(num, fields, cancellable);
+        
+        // save to local store
+        yield local_folder.update_email_async(email, false, cancellable);
+        
+        return email;
     }
     
     private void on_local_updated() {
     }
     
-    private void on_net_updated() {
+    private void on_remote_updated() {
+    }
+    
+    private Gee.List<Geary.Email>? combine_lists(Gee.List<Geary.Email>? a, Gee.List<Geary.Email>? b) {
+        if (a == null)
+            return b;
+        
+        if (b == null)
+            return a;
+        
+        Gee.List<Geary.Email> combined = new Gee.ArrayList<Geary.Email>();
+        combined.add_all(a);
+        combined.add_all(b);
+        
+        return combined;
     }
 }
 

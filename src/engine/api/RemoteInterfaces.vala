@@ -4,13 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public errordomain Geary.EngineError {
-    OPEN_REQUIRED,
-    ALREADY_OPEN,
-    ALREADY_EXISTS,
-    NOT_FOUND,
-    READONLY,
-    BAD_PARAMETERS,
-    INCOMPLETE_MESSAGE
+public interface Geary.RemoteAccount : Object, Geary.Account {
+}
+
+public interface Geary.RemoteFolder : Object, Geary.Folder {
 }
 

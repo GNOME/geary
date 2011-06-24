@@ -54,6 +54,18 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData {
     }
 }
 
+public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData {
+    public int64 value { get; private set; }
+    
+    public Int64MessageData(int64 value) {
+        this.value = value;
+    }
+    
+    public override string to_string() {
+        return value.to_string();
+    }
+}
+
 public abstract class Geary.Common.BlockMessageData : Geary.Common.MessageData {
     public string data_name { get; private set; }
     public Geary.Memory.AbstractBuffer buffer { get; private set; }

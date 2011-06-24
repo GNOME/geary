@@ -49,8 +49,10 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         FetchResults[] results = FetchResults.decode(resp);
         foreach (FetchResults res in results) {
-            // TODO: Add UID
-            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, 0));
+            UID? uid = res.get_data(FetchDataType.UID) as UID;
+            assert(uid != null);
+            
+            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, uid));
             fetch_results_to_email(res, fields, email);
             msgs.add(email);
         }
@@ -79,8 +81,10 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 results[0].msg_num, msg_num);
         }
         
-        // TODO: Add UID
-        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(results[0].msg_num, 0));
+        UID? uid = results[0].get_data(FetchDataType.UID) as UID;
+        assert(uid != null);
+        
+        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(results[0].msg_num, uid));
         fetch_results_to_email(results[0], fields, email);
         
         return email;
@@ -132,10 +136,13 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         assert(data_type_set.size > 0);
-        FetchDataType[] data_types = new FetchDataType[data_type_set.size];
+        FetchDataType[] data_types = new FetchDataType[data_type_set.size + 1];
         int ctr = 0;
         foreach (FetchDataType data_type in data_type_set)
             data_types[ctr++] = data_type;
+        
+        // UID is always fetched, no matter what the caller requests
+        data_types[ctr] = FetchDataType.UID;
         
         return data_types;
     }
@@ -152,39 +159,31 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                     Envelope envelope = (Envelope) data;
                     
                     if ((fields & Geary.Email.Field.DATE) != 0)
-                        email.date = envelope.sent;
+                        email.set_send_date(envelope.sent);
                     
                     if ((fields & Geary.Email.Field.SUBJECT) != 0)
-                        email.subject = envelope.subject;
+                        email.set_message_subject(envelope.subject);
                     
-                    if ((fields & Geary.Email.Field.ORIGINATORS) != 0) {
-                        email.from = envelope.from;
-                        email.sender = envelope.sender;
-                        email.reply_to = envelope.reply_to;
-                    }
+                    if ((fields & Geary.Email.Field.ORIGINATORS) != 0)
+                        email.set_originators(envelope.from, envelope.sender, envelope.reply_to);
                     
-                    if ((fields & Geary.Email.Field.RECEIVERS) != 0) {
-                        email.to = envelope.to;
-                        email.cc = envelope.cc;
-                        email.bcc = envelope.bcc;
-                    }
+                    if ((fields & Geary.Email.Field.RECEIVERS) != 0)
+                        email.set_receivers(envelope.to, envelope.cc, envelope.bcc);
                     
-                    if ((fields & Geary.Email.Field.REFERENCES) != 0) {
-                        email.in_reply_to = envelope.in_reply_to;
-                        email.message_id = envelope.message_id;
-                    }
+                    if ((fields & Geary.Email.Field.REFERENCES) != 0)
+                        email.set_references(envelope.message_id, envelope.in_reply_to);
                 break;
                 
                 case FetchDataType.RFC822_HEADER:
-                    email.header = (RFC822.Header) data;
+                    email.set_message_header((RFC822.Header) data);
                 break;
                 
                 case FetchDataType.RFC822_TEXT:
-                    email.body = (RFC822.Text) data;
+                    email.set_message_body((RFC822.Text) data);
                 break;
                 
                 case FetchDataType.FLAGS:
-                    email.properties = new Imap.EmailProperties((MessageFlags) data);
+                    email.set_email_properties(new Imap.EmailProperties((MessageFlags) data));
                 break;
                 
                 default:
