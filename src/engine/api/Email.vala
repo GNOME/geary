@@ -32,8 +32,12 @@ public class Geary.Email : Object {
             };
         }
         
-        public inline bool is_set(Field required_fields) {
+        public inline bool is_all_set(Field required_fields) {
             return (this & required_fields) == required_fields;
+        }
+        
+        public inline bool is_set(Field required_fields) {
+            return (this & required_fields) != 0;
         }
         
         public inline Field set(Field field) {
@@ -42,6 +46,10 @@ public class Geary.Email : Object {
         
         public inline Field clear(Field field) {
             return (this & ~(field));
+        }
+        
+        public inline bool fulfills(Field required_fields) {
+            return is_all_set(required_fields);
         }
     }
     

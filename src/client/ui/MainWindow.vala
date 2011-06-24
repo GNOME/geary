@@ -31,7 +31,7 @@ public class MainWindow : Gtk.Window {
     
     public MainWindow() {
         title = GearyApplication.NAME;
-        set_default_size(800, 600);
+        set_default_size(862, 684);
         
         try {
             ui.add_ui_from_string(MAIN_MENU_XML, -1);

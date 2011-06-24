@@ -52,12 +52,14 @@ public class MessageListStore : Gtk.TreeStore {
     
     public MessageListStore() {
         set_column_types(Column.get_types());
+        set_default_sort_func(sort_by_date);
+        set_sort_column_id(TreeSortable.DEFAULT_SORT_COLUMN_ID, Gtk.SortType.DESCENDING);
     }
     
     // The Email should've been fetched with Geary.Email.Field.ENVELOPE, at least.
-    //
-    // TODO: Need to insert email's in their proper position, not merely append.
     public void append_envelope(Geary.Email envelope) {
+        assert(envelope.fields.fulfills(Geary.Email.Field.ENVELOPE));
+        
         Gtk.TreeIter iter;
         append(out iter, null);
         
@@ -78,6 +80,21 @@ public class MessageListStore : Gtk.TreeStore {
         get(iter, Column.MESSAGE_OBJECT, out email);
         
         return email;
+    }
+    
+    private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
+        Geary.Email aenvelope;
+        get(aiter, Column.MESSAGE_OBJECT, out aenvelope);
+        
+        Geary.Email benvelope;
+        get(biter, Column.MESSAGE_OBJECT, out benvelope);
+        
+        int diff = aenvelope.date.value.compare(benvelope.date.value);
+        if (diff != 0)
+            return diff;
+        
+        // stabilize sort by using the mail's position, which is always unique in a folder
+        return aenvelope.location.position - benvelope.location.position;
     }
 }
 

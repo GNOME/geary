@@ -4,6 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+// These are defined here due to this bug:
+// https://bugzilla.gnome.org/show_bug.cgi?id=653379
+public enum TreeSortable {
+    DEFAULT_SORT_COLUMN_ID = -1,
+    UNSORTED_SORT_COLUMN_ID = -2
+}
+
 public class FolderListStore : Gtk.TreeStore {
     public enum Column {
         NAME,
@@ -40,6 +47,8 @@ public class FolderListStore : Gtk.TreeStore {
     
     public FolderListStore() {
         set_column_types(Column.get_types());
+        set_default_sort_func(sort_by_name);
+        set_sort_column_id(TreeSortable.DEFAULT_SORT_COLUMN_ID, Gtk.SortType.ASCENDING);
     }
     
     public void add_folder(Geary.Folder folder) {
@@ -66,6 +75,16 @@ public class FolderListStore : Gtk.TreeStore {
         get(iter, Column.FOLDER_OBJECT, out folder);
         
         return folder;
+    }
+    
+    private int sort_by_name(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
+        string aname;
+        model.get(aiter, Column.NAME, out aname);
+        
+        string bname;
+        model.get(biter, Column.NAME, out bname);
+        
+        return strcmp(aname.down(), bname.down());
     }
 }
 
