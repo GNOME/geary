@@ -1,0 +1,21 @@
+#! /usr/bin/env python
+# encoding: utf-8
+#
+# Copyright 2011 Yorba Foundation
+
+console_src = [
+'main.vala'
+]
+
+console_uselib = 'GEE GTK GLIB'
+console_packages = [ 'gee-1.0', 'gtk+-2.0', 'glib-2.0' ]
+
+bld.program(
+	target		= 'console',
+	vapi_dirs	= '../../vapi',
+	threading	= True,
+	uselib		= console_uselib + ' ' + bld.engine_uselib + ' ' + bld.common_uselib,
+	packages	= console_packages + bld.engine_packages + bld.common_packages,
+	source 		= console_src + bld.common_src + bld.engine_src
+)
+

@@ -1,0 +1,12 @@
+#! /bin/sh
+# 
+# This script is merely intended for developers to use to run geary from
+# the development directory, and is not needed or meant for installation.
+
+if [ -f build/src/client/geary ]
+then
+    build/src/client/geary "$@"
+else
+    echo "Run './waf configure build' first."
+fi
+
