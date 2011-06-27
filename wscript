@@ -18,6 +18,8 @@ def options(opt):
 def configure(conf):
 	conf.load('compiler_c vala')
 	
+	conf.check_vala((0, 12, 0))
+	
 	conf.check_cfg(
 		package='glib-2.0',
 		uselib_store='GLIB',
