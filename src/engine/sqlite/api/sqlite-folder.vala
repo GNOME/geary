@@ -7,7 +7,7 @@
 // TODO: This class currently deals with generic email storage as well as IMAP-specific issues; in
 // the future, to support other email services, will need to break this up.
 
-public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
+public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
     private MailDatabase db;
     private FolderRow folder_row;
     private MessageTable message_table;
@@ -32,15 +32,15 @@ public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
     
-    public string get_name() {
+    public override string get_name() {
         return name;
     }
     
-    public Geary.FolderProperties? get_properties() {
+    public override Geary.FolderProperties? get_properties() {
         return null;
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
         if (opened)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
@@ -48,7 +48,7 @@ public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
         notify_opened();
     }
     
-    public async void close_async(Cancellable? cancellable = null) throws Error {
+    public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (!opened)
             return;
         
@@ -56,14 +56,15 @@ public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    public async int get_email_count(Cancellable? cancellable = null) throws Error {
+    public override async int get_email_count(Cancellable? cancellable = null) throws Error {
         check_open();
         
         // TODO
         return 0;
     }
     
-    public async void create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
+    public override async void create_email_async(Geary.Email email, Cancellable? cancellable = null)
+        throws Error {
         check_open();
         
         Geary.Imap.EmailLocation location = (Geary.Imap.EmailLocation) email.location;
@@ -90,7 +91,7 @@ public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
         yield imap_location_table.create_async(imap_location_row, cancellable);
     }
     
-    public async Gee.List<Geary.Email>? list_email_async(int low, int count,
+    public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
         assert(low >= 1);
         assert(count >= 1);
@@ -103,7 +104,7 @@ public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
         return yield list_email(list, required_fields, cancellable);
     }
     
-    public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
+    public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         check_open();
         
@@ -146,7 +147,7 @@ public class Geary.Sqlite.Folder : Object, Geary.Folder, Geary.LocalFolder {
         return (emails.size > 0) ? emails : null;
     }
     
-    public async Geary.Email fetch_email_async(int position, Geary.Email.Field required_fields,
+    public override async Geary.Email fetch_email_async(int position, Geary.Email.Field required_fields,
         Cancellable? cancellable = null) throws Error {
         assert(position >= 1);
         

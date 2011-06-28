@@ -4,11 +4,15 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.EngineFolder : Object, Geary.Folder {
+private class Geary.EngineFolder : Geary.AbstractFolder {
+    private const int REMOTE_FETCH_CHUNK_COUNT = 10;
+    
     private RemoteAccount remote;
     private LocalAccount local;
-    private RemoteFolder remote_folder;
+    private RemoteFolder? remote_folder = null;
     private LocalFolder local_folder;
+    private bool opened = false;
+    private Geary.Common.NonblockingSemaphore remote_semaphore = new Geary.Common.NonblockingSemaphore();
     
     public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         this.remote = remote;
@@ -19,67 +23,166 @@ private class Geary.EngineFolder : Object, Geary.Folder {
     }
     
     ~EngineFolder() {
+        if (opened)
+            warning("Folder %s destroyed without closing", get_name());
+        
         local_folder.updated.disconnect(on_local_updated);
     }
     
-    public string get_name() {
+    public override string get_name() {
         return local_folder.get_name();
     }
     
-    public Geary.FolderProperties? get_properties() {
+    public override Geary.FolderProperties? get_properties() {
         return null;
     }
     
-    public async void create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
+    public override async void create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
         throw new EngineError.READONLY("Engine currently read-only");
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+        if (opened)
+            throw new EngineError.ALREADY_OPEN("Folder %s already open", get_name());
+        
         yield local_folder.open_async(readonly, cancellable);
         
-        if (remote_folder == null) {
-            remote_folder = (RemoteFolder) yield remote.fetch_folder_async(null, local_folder.get_name(),
+        // Rather than wait for the remote folder to open (which blocks completion of this method),
+        // attempt to open in the background and treat this folder as "opened".  If the remote
+        // doesn't open, this folder remains open but only able to work with the local cache.
+        //
+        // Note that any use of remote_folder in this class should first call
+        // wait_for_remote_to_open(), which uses a NonblockingSemaphore to indicate that the remote
+        // is open (or has failed to open).  This allows for early calls to list and fetch emails
+        // can work out of the local cache until the remote is ready.
+        RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(null, local_folder.get_name(),
                 cancellable);
-            remote_folder.updated.connect(on_remote_updated);
-        }
+        open_remote_async.begin(folder, readonly, cancellable, on_open_remote_completed);
         
-        yield remote_folder.open_async(readonly, cancellable);
+        opened = true;
         
         notify_opened();
     }
     
-    public async void close_async(Cancellable? cancellable = null) throws Error {
-        yield local_folder.close_async(cancellable);
+    private async void open_remote_async(RemoteFolder folder, bool readonly, Cancellable? cancellable)
+        throws Error {
+        yield folder.open_async(readonly, cancellable);
         
-        if (remote_folder != null) {
-            remote_folder.updated.disconnect(on_remote_updated);
-            yield remote_folder.close_async(cancellable);
-            remote_folder = null;
+        remote_folder = folder;
+        remote_folder.updated.connect(on_remote_updated);
+        
+        remote_semaphore.notify();
+    }
+    
+    private void on_open_remote_completed(Object? source, AsyncResult result) {
+        try {
+            open_remote_async.end(result);
+        } catch (Error err) {
+            debug("Unable to open remote folder %s: %s", to_string(), err.message);
             
-            notify_closed(CloseReason.FOLDER_CLOSED);
+            remote_folder = null;
+            try {
+                remote_semaphore.notify();
+            } catch (Error err) {
+                debug("Unable to notify remote folder ready: %s", err.message);
+            }
         }
     }
     
-    public async int get_email_count(Cancellable? cancellable = null) throws Error {
+    private async void wait_for_remote_to_open() throws Error {
+        yield remote_semaphore.wait_async();
+    }
+    
+    public override async void close_async(Cancellable? cancellable = null) throws Error {
+        yield local_folder.close_async(cancellable);
+        
+        // if the remote folder is open, close it in the background so the caller isn't waiting for
+        // this method to complete (much like open_async())
+        if (remote_folder != null) {
+            yield remote_semaphore.wait_async();
+            remote_semaphore = new Geary.Common.NonblockingSemaphore();
+            
+            remote_folder.updated.disconnect(on_remote_updated);
+            RemoteFolder? folder = remote_folder;
+            remote_folder = null;
+            
+            folder.close_async.begin(cancellable);
+            
+            notify_closed(CloseReason.FOLDER_CLOSED);
+        }
+        
+        opened = false;
+    }
+    
+    public override async int get_email_count(Cancellable? cancellable = null) throws Error {
         // TODO
         return 0;
     }
     
-    public async Gee.List<Geary.Email>? list_email_async(int low, int count,
+    public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
-        assert(low >= 1);
-        assert(count >= 0);
-        
         if (count == 0)
             return null;
         
-        Gee.List<Geary.Email>? local_list = yield local_folder.list_email_async(low, count,
-            required_fields, cancellable);
-        int local_list_size = (local_list != null) ? local_list.size : 0;
-        debug("local list found %d", local_list_size);
+        // block on do_list_email_async(), using an accumulator to gather the emails and return
+        // them all at once to the caller
+        Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
+        yield do_list_email_async(low, count, required_fields, accumulator, null, cancellable);
         
-        if (remote_folder == null || local_list_size == count)
-            return local_list;
+        return accumulator;
+    }
+    
+    public override void lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
+        EmailCallback cb, Cancellable? cancellable = null) {
+        // schedule do_list_email_async(), using the callback to drive availability of email
+        do_list_email_async.begin(low, count, required_fields, null, cb, cancellable);
+    }
+    
+    private async void do_list_email_async(int low, int count, Geary.Email.Field required_fields,
+        Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable = null)
+        throws Error {
+        assert(low >= 1);
+        assert(count >= 0);
+        
+        if (!opened)
+            throw new EngineError.OPEN_REQUIRED("%s is not open", get_name());
+        
+        if (count == 0) {
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
+        
+        Gee.List<Geary.Email>? local_list = null;
+        try {
+            local_list = yield local_folder.list_email_async(low, count, required_fields,
+                cancellable);
+        } catch (Error local_err) {
+            if (cb != null)
+                cb (null, local_err);
+            
+            throw local_err;
+        }
+        
+        int local_list_size = (local_list != null) ? local_list.size : 0;
+        
+        if (local_list_size > 0) {
+            if (accumulator != null)
+                accumulator.add_all(local_list);
+            
+            if (cb != null)
+                cb(local_list, null);
+        }
+        
+        if (local_list_size == count) {
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
         
         // go through the positions from (low) to (low + count) and see if they're not already
         // present in local_list; whatever isn't present needs to be fetched
@@ -93,26 +196,91 @@ private class Geary.EngineFolder : Object, Geary.Folder {
                 needed_by_position += position;
         }
         
-        if (needed_by_position.length == 0)
-            return local_list;
+        if (needed_by_position.length == 0) {
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
         
-        Gee.List<Geary.Email>? remote_list = yield remote_list_email(needed_by_position,
-            required_fields, cancellable);
+        Gee.List<Geary.Email>? remote_list = null;
+        try {
+            // if cb != null, it will be called by remote_list_email(), so don't call again with
+            // returned list
+            remote_list = yield remote_list_email(needed_by_position, required_fields, cb, cancellable);
+        } catch (Error remote_err) {
+            if (cb != null)
+                cb(null, remote_err);
+            
+            throw remote_err;
+        }
         
-        return combine_lists(local_list, remote_list);
+        if (accumulator != null && remote_list != null && remote_list.size > 0)
+            accumulator.add_all(remote_list);
+        
+        // signal finished
+        if (cb != null)
+            cb(null, null);
     }
     
-    public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
+    public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         if (by_position.length == 0)
             return null;
         
-        Gee.List<Geary.Email>? local_list = yield local_folder.list_email_sparse_async(by_position,
-            required_fields, cancellable);
+        Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
+        yield do_list_email_sparse_async(by_position, required_fields, accumulator, null,
+            cancellable);
+        
+        return accumulator;
+    }
+    
+    public override void lazy_list_email_sparse_async(int[] by_position, Geary.Email.Field required_fields,
+        EmailCallback cb, Cancellable? cancellable = null) {
+        // schedule listing in the background, using the callback to drive availability of email
+        do_list_email_sparse_async.begin(by_position, required_fields, null, cb, cancellable);
+    }
+    
+    private async void do_list_email_sparse_async(int[] by_position, Geary.Email.Field required_fields,
+        Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable = null)
+        throws Error {
+        if (!opened)
+            throw new EngineError.OPEN_REQUIRED("%s is not open", get_name());
+        
+        if (by_position.length == 0) {
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
+        
+        Gee.List<Geary.Email>? local_list = null;
+        try {
+            local_list = yield local_folder.list_email_sparse_async(by_position, required_fields,
+                cancellable);
+        } catch (Error local_err) {
+            if (cb != null)
+                cb(null, local_err);
+            
+            throw local_err;
+        }
+        
         int local_list_size = (local_list != null) ? local_list.size : 0;
         
-        if (remote_folder == null || local_list_size == by_position.length)
-            return local_list;
+        if (local_list_size == by_position.length) {
+            if (accumulator != null)
+                accumulator.add_all(local_list);
+            
+            // report and signal finished
+            if (cb != null) {
+                cb(local_list, null);
+                cb(null, null);
+            }
+            
+            return;
+        }
         
         // go through the list looking for anything not already in the sparse by_position list
         // to fetch from the server; since by_position is not guaranteed to be sorted, the local
@@ -136,28 +304,71 @@ private class Geary.EngineFolder : Object, Geary.Folder {
                 needed_by_position += position;
         }
         
-        if (needed_by_position.length == 0)
-            return local_list;
+        if (needed_by_position.length == 0) {
+            if (local_list != null && local_list.size > 0) {
+                if (accumulator != null)
+                    accumulator.add_all(local_list);
+                
+                if (cb != null)
+                    cb(local_list, null);
+            }
+            
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
         
-        Gee.List<Geary.Email>? remote_list = yield remote_list_email(needed_by_position,
-            required_fields, cancellable);
+        Gee.List<Geary.Email>? remote_list = null;
+        try {
+            // if cb != null, it will be called by remote_list_email(), so don't call again with
+            // returned list
+            remote_list = yield remote_list_email(needed_by_position, required_fields, cb, cancellable);
+        } catch (Error remote_err) {
+            if (cb != null)
+                cb(null, remote_err);
+            
+            throw remote_err;
+        }
         
-        return combine_lists(local_list, remote_list);
+        if (accumulator != null && remote_list != null && remote_list.size > 0)
+            accumulator.add_all(remote_list);
+        
+        // signal finished
+        if (cb != null)
+            cb(null, null);
     }
     
     private async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
-        Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
+        Geary.Email.Field required_fields, EmailCallback? cb, Cancellable? cancellable) throws Error {
+        // possible to call remote multiple times, wait for it to open once and go
+        yield wait_for_remote_to_open();
+        
         debug("Background fetching %d emails for %s", needed_by_position.length, get_name());
         
-        Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_sparse_async(
-            needed_by_position, required_fields, cancellable);
+        Gee.List<Geary.Email> full = new Gee.ArrayList<Geary.Email>();
         
-        if (remote_list != null && remote_list.size == 0)
-            remote_list = null;
-        
-        // if any were fetched, store locally
-        // TODO: Bulk writing
-        if (remote_list != null) {
+        int index = 0;
+        while (index <= needed_by_position.length) {
+            // if a callback is specified, pull the messages down in chunks, so they can be reported
+            // incrementally
+            unowned int[] list;
+            if (cb != null) {
+                int list_count = int.min(REMOTE_FETCH_CHUNK_COUNT, needed_by_position.length - index);
+                list = needed_by_position[index:index + list_count];
+            } else {
+                list = needed_by_position;
+            }
+            
+            Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_sparse_async(
+                list, required_fields, cancellable);
+            
+            if (remote_list == null || remote_list.size == 0)
+                break;
+            
+            // if any were fetched, store locally
+            // TODO: Bulk writing
             foreach (Geary.Email email in remote_list) {
                 bool exists_in_system = false;
                 if (email.message_id != null) {
@@ -193,14 +404,21 @@ private class Geary.EngineFolder : Object, Geary.Folder {
                     yield local_folder.update_email_async(email, false, cancellable);
                 }
             }
+            
+            if (cb != null)
+                cb(remote_list, null);
+            
+            full.add_all(remote_list);
+            
+            index += list.length;
         }
         
-        return remote_list;
+        return full;
     }
     
-    public async Geary.Email fetch_email_async(int num, Geary.Email.Field fields,
+    public override async Geary.Email fetch_email_async(int num, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
-        if (remote_folder == null)
+        if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", get_name());
         
         try {
@@ -220,6 +438,7 @@ private class Geary.EngineFolder : Object, Geary.Folder {
             fields = fields.set(Geary.Email.Field.REFERENCES);
         
         // fetch from network
+        yield wait_for_remote_to_open();
         Geary.Email email = yield remote_folder.fetch_email_async(num, fields, cancellable);
         
         // save to local store
@@ -232,20 +451,6 @@ private class Geary.EngineFolder : Object, Geary.Folder {
     }
     
     private void on_remote_updated() {
-    }
-    
-    private Gee.List<Geary.Email>? combine_lists(Gee.List<Geary.Email>? a, Gee.List<Geary.Email>? b) {
-        if (a == null)
-            return b;
-        
-        if (b == null)
-            return a;
-        
-        Gee.List<Geary.Email> combined = new Gee.ArrayList<Geary.Email>();
-        combined.add_all(a);
-        combined.add_all(b);
-        
-        return combined;
     }
 }
 

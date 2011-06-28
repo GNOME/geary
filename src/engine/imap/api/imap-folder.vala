@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
+public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
     private ClientSessionManager session_mgr;
     private MailboxInformation info;
     private string name;
@@ -21,7 +21,7 @@ public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
         properties = new Imap.FolderProperties(null, info.attrs);
     }
     
-    public string get_name() {
+    public override string get_name() {
         return name;
     }
     
@@ -29,11 +29,11 @@ public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
         return readonly;
     }
     
-    public Geary.FolderProperties? get_properties() {
+    public override Geary.FolderProperties? get_properties() {
         return properties;
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
         if (mailbox != null)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
@@ -46,7 +46,7 @@ public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
         notify_opened();
     }
     
-    public async void close_async(Cancellable? cancellable = null) throws Error {
+    public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             return;
         
@@ -57,21 +57,21 @@ public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    public async int get_email_count(Cancellable? cancellable = null) throws Error {
+    public override async int get_email_count(Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
         return mailbox.count;
     }
     
-    public async void create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
+    public override async void create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
         throw new EngineError.READONLY("IMAP currently read-only");
     }
     
-    public async Gee.List<Geary.Email>? list_email_async(int low, int count, Geary.Email.Field fields,
+    public override async Gee.List<Geary.Email>? list_email_async(int low, int count, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
@@ -79,7 +79,7 @@ public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
         return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
     }
     
-    public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
+    public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
         Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
@@ -87,7 +87,7 @@ public class Geary.Imap.Folder : Object, Geary.Folder, Geary.RemoteFolder {
         return yield mailbox.list_set_async(new MessageSet.sparse(by_position), fields, cancellable);
     }
     
-    public async Geary.Email fetch_email_async(int position, Geary.Email.Field fields,
+    public override async Geary.Email fetch_email_async(int position, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());

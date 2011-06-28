@@ -198,12 +198,18 @@ public class MainWindow : Gtk.Window {
         
         yield current_folder.open_async(true);
         
-        Gee.List<Geary.Email>? email = yield current_folder.list_email_async(1, 100,
-            Geary.Email.Field.ENVELOPE);
+        current_folder.lazy_list_email_async(1, 1000, Geary.Email.Field.ENVELOPE,
+            on_list_email_ready);
+    }
+    
+    private void on_list_email_ready(Gee.List<Geary.Email>? email, Error? err) {
         if (email != null && email.size > 0) {
             foreach (Geary.Email envelope in email)
                 message_list_store.append_envelope(envelope);
         }
+        
+        if (err != null)
+            debug("Error while listing email: %s", err.message);
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {

@@ -5,6 +5,8 @@
  */
 
 public class Geary.Imap.ClientSessionManager {
+    public const int MIN_POOL_SIZE = 2;
+    
     private Credentials cred;
     private uint default_port;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
@@ -15,6 +17,20 @@ public class Geary.Imap.ClientSessionManager {
     public ClientSessionManager(Credentials cred, uint default_port) {
         this.cred = cred;
         this.default_port = default_port;
+        
+        adjust_session_pool.begin();
+    }
+    
+    // TODO: Need a more thorough and bulletproof system for maintaining a pool of ready
+    // authorized sessions.
+    private async void adjust_session_pool() {
+        while (sessions.size < MIN_POOL_SIZE) {
+            try {
+                yield create_new_authorized_session(null);
+            } catch (Error err) {
+                debug("Unable to create authorized session to %s: %s", cred.server, err.message);
+            }
+        }
     }
     
     /**
@@ -115,13 +131,7 @@ public class Geary.Imap.ClientSessionManager {
             context.session.close_mailbox_async.begin();
     }
     
-    private async ClientSession get_authorized_session(Cancellable? cancellable = null) throws Error {
-        foreach (ClientSession session in sessions) {
-            string? mailbox;
-            if (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)
-                return session;
-        }
-        
+    private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         debug("Creating new session to %s", cred.server);
         
         ClientSession new_session = new ClientSession(cred.server, default_port);
@@ -135,11 +145,23 @@ public class Geary.Imap.ClientSessionManager {
         
         sessions.add(new_session);
         
+        debug("Created new session to %s, %d total", cred.server, sessions.size);
+        
         return new_session;
     }
     
+    private async ClientSession get_authorized_session(Cancellable? cancellable) throws Error {
+        foreach (ClientSession session in sessions) {
+            string? mailbox;
+            if (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)
+                return session;
+        }
+        
+        return yield create_new_authorized_session(cancellable);
+    }
+    
     private async ClientSession select_examine_async(string folder, bool is_select,
-        out SelectExamineResults results, Cancellable? cancellable = null) throws Error {
+        out SelectExamineResults results, Cancellable? cancellable) throws Error {
         ClientSession.Context needed_context = (is_select) ? ClientSession.Context.SELECTED
             : ClientSession.Context.EXAMINED;
         foreach (ClientSession session in sessions) {

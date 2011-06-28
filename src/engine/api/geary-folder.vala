@@ -4,6 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+public delegate void Geary.EmailCallback(Gee.List<Geary.Email>? emails, Error? err);
+
 public interface Geary.Folder : Object {
     public enum CloseReason {
         LOCAL_CLOSE,
@@ -109,7 +111,8 @@ public interface Geary.Folder : Object {
      *
      * Note that this only returns the number of messages available to the backing medium.  In the
      * case of the local store, this might be less than the number on the network server.  Folders
-     * created by Engine are aggregating objects and will return the true count.
+     * created by Engine are aggregating objects and will return the true count.  However, this
+     * might require a round-trip to the server.
      *
      * Also note that local folders may be sparsely populated.  get_count() returns the last position
      * available, but not all emails from 1 to n may be available.
@@ -151,7 +154,7 @@ public interface Geary.Folder : Object {
      *
      * In the case of a Folder returned by Engine, it will use what's available in the local store
      * and fetch from the network only what it needs, so that the caller gets a full list.
-     * Note that this means the call may take some time to complete.
+     * Note that this means the call may require a round-trip to the server.
      *
      * TODO: Delayed listing methods (where what's available are reported via a callback after the
      * async method has completed) will be implemented in the future for more responsive behavior.
@@ -163,6 +166,19 @@ public interface Geary.Folder : Object {
      */
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Similar in contract to list_email_async(), however instead of the emails being returned all
+     * at once at completion time, the emails are delivered to the caller in chunks via the
+     * EmailCallback.  The method indicates when all the message have been fetched by passing a null
+     * for the first parameter.  If an Error occurs while processing, it will be passed as the
+     * second parameter.  There's no guarantess of the order the messages will be delivered to the
+     * caller.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract void lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
+        EmailCallback cb, Cancellable? cancellable = null);
     
     /**
      * Like list_email_async(), but the caller passes a sparse list of email by it's ordered
@@ -181,6 +197,18 @@ public interface Geary.Folder : Object {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
+     * Similar in contract to list_email_sparse_async(), but like lazy_list_email_async(), the
+     * messages are passed back to the caller in chunks as they're retrieved.  When null is passed
+     * as the first parameter, all the messages have been fetched.  If an Error occurs during
+     * processing, it's passed as the second parameter.  There's no guarantee of the returned
+     * message's order.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract void lazy_list_email_sparse_async(int[] by_position,
+        Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable = null);
+    
+    /**
      * Returns a single email that fulfills the required_fields flag at the ordered position in
      * the folder.  If position is invalid for the folder's contents, an EngineError.NOT_FOUND
      * error is thrown.  If the requested fields are not available, EngineError.INCOMPLETE_MESSAGE
@@ -196,8 +224,6 @@ public interface Geary.Folder : Object {
     /**
      * Used for debugging.  Should not be used for user-visible labels.
      */
-    public virtual string to_string() {
-        return get_name();
-    }
+    public abstract string to_string();
 }
 
