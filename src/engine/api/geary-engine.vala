@@ -5,7 +5,15 @@
  */
 
 public class Geary.Engine {
+    private static bool gmime_inited = false;
+    
     public static Geary.EngineAccount open(Geary.Credentials cred) throws Error {
+        // Initialize GMime
+        if (!gmime_inited) {
+            GMime.init(0);
+            gmime_inited = true;
+        }
+        
         // Only Gmail today
         return new GenericImapAccount(
             "Gmail account %s".printf(cred.to_string()),
