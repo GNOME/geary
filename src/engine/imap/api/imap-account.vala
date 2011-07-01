@@ -4,57 +4,87 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Account : Object, Geary.Account, Geary.RemoteAccount {
+public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     private ClientSessionManager session_mgr;
+    private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     
     public Account(Credentials cred, uint default_port) {
+        base ("IMAP Account for %s".printf(cred.to_string()));
+        
         session_mgr = new ClientSessionManager(cred, default_port);
     }
     
-    public Geary.Email.Field get_required_fields_for_writing() {
+    public override Geary.Email.Field get_required_fields_for_writing() {
         return Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
     }
     
-    public async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
+    public async string? get_folder_delimiter_async(string toplevel,
         Cancellable? cancellable = null) throws Error {
-        throw new EngineError.READONLY("IMAP readonly");
+        if (delims.has_key(toplevel))
+            return delims.get(toplevel);
+        
+        MailboxInformation? mbox = yield session_mgr.fetch_async(toplevel, cancellable);
+        if (mbox == null) {
+            throw new EngineError.NOT_FOUND("Toplevel folder %s not found on %s", toplevel,
+                session_mgr.to_string());
+        }
+        
+        delims.set(toplevel, mbox.delim);
+        
+        return mbox.delim;
     }
     
-    public async void create_many_folders_async(Geary.Folder? parent, Gee.Collection<Geary.Folder> folders,
+    public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
-        throw new EngineError.READONLY("IMAP readonly");
-    }
-    
-    public async Gee.Collection<Geary.Folder> list_folders_async(Geary.Folder? parent,
-        Cancellable? cancellable = null) throws Error {
-        Gee.Collection<MailboxInformation> mboxes = yield session_mgr.list(
-            (parent != null) ? parent.get_name() : null, cancellable);
+        Gee.Collection<MailboxInformation> mboxes;
+        try {
+            mboxes = (parent == null)
+                ? yield session_mgr.list_roots(cancellable)
+                : yield session_mgr.list(parent.get_fullpath(), parent.get_root().default_separator,
+                    cancellable);
+        } catch (Error err) {
+            if (err is ImapError.SERVER_ERROR)
+                throw_not_found(parent);
+            else
+                throw err;
+        }
         
         Gee.Collection<Geary.Folder> folders = new Gee.ArrayList<Geary.Folder>();
-        foreach (MailboxInformation mbox in mboxes)
-            folders.add(new Geary.Imap.Folder(session_mgr, mbox));
+        foreach (MailboxInformation mbox in mboxes) {
+            if (parent == null)
+                delims.set(mbox.name, mbox.delim);
+            
+            string basename = mbox.get_path().last();
+            
+            Geary.FolderPath path = (parent != null)
+                ? parent.get_child(basename)
+                : new Geary.FolderRoot(basename, mbox.delim, Folder.CASE_SENSITIVE);
+            
+            folders.add(new Geary.Imap.Folder(session_mgr, path, mbox));
+        }
         
         return folders;
     }
     
-    public async Geary.Folder fetch_folder_async(Geary.Folder? parent, string folder_name,
+    public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
-        MailboxInformation? mbox = yield session_mgr.fetch_async(
-            (parent != null) ? parent.get_name() : null, folder_name, cancellable);
-        if (mbox == null)
-            throw new EngineError.NOT_FOUND("Folder %s not found on server", folder_name);
-        
-        return new Geary.Imap.Folder(session_mgr, mbox);
+        try {
+            MailboxInformation? mbox = yield session_mgr.fetch_async(path.get_fullpath(), cancellable);
+            if (mbox == null)
+                throw_not_found(path);
+            
+            return new Geary.Imap.Folder(session_mgr, path, mbox);
+        } catch (ImapError err) {
+            if (err is ImapError.SERVER_ERROR)
+                throw_not_found(path);
+            else
+                throw err;
+        }
     }
     
-    public async void remove_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
-        throws Error {
-        throw new EngineError.READONLY("IMAP readonly");
-    }
-    
-    public async void remove_many_folders_async(Gee.Set<Geary.Folder> folders,
-        Cancellable? cancellable = null) throws Error {
-        throw new EngineError.READONLY("IMAP readonly");
+    [NoReturn]
+    private void throw_not_found(Geary.FolderPath? path) throws EngineError {
+        throw new EngineError.NOT_FOUND("Folder %s not found on %s",
+            (path != null) ? path.to_string() : "root", session_mgr.to_string());
     }
 }
-

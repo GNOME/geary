@@ -13,14 +13,13 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
     private MessageTable message_table;
     private MessageLocationTable location_table;
     private ImapMessageLocationPropertiesTable imap_location_table;
-    private string name;
+    private Geary.FolderPath path;
     private bool opened = false;
     
-    internal Folder(MailDatabase db, FolderRow folder_row) throws Error {
+    internal Folder(MailDatabase db, FolderRow folder_row, Geary.FolderPath path) throws Error {
         this.db = db;
         this.folder_row = folder_row;
-        
-        name = folder_row.name;
+        this.path = path;
         
         message_table = db.get_message_table();
         location_table = db.get_message_location_table();
@@ -32,8 +31,8 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
     
-    public override string get_name() {
-        return name;
+    public override Geary.FolderPath get_path() {
+        return path;
     }
     
     public override Geary.FolderProperties? get_properties() {
@@ -75,7 +74,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
         if (yield imap_location_table.search_uid_in_folder(location.uid, folder_row.id, out message_id,
             cancellable)) {
             throw new EngineError.ALREADY_EXISTS("Email with UID %s already exists in %s",
-                location.uid.to_string(), get_name());
+                location.uid.to_string(), to_string());
         }
         
         message_id = yield message_table.create_async(
@@ -155,8 +154,10 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
         
         MessageLocationRow? location_row = yield location_table.fetch_async(folder_row.id, position,
             cancellable);
-        if (location_row == null)
-            throw new EngineError.NOT_FOUND("No message at position %d in folder %s", position, name);
+        if (location_row == null) {
+            throw new EngineError.NOT_FOUND("No message at position %d in folder %s", position,
+                to_string());
+        }
         
         assert(location_row.position == position);
         
@@ -164,15 +165,17 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
             location_row.id, cancellable);
         if (imap_location_row == null) {
             throw new EngineError.NOT_FOUND("No IMAP location properties at position %d in %s",
-                position, name);
+                position, to_string());
         }
         
         assert(imap_location_row.location_id == location_row.id);
         
         MessageRow? message_row = yield message_table.fetch_async(location_row.message_id,
             required_fields, cancellable);
-        if (message_row == null)
-            throw new EngineError.NOT_FOUND("No message at position %d in folder %s", position, name);
+        if (message_row == null) {
+            throw new EngineError.NOT_FOUND("No message at position %d in folder %s", position,
+                to_string());
+        }
         
         if (!message_row.fields.is_set(required_fields)) {
             throw new EngineError.INCOMPLETE_MESSAGE(

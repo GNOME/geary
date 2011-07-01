@@ -22,7 +22,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         updated();
     }
     
-    public abstract string get_name();
+    public abstract Geary.FolderPath get_path();
     
     public abstract Geary.FolderProperties? get_properties();
     
@@ -85,7 +85,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Cancellable? cancellable = null) throws Error;
     
     public virtual string to_string() {
-        return get_name();
+        return get_path().to_string();
     }
 }
 

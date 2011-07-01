@@ -8,10 +8,8 @@ public interface Geary.Account : Object {
     public signal void folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
     
-    protected virtual void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
-        Gee.Collection<Geary.Folder>? removed) {
-        folders_added_removed(added, removed);
-    }
+    protected abstract void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
+        Gee.Collection<Geary.Folder>? removed);
     
     /**
      * This method returns which Geary.Email.Field fields must be available in a Geary.Email to
@@ -25,22 +23,22 @@ public interface Geary.Account : Object {
      */
     public abstract Geary.Email.Field get_required_fields_for_writing();
     
-    public abstract async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
+    /**
+     * Lists all the folders found under the parent path unless it's null, in which case it lists
+     * all the root folders.  If the parent path cannot be found, EngineError.NOT_FOUND is thrown.
+     * If no folders exist in the root, EngineError.NOT_FOUND may be thrown as well.  However,
+     * the caller should be prepared to deal with an empty list being returned instead.
+     */
+    public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async void create_many_folders_async(Geary.Folder? parent,
-        Gee.Collection<Geary.Folder> folders, Cancellable? cancellable = null) throws Error;
-    
-    public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.Folder? parent,
+    /**
+     * Fetches a Folder object corresponding to the supplied path.  If the backing medium does
+     * not have a record of a folder at the path, EngineError.NOT_FOUND will be thrown.
+     */
+    public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async Geary.Folder fetch_folder_async(Geary.Folder? parent, string folder_name,
-        Cancellable? cancellable = null) throws Error;
-    
-    public abstract async void remove_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
-        throws Error;
-    
-    public abstract async void remove_many_folders_async(Gee.Set<Geary.Folder> folders,
-        Cancellable? cancellable = null) throws Error;
+    public abstract string to_string();
 }
 

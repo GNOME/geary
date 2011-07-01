@@ -87,5 +87,46 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         
         return (!result.finished) ? new FolderRow.from_query_result(this, result) : null;
     }
+    
+    public async FolderRow? fetch_descend_async(Gee.List<string> path, Cancellable? cancellable = null)
+        throws Error {
+        assert(path.size > 0);
+        
+        int64 parent_id = Row.INVALID_ID;
+        
+        // walk the folder tree to the final node (which is at length - 1 - 1)
+        int length = path.size;
+        for (int ctr = 0; ctr < length - 1; ctr++) {
+            SQLHeavy.Query query;
+            if (parent_id != Row.INVALID_ID) {
+                query = db.prepare("SELECT id FROM FolderTable WHERE parent_id=? AND name=?");
+                query.bind_int64(0, parent_id);
+                query.bind_string(1, path[ctr]);
+            } else {
+                query = db.prepare("SELECT id FROM FolderTable WHERE parent_id IS NULL AND name=?");
+                query.bind_string(0, path[ctr]);
+            }
+            
+            SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+            if (result.finished)
+                return null;
+            
+            int64 id = result.fetch_int64(0);
+            
+            // watch for loops, real bad if it happens ... could be more thorough here, but at least
+            // one level of checking is better than none
+            if (id == parent_id) {
+                warning("Loop found in database: parent of %lld is %lld in FolderTable",
+                    parent_id, id);
+                
+                return null;
+            }
+            
+            parent_id = id;
+        }
+        
+        // do full fetch on this folder
+        return yield fetch_async(parent_id, path.last(), cancellable);
+    }
 }
 

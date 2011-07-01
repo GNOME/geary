@@ -8,14 +8,18 @@ public class Geary.Imap.ClientConnection {
     public const uint16 DEFAULT_PORT = 143;
     public const uint16 DEFAULT_PORT_TLS = 993;
     
+    private const int FLUSH_TIMEOUT_MSEC = 100;
+    
     private string host_specifier;
     private uint16 default_port;
     private SocketClient socket_client = new SocketClient();
     private SocketConnection? cx = null;
     private Serializer? ser = null;
     private Deserializer? des = null;
+    private Geary.Common.NonblockingMutex send_mutex = new Geary.Common.NonblockingMutex();
     private int tag_counter = 0;
     private char tag_prefix = 'a';
+    private uint flush_timeout_id = 0;
     
     public virtual signal void connected() {
     }
@@ -24,6 +28,9 @@ public class Geary.Imap.ClientConnection {
     }
     
     public virtual signal void sent_command(Command cmd) {
+    }
+    
+    public virtual signal void flush_failure(Error err) {
     }
     
     public virtual signal void received_status_response(StatusResponse status_response) {
@@ -41,7 +48,7 @@ public class Geary.Imap.ClientConnection {
     public virtual signal void receive_failure(Error err) {
     }
     
-    public virtual signal void deserialize_failure() {
+    public virtual signal void deserialize_failure(Error err) {
     }
     
     public ClientConnection(string host_specifier, uint16 default_port) {
@@ -54,6 +61,8 @@ public class Geary.Imap.ClientConnection {
     
     ~ClientConnection() {
         // TODO: Close connection as gracefully as possible
+        if (flush_timeout_id != 0)
+            Source.remove(flush_timeout_id);
     }
     
     /**
@@ -106,6 +115,8 @@ public class Geary.Imap.ClientConnection {
         ser = null;
         des = null;
         
+        des.xoff();
+        
         disconnected();
     }
     
@@ -128,41 +139,45 @@ public class Geary.Imap.ClientConnection {
     }
     
     private void on_deserialize_failure() {
-        deserialize_failure();
+        deserialize_failure(new ImapError.PARSE_ERROR("Unable to deserialize from %s", to_string()));
     }
     
     private void on_eos() {
         recv_closed();
     }
     
-    /**
-     * Convenience method for send_async.begin().
-     */
-    public void post(Command cmd, AsyncReadyCallback cb, int priority = Priority.DEFAULT,
-        Cancellable? cancellable = null) {
-        send_async.begin(cmd, priority, cancellable, cb);
-    }
-    
-    /**
-     * Convenience method for sync_async.end().  This is largely provided for symmetry with
-     * post_send().
-     */
-    public void finish_post(AsyncResult result) throws Error {
-        send_async.end(result);
-    }
-    
-    public async void send_async(Command cmd, int priority = Priority.DEFAULT, 
-        Cancellable? cancellable = null) throws Error {
+    public async void send_async(Command cmd, Cancellable? cancellable = null) throws Error {
         check_for_connection();
         
-        cmd.serialize(ser);
+        // need to run this in critical section because OutputStreams can only be written to
+        // serially
+        int token = yield send_mutex.claim_async(cancellable);
         
-        // TODO: At this point, we flush each command as it's written; at some point we'll have
-        // a queuing strategy that means serialized data is pushed out to the wire only at certain
-        // times
-        yield ser.flush_async(priority, cancellable);
+        yield cmd.serialize(ser);
+        
+        send_mutex.release(token);
+        
+        if (flush_timeout_id == 0)
+            flush_timeout_id = Timeout.add(FLUSH_TIMEOUT_MSEC, on_flush_timeout);
         
         sent_command(cmd);
+    }
+    
+    private bool on_flush_timeout() {
+        do_flush_async.begin();
+        
+        flush_timeout_id = 0;
+        
+        return false;
+    }
+    
+    private async void do_flush_async() {
+        try {
+            if (ser != null)
+                yield ser.flush_async();
+        } catch (Error err) {
+            flush_failure(err);
+        }
     }
     
     private void check_for_connection() throws Error {

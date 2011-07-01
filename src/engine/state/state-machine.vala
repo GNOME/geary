@@ -103,7 +103,7 @@ public class Geary.State.Machine {
     }
     
     public string to_string() {
-        return "Machine %s".printf(descriptor.name);
+        return "Machine %s [%s]".printf(descriptor.name, descriptor.get_state_string(state));
     }
 }
 

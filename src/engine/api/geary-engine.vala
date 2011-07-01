@@ -5,11 +5,11 @@
  */
 
 public class Geary.Engine {
-    public static Geary.Account open(Geary.Credentials cred) throws Error {
-        // Only ImapEngine today
-        return new ImapEngine(
+    public static Geary.EngineAccount open(Geary.Credentials cred) throws Error {
+        // Only Gmail today
+        return new GenericImapAccount(
+            "Gmail account %s".printf(cred.to_string()),
             new Geary.Imap.Account(cred, Imap.ClientConnection.DEFAULT_PORT_TLS),
             new Geary.Sqlite.Account(cred));
     }
 }
-

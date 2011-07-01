@@ -4,12 +4,14 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Sqlite.Account : Object, Geary.Account, Geary.LocalAccount {
+public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
     private MailDatabase db;
     private FolderTable folder_table;
     private MessageTable message_table;
     
     public Account(Geary.Credentials cred) {
+        base ("SQLite account for %s".printf(cred.to_string()));
+        
         try {
             db = new MailDatabase(cred.user);
         } catch (Error err) {
@@ -20,53 +22,76 @@ public class Geary.Sqlite.Account : Object, Geary.Account, Geary.LocalAccount {
         message_table = db.get_message_table();
     }
     
-    public Geary.Email.Field get_required_fields_for_writing() {
+    public override Geary.Email.Field get_required_fields_for_writing() {
         return Geary.Email.Field.NONE;
     }
     
-    public async void create_folder_async(Geary.Folder? parent, Geary.Folder folder,
-        Cancellable? cancellable = null) throws Error {
-        yield folder_table.create_async(new FolderRow(folder_table, folder.get_name(), Row.INVALID_ID),
-            cancellable);
+    private async int64 fetch_id_async(Geary.FolderPath path, Cancellable? cancellable = null)
+        throws Error {
+        FolderRow? row = yield folder_table.fetch_descend_async(path.as_list(), cancellable);
+        if (row == null)
+            throw new EngineError.NOT_FOUND("Cannot find local path to %s", path.to_string());
+        
+        return row.id;
     }
     
-    public async void create_many_folders_async(Geary.Folder? parent, Gee.Collection<Geary.Folder> folders,
+    private async int64 fetch_parent_id_async(Geary.FolderPath path, Cancellable? cancellable = null)
+        throws Error {
+        return path.is_root() ? Row.INVALID_ID : yield fetch_id_async(path.get_parent(), cancellable);
+    }
+    
+    public async void clone_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
+        throws Error {
+        int64 parent_id = yield fetch_parent_id_async(folder.get_path(), cancellable);
+        yield folder_table.create_async(new FolderRow(folder_table, folder.get_path().basename,
+            parent_id), cancellable);
+    }
+    
+    public async void clone_many_folders_async(Gee.Collection<Geary.Folder> folders,
         Cancellable? cancellable = null) throws Error {
         Gee.List<FolderRow> rows = new Gee.ArrayList<FolderRow>();
-        foreach (Geary.Folder folder in folders)
-            rows.add(new FolderRow(db.get_folder_table(), folder.get_name(), Row.INVALID_ID));
+        foreach (Geary.Folder folder in folders) {
+            int64 parent_id = yield fetch_parent_id_async(folder.get_path(), cancellable);
+            rows.add(new FolderRow(db.get_folder_table(), folder.get_path().basename, parent_id));
+        }
         
         yield folder_table.create_many_async(rows, cancellable);
     }
     
-    public async Gee.Collection<Geary.Folder> list_folders_async(Geary.Folder? parent,
+    public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
-        Gee.List<FolderRow> rows = yield folder_table.list_async(Row.INVALID_ID, cancellable);
+        int64 parent_id = (parent != null)
+            ? yield fetch_id_async(parent, cancellable)
+            : Row.INVALID_ID;
+        
+        if (parent != null)
+            assert(parent_id != Row.INVALID_ID);
+        
+        Gee.List<FolderRow> rows = yield folder_table.list_async(parent_id, cancellable);
+        if (rows.size == 0) {
+            throw new EngineError.NOT_FOUND("No local folders in %s",
+                (parent != null) ? parent.get_fullpath() : "root");
+        }
         
         Gee.Collection<Geary.Folder> folders = new Gee.ArrayList<Geary.Sqlite.Folder>();
-        foreach (FolderRow row in rows)
-            folders.add(new Geary.Sqlite.Folder(db, row));
+        foreach (FolderRow row in rows) {
+            Geary.FolderPath path = (parent != null)
+                ? parent.get_child(row.name)
+                : new Geary.FolderRoot(row.name, "/", Geary.Imap.Folder.CASE_SENSITIVE);
+            
+            folders.add(new Geary.Sqlite.Folder(db, row, path));
+        }
         
         return folders;
     }
     
-    public async Geary.Folder fetch_folder_async(Geary.Folder? parent, string folder_name,
+    public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
-        FolderRow? row =  yield folder_table.fetch_async(Row.INVALID_ID, folder_name, cancellable);
+        FolderRow? row =  yield folder_table.fetch_descend_async(path.as_list(), cancellable);
         if (row == null)
-            throw new EngineError.NOT_FOUND("\"%s\" not found in local database", folder_name);
+            throw new EngineError.NOT_FOUND("%s not found in local database", path.to_string());
         
-        return new Geary.Sqlite.Folder(db, row);
-    }
-    
-    public async void remove_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
-        throws Error {
-        // TODO
-    }
-    
-    public async void remove_many_folders_async(Gee.Set<Geary.Folder> folders,
-        Cancellable? cancellable = null) throws Error {
-        // TODO
+        return new Geary.Sqlite.Folder(db, row, path);
     }
     
     public async bool has_message_id_async(Geary.RFC822.MessageID message_id, out int count,

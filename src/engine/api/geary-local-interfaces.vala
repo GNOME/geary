@@ -5,6 +5,12 @@
  */
 
 public interface Geary.LocalAccount : Object, Geary.Account {
+    public abstract async void clone_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
+        throws Error;
+    
+    public abstract async void clone_many_folders_async(Gee.Collection<Geary.Folder> folders,
+        Cancellable? cancellable = null) throws Error;
+    
     /**
      * Returns true if the email (identified by its Message-ID) already exists in the account's
      * local store, no matter the folder.

@@ -413,10 +413,12 @@ public class Geary.Imap.ClientSession {
         cx.connected.connect(on_network_connected);
         cx.disconnected.connect(on_network_disconnected);
         cx.sent_command.connect(on_network_sent_command);
+        cx.flush_failure.connect(on_network_flush_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
         cx.received_bad_response.connect(on_received_bad_response);
-        cx.receive_failure.connect(on_receive_failed);
+        cx.receive_failure.connect(on_network_receive_failure);
+        cx.deserialize_failure.connect(on_network_receive_failure);
         
         cx.connect_async.begin(connect_params.cancellable, on_connect_completed);
         
@@ -988,7 +990,7 @@ public class Geary.Imap.ClientSession {
         }
         
         try {
-            yield cx.send_async(cmd, Priority.DEFAULT, cancellable);
+            yield cx.send_async(cmd, cancellable);
         } catch (Error err) {
             return new AsyncCommandResponse(null, user, err);
         }
@@ -1050,6 +1052,11 @@ public class Geary.Imap.ClientSession {
 #endif
     }
     
+    private void on_network_flush_error(Error err) {
+        debug("Flush error on %s: %s", to_string(), err.message);
+        fsm.issue(Event.SEND_ERROR, null, null, err);
+    }
+    
     private void on_received_status_response(StatusResponse status_response) {
         assert(!current_cmd_response.is_sealed());
         current_cmd_response.seal(status_response);
@@ -1086,7 +1093,7 @@ public class Geary.Imap.ClientSession {
         debug("Received bad response %s: %s", root.to_string(), err.message);
     }
     
-    private void on_receive_failed(Error err) {
+    private void on_network_receive_failure(Error err) {
         debug("Receive failed: %s", err.message);
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }

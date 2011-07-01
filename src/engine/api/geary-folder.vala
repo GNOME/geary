@@ -82,7 +82,7 @@ public interface Geary.Folder : Object {
         updated();
     }
     
-    public abstract string get_name();
+    public abstract Geary.FolderPath get_path();
     
     public abstract Geary.FolderProperties? get_properties();
     

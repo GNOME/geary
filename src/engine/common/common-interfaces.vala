@@ -5,18 +5,26 @@
  */
 
 public interface Geary.Comparable {
-    public abstract bool equals(Comparable other);
+    public abstract int compare(Comparable other);
+    
+    public static int compare_func(void *a, void *b) {
+        return ((Comparable *) a)->compare((Comparable *) b);
+    }
+}
+
+public interface Geary.Equalable {
+    public abstract bool equals(Equalable other);
     
     public static bool equal_func(void *a, void *b) {
-        return ((Comparable *) a)->equals((Comparable *) b);
+        return ((Equalable *) a)->equals((Equalable *) b);
     }
 }
 
 public interface Geary.Hashable {
-    public abstract uint get_hash();
+    public abstract uint to_hash();
     
     public static uint hash_func(void *ptr) {
-        return ((Hashable *) ptr)->get_hash();
+        return ((Hashable *) ptr)->to_hash();
     }
 }
 

@@ -6,13 +6,33 @@
 
 public class Geary.Imap.MailboxInformation {
     public string name { get; private set; }
-    public string delim { get; private set; }
+    public string? delim { get; private set; }
     public MailboxAttributes attrs { get; private set; }
     
-    public MailboxInformation(string name, string delim, MailboxAttributes attrs) {
+    public MailboxInformation(string name, string? delim, MailboxAttributes attrs) {
         this.name = name;
         this.delim = delim;
         this.attrs = attrs;
+    }
+    
+    /**
+     * Will always return a list with at least one element in it.
+     */
+    public Gee.List<string> get_path() {
+        Gee.List<string> path = new Gee.ArrayList<string>();
+        
+        if (delim != null) {
+            string[] split = name.split(delim);
+            foreach (string str in split) {
+                if (!String.is_empty(str))
+                    path.add(str);
+            }
+        }
+        
+        if (path.size == 0)
+            path.add(name);
+        
+        return path;
     }
 }
 
@@ -37,7 +57,7 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
             try {
                 StringParameter cmd = data.get_as_string(1);
                 ListParameter attrs = data.get_as_list(2);
-                StringParameter delim = data.get_as_string(3);
+                StringParameter? delim = data.get_as_nullable_string(3);
                 StringParameter mailbox = data.get_as_string(4);
                 
                 if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(XListCommand.NAME)) {
@@ -60,7 +80,7 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                     attrlist.add(new MailboxAttribute(stringp.value));
                 }
                 
-                MailboxInformation info = new MailboxInformation(mailbox.value, delim.value,
+                MailboxInformation info = new MailboxInformation(mailbox.value, delim.nullable_value,
                     new MailboxAttributes(attrlist));
                 
                 map.set(mailbox.value, info);

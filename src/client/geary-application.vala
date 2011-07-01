@@ -46,7 +46,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     private static GearyApplication? _instance = null;
     
     private MainWindow main_window = new MainWindow();
-    private Geary.Account? account = null;
+    private Geary.EngineAccount? account = null;
     
     private GearyApplication() {
         base (NAME, "geary", "org.yorba.geary");

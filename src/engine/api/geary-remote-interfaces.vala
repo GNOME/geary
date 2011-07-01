@@ -5,6 +5,8 @@
  */
 
 public interface Geary.RemoteAccount : Object, Geary.Account {
+    public abstract async string? get_folder_delimiter_async(string toplevel,
+        Cancellable? cancellable = null) throws Error;
 }
 
 public interface Geary.RemoteFolder : Object, Geary.Folder {

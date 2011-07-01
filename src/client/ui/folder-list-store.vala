@@ -52,18 +52,17 @@ public class FolderListStore : Gtk.TreeStore {
     }
     
     public void add_folder(Geary.Folder folder) {
+        Gtk.TreeIter? parent_iter = !folder.get_path().is_root()
+            ? find_path(folder.get_path().get_parent())
+            : null;
+        
         Gtk.TreeIter iter;
-        append(out iter, null);
+        append(out iter, parent_iter);
         
         set(iter,
-            Column.NAME, folder.get_name(),
+            Column.NAME, folder.get_path().basename,
             Column.FOLDER_OBJECT, folder
         );
-    }
-    
-    public void add_folders(Gee.Collection<Geary.Folder> folders) {
-        foreach (Geary.Folder folder in folders)
-            add_folder(folder);
     }
     
     public Geary.Folder? get_folder_at(Gtk.TreePath path) {
@@ -75,6 +74,36 @@ public class FolderListStore : Gtk.TreeStore {
         get(iter, Column.FOLDER_OBJECT, out folder);
         
         return folder;
+    }
+    
+    // TODO: This could be replaced with a binary search
+    private Gtk.TreeIter? find_path(Geary.FolderPath path, Gtk.TreeIter? parent = null) {
+        Gtk.TreeIter iter;
+        // no parent, start at the root, otherwise start at the parent's children
+        if (parent == null) {
+            if (!get_iter_first(out iter))
+                return null;
+        } else {
+            if (!iter_children(out iter, parent))
+                return null;
+        }
+        
+        do {
+            Geary.Folder folder;
+            get(iter, Column.FOLDER_OBJECT, out folder);
+            
+            if (folder.get_path().equals(path))
+                return iter;
+            
+            // recurse
+            if (iter_has_child(iter)) {
+                Gtk.TreeIter? found = find_path(path, iter);
+                if (found != null)
+                    return found;
+            }
+        } while (iter_next(ref iter));
+        
+        return null;
     }
     
     private int sort_by_name(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {

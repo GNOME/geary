@@ -26,7 +26,7 @@ public class MainWindow : Gtk.Window {
     private MessageViewer message_viewer = new MessageViewer();
     private MessageBuffer message_buffer = new MessageBuffer();
     private Gtk.UIManager ui = new Gtk.UIManager();
-    private Geary.Account? account = null;
+    private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
     
     public MainWindow() {
@@ -61,7 +61,7 @@ public class MainWindow : Gtk.Window {
             account.folders_added_removed.disconnect(on_folders_added_removed);
     }
     
-    public void start(Geary.Account account) {
+    public void start(Geary.EngineAccount account) {
         this.account = account;
         account.folders_added_removed.connect(on_folders_added_removed);
         
@@ -180,7 +180,7 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        debug("Folder %s selected", folder.get_name());
+        debug("Folder %s selected", folder.to_string());
         
         do_select_folder.begin(folder, on_select_folder_completed);
     }
@@ -252,9 +252,11 @@ public class MainWindow : Gtk.Window {
     
     private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
-        if (added != null) {
-            folder_list_store.add_folders(added);
-            debug("%d folders added", added.size);
+        if (added != null && added.size > 0) {
+            foreach (Geary.Folder folder in added)
+                folder_list_store.add_folder(folder);
+            
+            search_folders_for_children.begin(added);
         }
     }
     
@@ -263,6 +265,22 @@ public class MainWindow : Gtk.Window {
             foreach (Geary.Email email in added)
                 message_list_store.append_envelope(email);
         }
+    }
+    
+    private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
+        Gee.ArrayList<Geary.Folder> accumulator = new Gee.ArrayList<Geary.Folder>();
+        foreach (Geary.Folder folder in folders) {
+            try {
+                Gee.Collection<Geary.Folder> children = yield account.list_folders_async(
+                    folder.get_path(), null);
+                accumulator.add_all(children);
+            } catch (Error err) {
+                debug("Unable to list children of %s: %s", folder.to_string(), err.message);
+            }
+        }
+        
+        if (accumulator.size > 0)
+            on_folders_added_removed(accumulator, null);
     }
 }
 

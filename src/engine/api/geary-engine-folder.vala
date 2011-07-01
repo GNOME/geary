@@ -12,7 +12,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private RemoteFolder? remote_folder = null;
     private LocalFolder local_folder;
     private bool opened = false;
-    private Geary.Common.NonblockingSemaphore remote_semaphore = new Geary.Common.NonblockingSemaphore();
+    private Geary.Common.NonblockingSemaphore remote_semaphore =
+        new Geary.Common.NonblockingSemaphore(true);
     
     public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         this.remote = remote;
@@ -24,13 +25,13 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     ~EngineFolder() {
         if (opened)
-            warning("Folder %s destroyed without closing", get_name());
+            warning("Folder %s destroyed without closing", to_string());
         
         local_folder.updated.disconnect(on_local_updated);
     }
     
-    public override string get_name() {
-        return local_folder.get_name();
+    public override Geary.FolderPath get_path() {
+        return local_folder.get_path();
     }
     
     public override Geary.FolderProperties? get_properties() {
@@ -43,7 +44,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
         if (opened)
-            throw new EngineError.ALREADY_OPEN("Folder %s already open", get_name());
+            throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
         
         yield local_folder.open_async(readonly, cancellable);
         
@@ -55,8 +56,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // wait_for_remote_to_open(), which uses a NonblockingSemaphore to indicate that the remote
         // is open (or has failed to open).  This allows for early calls to list and fetch emails
         // can work out of the local cache until the remote is ready.
-        RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(null, local_folder.get_name(),
-                cancellable);
+        RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(local_folder.get_path(),
+            cancellable);
         open_remote_async.begin(folder, readonly, cancellable, on_open_remote_completed);
         
         opened = true;
@@ -100,7 +101,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // this method to complete (much like open_async())
         if (remote_folder != null) {
             yield remote_semaphore.wait_async();
-            remote_semaphore = new Geary.Common.NonblockingSemaphore();
+            remote_semaphore = new Geary.Common.NonblockingSemaphore(true);
             
             remote_folder.updated.disconnect(on_remote_updated);
             RemoteFolder? folder = remote_folder;
@@ -145,7 +146,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         assert(count >= 0);
         
         if (!opened)
-            throw new EngineError.OPEN_REQUIRED("%s is not open", get_name());
+            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
         
         if (count == 0) {
             // signal finished
@@ -246,7 +247,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable = null)
         throws Error {
         if (!opened)
-            throw new EngineError.OPEN_REQUIRED("%s is not open", get_name());
+            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
         
         if (by_position.length == 0) {
             // signal finished
@@ -345,7 +346,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // possible to call remote multiple times, wait for it to open once and go
         yield wait_for_remote_to_open();
         
-        debug("Background fetching %d emails for %s", needed_by_position.length, get_name());
+        debug("Background fetching %d emails for %s", needed_by_position.length, to_string());
         
         Gee.List<Geary.Email> full = new Gee.ArrayList<Geary.Email>();
         
@@ -419,7 +420,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     public override async Geary.Email fetch_email_async(int num, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (!opened)
-            throw new EngineError.OPEN_REQUIRED("Folder %s not opened", get_name());
+            throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         
         try {
             return yield local_folder.fetch_email_async(num, fields, cancellable);

@@ -6,6 +6,7 @@
 def build(bld):
 	bld.common_src = [
 	'../common/common-date.vala',
+	'../common/common-intl.vala',
 	'../common/common-yorba-application.vala'
 	]
 	
@@ -13,23 +14,28 @@ def build(bld):
 	bld.common_packages = ['glib-2.0', 'unique-1.0', 'posix' ]
 	
 	bld.engine_src = [
+	'../engine/api/geary-abstract-account.vala',
 	'../engine/api/geary-abstract-folder.vala',
 	'../engine/api/geary-account.vala',
 	'../engine/api/geary-credentials.vala',
 	'../engine/api/geary-email-location.vala',
 	'../engine/api/geary-email-properties.vala',
 	'../engine/api/geary-email.vala',
+	'../engine/api/geary-engine-account.vala',
 	'../engine/api/geary-engine-error.vala',
 	'../engine/api/geary-engine-folder.vala',
 	'../engine/api/geary-engine.vala',
+	'../engine/api/geary-folder-path.vala',
 	'../engine/api/geary-folder-properties.vala',
 	'../engine/api/geary-folder.vala',
-	'../engine/api/geary-imap-engine.vala',
+	'../engine/api/geary-generic-imap-account.vala',
 	'../engine/api/geary-local-interfaces.vala',
 	'../engine/api/geary-remote-interfaces.vala',
 	
 	'../engine/common/common-interfaces.vala',
 	'../engine/common/common-message-data.vala',
+	'../engine/common/common-nonblocking-mailbox.vala',
+	'../engine/common/common-nonblocking-mutex.vala',
 	'../engine/common/common-nonblocking-semaphore.vala',
 	'../engine/common/common-string.vala',
 	

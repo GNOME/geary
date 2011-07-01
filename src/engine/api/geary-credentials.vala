@@ -14,5 +14,8 @@ public class Geary.Credentials {
         this.user = user;
         this.pass = pass;
     }
+    
+    public string to_string() {
+        return "%s/%s".printf(user, server);
+    }
 }
-

@@ -10,6 +10,7 @@ public class Geary.Imap.ClientSessionManager {
     private Credentials cred;
     private uint default_port;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
+    private Geary.Common.NonblockingMutex sessions_mutex = new Geary.Common.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
     private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
     private int keepalive_sec = ClientSession.DEFAULT_KEEPALIVE_SEC;
@@ -45,30 +46,45 @@ public class Geary.Imap.ClientSessionManager {
             session.enable_keepalives(keepalive_sec);
     }
     
-    public async Gee.Collection<Geary.Imap.MailboxInformation> list(string? parent_name,
+    public async Gee.Collection<Geary.Imap.MailboxInformation> list_roots(
         Cancellable? cancellable = null) throws Error {
-        // build a proper IMAP specifier
-        string specifier = parent_name ?? "/";
-        specifier += (specifier.has_suffix("/")) ? "%" : "/%";
-        
         ClientSession session = yield get_authorized_session(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(session.generate_tag(), specifier), cancellable));
+            new ListCommand.wildcarded(session.generate_tag(), "%", "%"), cancellable));
+        
+        if (results.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
         
         return results.get_all();
     }
     
-    public async Geary.Imap.MailboxInformation? fetch_async(string? parent_name, string folder_name,
-        Cancellable? cancellable = null) throws Error {
+    public async Gee.Collection<Geary.Imap.MailboxInformation> list(string parent,
+        string delim, Cancellable? cancellable = null) throws Error {
         // build a proper IMAP specifier
-        string specifier = parent_name ?? "/";
-        specifier += (specifier.has_suffix("/")) ? folder_name : "/%s".printf(folder_name);
+        string specifier = parent;
+        specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
         
         ClientSession session = yield get_authorized_session(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
             new ListCommand(session.generate_tag(), specifier), cancellable));
+        
+        if (results.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
+        
+        return results.get_all();
+    }
+    
+    public async Geary.Imap.MailboxInformation? fetch_async(string path,
+        Cancellable? cancellable = null) throws Error {
+        ClientSession session = yield get_authorized_session(cancellable);
+        
+        ListResults results = ListResults.decode(yield session.send_command_async(
+            new ListCommand(session.generate_tag(), path), cancellable));
+        
+        if (results.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
         
         return (results.get_count() > 0) ? results.get_all()[0] : null;
     }
@@ -92,6 +108,9 @@ public class Geary.Imap.ClientSessionManager {
         
         SelectExamineResults results;
         ClientSession session = yield select_examine_async(path, is_select, out results, cancellable);
+        
+        if (results.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
         
         SelectedContext new_context = new SelectedContext(session, results);
         
@@ -131,6 +150,7 @@ public class Geary.Imap.ClientSessionManager {
             context.session.close_mailbox_async.begin();
     }
     
+    // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         debug("Creating new session to %s", cred.server);
         
@@ -151,13 +171,24 @@ public class Geary.Imap.ClientSessionManager {
     }
     
     private async ClientSession get_authorized_session(Cancellable? cancellable) throws Error {
+        int token = yield sessions_mutex.claim_async(cancellable);
+        
+        ClientSession? found_session = null;
         foreach (ClientSession session in sessions) {
             string? mailbox;
-            if (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)
-                return session;
+            if (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED) {
+                found_session = session;
+                
+                break;
+            }
         }
         
-        return yield create_new_authorized_session(cancellable);
+        if (found_session == null)
+            found_session = yield create_new_authorized_session(cancellable);
+        
+        sessions_mutex.release(token);
+        
+        return found_session;
     }
     
     private async ClientSession select_examine_async(string folder, bool is_select,
@@ -182,6 +213,13 @@ public class Geary.Imap.ClientSessionManager {
         
         bool removed = sessions.remove(session);
         assert(removed);
+    }
+    
+    /**
+     * Use only for debugging and logging.
+     */
+    public string to_string() {
+        return cred.to_string();
     }
 }
 

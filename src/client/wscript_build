@@ -13,9 +13,7 @@ client_src = [
 'ui/message-buffer.vala',
 'ui/message-list-store.vala',
 'ui/message-list-view.vala',
-'ui/message-viewer.vala',
-
-'util/intl.vala'
+'ui/message-viewer.vala'
 ]
 
 client_uselib = 'GLIB GEE GTK'

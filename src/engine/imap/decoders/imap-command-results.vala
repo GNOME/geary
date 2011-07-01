@@ -10,5 +10,9 @@ public abstract class Geary.Imap.CommandResults {
     public CommandResults(StatusResponse status_response) {
         this.status_response = status_response;
     }
+    
+    public string to_string() {
+        return status_response.to_string();
+    }
 }
 

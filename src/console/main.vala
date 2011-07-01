@@ -217,7 +217,7 @@ class ImapConsole : Gtk.Window {
     private void capabilities(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
-        cx.send_async.begin(new Geary.Imap.CapabilityCommand(cx.generate_tag()), Priority.DEFAULT, null,
+        cx.send_async.begin(new Geary.Imap.CapabilityCommand(cx.generate_tag()), null,
             on_capabilities);
     }
     
@@ -233,8 +233,7 @@ class ImapConsole : Gtk.Window {
     private void noop(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
-        cx.send_async.begin(new Geary.Imap.NoopCommand(cx.generate_tag()), Priority.DEFAULT, null,
-            on_noop);
+        cx.send_async.begin(new Geary.Imap.NoopCommand(cx.generate_tag()), null, on_noop);
     }
     
     private void on_noop(Object? source, AsyncResult result) {
@@ -301,12 +300,13 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "user pass");
         
         status("Logging in...");
-        cx.post(new Geary.Imap.LoginCommand(cx.generate_tag(), args[0], args[1]), on_logged_in);
+        cx.send_async.begin(new Geary.Imap.LoginCommand(cx.generate_tag(), args[0], args[1]),
+            null, on_logged_in);
     }
     
     private void on_logged_in(Object? source, AsyncResult result) {
         try {
-            cx.finish_post(result);
+            cx.send_async.end(result);
             status("Login completed");
         } catch (Error err) {
             exception(err);
@@ -317,12 +317,12 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 0, null);
         
         status("Logging out...");
-        cx.post(new Geary.Imap.LogoutCommand(cx.generate_tag()), on_logout);
+        cx.send_async.begin(new Geary.Imap.LogoutCommand(cx.generate_tag()), null, on_logout);
     }
     
     private void on_logout(Object? source, AsyncResult result) {
         try {
-            cx.finish_post(result);
+            cx.send_async.end(result);
             status("Logged out");
         } catch (Error err) {
             exception(err);
@@ -333,12 +333,13 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
         status("Listing...");
-        cx.post(new Geary.Imap.ListCommand.wildcarded(cx.generate_tag(), args[0], args[1]), on_list);
+        cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(cx.generate_tag(), args[0], args[1]),
+            null, on_list);
     }
     
     private void on_list(Object? source, AsyncResult result) {
         try {
-            cx.finish_post(result);
+            cx.send_async.end(result);
             status("Listed");
         } catch (Error err) {
             exception(err);
@@ -349,20 +350,21 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
         status("Xlisting...");
-        cx.post(new Geary.Imap.XListCommand.wildcarded(cx.generate_tag(), args[0], args[1]),
-            on_list);
+        cx.send_async.begin(new Geary.Imap.XListCommand.wildcarded(cx.generate_tag(), args[0], args[1]),
+            null, on_list);
     }
     
     private void examine(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 1, "<mailbox>");
         
         status("Opening %s read-only".printf(args[0]));
-        cx.post(new Geary.Imap.ExamineCommand(cx.generate_tag(), args[0]), on_examine);
+        cx.send_async.begin(new Geary.Imap.ExamineCommand(cx.generate_tag(), args[0]), null,
+            on_examine);
     }
     
     private void on_examine(Object? source, AsyncResult result) {
         try {
-            cx.finish_post(result);
+            cx.send_async.end(result);
             status("Opened read-only");
         } catch (Error err) {
             exception(err);
@@ -378,13 +380,13 @@ class ImapConsole : Gtk.Window {
         for (int ctr = 1; ctr < args.length; ctr++)
             data_items += Geary.Imap.FetchDataType.decode(args[ctr]);
         
-        cx.post(new Geary.Imap.FetchCommand(cx.generate_tag(), 
-            new Geary.Imap.MessageSet.custom(args[0]), data_items), on_fetch);
+        cx.send_async.begin(new Geary.Imap.FetchCommand(cx.generate_tag(), 
+            new Geary.Imap.MessageSet.custom(args[0]), data_items), null, on_fetch);
     }
     
     private void on_fetch(Object? source, AsyncResult result) {
         try {
-            cx.finish_post(result);
+            cx.send_async.end(result);
             status("Fetched");
         } catch (Error err) {
             exception(err);

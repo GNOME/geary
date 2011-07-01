@@ -5,24 +5,26 @@
  */
 
 public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
+    public const bool CASE_SENSITIVE = true;
+    
     private ClientSessionManager session_mgr;
     private MailboxInformation info;
-    private string name;
+    private Geary.FolderPath path;
     private Trillian readonly;
     private Imap.FolderProperties properties;
     private Mailbox? mailbox = null;
     
-    internal Folder(ClientSessionManager session_mgr, MailboxInformation info) {
+    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
+        this.path = path;
         
-        name = info.name;
         readonly = Trillian.UNKNOWN;
         properties = new Imap.FolderProperties(null, info.attrs);
     }
     
-    public override string get_name() {
-        return name;
+    public override Geary.FolderPath get_path() {
+        return path;
     }
     
     public Trillian is_readonly() {
@@ -37,8 +39,9 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox != null)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
-        mailbox = yield session_mgr.select_examine_mailbox(name, !readonly, cancellable);
-        // hook up signals
+        mailbox = yield session_mgr.select_examine_mailbox(path.get_fullpath(info.delim), !readonly,
+            cancellable);
+        // TODO: hook up signals
         
         this.readonly = Trillian.from_boolean(readonly);
         properties.uid_validity = mailbox.uid_validity;
