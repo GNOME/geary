@@ -12,6 +12,7 @@ public errordomain Geary.ImapError {
     COMMAND_FAILED,
     UNAUTHENTICATED,
     NOT_SUPPORTED,
-    NOT_SELECTED
+    NOT_SELECTED,
+    INVALID_PATH
 }
 

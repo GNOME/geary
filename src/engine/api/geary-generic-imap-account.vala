@@ -5,7 +5,7 @@
  */
 
 private class Geary.GenericImapAccount : Geary.EngineAccount {
-    public const string INBOX = "Inbox";
+    private SpecialFolderMap? special_folders = null;
     
     private RemoteAccount remote;
     private LocalAccount local;
@@ -15,6 +15,19 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         
         this.remote = remote;
         this.local = local;
+        
+        if (special_folders == null) {
+            special_folders = new SpecialFolderMap();
+            
+            special_folders.set_folder(
+                new SpecialFolder(
+                    SpecialFolderType.INBOX,
+                    _("Inbox"),
+                    new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR, false),
+                    0
+                )
+            );
+        }
     }
     
     public override Geary.Email.Field get_required_fields_for_writing() {
@@ -116,6 +129,18 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         
         if (engine_added != null)
             notify_folders_added_removed(engine_added, null);
+    }
+    
+    public override string get_user_folders_label() {
+        return _("Folders");
+    }
+    
+    public override Geary.SpecialFolderMap? get_special_folder_map() {
+        return special_folders;
+    }
+    
+    public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
+        return null;
     }
 }
 

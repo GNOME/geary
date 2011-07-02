@@ -15,7 +15,7 @@ public class Geary.Engine {
         }
         
         // Only Gmail today
-        return new GenericImapAccount(
+        return new GmailAccount(
             "Gmail account %s".printf(cred.to_string()),
             new Geary.Imap.Account(cred, Imap.ClientConnection.DEFAULT_PORT_TLS),
             new Geary.Sqlite.Account(cred));

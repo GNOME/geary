@@ -65,12 +65,28 @@ public class MainWindow : Gtk.Window {
         this.account = account;
         account.folders_added_removed.connect(on_folders_added_removed);
         
+        folder_list_store.set_user_folders_root_name(account.get_user_folders_label());
+        
         do_start.begin();
     }
     
     private async void do_start() {
         try {
-            // pull down the root-level folders
+            // add all the special folders, which are assumed to always exist
+            Geary.SpecialFolderMap? special_folders = account.get_special_folder_map();
+            if (special_folders != null) {
+                foreach (Geary.SpecialFolder special_folder in special_folders.get_all()) {
+                    Geary.Folder folder = yield account.fetch_folder_async(special_folder.path);
+                    folder_list_store.add_special_folder(special_folder, folder);
+                }
+                
+                // If inbox is specified, select that
+                Geary.SpecialFolder? inbox = special_folders.get_folder(Geary.SpecialFolderType.INBOX);
+                if (inbox != null)
+                    folder_list_view.select_path(inbox.path);
+            }
+            
+            // pull down the root-level user folders
             Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null);
             if (folders != null)
                 on_folders_added_removed(folders, null);
@@ -253,10 +269,24 @@ public class MainWindow : Gtk.Window {
     private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
         if (added != null && added.size > 0) {
-            foreach (Geary.Folder folder in added)
-                folder_list_store.add_folder(folder);
+            Gee.Set<Geary.FolderPath>? ignored_paths = account.get_ignored_paths();
             
-            search_folders_for_children.begin(added);
+            Gee.ArrayList<Geary.Folder> skipped = new Gee.ArrayList<Geary.Folder>();
+            foreach (Geary.Folder folder in added) {
+                if (ignored_paths != null && ignored_paths.contains(folder.get_path()))
+                    skipped.add(folder);
+                else
+                    folder_list_store.add_user_folder(folder);
+            }
+            
+            Gee.Collection<Geary.Folder> remaining = added;
+            if (skipped.size > 0) {
+                remaining = new Gee.ArrayList<Geary.Folder>();
+                remaining.add_all(added);
+                remaining.remove_all(skipped);
+            }
+            
+            search_folders_for_children.begin(remaining);
         }
     }
     

@@ -56,17 +56,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // wait_for_remote_to_open(), which uses a NonblockingSemaphore to indicate that the remote
         // is open (or has failed to open).  This allows for early calls to list and fetch emails
         // can work out of the local cache until the remote is ready.
-        RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(local_folder.get_path(),
-            cancellable);
-        open_remote_async.begin(folder, readonly, cancellable, on_open_remote_completed);
+        open_remote_async.begin(readonly, cancellable, on_open_remote_completed);
         
         opened = true;
         
         notify_opened();
     }
     
-    private async void open_remote_async(RemoteFolder folder, bool readonly, Cancellable? cancellable)
-        throws Error {
+    private async void open_remote_async(bool readonly, Cancellable? cancellable) throws Error {
+        RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(local_folder.get_path(),
+            cancellable);
         yield folder.open_async(readonly, cancellable);
         
         remote_folder = folder;

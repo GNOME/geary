@@ -4,11 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Personality {
-    public EngineAccount(string name) {
-        base (name);
-    }
-    
+public interface Geary.Personality : Object {
     public abstract string get_user_folders_label();
     
     public abstract Geary.SpecialFolderMap? get_special_folder_map();
