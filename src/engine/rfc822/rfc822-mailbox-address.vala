@@ -25,12 +25,23 @@ public class Geary.RFC822.MailboxAddress {
     }
     
     public MailboxAddress.imap(string? name, string? source_route, string mailbox, string domain) {
-        this.name = name;
+        this.name = (name != null) ? decode_name(name) : null;
         this.source_route = source_route;
         this.mailbox = mailbox;
         this.domain = domain;
         
         address = "%s@%s".printf(mailbox, domain);
+    }
+    
+    // Borrowed liberally from GMime's internal _internet_address_decode_name() function.
+    private static string decode_name(string name) {
+        // see if a broken mailer has sent raw 8-bit information
+        string phrase = name.validate() ? name : GMime.utils_decode_8bit(name, name.length);
+        
+        // unquote the string and decode the phrase
+        GMime.utils_unquote_string(phrase);
+        
+        return GMime.utils_header_decode_phrase(phrase);
     }
     
     /**
