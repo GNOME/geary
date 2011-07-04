@@ -33,6 +33,14 @@ public interface Geary.Account : Object {
         Cancellable? cancellable = null) throws Error;
     
     /**
+     * Returns true if the folder exists.
+     *
+     * This method never throws EngineError.NOT_FOUND.
+     */
+    public abstract async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
+        throws Error;
+    
+    /**
      * Fetches a Folder object corresponding to the supplied path.  If the backing medium does
      * not have a record of a folder at the path, EngineError.NOT_FOUND will be thrown.
      */

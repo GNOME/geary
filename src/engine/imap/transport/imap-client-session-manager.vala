@@ -76,6 +76,15 @@ public class Geary.Imap.ClientSessionManager {
         return results.get_all();
     }
     
+    public async bool folder_exists_async(string path, Cancellable? cancellable = null) throws Error {
+        ClientSession session = yield get_authorized_session(cancellable);
+        
+        ListResults results = ListResults.decode(yield session.send_command_async(
+            new ListCommand(session.generate_tag(), path), cancellable));
+        
+        return (results.status_response.status == Status.OK) && (results.get_count() == 1);
+    }
+    
     public async Geary.Imap.MailboxInformation? fetch_async(string path,
         Cancellable? cancellable = null) throws Error {
         ClientSession session = yield get_authorized_session(cancellable);

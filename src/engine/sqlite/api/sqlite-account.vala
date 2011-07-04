@@ -85,6 +85,20 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         return folders;
     }
     
+    public override async bool folder_exists_async(Geary.FolderPath path,
+        Cancellable? cancellable = null) throws Error {
+        try {
+            int64 id = yield fetch_id_async(path, cancellable);
+            
+            return (id != Row.INVALID_ID);
+        } catch (EngineError err) {
+            if (err is EngineError.NOT_FOUND)
+                return false;
+            else
+                throw err;
+        }
+    }
+    
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
         FolderRow? row =  yield folder_table.fetch_descend_async(path.as_list(), cancellable);

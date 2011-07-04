@@ -72,6 +72,15 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         return folders;
     }
     
+    public override async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
+        throws Error {
+        Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
+        if (processed == null)
+            throw new ImapError.INVALID_PATH("Invalid path %s", path.to_string());
+        
+        return yield session_mgr.folder_exists_async(processed.get_fullpath(), cancellable);
+    }
+    
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
         Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
@@ -103,25 +112,31 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     // application.
     private static Geary.FolderPath? process_path(Geary.FolderPath? parent, string? basename,
         string? delim) throws ImapError {
+        bool empty_basename = String.is_empty(basename);
+        
         // 1. Both null, done
-        if (parent == null && basename == null)
+        if (parent == null && empty_basename)
             return null;
         
         // 2. Parent null but basename not, create FolderRoot for Inbox
-        if (parent == null && basename != null && basename.up() == INBOX_NAME)
+        if (parent == null && !empty_basename && basename.up() == INBOX_NAME)
             return new Geary.FolderRoot(INBOX_NAME, delim, false);
         
         // 3. Parent and basename supplied, verify parent is not Inbox, as IMAP does not allow it
         //    to have children
-        if (parent != null && basename != null && parent.get_root().basename.up() == INBOX_NAME)
+        if (parent != null && !empty_basename && parent.get_root().basename.up() == INBOX_NAME)
             throw new ImapError.INVALID_PATH("Inbox may not have children");
         
-        // 4. Default behavior: create child of basename or basename as root, otherwise return parent
+        // 4. Parent supplied but basename is not; if parent points to Inbox, normalize it
+        if (parent != null && empty_basename && parent.basename.up() == INBOX_NAME)
+            return new Geary.FolderRoot(INBOX_NAME, delim, false);
+        
+        // 5. Default behavior: create child of basename or basename as root, otherwise return parent
         //    unmodified
-        if (parent != null && basename != null)
+        if (parent != null && !empty_basename)
             return parent.get_child(basename);
         
-        if (basename != null)
+        if (!empty_basename)
             return new Geary.FolderRoot(basename, delim, Folder.CASE_SENSITIVE);
         
         return parent;

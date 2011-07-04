@@ -58,12 +58,46 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         return engine_list;
     }
     
+    public override async bool folder_exists_async(Geary.FolderPath path,
+        Cancellable? cancellable = null) throws Error {
+        if (yield local.folder_exists_async(path, cancellable))
+            return true;
+        
+        return yield remote.folder_exists_async(path, cancellable);
+    }
+    
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
-        LocalFolder local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
-        Geary.Folder engine_folder = new EngineFolder(remote, local, local_folder);
+        LocalFolder? local_folder = null;
+        try {
+            local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
+            
+            return new EngineFolder(remote, local, local_folder);
+        } catch (EngineError err) {
+            // don't thrown NOT_FOUND's, that means we need to fall through and clone from the
+            // server
+            if (!(err is EngineError.NOT_FOUND))
+                throw err;
+        }
         
-        return engine_folder;
+        // clone the entire path
+        int length = path.get_path_length();
+        for (int ctr = 0; ctr < length; ctr++) {
+            Geary.FolderPath folder = path.get_folder_at(ctr);
+            
+            if (yield local.folder_exists_async(folder))
+                continue;
+            
+            RemoteFolder remote_folder = (RemoteFolder) yield remote.fetch_folder_async(folder,
+                cancellable);
+            
+            yield local.clone_folder_async(remote_folder, cancellable);
+        }
+        
+        // Fetch the local account's version of the folder for the EngineFolder
+        local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
+        
+        return new EngineFolder(remote, local, local_folder);
     }
     
     private Gee.Set<string> get_folder_names(Gee.Collection<Geary.Folder> folders) {

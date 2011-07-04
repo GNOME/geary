@@ -21,6 +21,9 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error;
     
+    public abstract async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
+        throws Error;
+    
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
     
