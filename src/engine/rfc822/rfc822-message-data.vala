@@ -48,6 +48,10 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
     public Subject(string value) {
         base (value);
     }
+    
+    public Subject.from_rfc822(string value) {
+        base (GMime.utils_header_decode_text(value));
+    }
 }
 
 public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {

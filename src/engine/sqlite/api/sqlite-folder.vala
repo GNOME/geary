@@ -77,6 +77,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
                 location.uid.to_string(), to_string());
         }
         
+        // TODO: The following steps should be atomic
         message_id = yield message_table.create_async(
             new MessageRow.from_email(message_table, email),
             cancellable);

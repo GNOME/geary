@@ -81,8 +81,10 @@ def build(bld):
 	'../engine/imap/transport/imap-serializable.vala',
 	'../engine/imap/transport/imap-serializer.vala',
 	
+	'../engine/rfc822/rfc822-error.vala',
 	'../engine/rfc822/rfc822-mailbox-addresses.vala',
 	'../engine/rfc822/rfc822-mailbox-address.vala',
+	'../engine/rfc822/rfc822-message.vala',
 	'../engine/rfc822/rfc822-message-data.vala',
 	
 	'../engine/sqlite/abstract/sqlite-database.vala',

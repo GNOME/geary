@@ -20,17 +20,18 @@ public abstract class Geary.Memory.AbstractBuffer {
     public abstract InputStream get_input_stream();
     
     /**
-     * Returns the contents of the buffer as though it was an ASCII (or 7-bit) string.  Note that
+     * Returns the contents of the buffer as though it was an UTF-8 string.  Note that
      * this involves reading the entire buffer into memory.
+     *
+     * If the conversion fails or decodes as invalid UTF-8, an empty string is returned.
      */
-    public string to_ascii_string() {
+    public string to_utf8() {
         uint8[] buffer = get_buffer();
+        buffer += (uint8) '\0';
         
-        StringBuilder builder = new StringBuilder();
-        foreach (uint8 byte in buffer)
-            builder.append_c((char) byte);
+        string str = (string) buffer;
         
-        return builder.str;
+        return str.validate() ? str : "";
     }
 }
 

@@ -191,13 +191,13 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         }
         
         if ((fields & Geary.Email.Field.HEADER) != 0) {
-            header = (email.header != null) ? email.header.buffer.to_ascii_string() : null;
+            header = (email.header != null) ? email.header.buffer.to_utf8() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.HEADER);
         }
         
         if ((fields & Geary.Email.Field.BODY) != 0) {
-            body = (email.body != null) ? email.body.buffer.to_ascii_string() : null;
+            body = (email.body != null) ? email.body.buffer.to_utf8() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.BODY);
         }

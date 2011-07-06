@@ -253,9 +253,13 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        Geary.Email text = yield current_folder.fetch_email_async(email.location.position,
-            Geary.Email.Field.BODY);
-        message_buffer.set_text(text.body.buffer.to_ascii_string());
+        Geary.Email full = yield current_folder.fetch_email_async(email.location.position,
+            Geary.Email.Field.HEADER | Geary.Email.Field.BODY);
+        
+        Geary.Memory.AbstractBuffer buffer = full.get_message().get_first_mime_part_of_content_type(
+            "text/plain");
+        
+        message_buffer.set_text(buffer.to_utf8());
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {

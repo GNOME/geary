@@ -1,12 +1,24 @@
-GMime cheader_filename="gmime/gmime.h" lower_case_cprefix="g_mime_"
+GMime lower_case_cprefix="gmime_" cheader_filename="gmime/gmime.h"
 
+GMimeObject abstract="1"
+GMimeStream abstract="1"
+
+g_mime_header_list_get_iter.iter is_out="1"
 g_mime_message_get_date.date is_out="1"
 g_mime_message_get_date.tz_offset is_out="1"
+g_mime_message_get_mime_part is_nullable="1"
+g_mime_object_to_string transfer_ownership="1"
 g_mime_param_next name="get_next"
+g_mime_parser_construct_message nullable="1"
+g_mime_part_get_content_part nullable="1"
 g_mime_signer_next name="get_next"
-
+g_mime_stream_mem_new_with_buffer.buffer is_array="1" array_length_pos="1.0" type_name="uint8[]"
+g_mime_stream_mem_new_with_buffer.len hidden="1"
+g_mime_utils_decode_8bit transfer_ownership="1"
 g_mime_utils_header_decode_date type_name="time_t"
 g_mime_utils_header_decode_date.tz_offset is_out="1" nullable="1"
+g_mime_utils_header_decode_phrase transfer_ownership="1"
+g_mime_utils_header_decode_text transfer_ownership="1"
 
 InternetAddress hidden="1"
 internet_address_* hidden="1"

@@ -86,6 +86,8 @@ public class Geary.Email : Object {
     
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
     
+    private Geary.RFC822.Message? message = null;
+    
     public Email(Geary.EmailLocation location) {
         this.location = location;
     }
@@ -130,11 +132,17 @@ public class Geary.Email : Object {
     public void set_message_header(Geary.RFC822.Header header) {
         this.header = header;
         
+        // reset the message object, which is built from this text
+        message = null;
+        
         fields |= Field.HEADER;
     }
     
     public void set_message_body(Geary.RFC822.Text body) {
         this.body = body;
+        
+        // reset the message object, which is built from this text
+        message = null;
         
         fields |= Field.BODY;
     }
@@ -143,6 +151,18 @@ public class Geary.Email : Object {
         this.properties = properties;
         
         fields |= Field.PROPERTIES;
+    }
+    
+    public Geary.RFC822.Message get_message() throws EngineError, RFC822.Error {
+        if (message != null)
+            return message;
+        
+        if (!fields.fulfills(Field.HEADER | Field.BODY))
+            throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
+        
+        message = new Geary.RFC822.Message.from_parts(header, body);
+        
+        return message;
     }
     
     public string to_string() {
