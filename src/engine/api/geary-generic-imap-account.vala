@@ -50,7 +50,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         Gee.Collection<Geary.Folder> engine_list = new Gee.ArrayList<Geary.Folder>();
         if (local_list != null && local_list.size > 0) {
             foreach (Geary.Folder local_folder in local_list)
-                engine_list.add(new EngineFolder(remote, local, (LocalFolder) local_folder));
+                engine_list.add(new GenericImapFolder(remote, local, (LocalFolder) local_folder));
         }
         
         background_update_folders.begin(parent, engine_list);
@@ -72,7 +72,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         try {
             local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
             
-            return new EngineFolder(remote, local, local_folder);
+            return new GenericImapFolder(remote, local, local_folder);
         } catch (EngineError err) {
             // don't thrown NOT_FOUND's, that means we need to fall through and clone from the
             // server
@@ -94,10 +94,10 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
             yield local.clone_folder_async(remote_folder, cancellable);
         }
         
-        // Fetch the local account's version of the folder for the EngineFolder
+        // Fetch the local account's version of the folder for the GenericImapFolder
         local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
         
-        return new EngineFolder(remote, local, local_folder);
+        return new GenericImapFolder(remote, local, local_folder);
     }
     
     private Gee.Set<string> get_folder_names(Gee.Collection<Geary.Folder> folders) {
@@ -140,11 +140,15 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         if (to_remove.size == 0)
             to_remove = null;
         
-        try {
-            if (to_add != null)
-                yield local.clone_many_folders_async(to_add);
-        } catch (Error err) {
-            error("Unable to add/remove folders: %s", err.message);
+        if (to_add != null) {
+            foreach (Geary.Folder folder in to_add) {
+                try {
+                    yield local.clone_folder_async(folder);
+                } catch (Error err) {
+                    debug("Unable to add/remove folder %s: %s", folder.get_path().to_string(),
+                        err.message);
+                }
+            }
         }
         
         Gee.Collection<Geary.Folder> engine_added = null;
@@ -154,7 +158,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
                 try {
                     LocalFolder local_folder = (LocalFolder) yield local.fetch_folder_async(
                         remote_folder.get_path());
-                    engine_added.add(new EngineFolder(remote, local, local_folder));
+                    engine_added.add(new GenericImapFolder(remote, local, local_folder));
                 } catch (Error convert_err) {
                     error("Unable to fetch local folder: %s", convert_err.message);
                 }

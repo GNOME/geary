@@ -10,20 +10,25 @@
 public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
     private MailDatabase db;
     private FolderRow folder_row;
+    private Geary.FolderProperties? properties;
     private MessageTable message_table;
     private MessageLocationTable location_table;
     private ImapMessageLocationPropertiesTable imap_location_table;
+    private ImapMessagePropertiesTable imap_message_properties_table;
     private Geary.FolderPath path;
     private bool opened = false;
     
-    internal Folder(MailDatabase db, FolderRow folder_row, Geary.FolderPath path) throws Error {
+    internal Folder(MailDatabase db, FolderRow folder_row, ImapFolderPropertiesRow? properties,
+        Geary.FolderPath path) throws Error {
         this.db = db;
         this.folder_row = folder_row;
+        this.properties = (properties != null) ? properties.get_imap_folder_properties() : null;
         this.path = path;
         
         message_table = db.get_message_table();
         location_table = db.get_message_location_table();
         imap_location_table = db.get_imap_message_location_table();
+        imap_message_properties_table = db.get_imap_message_properties_table();
     }
     
     private void check_open() throws Error {
@@ -36,7 +41,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
     }
     
     public override Geary.FolderProperties? get_properties() {
-        return null;
+        return properties;
     }
     
     public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
@@ -44,7 +49,8 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
         opened = true;
-        notify_opened();
+        
+        notify_opened(Geary.Folder.OpenState.LOCAL);
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -52,6 +58,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
             return;
         
         opened = false;
+        
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
@@ -89,14 +96,26 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
         ImapMessageLocationPropertiesRow imap_location_row = new ImapMessageLocationPropertiesRow(
             imap_location_table, Row.INVALID_ID, location_id, location.uid);
         yield imap_location_table.create_async(imap_location_row, cancellable);
+        
+        // only write out the IMAP email properties if they're supplied and there's something to
+        // write out -- no need to create an empty row
+        Geary.Imap.EmailProperties? properties = (Geary.Imap.EmailProperties?) email.properties;
+        if (email.fields.fulfills(Geary.Email.Field.PROPERTIES) && properties != null && !properties.is_empty()) {
+            ImapMessagePropertiesRow properties_row = new ImapMessagePropertiesRow.from_imap_properties(
+                imap_message_properties_table, message_id, properties);
+            yield imap_message_properties_table.create_async(properties_row, cancellable);
+        }
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
         assert(low >= 1);
-        assert(count >= 1);
+        assert(count >= 0 || count == -1);
         
         check_open();
+        
+        if (count == 0)
+            return null;
         
         Gee.List<MessageLocationRow>? list = yield location_table.list_async(folder_row.id, low,
             count, cancellable);
@@ -136,12 +155,23 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
             MessageRow? message_row = yield message_table.fetch_async(location_row.message_id,
                 required_fields, cancellable);
             assert(message_row != null);
+            
             // only add to the list if the email contains all the required fields
             if (!message_row.fields.is_set(required_fields))
                 continue;
             
-            emails.add(message_row.to_email(new Geary.Imap.EmailLocation(location_row.position,
-                imap_location_row.uid)));
+            ImapMessagePropertiesRow? properties = null;
+            if (required_fields.fulfills(Geary.Email.Field.PROPERTIES)) {
+                properties = yield imap_message_properties_table.fetch_async(location_row.message_id,
+                    cancellable);
+            }
+            
+            Geary.Email email = message_row.to_email(new Geary.Imap.EmailLocation(location_row.position,
+                imap_location_row.uid));
+            if (properties != null)
+                email.set_email_properties(properties.get_imap_email_properties());
+            
+            emails.add(email);
         }
         
         return (emails.size > 0) ? emails : null;
@@ -184,8 +214,18 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
                 message_row.fields);
         }
         
-        return message_row.to_email(new Geary.Imap.EmailLocation(location_row.position,
+        ImapMessagePropertiesRow? properties = null;
+        if (required_fields.fulfills(Geary.Email.Field.PROPERTIES)) {
+            properties = yield imap_message_properties_table.fetch_async(location_row.message_id,
+                cancellable);
+        }
+        
+        Geary.Email email = message_row.to_email(new Geary.Imap.EmailLocation(location_row.position,
             imap_location_row.uid));
+        if (properties != null)
+            email.set_email_properties(properties.get_imap_email_properties());
+        
+        return email;
     }
     
     public async bool is_email_present_at(int position, out Geary.Email.Field available_fields,
@@ -292,7 +332,6 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
     }
     
     // TODO: The database should be locked around this method, as it should be atomic.
-    // TODO: Merge email properties
     private async void merge_email_async(int64 message_id, Geary.Email email,
         Cancellable? cancellable = null) throws Error {
         assert(message_id != Row.INVALID_ID);
@@ -310,6 +349,12 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
         // possible nothing has changed or been added
         if (message_row.fields != Geary.Email.Field.NONE)
             yield message_table.merge_async(message_row, cancellable);
+            
+        // update IMAP properties
+        if (email.fields.fulfills(Geary.Email.Field.PROPERTIES)) {
+            yield imap_message_properties_table.update_async(message_id,
+                ((Geary.Imap.EmailProperties) email.properties).flags.serialize(), cancellable);
+        }
     }
 }
 

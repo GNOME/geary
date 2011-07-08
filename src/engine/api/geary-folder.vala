@@ -7,6 +7,12 @@
 public delegate void Geary.EmailCallback(Gee.List<Geary.Email>? emails, Error? err);
 
 public interface Geary.Folder : Object {
+    public enum OpenState {
+        REMOTE,
+        LOCAL,
+        BOTH
+    }
+    
     public enum CloseReason {
         LOCAL_CLOSE,
         REMOTE_CLOSE,
@@ -15,9 +21,9 @@ public interface Geary.Folder : Object {
     
     /**
      * This is fired when the Folder is successfully opened by a caller.  It will only fire once
-     * until the Folder is closed.
+     * until the Folder is closed, with the OpenState indicating what has been opened.
      */
-    public signal void opened();
+    public signal void opened(OpenState state);
     
     /**
      * This is fired when the Folder is successfully closed by a caller.  It will only fire once
@@ -50,8 +56,8 @@ public interface Geary.Folder : Object {
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected virtual void notify_opened() {
-        opened();
+    protected virtual void notify_opened(OpenState state) {
+        opened(state);
     }
     
     /**
@@ -140,7 +146,8 @@ public interface Geary.Folder : Object {
     
     /**
      * Returns a list of messages that fulfill the required_fields flags starting at the low
-     * position and moving up to (low + count).  The list is not guaranteed to be in any
+     * position and moving up to (low + count).  If count is -1, the returned list starts at low
+     * and proceeds to all available emails.  The returned list is not guaranteed to be in any
      * particular order.
      *
      * If any position in low to (low + count) are out of range, only the email within range are

@@ -23,6 +23,14 @@ public abstract class Geary.Sqlite.Table {
         return table.field_name(col);
     }
     
+    protected inline static int bool_to_int(bool b) {
+        return b ? 1 : 0;
+    }
+    
+    protected inline static bool int_to_bool(int i) {
+        return !(i == 0);
+    }
+    
     public string to_string() {
         return table.name;
     }

@@ -7,10 +7,11 @@
 private class Geary.EngineFolder : Geary.AbstractFolder {
     private const int REMOTE_FETCH_CHUNK_COUNT = 10;
     
-    private RemoteAccount remote;
-    private LocalAccount local;
-    private RemoteFolder? remote_folder = null;
-    private LocalFolder local_folder;
+    protected RemoteAccount remote;
+    protected LocalAccount local;
+    protected RemoteFolder? remote_folder = null;
+    protected LocalFolder local_folder;
+    
     private bool opened = false;
     private Geary.Common.NonblockingSemaphore remote_semaphore =
         new Geary.Common.NonblockingSemaphore(true);
@@ -59,8 +60,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         open_remote_async.begin(readonly, cancellable, on_open_remote_completed);
         
         opened = true;
-        
-        notify_opened();
     }
     
     private async void open_remote_async(bool readonly, Cancellable? cancellable) throws Error {
@@ -77,6 +76,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private void on_open_remote_completed(Object? source, AsyncResult result) {
         try {
             open_remote_async.end(result);
+            
+            notify_opened(Geary.Folder.OpenState.BOTH);
         } catch (Error err) {
             debug("Unable to open remote folder %s: %s", to_string(), err.message);
             
@@ -86,6 +87,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             } catch (Error err) {
                 debug("Unable to notify remote folder ready: %s", err.message);
             }
+            
+            notify_opened(Geary.Folder.OpenState.LOCAL);
         }
     }
     
@@ -142,7 +145,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable = null)
         throws Error {
         assert(low >= 1);
-        assert(count >= 0);
+        assert(count >= 0 || count == -1);
         
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
@@ -361,8 +364,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 list = needed_by_position;
             }
             
+            // Always get the flags, and the generic end-user won't know to ask for them until they
+            // need them
             Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_sparse_async(
-                list, required_fields, cancellable);
+                list, required_fields | Geary.Email.Field.PROPERTIES, cancellable);
             
             if (remote_list == null || remote_list.size == 0)
                 break;

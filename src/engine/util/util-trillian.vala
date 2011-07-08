@@ -9,6 +9,7 @@
  */
 
 public enum Geary.Trillian {
+    // DO NOT MODIFY unless you know what you're doing.  These values are persisted.
     UNKNOWN = -1,
     FALSE = 0,
     TRUE = 1;

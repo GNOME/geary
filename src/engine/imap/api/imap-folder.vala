@@ -14,13 +14,14 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
     private Imap.FolderProperties properties;
     private Mailbox? mailbox = null;
     
-    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, MailboxInformation info) {
+    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, UIDValidity? uid_validity,
+        MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
         this.path = path;
         
         readonly = Trillian.UNKNOWN;
-        properties = new Imap.FolderProperties(null, info.attrs);
+        properties = new Imap.FolderProperties(uid_validity, info.attrs);
     }
     
     public override Geary.FolderPath get_path() {
@@ -46,7 +47,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         this.readonly = Trillian.from_boolean(readonly);
         properties.uid_validity = mailbox.uid_validity;
         
-        notify_opened();
+        notify_opened(Geary.Folder.OpenState.REMOTE);
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -79,7 +80,11 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
+        MessageSet msg_set = (count != -1)
+            ? new MessageSet.range(low, count)
+            : new MessageSet.range_to_highest(low);
+        
+        return yield mailbox.list_set_async(msg_set, fields, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,

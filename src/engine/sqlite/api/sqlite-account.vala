@@ -7,6 +7,7 @@
 public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
     private MailDatabase db;
     private FolderTable folder_table;
+    private ImapFolderPropertiesTable folder_properties_table;
     private MessageTable message_table;
     
     public Account(Geary.Credentials cred) {
@@ -19,6 +20,7 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         }
         
         folder_table = db.get_folder_table();
+        folder_properties_table = db.get_imap_folder_properties_table();
         message_table = db.get_message_table();
     }
     
@@ -42,20 +44,21 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
     
     public async void clone_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
         throws Error {
-        int64 parent_id = yield fetch_parent_id_async(folder.get_path(), cancellable);
-        yield folder_table.create_async(new FolderRow(folder_table, folder.get_path().basename,
-            parent_id), cancellable);
-    }
-    
-    public async void clone_many_folders_async(Gee.Collection<Geary.Folder> folders,
-        Cancellable? cancellable = null) throws Error {
-        Gee.List<FolderRow> rows = new Gee.ArrayList<FolderRow>();
-        foreach (Geary.Folder folder in folders) {
-            int64 parent_id = yield fetch_parent_id_async(folder.get_path(), cancellable);
-            rows.add(new FolderRow(db.get_folder_table(), folder.get_path().basename, parent_id));
-        }
+        Geary.Imap.Folder imap_folder = (Geary.Imap.Folder) folder;
+        Geary.Imap.FolderProperties? imap_folder_properties = (Geary.Imap.FolderProperties?)
+            imap_folder.get_properties();
         
-        yield folder_table.create_many_async(rows, cancellable);
+        // properties *must* be available to perform a clone
+        assert(imap_folder_properties != null);
+        
+        int64 parent_id = yield fetch_parent_id_async(folder.get_path(), cancellable);
+        
+        int64 folder_id = yield folder_table.create_async(new FolderRow(folder_table,
+            imap_folder.get_path().basename, parent_id), cancellable);
+        
+        yield folder_properties_table.create_async(
+            new ImapFolderPropertiesRow.from_imap_properties(folder_properties_table, folder_id,
+                imap_folder_properties));
     }
     
     public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
@@ -75,11 +78,14 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         
         Gee.Collection<Geary.Folder> folders = new Gee.ArrayList<Geary.Sqlite.Folder>();
         foreach (FolderRow row in rows) {
+            ImapFolderPropertiesRow? properties = yield folder_properties_table.fetch_async(row.id,
+                cancellable);
+            
             Geary.FolderPath path = (parent != null)
                 ? parent.get_child(row.name)
                 : new Geary.FolderRoot(row.name, "/", Geary.Imap.Folder.CASE_SENSITIVE);
             
-            folders.add(new Geary.Sqlite.Folder(db, row, path));
+            folders.add(new Geary.Sqlite.Folder(db, row, properties, path));
         }
         
         return folders;
@@ -105,7 +111,10 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         if (row == null)
             throw new EngineError.NOT_FOUND("%s not found in local database", path.to_string());
         
-        return new Geary.Sqlite.Folder(db, row, path);
+        ImapFolderPropertiesRow? properties = yield folder_properties_table.fetch_async(row.id,
+            cancellable);
+        
+        return new Geary.Sqlite.Folder(db, row, properties, path);
     }
     
     public async bool has_message_id_async(Geary.RFC822.MessageID message_id, out int count,

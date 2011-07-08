@@ -98,6 +98,19 @@ public class Geary.Imap.ClientSessionManager {
         return (results.get_count() > 0) ? results.get_all()[0] : null;
     }
     
+    public async Geary.Imap.StatusResults status_async(string path, StatusDataType[] types,
+        Cancellable? cancellable = null) throws Error {
+        ClientSession session = yield get_authorized_session(cancellable);
+        
+        StatusResults results = StatusResults.decode(yield session.send_command_async(
+            new StatusCommand(session.generate_tag(), path, types), cancellable));
+        
+        if (results.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
+        
+        return results;
+    }
+    
     public async Mailbox select_mailbox(string path, Cancellable? cancellable = null) throws Error {
         return yield select_examine_mailbox(path, true, cancellable);
     }

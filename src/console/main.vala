@@ -91,7 +91,8 @@ class ImapConsole : Gtk.Window {
         "exit",
         "quit",
         "gmail",
-        "keepalive"
+        "keepalive",
+        "status"
     };
     
     private void exec(string input) {
@@ -178,6 +179,10 @@ class ImapConsole : Gtk.Window {
                     
                     case "keepalive":
                         keepalive(cmd, args);
+                    break;
+                    
+                    case "status":
+                        folder_status(cmd, args);
                     break;
                     
                     default:
@@ -388,6 +393,28 @@ class ImapConsole : Gtk.Window {
         try {
             cx.send_async.end(result);
             status("Fetched");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
+    private void folder_status(string cmd, string[] args) throws Error {
+        check_min_connected(cmd, args, 2, "<folder> <data-item...>");
+        
+        status("Status %s".printf(args[0]));
+        
+        Geary.Imap.StatusDataType[] data_items = new Geary.Imap.StatusDataType[0];
+        for (int ctr = 1; ctr < args.length; ctr++)
+            data_items += Geary.Imap.StatusDataType.decode(args[ctr]);
+        
+        cx.send_async.begin(new Geary.Imap.StatusCommand(cx.generate_tag(), args[0], data_items),
+            null, on_get_status);
+    }
+    
+    private void on_get_status(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Get status");
         } catch (Error err) {
             exception(err);
         }

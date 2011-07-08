@@ -17,13 +17,13 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
      * -1 if not specified.
      */
     public int unseen { get; private set; }
-    public UID? uid_validity { get; private set; }
+    public UIDValidity? uid_validity { get; private set; }
     public Flags? flags { get; private set; }
     public Flags? permanentflags { get; private set; }
     public bool readonly { get; private set; }
     
     private SelectExamineResults(StatusResponse status_response, int exists, int recent, int unseen,
-        UID? uidvalidity, Flags? flags, Flags? permanentflags, bool readonly) {
+        UIDValidity? uidvalidity, Flags? flags, Flags? permanentflags, bool readonly) {
         base (status_response);
         
         this.exists = exists;
@@ -41,7 +41,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
         int exists = -1;
         int recent = -1;
         int unseen = -1;
-        UID? uidvalidity = null;
+        UIDValidity? uidvalidity = null;
         UID? uidnext = null;
         MessageFlags? flags = null;
         MessageFlags? permanentflags = null;
@@ -75,7 +75,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
                             break;
                             
                             case ResponseCodeType.UIDVALIDITY:
-                                uidvalidity = new UID(
+                                uidvalidity = new UIDValidity(
                                     ok_response.response_code.get_as_string(1).as_int());
                             break;
                             

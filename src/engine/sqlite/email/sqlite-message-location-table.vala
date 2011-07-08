@@ -29,18 +29,29 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
     }
     
     /**
-     * low is one-based.
+     * low is one-based.  If count is -1, all messages starting at low are returned.
      */
     public async Gee.List<MessageLocationRow>? list_async(int64 folder_id, int low, int count,
         Cancellable? cancellable = null) throws Error {
         assert(low >= 1);
+        assert(count >= 0 || count == -1);
         
-        SQLHeavy.Query query = db.prepare(
-            "SELECT id, message_id, position FROM MessageLocationTable WHERE folder_id = ? "
-            + "ORDER BY position LIMIT ? OFFSET ?");
-        query.bind_int64(0, folder_id);
-        query.bind_int(1, count);
-        query.bind_int(2, low - 1);
+        SQLHeavy.Query query;
+        if (count >= 0) {
+            query = db.prepare(
+                "SELECT id, message_id, position FROM MessageLocationTable WHERE folder_id = ? "
+                + "ORDER BY position LIMIT ? OFFSET ?");
+            query.bind_int64(0, folder_id);
+            query.bind_int(1, count);
+            query.bind_int(2, low - 1);
+        } else {
+            // count == -1
+            query = db.prepare(
+                "SELECT id, message_id, position FROM MessageLocationTable WHERE folder_id = ? "
+                + "ORDER BY position OFFSET ?");
+            query.bind_int64(0, folder_id);
+            query.bind_int(1, low - 1);
+        }
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
         if (results.finished)
@@ -103,7 +114,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "SELECT id, message_id, position FROM MessageLocationTable WHERE folder_id = ? "
             + "AND position = ?");
         query.bind_int64(0, folder_id);
-        query.bind_int64(1, position);
+        query.bind_int(1, position);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
         if (results.finished)

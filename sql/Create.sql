@@ -69,8 +69,7 @@ CREATE TABLE ImapFolderPropertiesTable (
     id INTEGER PRIMARY KEY,
     folder_id INTEGER UNIQUE REFERENCES FolderTable ON DELETE CASCADE,
     uid_validity INTEGER,
-    supports_children INTEGER,
-    is_openable INTEGER
+    attributes TEXT
 );
 
 CREATE INDEX ImapFolderPropertiesTableFolderIDIndex ON ImapFolderPropertiesTable(folder_id);
@@ -82,13 +81,7 @@ CREATE INDEX ImapFolderPropertiesTableFolderIDIndex ON ImapFolderPropertiesTable
 CREATE TABLE ImapMessagePropertiesTable (
     id INTEGER PRIMARY KEY,
     message_id INTEGER UNIQUE REFERENCES MessageTable ON DELETE CASCADE,
-    answered INTEGER,
-    deleted INTEGER,
-    draft INTEGER,
-    flagged INTEGER,
-    recent INTEGER,
-    seen INTEGER,
-    all_flags TEXT
+    flags TEXT
 );
 
 CREATE INDEX ImapMessagePropertiesTableMessageIDIndex ON ImapMessagePropertiesTable(message_id);

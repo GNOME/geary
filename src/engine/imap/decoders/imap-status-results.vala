@@ -15,14 +15,14 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
      */
     public int recent { get; private set; }
     public UID? uidnext { get; private set; }
-    public UID? uidvalidity { get; private set; }
+    public UIDValidity? uidvalidity { get; private set; }
     /**
      * -1 if not set.
      */
     public int unseen { get; private set; }
     
     public StatusResults(StatusResponse status_response, string mailbox, int messages, int recent,
-        UID? uidnext, UID? uidvalidity, int unseen) {
+        UID? uidnext, UIDValidity? uidvalidity, int unseen) {
         base (status_response);
         
         this.mailbox = mailbox;
@@ -54,7 +54,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
         int messages = -1;
         int recent = -1;
         UID? uidnext = null;
-        UID? uidvalidity = null;
+        UIDValidity? uidvalidity = null;
         int unseen = -1;
         
         for (int ctr = 0; ctr < values.get_count(); ctr += 2) {
@@ -76,7 +76,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
                     break;
                     
                     case StatusDataType.UIDVALIDITY:
-                        uidvalidity = new UID(valuep.as_int());
+                        uidvalidity = new UIDValidity(valuep.as_int());
                     break;
                     
                     case StatusDataType.UNSEEN:

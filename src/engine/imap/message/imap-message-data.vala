@@ -25,6 +25,12 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
     }
 }
 
+public class Geary.Imap.UIDValidity : Geary.Common.Int64MessageData, Geary.Imap.MessageData {
+    public UIDValidity(int64 value) {
+        base (value);
+    }
+}
+
 public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.MessageData {
     public MessageNumber(int value) {
         base (value);
@@ -32,6 +38,8 @@ public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.
 }
 
 public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData {
+    public int size { get { return list.size; } }
+    
     private Gee.Set<Flag> list;
     
     public Flags(Gee.Collection<Flag> flags) {
@@ -45,6 +53,14 @@ public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.Me
     
     public Gee.Set<Flag> get_all() {
         return list.read_only_view;
+    }
+    
+    /**
+     * Returns the flags in serialized form, which is each flag separated by a space (legal in
+     * IMAP, as flags must be atoms and atoms prohibit spaces).
+     */
+    public virtual string serialize() {
+        return to_string();
     }
     
     public override string to_string() {
@@ -79,11 +95,31 @@ public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
         
         return new MessageFlags(list);
     }
+    
+    public static MessageFlags deserialize(string str) {
+        string[] tokens = str.split(" ");
+        
+        Gee.Collection<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
+        foreach (string token in tokens)
+            flags.add(new MessageFlag(token));
+        
+        return new MessageFlags(flags);
+    }
 }
 
 public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
     public MailboxAttributes(Gee.Collection<MailboxAttribute> attrs) {
         base (attrs);
+    }
+    
+    public static MailboxAttributes deserialize(string str) {
+        string[] tokens = str.split(" ");
+        
+        Gee.Collection<MailboxAttribute> attrs = new Gee.ArrayList<MailboxAttribute>();
+        foreach (string token in tokens)
+            attrs.add(new MailboxAttribute(token));
+        
+        return new MailboxAttributes(attrs);
     }
 }
 

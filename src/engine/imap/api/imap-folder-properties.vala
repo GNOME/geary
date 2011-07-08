@@ -5,13 +5,13 @@
  */
 
 public class Geary.Imap.FolderProperties : Geary.FolderProperties {
-    public UID? uid_validity { get; set; }
+    public UIDValidity? uid_validity { get; set; }
     public MailboxAttributes attrs { get; private set; }
     public Trillian supports_children { get; private set; }
     public Trillian has_children { get; private set; }
     public Trillian is_openable { get; private set; }
     
-    public FolderProperties(UID? uid_validity, MailboxAttributes attrs) {
+    public FolderProperties(UIDValidity? uid_validity, MailboxAttributes attrs) {
         this.uid_validity = uid_validity;
         this.attrs = attrs;
         

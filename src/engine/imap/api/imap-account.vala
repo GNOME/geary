@@ -66,7 +66,18 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             if (processed == null)
                 delims.set(path.get_root().basename, mbox.delim);
             
-            folders.add(new Geary.Imap.Folder(session_mgr, path, mbox));
+            UIDValidity? uid_validity = null;
+            if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT)) {
+                try {
+                    StatusResults results = yield session_mgr.status_async(path.get_fullpath(),
+                        { StatusDataType.UIDVALIDITY }, cancellable);
+                    uid_validity = results.uidvalidity;
+                } catch (Error status_err) {
+                    message("Unable to fetch UID Validity for %s: %s", path.to_string(), status_err.message);
+                }
+            }
+            
+            folders.add(new Geary.Imap.Folder(session_mgr, path, uid_validity, mbox));
         }
         
         return folders;
@@ -93,7 +104,14 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             if (mbox == null)
                 throw_not_found(path);
             
-            return new Geary.Imap.Folder(session_mgr, processed, mbox);
+            UIDValidity? uid_validity = null;
+            if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT)) {
+                StatusResults results = yield session_mgr.status_async(processed.get_fullpath(),
+                    { StatusDataType.UIDVALIDITY }, cancellable);
+                uid_validity = results.uidvalidity;
+            }
+            
+            return new Geary.Imap.Folder(session_mgr, processed, uid_validity, mbox);
         } catch (ImapError err) {
             if (err is ImapError.SERVER_ERROR)
                 throw_not_found(path);

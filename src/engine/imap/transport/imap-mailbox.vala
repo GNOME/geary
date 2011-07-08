@@ -8,7 +8,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     public string name { get; private set; }
     public int count { get; private set; }
     public bool is_readonly { get; private set; }
-    public UID uid_validity { get; private set; }
+    public UIDValidity uid_validity { get; private set; }
     
     private SelectedContext context;
     
@@ -203,7 +203,7 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     public int exists { get; protected set; }
     public int recent { get; protected set; }
     public bool is_readonly { get; protected set; }
-    public UID uid_validity { get; protected set; }
+    public UIDValidity uid_validity { get; protected set; }
     
     public signal void exists_changed(int exists);
     

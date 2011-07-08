@@ -33,20 +33,11 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
             query.bind_null(1);
     }
     
-    public async void create_async(FolderRow row, Cancellable? cancellable = null) throws Error {
+    public async int64 create_async(FolderRow row, Cancellable? cancellable = null) throws Error {
         SQLHeavy.Query query = create_query();
         create_binding(query, row);
         
-        yield query.execute_insert_async(cancellable);
-    }
-    
-    public async void create_many_async(Gee.Collection<FolderRow> rows, Cancellable? cancellable = null)
-        throws Error {
-        SQLHeavy.Query query = create_query();
-        foreach (FolderRow row in rows) {
-            create_binding(query, row);
-            query.execute_insert();
-        }
+        return yield query.execute_insert_async(cancellable);
     }
     
     public async Gee.List<FolderRow> list_async(int64 parent_id, Cancellable? cancellable = null)

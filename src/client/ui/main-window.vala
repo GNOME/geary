@@ -93,7 +93,7 @@ public class MainWindow : Gtk.Window {
             else
                 debug("no folders");
         } catch (Error err) {
-            error("%s", err.message);
+            warning("%s", err.message);
         }
     }
     
