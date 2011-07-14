@@ -6,6 +6,8 @@
 
 public class MessageViewer : Gtk.TextView {
     public MessageViewer() {
+        editable = false;
+        cursor_visible = false;
     }
 }
 
