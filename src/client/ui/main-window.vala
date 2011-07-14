@@ -237,13 +237,10 @@ public class MainWindow : Gtk.Window {
     }
     
     private void on_message_selected(Geary.Email? email) {
-        if (email == null) {
-            message_buffer.set_text("");
-            
-            return;
-        }
+        message_buffer.clear();
         
-        do_select_message.begin(email, on_select_message_completed);
+        if (email != null)
+            do_select_message.begin(email, on_select_message_completed);
     }
     
     private async void do_select_message(Geary.Email email) throws Error {
@@ -253,13 +250,10 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        Geary.Email full = yield current_folder.fetch_email_async(email.location.position,
-            Geary.Email.Field.HEADER | Geary.Email.Field.BODY);
+        Geary.Email for_buffer = yield current_folder.fetch_email_async(email.location.position,
+            MessageBuffer.REQUIRED_FIELDS);
         
-        Geary.Memory.AbstractBuffer buffer = full.get_message().get_first_mime_part_of_content_type(
-            "text/plain");
-        
-        message_buffer.set_text(buffer.to_utf8());
+        message_buffer.display_email(for_buffer);
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {

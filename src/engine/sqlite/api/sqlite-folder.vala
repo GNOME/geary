@@ -178,7 +178,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder {
                 to_string());
         }
         
-        if (!message_row.fields.is_set(required_fields)) {
+        if (!message_row.fields.fulfills(required_fields)) {
             throw new EngineError.INCOMPLETE_MESSAGE(
                 "Message at position %d in folder %s only fulfills %Xh fields", position, to_string(),
                 message_row.fields);
