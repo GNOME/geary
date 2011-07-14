@@ -5,5 +5,9 @@
  */
 
 public abstract class Geary.EmailProperties : Object {
+    public EmailProperties() {
+    }
+    
+    public abstract bool is_unread();
 }
 

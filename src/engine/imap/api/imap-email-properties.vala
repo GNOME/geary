@@ -10,5 +10,9 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties {
     public EmailProperties(MessageFlags flags) {
         this.flags = flags;
     }
+    
+    public override bool is_unread() {
+        return !flags.contains(MessageFlag.SEEN);
+    }
 }
 

@@ -5,6 +5,9 @@
  */
 
 public class MessageListStore : Gtk.TreeStore {
+    public const Geary.Email.Field REQUIRED_FIELDS =
+        Geary.Email.Field.ENVELOPE | Geary.Email.Field.PROPERTIES;
+    
     public enum Column {
         DATE,
         FROM,
@@ -56,17 +59,28 @@ public class MessageListStore : Gtk.TreeStore {
         set_sort_column_id(TreeSortable.DEFAULT_SORT_COLUMN_ID, Gtk.SortType.DESCENDING);
     }
     
-    // The Email should've been fetched with Geary.Email.Field.ENVELOPE, at least.
+    // The Email should've been fetched with REQUIRED_FIELDS.
     public void append_envelope(Geary.Email envelope) {
         assert(envelope.fields.fulfills(Geary.Email.Field.ENVELOPE));
         
         Gtk.TreeIter iter;
         append(out iter, null);
         
+        string? pre = null;;
+        string? post = null;
+        if (envelope.properties != null) {
+            pre = envelope.properties.is_unread() ? "<b>" : null;
+            post = envelope.properties.is_unread() ? "</b>" : null;
+        }
+        
+        string date = to_markup(Date.pretty_print(envelope.date.value), pre, post);
+        string from = to_markup(envelope.from[0].get_short_address(), pre, post);
+        string subject = to_markup(envelope.subject.value, pre, post);
+        
         set(iter,
-            Column.DATE, Date.pretty_print(envelope.date.value),
-            Column.FROM, envelope.from[0].get_short_address(),
-            Column.SUBJECT, envelope.subject.value,
+            Column.DATE, date,
+            Column.FROM, from,
+            Column.SUBJECT, subject,
             Column.MESSAGE_OBJECT, envelope
         );
     }
@@ -95,6 +109,14 @@ public class MessageListStore : Gtk.TreeStore {
         
         // stabilize sort by using the mail's position, which is always unique in a folder
         return aenvelope.location.position - benvelope.location.position;
+    }
+    
+    private static string to_markup(string str, string? pre = null, string? post = null) {
+        return "%s%s%s".printf(
+            (pre != null) ? pre : "",
+            Markup.escape_text(str),
+            (post != null) ? post : ""
+        );
     }
 }
 

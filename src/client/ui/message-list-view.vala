@@ -13,10 +13,10 @@ public class MessageListView : Gtk.TreeView {
         Gtk.CellRendererText date_renderer = new Gtk.CellRendererText();
         date_renderer.xalign = 1.0f;
         append_column(create_column(MessageListStore.Column.FROM, new Gtk.CellRendererText(),
-            "text", 200));
+            "markup", 200));
         append_column(create_column(MessageListStore.Column.SUBJECT, new Gtk.CellRendererText(),
-            "text", 400));
-        append_column(create_column(MessageListStore.Column.DATE, date_renderer, "text", 100));
+            "markup", 400));
+        append_column(create_column(MessageListStore.Column.DATE, date_renderer, "markup", 100));
         
         get_selection().changed.connect(on_selection_changed);
     }

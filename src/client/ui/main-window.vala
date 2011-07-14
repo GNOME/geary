@@ -214,7 +214,7 @@ public class MainWindow : Gtk.Window {
         
         yield current_folder.open_async(true);
         
-        current_folder.lazy_list_email_async(1, 1000, Geary.Email.Field.ENVELOPE,
+        current_folder.lazy_list_email_async(1, 1000, MessageListStore.REQUIRED_FIELDS,
             on_list_email_ready);
     }
     
