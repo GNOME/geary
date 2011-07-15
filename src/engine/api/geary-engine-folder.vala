@@ -537,19 +537,21 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // (any messages that may be between the user's high and the remote's high, assuming that
         // all messages in local_count are contiguous from the highest email position, which is
         // taken care of my prepare_opened_folder_async())
-        int local_low = remote_count - local_count + 1;
-        if (low >= local_low)
+        int high = (low + (count - 1)).clamp(1, remote_count);
+        int local_low = (local_count > 0) ? (remote_count - local_count) + 1 : remote_count;
+        if (high >= local_low)
             return remote_count;
         
-        int prefetch_count = local_low - low;
+        int prefetch_count = local_low - high;
         
-        debug("prefetching %d (%d) for %s", low, prefetch_count, to_string());
+        debug("prefetching %d (%d) for %s (local_low=%d)", high, prefetch_count, to_string(),
+            local_low);
         
         // Use PROPERTIES as they're the most useful information for certain actions (such as
         // finding duplicates when we start using INTERNALDATE and RFC822.SIZE) and cheap to fetch
         // TODO: Consider only fetching their UID; would need Geary.Email.Field.LOCATION (or\
         // perhaps NONE is considered a call for just the UID).
-        Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(low, prefetch_count,
+        Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(high, prefetch_count,
             Geary.Email.Field.PROPERTIES, cancellable);
         if (list == null || list.size != prefetch_count) {
             throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
