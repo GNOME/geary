@@ -84,7 +84,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             assert(position >= 1);
             
             query.bind_int64(0, folder_id);
-            query.bind_int(1, position);
+            query.bind_int(1, position - 1);
             
             SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
             if (results.finished)
@@ -153,7 +153,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
             + "ORDER BY ordering LIMIT 1 OFFSET ?");
         query.bind_int64(0, folder_id);
-        query.bind_int(1, position);
+        query.bind_int(1, position - 1);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
         if (results.finished)

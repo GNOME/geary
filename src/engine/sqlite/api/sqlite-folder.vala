@@ -199,14 +199,16 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
                 to_string());
         }
         
-        if (!message_row.fields.fulfills(required_fields)) {
+        // see if the message row fulfills everything but properties, which are held in
+        // separate table
+        if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
             throw new EngineError.INCOMPLETE_MESSAGE(
                 "Message at position %d in folder %s only fulfills %Xh fields", position, to_string(),
                 message_row.fields);
         }
         
         ImapMessagePropertiesRow? properties = null;
-        if (required_fields.fulfills(Geary.Email.Field.PROPERTIES)) {
+        if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
             properties = yield imap_message_properties_table.fetch_async(location_row.message_id,
                 cancellable);
         }

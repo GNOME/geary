@@ -51,6 +51,10 @@ public class Geary.Email : Object {
         public inline bool fulfills(Field required_fields) {
             return is_all_set(required_fields);
         }
+        
+        public inline bool require(Field required_fields) {
+            return is_all_set(required_fields);
+        }
     }
     
     public Geary.EmailLocation location { get; private set; }
