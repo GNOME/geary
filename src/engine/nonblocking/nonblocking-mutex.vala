@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Common.NonblockingMutex {
+public class Geary.NonblockingMutex {
     private NonblockingSemaphore spinlock = new NonblockingSemaphore(false);
     private bool locked = false;
     private int next_token = 0;

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Common.NonblockingMailbox<G> : Object {
+public class Geary.NonblockingMailbox<G> : Object {
     public int size { get { return queue.size; } }
     
     private Gee.List<G> queue;

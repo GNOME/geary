@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Common.NonblockingSemaphore {
+public class Geary.NonblockingSemaphore {
     private class Pending {
         public SourceFunc cb;
         public Cancellable? cancellable;

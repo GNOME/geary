@@ -12,8 +12,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private RemoteFolder? remote_folder = null;
     private LocalFolder local_folder;
     private bool opened = false;
-    private Geary.Common.NonblockingSemaphore remote_semaphore =
-        new Geary.Common.NonblockingSemaphore(true);
+    private Geary.NonblockingSemaphore remote_semaphore = new Geary.NonblockingSemaphore(true);
     
     public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         this.remote = remote;
@@ -128,7 +127,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // this method to complete (much like open_async())
         if (remote_folder != null) {
             yield remote_semaphore.wait_async();
-            remote_semaphore = new Geary.Common.NonblockingSemaphore(true);
+            remote_semaphore = new Geary.NonblockingSemaphore(true);
             
             remote_folder.updated.disconnect(on_remote_updated);
             RemoteFolder? folder = remote_folder;

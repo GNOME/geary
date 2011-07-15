@@ -37,12 +37,7 @@ def build(bld):
 	'../engine/api/geary-remote-interfaces.vala',
 	'../engine/api/geary-special-folder.vala',
 	
-	'../engine/common/common-interfaces.vala',
 	'../engine/common/common-message-data.vala',
-	'../engine/common/common-nonblocking-mailbox.vala',
-	'../engine/common/common-nonblocking-mutex.vala',
-	'../engine/common/common-nonblocking-semaphore.vala',
-	'../engine/common/common-string.vala',
 	
 	'../engine/imap/api/imap-account.vala',
 	'../engine/imap/api/imap-email-location.vala',
@@ -84,6 +79,10 @@ def build(bld):
 	'../engine/imap/transport/imap-serializable.vala',
 	'../engine/imap/transport/imap-serializer.vala',
 	
+	'../engine/nonblocking/nonblocking-mailbox.vala',
+	'../engine/nonblocking/nonblocking-mutex.vala',
+	'../engine/nonblocking/nonblocking-semaphore.vala',
+	
 	'../engine/rfc822/rfc822-error.vala',
 	'../engine/rfc822/rfc822-mailbox-addresses.vala',
 	'../engine/rfc822/rfc822-mailbox-address.vala',
@@ -112,8 +111,10 @@ def build(bld):
 	'../engine/state/state-machine.vala',
 	'../engine/state/state-mapping.vala',
 	
+	'../engine/util/util-interfaces.vala',
 	'../engine/util/util-memory.vala',
 	'../engine/util/util-reference-semantics.vala',
+	'../engine/util/util-string.vala',
 	'../engine/util/util-trillian.vala'
 	]
 	

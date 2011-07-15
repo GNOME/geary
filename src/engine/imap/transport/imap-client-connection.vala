@@ -16,7 +16,7 @@ public class Geary.Imap.ClientConnection {
     private SocketConnection? cx = null;
     private Serializer? ser = null;
     private Deserializer? des = null;
-    private Geary.Common.NonblockingMutex send_mutex = new Geary.Common.NonblockingMutex();
+    private Geary.NonblockingMutex send_mutex = new Geary.NonblockingMutex();
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;

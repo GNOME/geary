@@ -10,7 +10,7 @@ public class Geary.Imap.ClientSessionManager {
     private Credentials cred;
     private uint default_port;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
-    private Geary.Common.NonblockingMutex sessions_mutex = new Geary.Common.NonblockingMutex();
+    private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
     private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
     private int keepalive_sec = ClientSession.DEFAULT_KEEPALIVE_SEC;
