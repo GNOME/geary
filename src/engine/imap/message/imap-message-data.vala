@@ -23,6 +23,10 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
     public UID(int64 value) {
         base (value);
     }
+    
+    public bool is_valid() {
+        return value >= 1;
+    }
 }
 
 public class Geary.Imap.UIDValidity : Geary.Common.Int64MessageData, Geary.Imap.MessageData {

@@ -56,6 +56,13 @@ def configure(conf):
 		args='--cflags --libs')
 	
 	conf.check_cfg(
+		package='sqlite3',
+		uselib_store='SQLITE',
+		atleast_version='3.7.5',
+		mandatory=1,
+		args='--cflags --libs')
+	
+	conf.check_cfg(
 		package='sqlheavy-0.1',
 		uselib_store='SQLHEAVY',
 		atleast_version='0.0.1',

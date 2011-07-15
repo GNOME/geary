@@ -398,8 +398,6 @@ public class Geary.Imap.ClientSession {
         
         if (params.err != null)
             throw params.err;
-        
-        debug("Connected to %s: %s", to_full_string(), connect_response.to_string());
     }
     
     private uint on_connect(uint state, uint event, void *user, Object? object) {
@@ -476,8 +474,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_connect_denied(uint state, uint event, void *user) {
-        debug("Connection to %s denied by server", to_full_string());
-        
         return State.BROKEN;
     }
     
@@ -494,8 +490,6 @@ public class Geary.Imap.ClientSession {
         
         if (params.err != null)
             throw params.err;
-        
-        debug("Logged in to %s: %s", to_full_string(), params.cmd_response.to_string());
     }
     
     private uint on_login(uint state, uint event, void *user, Object? object) {
@@ -521,8 +515,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_login_failed(uint state, uint event, void *user) {
-        debug("Login to %s failed", to_full_string());
-        
         return State.NOAUTH;
     }
     
@@ -815,8 +807,6 @@ public class Geary.Imap.ClientSession {
         
         if (params.err != null)
             throw params.err;
-        
-        debug("Logged out of %s: %s", to_string(), params.cmd_response.to_string());
     }
     
     private uint on_logout(uint state, uint event, void *user, Object? object) {

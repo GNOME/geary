@@ -5,12 +5,21 @@
  */
 
 public class Geary.Imap.MessageSet {
-    public string value { get; private set; }
+    public bool is_uid { get; private set; default = false; }
+    
+    private string value { get; private set; }
     
     public MessageSet(int msg_num) {
-        assert(msg_num >= 0);
+        assert(msg_num > 0);
         
         value = "%d".printf(msg_num);
+    }
+    
+    public MessageSet.uid(UID uid) {
+        assert(uid.value > 0);
+        
+        value = "%lld".printf(uid.value);
+        is_uid = true;
     }
     
     public MessageSet.range(int low_msg_num, int count) {
@@ -22,10 +31,25 @@ public class Geary.Imap.MessageSet {
             : "%d".printf(low_msg_num);
     }
     
+    public MessageSet.uid_range(UID low, UID high) {
+        assert(low.value > 0);
+        assert(high.value > 0);
+        
+        value = "%lld:%lld".printf(low.value, high.value);
+        is_uid = true;
+    }
+    
     public MessageSet.range_to_highest(int low_msg_num) {
         assert(low_msg_num > 0);
         
         value = "%d:*".printf(low_msg_num);
+    }
+    
+    public MessageSet.uid_range_to_highest(UID low) {
+        assert(low.value > 0);
+        
+        value = "%lld:*".printf(low.value);
+        is_uid = true;
     }
     
     public MessageSet.sparse(int[] msg_nums) {
@@ -68,6 +92,11 @@ public class Geary.Imap.MessageSet {
         value = custom;
     }
     
+    public MessageSet.uid_custom(string custom) {
+        value = custom;
+        is_uid = true;
+    }
+    
     // TODO: It would be more efficient to look for runs in the numbers and form the set specifier
     // with them.
     private static string build_sparse_range(int[] msg_nums) {
@@ -85,6 +114,16 @@ public class Geary.Imap.MessageSet {
         }
         
         return builder.str;
+    }
+    
+    public Parameter to_parameter() {
+        // Message sets are not quoted, even if they use an atom-special character (this *might*
+        // be a Gmailism...)
+        return new UnquotedStringParameter(value);
+    }
+    
+    public string to_string() {
+        return value;
     }
 }
 

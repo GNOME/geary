@@ -5,7 +5,7 @@
  */
 
 public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
-    private MailDatabase db;
+    private ImapDatabase db;
     private FolderTable folder_table;
     private ImapFolderPropertiesTable folder_properties_table;
     private MessageTable message_table;
@@ -14,7 +14,7 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         base ("SQLite account for %s".printf(cred.to_string()));
         
         try {
-            db = new MailDatabase(cred.user);
+            db = new ImapDatabase(cred.user);
         } catch (Error err) {
             error("Unable to open database: %s", err.message);
         }
@@ -58,6 +58,27 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         
         yield folder_properties_table.create_async(
             new ImapFolderPropertiesRow.from_imap_properties(folder_properties_table, folder_id,
+                imap_folder_properties));
+    }
+    
+    public async void update_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
+        throws Error {
+        Geary.Imap.Folder imap_folder = (Geary.Imap.Folder) folder;
+        Geary.Imap.FolderProperties? imap_folder_properties = (Geary.Imap.FolderProperties?)
+            imap_folder.get_properties();
+        
+        // properties *must* be available
+        assert(imap_folder_properties != null);
+        
+        int64 parent_id = yield fetch_parent_id_async(folder.get_path(), cancellable);
+        
+        FolderRow? row = yield folder_table.fetch_async(parent_id, folder.get_path().basename,
+            cancellable);
+        if (row == null)
+            throw new EngineError.NOT_FOUND("Can't find in local store %s", folder.get_path().to_string());
+        
+        yield folder_properties_table.update_async(row.id,
+            new ImapFolderPropertiesRow.from_imap_properties(folder_properties_table, row.id,
                 imap_folder_properties));
     }
     

@@ -36,7 +36,7 @@ public class Geary.Email : Object {
             return (this & required_fields) == required_fields;
         }
         
-        public inline bool is_set(Field required_fields) {
+        public inline bool is_any_set(Field required_fields) {
             return (this & required_fields) != 0;
         }
         

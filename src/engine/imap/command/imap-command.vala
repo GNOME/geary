@@ -15,7 +15,7 @@ public class Geary.Imap.Command : RootParameters {
         this.args = args;
         
         add(tag);
-        add(new StringParameter(name));
+        add(new UnquotedStringParameter(name));
         if (args != null) {
             foreach (string arg in args)
                 add(new StringParameter(arg));

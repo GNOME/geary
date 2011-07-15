@@ -56,6 +56,13 @@ public class Geary.Imap.Serializer {
         }
     }
     
+    /**
+     * This will push the string to IMAP as-is.  Use only if you absolutely know what you're doing.
+     */
+    public void push_unquoted_string(string str) throws Error {
+        douts.put_string(str);
+    }
+    
     public void push_space() throws Error {
         douts.put_byte(' ', null);
     }

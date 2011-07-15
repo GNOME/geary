@@ -11,7 +11,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         FIELDS,
         
         DATE_FIELD,
-        DATE_INT64,
+        DATE_TIME_T,
         
         FROM_FIELD,
         SENDER,
@@ -70,7 +70,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         query.execute();
         
-        if (row.fields.is_set(Geary.Email.Field.DATE)) {
+        if (row.fields.is_any_set(Geary.Email.Field.DATE)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET date_field=?, date_time_t=? WHERE id=?");
             query.bind_string(0, row.date);
@@ -80,7 +80,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.execute();
         }
         
-        if (row.fields.is_set(Geary.Email.Field.ORIGINATORS)) {
+        if (row.fields.is_any_set(Geary.Email.Field.ORIGINATORS)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET from_field=?, sender=?, reply_to=? WHERE id=?");
             query.bind_string(0, row.from);
@@ -91,7 +91,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.execute();
         }
         
-        if (row.fields.is_set(Geary.Email.Field.RECEIVERS)) {
+        if (row.fields.is_any_set(Geary.Email.Field.RECEIVERS)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET to_field=?, cc=?, bcc=? WHERE id=?");
             query.bind_string(0, row.to);
@@ -102,7 +102,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.execute();
         }
         
-        if (row.fields.is_set(Geary.Email.Field.REFERENCES)) {
+        if (row.fields.is_any_set(Geary.Email.Field.REFERENCES)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET message_id=?, in_reply_to=? WHERE id=?");
             query.bind_string(0, row.message_id);
@@ -112,7 +112,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.execute();
         }
         
-        if (row.fields.is_set(Geary.Email.Field.SUBJECT)) {
+        if (row.fields.is_any_set(Geary.Email.Field.SUBJECT)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET subject=? WHERE id=?");
             query.bind_string(0, row.subject);
@@ -121,7 +121,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.execute();
         }
         
-        if (row.fields.is_set(Geary.Email.Field.HEADER)) {
+        if (row.fields.is_any_set(Geary.Email.Field.HEADER)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET header=? WHERE id=?");
             query.bind_string(0, row.header);
@@ -130,7 +130,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.execute();
         }
         
-        if (row.fields.is_set(Geary.Email.Field.BODY)) {
+        if (row.fields.is_any_set(Geary.Email.Field.BODY)) {
             query = transaction.prepare(
                 "UPDATE MessageTable SET body=? WHERE id=?");
             query.bind_string(0, row.body);

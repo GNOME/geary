@@ -50,7 +50,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         
         if ((fields & Geary.Email.Field.DATE) != 0) {
             date = fetch_string_for(result, MessageTable.Column.DATE_FIELD);
-            date_time_t = (time_t) fetch_int64_for(result, MessageTable.Column.DATE_INT64);
+            date_time_t = (time_t) fetch_int64_for(result, MessageTable.Column.DATE_TIME_T);
         }
         
         if ((fields & Geary.Email.Field.ORIGINATORS) != 0) {

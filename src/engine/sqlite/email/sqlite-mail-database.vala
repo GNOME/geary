@@ -39,36 +39,5 @@ public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
             ? location_table
             : (MessageLocationTable) add_table(new MessageLocationTable(this, heavy_table));
     }
-    
-    // TODO: This belongs in a subclass.
-    public Geary.Sqlite.ImapMessageLocationPropertiesTable get_imap_message_location_table() {
-        SQLHeavy.Table heavy_table;
-        ImapMessageLocationPropertiesTable? imap_location_table = get_table(
-            "ImapMessageLocationPropertiesTable", out heavy_table) as ImapMessageLocationPropertiesTable;
-        
-        return (imap_location_table != null)
-            ? imap_location_table
-            : (ImapMessageLocationPropertiesTable) add_table(new ImapMessageLocationPropertiesTable(this, heavy_table));
-    }
-    
-    // TODO: This belongs in a subclass.
-    public Geary.Sqlite.ImapFolderPropertiesTable get_imap_folder_properties_table() {
-        SQLHeavy.Table heavy_table;
-        ImapFolderPropertiesTable? imap_folder_properties_table = get_table(
-            "ImapFolderPropertiesTable", out heavy_table) as ImapFolderPropertiesTable;
-        
-        return imap_folder_properties_table 
-            ?? (ImapFolderPropertiesTable) add_table(new ImapFolderPropertiesTable(this, heavy_table));
-    }
-    
-    // TODO: This belongs in a subclass.
-    public Geary.Sqlite.ImapMessagePropertiesTable get_imap_message_properties_table() {
-        SQLHeavy.Table heavy_table;
-        ImapMessagePropertiesTable? imap_message_properties_table = get_table(
-            "ImapMessagePropertiesTable", out heavy_table) as ImapMessagePropertiesTable;
-        
-        return imap_message_properties_table 
-            ?? (ImapMessagePropertiesTable) add_table(new ImapMessagePropertiesTable(this, heavy_table));
-    }
 }
 

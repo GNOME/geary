@@ -7,8 +7,11 @@
 public class Geary.Imap.Mailbox : Geary.SmartReference {
     public string name { get; private set; }
     public int count { get; private set; }
+    public int recent { get; private set; }
+    public int unseen { get; private set; }
     public bool is_readonly { get; private set; }
-    public UIDValidity uid_validity { get; private set; }
+    public UIDValidity? uid_validity { get; private set; }
+    public UID? uid_next { get; private set; }
     
     private SelectedContext context;
     
@@ -26,8 +29,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         name = context.name;
         count = context.exists;
+        recent = context.recent;
+        unseen = context.unseen;
         is_readonly = context.is_readonly;
         uid_validity = context.uid_validity;
+        uid_next = context.uid_next;
     }
     
     public async Gee.List<Geary.Email>? list_set_async(MessageSet msg_set, Geary.Email.Field fields,
@@ -36,20 +42,27 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
         if (fields == Geary.Email.Field.NONE)
-            throw new EngineError.BAD_PARAMETERS("No email fields specify for list");
+            throw new EngineError.BAD_PARAMETERS("No email fields specified");
         
-        CommandResponse resp = yield context.session.send_command_async(
-            new FetchCommand(context.session.generate_tag(), msg_set,
-                fields_to_fetch_data_types(fields)), cancellable);
+        Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
+        fields_to_fetch_data_types(fields, data_type_list);
         
-        if (resp.status_response.status != Status.OK)
-            throw new ImapError.SERVER_ERROR("Server error: %s", resp.to_string());
+        FetchCommand fetch_cmd = new FetchCommand(context.session.generate_tag(), msg_set,
+            Arrays.list_to_array<FetchDataType>(data_type_list));
+        
+        CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
+        
+        if (resp.status_response.status != Status.OK) {
+            throw new ImapError.SERVER_ERROR("Server error for %s: %s", fetch_cmd.to_string(),
+                resp.to_string());
+        }
         
         Gee.List<Geary.Email> msgs = new Gee.ArrayList<Geary.Email>();
         
         FetchResults[] results = FetchResults.decode(resp);
         foreach (FetchResults res in results) {
             UID? uid = res.get_data(FetchDataType.UID) as UID;
+            // see fields_to_fetch_data_types() for why this is guaranteed
             assert(uid != null);
             
             Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, uid));
@@ -65,12 +78,18 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
-        CommandResponse resp = yield context.session.send_command_async(
-            new FetchCommand(context.session.generate_tag(), new MessageSet(msg_num),
-                fields_to_fetch_data_types(fields)), cancellable);
+        Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
+        fields_to_fetch_data_types(fields, data_type_list);
         
-        if (resp.status_response.status != Status.OK)
-            throw new ImapError.SERVER_ERROR("Server error: %s", resp.to_string());
+        FetchCommand fetch_cmd = new FetchCommand(context.session.generate_tag(), new MessageSet(msg_num),
+            Arrays.list_to_array<FetchDataType>(data_type_list));
+        
+        CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
+        
+        if (resp.status_response.status != Status.OK) {
+            throw new ImapError.SERVER_ERROR("Server error for %s: %s", fetch_cmd.to_string(),
+                resp.to_string());
+        }
         
         FetchResults[] results = FetchResults.decode(resp);
         if (results.length != 1)
@@ -102,8 +121,15 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         disconnected(local);
     }
     
-    private static FetchDataType[] fields_to_fetch_data_types(Geary.Email.Field fields) {
+    private static void fields_to_fetch_data_types(Geary.Email.Field fields,
+        Gee.List<FetchDataType> data_type_list) {
+        // store FetchDataTypes in a set because the same data type may be requested multiple times
+        // by different fields (i.e. ENVELOPE)
         Gee.HashSet<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
+        
+        // UID is always fetched
+        data_type_set.add(FetchDataType.UID);
+        
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             switch (fields & field) {
                 case Geary.Email.Field.DATE:
@@ -123,7 +149,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 break;
                 
                 case Geary.Email.Field.PROPERTIES:
+                    // Gmail doesn't like using FAST when combined with other fetch types, so
+                    // do this manually
                     data_type_set.add(FetchDataType.FLAGS);
+                    data_type_set.add(FetchDataType.INTERNALDATE);
+                    data_type_set.add(FetchDataType.RFC822_SIZE);
                 break;
                 
                 case Geary.Email.Field.NONE:
@@ -135,20 +165,16 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             }
         }
         
-        assert(data_type_set.size > 0);
-        FetchDataType[] data_types = new FetchDataType[data_type_set.size + 1];
-        int ctr = 0;
-        foreach (FetchDataType data_type in data_type_set)
-            data_types[ctr++] = data_type;
-        
-        // UID is always fetched, no matter what the caller requests
-        data_types[ctr] = FetchDataType.UID;
-        
-        return data_types;
+        data_type_list.add_all(data_type_set);
     }
     
     private static void fetch_results_to_email(FetchResults res, Geary.Email.Field fields,
         Geary.Email email) {
+        // accumulate these to submit Imap.EmailProperties all at once
+        Geary.Imap.MessageFlags? flags = null;
+        InternalDate? internaldate = null;
+        RFC822.Size? rfc822_size = null;
+        
         foreach (FetchDataType data_type in res.get_all_types()) {
             MessageData? data = res.get_data(data_type);
             if (data == null)
@@ -182,8 +208,16 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                     email.set_message_body((RFC822.Text) data);
                 break;
                 
+                case FetchDataType.RFC822_SIZE:
+                    rfc822_size = (RFC822.Size) data;
+                break;
+                
                 case FetchDataType.FLAGS:
-                    email.set_email_properties(new Imap.EmailProperties((MessageFlags) data));
+                    flags = (MessageFlags) data;
+                break;
+                
+                case FetchDataType.INTERNALDATE:
+                    internaldate = (InternalDate) data;
                 break;
                 
                 default:
@@ -191,6 +225,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 break;
             }
         }
+        
+        if (flags != null && internaldate != null && rfc822_size != null)
+            email.set_email_properties(new Geary.Imap.EmailProperties(flags, internaldate, rfc822_size));
     }
 }
 
@@ -202,8 +239,10 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     public string name { get; protected set; }
     public int exists { get; protected set; }
     public int recent { get; protected set; }
+    public int unseen { get; protected set; }
     public bool is_readonly { get; protected set; }
-    public UIDValidity uid_validity { get; protected set; }
+    public UIDValidity? uid_validity { get; protected set; }
+    public UID? uid_next { get; protected set; }
     
     public signal void exists_changed(int exists);
     
@@ -220,7 +259,9 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
         is_readonly = results.readonly;
         exists = results.exists;
         recent = results.recent;
+        unseen = results.unseen;
         uid_validity = results.uid_validity;
+        uid_next = results.uid_next;
         
         session.current_mailbox_changed.connect(on_session_mailbox_changed);
         session.unsolicited_exists.connect(on_unsolicited_exists);

@@ -61,7 +61,7 @@ public class MessageListStore : Gtk.TreeStore {
     
     // The Email should've been fetched with REQUIRED_FIELDS.
     public void append_envelope(Geary.Email envelope) {
-        assert(envelope.fields.fulfills(Geary.Email.Field.ENVELOPE));
+        assert(envelope.fields.fulfills(REQUIRED_FIELDS));
         
         Gtk.TreeIter iter;
         append(out iter, null);

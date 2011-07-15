@@ -116,12 +116,12 @@ public interface Geary.Folder : Object {
      * from 1 to n.
      *
      * Note that this only returns the number of messages available to the backing medium.  In the
-     * case of the local store, this might be less than the number on the network server.  Folders
+     * case of the local store, this might differ from the number on the network server.  Folders
      * created by Engine are aggregating objects and will return the true count.  However, this
      * might require a round-trip to the server.
      *
-     * Also note that local folders may be sparsely populated.  get_count() returns the last position
-     * available, but not all emails from 1 to n may be available.
+     * Also note that local folders may be sparsely populated.  get_email_count() returns the last
+     * position available, but not all emails from 1 to n may be available.
      *
      * The Folder must be opened prior to attempting this operation.
      */
@@ -147,12 +147,20 @@ public interface Geary.Folder : Object {
     /**
      * Returns a list of messages that fulfill the required_fields flags starting at the low
      * position and moving up to (low + count).  If count is -1, the returned list starts at low
-     * and proceeds to all available emails.  The returned list is not guaranteed to be in any
-     * particular order.
+     * and proceeds to all available emails.  If low is -1, the *last* (most recent) 'count' emails
+     * are returned.  If both low and count are -1, it's no different than calling with low as
+     * 1 and count -1, that is, all emails are returned.  (See normalize_span_specifiers() for
+     * a utility function that handles all aspects of these requirements.)
+     *
+     * The returned list is not guaranteed to be in any particular order.  The position index
+     * (starting from low) *is* ordered, however, from oldest to newest (in terms of receipt by the 
+     * SMTP server, not necessarily the Sent: field), so if the caller wants the latest emails,
+     * they should calculate low by subtracting from get_email_count() or set low to -1 and use
+     * count to fetch the last n emails.
      *
      * If any position in low to (low + count) are out of range, only the email within range are
-     * reported.  No error is thrown.  This allows callers to blindly request the first n emails
-     * in a folder without determining the count first.
+     * reported.  No error is thrown.  This allows callers to blindly request the first or last n
+     * emails in a folder without determining the count first.
      *
      * Note that this only returns the emails with the required fields that are available to the
      * Folder's backing medium.  The local store may have fewer or incomplete messages, meaning that
@@ -163,13 +171,9 @@ public interface Geary.Folder : Object {
      * and fetch from the network only what it needs, so that the caller gets a full list.
      * Note that this means the call may require a round-trip to the server.
      *
-     * TODO: Delayed listing methods (where what's available are reported via a callback after the
-     * async method has completed) will be implemented in the future for more responsive behavior.
-     * These may be operations only available from Folders returned by Engine.
-     *
      * The Folder must be opened prior to attempting this operation.
      *
-     * low is one-based.
+     * low is one-based, unless -1 is specified, as explained above.
      */
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
@@ -193,8 +197,7 @@ public interface Geary.Folder : Object {
      * only the emails within range are reported.  The list is not guaranteed to be in any
      * particular order.
      *
-     * See the notes in list_email_async() regarding issues about local versus remote stores and
-     * possible future additions to the API.
+     * See the notes in list_email_async() regarding issues about local versus remote stores.
      *
      * The Folder must be opened prior to attempting this operation.
      *
@@ -227,6 +230,56 @@ public interface Geary.Folder : Object {
      */
     public abstract async Geary.Email fetch_email_async(int position, Geary.Email.Field required_fields,
         Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Removes the email from the folder, determined by its EmailLocation.  If the email location
+     * is invalid for any reason, EngineError.NOT_FOUND is thrown.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+        throws Error;
+    
+    /**
+     * check_span_specifiers() verifies that the span specifiers match the requirements set by
+     * list_email_async() and lazy_list_email_async().  If not, this method throws
+     * EngineError.BAD_PARAMETERS.
+     */
+    protected static void check_span_specifiers(int low, int count) throws EngineError {
+        if ((low < 1 && low != -1) || (count < 0 && count != -1))
+            throw new EngineError.BAD_PARAMETERS("low=%d count=%d", low, count);
+    }
+    
+    /**
+     * normalize_span_specifiers() deals with the varieties of span specifiers that can be passed
+     * to list_email_async() and lazy_list_email_async().  Note that this function is for
+     * implementations to convert 'low' and 'count' into positive values (1-based in the case of
+     * low) that are within an appropriate range.
+     *
+     * The caller should plug in 'low' and 'count' passed from the user as well as the total
+     * number of emails available (i.e. the complete span is 1..total).
+     */
+    protected static void normalize_span_specifiers(ref int low, ref int count, int total) 
+        throws EngineError {
+        check_span_specifiers(low, count);
+        
+        if (total < 0)
+            throw new EngineError.BAD_PARAMETERS("total=%d", total);
+        
+        // if both are -1, it's no different than low=1 count=-1 (that is, return all email)
+        if (low == -1 && count == -1)
+            low = 1;
+        
+        // if count is -1, it's like a globbed star (return everything starting at low)
+        if (count == -1 || total == 0)
+            count = total;
+            
+        if (low == -1)
+            low = (total - count).clamp(1, total);
+        
+        if ((low + count - 1) > total)
+            count = (total - low + 1).clamp(1, total);
+    }
     
     /**
      * Used for debugging.  Should not be used for user-visible labels.

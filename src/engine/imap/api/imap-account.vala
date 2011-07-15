@@ -66,18 +66,17 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             if (processed == null)
                 delims.set(path.get_root().basename, mbox.delim);
             
-            UIDValidity? uid_validity = null;
+            StatusResults? status = null;
             if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT)) {
                 try {
-                    StatusResults results = yield session_mgr.status_async(path.get_fullpath(),
-                        { StatusDataType.UIDVALIDITY }, cancellable);
-                    uid_validity = results.uidvalidity;
+                    status = yield session_mgr.status_async(path.get_fullpath(),
+                        StatusDataType.all(), cancellable);
                 } catch (Error status_err) {
-                    message("Unable to fetch UID Validity for %s: %s", path.to_string(), status_err.message);
+                    message("Unable to fetch status for %s: %s", path.to_string(), status_err.message);
                 }
             }
             
-            folders.add(new Geary.Imap.Folder(session_mgr, path, uid_validity, mbox));
+            folders.add(new Geary.Imap.Folder(session_mgr, path, status, mbox));
         }
         
         return folders;
@@ -104,14 +103,17 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             if (mbox == null)
                 throw_not_found(path);
             
-            UIDValidity? uid_validity = null;
+            StatusResults? status = null;
             if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT)) {
-                StatusResults results = yield session_mgr.status_async(processed.get_fullpath(),
-                    { StatusDataType.UIDVALIDITY }, cancellable);
-                uid_validity = results.uidvalidity;
+                try {
+                    status = yield session_mgr.status_async(processed.get_fullpath(),
+                        StatusDataType.all(), cancellable);
+                } catch (Error status_err) {
+                    debug("Unable to get status for %s: %s", processed.to_string(), status_err.message);
+                }
             }
             
-            return new Geary.Imap.Folder(session_mgr, processed, uid_validity, mbox);
+            return new Geary.Imap.Folder(session_mgr, processed, status, mbox);
         } catch (ImapError err) {
             if (err is ImapError.SERVER_ERROR)
                 throw_not_found(path);

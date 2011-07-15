@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
+public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary.Imap.FolderExtensions {
     public const bool CASE_SENSITIVE = true;
     
     private ClientSessionManager session_mgr;
@@ -14,14 +14,17 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
     private Imap.FolderProperties properties;
     private Mailbox? mailbox = null;
     
-    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, UIDValidity? uid_validity,
+    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusResults? status,
         MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
         this.path = path;
         
         readonly = Trillian.UNKNOWN;
-        properties = new Imap.FolderProperties(uid_validity, info.attrs);
+        
+        properties = (status != null)
+            ? new Imap.FolderProperties.status(status , info.attrs)
+            : new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
     public override Geary.FolderPath get_path() {
@@ -44,8 +47,11 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
             cancellable);
         // TODO: hook up signals
         
+        // update with new information
         this.readonly = Trillian.from_boolean(readonly);
-        properties.uid_validity = mailbox.uid_validity;
+        
+        properties = new Imap.FolderProperties(mailbox.count, mailbox.recent, mailbox.unseen,
+            mailbox.uid_validity, mailbox.uid_next, properties.attrs);
         
         notify_opened(Geary.Folder.OpenState.REMOTE);
     }
@@ -65,6 +71,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
+        // TODO: Need to monitor folder for updates to the message count
         return mailbox.count;
     }
     
@@ -80,11 +87,10 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        MessageSet msg_set = (count != -1)
-            ? new MessageSet.range(low, count)
-            : new MessageSet.range_to_highest(low);
+        // TODO: Need to use a monitored count
+        normalize_span_specifiers(ref low, ref count, mailbox.count);
         
-        return yield mailbox.list_set_async(msg_set, fields, cancellable);
+        return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
@@ -95,6 +101,18 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         return yield mailbox.list_set_async(new MessageSet.sparse(by_position), fields, cancellable);
     }
     
+    public async Gee.List<Geary.Email>? list_email_uid_async(Geary.Imap.UID? low,
+        Geary.Imap.UID? high, Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+        
+        MessageSet msg_set = (high != null)
+            ? new MessageSet.uid_range((low != null) ? low : new Geary.Imap.UID(1), high)
+            : new MessageSet.uid_range_to_highest(low);
+        
+        return yield mailbox.list_set_async(msg_set, fields, cancellable);
+    }
+    
     public override async Geary.Email fetch_email_async(int position, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
@@ -103,6 +121,18 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         // TODO: If position out of range, throw EngineError.NOT_FOUND
         
         return yield mailbox.fetch_async(position, fields, cancellable);
+    }
+    
+    public override async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+        throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+        
+        Geary.Imap.UID? uid = ((Geary.Imap.EmailLocation) email.location).uid;
+        if (uid == null)
+            throw new EngineError.NOT_FOUND("Removing email requires UID");
+        
+        throw new EngineError.READONLY("IMAP currently read-only");
     }
 }
 

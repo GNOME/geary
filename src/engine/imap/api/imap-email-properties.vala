@@ -12,9 +12,13 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties {
     public bool recent { get; private set; }
     public bool seen { get; private set; }
     public MessageFlags flags { get; private set; }
+    public InternalDate? internaldate { get; private set; }
+    public RFC822.Size? rfc822_size { get; private set; }
     
-    public EmailProperties(MessageFlags flags) {
+    public EmailProperties(MessageFlags flags, InternalDate? internaldate, RFC822.Size? rfc822_size) {
         this.flags = flags;
+        this.internaldate = internaldate;
+        this.rfc822_size = rfc822_size;
         
         answered = flags.contains(MessageFlag.ANSWERED);
         deleted = flags.contains(MessageFlag.DELETED);
@@ -22,10 +26,6 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties {
         flagged = flags.contains(MessageFlag.FLAGGED);
         recent = flags.contains(MessageFlag.RECENT);
         seen = flags.contains(MessageFlag.SEEN);
-    }
-    
-    public bool is_empty() {
-        return (flags.size == 0);
     }
     
     public override bool is_unread() {

@@ -67,6 +67,7 @@ public class Geary.Imap.Deserializer {
     private unowned uint8[]? current_buffer = null;
     private bool flow_controlled = true;
     private int ins_priority = Priority.DEFAULT;
+    private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
     
     public signal void flow_control(bool xon);
     
@@ -287,6 +288,10 @@ public class Geary.Imap.Deserializer {
         context = child;
     }
     
+    private char get_current_context_terminator() {
+        return (context is ResponseCode) ? ']' : ')';
+    }
+    
     private State pop() {
         ListParameter? parent = context.get_parent();
         if (parent == null) {
@@ -329,7 +334,8 @@ public class Geary.Imap.Deserializer {
     private uint on_first_param_char(uint state, uint event, void *user) {
         // look for opening characters to special parameter formats, otherwise jump to atom
         // handler (i.e. don't drop this character in the case of atoms)
-        switch (*((unichar *) user)) {
+        unichar ch = *((unichar *) user);
+        switch (ch) {
             case '[':
                 // open response code
                 ResponseCode response_code = new ResponseCode(context);
@@ -350,13 +356,13 @@ public class Geary.Imap.Deserializer {
                 
                 return State.START_PARAM;
             
-            case ')':
-            case ']':
-                // close list or response code
-                return pop();
-            
             default:
-                return on_tag_or_atom_char(State.ATOM, event, user);
+                // if current context's terminator, close the context, otherwise deserializer is
+                // now "in" an Atom
+                if (ch == get_current_context_terminator())
+                    return pop();
+                else
+                    return on_tag_or_atom_char(State.ATOM, event, user);
         }
     }
     
@@ -369,12 +375,18 @@ public class Geary.Imap.Deserializer {
         
         unichar ch = *((unichar *) user);
         
+        // get the terminator for this context and re-use the atom_special_exceptions array to
+        // pass to DataFormat.is_atom_special() (this means not allocating a new array on the heap
+        // for each call here, which isn't a problem because the FSM is non-reentrant)
+        char terminator = get_current_context_terminator();
+        atom_specials_exceptions[1] = terminator;
+        
         // Atom specials includes space and close-parens, but those are handled in particular ways
         // while in the ATOM state, so they're excluded here.  Like atom specials, the space is 
         // treated in a particular way for tags, but unlike atom, the close-parens character is not.
         if (state == State.TAG && DataFormat.is_tag_special(ch, " "))
             return state;
-        else if (state == State.ATOM && DataFormat.is_atom_special(ch, " )"))
+        else if (state == State.ATOM && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
             return state;
         
         // message flag indicator is only legal at start of atom
@@ -390,7 +402,7 @@ public class Geary.Imap.Deserializer {
         
         // close-parens/close-square-bracket after an atom indicates end-of-list/end-of-response
         // code
-        if (state == State.ATOM && (ch == ')' || ch == ']')) {
+        if (state == State.ATOM && ch == terminator) {
             save_string_parameter();
             
             return pop();

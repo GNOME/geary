@@ -84,6 +84,9 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async Geary.Email fetch_email_async(int position, Geary.Email.Field required_fields,
         Cancellable? cancellable = null) throws Error;
     
+    public abstract async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+        throws Error;
+    
     public virtual string to_string() {
         return get_path().to_string();
     }

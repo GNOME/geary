@@ -90,11 +90,12 @@ public class Geary.Imap.CloseCommand : Command {
 
 public class Geary.Imap.FetchCommand : Command {
     public const string NAME = "fetch";
+    public const string UID_NAME = "uid fetch";
     
     public FetchCommand(Tag tag, MessageSet msg_set, FetchDataType[] data_items) {
-        base (tag, NAME);
+        base (tag, msg_set.is_uid ? UID_NAME : NAME);
         
-        add(new StringParameter(msg_set.value));
+        add(msg_set.to_parameter());
         
         assert(data_items.length > 0);
         if (data_items.length == 1) {

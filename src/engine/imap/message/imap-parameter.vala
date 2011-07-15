@@ -82,6 +82,21 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     }
 }
 
+/**
+ * This delivers the string to the IMAP server with no quoting or formatting applied.  (Deserializer
+ * will never generate this Parameter.)  This can lead to server errors if misused.  Use only if
+ * absolutely necessary.
+ */
+public class Geary.Imap.UnquotedStringParameter : Geary.Imap.StringParameter {
+    public UnquotedStringParameter(string value) {
+        base (value);
+    }
+    
+    public override async void serialize(Serializer ser) throws Error {
+        ser.push_unquoted_string(value);
+    }
+}
+
 public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
     private Geary.Memory.AbstractBuffer buffer;
     

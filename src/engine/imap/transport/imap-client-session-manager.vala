@@ -161,8 +161,6 @@ public class Geary.Imap.ClientSessionManager {
         Gee.HashSet<SelectedContext> contexts) {
         SelectedContext context = (SelectedContext) semantics;
         
-        debug("Mailbox %s freed, closing select/examine", context.name);
-        
         // last reference to the Mailbox has been dropped, so drop the mailbox and move the
         // ClientSession back to the authorized state
         bool removed = contexts.remove(context);
@@ -174,8 +172,6 @@ public class Geary.Imap.ClientSessionManager {
     
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
-        debug("Creating new session to %s", cred.server);
-        
         ClientSession new_session = new ClientSession(cred.server, default_port);
         new_session.disconnected.connect(on_disconnected);
         
@@ -186,8 +182,6 @@ public class Geary.Imap.ClientSessionManager {
         new_session.enable_keepalives(keepalive_sec);
         
         sessions.add(new_session);
-        
-        debug("Created new session to %s, %d total", cred.server, sessions.size);
         
         return new_session;
     }
@@ -231,8 +225,6 @@ public class Geary.Imap.ClientSessionManager {
     }
     
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
-        debug("Client session %s disconnected: %s", session.to_string(), reason.to_string());
-        
         bool removed = sessions.remove(session);
         assert(removed);
     }

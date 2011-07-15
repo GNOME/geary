@@ -5,6 +5,7 @@
 
 def build(bld):
 	bld.common_src = [
+	'../common/common-arrays.vala',
 	'../common/common-date.vala',
 	'../common/common-intl.vala',
 	'../common/common-yorba-application.vala'
@@ -46,6 +47,7 @@ def build(bld):
 	'../engine/imap/api/imap-account.vala',
 	'../engine/imap/api/imap-email-location.vala',
 	'../engine/imap/api/imap-email-properties.vala',
+	'../engine/imap/api/imap-folder-extensions.vala',
 	'../engine/imap/api/imap-folder-properties.vala',
 	'../engine/imap/api/imap-folder.vala',
 	'../engine/imap/command/imap-command-response.vala',
@@ -100,10 +102,9 @@ def build(bld):
 	'../engine/sqlite/email/sqlite-message-location-table.vala',
 	'../engine/sqlite/email/sqlite-message-row.vala',
 	'../engine/sqlite/email/sqlite-message-table.vala',
+	'../engine/sqlite/imap/sqlite-imap-database.vala',
 	'../engine/sqlite/imap/sqlite-imap-folder-properties-row.vala',
 	'../engine/sqlite/imap/sqlite-imap-folder-properties-table.vala',
-	'../engine/sqlite/imap/sqlite-imap-message-location-properties-row.vala',
-	'../engine/sqlite/imap/sqlite-imap-message-location-properties-table.vala',
 	'../engine/sqlite/imap/sqlite-imap-message-properties-row.vala',
 	'../engine/sqlite/imap/sqlite-imap-message-properties-table.vala',
 	

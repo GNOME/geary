@@ -18,18 +18,20 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
      */
     public int unseen { get; private set; }
     public UIDValidity? uid_validity { get; private set; }
+    public UID? uid_next { get; private set; }
     public Flags? flags { get; private set; }
     public Flags? permanentflags { get; private set; }
     public bool readonly { get; private set; }
     
     private SelectExamineResults(StatusResponse status_response, int exists, int recent, int unseen,
-        UIDValidity? uidvalidity, Flags? flags, Flags? permanentflags, bool readonly) {
+        UIDValidity? uid_validity, UID? uid_next, Flags? flags, Flags? permanentflags, bool readonly) {
         base (status_response);
         
         this.exists = exists;
         this.recent = recent;
         this.unseen = unseen;
         this.uid_validity = uid_validity;
+        this.uid_next = uid_next;
         this.flags = flags;
         this.permanentflags = permanentflags;
         this.readonly = readonly;
@@ -41,8 +43,8 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
         int exists = -1;
         int recent = -1;
         int unseen = -1;
-        UIDValidity? uidvalidity = null;
-        UID? uidnext = null;
+        UIDValidity? uid_validity = null;
+        UID? uid_next = null;
         MessageFlags? flags = null;
         MessageFlags? permanentflags = null;
         
@@ -75,12 +77,12 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
                             break;
                             
                             case ResponseCodeType.UIDVALIDITY:
-                                uidvalidity = new UIDValidity(
+                                uid_validity = new UIDValidity(
                                     ok_response.response_code.get_as_string(1).as_int());
                             break;
                             
                             case ResponseCodeType.UIDNEXT:
-                                uidnext = new UID(ok_response.response_code.get_as_string(1).as_int());
+                                uid_next = new UID(ok_response.response_code.get_as_string(1).as_int());
                             break;
                             
                             case ResponseCodeType.PERMANENT_FLAGS:
@@ -125,7 +127,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
             throw new ImapError.PARSE_ERROR("Incomplete SELECT/EXAMINE Response: \"%s\"", response.to_string());
         
         return new SelectExamineResults(response.status_response, exists, recent, unseen,
-            uidvalidity, flags, permanentflags, readonly);
+            uid_validity, uid_next, flags, permanentflags, readonly);
     }
 }
 
