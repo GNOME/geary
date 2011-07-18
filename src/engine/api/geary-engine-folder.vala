@@ -192,6 +192,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         int remote_count = yield normalize_email_positions_async(low, count, cancellable);
         normalize_span_specifiers(ref low, ref count, remote_count);
         
+        debug("do_list_email_async: low=%d count=%d remote_count=%d", low, count, remote_count);
+        
         Gee.List<Geary.Email>? local_list = null;
         try {
             local_list = yield local_folder.list_email_async(low, count, required_fields,
@@ -225,7 +227,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // present in local_list; whatever isn't present needs to be fetched
         int[] needed_by_position = new int[0];
         int position = low;
-        for (int index = 0; (index < count) && (position <= (low + count - 1)); position++) {
+        for (int index = 0; (index < count) && (position <= (low + (count - 1))); position++) {
             while ((index < local_list_size) && (local_list[index].location.position < position))
                 index++;
             

@@ -5,10 +5,22 @@
  */
 
 public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
+    private class FolderReference : Geary.SmartReference {
+        public Geary.FolderPath path;
+        
+        public FolderReference(Sqlite.Folder folder, Geary.FolderPath path) {
+            base (folder);
+            
+            this.path = path;
+        }
+    }
+    
     private ImapDatabase db;
     private FolderTable folder_table;
     private ImapFolderPropertiesTable folder_properties_table;
     private MessageTable message_table;
+    private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
+        new Gee.HashMap<Geary.FolderPath, FolderReference>(Hashable.hash_func, Equalable.equal_func);
     
     public Account(Geary.Credentials cred) {
         base ("SQLite account for %s".printf(cred.to_string()));
@@ -80,6 +92,10 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         yield folder_properties_table.update_async(row.id,
             new ImapFolderPropertiesRow.from_imap_properties(folder_properties_table, row.id,
                 imap_folder_properties));
+        
+        FolderReference? folder_ref = folder_refs.get(folder.get_path());
+        if (folder_ref != null)
+            ((Geary.Sqlite.Folder) folder_ref.get_reference()).update_properties(imap_folder_properties);
     }
     
     public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
@@ -106,7 +122,12 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
                 ? parent.get_child(row.name)
                 : new Geary.FolderRoot(row.name, "/", Geary.Imap.Folder.CASE_SENSITIVE);
             
-            folders.add(new Geary.Sqlite.Folder(db, row, properties, path));
+            Geary.Sqlite.Folder? folder = get_sqlite_folder(path);
+            if (folder == null)
+                folder = create_sqlite_folder(row,
+                    (properties != null) ? properties.get_imap_folder_properties() : null, path);
+            
+            folders.add(folder);
         }
         
         return folders;
@@ -128,14 +149,22 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
     
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        // check references table first
+        Geary.Sqlite.Folder? folder = get_sqlite_folder(path);
+        if (folder != null)
+            return folder;
+        
+        // locate in database
         FolderRow? row =  yield folder_table.fetch_descend_async(path.as_list(), cancellable);
         if (row == null)
             throw new EngineError.NOT_FOUND("%s not found in local database", path.to_string());
         
+        // fetch it's IMAP-specific properties
         ImapFolderPropertiesRow? properties = yield folder_properties_table.fetch_async(row.id,
             cancellable);
         
-        return new Geary.Sqlite.Folder(db, row, properties, path);
+        return create_sqlite_folder(row,
+            (properties != null) ? properties.get_imap_folder_properties() : null, path);
     }
     
     public async bool has_message_id_async(Geary.RFC822.MessageID message_id, out int count,
@@ -143,6 +172,34 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
         count = yield message_table.search_message_id_count_async(message_id);
         
         return (count > 0);
+    }
+    
+    private Geary.Sqlite.Folder? get_sqlite_folder(Geary.FolderPath path) {
+        FolderReference? folder_ref = folder_refs.get(path);
+        
+        return (folder_ref != null) ? (Geary.Sqlite.Folder) folder_ref.get_reference() : null;
+    }
+    
+    private Geary.Sqlite.Folder create_sqlite_folder(FolderRow row, Imap.FolderProperties? properties,
+        Geary.FolderPath path) throws Error {
+        // create folder
+        Geary.Sqlite.Folder folder = new Geary.Sqlite.Folder(db, row, properties, path);
+        
+        // build a reference to it
+        FolderReference folder_ref = new FolderReference(folder, path);
+        folder_ref.reference_broken.connect(on_folder_reference_broken);
+        
+        // add to the references table
+        folder_refs.set(folder_ref.path, folder_ref);
+        
+        return folder;
+    }
+    
+    private void on_folder_reference_broken(Geary.SmartReference reference) {
+        FolderReference folder_ref = (FolderReference) reference;
+        
+        // drop from folder references table, all cleaned up
+        folder_refs.unset(folder_ref.path);
     }
 }
 

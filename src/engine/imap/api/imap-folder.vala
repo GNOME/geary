@@ -62,7 +62,6 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         
         mailbox = null;
         readonly = Trillian.UNKNOWN;
-        properties.uid_validity = null;
         
         notify_closed(CloseReason.FOLDER_CLOSED);
     }

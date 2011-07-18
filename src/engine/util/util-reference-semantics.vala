@@ -89,6 +89,10 @@ public abstract class Geary.SmartReference : Object {
             reffed.release();
     }
     
+    public ReferenceSemantics? get_reference() {
+        return reffed;
+    }
+    
     private void on_release_now() {
         reffed.release();
         reffed = null;

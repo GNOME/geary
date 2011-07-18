@@ -5,11 +5,11 @@
  */
 
 public class Geary.Imap.FolderProperties : Geary.FolderProperties {
-    public int messages { get; set; }
-    public int recent { get; set; }
-    public int unseen { get; set; }
-    public UIDValidity? uid_validity { get; set; }
-    public UID? uid_next { get; set; }
+    public int messages { get; private set; }
+    public int recent { get; private set; }
+    public int unseen { get; private set; }
+    public UIDValidity? uid_validity { get; private set; }
+    public UID? uid_next { get; private set; }
     public MailboxAttributes attrs { get; private set; }
     public Trillian supports_children { get; private set; }
     public Trillian has_children { get; private set; }

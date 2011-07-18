@@ -275,10 +275,10 @@ public interface Geary.Folder : Object {
             count = total;
             
         if (low == -1)
-            low = (total - count).clamp(1, total);
+            low = ((total - count) + 1).clamp(1, total);
         
-        if ((low + count - 1) > total)
-            count = (total - low + 1).clamp(1, total);
+        if ((low + (count - 1)) > total)
+            count = ((total - low) + 1).clamp(1, total);
     }
     
     /**

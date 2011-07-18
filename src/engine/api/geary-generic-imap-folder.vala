@@ -33,15 +33,17 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // and both must have their next UID's (it's possible they don't if it's a non-selectable
         // folder)
         if (local_properties.uid_next == null || local_properties.uid_validity == null) {
-            debug("Unable to verify UID next for %s: missing local UID next or validity",
-                get_path().to_string());
+            debug("Unable to verify UID next for %s: missing local UID next (%s) and/or validity (%s)",
+                get_path().to_string(), (local_properties.uid_next == null).to_string(),
+                (local_properties.uid_validity == null).to_string());
             
             return false;
         }
         
         if (remote_properties.uid_next == null || remote_properties.uid_validity == null) {
-            debug("Unable to verify UID next for %s: missing remote UID next or validity",
-                get_path().to_string());
+            debug("Unable to verify UID next for %s: missing remote UID next (%s) and/or validity (%s)",
+                get_path().to_string(), (remote_properties.uid_next == null).to_string(),
+                (remote_properties.uid_validity == null).to_string());
             
             return false;
         }

@@ -7,7 +7,10 @@
 // TODO: This class currently deals with generic email storage as well as IMAP-specific issues; in
 // the future, to support other email services, will need to break this up.
 
-public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Geary.Imap.FolderExtensions {
+public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Geary.Imap.FolderExtensions,
+    Geary.ReferenceSemantics {
+    protected int manual_ref_count { get; protected set; }
+    
     private MailDatabase db;
     private FolderRow folder_row;
     private Geary.Imap.FolderProperties? properties;
@@ -17,11 +20,11 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
     private Geary.FolderPath path;
     private bool opened = false;
     
-    internal Folder(ImapDatabase db, FolderRow folder_row, ImapFolderPropertiesRow? properties,
+    internal Folder(ImapDatabase db, FolderRow folder_row, Geary.Imap.FolderProperties? properties,
         Geary.FolderPath path) throws Error {
         this.db = db;
         this.folder_row = folder_row;
-        this.properties = (properties != null) ? properties.get_imap_folder_properties() : null;
+        this.properties = properties;
         this.path = path;
         
         message_table = db.get_message_table();
@@ -39,7 +42,12 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
     }
     
     public override Geary.FolderProperties? get_properties() {
+        // TODO: TBD: alteration/updated signals for folders
         return properties;
+    }
+    
+    internal void update_properties(Geary.Imap.FolderProperties? properties) {
+        this.properties = properties;
     }
     
     public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
