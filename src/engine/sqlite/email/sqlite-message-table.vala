@@ -68,7 +68,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         query.bind_int(0, row.fields);
         query.bind_int64(1, row.id);
         
-        query.execute();
+        yield query.execute_async(cancellable);
         
         if (row.fields.is_any_set(Geary.Email.Field.DATE)) {
             query = transaction.prepare(
@@ -77,7 +77,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_int64(1, row.date_time_t);
             query.bind_int64(2, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.ORIGINATORS)) {
@@ -88,7 +88,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(2, row.reply_to);
             query.bind_int64(3, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.RECEIVERS)) {
@@ -99,7 +99,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(2, row.bcc);
             query.bind_int64(3, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.REFERENCES)) {
@@ -109,7 +109,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(1, row.in_reply_to);
             query.bind_int64(2, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.SUBJECT)) {
@@ -118,7 +118,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(0, row.subject);
             query.bind_int64(1, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.HEADER)) {
@@ -127,7 +127,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(0, row.header);
             query.bind_int64(1, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.BODY)) {
@@ -136,10 +136,10 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(0, row.body);
             query.bind_int64(1, row.id);
             
-            query.execute();
+            yield query.execute_async(cancellable);
         }
         
-        transaction.commit();
+        yield transaction.commit_async();
     }
     
     public async Gee.List<MessageRow>? list_by_message_id_async(Geary.RFC822.MessageID message_id,
