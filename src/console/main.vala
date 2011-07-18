@@ -92,7 +92,8 @@ class ImapConsole : Gtk.Window {
         "quit",
         "gmail",
         "keepalive",
-        "status"
+        "status",
+        "close"
     };
     
     private void exec(string input) {
@@ -159,6 +160,10 @@ class ImapConsole : Gtk.Window {
                     
                     case "fetch":
                         fetch(cmd, args);
+                    break;
+                    
+                    case "close":
+                        close(cmd, args);
                     break;
                     
                     case "help":
@@ -393,6 +398,23 @@ class ImapConsole : Gtk.Window {
         try {
             cx.send_async.end(result);
             status("Fetched");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
+    private void close(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 0, null);
+        
+        status("Closing");
+        
+        cx.send_async.begin(new Geary.Imap.CloseCommand(cx.generate_tag()), null, on_closed);
+    }
+    
+    private void on_closed(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Closed");
         } catch (Error err) {
             exception(err);
         }
