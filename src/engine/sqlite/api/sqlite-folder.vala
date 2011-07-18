@@ -169,9 +169,11 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
                 continue;
             
             ImapMessagePropertiesRow? properties = null;
-            if (required_fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
+            if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
                 properties = yield imap_message_properties_table.fetch_async(location_row.message_id,
                     cancellable);
+                if (properties == null)
+                    continue;
             }
             
             Geary.Email email = message_row.to_email(new Geary.Imap.EmailLocation(location_row.position,

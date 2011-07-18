@@ -6,19 +6,6 @@
 
 namespace Arrays {
 
-public G[]? list_to_array<G>(Gee.List<G>? list) {
-    if (list == null)
-        return null;
-    
-    int length = list.size;
-    
-    G[] array = new G[length];
-    for (int ctr = 0; ctr < length; ctr++)
-        array[ctr] = list[ctr];
-    
-    return array;
-}
-
 public int int_find_low(int[] ar) {
     assert(ar.length > 0);
     

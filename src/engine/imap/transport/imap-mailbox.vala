@@ -44,11 +44,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (fields == Geary.Email.Field.NONE)
             throw new EngineError.BAD_PARAMETERS("No email fields specified");
         
-        Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
-        fields_to_fetch_data_types(fields, data_type_list);
+        Gee.Set<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
+        fields_to_fetch_data_types(fields, data_type_set);
         
-        FetchCommand fetch_cmd = new FetchCommand(context.session.generate_tag(), msg_set,
-            Arrays.list_to_array<FetchDataType>(data_type_list));
+        FetchCommand fetch_cmd = new FetchCommand.from_collection(context.session.generate_tag(),
+            msg_set, data_type_set);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
@@ -78,11 +78,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
-        Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
-        fields_to_fetch_data_types(fields, data_type_list);
+        Gee.Set<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
+        fields_to_fetch_data_types(fields, data_type_set);
         
-        FetchCommand fetch_cmd = new FetchCommand(context.session.generate_tag(), new MessageSet(msg_num),
-            Arrays.list_to_array<FetchDataType>(data_type_list));
+        FetchCommand fetch_cmd = new FetchCommand.from_collection(context.session.generate_tag(),
+            new MessageSet(msg_num), data_type_set);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
@@ -121,12 +121,10 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         disconnected(local);
     }
     
+    // store FetchDataTypes in a set because the same data type may be requested multiple times
+    // by different fields (i.e. ENVELOPE)
     private static void fields_to_fetch_data_types(Geary.Email.Field fields,
-        Gee.List<FetchDataType> data_type_list) {
-        // store FetchDataTypes in a set because the same data type may be requested multiple times
-        // by different fields (i.e. ENVELOPE)
-        Gee.HashSet<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
-        
+        Gee.Set<FetchDataType> data_type_set) {
         // UID is always fetched
         data_type_set.add(FetchDataType.UID);
         
@@ -164,8 +162,6 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                     assert_not_reached();
             }
         }
-        
-        data_type_list.add_all(data_type_set);
     }
     
     private static void fetch_results_to_email(FetchResults res, Geary.Email.Field fields,

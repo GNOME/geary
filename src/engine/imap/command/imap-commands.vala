@@ -108,6 +108,27 @@ public class Geary.Imap.FetchCommand : Command {
             add(data_item_list);
         }
     }
+    
+    public FetchCommand.from_collection(Tag tag, MessageSet msg_set, Gee.Collection<FetchDataType> data_items) {
+        base (tag, msg_set.is_uid ? UID_NAME : NAME);
+        
+        add(msg_set.to_parameter());
+        
+        assert(data_items.size > 0);
+        if (data_items.size == 1) {
+            foreach (FetchDataType data_type in data_items) {
+                add(data_type.to_parameter());
+                
+                break;
+            }
+        } else {
+            ListParameter data_item_list = new ListParameter(this);
+            foreach (FetchDataType data_item in data_items)
+                data_item_list.add(data_item.to_parameter());
+            
+            add(data_item_list);
+        }
+    }
 }
 
 public class Geary.Imap.StatusCommand : Command {
