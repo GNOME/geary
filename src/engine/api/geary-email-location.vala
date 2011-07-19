@@ -6,9 +6,11 @@
 
 public class Geary.EmailLocation : Object {
     public int position { get; private set; }
+    public int64 ordering { get; private set; }
     
-    public EmailLocation(int position) {
+    public EmailLocation(int position, int64 ordering) {
         this.position = position;
+        this.ordering = ordering;
     }
 }
 

@@ -58,6 +58,7 @@ public class Geary.Email : Object {
     }
     
     public Geary.EmailLocation location { get; private set; }
+    public Geary.EmailIdentifier id { get; private set; }
     
     // DATE
     public Geary.RFC822.Date? date { get; private set; default = null; }
@@ -92,7 +93,12 @@ public class Geary.Email : Object {
     
     private Geary.RFC822.Message? message = null;
     
-    public Email(Geary.EmailLocation location) {
+    public Email(Geary.EmailLocation location, Geary.EmailIdentifier id) {
+        this.location = location;
+        this.id = id;
+    }
+    
+    public void update_location(Geary.EmailLocation location) {
         this.location = location;
     }
     

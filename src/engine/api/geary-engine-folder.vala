@@ -146,7 +146,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
         
-        if (remote_folder != null)
+        if (yield wait_for_remote_to_open())
             return yield remote_folder.get_email_count(cancellable);
         
         return yield local_folder.get_email_count(cancellable);
@@ -189,14 +189,24 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         // normalize the position (ordering) of what's available locally with the situation on
         // the server
-        int remote_count = yield normalize_email_positions_async(low, count, cancellable);
+        int local_count, remote_count;
+        yield normalize_email_positions_async(low, count, out local_count, out remote_count,
+            cancellable);
+        
+        // normalize the arguments to match what's on the remote server
         normalize_span_specifiers(ref low, ref count, remote_count);
         
-        debug("do_list_email_async: low=%d count=%d remote_count=%d", low, count, remote_count);
+        // because the local store caches messages starting from the newest (at the end of the list)
+        // to the earliest fetched by the user, need to adjust the low value to match its offset
+        // and range
+        int local_low = (low - (remote_count - local_count)).clamp(1, local_count);
+        
+        debug("do_list_email_async: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
+            low, count, local_count, remote_count, local_low);
         
         Gee.List<Geary.Email>? local_list = null;
         try {
-            local_list = yield local_folder.list_email_async(low, count, required_fields,
+            local_list = yield local_folder.list_email_async(local_low, count, required_fields,
                 cancellable);
         } catch (Error local_err) {
             if (cb != null)
@@ -206,6 +216,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
         
         int local_list_size = (local_list != null) ? local_list.size : 0;
+        
+        debug("Fetched %d emails from local store for %s", local_list_size, to_string());
         
         if (local_list_size > 0) {
             if (accumulator != null)
@@ -223,16 +235,35 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             return;
         }
         
+        // fixup local email positions to match server's positions
+        if (local_list_size > 0) {
+            foreach (Geary.Email email in local_list) {
+                int new_position = email.location.position + (low - local_low);
+                email.update_location(new Geary.EmailLocation(new_position, email.location.ordering));
+            }
+        }
+        
         // go through the positions from (low) to (low + count) and see if they're not already
         // present in local_list; whatever isn't present needs to be fetched
+        //
+        // TODO: This is inefficient because we can't assume the returned emails are sorted or
+        // contiguous (it's possible local email is present but doesn't fulfill all the fields).
+        // A better search method is probably possible, but this will do for now
         int[] needed_by_position = new int[0];
-        int position = low;
-        for (int index = 0; (index < count) && (position <= (low + (count - 1))); position++) {
-            while ((index < local_list_size) && (local_list[index].location.position < position))
-                index++;
+        for (int position = low; position <= (low + (count - 1)); position++) {
+            bool found = false;
+            for (int ctr = 0; ctr < local_list_size; ctr++) {
+                if (local_list[ctr].location.position == position) {
+                    found = true;
+                    
+                    break;
+                }
+            }
             
-            if (index >= local_list_size || local_list[index].location.position != position)
+            if (!found) {
+                debug("Need email at %d in %s", position, to_string());
                 needed_by_position += position;
+            }
         }
         
         if (needed_by_position.length == 0) {
@@ -299,11 +330,21 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // the server
         int low, high;
         Arrays.int_find_high_low(by_position, out low, out high);
-        yield normalize_email_positions_async(low, high - low + 1, cancellable);
+        
+        int local_count, remote_count;
+        yield normalize_email_positions_async(low, high - low + 1, out local_count, out remote_count,
+            cancellable);
+        
+        int local_offset = (remote_count > local_count) ? (remote_count - local_count - 1) : 0;
+        
+        // Fixup all the positions to match the local store's notions
+        int[] local_by_position = new int[by_position.length];
+        for (int ctr = 0; ctr < by_position.length; ctr++)
+            local_by_position[ctr] = by_position[ctr] - local_offset;
         
         Gee.List<Geary.Email>? local_list = null;
         try {
-            local_list = yield local_folder.list_email_sparse_async(by_position, required_fields,
+            local_list = yield local_folder.list_email_sparse_async(local_by_position, required_fields,
                 cancellable);
         } catch (Error local_err) {
             if (cb != null)
@@ -313,6 +354,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
         
         int local_list_size = (local_list != null) ? local_list.size : 0;
+        
+        // reverse the process, fixing up all the returned messages to match the server's notions
+        if (local_list_size > 0) {
+            foreach (Geary.Email email in local_list) {
+                int new_position = email.location.position + local_offset;
+                email.update_location(new Geary.EmailLocation(new_position, email.location.ordering));
+            }
+        }
         
         if (local_list_size == by_position.length) {
             if (accumulator != null)
@@ -336,8 +385,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         foreach (int position in by_position) {
             bool found = false;
             if (local_list != null) {
-                foreach (Geary.Email email in local_list) {
-                    if (email.location.position == position) {
+                foreach (Geary.Email email2 in local_list) {
+                    if (email2.location.position == position) {
                         found = true;
                         
                         break;
@@ -464,13 +513,13 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return full;
     }
     
-    public override async Geary.Email fetch_email_async(int num, Geary.Email.Field fields,
-        Cancellable? cancellable = null) throws Error {
+    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         
         try {
-            return yield local_folder.fetch_email_async(num, fields, cancellable);
+            return yield local_folder.fetch_email_async(id, fields, cancellable);
         } catch (Error err) {
             // TODO: Better parsing of error; currently merely falling through and trying network
             // for copy
@@ -481,7 +530,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // or it's simply not present.  If it's not present, want to ensure that the Message-ID
         // is requested, as that's a good way to manage duplicate messages in the system
         Geary.Email.Field available_fields;
-        bool is_present = yield local_folder.is_email_present_at(num, out available_fields, cancellable);
+        bool is_present = yield local_folder.is_email_present(id, out available_fields, cancellable);
         if (!is_present)
             fields = fields.set(Geary.Email.Field.REFERENCES);
         
@@ -489,7 +538,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
-        Geary.Email email = yield remote_folder.fetch_email_async(num, fields, cancellable);
+        Geary.Email email = yield remote_folder.fetch_email_async(id, fields, cancellable);
         
         // save to local store
         yield local_folder.update_email_async(email, false, cancellable);
@@ -521,15 +570,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // the database stores entries for the lowest requested email to the highest (newest), which
     // means there can be no gaps between the last in the database and the last on the server.
     // This method takes care of that.
-    //
-    // Returns the email count on remote_folder.
-    private async int normalize_email_positions_async(int low, int count, Cancellable? cancellable)
+    private async void normalize_email_positions_async(int low, int count, out int local_count,
+        out int remote_count, Cancellable? cancellable)
         throws Error {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
-        int local_count = yield local_folder.get_email_count(cancellable);
-        int remote_count = yield remote_folder.get_email_count(cancellable);
+        local_count = yield local_folder.get_email_count(cancellable);
+        remote_count = yield remote_folder.get_email_count(cancellable);
         
         // fixup span specifier
         normalize_span_specifiers(ref low, ref count, remote_count);
@@ -541,7 +589,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         int high = (low + (count - 1)).clamp(1, remote_count);
         int local_low = (local_count > 0) ? (remote_count - local_count) + 1 : remote_count;
         if (high >= local_low)
-            return remote_count;
+            return;
         
         int prefetch_count = local_low - high;
         
@@ -563,8 +611,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             yield local_folder.create_email_async(email, cancellable);
         
         debug("prefetched %d for %s", prefetch_count, to_string());
-        
-        return remote_count;
     }
 }
 

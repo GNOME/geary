@@ -228,8 +228,8 @@ public interface Geary.Folder : Object {
      *
      * position is one-based.
      */
-    public abstract async Geary.Email fetch_email_async(int position, Geary.Email.Field required_fields,
-        Cancellable? cancellable = null) throws Error;
+    public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
      * Removes the email from the folder, determined by its EmailLocation.  If the email location

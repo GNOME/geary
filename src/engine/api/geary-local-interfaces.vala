@@ -24,13 +24,8 @@ public interface Geary.LocalAccount : Object, Geary.Account {
 }
 
 public interface Geary.LocalFolder : Object, Geary.Folder {
-    /**
-     * Unlike the remote store, the local store can be sparsely populated, both by fields within
-     * an email and position (ordering) within the list.  This checks if the email at position
-     * is available.  If it returns true, the available_fields indicate what is stored locally.
-     */
-    public async abstract bool is_email_present_at(int position, out Geary.Email.Field available_fields,
-        Cancellable? cancellable = null) throws Error;
+    public async abstract bool is_email_present(Geary.EmailIdentifier id,
+        out Geary.Email.Field available_fields, Cancellable? cancellable = null) throws Error;
      
     /**
      * Geary allows for a single message to exist in multiple folders.  This method checks if the

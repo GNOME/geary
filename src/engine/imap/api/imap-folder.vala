@@ -112,14 +112,14 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         return yield mailbox.list_set_async(msg_set, fields, cancellable);
     }
     
-    public override async Geary.Email fetch_email_async(int position, Geary.Email.Field fields,
-        Cancellable? cancellable = null) throws Error {
+    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
         // TODO: If position out of range, throw EngineError.NOT_FOUND
         
-        return yield mailbox.fetch_async(position, fields, cancellable);
+        return yield mailbox.fetch_async(((Imap.EmailIdentifier) id).uid, fields, cancellable);
     }
     
     public override async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
@@ -127,7 +127,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        Geary.Imap.UID? uid = ((Geary.Imap.EmailLocation) email.location).uid;
+        Geary.Imap.UID? uid = ((Geary.Imap.EmailIdentifier) email.id).uid;
         if (uid == null)
             throw new EngineError.NOT_FOUND("Removing email requires UID");
         

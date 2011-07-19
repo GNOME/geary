@@ -250,7 +250,7 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        Geary.Email for_buffer = yield current_folder.fetch_email_async(email.location.position,
+        Geary.Email for_buffer = yield current_folder.fetch_email_async(email.id,
             MessageBuffer.REQUIRED_FIELDS);
         
         message_buffer.display_email(for_buffer);

@@ -163,6 +163,21 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             results.fetch_int64(2), position);
     }
     
+    public async MessageLocationRow? fetch_by_ordering_async(int64 folder_id, int64 ordering,
+        Cancellable? cancellable = null) throws Error {
+        SQLHeavy.Query query = db.prepare(
+            "SELECT id, message_id FROM MessageLocationTable WHERE folder_id = ? AND ordering = ? ");
+        query.bind_int64(0, folder_id);
+        query.bind_int64(1, ordering);
+        
+        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        if (results.finished)
+            return null;
+        
+        return new MessageLocationRow(this, results.fetch_int64(0), results.fetch_int64(1),
+            folder_id, ordering, -1);
+    }
+    
     public async int fetch_count_for_folder_async(int64 folder_id, Cancellable? cancellable = null)
         throws Error {
         SQLHeavy.Query query = db.prepare(

@@ -114,9 +114,9 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                 break;
             
             Geary.Imap.UID remote_uid = 
-                ((Geary.Imap.EmailLocation) old_remote[remote_ctr].location).uid;
+                ((Geary.Imap.EmailIdentifier) old_remote[remote_ctr].id).uid;
             Geary.Imap.UID local_uid =
-                ((Geary.Imap.EmailLocation) old_local[local_ctr].location).uid;
+                ((Geary.Imap.EmailIdentifier) old_local[local_ctr].id).uid;
             
             if (remote_uid.value == local_uid.value) {
                 // same, update flags and move on

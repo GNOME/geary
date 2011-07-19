@@ -65,15 +65,17 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             // see fields_to_fetch_data_types() for why this is guaranteed
             assert(uid != null);
             
-            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, uid));
+            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, uid),
+                new Geary.Imap.EmailIdentifier(uid));
             fetch_results_to_email(res, fields, email);
+            
             msgs.add(email);
         }
         
         return (msgs != null && msgs.size > 0) ? msgs : null;
     }
     
-    public async Geary.Email fetch_async(int msg_num, Geary.Email.Field fields,
+    public async Geary.Email fetch_async(Geary.Imap.UID uid, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
@@ -81,8 +83,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         Gee.Set<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
         fields_to_fetch_data_types(fields, data_type_set);
         
+        // no need to fetch the UID we're asking for
+        data_type_set.remove(FetchDataType.UID);
+        
         FetchCommand fetch_cmd = new FetchCommand.from_collection(context.session.generate_tag(),
-            new MessageSet(msg_num), data_type_set);
+            new MessageSet.uid(uid), data_type_set);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
@@ -95,15 +100,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (results.length != 1)
             throw new ImapError.SERVER_ERROR("Too many responses from server: %d", results.length);
         
-        if (results[0].msg_num != msg_num) {
-            throw new ImapError.SERVER_ERROR("Server returns message #%d, requested %d",
-                results[0].msg_num, msg_num);
-        }
-        
-        UID? uid = results[0].get_data(FetchDataType.UID) as UID;
-        assert(uid != null);
-        
-        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(results[0].msg_num, uid));
+        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(results[0].msg_num, uid),
+            new Geary.Imap.EmailIdentifier(uid));
         fetch_results_to_email(results[0], fields, email);
         
         return email;
