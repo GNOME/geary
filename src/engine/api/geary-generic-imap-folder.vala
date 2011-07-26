@@ -60,21 +60,41 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         // if same, no problem-o
         if (local_properties.uid_next.value != remote_properties.uid_next.value) {
-            debug("UID next changed: %lld -> %lld", local_properties.uid_next.value,
+            debug("UID next changed for %s: %lld -> %lld", to_string(), local_properties.uid_next.value,
                 remote_properties.uid_next.value);
             
-            // fetch everything from the last seen UID (+1) to the current next UID
+            // fetch everything from the last seen UID (+1) to the current next UID that's not
+            // already in the local store (since the uidnext field isn't reported by NOOP or IDLE,
+            // it's possible these were fetched the last time the folder was selected)
+            //
             // TODO: Could break this fetch up in chunks if it helps
-            Gee.List<Geary.Email>? newest = yield imap_remote_folder.list_email_uid_async(
-                local_properties.uid_next, null, Geary.Email.Field.PROPERTIES, cancellable);
+            int64 uid_start_value = local_properties.uid_next.value;
+            for (;;) {
+                Geary.EmailIdentifier start_id = new Imap.EmailIdentifier(new Imap.UID(uid_start_value));
+                Geary.Email.Field available_fields;
+                if (!yield imap_local_folder.is_email_present(start_id, out available_fields, cancellable))
+                    break;
+                
+                debug("already have UID %lld in %s local store", uid_start_value, to_string());
+                
+                if (++uid_start_value >= remote_properties.uid_next.value)
+                    break;
+            }
             
-            if (newest != null && newest.size > 0) {
-                debug("saving %d newest emails", newest.size);
-                foreach (Geary.Email email in newest) {
-                    try {
-                        yield local_folder.create_email_async(email, cancellable);
-                    } catch (Error newest_err) {
-                        debug("Unable to save new email in %s: %s", to_string(), newest_err.message);
+            if (uid_start_value < remote_properties.uid_next.value) {
+                Imap.UID uid_start = new Imap.UID(uid_start_value);
+                
+                Gee.List<Geary.Email>? newest = yield imap_remote_folder.list_email_uid_async(
+                    uid_start, null, Geary.Email.Field.PROPERTIES, cancellable);
+                
+                if (newest != null && newest.size > 0) {
+                    debug("saving %d newest emails in %s", newest.size, to_string());
+                    foreach (Geary.Email email in newest) {
+                        try {
+                            yield local_folder.create_email_async(email, cancellable);
+                        } catch (Error newest_err) {
+                            debug("Unable to save new email in %s: %s", to_string(), newest_err.message);
+                        }
                     }
                 }
             }

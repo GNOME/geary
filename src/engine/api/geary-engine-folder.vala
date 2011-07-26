@@ -9,8 +9,9 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     private RemoteAccount remote;
     private LocalAccount local;
-    private RemoteFolder? remote_folder = null;
     private LocalFolder local_folder;
+    private RemoteFolder? remote_folder = null;
+    private int remote_count = -1;
     private bool opened = false;
     private Geary.NonblockingSemaphore remote_semaphore = new Geary.NonblockingSemaphore(true);
     
@@ -18,15 +19,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
-        
-        local_folder.updated.connect(on_local_updated);
     }
     
     ~EngineFolder() {
         if (opened)
             warning("Folder %s destroyed without closing", to_string());
-        
-        local_folder.updated.disconnect(on_local_updated);
     }
     
     public override Geary.FolderPath get_path() {
@@ -89,9 +86,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 // update flags, properties, etc.
                 yield local.update_folder_async(folder, cancellable);
                 
+                // signals
+                folder.list_appended.connect(on_remote_list_appended);
+                
+                // state
+                remote_count = yield folder.get_email_count_async(cancellable);
+                
                 // all set; bless the remote folder as opened
                 remote_folder = folder;
-                remote_folder.updated.connect(on_remote_updated);
             } else {
                 debug("Unable to prepare remote folder %s: prepare_opened_file() failed", to_string());
             }
@@ -129,9 +131,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             yield remote_semaphore.wait_async();
             remote_semaphore = new Geary.NonblockingSemaphore(true);
             
-            remote_folder.updated.disconnect(on_remote_updated);
             RemoteFolder? folder = remote_folder;
             remote_folder = null;
+            
+            // signals
+            folder.list_appended.disconnect(on_remote_list_appended);
             
             folder.close_async.begin(cancellable);
             
@@ -141,15 +145,63 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         opened = false;
     }
     
-    public override async int get_email_count(Cancellable? cancellable = null) throws Error {
+    private void on_remote_list_appended(int total) {
+        // need to prefetch PROPERTIES (or, in the future NONE or LOCATION) fields to create a
+        // normalized placeholder in the local database of the message, so all positions are
+        // properly relative to the end of the message list; once this is done, notify user of new
+        // messages
+        do_normalize_appended_messages.begin(total);
+    }
+    
+    private async void do_normalize_appended_messages(int new_remote_count) {
+        // this only works when the list is grown
+        assert(new_remote_count > remote_count);
+        
+        try {
+            // if no mail in local store, nothing needs to be done here; the store is "normalized"
+            int local_count = yield local_folder.get_email_count_async();
+            if (local_count == 0) {
+                notify_list_appended(new_remote_count);
+                
+                return;
+            }
+            
+            if (!yield wait_for_remote_to_open()) {
+                notify_list_appended(new_remote_count);
+                
+                return;
+            }
+            
+            // normalize starting at the message *after* the highest position of the local store,
+            // which has now changed
+            Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(remote_count + 1, -1,
+                Geary.Email.Field.PROPERTIES, null);
+            assert(list != null && list.size > 0);
+            
+            foreach (Geary.Email email in list)
+                yield local_folder.create_email_async(email, null);
+            
+            // save new remote count
+            remote_count = new_remote_count;
+            
+            notify_list_appended(new_remote_count);
+        } catch (Error err) {
+            debug("Unable to normalize local store of newly appended messages to %s: %s",
+                to_string(), err.message);
+        }
+    }
+    
+    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
         // TODO: Use monitoring to avoid round-trip to the server
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
         
+        // if connected, use stashed remote count (which is always kept current once remote folder
+        // is opened)
         if (yield wait_for_remote_to_open())
-            return yield remote_folder.get_email_count(cancellable);
+            return remote_count;
         
-        return yield local_folder.get_email_count(cancellable);
+        return yield local_folder.get_email_count_async(cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
@@ -165,7 +217,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return accumulator;
     }
     
-    public override void lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
+    public override void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         EmailCallback cb, Cancellable? cancellable = null) {
         // schedule do_list_email_async(), using the callback to drive availability of email
         do_list_email_async.begin(low, count, required_fields, null, cb, cancellable);
@@ -236,10 +288,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
         
         // fixup local email positions to match server's positions
-        if (local_list_size > 0) {
+        if (local_list_size > 0 && local_count < remote_count) {
+            int adjustment = remote_count - local_count;
             foreach (Geary.Email email in local_list) {
-                int new_position = email.location.position + (low - local_low);
-                email.update_location(new Geary.EmailLocation(new_position, email.location.ordering));
+                email.update_location(new Geary.EmailLocation(email.location.position + adjustment,
+                    email.location.ordering));
             }
         }
         
@@ -306,7 +359,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return accumulator;
     }
     
-    public override void lazy_list_email_sparse_async(int[] by_position, Geary.Email.Field required_fields,
+    public override void lazy_list_email_sparse(int[] by_position, Geary.Email.Field required_fields,
         EmailCallback cb, Cancellable? cancellable = null) {
         // schedule listing in the background, using the callback to drive availability of email
         do_list_email_sparse_async.begin(by_position, required_fields, null, cb, cancellable);
@@ -560,12 +613,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         yield local_folder.remove_email_async(email, cancellable);
     }
     
-    private void on_local_updated() {
-    }
-    
-    private void on_remote_updated() {
-    }
-    
     // In order to maintain positions for all messages without storing all of them locally,
     // the database stores entries for the lowest requested email to the highest (newest), which
     // means there can be no gaps between the last in the database and the last on the server.
@@ -576,8 +623,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
-        local_count = yield local_folder.get_email_count(cancellable);
-        remote_count = yield remote_folder.get_email_count(cancellable);
+        local_count = yield local_folder.get_email_count_async(cancellable);
+        remote_count = yield remote_folder.get_email_count_async(cancellable);
         
         // fixup span specifier
         normalize_span_specifiers(ref low, ref count, remote_count);
@@ -598,7 +645,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         // Use PROPERTIES as they're the most useful information for certain actions (such as
         // finding duplicates when we start using INTERNALDATE and RFC822.SIZE) and cheap to fetch
-        // TODO: Consider only fetching their UID; would need Geary.Email.Field.LOCATION (or\
+        //
+        // TODO: Consider only fetching their UID; would need Geary.Email.Field.LOCATION (or
         // perhaps NONE is considered a call for just the UID).
         Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(high, prefetch_count,
             Geary.Email.Field.PROPERTIES, cancellable);

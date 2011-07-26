@@ -205,17 +205,16 @@ public class MainWindow : Gtk.Window {
         message_list_store.clear();
         
         if (current_folder != null) {
-            current_folder.email_added_removed.disconnect(on_email_added_removed);
+            current_folder.list_appended.disconnect(on_folder_list_appended);
             yield current_folder.close_async();
         }
         
         current_folder = folder;
-        current_folder.email_added_removed.connect(on_email_added_removed);
+        current_folder.list_appended.connect(on_folder_list_appended);
         
         yield current_folder.open_async(true);
         
-        current_folder.lazy_list_email_async(-1, 50, MessageListStore.REQUIRED_FIELDS,
-            on_list_email_ready);
+        current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS, on_list_email_ready);
     }
     
     private void on_list_email_ready(Gee.List<Geary.Email>? email, Error? err) {
@@ -288,11 +287,17 @@ public class MainWindow : Gtk.Window {
         }
     }
     
-    private void on_email_added_removed(Gee.List<Geary.Email>? added, Gee.List<Geary.Folder>? removed) {
-        if (added != null) {
-            foreach (Geary.Email email in added)
-                message_list_store.append_envelope(email);
+    private void on_folder_list_appended() {
+        int high = message_list_store.get_highest_folder_position();
+        if (high < 0) {
+            debug("Unable to find highest message position in %s", current_folder.to_string());
+            
+            return;
         }
+        
+        // Want to get the one *after* the highest position in the message list
+        current_folder.lazy_list_email(high + 1, -1, MessageListStore.REQUIRED_FIELDS,
+            on_list_email_ready);
     }
     
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {

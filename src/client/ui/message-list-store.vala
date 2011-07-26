@@ -66,7 +66,7 @@ public class MessageListStore : Gtk.TreeStore {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        string? pre = null;;
+        string? pre = null;
         string? post = null;
         if (envelope.properties != null) {
             pre = envelope.properties.is_unread() ? "<b>" : null;
@@ -94,6 +94,27 @@ public class MessageListStore : Gtk.TreeStore {
         get(iter, Column.MESSAGE_OBJECT, out email);
         
         return email;
+    }
+    
+    // Returns -1 if the list is empty.
+    public int get_highest_folder_position() {
+        Gtk.TreeIter iter;
+        if (!get_iter_first(out iter))
+            return -1;
+        
+        int high = int.MIN;
+        
+        // TODO: It would be more efficient to maintain highest and lowest values in a table or
+        // as items are added and removed; this will do for now.
+        do {
+            Geary.Email email;
+            get(iter, Column.MESSAGE_OBJECT, out email);
+            
+            if (email.location.position > high)
+                high = email.location.position;
+        } while (iter_next(ref iter));
+        
+        return high;
     }
     
     private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {

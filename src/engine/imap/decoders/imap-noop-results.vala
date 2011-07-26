@@ -36,7 +36,7 @@ public class Geary.Imap.NoopResults : Geary.Imap.CommandResults {
         
         foreach (ServerData data in response.server_data) {
             try {
-                int ordinal = data.get_as_string(1).as_int().clamp(-1, int.MAX);
+                int ordinal = data.get_as_string(1).as_int(-1, int.MAX);
                 ServerDataType type = ServerDataType.from_parameter(data.get_as_string(2));
                 
                 switch (type) {

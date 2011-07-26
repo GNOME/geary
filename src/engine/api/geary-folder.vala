@@ -19,6 +19,11 @@ public interface Geary.Folder : Object {
         FOLDER_CLOSED
     }
     
+    public enum Direction {
+        BEFORE,
+        AFTER
+    }
+    
     /**
      * This is fired when the Folder is successfully opened by a caller.  It will only fire once
      * until the Folder is closed, with the OpenState indicating what has been opened.
@@ -36,57 +41,32 @@ public interface Geary.Folder : Object {
     public signal void closed(CloseReason reason);
     
     /**
-     * "email-added-removed" is fired when new email has been detected due to background monitoring
-     * operations or if an unrelated operation causes or reveals the existence or removal of
-     * messages.
-     *
-     * There are no guarantees of what Geary.Email.Field fields will be available when these are
-     * reported.  If more information is required, use the fetch or list operations.
+     * "list-appended" is fired when new messages have been appended to the list of messages in the
+     * folder (and therefore old message position numbers remain valid, but the total count of the
+     * messages in the folder has changed).
      */
-    public signal void email_added_removed(Gee.List<Geary.Email>? added,
-        Gee.List<Geary.Email>? removed);
-    
-    /**
-     * TBD.
-     */
-    public signal void updated();
+    public signal void list_appended(int total);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected virtual void notify_opened(OpenState state) {
-        opened(state);
-    }
+    protected abstract void notify_opened(OpenState state);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected virtual void notify_closed(CloseReason reason) {
-        closed(reason);
-    }
+    protected abstract void notify_closed(CloseReason reason);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected virtual void notify_email_added_removed(Gee.List<Geary.Email>? added,
-        Gee.List<Geary.Email>? removed) {
-        email_added_removed(added, removed);
-    }
-    
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
-    public virtual void notify_updated() {
-        updated();
-    }
+    protected abstract void notify_list_appended(int total);
     
     public abstract Geary.FolderPath get_path();
     
@@ -125,7 +105,7 @@ public interface Geary.Folder : Object {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async int get_email_count(Cancellable? cancellable = null) throws Error;
+    public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
     
     /**
      * If the Folder object detects that the supplied Email does not have sufficient fields for
@@ -188,7 +168,7 @@ public interface Geary.Folder : Object {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract void lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
+    public abstract void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         EmailCallback cb, Cancellable? cancellable = null);
     
     /**
@@ -207,7 +187,7 @@ public interface Geary.Folder : Object {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Similar in contract to list_email_sparse_async(), but like lazy_list_email_async(), the
+     * Similar in contract to list_email_sparse_async(), but like lazy_list_email(), the
      * messages are passed back to the caller in chunks as they're retrieved.  When null is passed
      * as the first parameter, all the messages have been fetched.  If an Error occurs during
      * processing, it's passed as the second parameter.  There's no guarantee of the returned
@@ -215,7 +195,7 @@ public interface Geary.Folder : Object {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract void lazy_list_email_sparse_async(int[] by_position,
+    public abstract void lazy_list_email_sparse(int[] by_position,
         Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable = null);
     
     /**

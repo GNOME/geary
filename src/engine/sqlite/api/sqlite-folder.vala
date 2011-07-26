@@ -68,7 +68,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    public override async int get_email_count(Cancellable? cancellable = null) throws Error {
+    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
         check_open();
         
         // TODO: This can be cached and updated when changes occur
@@ -109,13 +109,15 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
                 imap_message_properties_table, message_id, properties);
             yield imap_message_properties_table.create_async(properties_row, cancellable);
         }
+        
+        notify_list_appended(yield get_email_count_async(cancellable));
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
         check_open();
         
-        normalize_span_specifiers(ref low, ref count, yield get_email_count(cancellable));
+        normalize_span_specifiers(ref low, ref count, yield get_email_count_async(cancellable));
         
         if (count == 0)
             return null;
@@ -259,6 +261,8 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
             throw new EngineError.NOT_FOUND("UID required to delete local email");
         
         yield location_table.remove_by_ordering_async(folder_row.id, uid.value, cancellable);
+        
+        // TODO: Notify of changes
     }
     
     public async bool is_email_present(Geary.EmailIdentifier id, out Geary.Email.Field available_fields,

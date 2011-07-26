@@ -45,12 +45,16 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         
         mailbox = yield session_mgr.select_examine_mailbox(path.get_fullpath(info.delim), !readonly,
             cancellable);
-        // TODO: hook up signals
         
         // update with new information
         this.readonly = Trillian.from_boolean(readonly);
         
-        properties = new Imap.FolderProperties(mailbox.count, mailbox.recent, mailbox.unseen,
+        // connect to signals
+        mailbox.exists_altered.connect(on_exists_altered);
+        mailbox.flags_altered.connect(on_flags_altered);
+        mailbox.expunged.connect(on_expunged);
+        
+        properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, mailbox.unseen,
             mailbox.uid_validity, mailbox.uid_next, properties.attrs);
         
         notify_opened(Geary.Folder.OpenState.REMOTE);
@@ -60,18 +64,36 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         if (mailbox == null)
             return;
         
+        mailbox.exists_altered.disconnect(on_exists_altered);
+        mailbox.flags_altered.disconnect(on_flags_altered);
+        mailbox.expunged.disconnect(on_expunged);
+        
         mailbox = null;
         readonly = Trillian.UNKNOWN;
         
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    public override async int get_email_count(Cancellable? cancellable = null) throws Error {
+    private void on_exists_altered(int exists) {
+        assert(mailbox != null);
+        notify_list_appended(exists);
+    }
+    
+    private void on_flags_altered(FetchResults flags) {
+        assert(mailbox != null);
+        // TODO: Notify of changes
+    }
+    
+    private void on_expunged(MessageNumber expunged) {
+        assert(mailbox != null);
+        // TODO: Notify of changes
+    }
+    
+    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        // TODO: Need to monitor folder for updates to the message count
-        return mailbox.count;
+        return mailbox.exists;
     }
     
     public override async void create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
@@ -86,8 +108,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        // TODO: Need to use a monitored count
-        normalize_span_specifiers(ref low, ref count, mailbox.count);
+        normalize_span_specifiers(ref low, ref count, mailbox.exists);
         
         return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
     }

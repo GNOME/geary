@@ -5,15 +5,23 @@
  */
 
 public class Geary.Imap.Mailbox : Geary.SmartReference {
-    public string name { get; private set; }
-    public int count { get; private set; }
-    public int recent { get; private set; }
-    public int unseen { get; private set; }
-    public bool is_readonly { get; private set; }
-    public UIDValidity? uid_validity { get; private set; }
-    public UID? uid_next { get; private set; }
+    public string name { get { return context.name; } }
+    public int exists { get { return context.exists; } }
+    public int recent { get { return context.recent; } }
+    public int unseen { get { return context.unseen; } }
+    public bool is_readonly { get { return context.is_readonly; } }
+    public UIDValidity? uid_validity { get { return context.uid_validity; } }
+    public UID? uid_next { get { return context.uid_next; } }
     
     private SelectedContext context;
+    
+    public signal void exists_altered(int exists);
+    
+    public signal void recent_altered(int recent);
+    
+    public signal void flags_altered(FetchResults flags);
+    
+    public signal void expunged(MessageNumber msg_num);
     
     public signal void closed();
     
@@ -23,17 +31,22 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         base (context);
         
         this.context = context;
-        context.exists_changed.connect(on_exists_changed);
+        
         context.closed.connect(on_closed);
         context.disconnected.connect(on_disconnected);
-        
-        name = context.name;
-        count = context.exists;
-        recent = context.recent;
-        unseen = context.unseen;
-        is_readonly = context.is_readonly;
-        uid_validity = context.uid_validity;
-        uid_next = context.uid_next;
+        context.unsolicited_exists.connect(on_unsolicited_exists);
+        context.unsolicited_expunged.connect(on_unsolicited_expunged);
+        context.unsolicited_flags.connect(on_unsolicited_flags);
+        context.unsolicited_recent.connect(on_unsolicited_recent);
+    }
+    
+    ~Mailbox() {
+        context.closed.disconnect(on_closed);
+        context.disconnected.disconnect(on_disconnected);
+        context.session.unsolicited_exists.disconnect(on_unsolicited_exists);
+        context.session.unsolicited_expunged.disconnect(on_unsolicited_expunged);
+        context.session.unsolicited_flags.disconnect(on_unsolicited_flags);
+        context.session.unsolicited_recent.disconnect(on_unsolicited_recent);
     }
     
     public async Gee.List<Geary.Email>? list_set_async(MessageSet msg_set, Geary.Email.Field fields,
@@ -107,16 +120,28 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         return email;
     }
     
-    private void on_exists_changed(int exists) {
-        count = exists;
-    }
-    
     private void on_closed() {
         closed();
     }
     
     private void on_disconnected(bool local) {
         disconnected(local);
+    }
+    
+    private void on_unsolicited_exists(int exists) {
+        exists_altered(exists);
+    }
+    
+    private void on_unsolicited_recent(int recent) {
+        recent_altered(recent);
+    }
+    
+    private void on_unsolicited_expunged(MessageNumber msg_num) {
+        expunged(msg_num);
+    }
+    
+    private void on_unsolicited_flags(FetchResults flags) {
+        flags_altered(flags);
     }
     
     // store FetchDataTypes in a set because the same data type may be requested multiple times
@@ -225,10 +250,21 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     }
 }
 
-internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
+// A SelectedContext is a ReferenceSemantics object wrapping a ClientSession that is in a SELECTED
+// or EXAMINED state (i.e. it has "cd'd" into a folder).  Multiple Mailbox objects may be created
+// that refer to this SelectedContext.  When they're all destroyed, the session is returned to 
+// the AUTHORIZED state by the ClientSessionManager.
+//
+// This means there is some duplication between the SelectedContext and the Mailbox.  In particular
+// signals must be reflected to ensure order-of-operation is preserved (i.e. when the ClientSession
+// "unsolicited-exists" signal is fired, a signal subscriber may then query SelectedContext for
+// its exists count before it has received the notification).
+//
+// All this fancy stepping should not be exposed to a user of the IMAP portion of Geary, who should
+// only see Geary.Imap.Mailbox, nor should it be exposed to the user of Geary.Engine, where all this
+// should only be exposed via Geary.Folder.
+private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     public ClientSession? session { get; private set; }
-    
-    protected int manual_ref_count { get; protected set; }
     
     public string name { get; protected set; }
     public int exists { get; protected set; }
@@ -238,9 +274,15 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     public UIDValidity? uid_validity { get; protected set; }
     public UID? uid_next { get; protected set; }
     
-    public signal void exists_changed(int exists);
+    protected int manual_ref_count { get; protected set; }
     
-    public signal void recent_changed(int recent);
+    public signal void unsolicited_exists(int exists);
+    
+    public signal void unsolicited_recent(int recent);
+    
+    public signal void unsolicited_expunged(MessageNumber expunged);
+    
+    public signal void unsolicited_flags(FetchResults flags);
     
     public signal void closed();
     
@@ -260,6 +302,8 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
         session.current_mailbox_changed.connect(on_session_mailbox_changed);
         session.unsolicited_exists.connect(on_unsolicited_exists);
         session.unsolicited_recent.connect(on_unsolicited_recent);
+        session.unsolicited_expunged.connect(on_unsolicited_expunged);
+        session.unsolicited_flags.connect(on_unsolicited_flags);
         session.logged_out.connect(on_session_logged_out);
         session.disconnected.connect(on_session_disconnected);
     }
@@ -269,6 +313,8 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
             session.current_mailbox_changed.disconnect(on_session_mailbox_changed);
             session.unsolicited_exists.disconnect(on_unsolicited_exists);
             session.unsolicited_recent.disconnect(on_unsolicited_recent);
+            session.unsolicited_recent.disconnect(on_unsolicited_recent);
+            session.unsolicited_expunged.disconnect(on_unsolicited_expunged);
             session.logged_out.disconnect(on_session_logged_out);
             session.disconnected.disconnect(on_session_disconnected);
         }
@@ -280,12 +326,20 @@ internal class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     
     private void on_unsolicited_exists(int exists) {
         this.exists = exists;
-        exists_changed(exists);
+        unsolicited_exists(exists);
     }
     
     private void on_unsolicited_recent(int recent) {
         this.recent = recent;
-        recent_changed(recent);
+        unsolicited_recent(recent);
+    }
+    
+    private void on_unsolicited_expunged(MessageNumber expunged) {
+        unsolicited_expunged(expunged);
+    }
+    
+    private void on_unsolicited_flags(FetchResults results) {
+        unsolicited_flags(results);
     }
     
     private void on_session_mailbox_changed(string? old_mailbox, string? new_mailbox, bool readonly) {

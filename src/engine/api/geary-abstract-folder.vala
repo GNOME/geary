@@ -13,13 +13,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         closed(reason);
     }
     
-    protected virtual void notify_email_added_removed(Gee.List<Geary.Email>? added,
-        Gee.List<Geary.Email>? removed) {
-        email_added_removed(added, removed);
-    }
-    
-    protected virtual void notify_updated() {
-        updated();
+    protected virtual void notify_list_appended(int total) {
+        list_appended(total);
     }
     
     public abstract Geary.FolderPath get_path();
@@ -30,7 +25,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
-    public abstract async int get_email_count(Cancellable? cancellable = null) throws Error;
+    public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
     
     public abstract async void create_email_async(Geary.Email email, Cancellable? cancellable = null)
         throws Error;
@@ -38,7 +33,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public virtual void lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
+    public virtual void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         EmailCallback cb, Cancellable? cancellable = null) {
         do_lazy_list_email_async.begin(low, count, required_fields, cb, cancellable);
     }
@@ -61,7 +56,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public virtual void lazy_list_email_sparse_async(int[] by_position,
+    public virtual void lazy_list_email_sparse(int[] by_position,
         Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable = null) {
         do_lazy_list_email_sparse_async.begin(by_position, required_fields, cb, cancellable);
     }

@@ -87,6 +87,7 @@ class ImapConsole : Gtk.Window {
         "xlist",
         "examine",
         "fetch",
+        "uid-fetch",
         "help",
         "exit",
         "quit",
@@ -159,6 +160,7 @@ class ImapConsole : Gtk.Window {
                     break;
                     
                     case "fetch":
+                    case "uid-fetch":
                         fetch(cmd, args);
                     break;
                     
@@ -386,12 +388,16 @@ class ImapConsole : Gtk.Window {
         
         status("Fetching %s".printf(args[0]));
         
+        Geary.Imap.MessageSet msg_set = (cmd.down() == "fetch")
+            ? new Geary.Imap.MessageSet.custom(args[0])
+            : new Geary.Imap.MessageSet.uid_custom(args[0]);
+        
         Geary.Imap.FetchDataType[] data_items = new Geary.Imap.FetchDataType[0];
         for (int ctr = 1; ctr < args.length; ctr++)
             data_items += Geary.Imap.FetchDataType.decode(args[ctr]);
         
-        cx.send_async.begin(new Geary.Imap.FetchCommand(cx.generate_tag(), 
-            new Geary.Imap.MessageSet.custom(args[0]), data_items), null, on_fetch);
+        cx.send_async.begin(new Geary.Imap.FetchCommand(cx.generate_tag(), msg_set, data_items),
+            null, on_fetch);
     }
     
     private void on_fetch(Object? source, AsyncResult result) {
