@@ -4,10 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.NonblockingSemaphore {
+public abstract class Geary.NonblockingAbstractSemaphore {
     private class Pending {
         public SourceFunc cb;
         public Cancellable? cancellable;
+        public bool passed = false;
         
         public signal void cancelled();
         
@@ -30,19 +31,21 @@ public class Geary.NonblockingSemaphore {
     }
     
     private bool broadcast;
+    private bool autoreset;
     private Cancellable? cancellable;
     private bool passed = false;
     private Gee.List<Pending> pending_queue = new Gee.LinkedList<Pending>();
     
-    public NonblockingSemaphore(bool broadcast, Cancellable? cancellable = null) {
+    protected NonblockingAbstractSemaphore(bool broadcast, bool autoreset, Cancellable? cancellable = null) {
         this.broadcast = broadcast;
+        this.autoreset = autoreset;
         this.cancellable = cancellable;
         
         if (cancellable != null)
             cancellable.cancelled.connect(on_cancelled);
     }
     
-    ~NonblockingSemaphore() {
+    ~NonblockingAbstractSemaphore() {
         if (pending_queue.size > 0)
             warning("Nonblocking semaphore destroyed with %d pending callers", pending_queue.size);
     }
@@ -51,13 +54,18 @@ public class Geary.NonblockingSemaphore {
         if (pending_queue.size == 0)
             return;
         
+        // in both cases, mark the Pending object(s) as passed in case this is an auto-reset
+        // semaphore
         if (all) {
-            foreach (Pending pending in pending_queue)
+            foreach (Pending pending in pending_queue) {
+                pending.passed = passed;
                 Idle.add(pending.cb);
+            }
             
             pending_queue.clear();
         } else {
             Pending pending = pending_queue.remove_at(0);
+            pending.passed = passed;
             Idle.add(pending.cb);
         }
     }
@@ -68,6 +76,9 @@ public class Geary.NonblockingSemaphore {
         passed = true;
         
         trigger(broadcast);
+        
+        if (autoreset)
+            reset();
     }
     
     // TODO: Allow the caller to pass their own cancellable in if they want to be able to cancel
@@ -87,6 +98,9 @@ public class Geary.NonblockingSemaphore {
             yield;
             
             pending.cancelled.disconnect(on_pending_cancelled);
+            
+            if (pending.passed)
+                return;
         }
     }
     

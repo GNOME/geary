@@ -9,12 +9,8 @@ public class Geary.Sqlite.MessageLocationRow : Geary.Sqlite.Row {
     public int64 message_id { get; private set; }
     public int64 folder_id { get; private set; }
     public int64 ordering { get; private set; }
-    /**
-     * Note that position is not stored in the database, but rather determined by its location
-     * determined by the sorted ordering.  If the database call is unable to easily determine the
-     * position of the message in the folder, this will be set to -1.
-     */
-    public int position { get; private set; }
+    
+    private int position;
     
     public MessageLocationRow(MessageLocationTable table, int64 id, int64 message_id, int64 folder_id,
         int64 ordering, int position) {
@@ -36,6 +32,26 @@ public class Geary.Sqlite.MessageLocationRow : Geary.Sqlite.Row {
         folder_id = fetch_int64_for(result, MessageLocationTable.Column.FOLDER_ID);
         ordering = fetch_int64_for(result, MessageLocationTable.Column.ORDERING);
         this.position = position;
+    }
+    
+    /**
+     * Note that position is not stored in the database, but rather determined by its location
+     * determined by the sorted ordering column.  In some cases the database can determine the
+     * position easily and will supply it to this object at construction time.  In other cases it's
+     * not so straightforward and another database query will be required.  This method handles
+     * both cases.
+     *
+     * If the call ever returns a position of -1, that indicates the message does not exist in the
+     * database.
+     */
+    public async int get_position_async(Cancellable? cancellable = null) throws Error {
+        if (position >= 1)
+            return position;
+        
+        position = yield ((MessageLocationTable) table).fetch_position_async(id, folder_id,
+            cancellable);
+        
+        return (position >= 1) ? position : -1;
     }
 }
 

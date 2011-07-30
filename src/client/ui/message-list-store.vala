@@ -83,6 +83,8 @@ public class MessageListStore : Gtk.TreeStore {
             Column.SUBJECT, subject,
             Column.MESSAGE_OBJECT, envelope
         );
+        
+        envelope.location.position_deleted.connect(on_email_position_deleted);
     }
     
     public Geary.Email? get_message_at(Gtk.TreePath path) {
@@ -117,6 +119,27 @@ public class MessageListStore : Gtk.TreeStore {
         return high;
     }
     
+    private bool remove_at_position(int position) {
+        Gtk.TreeIter iter;
+        if (!get_iter_first(out iter))
+            return false;
+        
+        do {
+            Geary.Email email;
+            get(iter, Column.MESSAGE_OBJECT, out email);
+            
+            if (email.location.position == position) {
+                remove(iter);
+                
+                email.location.position_deleted.disconnect(on_email_position_deleted);
+                
+                return true;
+            }
+        } while (iter_next(ref iter));
+        
+        return false;
+    }
+    
     private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
         Geary.Email aenvelope;
         get(aiter, Column.MESSAGE_OBJECT, out aenvelope);
@@ -130,6 +153,11 @@ public class MessageListStore : Gtk.TreeStore {
         
         // stabilize sort by using the mail's position, which is always unique in a folder
         return aenvelope.location.position - benvelope.location.position;
+    }
+    
+    private void on_email_position_deleted(int position) {
+        if (!remove_at_position(position))
+            debug("on_email_position_deleted: unable to find email at position %d", position);
     }
     
     private static string to_markup(string str, string? pre = null, string? post = null) {

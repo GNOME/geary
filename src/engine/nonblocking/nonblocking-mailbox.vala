@@ -8,7 +8,7 @@ public class Geary.NonblockingMailbox<G> : Object {
     public int size { get { return queue.size; } }
     
     private Gee.List<G> queue;
-    private NonblockingSemaphore spinlock = new NonblockingSemaphore(false);
+    private NonblockingSpinlock spinlock = new NonblockingSpinlock();
     
     public NonblockingMailbox() {
         queue = new Gee.LinkedList<G>();

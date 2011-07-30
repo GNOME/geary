@@ -5,7 +5,7 @@
  */
 
 public class Geary.NonblockingMutex {
-    private NonblockingSemaphore spinlock = new NonblockingSemaphore(false);
+    private NonblockingSpinlock spinlock = new NonblockingSpinlock();
     private bool locked = false;
     private int next_token = 0;
     private int locked_token = -1;

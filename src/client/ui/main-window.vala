@@ -205,12 +205,12 @@ public class MainWindow : Gtk.Window {
         message_list_store.clear();
         
         if (current_folder != null) {
-            current_folder.list_appended.disconnect(on_folder_list_appended);
+            current_folder.messages_appended.disconnect(on_folder_messages_appended);
             yield current_folder.close_async();
         }
         
         current_folder = folder;
-        current_folder.list_appended.connect(on_folder_list_appended);
+        current_folder.messages_appended.connect(on_folder_messages_appended);
         
         yield current_folder.open_async(true);
         
@@ -287,13 +287,16 @@ public class MainWindow : Gtk.Window {
         }
     }
     
-    private void on_folder_list_appended() {
+    private void on_folder_messages_appended() {
         int high = message_list_store.get_highest_folder_position();
         if (high < 0) {
             debug("Unable to find highest message position in %s", current_folder.to_string());
             
             return;
         }
+        
+        debug("Message(s) appended to %s, fetching email at %d and above", current_folder.to_string(),
+            high + 1);
         
         // Want to get the one *after* the highest position in the message list
         current_folder.lazy_list_email(high + 1, -1, MessageListStore.REQUIRED_FIELDS,

@@ -9,8 +9,8 @@
  */
 
 private class Geary.Imap.EmailLocation : Geary.EmailLocation {
-    public EmailLocation(int position, Geary.Imap.UID uid) {
-        base (position, uid.value);
+    public EmailLocation(Geary.Folder folder, int position, Geary.Imap.UID uid) {
+        base (folder, position, uid.value);
     }
 }
 

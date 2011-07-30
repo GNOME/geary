@@ -41,11 +41,18 @@ public interface Geary.Folder : Object {
     public signal void closed(CloseReason reason);
     
     /**
-     * "list-appended" is fired when new messages have been appended to the list of messages in the
-     * folder (and therefore old message position numbers remain valid, but the total count of the
-     * messages in the folder has changed).
+     * "messages-appended" is fired when new messages have been appended to the list of messages in
+     * the folder (and therefore old message position numbers remain valid, but the total count of
+     * the messages in the folder has changed).
      */
-    public signal void list_appended(int total);
+    public signal void messages_appended(int total);
+    
+    /**
+     * "message-removed" is fired when a message has been removed (deleted or moved) from the
+     * folder (and therefore old message position numbers may no longer be valid, i.e. those after
+     * the removed message).
+     */
+    public signal void message_removed(int position, int total);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
@@ -66,7 +73,14 @@ public interface Geary.Folder : Object {
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected abstract void notify_list_appended(int total);
+    protected abstract void notify_messages_appended(int total);
+    
+    /**
+     * This helper method should be called by implementors of Folder rather than firing the signal
+     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
+     * and update state before and/or after the signal has been fired.
+     */
+    protected abstract void notify_message_removed(int position, int total);
     
     public abstract Geary.FolderPath get_path();
     
@@ -212,12 +226,12 @@ public interface Geary.Folder : Object {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Removes the email from the folder, determined by its EmailLocation.  If the email location
-     * is invalid for any reason, EngineError.NOT_FOUND is thrown.
+     * Removes the email at the supplied position from the folder.  If the email position is
+     * invalid for any reason, EngineError.NOT_FOUND is thrown.
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public abstract async void remove_email_async(int position, Cancellable? cancellable = null)
         throws Error;
     
     /**

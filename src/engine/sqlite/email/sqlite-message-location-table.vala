@@ -178,6 +178,27 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             folder_id, ordering, -1);
     }
     
+    public async int fetch_position_async(int64 id, int64 folder_id, Cancellable? cancellable = null)
+        throws Error {
+        SQLHeavy.Query query = db.prepare(
+            "SELECT id FROM MessageLocationTable WHERE folder_id = ? ORDER BY ordering");
+        query.bind_int64(0, folder_id);
+        
+        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        
+        int position = 1;
+        while (!results.finished) {
+            if (results.fetch_int64(0) == id)
+                return position;
+            
+            yield results.next_async(cancellable);
+            position++;
+        }
+        
+        // not found
+        return -1;
+    }
+    
     public async int fetch_count_for_folder_async(int64 folder_id, Cancellable? cancellable = null)
         throws Error {
         SQLHeavy.Query query = db.prepare(
@@ -219,14 +240,30 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         return (!result.finished) ? result.fetch_int64(0) : -1;
     }
     
-    public async void remove_by_ordering_async(int64 folder_id, int64 ordering,
+    public async bool remove_by_position_async(int64 folder_id, int position,
         Cancellable? cancellable = null) throws Error {
-        SQLHeavy.Query query = db.prepare(
-            "DELETE FROM MessageLocationTable WHERE folder_id = ? AND ordering = ?");
+        assert(position >= 1);
+        
+        SQLHeavy.Transaction transaction = db.begin_transaction();
+        
+        SQLHeavy.Query query = transaction.prepare(
+            "SELECT id FROM MessageLocationTable WHERE folder_id = ? ORDER BY ordering LIMIT 1 OFFSET ?");
         query.bind_int64(0, folder_id);
-        query.bind_int64(1, ordering);
+        query.bind_int(1, position - 1);
+        
+        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        if (results.finished)
+            return false;
+        
+        query = transaction.prepare(
+            "DELETE FROM MessageLocationTable WHERE id = ?");
+        query.bind_int64(0, results.fetch_int(0));
         
         yield query.execute_async(cancellable);
+        
+        yield transaction.commit_async();
+        
+        return true;
     }
 }
 

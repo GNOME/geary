@@ -12,6 +12,7 @@ public errordomain Geary.EngineError {
     READONLY,
     BAD_PARAMETERS,
     INCOMPLETE_MESSAGE,
-    SERVER_UNAVAILABLE
+    SERVER_UNAVAILABLE,
+    CLOSED
 }
 

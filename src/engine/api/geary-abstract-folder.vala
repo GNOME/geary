@@ -13,8 +13,12 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         closed(reason);
     }
     
-    protected virtual void notify_list_appended(int total) {
-        list_appended(total);
+    protected virtual void notify_messages_appended(int total) {
+        messages_appended(total);
+    }
+    
+    protected virtual void notify_message_removed(int position, int total) {
+        message_removed(position, total);
     }
     
     public abstract Geary.FolderPath get_path();
@@ -79,7 +83,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public abstract async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public abstract async void remove_email_async(int position, Cancellable? cancellable = null)
         throws Error;
     
     public virtual string to_string() {

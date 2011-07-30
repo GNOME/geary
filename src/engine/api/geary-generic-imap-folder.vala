@@ -163,7 +163,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                 
                 // local's email on the server has been removed, remove locally
                 try {
-                    yield local_folder.remove_email_async(old_local[local_ctr], cancellable);
+                    yield local_folder.remove_email_async(old_local[local_ctr].location.position,
+                        cancellable);
                 } catch (Error remove_err) {
                     debug("Unable to remove discarded email from %s: %s", to_string(),
                         remove_err.message);
@@ -185,7 +186,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // remove anything left over
         for (; local_ctr < local_length; local_ctr++) {
             try {
-                yield local_folder.remove_email_async(old_local[local_ctr], cancellable);
+                yield local_folder.remove_email_async(old_local[local_ctr].location.position,
+                    cancellable);
             } catch (Error discard_err) {
                 debug("Unable to discard email from %s: %s", to_string(), discard_err.message);
             }

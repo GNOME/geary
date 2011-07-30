@@ -110,7 +110,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
             yield imap_message_properties_table.create_async(properties_row, cancellable);
         }
         
-        notify_list_appended(yield get_email_count_async(cancellable));
+        notify_messages_appended(yield get_email_count_async(cancellable));
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
@@ -179,9 +179,15 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
             }
             
             Geary.Imap.UID uid = new Geary.Imap.UID(location_row.ordering);
+            int position = yield location_row.get_position_async(cancellable);
+            if (position == -1) {
+                debug("Unable to locate position of email during list of %s, dropping", to_string());
+                
+                continue;
+            }
             
             Geary.Email email = message_row.to_email(
-                new Geary.Imap.EmailLocation(location_row.position, uid),
+                new Geary.Imap.EmailLocation(this, position, uid),
                 new Geary.Imap.EmailIdentifier(uid));
             if (properties != null)
                 email.set_email_properties(properties.get_imap_email_properties());
@@ -231,9 +237,13 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
             }
         }
         
-        // TODO: Would be helpful if proper position was known
-        Geary.Email email = message_row.to_email(
-            new Geary.Imap.EmailLocation(location_row.position, uid), id);
+        int position = yield location_row.get_position_async(cancellable);
+        if (position == -1) {
+            throw new EngineError.NOT_FOUND("Unable to determine position of email %s in %s",
+                id.to_string(), to_string());
+        }
+        
+        Geary.Email email = message_row.to_email(new Geary.Imap.EmailLocation(this, position, uid), id);
         if (properties != null)
             email.set_email_properties(properties.get_imap_email_properties());
         
@@ -248,7 +258,7 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
         return (ordering >= 1) ? new Geary.Imap.UID(ordering) : null;
     }
     
-    public override async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public override async void remove_email_async(int position, Cancellable? cancellable = null)
         throws Error {
         check_open();
         
@@ -256,13 +266,12 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
         // (since it may be located in multiple folders).  This means at some point in the future
         // a vacuum will be required to remove emails that are completely unassociated with the
         // account
-        Geary.Imap.UID? uid = ((Geary.Imap.EmailIdentifier) email.id).uid;
-        if (uid == null)
-            throw new EngineError.NOT_FOUND("UID required to delete local email");
+        if (!yield location_table.remove_by_position_async(folder_row.id, position, cancellable)) {
+            throw new EngineError.NOT_FOUND("Message #%d in local store of %s not found", position,
+                to_string());
+        }
         
-        yield location_table.remove_by_ordering_async(folder_row.id, uid.value, cancellable);
-        
-        // TODO: Notify of changes
+        notify_message_removed(position, yield get_email_count_async(cancellable));
     }
     
     public async bool is_email_present(Geary.EmailIdentifier id, out Geary.Email.Field available_fields,

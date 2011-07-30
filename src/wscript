@@ -36,6 +36,7 @@ def build(bld):
 	'../engine/api/geary-local-interfaces.vala',
 	'../engine/api/geary-personality.vala',
 	'../engine/api/geary-remote-interfaces.vala',
+	'../engine/api/geary-replay-queue.vala',
 	'../engine/api/geary-special-folder.vala',
 	
 	'../engine/common/common-message-data.vala',
@@ -83,7 +84,8 @@ def build(bld):
 	
 	'../engine/nonblocking/nonblocking-mailbox.vala',
 	'../engine/nonblocking/nonblocking-mutex.vala',
-	'../engine/nonblocking/nonblocking-semaphore.vala',
+	'../engine/nonblocking/nonblocking-abstract-semaphore.vala',
+	'../engine/nonblocking/nonblocking-variants.vala',
 	
 	'../engine/rfc822/rfc822-error.vala',
 	'../engine/rfc822/rfc822-mailbox-addresses.vala',

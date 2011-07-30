@@ -74,9 +74,14 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    private void on_exists_altered(int exists) {
+    private void on_exists_altered(int old_exists, int new_exists) {
         assert(mailbox != null);
-        notify_list_appended(exists);
+        assert(old_exists != new_exists);
+        
+        // only use this signal to notify of additions; removals are handled with the expunged
+        // signal
+        if (new_exists > old_exists)
+            notify_messages_appended(new_exists);
     }
     
     private void on_flags_altered(FetchResults flags) {
@@ -84,9 +89,10 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         // TODO: Notify of changes
     }
     
-    private void on_expunged(MessageNumber expunged) {
+    private void on_expunged(MessageNumber expunged, int total) {
         assert(mailbox != null);
-        // TODO: Notify of changes
+        
+        notify_message_removed(expunged.value, total);
     }
     
     public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
@@ -110,7 +116,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         
         normalize_span_specifiers(ref low, ref count, mailbox.exists);
         
-        return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
+        return yield mailbox.list_set_async(this, new MessageSet.range(low, count), fields, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
@@ -118,7 +124,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        return yield mailbox.list_set_async(new MessageSet.sparse(by_position), fields, cancellable);
+        return yield mailbox.list_set_async(this, new MessageSet.sparse(by_position), fields, cancellable);
     }
     
     public async Gee.List<Geary.Email>? list_email_uid_async(Geary.Imap.UID? low,
@@ -130,7 +136,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
             ? new MessageSet.uid_range((low != null) ? low : new Geary.Imap.UID(1), high)
             : new MessageSet.uid_range_to_highest(low);
         
-        return yield mailbox.list_set_async(msg_set, fields, cancellable);
+        return yield mailbox.list_set_async(this, msg_set, fields, cancellable);
     }
     
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
@@ -140,17 +146,13 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         
         // TODO: If position out of range, throw EngineError.NOT_FOUND
         
-        return yield mailbox.fetch_async(((Imap.EmailIdentifier) id).uid, fields, cancellable);
+        return yield mailbox.fetch_async(this, ((Imap.EmailIdentifier) id).uid, fields, cancellable);
     }
     
-    public override async void remove_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public override async void remove_email_async(int position, Cancellable? cancellable = null)
         throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
-        
-        Geary.Imap.UID? uid = ((Geary.Imap.EmailIdentifier) email.id).uid;
-        if (uid == null)
-            throw new EngineError.NOT_FOUND("Removing email requires UID");
         
         throw new EngineError.READONLY("IMAP currently read-only");
     }

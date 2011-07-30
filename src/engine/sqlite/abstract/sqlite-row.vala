@@ -7,7 +7,7 @@
 public abstract class Geary.Sqlite.Row {
     public const int64 INVALID_ID = -1;
     
-    private Table table;
+    protected Table table;
     
     public Row(Table table) {
         this.table = table;

@@ -15,13 +15,13 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     private SelectedContext context;
     
-    public signal void exists_altered(int exists);
+    public signal void exists_altered(int old_exists, int new_exists);
     
     public signal void recent_altered(int recent);
     
     public signal void flags_altered(FetchResults flags);
     
-    public signal void expunged(MessageNumber msg_num);
+    public signal void expunged(MessageNumber msg_num, int total);
     
     public signal void closed();
     
@@ -34,23 +34,23 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         context.closed.connect(on_closed);
         context.disconnected.connect(on_disconnected);
-        context.unsolicited_exists.connect(on_unsolicited_exists);
-        context.unsolicited_expunged.connect(on_unsolicited_expunged);
-        context.unsolicited_flags.connect(on_unsolicited_flags);
-        context.unsolicited_recent.connect(on_unsolicited_recent);
+        context.exists_altered.connect(on_exists_altered);
+        context.expunged.connect(on_expunged);
+        context.flags_altered.connect(on_flags_altered);
+        context.recent_altered.connect(on_recent_altered);
     }
     
     ~Mailbox() {
         context.closed.disconnect(on_closed);
         context.disconnected.disconnect(on_disconnected);
-        context.session.unsolicited_exists.disconnect(on_unsolicited_exists);
-        context.session.unsolicited_expunged.disconnect(on_unsolicited_expunged);
-        context.session.unsolicited_flags.disconnect(on_unsolicited_flags);
-        context.session.unsolicited_recent.disconnect(on_unsolicited_recent);
+        context.exists_altered.disconnect(on_exists_altered);
+        context.expunged.disconnect(on_expunged);
+        context.flags_altered.disconnect(on_flags_altered);
+        context.recent_altered.disconnect(on_recent_altered);
     }
     
-    public async Gee.List<Geary.Email>? list_set_async(MessageSet msg_set, Geary.Email.Field fields,
-        Cancellable? cancellable = null) throws Error {
+    public async Gee.List<Geary.Email>? list_set_async(Geary.Folder folder, MessageSet msg_set,
+        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
@@ -78,7 +78,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             // see fields_to_fetch_data_types() for why this is guaranteed
             assert(uid != null);
             
-            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(res.msg_num, uid),
+            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(folder, res.msg_num, uid),
                 new Geary.Imap.EmailIdentifier(uid));
             fetch_results_to_email(res, fields, email);
             
@@ -88,7 +88,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         return (msgs != null && msgs.size > 0) ? msgs : null;
     }
     
-    public async Geary.Email fetch_async(Geary.Imap.UID uid, Geary.Email.Field fields,
+    public async Geary.Email fetch_async(Geary.Folder folder, Geary.Imap.UID uid, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
@@ -113,7 +113,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (results.length != 1)
             throw new ImapError.SERVER_ERROR("Too many responses from server: %d", results.length);
         
-        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(results[0].msg_num, uid),
+        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(folder, results[0].msg_num, uid),
             new Geary.Imap.EmailIdentifier(uid));
         fetch_results_to_email(results[0], fields, email);
         
@@ -128,19 +128,19 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         disconnected(local);
     }
     
-    private void on_unsolicited_exists(int exists) {
-        exists_altered(exists);
+    private void on_exists_altered(int old_exists, int new_exists) {
+        exists_altered(old_exists, new_exists);
     }
     
-    private void on_unsolicited_recent(int recent) {
+    private void on_recent_altered(int recent) {
         recent_altered(recent);
     }
     
-    private void on_unsolicited_expunged(MessageNumber msg_num) {
-        expunged(msg_num);
+    private void on_expunged(MessageNumber msg_num, int total) {
+        expunged(msg_num, total);
     }
     
-    private void on_unsolicited_flags(FetchResults flags) {
+    private void on_flags_altered(FetchResults flags) {
         flags_altered(flags);
     }
     
@@ -276,13 +276,13 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     
     protected int manual_ref_count { get; protected set; }
     
-    public signal void unsolicited_exists(int exists);
+    public signal void exists_altered(int old_exists, int new_exists);
     
-    public signal void unsolicited_recent(int recent);
+    public signal void recent_altered(int recent);
     
-    public signal void unsolicited_expunged(MessageNumber expunged);
+    public signal void expunged(MessageNumber msg_num, int total);
     
-    public signal void unsolicited_flags(FetchResults flags);
+    public signal void flags_altered(FetchResults flags);
     
     public signal void closed();
     
@@ -325,21 +325,35 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     }
     
     private void on_unsolicited_exists(int exists) {
+        // only report if changed; note that on_solicited_expunged also fires this signal
+        if (this.exists == exists)
+            return;
+        
+        int old_exists = this.exists;
         this.exists = exists;
-        unsolicited_exists(exists);
+        
+        exists_altered(old_exists, this.exists);
     }
     
     private void on_unsolicited_recent(int recent) {
         this.recent = recent;
-        unsolicited_recent(recent);
+        
+        recent_altered(recent);
     }
     
-    private void on_unsolicited_expunged(MessageNumber expunged) {
-        unsolicited_expunged(expunged);
+    private void on_unsolicited_expunged(MessageNumber msg_num) {
+        assert(exists > 0);
+        
+        // update exists count along with reporting the deletion
+        int old_exists = exists;
+        exists--;
+        
+        exists_altered(old_exists, exists);
+        expunged(msg_num, exists);
     }
     
     private void on_unsolicited_flags(FetchResults results) {
-        unsolicited_flags(results);
+        flags_altered(results);
     }
     
     private void on_session_mailbox_changed(string? old_mailbox, string? new_mailbox, bool readonly) {
