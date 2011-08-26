@@ -23,7 +23,7 @@ def configure(conf):
 	conf.check_cfg(
 		package='glib-2.0',
 		uselib_store='GLIB',
-		atleast_version='2.28.8',
+		atleast_version='2.28.6',
 		mandatory=1,
 		args='--cflags --libs')
 	
@@ -58,7 +58,7 @@ def configure(conf):
 	conf.check_cfg(
 		package='sqlite3',
 		uselib_store='SQLITE',
-		atleast_version='3.7.5',
+		atleast_version='3.7.4',
 		mandatory=1,
 		args='--cflags --libs')
 	
