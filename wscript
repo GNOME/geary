@@ -3,6 +3,10 @@
 #
 # Copyright 2011 Yorba Foundation
 
+import shutil
+import os.path
+import subprocess
+
 # the following two variables are used by the target "waf dist"
 VERSION = '0.0.0+trunk'
 APPNAME = 'geary'
@@ -14,9 +18,10 @@ out = 'build'
 def options(opt):
 	opt.load('compiler_c')
 	opt.load('vala')
+	opt.load('glib2')
 
 def configure(conf):
-	conf.load('compiler_c vala')
+	conf.load('compiler_c vala glib2')
 	
 	conf.check_vala((0, 12, 0))
 	
@@ -77,9 +82,24 @@ def configure(conf):
 		args='--cflags --libs')
 
 def build(bld):
-	bld.env.append_value('CFLAGS', ['-O2', '-g'])
+	bld.add_post_fun(post_build)
+	
+	bld.env.append_value('CFLAGS', ['-O2', '-g', '-D_PREFIX="' + bld.env.PREFIX + '"'])
 	bld.env.append_value('LINKFLAGS', ['-O2', '-g'])
 	bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])
 	
 	bld.recurse('src')
+
+
+def post_build(bld):
+	# Copy executable to root folder.
+	geary_path = 'build/src/client/geary'
+	
+	if os.path.isfile(geary_path) :
+		shutil.copy2(geary_path, 'geary')
+	
+	# Compile schemas for local (non-intall) build.
+	client_build_path = 'build/src/client'
+	shutil.copy2('src/client/org.yorba.geary.gschema.xml', client_build_path)
+	subprocess.call(['glib-compile-schemas', client_build_path])
 

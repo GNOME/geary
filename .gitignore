@@ -2,4 +2,5 @@
 .lock-wafbuild
 .valencia
 build/
+geary
 

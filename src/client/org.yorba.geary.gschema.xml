@@ -1,0 +1,25 @@
+<schemalist>
+
+<schema id="org.yorba.geary" path="/apps/geary/">
+    
+    <key name="window-maximize" type="b">
+        <default>false</default>
+        <summary>maximize window</summary>
+        <description>True if library application is maximized, false otherwise.</description>
+    </key>
+    
+    <key name="window-width" type="i">
+        <default>1024</default>
+        <summary>width of window</summary>
+        <description>The last recorded width of the application window.</description>
+    </key>
+    
+    <key name="window-height" type="i">
+        <default>768</default>
+        <summary>height of window</summary>
+        <description>The last recorded height of the application window.</description>
+    </key>
+    
+</schema>
+
+</schemalist>

@@ -28,10 +28,12 @@ public class MainWindow : Gtk.Window {
     private Gtk.UIManager ui = new Gtk.UIManager();
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
+    private int window_width;
+    private int window_height;
+    private bool window_maximized;
     
     public MainWindow() {
         title = GearyApplication.NAME;
-        set_default_size(862, 684);
         
         try {
             ui.add_ui_from_string(MAIN_MENU_XML, -1);
@@ -97,10 +99,33 @@ public class MainWindow : Gtk.Window {
         }
     }
     
+    public override void show_all() {
+        set_default_size(GearyApplication.instance.config.window_width, 
+            GearyApplication.instance.config.window_height);
+        if (GearyApplication.instance.config.window_maximize)
+            maximize();
+        
+        base.show_all();
+    }
+    
     public override void destroy() {
+        // Save window dimensions.
+        GearyApplication.instance.config.window_width = window_width;
+        GearyApplication.instance.config.window_height = window_height;
+        GearyApplication.instance.config.window_maximize = window_maximized;
+        
         GearyApplication.instance.exit();
         
         base.destroy();
+    }
+    
+    public override bool configure_event(Gdk.EventConfigure event) {
+        // Get window dimensions.
+        window_maximized = (window.get_state() == Gdk.WindowState.MAXIMIZED);
+        if (!window_maximized)
+            get_size(out window_width, out window_height);
+        
+        return base.configure_event(event);
     }
     
     private Gtk.ActionEntry[] create_actions() {

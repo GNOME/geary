@@ -5,6 +5,7 @@
 
 client_src = [
 'geary-application.vala',
+'geary-config.vala',
 'main.vala',
 
 'ui/folder-list-store.vala',
@@ -16,10 +17,14 @@ client_src = [
 'ui/message-viewer.vala'
 ]
 
+gsettings_schemas = [
+'org.yorba.geary.gschema.xml'
+]
+
 client_uselib = 'GLIB GEE GTK'
 client_packages = [ 'gtk+-2.0', 'glib-2.0', 'gee-1.0' ]
 
-bld.program(
+app = bld.program(
 	target		= 'geary',
 	vapi_dirs	= '../../vapi',
 	threading	= True,
@@ -27,4 +32,7 @@ bld.program(
 	packages	= client_packages + bld.common_packages + bld.engine_packages,
 	source 		= client_src + bld.common_src + bld.engine_src
 )
+
+app.add_settings_schemas(gsettings_schemas)
+app.process_settings()
 

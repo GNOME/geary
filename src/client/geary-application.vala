@@ -47,12 +47,18 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     private MainWindow main_window = new MainWindow();
     private Geary.EngineAccount? account = null;
+    public Configuration config {
+        get; private set;
+    }
     
     private GearyApplication() {
         base (NAME, "geary", "org.yorba.geary");
     }
     
     public override void startup() {
+        config = new Configuration(YorbaApplication.instance.get_install_dir() != null,
+            YorbaApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
+        
         Geary.Credentials cred = new Geary.Credentials("imap.gmail.com", args[1], args[2]);
         
         try {

@@ -4,6 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+// Defined by wscript
+extern const string _PREFIX;
+
 /**
  * YorbaApplication is a poor man's lookalike of GNOME 3's GApplication, with a couple of additions.
  * It's only here to give some of GApplication's functionality in a GTK+ 2 environment.  The idea
@@ -16,6 +19,8 @@
 public abstract class YorbaApplication {
     public static YorbaApplication? instance { get; private set; default = null; }
     
+    public const string PREFIX = _PREFIX;
+    
     public bool registered { get; private set; }
     public string[]? args { get; private set; }
     
@@ -23,6 +28,7 @@ public abstract class YorbaApplication {
     private bool running = false;
     private bool exiting_fired = false;
     private int exitcode = 0;
+    private File exec_dir;
     private Unique.App? unique_app = null;
     
     /**
@@ -98,6 +104,8 @@ public abstract class YorbaApplication {
         
         this.args = args;
         
+        exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
+        
         running = true;
         startup();
         
@@ -146,6 +154,18 @@ public abstract class YorbaApplication {
      */
     public File get_resource_directory() {
         return File.new_for_path(Environment.get_current_dir());
+    }
+    
+    // Returns the directory the application is currently executing from.
+    public File get_exec_dir() {
+        return exec_dir;
+    }
+    
+    // Returns the installation directory, or null if we're running outside of the installation
+    // directory.
+    public File? get_install_dir() {
+        File prefix_dir = File.new_for_path(PREFIX);
+        return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
 }
 
