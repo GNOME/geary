@@ -20,4 +20,20 @@ public class Geary.Engine {
             new Geary.Imap.Account(cred, Imap.ClientConnection.DEFAULT_PORT_TLS),
             new Geary.Sqlite.Account(cred));
     }
+    
+    // Returns a list of usernames associated with Geary.
+    public static Gee.List<string> get_usernames() throws Error {
+        Gee.ArrayList<string> list = new Gee.ArrayList<string>();
+        
+        FileEnumerator enumerator = YorbaApplication.instance.get_user_data_directory().
+            enumerate_children("standard::*", FileQueryInfoFlags.NONE);
+        
+        FileInfo? info = null;
+        while ((info = enumerator.next_file()) != null) {
+            if (info.get_file_type() == FileType.DIRECTORY)
+                list.add(info.get_name());
+        }
+        
+        return list;
+    }
 }

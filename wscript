@@ -80,16 +80,22 @@ def configure(conf):
 		atleast_version='2.4.14',
 		mandatory=1,
 		args='--cflags --libs')
+		
+	conf.check_cfg(
+		package='gnome-keyring-1',
+		uselib_store='GNOME-KEYRING',
+		atleast_version='2.32.0',
+		mandatory=1,
+		args='--cflags --libs')
 
 def build(bld):
 	bld.add_post_fun(post_build)
 	
 	bld.env.append_value('CFLAGS', ['-O2', '-g', '-D_PREFIX="' + bld.env.PREFIX + '"'])
 	bld.env.append_value('LINKFLAGS', ['-O2', '-g'])
-	bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])
+	bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])	
 	
 	bld.recurse('src')
-
 
 def post_build(bld):
 	# Copy executable to root folder.

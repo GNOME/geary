@@ -37,7 +37,8 @@ public abstract class YorbaApplication {
      *
      * The args[] array will be available when this signal is fired.
      */
-    public virtual signal void startup() {
+    public virtual signal int startup() {
+        return 0;
     }
     
     public virtual signal void activate() {
@@ -107,10 +108,11 @@ public abstract class YorbaApplication {
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
         
         running = true;
-        startup();
+        exitcode = startup();
         
         // enter the main loop
-        Gtk.main();
+        if (exitcode == 0)
+            Gtk.main();
         
         return exitcode;
     }
@@ -167,5 +169,18 @@ public abstract class YorbaApplication {
         File prefix_dir = File.new_for_path(PREFIX);
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
+    
+    // Creates a GTK builder given the filename of a UI file in the ui directory.
+    public Gtk.Builder create_builder(string ui_filename) {
+        Gtk.Builder builder = new Gtk.Builder();
+        try {
+            builder.add_from_file(get_resource_directory().get_child("ui").get_child(
+                ui_filename).get_path());
+        } catch(GLib.Error error) {
+            warning("Unable to create Gtk.Builder: %s".printf(error.message));
+        }
+        
+    return builder;
+}
 }
 

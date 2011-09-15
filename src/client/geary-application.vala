@@ -55,11 +55,38 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         base (NAME, "geary", "org.yorba.geary");
     }
     
-    public override void startup() {
+    public override int startup() {
         config = new Configuration(YorbaApplication.instance.get_install_dir() != null,
             YorbaApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
         
-        Geary.Credentials cred = new Geary.Credentials("imap.gmail.com", args[1], args[2]);
+        // Get saved credentials. If not present, ask user.
+        string username = "";
+        string? password = null;
+        try {
+            Gee.List<string> accounts = Geary.Engine.get_usernames();
+            if (accounts.size > 0) {
+                username = accounts.get(0);
+                password = keyring_get_password(username);
+            }
+        } catch (Error e) {
+            debug("Unable to fetch accounts. Error: %s", e.message);
+        }
+        
+        if (password == null) {
+            LoginDialog login = new LoginDialog(username);
+            login.show();
+            if (login.get_response() == Gtk.ResponseType.OK) {
+                username = login.username;
+                password = login.password;
+                
+                // TODO: check credentials before saving password in keyring.
+                keyring_save_password(username, password);
+            } else {
+                return 1;
+            }
+        }
+        
+        Geary.Credentials cred = new Geary.Credentials("imap.gmail.com", username, password);
         
         try {
             account = Geary.Engine.open(cred);
@@ -69,6 +96,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         main_window.show_all();
         main_window.start(account);
+        return 0;
     }
     
     public override void activate() {

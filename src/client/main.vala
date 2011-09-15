@@ -8,12 +8,6 @@ int main(string[] args) {
     // initialize GTK, which modifies the command-line arguments
     Gtk.init(ref args);
     
-    if (args.length != 3) {
-        stderr.printf("usage: geary <user> <pass>\n");
-        
-        return 0;
-    }
-    
     try {
         // if already registered, silently exit
         if (!GearyApplication.instance.register())
