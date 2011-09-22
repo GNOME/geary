@@ -12,7 +12,7 @@ def build(bld):
 	]
 	
 	bld.common_uselib = 'GLIB UNIQUE'
-	bld.common_packages = ['glib-2.0', 'unique-1.0', 'posix' ]
+	bld.common_packages = ['glib-2.0', 'unique-3.0', 'posix' ]
 	
 	bld.engine_src = [
 	'../engine/api/geary-abstract-account.vala',

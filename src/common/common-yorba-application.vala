@@ -71,7 +71,7 @@ public abstract class YorbaApplication {
         unique_app.message_received.connect(on_unique_app_message);
         
         // If app already running, activate it and exit
-        if (unique_app.is_running) {
+        if (unique_app.is_running()) {
             unique_app.send_message((int) Unique.Command.ACTIVATE, null);
             
             return false;

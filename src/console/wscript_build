@@ -8,7 +8,7 @@ console_src = [
 ]
 
 console_uselib = 'GEE GTK GLIB'
-console_packages = [ 'gee-1.0', 'gtk+-2.0', 'glib-2.0' ]
+console_packages = [ 'gee-1.0', 'gtk+-3.0', 'glib-2.0' ]
 
 bld.program(
 	target		= 'console',

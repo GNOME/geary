@@ -38,7 +38,6 @@ class ImapConsole : Gtk.Window {
         layout.pack_start(cmdline, false, false, 0);
         
         statusbar_ctx = statusbar.get_context_id("status");
-        statusbar.has_resize_grip = true;
         layout.pack_end(statusbar, false, false, 0);
         
         add(layout);

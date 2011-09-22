@@ -47,16 +47,16 @@ def configure(conf):
 		args='--cflags --libs')
 	
 	conf.check_cfg(
-		package='gtk+-2.0',
+		package='gtk+-3.0',
 		uselib_store='GTK',
-		atleast_version='2.22.0',
+		atleast_version='3.0.',
 		mandatory=1,
 		args='--cflags --libs')
 	
 	conf.check_cfg(
-		package='unique-1.0',
+		package='unique-3.0',
 		uselib_store='UNIQUE',
-		atleast_version='1.0.0',
+		atleast_version='3.0.0',
 		mandatory=1,
 		args='--cflags --libs')
 	

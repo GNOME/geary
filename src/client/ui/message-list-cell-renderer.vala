@@ -89,36 +89,31 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
             height = cell_height;
     }
     
-    public override void render(Gdk.Window window, Gtk.Widget widget, Gdk.Rectangle background_area, 
-        Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, Gtk.CellRendererState flags) {
-        
-        Cairo.Context ctx = Gdk.cairo_create(window);
-        Gdk.cairo_rectangle (ctx, expose_area);
-        ctx.clip();
-        
+    public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
+        Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
         if (data == null)
             return;
         
         Pango.Rectangle? ink_rect;
         Pango.Rectangle? logical_rect;
         
-        int y = LINE_SPACING + expose_area.y;
+        int y = LINE_SPACING + cell_area.y;
         
         // Date field.
         Pango.Layout layout_date = widget.create_pango_layout(null);
         layout_date.set_markup(data.date, -1);
         layout_date.set_alignment(Pango.Alignment.RIGHT);
         layout_date.get_pixel_extents(out ink_rect, out logical_rect);
-        ctx.move_to(expose_area.width - expose_area.x - ink_rect.width - ink_rect.x - LINE_SPACING, y);
+        ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - LINE_SPACING, y);
         Pango.cairo_show_layout(ctx, layout_date);
         
         // From field.
         Pango.Layout layout_from = widget.create_pango_layout(null);
         layout_from.set_markup(data.from, -1);
-        layout_from.set_width((expose_area.width - ink_rect.width - ink_rect.x - LINE_SPACING - TEXT_LEFT)
+        layout_from.set_width((cell_area.width - ink_rect.width - ink_rect.x - LINE_SPACING - TEXT_LEFT)
             * Pango.SCALE);
         layout_from.set_ellipsize(Pango.EllipsizeMode.END);
-        ctx.move_to(expose_area.x + TEXT_LEFT, y);
+        ctx.move_to(cell_area.x + TEXT_LEFT, y);
         Pango.cairo_show_layout(ctx, layout_from);
         
         y += ink_rect.height + ink_rect.y + LINE_SPACING;
@@ -126,10 +121,10 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
         // Subject field.
         Pango.Layout layout_subject = widget.create_pango_layout(null);
         layout_subject.set_markup(data.subject, -1);
-        layout_subject.set_width((expose_area.width - TEXT_LEFT) * Pango.SCALE);
+        layout_subject.set_width((cell_area.width - TEXT_LEFT) * Pango.SCALE);
         layout_subject.set_ellipsize(Pango.EllipsizeMode.END);
         layout_date.get_pixel_extents(out ink_rect, out logical_rect);
-        ctx.move_to(expose_area.x + TEXT_LEFT, y);
+        ctx.move_to(cell_area.x + TEXT_LEFT, y);
         Pango.cairo_show_layout(ctx, layout_subject);
         
         y += ink_rect.height + ink_rect.y + LINE_SPACING;
@@ -137,11 +132,11 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
         // Body preview.
         Pango.Layout layout_preview = widget.create_pango_layout(null);
         layout_preview.set_markup(data.body, -1);
-        layout_preview.set_width((expose_area.width - TEXT_LEFT) * Pango.SCALE);
+        layout_preview.set_width((cell_area.width - TEXT_LEFT) * Pango.SCALE);
         layout_preview.set_height(preview_height * Pango.SCALE);
         layout_preview.set_wrap(Pango.WrapMode.WORD);
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
-        ctx.move_to(expose_area.x + TEXT_LEFT, y);
+        ctx.move_to(cell_area.x + TEXT_LEFT, y);
         Pango.cairo_show_layout(ctx, layout_preview);
         
         // Unread indicator.
@@ -155,8 +150,8 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
                 }
             }
             
-            Gdk.cairo_set_source_pixbuf(ctx, unread_pixbuf, expose_area.x + LINE_SPACING, 
-                expose_area.y + (expose_area.height / 2) - (UNREAD_ICON_SIZE / 2));
+            Gdk.cairo_set_source_pixbuf(ctx, unread_pixbuf, cell_area.x + LINE_SPACING, 
+                cell_area.y + (cell_area.height / 2) - (UNREAD_ICON_SIZE / 2));
             ctx.paint();
         }
     }

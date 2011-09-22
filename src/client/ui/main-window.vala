@@ -123,7 +123,7 @@ public class MainWindow : Gtk.Window {
     
     public override bool configure_event(Gdk.EventConfigure event) {
         // Get window dimensions.
-        window_maximized = (window.get_state() == Gdk.WindowState.MAXIMIZED);
+        window_maximized = (get_window().get_state() == Gdk.WindowState.MAXIMIZED);
         if (!window_maximized)
             get_size(out window_width, out window_height);
         
