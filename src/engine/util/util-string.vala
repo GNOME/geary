@@ -38,5 +38,9 @@ public inline bool ascii_equali(string a, string b) {
     return ascii_cmpi(a, b) == 0;
 }
 
+public inline string escape(string? plain) {
+    return (!is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
+}
+
 }
 

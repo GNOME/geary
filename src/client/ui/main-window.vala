@@ -19,6 +19,8 @@ public class MainWindow : Gtk.Window {
 </ui>
 """;
     
+    private const int MESSAGE_LIST_WIDTH = 150;
+    
     private MessageListStore message_list_store = new MessageListStore();
     private MessageListView message_list_view;
     private FolderListStore folder_list_store = new FolderListStore();
@@ -165,7 +167,7 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_start(ui.get_widget("/MenuBar"), false, false, 0);
         
         Gtk.HPaned folder_paned = new Gtk.HPaned();
-        Gtk.VPaned messages_paned = new Gtk.VPaned();
+        Gtk.HPaned messages_paned = new Gtk.HPaned();
         
         // folder list
         Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
@@ -174,6 +176,7 @@ public class MainWindow : Gtk.Window {
         
         // message list
         Gtk.ScrolledWindow message_list_scrolled = new Gtk.ScrolledWindow(null, null);
+        message_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
         message_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_list_scrolled.add_with_viewport(message_list_view);
         
@@ -182,9 +185,9 @@ public class MainWindow : Gtk.Window {
         message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_viewer_scrolled.add(message_viewer);
         
-        // three-pane display: message list on top and current message on bottom separated by
+        // three-pane display: message list left of current message on bottom separated by
         // grippable
-        messages_paned.pack1(message_list_scrolled, true, false);
+        messages_paned.pack1(message_list_scrolled, false, false);
         messages_paned.pack2(message_viewer_scrolled, true, false);
         
         // three-pane display: folder list on left and messages on right separated by grippable
@@ -250,7 +253,22 @@ public class MainWindow : Gtk.Window {
         
         if (err != null)
             debug("Error while listing email: %s", err.message);
+        
+        // end of list
+        if (email == null)
+            do_fetch_previews.begin();
     }
+    
+    private async void do_fetch_previews(Cancellable? cancellable = null) throws Error {
+        int count = message_list_store.get_count();
+        for (int ctr = 0; ctr < count; ctr++) {
+            Geary.Email? email = message_list_store.get_message_at_pos(ctr);
+            Geary.Email? body = yield current_folder.fetch_email_async(email.id,
+                Geary.Email.Field.HEADER | Geary.Email.Field.BODY | Geary.Email.Field.ENVELOPE | 
+                Geary.Email.Field.PROPERTIES, cancellable);
+            message_list_store.set_preview_at_pos(ctr, body);
+        }
+     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
         try {

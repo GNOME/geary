@@ -9,43 +9,30 @@ public class MessageListStore : Gtk.TreeStore {
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.PROPERTIES;
     
     public enum Column {
-        DATE,
-        FROM,
-        SUBJECT,
+        MESSAGE_DATA,
         MESSAGE_OBJECT,
         N_COLUMNS;
         
         public static Column[] all() {
             return {
-                DATE,
-                FROM,
-                SUBJECT,
+                MESSAGE_DATA,
                 MESSAGE_OBJECT
             };
         }
         
         public static Type[] get_types() {
             return {
-                typeof (string),            // DATE
-                typeof (string),            // FROM
-                typeof (string),            // SUBJECT
-                typeof (Geary.Email)        // MESSAGE_OBJECT
+                typeof (FormattedMessageData), // MESSAGE_DATA
+                typeof (Geary.Email)           // MESSAGE_OBJECT
             };
         }
         
         public string to_string() {
             switch (this) {
-                case DATE:
-                    return _("Date");
-                
-                case FROM:
-                    return _("From");
-                
-                case SUBJECT:
-                    return _("Subject");
-                
+                case MESSAGE_DATA:
+                    return "data";
                 case MESSAGE_OBJECT:
-                    return "(hidden)";
+                    return "envelope";
                 
                 default:
                     assert_not_reached();
@@ -66,25 +53,31 @@ public class MessageListStore : Gtk.TreeStore {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        string? pre = null;
-        string? post = null;
-        if (envelope.properties != null) {
-            pre = envelope.properties.is_unread() ? "<b>" : null;
-            post = envelope.properties.is_unread() ? "</b>" : null;
-        }
-        
-        string date = to_markup(Date.pretty_print(envelope.date.value), pre, post);
-        string from = to_markup(envelope.from[0].get_short_address(), pre, post);
-        string subject = to_markup(envelope.subject.value, pre, post);
-        
         set(iter,
-            Column.DATE, date,
-            Column.FROM, from,
-            Column.SUBJECT, subject,
+            Column.MESSAGE_DATA, new FormattedMessageData.from_email(envelope),
             Column.MESSAGE_OBJECT, envelope
         );
         
         envelope.location.position_deleted.connect(on_email_position_deleted);
+    }
+    
+    public Geary.Email? get_message_at_pos(int pos) {
+        return get_message_at(new Gtk.TreePath.from_indices(pos, -1));
+    }
+    
+    public void set_preview_at_pos(int pos, Geary.Email email) {
+        Gtk.TreeIter iter;
+        if (!get_iter(out iter, new Gtk.TreePath.from_indices(pos, -1))) {
+            warning("Unable to get tree path from position: %d".printf(pos));
+            
+            return;
+        }
+        
+        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email));
+    }
+    
+    public int get_count() {
+        return iter_n_children(null);
     }
     
     public Geary.Email? get_message_at(Gtk.TreePath path) {
@@ -158,14 +151,6 @@ public class MessageListStore : Gtk.TreeStore {
     private void on_email_position_deleted(int position) {
         if (!remove_at_position(position))
             debug("on_email_position_deleted: unable to find email at position %d", position);
-    }
-    
-    private static string to_markup(string str, string? pre = null, string? post = null) {
-        return "%s%s%s".printf(
-            (pre != null) ? pre : "",
-            Markup.escape_text(str),
-            (post != null) ? post : ""
-        );
     }
 }
 

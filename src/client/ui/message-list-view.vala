@@ -10,15 +10,20 @@ public class MessageListView : Gtk.TreeView {
     public MessageListView(MessageListStore store) {
         set_model(store);
         
-        Gtk.CellRendererText date_renderer = new Gtk.CellRendererText();
-        date_renderer.xalign = 1.0f;
-        append_column(create_column(MessageListStore.Column.FROM, new Gtk.CellRendererText(),
-            "markup", 200));
-        append_column(create_column(MessageListStore.Column.SUBJECT, new Gtk.CellRendererText(),
-            "markup", 400));
-        append_column(create_column(MessageListStore.Column.DATE, date_renderer, "markup", 100));
+        set_show_expanders(false);
+        set_headers_visible(false);
+        enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
+        
+        append_column(create_column(MessageListStore.Column.MESSAGE_DATA, new MessageListCellRenderer(),
+            MessageListStore.Column.MESSAGE_DATA.to_string(), 0));
         
         get_selection().changed.connect(on_selection_changed);
+        this.style_set.connect(on_style_changed);
+    }
+    
+    private void on_style_changed() {
+        // Recalculate dimensions of child cells.
+        MessageListCellRenderer.style_changed(this);
     }
     
     private static Gtk.TreeViewColumn create_column(MessageListStore.Column column,
