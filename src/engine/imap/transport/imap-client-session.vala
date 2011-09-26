@@ -27,7 +27,7 @@ public class Geary.Imap.ClientSession {
     
     // Need this because delegates with targets cannot be stored in ADTs.
     private class CommandCallback {
-        public SourceFunc callback;
+        public unowned SourceFunc callback;
         
         public CommandCallback(SourceFunc callback) {
             this.callback = callback;
@@ -50,7 +50,7 @@ public class Geary.Imap.ClientSession {
     // the multiple transitions are completed
     private class AsyncParams : Object {
         public Cancellable? cancellable;
-        public SourceFunc cb;
+        public unowned SourceFunc cb;
         public CommandResponse? cmd_response = null;
         public Error? err = null;
         public bool do_yield = false;
@@ -434,7 +434,7 @@ public class Geary.Imap.ClientSession {
             fsm.issue(Event.SEND_ERROR, null, null, err);
             connect_params.err = err;
             
-            Idle.add(connect_params.cb);
+            Scheduler.on_idle(connect_params.cb);
             connect_params = null;
             
             return;
@@ -463,7 +463,7 @@ public class Geary.Imap.ClientSession {
             fsm.issue(Event.CONNECT_DENIED);
         }
         
-        Idle.add(connect_params.cb);
+        Scheduler.on_idle(connect_params.cb);
         connect_params = null;
         
         return false;
@@ -872,7 +872,7 @@ public class Geary.Imap.ClientSession {
             disconnect_params.err = err;
         }
         
-        Idle.add(disconnect_params.cb);
+        Scheduler.on_idle(disconnect_params.cb);
         disconnect_params = null;
     }
     
@@ -1015,7 +1015,7 @@ public class Geary.Imap.ClientSession {
             success = true;
         }
         
-        Idle.add(params.cb);
+        Scheduler.on_idle(params.cb);
         
         return success;
     }
@@ -1058,7 +1058,7 @@ public class Geary.Imap.ClientSession {
         CommandCallback? cmd_callback = cb_queue.poll();
         assert(cmd_callback != null);
         
-        Idle.add(cmd_callback.callback);
+        Scheduler.on_idle(cmd_callback.callback);
     }
     
     private void on_received_server_data(ServerData server_data) {
@@ -1071,7 +1071,7 @@ public class Geary.Imap.ClientSession {
             CommandCallback? cmd_callback = cb_queue.poll();
             assert(cmd_callback != null);
             
-            Idle.add(cmd_callback.callback);
+            Scheduler.on_idle(cmd_callback.callback);
             
             return;
         }

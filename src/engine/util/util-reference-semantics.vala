@@ -25,7 +25,8 @@
  * simple ref) implements the ReferenceSemantics interface.  (Note that the only required field to
  * implement is manual_ref_count.)  The objects that are distributed to callers are subclasses
  * of SmartReference.  When all the SmartReferences are destroyed, the ReferenceSemantics
- * "freed" signal will fire.  Any final references can be dropped and/or clean up can then occur.
+ * "freed" signal will fire.  Any final references to the underlying Object can be dropped and/or
+ * clean up can then occur.
  *
  * If the ReferenceSemantics object needs all the SmartReferences to drop their reference to it,
  * fire the "release-now" signal.  Although the SmartReferences will still be active in the system,
@@ -57,6 +58,10 @@ public interface Geary.ReferenceSemantics : Object {
         
         if (--manual_ref_count == 0)
             freed();
+    }
+    
+    public bool is_freed() {
+        return (manual_ref_count == 0);
     }
 }
 

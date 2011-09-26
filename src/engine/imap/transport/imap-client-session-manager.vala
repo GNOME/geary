@@ -222,6 +222,8 @@ public class Geary.Imap.ClientSessionManager {
     
     private async ClientSession select_examine_async(string folder, bool is_select,
         out SelectExamineResults results, Cancellable? cancellable) throws Error {
+        results = null;
+        
         ClientSession.Context needed_context = (is_select) ? ClientSession.Context.SELECTED
             : ClientSession.Context.EXAMINED;
         foreach (ClientSession session in sessions) {

@@ -23,7 +23,7 @@ def options(opt):
 def configure(conf):
 	conf.load('compiler_c vala glib2')
 	
-	conf.check_vala((0, 12, 0))
+	conf.check_vala((0, 14, 0))
 	
 	conf.check_cfg(
 		package='glib-2.0',

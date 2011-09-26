@@ -75,18 +75,13 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
     
     public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
         out int y_offset, out int width, out int height) {
-        
         if (cell_height == -1 || preview_height == -1 || example_data == null)
             style_changed(widget);
         
-        if (&x_offset != null)
-            x_offset = 0;
-        if (&y_offset != null)
-            y_offset = 0;
-        if (&width != null)
-            width = 0;
-        if (&height != null)
-            height = cell_height;
+        x_offset = 0;
+        y_offset = 0;
+        width = 0;
+        height = cell_height;
     }
     
     public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 

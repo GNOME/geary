@@ -6,7 +6,7 @@
 
 public abstract class Geary.NonblockingAbstractSemaphore {
     private class Pending {
-        public SourceFunc cb;
+        public unowned SourceFunc cb;
         public Cancellable? cancellable;
         public bool passed = false;
         
@@ -59,14 +59,14 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         if (all) {
             foreach (Pending pending in pending_queue) {
                 pending.passed = passed;
-                Idle.add(pending.cb);
+                Scheduler.on_idle(pending.cb);
             }
             
             pending_queue.clear();
         } else {
             Pending pending = pending_queue.remove_at(0);
             pending.passed = passed;
-            Idle.add(pending.cb);
+            Scheduler.on_idle(pending.cb);
         }
     }
     
@@ -126,7 +126,7 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         bool removed = pending_queue.remove(pending);
         assert(removed);
         
-        Idle.add(pending.cb);
+        Scheduler.on_idle(pending.cb);
     }
     
     private void on_cancelled() {

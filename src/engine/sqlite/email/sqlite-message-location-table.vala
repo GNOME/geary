@@ -215,6 +215,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
      */
     public async bool does_ordering_exist_async(int64 folder_id, int64 ordering,
         out int64 message_id, Cancellable? cancellable = null) throws Error {
+        message_id = Row.INVALID_ID;
+        
         SQLHeavy.Query query = db.prepare(
             "SELECT message_id FROM MessageLocationTable WHERE folder_id = ? AND ordering = ?");
         query.bind_int64(0, folder_id);

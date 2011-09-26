@@ -12,8 +12,8 @@ public class Geary.State.MachineDescriptor {
     public uint state_count { get; private set; }
     public uint event_count { get; private set; }
     
-    private StateEventToString? state_to_string;
-    private StateEventToString? event_to_string;
+    private unowned StateEventToString? state_to_string;
+    private unowned StateEventToString? event_to_string;
     
     public MachineDescriptor(string name, uint start_state, uint state_count, uint event_count,
         StateEventToString? state_to_string, StateEventToString? event_to_string) {

@@ -118,6 +118,7 @@ def build(bld):
 	'../engine/util/util-interfaces.vala',
 	'../engine/util/util-memory.vala',
 	'../engine/util/util-reference-semantics.vala',
+	'../engine/util/util-scheduler.vala',
 	'../engine/util/util-string.vala',
 	'../engine/util/util-trillian.vala'
 	]

@@ -8,7 +8,7 @@ public class Geary.State.Machine {
     private Geary.State.MachineDescriptor descriptor;
     private uint state;
     private Mapping[,] transitions;
-    private Transition? default_transition;
+    private unowned Transition? default_transition;
     private bool locked = false;
     private bool abort_on_no_transition = true;
     private bool logging = false;
@@ -61,7 +61,7 @@ public class Geary.State.Machine {
         
         unowned Mapping? mapping = transitions[state, event];
         
-        Transition? transition = (mapping != null) ? mapping.transition : default_transition;
+        unowned Transition? transition = (mapping != null) ? mapping.transition : default_transition;
         if (transition == null) {
             string msg = "%s: No transition defined for %s@%s".printf(to_string(),
                 descriptor.get_event_string(event), descriptor.get_state_string(state));

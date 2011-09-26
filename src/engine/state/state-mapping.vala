@@ -10,7 +10,7 @@ public delegate uint Geary.State.Transition(uint state, uint event, void *user =
 public class Geary.State.Mapping {
     public uint state;
     public uint event;
-    public Transition transition;
+    public unowned Transition transition;
     
     public Mapping(uint state, uint event, Transition transition) {
         this.state = state;
