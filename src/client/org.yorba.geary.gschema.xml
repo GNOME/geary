@@ -20,6 +20,18 @@
         <description>The last recorded height of the application window.</description>
     </key>
     
+    <key name="folder-list-pane-position" type="i">
+        <default>-1</default>
+        <summary>position of folder list pane</summary>
+        <description>Position of the folder list HPaned grabber. -1 means unset.</description>
+    </key>
+    
+    <key name="messages-pane-position" type="i">
+        <default>-1</default>
+        <summary>position of message list pane</summary>
+        <description>Position of the message list HPaned grabber. -1 means unset.</description>
+    </key>
+    
 </schema>
 
 </schemalist>

@@ -26,6 +26,18 @@ public class Configuration {
         set { settings.set_boolean(WINDOW_MAXIMIZE_NAME, value); }
     }
     
+    private const string FOLDER_LIST_PANE_POSITION_NAME = "folder-list-pane-position";
+    public int folder_list_pane_position {
+        get { return settings.get_int(FOLDER_LIST_PANE_POSITION_NAME); }
+        set { settings.set_int(FOLDER_LIST_PANE_POSITION_NAME, value); }
+    }
+    
+    private const string MESSAGES_PANE_POSITION_NAME = "messages-pane-position";
+    public int messages_pane_position {
+        get { return settings.get_int(MESSAGES_PANE_POSITION_NAME); }
+        set { settings.set_int(MESSAGES_PANE_POSITION_NAME, value); }
+    }
+    
     // Creates a configuration object.
     // is_installed: set to true if installed, else false.
     // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.

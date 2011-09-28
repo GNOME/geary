@@ -33,6 +33,8 @@ public class MainWindow : Gtk.Window {
     private int window_width;
     private int window_height;
     private bool window_maximized;
+    private Gtk.HPaned folder_paned = new Gtk.HPaned();
+    private Gtk.HPaned messages_paned = new Gtk.HPaned();
     
     public MainWindow() {
         title = GearyApplication.NAME;
@@ -107,6 +109,9 @@ public class MainWindow : Gtk.Window {
         if (GearyApplication.instance.config.window_maximize)
             maximize();
         
+        folder_paned.set_position(GearyApplication.instance.config.folder_list_pane_position);
+        messages_paned.set_position(GearyApplication.instance.config.messages_pane_position);
+        
         base.show_all();
     }
     
@@ -115,6 +120,10 @@ public class MainWindow : Gtk.Window {
         GearyApplication.instance.config.window_width = window_width;
         GearyApplication.instance.config.window_height = window_height;
         GearyApplication.instance.config.window_maximize = window_maximized;
+        
+        // Save pane positions.
+        GearyApplication.instance.config.folder_list_pane_position = folder_paned.get_position();
+        GearyApplication.instance.config.messages_pane_position = messages_paned.get_position();
         
         GearyApplication.instance.exit();
         
@@ -165,9 +174,6 @@ public class MainWindow : Gtk.Window {
         
         // main menu
         main_layout.pack_start(ui.get_widget("/MenuBar"), false, false, 0);
-        
-        Gtk.HPaned folder_paned = new Gtk.HPaned();
-        Gtk.HPaned messages_paned = new Gtk.HPaned();
         
         // folder list
         Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
