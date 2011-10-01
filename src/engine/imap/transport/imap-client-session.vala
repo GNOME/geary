@@ -161,8 +161,7 @@ public class Geary.Imap.ClientSession {
         "Geary.Imap.ClientSession", State.DISCONNECTED, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
-    private string server;
-    private uint default_port;
+    private Geary.Endpoint endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
     private string? current_mailbox = null;
@@ -210,9 +209,8 @@ public class Geary.Imap.ClientSession {
     public virtual signal void unsolicited_flags(FetchResults flags) {
     }
     
-    public ClientSession(string server, uint default_port) {
-        this.server = server;
-        this.default_port = default_port;
+    public ClientSession(Geary.Endpoint endpoint) {
+        this.endpoint = endpoint;
         
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.DISCONNECTED, Event.CONNECT, on_connect),
@@ -407,7 +405,7 @@ public class Geary.Imap.ClientSession {
         connect_params = (AsyncParams) object;
         
         assert(cx == null);
-        cx = new ClientConnection(server, ClientConnection.DEFAULT_PORT_TLS);
+        cx = new ClientConnection(endpoint);
         cx.connected.connect(on_network_connected);
         cx.disconnected.connect(on_network_disconnected);
         cx.sent_command.connect(on_network_sent_command);
@@ -481,8 +479,10 @@ public class Geary.Imap.ClientSession {
     // login
     //
     
-    public async void login_async(string user, string pass, Cancellable? cancellable = null) throws Error {
-        LoginParams params = new LoginParams(user, pass, cancellable, login_async.callback);
+    public async void login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
+        throws Error {
+        LoginParams params = new LoginParams(credentials.user, credentials.pass, cancellable,
+            login_async.callback);
         fsm.issue(Event.LOGIN, null, params);
         
         if (params.do_yield)
@@ -976,7 +976,7 @@ public class Geary.Imap.ClientSession {
         Cancellable? cancellable = null) {
         if (cx == null) {
             return new AsyncCommandResponse(null, user,
-                new ImapError.NOT_CONNECTED("Not connected to %s", server));
+                new ImapError.NOT_CONNECTED("Not connected to %s", endpoint.to_string()));
         }
         
         try {
@@ -1089,7 +1089,7 @@ public class Geary.Imap.ClientSession {
     }
     
     public string to_string() {
-        return "ClientSession:%s:%u".printf(server, default_port);
+        return "ClientSession:%s".printf(endpoint.to_string());
     }
     
     public string to_full_string() {

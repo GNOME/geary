@@ -42,5 +42,25 @@ public inline string escape(string? plain) {
     return (!is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
 }
 
+/**
+ * Returns char from 0 to 9 converted to an int.  If a non-numeric value, -1 is returned.
+ */
+public inline int digit_to_int(char ch) {
+    return ch.isdigit() ? (ch - '0') : -1;
+}
+
+public string uint8_to_hex(uint8[] buffer) {
+    StringBuilder builder = new StringBuilder();
+    
+    foreach (uint8 byte in buffer) {
+        if (builder.len > 0)
+            builder.append_c(' ');
+        
+        builder.append("%X (%c)".printf(byte, (char) byte));
+    }
+    
+    return builder.str;
+}
+
 }
 

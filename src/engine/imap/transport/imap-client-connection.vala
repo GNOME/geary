@@ -10,9 +10,7 @@ public class Geary.Imap.ClientConnection {
     
     private const int FLUSH_TIMEOUT_MSEC = 100;
     
-    private string host_specifier;
-    private uint16 default_port;
-    private SocketClient socket_client = new SocketClient();
+    private Geary.Endpoint endpoint;
     private SocketConnection? cx = null;
     private Serializer? ser = null;
     private Deserializer? des = null;
@@ -51,12 +49,8 @@ public class Geary.Imap.ClientConnection {
     public virtual signal void deserialize_failure(Error err) {
     }
     
-    public ClientConnection(string host_specifier, uint16 default_port) {
-        this.host_specifier = host_specifier;
-        this.default_port = default_port;
-        
-        socket_client.set_tls(true);
-        socket_client.set_tls_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
+    public ClientConnection(Geary.Endpoint endpoint) {
+        this.endpoint = endpoint;
     }
     
     ~ClientConnection() {
@@ -92,7 +86,7 @@ public class Geary.Imap.ClientConnection {
             return;
         }
         
-        cx = yield socket_client.connect_to_host_async(host_specifier, default_port, cancellable);
+        cx = yield endpoint.connect_async(cancellable);
         ser = new Serializer(new BufferedOutputStream(cx.output_stream));
         des = new Deserializer(new BufferedInputStream(cx.input_stream));
         des.parameters_ready.connect(on_parameters_ready);
@@ -186,7 +180,7 @@ public class Geary.Imap.ClientConnection {
     }
     
     public string to_string() {
-        return "%s:%ud".printf(host_specifier, default_port);
+        return endpoint.to_string();
     }
 }
 

@@ -180,5 +180,10 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
     public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
         return null;
     }
+    
+    public override async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
+        throws Error {
+        yield remote.send_email_async(composed, cancellable);
+    }
 }
 

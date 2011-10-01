@@ -86,7 +86,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             }
         }
         
-        Geary.Credentials cred = new Geary.Credentials("imap.gmail.com", username, password);
+        Geary.Credentials cred = new Geary.Credentials(username, password);
         
         try {
             account = Geary.Engine.open(cred);

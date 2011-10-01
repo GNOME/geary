@@ -98,11 +98,19 @@ def build(bld):
 	bld.recurse('src')
 
 def post_build(bld):
-	# Copy executable to root folder.
+	# Copy executables to root folder.
 	geary_path = 'build/src/client/geary'
+	console_path = 'build/src/console/console'
+	norman_path = 'build/src/norman/norman'
 	
 	if os.path.isfile(geary_path) :
 		shutil.copy2(geary_path, 'geary')
+	
+	if os.path.isfile(console_path) :
+		shutil.copy2(console_path, 'console')
+	
+	if os.path.isfile(norman_path) :
+		shutil.copy2(norman_path, 'norman')
 	
 	# Compile schemas for local (non-intall) build.
 	client_build_path = 'build/src/client'

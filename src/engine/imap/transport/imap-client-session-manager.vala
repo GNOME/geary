@@ -8,8 +8,8 @@ public class Geary.Imap.ClientSessionManager {
     public const int MIN_POOL_SIZE = 2;
     public const int SELECTED_KEEPALIVE_SEC = 5;
     
-    private Credentials cred;
-    private uint default_port;
+    private Endpoint endpoint;
+    private Credentials credentials;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
@@ -17,9 +17,9 @@ public class Geary.Imap.ClientSessionManager {
     private int keepalive_sec = ClientSession.DEFAULT_KEEPALIVE_SEC;
     private int selected_keepalive_sec = SELECTED_KEEPALIVE_SEC;
     
-    public ClientSessionManager(Credentials cred, uint default_port) {
-        this.cred = cred;
-        this.default_port = default_port;
+    public ClientSessionManager(Endpoint endpoint, Credentials credentials) {
+        this.endpoint = endpoint;
+        this.credentials = credentials;
         
         adjust_session_pool.begin();
     }
@@ -31,7 +31,7 @@ public class Geary.Imap.ClientSessionManager {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {
-                debug("Unable to create authorized session to %s: %s", cred.server, err.message);
+                debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
             }
         }
     }
@@ -185,11 +185,11 @@ public class Geary.Imap.ClientSessionManager {
     
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
-        ClientSession new_session = new ClientSession(cred.server, default_port);
+        ClientSession new_session = new ClientSession(endpoint);
         new_session.disconnected.connect(on_disconnected);
         
         yield new_session.connect_async(cancellable);
-        yield new_session.login_async(cred.user, cred.pass, cancellable);
+        yield new_session.login_async(credentials, cancellable);
         
         // do this after logging in
         new_session.enable_keepalives(keepalive_sec);
@@ -250,7 +250,7 @@ public class Geary.Imap.ClientSessionManager {
      * Use only for debugging and logging.
      */
     public string to_string() {
-        return cred.to_string();
+        return endpoint.to_string();
     }
 }
 

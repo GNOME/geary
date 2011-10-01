@@ -148,6 +148,13 @@ public class Geary.Memory.GrowableBuffer : Geary.Memory.AbstractBuffer {
         fragments[fragments.size - 1].adjust(buffer, adjusted_bytes);
     }
     
+    public void append(uint8[] buffer) {
+        unowned uint8[] dest = allocate(buffer.length);
+        assert(dest.length == buffer.length);
+        
+        GLib.Memory.copy(dest, buffer, buffer.length);
+    }
+    
     public override size_t get_size() {
         size_t size = 0;
         foreach (BufferFragment fragment in fragments)

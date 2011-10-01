@@ -10,13 +10,18 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     public const string INBOX_NAME = "INBOX";
     public const string ASSUMED_SEPARATOR = "/";
     
+    private Geary.Credentials cred;
     private ClientSessionManager session_mgr;
+    private Geary.Smtp.ClientSession smtp;
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     
-    public Account(Credentials cred, uint default_port) {
+    public Account(Geary.Endpoint imap_endpoint, Geary.Endpoint smtp_endpoint, Geary.Credentials cred) {
         base ("IMAP Account for %s".printf(cred.to_string()));
         
-        session_mgr = new ClientSessionManager(cred, default_port);
+        this.cred = cred;
+        
+        session_mgr = new ClientSessionManager(imap_endpoint, cred);
+        smtp = new Geary.Smtp.ClientSession(smtp_endpoint);
     }
     
     public override Geary.Email.Field get_required_fields_for_writing() {
@@ -160,6 +165,24 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             return new Geary.FolderRoot(basename, delim, Folder.CASE_SENSITIVE);
         
         return parent;
+    }
+    
+    public async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
+        throws Error {
+        Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(composed);
+        assert(rfc822.message != null);
+        
+        yield smtp.login_async(cred, cancellable);
+        try {
+            yield smtp.send_email_async(rfc822.message, cancellable);
+        } finally {
+            // always logout
+            try {
+                yield smtp.quit_async(cancellable);
+            } catch (Error err) {
+                message("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
+            }
+        }
     }
 }
 

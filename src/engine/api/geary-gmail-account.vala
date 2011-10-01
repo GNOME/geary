@@ -7,6 +7,26 @@
 private class Geary.GmailAccount : Geary.GenericImapAccount {
     private const string GMAIL_FOLDER = "[Gmail]";
     
+    private static Geary.Endpoint? _imap_endpoint = null;
+    public static Geary.Endpoint IMAP_ENDPOINT { get {
+        if (_imap_endpoint == null) {
+            _imap_endpoint = new Geary.Endpoint("imap.gmail.com", Imap.ClientConnection.DEFAULT_PORT_TLS,
+                Geary.Endpoint.Flags.TLS);
+        }
+        
+        return _imap_endpoint;
+    } }
+    
+    private static Geary.Endpoint? _smtp_endpoint = null;
+    public static Geary.Endpoint SMTP_ENDPOINT { get {
+        if (_smtp_endpoint == null) {
+            _smtp_endpoint = new Geary.Endpoint("smtp.gmail.com", Smtp.ClientConnection.SECURE_SMTP_PORT,
+                Geary.Endpoint.Flags.TLS);
+        }
+        
+        return _smtp_endpoint;
+    } }
+    
     private static SpecialFolderMap? special_folder_map = null;
     private static Gee.Set<Geary.FolderPath>? ignored_paths = null;
     

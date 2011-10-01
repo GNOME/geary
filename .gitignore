@@ -2,5 +2,6 @@
 .lock-wafbuild
 .valencia
 build/
-geary
-
+/geary
+/console
+/norman

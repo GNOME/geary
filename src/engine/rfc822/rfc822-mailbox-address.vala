@@ -53,6 +53,14 @@ public class Geary.RFC822.MailboxAddress {
     }
     
     /**
+     * Returns a simple address, that is, no human-readable name and the email address in angled
+     * brackets.
+     */
+    public string get_simple_address() {
+        return "<%s>".printf(address);
+    }
+    
+    /**
      * Returns a human-readable pretty address, showing only the name, but if unavailable, the
      * mailbox name (that is, the account name without the domain).
      */

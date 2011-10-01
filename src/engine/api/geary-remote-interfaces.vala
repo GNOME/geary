@@ -7,6 +7,15 @@
 public interface Geary.RemoteAccount : Object, Geary.Account {
     public abstract async string? get_folder_delimiter_async(string toplevel,
         Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Delivers a formatted message with this Account being the sender of record.
+     *
+     * TODO: The Account object should enqueue messages and notify of their transmission.  Currently
+     * this method initiates delivery.
+     */
+    public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
+        throws Error;
 }
 
 public interface Geary.RemoteFolder : Object, Geary.Folder {

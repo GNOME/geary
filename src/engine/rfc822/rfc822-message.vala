@@ -5,7 +5,7 @@
  */
 
 public class Geary.RFC822.Message : Object {
-    private GMime.Message? message;
+    public GMime.Message? message { get; private set; }
     
     public Message(Full full) {
         GMime.Parser parser = new GMime.Parser.with_stream(
@@ -22,6 +22,40 @@ public class Geary.RFC822.Message : Object {
         GMime.Parser parser = new GMime.Parser.with_stream(stream_cat);
         
         message = parser.construct_message();
+    }
+    
+    public Message.from_composed_email(Geary.ComposedEmail email) {
+        message = new GMime.Message(true);
+        
+        // Required headers
+        message.set_sender(email.from);
+        message.set_date((time_t) email.date.to_unix(),
+            (int) (email.date.get_utc_offset() / TimeSpan.HOUR));
+        
+        // Optional headers
+        if (!String.is_empty(email.to))
+            message.add_recipient(GMime.RecipientType.TO, "", email.to);
+        
+        if (!String.is_empty(email.cc))
+            message.add_recipient(GMime.RecipientType.CC, "", email.cc);
+        
+        if (!String.is_empty(email.bcc))
+            message.add_recipient(GMime.RecipientType.BCC, "", email.bcc);
+        
+        if (!String.is_empty(email.subject))
+            message.set_subject(email.subject);
+        
+        // Body (also optional)
+        if (!String.is_empty(email.body)) {
+            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
+                new GMime.StreamMem.with_buffer(email.body.data),
+                GMime.ContentEncoding.DEFAULT);
+            
+            GMime.Part part = new GMime.Part();
+            part.set_content_object(content);
+            
+            message.set_mime_part(part);
+        }
     }
     
     public bool is_decoded() {
