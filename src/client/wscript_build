@@ -8,6 +8,7 @@ client_src = [
 'geary-config.vala',
 'main.vala',
 
+'ui/composer-window.vala',
 'ui/geary-login.vala',
 'ui/folder-list-store.vala',
 'ui/folder-list-view.vala',

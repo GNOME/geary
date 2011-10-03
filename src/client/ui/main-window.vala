@@ -9,6 +9,8 @@ public class MainWindow : Gtk.Window {
 <ui>
     <menubar name="MenuBar">
         <menu name="FileMenu" action="FileMenu">
+            <menuitem name="NewMessage" action="FileNewMessage" />
+            <separator />
             <menuitem name="Quit" action="FileQuit" />
         </menu>
         
@@ -154,6 +156,11 @@ public class MainWindow : Gtk.Window {
         quit.label = _("_Quit");
         entries += quit;
         
+        Gtk.ActionEntry new_message = { "FileNewMessage", Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", null,
+            on_new_message };
+        new_message.label = _("_New Message");
+        entries += new_message;
+        
         //
         // Help
         //
@@ -203,6 +210,34 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
+    }
+    
+    private void on_new_message() {
+        ComposerWindow w = new ComposerWindow();
+        w.send.connect(on_send);
+        w.show_all();
+    }
+    
+    private void on_send(ComposerWindow cw) {
+        string username;
+        try {
+            // TODO: Multiple accounts.
+            username = Geary.Engine.get_usernames().get(0);
+        } catch (Error e) {
+            error("Unable to get username. Error: %s", e.message);
+        }
+        
+        Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(), username);
+        
+        email.to = cw.to;
+        email.cc = cw.cc;
+        email.bcc = cw.bcc;
+        email.subject = cw.subject;
+        email.body = cw.message;
+        
+        account.send_email_async.begin(email);
+        
+        cw.destroy();
     }
     
     private void on_quit() {
