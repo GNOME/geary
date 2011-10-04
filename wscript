@@ -96,6 +96,17 @@ def build(bld):
 	bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])	
 	
 	bld.recurse('src')
+	
+	# Remove executables in root folder.
+	if bld.cmd == 'clean':
+		if os.path.isfile('geary') :
+			os.remove('geary')
+		
+		if os.path.isfile('console') :
+			os.remove('console')
+		
+		if os.path.isfile('norman') :
+			os.remove('norman')
 
 def post_build(bld):
 	# Copy executables to root folder.
