@@ -8,6 +8,8 @@ public class MessageViewer : Gtk.TextView {
     public MessageViewer() {
         editable = false;
         cursor_visible = false;
+        
+        set_wrap_mode(Gtk.WrapMode.WORD);
     }
 }
 
