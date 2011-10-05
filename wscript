@@ -68,9 +68,9 @@ def configure(conf):
 		args='--cflags --libs')
 	
 	conf.check_cfg(
-		package='sqlheavy-0.1',
+		package='sqlheavy-0.2',
 		uselib_store='SQLHEAVY',
-		atleast_version='0.0.1',
+		atleast_version='0.2.0',
 		mandatory=1,
 		args='--cflags --libs')
 	
