@@ -61,14 +61,31 @@ public class MessageListStore : Gtk.TreeStore {
         envelope.location.position_deleted.connect(on_email_position_deleted);
     }
     
-    public Geary.Email? get_message_at_pos(int pos) {
-        return get_message_at(new Gtk.TreePath.from_indices(pos, -1));
+    // The Email should've been fetched with REQUIRED_FIELDS.
+    public bool has_envelope(Geary.Email envelope) {
+        assert(envelope.fields.fulfills(REQUIRED_FIELDS));
+        
+        int count = get_count();
+        for (int ctr = 0; ctr < count; ctr++) {
+            Geary.Email? email = get_message_at_index(ctr);
+            if (email == null)
+                break;
+            
+            if (email.location.position == envelope.location.position)
+                return true;
+        }
+        
+        return false;
     }
     
-    public void set_preview_at_pos(int pos, Geary.Email email) {
+    public Geary.Email? get_message_at_index(int index) {
+        return get_message_at(new Gtk.TreePath.from_indices(index, -1));
+    }
+    
+    public void set_preview_at_index(int index, Geary.Email email) {
         Gtk.TreeIter iter;
-        if (!get_iter(out iter, new Gtk.TreePath.from_indices(pos, -1))) {
-            warning("Unable to get tree path from position: %d".printf(pos));
+        if (!get_iter(out iter, new Gtk.TreePath.from_indices(index, -1))) {
+            warning("Unable to get tree path from position: %d".printf(index));
             
             return;
         }

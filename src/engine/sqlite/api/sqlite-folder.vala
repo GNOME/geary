@@ -46,6 +46,10 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
         return properties;
     }
     
+    public override Geary.Folder.ListFlags get_supported_list_flags() {
+        return Geary.Folder.ListFlags.NONE;
+    }
+    
     internal void update_properties(Geary.Imap.FolderProperties? properties) {
         this.properties = properties;
     }
@@ -114,7 +118,8 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
-        Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable)
+        throws Error {
         check_open();
         
         normalize_span_specifiers(ref low, ref count, yield get_email_count_async(cancellable));
@@ -129,7 +134,8 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
+        throws Error {
         check_open();
         
         Gee.List<MessageLocationRow>? list = yield location_table.list_sparse_async(folder_row.id,

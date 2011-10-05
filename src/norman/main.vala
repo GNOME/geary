@@ -21,8 +21,8 @@ async void main_async() throws Error {
     yield session.send_email_async(msg.message);
     stdout.printf("Sent\n");
     
-    Geary.Smtp.Response? quit = yield session.quit_async();
-    stdout.printf("%s\n", quit.to_string());
+    Geary.Smtp.Response? logout = yield session.logout_async();
+    stdout.printf("%s\n", logout.to_string());
 }
 
 void on_main_completed(Object? object, AsyncResult result) {

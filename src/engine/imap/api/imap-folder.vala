@@ -39,6 +39,10 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
         return properties;
     }
     
+    public override Geary.Folder.ListFlags get_supported_list_flags() {
+        return Geary.Folder.ListFlags.NONE;
+    }
+    
     public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
         if (mailbox != null)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
@@ -110,7 +114,7 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count, Geary.Email.Field fields,
-        Cancellable? cancellable = null) throws Error {
+        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
@@ -120,7 +124,8 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
+        Geary.Email.Field fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
+        throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         

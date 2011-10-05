@@ -24,6 +24,20 @@ public interface Geary.Folder : Object {
         AFTER
     }
     
+    [Flags]
+    public enum ListFlags {
+        NONE = 0,
+        FAST;
+        
+        public bool is_any_set(ListFlags flags) {
+            return (this & flags) != 0;
+        }
+        
+        public bool is_all_set(ListFlags flags) {
+            return (this & flags) == flags;
+        }
+    }
+    
     /**
      * This is fired when the Folder is successfully opened by a caller.  It will only fire once
      * until the Folder is closed, with the OpenState indicating what has been opened.
@@ -85,6 +99,8 @@ public interface Geary.Folder : Object {
     public abstract Geary.FolderPath get_path();
     
     public abstract Geary.FolderProperties? get_properties();
+    
+    public abstract ListFlags get_supported_list_flags();
     
     /**
      * The Folder must be opened before most operations may be performed on it.  Depending on the
@@ -165,12 +181,23 @@ public interface Geary.Folder : Object {
      * and fetch from the network only what it needs, so that the caller gets a full list.
      * Note that this means the call may require a round-trip to the server.
      *
+     * If the caller would prefer the Folder return emails it has immediately available rather than
+     * make an expensive I/O call to "properly" fetch the emails, it should pass ListFlags.FAST.
+     * However, this also means avoiding a full synchronization, so it's possible the fetched
+     * emails do not correspond to what's actually available on the server.
+     * The best use of this method is to quickly retrieve a block of email for display or processing
+     * purposes, immediately followed by a non-fast list operation and then merging the two results.
+     *
+     * Note that implementing ListFlags.FAST is advisory, not required.  The implementation may
+     * ignore it completely.  See get_supported_list_flags() for more information.
+     *
      * The Folder must be opened prior to attempting this operation.
      *
      * low is one-based, unless -1 is specified, as explained above.
      */
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
+        throws Error;
     
     /**
      * Similar in contract to list_email_async(), however instead of the emails being returned all
@@ -183,7 +210,7 @@ public interface Geary.Folder : Object {
      * The Folder must be opened prior to attempting this operation.
      */
     public abstract void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
-        EmailCallback cb, Cancellable? cancellable = null);
+        ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
     
     /**
      * Like list_email_async(), but the caller passes a sparse list of email by it's ordered
@@ -198,7 +225,8 @@ public interface Geary.Folder : Object {
      * All positions are one-based.
      */
     public abstract async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
+        throws Error;
     
     /**
      * Similar in contract to list_email_sparse_async(), but like lazy_list_email(), the
@@ -210,7 +238,8 @@ public interface Geary.Folder : Object {
      * The Folder must be opened prior to attempting this operation.
      */
     public abstract void lazy_list_email_sparse(int[] by_position,
-        Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable = null);
+        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb,
+        Cancellable? cancellable = null);
     
     /**
      * Returns a single email that fulfills the required_fields flag at the ordered position in

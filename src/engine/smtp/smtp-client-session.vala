@@ -75,7 +75,7 @@ public class Geary.Smtp.ClientSession {
         return greeting;
     }
     
-    public async Response? quit_async(Cancellable? cancellable = null) throws Error {
+    public async Response? logout_async(Cancellable? cancellable = null) throws Error {
         Response? response = null;
         try {
             response = yield cx.transaction_async(new Request(Command.QUIT), cancellable);

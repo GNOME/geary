@@ -178,7 +178,7 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         } finally {
             // always logout
             try {
-                yield smtp.quit_async(cancellable);
+                yield smtp.logout_async(cancellable);
             } catch (Error err) {
                 message("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
             }

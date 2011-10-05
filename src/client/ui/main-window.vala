@@ -32,6 +32,7 @@ public class MainWindow : Gtk.Window {
     private Gtk.UIManager ui = new Gtk.UIManager();
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
+    private bool second_list_pass_required = false;
     private int window_width;
     private int window_height;
     private bool window_maximized;
@@ -283,19 +284,28 @@ public class MainWindow : Gtk.Window {
         
         yield current_folder.open_async(true);
         
-        current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS, on_list_email_ready);
+        // Do a quick-list of the messages (which should return what's in the local store) if
+        // supported by the Folder, followed by a complete list if needed
+        second_list_pass_required =
+            current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.FAST);
+        current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS,
+            current_folder.get_supported_list_flags() & Geary.Folder.ListFlags.FAST,
+            on_list_email_ready);
     }
     
     private void on_list_email_ready(Gee.List<Geary.Email>? email, Error? err) {
         if (email != null && email.size > 0) {
-            foreach (Geary.Email envelope in email)
-                message_list_store.append_envelope(envelope);
+            debug("Listing %d emails", email.size);
+            foreach (Geary.Email envelope in email) {
+                if (!message_list_store.has_envelope(envelope))
+                    message_list_store.append_envelope(envelope);
+            }
         }
         
         if (err != null)
             debug("Error while listing email: %s", err.message);
         
-        // end of list
+        // end of list, go get the previews for them
         if (email == null)
             do_fetch_previews.begin();
     }
@@ -303,13 +313,21 @@ public class MainWindow : Gtk.Window {
     private async void do_fetch_previews(Cancellable? cancellable = null) throws Error {
         int count = message_list_store.get_count();
         for (int ctr = 0; ctr < count; ctr++) {
-            Geary.Email? email = message_list_store.get_message_at_pos(ctr);
+            Geary.Email? email = message_list_store.get_message_at_index(ctr);
             Geary.Email? body = yield current_folder.fetch_email_async(email.id,
                 Geary.Email.Field.HEADER | Geary.Email.Field.BODY | Geary.Email.Field.ENVELOPE | 
                 Geary.Email.Field.PROPERTIES, cancellable);
-            message_list_store.set_preview_at_pos(ctr, body);
+            message_list_store.set_preview_at_index(ctr, body);
         }
-     }
+        
+        // with all the previews fetched, now go back and do a full list (if required)
+        if (second_list_pass_required) {
+            second_list_pass_required = false;
+            debug("Doing second list pass now");
+            current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS,
+                Geary.Folder.ListFlags.NONE, on_list_email_ready);
+        }
+    }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
         try {
@@ -384,7 +402,7 @@ public class MainWindow : Gtk.Window {
         
         // Want to get the one *after* the highest position in the message list
         current_folder.lazy_list_email(high + 1, -1, MessageListStore.REQUIRED_FIELDS,
-            on_list_email_ready);
+            Geary.Folder.ListFlags.NONE, on_list_email_ready);
     }
     
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
