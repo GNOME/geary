@@ -21,7 +21,7 @@ public class MainWindow : Gtk.Window {
 </ui>
 """;
     
-    private const int MESSAGE_LIST_WIDTH = 150;
+    private const int MESSAGE_LIST_WIDTH = 250;
     
     private MessageListStore message_list_store = new MessageListStore();
     private MessageListView message_list_view;
