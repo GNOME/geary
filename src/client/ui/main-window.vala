@@ -186,7 +186,7 @@ public class MainWindow : Gtk.Window {
         // folder list
         Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
         folder_list_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-        folder_list_scrolled.add_with_viewport(folder_list_view);
+        folder_list_scrolled.add(folder_list_view);
         
         // message list
         Gtk.ScrolledWindow message_list_scrolled = new Gtk.ScrolledWindow(null, null);
