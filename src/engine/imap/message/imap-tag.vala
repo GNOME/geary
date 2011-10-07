@@ -6,8 +6,10 @@
 
 public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
     public const string UNTAGGED_VALUE = "*";
+    public const string UNASSIGNED_VALUE = "----";
     
     private static Tag? untagged = null;
+    private static Tag? unassigned = null;
     
     public Tag(string value) {
         base (value);
@@ -24,8 +26,19 @@ public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
         return untagged;
     }
     
+    public static Tag get_unassigned() {
+        if (unassigned == null)
+            unassigned = new Tag(UNASSIGNED_VALUE);
+        
+        return unassigned;
+    }
+    
     public bool is_tagged() {
         return value != UNTAGGED_VALUE;
+    }
+    
+    public bool is_assigned() {
+        return value != UNASSIGNED_VALUE;
     }
     
     public uint to_hash() {

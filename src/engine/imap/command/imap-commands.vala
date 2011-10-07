@@ -7,24 +7,24 @@
 public class Geary.Imap.CapabilityCommand : Command {
     public const string NAME = "capability";
     
-    public CapabilityCommand(Tag tag) {
-        base (tag, NAME);
+    public CapabilityCommand() {
+        base (NAME);
     }
 }
 
 public class Geary.Imap.NoopCommand : Command {
     public const string NAME = "noop";
     
-    public NoopCommand(Tag tag) {
-        base (tag, NAME);
+    public NoopCommand() {
+        base (NAME);
     }
 }
 
 public class Geary.Imap.LoginCommand : Command {
     public const string NAME = "login";
     
-    public LoginCommand(Tag tag, string user, string pass) {
-        base (tag, NAME, { user, pass });
+    public LoginCommand(string user, string pass) {
+        base (NAME, { user, pass });
     }
     
     public override string to_string() {
@@ -35,56 +35,56 @@ public class Geary.Imap.LoginCommand : Command {
 public class Geary.Imap.LogoutCommand : Command {
     public const string NAME = "logout";
     
-    public LogoutCommand(Tag tag) {
-        base (tag, NAME);
+    public LogoutCommand() {
+        base (NAME);
     }
 }
 
 public class Geary.Imap.ListCommand : Command {
     public const string NAME = "list";
     
-    public ListCommand(Tag tag, string mailbox) {
-        base (tag, NAME, { "", mailbox });
+    public ListCommand(string mailbox) {
+        base (NAME, { "", mailbox });
     }
     
-    public ListCommand.wildcarded(Tag tag, string reference, string mailbox) {
-        base (tag, NAME, { reference, mailbox });
+    public ListCommand.wildcarded(string reference, string mailbox) {
+        base (NAME, { reference, mailbox });
     }
 }
 
 public class Geary.Imap.XListCommand : Command {
     public const string NAME = "xlist";
     
-    public XListCommand(Tag tag, string mailbox) {
-        base (tag, NAME, { "", mailbox });
+    public XListCommand(string mailbox) {
+        base (NAME, { "", mailbox });
     }
     
-    public XListCommand.wildcarded(Tag tag, string reference, string mailbox) {
-        base (tag, NAME, { reference, mailbox });
+    public XListCommand.wildcarded(string reference, string mailbox) {
+        base (NAME, { reference, mailbox });
     }
 }
 
 public class Geary.Imap.ExamineCommand : Command {
     public const string NAME = "examine";
     
-    public ExamineCommand(Tag tag, string mailbox) {
-        base (tag, NAME, { mailbox });
+    public ExamineCommand(string mailbox) {
+        base (NAME, { mailbox });
     }
 }
 
 public class Geary.Imap.SelectCommand : Command {
     public const string NAME = "select";
     
-    public SelectCommand(Tag tag, string mailbox) {
-        base (tag, NAME, { mailbox });
+    public SelectCommand(string mailbox) {
+        base (NAME, { mailbox });
     }
 }
 
 public class Geary.Imap.CloseCommand : Command {
     public const string NAME = "close";
     
-    public CloseCommand(Tag tag) {
-        base (tag, NAME);
+    public CloseCommand() {
+        base (NAME);
     }
 }
 
@@ -92,8 +92,8 @@ public class Geary.Imap.FetchCommand : Command {
     public const string NAME = "fetch";
     public const string UID_NAME = "uid fetch";
     
-    public FetchCommand(Tag tag, MessageSet msg_set, FetchDataType[] data_items) {
-        base (tag, msg_set.is_uid ? UID_NAME : NAME);
+    public FetchCommand(MessageSet msg_set, FetchDataType[] data_items) {
+        base (msg_set.is_uid ? UID_NAME : NAME);
         
         add(msg_set.to_parameter());
         
@@ -109,8 +109,8 @@ public class Geary.Imap.FetchCommand : Command {
         }
     }
     
-    public FetchCommand.from_collection(Tag tag, MessageSet msg_set, Gee.Collection<FetchDataType> data_items) {
-        base (tag, msg_set.is_uid ? UID_NAME : NAME);
+    public FetchCommand.from_collection(MessageSet msg_set, Gee.Collection<FetchDataType> data_items) {
+        base (msg_set.is_uid ? UID_NAME : NAME);
         
         add(msg_set.to_parameter());
         
@@ -134,8 +134,8 @@ public class Geary.Imap.FetchCommand : Command {
 public class Geary.Imap.StatusCommand : Command {
     public const string NAME = "status";
     
-    public StatusCommand(Tag tag, string mailbox, StatusDataType[] data_items) {
-        base (tag, NAME);
+    public StatusCommand(string mailbox, StatusDataType[] data_items) {
+        base (NAME);
         
         add (new StringParameter(mailbox));
         

@@ -210,6 +210,20 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return list.read_only_view;
     }
     
+    /**
+     * Returns the replaced Paramater.  Throws ImapError.TYPE_ERROR if no Parameter exists at the
+     * index.
+     */
+    public Parameter replace(int index, Parameter parameter) throws ImapError {
+        if (list.size <= index)
+            throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
+        
+        Parameter old = list[index];
+        list[index] = parameter;
+        
+        return old;
+    }
+    
     // This replaces all existing parameters with those from the supplied list
     public void copy(ListParameter src) {
         list.clear();
@@ -233,10 +247,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return "(%s)".printf(stringize_list());
     }
     
-    protected void serialize_list(Serializer ser) throws Error {
+    protected async void serialize_list(Serializer ser) throws Error {
         int length = list.size;
         for (int ctr = 0; ctr < length; ctr++) {
-            list[ctr].serialize(ser);
+            yield list[ctr].serialize(ser);
             if (ctr < (length - 1))
                 ser.push_space();
         }
@@ -244,7 +258,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     
     public override async void serialize(Serializer ser) throws Error {
         ser.push_ascii('(');
-        serialize_list(ser);
+        yield serialize_list(ser);
         ser.push_ascii(')');
     }
 }
@@ -265,7 +279,7 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
     }
     
     public override async void serialize(Serializer ser) throws Error {
-        serialize_list(ser);
+        yield serialize_list(ser);
         ser.push_eol();
     }
 }

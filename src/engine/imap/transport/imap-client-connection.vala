@@ -62,7 +62,7 @@ public class Geary.Imap.ClientConnection {
     /**
      * Generates a unique tag for the IMAP connection in the form of "<a-z><000-999>".
      */
-    public Tag generate_tag() {
+    private Tag generate_tag() {
         // watch for odometer rollover
         if (++tag_counter >= 1000) {
             tag_counter = 0;
@@ -148,6 +148,11 @@ public class Geary.Imap.ClientConnection {
         // need to run this in critical section because OutputStreams can only be written to
         // serially
         int token = yield send_mutex.claim_async(cancellable);
+        
+        // Always assign a new tag; Commands with pre-assigned Tags should not be re-sent.
+        // (Do this inside the critical section to ensure commands go out in Tag order; this is not
+        // an IMAP requirement but makes tracing commands easier.)
+        cmd.assign_tag(generate_tag());
         
         yield cmd.serialize(ser);
         

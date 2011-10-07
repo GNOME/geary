@@ -62,7 +62,7 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand.wildcarded(session.generate_tag(), "%", "%"), cancellable));
+            new ListCommand.wildcarded("%", "%"), cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
@@ -79,7 +79,7 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(session.generate_tag(), specifier), cancellable));
+            new ListCommand(specifier), cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
@@ -91,7 +91,7 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(session.generate_tag(), path), cancellable));
+            new ListCommand(path), cancellable));
         
         return (results.status_response.status == Status.OK) && (results.get_count() == 1);
     }
@@ -101,7 +101,7 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(session.generate_tag(), path), cancellable));
+            new ListCommand(path), cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
@@ -114,7 +114,7 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session(cancellable);
         
         StatusResults results = StatusResults.decode(yield session.send_command_async(
-            new StatusCommand(session.generate_tag(), path, types), cancellable));
+            new StatusCommand(path, types), cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());

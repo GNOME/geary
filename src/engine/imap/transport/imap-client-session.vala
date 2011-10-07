@@ -337,13 +337,6 @@ public class Geary.Imap.ClientSession {
         fsm.set_logging(false);
     }
     
-    public Tag generate_tag() throws ImapError {
-        if (cx == null)
-            throw new ImapError.NOT_CONNECTED("Not connected to %s", to_string());
-        
-        return cx.generate_tag();
-    }
-    
     public string? get_current_mailbox() {
         return current_mailbox;
     }
@@ -499,8 +492,8 @@ public class Geary.Imap.ClientSession {
         
         LoginParams params = (LoginParams) object;
         
-        issue_command_async.begin(new LoginCommand(cx.generate_tag(), params.user, params.pass),
-            params, params.cancellable, on_login_completed);
+        issue_command_async.begin(new LoginCommand(params.user, params.pass), params,
+            params.cancellable, on_login_completed);
         
         params.do_yield = true;
         
@@ -558,15 +551,7 @@ public class Geary.Imap.ClientSession {
     }
     
     private bool on_keepalive() {
-        try {
-            send_command_async.begin(new NoopCommand(generate_tag()), null, on_keepalive_completed);
-        } catch (ImapError ierr) {
-            message("Unable to keepalive %s, halting attempts: %s", to_string(), ierr.message);
-            
-            keepalive_id = 0;
-            
-            return false;
-        }
+        send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
         
         return true;
     }
@@ -699,9 +684,9 @@ public class Geary.Imap.ClientSession {
         
         Command cmd;
         if (params.is_select)
-            cmd = new SelectCommand(cx.generate_tag(), params.mailbox);
+            cmd = new SelectCommand(params.mailbox);
         else
-            cmd = new ExamineCommand(cx.generate_tag(), params.mailbox);
+            cmd = new ExamineCommand(params.mailbox);
         issue_command_async.begin(cmd, params, params.cancellable, on_select_completed);
         
         params.do_yield = true;
@@ -768,7 +753,7 @@ public class Geary.Imap.ClientSession {
         
         AsyncParams params = (AsyncParams) object;
         
-        issue_command_async.begin(new CloseCommand(cx.generate_tag()), params, params.cancellable,
+        issue_command_async.begin(new CloseCommand(), params, params.cancellable,
             on_close_mailbox_completed);
         
         params.do_yield = true;
@@ -816,8 +801,7 @@ public class Geary.Imap.ClientSession {
         
         AsyncParams params = (AsyncParams) object;
         
-        issue_command_async.begin(new LogoutCommand(cx.generate_tag()), params, params.cancellable,
-            on_logout_completed);
+        issue_command_async.begin(new LogoutCommand(), params, params.cancellable, on_logout_completed);
         
         params.do_yield = true;
         

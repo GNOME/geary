@@ -60,8 +60,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         Gee.Set<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
         fields_to_fetch_data_types(fields, data_type_set);
         
-        FetchCommand fetch_cmd = new FetchCommand.from_collection(context.session.generate_tag(),
-            msg_set, data_type_set);
+        FetchCommand fetch_cmd = new FetchCommand.from_collection(msg_set, data_type_set);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
@@ -99,8 +98,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         // no need to fetch the UID we're asking for
         data_type_set.remove(FetchDataType.UID);
         
-        FetchCommand fetch_cmd = new FetchCommand.from_collection(context.session.generate_tag(),
-            new MessageSet.uid(uid), data_type_set);
+        FetchCommand fetch_cmd = new FetchCommand.from_collection(new MessageSet.uid(uid),
+            data_type_set);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
