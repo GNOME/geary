@@ -228,8 +228,8 @@ public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gear
         // separate table
         if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
             throw new EngineError.INCOMPLETE_MESSAGE(
-                "Message %s in folder %s only fulfills %Xh fields", id.to_string(), to_string(),
-                message_row.fields);
+                "Message %s in folder %s only fulfills %Xh fields (required: %Xh)", id.to_string(),
+                to_string(), message_row.fields, required_fields);
         }
         
         ImapMessagePropertiesRow? properties = null;

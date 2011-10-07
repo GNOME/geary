@@ -106,11 +106,11 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
-        StringParameter sent = listp.get_as_string(0);
-        StringParameter subject = listp.get_as_string(1);
-        ListParameter from = listp.get_as_list(2);
-        ListParameter sender = listp.get_as_list(3);
-        ListParameter reply_to = listp.get_as_list(4);
+        StringParameter sent = listp.get_as_empty_string(0);
+        StringParameter subject = listp.get_as_empty_string(1);
+        ListParameter from = listp.get_as_empty_list(2);
+        ListParameter sender = listp.get_as_empty_list(3);
+        ListParameter reply_to = listp.get_as_empty_list(4);
         ListParameter? to = listp.get_as_nullable_list(5);
         ListParameter? cc = listp.get_as_nullable_list(6);
         ListParameter? bcc = listp.get_as_nullable_list(7);
@@ -137,11 +137,11 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
     private Geary.RFC822.MailboxAddresses? parse_addresses(ListParameter listp) throws ImapError {
         Gee.List<Geary.RFC822.MailboxAddress> list = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
         for (int ctr = 0; ctr < listp.get_count(); ctr++) {
-            ListParameter fields = listp.get_as_list(ctr);
+            ListParameter fields = listp.get_as_empty_list(ctr);
             StringParameter? name = fields.get_as_nullable_string(0);
             StringParameter? source_route = fields.get_as_nullable_string(1);
-            StringParameter mailbox = fields.get_as_string(2);
-            StringParameter domain = fields.get_as_string(3);
+            StringParameter mailbox = fields.get_as_empty_string(2);
+            StringParameter domain = fields.get_as_empty_string(3);
             
             Geary.RFC822.MailboxAddress addr = new Geary.RFC822.MailboxAddress.imap(
                 (name != null) ? name.nullable_value : null,

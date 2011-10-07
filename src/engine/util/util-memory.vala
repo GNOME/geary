@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Memory.AbstractBuffer {
+public abstract class Geary.Memory.AbstractBuffer : Object {
     public abstract size_t get_size();
     
     public abstract size_t get_actual_size();
@@ -32,6 +32,42 @@ public abstract class Geary.Memory.AbstractBuffer {
         string str = (string) buffer;
         
         return str.validate() ? str : "";
+    }
+}
+
+public class Geary.Memory.EmptyBuffer : Geary.Memory.AbstractBuffer {
+    private static EmptyBuffer? _instance = null;
+    public static EmptyBuffer instance {
+        get {
+            if (_instance == null)
+                _instance = new EmptyBuffer();
+            
+            return _instance;
+        }
+    }
+    
+    private uint8[]? empty = null;
+    
+    private EmptyBuffer() {
+    }
+    
+    public override size_t get_size() {
+        return 0;
+    }
+    
+    public override size_t get_actual_size() {
+        return 0;
+    }
+    
+    public override uint8[] get_buffer() {
+        if (empty == null)
+            empty = new uint8[0];
+        
+        return empty;
+    }
+    
+    public override InputStream get_input_stream() {
+        return new MemoryInputStream.from_data(get_buffer(), null);
     }
 }
 
