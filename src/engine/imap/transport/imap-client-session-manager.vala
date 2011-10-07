@@ -186,7 +186,6 @@ public class Geary.Imap.ClientSessionManager {
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         ClientSession new_session = new ClientSession(endpoint);
-        new_session.disconnected.connect(on_disconnected);
         
         yield new_session.connect_async(cancellable);
         yield new_session.login_async(credentials, cancellable);
@@ -195,6 +194,12 @@ public class Geary.Imap.ClientSessionManager {
         new_session.enable_keepalives(keepalive_sec);
         
         sessions.add(new_session);
+        
+        // since "disconnected" is used to remove the ClientSession from the sessions list, want
+        // to only connect to the signal once the object has been added to the list; otherwise it's
+        // possible a cancel during the connect or login will result in a "disconnected" signal,
+        // removing the session before it's added
+        new_session.disconnected.connect(on_disconnected);
         
         return new_session;
     }

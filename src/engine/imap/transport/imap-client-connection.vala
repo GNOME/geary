@@ -103,15 +103,17 @@ public class Geary.Imap.ClientConnection {
         if (cx == null)
             return;
         
-        yield cx.close_async(Priority.DEFAULT, cancellable);
-        
-        cx = null;
-        ser = null;
-        des = null;
-        
         des.xoff();
         
-        disconnected();
+        try {
+            yield cx.close_async(Priority.DEFAULT, cancellable);
+        } finally {
+            cx = null;
+            ser = null;
+            des = null;
+            
+            disconnected();
+        }
     }
     
     private void on_parameters_ready(RootParameters root) {

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Tag : StringParameter {
+public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
     public const string UNTAGGED_VALUE = "*";
     
     private static Tag? untagged = null;
@@ -28,14 +28,19 @@ public class Geary.Imap.Tag : StringParameter {
         return value != UNTAGGED_VALUE;
     }
     
-    public bool equals(Tag? tag) {
-        if (this == tag)
-            return true;
-        
+    public uint to_hash() {
+        return str_hash(value);
+    }
+    
+    public bool equals(Equalable e) {
+        Tag? tag = e as Tag;
         if (tag == null)
             return false;
         
-        return (this.value == tag.value);
+        if (this == tag)
+            return true;
+        
+        return equals_cs(tag.value);
     }
 }
 

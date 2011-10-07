@@ -14,7 +14,7 @@ public class Geary.Sqlite.ImapFolderPropertiesRow : Geary.Sqlite.Row {
     
     public ImapFolderPropertiesRow(ImapFolderPropertiesTable table, int64 id, int64 folder_id,
         int last_seen_total, Geary.Imap.UIDValidity? uid_validity, Geary.Imap.UID? uid_next,
-        string attributes) {
+        string? attributes) {
         base (table);
         
         this.id = id;
@@ -22,7 +22,7 @@ public class Geary.Sqlite.ImapFolderPropertiesRow : Geary.Sqlite.Row {
         this.last_seen_total = last_seen_total;
         this.uid_validity = uid_validity;
         this.uid_next = uid_next;
-        this.attributes = attributes;
+        this.attributes = attributes ?? "";
     }
     
     public ImapFolderPropertiesRow.from_imap_properties(ImapFolderPropertiesTable table,

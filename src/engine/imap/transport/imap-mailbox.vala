@@ -149,6 +149,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     private static void fields_to_fetch_data_types(Geary.Email.Field fields,
         Gee.Set<FetchDataType> data_type_set) {
         // UID is always fetched
+        // TODO: Detect when FETCH is addressed by UID instead of position and *not* fetch the
+        // UID, on the assumption that the caller will not need it
         data_type_set.add(FetchDataType.UID);
         
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {

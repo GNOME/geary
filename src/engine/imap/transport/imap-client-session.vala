@@ -166,8 +166,10 @@ public class Geary.Imap.ClientSession {
     private ClientConnection? cx = null;
     private string? current_mailbox = null;
     private bool current_mailbox_readonly = false;
-    private Gee.Queue<CommandCallback> cb_queue = new Gee.LinkedList<CommandCallback>();
-    private Gee.Queue<CommandResponse> cmd_response_queue = new Gee.LinkedList<CommandResponse>();
+    private Gee.HashMap<Tag, CommandCallback> tag_cb = new Gee.HashMap<Tag, CommandCallback>(
+        Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>(
+        Hashable.hash_func, Equalable.equal_func);
     private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
     
@@ -413,6 +415,7 @@ public class Geary.Imap.ClientSession {
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
         cx.received_bad_response.connect(on_received_bad_response);
+        cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
         cx.deserialize_failure.connect(on_network_receive_failure);
         
@@ -439,7 +442,6 @@ public class Geary.Imap.ClientSession {
         }
         
         // wait for the initial greeting from the server
-        cb_queue.offer(new CommandCallback(on_connect_response_received));
         awaiting_connect_response = true;
     }
     
@@ -895,32 +897,42 @@ public class Geary.Imap.ClientSession {
         assert(err != null);
         debug("Send error on %s: %s", to_full_string(), err.message);
         
-        cx = null;
-        Idle.add(on_fire_send_error_signal);
+        cx.disconnect_async.begin(null, on_fire_send_error_signal);
         
         return State.BROKEN;
     }
     
-    private bool on_fire_send_error_signal() {
-        disconnected(DisconnectReason.LOCAL_ERROR);
+    private void on_fire_send_error_signal(Object? object, AsyncResult result) {
+        try {
+            cx.disconnect_async.end(result);
+        } catch (Error err) {
+            // ignored
+        }
         
-        return false;
+        cx = null;
+        
+        disconnected(DisconnectReason.LOCAL_ERROR);
     }
     
     private uint on_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);
         debug("Receive error on %s: %s", to_full_string(), err.message);
         
-        cx = null;
-        Idle.add(on_fire_recv_error_signal);
+        cx.disconnect_async.begin(null, on_fire_recv_error_signal);
         
         return State.BROKEN;
     }
     
-    private bool on_fire_recv_error_signal() {
-        disconnected(DisconnectReason.REMOTE_ERROR);
+    private void on_fire_recv_error_signal(Object? object, AsyncResult result) {
+        try {
+            cx.disconnect_async.end(result);
+        } catch (Error err) {
+            // ignored
+        }
         
-        return false;
+        cx = null;
+        
+        disconnected(DisconnectReason.REMOTE_ERROR);
     }
     
     // This handles the situation where the user submits a command before the connection has been
@@ -985,10 +997,14 @@ public class Geary.Imap.ClientSession {
             return new AsyncCommandResponse(null, user, err);
         }
         
-        cb_queue.offer(new CommandCallback(issue_command_async.callback));
-        yield;
+        // If the command didn't complete in the context of send_async(), wait for it
+        // now
+        if (!tag_response.has_key(cmd.tag)) {
+            tag_cb.set(cmd.tag, new CommandCallback(issue_command_async.callback));
+            yield;
+        }
         
-        CommandResponse? cmd_response = cmd_response_queue.poll();
+        CommandResponse? cmd_response = tag_response.get(cmd.tag);
         assert(cmd_response != null);
         assert(cmd_response.is_sealed());
         assert(cmd_response.status_response.tag.equals(cmd.tag));
@@ -1052,13 +1068,20 @@ public class Geary.Imap.ClientSession {
         current_cmd_response.seal(status_response);
         assert(current_cmd_response.is_sealed());
         
-        cmd_response_queue.offer(current_cmd_response);
+        Tag tag = current_cmd_response.status_response.tag;
+        
+        // store the result for the caller to index
+        assert(!tag_response.has_key(tag));
+        tag_response.set(tag, current_cmd_response);
         current_cmd_response = new CommandResponse();
         
-        CommandCallback? cmd_callback = cb_queue.poll();
-        assert(cmd_callback != null);
-        
-        Scheduler.on_idle(cmd_callback.callback);
+        // The caller may not have had a chance to register a callback (if the receive came in in
+        // the context of their send_async(), for example), so only schedule if they're yielding
+        CommandCallback? cmd_callback = null;
+        if (tag_cb.unset(tag, out cmd_callback)) {
+            assert(cmd_callback != null);
+            Scheduler.on_idle(cmd_callback.callback);
+        }
     }
     
     private void on_received_server_data(ServerData server_data) {
@@ -1068,10 +1091,7 @@ public class Geary.Imap.ClientSession {
             awaiting_connect_response = false;
             connect_response = server_data;
             
-            CommandCallback? cmd_callback = cb_queue.poll();
-            assert(cmd_callback != null);
-            
-            Scheduler.on_idle(cmd_callback.callback);
+            Scheduler.on_idle(on_connect_response_received);
             
             return;
         }
@@ -1081,6 +1101,14 @@ public class Geary.Imap.ClientSession {
     
     private void on_received_bad_response(RootParameters root, ImapError err) {
         debug("Received bad response %s: %s", root.to_string(), err.message);
+    }
+    
+    private void on_received_closed(ClientConnection cx) {
+#if VERBOSE_SESSION
+        // This currently doesn't generate any Events, but it does mean the connection has closed
+        // due to EOS
+        debug("Received closed from %s", cx.to_string());
+#endif
     }
     
     private void on_network_receive_failure(Error err) {

@@ -38,6 +38,7 @@ public class MainWindow : Gtk.Window {
     private bool window_maximized;
     private Gtk.HPaned folder_paned = new Gtk.HPaned();
     private Gtk.HPaned messages_paned = new Gtk.HPaned();
+    private Cancellable cancellable = new Cancellable();
     
     public MainWindow() {
         title = GearyApplication.NAME;
@@ -272,6 +273,7 @@ public class MainWindow : Gtk.Window {
     }
     
     private async void do_select_folder(Geary.Folder folder) throws Error {
+        cancel();
         message_list_store.clear();
         
         if (current_folder != null) {
@@ -282,7 +284,7 @@ public class MainWindow : Gtk.Window {
         current_folder = folder;
         current_folder.messages_appended.connect(on_folder_messages_appended);
         
-        yield current_folder.open_async(true);
+        yield current_folder.open_async(true, cancellable);
         
         // Do a quick-list of the messages (which should return what's in the local store) if
         // supported by the Folder, followed by a complete list if needed
@@ -290,7 +292,7 @@ public class MainWindow : Gtk.Window {
             current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.FAST);
         current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS,
             current_folder.get_supported_list_flags() & Geary.Folder.ListFlags.FAST,
-            on_list_email_ready);
+            on_list_email_ready, cancellable);
     }
     
     private void on_list_email_ready(Gee.List<Geary.Email>? email, Error? err) {
@@ -302,15 +304,19 @@ public class MainWindow : Gtk.Window {
             }
         }
         
-        if (err != null)
+        if (err != null) {
             debug("Error while listing email: %s", err.message);
+            
+            // TODO: Better error handling here
+            return;
+        }
         
         // end of list, go get the previews for them
         if (email == null)
-            do_fetch_previews.begin();
+            do_fetch_previews.begin(cancellable);
     }
     
-    private async void do_fetch_previews(Cancellable? cancellable = null) throws Error {
+    private async void do_fetch_previews(Cancellable? cancellable) throws Error {
         int count = message_list_store.get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Email? email = message_list_store.get_message_at_index(ctr);
@@ -325,7 +331,7 @@ public class MainWindow : Gtk.Window {
             second_list_pass_required = false;
             debug("Doing second list pass now");
             current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS,
-                Geary.Folder.ListFlags.NONE, on_list_email_ready);
+                Geary.Folder.ListFlags.NONE, on_list_email_ready, cancellable);
         }
     }
     
@@ -352,7 +358,7 @@ public class MainWindow : Gtk.Window {
         }
         
         Geary.Email for_buffer = yield current_folder.fetch_email_async(email.id,
-            MessageBuffer.REQUIRED_FIELDS);
+            MessageBuffer.REQUIRED_FIELDS, cancellable);
         
         message_buffer.display_email(for_buffer);
     }
@@ -361,7 +367,8 @@ public class MainWindow : Gtk.Window {
         try {
             do_select_message.end(result);
         } catch (Error err) {
-            debug("Unable to select message: %s", err.message);
+            if (!(err is IOError.CANCELLED))
+                debug("Unable to select message: %s", err.message);
         }
     }
     
@@ -402,7 +409,7 @@ public class MainWindow : Gtk.Window {
         
         // Want to get the one *after* the highest position in the message list
         current_folder.lazy_list_email(high + 1, -1, MessageListStore.REQUIRED_FIELDS,
-            Geary.Folder.ListFlags.NONE, on_list_email_ready);
+            Geary.Folder.ListFlags.NONE, on_list_email_ready, cancellable);
     }
     
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
@@ -419,6 +426,13 @@ public class MainWindow : Gtk.Window {
         
         if (accumulator.size > 0)
             on_folders_added_removed(accumulator, null);
+    }
+    
+    private void cancel() {
+        Cancellable old_cancellable = cancellable;
+        cancellable = new Cancellable();
+        
+        old_cancellable.cancel();
     }
 }
 

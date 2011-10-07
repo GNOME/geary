@@ -12,13 +12,13 @@ public class Geary.Sqlite.ImapMessagePropertiesRow : Geary.Sqlite.Row {
     public long rfc822_size { get; private set; }
     
     public ImapMessagePropertiesRow(ImapMessagePropertiesTable table, int64 id, int64 message_id,
-        string flags, string internaldate, long rfc822_size) {
+        string? flags, string? internaldate, long rfc822_size) {
         base (table);
         
         this.id = id;
         this.message_id = message_id;
-        this.flags = flags;
-        this.internaldate = internaldate;
+        this.flags = flags ?? "";
+        this.internaldate = internaldate ?? "";
         this.rfc822_size = rfc822_size;
     }
     

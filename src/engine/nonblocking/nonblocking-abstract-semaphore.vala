@@ -9,6 +9,7 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         public unowned SourceFunc cb;
         public Cancellable? cancellable;
         public bool passed = false;
+        public bool scheduled = false;
         
         public signal void cancelled();
         
@@ -27,6 +28,15 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         
         private void on_cancelled() {
             cancelled();
+        }
+        
+        public void schedule(bool passed) {
+            assert(!scheduled);
+            
+            this.passed = passed;
+            
+            Scheduler.on_idle(cb);
+            scheduled = true;
         }
     }
     
@@ -57,16 +67,13 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         // in both cases, mark the Pending object(s) as passed in case this is an auto-reset
         // semaphore
         if (all) {
-            foreach (Pending pending in pending_queue) {
-                pending.passed = passed;
-                Scheduler.on_idle(pending.cb);
-            }
+            foreach (Pending pending in pending_queue)
+                pending.schedule(passed);
             
             pending_queue.clear();
         } else {
             Pending pending = pending_queue.remove_at(0);
-            pending.passed = passed;
-            Scheduler.on_idle(pending.cb);
+            pending.schedule(passed);
         }
     }
     
@@ -123,6 +130,10 @@ public abstract class Geary.NonblockingAbstractSemaphore {
     }
     
     private void on_pending_cancelled(Pending pending) {
+        // if already scheduled, the cancellation will be dealt with when they wake up
+        if (pending.scheduled)
+            return;
+        
         bool removed = pending_queue.remove(pending);
         assert(removed);
         
