@@ -13,6 +13,10 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
         this.addrs.add_all(addrs);
     }
     
+    public MailboxAddresses.single(MailboxAddress addr) {
+        addrs.add(addr);
+    }
+    
     public MailboxAddresses.from_rfc822_string(string rfc822) {
         InternetAddressList addrlist = InternetAddressList.parse_string(rfc822);
         int length = addrlist.length();

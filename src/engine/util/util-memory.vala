@@ -7,9 +7,9 @@
 public abstract class Geary.Memory.AbstractBuffer : Object {
     public abstract size_t get_size();
     
-    public abstract size_t get_actual_size();
+    public abstract size_t get_allocated_size();
     
-    public abstract uint8[] get_buffer();
+    public abstract uint8[] get_array();
     
     /**
      * Returns an InputStream that can read the buffer in its current entirety.  Note that the
@@ -26,7 +26,7 @@ public abstract class Geary.Memory.AbstractBuffer : Object {
      * If the conversion fails or decodes as invalid UTF-8, an empty string is returned.
      */
     public string to_utf8() {
-        uint8[] buffer = get_buffer();
+        uint8[] buffer = get_array();
         buffer += (uint8) '\0';
         
         string str = (string) buffer;
@@ -55,11 +55,11 @@ public class Geary.Memory.EmptyBuffer : Geary.Memory.AbstractBuffer {
         return 0;
     }
     
-    public override size_t get_actual_size() {
+    public override size_t get_allocated_size() {
         return 0;
     }
     
-    public override uint8[] get_buffer() {
+    public override uint8[] get_array() {
         if (empty == null)
             empty = new uint8[0];
         
@@ -67,7 +67,7 @@ public class Geary.Memory.EmptyBuffer : Geary.Memory.AbstractBuffer {
     }
     
     public override InputStream get_input_stream() {
-        return new MemoryInputStream.from_data(get_buffer(), null);
+        return new MemoryInputStream.from_data(get_array(), null);
     }
 }
 
@@ -82,11 +82,11 @@ public class Geary.Memory.StringBuffer : Geary.Memory.AbstractBuffer {
         return str.data.length;
     }
     
-    public override size_t get_actual_size() {
+    public override size_t get_allocated_size() {
         return str.data.length;
     }
     
-    public override uint8[] get_buffer() {
+    public override uint8[] get_array() {
         return str.data;
     }
     
@@ -108,11 +108,11 @@ public class Geary.Memory.Buffer : Geary.Memory.AbstractBuffer {
         return filled;
     }
     
-    public override size_t get_actual_size() {
+    public override size_t get_allocated_size() {
         return buffer.length;
     }
     
-    public override uint8[] get_buffer() {
+    public override uint8[] get_array() {
         return buffer[0:filled];
     }
     
@@ -199,7 +199,7 @@ public class Geary.Memory.GrowableBuffer : Geary.Memory.AbstractBuffer {
         return size;
     }
     
-    public override size_t get_actual_size() {
+    public override size_t get_allocated_size() {
         size_t size = 0;
         foreach (BufferFragment fragment in fragments)
             size += fragment.buffer.length;
@@ -207,7 +207,7 @@ public class Geary.Memory.GrowableBuffer : Geary.Memory.AbstractBuffer {
         return size;
     }
     
-    public override uint8[] get_buffer() {
+    public override uint8[] get_array() {
         uint8[] buffer = new uint8[get_size()];
         uint8 *buffer_ptr = (uint8 *) buffer;
         foreach (BufferFragment fragment in fragments) {

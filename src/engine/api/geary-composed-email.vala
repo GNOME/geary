@@ -6,14 +6,14 @@
 
 public class Geary.ComposedEmail : Object {
     public DateTime date { get; set; }
-    public string from { get; set; }
-    public string? to { get; set; }
-    public string? cc { get; set; }
-    public string? bcc { get; set; }
-    public string? subject { get; set; }
-    public string? body { get; set; }
+    public RFC822.MailboxAddresses from { get; set; }
+    public RFC822.MailboxAddresses? to { get; set; default = null; }
+    public RFC822.MailboxAddresses? cc { get; set; default = null; }
+    public RFC822.MailboxAddresses? bcc { get; set; default = null; }
+    public RFC822.Subject? subject { get; set; default = null; }
+    public RFC822.Text? body { get; set; default = null; }
     
-    public ComposedEmail(DateTime date, string from) {
+    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
         this.date = date;
         this.from = from;
     }

@@ -170,11 +170,10 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     public async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error {
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(composed);
-        assert(rfc822.message != null);
         
         yield smtp.login_async(cred, cancellable);
         try {
-            yield smtp.send_email_async(rfc822.message, cancellable);
+            yield smtp.send_email_async(rfc822, cancellable);
         } finally {
             // always logout
             try {

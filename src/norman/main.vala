@@ -16,9 +16,9 @@ async void main_async() throws Error {
     stdout.printf("%s\n", greeting.to_string());
     
     Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email);
-    assert(msg.message != null);
+    stdout.printf("\n\n%s\n\n", msg.to_string());
     
-    yield session.send_email_async(msg.message);
+    yield session.send_email_async(msg);
     stdout.printf("Sent\n");
     
     Geary.Smtp.Response? logout = yield session.logout_async();
@@ -46,15 +46,21 @@ int main(string[] args) {
     
     credentials = new Geary.Credentials(args[1], args[2]);
     
-    stdout.printf("From (blank for \"%s\"): ", credentials.user);
+    stdout.printf("From address (blank for \"%s\"): ", credentials.user);
     string? from = stdin.read_line();
     if (Geary.String.is_empty(from))
         from = credentials.user;
     
-    stdout.printf("To: ");
+    stdout.printf("From name: ");
+    string? from_name = stdin.read_line();
+    
+    stdout.printf("To address: ");
     string? to = stdin.read_line();
     if (Geary.String.is_empty(to))
         return 1;
+    
+    stdout.printf("To name: ");
+    string? to_name = stdin.read_line();
     
     stdout.printf("Subject: ");
     string? subject = stdin.read_line();
@@ -70,10 +76,14 @@ int main(string[] args) {
         builder.append(line);
     }
     
-    composed_email = new Geary.ComposedEmail(new DateTime.now_local(), from);
-    composed_email.to = to;
-    composed_email.subject = subject;
-    composed_email.body = builder.str;
+    composed_email = new Geary.ComposedEmail(new DateTime.now_local(),
+        new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(from_name, from)));
+    composed_email.to = new Geary.RFC822.MailboxAddresses.single(
+        new Geary.RFC822.MailboxAddress(to_name, to));
+    if (!Geary.String.is_empty(subject))
+        composed_email.subject = new Geary.RFC822.Subject(subject);
+    if (!Geary.String.is_empty(builder.str))
+        composed_email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(builder.str));
     
     main_loop = new MainLoop();
     

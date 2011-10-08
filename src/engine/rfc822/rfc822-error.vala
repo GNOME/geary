@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public errordomain Geary.RFC822.Error {
+public errordomain Geary.RFC822Error {
     INVALID,
     NOT_FOUND
 }

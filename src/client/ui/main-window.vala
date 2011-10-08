@@ -229,13 +229,14 @@ public class MainWindow : Gtk.Window {
             error("Unable to get username. Error: %s", e.message);
         }
         
-        Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(), username);
+        Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.from_rfc822_string(username));
         
-        email.to = cw.to;
-        email.cc = cw.cc;
-        email.bcc = cw.bcc;
-        email.subject = cw.subject;
-        email.body = cw.message;
+        email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);
+        email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.cc);
+        email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.bcc);
+        email.subject = new Geary.RFC822.Subject(cw.subject);
+        email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(cw.message));
         
         account.send_email_async.begin(email);
         

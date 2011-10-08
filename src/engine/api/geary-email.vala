@@ -167,7 +167,7 @@ public class Geary.Email : Object {
      * This method requires Geary.Email.Field.HEADER and Geary.Email.Field.BODY be present.
      * If not, EngineError.INCOMPLETE_MESSAGE is thrown.
      */
-    public Geary.RFC822.Message get_message() throws EngineError, RFC822.Error {
+    public Geary.RFC822.Message get_message() throws EngineError, RFC822Error {
         if (message != null)
             return message;
         

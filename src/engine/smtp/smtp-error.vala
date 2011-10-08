@@ -9,6 +9,7 @@ public errordomain Geary.SmtpError {
     AUTHENTICATION_FAILED,
     SERVER_ERROR,
     ALREADY_CONNECTED,
-    NOT_CONNECTED
+    NOT_CONNECTED,
+    REQUIRED_FIELD
 }
 

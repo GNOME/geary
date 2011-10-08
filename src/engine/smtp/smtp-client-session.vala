@@ -98,7 +98,7 @@ public class Geary.Smtp.ClientSession {
         return response;
     }
     
-    public async void send_email_async(GMime.Message email, Cancellable? cancellable = null)
+    public async void send_email_async(Geary.RFC822.Message email, Cancellable? cancellable = null)
         throws Error {
         if (!cx.is_connected())
             throw new SmtpError.NOT_CONNECTED("Not connected to %s", to_string());
@@ -113,7 +113,10 @@ public class Geary.Smtp.ClientSession {
         }
         
         // MAIL
-        MailRequest mail_request = new MailRequest.plain(email.get_sender());
+        if (email.sender == null)
+            throw new SmtpError.REQUIRED_FIELD("No sender in message");
+        
+        MailRequest mail_request = new MailRequest(email.sender);
         Response response = yield cx.transaction_async(mail_request, cancellable);
         if (!response.code.is_success_completed())
             response.throw_error("\"%s\" failed".printf(mail_request.to_string()));
@@ -123,10 +126,14 @@ public class Geary.Smtp.ClientSession {
         rset_required = true;
         
         // RCPTs
-        yield send_rcpts_async(email.get_all_recipients(), cancellable);
+        Gee.List<RFC822.MailboxAddress>? addrlist = email.get_recipients();
+        if (addrlist == null || addrlist.size == 0)
+            throw new SmtpError.REQUIRED_FIELD("No recipients in message");
+        
+        yield send_rcpts_async(addrlist, cancellable);
         
         // DATA
-        response = yield cx.send_data_async(email.to_string().data, cancellable);
+        response = yield cx.send_data_async(email.get_body_rfc822_buffer().get_array(), cancellable);
         if (!response.code.is_success_completed())
             response.throw_error("Unable to send message");
         
@@ -134,31 +141,17 @@ public class Geary.Smtp.ClientSession {
         rset_required = false;
     }
     
-    private async void send_rcpts_async(InternetAddressList addrlist, Cancellable? cancellable)
-        throws Error {
-        int length = addrlist.length();
-        for (int ctr = 0; ctr < length; ctr++) {
-            InternetAddress? addr = addrlist.get_address(ctr);
-            assert(addr != null);
-            
-            InternetAddressMailbox? mailbox = addr as InternetAddressMailbox;
-            if (mailbox != null) {
-                RcptRequest rcpt_request = new RcptRequest.plain(mailbox.get_addr());
-                Response response = yield cx.transaction_async(rcpt_request, cancellable);
-                if (!response.code.is_success_completed())
-                    response.throw_error("\"%s\" failed".printf(rcpt_request.to_string()));
-                
-                continue;
-            }
-            
-            InternetAddressGroup? group = addr as InternetAddressGroup;
-            if (group != null) {
-                yield send_rcpts_async(group.get_members(), cancellable);
-                
-                continue;
-            }
-            
-            message("Unable to convert InternetAddress \"%s\" to appropriate type", addr.to_string(true));
+    private async void send_rcpts_async(Gee.List<RFC822.MailboxAddress>? addrlist,
+        Cancellable? cancellable) throws Error {
+        if (addrlist == null)
+            return;
+        
+        // TODO: Support mailbox groups
+        foreach (RFC822.MailboxAddress mailbox in addrlist) {
+            RcptRequest rcpt_request = new RcptRequest.plain(mailbox.address);
+            Response response = yield cx.transaction_async(rcpt_request, cancellable);
+            if (!response.code.is_success_completed())
+                response.throw_error("\"%s\" failed".printf(rcpt_request.to_string()));
         }
     }
     

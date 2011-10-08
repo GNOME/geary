@@ -5,50 +5,77 @@
  */
 
 public class Geary.RFC822.Message : Object {
-    public GMime.Message? message { get; private set; }
+    public RFC822.MailboxAddress? sender { get; private set; default = null; }
+    public RFC822.MailboxAddresses? from { get; private set; default = null; }
+    public RFC822.MailboxAddresses? to { get; private set; default = null; }
+    public RFC822.MailboxAddresses? cc { get; private set; default = null; }
+    public RFC822.MailboxAddresses? bcc { get; private set; default = null; }
+    public RFC822.Subject? subject { get; private set; default = null; }
     
-    public Message(Full full) {
+    private GMime.Message message;
+    
+    public Message(Full full) throws RFC822Error {
         GMime.Parser parser = new GMime.Parser.with_stream(
-            new GMime.StreamMem.with_buffer(full.buffer.get_buffer()));
+            new GMime.StreamMem.with_buffer(full.buffer.get_array()));
         
         message = parser.construct_message();
+        if (message == null)
+            throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+        
+        stock_from_gmime();
     }
     
-    public Message.from_parts(Header header, Text body) {
+    public Message.from_parts(Header header, Text body) throws RFC822Error {
         GMime.StreamCat stream_cat = new GMime.StreamCat();
-        stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_buffer()));
-        stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_buffer()));
+        stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_array()));
+        stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_array()));
         
         GMime.Parser parser = new GMime.Parser.with_stream(stream_cat);
-        
         message = parser.construct_message();
+        if (message == null)
+            throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+        
+        stock_from_gmime();
     }
     
     public Message.from_composed_email(Geary.ComposedEmail email) {
         message = new GMime.Message(true);
         
         // Required headers
-        message.set_sender(email.from);
+        assert(email.from.size > 0);
+        sender = email.from[0];
+        message.set_sender(sender.to_rfc822_string());
         message.set_date((time_t) email.date.to_unix(),
             (int) (email.date.get_utc_offset() / TimeSpan.HOUR));
         
         // Optional headers
-        if (!String.is_empty(email.to))
-            message.add_recipient(GMime.RecipientType.TO, "", email.to);
+        if (email.to != null) {
+            to = email.to;
+            foreach (RFC822.MailboxAddress mailbox in email.to)
+                message.add_recipient(GMime.RecipientType.TO, mailbox.name, mailbox.address);
+        }
         
-        if (!String.is_empty(email.cc))
-            message.add_recipient(GMime.RecipientType.CC, "", email.cc);
+        if (email.cc != null) {
+            cc = email.cc;
+            foreach (RFC822.MailboxAddress mailbox in email.cc)
+                message.add_recipient(GMime.RecipientType.CC, mailbox.name, mailbox.address);
+        }
         
-        if (!String.is_empty(email.bcc))
-            message.add_recipient(GMime.RecipientType.BCC, "", email.bcc);
+        if (email.bcc != null) {
+            bcc = email.bcc;
+            foreach (RFC822.MailboxAddress mailbox in email.bcc)
+                message.add_recipient(GMime.RecipientType.BCC, mailbox.name, mailbox.address);
+        }
         
-        if (!String.is_empty(email.subject))
-            message.set_subject(email.subject);
+        if (email.subject != null) {
+            subject = email.subject;
+            message.set_subject(email.subject.value);
+        }
         
         // Body (also optional)
-        if (!String.is_empty(email.body)) {
+        if (email.body != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body.data),
+                new GMime.StreamMem.with_buffer(email.body.buffer.get_array()),
                 GMime.ContentEncoding.DEFAULT);
             
             GMime.Part part = new GMime.Part();
@@ -58,26 +85,78 @@ public class Geary.RFC822.Message : Object {
         }
     }
     
-    public bool is_decoded() {
-        return message != null;
+    private void stock_from_gmime() {
+        from = new RFC822.MailboxAddresses.from_rfc822_string(message.get_sender());
+        if (from.size == 0) {
+            from = null;
+        } else {
+            // sender is defined as first From address, from better or worse
+            sender = from[0];
+        }
+        
+        to = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.TO));
+        cc = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.CC));
+        bcc = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.BCC));
+        
+        if (!String.is_empty(message.get_subject()))
+            subject = new RFC822.Subject(message.get_subject());
+    }
+    
+    private RFC822.MailboxAddresses? convert_gmime_address_list(InternetAddressList? addrlist) {
+        if (addrlist == null || addrlist.length() == 0)
+            return null;
+        
+        Gee.ArrayList<RFC822.MailboxAddress>? conv = new Gee.ArrayList<RFC822.MailboxAddress>();
+        int length = addrlist.length();
+        for (int ctr = 0; ctr < length; ctr++) {
+            InternetAddress addr = addrlist.get_address(ctr);
+            
+            InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
+            if (mbox_addr != null) {
+                conv.add(new RFC822.MailboxAddress(mbox_addr.get_name(), mbox_addr.get_addr()));
+                
+                continue;
+            }
+            
+            // TODO: Support group address lists
+            warning("Group mailbox lists not supported");
+        }
+        
+        return (conv.size > 0) ? new RFC822.MailboxAddresses(conv) : null;
+    }
+    
+    public Gee.List<RFC822.MailboxAddress>? get_recipients() {
+        Gee.List<RFC822.MailboxAddress> addrs = new Gee.ArrayList<RFC822.MailboxAddress>();
+        
+        if (to != null)
+            addrs.add_all(to.get_all());
+        
+        if (cc != null)
+            addrs.add_all(cc.get_all());
+        
+        if (bcc != null)
+            addrs.add_all(bcc.get_all());
+        
+        return (addrs.size > 0) ? addrs : null;
+    }
+    
+    public Geary.Memory.AbstractBuffer get_body_rfc822_buffer() {
+        return new Geary.Memory.StringBuffer(message.to_string());
     }
     
     public Geary.Memory.AbstractBuffer get_first_mime_part_of_content_type(string content_type)
-        throws RFC822.Error {
-        if (!is_decoded())
-            throw new RFC822.Error.INVALID("Message could not be decoded");
-        
+        throws RFC822Error {
         // search for content type starting from the root
         GMime.Part? part = find_first_mime_part(message.get_mime_part(), content_type);
         if (part == null) {
-            throw new RFC822.Error.NOT_FOUND("Could not find a MIME part with content-type %s",
+            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with content-type %s",
                 content_type);
         }
         
         // convert payload to a buffer
         GMime.DataWrapper? wrapper = part.get_content_object();
         if (wrapper == null) {
-            throw new RFC822.Error.INVALID("Could not get the content wrapper for content-type %s",
+            throw new RFC822Error.INVALID("Could not get the content wrapper for content-type %s",
                 content_type);
         }
         
@@ -107,6 +186,10 @@ public class Geary.RFC822.Message : Object {
             return part;
         
         return null;
+    }
+    
+    public string to_string() {
+        return message.to_string();
     }
 }
 

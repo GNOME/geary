@@ -32,7 +32,7 @@ public class Geary.Smtp.PlainAuthenticator : Geary.Smtp.AbstractAuthenticator {
         growable.append(credentials.pass.data);
         growable.append(nul);
         
-        return Base64.encode(growable.get_buffer()).data;
+        return Base64.encode(growable.get_array()).data;
     }
 }
 
