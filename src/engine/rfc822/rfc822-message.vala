@@ -94,35 +94,54 @@ public class Geary.RFC822.Message : Object {
             sender = from[0];
         }
         
-        to = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.TO));
-        cc = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.CC));
-        bcc = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.BCC));
+        Gee.List<RFC822.MailboxAddress>? converted = convert_gmime_address_list(
+            message.get_recipients(GMime.RecipientType.TO));
+        if (converted != null && converted.size > 0)
+            to = new RFC822.MailboxAddresses(converted);
+        
+        converted = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.CC));
+        if (converted != null && converted.size > 0)
+            cc = new RFC822.MailboxAddresses(converted);
+        
+        converted = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.BCC));
+        if (converted != null && converted.size > 0)
+            bcc = new RFC822.MailboxAddresses(converted);
         
         if (!String.is_empty(message.get_subject()))
             subject = new RFC822.Subject(message.get_subject());
     }
     
-    private RFC822.MailboxAddresses? convert_gmime_address_list(InternetAddressList? addrlist) {
+    private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist) {
         if (addrlist == null || addrlist.length() == 0)
             return null;
         
-        Gee.ArrayList<RFC822.MailboxAddress>? conv = new Gee.ArrayList<RFC822.MailboxAddress>();
+        Gee.List<RFC822.MailboxAddress>? converted = new Gee.ArrayList<RFC822.MailboxAddress>();
+        
         int length = addrlist.length();
         for (int ctr = 0; ctr < length; ctr++) {
             InternetAddress addr = addrlist.get_address(ctr);
             
             InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
             if (mbox_addr != null) {
-                conv.add(new RFC822.MailboxAddress(mbox_addr.get_name(), mbox_addr.get_addr()));
+                converted.add(new RFC822.MailboxAddress(mbox_addr.get_name(), mbox_addr.get_addr()));
                 
                 continue;
             }
             
-            // TODO: Support group address lists
-            warning("Group mailbox lists not supported");
+            InternetAddressGroup? group = addr as InternetAddressGroup;
+            if (group != null) {
+                Gee.List<RFC822.MailboxAddress>? grouplist = convert_gmime_address_list(
+                    group.get_members());
+                if (grouplist != null)
+                    converted.add_all(grouplist);
+                
+                continue;
+            }
+            
+            warning("Unknown InternetAddress in list: %s", addr.get_type().name());
         }
         
-        return (conv.size > 0) ? new RFC822.MailboxAddresses(conv) : null;
+        return (converted.size > 0) ? converted : null;
     }
     
     public Gee.List<RFC822.MailboxAddress>? get_recipients() {
