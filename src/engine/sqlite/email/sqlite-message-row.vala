@@ -131,7 +131,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
                 return null;
             
             case 1:
-                return addrs[0].get_full_address();
+                return addrs[0].to_rfc822_string();
             
             default:
                 StringBuilder builder = new StringBuilder();
@@ -139,7 +139,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
                     if (!String.is_empty(builder.str))
                         builder.append(", ");
                     
-                    builder.append(addr.get_full_address());
+                    builder.append(addr.to_rfc822_string());
                 }
                 
                 return builder.str;

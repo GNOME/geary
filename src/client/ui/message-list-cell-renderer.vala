@@ -15,11 +15,11 @@ public class FormattedMessageData : Object {
     public FormattedMessageData(bool is_unread, string date, string from, string subject, 
         string preview) {
         this.is_unread = is_unread;
-        this.date = "<span foreground='blue'>%s</span>".printf(Geary.String.escape(date));
-        this.from = "<b>%s</b>".printf(Geary.String.escape(from));
-        this.subject = "<small>%s</small>".printf(Geary.String.escape(subject));
+        this.date = "<span foreground='blue'>%s</span>".printf(Geary.String.escape_to_markup(date));
+        this.from = "<b>%s</b>".printf(Geary.String.escape_to_markup(from));
+        this.subject = "<small>%s</small>".printf(Geary.String.escape_to_markup(subject));
         this.body = "<span size='x-small' foreground='#777777'>%s</span>".printf(
-            Geary.String.escape(preview));
+            Geary.String.escape_to_markup(preview));
     }
     
     // Creates a formatted message data from an e-mail.
@@ -37,9 +37,10 @@ public class FormattedMessageData : Object {
             }
         }
         
+        string from = (email.from.size > 0) ? email.from[0].get_short_address() : "";
+        
         this(email.properties.is_unread(), Date.pretty_print(email.date.value),
-            email.from[0].get_short_address(), email.subject.value, 
-            Geary.String.escape(make_preview(builder.str)));
+            from, email.subject.value, Geary.String.escape_to_markup(make_preview(builder.str)));
     }
     
     // Distills an e-mail body into a preview by removing extra spaces, html, etc.
