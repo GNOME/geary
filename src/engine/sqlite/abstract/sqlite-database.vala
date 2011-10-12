@@ -33,5 +33,12 @@ public abstract class Geary.Sqlite.Database {
         
         return table;
     }
+    
+    public async Transaction begin_transaction_async(string name, Cancellable? cancellable) throws Error {
+        Transaction t = new Transaction(db, name);
+        yield t.begin_async(cancellable);
+        
+        return t;
+    }
 }
 

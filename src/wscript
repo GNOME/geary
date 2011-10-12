@@ -112,6 +112,7 @@ def build(bld):
 	'../engine/sqlite/abstract/sqlite-database.vala',
 	'../engine/sqlite/abstract/sqlite-row.vala',
 	'../engine/sqlite/abstract/sqlite-table.vala',
+	'../engine/sqlite/abstract/sqlite-transaction.vala',
 	'../engine/sqlite/api/sqlite-account.vala',
 	'../engine/sqlite/api/sqlite-folder.vala',
 	'../engine/sqlite/email/sqlite-folder-row.vala',

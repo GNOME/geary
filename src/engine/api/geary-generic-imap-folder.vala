@@ -72,8 +72,10 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             for (;;) {
                 Geary.EmailIdentifier start_id = new Imap.EmailIdentifier(new Imap.UID(uid_start_value));
                 Geary.Email.Field available_fields;
-                if (!yield imap_local_folder.is_email_present(start_id, out available_fields, cancellable))
+                if (!yield imap_local_folder.is_email_present_async(start_id, out available_fields,
+                    cancellable)) {
                     break;
+                }
                 
                 debug("already have UID %lld in %s local store", uid_start_value, to_string());
                 

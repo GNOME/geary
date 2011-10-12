@@ -220,7 +220,7 @@ public class Geary.Imap.ClientSessionManager {
         if (found_session == null)
             found_session = yield create_new_authorized_session(cancellable);
         
-        sessions_mutex.release(token);
+        sessions_mutex.release(ref token);
         
         return found_session;
     }

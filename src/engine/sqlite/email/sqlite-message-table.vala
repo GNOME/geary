@@ -35,8 +35,12 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         base (gdb, table);
     }
     
-    public async int64 create_async(MessageRow row, Cancellable? cancellable) throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async int64 create_async(Transaction? transaction, MessageRow row,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.create_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "INSERT INTO MessageTable "
             + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
             + "message_id, in_reply_to, subject, header, body) "
@@ -56,22 +60,30 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         query.bind_string(12, row.header);
         query.bind_string(13, row.body);
         
-        return yield query.execute_insert_async(cancellable);
+        int64 id = yield query.execute_insert_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+        
+        return id;
     }
     
-    public async void merge_async(MessageRow row, Cancellable? cancellable = null) throws Error {
-        SQLHeavy.Transaction transaction = db.begin_transaction();
+    public async void merge_async(Transaction? transaction, MessageRow row,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.merge_async",
+            cancellable);
         
         // merge the valid fields in the row
-        SQLHeavy.Query query = transaction.prepare(
+        SQLHeavy.Query query = locked.prepare(
             "UPDATE MessageTable SET fields = fields | ? WHERE id=?");
         query.bind_int(0, row.fields);
         query.bind_int64(1, row.id);
         
         yield query.execute_async(cancellable);
+        locked.set_commit_required();
         
         if (row.fields.is_any_set(Geary.Email.Field.DATE)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET date_field=?, date_time_t=? WHERE id=?");
             query.bind_string(0, row.date);
             query.bind_int64(1, row.date_time_t);
@@ -81,7 +93,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.ORIGINATORS)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET from_field=?, sender=?, reply_to=? WHERE id=?");
             query.bind_string(0, row.from);
             query.bind_string(1, row.sender);
@@ -92,7 +104,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.RECEIVERS)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET to_field=?, cc=?, bcc=? WHERE id=?");
             query.bind_string(0, row.to);
             query.bind_string(1, row.cc);
@@ -103,7 +115,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.REFERENCES)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET message_id=?, in_reply_to=? WHERE id=?");
             query.bind_string(0, row.message_id);
             query.bind_string(1, row.in_reply_to);
@@ -113,7 +125,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.SUBJECT)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET subject=? WHERE id=?");
             query.bind_string(0, row.subject);
             query.bind_int64(1, row.id);
@@ -122,7 +134,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.HEADER)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET header=? WHERE id=?");
             query.bind_string(0, row.header);
             query.bind_int64(1, row.id);
@@ -131,7 +143,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         if (row.fields.is_any_set(Geary.Email.Field.BODY)) {
-            query = transaction.prepare(
+            query = locked.prepare(
                 "UPDATE MessageTable SET body=? WHERE id=?");
             query.bind_string(0, row.body);
             query.bind_int64(1, row.id);
@@ -139,14 +151,22 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             yield query.execute_async(cancellable);
         }
         
-        yield transaction.commit_async();
+        // only commit if internally atomic
+        if (transaction == null)
+            yield locked.commit_async(cancellable);
+        
+        yield release_lock_async(transaction, locked, cancellable);
     }
     
-    public async Gee.List<MessageRow>? list_by_message_id_async(Geary.RFC822.MessageID message_id,
-        Geary.Email.Field fields, Cancellable? cancellable) throws Error {
+    public async Gee.List<MessageRow>? list_by_message_id_async(Transaction? transaction,
+        Geary.RFC822.MessageID message_id, Geary.Email.Field fields, Cancellable? cancellable)
+        throws Error {
         assert(fields != Geary.Email.Field.NONE);
         
-        SQLHeavy.Query query = db.prepare(
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.list_by_message_id_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT %s FROM MessageTable WHERE message_id=?".printf(fields_to_columns(fields)));
         query.bind_string(0, message_id.value);
         
@@ -163,11 +183,14 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         return (list.size > 0) ? list : null;
     }
     
-    public async MessageRow? fetch_async(int64 id, Geary.Email.Field requested_fields,
-        Cancellable? cancellable = null) throws Error {
+    public async MessageRow? fetch_async(Transaction? transaction, int64 id,
+        Geary.Email.Field requested_fields, Cancellable? cancellable = null) throws Error {
         assert(requested_fields != Geary.Email.Field.NONE);
         
-        SQLHeavy.Query query = db.prepare(
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.fetch_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT %s FROM MessageTable WHERE id=?".printf(fields_to_columns(requested_fields)));
         query.bind_int64(0, id);
         
@@ -180,11 +203,14 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         return row;
     }
     
-    public async bool fetch_fields_async(int64 id, out Geary.Email.Field available_fields,
-        Cancellable? cancellable = null) throws Error {
+    public async bool fetch_fields_async(Transaction? transaction, int64 id,
+        out Geary.Email.Field available_fields, Cancellable? cancellable) throws Error {
         available_fields = Geary.Email.Field.NONE;
         
-        SQLHeavy.Query query = db.prepare(
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.fetch_fields_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT fields FROM MessageTable WHERE id=?");
         query.bind_int64(0, id);
         
@@ -244,9 +270,12 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         return builder.str;
     }
     
-    public async int search_message_id_count_async(Geary.RFC822.MessageID message_id,
-        Cancellable? cancellable = null) throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async int search_message_id_count_async(Transaction? transaction,
+        Geary.RFC822.MessageID message_id, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.search_message_id_count",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT COUNT(*) FROM MessageTable WHERE message_id=?");
         query.bind_string(0, message_id.value);
         
@@ -255,9 +284,12 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         return (result.finished) ? 0 : result.fetch_int(0);
     }
     
-    public async Gee.List<int64?>? search_message_id_async(Geary.RFC822.MessageID message_id,
-        Cancellable? cancellable = null) throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async Gee.List<int64?>? search_message_id_async(Transaction? transaction,
+        Geary.RFC822.MessageID message_id, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.search_message_id_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT id FROM MessageTable WHERE message_id=?");
         query.bind_string(0, message_id.value);
         

@@ -5,10 +5,12 @@
  */
 
 public class Geary.NonblockingMutex {
+    public const int INVALID_TOKEN = -1;
+    
     private NonblockingSpinlock spinlock = new NonblockingSpinlock();
     private bool locked = false;
-    private int next_token = 0;
-    private int locked_token = -1;
+    private int next_token = INVALID_TOKEN + 1;
+    private int locked_token = INVALID_TOKEN;
     
     public NonblockingMutex() {
     }
@@ -17,7 +19,9 @@ public class Geary.NonblockingMutex {
         for (;;) {
             if (!locked) {
                 locked = true;
-                locked_token = next_token++;
+                do {
+                    locked_token = next_token++;
+                } while (locked_token == INVALID_TOKEN);
                 
                 return locked_token;
             }
@@ -26,12 +30,13 @@ public class Geary.NonblockingMutex {
         }
     }
     
-    public void release(int token) throws Error {
-        if (token != locked_token)
+    public void release(ref int token) throws Error {
+        if (token != locked_token || token == INVALID_TOKEN)
             throw new IOError.INVALID_ARGUMENT("Token %d is not the lock token", token);
         
         locked = false;
-        locked_token = -1;
+        token = INVALID_TOKEN;
+        locked_token = INVALID_TOKEN;
         
         spinlock.notify();
     }

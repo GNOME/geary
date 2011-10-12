@@ -156,7 +156,7 @@ public class Geary.Imap.ClientConnection {
         
         yield cmd.serialize(ser);
         
-        send_mutex.release(token);
+        send_mutex.release(ref token);
         
         if (flush_timeout_id == 0)
             flush_timeout_id = Timeout.add(FLUSH_TIMEOUT_MSEC, on_flush_timeout);

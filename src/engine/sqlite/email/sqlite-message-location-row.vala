@@ -44,11 +44,12 @@ public class Geary.Sqlite.MessageLocationRow : Geary.Sqlite.Row {
      * If the call ever returns a position of -1, that indicates the message does not exist in the
      * database.
      */
-    public async int get_position_async(Cancellable? cancellable = null) throws Error {
+    public async int get_position_async(Transaction? transaction, Cancellable? cancellable)
+        throws Error {
         if (position >= 1)
             return position;
         
-        position = yield ((MessageLocationTable) table).fetch_position_async(id, folder_id,
+        position = yield ((MessageLocationTable) table).fetch_position_async(transaction, id, folder_id,
             cancellable);
         
         return (position >= 1) ? position : -1;

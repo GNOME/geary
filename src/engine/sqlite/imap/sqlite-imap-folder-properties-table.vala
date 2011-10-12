@@ -19,9 +19,12 @@ public class Geary.Sqlite.ImapFolderPropertiesTable : Geary.Sqlite.Table {
         base (gdb, table);
     }
     
-    public async int64 create_async(ImapFolderPropertiesRow row, Cancellable? cancellable = null)
-        throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async int64 create_async(Transaction? transaction, ImapFolderPropertiesRow row,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "ImapFolderPropertiesTable.create_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "INSERT INTO ImapFolderPropertiesTable (folder_id, last_seen_total, uid_validity, uid_next, attributes) "
             + "VALUES (?, ?, ?, ?, ?)");
         query.bind_int64(0, row.folder_id);
@@ -30,12 +33,20 @@ public class Geary.Sqlite.ImapFolderPropertiesTable : Geary.Sqlite.Table {
         query.bind_int64(3, (row.uid_next != null) ? row.uid_next.value : -1);
         query.bind_string(4, row.attributes);
         
-        return yield query.execute_insert_async(cancellable);
+        int64 id = yield query.execute_insert_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+        
+        return id;
     }
     
-    public async void update_async(int64 folder_id, ImapFolderPropertiesRow row,
-        Cancellable? cancellable = null) throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async void update_async(Transaction? transaction, int64 folder_id, 
+        ImapFolderPropertiesRow row, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "ImapFolderPropertiesTable.update_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "UPDATE ImapFolderPropertiesTable "
             + "SET last_seen_total = ?, uid_validity = ?, uid_next = ?, attributes = ? "
             + "WHERE folder_id = ?");
@@ -46,11 +57,17 @@ public class Geary.Sqlite.ImapFolderPropertiesTable : Geary.Sqlite.Table {
         query.bind_int64(4, folder_id);
         
         yield query.execute_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
     }
     
-    public async ImapFolderPropertiesRow? fetch_async(int64 folder_id, Cancellable? cancellable = null)
-        throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async ImapFolderPropertiesRow? fetch_async(Transaction? transaction,
+        int64 folder_id, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "ImapFolderPropertiesTable.fetch_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT id, last_seen_total, uid_validity, uid_next, attributes "
             + "FROM ImapFolderPropertiesTable WHERE folder_id = ?");
         query.bind_int64(0, folder_id);

@@ -693,7 +693,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // or it's simply not present.  If it's not present, want to ensure that the Message-ID
         // is requested, as that's a good way to manage duplicate messages in the system
         Geary.Email.Field available_fields;
-        bool is_present = yield local_folder.is_email_present(id, out available_fields, cancellable);
+        bool is_present = yield local_folder.is_email_present_async(id, out available_fields,
+            cancellable);
         if (!is_present)
             fields = fields.set(Geary.Email.Field.REFERENCES);
         

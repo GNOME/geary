@@ -24,7 +24,7 @@ public interface Geary.LocalAccount : Object, Geary.Account {
 }
 
 public interface Geary.LocalFolder : Object, Geary.Folder {
-    public async abstract bool is_email_present(Geary.EmailIdentifier id,
+    public async abstract bool is_email_present_async(Geary.EmailIdentifier id,
         out Geary.Email.Field available_fields, Cancellable? cancellable = null) throws Error;
      
     /**

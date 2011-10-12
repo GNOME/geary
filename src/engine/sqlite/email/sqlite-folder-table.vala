@@ -16,38 +16,38 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         base (gdb, table);
     }
     
-    private SQLHeavy.Query create_query(SQLHeavy.Queryable? queryable = null) throws SQLHeavy.Error {
-        SQLHeavy.Queryable q = queryable ?? db;
-        SQLHeavy.Query query = q.prepare(
-            "INSERT INTO FolderTable (name, parent_id) VALUES (?, ?)");
+    public async int64 create_async(Transaction? transaction, FolderRow row,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "FolderTable.create_async",
+            cancellable);
         
-        return query;
-    }
-    
-    private void create_binding(SQLHeavy.Query query, FolderRow row) throws SQLHeavy.Error {
-        query.clear();
+        SQLHeavy.Query query = locked.prepare(
+            "INSERT INTO FolderTable (name, parent_id) VALUES (?, ?)");
         query.bind_string(0, row.name);
         if (row.parent_id != Row.INVALID_ID)
             query.bind_int64(1, row.parent_id);
         else
             query.bind_null(1);
-    }
-    
-    public async int64 create_async(FolderRow row, Cancellable? cancellable = null) throws Error {
-        SQLHeavy.Query query = create_query();
-        create_binding(query, row);
         
-        return yield query.execute_insert_async(cancellable);
+        int64 id = yield query.execute_insert_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+        
+        return id;
     }
     
-    public async Gee.List<FolderRow> list_async(int64 parent_id, Cancellable? cancellable = null)
-        throws Error {
+    public async Gee.List<FolderRow> list_async(Transaction? transaction, int64 parent_id, 
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "FolderTable.list_async",
+            cancellable);
+        
         SQLHeavy.Query query;
         if (parent_id != Row.INVALID_ID) {
-            query = db.prepare("SELECT * FROM FolderTable WHERE parent_id=?");
+            query = locked.prepare("SELECT * FROM FolderTable WHERE parent_id=?");
             query.bind_int64(0, parent_id);
         } else {
-            query = db.prepare("SELECT * FROM FolderTable WHERE parent_id IS NULL");
+            query = locked.prepare("SELECT * FROM FolderTable WHERE parent_id IS NULL");
         }
         
         SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
@@ -62,15 +62,18 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         return rows;
     }
     
-    public async FolderRow? fetch_async(int64 parent_id, string name, Cancellable? cancellable = null)
-        throws Error {
+    public async FolderRow? fetch_async(Transaction? transaction, int64 parent_id, 
+        string name, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "FolderTable.fetch_async",
+            cancellable);
+        
         SQLHeavy.Query query;
         if (parent_id != Row.INVALID_ID) {
-            query = db.prepare("SELECT * FROM FolderTable WHERE parent_id=? AND name=?");
+            query = locked.prepare("SELECT * FROM FolderTable WHERE parent_id=? AND name=?");
             query.bind_int64(0, parent_id);
             query.bind_string(1, name);
         } else {
-            query = db.prepare("SELECT * FROM FolderTable WHERE name=? AND parent_id IS NULL");
+            query = locked.prepare("SELECT * FROM FolderTable WHERE name=? AND parent_id IS NULL");
             query.bind_string(0, name);
         }
         
@@ -79,9 +82,12 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         return (!result.finished) ? new FolderRow.from_query_result(this, result) : null;
     }
     
-    public async FolderRow? fetch_descend_async(Gee.List<string> path, Cancellable? cancellable = null)
-        throws Error {
+    public async FolderRow? fetch_descend_async(Transaction? transaction, 
+        Gee.List<string> path, Cancellable? cancellable) throws Error {
         assert(path.size > 0);
+        
+        Transaction locked = yield obtain_lock_async(transaction, "FolderTable.fetch_descend_async",
+            cancellable);
         
         int64 parent_id = Row.INVALID_ID;
         
@@ -90,11 +96,13 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         for (int ctr = 0; ctr < length - 1; ctr++) {
             SQLHeavy.Query query;
             if (parent_id != Row.INVALID_ID) {
-                query = db.prepare("SELECT id FROM FolderTable WHERE parent_id=? AND name=?");
+                query = locked.prepare(
+                    "SELECT id FROM FolderTable WHERE parent_id=? AND name=?");
                 query.bind_int64(0, parent_id);
                 query.bind_string(1, path[ctr]);
             } else {
-                query = db.prepare("SELECT id FROM FolderTable WHERE parent_id IS NULL AND name=?");
+                query = locked.prepare(
+                    "SELECT id FROM FolderTable WHERE parent_id IS NULL AND name=?");
                 query.bind_string(0, path[ctr]);
             }
             
@@ -117,7 +125,7 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
         }
         
         // do full fetch on this folder
-        return yield fetch_async(parent_id, path.last(), cancellable);
+        return yield fetch_async(locked, parent_id, path.last(), cancellable);
     }
 }
 

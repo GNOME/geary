@@ -106,8 +106,11 @@ public abstract class Geary.NonblockingAbstractSemaphore {
             
             pending.cancelled.disconnect(on_pending_cancelled);
             
-            if (pending.passed)
+            if (pending.passed) {
+                check_user_cancelled(cancellable);
+                
                 return;
+            }
         }
     }
     

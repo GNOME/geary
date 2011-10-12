@@ -18,9 +18,12 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
         base (gdb, table);
     }
     
-    public async int64 create_async(ImapMessagePropertiesRow row, Cancellable? cancellable = null)
-        throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async int64 create_async(Transaction? transaction, ImapMessagePropertiesRow row,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction,
+            "ImapMessagePropertiesTable.create_async", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "INSERT INTO ImapMessagePropertiesTable (message_id, flags, internaldate, rfc822_size) "
             + "VALUES (?, ?, ?, ?)");
         query.bind_int64(0, row.message_id);
@@ -28,12 +31,20 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
         query.bind_string(2, row.internaldate);
         query.bind_int64(3, row.rfc822_size);
         
-        return yield query.execute_insert_async(cancellable);
+        int64 id = yield query.execute_insert_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+        
+        return id;
     }
     
-    public async ImapMessagePropertiesRow? fetch_async(int64 message_id, Cancellable? cancellable = null)
-        throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async ImapMessagePropertiesRow? fetch_async(Transaction? transaction, int64 message_id,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "ImapMessagePropertiesTable.fetch_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "SELECT id, flags internaldate, rfc822_size FROM ImapMessagePropertiesTable "
             + "WHERE message_id = ?");
         query.bind_int64(0, message_id);
@@ -46,10 +57,12 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
             result.fetch_string(1), result.fetch_string(2), (long) result.fetch_int64(3));
     }
     
-    public async void update_async(int64 message_id, string? flags, string? internaldate, long rfc822_size,
-        Cancellable? cancellable = null)
-        throws Error {
-        SQLHeavy.Query query = db.prepare(
+    public async void update_async(Transaction? transaction, int64 message_id, string? flags,
+        string? internaldate, long rfc822_size, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, "ImapMessagePropertiesTable.update_async",
+            cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
             "UPDATE ImapMessagePropertiesTable SET flags = ?, internaldate = ?, rfc822_size = ? "
             + "WHERE message_id = ?");
         query.bind_string(0, flags);
@@ -58,6 +71,9 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
         query.bind_int64(3, message_id);
         
         yield query.execute_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
     }
 }
 
