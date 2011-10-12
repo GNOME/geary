@@ -1,0 +1,8 @@
+<ui>
+    <popup name="ToolbarMenu">
+        <menuitem name="About" action="GearyAbout" />
+        <menuitem name="Donate" action="GearyDonate" />
+        <separator />
+        <menuitem name="Quit" action="GearyQuit" />
+    </popup>
+</ui>

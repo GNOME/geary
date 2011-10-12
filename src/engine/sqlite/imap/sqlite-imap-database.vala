@@ -5,8 +5,8 @@
  */
 
 public class Geary.Sqlite.ImapDatabase : Geary.Sqlite.MailDatabase {
-    public ImapDatabase(string user) throws Error {
-        base (user);
+    public ImapDatabase(string user, File user_data_dir, File resource_dir) throws Error {
+        base (user, user_data_dir, resource_dir);
     }
     
     public Geary.Sqlite.ImapFolderPropertiesTable get_imap_folder_properties_table() {

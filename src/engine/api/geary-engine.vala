@@ -7,7 +7,8 @@
 public class Geary.Engine {
     private static bool gmime_inited = false;
     
-    public static Geary.EngineAccount open(Geary.Credentials cred) throws Error {
+    public static Geary.EngineAccount open(Geary.Credentials cred, File user_data_dir, 
+        File resource_dir) throws Error {
         // Initialize GMime
         if (!gmime_inited) {
             GMime.init(0);
@@ -18,15 +19,15 @@ public class Geary.Engine {
         return new GmailAccount(
             "Gmail account %s".printf(cred.to_string()),
             new Geary.Imap.Account(GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, cred),
-            new Geary.Sqlite.Account(cred));
+            new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
     }
     
     // Returns a list of usernames associated with Geary.
-    public static Gee.List<string> get_usernames() throws Error {
+    public static Gee.List<string> get_usernames(File user_data_dir) throws Error {
         Gee.ArrayList<string> list = new Gee.ArrayList<string>();
         
-        FileEnumerator enumerator = YorbaApplication.instance.get_user_data_directory().
-            enumerate_children("standard::*", FileQueryInfoFlags.NONE);
+        FileEnumerator enumerator = user_data_dir.enumerate_children("standard::*", 
+            FileQueryInfoFlags.NONE);
         
         FileInfo? info = null;
         while ((info = enumerator.next_file()) != null) {

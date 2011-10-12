@@ -7,9 +7,9 @@
 public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
     public const string FILENAME = "geary.db";
     
-    public MailDatabase(string user) throws Error {
-        base (YorbaApplication.instance.get_user_data_directory().get_child(user).get_child(FILENAME),
-            YorbaApplication.instance.get_resource_directory().get_child("sql"));
+    public MailDatabase(string user, File user_data_dir, File resource_dir) throws Error {
+        base (user_data_dir.get_child(user).get_child(FILENAME),
+            resource_dir.get_child("sql"));
     }
     
     public Geary.Sqlite.FolderTable get_folder_table() {

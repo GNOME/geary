@@ -7,12 +7,11 @@ def build(bld):
 	bld.common_src = [
 	'../common/common-arrays.vala',
 	'../common/common-date.vala',
-	'../common/common-intl.vala',
-	'../common/common-yorba-application.vala'
+	'../common/common-intl.vala'
 	]
 	
-	bld.common_uselib = 'GLIB UNIQUE'
-	bld.common_packages = ['glib-2.0', 'unique-3.0', 'posix' ]
+	bld.common_uselib = ''
+	bld.common_packages = ['glib-2.0', 'posix' ]
 	
 	bld.engine_src = [
 	'../engine/api/geary-abstract-account.vala',

@@ -5,31 +5,16 @@
  */
 
 public class MainWindow : Gtk.Window {
-    private const string MAIN_MENU_XML = """
-<ui>
-    <menubar name="MenuBar">
-        <menu name="FileMenu" action="FileMenu">
-            <menuitem name="NewMessage" action="FileNewMessage" />
-            <separator />
-            <menuitem name="Quit" action="FileQuit" />
-        </menu>
-        
-        <menu name="HelpMenu" action="HelpMenu">
-            <menuitem name="About" action="HelpAbout" />
-        </menu>
-    </menubar>
-</ui>
-""";
     
     private const int MESSAGE_LIST_WIDTH = 250;
     
+    private MainToolbar main_toolbar;
     private MessageListStore message_list_store = new MessageListStore();
     private MessageListView message_list_view;
     private FolderListStore folder_list_store = new FolderListStore();
     private FolderListView folder_list_view;
     private MessageViewer message_viewer = new MessageViewer();
     private MessageBuffer message_buffer = new MessageBuffer();
-    private Gtk.UIManager ui = new Gtk.UIManager();
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
     private bool second_list_pass_required = false;
@@ -43,18 +28,6 @@ public class MainWindow : Gtk.Window {
     public MainWindow() {
         title = GearyApplication.NAME;
         
-        try {
-            ui.add_ui_from_string(MAIN_MENU_XML, -1);
-        } catch (Error err) {
-            error("Unable to load main menu UI: %s", err.message);
-        }
-        
-        Gtk.ActionGroup action_group = new Gtk.ActionGroup("MainMenuActionGroup");
-        action_group.add_actions(create_actions(), this);
-        
-        ui.insert_action_group(action_group, 0);
-        add_accel_group(ui.get_accel_group());
-        
         message_list_view = new MessageListView(message_list_store);
         message_list_view.message_selected.connect(on_message_selected);
         
@@ -62,6 +35,8 @@ public class MainWindow : Gtk.Window {
         folder_list_view.folder_selected.connect(on_folder_selected);
         
         message_viewer.set_buffer(message_buffer);
+        
+        add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
         create_layout();
     }
@@ -143,46 +118,12 @@ public class MainWindow : Gtk.Window {
         return base.configure_event(event);
     }
     
-    private Gtk.ActionEntry[] create_actions() {
-        Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
-        
-        //
-        // File
-        //
-        
-        Gtk.ActionEntry file_menu = { "FileMenu", null, TRANSLATABLE, null, null, null };
-        file_menu.label = _("_File");
-        entries += file_menu;
-        
-        Gtk.ActionEntry quit = { "FileQuit", Gtk.Stock.QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
-        quit.label = _("_Quit");
-        entries += quit;
-        
-        Gtk.ActionEntry new_message = { "FileNewMessage", Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", null,
-            on_new_message };
-        new_message.label = _("_New Message");
-        entries += new_message;
-        
-        //
-        // Help
-        //
-        
-        Gtk.ActionEntry help_menu = { "HelpMenu", null, TRANSLATABLE, null, null, null };
-        help_menu.label = _("_Help");
-        entries += help_menu;
-        
-        Gtk.ActionEntry about = { "HelpAbout", Gtk.Stock.ABOUT, TRANSLATABLE, null, null, on_about };
-        about.label = _("_About");
-        entries += about;
-        
-        return entries;
-    }
-    
     private void create_layout() {
         Gtk.VBox main_layout = new Gtk.VBox(false, 0);
         
-        // main menu
-        main_layout.pack_start(ui.get_widget("/MenuBar"), false, false, 0);
+        // Toolbar.
+        main_toolbar = new MainToolbar();
+        main_layout.pack_start(main_toolbar, false, false, 0);
         
         // folder list
         Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
@@ -212,52 +153,6 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
-    }
-    
-    private void on_new_message() {
-        ComposerWindow w = new ComposerWindow();
-        w.send.connect(on_send);
-        w.show_all();
-    }
-    
-    private void on_send(ComposerWindow cw) {
-        string username;
-        try {
-            // TODO: Multiple accounts.
-            username = Geary.Engine.get_usernames().get(0);
-        } catch (Error e) {
-            error("Unable to get username. Error: %s", e.message);
-        }
-        
-        Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.from_rfc822_string(username));
-        
-        email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);
-        email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.cc);
-        email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.bcc);
-        email.subject = new Geary.RFC822.Subject(cw.subject);
-        email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(cw.message));
-        
-        account.send_email_async.begin(email);
-        
-        cw.destroy();
-    }
-    
-    private void on_quit() {
-        GearyApplication.instance.exit();
-    }
-    
-    private void on_about() {
-        Gtk.show_about_dialog(this,
-            "program-name", GearyApplication.NAME,
-            "comments", GearyApplication.DESCRIPTION,
-            "authors", GearyApplication.AUTHORS,
-            "copyright", GearyApplication.COPYRIGHT,
-            "license", GearyApplication.LICENSE,
-            "version", GearyApplication.VERSION,
-            "website", GearyApplication.WEBSITE,
-            "website-label", GearyApplication.WEBSITE_LABEL
-        );
     }
     
     private void on_folder_selected(Geary.Folder? folder) {

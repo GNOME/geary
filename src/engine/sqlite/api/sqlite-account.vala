@@ -22,11 +22,11 @@ public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>(Hashable.hash_func, Equalable.equal_func);
     
-    public Account(Geary.Credentials cred) {
+    public Account(Geary.Credentials cred, File user_data_dir, File resource_dir) {
         base ("SQLite account for %s".printf(cred.to_string()));
         
         try {
-            db = new ImapDatabase(cred.user);
+            db = new ImapDatabase(cred.user, user_data_dir, resource_dir);
         } catch (Error err) {
             error("Unable to open database: %s", err.message);
         }

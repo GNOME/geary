@@ -5,19 +5,8 @@
  */
 
 int main(string[] args) {
-    // initialize GTK, which modifies the command-line arguments
-    Gtk.init(ref args);
+    GearyApplication app = new GearyApplication(args);
     
-    try {
-        // if already registered, silently exit
-        if (!GearyApplication.instance.register())
-            return 0;
-    } catch (Error err) {
-        stderr.printf("Unable to register application: %s", err.message);
-        
-        return 1;
-    }
-    
-    return GearyApplication.instance.run(args);
+    return app.run(args);
 }
 

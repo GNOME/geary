@@ -54,13 +54,6 @@ def configure(conf):
 		args='--cflags --libs')
 	
 	conf.check_cfg(
-		package='unique-3.0',
-		uselib_store='UNIQUE',
-		atleast_version='3.0.0',
-		mandatory=1,
-		args='--cflags --libs')
-	
-	conf.check_cfg(
 		package='sqlite3',
 		uselib_store='SQLITE',
 		atleast_version='3.7.4',

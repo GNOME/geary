@@ -42,7 +42,7 @@ public class ComposerWindow : Gtk.Window {
     public signal void send(ComposerWindow composer);
     
     public ComposerWindow() {
-        Gtk.Builder builder = YorbaApplication.instance.create_builder("composer.glade");
+        Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
         
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
         Gtk.Button send_button = builder.get_object("Send") as Gtk.Button;

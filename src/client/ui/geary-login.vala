@@ -16,7 +16,7 @@ public class LoginDialog {
     public string password { get; private set; default = ""; }
     
     public LoginDialog(string default_username = "", string default_password = "") {
-        Gtk.Builder builder = YorbaApplication.instance.create_builder("login.glade");
+        Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
         dialog = builder.get_object("LoginDialog") as Gtk.Dialog;
         dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG);

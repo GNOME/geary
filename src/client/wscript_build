@@ -12,6 +12,7 @@ client_src = [
 'ui/geary-login.vala',
 'ui/folder-list-store.vala',
 'ui/folder-list-view.vala',
+'ui/main-toolbar.vala',
 'ui/main-window.vala',
 'ui/message-buffer.vala',
 'ui/message-list-cell-renderer.vala',
