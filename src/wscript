@@ -62,6 +62,7 @@ def build(bld):
 	'../engine/imap/imap-error.vala',
 	'../engine/imap/message/imap-data-format.vala',
 	'../engine/imap/message/imap-fetch-data-type.vala',
+	'../engine/imap/message/imap-fetch-body-data-type.vala',
 	'../engine/imap/message/imap-flag.vala',
 	'../engine/imap/message/imap-message-data.vala',
 	'../engine/imap/message/imap-message-set.vala',

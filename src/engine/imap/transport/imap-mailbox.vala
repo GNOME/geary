@@ -57,10 +57,12 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (fields == Geary.Email.Field.NONE)
             throw new EngineError.BAD_PARAMETERS("No email fields specified");
         
-        Gee.Set<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
-        fields_to_fetch_data_types(fields, data_type_set);
+        Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
+        Gee.List<FetchBodyDataType> body_data_type_list = new Gee.ArrayList<FetchBodyDataType>();
+        fields_to_fetch_data_types(fields, data_type_list, body_data_type_list, false);
         
-        FetchCommand fetch_cmd = new FetchCommand.from_collection(msg_set, data_type_set);
+        FetchCommand fetch_cmd = new FetchCommand.from_collection(msg_set, data_type_list,
+            body_data_type_list);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
@@ -77,7 +79,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             // see fields_to_fetch_data_types() for why this is guaranteed
             assert(uid != null);
             
-            Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(folder, res.msg_num, uid),
+            Geary.Email email = new Geary.Email(
+                new Geary.Imap.EmailLocation(folder, res.msg_num, uid),
                 new Geary.Imap.EmailIdentifier(uid));
             fetch_results_to_email(res, fields, email);
             
@@ -92,14 +95,12 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
-        Gee.Set<FetchDataType> data_type_set = new Gee.HashSet<FetchDataType>();
-        fields_to_fetch_data_types(fields, data_type_set);
-        
-        // no need to fetch the UID we're asking for
-        data_type_set.remove(FetchDataType.UID);
+        Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
+        Gee.List<FetchBodyDataType> body_data_type_list = new Gee.ArrayList<FetchBodyDataType>();
+        fields_to_fetch_data_types(fields, data_type_list, body_data_type_list, true);
         
         FetchCommand fetch_cmd = new FetchCommand.from_collection(new MessageSet.uid(uid),
-            data_type_set);
+            data_type_list, body_data_type_list);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
         
@@ -112,7 +113,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (results.length != 1)
             throw new ImapError.SERVER_ERROR("Too many responses from server: %d", results.length);
         
-        Geary.Email email = new Geary.Email(new Geary.Imap.EmailLocation(folder, results[0].msg_num, uid),
+        Geary.Email email = new Geary.Email(
+            new Geary.Imap.EmailLocation(folder, results[0].msg_num, uid),
             new Geary.Imap.EmailIdentifier(uid));
         fetch_results_to_email(results[0], fields, email);
         
@@ -145,37 +147,64 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     // store FetchDataTypes in a set because the same data type may be requested multiple times
     // by different fields (i.e. ENVELOPE)
-    private static void fields_to_fetch_data_types(Geary.Email.Field fields,
-        Gee.Set<FetchDataType> data_type_set) {
-        // UID is always fetched
-        // TODO: Detect when FETCH is addressed by UID instead of position and *not* fetch the
-        // UID, on the assumption that the caller will not need it
-        data_type_set.add(FetchDataType.UID);
+    private void fields_to_fetch_data_types(Geary.Email.Field fields, Gee.List<FetchDataType> data_types_list,
+        Gee.List<FetchBodyDataType> body_data_types_list, bool is_specific_uid) {
+        // always fetch UID because it's needed for EmailIdentifier (unless single message is being
+        // fetched by UID, in which case, obviously not necessary)
+        if (!is_specific_uid)
+            data_types_list.add(FetchDataType.UID);
+        
+        // The assumption here is that because ENVELOPE is such a common fetch command, the
+        // server will have optimizations for it, whereas if we called for each header in the
+        // envelope separately, the server has to chunk harder parsing the RFC822 header
+        if (fields.is_all_set(Geary.Email.Field.ENVELOPE)) {
+            data_types_list.add(FetchDataType.ENVELOPE);
+            
+            // remove those flags and process any remaining
+            fields = fields.clear(Geary.Email.Field.ENVELOPE);
+        }
         
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             switch (fields & field) {
                 case Geary.Email.Field.DATE:
+                    body_data_types_list.add(new FetchBodyDataType.peek(
+                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "Date" }));
+                break;
+                
                 case Geary.Email.Field.ORIGINATORS:
+                    body_data_types_list.add(new FetchBodyDataType.peek(
+                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "From", "Sender", "Reply-To" }));
+                break;
+                
                 case Geary.Email.Field.RECEIVERS:
+                    body_data_types_list.add(new FetchBodyDataType.peek(
+                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "To", "Cc", "Bcc" }));
+                break;
+                
                 case Geary.Email.Field.REFERENCES:
+                    body_data_types_list.add(new FetchBodyDataType.peek(
+                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "Message-ID", "In-Reply-To" }));
+                break;
+                
                 case Geary.Email.Field.SUBJECT:
-                    data_type_set.add(FetchDataType.ENVELOPE);
+                    body_data_types_list.add(new FetchBodyDataType.peek(
+                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "Subject" }));
                 break;
                 
                 case Geary.Email.Field.HEADER:
-                    data_type_set.add(FetchDataType.RFC822_HEADER);
+                    data_types_list.add(FetchDataType.RFC822_HEADER);
                 break;
                 
                 case Geary.Email.Field.BODY:
-                    data_type_set.add(FetchDataType.RFC822_TEXT);
+                    data_types_list.add(FetchDataType.RFC822_TEXT);
                 break;
                 
                 case Geary.Email.Field.PROPERTIES:
                     // Gmail doesn't like using FAST when combined with other fetch types, so
                     // do this manually
-                    data_type_set.add(FetchDataType.FLAGS);
-                    data_type_set.add(FetchDataType.INTERNALDATE);
-                    data_type_set.add(FetchDataType.RFC822_SIZE);
+                    data_types_list.add(FetchDataType.FLAGS);
+                    data_types_list.add(FetchDataType.INTERNALDATE);
+                    data_types_list.add(FetchDataType.RFC822_SIZE);
                 break;
                 
                 case Geary.Email.Field.NONE:

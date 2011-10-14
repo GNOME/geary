@@ -87,6 +87,7 @@ class ImapConsole : Gtk.Window {
         "examine",
         "fetch",
         "uid-fetch",
+        "fetch-fields",
         "help",
         "exit",
         "quit",
@@ -165,6 +166,10 @@ class ImapConsole : Gtk.Window {
                     
                     case "close":
                         close(cmd, args);
+                    break;
+                    
+                    case "fetch-fields":
+                        fetch_fields(cmd, args);
                     break;
                     
                     case "help":
@@ -393,7 +398,19 @@ class ImapConsole : Gtk.Window {
         for (int ctr = 1; ctr < args.length; ctr++)
             data_items += Geary.Imap.FetchDataType.decode(args[ctr]);
         
-        cx.send_async.begin(new Geary.Imap.FetchCommand(msg_set, data_items), null, on_fetch);
+        cx.send_async.begin(new Geary.Imap.FetchCommand(msg_set, data_items, null), null, on_fetch);
+    }
+    
+    private void fetch_fields(string cmd, string[] args) throws Error {
+        check_min_connected(cmd, args, 2, "<message-span> <field-name...>");
+        
+        status("Fetching fields %s".printf(args[0]));
+        
+        Geary.Imap.FetchBodyDataType fields = new Geary.Imap.FetchBodyDataType(
+            Geary.Imap.FetchBodyDataType.SectionPart.HEADER_FIELDS, args[1:args.length]);
+        
+        cx.send_async.begin(new Geary.Imap.FetchCommand(
+            new Geary.Imap.MessageSet.custom(args[0]), null, { fields }), null, on_fetch);
     }
     
     private void on_fetch(Object? source, AsyncResult result) {
