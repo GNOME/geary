@@ -132,6 +132,7 @@ def build(bld):
 	'../engine/state/state-machine.vala',
 	'../engine/state/state-mapping.vala',
 	
+	'../engine/util/util-inet.vala',
 	'../engine/util/util-interfaces.vala',
 	'../engine/util/util-memory.vala',
 	'../engine/util/util-reference-semantics.vala',

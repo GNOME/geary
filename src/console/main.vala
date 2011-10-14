@@ -262,18 +262,19 @@ class ImapConsole : Gtk.Window {
         check_args(cmd, args, 1, "hostname[:port]");
         
         cx = new Geary.Imap.ClientConnection(
-            new Geary.Endpoint(args[0], Geary.Imap.ClientConnection.DEFAULT_PORT));
+            new Geary.Endpoint(args[0], Geary.Imap.ClientConnection.DEFAULT_PORT_TLS,
+                Geary.Endpoint.Flags.TLS));
+        
+        cx.sent_command.connect(on_sent_command);
+        cx.received_status_response.connect(on_received_status_response);
+        cx.received_server_data.connect(on_received_server_data);
+        cx.received_bad_response.connect(on_received_bad_response);
         
         status("Connecting to %s...".printf(args[0]));
         cx.connect_async.begin(null, on_connected);
     }
     
     private void on_connected(Object? source, AsyncResult result) {
-        cx.sent_command.connect(on_sent_command);
-        cx.received_status_response.connect(on_received_status_response);
-        cx.received_server_data.connect(on_received_server_data);
-        cx.received_bad_response.connect(on_received_bad_response);
-        
         try {
             cx.connect_async.end(result);
             status("Connected");

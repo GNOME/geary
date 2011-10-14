@@ -187,6 +187,14 @@ public class Geary.Imap.ClientConnection {
     }
     
     public string to_string() {
+        if (cx != null) {
+            try {
+                return Inet.address_to_string((InetSocketAddress) cx.get_remote_address());
+            } catch (Error err) {
+                // fall through
+            }
+        }
+        
         return endpoint.to_string();
     }
 }

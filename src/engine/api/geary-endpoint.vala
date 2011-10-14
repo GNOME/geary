@@ -17,7 +17,7 @@ public class Geary.Endpoint : Object {
     
     private SocketClient? socket_client = null;
     
-    public Endpoint(string host_specifier, uint16 default_port, Flags flags = Flags.NONE) {
+    public Endpoint(string host_specifier, uint16 default_port, Flags flags) {
         this.host_specifier = host_specifier;
         this.default_port = default_port;
         this.flags = flags;
@@ -43,7 +43,7 @@ public class Geary.Endpoint : Object {
     }
     
     public string to_string() {
-        return "%s:%u".printf(host_specifier, default_port);
+        return "%s/default:%u".printf(host_specifier, default_port);
     }
 }
 
