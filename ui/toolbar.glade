@@ -10,6 +10,7 @@
       <object class="GtkToolButton" id="new_button">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose new message</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">New Message</property>
         <property name="use_underline">True</property>
