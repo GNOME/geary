@@ -306,5 +306,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         cw.destroy();
     }
+    
+    public Gtk.Window get_main_window() {
+        return main_window;
+    }
 }
 

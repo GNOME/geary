@@ -14,7 +14,6 @@ client_src = [
 'ui/folder-list-view.vala',
 'ui/main-toolbar.vala',
 'ui/main-window.vala',
-'ui/message-buffer.vala',
 'ui/message-list-cell-renderer.vala',
 'ui/message-list-store.vala',
 'ui/message-list-view.vala',

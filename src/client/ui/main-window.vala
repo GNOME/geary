@@ -14,7 +14,6 @@ public class MainWindow : Gtk.Window {
     private FolderListStore folder_list_store = new FolderListStore();
     private FolderListView folder_list_view;
     private MessageViewer message_viewer = new MessageViewer();
-    private MessageBuffer message_buffer = new MessageBuffer();
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
     private bool second_list_pass_required = false;
@@ -33,8 +32,6 @@ public class MainWindow : Gtk.Window {
         
         folder_list_view = new FolderListView(folder_list_store);
         folder_list_view.folder_selected.connect(on_folder_selected);
-        
-        message_viewer.set_buffer(message_buffer);
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
@@ -139,7 +136,7 @@ public class MainWindow : Gtk.Window {
         // message viewer
         Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
         message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        message_viewer_scrolled.add(message_viewer);
+        message_viewer_scrolled.add_with_viewport(message_viewer);
         
         // three-pane display: message list left of current message on bottom separated by
         // grippable
@@ -240,8 +237,6 @@ public class MainWindow : Gtk.Window {
     }
     
     private void on_message_selected(Geary.Email? email) {
-        message_buffer.clear();
-        
         if (email != null)
             do_select_message.begin(email, on_select_message_completed);
     }
@@ -253,10 +248,11 @@ public class MainWindow : Gtk.Window {
             return;
         }
         
-        Geary.Email for_buffer = yield current_folder.fetch_email_async(email.id,
-            MessageBuffer.REQUIRED_FIELDS, cancellable);
+        Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
+            MessageViewer.REQUIRED_FIELDS, cancellable);
         
-        message_buffer.display_email(for_buffer);
+        message_viewer.clear();
+        message_viewer.add_message(full_email);
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {
