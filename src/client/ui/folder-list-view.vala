@@ -11,6 +11,7 @@ public class FolderListView : Gtk.TreeView {
         set_model(store);
         
         set_headers_visible(false);
+        enable_search = false;
         
         Gtk.CellRendererText name_renderer = new Gtk.CellRendererText();
         Gtk.TreeViewColumn name_column = new Gtk.TreeViewColumn.with_attributes(
