@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
+private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     // all references to Inbox are converted to this string, purely for sanity sake when dealing
     // with Inbox's case issues
     public const string INBOX_NAME = "INBOX";
@@ -26,22 +26,6 @@ public class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     
     public override Geary.Email.Field get_required_fields_for_writing() {
         return Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
-    }
-    
-    public async string? get_folder_delimiter_async(string toplevel,
-        Cancellable? cancellable = null) throws Error {
-        if (delims.has_key(toplevel))
-            return delims.get(toplevel);
-        
-        MailboxInformation? mbox = yield session_mgr.fetch_async(toplevel, cancellable);
-        if (mbox == null) {
-            throw new EngineError.NOT_FOUND("Toplevel folder %s not found on %s", toplevel,
-                session_mgr.to_string());
-        }
-        
-        delims.set(toplevel, mbox.delim);
-        
-        return mbox.delim;
     }
     
     public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public interface Geary.LocalAccount : Object, Geary.Account {
+private interface Geary.LocalAccount : Object, Geary.Account {
     public abstract async void clone_folder_async(Geary.Folder folder, Cancellable? cancellable = null)
         throws Error;
     
@@ -23,7 +23,7 @@ public interface Geary.LocalAccount : Object, Geary.Account {
         out int count, Cancellable? cancellable = null) throws Error;
 }
 
-public interface Geary.LocalFolder : Object, Geary.Folder {
+private interface Geary.LocalFolder : Object, Geary.Folder {
     public async abstract bool is_email_present_async(Geary.EmailIdentifier id,
         out Geary.Email.Field available_fields, Cancellable? cancellable = null) throws Error;
      

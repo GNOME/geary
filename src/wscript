@@ -14,8 +14,6 @@ def build(bld):
 	bld.common_packages = ['glib-2.0', 'posix' ]
 	
 	bld.engine_src = [
-	'../engine/api/geary-abstract-account.vala',
-	'../engine/api/geary-abstract-folder.vala',
 	'../engine/api/geary-account.vala',
 	'../engine/api/geary-composed-email.vala',
 	'../engine/api/geary-credentials.vala',
@@ -24,20 +22,12 @@ def build(bld):
 	'../engine/api/geary-email-properties.vala',
 	'../engine/api/geary-email.vala',
 	'../engine/api/geary-endpoint.vala',
-	'../engine/api/geary-engine-account.vala',
 	'../engine/api/geary-engine-error.vala',
-	'../engine/api/geary-engine-folder.vala',
 	'../engine/api/geary-engine.vala',
 	'../engine/api/geary-folder-path.vala',
 	'../engine/api/geary-folder-properties.vala',
 	'../engine/api/geary-folder.vala',
-	'../engine/api/geary-generic-imap-account.vala',
-	'../engine/api/geary-generic-imap-folder.vala',
-	'../engine/api/geary-gmail-account.vala',
-	'../engine/api/geary-local-interfaces.vala',
 	'../engine/api/geary-personality.vala',
-	'../engine/api/geary-remote-interfaces.vala',
-	'../engine/api/geary-replay-queue.vala',
 	'../engine/api/geary-special-folder.vala',
 	
 	'../engine/common/common-message-data.vala',
@@ -83,6 +73,17 @@ def build(bld):
 	'../engine/imap/transport/imap-mailbox.vala',
 	'../engine/imap/transport/imap-serializable.vala',
 	'../engine/imap/transport/imap-serializer.vala',
+	
+	'../engine/impl/geary-abstract-account.vala',
+	'../engine/impl/geary-abstract-folder.vala',
+	'../engine/impl/geary-engine-account.vala',
+	'../engine/impl/geary-engine-folder.vala',
+	'../engine/impl/geary-generic-imap-account.vala',
+	'../engine/impl/geary-generic-imap-folder.vala',
+	'../engine/impl/geary-gmail-account.vala',
+	'../engine/impl/geary-local-interfaces.vala',
+	'../engine/impl/geary-remote-interfaces.vala',
+	'../engine/impl/geary-replay-queue.vala',
 	
 	'../engine/nonblocking/nonblocking-mailbox.vala',
 	'../engine/nonblocking/nonblocking-mutex.vala',

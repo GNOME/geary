@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary.Imap.FolderExtensions {
+private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary.Imap.FolderExtensions {
     public const bool CASE_SENSITIVE = true;
     
     private ClientSessionManager session_mgr;
@@ -29,10 +29,6 @@ public class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Geary
     
     public override Geary.FolderPath get_path() {
         return path;
-    }
-    
-    public Trillian is_readonly() {
-        return readonly;
     }
     
     public override Geary.FolderProperties? get_properties() {

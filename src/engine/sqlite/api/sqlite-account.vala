@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
+private class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         

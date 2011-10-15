@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
+private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
     public Imap.UID uid { get; private set; }
     
     public EmailIdentifier(Imap.UID uid) {

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public interface Geary.Imap.FolderExtensions : Geary.Folder {
+private interface Geary.Imap.FolderExtensions : Geary.Folder {
     /**
      * Much like Geary.Folder.list_email_async(), but this list operation allows for a range of
      * emails to be specified by their UID rather than position (message number).  If low is null

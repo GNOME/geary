@@ -4,10 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public interface Geary.RemoteAccount : Object, Geary.Account {
-    public abstract async string? get_folder_delimiter_async(string toplevel,
-        Cancellable? cancellable = null) throws Error;
-    
+private interface Geary.RemoteAccount : Object, Geary.Account {
     /**
      * Delivers a formatted message with this Account being the sender of record.
      *
@@ -18,6 +15,6 @@ public interface Geary.RemoteAccount : Object, Geary.Account {
         throws Error;
 }
 
-public interface Geary.RemoteFolder : Object, Geary.Folder {
+private interface Geary.RemoteFolder : Object, Geary.Folder {
 }
 

@@ -7,7 +7,7 @@
 // TODO: This class currently deals with generic email storage as well as IMAP-specific issues; in
 // the future, to support other email services, will need to break this up.
 
-public class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Geary.Imap.FolderExtensions,
+private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Geary.Imap.FolderExtensions,
     Geary.ReferenceSemantics {
     protected int manual_ref_count { get; protected set; }
     
