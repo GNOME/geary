@@ -21,6 +21,10 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         message_removed(position, total);
     }
     
+    protected virtual void notify_positions_reordered() {
+        positions_reordered();
+    }
+    
     public abstract Geary.FolderPath get_path();
     
     public abstract Geary.FolderProperties? get_properties();

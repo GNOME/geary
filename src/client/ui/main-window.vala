@@ -5,8 +5,8 @@
  */
 
 public class MainWindow : Gtk.Window {
-    
     private const int MESSAGE_LIST_WIDTH = 250;
+    private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
     private MainToolbar main_toolbar;
     private MessageListStore message_list_store = new MessageListStore();
@@ -183,7 +183,7 @@ public class MainWindow : Gtk.Window {
         // supported by the Folder, followed by a complete list if needed
         second_list_pass_required =
             current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.FAST);
-        current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS,
+        current_folder.lazy_list_email(-1, FETCH_EMAIL_CHUNK_COUNT, MessageListStore.REQUIRED_FIELDS,
             current_folder.get_supported_list_flags() & Geary.Folder.ListFlags.FAST,
             on_list_email_ready, cancellable);
     }
@@ -223,7 +223,7 @@ public class MainWindow : Gtk.Window {
         if (second_list_pass_required) {
             second_list_pass_required = false;
             debug("Doing second list pass now");
-            current_folder.lazy_list_email(-1, 50, MessageListStore.REQUIRED_FIELDS,
+            current_folder.lazy_list_email(-1, FETCH_EMAIL_CHUNK_COUNT, MessageListStore.REQUIRED_FIELDS,
                 Geary.Folder.ListFlags.NONE, on_list_email_ready, cancellable);
         }
     }
@@ -247,6 +247,8 @@ public class MainWindow : Gtk.Window {
             
             return;
         }
+        
+        debug("Fetching email %s", email.to_string());
         
         Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
             MessageViewer.REQUIRED_FIELDS, cancellable);

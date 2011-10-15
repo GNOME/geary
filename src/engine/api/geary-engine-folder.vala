@@ -271,6 +271,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             remote_count = new_remote_count;
             
             notify_message_removed(remote_position, new_remote_count);
+            
+            // only fire "positions-altered" if indeed positions have been altered
+            if (remote_position != new_remote_count)
+                notify_positions_reordered();
         } catch (Error err) {
             debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
                 err.message);
@@ -328,14 +332,21 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             return;
         }
         
-        int local_count, remote_count, local_low;
+        int local_count;
         if (!local_only) {
             // normalize the position (ordering) of what's available locally with the situation on
-            // the server
-            yield normalize_email_positions_async(low, count, out local_count, out remote_count,
-                cancellable);
-            
-            // normalize the arguments to match what's on the remote server
+            // the server ... this involves prefetching the PROPERTIES of the missing emails from
+            // the server and caching them locally
+            yield normalize_email_positions_async(low, count, out local_count, cancellable);
+        } else {
+            // local_only means just that
+            local_count = yield local_folder.get_email_count_async(cancellable);
+        }
+        
+        // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
+        // if the folder is in the process of opening
+        int local_low;
+        if (remote_count >= 0) {
             normalize_span_specifiers(ref low, ref count, remote_count);
             
             // because the local store caches messages starting from the newest (at the end of the list)
@@ -343,10 +354,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             // and range
             local_low = (low - (remote_count - local_count)).clamp(1, local_count);
         } else {
-            // local_only means just that
-            local_count = yield local_folder.get_email_count_async(cancellable);
-            local_low = 1;
-            remote_count = -1;
+            normalize_span_specifiers(ref low, ref count, local_count);
+            local_low = low.clamp(1, local_count);
         }
         
         debug("do_list_email_async: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
@@ -367,6 +376,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         debug("Fetched %d emails from local store for %s", local_list_size, to_string());
         
+        // fixup local email positions to match server's positions
+        if (local_list_size > 0 && remote_count > 0 && local_count < remote_count) {
+            int adjustment = remote_count - local_count;
+            foreach (Geary.Email email in local_list) {
+                email.update_location(new Geary.EmailLocation(this,
+                    email.location.position + adjustment, email.location.ordering));
+            }
+        }
+        
+        // report list
         if (local_list_size > 0) {
             if (accumulator != null)
                 accumulator.add_all(local_list);
@@ -375,21 +394,12 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 cb(local_list, null);
         }
         
+        // if local list matches total asked for, or if only returning local versions, exit
         if (local_list_size == count || local_only) {
-            // signal finished
             if (cb != null)
                 cb(null, null);
             
             return;
-        }
-        
-        // fixup local email positions to match server's positions
-        if (local_list_size > 0 && local_count < remote_count) {
-            int adjustment = remote_count - local_count;
-            foreach (Geary.Email email in local_list) {
-                email.update_location(new Geary.EmailLocation(this,
-                    email.location.position + adjustment, email.location.ordering));
-            }
         }
         
         // go through the positions from (low) to (low + count) and see if they're not already
@@ -480,17 +490,15 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         int low, high;
         Arrays.int_find_high_low(by_position, out low, out high);
         
-        int local_count, remote_count, local_offset;
+        int local_count, local_offset;
         if (!local_only) {
             // normalize the position (ordering) of what's available locally with the situation on
             // the server
-            yield normalize_email_positions_async(low, high - low + 1, out local_count, out remote_count,
-                cancellable);
+            yield normalize_email_positions_async(low, high - low + 1, out local_count, cancellable);
             
             local_offset = (remote_count > local_count) ? (remote_count - local_count - 1) : 0;
         } else {
             local_count = yield local_folder.get_email_count_async(cancellable);
-            remote_count = -1;
             local_offset = 0;
         }
         
@@ -723,13 +731,15 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // the database stores entries for the lowest requested email to the highest (newest), which
     // means there can be no gaps between the last in the database and the last on the server.
     // This method takes care of that.
+    //
+    // Note that this method doesn't return a remote_count because that's maintained by the
+    // EngineFolder as a member variable.
     private async void normalize_email_positions_async(int low, int count, out int local_count,
-        out int remote_count, Cancellable? cancellable) throws Error {
+        Cancellable? cancellable) throws Error {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
         local_count = yield local_folder.get_email_count_async(cancellable);
-        remote_count = yield remote_folder.get_email_count_async(cancellable);
         
         // fixup span specifier
         normalize_span_specifiers(ref low, ref count, remote_count);

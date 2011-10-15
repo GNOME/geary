@@ -50,9 +50,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         if (local_properties.uid_validity.value != remote_properties.uid_validity.value) {
             // TODO: Don't deal with UID validity changes yet
-            debug("UID validity changed: %lld -> %lld", local_properties.uid_validity.value,
+            error("UID validity changed: %lld -> %lld", local_properties.uid_validity.value,
                 remote_properties.uid_validity.value);
-            breakpoint();
         }
         
         Geary.Imap.Folder imap_remote_folder = (Geary.Imap.Folder) remote_folder;

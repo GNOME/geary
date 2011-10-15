@@ -69,6 +69,18 @@ public interface Geary.Folder : Object {
     public signal void message_removed(int position, int total);
     
     /**
+     * "positions-reordered" is fired when message positions on emails in the folder may no longer
+     * be valid, which may happen even if a message has not been removed.  In other words, if a
+     * message is removed and it causes positions to change, "message-remove" will be fired followed
+     * by this signal.
+     *
+     * Although reordering may be rare (positions shifting is a better description), it is possible
+     * for messages in a folder to change positions completely.  This signal covers both
+     * circumstances.
+     */
+    public signal void positions_reordered();
+    
+    /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
@@ -88,6 +100,13 @@ public interface Geary.Folder : Object {
      * and update state before and/or after the signal has been fired.
      */
     protected abstract void notify_messages_appended(int total);
+    
+    /**
+     * This helper method should be called by implementors of Folder rather than firing the signal
+     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
+     * and update state before and/or after the signal has been fired.
+     */
+    protected abstract void notify_positions_reordered();
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
@@ -130,8 +149,9 @@ public interface Geary.Folder : Object {
      * created by Engine are aggregating objects and will return the true count.  However, this
      * might require a round-trip to the server.
      *
-     * Also note that local folders may be sparsely populated.  get_email_count() returns the last
-     * position available, but not all emails from 1 to n may be available.
+     * Also note that local folders may be sparsely populated.  get_email_count_async() returns the
+     * total number of recorded emails, but it's possible none of them have more than placeholder
+     * information.
      *
      * The Folder must be opened prior to attempting this operation.
      */

@@ -182,23 +182,10 @@ public class Geary.Email : Object {
     public string to_string() {
         StringBuilder builder = new StringBuilder();
         
+        builder.append_printf("[#%d/%s] ", location.position, id.to_string());
+        
         if (date != null)
             builder.append_printf("[%s]", date.to_string());
-        
-        if (from != null)
-            builder.append_printf("[From: %s]", from.to_string());
-        
-        if (to != null)
-            builder.append_printf("[To: %s]", to.to_string());
-        
-        if (subject != null)
-            builder.append_printf("[Subj: %s]", subject.to_string());
-        
-        if (header != null)
-            builder.append_printf("[Header: %lub]", header.buffer.get_size());
-        
-        if (body != null)
-            builder.append_printf("[Body: %lub]", body.buffer.get_size());
         
         return builder.str;
     }

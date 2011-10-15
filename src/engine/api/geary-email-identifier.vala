@@ -5,7 +5,7 @@
  */
 
 /**
- * Each mail system muse have its own method for uniquely identifying an email message.  The only
+ * Each mail system must have its own method for uniquely identifying an email message.  The only
  * limitation upon an EmailIdentifier is that it's only considered valid within the Folder the
  * message is located in; an EmailIdentifier cannot be used in another Folder to determine if the
  * message is duplicated there.  (Either EmailIdentifier will be expanded to allow for this or
