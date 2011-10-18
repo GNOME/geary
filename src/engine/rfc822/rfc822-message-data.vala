@@ -114,7 +114,7 @@ public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.M
         return message.get_header_list();
     }
     
-    public string get_header(string name) throws RFC822Error {
+    public string? get_header(string name) throws RFC822Error {
         return get_headers().get(name);
     }
     

@@ -69,6 +69,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         if ((fields & Geary.Email.Field.REFERENCES) != 0) {
             message_id = fetch_string_for(result, MessageTable.Column.MESSAGE_ID);
             in_reply_to = fetch_string_for(result, MessageTable.Column.IN_REPLY_TO);
+            references = fetch_string_for(result, MessageTable.Column.REFERENCES);
         }
         
         if ((fields & Geary.Email.Field.SUBJECT) != 0)
@@ -183,6 +184,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         if ((fields & Geary.Email.Field.REFERENCES) != 0) {
             message_id = (email.message_id != null) ? email.message_id.value : null;
             in_reply_to = (email.in_reply_to != null) ? email.in_reply_to.value : null;
+            references = (email.references != null) ? email.references.value : null;
             
             this.fields = this.fields.set(Geary.Email.Field.REFERENCES);
         }
@@ -233,6 +235,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         if ((fields & Geary.Email.Field.REFERENCES) != 0) {
             message_id = null;
             in_reply_to = null;
+            references = null;
             
             this.fields = this.fields.clear(Geary.Email.Field.REFERENCES);
         }

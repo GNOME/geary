@@ -31,6 +31,8 @@ public class Geary.Imap.Deserializer {
         ATOM,
         QUOTED,
         QUOTED_ESCAPE,
+        PARTIAL_BODY_ATOM,
+        PARTIAL_BODY_ATOM_TERMINATING,
         LITERAL,
         LITERAL_DATA_BEGIN,
         LITERAL_DATA,
@@ -97,6 +99,11 @@ public class Geary.Imap.Deserializer {
             new Geary.State.Mapping(State.QUOTED, Event.CHAR, on_quoted_char),
             
             new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.CHAR, on_quoted_escape_char),
+            
+            new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.CHAR, on_partial_body_atom_char),
+            
+            new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.CHAR,
+                on_partial_body_atom_terminating_char),
             
             new Geary.State.Mapping(State.LITERAL, Event.CHAR, on_literal_char),
             
@@ -248,6 +255,14 @@ public class Geary.Imap.Deserializer {
         return (current_string == null) || String.is_empty(current_string.str);
     }
     
+    // Case-insensitive compare
+    private bool has_current_string_prefix(string prefix) {
+        if (current_string == null || String.is_empty(current_string.str))
+            return false;
+        
+        return current_string.str.down().has_prefix(prefix);
+    }
+    
     private void append_to_string(unichar ch) {
         if (current_string == null)
             current_string = new StringBuilder();
@@ -319,10 +334,11 @@ public class Geary.Imap.Deserializer {
             return State.FAILED;
         }
         
-        parameters_ready(root);
-        
+        RootParameters ready = root;
         root = new RootParameters();
         context = root;
+        
+        parameters_ready(ready);
         
         return State.TAG;
     }
@@ -374,6 +390,16 @@ public class Geary.Imap.Deserializer {
         assert(state == State.TAG || state == State.ATOM);
         
         unichar ch = *((unichar *) user);
+        
+        // The partial body fetch results ("BODY[section]" or "BODY[section]<partial>" and their
+        // .peek variants) offer so many exceptions to the decoding process they're given their own
+        // state
+        if (state == State.ATOM && ch == '['
+            && (has_current_string_prefix("body") || has_current_string_prefix("body.peek"))) {
+            append_to_string(ch);
+            
+            return State.PARTIAL_BODY_ATOM;
+        }
         
         // get the terminator for this context and re-use the atom_special_exceptions array to
         // pass to DataFormat.is_atom_special() (this means not allocating a new array on the heap
@@ -456,6 +482,43 @@ public class Geary.Imap.Deserializer {
         }
         
         return State.QUOTED;
+    }
+    
+    private uint on_partial_body_atom_char(uint state, uint event, void *user) {
+        unichar ch = *((unichar *) user);
+        
+        // decoding the partial body parameter ("BODY[section]" et al.) is simply to locate the
+        // terminating space after the closing square bracket or closing angle bracket
+        // TODO: stricter testing of atom special characters and such (much like on_tag_or_atom_char)
+        // but keeping in mind the looser rules and such with this variation
+        append_to_string(ch);
+        
+        // Can't terminate the atom with a close square bracket because the partial span
+        // ("<...>") might be next
+        //
+        // Don't terminate with a close angle bracket unless the next character is a space
+        // (which it better be) because the handler needs to eat the space before transitioning
+        // to START_PARAM
+        switch (ch) {
+            case ']':
+            case '>':
+                return State.PARTIAL_BODY_ATOM_TERMINATING;
+            
+            default:
+                return state;
+        }
+    }
+    
+    private uint on_partial_body_atom_terminating_char(uint state, uint event, void *user) {
+        unichar ch = *((unichar *) user);
+        
+        // anything but a space indicates the atom is continuing, therefore return to prior state
+        if (ch != ' ')
+            return on_partial_body_atom_char(State.PARTIAL_BODY_ATOM, event, user);
+        
+        save_string_parameter();
+        
+        return State.START_PARAM;
     }
     
     private uint on_literal_char(uint state, uint event, void *user) {

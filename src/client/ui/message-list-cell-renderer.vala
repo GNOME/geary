@@ -37,7 +37,7 @@ public class FormattedMessageData : Object {
             }
         }
         
-        string from = (email.from.size > 0) ? email.from[0].get_short_address() : "";
+        string from = (email.from != null && email.from.size > 0) ? email.from[0].get_short_address() : "";
         
         this(email.properties.is_unread(), Date.pretty_print(email.date.value),
             from, email.subject.value, Geary.String.escape_markup(make_preview(builder.str)));
