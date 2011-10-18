@@ -33,6 +33,7 @@ CREATE TABLE MessageTable (
     
     message_id TEXT,
     in_reply_to TEXT,
+    reference_ids TEXT,
     
     subject TEXT,
     

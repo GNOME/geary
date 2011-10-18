@@ -105,6 +105,12 @@ public class Geary.Imap.FetchBodyDataType {
         return builder.str;
     }
     
+    public static bool is_fetch_body(StringParameter items) {
+        string strd = items.value.down();
+        
+        return strd.has_prefix("body[") || strd.has_prefix("body.peek[");
+    }
+    
     public string to_string() {
         return (!is_peek ? "body[%s%s]" : "body.peek[%s%s]").printf(section_part.serialize(),
             serialize_field_names());

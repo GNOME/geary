@@ -23,6 +23,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         MESSAGE_ID,
         IN_REPLY_TO,
+        REFERENCES,
         
         SUBJECT,
         
@@ -43,8 +44,8 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         SQLHeavy.Query query = locked.prepare(
             "INSERT INTO MessageTable "
             + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
-            + "message_id, in_reply_to, subject, header, body) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            + "message_id, in_reply_to, reference_ids, subject, header, body) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         query.bind_int(0, row.fields);
         query.bind_string(1, row.date);
         query.bind_int64(2, row.date_time_t);
@@ -56,9 +57,10 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         query.bind_string(8, row.bcc);
         query.bind_string(9, row.message_id);
         query.bind_string(10, row.in_reply_to);
-        query.bind_string(11, row.subject);
-        query.bind_string(12, row.header);
-        query.bind_string(13, row.body);
+        query.bind_string(11, row.references);
+        query.bind_string(12, row.subject);
+        query.bind_string(13, row.header);
+        query.bind_string(14, row.body);
         
         int64 id = yield query.execute_insert_async(cancellable);
         locked.set_commit_required();
@@ -116,10 +118,11 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         if (row.fields.is_any_set(Geary.Email.Field.REFERENCES)) {
             query = locked.prepare(
-                "UPDATE MessageTable SET message_id=?, in_reply_to=? WHERE id=?");
+                "UPDATE MessageTable SET message_id=?, in_reply_to=?, reference_ids = ? WHERE id=?");
             query.bind_string(0, row.message_id);
             query.bind_string(1, row.in_reply_to);
-            query.bind_int64(2, row.id);
+            query.bind_string(2, row.references);
+            query.bind_int64(3, row.id);
             
             yield query.execute_async(cancellable);
         }
@@ -242,7 +245,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
                     break;
                     
                     case Geary.Email.Field.REFERENCES:
-                        append = "message_id, in_reply_to";
+                        append = "message_id, in_reply_to, reference_ids";
                     break;
                     
                     case Geary.Email.Field.SUBJECT:

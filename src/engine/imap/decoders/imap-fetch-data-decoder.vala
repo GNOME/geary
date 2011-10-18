@@ -40,7 +40,7 @@ public abstract class Geary.Imap.FetchDataDecoder {
             return decode_literal(literalp);
         
         // bad news; this means this function isn't handling a Parameter type properly
-        assert_not_reached();;
+        assert_not_reached();
     }
     
     protected virtual MessageData decode_string(StringParameter param) throws ImapError {

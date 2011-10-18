@@ -13,9 +13,45 @@
 public interface Geary.RFC822.MessageData : Geary.Common.MessageData {
 }
 
-public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC822.MessageData,
+    Geary.Equalable {
     public MessageID(string value) {
         base (value);
+    }
+    
+    public bool equals(Equalable e) {
+        MessageID? message_id = e as MessageID;
+        if (message_id == null)
+            return false;
+        
+        if (this == message_id)
+            return true;
+        
+        return value == message_id.value;
+    }
+}
+
+public class Geary.RFC822.MessageIDList : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
+    private Gee.List<MessageID>? list = null;
+    
+    public MessageIDList(string value) {
+        base (value);
+    }
+    
+    public Gee.List<MessageID> decoded() {
+        if (list != null)
+            return list;
+        
+        list = new Gee.ArrayList<MessageID>(Equalable.equal_func);
+        
+        string[] ids = value.split(" ");
+        foreach (string id in ids) {
+            id = id.strip();
+            if (!String.is_empty(id))
+                list.add(new MessageID(id));
+        }
+        
+        return list;
     }
 }
 
@@ -55,8 +91,48 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
 }
 
 public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+    private GMime.Message? message = null;
+    private string[]? names = null;
+    
     public Header(Geary.Memory.AbstractBuffer buffer) {
         base ("RFC822.Header", buffer);
+    }
+    
+    private unowned GMime.HeaderList get_headers() throws RFC822Error {
+        if (message != null)
+            return message.get_header_list();
+        
+        GMime.Parser parser = new GMime.Parser.with_stream(
+            new GMime.StreamMem.with_buffer(buffer.get_array()));
+        parser.set_respect_content_length(false);
+        parser.set_scan_from(false);
+        
+        message = parser.construct_message();
+        if (message == null)
+            throw new RFC822Error.INVALID("Unable to parse RFC 822 headers");
+        
+        return message.get_header_list();
+    }
+    
+    public string get_header(string name) throws RFC822Error {
+        return get_headers().get(name);
+    }
+    
+    public string[] get_header_names() throws RFC822Error {
+        if (names != null)
+            return names;
+        
+        names = new string[0];
+        
+        unowned GMime.HeaderIter iter;
+        if (!get_headers().get_iter(out iter))
+            return names;
+        
+        do {
+            names += iter.get_name();
+        } while (iter.next());
+        
+        return names;
     }
 }
 

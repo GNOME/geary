@@ -21,6 +21,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
     
     public string? message_id { get; set; }
     public string? in_reply_to { get; set; }
+    public string? references { get; set; }
     
     public string? subject { get; set; }
     
@@ -97,8 +98,10 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         }
         
         if ((fields & Geary.Email.Field.REFERENCES) != 0) {
-            email.set_references((message_id != null) ? new RFC822.MessageID(message_id) : null,
-                (in_reply_to != null) ? new RFC822.MessageID(in_reply_to) : null);
+            email.set_full_references(
+                (message_id != null) ? new RFC822.MessageID(message_id) : null,
+                (in_reply_to != null) ? new RFC822.MessageID(in_reply_to) : null,
+                (references != null) ? new RFC822.MessageIDList(references) : null);
         }
         
         if (((fields & Geary.Email.Field.SUBJECT) != 0) && (subject != null))

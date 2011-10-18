@@ -16,6 +16,7 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
     public int msg_num { get; private set; }
     
     private Gee.Map<FetchDataType, MessageData> map = new Gee.HashMap<FetchDataType, MessageData>();
+    private Gee.List<Memory.AbstractBuffer> body_data = new Gee.ArrayList<Memory.AbstractBuffer>();
     
     public FetchResults(StatusResponse status_response, int msg_num) {
         base (status_response);
@@ -40,16 +41,23 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
         // and the structured data itself
         for (int ctr = 0; ctr < list.get_count(); ctr += 2) {
             StringParameter data_item_param = list.get_as_string(ctr);
-            FetchDataType data_item = FetchDataType.decode(data_item_param.value);
-            FetchDataDecoder? decoder = data_item.get_decoder();
-            if (decoder == null) {
-                debug("Unable to decode fetch response for \"%s\": No decoder available",
-                    data_item.to_string());
-                
-                continue;
-            }
             
-            results.set_data(data_item, decoder.decode(list.get_required(ctr + 1)));
+            if (FetchBodyDataType.is_fetch_body(data_item_param)) {
+                // FETCH body data items are merely a literal of all requested fields formatted
+                // in RFC822 header format
+                results.body_data.add(list.get_as_literal(ctr + 1).get_buffer());
+            } else {
+                FetchDataType data_item = FetchDataType.decode(data_item_param.value);
+                FetchDataDecoder? decoder = data_item.get_decoder();
+                if (decoder == null) {
+                    debug("Unable to decode fetch response for \"%s\": No decoder available",
+                        data_item.to_string());
+                    
+                    continue;
+                }
+                
+                results.set_data(data_item, decoder.decode(list.get_required(ctr + 1)));
+            }
         }
         
         return results;
@@ -83,6 +91,10 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
     
     public MessageData? get_data(FetchDataType data_item) {
         return map.get(data_item);
+    }
+    
+    public Gee.List<Memory.AbstractBuffer> get_body_data() {
+        return body_data.read_only_view;
     }
     
     public int get_count() {

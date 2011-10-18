@@ -65,7 +65,6 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             body_data_type_list);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
-        
         if (resp.status_response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server error for %s: %s", fetch_cmd.to_string(),
                 resp.to_string());
@@ -103,7 +102,6 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             data_type_list, body_data_type_list);
         
         CommandResponse resp = yield context.session.send_command_async(fetch_cmd, cancellable);
-        
         if (resp.status_response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server error for %s: %s", fetch_cmd.to_string(),
                 resp.to_string());
@@ -157,38 +155,47 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         // The assumption here is that because ENVELOPE is such a common fetch command, the
         // server will have optimizations for it, whereas if we called for each header in the
         // envelope separately, the server has to chunk harder parsing the RFC822 header
+        bool using_envelope = false;
         if (fields.is_all_set(Geary.Email.Field.ENVELOPE)) {
             data_types_list.add(FetchDataType.ENVELOPE);
             
             // remove those flags and process any remaining
             fields = fields.clear(Geary.Email.Field.ENVELOPE);
+            
+            using_envelope = true;
         }
+        
+        // pack all the needed headers into a single FetchBodyDataType
+        string[] field_names = new string[0];
         
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             switch (fields & field) {
                 case Geary.Email.Field.DATE:
-                    body_data_types_list.add(new FetchBodyDataType.peek(
-                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "Date" }));
+                    field_names += "Date";
                 break;
                 
                 case Geary.Email.Field.ORIGINATORS:
-                    body_data_types_list.add(new FetchBodyDataType.peek(
-                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "From", "Sender", "Reply-To" }));
+                    field_names += "From";
+                    field_names += "Sender";
+                    field_names += "Reply-To";
                 break;
                 
                 case Geary.Email.Field.RECEIVERS:
-                    body_data_types_list.add(new FetchBodyDataType.peek(
-                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "To", "Cc", "Bcc" }));
+                    field_names += "To";
+                    field_names += "Cc";
+                    field_names += "Bcc";
                 break;
                 
                 case Geary.Email.Field.REFERENCES:
-                    body_data_types_list.add(new FetchBodyDataType.peek(
-                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "Message-ID", "In-Reply-To" }));
+                    field_names += "References";
+                    if (!using_envelope) {
+                        field_names += "Message-ID";
+                        field_names += "In-Reply-To";
+                    }
                 break;
                 
                 case Geary.Email.Field.SUBJECT:
-                    body_data_types_list.add(new FetchBodyDataType.peek(
-                        FetchBodyDataType.SectionPart.HEADER_FIELDS, { "Subject" }));
+                    field_names += "Subject";
                 break;
                 
                 case Geary.Email.Field.HEADER:
@@ -215,14 +222,24 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                     assert_not_reached();
             }
         }
+        
+        if (field_names.length > 0) {
+            body_data_types_list.add(new FetchBodyDataType(
+                FetchBodyDataType.SectionPart.HEADER_FIELDS, field_names));
+        }
     }
     
     private static void fetch_results_to_email(FetchResults res, Geary.Email.Field fields,
-        Geary.Email email) {
+        Geary.Email email) throws Error {
         // accumulate these to submit Imap.EmailProperties all at once
         Geary.Imap.MessageFlags? flags = null;
         InternalDate? internaldate = null;
         RFC822.Size? rfc822_size = null;
+        
+        // accumulate these to submit References all at once
+        RFC822.MessageID? message_id = null;
+        RFC822.MessageID? in_reply_to = null;
+        RFC822.MessageIDList? references = null;
         
         foreach (FetchDataType data_type in res.get_all_types()) {
             MessageData? data = res.get_data(data_type);
@@ -245,8 +262,10 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                     if ((fields & Geary.Email.Field.RECEIVERS) != 0)
                         email.set_receivers(envelope.to, envelope.cc, envelope.bcc);
                     
-                    if ((fields & Geary.Email.Field.REFERENCES) != 0)
-                        email.set_references(envelope.message_id, envelope.in_reply_to);
+                    if ((fields & Geary.Email.Field.REFERENCES) != 0) {
+                        message_id = envelope.message_id;
+                        in_reply_to = envelope.in_reply_to;
+                    }
                 break;
                 
                 case FetchDataType.RFC822_HEADER:
@@ -275,8 +294,81 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             }
         }
         
+        // fields_to_fetch_data_types() will always generate a single FetchBodyDataType for all
+        // the header fields it needs
+        Gee.List<Memory.AbstractBuffer> body_data = res.get_body_data();
+        if (body_data.size > 0) {
+            assert(body_data.size == 1);
+            RFC822.Header headers = new RFC822.Header(body_data[0]);
+            
+            // DATE
+            string? value = headers.get_header("Date");
+            if (!String.is_empty(value))
+                email.set_send_date(new RFC822.Date(value));
+            
+            // ORIGINATORS
+            RFC822.MailboxAddresses? from = null;
+            RFC822.MailboxAddresses? sender = null;
+            RFC822.MailboxAddresses? reply_to = null;
+            
+            value = headers.get_header("From");
+            if (!String.is_empty(value))
+                from = new RFC822.MailboxAddresses.from_rfc822_string(value);
+            
+            value = headers.get_header("Sender");
+            if (!String.is_empty(value))
+                sender = new RFC822.MailboxAddresses.from_rfc822_string(value);
+            
+            value = headers.get_header("Reply-To");
+            if (!String.is_empty(value))
+                reply_to = new RFC822.MailboxAddresses.from_rfc822_string(value);
+            
+            email.set_originators(from, sender, reply_to);
+            
+            // RECEIVERS
+            RFC822.MailboxAddresses? to = null;
+            RFC822.MailboxAddresses? cc = null;
+            RFC822.MailboxAddresses? bcc = null;
+            
+            value = headers.get_header("To");
+            if (!String.is_empty(value))
+                to = new RFC822.MailboxAddresses.from_rfc822_string(value);
+            
+            value = headers.get_header("Cc");
+            if (!String.is_empty(value))
+                cc = new RFC822.MailboxAddresses.from_rfc822_string(value);
+            
+            value = headers.get_header("Bcc");
+            if (!String.is_empty(value))
+                bcc = new RFC822.MailboxAddresses.from_rfc822_string(value);
+            
+            email.set_receivers(to, cc, bcc);
+            
+            // REFERENCES
+            // (Note that it's possible the request used an IMAP ENVELOPE, in which case only the
+            // References header will be present if REFERENCES were required.)
+            value = headers.get_header("Message-ID");
+            if (!String.is_empty(value))
+                message_id = new RFC822.MessageID(value);
+            
+            value = headers.get_header("In-Reply-To");
+            if (!String.is_empty(value))
+                in_reply_to = new RFC822.MessageID(value);
+            
+            value = headers.get_header("References");
+            if (!String.is_empty(value))
+                references = new RFC822.MessageIDList(value);
+            
+            // SUBJECT
+            value = headers.get_header("Subject");
+            if (!String.is_empty(value))
+                email.set_message_subject(new RFC822.Subject(value));
+        }
+        
         if (flags != null && internaldate != null && rfc822_size != null)
             email.set_email_properties(new Geary.Imap.EmailProperties(flags, internaldate, rfc822_size));
+        
+        email.set_full_references(message_id, in_reply_to, references);
     }
 }
 

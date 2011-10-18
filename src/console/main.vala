@@ -408,9 +408,12 @@ class ImapConsole : Gtk.Window {
         
         Geary.Imap.FetchBodyDataType fields = new Geary.Imap.FetchBodyDataType(
             Geary.Imap.FetchBodyDataType.SectionPart.HEADER_FIELDS, args[1:args.length]);
+            
+        Gee.List<Geary.Imap.FetchBodyDataType> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataType>();
+        list.add(fields);
         
         cx.send_async.begin(new Geary.Imap.FetchCommand(
-            new Geary.Imap.MessageSet.custom(args[0]), null, { fields }), null, on_fetch);
+            new Geary.Imap.MessageSet.custom(args[0]), null, list), null, on_fetch);
     }
     
     private void on_fetch(Object? source, AsyncResult result) {

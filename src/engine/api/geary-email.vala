@@ -76,6 +76,7 @@ public class Geary.Email : Object {
     // REFERENCES
     public Geary.RFC822.MessageID? message_id { get; private set; default = null; }
     public Geary.RFC822.MessageID? in_reply_to { get; private set; default = null; }
+    public Geary.RFC822.MessageIDList? references { get; private set; default = null; }
     
     // SUBJECT
     public Geary.RFC822.Subject? subject { get; private set; default = null; }
@@ -126,9 +127,11 @@ public class Geary.Email : Object {
         fields |= Field.RECEIVERS;
     }
     
-    public void set_references(Geary.RFC822.MessageID? message_id, Geary.RFC822.MessageID? in_reply_to) {
+    public void set_full_references(Geary.RFC822.MessageID? message_id, Geary.RFC822.MessageID? in_reply_to,
+        Geary.RFC822.MessageIDList? references) {
         this.message_id = message_id;
         this.in_reply_to = in_reply_to;
+        this.references = references;
         
         fields |= Field.REFERENCES;
     }
