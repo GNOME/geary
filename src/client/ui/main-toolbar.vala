@@ -24,6 +24,8 @@ public class MainToolbar : Gtk.VBox {
         menu_button = builder.get_object("menu_button") as Gtk.ToolButton;
         menu_button.clicked.connect(on_show_menu);
         
+        toolbar.get_style_context().add_class("primary-toolbar");
+        
         add(toolbar);
     }
     
