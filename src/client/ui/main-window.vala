@@ -190,11 +190,19 @@ public class MainWindow : Gtk.Window {
     
     private void on_list_email_ready(Gee.List<Geary.Email>? email, Error? err) {
         if (email != null && email.size > 0) {
-            debug("Listing %d emails", email.size);
+            int low = int.MAX;
+            int high = int.MIN;
             foreach (Geary.Email envelope in email) {
+                if (envelope.location.position < low)
+                    low = envelope.location.position;
+                
+                if (envelope.location.position > high)
+                    high = envelope.location.position;
+                
                 if (!message_list_store.has_envelope(envelope))
                     message_list_store.append_envelope(envelope);
             }
+            debug("Listed %d emails from position %d to %d", email.size, low, high);
         }
         
         if (err != null) {

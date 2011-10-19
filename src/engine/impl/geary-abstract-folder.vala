@@ -5,8 +5,8 @@
  */
 
 public abstract class Geary.AbstractFolder : Object, Geary.Folder {
-    protected virtual void notify_opened(Geary.Folder.OpenState state) {
-        opened(state);
+    protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
+        opened(state, count);
     }
     
     protected virtual void notify_closed(Geary.Folder.CloseReason reason) {

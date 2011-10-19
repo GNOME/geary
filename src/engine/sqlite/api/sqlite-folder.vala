@@ -11,7 +11,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
     Geary.ReferenceSemantics {
     protected int manual_ref_count { get; protected set; }
     
-    private MailDatabase db;
+    private ImapDatabase db;
     private FolderRow folder_row;
     private Geary.Imap.FolderProperties? properties;
     private MessageTable message_table;
@@ -60,7 +60,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         
         opened = true;
         
-        notify_opened(Geary.Folder.OpenState.LOCAL);
+        notify_opened(Geary.Folder.OpenState.LOCAL, yield get_email_count_async(cancellable));
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {

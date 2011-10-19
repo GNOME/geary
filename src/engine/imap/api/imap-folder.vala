@@ -57,7 +57,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder, Gear
         properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, mailbox.unseen,
             mailbox.uid_validity, mailbox.uid_next, properties.attrs);
         
-        notify_opened(Geary.Folder.OpenState.REMOTE);
+        notify_opened(Geary.Folder.OpenState.REMOTE, mailbox.exists);
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {

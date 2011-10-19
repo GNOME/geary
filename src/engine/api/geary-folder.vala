@@ -40,9 +40,11 @@ public interface Geary.Folder : Object {
     
     /**
      * This is fired when the Folder is successfully opened by a caller.  It will only fire once
-     * until the Folder is closed, with the OpenState indicating what has been opened.
+     * until the Folder is closed, with the OpenState indicating what has been opened and the count
+     * indicating the number of messages in the folder (in the case of OpenState.BOTH, it refers
+     * to the authoritative number).
      */
-    public signal void opened(OpenState state);
+    public signal void opened(OpenState state, int count);
     
     /**
      * This is fired when the Folder is successfully closed by a caller.  It will only fire once
@@ -85,7 +87,7 @@ public interface Geary.Folder : Object {
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected abstract void notify_opened(OpenState state);
+    protected abstract void notify_opened(OpenState state, int count);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal

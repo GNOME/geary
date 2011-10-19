@@ -140,8 +140,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             } else {
                 debug("Unable to prepare remote folder %s: prepare_opened_file() failed", to_string());
             }
-        } catch (Error err) {
-            debug("Unable to open or prepare remote folder %s: %s", to_string(), err.message);
+        } catch (Error open_err) {
+            debug("Unable to open or prepare remote folder %s: %s", to_string(), open_err.message);
         }
         
         // notify any threads of execution waiting for the remote folder to open that the result
@@ -153,9 +153,21 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 notify_err.message);
         }
         
+        int count;
+        try {
+            count = (remote_folder != null)
+                ? remote_count
+                : yield local_folder.get_email_count_async(cancellable);
+        } catch (Error count_err) {
+            debug("Unable to fetch count from local folder: %s", count_err.message);
+            
+            count = 0;
+        }
+        
         // notify any subscribers with similar information
         notify_opened(
-            (remote_folder != null) ? Geary.Folder.OpenState.BOTH : Geary.Folder.OpenState.LOCAL);
+            (remote_folder != null) ? Geary.Folder.OpenState.BOTH : Geary.Folder.OpenState.LOCAL,
+            count);
     }
     
     // Returns true if the remote folder is ready, false otherwise
@@ -207,7 +219,12 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // This MUST only be called from ReplayAppend.
     private async void do_replay_appended_messages(int new_remote_count) {
         // this only works when the list is grown
-        assert(new_remote_count > remote_count);
+        if (remote_count >= new_remote_count) {
+            debug("Message reported appended by server but remote count %d already known",
+                remote_count);
+            
+            return;
+        }
         
         try {
             // if no mail in local store, nothing needs to be done here; the store is "normalized"
@@ -382,6 +399,15 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             foreach (Geary.Email email in local_list) {
                 email.update_location(new Geary.EmailLocation(this,
                     email.location.position + adjustment, email.location.ordering));
+            }
+        } else if (local_list_size > 0 && local_only) {
+            // if remote_count is -1, the remote folder hasn't been opened so the true count hasn't
+            // been determined; create local EmailLocations that update themselves when the
+            // folder is opened and the count is known (adjusted by the local_offset passed in)
+            foreach (Geary.Email local_email in local_list) {
+                local_email.update_location(new Geary.EmailLocation.local(this,
+                    local_email.location.position, local_email.location.ordering,
+                    (count + low - 1) - local_email.location.position));
             }
         }
         

@@ -31,6 +31,7 @@ public class Geary.EmailLocation : Object {
     public int64 ordering { get; private set; }
     
     private Geary.Folder folder;
+    private int local_adjustment;
     
     public signal void position_altered(int old_position, int new_position);
     
@@ -43,18 +44,28 @@ public class Geary.EmailLocation : Object {
     public signal void invalidated();
     
     public EmailLocation(Geary.Folder folder, int position, int64 ordering) {
+        init(folder, position, ordering, -1);
+    }
+    
+    public EmailLocation.local(Geary.Folder folder, int position, int64 ordering, int local_adjustment) {
+        init(folder, position, ordering, local_adjustment);
+    }
+    
+    ~EmailLocation() {
+        invalidate(false);
+    }
+    
+    private void init(Geary.Folder folder, int position, int64 ordering, int local_adjustment) {
         assert(position >= 1);
         
         this.folder = folder;
         this.position = position;
         this.ordering = ordering;
+        this.local_adjustment = local_adjustment;
         
         folder.message_removed.connect(on_message_removed);
+        folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
-    }
-    
-    ~EmailLocation() {
-        invalidate(false);
     }
     
     private void invalidate(bool signalled) {
@@ -64,6 +75,7 @@ public class Geary.EmailLocation : Object {
         position = -1;
         
         folder.message_removed.disconnect(on_message_removed);
+        folder.opened.disconnect(on_folder_opened);
         folder.closed.disconnect(on_folder_closed);
         
         if (signalled)
@@ -97,6 +109,21 @@ public class Geary.EmailLocation : Object {
     
     private void on_folder_closed() {
         invalidate(true);
+    }
+    
+    private void on_folder_opened(Geary.Folder.OpenState state, int count) {
+        if (local_adjustment < 0 || count < local_adjustment)
+            return;
+        
+        int old_position = position;
+        position = count - local_adjustment;
+        assert(position >= 1);
+        
+        // mark as completed, to prevent this from happening again
+        local_adjustment = -1;
+        
+        if (position != old_position)
+            position_altered(old_position, position);
     }
 }
 
