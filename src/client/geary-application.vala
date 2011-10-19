@@ -7,7 +7,7 @@
 // Defined by wscript
 extern const string _PREFIX;
 
-public class GearyApplication : Gtk.Application {
+public class GearyApplication : YorbaApplication {
     // TODO: replace static strings with const strings when gettext is integrated properly
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
@@ -46,11 +46,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 """;
     
-    public virtual signal void exiting(bool panicked) {
-        if (main_window != null)
-            main_window.destroy();
-    }
-    
     public static GearyApplication instance { 
         get { return _instance; }
         private set { 
@@ -69,44 +64,34 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public Configuration config { get; private set; }
-    public string[]? args { get; private set; }
     
     private static GearyApplication _instance = null;
     
-    private MainWindow main_window;
+    private MainWindow? main_window = null;
     private Geary.EngineAccount? account = null;
     
-    private bool running = false;
-    private bool exiting_fired = false;
-    private int exitcode = 0;
     private File exec_dir;
     
-    public GearyApplication(string[] args) {
-        Object(application_id: "org.yorba.geary", flags: ApplicationFlags.FLAGS_NONE);
-        _instance = this;
-        this.args = args;
-        exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
-        running = true;
+    public GearyApplication() {
+        base (NAME, PRGNAME, "org.yorba.geary");
         
-        Environment.set_application_name(NAME);
-        Environment.set_prgname(PRGNAME);
+        _instance = this;
     }
     
-   public override void activate() {
-        // Check if we're already running.
-        unowned GLib.List<weak Gtk.Window> windows = get_windows();
-        if (windows.length() > 0) {
-            foreach (Gtk.Window w in windows)
-                w.present();
+    public override void activate() {
+        // If Geary is already running, show the main window and return.
+        if (main_window != null) {
+            main_window.present();
             return;
         }
+        
+        exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
         
         // Start Geary.
         actions.add_actions(create_actions(), this);
         ui_manager.insert_action_group(actions, 0);
         
         main_window = new MainWindow();
-        add_window(main_window);
         
         config = new Configuration(GearyApplication.instance.get_install_dir() != null,
             GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
@@ -151,30 +136,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return;
     }
     
-    // This call will fire "exiting" only if it's not already been fired.
-    public void exit(int exitcode = 0) {
-        if (exiting_fired || !running)
-            return;
-        
-        this.exitcode = exitcode;
-        
-        exiting_fired = true;
-        exiting(false);
-        
-        remove_window(main_window);
-        
-        Gtk.main_quit();
-    }
-    
-    // This call will fire "exiting" only if it's not already been fired and halt the application
-    // in its tracks.
-    public void panic() {
-        if (!exiting_fired) {
-            exiting_fired = true;
-            exiting(true);
-        }
-        
-        Posix.exit(1);
+    public override void exiting(bool panicked) {
+        if (main_window != null)
+            main_window.destroy();
     }
     
     public File get_user_data_directory() {

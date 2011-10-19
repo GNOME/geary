@@ -5,7 +5,7 @@
  */
 
 int main(string[] args) {
-    GearyApplication app = new GearyApplication(args);
+    GearyApplication app = new GearyApplication();
     
     return app.run(args);
 }
