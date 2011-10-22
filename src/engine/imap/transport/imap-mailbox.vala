@@ -380,7 +380,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             }
         }
         
-        email.set_full_references(message_id, in_reply_to, references);
+        if (fields.require(Geary.Email.Field.REFERENCES))
+            email.set_full_references(message_id, in_reply_to, references);
     }
 }
 

@@ -102,9 +102,11 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
                 id.uid.to_string(), to_string());
         }
         
+        // TODO: Also check by Message-ID (and perhaps other EmailProperties) to link an existing
+        // message in the database to this Folder
+        
         message_id = yield message_table.create_async(transaction,
-            new MessageRow.from_email(message_table, email),
-            cancellable);
+            new MessageRow.from_email(message_table, email), cancellable);
         
         // create the message location in the location lookup table using its UID for the ordering
         // (which fulfills the requirements for the ordering column)

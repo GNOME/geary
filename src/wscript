@@ -6,6 +6,7 @@
 def build(bld):
 	bld.common_src = [
 	'../common/common-arrays.vala',
+	'../common/common-async.vala',
 	'../common/common-date.vala',
 	'../common/common-intl.vala',
 	'../common/common-yorba-application.vala'
@@ -17,6 +18,8 @@ def build(bld):
 	bld.engine_src = [
 	'../engine/api/geary-account.vala',
 	'../engine/api/geary-composed-email.vala',
+	'../engine/api/geary-conversation.vala',
+	'../engine/api/geary-conversations.vala',
 	'../engine/api/geary-credentials.vala',
 	'../engine/api/geary-email-identifier.vala',
 	'../engine/api/geary-email-location.vala',
@@ -152,4 +155,5 @@ def build(bld):
 	bld.recurse('client')
 	bld.recurse('console')
 	bld.recurse('norman')
+	bld.recurse('theseus')
 

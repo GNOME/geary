@@ -275,14 +275,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             if (remote_position < local_low) {
                 debug("do_replay_remove_message: Not removing message at %d from local store, not present",
                     remote_position);
-                
-                remote_count = new_remote_count;
-                
-                return;
+            } else {
+                // Adjust remote position to local position
+                yield local_folder.remove_email_async((remote_position - local_low) + 1);
             }
-            
-            // Adjust remote position to local position
-            yield local_folder.remove_email_async((remote_position - local_low) + 1);
             
             // save new remote count
             remote_count = new_remote_count;
@@ -445,10 +441,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 }
             }
             
-            if (!found) {
-                debug("Need email at %d in %s", position, to_string());
+            if (!found)
                 needed_by_position += position;
-            }
         }
         
         if (needed_by_position.length == 0) {

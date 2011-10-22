@@ -113,6 +113,7 @@ def post_build(bld):
 	geary_path = 'build/src/client/geary'
 	console_path = 'build/src/console/console'
 	norman_path = 'build/src/norman/norman'
+	theseus_path = 'build/src/theseus/theseus'
 	
 	if os.path.isfile(geary_path) :
 		shutil.copy2(geary_path, 'geary')
@@ -122,6 +123,9 @@ def post_build(bld):
 	
 	if os.path.isfile(norman_path) :
 		shutil.copy2(norman_path, 'norman')
+	
+	if os.path.isfile(theseus_path) :
+		shutil.copy2(theseus_path, 'theseus')
 	
 	# Compile schemas for local (non-intall) build.
 	client_build_path = 'build/src/client'

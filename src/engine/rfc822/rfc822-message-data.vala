@@ -14,7 +14,9 @@ public interface Geary.RFC822.MessageData : Geary.Common.MessageData {
 }
 
 public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC822.MessageData,
-    Geary.Equalable {
+    Geary.Equalable, Geary.Hashable {
+    private uint hash = 0;
+    
     public MessageID(string value) {
         base (value);
     }
@@ -27,31 +29,36 @@ public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC8
         if (this == message_id)
             return true;
         
+        if (to_hash() != message_id.to_hash())
+            return false;
+        
         return value == message_id.value;
+    }
+    
+    public uint to_hash() {
+        return (hash != 0) ? hash : (hash = str_hash(value));
     }
 }
 
+/**
+ * A Message-ID list stores its IDs from earliest to latest.
+ */
 public class Geary.RFC822.MessageIDList : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
-    private Gee.List<MessageID>? list = null;
+    public Gee.List<MessageID>? list { get; private set; }
     
     public MessageIDList(string value) {
         base (value);
-    }
-    
-    public Gee.List<MessageID> decoded() {
-        if (list != null)
-            return list;
         
-        list = new Gee.ArrayList<MessageID>(Equalable.equal_func);
-        
-        string[] ids = value.split(" ");
+        string[] ids = value.split_set(" \n\r\t");
         foreach (string id in ids) {
             id = id.strip();
-            if (!String.is_empty(id))
+            if (!String.is_empty(id)) {
+                if (list == null)
+                    list = new Gee.ArrayList<MessageID>();
+                
                 list.add(new MessageID(id));
+            }
         }
-        
-        return list;
     }
 }
 

@@ -118,7 +118,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         if (row.fields.is_any_set(Geary.Email.Field.REFERENCES)) {
             query = locked.prepare(
-                "UPDATE MessageTable SET message_id=?, in_reply_to=?, reference_ids = ? WHERE id=?");
+                "UPDATE MessageTable SET message_id=?, in_reply_to=?, reference_ids=? WHERE id=?");
             query.bind_string(0, row.message_id);
             query.bind_string(1, row.in_reply_to);
             query.bind_string(2, row.references);
