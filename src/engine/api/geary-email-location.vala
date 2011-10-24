@@ -112,8 +112,14 @@ public class Geary.EmailLocation : Object {
     }
     
     private void on_folder_opened(Geary.Folder.OpenState state, int count) {
-        if (local_adjustment < 0 || count < local_adjustment)
+        // If no local_adjustment, nothing needs to be done; if the local_adjustment is greater or
+        // equal to the remote folder's count, that indicates messages have been removed, in which
+        // case let the adjustments occur via on_message_removed().
+        if (local_adjustment < 0 || count <= local_adjustment) {
+            local_adjustment = -1;
+            
             return;
+        }
         
         int old_position = position;
         position = count - local_adjustment;
