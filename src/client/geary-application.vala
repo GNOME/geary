@@ -243,6 +243,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     private void on_new_message() {
         ComposerWindow w = new ComposerWindow();
+        w.set_position(Gtk.WindowPosition.CENTER);
         w.send.connect(on_send);
         w.show_all();
     }
