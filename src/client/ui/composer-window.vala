@@ -58,7 +58,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     public override void show_all() {
-        set_default_size(400, 550);
+        set_default_size(650, 550);
         
         base.show_all();
     }
