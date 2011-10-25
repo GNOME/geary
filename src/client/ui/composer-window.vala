@@ -6,6 +6,7 @@
 
 // Window for sending messages.
 public class ComposerWindow : Gtk.Window {
+    private static string DEFAULT_TITLE = _("New Message");
     
     private Gtk.Entry to_entry;
     private Gtk.Entry cc_entry;
@@ -54,6 +55,9 @@ public class ComposerWindow : Gtk.Window {
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         message_text = builder.get_object("message") as Gtk.TextView;
         
+        title = DEFAULT_TITLE;
+        subject_entry.changed.connect(on_subject_changed);
+        
         add(box);
     }
     
@@ -65,6 +69,11 @@ public class ComposerWindow : Gtk.Window {
     
     private void on_send() {
         send(this);
+    }
+    
+    private void on_subject_changed() {
+        title = Geary.String.is_empty(subject_entry.text.strip()) ? DEFAULT_TITLE :
+            subject_entry.text.strip();
     }
     
 }
