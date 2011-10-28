@@ -104,7 +104,7 @@ public class MessageViewer : Gtk.EventBox {
         insert_header(header, header_height++, _("To:"), to);
         
         if (email.cc != null)
-            insert_header(header, header_height++, _("cc:"), email.cc.to_string());
+            insert_header(header, header_height++, _("Cc:"), email.cc.to_string());
             
         if (email.subject != null)
             insert_header(header, header_height++, _("Subject:"), email.subject.value);
