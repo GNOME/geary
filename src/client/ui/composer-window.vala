@@ -13,6 +13,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Entry bcc_entry;
     private Gtk.Entry subject_entry;
     private Gtk.TextView message_text;
+    private Gtk.Button send_button;
     
     public string to {
         get { return to_entry.get_text(); }
@@ -46,7 +47,7 @@ public class ComposerWindow : Gtk.Window {
         Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
         
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
-        Gtk.Button send_button = builder.get_object("Send") as Gtk.Button;
+        send_button = builder.get_object("Send") as Gtk.Button;
         send_button.clicked.connect(on_send);
         
         to_entry = builder.get_object("to") as Gtk.Entry;
@@ -57,8 +58,12 @@ public class ComposerWindow : Gtk.Window {
         
         title = DEFAULT_TITLE;
         subject_entry.changed.connect(on_subject_changed);
+        to_entry.changed.connect(validate_send_button);
+        cc_entry.changed.connect(validate_send_button);
+        bcc_entry.changed.connect(validate_send_button);
         
         add(box);
+        validate_send_button();
     }
     
     public override void show_all() {
@@ -76,4 +81,10 @@ public class ComposerWindow : Gtk.Window {
             subject_entry.text.strip();
     }
     
+    private void validate_send_button() {
+        send_button.sensitive = !Geary.String.is_empty(to_entry.get_text().strip()) ||
+            !Geary.String.is_empty(cc_entry.get_text().strip()) ||
+            !Geary.String.is_empty(bcc_entry.get_text().strip());
+    }
 }
+
