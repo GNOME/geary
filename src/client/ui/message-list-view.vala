@@ -5,7 +5,7 @@
  */
 
 public class MessageListView : Gtk.TreeView {
-    public signal void message_selected(Geary.Email? email);
+    public signal void conversation_selected(Geary.Conversation? conversation);
     
     public MessageListView(MessageListStore store) {
         set_model(store);
@@ -48,14 +48,14 @@ public class MessageListView : Gtk.TreeView {
         Gtk.TreeModel model;
         Gtk.TreePath? path = get_selection().get_selected_rows(out model).nth_data(0);
         if (path == null) {
-            message_selected(null);
+            conversation_selected(null);
             
             return;
         }
         
-        Geary.Email? email = get_store().get_message_at(path);
-        if (email != null)
-            message_selected(email);
+        Geary.Conversation? conversation = get_store().get_conversation_at(path);
+        if (conversation != null)
+            conversation_selected(conversation);
     }
 }
 

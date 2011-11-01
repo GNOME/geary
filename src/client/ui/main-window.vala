@@ -16,19 +16,21 @@ public class MainWindow : Gtk.Window {
     private MessageViewer message_viewer = new MessageViewer();
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
+    private Geary.Conversations? current_conversations = null;
     private bool second_list_pass_required = false;
     private int window_width;
     private int window_height;
     private bool window_maximized;
     private Gtk.HPaned folder_paned = new Gtk.HPaned();
     private Gtk.HPaned messages_paned = new Gtk.HPaned();
-    private Cancellable cancellable = new Cancellable();
+    private Cancellable cancellable_folder = new Cancellable();
+    private Cancellable cancellable_message = new Cancellable();
     
     public MainWindow() {
         title = GearyApplication.NAME;
         
         message_list_view = new MessageListView(message_list_store);
-        message_list_view.message_selected.connect(on_message_selected);
+        message_list_view.conversation_selected.connect(on_conversation_selected);
         
         folder_list_view = new FolderListView(folder_list_store);
         folder_list_view.folder_selected.connect(on_folder_selected);
@@ -136,12 +138,12 @@ public class MainWindow : Gtk.Window {
         // message viewer
         Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
         message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        message_viewer_scrolled.add_with_viewport(message_viewer);
+        message_viewer_scrolled.add(message_viewer);
         
         // three-pane display: message list left of current message on bottom separated by
         // grippable
         messages_paned.pack1(message_list_scrolled, false, false);
-        messages_paned.pack2(message_viewer_scrolled, true, false);
+        messages_paned.pack2(message_viewer_scrolled, true, true);
         
         // three-pane display: folder list on left and messages on right separated by grippable
         folder_paned.pack1(folder_list_scrolled, false, false);
@@ -166,61 +168,77 @@ public class MainWindow : Gtk.Window {
     }
     
     private async void do_select_folder(Geary.Folder folder) throws Error {
-        cancel();
+        cancel_folder();
         message_list_store.clear();
         
         if (current_folder != null) {
-            current_folder.messages_appended.disconnect(on_folder_messages_appended);
             yield current_folder.close_async();
         }
         
         current_folder = folder;
-        current_folder.messages_appended.connect(on_folder_messages_appended);
         
-        yield current_folder.open_async(true, cancellable);
+        yield current_folder.open_async(true, cancellable_folder);
+        
+        current_conversations = new Geary.Conversations(current_folder, 
+            MessageListStore.REQUIRED_FIELDS);
+            
+        current_conversations.monitor_new_messages(cancellable_folder);
+        
+        current_conversations.scan_started.connect(on_scan_started);
+        current_conversations.scan_error.connect(on_scan_error);
+        current_conversations.scan_completed.connect(on_scan_completed);
+        current_conversations.conversations_added.connect(on_conversations_added);
+        current_conversations.conversation_appended.connect(on_conversation_appended);
+        current_conversations.updated_placeholders.connect(on_updated_placeholders);
         
         // Do a quick-list of the messages (which should return what's in the local store) if
         // supported by the Folder, followed by a complete list if needed
         second_list_pass_required =
             current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.FAST);
-        current_folder.lazy_list_email(-1, FETCH_EMAIL_CHUNK_COUNT, MessageListStore.REQUIRED_FIELDS,
-            current_folder.get_supported_list_flags() & Geary.Folder.ListFlags.FAST,
-            on_list_email_ready, cancellable);
+        
+        // Load all conversations from the DB.
+        current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.FAST, cancellable_folder);
     }
     
-    private void on_list_email_ready(Gee.List<Geary.Email>? email, Error? err) {
-        if (email != null && email.size > 0) {
-            int low = int.MAX;
-            int high = int.MIN;
-            foreach (Geary.Email envelope in email) {
-                if (envelope.location.position < low)
-                    low = envelope.location.position;
-                
-                if (envelope.location.position > high)
-                    high = envelope.location.position;
-                
-                if (!message_list_store.has_envelope(envelope))
-                    message_list_store.append_envelope(envelope);
-            }
-            debug("Listed %d emails from position %d to %d", email.size, low, high);
-        }
+    public void on_scan_started(int low, int count) {
+        debug("on scan started");
+    }
+    
+    public void on_scan_error(Error err) {
+        debug("Scan error: %s", err.message);
+    }
+    
+    public void on_scan_completed() {
+        debug("on scan completed");
         
-        if (err != null) {
-            debug("Error while listing email: %s", err.message);
-            
-            // TODO: Better error handling here
-            return;
+        do_fetch_previews.begin(cancellable_message);
+    }
+    
+    public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
+        debug("on conversation added");
+        foreach (Geary.Conversation c in conversations) {
+            if (!message_list_store.has_conversation(c))
+                message_list_store.append_conversation(c);
         }
-        
-        // end of list, go get the previews for them
-        if (email == null)
-            do_fetch_previews.begin(cancellable);
+    }
+    
+    public void on_conversation_appended(Geary.Conversation conversation,
+        Gee.Collection<Geary.Email> email) {
+        message_list_store.update_conversation(conversation);
+    }
+    
+    public void on_updated_placeholders(Geary.Conversation conversation,
+        Gee.Collection<Geary.Email> email) {
+        message_list_store.update_conversation(conversation);
     }
     
     private async void do_fetch_previews(Cancellable? cancellable) throws Error {
         int count = message_list_store.get_count();
         for (int ctr = 0; ctr < count; ctr++) {
-            Geary.Email? email = message_list_store.get_message_at_index(ctr);
+            Geary.Email? email = message_list_store.get_newest_message_at_index(ctr);
+            if (email == null)
+                continue;
+            
             Geary.Email? body = yield current_folder.fetch_email_async(email.id,
                 Geary.Email.Field.HEADER | Geary.Email.Field.BODY | Geary.Email.Field.ENVELOPE | 
                 Geary.Email.Field.PROPERTIES, cancellable);
@@ -231,8 +249,8 @@ public class MainWindow : Gtk.Window {
         if (second_list_pass_required) {
             second_list_pass_required = false;
             debug("Doing second list pass now");
-            current_folder.lazy_list_email(-1, FETCH_EMAIL_CHUNK_COUNT, MessageListStore.REQUIRED_FIELDS,
-                Geary.Folder.ListFlags.NONE, on_list_email_ready, cancellable);
+            current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
+                cancellable);
         }
     }
     
@@ -244,25 +262,26 @@ public class MainWindow : Gtk.Window {
         }
     }
     
-    private void on_message_selected(Geary.Email? email) {
-        if (email != null)
-            do_select_message.begin(email, on_select_message_completed);
+    private void on_conversation_selected(Geary.Conversation? conversation) {
+        if (conversation != null)
+            do_select_message.begin(conversation, on_select_message_completed);
     }
     
-    private async void do_select_message(Geary.Email email) throws Error {
+    private async void do_select_message(Geary.Conversation conversation) throws Error {
         if (current_folder == null) {
-            debug("Message %s selected with no folder selected", email.to_string());
+            debug("Conversation selected with no folder selected");
             
             return;
         }
         
-        debug("Fetching email %s", email.to_string());
-        
-        Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
-            MessageViewer.REQUIRED_FIELDS, cancellable);
-        
+        cancel_message();
         message_viewer.clear();
-        message_viewer.add_message(full_email);
+        foreach (Geary.Email email in conversation.get_pool_sorted(compare_email)) {
+            Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
+                MessageViewer.REQUIRED_FIELDS, cancellable_message);
+                
+            message_viewer.add_message(full_email);
+         }
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {
@@ -298,22 +317,6 @@ public class MainWindow : Gtk.Window {
         }
     }
     
-    private void on_folder_messages_appended() {
-        int high = message_list_store.get_highest_folder_position();
-        if (high < 0) {
-            debug("Unable to find highest message position in %s", current_folder.to_string());
-            
-            return;
-        }
-        
-        debug("Message(s) appended to %s, fetching email at %d and above", current_folder.to_string(),
-            high + 1);
-        
-        // Want to get the one *after* the highest position in the message list
-        current_folder.lazy_list_email(high + 1, -1, MessageListStore.REQUIRED_FIELDS,
-            Geary.Folder.ListFlags.NONE, on_list_email_ready, cancellable);
-    }
-    
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
         Gee.ArrayList<Geary.Folder> accumulator = new Gee.ArrayList<Geary.Folder>();
         foreach (Geary.Folder folder in folders) {
@@ -330,9 +333,17 @@ public class MainWindow : Gtk.Window {
             on_folders_added_removed(accumulator, null);
     }
     
-    private void cancel() {
-        Cancellable old_cancellable = cancellable;
-        cancellable = new Cancellable();
+    private void cancel_folder() {
+        Cancellable old_cancellable = cancellable_folder;
+        cancellable_folder = new Cancellable();
+        cancel_message();
+        
+        old_cancellable.cancel();
+    }
+    
+    private void cancel_message() {
+        Cancellable old_cancellable = cancellable_message;
+        cancellable_message = new Cancellable();
         
         old_cancellable.cancel();
     }

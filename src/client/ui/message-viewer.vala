@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class MessageViewer : Gtk.EventBox {
+public class MessageViewer : Gtk.Viewport {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
@@ -15,6 +15,7 @@ public class MessageViewer : Gtk.EventBox {
     
     private const int HEADER_COL_SPACING = 10;
     private const int HEADER_ROW_SPACING = 3;
+    private const int MESSAGE_BOX_MARGIN = 10;
     
     // List of emails corresponding with VBox.
     private Gee.LinkedList<Geary.Email> messages = new Gee.LinkedList<Geary.Email>();
@@ -48,7 +49,7 @@ public class MessageViewer : Gtk.EventBox {
                 border-color: #cccccc;
                 border-style: solid;
                 border-width: 1;
-                -GtkWidget-separator-height: 1;
+                -GtkWidget-separator-height: 2;
             }
         """;
         
@@ -77,12 +78,10 @@ public class MessageViewer : Gtk.EventBox {
         }
         
         // Only include to string if it's not just this account.
-        // TODO: <ultiple accounts.
+        // TODO: multiple accounts.
         string to = "";
         if (email.to != null) {
-            Geary.RFC822.MailboxAddresses addr = new Geary.RFC822.MailboxAddresses.
-                from_rfc822_string(email.to.to_string());
-            if (!(addr.get_all().size == 1 && addr.get_all().get(0).address == username))
+            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == username))
                 to = email.to.to_string();
         }
         
@@ -119,7 +118,12 @@ public class MessageViewer : Gtk.EventBox {
             debug("Could not get message text. %s", err.message);
         }
         
-        message_box.pack_start(container, false, false);
+        Gtk.EventBox box = new Gtk.EventBox();
+        box.add(container);
+        box.margin = MESSAGE_BOX_MARGIN;
+        
+        message_box.pack_end(box, false, false);
+        message_box.show_all();
         
         add_style();
     }
@@ -163,7 +167,8 @@ public class MessageViewer : Gtk.EventBox {
         
         Gdk.RGBA color = Gdk.RGBA();
         color.parse(sample_view.style.base[0].to_string());
-        override_background_color(Gtk.StateFlags.NORMAL, color);
+        foreach (Gtk.Widget w in message_box.get_children())
+            w.override_background_color(Gtk.StateFlags.NORMAL, color);
     }
 }
 

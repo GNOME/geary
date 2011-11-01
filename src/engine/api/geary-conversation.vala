@@ -45,23 +45,35 @@ public abstract class Geary.Conversation : Object {
      */
     public abstract Gee.Collection<Geary.ConversationNode>? get_replies(Geary.ConversationNode node);
     
-    /**
-     * Returns all ConversationNodes in the conversation, which can then be sorted by the caller's
-     * own requirements.
-     *
+     /**
+     * Returns all emails in the conversation.
+     * Only returns nodes that have an e-mail.
      */
-    public virtual Gee.Collection<Geary.ConversationNode>? get_pool() {
-        Gee.HashSet<ConversationNode> pool = new Gee.HashSet<ConversationNode>();
+    public virtual Gee.Set<Geary.Email>? get_pool() {
+        Gee.HashSet<Email> pool = new Gee.HashSet<Email>();
         gather(pool, get_origin());
         
         return (pool.size > 0) ? pool : null;
     }
     
-    private void gather(Gee.Set<ConversationNode> pool, ConversationNode? current) {
+    /**
+     * Returns all emails in the conversation, sorted by compare_func.
+     * Only returns nodes that have an e-mail.
+     */
+    public virtual Gee.SortedSet<Geary.Email>? get_pool_sorted(CompareFunc<Geary.Email>? 
+        compare_func = null) {
+        Gee.TreeSet<Email> pool = new Gee.TreeSet<Email>(compare_func);
+        gather(pool, get_origin());
+        
+        return (pool.size > 0) ? pool : null;
+    }
+    
+    private void gather(Gee.Set<Email> pool, ConversationNode? current) {
         if (current == null)
             return;
         
-        pool.add(current);
+        if (current.get_email() != null)
+            pool.add(current.get_email());
         
         Gee.Collection<Geary.ConversationNode>? children = get_replies(current);
         if (children != null) {

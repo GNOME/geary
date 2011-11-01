@@ -5,6 +5,7 @@
  */
 
 public class MessageListStore : Gtk.TreeStore {
+    
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.PROPERTIES;
     
@@ -23,7 +24,7 @@ public class MessageListStore : Gtk.TreeStore {
         public static Type[] get_types() {
             return {
                 typeof (FormattedMessageData), // MESSAGE_DATA
-                typeof (Geary.Email)           // MESSAGE_OBJECT
+                typeof (Geary.Conversation)    // MESSAGE_OBJECT
             };
         }
         
@@ -47,39 +48,53 @@ public class MessageListStore : Gtk.TreeStore {
     }
     
     // The Email should've been fetched with REQUIRED_FIELDS.
-    public void append_envelope(Geary.Email envelope) {
-        assert(envelope.fields.fulfills(REQUIRED_FIELDS));
-        
+    public void append_conversation(Geary.Conversation conversation) {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        set(iter,
-            Column.MESSAGE_DATA, new FormattedMessageData.from_email(envelope),
-            Column.MESSAGE_OBJECT, envelope
-        );
+        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
         
-        envelope.location.position_deleted.connect(on_email_position_deleted);
+        if (pool != null)
+            set(iter,
+                Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first()),
+                Column.MESSAGE_OBJECT, conversation
+            );
     }
     
-    // The Email should've been fetched with REQUIRED_FIELDS.
-    public bool has_envelope(Geary.Email envelope) {
-        assert(envelope.fields.fulfills(REQUIRED_FIELDS));
+    public void update_conversation(Geary.Conversation conversation) {
+        Gtk.TreeIter iter;
+        if (!find_conversation(conversation, out iter)) {
+            // Unknown conversation, attempt to append it.
+            append_conversation(conversation);
+            
+            return;
+        }
         
+        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
+        
+        // Update the preview.
+        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first()));
+    }
+    
+    public bool has_conversation(Geary.Conversation conversation) {
         int count = get_count();
         for (int ctr = 0; ctr < count; ctr++) {
-            Geary.Email? email = get_message_at_index(ctr);
-            if (email == null)
-                break;
-            
-            if (email.location.position == envelope.location.position)
+            if (conversation == get_conversation_at_index(ctr))
                 return true;
         }
         
         return false;
     }
     
-    public Geary.Email? get_message_at_index(int index) {
-        return get_message_at(new Gtk.TreePath.from_indices(index, -1));
+    public Geary.Conversation? get_conversation_at_index(int index) {
+        return get_conversation_at(new Gtk.TreePath.from_indices(index, -1));
+    }
+    
+    public Geary.Email? get_newest_message_at_index(int index) {
+        Geary.Conversation? c = get_conversation_at_index(index);
+        Gee.SortedSet<Geary.Email>? pool = c.get_pool_sorted(compare_email);
+        
+        return pool != null ? pool.first() : null;
     }
     
     public void set_preview_at_index(int index, Geary.Email email) {
@@ -97,77 +112,43 @@ public class MessageListStore : Gtk.TreeStore {
         return iter_n_children(null);
     }
     
-    public Geary.Email? get_message_at(Gtk.TreePath path) {
-        Gtk.TreeIter iter;
+    public Geary.Conversation? get_conversation_at(Gtk.TreePath path) {
+       Gtk.TreeIter iter;
         if (!get_iter(out iter, path))
             return null;
         
-        Geary.Email email;
-        get(iter, Column.MESSAGE_OBJECT, out email);
+        Geary.Conversation? conversation;
+        get(iter, Column.MESSAGE_OBJECT, out conversation);
         
-        return email;
+        return conversation;
     }
     
-    // Returns -1 if the list is empty.
-    public int get_highest_folder_position() {
-        Gtk.TreeIter iter;
-        if (!get_iter_first(out iter))
-            return -1;
-        
-        int high = int.MIN;
-        
-        // TODO: It would be more efficient to maintain highest and lowest values in a table or
-        // as items are added and removed; this will do for now.
-        do {
-            Geary.Email email;
-            get(iter, Column.MESSAGE_OBJECT, out email);
-            
-            if (email.location.position > high)
-                high = email.location.position;
-        } while (iter_next(ref iter));
-        
-        return high;
-    }
-    
-    private bool remove_at_position(int position) {
-        Gtk.TreeIter iter;
-        if (!get_iter_first(out iter))
-            return false;
-        
-        do {
-            Geary.Email email;
-            get(iter, Column.MESSAGE_OBJECT, out email);
-            
-            if (email.location.position == position) {
-                remove(iter);
-                
-                email.location.position_deleted.disconnect(on_email_position_deleted);
-                
-                return true;
-            }
-        } while (iter_next(ref iter));
+    private bool find_conversation(Geary.Conversation conversation, out Gtk.TreeIter iter) {
+        iter = Gtk.TreeIter();
+        int count = get_count();
+        for (int ctr = 0; ctr < count; ctr++) {
+            if (conversation == get_conversation_at_index(ctr))
+                return get_iter(out iter, new Gtk.TreePath.from_indices(ctr, -1));
+        }
         
         return false;
     }
     
     private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
-        Geary.Email aenvelope;
-        get(aiter, Column.MESSAGE_OBJECT, out aenvelope);
+        Geary.Conversation a, b;
         
-        Geary.Email benvelope;
-        get(biter, Column.MESSAGE_OBJECT, out benvelope);
+        get(aiter, Column.MESSAGE_OBJECT, out a);
+        get(biter, Column.MESSAGE_OBJECT, out b);
         
-        int diff = aenvelope.date.value.compare(benvelope.date.value);
-        if (diff != 0)
-            return diff;
+        Gee.SortedSet<Geary.Email>? apool = a.get_pool_sorted(compare_email);
+        Gee.SortedSet<Geary.Email>? bpool = b.get_pool_sorted(compare_email);
         
-        // stabilize sort by using the mail's position, which is always unique in a folder
-        return aenvelope.location.position - benvelope.location.position;
-    }
-    
-    private void on_email_position_deleted(int position) {
-        if (!remove_at_position(position))
-            debug("on_email_position_deleted: unable to find email at position %d", position);
+        if (apool == null || apool.first() == null)
+            return -1;
+        else if (bpool == null || bpool.first() == null)
+            return 1;
+        
+        return compare_email(apool.first(), bpool.first());
     }
 }
 

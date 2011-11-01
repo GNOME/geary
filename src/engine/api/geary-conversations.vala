@@ -166,6 +166,8 @@ public class Geary.Conversations : Object {
     private Gee.Map<Geary.RFC822.MessageID, Node> id_map = new Gee.HashMap<Geary.RFC822.MessageID,
         Node>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
+    private bool monitor_new = false;
+    private Cancellable? cancellable_monitor = null;
     
     public virtual signal void scan_started(int low, int count) {
     }
@@ -196,6 +198,9 @@ public class Geary.Conversations : Object {
         // Manually detach all the weak refs in the Conversation objects
         foreach (ImplConversation conversation in conversations)
             conversation.owner = null;
+        
+        if (monitor_new)
+            folder.messages_appended.disconnect(on_folder_messages_appended);
     }
     
     protected virtual void notify_scan_started(int low, int count) {
@@ -245,6 +250,16 @@ public class Geary.Conversations : Object {
         throws Error {
         notify_scan_started(low, count);
         folder.lazy_list_email(low, count, required_fields, flags, on_email_listed, cancellable);
+    }
+    
+    public bool monitor_new_messages(Cancellable? cancellable = null) {
+        if (monitor_new)
+            return false;
+        
+        monitor_new = true;
+        cancellable_monitor = cancellable;
+        folder.messages_appended.connect(on_folder_messages_appended);
+        return true;
     }
     
     private void on_email_listed(Gee.List<Geary.Email>? emails, Error? err) {
@@ -340,7 +355,7 @@ public class Geary.Conversations : Object {
                 RFC822.MessageID ancestor_id = ancestors[ctr];
                 
                 if (seen.contains(ancestor_id)) {
-                    warning("Loop detected in conversation: %s seen twice", ancestor_id.to_string());
+                    message("Loop detected in conversation: %s seen twice", ancestor_id.to_string());
                     
                     continue;
                 }
@@ -451,6 +466,32 @@ public class Geary.Conversations : Object {
                 
                 assign_conversation(child, conversation);
             }
+        }
+    }
+    
+    private void on_folder_messages_appended() {
+        // Find highest position.
+        // TODO: optimize.
+        int high = -1;
+        foreach (Conversation c in conversations)
+            foreach (Email e in c.get_pool())
+                if (e.location.position > high)
+                    high = e.location.position;
+        
+        if (high < 0) {
+            debug("Unable to find highest message position in %s", folder.to_string());
+            
+            return;
+        }
+        
+        debug("Message(s) appended to %s, fetching email at %d and above", folder.to_string(),
+            high + 1);
+        
+        // Want to get the one *after* the highest position in the list
+        try {
+            lazy_load(high + 1, -1, Folder.ListFlags.NONE, cancellable_monitor);
+        } catch (Error e) {
+            warning("Error getting new mail: %s", e.message);
         }
     }
 }

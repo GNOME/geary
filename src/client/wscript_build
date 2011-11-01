@@ -19,7 +19,8 @@ client_src = [
 'ui/message-list-view.vala',
 'ui/message-viewer.vala',
 
-'util/util-keyring.vala'
+'util/util-keyring.vala',
+'util/util-email.vala'
 ]
 
 gsettings_schemas = [
