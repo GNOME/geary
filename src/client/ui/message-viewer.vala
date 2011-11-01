@@ -138,8 +138,8 @@ public class MessageViewer : Gtk.EventBox {
         
         label_title.set_line_wrap(true);
         label_value.set_line_wrap(true);
-        label_title.set_alignment(1.0f, 0.5f);
-        label_value.set_alignment(0.0f, 0.5f);
+        label_title.set_alignment(1.0f, 0.0f);
+        label_value.set_alignment(0.0f, 0.0f);
         label_title.selectable = true;
         label_value.selectable = true;
         
