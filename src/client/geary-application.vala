@@ -261,10 +261,18 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(),
             new Geary.RFC822.MailboxAddresses.from_rfc822_string(username));
         
-        email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);
-        email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.cc);
-        email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.bcc);
-        email.subject = new Geary.RFC822.Subject(cw.subject);
+        if (!Geary.String.is_empty(cw.to))
+            email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);
+        
+        if (!Geary.String.is_empty(cw.cc))
+            email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.cc);
+        
+        if (!Geary.String.is_empty(cw.bcc))
+            email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.bcc);
+        
+        if (!Geary.String.is_empty(cw.subject))
+            email.subject = new Geary.RFC822.Subject(cw.subject);
+        
         email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(cw.message));
         
         account.send_email_async.begin(email);
