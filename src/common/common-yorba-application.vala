@@ -129,7 +129,10 @@ public abstract class YorbaApplication {
         exiting_fired = true;
         exiting(false);
         
-        Gtk.main_quit();
+        if (Gtk.main_level() > 0)
+            Gtk.main_quit();
+        else
+            Posix.exit(exitcode);
     }
     
     // This call will fire "exiting" only if it's not already been fired and halt the application
