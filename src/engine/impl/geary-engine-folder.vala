@@ -714,7 +714,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         } catch (Error err) {
             // TODO: Better parsing of error; currently merely falling through and trying network
             // for copy
-            debug("Unable to fetch email from local store: %s", err.message);
         }
         
         // To reach here indicates either the local version does not have all the requested fields
