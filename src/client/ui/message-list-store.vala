@@ -71,9 +71,14 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
+        Geary.Email preview = pool.first();
         
-        // Update the preview.
-        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first()));
+        FormattedMessageData? existing = null;
+        get(iter, Column.MESSAGE_DATA, out existing);
+        
+        // Update the preview if needed.
+        if (existing == null || !existing.email.id.equals(preview.id))
+            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview)); 
     }
     
     public bool has_conversation(Geary.Conversation conversation) {

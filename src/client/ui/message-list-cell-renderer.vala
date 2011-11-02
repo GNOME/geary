@@ -6,13 +6,16 @@
 
 // Stores formatted data for a message.
 public class FormattedMessageData : Object {
+    private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
+    
+    public Geary.Email email { get; private set; default = null; }
     public bool is_unread { get; private set; default = false; }
     public string date { get; private set; default = ""; } 
     public string from { get; private set;  default = ""; }
     public string subject { get; private set; default = ""; }
     public string? body { get; private set; default = null; } // optional
     
-    public FormattedMessageData(bool is_unread, string date, string from, string subject, 
+    private FormattedMessageData(bool is_unread, string date, string from, string subject, 
         string preview) {
         this.is_unread = is_unread;
         this.date = "<span foreground='blue'>%s</span>".printf(Geary.String.escape_markup(date));
@@ -41,6 +44,13 @@ public class FormattedMessageData : Object {
         
         this(email.properties.is_unread(), Date.pretty_print(email.date.value),
             from, email.subject.value, Geary.String.escape_markup(make_preview(builder.str)));
+        
+        this.email = email;
+    }
+    
+    // Creates an example message (used interally for styling calculations.)
+    public FormattedMessageData.create_example() {
+        this(false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE);
     }
     
     // Distills an e-mail body into a preview by removing extra spaces, html, etc.
@@ -61,7 +71,6 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
     private const int LINE_SPACING = 4;
     private const int UNREAD_ICON_SIZE = 12;
     private const int TEXT_LEFT = LINE_SPACING * 2 + UNREAD_ICON_SIZE;
-    private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
     
     private static int cell_height = -1;
     private static int preview_height = -1;
@@ -159,8 +168,7 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
         Pango.Rectangle? logical_rect;
         Pango.Layout layout;
         if (example_data == null) {
-            example_data = new FormattedMessageData(false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, 
-                STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE);
+            example_data = new FormattedMessageData.create_example();
         }
         
         cell_height = LINE_SPACING;
