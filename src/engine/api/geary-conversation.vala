@@ -45,6 +45,14 @@ public abstract class Geary.Conversation : Object {
      */
     public abstract Gee.Collection<Geary.ConversationNode>? get_replies(Geary.ConversationNode node);
     
+    /**
+     * Returns a Collection of ConversationNodes that are associated with the Conversation but
+     * could not be properly linked into the chain (most likely because it would cause a loop).
+     *
+     * Returns null if the Conversation has no orphans.
+     */
+    public abstract Gee.Collection<Geary.ConversationNode>? get_orphans();
+    
      /**
      * Returns all emails in the conversation.
      * Only returns nodes that have an e-mail.
@@ -52,6 +60,7 @@ public abstract class Geary.Conversation : Object {
     public virtual Gee.Set<Geary.Email>? get_pool() {
         Gee.HashSet<Email> pool = new Gee.HashSet<Email>();
         gather(pool, get_origin());
+        add_orphans_to_pool(pool);
         
         return (pool.size > 0) ? pool : null;
     }
@@ -64,6 +73,7 @@ public abstract class Geary.Conversation : Object {
         compare_func = null) {
         Gee.TreeSet<Email> pool = new Gee.TreeSet<Email>(compare_func);
         gather(pool, get_origin());
+        add_orphans_to_pool(pool);
         
         return (pool.size > 0) ? pool : null;
     }
@@ -79,6 +89,17 @@ public abstract class Geary.Conversation : Object {
         if (children != null) {
             foreach (Geary.ConversationNode child in children)
                 gather(pool, child);
+        }
+    }
+    
+    private void add_orphans_to_pool(Gee.Set<Email> pool) {
+        Gee.Collection<ConversationNode>? orphans = get_orphans();
+        if (orphans == null || orphans.size == 0)
+            return;
+        
+        foreach (Geary.ConversationNode orphan in orphans) {
+            if (orphan.get_email() != null)
+                pool.add(orphan.get_email());
         }
     }
 }

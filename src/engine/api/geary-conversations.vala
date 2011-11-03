@@ -59,6 +59,8 @@ public class Geary.Conversations : Object {
         public RFC822.MessageID? origin;
         public SingleConversationNode? single_node;
         
+        private Gee.HashSet<ConversationNode>? orphans = null;
+        
         public ImplConversation(Geary.Conversations owner, ConversationNode origin_node) {
             this.owner = owner;
             
@@ -72,6 +74,14 @@ public class Geary.Conversations : Object {
                 origin = ((Node) origin_node).node_id;
                 assert(origin != null);
             }
+        }
+        
+        // Cannot be used for SingleConversationNodes.
+        public void set_origin(ConversationNode new_origin_node) {
+            assert(single_node == null);
+            
+            origin = ((Node) new_origin_node).node_id;
+            assert(origin != null);
         }
         
         public override Geary.ConversationNode? get_origin() {
@@ -157,6 +167,17 @@ public class Geary.Conversations : Object {
             }
             
             return child_nodes;
+        }
+        
+        public void add_orphans(Gee.Collection<ConversationNode> add) {
+            if (orphans == null)
+                orphans = new Gee.HashSet<Node>();
+            
+            orphans.add_all(add);
+        }
+        
+        public override Gee.Collection<Geary.ConversationNode>? get_orphans() {
+            return orphans;
         }
     }
     
@@ -351,6 +372,7 @@ public class Geary.Conversations : Object {
             // direction
             Node current_node = node;
             Node? ancestor_node = null;
+            Gee.HashSet<ConversationNode> orphans = new Gee.HashSet<ConversationNode>();
             for (int ctr = ancestors.size - 1; ctr >= 0; ctr--) {
                 RFC822.MessageID ancestor_id = ancestors[ctr];
                 
@@ -367,6 +389,17 @@ public class Geary.Conversations : Object {
                 if (ancestor_node == null)
                     ancestor_node = add_node(new Node(ancestor_id, null));
                 
+                // if prior node was orphaned, then all its ancestors are orphaned as well; if any
+                // ancestors are already part of a conversation, leave them be
+                if (orphans.size > 0) {
+                    if (current_node.conversation == null)
+                        orphans.add(current_node);
+                    
+                    current_node = ancestor_node;
+                    
+                    continue;
+                }
+                
                 // if current_node is in a conversation and its parent_id is null, that means
                 // it's the origin of a conversation, in which case making it a child of ancestor
                 // is potentially creating a loop
@@ -375,7 +408,6 @@ public class Geary.Conversations : Object {
                 // This watches for emails with contradictory References paths and new loops;
                 // essentially, first email encountered wins when assigning parentage
                 if (!is_origin && (current_node.parent_id == null || current_node.parent_id.equals(ancestor_id))) {
-                    // link up only if 
                     current_node.parent_id = ancestor_id;
                     ancestor_node.add_child(current_node.node_id);
                     
@@ -383,12 +415,18 @@ public class Geary.Conversations : Object {
                     if (found_conversation == null)
                         found_conversation = ancestor_node.conversation;
                 } else if (!is_origin) {
-                    warning("Email %s parent already assigned to %s, %s is orphaned",
+                    message("Email %s parent already assigned to %s, %s is orphaned in conversation",
                         current_node.node_id.to_string(), current_node.parent_id.to_string(),
                         ancestor_id.to_string());
+                    orphans.add(ancestor_node);
                 } else {
-                    warning("Email %s already origin of conversation, %s is orphaned",
+                    message("Email %s already origin of conversation, %s is now origin",
                         current_node.node_id.to_string(), ancestor_id.to_string());
+                    
+                    current_node.conversation.set_origin(ancestor_node);
+                    current_node.parent_id = ancestor_id;
+                    ancestor_node.conversation = current_node.conversation;
+                    ancestor_node.add_child(current_node.node_id);
                 }
                 
                 // move up the chain
@@ -407,6 +445,16 @@ public class Geary.Conversations : Object {
             }
             
             assign_conversation(current_node, found_conversation);
+            
+            // assign orphans and clear set
+            if (orphans.size > 0) {
+                foreach (ConversationNode orphan in orphans)
+                    ((Node) orphan).conversation = found_conversation;
+                
+                found_conversation.add_orphans(orphans);
+                
+                orphans.clear();
+            }
         }
         
         // Go through all the emails and verify they've all been marked as part of a conversation

@@ -128,6 +128,18 @@ public interface Geary.Folder : Object {
      * implementation this might entail opening a network connection or setting the connection to
      * a particular state, opening a file or database, and so on.
      *
+     * In the case of a Folder that is aggregating the contents of synchronized folder, it's possible
+     * for this method to complete even though all internal opens haven't completed.  The "opened"
+     * signal is the final say on when a Folder is fully opened with its OpenState parameter
+     * indicating how open it really is.  In general, a Folder's local state will occur immediately
+     * while it may take time (if ever) for the remote state to open.  Thus, it's possible for
+     * the "opened" signal to fire some time *after* this method completes.
+     *
+     * However, even if the method returns before the Folder's OpenState is BOTH, this Folder is
+     * ready for operation if this method returns without error.  The messages the folder returns
+     * may not reflect the full state of the Folder, however, and returned emails may subsequently
+     * have their state changed (such as their EmailLocation).
+     *
      * If the Folder has been opened previously, EngineError.ALREADY_OPEN is thrown.  There are no
      * other side-effects.
      */
