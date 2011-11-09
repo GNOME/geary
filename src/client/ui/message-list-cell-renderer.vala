@@ -14,19 +14,21 @@ public class FormattedMessageData : Object {
     public string from { get; private set;  default = ""; }
     public string subject { get; private set; default = ""; }
     public string? body { get; private set; default = null; } // optional
+    public int num_emails { get; private set; default = 1; }
     
     private FormattedMessageData(bool is_unread, string date, string from, string subject, 
-        string preview) {
+        string preview, int num_emails) {
         this.is_unread = is_unread;
         this.date = "<span foreground='blue'>%s</span>".printf(Geary.String.escape_markup(date));
         this.from = "<b>%s</b>".printf(Geary.String.escape_markup(from));
         this.subject = "<small>%s</small>".printf(Geary.String.escape_markup(subject));
         this.body = "<span size='x-small' foreground='#777777'>%s</span>".printf(
             Geary.String.escape_markup(preview));
+        this.num_emails = num_emails;
     }
     
     // Creates a formatted message data from an e-mail.
-    public FormattedMessageData.from_email(Geary.Email email) {
+    public FormattedMessageData.from_email(Geary.Email email, int num_emails) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
         
         StringBuilder builder = new StringBuilder();
@@ -43,14 +45,14 @@ public class FormattedMessageData : Object {
         string from = (email.from != null && email.from.size > 0) ? email.from[0].get_short_address() : "";
         
         this(email.properties.is_unread(), Date.pretty_print(email.date.value),
-            from, email.subject.value, Geary.String.escape_markup(make_preview(builder.str)));
+            from, email.subject.value, Geary.String.escape_markup(make_preview(builder.str)), num_emails);
         
         this.email = email;
     }
     
     // Creates an example message (used interally for styling calculations.)
     public FormattedMessageData.create_example() {
-        this(false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE);
+        this(false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE, 1);
     }
     
     // Distills an e-mail body into a preview by removing extra spaces, html, etc.
@@ -134,10 +136,30 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
         
         y += ink_rect.height + ink_rect.y + LINE_SPACING;
         
+        // Number of e-mails field.
+        int num_email_width = 0;
+        if (data.num_emails > 1) {
+            Pango.Rectangle? num_ink_rect;
+            Pango.Rectangle? num_logical_rect;
+            string mails = 
+                "<span background='#999999' foreground='white' size='x-small' weight='bold'> %d </span>"
+                .printf(data.num_emails);
+                
+            Pango.Layout layout_num = widget.create_pango_layout(null);
+            layout_num.set_markup(mails, -1);
+            layout_num.set_alignment(Pango.Alignment.RIGHT);
+            layout_num.get_pixel_extents(out num_ink_rect, out num_logical_rect);
+            ctx.move_to(cell_area.width - cell_area.x - num_ink_rect.width - num_ink_rect.x - 
+                LINE_SPACING, y);
+            Pango.cairo_show_layout(ctx, layout_num);
+            
+            num_email_width = num_ink_rect.width + (LINE_SPACING * 3);
+        }
+        
         // Body preview.
         Pango.Layout layout_preview = widget.create_pango_layout(null);
         layout_preview.set_markup(data.body, -1);
-        layout_preview.set_width((cell_area.width - TEXT_LEFT) * Pango.SCALE);
+        layout_preview.set_width((cell_area.width - TEXT_LEFT - num_email_width) * Pango.SCALE);
         layout_preview.set_height(preview_height * Pango.SCALE);
         layout_preview.set_wrap(Pango.WrapMode.WORD);
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);

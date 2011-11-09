@@ -56,7 +56,7 @@ public class MessageListStore : Gtk.TreeStore {
         
         if (pool != null)
             set(iter,
-                Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first()),
+                Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first(), pool.size),
                 Column.MESSAGE_OBJECT, conversation
             );
     }
@@ -78,7 +78,7 @@ public class MessageListStore : Gtk.TreeStore {
         
         // Update the preview if needed.
         if (existing == null || !existing.email.id.equals(preview.id))
-            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview)); 
+            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview, pool.size)); 
     }
     
     public bool has_conversation(Geary.Conversation conversation) {
@@ -110,7 +110,15 @@ public class MessageListStore : Gtk.TreeStore {
             return;
         }
         
-        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email));
+        int num_emails = 1;
+        Geary.Conversation? c = get_conversation_at_index(index);
+        if (c != null) {
+            Gee.Set<Geary.Email>? list = c.get_pool();
+            if (list != null)
+                num_emails = list.size;
+        }
+        
+        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, num_emails));
     }
     
     public int get_count() {
