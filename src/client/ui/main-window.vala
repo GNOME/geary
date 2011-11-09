@@ -333,6 +333,24 @@ public class MainWindow : Gtk.Window {
             on_folders_added_removed(accumulator, null);
     }
     
+    public void debug_print_selected() {
+        if (message_viewer.messages.size == 0) {
+            debug("Nothing to print");
+            return;
+        }
+        
+        debug("---------------------------");
+        foreach (Geary.Email e in message_viewer.messages) {
+            debug("Message: %s", e.id.to_string());
+            if (e.header != null)
+                debug("\n%s", e.header.buffer.to_utf8());
+            else
+                debug("No message data.");
+            
+            debug("---------------------------");
+        }
+    }
+    
     private void cancel_folder() {
         Cancellable old_cancellable = cancellable_folder;
         cancellable_folder = new Cancellable();

@@ -22,6 +22,7 @@ public class GearyApplication : YorbaApplication {
     public const string ACTION_ABOUT = "GearyAbout";
     public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
+    public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
     
     public const string PREFIX = _PREFIX;
     
@@ -90,6 +91,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // Start Geary.
         actions.add_actions(create_actions(), this);
         ui_manager.insert_action_group(actions, 0);
+        load_ui_file("accelerators.ui");
         
         main_window = new MainWindow();
         
@@ -213,6 +215,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         new_message.label = _("_New Message");
         entries += new_message;
         
+        Gtk.ActionEntry secret_debug = { ACTION_DEBUG_PRINT, null, null, "<Ctrl><Alt>P",
+            null, on_debug_print };
+        entries += secret_debug;
+        
         return entries;
     }
     
@@ -278,6 +284,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         account.send_email_async.begin(email);
         
         cw.destroy();
+    }
+    
+    private void on_debug_print() {
+        main_window.debug_print_selected();
     }
     
     public Gtk.Window get_main_window() {

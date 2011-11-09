@@ -1,0 +1,4 @@
+<ui>
+    <accelerator action="GearyNewMessage" />
+    <accelerator action="GearyDebugPrint" />
+</ui>

@@ -18,7 +18,8 @@ public class MessageViewer : Gtk.Viewport {
     private const int MESSAGE_BOX_MARGIN = 10;
     
     // List of emails corresponding with VBox.
-    private Gee.LinkedList<Geary.Email> messages = new Gee.LinkedList<Geary.Email>();
+    public Gee.LinkedList<Geary.Email> messages { get; private set; default = 
+        new Gee.LinkedList<Geary.Email>(); }
     
     // GUI containing message widgets.
     private Gtk.VBox message_box = new Gtk.VBox(false, 0);
@@ -66,6 +67,7 @@ public class MessageViewer : Gtk.Viewport {
     
     // Adds a message to the view.
     public void add_message(Geary.Email email) {
+        messages.add(email);
         Gtk.Builder builder = GearyApplication.instance.create_builder("message.glade");
         
         string username;
