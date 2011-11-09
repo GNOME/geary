@@ -44,6 +44,7 @@ public class ComposerWindow : Gtk.Window {
     public signal void send(ComposerWindow composer);
     
     public ComposerWindow() {
+        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
         Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
         
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
@@ -85,6 +86,15 @@ public class ComposerWindow : Gtk.Window {
         send_button.sensitive = !Geary.String.is_empty(to_entry.get_text().strip()) ||
             !Geary.String.is_empty(cc_entry.get_text().strip()) ||
             !Geary.String.is_empty(bcc_entry.get_text().strip());
+    }
+    
+    public override bool key_press_event(Gdk.EventKey event) {
+        if (Gdk.keyval_name(event.keyval) == "Return" && 
+            (event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive) {
+            on_send();
+        }
+        
+        return base.key_press_event(event);
     }
 }
 
