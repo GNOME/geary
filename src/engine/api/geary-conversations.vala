@@ -582,11 +582,13 @@ public class Geary.Conversations : Object {
             return;
         }
         
-        debug("Message(s) appended to %s, fetching email at %s and above", folder.to_string(),
-            highest.to_string());
-        
         // Want to get the one *after* the highest position in the list
-        lazy_load_by_id(highest.next(), int.MAX, Folder.ListFlags.NONE, cancellable_monitor);
+        Geary.EmailIdentifier next = highest.next();
+        
+        debug("Message(s) appended to %s, fetching email at %s and above", folder.to_string(),
+            next.to_string());
+        
+        lazy_load_by_id(next, int.MAX, Folder.ListFlags.NONE, cancellable_monitor);
     }
 }
 

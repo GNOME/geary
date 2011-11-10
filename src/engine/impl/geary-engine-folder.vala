@@ -239,19 +239,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
         
         try {
-            // if no mail in local store, nothing needs to be done here; the store is "normalized"
-            int local_count = yield local_folder.get_email_count_async();
-            if (local_count == 0) {
-                notify_messages_appended(new_remote_count);
-                
+            // If remote doesn't fully open, then don't fire signal, as we'll be unable to
+            // normalize the folder
+            if (!yield wait_for_remote_to_open())
                 return;
-            }
-            
-            if (!yield wait_for_remote_to_open()) {
-                notify_messages_appended(new_remote_count);
-                
-                return;
-            }
             
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
