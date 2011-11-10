@@ -34,6 +34,7 @@ public class MessageViewer : Gtk.Viewport {
         set_border_width(0);
         message_box.set_border_width(0);
         message_box.spacing = 0;
+        resize_mode = Gtk.ResizeMode.IMMEDIATE;
     }
     
     // Removes all displayed e-mails from the view.
@@ -120,7 +121,7 @@ public class MessageViewer : Gtk.Viewport {
             debug("Could not get message text. %s", err.message);
         }
         
-        Gtk.EventBox box = new Gtk.EventBox();
+        BackgroundBox box = new BackgroundBox();
         box.add(container);
         box.margin = MESSAGE_BOX_MARGIN;
         
@@ -144,6 +145,8 @@ public class MessageViewer : Gtk.Viewport {
         
         label_title.set_line_wrap(true);
         label_value.set_line_wrap(true);
+        label_title.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+        label_value.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
         label_title.set_alignment(1.0f, 0.0f);
         label_value.set_alignment(0.0f, 0.0f);
         label_title.selectable = true;
