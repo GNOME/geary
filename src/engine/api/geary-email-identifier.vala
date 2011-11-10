@@ -19,14 +19,12 @@
  * it may not be.
  */
 
-public abstract class Geary.EmailIdentifier : Object, Geary.Equalable, Geary.Comparable {
+public abstract class Geary.EmailIdentifier : Object, Geary.Equalable, Geary.Comparable, Geary.Hashable {
     public abstract int64 ordering { get; protected set; }
     
-    public abstract EmailIdentifier next();
-    
-    public abstract EmailIdentifier previous();
-    
     public abstract bool equals(Geary.Equalable other);
+    
+    public abstract uint to_hash();
     
     public virtual int compare(Geary.Comparable o) {
         Geary.EmailIdentifier? other = o as Geary.EmailIdentifier;

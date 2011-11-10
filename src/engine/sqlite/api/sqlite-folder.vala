@@ -182,7 +182,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
-        if (count == 0) {
+        if (count == 0 || count == 1) {
             Geary.Email email = yield fetch_email_async(initial_id, required_fields, cancellable);
             
             Gee.List<Geary.Email> singleton = new Gee.ArrayList<Geary.Email>();
@@ -194,17 +194,18 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         check_open();
         
         Geary.Imap.UID uid = ((Geary.Imap.EmailIdentifier) initial_id).uid;
+        bool excluding_id = flags.is_all_set(Geary.Folder.ListFlags.EXCLUDING_ID);
         
         Transaction transaction = yield db.begin_transaction_async("Folder.list_email_by_id_async",
             cancellable);
         
         int64 low, high;
         if (count < 0) {
-            high = uid.value;
+            high = excluding_id ? uid.value - 1 : uid.value;
             low = (count != int.MIN) ? (high + count).clamp(1, uint32.MAX) : -1;
         } else {
-            // count > 0
-            low = uid.value;
+            // count > 1
+            low = excluding_id ? uid.value + 1 : uid.value;
             high = (count != int.MAX) ? (low + count).clamp(1, uint32.MAX) : -1;
         }
         
@@ -228,14 +229,17 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<Geary.Email> emails = new Gee.ArrayList<Geary.Email>();
         foreach (MessageLocationRow location_row in list) {
             // fetch the message itself
-            MessageRow? message_row = yield message_table.fetch_async(transaction,
-                location_row.message_id, required_fields, cancellable);
-            assert(message_row != null);
-            
-            // only add to the list if the email contains all the required fields (because
-            // properties comes out of a separate table, skip this if properties are requested)
-            if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES)))
-                continue;
+            MessageRow? message_row = null;
+            if (required_fields != Geary.Email.Field.NONE && required_fields != Geary.Email.Field.PROPERTIES) {
+                message_row = yield message_table.fetch_async(transaction, location_row.message_id,
+                    required_fields, cancellable);
+                assert(message_row != null);
+                
+                // only add to the list if the email contains all the required fields (because
+                // properties comes out of a separate table, skip this if properties are requested)
+                if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES)))
+                    continue;
+            }
             
             ImapMessagePropertiesRow? properties = null;
             if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
@@ -253,7 +257,12 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
                 continue;
             }
             
-            Geary.Email email = message_row.to_email(position, new Geary.Imap.EmailIdentifier(uid));
+            Geary.Imap.EmailIdentifier email_id = new Geary.Imap.EmailIdentifier(uid);
+            
+            Geary.Email email = (message_row != null)
+                ? message_row.to_email(position, email_id)
+                : new Geary.Email(position, email_id);
+                
             if (properties != null)
                 email.set_email_properties(properties.get_imap_email_properties());
             
@@ -279,6 +288,16 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
                 to_string());
         }
         
+        int position = yield location_row.get_position_async(transaction, cancellable);
+        if (position == -1) {
+            throw new EngineError.NOT_FOUND("Unable to determine position of email %s in %s",
+                id.to_string(), to_string());
+        }
+        
+        // loopback on perverse case
+        if (required_fields == Geary.Email.Field.NONE)
+            return new Geary.Email(position, id);
+        
         MessageRow? message_row = yield message_table.fetch_async(transaction,
             location_row.message_id, required_fields, cancellable);
         if (message_row == null) {
@@ -303,12 +322,6 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
                     "Message %s in folder %s does not have PROPERTIES field", id.to_string(),
                         to_string());
             }
-        }
-        
-        int position = yield location_row.get_position_async(transaction, cancellable);
-        if (position == -1) {
-            throw new EngineError.NOT_FOUND("Unable to determine position of email %s in %s",
-                id.to_string(), to_string());
         }
         
         Geary.Email email = message_row.to_email(position, id);
@@ -468,16 +481,18 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         if (email.fields == Geary.Email.Field.NONE)
             return;
         
-        MessageRow? message_row = yield message_table.fetch_async(transaction, message_id, email.fields,
-            cancellable);
-        assert(message_row != null);
-        
-        message_row.merge_from_network(email);
-        
-        // possible nothing has changed or been added
-        if (message_row.fields != Geary.Email.Field.NONE)
-            yield message_table.merge_async(transaction, message_row, cancellable);
+        if (email.fields != Geary.Email.Field.PROPERTIES) {
+            MessageRow? message_row = yield message_table.fetch_async(transaction, message_id, email.fields,
+                cancellable);
+            assert(message_row != null);
             
+            message_row.merge_from_network(email);
+            
+            // possible nothing has changed or been added
+            if (message_row.fields != Geary.Email.Field.NONE)
+                yield message_table.merge_async(transaction, message_row, cancellable);
+        }
+        
         // update IMAP properties
         if (email.fields.fulfills(Geary.Email.Field.PROPERTIES)) {
             Geary.Imap.EmailProperties properties = (Geary.Imap.EmailProperties) email.properties;

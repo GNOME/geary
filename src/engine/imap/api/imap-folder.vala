@@ -139,6 +139,12 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
         UID uid = ((Imap.EmailIdentifier) email_id).uid;
+        if (flags.is_all_set(Geary.Folder.ListFlags.EXCLUDING_ID)) {
+            if (count > 1)
+                uid = new UID(uid.value + 1);
+            else if (count < 0)
+                uid = new UID(uid.value - 1);
+        }
         
         MessageSet msg_set;
         if (count > 0) {

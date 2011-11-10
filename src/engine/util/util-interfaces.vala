@@ -26,5 +26,22 @@ public interface Geary.Hashable {
     public static uint hash_func(void *ptr) {
         return ((Hashable *) ptr)->to_hash();
     }
+    
+    public static uint int64_hash(int64 value) {
+        return hash_memory(&value, sizeof(int64));
+    }
+    
+    /**
+     * A rotating-XOR hash that can be used to hash memory buffers of any size.  Use only if
+     * equality is determined by memory contents.
+     */
+    public static uint hash_memory(void *ptr, size_t bytes) {
+        uint8 *u8 = (uint8 *) ptr;
+        uint32 hash = 0;
+        for (int ctr = 0; ctr < bytes; ctr++)
+            hash = (hash << 4) ^ (hash >> 28) ^ (*u8++);
+        
+        return hash;
+    }
 }
 

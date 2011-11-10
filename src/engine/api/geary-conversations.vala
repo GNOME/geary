@@ -13,14 +13,19 @@ public class Geary.Conversations : Object {
     
     private class Node : Object, ConversationNode {
         public RFC822.MessageID? node_id { get; private set; }
-        public Geary.Email? email { get; set; }
+        public Geary.Email? email;
         public RFC822.MessageID? parent_id { get; set; default = null; }
-        public ImplConversation? conversation { get; set; default = null; }
+        public ImplConversation? conversation = null;
         
         private Gee.Set<RFC822.MessageID>? children_ids = null;
         
         public Node(RFC822.MessageID? node_id, Geary.Email? email) {
             this.node_id = node_id;
+            this.email = email;
+        }
+        
+        public Node.single(Geary.Email email) {
+            node_id = null;
             this.email = email;
         }
         
@@ -40,24 +45,19 @@ public class Geary.Conversations : Object {
         public Geary.Email? get_email() {
             return email;
         }
-    }
-    
-    private class SingleConversationNode : Object, ConversationNode {
-        public Geary.Email email;
         
-        public SingleConversationNode(Geary.Email email) {
-            this.email = email;
-        }
-        
-        public Geary.Email? get_email() {
-            return email;
+        public Geary.Conversation get_conversation() {
+            // this method should only be called when the Conversation has been set on the Node
+            assert(conversation != null);
+            
+            return conversation;
         }
     }
     
     private class ImplConversation : Conversation {
         public weak Geary.Conversations? owner;
         public RFC822.MessageID? origin;
-        public SingleConversationNode? single_node;
+        public Node? single_node;
         
         private Gee.HashSet<ConversationNode>? orphans = null;
         
@@ -67,16 +67,12 @@ public class Geary.Conversations : Object {
             // Rather than keep a reference to the origin node (creating a cross-reference from it
             // to the conversation), keep only the Message-ID, unless it's a SingleConversationNode,
             // which can't be addressed by a Message-ID (it has none)
-            single_node = origin_node as SingleConversationNode;
-            if (single_node != null) {
-                origin = null;
-            } else {
-                origin = ((Node) origin_node).node_id;
-                assert(origin != null);
-            }
+            origin = ((Node) origin_node).node_id;
+            if (origin == null)
+                single_node = (Node) origin_node;
         }
         
-        // Cannot be used for SingleConversationNodes.
+        // Cannot be used for Conversations with single nodes
         public void set_origin(ConversationNode new_origin_node) {
             assert(single_node == null);
             
@@ -186,6 +182,8 @@ public class Geary.Conversations : Object {
     private Geary.Email.Field required_fields;
     private Gee.Map<Geary.RFC822.MessageID, Node> id_map = new Gee.HashMap<Geary.RFC822.MessageID,
         Node>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+    private Gee.Map<Geary.EmailIdentifier, Node> geary_id_map = new Gee.HashMap<
+        Geary.EmailIdentifier, Node>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
     private bool monitor_new = false;
     private Cancellable? cancellable_monitor = null;
@@ -195,23 +193,72 @@ public class Geary.Conversations : Object {
      * If id is not null, then the scan is starting at an identifier and progressing according to
      * count (see Geary.Folder.list_email_by_id_async()).  Otherwise, the scan is using positional
      * addressing and low is a valid one-based position (see Geary.Folder.list_email_async()).
+     *
+     * Note that more than one load can be initiated, due to Conversations being completely
+     * asynchronous.  "scan-started", "scan-error", and "scan-completed" will be fired (as
+     * appropriate) for each individual load request; that is, there is no internal counter to ensure
+     * only a single "scan-completed" is fired to indiciate multiple loads have finished.
      */
     public virtual signal void scan_started(Geary.EmailIdentifier? id, int low, int count) {
     }
     
+    /**
+     * "scan-error" is fired when an Error is encounted while loading messages.  It will be followed
+     * by a "scan-completed" signal.
+     */
     public virtual signal void scan_error(Error err) {
     }
     
+    /**
+     * "scan-completed" is fired when the scan of the email has finished.
+     */
     public virtual signal void scan_completed() {
     }
     
+    /**
+     * "conversations-added" indicates that one or more new Conversations have been detected while
+     * processing email, either due to a user-initiated load request or due to monitoring.
+     */
     public virtual signal void conversations_added(Gee.Collection<Conversation> conversations) {
     }
     
+    /**
+     * "conversations-removed" is fired when all the usable email in a Conversation has been removed.
+     * Although the Conversation structure remains intact, there's no usable Email objects in any
+     * ConversationNode.  Conversations will then remove the Conversation object.
+     *
+     * Note that this can only occur when monitoring is enabled.  There is (currently) no
+     * user call to manually remove email from Conversations.
+     */
+    public virtual signal void conversation_removed(Conversation conversation) {
+    }
+    
+    /**
+     * "conversation-appended" is fired when one or more Email objects have been added to the
+     * specified Conversation.  This can happen due to a user-initiated load or while monitoring
+     * the Folder.
+     */
     public virtual signal void conversation_appended(Conversation conversation,
         Gee.Collection<Geary.Email> email) {
     }
     
+    /**
+     * "conversation-trimmed" is fired when an Email has been removed from the Folder, and therefore
+     * from the specified Conversation.  If the trimmed Email is the last usable Email in the
+     * Conversation, this signal will be followed by "conversation-removed".
+     *
+     * There is (currently) no user-specified call to manually remove Email from Conversations.
+     * This is only called when monitoring is enabled.
+     */
+    public virtual signal void conversation_trimmed(Conversation conversation, Geary.Email email) {
+    }
+    
+    /**
+     * "updated-placeholders" is fired when a ConversationNode in a Conversation was earlier
+     * detected (i.e. referenced by another Email) but the actual Email was not available.  This
+     * signal indicates the Email was discovered (either by loading additional messages or from
+     * monitoring) and is now available.
+     */
     public virtual signal void updated_placeholders(Conversation conversation,
         Gee.Collection<Geary.Email> email) {
     }
@@ -226,8 +273,10 @@ public class Geary.Conversations : Object {
         foreach (ImplConversation conversation in conversations)
             conversation.owner = null;
         
-        if (monitor_new)
+        if (monitor_new) {
             folder.messages_appended.disconnect(on_folder_messages_appended);
+            folder.message_removed.disconnect(on_folder_message_removed);
+        }
     }
     
     protected virtual void notify_scan_started(Geary.EmailIdentifier? id, int low, int count) {
@@ -246,9 +295,17 @@ public class Geary.Conversations : Object {
         conversations_added(conversations);
     }
     
+    protected virtual void notify_conversation_removed(Conversation conversation) {
+        conversation_removed(conversation);
+    }
+    
     protected virtual void notify_conversation_appended(Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         conversation_appended(conversation, email);
+    }
+    
+    protected virtual void notify_conversation_trimmed(Conversation conversation, Geary.Email email) {
+        conversation_trimmed(conversation, email);
     }
     
     protected virtual void notify_updated_placeholders(Conversation conversation,
@@ -267,6 +324,7 @@ public class Geary.Conversations : Object {
         monitor_new = true;
         cancellable_monitor = cancellable;
         folder.messages_appended.connect(on_folder_messages_appended);
+        folder.message_removed.connect(on_folder_message_removed);
         
         return true;
     }
@@ -362,9 +420,14 @@ public class Geary.Conversations : Object {
             if (email.message_id == null) {
                 debug("Email %s: No Message-ID", email.to_string());
                 
-                bool added = new_conversations.add(
-                    new ImplConversation(this, new SingleConversationNode(email)));
+                Node singleton = new Node.single(email);
+                ImplConversation conversation = new ImplConversation(this, singleton);
+                singleton.conversation = conversation;
+                
+                bool added = new_conversations.add(conversation);
                 assert(added);
+                
+                new_email_for_node(singleton);
                 
                 continue;
             }
@@ -377,15 +440,12 @@ public class Geary.Conversations : Object {
             // emails refer to this one)
             Node? node = get_node(email.message_id);
             if (node != null) {
-                if (node.email != null) {
-                    message("Duplicate email found while threading: %s vs. %s", node.email.to_string(),
-                        email.to_string());
-                }
-                
                 // even with duplicates, this new email is considered authoritative
                 // (Note that if the node's conversation is null then it's been added this loop,
                 // in which case it's not an updated placeholder but part of a new conversation)
                 node.email = email;
+                new_email_for_node(node);
+                
                 if (node.conversation != null)
                     updated_placeholders.set(node.conversation, email);
             } else {
@@ -541,7 +601,77 @@ public class Geary.Conversations : Object {
         
         id_map.set(node.node_id, node);
         
+        new_email_for_node(node);
+        
         return node;
+    }
+    
+    private void new_email_for_node(Node node) {
+        Geary.Email? email = node.get_email();
+        if (email == null)
+            return;
+        
+        // Possible this method will be called multiple times when processing mail (just a fact of
+        // life), so be sure before issuing warning
+        Node? replacement = geary_id_map.get(email.id);
+        if (replacement != null && replacement != node) {
+            debug("WARNING: Replacing node in conversation model with new node of same EmailIdentifier %s",
+                email.id.to_string());
+        }
+        
+        geary_id_map.set(email.id, node);
+    }
+    
+    private void remove_email(Geary.EmailIdentifier removed_id) {
+        // Remove EmailIdentifier from map
+        Node node;
+        if (!geary_id_map.unset(removed_id, out node)) {
+            debug("Removed email %s not found on conversations model", removed_id.to_string());
+            
+            return;
+        }
+        
+        // Drop email from the Node and signal it's been trimmed from the conversation
+        Geary.Email? email = node.email;
+        node.email = null;
+        
+        Conversation conversation = node.get_conversation();
+        
+        if (email != null)
+            notify_conversation_trimmed(conversation, email);
+        
+        if (conversation.get_usable_count() == 0) {
+            // prune all Nodes in the conversation tree
+            prune_nodes((Node) conversation.get_origin());
+            
+            // prune all orphan Nodes
+            Gee.Collection<ConversationNode>? orphans = conversation.get_orphans();
+            if (orphans != null) {
+                foreach (ConversationNode orphan in orphans)
+                    prune_nodes((Node) orphan);
+            }
+            
+            // remove the Conversation from the master list
+            bool removed = conversations.remove((ImplConversation) conversation);
+            assert(removed);
+            
+            // done
+            notify_conversation_removed(conversation);
+        }
+    }
+    
+    private void prune_nodes(Node node) {
+        Gee.Set<RFC822.MessageID>? children = node.get_children();
+        if (children != null) {
+            foreach (RFC822.MessageID child in children) {
+                Node? child_node = id_map.get(child);
+                if (child_node != null)
+                    prune_nodes(child_node);
+            }
+        }
+        
+        bool removed = id_map.unset(node.node_id);
+        assert(removed);
     }
     
     private inline Node? get_node(RFC822.MessageID node_id) {
@@ -582,13 +712,15 @@ public class Geary.Conversations : Object {
             return;
         }
         
+        debug("Message(s) appended to %s, fetching email above %s", folder.to_string(),
+            highest.to_string());
+        
         // Want to get the one *after* the highest position in the list
-        Geary.EmailIdentifier next = highest.next();
-        
-        debug("Message(s) appended to %s, fetching email at %s and above", folder.to_string(),
-            next.to_string());
-        
-        lazy_load_by_id(next, int.MAX, Folder.ListFlags.NONE, cancellable_monitor);
+        lazy_load_by_id(highest, int.MAX, Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
+    }
+    
+    private void on_folder_message_removed(Geary.EmailIdentifier removed_id) {
+        remove_email(removed_id);
     }
 }
 

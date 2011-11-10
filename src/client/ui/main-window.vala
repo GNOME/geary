@@ -189,6 +189,8 @@ public class MainWindow : Gtk.Window {
         current_conversations.scan_completed.connect(on_scan_completed);
         current_conversations.conversations_added.connect(on_conversations_added);
         current_conversations.conversation_appended.connect(on_conversation_appended);
+        current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
+        current_conversations.conversation_removed.connect(on_conversation_removed);
         current_conversations.updated_placeholders.connect(on_updated_placeholders);
         
         // Do a quick-list of the messages (which should return what's in the local store) if
@@ -225,6 +227,14 @@ public class MainWindow : Gtk.Window {
     public void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         message_list_store.update_conversation(conversation);
+    }
+    
+    public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
+        message_list_store.update_conversation(conversation);
+    }
+    
+    public void on_conversation_removed(Geary.Conversation conversation) {
+        message_list_store.remove_conversation(conversation);
     }
     
     public void on_updated_placeholders(Geary.Conversation conversation,
@@ -265,6 +275,8 @@ public class MainWindow : Gtk.Window {
     private void on_conversation_selected(Geary.Conversation? conversation) {
         if (conversation != null)
             do_select_message.begin(conversation, on_select_message_completed);
+        else
+            message_viewer.clear();
     }
     
     private async void do_select_message(Geary.Conversation conversation) throws Error {

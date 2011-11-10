@@ -9,17 +9,13 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
     
     public Imap.UID uid { get; private set; }
     
-    public override Geary.EmailIdentifier next() {
-        return new Geary.Imap.EmailIdentifier(new Imap.UID((uid.value + 1).clamp(1, uint32.MAX)));
-    }
-    
-    public override Geary.EmailIdentifier previous() {
-        return new Geary.Imap.EmailIdentifier(new Imap.UID((uid.value - 1).clamp(1, uint32.MAX)));
-    }
-    
     public EmailIdentifier(Imap.UID uid) {
         this.uid = uid;
         ordering = uid.value;
+    }
+    
+    public override uint to_hash() {
+        return Geary.Hashable.int64_hash(uid.value);
     }
     
     public override bool equals(Equalable o) {

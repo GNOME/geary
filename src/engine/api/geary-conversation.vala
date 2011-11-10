@@ -14,10 +14,66 @@ public interface Geary.ConversationNode : Object {
      * null (it's a placeholder).
      */
     public abstract Geary.Email? get_email();
+    
+    /**
+     * Returns the Conversation the ConversationNode is a part of.
+     */
+    public abstract Geary.Conversation get_conversation();
 }
 
 public abstract class Geary.Conversation : Object {
     protected Conversation() {
+    }
+    
+    /**
+     * Returns the total number of ConversationNodes in the Conversation, both threaded and orphaned.
+     */
+    public virtual int get_count() {
+        return count_conversation_nodes(false);
+    }
+    
+    /**
+     * Returns the total number of ConversationNodes *with email* in the Conversation, both threaded
+     * and orphaned.
+     */
+    public virtual int get_usable_count() {
+        return count_conversation_nodes(true);
+    }
+    
+    private int count_conversation_nodes(bool usable) {
+        int count = 0;
+        
+        // start with origin
+        ConversationNode? origin = get_origin();
+        if (origin != null)
+            count += count_nodes(origin, usable);
+        
+        // add orphans
+        Gee.Collection<ConversationNode>? orphans = get_orphans();
+        if (orphans != null) {
+            foreach (ConversationNode orphan in orphans)
+                count += count_nodes(orphan, usable);
+        }
+        
+        return count;
+    }
+    
+    private int count_nodes(ConversationNode current, bool usable) {
+        // start with current Node
+        int count;
+        if (usable)
+            count = current.get_email() != null ? 1 : 0;
+        else
+            count = 1;
+        
+        // add to it all its children
+        Gee.Collection<ConversationNode>? children = get_replies(current);
+        if (children != null) {
+            foreach (ConversationNode child in children)
+                count += count_nodes(child, usable);
+        }
+        
+        return count;
     }
     
     /**

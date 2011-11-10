@@ -27,7 +27,8 @@ public interface Geary.Folder : Object {
     [Flags]
     public enum ListFlags {
         NONE = 0,
-        FAST;
+        FAST,
+        EXCLUDING_ID;
         
         public bool is_any_set(ListFlags flags) {
             return (this & flags) != 0;
@@ -298,6 +299,14 @@ public interface Geary.Folder : Object {
      *
      * To fetch all available messages in one direction or another, use int.MIN or int.MAX.
      *
+     * initial_id *must* be an EmailIdentifier available to the Folder for this to work, as listing
+     * a range inevitably requires positional addressing under the covers.  However, since it's
+     * some times desirable to list messages excluding the specified EmailIdentifier, callers may
+     * use ListFlags.EXCLUDING_ID (which is a flag only recognized by this method and
+     * lazy_list_email_by_id()).  This ListFlag *must* be supported by all Folders and will not
+     * necessarily be returned by get_supported_flags().  Note that this flag doesn't make sense
+     * when count is zero or one and will be ignored.
+     *
      * There's no guarantee of the returned messages' order.
      *
      * There is (currently) no sparse version of list_email_by_id_async().
@@ -311,7 +320,7 @@ public interface Geary.Folder : Object {
     /**
      * Similar in contract to lazy_list_email_async(), but uses Geary.EmailIdentifier rather than
      * positional addressing, much like list_email_by_id_async().  See that method for more
-     * information on its contract and how the count parameter works.
+     * information on its contract and how the count and flags parameters work.
      *
      * Like the other "lazy" methods, this method will call EmailCallback while the operation is
      * processing.  This method does not block.

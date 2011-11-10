@@ -54,7 +54,7 @@ public class MessageListStore : Gtk.TreeStore {
         
         Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
         
-        if (pool != null)
+        if (pool != null && pool.size > 0)
             set(iter,
                 Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first(), pool.size),
                 Column.MESSAGE_OBJECT, conversation
@@ -71,6 +71,13 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
+        if (pool == null) {
+            // empty conversation, remove from store
+            remove_conversation(conversation);
+            
+            return;
+        }
+        
         Geary.Email preview = pool.first();
         
         FormattedMessageData? existing = null;
@@ -79,6 +86,17 @@ public class MessageListStore : Gtk.TreeStore {
         // Update the preview if needed.
         if (existing == null || !existing.email.id.equals(preview.id))
             set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview, pool.size)); 
+    }
+    
+    public void remove_conversation(Geary.Conversation conversation) {
+        Gtk.TreeIter iter;
+        if (!find_conversation(conversation, out iter)) {
+            // unknown, nothing to do here
+            return;
+        }
+        
+        if (!remove(iter))
+            debug("Unable to remove conversation from MessageListStore");
     }
     
     public bool has_conversation(Geary.Conversation conversation) {
@@ -97,6 +115,9 @@ public class MessageListStore : Gtk.TreeStore {
     
     public Geary.Email? get_newest_message_at_index(int index) {
         Geary.Conversation? c = get_conversation_at_index(index);
+        if (c == null)
+            return null;
+        
         Gee.SortedSet<Geary.Email>? pool = c.get_pool_sorted(compare_email);
         
         return pool != null ? pool.first() : null;
