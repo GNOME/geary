@@ -57,7 +57,25 @@ public class Geary.Email : Object {
         }
     }
     
-    public Geary.EmailLocation location { get; private set; }
+    /**
+     * position is the one-based addressing of the email in the folder, in the notion that messages
+     * are "stacked" from 1 to n, earliest to newest.  "Earliest" and "newest" do not necessarily
+     * correspond to the emails' send or receive time, merely how they've been arranged on the stack.
+     *
+     * This value is only good at the time the Email is requested from the folder.  Subsequent
+     * operations may change the Email's position in the folder (or simply remove it).  This value
+     * is *not* updated to reflect this.
+     *
+     * This field is always returned, no matter what Fields are used to retrieve the Email.
+     */
+    public int position { get; private set; }
+    
+    /**
+     * id is a unique identifier for the Email in the Folder.  It is guaranteed to be unique for
+     * as long as the Folder is open.  Once closed, guarantees are no longer made.
+     *
+     * This field is always returned, no matter what Fields are used to retrieve the Email.
+     */
     public Geary.EmailIdentifier id { get; private set; }
     
     // DATE
@@ -94,13 +112,17 @@ public class Geary.Email : Object {
     
     private Geary.RFC822.Message? message = null;
     
-    public Email(Geary.EmailLocation location, Geary.EmailIdentifier id) {
-        this.location = location;
+    public Email(int position, Geary.EmailIdentifier id) {
+        assert(position >= 1);
+        
+        this.position = position;
         this.id = id;
     }
     
-    public void update_location(Geary.EmailLocation location) {
-        this.location = location;
+    internal void update_position(int position) {
+        assert(position >= 1);
+        
+        this.position = position;
     }
     
     public void set_send_date(Geary.RFC822.Date date) {
@@ -185,10 +207,10 @@ public class Geary.Email : Object {
     public string to_string() {
         StringBuilder builder = new StringBuilder();
         
-        builder.append_printf("[#%d/%s] ", location.position, id.to_string());
+        builder.append_printf("[#%d/%s] ", position, id.to_string());
         
         if (date != null)
-            builder.append_printf("[%s]", date.to_string());
+            builder.append_printf("%s/", date.to_string());
         
         return builder.str;
     }

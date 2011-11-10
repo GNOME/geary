@@ -6,9 +6,7 @@
 
 public int compare_email(Geary.Email aenvelope, Geary.Email benvelope) {
     int diff = aenvelope.date.value.compare(benvelope.date.value);
-    if (diff != 0)
-        return diff;
     
-    // stabilize sort by using the mail's position, which is always unique in a folder
-    return aenvelope.location.position - benvelope.location.position;
+    // stabilize sort by using the mail's ordering, which is always unique in a folder
+    return (diff != 0) ? diff : aenvelope.id.compare(benvelope.id);
 }

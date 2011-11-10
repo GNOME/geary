@@ -28,6 +28,21 @@ private interface Geary.LocalFolder : Object, Geary.Folder {
         out Geary.Email.Field available_fields, Cancellable? cancellable = null) throws Error;
      
     /**
+     * Converts an EmailIdentifier into positional addressing in the Folder.  This call relies on
+     * the fact that when a Folder is fully opened, the local stores' tail list of messages (the
+     * messages located at the top of the stack, i.e. the latest ones added) are synchronized with
+     * the server and is gap-free, even if all the fields for those messages is not entirely
+     * available.
+     *
+     * Returns a positive value locating the position of the email.  Other values (zero, negative)
+     * indicate the EmailIdentifier is unknown, which could mean the message is not associated with
+     * the folder, or is buried so far down the list on the remote server that it's not known
+     * locally (yet).
+     */
+    public async abstract int get_id_position_async(Geary.EmailIdentifier id, Cancellable? cancellable)
+        throws Error;
+     
+    /**
      * Geary allows for a single message to exist in multiple folders.  This method checks if the
      * email is associated with this folder.  It may rely on a Message-ID being present, in which
      * case if it's not the method will throw an EngineError.INCOMPLETE_MESSAGE.

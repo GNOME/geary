@@ -83,10 +83,12 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             }
             
             if (uid_start_value < remote_properties.uid_next.value) {
-                Imap.UID uid_start = new Imap.UID(uid_start_value);
+                Geary.Imap.EmailIdentifier uid_start = new Geary.Imap.EmailIdentifier(
+                    new Geary.Imap.UID(uid_start_value));
                 
-                Gee.List<Geary.Email>? newest = yield imap_remote_folder.list_email_uid_async(
-                    uid_start, null, Geary.Email.Field.PROPERTIES, cancellable);
+                Gee.List<Geary.Email>? newest = yield imap_remote_folder.list_email_by_id_async(
+                    uid_start, int.MAX, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
+                    cancellable);
                 
                 if (newest != null && newest.size > 0) {
                     debug("saving %d newest emails in %s", newest.size, to_string());
@@ -103,8 +105,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
         // any flags that may have changed
-        Geary.Imap.UID last_uid = new Geary.Imap.UID(local_properties.uid_next.value - 1);
         Geary.Imap.UID? earliest_uid = yield imap_local_folder.get_earliest_uid_async(cancellable);
+        int64 full_uid_count = local_properties.uid_next.value - 1 - earliest_uid.value;
         
         // if no earliest UID, that means no messages in local store, so nothing to update
         if (earliest_uid == null || !earliest_uid.is_valid()) {
@@ -113,8 +115,21 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             return true;
         }
         
-        Gee.List<Geary.Email>? old_local = yield imap_local_folder.list_email_uid_async(earliest_uid,
-            last_uid, Geary.Email.Field.PROPERTIES, cancellable);
+        // If no UID's, nothing to update
+        if (full_uid_count <= 0 || (full_uid_count > int.MAX)) {
+            debug("No valid UID range in local folder %s (count=%lld), nothing to update", to_string(),
+                full_uid_count);
+            
+            return true;
+        }
+        
+        Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid);
+        int full_id_count = (int) full_uid_count;
+        
+        // Get the local emails in the range
+        Gee.List<Geary.Email>? old_local = yield imap_local_folder.list_email_by_id_async(
+            earliest_id, full_id_count, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
+            cancellable);
         int local_length = (old_local != null) ? old_local.size : 0;
         
         // as before, if empty folder, nothing to update
@@ -124,8 +139,10 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             return true;
         }
         
-        Gee.List<Geary.Email>? old_remote = yield imap_remote_folder.list_email_uid_async(earliest_uid,
-            last_uid, Geary.Email.Field.PROPERTIES, cancellable);
+        // Get the remote emails in the range
+        Gee.List<Geary.Email>? old_remote = yield imap_remote_folder.list_email_by_id_async(
+            earliest_id, full_id_count, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
+            cancellable);
         int remote_length = (old_remote != null) ? old_remote.size : 0;
         
         int remote_ctr = 0;
@@ -164,34 +181,42 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                 
                 // local's email on the server has been removed, remove locally
                 try {
-                    yield local_folder.remove_email_async(old_local[local_ctr].location.position,
-                        cancellable);
+                    yield local_folder.remove_email_async(old_local[local_ctr].id, cancellable);
                 } catch (Error remove_err) {
                     debug("Unable to remove discarded email from %s: %s", to_string(),
                         remove_err.message);
                 }
+                
+                notify_message_removed(old_local[local_ctr].id);
                 
                 local_ctr++;
             }
         }
         
         // add newly-discovered emails to local store
+        int appended = 0;
         for (; remote_ctr < remote_length; remote_ctr++) {
             try {
                 yield local_folder.create_email_async(old_remote[remote_ctr], cancellable);
+                appended++;
             } catch (Error append_err) {
                 debug("Unable to append new email to %s: %s", to_string(), append_err.message);
             }
         }
         
-        // remove anything left over
+        if (appended > 0)
+            notify_messages_appended(appended);
+        
+        // remove anything left over ... use local count rather than remote as we're still in a stage
+        // where only the local messages are available
         for (; local_ctr < local_length; local_ctr++) {
             try {
-                yield local_folder.remove_email_async(old_local[local_ctr].location.position,
-                    cancellable);
+                yield local_folder.remove_email_async(old_local[local_ctr].id, cancellable);
             } catch (Error discard_err) {
                 debug("Unable to discard email from %s: %s", to_string(), discard_err.message);
             }
+            
+            notify_message_removed(old_local[local_ctr].id);
         }
         
         return true;

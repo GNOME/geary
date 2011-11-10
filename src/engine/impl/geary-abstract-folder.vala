@@ -17,12 +17,12 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         messages_appended(total);
     }
     
-    protected virtual void notify_message_removed(int position, int total) {
-        message_removed(position, total);
+    protected virtual void notify_message_removed(Geary.EmailIdentifier id) {
+        message_removed(id);
     }
     
-    protected virtual void notify_positions_reordered() {
-        positions_reordered();
+    protected virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
+        email_count_changed(new_count, reason);
     }
     
     public abstract Geary.FolderPath get_path();
@@ -90,10 +90,36 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         }
     }
     
+    public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
+        int count, Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
+        throws Error;
+    
+    public virtual void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
+        Cancellable? cancellable = null) {
+        do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, flags, cb, cancellable);
+    }
+    
+    private async void do_lazy_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
+        Cancellable? cancellable) {
+        try {
+            Gee.List<Geary.Email>? list = yield list_email_by_id_async(initial_id, count,
+                required_fields, flags, cancellable);
+            
+            if (list != null && list.size > 0)
+                cb(list, null);
+            
+            cb(null, null);
+        } catch (Error err) {
+            cb(null, err);
+        }
+    }
+    
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public abstract async void remove_email_async(int position, Cancellable? cancellable = null)
+    public abstract async void remove_email_async(Geary.EmailIdentifier email_id, Cancellable? cancellable = null)
         throws Error;
     
     public virtual string to_string() {

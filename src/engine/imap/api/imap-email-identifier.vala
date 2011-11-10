@@ -5,10 +5,21 @@
  */
 
 private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
+    public override int64 ordering { get; protected set; }
+    
     public Imap.UID uid { get; private set; }
+    
+    public override Geary.EmailIdentifier next() {
+        return new Geary.Imap.EmailIdentifier(new Imap.UID((uid.value + 1).clamp(1, uint32.MAX)));
+    }
+    
+    public override Geary.EmailIdentifier previous() {
+        return new Geary.Imap.EmailIdentifier(new Imap.UID((uid.value - 1).clamp(1, uint32.MAX)));
+    }
     
     public EmailIdentifier(Imap.UID uid) {
         this.uid = uid;
+        ordering = uid.value;
     }
     
     public override bool equals(Equalable o) {

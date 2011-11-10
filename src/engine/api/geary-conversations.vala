@@ -190,7 +190,13 @@ public class Geary.Conversations : Object {
     private bool monitor_new = false;
     private Cancellable? cancellable_monitor = null;
     
-    public virtual signal void scan_started(int low, int count) {
+    /**
+     * "scan-started" is fired whenever beginning to load messages into the Conversations object.
+     * If id is not null, then the scan is starting at an identifier and progressing according to
+     * count (see Geary.Folder.list_email_by_id_async()).  Otherwise, the scan is using positional
+     * addressing and low is a valid one-based position (see Geary.Folder.list_email_async()).
+     */
+    public virtual signal void scan_started(Geary.EmailIdentifier? id, int low, int count) {
     }
     
     public virtual signal void scan_error(Error err) {
@@ -224,8 +230,8 @@ public class Geary.Conversations : Object {
             folder.messages_appended.disconnect(on_folder_messages_appended);
     }
     
-    protected virtual void notify_scan_started(int low, int count) {
-        scan_started(low, count);
+    protected virtual void notify_scan_started(Geary.EmailIdentifier? id, int low, int count) {
+        scan_started(id, low, count);
     }
     
     protected virtual void notify_scan_error(Error err) {
@@ -254,11 +260,28 @@ public class Geary.Conversations : Object {
         return conversations.read_only_view;
     }
     
+    public bool monitor_new_messages(Cancellable? cancellable = null) {
+        if (monitor_new)
+            return false;
+        
+        monitor_new = true;
+        cancellable_monitor = cancellable;
+        folder.messages_appended.connect(on_folder_messages_appended);
+        
+        return true;
+    }
+    
+    /**
+     * See Geary.Folder.list_email_async() for details of how these parameters operate.  Instead
+     * of returning emails, this method will load the Conversations object with them sorted into
+     * Conversation objects.
+     */
     public async void load_async(int low, int count, Geary.Folder.ListFlags flags,
         Cancellable? cancellable) throws Error {
-        notify_scan_started(low, count);
+        notify_scan_started(null, low, count);
         try {
-            Gee.List<Email>? list = yield folder.list_email_async(low, count, required_fields, flags);
+            Gee.List<Email>? list = yield folder.list_email_async(low, count, required_fields, flags,
+                cancellable);
             on_email_listed(list, null);
             if (list != null)
                 on_email_listed(null, null);
@@ -267,20 +290,45 @@ public class Geary.Conversations : Object {
         }
     }
     
-    public void lazy_load(int low, int count, Geary.Folder.ListFlags flags, Cancellable? cancellable)
-        throws Error {
-        notify_scan_started(low, count);
+    /**
+     * See Geary.Folder.lazy_list_email_async() for details of how these parameters operate.  Instead
+     * of returning emails, this method will load the Conversations object with them sorted into
+     * Conversation objects.
+     */
+    public void lazy_load(int low, int count, Geary.Folder.ListFlags flags, Cancellable? cancellable) {
+        notify_scan_started(null, low, count);
         folder.lazy_list_email(low, count, required_fields, flags, on_email_listed, cancellable);
     }
     
-    public bool monitor_new_messages(Cancellable? cancellable = null) {
-        if (monitor_new)
-            return false;
-        
-        monitor_new = true;
-        cancellable_monitor = cancellable;
-        folder.messages_appended.connect(on_folder_messages_appended);
-        return true;
+    /**
+     * See Geary.Folder.list_email_by_id_async() for details of how these parameters operate.  Instead
+     * of returning emails, this method will load the Conversations object with them sorted into
+     * Conversation objects.
+     */
+    public async void load_by_id_async(Geary.EmailIdentifier initial_id, int count,
+        Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
+        notify_scan_started(initial_id, -1, count);
+        try {
+            Gee.List<Email>? list = yield folder.list_email_by_id_async(initial_id, count,
+                required_fields, flags, cancellable);
+            on_email_listed(list, null);
+            if (list != null)
+                on_email_listed(null, null);
+        } catch (Error err) {
+            on_email_listed(null, err);
+        }
+    }
+    
+    /**
+     * See Geary.Folder.lazy_list_email_by_id() for details of how these parameters operate.  Instead
+     * of returning emails, this method will load the Conversations object with them sorted into
+     * Conversation objects.
+     */
+    public void lazy_load_by_id(Geary.EmailIdentifier initial_id, int count, Geary.Folder.ListFlags flags,
+        Cancellable? cancellable) {
+        notify_scan_started(initial_id, -1, count);
+        folder.lazy_list_email_by_id(initial_id, count, required_fields, flags, on_email_listed,
+            cancellable);
     }
     
     private void on_email_listed(Gee.List<Geary.Email>? emails, Error? err) {
@@ -518,29 +566,27 @@ public class Geary.Conversations : Object {
     }
     
     private void on_folder_messages_appended() {
-        // Find highest position.
+        // Find highest identifier by ordering
         // TODO: optimize.
-        int high = -1;
-        foreach (Conversation c in conversations)
-            foreach (Email e in c.get_pool())
-                if (e.location.position > high)
-                    high = e.location.position;
+        Geary.EmailIdentifier? highest = null;
+        foreach (Conversation c in conversations) {
+            foreach (Email e in c.get_pool()) {
+                if (highest == null || (e.id.compare(highest) > 0))
+                    highest = e.id;
+            }
+        }
         
-        if (high < 0) {
+        if (highest == null) {
             debug("Unable to find highest message position in %s", folder.to_string());
             
             return;
         }
         
-        debug("Message(s) appended to %s, fetching email at %d and above", folder.to_string(),
-            high + 1);
+        debug("Message(s) appended to %s, fetching email at %s and above", folder.to_string(),
+            highest.to_string());
         
         // Want to get the one *after* the highest position in the list
-        try {
-            lazy_load(high + 1, -1, Folder.ListFlags.NONE, cancellable_monitor);
-        } catch (Error e) {
-            warning("Error getting new mail: %s", e.message);
-        }
+        lazy_load_by_id(highest.next(), int.MAX, Folder.ListFlags.NONE, cancellable_monitor);
     }
 }
 

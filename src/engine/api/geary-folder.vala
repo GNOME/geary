@@ -19,9 +19,9 @@ public interface Geary.Folder : Object {
         FOLDER_CLOSED
     }
     
-    public enum Direction {
-        BEFORE,
-        AFTER
+    public enum CountChangeReason {
+        ADDED,
+        REMOVED
     }
     
     [Flags]
@@ -67,20 +67,21 @@ public interface Geary.Folder : Object {
      * "message-removed" is fired when a message has been removed (deleted or moved) from the
      * folder (and therefore old message position numbers may no longer be valid, i.e. those after
      * the removed message).
+     *
+     * NOTE: It's possible for the remote server to report a message has been removed that is not
+     * known locally (and therefore the caller could not have record of).  If this happens, this
+     * signal will *not* fire, although "email-count-changed" will.
      */
-    public signal void message_removed(int position, int total);
+    public signal void message_removed(Geary.EmailIdentifier id);
     
     /**
-     * "positions-reordered" is fired when message positions on emails in the folder may no longer
-     * be valid, which may happen even if a message has not been removed.  In other words, if a
-     * message is removed and it causes positions to change, "message-remove" will be fired followed
-     * by this signal.
+     * "email-count-changed" is fired when the total count of email in a folder has changed in any way.
      *
-     * Although reordering may be rare (positions shifting is a better description), it is possible
-     * for messages in a folder to change positions completely.  This signal covers both
-     * circumstances.
+     * Note that this signal will be fired alongside "messages-appended" or "message-removed".
+     * That is, do not use both signals to process email count changes; one will suffice.
+     * This signal will fire after those (although see the note at "message-removed").
      */
-    public signal void positions_reordered();
+    public signal void email_count_changed(int new_count, CountChangeReason reason);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
@@ -108,14 +109,14 @@ public interface Geary.Folder : Object {
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected abstract void notify_positions_reordered();
+    protected abstract void notify_message_removed(Geary.EmailIdentifier id);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected abstract void notify_message_removed(int position, int total);
+    protected abstract void notify_email_count_changed(int new_count, CountChangeReason reason);
     
     public abstract Geary.FolderPath get_path();
     
@@ -267,7 +268,7 @@ public interface Geary.Folder : Object {
      * messages are passed back to the caller in chunks as they're retrieved.  When null is passed
      * as the first parameter, all the messages have been fetched.  If an Error occurs during
      * processing, it's passed as the second parameter.  There's no guarantee of the returned
-     * message's order.
+     * messages' order.
      *
      * The Folder must be opened prior to attempting this operation.
      */
@@ -276,26 +277,72 @@ public interface Geary.Folder : Object {
         Cancellable? cancellable = null);
     
     /**
+     * Similar in contract to list_email_async(), but uses Geary.EmailIdentifier rather than
+     * positional addressing.  This allows for a batch of messages to be listed from a starting
+     * identifier, going up and down the stack depending on the count parameter.
+     *
+     * The count parameter is exclusive of the Email at initial_id.  That is, if count is one,
+     * two Emails may be returned: the one for initial_id and the next one.  If count is zero,
+     * only the Email with the specified initial_id will be listed, making this method operate
+     * like fetch_email_async().
+     *
+     * There is no guarantee that a message with the initial_id will be returned however.
+     * (It is up to the implementation to deal with spans starting from a non-existant or
+     * unavailable EmailIdentifier.)  To fetch email exclusive of the initial_id, use
+     * EmailIdentifier.next() or EmailIdentifier.previous().
+     *
+     * If count is positive, initial_id is the *lowest* identifier and the returned list is going
+     * up the stack (toward the most recently added).  If the count is negative, initial_id is
+     * the *highest* identifier and the returned list is going down the stack (toward the earliest
+     * added).
+     *
+     * To fetch all available messages in one direction or another, use int.MIN or int.MAX.
+     *
+     * There's no guarantee of the returned messages' order.
+     *
+     * There is (currently) no sparse version of list_email_by_id_async().
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
+        int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
+        throws Error;
+    
+    /**
+     * Similar in contract to lazy_list_email_async(), but uses Geary.EmailIdentifier rather than
+     * positional addressing, much like list_email_by_id_async().  See that method for more
+     * information on its contract and how the count parameter works.
+     *
+     * Like the other "lazy" methods, this method will call EmailCallback while the operation is
+     * processing.  This method does not block.
+     *
+     * There is (currently) no sparse version of lazy_list_email_by_id().
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb,
+        Cancellable? cancellable = null);
+    
+    /**
      * Returns a single email that fulfills the required_fields flag at the ordered position in
-     * the folder.  If position is invalid for the folder's contents, an EngineError.NOT_FOUND
+     * the folder.  If the email_id is invalid for the folder's contents, an EngineError.NOT_FOUND
      * error is thrown.  If the requested fields are not available, EngineError.INCOMPLETE_MESSAGE
      * is thrown.
      *
      * The Folder must be opened prior to attempting this operation.
-     *
-     * position is one-based.
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Removes the email at the supplied position from the folder.  If the email position is
-     * invalid for any reason, EngineError.NOT_FOUND is thrown.
+     * Removes the email at the supplied position from the folder.  If the email_id is invalid for
+     * any reason, EngineError.NOT_FOUND is thrown.
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async void remove_email_async(int position, Cancellable? cancellable = null)
-        throws Error;
+    public abstract async void remove_email_async(Geary.EmailIdentifier email_id,
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * check_span_specifiers() verifies that the span specifiers match the requirements set by

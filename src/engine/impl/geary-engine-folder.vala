@@ -27,6 +27,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         public EngineFolder owner;
         public int position;
         public int new_remote_count;
+        public EmailIdentifier? id;
         
         public ReplayRemoval(EngineFolder owner, int position, int new_remote_count) {
             base ("Removal");
@@ -34,10 +35,20 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             this.owner = owner;
             this.position = position;
             this.new_remote_count = new_remote_count;
+            id = null;
+        }
+        
+        public ReplayRemoval.with_id(EngineFolder owner, EmailIdentifier id) {
+            base ("Removal.with_id");
+            
+            this.owner = owner;
+            position = -1;
+            new_remote_count = -1;
+            this.id = id;
         }
         
         public override async void replay() {
-            yield owner.do_replay_remove_message(position, new_remote_count);
+            yield owner.do_replay_remove_message(position, new_remote_count, id);
         }
     }
     
@@ -128,6 +139,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 // signals
                 folder.messages_appended.connect(on_remote_messages_appended);
                 folder.message_removed.connect(on_remote_message_removed);
+                folder.message_at_removed.connect(on_remote_message_at_removed);
                 
                 // state
                 remote_count = yield folder.get_email_count_async(cancellable);
@@ -260,38 +272,52 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
     }
     
-    private void on_remote_message_removed(int position, int total) {
-        debug("on_remote_message_removed: position=%d total=%d", position, total);
+    private void on_remote_message_removed(Geary.EmailIdentifier id) {
+        debug("on_remote_message_removed: %s", id.to_string());
+        replay_queue.schedule(new ReplayRemoval.with_id(this, id));
+    }
+    
+    private void on_remote_message_at_removed(int position, int total) {
+        debug("on_remote_message_at_removed: position=%d total=%d", position, total);
         replay_queue.schedule(new ReplayRemoval(this, position, total));
     }
     
     // This MUST only be called from ReplayRemoval.
-    private async void do_replay_remove_message(int remote_position, int new_remote_count) {
-        try {
-            // calculate the local position of the message in the local store
-            int local_count = yield local_folder.get_email_count_async();
-            int local_low = ((remote_count - local_count) + 1).clamp(1, remote_count);
-            
-            if (remote_position < local_low) {
-                debug("do_replay_remove_message: Not removing message at %d from local store, not present",
-                    remote_position);
-            } else {
-                // Adjust remote position to local position
-                yield local_folder.remove_email_async((remote_position - local_low) + 1);
+    private async void do_replay_remove_message(int remote_position, int new_remote_count,
+        Geary.EmailIdentifier? id) {
+        if (remote_position < 1)
+            assert(id != null);
+        else
+            assert(new_remote_count >= 0);
+        
+        if (id == null) {
+            try {
+                Gee.List<Geary.Email>? local = yield local_folder.list_email_async(remote_position, 1,
+                    Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, null);
+                if (local != null && local.size > 0)
+                    id = local[0].id;
+            } catch (Error err) {
+                debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
+                    to_string(), err.message);
             }
-            
-            // save new remote count
-            remote_count = new_remote_count;
-            
-            notify_message_removed(remote_position, new_remote_count);
-            
-            // only fire "positions-altered" if indeed positions have been altered
-            if (remote_position != new_remote_count)
-                notify_positions_reordered();
-        } catch (Error err) {
-            debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
-                err.message);
         }
+        
+        if (id != null) {
+            try {
+                // Reflect change in the local store and notify subscribers
+                yield local_folder.remove_email_async(id, null);
+                
+                notify_message_removed(id);
+            } catch (Error err2) {
+                debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
+                    err2.message);
+            }
+        }
+        
+        // save new remote count and notify of change
+        remote_count = new_remote_count;
+        
+        notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
     }
     
     public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
@@ -322,6 +348,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return accumulator;
     }
     
+    // TODO: Capture Error and report via EmailCallback.
     public override void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         Geary.Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
         // schedule do_list_email_async(), using the callback to drive availability of email
@@ -392,19 +419,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // fixup local email positions to match server's positions
         if (local_list_size > 0 && remote_count > 0 && local_count < remote_count) {
             int adjustment = remote_count - local_count;
-            foreach (Geary.Email email in local_list) {
-                email.update_location(new Geary.EmailLocation(this,
-                    email.location.position + adjustment, email.location.ordering));
-            }
-        } else if (local_list_size > 0 && local_only) {
-            // if remote_count is -1, the remote folder hasn't been opened so the true count hasn't
-            // been determined; create local EmailLocations that update themselves when the
-            // folder is opened and the count is known (adjusted by the local_offset passed in)
-            foreach (Geary.Email local_email in local_list) {
-                local_email.update_location(new Geary.EmailLocation.local(this,
-                    local_email.location.position, local_email.location.ordering,
-                    (count + low - 1) - local_email.location.position));
-            }
+            foreach (Geary.Email email in local_list)
+                email.update_position(email.position + adjustment);
         }
         
         // report list
@@ -434,7 +450,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         for (int position = low; position <= (low + (count - 1)); position++) {
             bool found = false;
             for (int ctr = 0; ctr < local_list_size; ctr++) {
-                if (local_list[ctr].location.position == position) {
+                if (local_list[ctr].position == position) {
                     found = true;
                     
                     break;
@@ -486,6 +502,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return accumulator;
     }
     
+    // TODO: Capture Error and report via EmailCallback.
     public override void lazy_list_email_sparse(int[] by_position, Geary.Email.Field required_fields,
         Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
         // schedule listing in the background, using the callback to drive availability of email
@@ -546,11 +563,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         // reverse the process, fixing up all the returned messages to match the server's notions
         if (local_list_size > 0 && local_offset > 0) {
-            foreach (Geary.Email email in local_list) {
-                int new_position = email.location.position + local_offset;
-                email.update_location(new Geary.EmailLocation(this, new_position,
-                    email.location.ordering));
-            }
+            foreach (Geary.Email email in local_list)
+                email.update_position(email.position + local_offset);
         }
         
         if (local_list_size == by_position.length || local_only) {
@@ -576,7 +590,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             bool found = false;
             if (local_list != null) {
                 foreach (Geary.Email email2 in local_list) {
-                    if (email2.location.position == position) {
+                    if (email2.position == position) {
                         found = true;
                         
                         break;
@@ -622,6 +636,84 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // signal finished
         if (cb != null)
             cb(null, null);
+    }
+    
+    public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
+        int count, Geary.Email.Field required_fields, Folder.ListFlags flags,
+        Cancellable? cancellable = null) throws Error {
+        Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
+        yield do_list_email_by_id_async(initial_id, count, required_fields, list, null, cancellable,
+            flags.is_all_set(Folder.ListFlags.FAST));
+        
+        return (list.size > 0) ? list : null;
+    }
+    
+    public override void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
+        Cancellable? cancellable = null) {
+        do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, cb, cancellable,
+            flags.is_all_set(Folder.ListFlags.FAST));
+    }
+    
+    private async void do_lazy_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable, bool local_only) {
+        try {
+            yield do_list_email_by_id_async(initial_id, count, required_fields, null, cb, cancellable,
+                local_only);
+        } catch (Error err) {
+            cb(null, err);
+        }
+    }
+    
+    // STRATEGY: Determine position number of message at initial_id then work via positions from
+    // that point on.
+    private async void do_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
+        Cancellable? cancellable, bool local_only) throws Error {
+        if (!opened)
+            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
+        
+        // listing by ID requires the remote to be open and fully synchronized, as there's no
+        // reliable way to determine certain counts and positions without it
+        //
+        // TODO: Need to deal with this in a sane manner when offline
+        if (!yield wait_for_remote_to_open())
+            throw new EngineError.SERVER_UNAVAILABLE("Must be synchronized with server for listing by ID");
+        
+        assert(remote_count >= 0);
+        
+        int local_count = yield local_folder.get_email_count_async(cancellable);
+        
+        int initial_position = yield local_folder.get_id_position_async(initial_id, cancellable);
+        if (initial_position <= 0) {
+            throw new EngineError.NOT_FOUND("Email ID %s in %s not known to local store",
+                initial_id.to_string(), to_string);
+        }
+        
+        // since count can also indicate "to earliest" or "to latest", normalize
+        // (count is exclusive of initial_id, hence adding/substracting one, meaning that a count
+        // of zero or one are accepted)
+        int low, high;
+        if (count < 0) {
+            low = (count != int.MIN) ? (initial_position + count + 1) : 1;
+            high = initial_position;
+        } else if (count > 0) {
+            low = initial_position;
+            high = (count != int.MAX) ? (initial_position + count - 1) : remote_count;
+        } else {
+            // count == 0
+            low = initial_position;
+            high = initial_position;
+        }
+        
+        int actual_count = (high - low + 1);
+        
+        debug("do_list_email_by_id_async: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d",
+            initial_id.to_string(), initial_position, count, actual_count, low, high, local_count,
+            remote_count);
+        
+        yield do_list_email_async(low, actual_count, required_fields, accumulator, cb, cancellable,
+            local_only);
     }
     
     private async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
@@ -737,8 +829,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return email;
     }
     
-    public override async void remove_email_async(int position, Cancellable? cancellable = null)
-        throws Error {
+    public override async void remove_email_async(Geary.EmailIdentifier email_id,
+        Cancellable? cancellable = null) throws Error {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         

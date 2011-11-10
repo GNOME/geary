@@ -78,9 +78,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             // see fields_to_fetch_data_types() for why this is guaranteed
             assert(uid != null);
             
-            Geary.Email email = new Geary.Email(
-                new Geary.Imap.EmailLocation(folder, res.msg_num, uid),
-                new Geary.Imap.EmailIdentifier(uid));
+            Geary.Email email = new Geary.Email(res.msg_num, new Geary.Imap.EmailIdentifier(uid));
             fetch_results_to_email(res, fields, email);
             
             msgs.add(email);
@@ -111,9 +109,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (results.length != 1)
             throw new ImapError.SERVER_ERROR("Too many responses from server: %d", results.length);
         
-        Geary.Email email = new Geary.Email(
-            new Geary.Imap.EmailLocation(folder, results[0].msg_num, uid),
-            new Geary.Imap.EmailIdentifier(uid));
+        Geary.Email email = new Geary.Email(results[0].msg_num, new Geary.Imap.EmailIdentifier(uid));
         fetch_results_to_email(results[0], fields, email);
         
         return email;

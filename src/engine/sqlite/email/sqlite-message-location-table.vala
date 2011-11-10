@@ -226,6 +226,30 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         return -1;
     }
     
+    public async int fetch_message_position_async(Transaction? transaction, int64 message_id,
+        int64 folder_id, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction,
+            "MessageLocationTable.fetch_message_position_async", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
+            "SELECT message_id FROM MessageLocationTable WHERE folder_id=? ORDER BY ordering");
+        query.bind_int64(0, folder_id);
+        
+        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        
+        int position = 1;
+        while (!results.finished) {
+            if (results.fetch_int64(0) == message_id)
+                return position;
+            
+            yield results.next_async(cancellable);
+            position++;
+        }
+        
+        // not found
+        return -1;
+    }
+    
     public async int fetch_count_for_folder_async(Transaction? transaction, 
         int64 folder_id, Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction,
@@ -278,32 +302,25 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         return (!result.finished) ? result.fetch_int64(0) : -1;
     }
     
-    public async bool remove_by_position_async(Transaction? transaction, int64 folder_id,
-        int position, Cancellable? cancellable) throws Error {
-        assert(position >= 1);
-        
+    public async bool remove_by_ordering_async(Transaction? transaction, int64 folder_id,
+        int64 ordering, Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction,
-            "MessageLocationTable.remove_by_position_async", cancellable);
+            "MessageLocationTable.remove_by_ordering_async", cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT id FROM MessageLocationTable WHERE folder_id = ? ORDER BY ordering LIMIT 1 OFFSET ?");
+            "SELECT id FROM MessageLocationTable WHERE folder_id=? AND ordering=?");
         query.bind_int64(0, folder_id);
-        query.bind_int(1, position - 1);
+        query.bind_int64(1, ordering);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
         if (results.finished)
             return false;
         
-        query = locked.prepare(
-            "DELETE FROM MessageLocationTable WHERE id = ?");
+        query = locked.prepare("DELETE FROM MessageLocationTable WHERE id=?");
         query.bind_int64(0, results.fetch_int(0));
         
         yield query.execute_async(cancellable);
         locked.set_commit_required();
-        
-        // only commit if performing our own transaction
-        if (transaction == null)
-            yield locked.commit_async(cancellable);
         
         yield release_lock_async(transaction, locked, cancellable);
         

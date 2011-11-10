@@ -200,7 +200,7 @@ public class MainWindow : Gtk.Window {
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.FAST, cancellable_folder);
     }
     
-    public void on_scan_started(int low, int count) {
+    public void on_scan_started() {
         debug("on scan started");
     }
     

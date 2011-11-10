@@ -82,8 +82,8 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             body = fetch_string_for(result, MessageTable.Column.BODY);
     }
     
-    public Geary.Email to_email(Geary.EmailLocation location, Geary.EmailIdentifier id) throws Error {
-        Geary.Email email = new Geary.Email(location, id);
+    public Geary.Email to_email(int position, Geary.EmailIdentifier id) throws Error {
+        Geary.Email email = new Geary.Email(position, id);
         
         if (((fields & Geary.Email.Field.DATE) != 0) && (date != null))
             email.set_send_date(new RFC822.Date(date));
