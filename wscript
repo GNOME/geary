@@ -28,7 +28,7 @@ def configure(conf):
 	conf.check_cfg(
 		package='glib-2.0',
 		uselib_store='GLIB',
-		atleast_version='2.28.6',
+		atleast_version='2.30.0',
 		mandatory=1,
 		args='--cflags --libs')
 	

@@ -24,13 +24,18 @@ public string pretty_print(DateTime datetime) {
         fmt = "%l:%M %P";
     } else if (datetime.get_year() == now.get_year()) {
         // Nov 8
-        fmt = "%b %e";
+        fmt = "%b %-e";
     } else {
         // 02/04/10
         fmt = "%m/%e/%y";
     }
     
     return datetime.format(fmt);
+}
+
+public string pretty_print_verbose(DateTime datetime) {
+    // November 8, 2010 8:42 am
+    return datetime.format("%B %-e, %Y %-l:%M %P");
 }
 
 }

@@ -112,7 +112,7 @@ public class MessageViewer : Gtk.Viewport {
             insert_header(header, header_height++, _("Subject:"), email.subject.value);
             
         if (email.date != null)
-         insert_header(header, header_height++, _("Date:"), Date.pretty_print(email.date.value));
+         insert_header(header, header_height++, _("Date:"), Date.pretty_print_verbose(email.date.value));
         
         try {
             body.buffer.text = email.get_message().get_first_mime_part_of_content_type("text/plain").
