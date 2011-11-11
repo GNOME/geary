@@ -157,6 +157,23 @@ public class MessageListStore : Gtk.TreeStore {
         return conversation;
     }
     
+    public Geary.EmailIdentifier? get_email_id_lowest() {
+        Geary.EmailIdentifier? low = null;
+        int count = get_count();
+        for (int ctr = 0; ctr < count; ctr++) {
+            Geary.Conversation c = get_conversation_at_index(ctr);
+            Gee.SortedSet<Geary.Email>? mail = c.get_pool_sorted(compare_email_id_desc);
+            if (mail == null)
+                continue;
+            
+            Geary.EmailIdentifier pos = mail.first().id;
+            if (low == null || pos.ordering < low.ordering)
+                low = pos;
+        }
+        
+        return low;
+    }
+    
     private bool find_conversation(Geary.Conversation conversation, out Gtk.TreeIter iter) {
         iter = Gtk.TreeIter();
         int count = get_count();

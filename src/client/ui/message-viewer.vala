@@ -70,6 +70,7 @@ public class MessageViewer : Gtk.Viewport {
     public void add_message(Geary.Email email) {
         messages.add(email);
         Gtk.Builder builder = GearyApplication.instance.create_builder("message.glade");
+        debug("Message id: %s", email.id.to_string());
         
         string username;
         try {

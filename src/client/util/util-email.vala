@@ -10,3 +10,7 @@ public int compare_email(Geary.Email aenvelope, Geary.Email benvelope) {
     // stabilize sort by using the mail's ordering, which is always unique in a folder
     return (diff != 0) ? diff : aenvelope.id.compare(benvelope.id);
 }
+
+public int compare_email_id_desc(Geary.Email aenvelope, Geary.Email benvelope) {
+    return (int) (aenvelope.id.ordering - benvelope.id.ordering);
+}

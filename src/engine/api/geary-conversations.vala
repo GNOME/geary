@@ -374,6 +374,7 @@ public class Geary.Conversations : Object {
                 on_email_listed(null, null);
         } catch (Error err) {
             on_email_listed(null, err);
+            throw err;
         }
     }
     

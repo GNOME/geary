@@ -387,7 +387,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             // because the local store caches messages starting from the newest (at the end of the list)
             // to the earliest fetched by the user, need to adjust the low value to match its offset
             // and range
-            local_low = (low - (remote_count - local_count)).clamp(1, local_count);
+            local_low = low - (remote_count - local_count);
         } else {
             normalize_span_specifiers(ref low, ref count, local_count);
             local_low = low.clamp(1, local_count);
@@ -397,14 +397,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             low, count, local_count, remote_count, local_low);
         
         Gee.List<Geary.Email>? local_list = null;
-        try {
-            local_list = yield local_folder.list_email_async(local_low, count, required_fields,
-                Geary.Folder.ListFlags.NONE, cancellable);
-        } catch (Error local_err) {
-            if (cb != null)
-                cb (null, local_err);
-            
-            throw local_err;
+        if (local_low > 0) {
+            try {
+                local_list = yield local_folder.list_email_async(local_low, count, required_fields,
+                    Geary.Folder.ListFlags.NONE, cancellable);
+            } catch (Error local_err) {
+                if (cb != null)
+                    cb (null, local_err);
+                
+                throw local_err;
+            }
         }
         
         int local_list_size = (local_list != null) ? local_list.size : 0;
@@ -683,6 +685,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             throw new EngineError.NOT_FOUND("Email ID %s in %s not known to local store",
                 initial_id.to_string(), to_string());
         }
+        
+        // normalize the initial position to the remote folder's addressing
+        initial_position = remote_count - (local_count - initial_position);
+        assert(initial_position > 0);
         
         // since count can also indicate "to earliest" or "to latest", normalize
         // (count is exclusive of initial_id, hence adding/substracting one, meaning that a count

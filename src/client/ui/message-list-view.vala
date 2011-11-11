@@ -5,7 +5,16 @@
  */
 
 public class MessageListView : Gtk.TreeView {
+    const int LOAD_MORE_HEIGHT = 100;
+    
+    public bool enable_load_more { get; set; default = true; }
+    
+    // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
+    // scroll adjustment seen at the call to load_more().
+    double last_upper = -1.0;
+    
     public signal void conversation_selected(Geary.Conversation? conversation);
+    public signal void load_more();
     
     public MessageListView(MessageListStore store) {
         set_model(store);
@@ -18,12 +27,32 @@ public class MessageListView : Gtk.TreeView {
             MessageListStore.Column.MESSAGE_DATA.to_string(), 0));
         
         get_selection().changed.connect(on_selection_changed);
-        this.style_set.connect(on_style_changed);
+        style_set.connect(on_style_changed);
+        show.connect(on_show);
     }
     
     private void on_style_changed() {
         // Recalculate dimensions of child cells.
         MessageListCellRenderer.style_changed(this);
+    }
+    
+    private void on_show() {
+        // Wait until we're visible to set this signal up.
+        get_vadjustment().value_changed.connect(on_value_changed);
+    }
+    
+    private void on_value_changed() {
+        if (!enable_load_more)
+            return;
+        
+        // Check if we're at the very bottom of the list. If we are, it's time to
+        // issue a load_more signal.
+        if (get_vadjustment().get_value() >= get_vadjustment().get_upper() - 
+            get_vadjustment().page_size - LOAD_MORE_HEIGHT && get_vadjustment().get_upper() 
+            > last_upper) {
+            load_more();
+            last_upper = get_vadjustment().get_upper();
+        }
     }
     
     private static Gtk.TreeViewColumn create_column(MessageListStore.Column column,

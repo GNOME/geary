@@ -31,6 +31,7 @@ public class MainWindow : Gtk.Window {
         
         message_list_view = new MessageListView(message_list_store);
         message_list_view.conversation_selected.connect(on_conversation_selected);
+        message_list_view.load_more.connect(on_load_more);
         
         folder_list_view = new FolderListView(folder_list_store);
         folder_list_view.folder_selected.connect(on_folder_selected);
@@ -202,8 +203,10 @@ public class MainWindow : Gtk.Window {
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.FAST, cancellable_folder);
     }
     
-    public void on_scan_started() {
-        debug("on scan started");
+    public void on_scan_started(Geary.EmailIdentifier? id, int low, int count) {
+        debug("on scan started. id = %s low = %d count = %d", id != null ? id.to_string() : "(null)", 
+            low, count);
+        message_list_view.enable_load_more = false;
     }
     
     public void on_scan_error(Error err) {
@@ -214,6 +217,7 @@ public class MainWindow : Gtk.Window {
         debug("on scan completed");
         
         do_fetch_previews.begin(cancellable_message);
+        message_list_view.enable_load_more = true;
     }
     
     public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
@@ -240,6 +244,25 @@ public class MainWindow : Gtk.Window {
     public void on_updated_placeholders(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         message_list_store.update_conversation(conversation);
+    }
+    
+    private void on_load_more() {
+        debug("on_load_more");
+        message_list_view.enable_load_more = false;
+        
+        Geary.EmailIdentifier? low_id = message_list_store.get_email_id_lowest();
+        
+        current_conversations.load_by_id_async.begin(low_id, - FETCH_EMAIL_CHUNK_COUNT,
+            Geary.Folder.ListFlags.NONE, cancellable_folder, on_load_more_completed);
+    }
+    
+    private void on_load_more_completed(Object? source, AsyncResult result) {
+        debug("on load more completed");
+        try {
+            current_conversations.load_by_id_async.end(result);
+        } catch (Error err) {
+            debug("Error, unable to load conversations: %s", err.message);
+        }
     }
     
     private async void do_fetch_previews(Cancellable? cancellable) throws Error {
