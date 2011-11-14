@@ -117,7 +117,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         return email;
     }
     
-    public void merge_from_network(Geary.Email email) {
+    public void merge_from_remote(Geary.Email email) {
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             if ((email.fields & field) != 0)
                 set_from_email(field, email);

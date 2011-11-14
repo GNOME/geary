@@ -70,6 +70,8 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         return id;
     }
     
+    // TODO: This could be improved greatly, in particular making this a single SQL command or
+    // parallelizing the commands.
     public async void merge_async(Transaction? transaction, MessageRow row,
         Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction, "MessageTable.merge_async",

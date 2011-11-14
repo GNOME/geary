@@ -298,14 +298,13 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             RFC822.Header headers = new RFC822.Header(body_data[0]);
             
             // DATE
-            if (!email.fields.is_all_set(Geary.Email.Field.DATE)) {
+            if (!email.fields.is_all_set(Geary.Email.Field.DATE) && fields.require(Geary.Email.Field.DATE)) {
                 string? value = headers.get_header("Date");
-                if (!String.is_empty(value))
-                    email.set_send_date(new RFC822.Date(value));
+                email.set_send_date(!String.is_empty(value) ? new RFC822.Date(value) : null);
             }
             
             // ORIGINATORS
-            if (!email.fields.is_all_set(Geary.Email.Field.ORIGINATORS)) {
+            if (!email.fields.is_all_set(Geary.Email.Field.ORIGINATORS) && fields.require(Geary.Email.Field.ORIGINATORS)) {
                 RFC822.MailboxAddresses? from = null;
                 RFC822.MailboxAddresses? sender = null;
                 RFC822.MailboxAddresses? reply_to = null;
@@ -326,7 +325,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             }
             
             // RECEIVERS
-            if (!email.fields.is_all_set(Geary.Email.Field.RECEIVERS)) {
+            if (!email.fields.is_all_set(Geary.Email.Field.RECEIVERS) && fields.require(Geary.Email.Field.RECEIVERS)) {
                 RFC822.MailboxAddresses? to = null;
                 RFC822.MailboxAddresses? cc = null;
                 RFC822.MailboxAddresses? bcc = null;
@@ -369,10 +368,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             }
             
             // SUBJECT
-            if (!email.fields.is_all_set(Geary.Email.Field.SUBJECT)) {
+            if (!email.fields.is_all_set(Geary.Email.Field.SUBJECT) && fields.require(Geary.Email.Field.SUBJECT)) {
                 string? value = headers.get_header("Subject");
-                if (!String.is_empty(value))
-                    email.set_message_subject(new RFC822.Subject(value));
+                email.set_message_subject(!String.is_empty(value) ? new RFC822.Subject(value) : null);
             }
         }
         

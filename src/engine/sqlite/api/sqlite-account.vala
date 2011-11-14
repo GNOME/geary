@@ -186,13 +186,6 @@ private class Geary.Sqlite.Account : Geary.AbstractAccount, Geary.LocalAccount {
             (properties != null) ? properties.get_imap_folder_properties() : null, path);
     }
     
-    public async bool has_message_id_async(Geary.RFC822.MessageID message_id, out int count,
-        Cancellable? cancellable = null) throws Error {
-        count = yield message_table.search_message_id_count_async(null, message_id, cancellable);
-        
-        return (count > 0);
-    }
-    
     private Geary.Sqlite.Folder? get_sqlite_folder(Geary.FolderPath path) {
         FolderReference? folder_ref = folder_refs.get(path);
         

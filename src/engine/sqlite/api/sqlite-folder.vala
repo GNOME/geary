@@ -8,6 +8,9 @@
 // the future, to support other email services, will need to break this up.
 
 private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Geary.ReferenceSemantics {
+    private const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = 
+        Geary.Email.Field.REFERENCES | Geary.Email.Field.PROPERTIES;
+    
     protected int manual_ref_count { get; protected set; }
     
     private ImapDatabase db;
@@ -47,6 +50,10 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
     
     public override Geary.Folder.ListFlags get_supported_list_flags() {
         return Geary.Folder.ListFlags.NONE;
+    }
+    
+    public Geary.Email.Field get_duplicate_detection_fields() {
+        return REQUIRED_FOR_DUPLICATE_DETECTION;
     }
     
     internal void update_properties(Geary.Imap.FolderProperties? properties) {
@@ -100,6 +107,90 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         yield atomic_create_email_async(null, email, cancellable);
     }
     
+    // TODO: Need to break out IMAP-specific functionality
+    private async int64 search_for_duplicate_async(Transaction transaction, Geary.Email email,
+        Cancellable? cancellable) throws Error {
+        // if fields not present, then no duplicate can reliably be found
+        if (!email.fields.is_all_set(REQUIRED_FOR_DUPLICATE_DETECTION))
+            return Sqlite.Row.INVALID_ID;
+        
+        // what's more, actually need all those fields to be available, not merely attempted,
+        // to err on the side of safety
+        if (email.message_id == null)
+            return Sqlite.Row.INVALID_ID;
+        
+        Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
+        string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
+            ? imap_properties.internaldate.original : null;
+        long rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
+        
+        if (String.is_empty(internaldate) || rfc822_size < 0)
+            return Sqlite.Row.INVALID_ID;
+        
+        // See if it already exists; first by UID (which is only guaranteed to be unique in a folder,
+        // not account-wide)
+        int64 message_id;
+        if (yield location_table.does_ordering_exist_async(transaction, folder_row.id,
+            email.id.ordering, out message_id, cancellable)) {
+            return message_id;
+        }
+        
+        // reset
+        message_id = Sqlite.Row.INVALID_ID;
+        
+        // look for duplicate via Message-ID
+        Gee.List<int64?>? list = yield message_table.search_message_id_async(transaction, 
+            email.message_id, cancellable);
+        
+        // only a duplicate candidate if exactly one found, otherwise err on the side of safety
+        if (list != null && list.size == 1)
+            message_id = list[0];
+        
+        // look for duplicate in IMAP message properties
+        Gee.List<int64?>? duplicate_ids = yield imap_message_properties_table.search_for_duplicates_async(
+            transaction, internaldate, rfc822_size, cancellable);
+        if (duplicate_ids != null && duplicate_ids.size > 0) {
+            // if a message_id was found via Message-ID, search for a match; else if one duplicate
+            // was found via IMAP properties, use that, otherwise err on the side of safety
+            if (message_id != Sqlite.Row.INVALID_ID) {
+                int64 match_id = Sqlite.Row.INVALID_ID;
+                foreach (int64 duplicate_id in duplicate_ids) {
+                    if (message_id == duplicate_id) {
+                        match_id = duplicate_id;
+                        
+                        break;
+                    }
+                }
+                
+                // use the matched ID, which if not found, invalidates the discovered ID
+                message_id = match_id;
+            } else if (duplicate_ids.size == 1) {
+                message_id = duplicate_ids[0];
+            } else {
+                message_id = Sqlite.Row.INVALID_ID;
+            }
+        }
+        
+        return message_id;
+    }
+    
+    // Returns false if the message already exists at the specified position
+    private async bool associate_with_folder_async(Transaction transaction, int64 message_id,
+        Geary.Email email, Cancellable? cancellable) throws Error {
+        // see if an email exists at this position
+        MessageLocationRow? location_row = yield location_table.fetch_async(transaction,
+            folder_row.id, email.position, cancellable);
+        if (location_row != null)
+            return false;
+        
+        // insert email at supplied position
+        location_row = new MessageLocationRow(location_table, Row.INVALID_ID, message_id,
+            folder_row.id, email.id.ordering, email.position);
+        yield location_table.create_async(transaction, location_row, cancellable);
+        
+        return true;
+    }
+    
     private async void atomic_create_email_async(Transaction? supplied_transaction, Geary.Email email,
         Cancellable? cancellable) throws Error {
         check_open();
@@ -107,18 +198,29 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Transaction transaction = supplied_transaction ?? yield db.begin_transaction_async(
             "Folder.atomic_create_email_async", cancellable);
         
-        // See if it already exists; first by UID (which is only guaranteed to be unique in a folder,
-        // not account-wide)
+        // See if this Email is already associated with the folder
         int64 message_id;
-        if (yield location_table.does_ordering_exist_async(transaction, folder_row.id,
-            email.id.ordering, out message_id, cancellable)) {
-            throw new EngineError.ALREADY_EXISTS("Email with ID %s already exists in %s",
-                email.id.to_string(), to_string());
+        bool associated = yield location_table.does_ordering_exist_async(transaction, folder_row.id,
+            email.id.ordering, out message_id, cancellable);
+        
+        // if duplicate found, associate this email with this folder and merge in any new details
+        if (!associated || message_id == Sqlite.Row.INVALID_ID)
+            message_id = yield search_for_duplicate_async(transaction, email, cancellable);
+        
+        // if already associated or a duplicate, associated
+        if (message_id != Sqlite.Row.INVALID_ID) {
+            if (!associated)
+                yield associate_with_folder_async(transaction, message_id, email, cancellable);
+            
+            yield merge_email_async(transaction, message_id, email, cancellable);
+            
+            if (supplied_transaction == null)
+                yield transaction.commit_if_required_async(cancellable);
+            
+            return;
         }
         
-        // TODO: Also check by Message-ID (and perhaps other EmailProperties) to link an existing
-        // message in the database to this Folder
-        
+        // not found, so create and associate with this folder
         message_id = yield message_table.create_async(transaction,
             new MessageRow.from_email(message_table, email), cancellable);
         
@@ -382,97 +484,6 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             out available_fields, cancellable);
     }
     
-    public async bool is_email_associated_async(Geary.Email email, Cancellable? cancellable = null)
-        throws Error {
-        check_open();
-        
-        int64 message_id;
-        return yield location_table.does_ordering_exist_async(null, folder_row.id,
-            ((Geary.Imap.EmailIdentifier) email.id).uid.value, out message_id, cancellable);
-    }
-    
-    public async void update_email_async(Geary.Email email, bool duplicate_okay,
-        Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        Transaction transaction = yield db.begin_transaction_async("Folder.update_email_async",
-            cancellable);
-        
-        // See if the message can be identified in the folder (which both reveals association and
-        // a message_id that can be used for a merge; note that this works without a Message-ID)
-        int64 message_id;
-        bool associated = yield location_table.does_ordering_exist_async(transaction, folder_row.id,
-            email.id.ordering, out message_id, cancellable);
-        
-        // If working around the lack of a Message-ID and not associated with this folder, treat
-        // this operation as a create; otherwise, since a folder-association is determined, do
-        // a merge
-        if (email.message_id == null) {
-            if (!associated) {
-                if (!duplicate_okay)
-                    throw new EngineError.INCOMPLETE_MESSAGE("No Message-ID");
-                
-                yield atomic_create_email_async(transaction, email, cancellable);
-            } else {
-                yield merge_email_async(transaction, message_id, email, cancellable);
-            }
-            
-            yield transaction.commit_if_required_async(cancellable);
-            
-            return;
-        }
-        
-        // If not associated, find message with matching Message-ID
-        if (!associated) {
-            Gee.List<int64?>? list = yield message_table.search_message_id_async(transaction,
-                email.message_id, cancellable);
-            
-            // If none found, this operation is a create
-            if (list == null || list.size == 0) {
-                yield atomic_create_email_async(transaction, email, cancellable);
-                
-                yield transaction.commit_if_required_async(cancellable);
-                
-                return;
-            }
-            
-            // Too many found turns this operation into a create
-            if (list.size != 1) {
-                yield atomic_create_email_async(transaction, email, cancellable);
-                
-                yield transaction.commit_if_required_async(cancellable);
-                
-                return;
-            }
-            
-            message_id = list[0];
-        }
-        
-        // Found a message.  If not associated with this folder, associate now.
-        // TODO: Need to lock the database during this operation, as these steps should be atomic.
-        if (!associated) {
-            // see if an email exists at this position
-            MessageLocationRow? location_row = yield location_table.fetch_async(transaction,
-                folder_row.id, email.position, cancellable);
-            if (location_row != null) {
-                throw new EngineError.ALREADY_EXISTS("Email already exists at position %d in %s",
-                    email.position, to_string());
-            }
-            
-            // insert email at supplied position
-            location_row = new MessageLocationRow(location_table, Row.INVALID_ID, message_id,
-                folder_row.id, email.id.ordering, email.position);
-            yield location_table.create_async(transaction, location_row, cancellable);
-        }
-        
-        // Merge any new information with the existing message in the local store
-        yield merge_email_async(transaction, message_id, email, cancellable);
-        
-        yield transaction.commit_if_required_async(cancellable);
-        
-        // Done.
-    }
-    
     private async void merge_email_async(Transaction transaction, int64 message_id, Geary.Email email,
         Cancellable? cancellable = null) throws Error {
         assert(message_id != Row.INVALID_ID);
@@ -486,7 +497,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
                 cancellable);
             assert(message_row != null);
             
-            message_row.merge_from_network(email);
+            message_row.merge_from_remote(email);
             
             // possible nothing has changed or been added
             if (message_row.fields != Geary.Email.Field.NONE)

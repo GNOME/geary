@@ -251,9 +251,11 @@ public class MainWindow : Gtk.Window {
         message_list_view.enable_load_more = false;
         
         Geary.EmailIdentifier? low_id = message_list_store.get_email_id_lowest();
+        if (low_id == null)
+            return;
         
         current_conversations.load_by_id_async.begin(low_id, - FETCH_EMAIL_CHUNK_COUNT,
-            Geary.Folder.ListFlags.NONE, cancellable_folder, on_load_more_completed);
+            Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_folder, on_load_more_completed);
     }
     
     private void on_load_more_completed(Object? source, AsyncResult result) {

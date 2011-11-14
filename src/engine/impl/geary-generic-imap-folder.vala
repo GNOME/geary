@@ -91,7 +91,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                     cancellable);
                 
                 if (newest != null && newest.size > 0) {
-                    debug("saving %d newest emails in %s", newest.size, to_string());
+                    debug("saving %d newest emails starting at %s in %s", newest.size, uid_start.to_string(),
+                        to_string());
                     foreach (Geary.Email email in newest) {
                         try {
                             yield local_folder.create_email_async(email, cancellable);
@@ -159,8 +160,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             if (remote_uid.value == local_uid.value) {
                 // same, update flags and move on
                 try {
-                    yield imap_local_folder.update_email_async(old_remote[remote_ctr], true,
-                        cancellable);
+                    yield local_folder.create_email_async(old_remote[remote_ctr], cancellable);
                 } catch (Error update_err) {
                     debug("Unable to update old email in %s: %s", to_string(), update_err.message);
                 }

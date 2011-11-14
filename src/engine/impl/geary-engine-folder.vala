@@ -223,10 +223,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         replay_queue.schedule(new ReplayAppend(this, total));
     }
     
-    // Need to prefetch PROPERTIES (or, in the future NONE or LOCATION) fields to create a
+    // Need to prefetch at least an EmailIdentifier (and duplicate detection fields) to create a
     // normalized placeholder in the local database of the message, so all positions are
     // properly relative to the end of the message list; once this is done, notify user of new
-    // messages.
+    // messages.  If duplicates, create_email_async() will fall through to an updated merge,
+    // which is exactly what we want.
     //
     // This MUST only be called from ReplayAppend.
     private async void do_replay_appended_messages(int new_remote_count) {
@@ -247,7 +248,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(remote_count + 1, -1,
-                Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE, null);
+                local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, null);
             assert(list != null && list.size > 0);
             
             foreach (Geary.Email email in list) {
@@ -351,6 +352,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             flags.is_any_set(Folder.ListFlags.FAST));
     }
     
+    // TODO: A great optimization would be to fetch message "fragments" from the local database
+    // (retrieve all stored fields that match required_fields, although not all of required_fields
+    // are present) and only fetch the missing parts from the remote; to do this right, requests
+    // would have to be parallelized.
     private async void do_list_email_async(int low, int count, Geary.Email.Field required_fields,
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
         bool local_only) throws Error {
@@ -706,11 +711,18 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             high = initial_position;
         }
         
-        int actual_count = (high - low + 1);
+        // low should never be -1, so don't need to check for that
+        low = low.clamp(1, int.MAX);
         
-        debug("do_list_email_by_id_async: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d",
+        int actual_count = ((high - low) + 1);
+        
+        // one more check for exclusive listing
+        if (actual_count == 0 || (excluding_id && actual_count == 1))
+            return;
+        
+        debug("do_list_email_by_id_async: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d excl=%s",
             initial_id.to_string(), initial_position, count, actual_count, low, high, local_count,
-            remote_count);
+            remote_count, excluding_id.to_string());
         
         yield do_list_email_async(low, actual_count, required_fields, accumulator, cb, cancellable,
             local_only);
@@ -723,6 +735,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             return null;
         
         debug("Background fetching %d emails for %s", needed_by_position.length, to_string());
+        
+        // Always get the flags for normalization and whatever the local store requires for duplicate
+        // detection
+        Geary.Email.Field full_fields =
+            required_fields | Geary.Email.Field.PROPERTIES | local_folder.get_duplicate_detection_fields();
         
         Gee.List<Geary.Email> full = new Gee.ArrayList<Geary.Email>();
         
@@ -738,52 +755,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 list = needed_by_position;
             }
             
-            // Always get the flags, and the generic end-user won't know to ask for them until they
-            // need them
             Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_sparse_async(
-                list, required_fields | Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
-                cancellable);
+                list, full_fields, Geary.Folder.ListFlags.NONE, cancellable);
             
             if (remote_list == null || remote_list.size == 0)
                 break;
             
             // if any were fetched, store locally
             // TODO: Bulk writing
-            foreach (Geary.Email email in remote_list) {
-                bool exists_in_system = false;
-                if (email.message_id != null) {
-                    int count;
-                    exists_in_system = yield local.has_message_id_async(email.message_id, out count,
-                        cancellable);
-                }
-                
-                bool exists_in_folder = yield local_folder.is_email_associated_async(email,
-                    cancellable);
-                
-                // NOTE: Although this looks redundant, this is a complex decision case and laying
-                // it out like this helps explain the logic.  Also, this code relies on the fact
-                // that update_email_async() is a powerful call which might be broken down in the
-                // future (requiring a duplicate email be manually associated with the folder,
-                // for example), and so would like to keep this around to facilitate that.
-                if (!exists_in_system && !exists_in_folder) {
-                    // This case indicates the email is new to the local store OR has no
-                    // Message-ID and so a new copy must be stored.
-                    yield local_folder.create_email_async(email, cancellable);
-                } else if (exists_in_system && !exists_in_folder) {
-                    // This case indicates the email has been (partially) stored previously but
-                    // was not associated with this folder; update it (which implies association)
-                    yield local_folder.update_email_async(email, false, cancellable);
-                } else if (!exists_in_system && exists_in_folder) {
-                    // This case indicates the message doesn't have a Message-ID and can only be
-                    // identified by a folder-specific ID, so it can be updated in the folder
-                    // (This may result in multiple copies of the message stored locally.)
-                    yield local_folder.update_email_async(email, true, cancellable);
-                } else if (exists_in_system && exists_in_folder) {
-                    // This indicates the message is in the local store and was previously
-                    // associated with this folder, so merely update the local store
-                    yield local_folder.update_email_async(email, false, cancellable);
-                }
-            }
+            foreach (Geary.Email email in remote_list)
+                yield local_folder.create_email_async(email, cancellable);
             
             if (cb != null)
                 cb(remote_list, null);
@@ -824,7 +805,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Email email = yield remote_folder.fetch_email_async(id, fields, cancellable);
         
         // save to local store
-        yield local_folder.update_email_async(email, false, cancellable);
+        yield local_folder.create_email_async(email, cancellable);
         
         return email;
     }
@@ -869,13 +850,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         debug("prefetching %d (%d) for %s (local_low=%d)", high, prefetch_count, to_string(),
             local_low);
         
-        // Use PROPERTIES as they're the most useful information for certain actions (such as
-        // finding duplicates when we start using INTERNALDATE and RFC822.SIZE) and cheap to fetch
-        //
-        // TODO: Consider only fetching their UID; would need Geary.Email.Field.LOCATION (or
-        // perhaps NONE is considered a call for just the UID).
+        // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
+        // as fields for duplicate detection
         Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(high, prefetch_count,
-            Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE, cancellable);
+            local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, cancellable);
         if (list == null || list.size != prefetch_count) {
             throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
                 count, low, to_string());

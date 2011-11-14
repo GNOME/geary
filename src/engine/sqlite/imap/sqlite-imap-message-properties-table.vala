@@ -75,5 +75,47 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
         
         yield release_lock_async(transaction, locked, cancellable);
     }
+    
+    public async Gee.List<int64?>? search_for_duplicates_async(Transaction? transaction, string? internaldate,
+        long rfc822_size, Cancellable? cancellable) throws Error {
+        bool has_internaldate = !String.is_empty(internaldate);
+        bool has_size = rfc822_size >= 0;
+        
+        // at least one parameter must be available
+        if (!has_internaldate && !has_size)
+            throw new EngineError.BAD_PARAMETERS("Cannot search for IMAP duplicates without a valid parameter");
+        
+        Transaction locked = yield obtain_lock_async(transaction, "ImapMessagePropertiesTable.search_for_duplicates",
+            cancellable);
+        
+        SQLHeavy.Query query;
+        if (has_internaldate && has_size) {
+            query = locked.prepare(
+                "SELECT message_id FROM ImapMessagePropertiesTable WHERE internaldate=? AND rfc822_size=?");
+            query.bind_string(0, internaldate);
+            query.bind_int64(1, rfc822_size);
+        } else if (has_internaldate) {
+            query = locked.prepare(
+                "SELECT message_id FROM ImapMessagePropertiesTable WHERE internaldate=?");
+            query.bind_string(0, internaldate);
+        } else {
+            assert(has_size);
+            query = locked.prepare(
+                "SELECT message_id FROM ImapMessagePropertiesTable WHERE rfc822_size=?");
+            query.bind_int64(0, rfc822_size);
+        }
+        
+        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        if (result.finished)
+            return null;
+        
+        Gee.List<int64?> list = new Gee.ArrayList<int64?>();
+        do {
+            list.add(result.fetch_int64(0));
+            yield result.next_async(cancellable);
+        } while (!result.finished);
+        
+        return list;
+    }
 }
 

@@ -179,11 +179,10 @@ public interface Geary.Folder : Object {
      * get_required_fields_for_writing() to determine which fields must be present to create the
      * email.
      *
-     * This method will throw EngineError.ALREADY_EXISTS if the email already exists in the folder
-     * *and* the backing medium allows for checking prior to creation (which is not necessarily
-     * the case with network folders).  Use LocalFolder.update_email_async() to update fields on
-     * an existing message in the local store.  Saving an email on the server will be available
-     * later.
+     * If the Folder supports duplicate detection, it may merge in additional fields from this Email
+     * and associate the revised Email with this Folder.  See LocalFolder for specific calls that
+     * deal with this.  Callers from outside the Engine don't need to worry about this; it's taken
+     * care of under the covers.
      *
      * The Folder must be opened prior to attempting this operation.
      */
@@ -287,11 +286,6 @@ public interface Geary.Folder : Object {
      * only the Email with the specified initial_id will be listed, making this method operate
      * like fetch_email_async().
      *
-     * There is no guarantee that a message with the initial_id will be returned however.
-     * (It is up to the implementation to deal with spans starting from a non-existant or
-     * unavailable EmailIdentifier.)  To fetch email exclusive of the initial_id, use
-     * EmailIdentifier.next() or EmailIdentifier.previous().
-     *
      * If count is positive, initial_id is the *lowest* identifier and the returned list is going
      * up the stack (toward the most recently added).  If the count is negative, initial_id is
      * the *highest* identifier and the returned list is going down the stack (toward the earliest
@@ -304,8 +298,9 @@ public interface Geary.Folder : Object {
      * some times desirable to list messages excluding the specified EmailIdentifier, callers may
      * use ListFlags.EXCLUDING_ID (which is a flag only recognized by this method and
      * lazy_list_email_by_id()).  This ListFlag *must* be supported by all Folders and will not
-     * necessarily be returned by get_supported_flags().  Note that this flag doesn't make sense
-     * when count is zero or one and will be ignored.
+     * necessarily be returned by get_supported_flags().  If the count is zero or one (or 
+     * the number of messages remaining on the stack from the initial ID's position is zero or one)
+     * *and* this flag is set, no messages will be returned.
      *
      * There's no guarantee of the returned messages' order.
      *
