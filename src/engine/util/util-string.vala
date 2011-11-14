@@ -62,5 +62,24 @@ public string uint8_to_hex(uint8[] buffer) {
     return builder.str;
 }
 
+// Removes redundant spaces, tabs, and newlines.
+public string reduce_whitespace(string _s) {
+    string s = _s;
+    s = s.replace("\n", " ");
+    s = s.replace("\r", " ");
+    s = s.replace("\t", " ");
+    s = s.strip();
+    
+    // Condense multiple spaces to one.
+    for (int i = 1; i < s.length; i++) {
+        if (s.get_char(i) == ' ' && s.get_char(i - 1) == ' ') {
+            s = s.slice(0, i - 1) + s.slice(i, s.length);
+            i--;
+        }
+    }
+    
+    return s;
+}
+
 }
 
