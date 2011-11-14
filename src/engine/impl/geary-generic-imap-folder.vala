@@ -107,7 +107,6 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
         // any flags that may have changed
         Geary.Imap.UID? earliest_uid = yield imap_local_folder.get_earliest_uid_async(cancellable);
-        int64 full_uid_count = local_properties.uid_next.value - 1 - earliest_uid.value;
         
         // if no earliest UID, that means no messages in local store, so nothing to update
         if (earliest_uid == null || !earliest_uid.is_valid()) {
@@ -115,6 +114,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             
             return true;
         }
+        
+        int64 full_uid_count = local_properties.uid_next.value - 1 - earliest_uid.value;
         
         // If no UID's, nothing to update
         if (full_uid_count <= 0 || (full_uid_count > int.MAX)) {
