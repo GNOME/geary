@@ -400,19 +400,23 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         if (required_fields == Geary.Email.Field.NONE)
             return new Geary.Email(position, id);
         
-        MessageRow? message_row = yield message_table.fetch_async(transaction,
-            location_row.message_id, required_fields, cancellable);
-        if (message_row == null) {
-            throw new EngineError.NOT_FOUND("No message with ID %s in folder %s", id.to_string(),
-                to_string());
-        }
-        
-        // see if the message row fulfills everything but properties, which are held in
-        // separate table
-        if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
-            throw new EngineError.INCOMPLETE_MESSAGE(
-                "Message %s in folder %s only fulfills %Xh fields (required: %Xh)", id.to_string(),
-                to_string(), message_row.fields, required_fields);
+        // Only fetch message row if we have fields other than Properties.
+        MessageRow? message_row = null;
+        if (required_fields != Geary.Email.Field.PROPERTIES) {
+            message_row = yield message_table.fetch_async(transaction,
+                location_row.message_id, required_fields, cancellable);
+            if (message_row == null) {
+                throw new EngineError.NOT_FOUND("No message with ID %s in folder %s", id.to_string(),
+                    to_string());
+            }
+            
+            // see if the message row fulfills everything but properties, which are held in
+            // separate table
+            if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
+                throw new EngineError.INCOMPLETE_MESSAGE(
+                    "Message %s in folder %s only fulfills %Xh fields (required: %Xh)", id.to_string(),
+                    to_string(), message_row.fields, required_fields);
+            }
         }
         
         ImapMessagePropertiesRow? properties = null;
@@ -426,7 +430,10 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             }
         }
         
-        Geary.Email email = message_row.to_email(position, id);
+        Geary.Email email;
+        email = message_row != null ? message_row.to_email(position, id) : email =
+            new Geary.Email(position, id);
+        
         if (properties != null)
             email.set_email_properties(properties.get_imap_email_properties());
         
