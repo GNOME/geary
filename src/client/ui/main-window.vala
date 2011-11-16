@@ -216,7 +216,7 @@ public class MainWindow : Gtk.Window {
     public void on_scan_completed() {
         debug("on scan completed");
         
-        do_fetch_previews.begin(cancellable_message);
+        do_fetch_previews.begin(cancellable_folder);
         message_list_view.enable_load_more = true;
     }
     
@@ -298,25 +298,28 @@ public class MainWindow : Gtk.Window {
     }
     
     private void on_conversation_selected(Geary.Conversation? conversation) {
+        cancel_message();
+        message_viewer.clear();
+        
         if (conversation != null)
-            do_select_message.begin(conversation, on_select_message_completed);
-        else
-            message_viewer.clear();
+            do_select_message.begin(conversation, cancellable_message, on_select_message_completed);
     }
     
-    private async void do_select_message(Geary.Conversation conversation) throws Error {
+    private async void do_select_message(Geary.Conversation conversation, Cancellable? 
+        cancellable = null) throws Error {
         if (current_folder == null) {
             debug("Conversation selected with no folder selected");
             
             return;
         }
         
-        cancel_message();
-        message_viewer.clear();
         foreach (Geary.Email email in conversation.get_pool_sorted(compare_email)) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
-                MessageViewer.REQUIRED_FIELDS, cancellable_message);
-                
+                MessageViewer.REQUIRED_FIELDS, cancellable);
+            
+            if (cancellable.is_cancelled())
+                break;
+            
             message_viewer.add_message(full_email);
          }
     }
