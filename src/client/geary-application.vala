@@ -93,8 +93,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         ui_manager.insert_action_group(actions, 0);
         load_ui_file("accelerators.ui");
         
-        main_window = new MainWindow();
-        
         config = new Configuration(GearyApplication.instance.get_install_dir() != null,
             GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
         
@@ -133,6 +131,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             error("Unable to open mail database for %s: %s", cred.user, err.message);
         }
         
+        main_window = new MainWindow();
         main_window.show_all();
         main_window.start(account);
         return;
