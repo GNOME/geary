@@ -51,20 +51,22 @@ public class Geary.NonblockingBatch : Object {
     private const int START_ID = 1;
     
     private class BatchContext {
-        public weak NonblockingBatch owner;
         public int id;
         public NonblockingBatchOperation op;
+        public NonblockingBatch? owner = null;
         public bool completed = false;
         public Object? returned = null;
         public Error? threw = null;
         
-        public BatchContext(NonblockingBatch owner, int id, NonblockingBatchOperation op) {
-            this.owner = owner;
+        public BatchContext(int id, NonblockingBatchOperation op) {
             this.id = id;
             this.op = op;
         }
         
-        public void schedule(Cancellable? cancellable) {
+        public void schedule(NonblockingBatch owner, Cancellable? cancellable) {
+            // hold a strong ref to the owner until the operation is completed
+            this.owner = owner;
+            
             op.execute_async.begin(cancellable, on_op_completed);
         }
         
@@ -78,6 +80,9 @@ public class Geary.NonblockingBatch : Object {
             }
             
             owner.on_context_completed(this);
+            
+            // drop the reference to the owner to prevent a reference loop
+            owner = null;
         }
     }
     
@@ -124,7 +129,7 @@ public class Geary.NonblockingBatch : Object {
         }
         
         int id = next_result_id++;
-        contexts.set(id, new BatchContext(this, id, op));
+        contexts.set(id, new BatchContext(id, op));
         
         added(op, id);
         
@@ -164,7 +169,7 @@ public class Geary.NonblockingBatch : Object {
             BatchContext? context = contexts.get(id);
             assert(context != null);
             
-            context.schedule(cancellable);
+            context.schedule(this, cancellable);
             count++;
         }
         
