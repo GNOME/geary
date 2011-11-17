@@ -9,7 +9,7 @@
  * a single task of asynchronous work.  NonblockingBatch will execute it one time only.
  */
 public abstract class Geary.NonblockingBatchOperation : Object {
-    public abstract async Object? execute(Cancellable? cancellable) throws Error;
+    public abstract async Object? execute_async(Cancellable? cancellable) throws Error;
 }
 
 /**
@@ -29,15 +29,15 @@ public abstract class Geary.NonblockingBatchOperation : Object {
  * a thrown exception.  Other results should be stored by the subclass.
  *
  * To use, create a NonblockingBatch and populate it via the add() method.  When all
- * NonblockingBatchOperations have been added, call execute_all().  NonblockingBatch will fire off
- * all at once and only complete execute_all() when all of them have finished.  As mentioned
+ * NonblockingBatchOperations have been added, call execute_all_async().  NonblockingBatch will fire off
+ * all at once and only complete execute_all_async() when all of them have finished.  As mentioned
  * earlier, it's also gather their returned objects and thrown exceptions while they run.  See
  * get_result() and throw_first_exception() for more information.
  *
  * The caller will want to call *either* get_result() or throw_first_exception() to ensure that
  * errors are propagated.  It's not necessary to call both.
  *
- * After execute_all() has completed, the results may be examined.  The NonblockingBatch object
+ * After execute_all_async() has completed, the results may be examined.  The NonblockingBatch object
  * can *not* be reused.
  *
  * Currently NonblockingBatch will fire off all operations at once and let them complete.  It does
@@ -64,15 +64,15 @@ public class Geary.NonblockingBatch : Object {
             this.op = op;
         }
         
-        public void execute(Cancellable? cancellable) {
-            op.execute.begin(cancellable, on_op_completed);
+        public void schedule(Cancellable? cancellable) {
+            op.execute_async.begin(cancellable, on_op_completed);
         }
         
         private void on_op_completed(Object? source, AsyncResult result) {
             completed = true;
             
             try {
-                returned = op.execute.end(result);
+                returned = op.execute_async.end(result);
             } catch (Error err) {
                 threw = err;
             }
@@ -141,7 +141,7 @@ public class Geary.NonblockingBatch : Object {
      *
      * If there are no operations added to the batch, the method quietly exits.
      */
-    public async void execute_all(Cancellable? cancellable = null) throws Error {
+    public async void execute_all_async(Cancellable? cancellable = null) throws Error {
         if (locked)
             throw new IOError.PENDING("NonblockingBatch already executed or executing");
         
@@ -164,7 +164,7 @@ public class Geary.NonblockingBatch : Object {
             BatchContext? context = contexts.get(id);
             assert(context != null);
             
-            context.execute(cancellable);
+            context.schedule(cancellable);
             count++;
         }
         

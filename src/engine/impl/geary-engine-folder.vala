@@ -61,7 +61,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             this.email = email;
         }
         
-        public override async Object? execute(Cancellable? cancellable) throws Error {
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
             yield folder.create_email_async(email, cancellable);
             
             return null;
@@ -790,7 +790,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             foreach (Geary.Email email in remote_list)
                 batch.add(new CommitOperation(local_folder, email));
             
-            yield batch.execute_all(cancellable);
+            yield batch.execute_all_async(cancellable);
             
             batch.throw_first_exception();
             

@@ -22,7 +22,7 @@ public class MainWindow : Gtk.Window {
             this.index = index;
         }
         
-        public override async Object? execute(Cancellable? cancellable) throws Error {
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
             Geary.Email? preview = yield folder.fetch_email_async(email_id,
                 MessageListStore.WITH_PREVIEW_FIELDS, cancellable);
             
@@ -41,7 +41,7 @@ public class MainWindow : Gtk.Window {
             this.path = path;
         }
         
-        public override async Object? execute(Cancellable? cancellable) throws Error {
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
             return yield account.list_folders_async(path, cancellable);
         }
     }
@@ -55,7 +55,7 @@ public class MainWindow : Gtk.Window {
             this.special_folder = special_folder;
         }
         
-        public override async Object? execute(Cancellable? cancellable) throws Error {
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
             return yield account.fetch_folder_async(special_folder.path);
         }
     }
@@ -117,7 +117,7 @@ public class MainWindow : Gtk.Window {
                     batch.add(new FetchSpecialFolderOperation(account, special_folder));
                 
                 debug("Listing special folders");
-                yield batch.execute_all();
+                yield batch.execute_all_async();
                 debug("Completed list of special folders");
                 
                 foreach (int id in batch.get_ids()) {
@@ -345,7 +345,7 @@ public class MainWindow : Gtk.Window {
         }
         
         debug("Fetching %d previews", count);
-        yield batch.execute_all(cancellable);
+        yield batch.execute_all_async(cancellable);
         debug("Completed fetching %d previews", count);
         
         batch.throw_first_exception();
@@ -434,7 +434,7 @@ public class MainWindow : Gtk.Window {
         
         debug("Listing folder children");
         try {
-            yield batch.execute_all();
+            yield batch.execute_all_async();
         } catch (Error err) {
             debug("Unable to execute batch: %s", err.message);
             

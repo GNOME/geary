@@ -14,7 +14,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             this.cmd = cmd;
         }
         
-        public override async Object? execute(Cancellable? cancellable) throws Error {
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
             return yield context.session.send_command_async(cmd, cancellable);
         }
     }
@@ -101,7 +101,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             preview_id = batch.add(new MailboxOperation(context, preview_cmd));
         }
         
-        yield batch.execute_all(cancellable);
+        yield batch.execute_all_async(cancellable);
         
         // process "plain" FETCH results ... these are fetched every time for, if nothing else,
         // the UID which provides a position -> UID mapping that is kept in the map.

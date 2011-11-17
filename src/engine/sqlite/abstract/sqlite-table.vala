@@ -5,6 +5,20 @@
  */
 
 public abstract class Geary.Sqlite.Table {
+    internal class ExecuteQueryOperation : NonblockingBatchOperation {
+        public SQLHeavy.Query query;
+        
+        public ExecuteQueryOperation(SQLHeavy.Query query) {
+            this.query = query;
+        }
+        
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            yield query.execute_async(cancellable);
+            
+            return null;
+        }
+    }
+    
     internal weak Geary.Sqlite.Database gdb;
     internal SQLHeavy.Table table;
     

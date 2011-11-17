@@ -22,7 +22,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             this.path = path;
         }
         
-        public override async Object? execute(Cancellable? cancellable) throws Error {
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
             return yield session_mgr.status_async(path.get_fullpath(), StatusDataType.all(), cancellable);
         }
     }
@@ -80,7 +80,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
                 folders.add(new Geary.Imap.Folder(session_mgr, path, null, mbox));
         }
         
-        yield batch.execute_all(cancellable);
+        yield batch.execute_all_async(cancellable);
         
         foreach (int id in batch.get_ids()) {
             StatusOperation op = (StatusOperation) batch.get_operation(id);

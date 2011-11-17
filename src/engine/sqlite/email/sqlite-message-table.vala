@@ -80,26 +80,35 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         Transaction locked = yield obtain_lock_async(transaction, "MessageTable.merge_async",
             cancellable);
         
+        Geary.Email.Field available_fields;
+        if (!yield fetch_fields_async(locked, row.id, out available_fields, cancellable))
+            throw new EngineError.NOT_FOUND("No message with ID %lld found in database", row.id);
+        
+        // This calculates the fields in the row that are not in the database already
+        Geary.Email.Field new_fields = (row.fields ^ available_fields) & row.fields;
+        
         // merge the valid fields in the row
         SQLHeavy.Query query = locked.prepare(
             "UPDATE MessageTable SET fields = fields | ? WHERE id=?");
-        query.bind_int(0, row.fields);
+        query.bind_int(0, new_fields);
         query.bind_int64(1, row.id);
         
         yield query.execute_async(cancellable);
         locked.set_commit_required();
         
-        if (row.fields.is_any_set(Geary.Email.Field.DATE)) {
+        NonblockingBatch batch = new NonblockingBatch();
+        
+        if (new_fields.is_any_set(Geary.Email.Field.DATE)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET date_field=?, date_time_t=? WHERE id=?");
             query.bind_string(0, row.date);
             query.bind_int64(1, row.date_time_t);
             query.bind_int64(2, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.ORIGINATORS)) {
+        if (new_fields.is_any_set(Geary.Email.Field.ORIGINATORS)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET from_field=?, sender=?, reply_to=? WHERE id=?");
             query.bind_string(0, row.from);
@@ -107,10 +116,10 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(2, row.reply_to);
             query.bind_int64(3, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.RECEIVERS)) {
+        if (new_fields.is_any_set(Geary.Email.Field.RECEIVERS)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET to_field=?, cc=?, bcc=? WHERE id=?");
             query.bind_string(0, row.to);
@@ -118,10 +127,10 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(2, row.bcc);
             query.bind_int64(3, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.REFERENCES)) {
+        if (new_fields.is_any_set(Geary.Email.Field.REFERENCES)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET message_id=?, in_reply_to=?, reference_ids=? WHERE id=?");
             query.bind_string(0, row.message_id);
@@ -129,44 +138,48 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query.bind_string(2, row.references);
             query.bind_int64(3, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.SUBJECT)) {
+        if (new_fields.is_any_set(Geary.Email.Field.SUBJECT)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET subject=? WHERE id=?");
             query.bind_string(0, row.subject);
             query.bind_int64(1, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.HEADER)) {
+        if (new_fields.is_any_set(Geary.Email.Field.HEADER)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET header=? WHERE id=?");
             query.bind_string(0, row.header);
             query.bind_int64(1, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.BODY)) {
+        if (new_fields.is_any_set(Geary.Email.Field.BODY)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET body=? WHERE id=?");
             query.bind_string(0, row.body);
             query.bind_int64(1, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
         
-        if (row.fields.is_any_set(Geary.Email.Field.PREVIEW)) {
+        if (new_fields.is_any_set(Geary.Email.Field.PREVIEW)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET preview=? WHERE id=?");
             query.bind_string(0, row.preview);
             query.bind_int64(1, row.id);
             
-            yield query.execute_async(cancellable);
+            batch.add(new ExecuteQueryOperation(query));
         }
+        
+        yield batch.execute_all_async(cancellable);
+        
+        batch.throw_first_exception();
         
         // only commit if internally atomic
         if (transaction == null)
