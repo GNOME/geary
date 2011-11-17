@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.EmailProperties : Geary.EmailProperties {
+public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
     public bool answered { get; private set; }
     public bool deleted { get; private set; }
     public bool draft { get; private set; }
@@ -30,6 +30,26 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties {
     
     public override bool is_unread() {
         return !flags.contains(MessageFlag.SEEN);
+    }
+    
+    public bool equals(Equalable e) {
+        Imap.EmailProperties? other = e as Imap.EmailProperties;
+        if (other == null)
+            return false;
+        
+        if (this == other)
+            return true;
+        
+        // for simplicity and robustness, internaldate and rfc822_size must be present in both
+        // to be considered equal
+        if (internaldate == null || other.internaldate == null)
+            return false;
+        
+        if (rfc822_size == null || other.rfc822_size == null)
+            return false;
+        
+        return flags.equals(other.flags) && internaldate.equals(other.internaldate)
+            && rfc822_size.equals(other.rfc822_size);
     }
 }
 

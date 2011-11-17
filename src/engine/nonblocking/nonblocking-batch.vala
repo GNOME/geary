@@ -84,7 +84,7 @@ public class Geary.NonblockingBatch : Object {
     /**
      * Returns the number of NonblockingBatchOperations added.
      */
-    public int count {
+    public int size {
         get { return contexts.size; }
     }
     

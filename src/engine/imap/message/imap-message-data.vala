@@ -41,7 +41,7 @@ public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.
     }
 }
 
-public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData {
+public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData, Equalable {
     public int size { get { return list.size; } }
     
     private Gee.Set<Flag> list;
@@ -65,6 +65,25 @@ public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.Me
      */
     public virtual string serialize() {
         return to_string();
+    }
+    
+    public bool equals(Equalable e) {
+        Imap.Flags? other = e as Imap.Flags;
+        if (other == null)
+            return false;
+        
+        if (this == other)
+            return true;
+        
+        if (other.size != size)
+            return false;
+        
+        foreach (Flag flag in list) {
+            if (!other.contains(flag))
+                return false;
+        }
+        
+        return true;
     }
     
     public override string to_string() {

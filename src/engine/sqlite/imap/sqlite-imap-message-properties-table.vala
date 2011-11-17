@@ -45,7 +45,7 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
             cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT id, flags internaldate, rfc822_size FROM ImapMessagePropertiesTable "
+            "SELECT id, flags, internaldate, rfc822_size FROM ImapMessagePropertiesTable "
             + "WHERE message_id = ?");
         query.bind_int64(0, message_id);
         

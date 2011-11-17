@@ -13,30 +13,9 @@
 public interface Geary.RFC822.MessageData : Geary.Common.MessageData {
 }
 
-public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC822.MessageData,
-    Geary.Equalable, Geary.Hashable {
-    private uint hash = 0;
-    
+public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
     public MessageID(string value) {
         base (value);
-    }
-    
-    public bool equals(Equalable e) {
-        MessageID? message_id = e as MessageID;
-        if (message_id == null)
-            return false;
-        
-        if (this == message_id)
-            return true;
-        
-        if (to_hash() != message_id.to_hash())
-            return false;
-        
-        return value == message_id.value;
-    }
-    
-    public uint to_hash() {
-        return (hash != 0) ? hash : (hash = str_hash(value));
     }
 }
 
@@ -62,7 +41,7 @@ public class Geary.RFC822.MessageIDList : Geary.Common.StringMessageData, Geary.
     }
 }
 
-public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData {
+public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData, Equalable, Hashable {
     public string original { get; private set; }
     public DateTime value { get; private set; }
     public time_t as_time_t { get; private set; }
@@ -74,6 +53,21 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageD
         
         value = new DateTime.from_unix_local(as_time_t);
         original = iso8601;
+    }
+    
+    public virtual bool equals(Equalable e) {
+        RFC822.Date? other = e as RFC822.Date;
+        if (other == null)
+            return false;
+        
+        if (this == other)
+            return true;
+        
+        return value.equal(other.value);
+    }
+    
+    public virtual uint to_hash() {
+        return value.hash();
     }
     
     public override string to_string() {

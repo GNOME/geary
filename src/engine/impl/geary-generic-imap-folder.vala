@@ -12,6 +12,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
     // Check if the remote folder's ordering has changed since last opened
     protected override async bool prepare_opened_folder(Geary.Folder local_folder,
         Geary.Folder remote_folder, Cancellable? cancellable) throws Error {
+        debug("prepare_opened_folder %s", to_string());
+        
         Geary.Imap.FolderProperties? local_properties =
             (Geary.Imap.FolderProperties?) local_folder.get_properties();
         Geary.Imap.FolderProperties? remote_properties =
@@ -57,7 +59,13 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         Geary.Imap.Folder imap_remote_folder = (Geary.Imap.Folder) remote_folder;
         Geary.Sqlite.Folder imap_local_folder = (Geary.Sqlite.Folder) local_folder;
         
-        // if same, no problem-o
+        // from here on the only operations being performed on the folder are creating or updating
+        // existing emails or removing them, both operations being performed using EmailIdentifiers
+        // rather than positional addressing ... this means the order of operation is not important
+        // and can be batched up rather than performed serially
+        NonblockingBatch batch = new NonblockingBatch();
+        
+        // if same, no problem-o, move on
         if (local_properties.uid_next.value != remote_properties.uid_next.value) {
             debug("UID next changed for %s: %lld -> %lld", to_string(), local_properties.uid_next.value,
                 remote_properties.uid_next.value);
@@ -65,8 +73,6 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             // fetch everything from the last seen UID (+1) to the current next UID that's not
             // already in the local store (since the uidnext field isn't reported by NOOP or IDLE,
             // it's possible these were fetched the last time the folder was selected)
-            //
-            // TODO: Could break this fetch up in chunks if it helps
             int64 uid_start_value = local_properties.uid_next.value;
             for (;;) {
                 Geary.EmailIdentifier start_id = new Imap.EmailIdentifier(new Imap.UID(uid_start_value));
@@ -82,6 +88,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                     break;
             }
             
+            // store all the new emails' UIDs and properties (primarily flags) in the local store,
+            // to normalize the database against the remote folder
             if (uid_start_value < remote_properties.uid_next.value) {
                 Geary.Imap.EmailIdentifier uid_start = new Geary.Imap.EmailIdentifier(
                     new Geary.Imap.UID(uid_start_value));
@@ -91,15 +99,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                     cancellable);
                 
                 if (newest != null && newest.size > 0) {
-                    debug("saving %d newest emails starting at %s in %s", newest.size, uid_start.to_string(),
-                        to_string());
-                    foreach (Geary.Email email in newest) {
-                        try {
-                            yield local_folder.create_email_async(email, cancellable);
-                        } catch (Error newest_err) {
-                            debug("Unable to save new email in %s: %s", to_string(), newest_err.message);
-                        }
-                    }
+                    foreach (Geary.Email email in newest)
+                        batch.add(new CreateEmailOperation(local_folder, email));
                 }
             }
         }
@@ -141,7 +142,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             return true;
         }
         
-        // Get the remote emails in the range
+        // Get the remote emails in the range to either add any not known, remove deleted messages,
+        // and update the flags of the remainder
         Gee.List<Geary.Email>? old_remote = yield imap_remote_folder.list_email_by_id_async(
             earliest_id, full_id_count, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
             cancellable);
@@ -149,6 +151,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         int remote_ctr = 0;
         int local_ctr = 0;
+        Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         for (;;) {
             if (local_ctr >= local_length || remote_ctr >= remote_length)
                 break;
@@ -159,66 +162,64 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                 ((Geary.Imap.EmailIdentifier) old_local[local_ctr].id).uid;
             
             if (remote_uid.value == local_uid.value) {
-                // same, update flags and move on
-                try {
-                    yield local_folder.create_email_async(old_remote[remote_ctr], cancellable);
-                } catch (Error update_err) {
-                    debug("Unable to update old email in %s: %s", to_string(), update_err.message);
-                }
+                // same, update flags (if changed) and move on
+                Geary.Imap.EmailProperties local_email_properties =
+                    (Geary.Imap.EmailProperties) old_local[local_ctr].properties;
+                Geary.Imap.EmailProperties remote_email_properties =
+                    (Geary.Imap.EmailProperties) old_remote[remote_ctr].properties;
+                
+                if (!local_email_properties.equals(remote_email_properties))
+                    batch.add(new CreateEmailOperation(local_folder, old_remote[remote_ctr]));
                 
                 remote_ctr++;
                 local_ctr++;
             } else if (remote_uid.value < local_uid.value) {
                 // one we'd not seen before is present, add and move to next remote
-                try {
-                    yield local_folder.create_email_async(old_remote[remote_ctr], cancellable);
-                } catch (Error add_err) {
-                    debug("Unable to add new email to %s: %s", to_string(), add_err.message);
-                }
+                batch.add(new CreateEmailOperation(local_folder, old_remote[remote_ctr]));
                 
                 remote_ctr++;
             } else {
                 assert(remote_uid.value > local_uid.value);
                 
                 // local's email on the server has been removed, remove locally
-                try {
-                    yield local_folder.remove_email_async(old_local[local_ctr].id, cancellable);
-                } catch (Error remove_err) {
-                    debug("Unable to remove discarded email from %s: %s", to_string(),
-                        remove_err.message);
-                }
-                
-                notify_message_removed(old_local[local_ctr].id);
+                batch.add(new RemoveEmailOperation(local_folder, old_local[local_ctr].id));
+                removed_ids.add(old_local[local_ctr].id);
                 
                 local_ctr++;
             }
         }
         
-        // add newly-discovered emails to local store
+        // add newly-discovered emails to local store ... only report these as appended; earlier
+        // CreateEmailOperations were updates of emails existing previously or additions of emails
+        // that were on the server earlier but not stored locally (i.e. this value represents emails
+        // added to the top of the stack)
         int appended = 0;
         for (; remote_ctr < remote_length; remote_ctr++) {
-            try {
-                yield local_folder.create_email_async(old_remote[remote_ctr], cancellable);
-                appended++;
-            } catch (Error append_err) {
-                debug("Unable to append new email to %s: %s", to_string(), append_err.message);
-            }
+            batch.add(new CreateEmailOperation(local_folder, old_remote[remote_ctr]));
+            appended++;
         }
-        
-        if (appended > 0)
-            notify_messages_appended(appended);
         
         // remove anything left over ... use local count rather than remote as we're still in a stage
         // where only the local messages are available
-        for (; local_ctr < local_length; local_ctr++) {
-            try {
-                yield local_folder.remove_email_async(old_local[local_ctr].id, cancellable);
-            } catch (Error discard_err) {
-                debug("Unable to discard email from %s: %s", to_string(), discard_err.message);
-            }
-            
-            notify_message_removed(old_local[local_ctr].id);
-        }
+        for (; local_ctr < local_length; local_ctr++)
+            batch.add(new RemoveEmailOperation(local_folder, old_local[local_ctr].id));
+        
+        // execute them all at once
+        yield batch.execute_all_async(cancellable);
+        
+        // throw the first exception, if one occurred
+        batch.throw_first_exception();
+        
+        // notify emails that have been removed (see note above about why not all Creates are
+        // signalled)
+        foreach (Geary.EmailIdentifier removed_id in removed_ids)
+            notify_message_removed(removed_id);
+        
+        // notify additions
+        if (appended > 0)
+            notify_messages_appended(appended);
+        
+        debug("completed prepare_opened_folder %s", to_string());
         
         return true;
     }
