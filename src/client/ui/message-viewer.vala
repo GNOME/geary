@@ -95,6 +95,8 @@ public class MessageViewer : Gtk.Viewport {
         if (sample_view == null)
             sample_view = body;
         body.style_updated.connect(on_text_style_changed);
+        body.key_press_event.connect(on_key_press_event);
+        body.key_release_event.connect(on_key_release_event);
         on_text_style_changed();
         
         header.column_spacing = HEADER_COL_SPACING;
@@ -175,6 +177,60 @@ public class MessageViewer : Gtk.Viewport {
         color.parse(sample_view.style.base[0].to_string());
         foreach (Gtk.Widget w in message_box.get_children())
             w.override_background_color(Gtk.StateFlags.NORMAL, color);
+    }
+    
+    public override bool key_press_event(Gdk.EventKey event) {
+        bool handled = true;
+        
+        switch (Gdk.keyval_name(event.keyval)) {
+            case "Up":
+            case "KP_Up":
+            case "Down":
+            case "KP_Down":
+                // Add control mask to up an down keys.  This is a hack due
+                // to a binding issue; see ticket #4387
+                event.state |= Gdk.ModifierType.CONTROL_MASK;
+                // Pass up to scrolled window.
+                parent.key_press_event(event);
+            break;
+            
+            case "Home":
+            case "KP_Home":
+            case "End":
+            case "KP_End":
+            case "Page_Down":
+            case "KP_Page_Down":
+            case "Page_Up":
+            case "KP_Page_Up":
+                // Pass up to scrolled window.
+                parent.key_press_event(event);
+            break;
+            
+            default:
+                handled = false;
+            break;
+        }
+        
+        if (handled)
+            return true;
+        
+        return (base.key_press_event != null) ? base.key_press_event(event) : true;
+    }
+    
+    public override bool key_release_event(Gdk.EventKey event) {
+        bool parent_ret = parent.key_release_event(event);
+        if (parent_ret)
+            return true;
+        
+        return (base.key_release_event != null) ? base.key_release_event(event) : true;
+    }
+    
+    private bool on_key_press_event(Gdk.EventKey event) {
+        return key_press_event(event);
+    }
+    
+    private bool on_key_release_event(Gdk.EventKey event) {
+        return key_release_event(event);
     }
 }
 
