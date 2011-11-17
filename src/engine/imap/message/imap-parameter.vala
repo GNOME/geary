@@ -73,6 +73,11 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
         return long.parse(value).clamp(clamp_min, clamp_max);
     }
     
+    // TODO: This does not check that the value is a properly-formed int64.
+    public int64 as_int64(int64 clamp_min = int64.MIN, int64 clamp_max = int64.MAX) throws ImapError {
+        return int64.parse(value).clamp(clamp_min, clamp_max);
+    }
+    
     public override string to_string() {
         return value;
     }

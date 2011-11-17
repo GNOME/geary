@@ -94,6 +94,7 @@ class ImapConsole : Gtk.Window {
         "gmail",
         "keepalive",
         "status",
+        "preview",
         "close"
     };
     
@@ -194,6 +195,10 @@ class ImapConsole : Gtk.Window {
                     
                     case "status":
                         folder_status(cmd, args);
+                    break;
+                    
+                    case "preview":
+                        preview(cmd, args);
                     break;
                     
                     default:
@@ -407,7 +412,7 @@ class ImapConsole : Gtk.Window {
         status("Fetching fields %s".printf(args[0]));
         
         Geary.Imap.FetchBodyDataType fields = new Geary.Imap.FetchBodyDataType(
-            Geary.Imap.FetchBodyDataType.SectionPart.HEADER_FIELDS, args[1:args.length]);
+            Geary.Imap.FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, args[1:args.length]);
             
         Gee.List<Geary.Imap.FetchBodyDataType> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataType>();
         list.add(fields);
@@ -458,6 +463,31 @@ class ImapConsole : Gtk.Window {
         try {
             cx.send_async.end(result);
             status("Get status");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
+    private void preview(string cmd, string[] args) throws Error {
+        check_min_connected(cmd, args, 1, "<message-span>");
+        
+        status("Preview %s".printf(args[0]));
+        
+        Geary.Imap.FetchBodyDataType preview_data_type = new Geary.Imap.FetchBodyDataType.peek(
+            Geary.Imap.FetchBodyDataType.SectionPart.NONE, { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES,
+            null);
+        
+        Gee.ArrayList<Geary.Imap.FetchBodyDataType> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataType>();
+        list.add(preview_data_type);
+        
+        cx.send_async.begin(new Geary.Imap.FetchCommand(
+            new Geary.Imap.MessageSet.custom(args[0]), null, list), null, on_preview_completed);
+    }
+    
+    private void on_preview_completed(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Preview fetched");
         } catch (Error err) {
             exception(err);
         }

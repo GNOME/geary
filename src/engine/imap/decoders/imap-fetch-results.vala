@@ -85,11 +85,11 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
         return map.keys;
     }
     
-    private void set_data(FetchDataType data_item, MessageData primitive) {
+    private new void set_data(FetchDataType data_item, MessageData primitive) {
         map.set(data_item, primitive);
     }
     
-    public MessageData? get_data(FetchDataType data_item) {
+    public new MessageData? get_data(FetchDataType data_item) {
         return map.get(data_item);
     }
     

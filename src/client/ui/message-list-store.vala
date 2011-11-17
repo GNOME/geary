@@ -5,9 +5,11 @@
  */
 
 public class MessageListStore : Gtk.TreeStore {
-    
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.PROPERTIES;
+    
+    public const Geary.Email.Field WITH_PREVIEW_FIELDS =
+        Geary.Email.Field.ENVELOPE | Geary.Email.Field.PROPERTIES | Geary.Email.Field.PREVIEW;
     
     public enum Column {
         MESSAGE_DATA,

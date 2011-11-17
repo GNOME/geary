@@ -5,7 +5,7 @@
  */
 
 private class Geary.EngineFolder : Geary.AbstractFolder {
-    private const int REMOTE_FETCH_CHUNK_COUNT = 10;
+    private const int REMOTE_FETCH_CHUNK_COUNT = 5;
     
     private class ReplayAppend : ReplayOperation {
         public EngineFolder owner;
@@ -49,6 +49,22 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         public override async void replay() {
             yield owner.do_replay_remove_message(position, new_remote_count, id);
+        }
+    }
+    
+    private class CommitOperation : NonblockingBatchOperation {
+        public Folder folder;
+        public Geary.Email email;
+        
+        public CommitOperation(Folder folder, Geary.Email email) {
+            this.folder = folder;
+            this.email = email;
+        }
+        
+        public override async Object? execute(Cancellable? cancellable) throws Error {
+            yield folder.create_email_async(email, cancellable);
+            
+            return null;
         }
     }
     
@@ -762,9 +778,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 break;
             
             // if any were fetched, store locally
-            // TODO: Bulk writing
+            NonblockingBatch batch = new NonblockingBatch();
+            
             foreach (Geary.Email email in remote_list)
-                yield local_folder.create_email_async(email, cancellable);
+                batch.add(new CommitOperation(local_folder, email));
+            
+            yield batch.execute_all(cancellable);
+            
+            batch.throw_first_exception();
             
             if (cb != null)
                 cb(remote_list, null);

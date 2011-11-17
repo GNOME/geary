@@ -4,7 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-// TODO: Support body[section]<partial> and body.peek[section]<partial> forms
 public enum Geary.Imap.FetchDataType {
     UID,
     FLAGS,

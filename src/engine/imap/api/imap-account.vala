@@ -10,6 +10,23 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     public const string INBOX_NAME = "INBOX";
     public const string ASSUMED_SEPARATOR = "/";
     
+    private class StatusOperation : Geary.NonblockingBatchOperation {
+        public ClientSessionManager session_mgr;
+        public MailboxInformation mbox;
+        public Geary.FolderPath path;
+        
+        public StatusOperation(ClientSessionManager session_mgr, MailboxInformation mbox,
+            Geary.FolderPath path) {
+            this.session_mgr = session_mgr;
+            this.mbox = mbox;
+            this.path = path;
+        }
+        
+        public override async Object? execute(Cancellable? cancellable) throws Error {
+            return yield session_mgr.status_async(path.get_fullpath(), StatusDataType.all(), cancellable);
+        }
+    }
+    
     private Geary.Credentials cred;
     private ClientSessionManager session_mgr;
     private Geary.Smtp.ClientSession smtp;
@@ -47,6 +64,8 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         }
         
         Gee.Collection<Geary.Folder> folders = new Gee.ArrayList<Geary.Folder>();
+        
+        Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
         foreach (MailboxInformation mbox in mboxes) {
             Geary.FolderPath path = process_path(processed, mbox.name, mbox.delim);
             
@@ -55,17 +74,22 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
             if (processed == null)
                 delims.set(path.get_root().basename, mbox.delim);
             
-            StatusResults? status = null;
-            if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT)) {
-                try {
-                    status = yield session_mgr.status_async(path.get_fullpath(),
-                        StatusDataType.all(), cancellable);
-                } catch (Error status_err) {
-                    message("Unable to fetch status for %s: %s", path.to_string(), status_err.message);
-                }
+            if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT))
+                batch.add(new StatusOperation(session_mgr, mbox, path));
+            else
+                folders.add(new Geary.Imap.Folder(session_mgr, path, null, mbox));
+        }
+        
+        yield batch.execute_all(cancellable);
+        
+        foreach (int id in batch.get_ids()) {
+            StatusOperation op = (StatusOperation) batch.get_operation(id);
+            try {
+                folders.add(new Geary.Imap.Folder(session_mgr, op.path,
+                    (StatusResults?) batch.get_result(id), op.mbox));
+            } catch (Error status_err) {
+                message("Unable to fetch status for %s: %s", op.path.to_string(), status_err.message);
             }
-            
-            folders.add(new Geary.Imap.Folder(session_mgr, path, status, mbox));
         }
         
         return folders;

@@ -39,7 +39,9 @@ CREATE TABLE MessageTable (
     
     header TEXT,
     
-    body TEXT
+    body TEXT,
+    
+    preview TEXT
 );
 
 CREATE INDEX MessageTableMessageIDIndex ON MessageTable(message_id);

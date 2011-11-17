@@ -29,7 +29,9 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         HEADER,
         
-        BODY;
+        BODY,
+        
+        PREVIEW;
     }
     
     internal MessageTable(Geary.Sqlite.Database gdb, SQLHeavy.Table table) {
@@ -44,8 +46,8 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         SQLHeavy.Query query = locked.prepare(
             "INSERT INTO MessageTable "
             + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
-            + "message_id, in_reply_to, reference_ids, subject, header, body) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            + "message_id, in_reply_to, reference_ids, subject, header, body, preview) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         query.bind_int(0, row.fields);
         query.bind_string(1, row.date);
         query.bind_int64(2, row.date_time_t);
@@ -61,6 +63,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         query.bind_string(12, row.subject);
         query.bind_string(13, row.header);
         query.bind_string(14, row.body);
+        query.bind_string(15, row.preview);
         
         int64 id = yield query.execute_insert_async(cancellable);
         locked.set_commit_required();
@@ -151,6 +154,15 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             query = locked.prepare(
                 "UPDATE MessageTable SET body=? WHERE id=?");
             query.bind_string(0, row.body);
+            query.bind_int64(1, row.id);
+            
+            yield query.execute_async(cancellable);
+        }
+        
+        if (row.fields.is_any_set(Geary.Email.Field.PREVIEW)) {
+            query = locked.prepare(
+                "UPDATE MessageTable SET preview=? WHERE id=?");
+            query.bind_string(0, row.preview);
             query.bind_int64(1, row.id);
             
             yield query.execute_async(cancellable);
@@ -263,13 +275,15 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
                     case Geary.Email.Field.BODY:
                         append = "body";
                     break;
+                    
+                    case Geary.Email.Field.PREVIEW:
+                        append = "preview";
+                    break;
                 }
             }
             
             if (append != null) {
-                if (!String.is_empty(builder.str))
-                    builder.append(", ");
-                
+                builder.append(", ");
                 builder.append(append);
             }
         }

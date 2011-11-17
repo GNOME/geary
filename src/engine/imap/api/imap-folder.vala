@@ -120,7 +120,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         
         normalize_span_specifiers(ref low, ref count, mailbox.exists);
         
-        return yield mailbox.list_set_async(this, new MessageSet.range(low, count), fields, cancellable);
+        return yield mailbox.list_set_async(new MessageSet.range(low, count), fields, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
@@ -129,7 +129,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        return yield mailbox.list_set_async(this, new MessageSet.sparse(by_position), fields, cancellable);
+        return yield mailbox.list_set_async(new MessageSet.sparse(by_position), fields, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier email_id,
@@ -160,7 +160,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
             msg_set = new MessageSet.uid(uid);
         }
         
-        return yield mailbox.list_set_async(this, msg_set, fields, cancellable);
+        return yield mailbox.list_set_async(msg_set, fields, cancellable);
     }
     
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
@@ -168,9 +168,20 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        // TODO: If position out of range, throw EngineError.NOT_FOUND
+        Gee.List<Geary.Email>? list = yield mailbox.list_set_async(
+            new MessageSet.uid(((Imap.EmailIdentifier) id).uid), fields, cancellable);
         
-        return yield mailbox.fetch_async(this, ((Imap.EmailIdentifier) id).uid, fields, cancellable);
+        if (list == null || list.size == 0) {
+            throw new EngineError.NOT_FOUND("Unable to fetch email %s from %s", id.to_string(),
+                to_string());
+        }
+        
+        if (list.size != 1) {
+            throw new EngineError.BAD_RESPONSE("Too many responses (%d) from %s when fetching %s",
+                list.size, to_string(), id.to_string());
+        }
+        
+        return list[0];
     }
     
     public override async void remove_email_async(Geary.EmailIdentifier email_id, Cancellable? cancellable = null)

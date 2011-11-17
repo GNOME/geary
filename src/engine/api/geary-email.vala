@@ -5,6 +5,10 @@
  */
 
 public class Geary.Email : Object {
+    // This value is not persisted, but it does represent the expected max size of the preview
+    // when returned.
+    public const int MAX_PREVIEW_BYTES = 128;
+    
     // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
     public enum Field {
         NONE =              0,
@@ -16,6 +20,8 @@ public class Geary.Email : Object {
         HEADER =            1 << 5,
         BODY =              1 << 6,
         PROPERTIES =        1 << 7,
+        PREVIEW =           1 << 8,
+        
         ENVELOPE =          DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT,
         ALL =               0xFFFFFFFF;
         
@@ -28,7 +34,8 @@ public class Geary.Email : Object {
                 SUBJECT,
                 HEADER,
                 BODY,
-                PROPERTIES
+                PROPERTIES,
+                PREVIEW
             };
         }
         
@@ -108,6 +115,9 @@ public class Geary.Email : Object {
     // PROPERTIES
     public Geary.EmailProperties? properties { get; private set; default = null; }
     
+    // PREVIEW
+    public RFC822.Text? preview { get; private set; default = null; }
+    
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
     
     private Geary.RFC822.Message? message = null;
@@ -186,6 +196,12 @@ public class Geary.Email : Object {
         this.properties = properties;
         
         fields |= Field.PROPERTIES;
+    }
+    
+    public void set_message_preview(Geary.RFC822.Text preview) {
+        this.preview = preview;
+        
+        fields |= Field.PREVIEW;
     }
     
     /**

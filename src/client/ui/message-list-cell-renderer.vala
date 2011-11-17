@@ -42,21 +42,14 @@ public class FormattedMessageData : Object {
     public FormattedMessageData.from_email(Geary.Email email, int num_emails) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
         
-        StringBuilder builder = new StringBuilder();
-        if (email.fields.fulfills(Geary.Email.Field.BODY)) {
-            try {
-                Geary.Memory.AbstractBuffer buffer = email.get_message().
-                    get_first_mime_part_of_content_type("text/plain");
-                builder.append(buffer.to_utf8());
-            } catch (Error e) {
-                debug("Error displaying message body: %s".printf(e.message));
-            }
-        }
+        string preview = "";
+        if (email.fields.fulfills(Geary.Email.Field.PREVIEW) && email.preview != null)
+            preview = email.preview.buffer.to_utf8();
         
         string from = (email.from != null && email.from.size > 0) ? email.from[0].get_short_address() : "";
         
         this(email.properties.is_unread(), Date.pretty_print(email.date.value),
-            from, email.subject.value, Geary.String.reduce_whitespace(builder.str), num_emails);
+            from, email.subject.value, Geary.String.reduce_whitespace(preview), num_emails);
         
         this.email = email;
     }

@@ -29,6 +29,8 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
     
     public string? body { get; set; }
     
+    public string? preview { get; set; }
+    
     public MessageRow(Table table) {
         base (table);
     }
@@ -80,6 +82,9 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         
         if ((fields & Geary.Email.Field.BODY) != 0)
             body = fetch_string_for(result, MessageTable.Column.BODY);
+        
+        if ((fields & Geary.Email.Field.PREVIEW) != 0)
+            preview = fetch_string_for(result, MessageTable.Column.PREVIEW);
     }
     
     public Geary.Email to_email(int position, Geary.EmailIdentifier id) throws Error {
@@ -113,6 +118,9 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         
         if (((fields & Geary.Email.Field.BODY) != 0) && (body != null))
             email.set_message_body(new RFC822.Text(new Geary.Memory.StringBuffer(body)));
+        
+        if (((fields & Geary.Email.Field.PREVIEW) != 0) && (preview != null))
+            email.set_message_preview(new RFC822.Text(new Geary.Memory.StringBuffer(preview)));
         
         return email;
     }
@@ -206,6 +214,12 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             
             this.fields = this.fields.set(Geary.Email.Field.BODY);
         }
+        
+        if ((fields & Geary.Email.Field.PREVIEW) != 0) {
+            preview = (email.preview != null) ? email.preview.buffer.to_utf8() : null;
+            
+            this.fields = this.fields.set(Geary.Email.Field.PREVIEW);
+        }
     }
     
     private void unset_fields(Geary.Email.Field fields) {
@@ -256,6 +270,12 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             body = null;
             
             this.fields = this.fields.clear(Geary.Email.Field.BODY);
+        }
+        
+        if ((fields & Geary.Email.Field.PREVIEW) != 0) {
+            preview = null;
+            
+            this.fields = this.fields.clear(Geary.Email.Field.PREVIEW);
         }
     }
 }

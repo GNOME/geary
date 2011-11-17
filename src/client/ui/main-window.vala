@@ -8,6 +8,58 @@ public class MainWindow : Gtk.Window {
     private const int MESSAGE_LIST_WIDTH = 250;
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
+    private class FetchPreviewOperation : Geary.NonblockingBatchOperation {
+        public MainWindow owner;
+        public Geary.Folder folder;
+        public Geary.EmailIdentifier email_id;
+        public int index;
+        
+        public FetchPreviewOperation(MainWindow owner, Geary.Folder folder,
+            Geary.EmailIdentifier email_id, int index) {
+            this.owner = owner;
+            this.folder = folder;
+            this.email_id = email_id;
+            this.index = index;
+        }
+        
+        public override async Object? execute(Cancellable? cancellable) throws Error {
+            Geary.Email? preview = yield folder.fetch_email_async(email_id,
+                MessageListStore.WITH_PREVIEW_FIELDS, cancellable);
+            
+            owner.message_list_store.set_preview_at_index(index, preview);
+            
+            return null;
+        }
+    }
+    
+    private class ListFoldersOperation : Geary.NonblockingBatchOperation {
+        public Geary.Account account;
+        public Geary.FolderPath path;
+        
+        public ListFoldersOperation(Geary.Account account, Geary.FolderPath path) {
+            this.account = account;
+            this.path = path;
+        }
+        
+        public override async Object? execute(Cancellable? cancellable) throws Error {
+            return yield account.list_folders_async(path, cancellable);
+        }
+    }
+    
+    private class FetchSpecialFolderOperation : Geary.NonblockingBatchOperation {
+        public Geary.Account account;
+        public Geary.SpecialFolder special_folder;
+        
+        public FetchSpecialFolderOperation(Geary.Account account, Geary.SpecialFolder special_folder) {
+            this.account = account;
+            this.special_folder = special_folder;
+        }
+        
+        public override async Object? execute(Cancellable? cancellable) throws Error {
+            return yield account.fetch_folder_async(special_folder.path);
+        }
+    }
+    
     private MainToolbar main_toolbar;
     private MessageListStore message_list_store = new MessageListStore();
     private MessageListView message_list_view;
@@ -60,9 +112,24 @@ public class MainWindow : Gtk.Window {
             // add all the special folders, which are assumed to always exist
             Geary.SpecialFolderMap? special_folders = account.get_special_folder_map();
             if (special_folders != null) {
-                foreach (Geary.SpecialFolder special_folder in special_folders.get_all()) {
-                    Geary.Folder folder = yield account.fetch_folder_async(special_folder.path);
-                    folder_list_store.add_special_folder(special_folder, folder);
+                Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
+                foreach (Geary.SpecialFolder special_folder in special_folders.get_all())
+                    batch.add(new FetchSpecialFolderOperation(account, special_folder));
+                
+                debug("Listing special folders");
+                yield batch.execute_all();
+                debug("Completed list of special folders");
+                
+                foreach (int id in batch.get_ids()) {
+                    FetchSpecialFolderOperation op = (FetchSpecialFolderOperation) batch.get_operation(id);
+                    try {
+                        Geary.Folder folder = (Geary.Folder) batch.get_result(id);
+                        folder_list_store.add_special_folder(op.special_folder, folder);
+                    } catch (Error inner_error) {
+                        message("Unable to fetch special folder %s: %s", op.special_folder.path.to_string(),
+                            inner_error.message);
+                    }
+                    
                 }
                 
                 // If inbox is specified, select that
@@ -78,7 +145,7 @@ public class MainWindow : Gtk.Window {
             else
                 debug("no folders");
         } catch (Error err) {
-            warning("%s", err.message);
+            message("%s", err.message);
         }
     }
     
@@ -268,17 +335,20 @@ public class MainWindow : Gtk.Window {
     }
     
     private async void do_fetch_previews(Cancellable? cancellable) throws Error {
+        Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
+        
         int count = message_list_store.get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Email? email = message_list_store.get_newest_message_at_index(ctr);
-            if (email == null)
-                continue;
-            
-            Geary.Email? body = yield current_folder.fetch_email_async(email.id,
-                Geary.Email.Field.HEADER | Geary.Email.Field.BODY | Geary.Email.Field.ENVELOPE | 
-                Geary.Email.Field.PROPERTIES, cancellable);
-            message_list_store.set_preview_at_index(ctr, body);
+            if (email != null)
+                batch.add(new FetchPreviewOperation(this, current_folder, email.id, ctr));
         }
+        
+        debug("Fetching %d previews", count);
+        yield batch.execute_all(cancellable);
+        debug("Completed fetching %d previews", count);
+        
+        batch.throw_first_exception();
         
         // with all the previews fetched, now go back and do a full list (if required)
         if (second_list_pass_required) {
@@ -358,14 +428,28 @@ public class MainWindow : Gtk.Window {
     }
     
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
+        Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
+        foreach (Geary.Folder folder in folders)
+            batch.add(new ListFoldersOperation(account, folder.get_path()));
+        
+        debug("Listing folder children");
+        try {
+            yield batch.execute_all();
+        } catch (Error err) {
+            debug("Unable to execute batch: %s", err.message);
+            
+            return;
+        }
+        debug("Completed listing folder children");
+        
         Gee.ArrayList<Geary.Folder> accumulator = new Gee.ArrayList<Geary.Folder>();
-        foreach (Geary.Folder folder in folders) {
+        foreach (int id in batch.get_ids()) {
+            ListFoldersOperation op = (ListFoldersOperation) batch.get_operation(id);
             try {
-                Gee.Collection<Geary.Folder> children = yield account.list_folders_async(
-                    folder.get_path(), null);
+                Gee.Collection<Geary.Folder> children = (Gee.Collection<Geary.Folder>) batch.get_result(id);
                 accumulator.add_all(children);
-            } catch (Error err) {
-                debug("Unable to list children of %s: %s", folder.to_string(), err.message);
+            } catch (Error err2) {
+                debug("Unable to list children of %s: %s", op.path.to_string(), err2.message);
             }
         }
         
