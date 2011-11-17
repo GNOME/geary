@@ -759,25 +759,32 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         Gee.List<Geary.Email> full = new Gee.ArrayList<Geary.Email>();
         
-        int index = 0;
-        while (index < needed_by_position.length) {
+        // pull in reverse order because callers to this method tend to order messages from oldest
+        // to newest, but for user satisfaction, should be fetched from newest to oldest
+        int remaining = needed_by_position.length;
+        while (remaining > 0) {
             // if a callback is specified, pull the messages down in chunks, so they can be reported
             // incrementally
             int[] list;
             if (cb != null) {
-                int list_count = int.min(REMOTE_FETCH_CHUNK_COUNT, needed_by_position.length - index);
-                list = needed_by_position[index:index + list_count];
+                int list_count = int.min(REMOTE_FETCH_CHUNK_COUNT, remaining);
+                list = needed_by_position[remaining - list_count:remaining];
+                assert(list.length == list_count);
             } else {
                 list = needed_by_position;
             }
             
+            // pull from server
             Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_sparse_async(
                 list, full_fields, Geary.Folder.ListFlags.NONE, cancellable);
             
             if (remote_list == null || remote_list.size == 0)
                 break;
             
-            // if any were fetched, store locally
+            // if any were fetched, store locally ... must be stored before they can be reported
+            // via the callback because if, in the context of the callback, these messages are
+            // requested, they won't be found in the database, causing another remote fetch to
+            // occur
             NonblockingBatch batch = new NonblockingBatch();
             
             foreach (Geary.Email email in remote_list)
@@ -792,7 +799,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             
             full.add_all(remote_list);
             
-            index += list.length;
+            remaining -= list.length;
         }
         
         return full;
