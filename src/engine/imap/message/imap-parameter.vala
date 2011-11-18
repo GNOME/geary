@@ -153,10 +153,13 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     public new Parameter? get(int index) {
-        return list.get(index);
+        return (index < list.size) ? list.get(index) : null;
     }
     
     public Parameter get_required(int index) throws ImapError {
+        if (index >= list.size)
+            throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
+        
         Parameter? param = list.get(index);
         if (param == null)
             throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
