@@ -303,10 +303,25 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.EmailIdentifier? owned_id = id;
         if (owned_id == null) {
             try {
-                Gee.List<Geary.Email>? local = yield local_folder.list_email_async(remote_position, 1,
-                    Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, null);
-                if (local != null && local.size > 0)
-                    owned_id = local[0].id;
+                // convert remote positional addressing to local positional addressing
+                int local_count = yield local_folder.get_email_count_async();
+                int local_position = remote_position_to_local_position(remote_position, local_count);
+                
+                // possible we don't have the remote email locally
+                if (local_position >= 1) {
+                    // get EmailIdentifier for removed email
+                    Gee.List<Geary.Email>? local = yield local_folder.list_email_async(local_position, 1,
+                        Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, null);
+                    if (local != null && local.size == 1) {
+                        owned_id = local[0].id;
+                    } else {
+                        debug("list_email_async unable to convert position %d into id (count=%d)",
+                            local_position, yield local_folder.get_email_count_async());
+                    }
+                } else {
+                    debug("Unable to get local position for remote position %d (local_count=%d remote_count=%d)",
+                        remote_position, local_count, remote_count);
+                }
             } catch (Error err) {
                 debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
                     to_string(), err.message);
@@ -408,7 +423,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             // because the local store caches messages starting from the newest (at the end of the list)
             // to the earliest fetched by the user, need to adjust the low value to match its offset
             // and range
-            local_low = low - (remote_count - local_count);
+            local_low = remote_position_to_local_position(low, local_count);
         } else {
             normalize_span_specifiers(ref low, ref count, local_count);
             local_low = low.clamp(1, local_count);
@@ -708,8 +723,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
         
         // normalize the initial position to the remote folder's addressing
-        initial_position = remote_count - (local_count - initial_position);
-        assert(initial_position > 0);
+        initial_position = local_position_to_remote_position(initial_position, local_count);
+        if (initial_position <= 0) {
+            throw new EngineError.NOT_FOUND("Cannot map email ID %s in %s to remote folder",
+                initial_id.to_string(), to_string());
+        }
         
         // since count can also indicate "to earliest" or "to latest", normalize
         // (count is exclusive of initial_id, hence adding/substracting one, meaning that a count
@@ -732,9 +750,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         int actual_count = ((high - low) + 1);
         
-        // one more check for exclusive listing
-        if (actual_count == 0 || (excluding_id && actual_count == 1))
+        // one more check
+        if (actual_count == 0) {
+            debug("do_list_email_by_id_async: no actual count to return (%d) (excluding=%s %s)",
+                actual_count, excluding_id.to_string(), initial_id.to_string());
+            
+            if (cb != null)
+                cb(null, null);
+            
             return;
+        }
         
         debug("do_list_email_by_id_async: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d excl=%s",
             initial_id.to_string(), initial_position, count, actual_count, low, high, local_count,
@@ -847,6 +872,23 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         throw new EngineError.READONLY("EngineFolder currently cannot remove email");
     }
     
+    // Converts a remote position to a local position, assuming that the remote has been completely
+    // opened.  local_count must be supplied because that's not held by EngineFolder (unlike
+    // remote_count).
+    //
+    // Returns a negative value if not available in local folder or remote is not open yet.
+    private int remote_position_to_local_position(int remote_pos, int local_count) {
+        return (remote_count >= 0) ? remote_pos - (remote_count - local_count) : -1;
+    }
+    
+    // Converts a local position to a remote position, assuming that the remote has been completely
+    // opened.  See remote_position_to_local_position for more caveats.
+    //
+    // Returns a negative value if remote is not open.
+    private int local_position_to_remote_position(int local_pos, int local_count) {
+        return (remote_count >= 0) ? remote_count - (local_count - local_pos) : -1;
+    }
+    
     // In order to maintain positions for all messages without storing all of them locally,
     // the database stores entries for the lowest requested email to the highest (newest), which
     // means there can be no gaps between the last in the database and the last on the server.
@@ -887,8 +929,13 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 count, low, to_string());
         }
         
+        NonblockingBatch batch = new NonblockingBatch();
+        
         foreach (Geary.Email email in list)
-            yield local_folder.create_email_async(email, cancellable);
+            batch.add(new CreateEmailOperation(local_folder, email));
+        
+        yield batch.execute_all_async(cancellable);
+        batch.throw_first_exception();
         
         debug("prefetched %d for %s", prefetch_count, to_string());
     }

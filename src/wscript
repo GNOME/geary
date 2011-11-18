@@ -69,6 +69,7 @@ def build(bld):
 	'../engine/imap/response/imap-status-data-type.vala',
 	'../engine/imap/response/imap-status-response.vala',
 	'../engine/imap/response/imap-status.vala',
+	'../engine/imap/response/imap-unsolicited-server-data.vala',
 	'../engine/imap/transport/imap-client-connection.vala',
 	'../engine/imap/transport/imap-client-session-manager.vala',
 	'../engine/imap/transport/imap-client-session.vala',

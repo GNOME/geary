@@ -12,21 +12,21 @@ public class MainWindow : Gtk.Window {
         public MainWindow owner;
         public Geary.Folder folder;
         public Geary.EmailIdentifier email_id;
-        public int index;
+        public Geary.Conversation conversation;
         
         public FetchPreviewOperation(MainWindow owner, Geary.Folder folder,
-            Geary.EmailIdentifier email_id, int index) {
+            Geary.EmailIdentifier email_id, Geary.Conversation conversation) {
             this.owner = owner;
             this.folder = folder;
             this.email_id = email_id;
-            this.index = index;
+            this.conversation = conversation;
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
             Geary.Email? preview = yield folder.fetch_email_async(email_id,
                 MessageListStore.WITH_PREVIEW_FIELDS, cancellable);
-            
-            owner.message_list_store.set_preview_at_index(index, preview);
+            if (preview != null)
+                owner.message_list_store.set_preview_for_conversation(conversation, preview);
             
             return null;
         }
@@ -339,9 +339,10 @@ public class MainWindow : Gtk.Window {
         
         int count = message_list_store.get_count();
         for (int ctr = 0; ctr < count; ctr++) {
-            Geary.Email? email = message_list_store.get_newest_message_at_index(ctr);
+            Geary.Conversation? conversation;
+            Geary.Email? email = message_list_store.get_newest_message_at_index(ctr, out conversation);
             if (email != null)
-                batch.add(new FetchPreviewOperation(this, current_folder, email.id, ctr));
+                batch.add(new FetchPreviewOperation(this, current_folder, email.id, conversation));
         }
         
         debug("Fetching %d previews", count);

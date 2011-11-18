@@ -115,33 +115,25 @@ public class MessageListStore : Gtk.TreeStore {
         return get_conversation_at(new Gtk.TreePath.from_indices(index, -1));
     }
     
-    public Geary.Email? get_newest_message_at_index(int index) {
-        Geary.Conversation? c = get_conversation_at_index(index);
-        if (c == null)
+    public Geary.Email? get_newest_message_at_index(int index, out Geary.Conversation? conversation) {
+        conversation = get_conversation_at_index(index);
+        if (conversation == null)
             return null;
         
-        Gee.SortedSet<Geary.Email>? pool = c.get_pool_sorted(compare_email);
+        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
         
         return pool != null ? pool.first() : null;
     }
     
-    public void set_preview_at_index(int index, Geary.Email email) {
+    public void set_preview_for_conversation(Geary.Conversation conversation, Geary.Email email) {
         Gtk.TreeIter iter;
-        if (!get_iter(out iter, new Gtk.TreePath.from_indices(index, -1))) {
-            warning("Unable to get tree path from position: %d".printf(index));
+        if (!find_conversation(conversation, out iter)) {
+            debug("Unable to find conversation for preview %s", email.id.to_string());
             
             return;
         }
         
-        int num_emails = 1;
-        Geary.Conversation? c = get_conversation_at_index(index);
-        if (c != null) {
-            Gee.Set<Geary.Email>? list = c.get_pool();
-            if (list != null)
-                num_emails = list.size;
-        }
-        
-        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, num_emails));
+        set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, conversation.get_count()));
     }
     
     public int get_count() {

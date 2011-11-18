@@ -88,7 +88,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
             notify_messages_appended(new_exists);
     }
     
-    private void on_flags_altered(FetchResults flags) {
+    private void on_flags_altered(MailboxAttributes flags) {
         assert(mailbox != null);
         // TODO: Notify of changes
     }

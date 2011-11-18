@@ -208,7 +208,7 @@ public class Geary.Imap.ClientSession {
     public virtual signal void unsolicited_recent(int recent) {
     }
     
-    public virtual signal void unsolicited_flags(FetchResults flags) {
+    public virtual signal void unsolicited_flags(MailboxAttributes attrs) {
     }
     
     public ClientSession(Geary.Endpoint endpoint) {
@@ -583,10 +583,8 @@ public class Geary.Imap.ClientSession {
         if (results.has_recent())
             unsolicited_recent(results.recent);
         
-        if (results.flags != null) {
-            foreach (FetchResults flags in results.flags)
-                unsolicited_flags(flags);
-        }
+        if (results.flags != null)
+            unsolicited_flags(results.flags);
     }
     
     //
@@ -613,6 +611,49 @@ public class Geary.Imap.ClientSession {
         
         if (params.err != null)
             throw params.err;
+        
+        // look for unsolicited server data and signal all that are found ... since SELECT/EXAMINE
+        // aren't allowed here, don't need to check for them (because their fields aren't considered
+        // unsolicited)
+        //
+        // Note that EXPUNGE returns *EXPUNGED* results, not *EXPUNGE*, which is what the unsolicited
+        // version is.
+        Gee.ArrayList<ServerData>? to_remove = null;
+        foreach (ServerData data in params.cmd_response.server_data) {
+            UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data(data);
+            if (unsolicited == null)
+                continue;
+            
+            if (unsolicited.exists >= 0) {
+                debug("UNSOLICITED EXISTS %d", unsolicited.exists);
+                unsolicited_exists(unsolicited.exists);
+            }
+            
+            if (unsolicited.recent >= 0) {
+                debug("UNSOLICITED RECENT %d", unsolicited.recent);
+                unsolicited_recent(unsolicited.recent);
+            }
+            
+            if (unsolicited.expunge != null) {
+                debug("UNSOLICITED EXPUNGE %s", unsolicited.expunge.to_string());
+                unsolicited_expunged(unsolicited.expunge);
+            }
+            
+            if (unsolicited.flags != null) {
+                debug("UNSOLICITED FLAGS %s", unsolicited.flags.to_string());
+                unsolicited_flags(unsolicited.flags);
+            }
+            
+            if (to_remove == null)
+                to_remove = new Gee.ArrayList<ServerData>();
+            
+            to_remove.add(data);
+        }
+        
+        if (to_remove != null) {
+            bool removed = params.cmd_response.remove_many_server_data(to_remove);
+            assert(removed);
+        }
         
         return params.cmd_response;
     }

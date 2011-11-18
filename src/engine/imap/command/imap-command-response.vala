@@ -18,6 +18,14 @@ public class Geary.Imap.CommandResponse : Object {
         server_data.add(data);
     }
     
+    public bool remove_server_data(ServerData data) {
+        return server_data.remove(data);
+    }
+    
+    public bool remove_many_server_data(Gee.Collection<ServerData> data) {
+        return server_data.remove_all(data);
+    }
+    
     public void seal(StatusResponse status_response) {
         assert(!is_sealed());
         

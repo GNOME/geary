@@ -106,15 +106,8 @@ public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
     
     public static MessageFlags from_list(ListParameter listp) throws ImapError {
         Gee.Collection<MessageFlag> list = new Gee.ArrayList<MessageFlag>();
-        foreach (Parameter param in listp.get_all()) {
-            StringParameter? stringp = param as StringParameter;
-            if (stringp == null) {
-                throw new ImapError.TYPE_ERROR("Flags list contained non-string parameter \"%s\"",
-                    param.to_string());
-            }
-            
-            list.add(new MessageFlag(stringp.value));
-        }
+        for (int ctr = 0; ctr < listp.get_count(); ctr++)
+            list.add(new MessageFlag(listp.get_as_string(ctr).value));
         
         return new MessageFlags(list);
     }
@@ -133,6 +126,14 @@ public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
 public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
     public MailboxAttributes(Gee.Collection<MailboxAttribute> attrs) {
         base (attrs);
+    }
+    
+    public static MailboxAttributes from_list(ListParameter listp) throws ImapError {
+        Gee.Collection<MailboxAttribute> list = new Gee.ArrayList<MailboxAttribute>();
+        for (int ctr = 0; ctr < listp.get_count(); ctr++)
+            list.add(new MailboxAttribute(listp.get_as_string(ctr).value));
+        
+        return new MailboxAttributes(list);
     }
     
     public static MailboxAttributes deserialize(string str) {

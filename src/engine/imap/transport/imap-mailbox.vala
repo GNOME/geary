@@ -33,7 +33,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     public signal void recent_altered(int recent);
     
-    public signal void flags_altered(FetchResults flags);
+    public signal void flags_altered(MailboxAttributes flags);
     
     public signal void expunged(MessageNumber msg_num, int total);
     
@@ -125,7 +125,6 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             
             msgs.add(email);
             map.set(plain_res.msg_num, email);
-            assert(map.get(plain_res.msg_num) != null);
         }
         
         // process preview FETCH results
@@ -142,9 +141,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             FetchResults[] preview_results = FetchResults.decode(preview_resp);
             foreach (FetchResults preview_res in preview_results) {
                 Geary.Email? preview_email = map.get(preview_res.msg_num);
-                assert(preview_email != null);
-                
-                preview_email.set_message_preview(new RFC822.Text(preview_res.get_body_data()[0]));
+                if (preview_email != null)
+                    preview_email.set_message_preview(new RFC822.Text(preview_res.get_body_data()[0]));
             }
         }
         
@@ -171,7 +169,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         expunged(msg_num, total);
     }
     
-    private void on_flags_altered(FetchResults flags) {
+    private void on_flags_altered(MailboxAttributes flags) {
         flags_altered(flags);
     }
     
@@ -444,7 +442,7 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     
     public signal void expunged(MessageNumber msg_num, int total);
     
-    public signal void flags_altered(FetchResults flags);
+    public signal void flags_altered(MailboxAttributes flags);
     
     public signal void closed();
     
@@ -514,8 +512,8 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
         expunged(msg_num, exists);
     }
     
-    private void on_unsolicited_flags(FetchResults results) {
-        flags_altered(results);
+    private void on_unsolicited_flags(MailboxAttributes flags) {
+        flags_altered(flags);
     }
     
     private void on_session_mailbox_changed(string? old_mailbox, string? new_mailbox, bool readonly) {

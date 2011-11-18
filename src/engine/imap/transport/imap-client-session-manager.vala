@@ -6,7 +6,7 @@
 
 public class Geary.Imap.ClientSessionManager {
     private const int MIN_POOL_SIZE = 2;
-    private const int SELECTED_KEEPALIVE_SEC = 60;
+    private const int SELECTED_KEEPALIVE_SEC = 30;
     
     private Endpoint endpoint;
     private Credentials credentials;
