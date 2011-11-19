@@ -30,8 +30,10 @@ public class Geary.Sqlite.Transaction {
     
     ~Transaction() {
         if (is_locked) {
+            // this may be the result of a programming error, but it can also be due to an exception
+            // being thrown (particularly IOError.CANCELLED) when attempting an operation.
             if (is_commit_required)
-                warning("[%s] destroyed without committing or rolling back changes", to_string());
+                message("[%s] destroyed without committing or rolling back changes", to_string());
             
             resolve(false, null);
         }

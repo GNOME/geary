@@ -73,8 +73,7 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         return id;
     }
     
-    // TODO: This could be improved greatly, in particular making this a single SQL command or
-    // parallelizing the commands.
+    // TODO: This could be made more efficient by executing a single SQL statement.
     public async void merge_async(Transaction? transaction, MessageRow row,
         Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction, "MessageTable.merge_async",
@@ -86,18 +85,17 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         // This calculates the fields in the row that are not in the database already
         Geary.Email.Field new_fields = (row.fields ^ available_fields) & row.fields;
-        
-        // merge the valid fields in the row
-        SQLHeavy.Query query = locked.prepare(
-            "UPDATE MessageTable SET fields = fields | ? WHERE id=?");
-        query.bind_int(0, new_fields);
-        query.bind_int64(1, row.id);
-        
-        yield query.execute_async(cancellable);
-        locked.set_commit_required();
+        if (new_fields == Geary.Email.Field.NONE) {
+            // nothing to add
+            return;
+        }
         
         NonblockingBatch batch = new NonblockingBatch();
         
+        // since the following queries are all updates, the Transaction must be committed
+        locked.set_commit_required();
+        
+        SQLHeavy.Query? query = null;
         if (new_fields.is_any_set(Geary.Email.Field.DATE)) {
             query = locked.prepare(
                 "UPDATE MessageTable SET date_field=?, date_time_t=? WHERE id=?");
@@ -181,9 +179,15 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         
         batch.throw_first_exception();
         
-        // only commit if internally atomic
-        if (transaction == null)
-            yield locked.commit_async(cancellable);
+        // now merge the new fields in the row (do this *after* adding the fields, particularly
+        // since we don't have full transaction backing out in the case of cancelled due to bugs
+        // in SQLHeavy's async code
+        query = locked.prepare(
+            "UPDATE MessageTable SET fields = fields | ? WHERE id=?");
+        query.bind_int(0, new_fields);
+        query.bind_int64(1, row.id);
+        
+        yield query.execute_async(cancellable);
         
         yield release_lock_async(transaction, locked, cancellable);
     }
