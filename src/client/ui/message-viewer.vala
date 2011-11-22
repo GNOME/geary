@@ -34,7 +34,6 @@ public class MessageViewer : Gtk.Viewport {
         set_border_width(0);
         message_box.set_border_width(0);
         message_box.spacing = 0;
-        resize_mode = Gtk.ResizeMode.IMMEDIATE;
     }
     
     // Removes all displayed e-mails from the view.
