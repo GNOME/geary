@@ -116,7 +116,7 @@ public class Geary.Email : Object {
     public Geary.EmailProperties? properties { get; private set; default = null; }
     
     // PREVIEW
-    public RFC822.Text? preview { get; private set; default = null; }
+    public RFC822.PreviewText? preview { get; private set; default = null; }
     
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
     
@@ -198,7 +198,7 @@ public class Geary.Email : Object {
         fields |= Field.PROPERTIES;
     }
     
-    public void set_message_preview(Geary.RFC822.Text preview) {
+    public void set_message_preview(Geary.RFC822.PreviewText preview) {
         this.preview = preview;
         
         fields |= Field.PREVIEW;

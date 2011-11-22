@@ -183,7 +183,12 @@ public class Geary.RFC822.Message : Object {
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
         
-        wrapper.write_to_stream(stream);
+        // Convert encoding to UTF-8.
+        GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
+        stream_filter.add(new GMime.FilterCharset(part.get_content_type_parameter("charset"), 
+            "UTF8"));
+        
+        wrapper.write_to_stream(stream_filter);
         
         return new Geary.Memory.Buffer(byte_array.data, byte_array.len);
     }

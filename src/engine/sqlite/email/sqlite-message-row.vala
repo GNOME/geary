@@ -120,7 +120,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             email.set_message_body(new RFC822.Text(new Geary.Memory.StringBuffer(body)));
         
         if (((fields & Geary.Email.Field.PREVIEW) != 0) && (preview != null))
-            email.set_message_preview(new RFC822.Text(new Geary.Memory.StringBuffer(preview)));
+            email.set_message_preview(new RFC822.PreviewText(new Geary.Memory.StringBuffer(preview)));
         
         return email;
     }

@@ -149,3 +149,48 @@ public class Geary.RFC822.Full : Geary.Common.BlockMessageData, Geary.RFC822.Mes
     }
 }
 
+// Used for decoding preview text.
+public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
+    public PreviewText(Geary.Memory.AbstractBuffer _buffer, Geary.Memory.AbstractBuffer? 
+        preview_header = null) {
+        
+        Geary.Memory.AbstractBuffer buffer = _buffer;
+        
+        if (preview_header != null) {
+            string? charset = null;
+            string? encoding = null;
+            
+            // Parse the header.
+            GMime.Stream header_stream = new GMime.StreamMem.with_buffer(
+                preview_header.get_array());
+            GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
+            GMime.Part? part = parser.construct_part() as GMime.Part;
+            if (part != null) {
+                charset = part.get_content_type_parameter("charset");
+                encoding = part.get_header("Content-Transfer-Encoding");
+            }
+            
+            GMime.StreamMem input_stream = new GMime.StreamMem.with_buffer(buffer.get_array());
+            
+            ByteArray output = new ByteArray();
+            GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
+            output_stream.set_owner(false);
+            
+            // Convert the encoding and character set.
+            GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
+            if (encoding != null)
+                filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
+            
+            if (charset != null)
+                filter.add(new GMime.FilterCharset(charset, "UTF8"));
+            
+            input_stream.write_to_stream(filter);
+            uint8[] data = output.data;
+            data += (uint8) '\0';
+            buffer = new Geary.Memory.StringBuffer((string) data);
+        }
+        
+        base (buffer);
+    }
+}
+

@@ -90,7 +90,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         int plain_id = batch.add(new MailboxOperation(context, fetch_cmd));
         
         int preview_id = NonblockingBatch.INVALID_ID;
+        int preview_charset_id = NonblockingBatch.INVALID_ID;
         if (fields.require(Geary.Email.Field.PREVIEW)) {
+            // Preview text.
             FetchBodyDataType fetch_preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
                 { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES, null);
             Gee.List<FetchBodyDataType> list = new Gee.ArrayList<FetchBodyDataType>();
@@ -99,6 +101,17 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             FetchCommand preview_cmd = new FetchCommand(msg_set, null, list);
             
             preview_id = batch.add(new MailboxOperation(context, preview_cmd));
+            
+            // Preview character set.
+            FetchBodyDataType fetch_preview_charset = new FetchBodyDataType.peek(
+                FetchBodyDataType.SectionPart.MIME,
+                { 1 }, -1, -1, null);
+            Gee.List<FetchBodyDataType> list_charset = new Gee.ArrayList<FetchBodyDataType>();
+            list_charset.add(fetch_preview_charset);
+            
+            FetchCommand preview_charset_cmd = new FetchCommand(msg_set, null, list_charset);
+            
+            preview_charset_id = batch.add(new MailboxOperation(context, preview_charset_cmd));
         }
         
         yield batch.execute_all_async(cancellable);
@@ -129,20 +142,38 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         // process preview FETCH results
         
-        if (preview_id != NonblockingBatch.INVALID_ID) {
+        if (preview_id != NonblockingBatch.INVALID_ID && 
+            preview_charset_id != NonblockingBatch.INVALID_ID) {
+            
             MailboxOperation preview_op = (MailboxOperation) batch.get_operation(preview_id);
             CommandResponse preview_resp = (CommandResponse) batch.get_result(preview_id);
+            
+            MailboxOperation preview_charset_op = (MailboxOperation) 
+                batch.get_operation(preview_charset_id);
+            CommandResponse preview_charset_resp = (CommandResponse) 
+                batch.get_result(preview_charset_id);
             
             if (preview_resp.status_response.status != Status.OK) {
                 throw new ImapError.SERVER_ERROR("Server error for %s: %s", preview_op.cmd.to_string(),
                     preview_resp.to_string());
             }
             
+            if (preview_charset_resp.status_response.status != Status.OK) {
+                throw new ImapError.SERVER_ERROR("Server error for %s: %s", 
+                    preview_charset_op.cmd.to_string(), preview_charset_resp.to_string());
+            }
+            
             FetchResults[] preview_results = FetchResults.decode(preview_resp);
+            FetchResults[] preview_header_results = FetchResults.decode(preview_charset_resp);
+            int i = 0;
             foreach (FetchResults preview_res in preview_results) {
                 Geary.Email? preview_email = map.get(preview_res.msg_num);
-                if (preview_email != null)
-                    preview_email.set_message_preview(new RFC822.Text(preview_res.get_body_data()[0]));
+                if (preview_email == null)
+                    continue;
+                
+                preview_email.set_message_preview(new RFC822.PreviewText(
+                    preview_res.get_body_data()[0], preview_header_results[i].get_body_data()[0]));
+                i++;
             }
         }
         
