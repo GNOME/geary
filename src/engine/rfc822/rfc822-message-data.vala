@@ -82,12 +82,11 @@ public class Geary.RFC822.Size : Geary.Common.LongMessageData, Geary.RFC822.Mess
 }
 
 public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
-    public Subject(string value) {
-        base (value);
-    }
+    public string original { get; private set; }
     
-    public Subject.from_rfc822(string value) {
+    public Subject(string value) {
         base (GMime.utils_header_decode_text(value));
+        original = value;
     }
 }
 

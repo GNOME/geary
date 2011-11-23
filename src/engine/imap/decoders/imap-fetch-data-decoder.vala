@@ -123,7 +123,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             message_id = null;
         
         return new Envelope(new Geary.RFC822.Date(sent.value),
-            new Geary.RFC822.Subject.from_rfc822(subject.value),
+            new Geary.RFC822.Subject(subject.value),
             parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null, 
             (cc != null) ? parse_addresses(cc) : null,

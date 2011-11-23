@@ -198,7 +198,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         }
         
         if ((fields & Geary.Email.Field.SUBJECT) != 0) {
-            subject = (email.subject != null) ? email.subject.value : null;
+            subject = (email.subject != null) ? email.subject.original : null;
             
             this.fields = this.fields.set(Geary.Email.Field.SUBJECT);
         }
