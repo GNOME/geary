@@ -19,7 +19,7 @@ public class MainToolbar : Gtk.VBox {
         
         Gtk.ToolButton new_message = builder.get_object("new_button") as Gtk.ToolButton;
         new_message.set_related_action(GearyApplication.instance.actions.get_action(
-            GearyApplication.ACTION_NEW_MESSAGE));
+            GearyController.ACTION_NEW_MESSAGE));
         
         menu_button = builder.get_object("menu_button") as Gtk.ToolButton;
         menu_button.clicked.connect(on_show_menu);

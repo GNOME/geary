@@ -6,6 +6,7 @@
 client_src = [
 'geary-application.vala',
 'geary-config.vala',
+'geary-controller.vala',
 'main.vala',
 
 'ui/background-box.vala',

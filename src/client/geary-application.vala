@@ -17,17 +17,11 @@ public class GearyApplication : YorbaApplication {
     public const string WEBSITE = "http://www.yorba.org";
     public static string WEBSITE_LABEL = _("Visit the Yorba web site");
     
-    // Named actions.
-    public const string ACTION_DONATE = "GearyDonate";
-    public const string ACTION_ABOUT = "GearyAbout";
-    public const string ACTION_QUIT = "GearyQuit";
-    public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
-    public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
-    
     public const string PREFIX = _PREFIX;
     
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
+        "Eric Gregory <eric@yorba.org>",
         null
     };
     
@@ -68,7 +62,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     private static GearyApplication _instance = null;
     
-    private MainWindow? main_window = null;
+    private GearyController? controller = null;
     private Geary.EngineAccount? account = null;
     
     private File exec_dir;
@@ -81,18 +75,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public override void activate() {
         // If Geary is already running, show the main window and return.
-        if (main_window != null) {
-            main_window.present();
+        if (controller != null && controller.main_window != null) {
+            controller.main_window.present();
             return;
         }
         
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
         
         // Start Geary.
-        actions.add_actions(create_actions(), this);
-        ui_manager.insert_action_group(actions, 0);
-        load_ui_file("accelerators.ui");
-        
         config = new Configuration(GearyApplication.instance.get_install_dir() != null,
             GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
         
@@ -131,15 +121,15 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             error("Unable to open mail database for %s: %s", cred.user, err.message);
         }
         
-        main_window = new MainWindow();
-        main_window.show_all();
-        main_window.start(account);
+        controller = new GearyController();
+        controller.start(account);
+        
         return;
     }
     
     public override void exiting(bool panicked) {
-        if (main_window != null)
-            main_window.destroy();
+        if (controller.main_window != null)
+            controller.main_window.destroy();
     }
     
     public File get_user_data_directory() {
@@ -194,103 +184,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
-    private Gtk.ActionEntry[] create_actions() {
-        Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
-        
-        Gtk.ActionEntry donate = { ACTION_DONATE, null, TRANSLATABLE, null, null, on_donate };
-        donate.label = _("_Donate");
-        entries += donate;
-        
-        Gtk.ActionEntry about = { ACTION_ABOUT, Gtk.Stock.ABOUT, TRANSLATABLE, null, null, on_about };
-        about.label = _("_About");
-        entries += about;
-        
-        Gtk.ActionEntry quit = { ACTION_QUIT, Gtk.Stock.QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
-        quit.label = _("_Quit");
-        entries += quit;
-        
-        Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", 
-            null, on_new_message };
-        new_message.label = _("_New Message");
-        entries += new_message;
-        
-        Gtk.ActionEntry secret_debug = { ACTION_DEBUG_PRINT, null, null, "<Ctrl><Alt>P",
-            null, on_debug_print };
-        entries += secret_debug;
-        
-        return entries;
-    }
-    
-    public void on_quit() {
-        GearyApplication.instance.exit();
-    }
-    
-    public void on_about() {
-        Gtk.show_about_dialog(main_window,
-            "program-name", GearyApplication.NAME,
-            "comments", GearyApplication.DESCRIPTION,
-            "authors", GearyApplication.AUTHORS,
-            "copyright", GearyApplication.COPYRIGHT,
-            "license", GearyApplication.LICENSE,
-            "version", GearyApplication.VERSION,
-            "website", GearyApplication.WEBSITE,
-            "website-label", GearyApplication.WEBSITE_LABEL
-        );
-    }
-    
-    public void on_donate() {
-        try {
-            Gtk.show_uri(main_window.get_screen(), "http://yorba.org/donate/", Gdk.CURRENT_TIME);
-        } catch (Error err) {
-            debug("Unable to open URL. %s", err.message);
-        }
-    }
-    
-    private void on_new_message() {
-        ComposerWindow w = new ComposerWindow();
-        w.set_position(Gtk.WindowPosition.CENTER);
-        w.send.connect(on_send);
-        w.show_all();
-    }
-    
-    private void on_send(ComposerWindow cw) {
-        string username;
-        try {
-            // TODO: Multiple accounts.
-            username = Geary.Engine.get_usernames(GearyApplication.instance.get_user_data_directory())
-                .get(0);
-        } catch (Error e) {
-            error("Unable to get username. Error: %s", e.message);
-        }
-        
-        Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.from_rfc822_string(username));
-        
-        if (!Geary.String.is_empty(cw.to))
-            email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);
-        
-        if (!Geary.String.is_empty(cw.cc))
-            email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.cc);
-        
-        if (!Geary.String.is_empty(cw.bcc))
-            email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.bcc);
-        
-        if (!Geary.String.is_empty(cw.subject))
-            email.subject = new Geary.RFC822.Subject(cw.subject);
-        
-        email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(cw.message));
-        
-        account.send_email_async.begin(email);
-        
-        cw.destroy();
-    }
-    
-    private void on_debug_print() {
-        main_window.debug_print_selected();
-    }
-    
     public Gtk.Window get_main_window() {
-        return main_window;
+        return controller.main_window;
     }
 }
 
