@@ -94,7 +94,7 @@ public class FormattedMessageData : Object {
         Pango.FontDescription font_date = new Pango.FontDescription();
         font_date.set_size(FONT_SIZE_DATE * Pango.SCALE);
         Pango.AttrList list_date = new Pango.AttrList();
-        list_date.insert(Pango.attr_foreground_new(0, 0, 65535));
+        list_date.insert(Pango.attr_foreground_new(10000, 10000, 55000)); // muted blue
         Pango.Layout layout_date = widget.create_pango_layout(null);
         layout_date.set_font_description(font_date);
         layout_date.set_attributes(list_date);
