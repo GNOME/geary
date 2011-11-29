@@ -158,5 +158,21 @@ public abstract class Geary.Conversation : Object {
                 pool.add(orphan.get_email());
         }
     }
+    
+    /**
+     * Returns true if *any* message in the conversation is unread.
+     */
+    public virtual bool is_unread() {
+        Gee.Set<Geary.Email>? list = get_pool();
+        if (list == null)
+            return false;
+        
+        foreach (Geary.Email email in list) {
+            if (email.properties.is_unread())
+                return true;
+        }
+        
+        return false;
+    }
 }
 

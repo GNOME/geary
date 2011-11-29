@@ -9,7 +9,8 @@ public class Geary.Conversations : Object {
      * These are the fields Conversations require to thread emails together.  These fields will
      * be retrieved irregardless of the Field parameter passed to the constructor.
      */
-    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES;
+    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES | 
+        Geary.Email.Field.PROPERTIES;
     
     private class Node : Object, ConversationNode {
         public RFC822.MessageID? node_id { get; private set; }

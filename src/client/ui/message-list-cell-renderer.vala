@@ -39,7 +39,7 @@ public class FormattedMessageData : Object {
     }
     
     // Creates a formatted message data from an e-mail.
-    public FormattedMessageData.from_email(Geary.Email email, int num_emails) {
+    public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
         
         string preview = "";
@@ -48,8 +48,8 @@ public class FormattedMessageData : Object {
         
         string from = (email.from != null && email.from.size > 0) ? email.from[0].get_short_address() : "";
         
-        this(email.properties.is_unread(), Date.pretty_print(email.date.value),
-            from, email.subject.value, Geary.String.reduce_whitespace(preview), num_emails);
+        this(unread, Date.pretty_print(email.date.value), from, email.subject.value, 
+            Geary.String.reduce_whitespace(preview), num_emails);
         
         this.email = email;
     }
