@@ -278,7 +278,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         if (field_names.length > 0) {
-            body_data_types_list.add(new FetchBodyDataType(
+            body_data_types_list.add(new FetchBodyDataType.peek(
                 FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, field_names));
         }
     }
