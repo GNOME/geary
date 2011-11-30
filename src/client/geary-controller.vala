@@ -77,6 +77,7 @@ public class GearyController {
     private Geary.Folder? current_folder = null;
     private Geary.Conversations? current_conversations = null;
     private bool second_list_pass_required = false;
+    private int busy_count = 0;
     
     public GearyController() {
         // Setup actions.
@@ -91,6 +92,8 @@ public class GearyController {
         main_window.message_list_view.conversation_selected.connect(on_conversation_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.folder_list_view.folder_selected.connect(on_folder_selected);
+        
+        set_busy(false);
     }
     
     ~GearyController() {
@@ -186,7 +189,7 @@ public class GearyController {
         }
         
         debug("Folder %s selected", folder.to_string());
-        
+        set_busy(true);
         do_select_folder.begin(folder, on_select_folder_completed);
     }
     
@@ -229,6 +232,7 @@ public class GearyController {
         debug("on scan started. id = %s low = %d count = %d", id != null ? id.to_string() : "(null)", 
             low, count);
         main_window.message_list_view.enable_load_more = false;
+        set_busy(true);
     }
     
     public void on_scan_error(Error err) {
@@ -237,6 +241,8 @@ public class GearyController {
     
     public void on_scan_completed() {
         debug("on scan completed");
+        
+        set_busy(false);
         
         do_fetch_previews.begin(cancellable_folder);
         main_window.message_list_view.enable_load_more = true;
@@ -276,6 +282,7 @@ public class GearyController {
         if (low_id == null)
             return;
         
+        set_busy(true);
         current_conversations.load_by_id_async.begin(low_id, - FETCH_EMAIL_CHUNK_COUNT,
             Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_folder, on_load_more_completed);
     }
@@ -287,9 +294,12 @@ public class GearyController {
         } catch (Error err) {
             debug("Error, unable to load conversations: %s", err.message);
         }
+        
+        set_busy(false);
     }
     
     private async void do_fetch_previews(Cancellable? cancellable) throws Error {
+        set_busy(true);
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
         
         int count = main_window.message_list_store.get_count();
@@ -306,6 +316,8 @@ public class GearyController {
         debug("Fetching %d previews", count);
         yield batch.execute_all_async(cancellable);
         debug("Completed fetching %d previews", count);
+        
+        set_busy(false);
         
         batch.throw_first_exception();
         
@@ -324,6 +336,8 @@ public class GearyController {
         } catch (Error err) {
             debug("Unable to select folder: %s", err.message);
         }
+        
+        set_busy(false);
     }
     
     private void on_conversation_selected(Geary.Conversation? conversation) {
@@ -336,12 +350,14 @@ public class GearyController {
     
     private async void do_select_message(Geary.Conversation conversation, Cancellable? 
         cancellable = null) throws Error {
+        
         if (current_folder == null) {
             debug("Conversation selected with no folder selected");
             
             return;
         }
         
+        set_busy(true);
         foreach (Geary.Email email in conversation.get_pool_sorted(compare_email)) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
                 MessageViewer.REQUIRED_FIELDS, cancellable);
@@ -360,10 +376,13 @@ public class GearyController {
             if (!(err is IOError.CANCELLED))
                 debug("Unable to select message: %s", err.message);
         }
+        
+        set_busy(false);
     }
     
     private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
+        
         if (added != null && added.size > 0) {
             Gee.Set<Geary.FolderPath>? ignored_paths = account.get_ignored_paths();
             
@@ -387,6 +406,7 @@ public class GearyController {
     }
     
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
+        set_busy(true);
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
         foreach (Geary.Folder folder in folders)
             batch.add(new ListFoldersOperation(account, folder.get_path()));
@@ -396,6 +416,7 @@ public class GearyController {
             yield batch.execute_all_async();
         } catch (Error err) {
             debug("Unable to execute batch: %s", err.message);
+            set_busy(false);
             
             return;
         }
@@ -415,6 +436,8 @@ public class GearyController {
         
         if (accumulator.size > 0)
             on_folders_added_removed(accumulator, null);
+        
+        set_busy(false);
     }
     
     public void debug_print_selected() {
@@ -512,6 +535,14 @@ public class GearyController {
         account.send_email_async.begin(email);
         
         cw.destroy();
+    }
+    
+    public void set_busy(bool is_busy) {
+        busy_count += is_busy ? 1 : -1;
+        if (busy_count < 0)
+            busy_count = 0;
+        
+        main_window.set_busy(busy_count > 0);
     }
 }
 

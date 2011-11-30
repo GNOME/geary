@@ -19,6 +19,7 @@ public class MainWindow : Gtk.Window {
     private bool window_maximized;
     private Gtk.HPaned folder_paned = new Gtk.HPaned();
     private Gtk.HPaned messages_paned = new Gtk.HPaned();
+    private Gtk.Spinner spinner = new Gtk.Spinner();
     
     public MainWindow() {
         title = GearyApplication.NAME;
@@ -67,6 +68,17 @@ public class MainWindow : Gtk.Window {
         return base.configure_event(event);
     }
     
+    // Displays or stops displaying busy spinner.
+    public void set_busy(bool is_busy) {
+        if (is_busy) {
+            spinner.start();
+            spinner.show();
+        } else {
+            spinner.stop();
+            spinner.hide();
+        }
+    }
+    
     private void create_layout() {
         Gtk.VBox main_layout = new Gtk.VBox(false, 0);
         
@@ -91,16 +103,24 @@ public class MainWindow : Gtk.Window {
         message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_viewer_scrolled.add(message_viewer);
         
-        // three-pane display: message list left of current message on bottom separated by
-        // grippable
-        messages_paned.pack1(message_list_scrolled, false, false);
-        messages_paned.pack2(message_viewer_scrolled, true, true);
+        
         
         // three-pane display: folder list on left and messages on right separated by grippable
         folder_paned.pack1(folder_list_scrolled, false, false);
-        folder_paned.pack2(messages_paned, true, false);
+        folder_paned.pack2(message_list_scrolled, true, false);
         
-        main_layout.pack_end(folder_paned, true, true, 0);
+        Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        Gtk.Statusbar status_bar = new Gtk.Statusbar();
+        status_bar.add(spinner);
+        status_bar_box.pack_start(folder_paned);
+        status_bar_box.pack_start(status_bar, false, false, 0);
+        
+         // three-pane display: message list left of current message on bottom separated by
+        // grippable
+        messages_paned.pack1(status_bar_box, false, false);
+        messages_paned.pack2(message_viewer_scrolled, true, true);
+        
+        main_layout.pack_end(messages_paned, true, true, 0);
         
         add(main_layout);
     }
