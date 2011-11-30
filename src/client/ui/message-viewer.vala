@@ -11,7 +11,8 @@ public class MessageViewer : Gtk.Viewport {
         | Geary.Email.Field.ORIGINATORS
         | Geary.Email.Field.RECEIVERS
         | Geary.Email.Field.SUBJECT
-        | Geary.Email.Field.DATE;
+        | Geary.Email.Field.DATE
+        | Geary.Email.Field.PROPERTIES;
     
     private const int HEADER_COL_SPACING = 10;
     private const int HEADER_ROW_SPACING = 3;
@@ -90,6 +91,7 @@ public class MessageViewer : Gtk.Viewport {
         
         Gtk.Box container = builder.get_object("mail container") as Gtk.Box;
         Gtk.Grid header = builder.get_object("header") as Gtk.Grid;
+        Gtk.Alignment icon_area = builder.get_object("icon area") as Gtk.Alignment;
         Gtk.TextView body = builder.get_object("body") as Gtk.TextView;
         if (sample_view == null)
             sample_view = body;
@@ -100,6 +102,9 @@ public class MessageViewer : Gtk.Viewport {
         
         header.column_spacing = HEADER_COL_SPACING;
         header.row_spacing = HEADER_ROW_SPACING;
+        
+        if (email.properties.is_unread())
+            icon_area.add(new Gtk.Image.from_pixbuf(IconFactory.instance.unread));
         
         int header_height = 0;
         if (email.from != null)

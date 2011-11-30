@@ -12,6 +12,7 @@ client_src = [
 'ui/background-box.vala',
 'ui/composer-window.vala',
 'ui/geary-login.vala',
+'ui/icon-factory.vala',
 'ui/folder-list-store.vala',
 'ui/folder-list-view.vala',
 'ui/main-toolbar.vala',

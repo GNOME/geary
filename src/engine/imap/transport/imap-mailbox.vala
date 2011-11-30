@@ -91,6 +91,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         int preview_id = NonblockingBatch.INVALID_ID;
         int preview_charset_id = NonblockingBatch.INVALID_ID;
+        int properties_id = NonblockingBatch.INVALID_ID;
+        
         if (fields.require(Geary.Email.Field.PREVIEW)) {
             // Preview text.
             FetchBodyDataType fetch_preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
@@ -112,6 +114,19 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             FetchCommand preview_charset_cmd = new FetchCommand(msg_set, null, list_charset);
             
             preview_charset_id = batch.add(new MailboxOperation(context, preview_charset_cmd));
+        }
+        
+        if (fields.require(Geary.Email.Field.PROPERTIES)) {
+            // Properties.
+            Gee.List<FetchDataType> properties_data_types_list = new Gee.ArrayList<FetchDataType>();
+            properties_data_types_list.add(FetchDataType.FLAGS);
+            properties_data_types_list.add(FetchDataType.INTERNALDATE);
+            properties_data_types_list.add(FetchDataType.RFC822_SIZE);
+            
+            FetchCommand properties_cmd = new FetchCommand.from_collection(msg_set,
+                properties_data_types_list, null);
+            
+            properties_id = batch.add(new MailboxOperation(context, properties_cmd));
         }
         
         yield batch.execute_all_async(cancellable);
@@ -138,6 +153,26 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             
             msgs.add(email);
             map.set(plain_res.msg_num, email);
+        }
+        
+        // Process properties results.
+        if (properties_id != NonblockingBatch.INVALID_ID) {
+            MailboxOperation properties_op = (MailboxOperation) batch.get_operation(properties_id);
+            CommandResponse properties_resp = (CommandResponse) batch.get_result(properties_id);
+            
+            if (properties_resp.status_response.status != Status.OK) {
+                throw new ImapError.SERVER_ERROR("Server error for %s: %s", 
+                    properties_op.cmd.to_string(), properties_resp.to_string());
+            }
+            
+            FetchResults[] properties_results = FetchResults.decode(properties_resp);
+            foreach (FetchResults properties_res in properties_results) {
+                Geary.Email? properties_email = map.get(properties_res.msg_num);
+                if (properties_email == null)
+                    continue;
+                
+                fetch_results_to_email(properties_res, Geary.Email.Field.PROPERTIES, properties_email);
+            }
         }
         
         // process preview FETCH results
@@ -260,16 +295,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 break;
                 
                 case Geary.Email.Field.PROPERTIES:
-                    // Gmail doesn't like using FAST when combined with other fetch types, so
-                    // do this manually
-                    data_types_list.add(FetchDataType.FLAGS);
-                    data_types_list.add(FetchDataType.INTERNALDATE);
-                    data_types_list.add(FetchDataType.RFC822_SIZE);
-                break;
-                
                 case Geary.Email.Field.NONE:
                 case Geary.Email.Field.PREVIEW:
-                    // not set (or, for previews, fetched separately)
+                    // not set (or, for previews and properties, fetched separately)
                 break;
                 
                 default:
