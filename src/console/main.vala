@@ -561,7 +561,7 @@ class ImapConsole : Gtk.Window {
     private void append_to_console(string text) {
         Gtk.TextIter iter;
         console.buffer.get_iter_at_offset(out iter, -1);
-        console.buffer.insert(iter, text, -1);
+        console.buffer.insert(ref iter, text, -1);
     }
 }
 

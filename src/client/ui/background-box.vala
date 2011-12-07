@@ -16,7 +16,7 @@ public class BackgroundBox : Gtk.Frame {
         
         sc.save();
         sc.set_state(get_state_flags());
-        Gtk.render_background(sc, cr, 0, 0, get_allocated_width(), get_allocated_height());
+        sc.render_background(cr, 0, 0, get_allocated_width(), get_allocated_height());
         sc.restore();
         
         base.draw(cr);
