@@ -117,14 +117,22 @@ public class MessageListStore : Gtk.TreeStore {
         return get_conversation_at(new Gtk.TreePath.from_indices(index, -1));
     }
     
-    public Geary.Email? get_newest_message_at_index(int index, out Geary.Conversation? conversation) {
+    public Geary.Email? get_email_for_preview(int index, out Geary.Conversation? conversation) {
         conversation = get_conversation_at_index(index);
         if (conversation == null)
             return null;
         
         Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
+        if (pool == null)
+            return null;
         
-        return pool != null ? pool.first() : null;
+        // If it exists, return oldest unread message.
+        foreach (Geary.Email email in pool)
+            if (email.properties.is_unread())
+                return email;
+        
+        // All e-mail was read, so return the newest one.
+        return pool.last();
     }
     
     public void set_preview_for_conversation(Geary.Conversation conversation, Geary.Email email) {

@@ -305,7 +305,7 @@ public class GearyController {
         int count = main_window.message_list_store.get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Conversation? conversation;
-            Geary.Email? email = main_window.message_list_store.get_newest_message_at_index(
+            Geary.Email? email = main_window.message_list_store.get_email_for_preview(
                 ctr, out conversation);
             
             if (email != null)
