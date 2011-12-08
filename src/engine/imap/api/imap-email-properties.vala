@@ -26,10 +26,9 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
         flagged = flags.contains(MessageFlag.FLAGGED);
         recent = flags.contains(MessageFlag.RECENT);
         seen = flags.contains(MessageFlag.SEEN);
-    }
-    
-    public override bool is_unread() {
-        return !flags.contains(MessageFlag.SEEN);
+        
+        if (!seen)
+            email_flags = email_flags.set(Geary.EmailProperties.EmailFlags.UNREAD);
     }
     
     public bool equals(Equalable e) {

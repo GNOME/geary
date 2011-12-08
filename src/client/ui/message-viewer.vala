@@ -103,7 +103,7 @@ public class MessageViewer : Gtk.Viewport {
         header.column_spacing = HEADER_COL_SPACING;
         header.row_spacing = HEADER_ROW_SPACING;
         
-        if (email.properties.is_unread())
+        if (email.properties.email_flags.is_unread())
             icon_area.add(new Gtk.Image.from_pixbuf(IconFactory.instance.unread));
         
         int header_height = 0;

@@ -94,7 +94,7 @@ public class Geary.Imap.StatusCommand : Command {
     public StatusCommand(string mailbox, StatusDataType[] data_items) {
         base (NAME);
         
-        add (new StringParameter(mailbox));
+        add(new StringParameter(mailbox));
         
         assert(data_items.length > 0);
         ListParameter data_item_list = new ListParameter(this);
@@ -102,6 +102,27 @@ public class Geary.Imap.StatusCommand : Command {
             data_item_list.add(data_item.to_parameter());
         
         add(data_item_list);
+    }
+}
+
+public class Geary.Imap.StoreCommand : Command {
+    public const string NAME = "store";
+    public const string UID_NAME = "uid store";
+    
+    public StoreCommand(MessageSet message_set, Gee.List<MessageFlag> flag_list, bool add_flag, 
+        bool silent) {
+        base (message_set.is_uid ? UID_NAME : NAME);
+        
+        add(message_set.to_parameter());
+        add(new StringParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));
+        
+        ListParameter list = new ListParameter(this);
+        foreach(MessageFlag flag in flag_list)
+            list.add(new StringParameter(flag.value));
+        
+        add(list);
+        
+        debug("command: %s", this.to_string());
     }
 }
 

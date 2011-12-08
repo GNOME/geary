@@ -89,9 +89,20 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         int plain_id = batch.add(new MailboxOperation(context, fetch_cmd));
         
+        int body_id = NonblockingBatch.INVALID_ID;
         int preview_id = NonblockingBatch.INVALID_ID;
         int preview_charset_id = NonblockingBatch.INVALID_ID;
         int properties_id = NonblockingBatch.INVALID_ID;
+        
+        if (fields.require(Geary.Email.Field.BODY)) {
+            // Fetch the body.
+            Gee.List<FetchBodyDataType> types = new Gee.ArrayList<FetchBodyDataType>();
+            types.add(new FetchBodyDataType.peek(
+                FetchBodyDataType.SectionPart.TEXT, null, -1, -1, null));
+            FetchCommand fetch_body = new FetchCommand(msg_set, null, types);
+            
+            body_id = batch.add(new MailboxOperation(context, fetch_body));
+        }
         
         if (fields.require(Geary.Email.Field.PREVIEW)) {
             // Preview text.
@@ -153,6 +164,26 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             
             msgs.add(email);
             map.set(plain_res.msg_num, email);
+        }
+        
+        // Process body results.
+        if (body_id != NonblockingBatch.INVALID_ID) {
+            MailboxOperation body_op = (MailboxOperation) batch.get_operation(body_id);
+            CommandResponse body_resp = (CommandResponse) batch.get_result(body_id);
+            
+            if (body_resp.status_response.status != Status.OK) {
+                throw new ImapError.SERVER_ERROR("Server error for %s: %s", 
+                    body_op.cmd.to_string(), body_resp.to_string());
+            }
+            
+            FetchResults[] body_results = FetchResults.decode(body_resp);
+            foreach (FetchResults body_res in body_results) {
+                Geary.Email? body_email = map.get(body_res.msg_num);
+                if (body_email == null)
+                    continue;
+                
+                body_email.set_message_body(new Geary.RFC822.Text(body_res.get_body_data().get(0)));
+            }
         }
         
         // Process properties results.
@@ -291,13 +322,10 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 break;
                 
                 case Geary.Email.Field.BODY:
-                    data_types_list.add(FetchDataType.RFC822_TEXT);
-                break;
-                
                 case Geary.Email.Field.PROPERTIES:
                 case Geary.Email.Field.NONE:
                 case Geary.Email.Field.PREVIEW:
-                    // not set (or, for previews and properties, fetched separately)
+                    // not set (or, for body previews and properties, fetched separately)
                 break;
                 
                 default:
@@ -466,6 +494,61 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         if (fields.require(Geary.Email.Field.REFERENCES))
             email.set_full_references(message_id, in_reply_to, references);
+    }
+    
+    public async void mark_email_async(MessageSet to_mark, Geary.EmailProperties.EmailFlags
+        flags_to_add, Geary.EmailProperties.EmailFlags flags_to_remove,
+        Cancellable? cancellable = null) throws Error {
+        
+        if (context.is_closed())
+            throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
+        
+        Gee.List<MessageFlag> msg_flags_add = new Gee.ArrayList<MessageFlag>();
+        Gee.List<MessageFlag> msg_flags_remove = new Gee.ArrayList<MessageFlag>();
+        MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add, 
+            out msg_flags_remove);
+        
+        NonblockingBatch batch = new NonblockingBatch();
+        int add_flags_id = NonblockingBatch.INVALID_ID;
+        int remove_flags_id = NonblockingBatch.INVALID_ID;
+        
+        if (msg_flags_add.size > 0)
+            add_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
+                to_mark, msg_flags_add, true, true)));
+        
+        if (msg_flags_remove.size > 0)
+            remove_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
+                to_mark, msg_flags_remove, false, true)));
+        
+        yield batch.execute_all_async(cancellable);
+        
+        if (add_flags_id != NonblockingBatch.INVALID_ID) {
+            MailboxOperation add_op = (MailboxOperation) batch.get_operation(add_flags_id);
+            CommandResponse add_resp = (CommandResponse) batch.get_result(add_flags_id);
+            
+            if (add_resp.status_response == null)
+                throw new ImapError.SERVER_ERROR("Server error. Command: %s No status response. %s", 
+                    add_op.cmd.to_string(), add_resp.to_string());
+            
+            if (add_resp.status_response.status != Status.OK)
+                throw new ImapError.SERVER_ERROR("Server error. Command: %s Response: %s Error: %s", 
+                    add_op.cmd.to_string(), add_resp.to_string(),
+                    add_resp.status_response.status.to_string());
+        }
+        
+        if (remove_flags_id != NonblockingBatch.INVALID_ID) {
+            MailboxOperation remove_op = (MailboxOperation) batch.get_operation(remove_flags_id);
+            CommandResponse remove_resp = (CommandResponse) batch.get_result(remove_flags_id);
+            
+            if (remove_resp.status_response == null)
+                throw new ImapError.SERVER_ERROR("Server error. Command: %s No status response. %s", 
+                    remove_op.cmd.to_string(), remove_resp.to_string());
+            
+            if (remove_resp.status_response.status != Status.OK)
+                throw new ImapError.SERVER_ERROR("Server error. Command: %s Response: %s Error: %s", 
+                    remove_op.cmd.to_string(), remove_resp.to_string(),
+                    remove_resp.status_response.status.to_string());
+        }
     }
 }
 

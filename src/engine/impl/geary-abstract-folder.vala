@@ -122,6 +122,10 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async void remove_email_async(Geary.EmailIdentifier email_id, Cancellable? cancellable = null)
         throws Error;
     
+    public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
+        flags_to_remove, Cancellable? cancellable = null) throws Error;
+    
     public virtual string to_string() {
         return get_path().to_string();
     }

@@ -203,7 +203,7 @@ public class GearyController {
         
         current_folder = folder;
         
-        yield current_folder.open_async(true, cancellable_folder);
+        yield current_folder.open_async(false, cancellable_folder);
         
         current_conversations = new Geary.Conversations(current_folder, 
             MessageListStore.REQUIRED_FIELDS);
@@ -351,6 +351,7 @@ public class GearyController {
     private async void do_select_message(Geary.Conversation conversation, Cancellable? 
         cancellable = null) throws Error {
         
+        Gee.List<Geary.EmailIdentifier> messages = new Gee.ArrayList<Geary.EmailIdentifier>();
         if (current_folder == null) {
             debug("Conversation selected with no folder selected");
             
@@ -366,7 +367,15 @@ public class GearyController {
                 break;
             
             main_window.message_viewer.add_message(full_email);
+            
+            if (full_email.properties.email_flags.is_unread())
+                messages.add(full_email.id);
          }
+         
+         // Mark as read.
+         if (messages.size > 0)
+             yield current_folder.mark_email_async(messages, Geary.EmailProperties.EmailFlags.NONE,
+                 Geary.EmailProperties.EmailFlags.UNREAD, cancellable);
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {

@@ -76,6 +76,22 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
         yield release_lock_async(transaction, locked, cancellable);
     }
     
+    public async void update_flags_async(Transaction? transaction, int64 message_id, string? flags,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction, 
+            "ImapMessagePropertiesTable.update_flags_async", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
+            "UPDATE ImapMessagePropertiesTable SET flags = ? WHERE message_id = ?");
+        query.bind_string(0, flags);
+        query.bind_int64(1, message_id);
+        
+        yield query.execute_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+    }
+    
     public async Gee.List<int64?>? search_for_duplicates_async(Transaction? transaction, string? internaldate,
         long rfc822_size, Cancellable? cancellable) throws Error {
         bool has_internaldate = !String.is_empty(internaldate);

@@ -128,7 +128,7 @@ public class MessageListStore : Gtk.TreeStore {
         
         // If it exists, return oldest unread message.
         foreach (Geary.Email email in pool)
-            if (email.properties.is_unread())
+            if (email.properties.email_flags.is_unread())
                 return email;
         
         // All e-mail was read, so return the newest one.

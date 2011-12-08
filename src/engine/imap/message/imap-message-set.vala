@@ -84,11 +84,16 @@ public class Geary.Imap.MessageSet {
     }
     
     public MessageSet.sparse(int[] msg_nums) {
-        value = build_sparse_range(msg_nums);
+        value = build_sparse_range(msg_array_to_int64(msg_nums));
+    }
+    
+    public MessageSet.uid_sparse(UID[] msg_uids) {
+        value = build_sparse_range(uid_array_to_int64(msg_uids));
+        is_uid = true;
     }
     
     public MessageSet.sparse_to_highest(int[] msg_nums) {
-        value = "%s:*".printf(build_sparse_range(msg_nums));
+        value = "%s:*".printf(build_sparse_range(msg_array_to_int64(msg_nums)));
     }
     
     public MessageSet.multirange(MessageSet[] msg_sets) {
@@ -128,23 +133,40 @@ public class Geary.Imap.MessageSet {
         is_uid = true;
     }
     
+    // Builds sparse range of either UID values or message numbers.
     // TODO: It would be more efficient to look for runs in the numbers and form the set specifier
     // with them.
-    private static string build_sparse_range(int[] msg_nums) {
+    private static string build_sparse_range(int64[] msg_nums) {
         assert(msg_nums.length > 0);
         
         StringBuilder builder = new StringBuilder();
         for (int ctr = 0; ctr < msg_nums.length; ctr++) {
-            int msg_num = msg_nums[ctr];
+            int64 msg_num = msg_nums[ctr];
             assert(msg_num >= 0);
             
             if (ctr < (msg_nums.length - 1))
-                builder.append_printf("%d,", msg_num);
+                builder.append_printf("%lld,", msg_num);
             else
-                builder.append_printf("%d", msg_num);
+                builder.append_printf("%lld", msg_num);
         }
         
         return builder.str;
+    }
+    
+    private static int64[] msg_array_to_int64(int[] msg_nums) {
+        int64[] ret = new int64[0];
+        foreach (int num in msg_nums)
+            ret += (int64) num;
+        
+        return ret;
+    }
+    
+    private static int64[] uid_array_to_int64(UID[] msg_uids) {
+        int64[] ret = new int64[0];
+        foreach (UID uid in msg_uids)
+            ret += uid.value;
+        
+        return ret;
     }
     
     public Parameter to_parameter() {

@@ -939,5 +939,15 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         debug("prefetched %d for %s", prefetch_count, to_string());
     }
+    
+    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
+        flags_to_remove, Cancellable? cancellable = null) throws Error {
+        if (!yield wait_for_remote_to_open())
+            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
+        
+        yield remote_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove, cancellable);
+        yield local_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove, cancellable);
+    }
 }
 

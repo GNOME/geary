@@ -168,7 +168,7 @@ public abstract class Geary.Conversation : Object {
             return false;
         
         foreach (Geary.Email email in list) {
-            if (email.properties.is_unread())
+            if (email.properties.email_flags.is_unread())
                 return true;
         }
         

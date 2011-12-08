@@ -191,5 +191,23 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         
         throw new EngineError.READONLY("IMAP currently read-only");
     }
+    
+    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
+        flags_to_remove, Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+        
+        // Build an array of UIDs.
+        Geary.Imap.UID[] sparse_set = new Geary.Imap.UID[to_mark.size];
+        int i = 0;
+        foreach(Geary.EmailIdentifier id in to_mark) {
+            sparse_set[i] = ((Geary.Imap.EmailIdentifier) id).uid;
+            i++;
+        }
+        
+        MessageSet message_set = new MessageSet.uid_sparse(sparse_set);
+        mailbox.mark_email_async(message_set, flags_to_add, flags_to_remove, cancellable);
+    }
 }
 

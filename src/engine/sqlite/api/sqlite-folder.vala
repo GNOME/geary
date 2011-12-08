@@ -471,6 +471,52 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         notify_message_removed(id);
     }
     
+    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
+        flags_to_remove, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
+        Transaction transaction = yield db.begin_transaction_async("Folder.mark_email_async",
+            cancellable);
+        
+        Gee.List<Geary.Imap.MessageFlag> msg_flags_add = new Gee.ArrayList<Geary.Imap.MessageFlag>();
+        Gee.List<Geary.Imap.MessageFlag> msg_flags_remove = 
+            new Gee.ArrayList<Geary.Imap.MessageFlag>();
+        Geary.Imap.MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add, 
+            out msg_flags_remove);
+        
+        foreach (Geary.EmailIdentifier id in to_mark) {
+            MessageLocationRow? location_row = yield location_table.fetch_by_ordering_async(
+                transaction, folder_row.id, ((Geary.Imap.EmailIdentifier) id).uid.value, cancellable);
+            if (location_row == null) {
+                throw new EngineError.NOT_FOUND("No message with ID %s in folder %s", id.to_string(),
+                    to_string());
+            }
+            
+            ImapMessagePropertiesRow? row = yield imap_message_properties_table.fetch_async(
+                transaction, location_row.id, cancellable);
+            
+            if (row == null) {
+                warning("Message not found in database: %lld", location_row.id);
+                continue;
+            }
+            
+            // Create new set of message flags with the appropriate flags added and/or removed.
+            Gee.HashSet<Geary.Imap.MessageFlag> mutable_copy = 
+                new Gee.HashSet<Geary.Imap.MessageFlag>();
+            mutable_copy.add_all(Geary.Imap.MessageFlags.deserialize(row.flags).get_all());
+            mutable_copy.remove_all(msg_flags_remove);
+            mutable_copy.add_all(msg_flags_add);
+            
+            Geary.Imap.MessageFlags new_flags = new Geary.Imap.MessageFlags(mutable_copy);
+            
+            yield imap_message_properties_table.update_flags_async(transaction, location_row.id,
+                new_flags.serialize(), cancellable);
+        }
+        
+        yield transaction.commit_async(cancellable);
+    }
+    
     public async bool is_email_present_async(Geary.EmailIdentifier id, out Geary.Email.Field available_fields,
         Cancellable? cancellable = null) throws Error {
         check_open();
