@@ -25,6 +25,11 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         email_count_changed(new_count, reason);
     }
     
+    protected virtual void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
+        Geary.EmailFlags> flag_map) {
+        email_flags_changed(flag_map);
+    }
+    
     public abstract Geary.FolderPath get_path();
     
     public abstract Geary.FolderProperties? get_properties();
@@ -122,9 +127,9 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async void remove_email_async(Geary.EmailIdentifier email_id, Cancellable? cancellable = null)
         throws Error;
     
-    public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
-        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
-        flags_to_remove, Cancellable? cancellable = null) throws Error;
+    public abstract async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error;
     
     public virtual string to_string() {
         return get_path().to_string();

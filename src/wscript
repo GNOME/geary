@@ -22,6 +22,8 @@ def build(bld):
 	'../engine/api/geary-conversation.vala',
 	'../engine/api/geary-conversations.vala',
 	'../engine/api/geary-credentials.vala',
+	'../engine/api/geary-email-flag.vala',
+	'../engine/api/geary-email-flags.vala',
 	'../engine/api/geary-email-identifier.vala',
 	'../engine/api/geary-email-properties.vala',
 	'../engine/api/geary-email.vala',
@@ -37,6 +39,7 @@ def build(bld):
 	'../engine/common/common-message-data.vala',
 	
 	'../engine/imap/api/imap-account.vala',
+	'../engine/imap/api/imap-email-flags.vala',
 	'../engine/imap/api/imap-email-identifier.vala',
 	'../engine/imap/api/imap-email-properties.vala',
 	'../engine/imap/api/imap-folder-properties.vala',

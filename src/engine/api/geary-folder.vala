@@ -24,10 +24,17 @@ public interface Geary.Folder : Object {
         REMOVED
     }
     
+    /**
+     * Flags used for retrieving email.
+     *   FAST:         fetch from the DB only
+     *   FORCE_UPDATE: fetch from remote only
+     *   EXCLUDING_ID: exclude the provided ID
+     */
     [Flags]
     public enum ListFlags {
         NONE = 0,
         FAST,
+        FORCE_UPDATE,
         EXCLUDING_ID;
         
         public bool is_any_set(ListFlags flags) {
@@ -85,6 +92,15 @@ public interface Geary.Folder : Object {
     public signal void email_count_changed(int new_count, CountChangeReason reason);
     
     /**
+     * "email-flags-changed" is fired when an email's flag changed.
+     *
+     * This signal will be fired both when changes occur on the client side via the
+     * mark_email_async() method as well as changes occur remotely.
+     */
+    public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier,
+        Geary.EmailFlags> flag_map);
+    
+    /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
@@ -118,6 +134,14 @@ public interface Geary.Folder : Object {
      * and update state before and/or after the signal has been fired.
      */
     protected abstract void notify_email_count_changed(int new_count, CountChangeReason reason);
+    
+    /**
+     * This helper method should be called by implementors of Folder rather than firing the signal
+     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
+     * and update state before and/or after the signal has been fired.
+     */
+    protected abstract void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
+        Geary.EmailFlags> flag_map);
     
     public abstract Geary.FolderPath get_path();
     
@@ -353,9 +377,9 @@ public interface Geary.Folder : Object {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
-        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
-        flags_to_remove, Cancellable? cancellable = null) throws Error;
+    public abstract async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error;
     
     /**
      * check_span_specifiers() verifies that the span specifiers match the requirements set by

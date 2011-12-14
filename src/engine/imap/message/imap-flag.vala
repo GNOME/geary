@@ -99,17 +99,21 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
     
     // Converts a list of email flags to add and remove to a list of message
     // flags to add and remove.
-    public static void from_email_flags(Geary.EmailProperties.EmailFlags email_flags_add, 
-        Geary.EmailProperties.EmailFlags email_flags_remove, out Gee.List<MessageFlag> msg_flags_add,
+    public static void from_email_flags(Geary.EmailFlags? email_flags_add, 
+        Geary.EmailFlags? email_flags_remove, out Gee.List<MessageFlag> msg_flags_add,
         out Gee.List<MessageFlag> msg_flags_remove) {
         msg_flags_add = new Gee.ArrayList<MessageFlag>();
         msg_flags_remove = new Gee.ArrayList<MessageFlag>();
         
-        if (email_flags_add.is_all_set(Geary.EmailProperties.EmailFlags.UNREAD))
-            msg_flags_remove.add(MessageFlag.SEEN);
+        if (email_flags_add != null) {
+            if (email_flags_add.contains(Geary.EmailFlags.UNREAD))
+                msg_flags_remove.add(MessageFlag.SEEN);
+        }
         
-        if (email_flags_remove.is_all_set(Geary.EmailProperties.EmailFlags.UNREAD))
-            msg_flags_add.add(MessageFlag.SEEN);
+        if (email_flags_remove != null) {
+            if (email_flags_remove.contains(Geary.EmailFlags.UNREAD))
+                msg_flags_add.add(MessageFlag.SEEN);
+        }
     }
 }
 

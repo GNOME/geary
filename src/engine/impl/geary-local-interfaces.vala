@@ -37,5 +37,12 @@ private interface Geary.LocalFolder : Object, Geary.Folder {
      */
     public async abstract int get_id_position_async(Geary.EmailIdentifier id, Cancellable? cancellable)
         throws Error;
+    
+    /**
+     * Sets an e-mails flags based on the MessageFlags.  Note that the EmailFlags MUST be of
+     * type Geary.Imap.EmailFlags and contain a valid MessageFlags object.
+     */
+    public async abstract void set_email_flags_async(Gee.Map<Geary.EmailIdentifier, 
+        Geary.EmailFlags> map, Cancellable? cancellable) throws Error;
 }
 

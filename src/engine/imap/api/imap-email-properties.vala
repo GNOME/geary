@@ -11,12 +11,11 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
     public bool flagged { get; private set; }
     public bool recent { get; private set; }
     public bool seen { get; private set; }
-    public MessageFlags flags { get; private set; }
     public InternalDate? internaldate { get; private set; }
     public RFC822.Size? rfc822_size { get; private set; }
     
     public EmailProperties(MessageFlags flags, InternalDate? internaldate, RFC822.Size? rfc822_size) {
-        this.flags = flags;
+        email_flags = new Geary.Imap.EmailFlags(flags);
         this.internaldate = internaldate;
         this.rfc822_size = rfc822_size;
         
@@ -26,9 +25,6 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
         flagged = flags.contains(MessageFlag.FLAGGED);
         recent = flags.contains(MessageFlag.RECENT);
         seen = flags.contains(MessageFlag.SEEN);
-        
-        if (!seen)
-            email_flags = email_flags.set(Geary.EmailProperties.EmailFlags.UNREAD);
     }
     
     public bool equals(Equalable e) {
@@ -47,8 +43,13 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
         if (rfc822_size == null || other.rfc822_size == null)
             return false;
         
-        return flags.equals(other.flags) && internaldate.equals(other.internaldate)
-            && rfc822_size.equals(other.rfc822_size);
+        return get_message_flags().equals(get_message_flags()) && 
+            internaldate.equals(other.internaldate) && 
+            rfc822_size.equals(other.rfc822_size);
+    }
+    
+    public Geary.Imap.MessageFlags get_message_flags() {
+        return ((Geary.Imap.EmailFlags) this.email_flags).message_flags;
     }
 }
 

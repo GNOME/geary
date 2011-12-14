@@ -28,7 +28,7 @@ public class Geary.Sqlite.ImapMessagePropertiesRow : Geary.Sqlite.Row {
         
         id = Row.INVALID_ID;
         this.message_id = message_id;
-        flags = properties.flags.serialize();
+        flags = properties.get_message_flags().serialize();
         internaldate = properties.internaldate.original;
         rfc822_size = properties.rfc822_size.value;
     }

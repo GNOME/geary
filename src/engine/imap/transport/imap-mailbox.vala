@@ -496,9 +496,12 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             email.set_full_references(message_id, in_reply_to, references);
     }
     
-    public async void mark_email_async(MessageSet to_mark, Geary.EmailProperties.EmailFlags
-        flags_to_add, Geary.EmailProperties.EmailFlags flags_to_remove,
+    public async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+        MessageSet to_mark, Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
         Cancellable? cancellable = null) throws Error {
+        
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> ret = 
+            new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
         
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
@@ -514,40 +517,53 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         if (msg_flags_add.size > 0)
             add_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
-                to_mark, msg_flags_add, true, true)));
+                to_mark, msg_flags_add, true, false)));
         
         if (msg_flags_remove.size > 0)
             remove_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
-                to_mark, msg_flags_remove, false, true)));
+                to_mark, msg_flags_remove, false, false)));
         
         yield batch.execute_all_async(cancellable);
         
         if (add_flags_id != NonblockingBatch.INVALID_ID) {
-            MailboxOperation add_op = (MailboxOperation) batch.get_operation(add_flags_id);
-            CommandResponse add_resp = (CommandResponse) batch.get_result(add_flags_id);
-            
-            if (add_resp.status_response == null)
-                throw new ImapError.SERVER_ERROR("Server error. Command: %s No status response. %s", 
-                    add_op.cmd.to_string(), add_resp.to_string());
-            
-            if (add_resp.status_response.status != Status.OK)
-                throw new ImapError.SERVER_ERROR("Server error. Command: %s Response: %s Error: %s", 
-                    add_op.cmd.to_string(), add_resp.to_string(),
-                    add_resp.status_response.status.to_string());
+            gather_flag_results((MailboxOperation) batch.get_operation(add_flags_id),
+                (CommandResponse) batch.get_result(add_flags_id), ref ret);
         }
         
         if (remove_flags_id != NonblockingBatch.INVALID_ID) {
-            MailboxOperation remove_op = (MailboxOperation) batch.get_operation(remove_flags_id);
-            CommandResponse remove_resp = (CommandResponse) batch.get_result(remove_flags_id);
+            gather_flag_results((MailboxOperation) batch.get_operation(remove_flags_id),
+                (CommandResponse) batch.get_result(remove_flags_id), ref ret);
+        }
+        
+        return ret;
+    }
+    
+    // Helper function for building results for mark_email_async
+    private void gather_flag_results(MailboxOperation operation, CommandResponse response, 
+        ref Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) throws Error {
+        
+        if (response.status_response == null)
+            throw new ImapError.SERVER_ERROR("Server error. Command: %s No status response. %s", 
+                operation.cmd.to_string(), response.to_string());
+        
+        if (response.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error. Command: %s Response: %s Error: %s", 
+                operation.cmd.to_string(), response.to_string(),
+                response.status_response.status.to_string());
+        
+        FetchResults[] results = FetchResults.decode(response);
+        foreach (FetchResults res in results) {
+            UID? uid = res.get_data(FetchDataType.UID) as UID;
+            assert(uid != null);
             
-            if (remove_resp.status_response == null)
-                throw new ImapError.SERVER_ERROR("Server error. Command: %s No status response. %s", 
-                    remove_op.cmd.to_string(), remove_resp.to_string());
-            
-            if (remove_resp.status_response.status != Status.OK)
-                throw new ImapError.SERVER_ERROR("Server error. Command: %s Response: %s Error: %s", 
-                    remove_op.cmd.to_string(), remove_resp.to_string(),
-                    remove_resp.status_response.status.to_string());
+            Geary.Imap.MessageFlags? msg_flags = res.get_data(FetchDataType.FLAGS) as MessageFlags;
+            if (msg_flags != null) {
+                Geary.Imap.EmailFlags email_flags = new Geary.Imap.EmailFlags(msg_flags);
+                
+                map.set(new Geary.Imap.EmailIdentifier(uid) , email_flags);
+            } else {
+                debug("No flags returned");
+            }
         }
     }
 }

@@ -5,8 +5,19 @@
  */
 
 private class Geary.GenericImapFolder : Geary.EngineFolder {
+    public const int DEFAULT_FLAG_WATCH_SEC = 3 * 60;
+    
+    private uint flag_watch_id = 0;
+    private Cancellable flag_watch_cancellable = new Cancellable();
+    private bool in_flag_watch = false;
+    
     public GenericImapFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         base (remote, local, local_folder);
+    }
+    
+    ~GenericImapFolder() {
+        disable_flag_watch();
+        flag_watch_cancellable.cancel();
     }
     
     // Check if the remote folder's ordering has changed since last opened
@@ -222,5 +233,109 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         debug("completed prepare_opened_folder %s", to_string());
         
         return true;
+    }
+    
+    protected override void notify_opened(Geary.Folder.OpenState state, int count) {
+        base.notify_opened(state, count);
+        
+        if (state == Geary.Folder.OpenState.BOTH) {
+            flag_watch_cancellable = new Cancellable();
+            enable_flag_watch();
+        }
+    }
+    
+    protected override void notify_closed(Geary.Folder.CloseReason reason) {
+        disable_flag_watch();
+        flag_watch_cancellable.cancel();
+        
+        base.notify_closed(reason);
+    }
+    
+    /**
+     * Turns on the "flag watch."  This periodtically checks if the flags on any messages have changed.
+     * 
+     * If seconds is negative or zero, keepalives will be disabled.  (This is not recommended.)
+     */
+    private void enable_flag_watch(int seconds = DEFAULT_FLAG_WATCH_SEC) {
+        if (seconds <= 0) {
+            disable_flag_watch();
+            
+            return;
+        }
+        
+        if (flag_watch_id != 0)
+            Source.remove(flag_watch_id);
+        
+        flag_watch_id = Timeout.add_seconds(seconds, on_flag_watch);
+    }
+    
+    private bool disable_flag_watch() {
+        if (flag_watch_id == 0)
+            return false;
+        
+        Source.remove(flag_watch_id);
+        flag_watch_id = 0;
+        
+        return true;
+    }
+    
+    private bool on_flag_watch() {
+        flag_watch_async.begin();
+        return true;
+    }
+    
+    private async void flag_watch_async() {
+        if (in_flag_watch)
+            return;
+        
+        in_flag_watch = true;
+        try {
+            yield do_flag_watch_async();
+        } catch (Error err) {
+            message("Flag watch error: %s", err.message);
+        }
+        
+        in_flag_watch = false;
+    }
+    
+    private async void do_flag_watch_async() throws Error {
+        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = 
+            new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
+            Geary.Equalable.equal_func);
+        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
+            new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
+            Geary.Equalable.equal_func);
+        
+        // Fetch all email properties in local folder.
+        Gee.List<Geary.Email>? list_local = yield local_folder.list_email_async(-1, int.MAX, 
+            Email.Field.PROPERTIES, ListFlags.FAST, flag_watch_cancellable);
+        
+        if (list_local == null)
+            return;
+        
+        // Build local map and find lowest ID.
+        Geary.EmailIdentifier? low = null;
+        foreach (Geary.Email e in list_local) {
+            local_map.set(e.id, e.properties.email_flags);
+            
+            if (low == null || e.id.compare(low) < 0)
+                low = e.id;
+        }
+        
+        // Fetch corresponding e-mail from folder.
+        Gee.List<Geary.Email>? list_remote = yield list_email_by_id_async(low, int.MAX,
+            Email.Field.PROPERTIES, ListFlags.FORCE_UPDATE, flag_watch_cancellable);
+        
+        // Build map of emails that have changed.
+        foreach (Geary.Email e in list_remote) {
+            if (!local_map.has_key(e.id))
+                continue;
+            
+            if (!local_map.get(e.id).equals(e.properties.email_flags))
+                changed_map.set(e.id, e.properties.email_flags);
+        }
+        
+        if (!flag_watch_cancellable.is_cancelled() && changed_map.size > 0)
+            notify_email_flags_changed(changed_map);
     }
 }

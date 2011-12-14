@@ -68,10 +68,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
     }
     
+    protected LocalFolder local_folder;
+    protected RemoteFolder? remote_folder = null;
+    
     private RemoteAccount remote;
     private LocalAccount local;
-    private LocalFolder local_folder;
-    private RemoteFolder? remote_folder = null;
     private int remote_count = -1;
     private bool opened = false;
     private NonblockingSemaphore remote_semaphore = new NonblockingSemaphore();
@@ -97,7 +98,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     }
     
     public override Geary.Folder.ListFlags get_supported_list_flags() {
-        return Geary.Folder.ListFlags.FAST;
+        return Geary.Folder.ListFlags.FAST | Geary.Folder.ListFlags.FORCE_UPDATE |
+            Geary.Folder.ListFlags.EXCLUDING_ID;
     }
     
     public override async void create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
@@ -370,7 +372,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // them all at once to the caller
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_async(low, count, required_fields, accumulator, null, cancellable,
-            flags.is_any_set(Folder.ListFlags.FAST));
+            flags.is_any_set(Folder.ListFlags.FAST), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
         
         return accumulator;
     }
@@ -380,7 +382,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
         // schedule do_list_email_async(), using the callback to drive availability of email
         do_list_email_async.begin(low, count, required_fields, null, cb, cancellable,
-            flags.is_any_set(Folder.ListFlags.FAST));
+            flags.is_any_set(Folder.ListFlags.FAST), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
     }
     
     // TODO: A great optimization would be to fetch message "fragments" from the local database
@@ -389,11 +391,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // would have to be parallelized.
     private async void do_list_email_async(int low, int count, Geary.Email.Field required_fields,
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
-        bool local_only) throws Error {
+        bool local_only, bool remote_only) throws Error {
         check_span_specifiers(low, count);
         
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
+        
+        if (local_only && remote_only)
+            throw new EngineError.BAD_PARAMETERS("local_only and remote_only are mutually exlusive");
         
         if (count == 0) {
             // signal finished
@@ -433,7 +438,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             low, count, local_count, remote_count, local_low);
         
         Gee.List<Geary.Email>? local_list = null;
-        if (local_low > 0) {
+        if (!remote_only && local_low > 0) {
             try {
                 local_list = yield local_folder.list_email_async(local_low, count, required_fields,
                     Geary.Folder.ListFlags.NONE, cancellable);
@@ -676,7 +681,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Cancellable? cancellable = null) throws Error {
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_by_id_async(initial_id, count, required_fields, list, null, cancellable,
-            flags.is_all_set(Folder.ListFlags.FAST), flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
+            flags.is_all_set(Folder.ListFlags.FAST), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
+            flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
         
         return (list.size > 0) ? list : null;
     }
@@ -685,15 +691,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
         Cancellable? cancellable = null) {
         do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, cb, cancellable,
-            flags.is_all_set(Folder.ListFlags.FAST), flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
+            flags.is_all_set(Folder.ListFlags.FAST), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
+            flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
     }
     
     private async void do_lazy_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable, bool local_only,
-        bool excluding_id) {
+        bool remote_only, bool excluding_id) {
         try {
             yield do_list_email_by_id_async(initial_id, count, required_fields, null, cb, cancellable,
-                local_only, excluding_id);
+                local_only, remote_only, excluding_id);
         } catch (Error err) {
             cb(null, err);
         }
@@ -701,7 +708,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     private async void do_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
-        Cancellable? cancellable, bool local_only, bool excluding_id) throws Error {
+        Cancellable? cancellable, bool local_only, bool remote_only, bool excluding_id) throws Error {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
         
@@ -766,7 +773,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             remote_count, excluding_id.to_string());
         
         yield do_list_email_async(low, actual_count, required_fields, accumulator, cb, cancellable,
-            local_only);
+            local_only, remote_only);
     }
     
     private async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
@@ -940,14 +947,19 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         debug("prefetched %d for %s", prefetch_count, to_string());
     }
     
-    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
-        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
-        flags_to_remove, Cancellable? cancellable = null) throws Error {
+    public override async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
-        yield remote_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove, cancellable);
-        yield local_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove, cancellable);
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = 
+            yield remote_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove, cancellable);
+        yield local_folder.set_email_flags_async(map, cancellable);
+        
+        notify_email_flags_changed(map);
+        
+        return map;
     }
 }
 

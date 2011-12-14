@@ -192,9 +192,9 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         throw new EngineError.READONLY("IMAP currently read-only");
     }
     
-    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
-        Geary.EmailProperties.EmailFlags flags_to_add, Geary.EmailProperties.EmailFlags 
-        flags_to_remove, Cancellable? cancellable = null) throws Error {
+    public override async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
@@ -207,7 +207,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         }
         
         MessageSet message_set = new MessageSet.uid_sparse(sparse_set);
-        mailbox.mark_email_async(message_set, flags_to_add, flags_to_remove, cancellable);
+        return yield mailbox.mark_email_async(message_set, flags_to_add, flags_to_remove, cancellable);
     }
 }
 

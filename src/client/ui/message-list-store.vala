@@ -64,7 +64,10 @@ public class MessageListStore : Gtk.TreeStore {
             );
     }
     
-    public void update_conversation(Geary.Conversation conversation) {
+    // Updates a converstaion.
+    // only_update_flags: if true, we'll only update the read/unread status
+    public void update_conversation(Geary.Conversation conversation, bool only_update_flags = false) {
+        debug("update conversation. is unread: %s", conversation.is_unread() ? "yes" : "no");
         Gtk.TreeIter iter;
         if (!find_conversation(conversation, out iter)) {
             // Unknown conversation, attempt to append it.
@@ -86,10 +89,16 @@ public class MessageListStore : Gtk.TreeStore {
         FormattedMessageData? existing = null;
         get(iter, Column.MESSAGE_DATA, out existing);
         
-        // Update the preview if needed.
-        if (existing == null || !existing.email.id.equals(preview.id))
-            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview, pool.size, 
-                conversation.is_unread())); 
+        // Update preview if text or unread status changed.
+        if (existing != null && existing.is_unread != conversation.is_unread()) {
+            existing.is_unread = conversation.is_unread();
+            set(iter, Column.MESSAGE_DATA, existing);
+        }
+        
+        if (!only_update_flags && (existing == null || !existing.email.id.equals(preview.id))) {
+            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview, pool.size,
+                conversation.is_unread()));
+        }
     }
     
     public void remove_conversation(Geary.Conversation conversation) {
@@ -177,6 +186,25 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         return low;
+    }
+    
+    public void update_flags(Geary.EmailIdentifier id, Geary.EmailFlags flags) {
+        int count = get_count();
+        for (int ctr = 0; ctr < count; ctr++) {
+            Geary.Conversation c = get_conversation_at_index(ctr);
+            Gee.SortedSet<Geary.Email>? mail = c.get_pool_sorted(compare_email_id_desc);
+            if (mail == null)
+                continue;
+            
+            foreach (Geary.Email e in mail) {
+                if (e.id.equals(id)) {
+                    e.properties.email_flags = flags;
+                    update_conversation(c, true);
+                    
+                    return;
+                }
+            }
+        }
     }
     
     private bool find_conversation(Geary.Conversation conversation, out Gtk.TreeIter iter) {

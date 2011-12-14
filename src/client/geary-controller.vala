@@ -219,6 +219,8 @@ public class GearyController {
         current_conversations.conversation_removed.connect(on_conversation_removed);
         current_conversations.updated_placeholders.connect(on_updated_placeholders);
         
+        current_folder.email_flags_changed.connect(on_email_flags_changed);
+        
         // Do a quick-list of the messages (which should return what's in the local store) if
         // supported by the Folder, followed by a complete list if needed
         second_list_pass_required =
@@ -298,6 +300,11 @@ public class GearyController {
         set_busy(false);
     }
     
+    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
+        foreach (Geary.EmailIdentifier id in map.keys)
+            main_window.message_list_store.update_flags(id, map.get(id));
+    }
+    
     private async void do_fetch_previews(Cancellable? cancellable) throws Error {
         set_busy(true);
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
@@ -370,12 +377,15 @@ public class GearyController {
             
             if (full_email.properties.email_flags.is_unread())
                 messages.add(full_email.id);
-         }
-         
-         // Mark as read.
-         if (messages.size > 0)
-             yield current_folder.mark_email_async(messages, Geary.EmailProperties.EmailFlags.NONE,
-                 Geary.EmailProperties.EmailFlags.UNREAD, cancellable);
+        }
+        
+        // Mark as read.
+        if (messages.size > 0) {
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.UNREAD);
+            
+            yield current_folder.mark_email_async(messages, null, flags, cancellable);
+        }
     }
     
     private void on_select_message_completed(Object? source, AsyncResult result) {

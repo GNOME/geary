@@ -19,7 +19,7 @@ public class FormattedMessageData : Object {
     private static int preview_height = -1;
     
     public Geary.Email email { get; private set; default = null; }
-    public bool is_unread { get; private set; default = false; }
+    public bool is_unread { get; set; default = false; }
     public string date { get; private set; default = ""; } 
     public string from { get; private set; default = ""; }
     public string subject { get; private set; default = ""; }
