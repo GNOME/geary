@@ -267,6 +267,10 @@ public class GearyController {
         
         do_fetch_previews.begin(cancellable_folder);
         main_window.message_list_view.enable_load_more = true;
+        
+        // Select first conversation.
+        if (!second_list_pass_required && GearyApplication.instance.config.autoselect)
+            main_window.message_list_view.select_first_conversation();
     }
     
     public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {

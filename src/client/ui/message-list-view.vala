@@ -93,6 +93,13 @@ public class MessageListView : Gtk.TreeView {
             conversation_selected(conversation);
     }
     
+    // Selects the first conversation, if nothing has been selected yet.
+    public void select_first_conversation() {
+        if (get_selected_path() == null) {
+            set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
+        }
+    }
+    
     private void on_row_deleted(Gtk.TreePath path) {
         if (GearyApplication.instance.config.autoselect) {
             // Move to next conversation.
