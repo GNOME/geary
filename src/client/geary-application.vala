@@ -73,6 +73,25 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         _instance = this;
     }
     
+    public override int startup() {
+        int result = base.startup();
+        
+        // TODO: Use OptionArg to properly parse the command line
+        for (int ctr = 1; ctr < args.length; ctr++) {
+            switch (args[ctr].down()) {
+                case "--log-network":
+                    Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+                break;
+                
+                default:
+                    // ignore
+                break;
+            }
+        }
+        
+        return result;
+    }
+    
     public override void activate() {
         // If Geary is already running, show the main window and return.
         if (controller != null && controller.main_window != null) {

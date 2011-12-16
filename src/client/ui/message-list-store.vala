@@ -67,7 +67,6 @@ public class MessageListStore : Gtk.TreeStore {
     // Updates a converstaion.
     // only_update_flags: if true, we'll only update the read/unread status
     public void update_conversation(Geary.Conversation conversation, bool only_update_flags = false) {
-        debug("update conversation. is unread: %s", conversation.is_unread() ? "yes" : "no");
         Gtk.TreeIter iter;
         if (!find_conversation(conversation, out iter)) {
             // Unknown conversation, attempt to append it.

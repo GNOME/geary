@@ -10,7 +10,11 @@ public class Geary.Imap.ClientConnection {
     
     private const int FLUSH_TIMEOUT_MSEC = 100;
     
+    // Used solely for debugging
+    private static int next_cx_id = 0;
+    
     private Geary.Endpoint endpoint;
+    private int cx_id;
     private SocketConnection? cx = null;
     private Serializer? ser = null;
     private Deserializer? des = null;
@@ -20,37 +24,52 @@ public class Geary.Imap.ClientConnection {
     private uint flush_timeout_id = 0;
     
     public virtual signal void connected() {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] connected to %s", to_string(),
+            endpoint.to_string());
     }
     
     public virtual signal void disconnected() {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] disconnected from %s", to_string(),
+            endpoint.to_string());
     }
     
     public virtual signal void sent_command(Command cmd) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), cmd.to_string());
     }
     
     public virtual signal void flush_failure(Error err) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] flush failure: %s", to_string(), err.message);
     }
     
     public virtual signal void received_status_response(StatusResponse status_response) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), status_response.to_string());
     }
     
     public virtual signal void received_server_data(ServerData server_data) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), server_data.to_string());
     }
     
     public virtual signal void received_bad_response(RootParameters root, ImapError err) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] recv bad response %s: %s", to_string(),
+            root.to_string(), err.message);
     }
     
     public virtual signal void recv_closed() {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] recv closed", to_string());
     }
     
     public virtual signal void receive_failure(Error err) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] recv failure: %s", to_string(), err.message);
     }
     
     public virtual signal void deserialize_failure(Error err) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] deserialize failure: %s", to_string(),
+            err.message);
     }
     
     public ClientConnection(Geary.Endpoint endpoint) {
         this.endpoint = endpoint;
+        cx_id = next_cx_id++;
     }
     
     ~ClientConnection() {
@@ -189,13 +208,14 @@ public class Geary.Imap.ClientConnection {
     public string to_string() {
         if (cx != null) {
             try {
-                return Inet.address_to_string((InetSocketAddress) cx.get_remote_address());
+                return "%04X/%s".printf(cx_id,
+                    Inet.address_to_string((InetSocketAddress) cx.get_remote_address()));
             } catch (Error err) {
                 // fall through
             }
         }
         
-        return endpoint.to_string();
+        return "%04X/%s".printf(cx_id, endpoint.to_string());
     }
 }
 

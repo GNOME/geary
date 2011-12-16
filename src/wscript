@@ -33,6 +33,7 @@ def build(bld):
 	'../engine/api/geary-folder-path.vala',
 	'../engine/api/geary-folder-properties.vala',
 	'../engine/api/geary-folder.vala',
+	'../engine/api/geary-logging.vala',
 	'../engine/api/geary-personality.vala',
 	'../engine/api/geary-special-folder.vala',
 	
