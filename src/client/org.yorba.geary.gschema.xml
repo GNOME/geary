@@ -32,6 +32,12 @@
         <description>Position of the message list HPaned grabber. -1 means unset.</description>
     </key>
     
+    <key name="autoselect" type="b">
+        <default>true</default>
+        <summary>autoselect next message</summary>
+        <description>True if we should autoselect the next available conversation.</description>
+    </key>
+    
 </schema>
 
 </schemalist>

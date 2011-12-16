@@ -11,7 +11,7 @@ public class MessageListView : Gtk.TreeView {
     
     // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
     // scroll adjustment seen at the call to load_more().
-    double last_upper = -1.0;
+    private double last_upper = -1.0;
     
     public signal void conversation_selected(Geary.Conversation? conversation);
     public signal void load_more();
@@ -29,6 +29,8 @@ public class MessageListView : Gtk.TreeView {
         get_selection().changed.connect(on_selection_changed);
         style_set.connect(on_style_changed);
         show.connect(on_show);
+        
+        store.row_deleted.connect(on_row_deleted);
     }
     
     private void on_style_changed() {
@@ -73,9 +75,13 @@ public class MessageListView : Gtk.TreeView {
         return (MessageListStore) get_model();
     }
     
-    private void on_selection_changed() {
+    private Gtk.TreePath? get_selected_path() {
         Gtk.TreeModel model;
-        Gtk.TreePath? path = get_selection().get_selected_rows(out model).nth_data(0);
+        return get_selection().get_selected_rows(out model).nth_data(0);
+    }
+    
+    private void on_selection_changed() {
+        Gtk.TreePath? path = get_selected_path();
         if (path == null) {
             conversation_selected(null);
             
@@ -85,6 +91,19 @@ public class MessageListView : Gtk.TreeView {
         Geary.Conversation? conversation = get_store().get_conversation_at(path);
         if (conversation != null)
             conversation_selected(conversation);
+    }
+    
+    private void on_row_deleted(Gtk.TreePath path) {
+        if (GearyApplication.instance.config.autoselect) {
+            // Move to next conversation.
+            set_cursor(path, null, false);
+            
+            // If the current path is no longer valid, try the previous message.
+            if (get_selected_path() == null) {
+                path.prev();
+                set_cursor(path, null, false);
+            }
+        }
     }
 }
 

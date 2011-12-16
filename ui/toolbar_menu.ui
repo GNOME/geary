@@ -1,5 +1,7 @@
 <ui>
     <popup name="ToolbarMenu">
+        <menuitem name="Preferences" action="GearyPreferences" />
+        <separator />
         <menuitem name="About" action="GearyAbout" />
         <menuitem name="Donate" action="GearyDonate" />
         <separator />

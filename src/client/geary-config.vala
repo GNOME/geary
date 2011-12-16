@@ -38,6 +38,12 @@ public class Configuration {
         set { settings.set_int(MESSAGES_PANE_POSITION_NAME, value); }
     }
     
+    private const string AUTOSELECT_NAME = "autoselect";
+    public bool autoselect {
+        get { return settings.get_boolean(AUTOSELECT_NAME); }
+        set { settings.set_boolean(AUTOSELECT_NAME, value); }
+    }
+    
     // Creates a configuration object.
     // is_installed: set to true if installed, else false.
     // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.

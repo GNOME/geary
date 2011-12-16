@@ -66,6 +66,7 @@ public class GearyController {
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
+    public const string ACTION_PREFERENCES = "GearyPreferences";
     
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
@@ -105,6 +106,10 @@ public class GearyController {
     
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
+        
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, null, TRANSLATABLE, null, null, on_preferences };
+        prefs.label = _("_Preferences");
+        entries += prefs;
         
         Gtk.ActionEntry donate = { ACTION_DONATE, null, TRANSLATABLE, null, null, on_donate };
         donate.label = _("_Donate");
@@ -523,6 +528,11 @@ public class GearyController {
             "website", GearyApplication.WEBSITE,
             "website-label", GearyApplication.WEBSITE_LABEL
         );
+    }
+    
+    public void on_preferences() {
+        PreferencesDialog dialog = new PreferencesDialog(GearyApplication.instance.config);
+        dialog.run();
     }
     
     public void on_donate() {

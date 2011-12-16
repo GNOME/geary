@@ -21,6 +21,7 @@ client_src = [
 'ui/message-list-store.vala',
 'ui/message-list-view.vala',
 'ui/message-viewer.vala',
+'ui/preferences-dialog.vala',
 
 'util/util-keyring.vala',
 'util/util-email.vala'
