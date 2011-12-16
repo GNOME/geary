@@ -15,6 +15,8 @@ public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Persona
     
     public abstract Gee.Set<Geary.FolderPath>? get_ignored_paths();
     
+    public abstract bool delete_is_archive();
+    
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
 }

@@ -449,8 +449,8 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         return (ordering >= 1) ? new Geary.Imap.UID(ordering) : null;
     }
     
-    public override async void remove_email_async(Geary.EmailIdentifier id, Cancellable? cancellable = null)
-        throws Error {
+    public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
+        Cancellable? cancellable = null) throws Error {
         check_open();
         
         Transaction transaction = yield db.begin_transaction_async("Folder.remove_email_async",
@@ -460,15 +460,18 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         // (since it may be located in multiple folders).  This means at some point in the future
         // a vacuum will be required to remove emails that are completely unassociated with the
         // account
-        if (!yield location_table.remove_by_ordering_async(transaction, folder_row.id, id.ordering,
-            cancellable)) {
-            throw new EngineError.NOT_FOUND("Message %s in local store of %s not found", id.to_string(),
-                to_string());
+        foreach (Geary.EmailIdentifier id in email_ids) {
+            if (!yield location_table.remove_by_ordering_async(transaction, folder_row.id, id.ordering,
+                cancellable)) {
+                throw new EngineError.NOT_FOUND("Message %s in local store of %s not found", id.to_string(),
+                    to_string());
+            }
         }
         
         yield transaction.commit_async(cancellable);
         
-        notify_message_removed(id);
+        foreach (Geary.EmailIdentifier id in email_ids)
+            notify_message_removed(id);
     }
     
     // This isn't implemented yet since it was simpler to replace the flags for a message wholesale

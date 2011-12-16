@@ -17,9 +17,15 @@ public class MainToolbar : Gtk.VBox {
         Gtk.Builder builder = GearyApplication.instance.create_builder("toolbar.glade");
         toolbar = builder.get_object("toolbar") as Gtk.Toolbar;
         
-        Gtk.ToolButton new_message = builder.get_object("new_button") as Gtk.ToolButton;
+        Gtk.ToolButton new_message = builder.get_object(GearyController.ACTION_NEW_MESSAGE)
+            as Gtk.ToolButton;
         new_message.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_NEW_MESSAGE));
+        
+        Gtk.ToolButton archive_message = builder.get_object(GearyController.ACTION_DELETE_MESSAGE)
+            as Gtk.ToolButton;
+        archive_message.set_related_action(GearyApplication.instance.actions.get_action(
+            GearyController.ACTION_DELETE_MESSAGE));
         
         menu_button = builder.get_object("menu_button") as Gtk.ToolButton;
         menu_button.clicked.connect(on_show_menu);

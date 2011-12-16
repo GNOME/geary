@@ -92,6 +92,7 @@ public class Geary.Imap.UnsolicitedServerData : Object {
                         : null;
                 
                 case "expunge":
+                case "expunged": // Automatically handles ExpungeCommand results
                     return (strparam != null)
                         ? new UnsolicitedServerData(-1, -1, new MessageNumber(strparam.as_int()), null)
                         : null;

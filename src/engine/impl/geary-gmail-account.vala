@@ -72,5 +72,9 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
     public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
         return ignored_paths.read_only_view;
     }
+    
+    public override bool delete_is_archive() {
+        return true;
+    }
 }
 

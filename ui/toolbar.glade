@@ -7,7 +7,8 @@
     <property name="toolbar_style">icons</property>
     <property name="icon_size">2</property>
     <child>
-      <object class="GtkToolButton" id="new_button">
+      <object class="GtkToolButton" id="GearyNewMessage">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose new message</property>
@@ -22,7 +23,24 @@
       </packing>
     </child>
     <child>
+      <object class="GtkToolButton" id="GearyDeleteMessage">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Delete the selected conversation</property>
+        <property name="use_action_appearance">False</property>
+        <property name="label" translatable="yes">Delete</property>
+        <property name="use_underline">True</property>
+        <property name="stock_id">gtk-close</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkToolItem" id="filler">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
@@ -37,6 +55,7 @@
     </child>
     <child>
       <object class="GtkToolButton" id="menu_button">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>

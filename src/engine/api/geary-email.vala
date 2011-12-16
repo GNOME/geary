@@ -7,7 +7,7 @@
 public class Geary.Email : Object {
     // This value is not persisted, but it does represent the expected max size of the preview
     // when returned.
-    public const int MAX_PREVIEW_BYTES = 512;
+    public const int MAX_PREVIEW_BYTES = 128;
     
     // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
     public enum Field {

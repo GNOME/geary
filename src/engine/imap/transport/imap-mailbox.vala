@@ -497,7 +497,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     }
     
     public async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
-        MessageSet to_mark, Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
+        MessageSet to_mark, Gee.List<MessageFlag>? flags_to_add, Gee.List<MessageFlag>? flags_to_remove,
         Cancellable? cancellable = null) throws Error {
         
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> ret = 
@@ -506,22 +506,17 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
-        Gee.List<MessageFlag> msg_flags_add = new Gee.ArrayList<MessageFlag>();
-        Gee.List<MessageFlag> msg_flags_remove = new Gee.ArrayList<MessageFlag>();
-        MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add, 
-            out msg_flags_remove);
-        
         NonblockingBatch batch = new NonblockingBatch();
         int add_flags_id = NonblockingBatch.INVALID_ID;
         int remove_flags_id = NonblockingBatch.INVALID_ID;
         
-        if (msg_flags_add.size > 0)
+        if (flags_to_add != null && flags_to_add.size > 0)
             add_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
-                to_mark, msg_flags_add, true, false)));
+                to_mark, flags_to_add, true, false)));
         
-        if (msg_flags_remove.size > 0)
+        if (flags_to_remove != null && flags_to_remove.size > 0)
             remove_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
-                to_mark, msg_flags_remove, false, false)));
+                to_mark, flags_to_remove, false, false)));
         
         yield batch.execute_all_async(cancellable);
         
@@ -565,6 +560,14 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 debug("No flags returned");
             }
         }
+    }
+    
+    public async void expunge_email_async(Cancellable? cancellable = null) throws Error {
+        if (context.is_closed())
+            throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
+        
+        // Response automatically handled by unsolicited server data.
+        yield context.session.send_command_async(new ExpungeCommand(), cancellable);
     }
 }
 

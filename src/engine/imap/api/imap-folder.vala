@@ -184,12 +184,16 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         return list[0];
     }
     
-    public override async void remove_email_async(Geary.EmailIdentifier email_id, Cancellable? cancellable = null)
-        throws Error {
+    public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
+        Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        throw new EngineError.READONLY("IMAP currently read-only");
+        Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
+        flags.add(MessageFlag.DELETED);
+        
+        yield mailbox.mark_email_async(message_set_from_id_list(email_ids), flags, null, cancellable);
+        yield mailbox.expunge_email_async(cancellable);
     }
     
     public override async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
@@ -198,16 +202,24 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
-        // Build an array of UIDs.
-        Geary.Imap.UID[] sparse_set = new Geary.Imap.UID[to_mark.size];
+        Gee.List<MessageFlag> msg_flags_add = new Gee.ArrayList<MessageFlag>();
+        Gee.List<MessageFlag> msg_flags_remove = new Gee.ArrayList<MessageFlag>();
+        MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add, 
+            out msg_flags_remove);
+        
+        return yield mailbox.mark_email_async(message_set_from_id_list(to_mark), msg_flags_add,
+            msg_flags_remove, cancellable);
+    }
+    
+    private MessageSet message_set_from_id_list(Gee.List<Geary.EmailIdentifier> list) {
+        Geary.Imap.UID[] sparse_set = new Geary.Imap.UID[list.size];
         int i = 0;
-        foreach(Geary.EmailIdentifier id in to_mark) {
+        foreach(Geary.EmailIdentifier id in list) {
             sparse_set[i] = ((Geary.Imap.EmailIdentifier) id).uid;
             i++;
         }
         
-        MessageSet message_set = new MessageSet.uid_sparse(sparse_set);
-        return yield mailbox.mark_email_async(message_set, flags_to_add, flags_to_remove, cancellable);
+        return new MessageSet.uid_sparse(sparse_set);
     }
 }
 

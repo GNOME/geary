@@ -44,7 +44,7 @@ public class Geary.RemoveEmailOperation : Geary.NonblockingBatchOperation {
     }
     
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
-        yield folder.remove_email_async(email_id, cancellable);
+        yield folder.remove_single_email_async(email_id, cancellable);
         
         return null;
     }

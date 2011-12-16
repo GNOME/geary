@@ -124,8 +124,16 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public abstract async void remove_email_async(Geary.EmailIdentifier email_id, Cancellable? cancellable = null)
-        throws Error;
+    public abstract async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
+        Cancellable? cancellable = null) throws Error;
+    
+    public virtual async void remove_single_email_async(Geary.EmailIdentifier email_id,
+        Cancellable? cancellable = null) throws Error {
+        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
+        list.add(email_id);
+        
+        yield remove_email_async(list, cancellable);
+    }
     
     public abstract async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
         Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,

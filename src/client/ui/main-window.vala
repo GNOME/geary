@@ -103,8 +103,6 @@ public class MainWindow : Gtk.Window {
         message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_viewer_scrolled.add(message_viewer);
         
-        
-        
         // three-pane display: folder list on left and messages on right separated by grippable
         folder_paned.pack1(folder_list_scrolled, false, false);
         folder_paned.pack2(message_list_scrolled, true, false);

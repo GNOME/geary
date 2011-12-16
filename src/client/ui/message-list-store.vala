@@ -108,8 +108,7 @@ public class MessageListStore : Gtk.TreeStore {
             return;
         }
         
-        if (!remove(iter))
-            debug("Unable to remove conversation from MessageListStore");
+        remove(iter);
     }
     
     public bool has_conversation(Geary.Conversation conversation) {

@@ -364,12 +364,19 @@ public interface Geary.Folder : Object {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Removes the email at the supplied position from the folder.  If the email_id is invalid for
-     * any reason, EngineError.NOT_FOUND is thrown.
+     * Removes the specified emails from the folder.
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async void remove_email_async(Geary.EmailIdentifier email_id,
+    public abstract async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
+        Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Removes one email from the folder.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async void remove_single_email_async(Geary.EmailIdentifier email_id,
         Cancellable? cancellable = null) throws Error;
     
     /**

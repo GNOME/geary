@@ -181,6 +181,10 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         return null;
     }
     
+    public override bool delete_is_archive() {
+        return false;
+    }
+    
     public override async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error {
         yield remote.send_email_async(composed, cancellable);

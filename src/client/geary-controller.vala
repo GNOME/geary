@@ -64,6 +64,7 @@ public class GearyController {
     public const string ACTION_ABOUT = "GearyAbout";
     public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
+    public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
     
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
@@ -78,6 +79,7 @@ public class GearyController {
     private Geary.Conversations? current_conversations = null;
     private bool second_list_pass_required = false;
     private int busy_count = 0;
+    private Geary.Conversation? current_conversation = null;
     
     public GearyController() {
         // Setup actions.
@@ -121,6 +123,10 @@ public class GearyController {
         new_message.label = _("_New Message");
         entries += new_message;
         
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "Delete",
+            null, on_delete_message };
+        entries += delete_message;
+        
         Gtk.ActionEntry secret_debug = { ACTION_DEBUG_PRINT, null, null, "<Ctrl><Alt>P",
             null, debug_print_selected };
         entries += secret_debug;
@@ -131,6 +137,14 @@ public class GearyController {
     public void start(Geary.EngineAccount account) {
         this.account = account;
         account.folders_added_removed.connect(on_folders_added_removed);
+        
+        // Personality-specific setup.
+        if (account.delete_is_archive()) {
+            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).label =
+                _("Archive Message");
+            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip =
+                _("Archive the selected conversation");
+        }
         
         main_window.folder_list_store.set_user_folders_root_name(account.get_user_folders_label());
         
@@ -351,6 +365,8 @@ public class GearyController {
         cancel_message();
         main_window.message_viewer.clear();
         
+        current_conversation = conversation;
+        
         if (conversation != null)
             do_select_message.begin(conversation, cancellable_message, on_select_message_completed);
     }
@@ -522,6 +538,34 @@ public class GearyController {
         w.set_position(Gtk.WindowPosition.CENTER);
         w.send.connect(on_send);
         w.show_all();
+    }
+    
+    private void on_delete_message() {
+        Gee.Set<Geary.Email>? pool = current_conversation.get_pool();
+        if (pool == null)
+            return;
+        
+        set_busy(true);
+        delete_messages.begin(pool, cancellable_folder, on_delete_messages_completed);
+    }
+    
+    private async void delete_messages(Gee.Collection<Geary.Email> messages, Cancellable? cancellable)
+        throws Error {
+        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (Geary.Email email in messages)
+            list.add(email.id);
+        
+        yield current_folder.remove_email_async(list, cancellable);
+    }
+    
+    private void on_delete_messages_completed(Object? source, AsyncResult result) {
+        try {
+            delete_messages.end(result);
+        } catch (Error err) {
+            debug("Error, unable to delete messages: %s", err.message);
+        }
+        
+        set_busy(false);
     }
     
     private void on_send(ComposerWindow cw) {

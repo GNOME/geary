@@ -35,7 +35,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             this.owner = owner;
             this.position = position;
             this.new_remote_count = new_remote_count;
-            id = null;
+            this.id = null;
         }
         
         public ReplayRemoval.with_id(EngineFolder owner, EmailIdentifier id) {
@@ -334,7 +334,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             debug("Removing from local store Email ID %s", owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
-                yield local_folder.remove_email_async(owned_id, null);
+                yield local_folder.remove_single_email_async(owned_id, null);
                 
                 notify_message_removed(owned_id);
             } catch (Error err2) {
@@ -870,13 +870,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return email;
     }
     
-    public override async void remove_email_async(Geary.EmailIdentifier email_id,
+    public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         
-        // TODO:
-        throw new EngineError.READONLY("EngineFolder currently cannot remove email");
+        // Only need to remove from remote folder, since it will be signaled and automatically
+        // removed from the local folder.
+        yield remote_folder.remove_email_async(email_ids, cancellable);
     }
     
     // Converts a remote position to a local position, assuming that the remote has been completely
