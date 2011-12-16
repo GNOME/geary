@@ -152,7 +152,7 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, 
-            conversation.get_count(), conversation.is_unread()));
+            conversation.get_usable_count(), conversation.is_unread()));
     }
     
     public int get_count() {
