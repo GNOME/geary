@@ -22,6 +22,7 @@ public class PreferencesDialog : Object {
         
         autoselect.toggled.connect(on_autoselect_toggled);
         close_button.clicked.connect(on_close);
+        dialog.close.connect(on_escape);
     }
     
     public void run() {
@@ -34,5 +35,9 @@ public class PreferencesDialog : Object {
     
     private void on_autoselect_toggled() {
         config.autoselect = autoselect.active;
+    }
+    
+    private void on_escape() {
+        dialog.hide();
     }
 }
