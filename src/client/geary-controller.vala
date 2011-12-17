@@ -99,6 +99,8 @@ public class GearyController {
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.folder_list_view.folder_selected.connect(on_folder_selected);
         
+        main_window.message_list_view.grab_focus();
+        
         set_busy(false);
     }
     
