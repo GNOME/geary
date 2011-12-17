@@ -5,6 +5,8 @@
  */
 
 public class Geary.RFC822.Message : Object {
+    private const string DEFAULT_ENCODING = "UTF8";
+    
     public RFC822.MailboxAddress? sender { get; private set; default = null; }
     public RFC822.MailboxAddresses? from { get; private set; default = null; }
     public RFC822.MailboxAddresses? to { get; private set; default = null; }
@@ -185,8 +187,10 @@ public class Geary.RFC822.Message : Object {
         
         // Convert encoding to UTF-8.
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
-        stream_filter.add(new GMime.FilterCharset(part.get_content_type_parameter("charset"), 
-            "UTF8"));
+        string? charset = part.get_content_type_parameter("charset");
+        if (charset == null)
+            charset = DEFAULT_ENCODING;
+        stream_filter.add(new GMime.FilterCharset(charset, "UTF8"));
         
         wrapper.write_to_stream(stream_filter);
         
