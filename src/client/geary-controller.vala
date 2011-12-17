@@ -92,6 +92,9 @@ public class GearyController {
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
         
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
+            = false;
+        
         main_window.message_list_view.conversation_selected.connect(on_conversation_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.folder_list_view.folder_selected.connect(on_folder_selected);
@@ -375,6 +378,9 @@ public class GearyController {
         main_window.message_viewer.clear();
         
         current_conversation = conversation;
+        
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
+            = (conversation != null);
         
         if (conversation != null)
             do_select_message.begin(conversation, cancellable_message, on_select_message_completed);
