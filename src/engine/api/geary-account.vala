@@ -5,8 +5,21 @@
  */
 
 public interface Geary.Account : Object {
+    public enum Problem {
+        LOGIN_FAILED,
+        HOST_UNREACHABLE,
+        NETWORK_UNAVAILABLE,
+        DATABASE_FAILURE
+    }
+    
+    public signal void report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
+        Error? err);
+    
     public signal void folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
+    
+    protected abstract void notify_report_problem(Geary.Account.Problem problem,
+        Geary.Credentials? credentials, Error? err);
     
     protected abstract void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);

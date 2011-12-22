@@ -17,6 +17,8 @@ public class Geary.Imap.ClientSessionManager {
     private int keepalive_sec = ClientSession.DEFAULT_KEEPALIVE_SEC;
     private int selected_keepalive_sec = SELECTED_KEEPALIVE_SEC;
     
+    public signal void login_failed();
+    
     public ClientSessionManager(Endpoint endpoint, Credentials credentials) {
         this.endpoint = endpoint;
         this.credentials = credentials;
@@ -187,13 +189,13 @@ public class Geary.Imap.ClientSessionManager {
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         ClientSession new_session = new ClientSession(endpoint);
         
+        add_session(new_session);
+        
         yield new_session.connect_async(cancellable);
         yield new_session.login_async(credentials, cancellable);
         
         // do this after logging in
         new_session.enable_keepalives(keepalive_sec);
-        
-        sessions.add(new_session);
         
         // since "disconnected" is used to remove the ClientSession from the sessions list, want
         // to only connect to the signal once the object has been added to the list; otherwise it's
@@ -247,8 +249,28 @@ public class Geary.Imap.ClientSessionManager {
     }
     
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
-        bool removed = sessions.remove(session);
+        bool removed = remove_session(session);
         assert(removed);
+    }
+    
+    private void on_login_failed() {
+        login_failed();
+    }
+    
+    private void add_session(ClientSession session) {
+        sessions.add(session);
+        
+        session.login_failed.connect(on_login_failed);
+    }
+    
+    private bool remove_session(ClientSession session) {
+        bool removed = sessions.remove(session);
+        if (removed) {
+            session.disconnected.disconnect(on_disconnected);
+            session.login_failed.disconnect(on_login_failed);
+        }
+        
+        return removed;
     }
     
     /**

@@ -11,6 +11,11 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
         this.name = name;
     }
     
+    public virtual void notify_report_problem(Geary.Account.Problem problem,
+        Geary.Credentials? credentials, Error? err) {
+        report_problem(problem, credentials, err);
+    }
+    
     protected virtual void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
         folders_added_removed(added, removed);

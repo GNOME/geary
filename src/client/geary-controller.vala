@@ -146,6 +146,7 @@ public class GearyController {
     
     public void start(Geary.EngineAccount account) {
         this.account = account;
+        
         account.folders_added_removed.connect(on_folders_added_removed);
         
         // Personality-specific setup.
@@ -159,10 +160,10 @@ public class GearyController {
         main_window.folder_list_store.set_user_folders_root_name(account.get_user_folders_label());
         
         main_window.show_all();
-        do_start.begin();
+        do_start.begin(cancellable_folder);
     }
     
-    private async void do_start() {
+    private async void do_start(Cancellable? cancellable) {
         try {
             // add all the special folders, which are assumed to always exist
             Geary.SpecialFolderMap? special_folders = account.get_special_folder_map();
@@ -172,7 +173,7 @@ public class GearyController {
                     batch.add(new FetchSpecialFolderOperation(account, special_folder));
                 
                 debug("Listing special folders");
-                yield batch.execute_all_async();
+                yield batch.execute_all_async(cancellable);
                 debug("Completed list of special folders");
                 
                 foreach (int id in batch.get_ids()) {
@@ -186,6 +187,9 @@ public class GearyController {
                             op.special_folder.path.to_string(), inner_error.message);
                     }
                 }
+                
+                if (cancellable.is_cancelled())
+                    return;
                 
                 // If inbox is specified, select that
                 Geary.SpecialFolder? inbox = special_folders.get_folder(Geary.SpecialFolderType.INBOX);
@@ -202,6 +206,12 @@ public class GearyController {
         } catch (Error err) {
             message("%s", err.message);
         }
+    }
+    
+    public void stop() {
+        cancel_folder();
+        cancel_message();
+        account = null;
     }
     
     private void on_folder_selected(Geary.Folder? folder) {

@@ -609,6 +609,8 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     
     public signal void disconnected(bool local);
     
+    public signal void login_failed();
+    
     internal SelectedContext(ClientSession session, SelectExamineResults results) {
         this.session = session;
         
@@ -627,6 +629,7 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
         session.unsolicited_flags.connect(on_unsolicited_flags);
         session.logged_out.connect(on_session_logged_out);
         session.disconnected.connect(on_session_disconnected);
+        session.login_failed.connect(on_login_failed);
     }
     
     ~SelectedContext() {
@@ -638,6 +641,7 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
             session.unsolicited_expunged.disconnect(on_unsolicited_expunged);
             session.logged_out.disconnect(on_session_logged_out);
             session.disconnected.disconnect(on_session_disconnected);
+            session.login_failed.disconnect(on_login_failed);
         }
     }
     
@@ -704,6 +708,10 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
             default:
                 assert_not_reached();
         }
+    }
+    
+    private void on_login_failed() {
+        login_failed();
     }
 }
 

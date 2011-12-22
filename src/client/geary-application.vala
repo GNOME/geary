@@ -78,6 +78,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         // TODO: Use OptionArg to properly parse the command line
         for (int ctr = 1; ctr < args.length; ctr++) {
+            if (args[ctr] == null)
+                continue;
+            
             switch (args[ctr].down()) {
                 case "--log-network":
                     Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
@@ -105,34 +108,24 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         config = new Configuration(GearyApplication.instance.get_install_dir() != null,
             GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
         
+        controller = new GearyController();
+        
+        login();
+        
+        return;
+    }
+    
+    private void login(bool query_keyring = true) {
         // Get saved credentials. If not present, ask user.
-        string username = "";
-        string? password = null;
-        try {
-            Gee.List<string> accounts = Geary.Engine.get_usernames(get_user_data_directory());
-            if (accounts.size > 0) {
-                username = accounts.get(0);
-                password = keyring_get_password(username);
-            }
-        } catch (Error e) {
-            debug("Unable to fetch accounts. Error: %s", e.message);
-        }
+        string username = get_username();
+        string? password = query_keyring ? keyring_get_password(username) : null;
         
+        Geary.Credentials cred;
         if (password == null) {
-            LoginDialog login = new LoginDialog(username);
-            login.show();
-            if (login.get_response() == Gtk.ResponseType.OK) {
-                username = login.username;
-                password = login.password;
-                
-                // TODO: check credentials before saving password in keyring.
-                keyring_save_password(username, password);
-            } else {
-                exit(1);
-            }
+            cred = request_login(username);
+        } else {
+            cred = new Geary.Credentials(username, password);
         }
-        
-        Geary.Credentials cred = new Geary.Credentials(username, password);
         
         try {
             account = Geary.Engine.open(cred, get_user_data_directory(), get_resource_directory());
@@ -140,10 +133,58 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             error("Unable to open mail database for %s: %s", cred.user, err.message);
         }
         
-        controller = new GearyController();
-        controller.start(account);
+        account.report_problem.connect(on_report_problem);
         
-        return;
+        controller.start(account);
+    }
+    
+    private string get_username() {
+        try {
+            Gee.List<string> accounts = Geary.Engine.get_usernames(get_user_data_directory());
+            if (accounts.size > 0) {
+                return accounts.get(0);
+            }
+        } catch (Error e) {
+            debug("Unable to fetch accounts. Error: %s", e.message);
+        }
+        
+        return "";
+    }
+    
+    // Prompt the user for a username and password, and try to start Geary.
+    private Geary.Credentials request_login(string _username = "") {
+        LoginDialog login = new LoginDialog(_username);
+        login.show();
+        if (login.get_response() == Gtk.ResponseType.OK) {
+            keyring_save_password(login.username, login.password);
+        } else {
+            exit(1);
+        }
+        
+        return new Geary.Credentials(login.username, login.password);
+    }
+    
+    private void on_report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
+        Error? err) {
+        debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
+        switch (problem) {
+            case Geary.Account.Problem.DATABASE_FAILURE:
+            case Geary.Account.Problem.HOST_UNREACHABLE:
+            case Geary.Account.Problem.NETWORK_UNAVAILABLE:
+                // TODO
+            break;
+            
+            case Geary.Account.Problem.LOGIN_FAILED:
+                debug("Login failed.");
+                if (controller != null)
+                    controller.stop();
+                account.report_problem.disconnect(on_report_problem);
+                login(false);
+            break;
+            
+            default:
+                assert_not_reached();
+        }
     }
     
     public override void exiting(bool panicked) {

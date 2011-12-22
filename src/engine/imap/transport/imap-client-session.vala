@@ -188,6 +188,9 @@ public class Geary.Imap.ClientSession {
     public virtual signal void logged_out() {
     }
     
+    public virtual signal void login_failed() {
+    }
+    
     public virtual signal void disconnected(DisconnectReason reason) {
     }
     
@@ -510,6 +513,7 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_login_failed(uint state, uint event, void *user) {
+        login_failed();
         return State.NOAUTH;
     }
     

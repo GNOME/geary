@@ -16,6 +16,9 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         this.remote = remote;
         this.local = local;
         
+        this.remote.report_problem.connect(on_report_problem);
+        this.local.report_problem.connect(on_report_problem);
+        
         if (special_folders == null) {
             special_folders = new SpecialFolderMap();
             
@@ -53,7 +56,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
                 engine_list.add(new GenericImapFolder(remote, local, (LocalFolder) local_folder));
         }
         
-        background_update_folders.begin(parent, engine_list);
+        background_update_folders.begin(parent, engine_list, cancellable);
         
         return engine_list;
     }
@@ -120,10 +123,10 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
     }
     
     private async void background_update_folders(Geary.FolderPath? parent,
-        Gee.Collection<Geary.Folder> engine_folders) {
+        Gee.Collection<Geary.Folder> engine_folders, Cancellable? cancellable) {
         Gee.Collection<Geary.Folder> remote_folders;
         try {
-            remote_folders = yield remote.list_folders_async(parent);
+            remote_folders = yield remote.list_folders_async(parent, cancellable);
         } catch (Error remote_error) {
             error("Unable to retrieve folder list from server: %s", remote_error.message);
         }
@@ -143,7 +146,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         if (to_add != null) {
             foreach (Geary.Folder folder in to_add) {
                 try {
-                    yield local.clone_folder_async(folder);
+                    yield local.clone_folder_async(folder, cancellable);
                 } catch (Error err) {
                     debug("Unable to add/remove folder %s: %s", folder.get_path().to_string(),
                         err.message);
@@ -157,7 +160,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
             foreach (Geary.Folder remote_folder in to_add) {
                 try {
                     LocalFolder local_folder = (LocalFolder) yield local.fetch_folder_async(
-                        remote_folder.get_path());
+                        remote_folder.get_path(), cancellable);
                     engine_added.add(new GenericImapFolder(remote, local, local_folder));
                 } catch (Error convert_err) {
                     error("Unable to fetch local folder: %s", convert_err.message);
@@ -188,6 +191,11 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
     public override async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error {
         yield remote.send_email_async(composed, cancellable);
+    }
+    
+    private void on_report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
+        Error? err) {
+        notify_report_problem(problem, credentials, err);
     }
 }
 

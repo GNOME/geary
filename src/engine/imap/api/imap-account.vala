@@ -38,6 +38,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         this.cred = cred;
         
         session_mgr = new ClientSessionManager(imap_endpoint, cred);
+        session_mgr.login_failed.connect(on_login_failed);
         smtp = new Geary.Smtp.ClientSession(smtp_endpoint);
     }
     
@@ -190,6 +191,10 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
                 message("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
             }
         }
+    }
+    
+    private void on_login_failed() {
+        notify_report_problem(Geary.Account.Problem.LOGIN_FAILED, cred, null);
     }
 }
 
