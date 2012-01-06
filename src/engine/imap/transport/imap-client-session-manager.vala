@@ -6,7 +6,6 @@
 
 public class Geary.Imap.ClientSessionManager {
     private const int MIN_POOL_SIZE = 2;
-    private const int SELECTED_KEEPALIVE_SEC = 30;
     
     private Endpoint endpoint;
     private Credentials credentials;
@@ -14,8 +13,8 @@ public class Geary.Imap.ClientSessionManager {
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
     private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
-    private int keepalive_sec = ClientSession.DEFAULT_KEEPALIVE_SEC;
-    private int selected_keepalive_sec = SELECTED_KEEPALIVE_SEC;
+    private int unselected_keepalive_sec = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC;
+    private int selected_keepalive_sec = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC;
     
     public signal void login_failed();
     
@@ -39,14 +38,15 @@ public class Geary.Imap.ClientSessionManager {
     }
     
     /**
-     * Set to zero or negative value if keepalives should be disabled.  (This is not recommended.)
+     * Set to zero or negative value if keepalives should be disabled when a connection has not
+     * selected a mailbox.  (This is not recommended.)
      *
      * This only affects newly created sessions or sessions leaving the selected/examined state
      * and returning to an authorized state.
      */
-    public void set_keepalive(int keepalive_sec) {
+    public void set_unselected_keepalive(int unselected_keepalive_sec) {
         // set for future connections
-        this.keepalive_sec = keepalive_sec;
+        this.unselected_keepalive_sec = unselected_keepalive_sec;
     }
     
     /**
@@ -179,10 +179,8 @@ public class Geary.Imap.ClientSessionManager {
         bool removed = contexts.remove(context);
         assert(removed);
         
-        if (context.session != null) {
+        if (context.session != null)
             context.session.close_mailbox_async.begin();
-            context.session.enable_keepalives(keepalive_sec);
-        }
     }
     
     // This should only be called when sessions_mutex is locked.
@@ -195,7 +193,7 @@ public class Geary.Imap.ClientSessionManager {
         yield new_session.login_async(credentials, cancellable);
         
         // do this after logging in
-        new_session.enable_keepalives(keepalive_sec);
+        new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec);
         
         // since "disconnected" is used to remove the ClientSession from the sessions list, want
         // to only connect to the signal once the object has been added to the list; otherwise it's
@@ -240,8 +238,6 @@ public class Geary.Imap.ClientSessionManager {
         }
         
         ClientSession authd = yield get_authorized_session(cancellable);
-        
-        authd.enable_keepalives(selected_keepalive_sec);
         
         results = yield authd.select_examine_async(folder, is_select, cancellable);
         

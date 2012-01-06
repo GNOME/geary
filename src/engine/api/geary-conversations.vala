@@ -644,7 +644,8 @@ public class Geary.Conversations : Object {
         
         if (conversation.get_usable_count() == 0) {
             // prune all Nodes in the conversation tree
-            prune_nodes((Node) conversation.get_origin());
+            if (conversation.get_origin() != null)
+                prune_nodes((Node) conversation.get_origin());
             
             // prune all orphan Nodes
             Gee.Collection<ConversationNode>? orphans = conversation.get_orphans();

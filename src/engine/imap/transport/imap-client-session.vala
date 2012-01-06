@@ -5,9 +5,13 @@
  */
 
 public class Geary.Imap.ClientSession {
-    // 30 min keepalive required to maintain session; back off by 5 min for breathing room
-    public const int MIN_KEEPALIVE_SEC = 25 * 60;
-    public const int DEFAULT_KEEPALIVE_SEC = 3 * 60;
+    // 30 min keepalive required to maintain session; back off by 1 min for breathing room
+    public const int MIN_KEEPALIVE_SEC = 29 * 60;
+    
+    // NOOP is only sent after this amount of time has passed since the last received
+    // message on the connection dependant on connection state (selected/examined vs. authorized)
+    public const int DEFAULT_SELECTED_KEEPALIVE_SEC = 45;
+    public const int DEFAULT_UNSELECTED_KEEPALIVE_SEC = MIN_KEEPALIVE_SEC;
     
     public enum Context {
         UNCONNECTED,
@@ -172,6 +176,8 @@ public class Geary.Imap.ClientSession {
         Hashable.hash_func, Equalable.equal_func);
     private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
+    private int selected_keepalive_secs = 0;
+    private int unselected_keepalive_secs = 0;
     
     // state used only during connect and disconnect
     private bool awaiting_connect_response = false;
@@ -528,17 +534,13 @@ public class Geary.Imap.ClientSession {
      * Although keepalives can be enabled at any time, if they're enabled and trigger sending
      * a command prior to connection, error signals may be fired.
      */
-    public void enable_keepalives(int seconds = DEFAULT_KEEPALIVE_SEC) {
-        if (seconds <= 0) {
-            disable_keepalives();
-            
-            return;
-        }
+    public void enable_keepalives(int seconds_while_selected = DEFAULT_SELECTED_KEEPALIVE_SEC,
+        int seconds_while_unselected = DEFAULT_UNSELECTED_KEEPALIVE_SEC) {
+        selected_keepalive_secs = seconds_while_selected;
+        unselected_keepalive_secs = seconds_while_unselected;
         
-        if (keepalive_id != 0)
-            Source.remove(keepalive_id);
-        
-        keepalive_id = Timeout.add_seconds(seconds, on_keepalive);
+        // schedule one now, although will be rescheduled if traffic is received before it fires
+        schedule_keepalive();
     }
     
     /**
@@ -554,41 +556,59 @@ public class Geary.Imap.ClientSession {
         return true;
     }
     
+    private void schedule_keepalive() {
+        // if old one was scheduled, unschedule and schedule anew
+        if (keepalive_id != 0)
+            Source.remove(keepalive_id);
+        
+        int seconds;
+        switch (get_context(null)) {
+            case Context.UNCONNECTED:
+                return;
+            
+            case Context.IN_PROGRESS:
+            case Context.EXAMINED:
+            case Context.SELECTED:
+                seconds = selected_keepalive_secs;
+                break;
+            
+            case Context.UNAUTHORIZED:
+            case Context.AUTHORIZED:
+            default:
+                seconds = unselected_keepalive_secs;
+                break;
+        }
+        
+        // Possible to not have keepalives in one state but in another, or for neither
+        //
+        // Yes, we allow keepalive to be set to 1 second.  It's their dime.
+        if (seconds > 0)
+            keepalive_id = Timeout.add_seconds(seconds, on_keepalive);
+    }
+    
     private bool on_keepalive() {
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
         
-        return true;
+        // Reschedule to reflect current connection state, although will be rescheduled again if
+        // traffic is received
+        keepalive_id = 0;
+        schedule_keepalive();
+        
+        return false;
     }
     
     private void on_keepalive_completed(Object? source, AsyncResult result) {
-        NoopResults results;
+        CommandResponse response;
         try {
-            results = NoopResults.decode(send_command_async.end(result));
+            response = send_command_async.end(result);
         } catch (Error err) {
-            message("Keepalive error: %s", err.message);
+            debug("Keepalive error: %s", err.message);
             
             return;
         }
         
-        if (results.status_response.status != Status.OK) {
-            debug("Keepalive failed: %s", results.status_response.to_string());
-            
-            return;
-        }
-        
-        if (results.expunged != null) {
-            foreach (MessageNumber msg in results.expunged)
-                unsolicited_expunged(msg);
-        }
-        
-        if (results.has_exists())
-            unsolicited_exists(results.exists);
-        
-        if (results.has_recent())
-            unsolicited_recent(results.recent);
-        
-        if (results.flags != null)
-            unsolicited_flags(results.flags);
+        if (response.status_response.status != Status.OK)
+            debug("Keepalive failed: %s", response.status_response.to_string());
     }
     
     //
@@ -616,9 +636,12 @@ public class Geary.Imap.ClientSession {
         if (params.err != null)
             throw params.err;
         
-        // look for unsolicited server data and signal all that are found ... since SELECT/EXAMINE
+        // Look for unsolicited server data and signal all that are found ... since SELECT/EXAMINE
         // aren't allowed here, don't need to check for them (because their fields aren't considered
-        // unsolicited)
+        // unsolicited).  Note that this also captures NOOP's responses; although not exactly
+        // unsolicited in one sense, the NOOP command is merely the transport vehicle to allow the
+        // server to deliver unsolicited messages when no other response is available to piggyback
+        // upon.
         //
         // Note that EXPUNGE returns *EXPUNGED* results, not *EXPUNGE*, which is what the unsolicited
         // version is.
@@ -1093,6 +1116,9 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_status_response(StatusResponse status_response) {
+        // reschedule keepalive, now that traffic has been seen
+        schedule_keepalive();
+        
         assert(!current_cmd_response.is_sealed());
         current_cmd_response.seal(status_response);
         assert(current_cmd_response.is_sealed());
@@ -1114,6 +1140,9 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_server_data(ServerData server_data) {
+        // reschedule keepalive, now that traffic has been seen
+        schedule_keepalive();
+        
         // The first response from the server is an untagged status response, which is considered
         // ServerData in our model.  This captures that and treats it as such.
         if (awaiting_connect_response) {
@@ -1129,6 +1158,9 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {
+        // reschedule keepalive, now that traffic has been seen
+        schedule_keepalive();
+        
         debug("Received bad response %s: %s", root.to_string(), err.message);
     }
     
