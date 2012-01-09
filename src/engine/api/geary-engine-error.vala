@@ -14,6 +14,6 @@ public errordomain Geary.EngineError {
     BAD_RESPONSE,
     INCOMPLETE_MESSAGE,
     SERVER_UNAVAILABLE,
-    CLOSED
+    ALREADY_CLOSED
 }
 

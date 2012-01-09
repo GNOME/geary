@@ -13,5 +13,19 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
         if (!flags.contains(MessageFlag.SEEN))
             add(UNREAD);
     }
+    
+    public override void add(EmailFlag flag) {
+        if (flag.equals(UNREAD))
+            message_flags.remove(MessageFlag.SEEN);
+        
+        base.add(flag);
+    }
+    
+    public override bool remove(EmailFlag flag) {
+        if (flag.equals(UNREAD))
+            message_flags.add(MessageFlag.SEEN);
+        
+        return base.remove(flag);
+    }
 }
 

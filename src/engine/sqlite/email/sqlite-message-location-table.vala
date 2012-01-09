@@ -10,7 +10,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         ID,
         MESSAGE_ID,
         FOLDER_ID,
-        ORDERING
+        ORDERING,
+        REMOVE_MARKER
     }
     
     public MessageLocationTable(Geary.Sqlite.Database db, SQLHeavy.Table table) {
@@ -40,7 +41,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
      * low is one-based.  If count is -1, all messages starting at low are returned.
      */
     public async Gee.List<MessageLocationRow>? list_async(Transaction? transaction,
-        int64 folder_id, int low, int count, Cancellable? cancellable) throws Error {
+        int64 folder_id, int low, int count, bool include_marked, Cancellable? cancellable) 
+        throws Error {
         assert(low >= 1);
         assert(count >= 0 || count == -1);
         
@@ -51,7 +53,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         if (count >= 0) {
             query = locked.prepare(
                 "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "ORDER BY ordering LIMIT ? OFFSET ?");
+                + "%s ORDER BY ordering LIMIT ? OFFSET ?".printf(include_marked ? "" : 
+                "AND remove_marker = 0"));
             query.bind_int64(0, folder_id);
             query.bind_int(1, count);
             query.bind_int(2, low - 1);
@@ -59,7 +62,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             // count == -1
             query = locked.prepare(
                 "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "ORDER BY ordering OFFSET ?");
+                + "%s ORDER BY ordering OFFSET ?".printf(include_marked ? "" : 
+                "AND remove_marker = 0"));
             query.bind_int64(0, folder_id);
             query.bind_int(1, low - 1);
         }
@@ -91,7 +95,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         // reuse the query for each iteration
         SQLHeavy.Query query = locked.prepare(
             "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-            + "ORDER BY ordering LIMIT 1 OFFSET ?");
+            + "AND remove_marker = 0 ORDER BY ordering LIMIT 1 OFFSET ?");
         
         Gee.List<MessageLocationRow> list = new Gee.ArrayList<MessageLocationRow>();
         foreach (int position in by_position) {
@@ -126,21 +130,21 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         if (high_ordering != -1 && low_ordering != -1) {
             query = locked.prepare(
                 "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "AND ordering >= ? AND ordering <= ? ORDER BY ordering ASC");
+                + "AND ordering >= ? AND ordering <= ? AND remove_marker = 0 ORDER BY ordering ASC");
             query.bind_int64(0, folder_id);
             query.bind_int64(1, low_ordering);
             query.bind_int64(2, high_ordering);
         } else if (high_ordering == -1) {
             query = locked.prepare(
                 "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "AND ordering >= ? ORDER BY ordering ASC");
+                + "AND ordering >= ? AND remove_marker = 0 ORDER BY ordering ASC");
             query.bind_int64(0, folder_id);
             query.bind_int64(1, low_ordering);
         } else {
             assert(low_ordering == -1);
             query = locked.prepare(
                 "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "AND ordering <= ? ORDER BY ordering ASC");
+                + "AND ordering <= ? AND remove_marker = 0 ORDER BY ordering ASC");
             query.bind_int64(0, folder_id);
             query.bind_int64(1, high_ordering);
         }
@@ -172,7 +176,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         
         SQLHeavy.Query query = locked.prepare(
             "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-            + "ORDER BY ordering LIMIT 1 OFFSET ?");
+            + "AND remove_marker = 0 ORDER BY ordering LIMIT 1 OFFSET ?");
         query.bind_int64(0, folder_id);
         query.bind_int(1, position - 1);
         
@@ -190,7 +194,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT id, message_id FROM MessageLocationTable WHERE folder_id = ? AND ordering = ? ");
+            "SELECT id, message_id FROM MessageLocationTable WHERE folder_id = ? AND ordering = ? "
+            + "AND remove_marker = 0");
         query.bind_int64(0, folder_id);
         query.bind_int64(1, ordering);
         
@@ -202,13 +207,33 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             folder_id, ordering, -1);
     }
     
+    public async MessageLocationRow? fetch_by_message_id_async(Transaction? transaction,
+        int64 folder_id, int64 message_id, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction,
+            "MessageLocationTable.fetch_by_message_id_async", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
+            "SELECT id, ordering FROM MessageLocationTable WHERE folder_id = ? AND message_id = ? "
+            + "AND remove_marker = 0");
+        query.bind_int64(0, folder_id);
+        query.bind_int64(1, message_id);
+        
+        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        if (results.finished)
+            return null;
+        
+        return new MessageLocationRow(this, results.fetch_int64(0), message_id,
+            folder_id, results.fetch_int64(1), -1);
+    }
+    
     public async int fetch_position_async(Transaction? transaction, int64 id, 
-        int64 folder_id, Cancellable? cancellable) throws Error {
+        int64 folder_id, bool include_marked, Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction, "MessageLocationTable.fetch_position_async",
             cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT id FROM MessageLocationTable WHERE folder_id = ? ORDER BY ordering");
+            "SELECT id FROM MessageLocationTable WHERE folder_id = ? %s ".printf(include_marked ? "" :
+            "AND remove_marker = 0") + "ORDER BY ordering");
         query.bind_int64(0, folder_id);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
@@ -232,7 +257,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "MessageLocationTable.fetch_message_position_async", cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT message_id FROM MessageLocationTable WHERE folder_id=? ORDER BY ordering");
+            "SELECT message_id FROM MessageLocationTable WHERE folder_id=? AND remove_marker = 0 "
+            + "ORDER BY ordering");
         query.bind_int64(0, folder_id);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
@@ -251,12 +277,13 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
     }
     
     public async int fetch_count_for_folder_async(Transaction? transaction, 
-        int64 folder_id, Cancellable? cancellable) throws Error {
+        int64 folder_id, bool include_removed, Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction,
             "MessageLocationTable.fetch_count_for_folder_async", cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT COUNT(*) FROM MessageLocationTable WHERE folder_id = ?");
+            "SELECT COUNT(*) FROM MessageLocationTable WHERE folder_id = ? %s".printf(
+                include_removed ? "" : "AND remove_marker = 0"));
         query.bind_int64(0, folder_id);
         
         SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
@@ -275,7 +302,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "MessageLocationTable.does_ordering_exist_async", cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT message_id FROM MessageLocationTable WHERE folder_id = ? AND ordering = ?");
+            "SELECT message_id FROM MessageLocationTable WHERE folder_id = ? AND ordering = ? "
+            + "AND remove_marker = 0");
         query.bind_int64(0, folder_id);
         query.bind_int64(1, ordering);
         
@@ -294,7 +322,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "MessageLocationTable.get_earliest_ordering_async", cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT MIN(ordering) FROM MessageLocationTable WHERE folder_id = ?");
+            "SELECT MIN(ordering) FROM MessageLocationTable WHERE folder_id = ? " + 
+            "AND remove_marker = 0");
         query.bind_int64(0, folder_id);
         
         SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
@@ -325,6 +354,41 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         yield release_lock_async(transaction, locked, cancellable);
         
         return true;
+    }
+    
+    // Marks the given message as removed if "remove" is true, otherwise marks
+    // it as non-removed.
+    public async void mark_removed_async(Transaction? transaction, int64 folder_id, int64 ordering,
+        bool remove, Cancellable? cancellable) throws Error {
+        
+        Transaction locked = yield obtain_lock_async(transaction,
+            "MessageLocationTable.mark_removed_async", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
+            "UPDATE MessageLocationTable SET remove_marker = ? WHERE folder_id = ? AND ordering = ?");
+        query.bind_int(0, (int) remove);
+        query.bind_int64(1, folder_id);
+        query.bind_int64(2, ordering);
+        
+        yield query.execute_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+    }
+    
+    public async bool is_marked_removed_async(Transaction? transaction, int64 folder_id, 
+        int64 ordering, Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction,
+            "MessageLocationTable.is_mark_removed_async", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
+            "SELECT remove_marker FROM MessageLocationTable WHERE folder_id = ? AND ordering = ?");
+        query.bind_int64(0, folder_id);
+        query.bind_int64(1, ordering);
+        
+        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        
+        return (bool) results.fetch_int(0);
     }
 }
 

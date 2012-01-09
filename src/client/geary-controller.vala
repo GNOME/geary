@@ -81,6 +81,7 @@ public class GearyController {
     private bool second_list_pass_required = false;
     private int busy_count = 0;
     private Geary.Conversation? current_conversation = null;
+    private Geary.Conversation? last_deleted_conversation = null;
     
     public GearyController() {
         // Setup actions.
@@ -573,6 +574,12 @@ public class GearyController {
     }
     
     private void on_delete_message() {
+        // Prevent deletes of the same conversation from repeating.
+        if (current_conversation == last_deleted_conversation)
+            return;
+        
+        last_deleted_conversation = current_conversation;
+        
         Gee.Set<Geary.Email>? pool = current_conversation.get_pool();
         if (pool == null)
             return;

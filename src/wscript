@@ -89,8 +89,11 @@ def build(bld):
 	'../engine/impl/geary-generic-imap-folder.vala',
 	'../engine/impl/geary-gmail-account.vala',
 	'../engine/impl/geary-local-interfaces.vala',
+	'../engine/impl/geary-receive-replay-operations.vala',
+	'../engine/impl/geary-receive-replay-queue.vala',
 	'../engine/impl/geary-remote-interfaces.vala',
-	'../engine/impl/geary-replay-queue.vala',
+	'../engine/impl/geary-send-replay-operations.vala',
+	'../engine/impl/geary-send-replay-queue.vala',
 	
 	'../engine/nonblocking/nonblocking-abstract-semaphore.vala',
 	'../engine/nonblocking/nonblocking-batch.vala',

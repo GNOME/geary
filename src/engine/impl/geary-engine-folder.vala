@@ -7,51 +7,6 @@
 private class Geary.EngineFolder : Geary.AbstractFolder {
     private const int REMOTE_FETCH_CHUNK_COUNT = 5;
     
-    private class ReplayAppend : ReplayOperation {
-        public EngineFolder owner;
-        public int new_remote_count;
-        
-        public ReplayAppend(EngineFolder owner, int new_remote_count) {
-            base ("Append");
-            
-            this.owner = owner;
-            this.new_remote_count = new_remote_count;
-        }
-        
-        public override async void replay() {
-            yield owner.do_replay_appended_messages(new_remote_count);
-        }
-    }
-    
-    private class ReplayRemoval : ReplayOperation {
-        public EngineFolder owner;
-        public int position;
-        public int new_remote_count;
-        public EmailIdentifier? id;
-        
-        public ReplayRemoval(EngineFolder owner, int position, int new_remote_count) {
-            base ("Removal");
-            
-            this.owner = owner;
-            this.position = position;
-            this.new_remote_count = new_remote_count;
-            this.id = null;
-        }
-        
-        public ReplayRemoval.with_id(EngineFolder owner, EmailIdentifier id) {
-            base ("Removal.with_id");
-            
-            this.owner = owner;
-            position = -1;
-            new_remote_count = -1;
-            this.id = id;
-        }
-        
-        public override async void replay() {
-            yield owner.do_replay_remove_message(position, new_remote_count, id);
-        }
-    }
-    
     private class CommitOperation : NonblockingBatchOperation {
         public Folder folder;
         public Geary.Email email;
@@ -68,15 +23,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         }
     }
     
-    protected LocalFolder local_folder;
-    protected RemoteFolder? remote_folder = null;
+    internal LocalFolder local_folder  { get; protected set; }
+    internal RemoteFolder? remote_folder { get; protected set; default = null; }
+    internal int remote_count { get; private set; default = -1; }
     
     private RemoteAccount remote;
     private LocalAccount local;
-    private int remote_count = -1;
     private bool opened = false;
     private NonblockingSemaphore remote_semaphore = new NonblockingSemaphore();
-    private ReplayQueue? replay_queue = null;
+    private ReceiveReplayQueue? recv_replay_queue = null;
+    private SendReplayQueue? send_replay_queue = null;
     
     public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         this.remote = remote;
@@ -165,8 +121,9 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 // all set; bless the remote folder as opened
                 remote_folder = folder;
                 
-                // start the replay queue
-                replay_queue = new ReplayQueue();
+                // start the replay queues
+                recv_replay_queue = new ReceiveReplayQueue();
+                send_replay_queue = new SendReplayQueue();
             } else {
                 debug("Unable to prepare remote folder %s: prepare_opened_file() failed", to_string());
             }
@@ -225,10 +182,12 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             
             folder.close_async.begin(cancellable);
             
-            // close the replay queue *after* the folder has been closed (in case any final upcalls
+            // close the replay queues *after* the folder has been closed (in case any final upcalls
             // come and can be handled)
-            yield replay_queue.close_async();
-            replay_queue = null;
+            yield recv_replay_queue.close_async();
+            yield send_replay_queue.close_async();
+            recv_replay_queue = null;
+            send_replay_queue = null;
             
             notify_closed(CloseReason.FOLDER_CLOSED);
         }
@@ -238,7 +197,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     private void on_remote_messages_appended(int total) {
         debug("on_remote_messages_appended: total=%d", total);
-        replay_queue.schedule(new ReplayAppend(this, total));
+        recv_replay_queue.schedule(new ReplayAppend(this, total));
     }
     
     // Need to prefetch at least an EmailIdentifier (and duplicate detection fields) to create a
@@ -248,7 +207,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // which is exactly what we want.
     //
     // This MUST only be called from ReplayAppend.
-    private async void do_replay_appended_messages(int new_remote_count) {
+    internal async void do_replay_appended_messages(int new_remote_count) {
         // this only works when the list is grown
         if (remote_count >= new_remote_count) {
             debug("Message reported appended by server but remote count %d already known",
@@ -286,16 +245,16 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     private void on_remote_message_removed(Geary.EmailIdentifier id) {
         debug("on_remote_message_removed: %s", id.to_string());
-        replay_queue.schedule(new ReplayRemoval.with_id(this, id));
+        recv_replay_queue.schedule(new ReplayRemoval.with_id(this, id));
     }
     
     private void on_remote_message_at_removed(int position, int total) {
         debug("on_remote_message_at_removed: position=%d total=%d", position, total);
-        replay_queue.schedule(new ReplayRemoval(this, position, total));
+        recv_replay_queue.schedule(new ReplayRemoval(this, position, total));
     }
     
     // This MUST only be called from ReplayRemoval.
-    private async void do_replay_remove_message(int remote_position, int new_remote_count,
+    internal async void do_replay_remove_message(int remote_position, int new_remote_count,
         Geary.EmailIdentifier? id) {
         if (remote_position < 1)
             assert(id != null);
@@ -305,38 +264,22 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.EmailIdentifier? owned_id = id;
         if (owned_id == null) {
             try {
-                // convert remote positional addressing to local positional addressing
-                int local_count = yield local_folder.get_email_count_async();
-                int local_position = remote_position_to_local_position(remote_position, local_count);
-                
-                // possible we don't have the remote email locally
-                if (local_position >= 1) {
-                    // get EmailIdentifier for removed email
-                    Gee.List<Geary.Email>? local = yield local_folder.list_email_async(local_position, 1,
-                        Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, null);
-                    if (local != null && local.size == 1) {
-                        owned_id = local[0].id;
-                    } else {
-                        debug("list_email_async unable to convert position %d into id (count=%d)",
-                            local_position, yield local_folder.get_email_count_async());
-                    }
-                } else {
-                    debug("Unable to get local position for remote position %d (local_count=%d remote_count=%d)",
-                        remote_position, local_count, remote_count);
-                }
+                owned_id = yield local_folder.id_from_remote_position(remote_position, remote_count);
             } catch (Error err) {
                 debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
                     to_string(), err.message);
             }
         }
         
+        bool marked = false;
         if (owned_id != null) {
             debug("Removing from local store Email ID %s", owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
-                yield local_folder.remove_single_email_async(owned_id, null);
+                yield local_folder.remove_marked_email_async(owned_id, out marked, null);
                 
-                notify_message_removed(owned_id);
+                if (!marked)
+                    notify_message_removed(owned_id);
             } catch (Error err2) {
                 debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
                     err2.message);
@@ -346,7 +289,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // save new remote count and notify of change
         remote_count = new_remote_count;
         
-        notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
+        if (!marked)
+            notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
     }
     
     public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
@@ -875,9 +819,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         
-        // Only need to remove from remote folder, since it will be signaled and automatically
-        // removed from the local folder.
-        yield remote_folder.remove_email_async(email_ids, cancellable);
+        send_replay_queue.schedule(new RemoveEmail(this, email_ids, cancellable));
     }
     
     // Converts a remote position to a local position, assuming that the remote has been completely
@@ -948,19 +890,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         debug("prefetched %d for %s", prefetch_count, to_string());
     }
     
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
-        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
-        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
+    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
+        Cancellable? cancellable = null) throws Error {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = 
-            yield remote_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove, cancellable);
-        yield local_folder.set_email_flags_async(map, cancellable);
-        
-        notify_email_flags_changed(map);
-        
-        return map;
+        send_replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
+            cancellable));
     }
 }
 

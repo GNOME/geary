@@ -13,19 +13,19 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         closed(reason);
     }
     
-    protected virtual void notify_messages_appended(int total) {
+    internal virtual void notify_messages_appended(int total) {
         messages_appended(total);
     }
     
-    protected virtual void notify_message_removed(Geary.EmailIdentifier id) {
+    internal virtual void notify_message_removed(Geary.EmailIdentifier id) {
         message_removed(id);
     }
     
-    protected virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
+    internal virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
         email_count_changed(new_count, reason);
     }
     
-    protected virtual void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
+    internal virtual void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
         Geary.EmailFlags> flag_map) {
         email_flags_changed(flag_map);
     }
@@ -135,7 +135,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         yield remove_email_async(list, cancellable);
     }
     
-    public abstract async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+    public abstract async void mark_email_async(
         Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error;
     

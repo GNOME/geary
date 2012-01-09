@@ -384,9 +384,9 @@ public interface Geary.Folder : Object {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
-        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
-        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error;
+    public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * check_span_specifiers() verifies that the span specifiers match the requirements set by

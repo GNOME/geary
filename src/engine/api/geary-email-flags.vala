@@ -27,11 +27,11 @@ public class Geary.EmailFlags : Geary.Equalable {
         return list.read_only_view;
     }
     
-    public void add(EmailFlag flag) {
+    public virtual void add(EmailFlag flag) {
         list.add(flag);
     }
     
-    public bool remove(EmailFlag flag) {
+    public virtual bool remove(EmailFlag flag) {
         return list.remove(flag);
     }
     

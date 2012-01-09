@@ -44,7 +44,7 @@ public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.
 public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData, Equalable {
     public int size { get { return list.size; } }
     
-    private Gee.Set<Flag> list;
+    protected Gee.Set<Flag> list;
     
     public Flags(Gee.Collection<Flag> flags) {
         list = new Gee.HashSet<Flag>(Hashable.hash_func, Equalable.equal_func);
@@ -120,6 +120,14 @@ public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
             flags.add(new MessageFlag(token));
         
         return new MessageFlags(flags);
+    }
+    
+    internal void add(MessageFlag flag) {
+        list.add(flag);
+    }
+    
+    internal void remove(MessageFlag flag) {
+        list.remove(flag);
     }
 }
 

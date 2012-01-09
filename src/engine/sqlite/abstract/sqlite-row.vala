@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Sqlite.Row {
+public abstract class Geary.Sqlite.Row : Object {
     public const int64 INVALID_ID = -1;
     
     protected Table table;

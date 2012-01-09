@@ -54,7 +54,8 @@ CREATE TABLE MessageLocationTable (
     id INTEGER PRIMARY KEY,
     message_id INTEGER REFERENCES MessageTable ON DELETE CASCADE,
     folder_id INTEGER REFERENCES FolderTable ON DELETE CASCADE,
-    ordering INTEGER
+    ordering INTEGER,
+    remove_marker INTEGER DEFAULT 0
 );
 
 CREATE INDEX MessageLocationTableMessageIDIndex ON MessageLocationTable(message_id);

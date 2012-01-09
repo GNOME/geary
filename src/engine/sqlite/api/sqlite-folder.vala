@@ -82,7 +82,17 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         check_open();
         
         // TODO: This can be cached and updated when changes occur
-        return yield location_table.fetch_count_for_folder_async(null, folder_row.id, cancellable);
+        return yield location_table.fetch_count_for_folder_async(null, folder_row.id, false,
+            cancellable);
+    }
+    
+    private async int get_email_count_including_removed_async(Cancellable? cancellable = null) 
+        throws Error {
+        check_open();
+        
+        // TODO: This can be cached and updated when changes occur
+        return yield location_table.fetch_count_for_folder_async(null, folder_row.id, true,
+            cancellable);
     }
     
     public async int get_id_position_async(Geary.EmailIdentifier id, Cancellable? cancellable)
@@ -239,7 +249,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         }
         
         int count = yield location_table.fetch_count_for_folder_async(transaction, folder_row.id,
-            cancellable);
+            false, cancellable);
         
         // only commit if not supplied a transaction
         if (supplied_transaction == null)
@@ -262,9 +272,29 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             cancellable);
         
         Gee.List<MessageLocationRow>? list = yield location_table.list_async(transaction,
-            folder_row.id, low, count, cancellable);
+            folder_row.id, low, count, false, cancellable);
         
-        return yield list_email(transaction, list, required_fields, cancellable);
+        return yield list_email(transaction, list, required_fields, false, cancellable);
+    }
+    
+    private async Gee.List<Geary.Email>? list_email_including_removed_async(int low, int count,
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable)
+        throws Error {
+        check_open();
+        
+        normalize_span_specifiers(ref low, ref count, yield get_email_count_including_removed_async(
+            cancellable));
+        
+        if (count == 0)
+            return null;
+        
+        Transaction transaction = yield db.begin_transaction_async(
+            "Folder.list_email_including_removed_async", cancellable);
+        
+        Gee.List<MessageLocationRow>? list = yield location_table.list_async(transaction,
+            folder_row.id, low, count, true, cancellable);
+        
+        return yield list_email(transaction, list, required_fields, true, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
@@ -278,7 +308,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<MessageLocationRow>? list = yield location_table.list_sparse_async(transaction,
             folder_row.id, by_position, cancellable);
         
-        return yield list_email(transaction, list, required_fields, cancellable);
+        return yield list_email(transaction, list, required_fields, false, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
@@ -314,12 +344,12 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<MessageLocationRow>? list = yield location_table.list_ordering_async(transaction,
             folder_row.id, low, high, cancellable);
         
-        return yield list_email(transaction, list, required_fields, cancellable);
+        return yield list_email(transaction, list, required_fields, false, cancellable);
     }
     
     private async Gee.List<Geary.Email>? list_email(Transaction transaction,
-        Gee.List<MessageLocationRow>? list, Geary.Email.Field required_fields, Cancellable? cancellable)
-        throws Error {
+        Gee.List<MessageLocationRow>? list, Geary.Email.Field required_fields,
+        bool include_removed, Cancellable? cancellable) throws Error {
         check_open();
         
         if (list == null || list.size == 0)
@@ -352,7 +382,8 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             }
             
             Geary.Imap.UID uid = new Geary.Imap.UID(location_row.ordering);
-            int position = yield location_row.get_position_async(transaction, cancellable);
+            int position = yield location_row.get_position_async(transaction, include_removed,
+                 cancellable);
             if (position == -1) {
                 debug("Unable to locate position of email during list of %s, dropping", to_string());
                 
@@ -390,7 +421,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
                 to_string());
         }
         
-        int position = yield location_row.get_position_async(transaction, cancellable);
+        int position = yield location_row.get_position_async(transaction, false, cancellable);
         if (position == -1) {
             throw new EngineError.NOT_FOUND("Unable to determine position of email %s in %s",
                 id.to_string(), to_string());
@@ -474,21 +505,63 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             notify_message_removed(id);
     }
     
-    // This isn't implemented yet since it was simpler to replace the flags for a message wholesale
-    // rather than adding and removing flags.
-    // Use set_email_flags_async() instead.
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+    public override async void mark_email_async(
         Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
         
-        assert_not_reached();
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = yield get_email_flags_async(
+            to_mark, cancellable);
+        
+        foreach (Geary.EmailIdentifier id in map.keys) {
+            if (flags_to_add != null)
+                foreach (Geary.EmailFlag flag in flags_to_add.get_all())
+                    ((Geary.Imap.EmailFlags) map.get(id)).add(flag);
+            
+            if (flags_to_remove != null)
+                foreach (Geary.EmailFlag flag in flags_to_remove.get_all())
+                    ((Geary.Imap.EmailFlags) map.get(id)).remove(flag);
+        }
+        
+        yield set_email_flags_async(map, cancellable);
+    }
+    
+    public async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> get_email_flags_async(
+        Gee.List<Geary.EmailIdentifier> to_get, Cancellable? cancellable) throws Error {
+        
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<Geary.EmailIdentifier,
+            Geary.EmailFlags>();
+        
+        Transaction transaction = yield db.begin_transaction_async("Folder.get_email_flags_async",
+            cancellable);
+        
+        foreach (Geary.EmailIdentifier id in to_get) {
+            MessageLocationRow? location_row = yield location_table.fetch_by_ordering_async(
+                transaction, folder_row.id, ((Geary.Imap.EmailIdentifier) id).uid.value,
+                cancellable);
+            
+            if (location_row == null) {
+                throw new EngineError.NOT_FOUND("No message with ID %s in folder %s", id.to_string(),
+                    to_string());
+            }
+            
+            ImapMessagePropertiesRow? row = yield imap_message_properties_table.fetch_async(
+                transaction, location_row.id, cancellable);
+            if (row == null)
+                continue;
+            
+            map.set(id, row.get_imap_email_properties().email_flags);
+        }
+        
+        yield transaction.commit_async(cancellable);
+        
+        return map;
     }
     
     public async void set_email_flags_async(Gee.Map<Geary.EmailIdentifier, 
         Geary.EmailFlags> map, Cancellable? cancellable) throws Error {
         check_open();
         
-        Transaction transaction = yield db.begin_transaction_async("Folder.mark_email_async",
+        Transaction transaction = yield db.begin_transaction_async("Folder.set_email_flags_async",
             cancellable);
         
         foreach (Geary.EmailIdentifier id in map.keys) {
@@ -559,6 +632,68 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             yield imap_message_properties_table.update_async(transaction, message_id,
                 properties.get_message_flags().serialize(), internaldate, rfc822_size, cancellable);
         }
+    }
+    
+    public async void remove_marked_email_async(Geary.EmailIdentifier id, out bool marked,
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        Transaction transaction = yield db.begin_transaction_async(
+            "Folder.remove_marked_email_async", cancellable);
+        
+        // Get marked status.
+        marked = yield location_table.is_marked_removed_async(transaction, folder_row.id,
+            id.ordering, cancellable);
+        
+        // Detaching email's association with a folder.
+        if (!yield location_table.remove_by_ordering_async(transaction, folder_row.id,
+            id.ordering, cancellable)) {
+            throw new EngineError.NOT_FOUND("Message %s in local store of %s not found",
+                id.to_string(), to_string());
+        }
+        
+        yield transaction.commit_async(cancellable);
+    }
+    
+    public async void mark_removed_async(Geary.EmailIdentifier id, bool remove, 
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        Transaction transaction = yield db.begin_transaction_async("Folder.mark_removed_async",
+            cancellable);
+        
+        yield location_table.mark_removed_async(transaction, folder_row.id, id.ordering,
+            remove, cancellable);
+        yield transaction.commit_async(cancellable);
+    }
+    
+    public async Geary.EmailIdentifier? id_from_remote_position(int remote_position, 
+        int remote_count) throws Error {
+        Geary.EmailIdentifier? id = null;
+        
+        debug("id from remote position: pos = %d, count = %d", remote_position, remote_count);
+        
+        // Get local count, convert remote to local position.
+        int local_count = yield get_email_count_including_removed_async();
+        int local_position = remote_position - (remote_count - local_count);
+        
+        // possible we don't have the remote email locally
+        if (local_position >= 1) {
+            // get EmailIdentifier
+            Gee.List<Geary.Email>? local = yield list_email_including_removed_async(local_position, 1,
+                Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, null);
+            if (local != null && local.size == 1) {
+                id = local[0].id;
+            } else {
+                debug("list_email_async unable to convert position %d into id (count=%d)",
+                    local_position, local_count);
+            }
+        } else {
+            debug("Unable to get local position for remote position %d (local_count=%d remote_count=%d)",
+                remote_position, local_count, remote_count);
+        }
+        
+        return id;
     }
 }
 

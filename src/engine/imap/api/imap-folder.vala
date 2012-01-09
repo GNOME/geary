@@ -196,7 +196,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         yield mailbox.expunge_email_async(cancellable);
     }
     
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> mark_email_async(
+    public override async void mark_email_async(
         Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
@@ -207,7 +207,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         MessageFlag.from_email_flags(flags_to_add, flags_to_remove, out msg_flags_add, 
             out msg_flags_remove);
         
-        return yield mailbox.mark_email_async(message_set_from_id_list(to_mark), msg_flags_add,
+        yield mailbox.mark_email_async(message_set_from_id_list(to_mark), msg_flags_add,
             msg_flags_remove, cancellable);
     }
     
