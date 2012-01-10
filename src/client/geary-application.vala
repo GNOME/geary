@@ -1,4 +1,4 @@
-/* Copyright 2011 Yorba Foundation
+/* Copyright 2011-2012 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution. 
@@ -13,7 +13,7 @@ public class GearyApplication : YorbaApplication {
     public const string PRGNAME = "geary";
     public static string DESCRIPTION = _("Email Client");
     public const string VERSION = "0.0.0+trunk";
-    public const string COPYRIGHT = "Copyright 2011 Yorba Foundation";
+    public const string COPYRIGHT = "Copyright 2011-2012 Yorba Foundation";
     public const string WEBSITE = "http://www.yorba.org";
     public static string WEBSITE_LABEL = _("Visit the Yorba web site");
     
