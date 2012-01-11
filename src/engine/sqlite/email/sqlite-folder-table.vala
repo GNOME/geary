@@ -50,13 +50,15 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
             query = locked.prepare("SELECT * FROM FolderTable WHERE parent_id IS NULL");
         }
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "list_async");
         
         Gee.List<FolderRow> rows = new Gee.ArrayList<FolderRow>();
         while (!result.finished) {
             rows.add(new FolderRow.from_query_result(this, result));
             
-            yield result.next_async(cancellable);
+            yield result.next_async();
+            check_cancel(cancellable, "list_async");
         }
         
         return rows;
@@ -77,7 +79,8 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
             query.bind_string(0, name);
         }
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "fetch_async");
         
         return (!result.finished) ? new FolderRow.from_query_result(this, result) : null;
     }
@@ -106,7 +109,8 @@ public class Geary.Sqlite.FolderTable : Geary.Sqlite.Table {
                 query.bind_string(0, path[ctr]);
             }
             
-            SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+            SQLHeavy.QueryResult result = yield query.execute_async();
+            check_cancel(cancellable, "fetch_descend_async");
             if (result.finished)
                 return null;
             

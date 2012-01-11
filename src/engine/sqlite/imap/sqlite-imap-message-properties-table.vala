@@ -49,9 +49,11 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
             + "WHERE message_id = ?");
         query.bind_int64(0, message_id);
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
         if (result.finished)
             return null;
+        
+        check_cancel(cancellable, "fetch_async");
         
         return new ImapMessagePropertiesRow(this, result.fetch_int64(0), message_id,
             result.fetch_string(1), result.fetch_string(2), (long) result.fetch_int64(3));
@@ -121,14 +123,18 @@ public class Geary.Sqlite.ImapMessagePropertiesTable : Geary.Sqlite.Table {
             query.bind_int64(0, rfc822_size);
         }
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "search_for_duplicates_async");
+        
         if (result.finished)
             return null;
         
         Gee.List<int64?> list = new Gee.ArrayList<int64?>();
         do {
             list.add(result.fetch_int64(0));
-            yield result.next_async(cancellable);
+            yield result.next_async();
+            
+            check_cancel(cancellable, "search_for_duplicates_async");
         } while (!result.finished);
         
         return list;

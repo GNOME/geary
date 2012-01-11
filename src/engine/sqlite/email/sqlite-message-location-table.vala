@@ -34,6 +34,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         
         yield release_lock_async(transaction, locked, cancellable);
         
+        check_cancel(cancellable, "create_async");
+        
         return id;
     }
     
@@ -68,7 +70,9 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             query.bind_int(1, low - 1);
         }
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        check_cancel(cancellable, "list_async");
+        
         if (results.finished)
             return null;
         
@@ -78,7 +82,9 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             list.add(new MessageLocationRow(this, results.fetch_int64(0), results.fetch_int64(1),
                 folder_id, results.fetch_int64(2), position++));
             
-            yield results.next_async(cancellable);
+            yield results.next_async();
+            
+            check_cancel(cancellable, "list_async");
         } while (!results.finished);
         
         return list;
@@ -99,12 +105,16 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         
         Gee.List<MessageLocationRow> list = new Gee.ArrayList<MessageLocationRow>();
         foreach (int position in by_position) {
+            check_cancel(cancellable, "list_sparse_async");
+            
             assert(position >= 1);
             
             query.bind_int64(0, folder_id);
             query.bind_int(1, position - 1);
             
-            SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+            SQLHeavy.QueryResult results = yield query.execute_async();
+            check_cancel(cancellable, "list_sparse_async");
+            
             if (results.finished)
                 continue;
             
@@ -149,7 +159,9 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             query.bind_int64(1, high_ordering);
         }
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "list_ordering_async");
+        
         if (result.finished)
             return null;
         
@@ -158,7 +170,10 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             list.add(new MessageLocationRow(this, result.fetch_int64(0), result.fetch_int64(1),
                 folder_id, result.fetch_int64(2), -1));
             
-            yield result.next_async(cancellable);
+            yield result.next_async();
+            
+            check_cancel(cancellable, "list_ordering_async");
+            
         } while (!result.finished);
         
         return (list.size > 0) ? list : null;
@@ -180,9 +195,11 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         query.bind_int64(0, folder_id);
         query.bind_int(1, position - 1);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
         if (results.finished)
             return null;
+        
+        check_cancel(cancellable, "fetch_async");
         
         return new MessageLocationRow(this, results.fetch_int64(0), results.fetch_int64(1), folder_id,
             results.fetch_int64(2), position);
@@ -199,7 +216,9 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         query.bind_int64(0, folder_id);
         query.bind_int64(1, ordering);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        check_cancel(cancellable, "fetch_ordering_async");
+        
         if (results.finished)
             return null;
         
@@ -218,9 +237,12 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         query.bind_int64(0, folder_id);
         query.bind_int64(1, message_id);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        check_cancel(cancellable, "fetch_by_message_id_async");
         if (results.finished)
             return null;
+        
+        check_cancel(cancellable, "fetch_position_async");
         
         return new MessageLocationRow(this, results.fetch_int64(0), message_id,
             folder_id, results.fetch_int64(1), -1);
@@ -236,14 +258,18 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "AND remove_marker = 0") + "ORDER BY ordering");
         query.bind_int64(0, folder_id);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        check_cancel(cancellable, "fetch_position_async");
         
         int position = 1;
         while (!results.finished) {
             if (results.fetch_int64(0) == id)
                 return position;
             
-            yield results.next_async(cancellable);
+            yield results.next_async();
+            
+            check_cancel(cancellable, "fetch_position_async");
+            
             position++;
         }
         
@@ -265,10 +291,13 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         
         int position = 1;
         while (!results.finished) {
+            check_cancel(cancellable, "fetch_message_position_async");
+            
             if (results.fetch_int64(0) == message_id)
                 return position;
             
-            yield results.next_async(cancellable);
+            yield results.next_async();
+            
             position++;
         }
         
@@ -286,7 +315,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
                 include_removed ? "" : "AND remove_marker = 0"));
         query.bind_int64(0, folder_id);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        check_cancel(cancellable, "fetch_count_for_folder_async");
         
         return (!results.finished) ? results.fetch_int(0) : 0;
     }
@@ -307,7 +337,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         query.bind_int64(0, folder_id);
         query.bind_int64(1, ordering);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
         if (results.finished)
             return false;
         
@@ -326,7 +356,8 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
             "AND remove_marker = 0");
         query.bind_int64(0, folder_id);
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "get_earliest_ordering_async");
         
         return (!result.finished) ? result.fetch_int64(0) : -1;
     }
@@ -341,14 +372,18 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         query.bind_int64(0, folder_id);
         query.bind_int64(1, ordering);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        check_cancel(cancellable, "remove_by_ordering_async");
+        
         if (results.finished)
             return false;
         
         query = locked.prepare("DELETE FROM MessageLocationTable WHERE id=?");
         query.bind_int64(0, results.fetch_int(0));
         
-        yield query.execute_async(cancellable);
+        yield query.execute_async();
+        check_cancel(cancellable, "remove_by_ordering_async");
+        
         locked.set_commit_required();
         
         yield release_lock_async(transaction, locked, cancellable);
@@ -386,7 +421,9 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         query.bind_int64(0, folder_id);
         query.bind_int64(1, ordering);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
+        
+        check_cancel(cancellable, "is_marked_removed_async");
         
         return (bool) results.fetch_int(0);
     }

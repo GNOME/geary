@@ -947,6 +947,10 @@ public class Geary.Imap.ClientSession {
     
     private uint on_send_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);
+        
+        if (err is IOError.CANCELLED)
+            return state;
+        
         debug("Send error on %s: %s", to_full_string(), err.message);
         
         cx.disconnect_async.begin(null, on_fire_send_error_signal);

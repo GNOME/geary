@@ -72,9 +72,11 @@ public class Geary.Sqlite.ImapFolderPropertiesTable : Geary.Sqlite.Table {
             + "FROM ImapFolderPropertiesTable WHERE folder_id = ?");
         query.bind_int64(0, folder_id);
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
         if (result.finished)
             return null;
+        
+        check_cancel(cancellable, "fetch_async");
         
         Geary.Imap.UIDValidity? uid_validity = null;
         if (result.fetch_int64(2) >= 0)

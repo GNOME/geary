@@ -68,6 +68,8 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         int64 id = yield query.execute_insert_async(cancellable);
         locked.set_commit_required();
         
+        check_cancel(cancellable, "create_async");
+        
         yield release_lock_async(transaction, locked, cancellable);
         
         return id;
@@ -204,14 +206,18 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             "SELECT %s FROM MessageTable WHERE message_id=?".printf(fields_to_columns(fields)));
         query.bind_string(0, message_id.value);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
         if (results.finished)
             return null;
+        
+       check_cancel(cancellable, "list_by_message_id_async");
         
         Gee.List<MessageRow> list = new Gee.ArrayList<MessageRow>();
         do {
             list.add(new MessageRow.from_query_result(this, fields, results));
-            yield results.next_async(cancellable);
+            yield results.next_async();
+            
+            check_cancel(cancellable, "list_by_message_id_async");
         } while (!results.finished);
         
         return (list.size > 0) ? list : null;
@@ -230,9 +236,11 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             "SELECT %s FROM MessageTable WHERE id=?".printf(fields_to_columns(requested_fields)));
         query.bind_int64(0, id);
         
-        SQLHeavy.QueryResult results = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult results = yield query.execute_async();
         if (results.finished)
             return null;
+        
+        check_cancel(cancellable, "fetch_async");
         
         MessageRow row = new MessageRow.from_query_result(this, requested_fields, results);
         
@@ -250,9 +258,11 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             "SELECT fields FROM MessageTable WHERE id=?");
         query.bind_int64(0, id);
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
         if (result.finished)
             return false;
+        
+        check_cancel(cancellable, "fetch_fields_async");
         
         available_fields = (Geary.Email.Field) result.fetch_int(0);
         
@@ -317,7 +327,8 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             "SELECT COUNT(*) FROM MessageTable WHERE message_id=?");
         query.bind_string(0, message_id.value);
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "search_message_id_count_async");
         
         return (result.finished) ? 0 : result.fetch_int(0);
     }
@@ -331,14 +342,16 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
             "SELECT id FROM MessageTable WHERE message_id=?");
         query.bind_string(0, message_id.value);
         
-        SQLHeavy.QueryResult result = yield query.execute_async(cancellable);
+        SQLHeavy.QueryResult result = yield query.execute_async();
+        check_cancel(cancellable, "search_message_id_async");
         if (result.finished)
             return null;
         
         Gee.List<int64?> list = new Gee.ArrayList<int64?>();
         do {
             list.add(result.fetch_int64(0));
-            yield result.next_async(cancellable);
+            yield result.next_async();
+            check_cancel(cancellable, "search_message_id_async");
         } while (!result.finished);
         
         return list;
