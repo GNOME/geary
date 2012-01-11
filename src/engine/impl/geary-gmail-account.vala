@@ -30,8 +30,9 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
     private static SpecialFolderMap? special_folder_map = null;
     private static Gee.Set<Geary.FolderPath>? ignored_paths = null;
     
-    public GmailAccount(string name, RemoteAccount remote, LocalAccount local) {
-        base (name, remote, local);
+    public GmailAccount(string name, string username, File user_data_dir, RemoteAccount remote,
+        LocalAccount local) {
+        base (name, username, user_data_dir, remote, local);
         
         if (special_folder_map == null || ignored_paths == null)
             initialize_personality();

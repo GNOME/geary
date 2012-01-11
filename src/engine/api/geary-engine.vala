@@ -17,7 +17,7 @@ public class Geary.Engine {
         
         // Only Gmail today
         return new GmailAccount(
-            "Gmail account %s".printf(cred.to_string()),
+            "Gmail account %s".printf(cred.to_string()), cred.user, user_data_dir,
             new Geary.Imap.Account(GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, cred),
             new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
     }

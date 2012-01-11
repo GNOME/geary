@@ -10,8 +10,9 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
     private RemoteAccount remote;
     private LocalAccount local;
     
-    public GenericImapAccount(string name, RemoteAccount remote, LocalAccount local) {
-        base (name);
+    public GenericImapAccount(string name, string username, File user_data_dir, RemoteAccount remote,
+        LocalAccount local) {
+        base (name, username, user_data_dir);
         
         this.remote = remote;
         this.local = local;

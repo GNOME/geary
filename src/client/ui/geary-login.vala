@@ -9,13 +9,16 @@ public class LoginDialog {
     private Gtk.Dialog dialog;
     private Gtk.Entry entry_username;
     private Gtk.Entry entry_password;
+    private Gtk.Entry entry_real_name;
     private Gtk.ResponseType response;
     private Gtk.Button ok_button;
     
     public string username { get; private set; default = ""; }
     public string password { get; private set; default = ""; }
+    public string real_name { get; private set; default = ""; }
     
-    public LoginDialog(string default_username = "", string default_password = "") {
+    public LoginDialog(string default_username = "", string default_password = "",
+        string default_real_name = "") {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
         dialog = builder.get_object("LoginDialog") as Gtk.Dialog;
@@ -24,12 +27,18 @@ public class LoginDialog {
         
         entry_username = builder.get_object("username") as Gtk.Entry;
         entry_password = builder.get_object("password") as Gtk.Entry;
+        entry_real_name = builder.get_object("real_name") as Gtk.Entry;
         
         entry_username.set_text(default_username);
         entry_password.set_text(default_password);
+        entry_real_name.set_text(default_real_name);
+        if(!Geary.String.is_empty(default_real_name)) {
+            entry_username.grab_focus();
+        }
         
         entry_username.changed.connect(on_changed);
         entry_password.changed.connect(on_changed);
+        entry_real_name.changed.connect(on_changed);
         
         dialog.add_action_widget(new Gtk.Button.from_stock(Gtk.Stock.CANCEL), Gtk.ResponseType.CANCEL);
         ok_button = new Gtk.Button.from_stock(Gtk.Stock.OK);
@@ -45,6 +54,7 @@ public class LoginDialog {
         response = (Gtk.ResponseType) dialog.run();
         username = entry_username.text.strip();
         password = entry_password.text.strip();
+        real_name = entry_real_name.text.strip();
         dialog.destroy();
     }
     

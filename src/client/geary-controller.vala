@@ -616,9 +616,14 @@ public class GearyController {
         } catch (Error e) {
             error("Unable to get username. Error: %s", e.message);
         }
+        Geary.AccountInformation acct_info = account.get_account_information();
         
-        Geary.ComposedEmail email = new Geary.ComposedEmail(new DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.from_rfc822_string(username));
+        Geary.ComposedEmail email = new Geary.ComposedEmail(
+            new DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(
+                new Geary.RFC822.MailboxAddress(acct_info.real_name, username)
+            )
+        );
         
         if (!Geary.String.is_empty(cw.to))
             email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);

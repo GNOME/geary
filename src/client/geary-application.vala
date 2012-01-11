@@ -119,10 +119,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // Get saved credentials. If not present, ask user.
         string username = get_username();
         string? password = query_keyring ? keyring_get_password(username) : null;
+        string real_name = null;
         
         Geary.Credentials cred;
         if (password == null) {
-            cred = request_login(username);
+            real_name = get_default_real_name();
+            cred = request_login(username, ref real_name);
         } else {
             cred = new Geary.Credentials(username, password);
         }
@@ -133,9 +135,24 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             error("Unable to open mail database for %s: %s", cred.user, err.message);
         }
         
+        if (!Geary.String.is_empty(real_name)) {
+            Geary.AccountInformation acct_info = account.get_account_information();
+            acct_info.real_name = real_name;
+            acct_info.store_async.begin(null, on_acct_info_store_async_completed);
+        }
+        
         account.report_problem.connect(on_report_problem);
         
         controller.start(account);
+    }
+    
+    private void on_acct_info_store_async_completed(Object? source, AsyncResult result) {
+        Geary.AccountInformation acct_info = account.get_account_information();
+        try {
+            acct_info.store_async.end(result);
+        } catch (Error err) {
+            warning("Error saving account information: %s", err.message);
+        }
     }
     
     private string get_username() {
@@ -151,9 +168,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return "";
     }
     
+    private string get_default_real_name() {
+        string real_name = Environment.get_real_name();
+        return real_name == "Unknown" ? "" : real_name;
+    }
+    
     // Prompt the user for a username and password, and try to start Geary.
-    private Geary.Credentials request_login(string _username = "") {
-        LoginDialog login = new LoginDialog(_username);
+    private Geary.Credentials request_login(string _username = "", ref string real_name) {
+        LoginDialog login = new LoginDialog(_username, "", real_name);
         login.show();
         if (login.get_response() == Gtk.ResponseType.OK) {
             keyring_save_password(login.username, login.password);
@@ -161,6 +183,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             exit(1);
         }
         
+        real_name = login.real_name;
         return new Geary.Credentials(login.username, login.password);
     }
     
