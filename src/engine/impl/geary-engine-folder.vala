@@ -82,6 +82,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         if (opened)
             throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
         
+        // start the replay queues
+        recv_replay_queue = new ReceiveReplayQueue();
+        send_replay_queue = new SendReplayQueue();
+        
         yield local_folder.open_async(readonly, cancellable);
         
         // Rather than wait for the remote folder to open (which blocks completion of this method),
@@ -120,10 +124,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 
                 // all set; bless the remote folder as opened
                 remote_folder = folder;
-                
-                // start the replay queues
-                recv_replay_queue = new ReceiveReplayQueue();
-                send_replay_queue = new SendReplayQueue();
             } else {
                 debug("Unable to prepare remote folder %s: prepare_opened_file() failed", to_string());
             }
@@ -352,123 +352,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             return;
         }
         
-        int local_count;
-        if (!local_only) {
-            // normalize the position (ordering) of what's available locally with the situation on
-            // the server ... this involves prefetching the PROPERTIES of the missing emails from
-            // the server and caching them locally
-            yield normalize_email_positions_async(low, count, out local_count, cancellable);
-        } else {
-            // local_only means just that
-            local_count = yield local_folder.get_email_count_async(cancellable);
-        }
-        
-        // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
-        // if the folder is in the process of opening
-        int local_low;
-        if (remote_count >= 0) {
-            normalize_span_specifiers(ref low, ref count, remote_count);
-            
-            // because the local store caches messages starting from the newest (at the end of the list)
-            // to the earliest fetched by the user, need to adjust the low value to match its offset
-            // and range
-            local_low = remote_position_to_local_position(low, local_count);
-        } else {
-            normalize_span_specifiers(ref low, ref count, local_count);
-            local_low = low.clamp(1, local_count);
-        }
-        
-        debug("do_list_email_async: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
-            low, count, local_count, remote_count, local_low);
-        
-        Gee.List<Geary.Email>? local_list = null;
-        if (!remote_only && local_low > 0) {
-            try {
-                local_list = yield local_folder.list_email_async(local_low, count, required_fields,
-                    Geary.Folder.ListFlags.NONE, cancellable);
-            } catch (Error local_err) {
-                if (cb != null)
-                    cb (null, local_err);
-                
-                throw local_err;
-            }
-        }
-        
-        int local_list_size = (local_list != null) ? local_list.size : 0;
-        
-        debug("Fetched %d emails from local store for %s", local_list_size, to_string());
-        
-        // fixup local email positions to match server's positions
-        if (local_list_size > 0 && remote_count > 0 && local_count < remote_count) {
-            int adjustment = remote_count - local_count;
-            foreach (Geary.Email email in local_list)
-                email.update_position(email.position + adjustment);
-        }
-        
-        // report list
-        if (local_list_size > 0) {
-            if (accumulator != null)
-                accumulator.add_all(local_list);
-            
-            if (cb != null)
-                cb(local_list, null);
-        }
-        
-        // if local list matches total asked for, or if only returning local versions, exit
-        if (local_list_size == count || local_only) {
-            if (cb != null)
-                cb(null, null);
-            
-            return;
-        }
-        
-        // go through the positions from (low) to (low + count) and see if they're not already
-        // present in local_list; whatever isn't present needs to be fetched
-        //
-        // TODO: This is inefficient because we can't assume the returned emails are sorted or
-        // contiguous (it's possible local email is present but doesn't fulfill all the fields).
-        // A better search method is probably possible, but this will do for now
-        int[] needed_by_position = new int[0];
-        for (int position = low; position <= (low + (count - 1)); position++) {
-            bool found = false;
-            for (int ctr = 0; ctr < local_list_size; ctr++) {
-                if (local_list[ctr].position == position) {
-                    found = true;
-                    
-                    break;
-                }
-            }
-            
-            if (!found)
-                needed_by_position += position;
-        }
-        
-        if (needed_by_position.length == 0) {
-            // signal finished
-            if (cb != null)
-                cb(null, null);
-            
-            return;
-        }
-        
-        Gee.List<Geary.Email>? remote_list = null;
-        try {
-            // if cb != null, it will be called by remote_list_email(), so don't call again with
-            // returned list
-            remote_list = yield remote_list_email(needed_by_position, required_fields, cb, cancellable);
-        } catch (Error remote_err) {
-            if (cb != null)
-                cb(null, remote_err);
-            
-            throw remote_err;
-        }
-        
-        if (accumulator != null && remote_list != null && remote_list.size > 0)
-            accumulator.add_all(remote_list);
-        
-        // signal finished
-        if (cb != null)
-            cb(null, null);
+        // Schedule list operation and wait for completion.
+        ListEmail op = new ListEmail(this, low, count, required_fields, accumulator, cb, cancellable,
+            local_only, remote_only);
+        send_replay_queue.schedule(op);
+        yield op.wait_for_ready();
     }
     
     public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
@@ -506,118 +394,11 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             return;
         }
         
-        int low, high;
-        Arrays.int_find_high_low(by_position, out low, out high);
-        
-        int local_count, local_offset;
-        if (!local_only) {
-            // normalize the position (ordering) of what's available locally with the situation on
-            // the server
-            yield normalize_email_positions_async(low, high - low + 1, out local_count, cancellable);
-            
-            local_offset = (remote_count > local_count) ? (remote_count - local_count - 1) : 0;
-        } else {
-            local_count = yield local_folder.get_email_count_async(cancellable);
-            local_offset = 0;
-        }
-        
-        // Fixup all the positions to match the local store's notions
-        if (local_offset > 0) {
-            int[] local_by_position = new int[by_position.length];
-            for (int ctr = 0; ctr < by_position.length; ctr++)
-                local_by_position[ctr] = by_position[ctr] - local_offset;
-            
-            by_position = local_by_position;
-        }
-        
-        Gee.List<Geary.Email>? local_list = null;
-        try {
-            local_list = yield local_folder.list_email_sparse_async(by_position, required_fields,
-                Folder.ListFlags.NONE, cancellable);
-        } catch (Error local_err) {
-            if (cb != null)
-                cb(null, local_err);
-            
-            throw local_err;
-        }
-        
-        int local_list_size = (local_list != null) ? local_list.size : 0;
-        
-        // reverse the process, fixing up all the returned messages to match the server's notions
-        if (local_list_size > 0 && local_offset > 0) {
-            foreach (Geary.Email email in local_list)
-                email.update_position(email.position + local_offset);
-        }
-        
-        if (local_list_size == by_position.length || local_only) {
-            if (accumulator != null)
-                accumulator.add_all(local_list);
-            
-            // report and signal finished
-            if (cb != null) {
-                cb(local_list, null);
-                cb(null, null);
-            }
-            
-            return;
-        }
-        
-        // go through the list looking for anything not already in the sparse by_position list
-        // to fetch from the server; since by_position is not guaranteed to be sorted, the local
-        // list needs to be searched each iteration.
-        //
-        // TODO: Optimize this, especially if large lists/sparse sets are supplied
-        int[] needed_by_position = new int[0];
-        foreach (int position in by_position) {
-            bool found = false;
-            if (local_list != null) {
-                foreach (Geary.Email email2 in local_list) {
-                    if (email2.position == position) {
-                        found = true;
-                        
-                        break;
-                    }
-                }
-            }
-            
-            if (!found)
-                needed_by_position += position;
-        }
-        
-        if (needed_by_position.length == 0) {
-            if (local_list != null && local_list.size > 0) {
-                if (accumulator != null)
-                    accumulator.add_all(local_list);
-                
-                if (cb != null)
-                    cb(local_list, null);
-            }
-            
-            // signal finished
-            if (cb != null)
-                cb(null, null);
-            
-            return;
-        }
-        
-        Gee.List<Geary.Email>? remote_list = null;
-        try {
-            // if cb != null, it will be called by remote_list_email(), so don't call again with
-            // returned list
-            remote_list = yield remote_list_email(needed_by_position, required_fields, cb, cancellable);
-        } catch (Error remote_err) {
-            if (cb != null)
-                cb(null, remote_err);
-            
-            throw remote_err;
-        }
-        
-        if (accumulator != null && remote_list != null && remote_list.size > 0)
-            accumulator.add_all(remote_list);
-        
-        // signal finished
-        if (cb != null)
-            cb(null, null);
+        // Schedule list operation and wait for completion.
+        ListEmailSparse op = new ListEmailSparse(this, by_position, required_fields, accumulator,
+            cb, cancellable, local_only);
+        send_replay_queue.schedule(op);
+        yield op.wait_for_ready();
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
@@ -665,62 +446,14 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         assert(remote_count >= 0);
         
-        int local_count = yield local_folder.get_email_count_async(cancellable);
-        
-        int initial_position = yield local_folder.get_id_position_async(initial_id, cancellable);
-        if (initial_position <= 0) {
-            throw new EngineError.NOT_FOUND("Email ID %s in %s not known to local store",
-                initial_id.to_string(), to_string());
-        }
-        
-        // normalize the initial position to the remote folder's addressing
-        initial_position = local_position_to_remote_position(initial_position, local_count);
-        if (initial_position <= 0) {
-            throw new EngineError.NOT_FOUND("Cannot map email ID %s in %s to remote folder",
-                initial_id.to_string(), to_string());
-        }
-        
-        // since count can also indicate "to earliest" or "to latest", normalize
-        // (count is exclusive of initial_id, hence adding/substracting one, meaning that a count
-        // of zero or one are accepted)
-        int low, high;
-        if (count < 0) {
-            low = (count != int.MIN) ? (initial_position + count + 1) : 1;
-            high = excluding_id ? initial_position - 1 : initial_position;
-        } else if (count > 0) {
-            low = excluding_id ? initial_position + 1 : initial_position;
-            high = (count != int.MAX) ? (initial_position + count - 1) : remote_count;
-        } else {
-            // count == 0
-            low = initial_position;
-            high = initial_position;
-        }
-        
-        // low should never be -1, so don't need to check for that
-        low = low.clamp(1, int.MAX);
-        
-        int actual_count = ((high - low) + 1);
-        
-        // one more check
-        if (actual_count == 0) {
-            debug("do_list_email_by_id_async: no actual count to return (%d) (excluding=%s %s)",
-                actual_count, excluding_id.to_string(), initial_id.to_string());
-            
-            if (cb != null)
-                cb(null, null);
-            
-            return;
-        }
-        
-        debug("do_list_email_by_id_async: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d excl=%s",
-            initial_id.to_string(), initial_position, count, actual_count, low, high, local_count,
-            remote_count, excluding_id.to_string());
-        
-        yield do_list_email_async(low, actual_count, required_fields, accumulator, cb, cancellable,
-            local_only, remote_only);
+        // Schedule list operation and wait for completion.
+        ListEmailByID op = new ListEmailByID(this, initial_id, count, required_fields, accumulator,
+            cb, cancellable, local_only, remote_only, excluding_id);
+        send_replay_queue.schedule(op);
+        yield op.wait_for_ready();
     }
     
-    private async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
+    internal async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
         Geary.Email.Field required_fields, EmailCallback? cb, Cancellable? cancellable) throws Error {
         // possible to call remote multiple times, wait for it to open once and go
         if (!yield wait_for_remote_to_open())
@@ -827,7 +560,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // remote_count).
     //
     // Returns a negative value if not available in local folder or remote is not open yet.
-    private int remote_position_to_local_position(int remote_pos, int local_count) {
+    internal int remote_position_to_local_position(int remote_pos, int local_count) {
         return (remote_count >= 0) ? remote_pos - (remote_count - local_count) : -1;
     }
     
@@ -835,7 +568,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // opened.  See remote_position_to_local_position for more caveats.
     //
     // Returns a negative value if remote is not open.
-    private int local_position_to_remote_position(int local_pos, int local_count) {
+    internal int local_position_to_remote_position(int local_pos, int local_count) {
         return (remote_count >= 0) ? remote_count - (local_count - local_pos) : -1;
     }
     
@@ -846,7 +579,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     //
     // Note that this method doesn't return a remote_count because that's maintained by the
     // EngineFolder as a member variable.
-    private async void normalize_email_positions_async(int low, int count, out int local_count,
+    internal async void normalize_email_positions_async(int low, int count, out int local_count,
         Cancellable? cancellable) throws Error {
         if (!yield wait_for_remote_to_open())
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());

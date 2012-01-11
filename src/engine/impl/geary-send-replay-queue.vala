@@ -14,6 +14,11 @@ private abstract class Geary.SendReplayOperation {
         this.name = name;
     }
     
+    // Used by grandchild classes that can't call c'tor directly.
+    public void set_name(string name) {
+        this.name = name;
+    }
+    
     /**
      * Runs the local operation.
      * Returns true if the operation is complete, or false if a call to

@@ -407,7 +407,7 @@ public interface Geary.Folder : Object {
      * The caller should plug in 'low' and 'count' passed from the user as well as the total
      * number of emails available (i.e. the complete span is 1..total).
      */
-    protected static void normalize_span_specifiers(ref int low, ref int count, int total) 
+    internal static void normalize_span_specifiers(ref int low, ref int count, int total) 
         throws EngineError {
         check_span_specifiers(low, count);
         
