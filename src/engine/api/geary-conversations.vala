@@ -270,14 +270,14 @@ public class Geary.Conversations : Object {
     }
     
     ~Conversations() {
-        // Manually detach all the weak refs in the Conversation objects
-        foreach (ImplConversation conversation in conversations)
-            conversation.owner = null;
-        
         if (monitor_new) {
             folder.messages_appended.disconnect(on_folder_messages_appended);
             folder.message_removed.disconnect(on_folder_message_removed);
         }
+        
+        // Manually detach all the weak refs in the Conversation objects
+        foreach (ImplConversation conversation in conversations)
+            conversation.owner = null;
     }
     
     protected virtual void notify_scan_started(Geary.EmailIdentifier? id, int low, int count) {

@@ -232,6 +232,8 @@ public class GearyController {
         cancel_folder();
         main_window.message_list_store.clear();
         
+        current_conversations = null;
+        
         if (current_folder != null) {
             yield current_folder.close_async();
         }
@@ -274,6 +276,7 @@ public class GearyController {
     
     public void on_scan_error(Error err) {
         debug("Scan error: %s", err.message);
+        set_busy(false);
     }
     
     public void on_scan_completed() {
@@ -401,7 +404,6 @@ public class GearyController {
     
     private async void do_select_message(Geary.Conversation conversation, Cancellable? 
         cancellable = null) throws Error {
-        
         Gee.List<Geary.EmailIdentifier> messages = new Gee.ArrayList<Geary.EmailIdentifier>();
         if (current_folder == null) {
             debug("Conversation selected with no folder selected");
@@ -409,13 +411,18 @@ public class GearyController {
             return;
         }
         
+        Gee.SortedSet<Geary.Email>? email_set = conversation.get_pool_sorted(compare_email);
+        if (email_set == null)
+            return;
+        
         set_busy(true);
-        foreach (Geary.Email email in conversation.get_pool_sorted(compare_email)) {
+        
+        foreach (Geary.Email email in email_set) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
                 MessageViewer.REQUIRED_FIELDS, cancellable);
             
             if (cancellable.is_cancelled())
-                break;
+                throw new IOError.CANCELLED("do_select_message cancelled");
             
             main_window.message_viewer.add_message(full_email);
             
@@ -532,6 +539,8 @@ public class GearyController {
     private void cancel_message() {
         Cancellable old_cancellable = cancellable_message;
         cancellable_message = new Cancellable();
+        
+        set_busy(false);
         
         old_cancellable.cancel();
     }

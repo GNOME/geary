@@ -143,7 +143,8 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
         // if the folder is in the process of opening
         int local_low;
-        if (engine.remote_count >= 0) {
+        if (!local_only && (yield engine.wait_for_remote_to_open(cancellable)) &&
+            engine.remote_count >= 0) {
             engine.normalize_span_specifiers(ref low, ref count, engine.remote_count);
             
             // because the local store caches messages starting from the newest (at the end of the list)
@@ -163,9 +164,8 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 local_list = yield engine.local_folder.list_email_async(local_low, count, required_fields,
                     Geary.Folder.ListFlags.NONE, cancellable);
             } catch (Error local_err) {
-                if (cb != null)
+                if (cb != null && !(local_err is IOError.CANCELLED))
                     cb (null, local_err);
-                
                 throw local_err;
             }
         }

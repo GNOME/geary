@@ -135,29 +135,19 @@ public class Geary.Imap.ClientSessionManager {
     public async Mailbox select_examine_mailbox(string path, bool is_select,
         Cancellable? cancellable = null) throws Error {
         Gee.HashSet<SelectedContext> contexts = is_select ? selected_contexts : examined_contexts;
+        SelectedContext new_context = yield select_examine_async(path, is_select, cancellable);
         
-        foreach (SelectedContext context in contexts) {
-            if (context.name == path)
-                return new Mailbox(context);
+        if (!contexts.contains(new_context)) {
+            // Can't use the ternary operator due to this bug:
+            // https://bugzilla.gnome.org/show_bug.cgi?id=599349
+            if (is_select)
+                new_context.freed.connect(on_selected_context_freed);
+            else
+                new_context.freed.connect(on_examined_context_freed);
+            
+            bool added = contexts.add(new_context);
+            assert(added);
         }
-        
-        SelectExamineResults results;
-        ClientSession session = yield select_examine_async(path, is_select, out results, cancellable);
-        
-        if (results.status_response.status != Status.OK)
-            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
-        
-        SelectedContext new_context = new SelectedContext(session, results);
-        
-        // Can't use the ternary operator due to this bug:
-        // https://bugzilla.gnome.org/show_bug.cgi?id=599349
-        if (is_select)
-            new_context.freed.connect(on_selected_context_freed);
-        else
-            new_context.freed.connect(on_examined_context_freed);
-        
-        bool added = contexts.add(new_context);
-        assert(added);
         
         return new Mailbox(new_context);
     }
@@ -217,31 +207,49 @@ public class Geary.Imap.ClientSessionManager {
             }
         }
         
-        if (found_session == null)
-            found_session = yield create_new_authorized_session(cancellable);
+        Error? c = null;
+        try {
+            if (found_session == null)
+                found_session = yield create_new_authorized_session(cancellable);
+        } catch (Error e2) {
+            debug("Error creating session %s", e2.message);
+            c = e2;
+        } finally {
+            try {
+                sessions_mutex.release(ref token);
+            } catch (Error e) {
+                debug("Error releasing mutex: %s", e.message);
+                c = e;
+            }
+        }
         
-        sessions_mutex.release(ref token);
+        if (c != null)
+            throw c;
         
         return found_session;
     }
     
-    private async ClientSession select_examine_async(string folder, bool is_select,
-        out SelectExamineResults results, Cancellable? cancellable) throws Error {
-        results = null;
-        
+    private async SelectedContext select_examine_async(string folder, bool is_select,
+        Cancellable? cancellable) throws Error {
         ClientSession.Context needed_context = (is_select) ? ClientSession.Context.SELECTED
             : ClientSession.Context.EXAMINED;
-        foreach (ClientSession session in sessions) {
+        
+        Gee.HashSet<SelectedContext> contexts = is_select ? selected_contexts : examined_contexts;
+        foreach (SelectedContext c in contexts) {
             string? mailbox;
-            if (session.get_context(out mailbox) == needed_context && mailbox == folder)
-                return session;
+            if (c.session != null && (c.session.get_context(out mailbox) == needed_context &&
+                mailbox == folder))
+                return c;
         }
         
         ClientSession authd = yield get_authorized_session(cancellable);
         
-        results = yield authd.select_examine_async(folder, is_select, cancellable);
+        SelectExamineResults results = yield authd.select_examine_async(folder, is_select, cancellable);
         
-        return authd;
+        if (results.status_response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
+        
+        return new SelectedContext(authd, results);
     }
     
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {

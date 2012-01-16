@@ -30,9 +30,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private RemoteAccount remote;
     private LocalAccount local;
     private bool opened = false;
-    private NonblockingSemaphore remote_semaphore = new NonblockingSemaphore();
+    private NonblockingSemaphore remote_semaphore;
     private ReceiveReplayQueue? recv_replay_queue = null;
     private SendReplayQueue? send_replay_queue = null;
+    private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
     public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         this.remote = remote;
@@ -82,6 +83,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         if (opened)
             throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
         
+        remote_semaphore = new Geary.NonblockingSemaphore();
+        
         // start the replay queues
         recv_replay_queue = new ReceiveReplayQueue();
         send_replay_queue = new SendReplayQueue();
@@ -106,6 +109,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             debug("Opening remote %s", local_folder.get_path().to_string());
             RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
+            
             yield folder.open_async(readonly, cancellable);
             
             // allow subclasses to examine the opened folder and resolve any vital
@@ -131,15 +135,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             debug("Unable to open or prepare remote folder %s: %s", to_string(), open_err.message);
         }
         
-        // notify any threads of execution waiting for the remote folder to open that the result
-        // of that operation is ready
-        try {
-            remote_semaphore.notify();
-        } catch (Error notify_err) {
-            debug("Unable to fire semaphore notifying remote folder ready/not ready: %s",
-                notify_err.message);
-        }
-        
         int count;
         try {
             count = (remote_folder != null)
@@ -151,6 +146,15 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             count = 0;
         }
         
+        // notify any threads of execution waiting for the remote folder to open that the result
+        // of that operation is ready
+        try {
+            remote_semaphore.notify();
+        } catch (Error notify_err) {
+            debug("Unable to fire semaphore notifying remote folder ready/not ready: %s",
+                notify_err.message);
+        }
+        
         // notify any subscribers with similar information
         notify_opened(
             (remote_folder != null) ? Geary.Folder.OpenState.BOTH : Geary.Folder.OpenState.LOCAL,
@@ -158,41 +162,65 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     }
     
     // Returns true if the remote folder is ready, false otherwise
-    private async bool wait_for_remote_to_open() throws Error {
-        yield remote_semaphore.wait_async();
+    internal async bool wait_for_remote_to_open(Cancellable? cancellable = null) throws Error {
+        if (remote_folder != null)
+            return true;
+        
+        yield remote_semaphore.wait_async(cancellable);
         
         return (remote_folder != null);
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
-        yield local_folder.close_async(cancellable);
-        
-        // if the remote folder is open, close it in the background so the caller isn't waiting for
-        // this method to complete (much like open_async())
-        if (remote_folder != null) {
-            yield remote_semaphore.wait_async();
-            remote_semaphore = new Geary.NonblockingSemaphore();
+        Error error = null;
+        try {
+            yield local_folder.close_async(cancellable);
             
-            RemoteFolder? folder = remote_folder;
-            remote_folder = null;
-            
-            // signals
-            folder.messages_appended.disconnect(on_remote_messages_appended);
-            folder.message_removed.disconnect(on_remote_message_removed);
-            
-            folder.close_async.begin(cancellable);
-            
-            // close the replay queues *after* the folder has been closed (in case any final upcalls
-            // come and can be handled)
-            yield recv_replay_queue.close_async();
-            yield send_replay_queue.close_async();
-            recv_replay_queue = null;
-            send_replay_queue = null;
-            
-            notify_closed(CloseReason.FOLDER_CLOSED);
+            // if the remote folder is open, close it in the background so the caller isn't waiting for
+            // this method to complete (much like open_async())
+            if (remote_folder != null) {
+                yield remote_semaphore.wait_async();
+                
+                RemoteFolder? folder = remote_folder;
+                remote_folder = null;
+                
+                // signals
+                folder.messages_appended.disconnect(on_remote_messages_appended);
+                folder.message_removed.disconnect(on_remote_message_removed);
+                
+                folder.close_async.begin(cancellable);
+            }
+        } catch (Error e) {
+            error = e;
         }
         
+        // Close the replay queues *after* the folder has been closed (in case any final upcalls
+        // come and can be handled)
+        try {
+            if (recv_replay_queue != null)
+                yield recv_replay_queue.close_async();
+        } catch (Error e) {
+            if (error != null)
+                error = e;
+        }
+        
+        try {
+            if (send_replay_queue != null)
+                yield send_replay_queue.close_async();
+        } catch (Error e) {
+            if (error != null)
+                error = e;
+        }
+        
+        recv_replay_queue = null;
+        send_replay_queue = null;
+        
+        notify_closed(CloseReason.FOLDER_CLOSED);
+        
         opened = false;
+        
+        if (error != null)
+            throw error;
     }
     
     private void on_remote_messages_appended(int total) {
@@ -300,7 +328,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         // if connected, use stashed remote count (which is always kept current once remote folder
         // is opened)
-        if (yield wait_for_remote_to_open())
+        if (yield wait_for_remote_to_open(cancellable))
             return remote_count;
         
         return yield local_folder.get_email_count_async(cancellable);
@@ -441,7 +469,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // reliable way to determine certain counts and positions without it
         //
         // TODO: Need to deal with this in a sane manner when offline
-        if (!yield wait_for_remote_to_open())
+        if (!yield wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("Must be synchronized with server for listing by ID");
         
         assert(remote_count >= 0);
@@ -456,7 +484,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     internal async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
         Geary.Email.Field required_fields, EmailCallback? cb, Cancellable? cancellable) throws Error {
         // possible to call remote multiple times, wait for it to open once and go
-        if (!yield wait_for_remote_to_open())
+        if (!yield wait_for_remote_to_open(cancellable))
             return null;
         
         debug("Background fetching %d emails for %s", needed_by_position.length, to_string());
@@ -536,7 +564,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             fields = fields.set(Geary.Email.Field.REFERENCES);
         
         // fetch from network
-        if (!yield wait_for_remote_to_open())
+        if (!yield wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
         Geary.Email email = yield remote_folder.fetch_email_async(id, fields, cancellable);
@@ -581,52 +609,66 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     // EngineFolder as a member variable.
     internal async void normalize_email_positions_async(int low, int count, out int local_count,
         Cancellable? cancellable) throws Error {
-        if (!yield wait_for_remote_to_open())
+        if (!yield wait_for_remote_to_open(cancellable)) {
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
-        
-        local_count = yield local_folder.get_email_count_async(cancellable);
-        
-        // fixup span specifier
-        normalize_span_specifiers(ref low, ref count, remote_count);
-        
-        // Only prefetch properties for messages not being asked for by the user
-        // (any messages that may be between the user's high and the remote's high, assuming that
-        // all messages in local_count are contiguous from the highest email position, which is
-        // taken care of my prepare_opened_folder_async())
-        int high = (low + (count - 1)).clamp(1, remote_count);
-        int local_low = (local_count > 0) ? (remote_count - local_count) + 1 : remote_count;
-        if (high >= local_low)
-            return;
-        
-        int prefetch_count = local_low - high;
-        
-        debug("prefetching %d (%d) for %s (local_low=%d)", high, prefetch_count, to_string(),
-            local_low);
-        
-        // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
-        // as fields for duplicate detection
-        Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(high, prefetch_count,
-            local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, cancellable);
-        if (list == null || list.size != prefetch_count) {
-            throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
-                count, low, to_string());
         }
         
-        NonblockingBatch batch = new NonblockingBatch();
+        int mutex_token = yield normalize_email_positions_mutex.claim_async(cancellable);
         
-        foreach (Geary.Email email in list)
-            batch.add(new CreateEmailOperation(local_folder, email));
+        Error? error = null;
+        try {
+            local_count = yield local_folder.get_email_count_async(cancellable);
+            
+            // fixup span specifier
+            normalize_span_specifiers(ref low, ref count, remote_count);
+            
+            // Only prefetch properties for messages not being asked for by the user
+            // (any messages that may be between the user's high and the remote's high, assuming that
+            // all messages in local_count are contiguous from the highest email position, which is
+            // taken care of my prepare_opened_folder_async())
+            int high = (low + (count - 1)).clamp(1, remote_count);
+            int local_low = (local_count > 0) ? (remote_count - local_count) + 1 : remote_count;
+            if (high >= local_low) {
+                normalize_email_positions_mutex.release(ref mutex_token);
+                return;
+            }
+            
+            int prefetch_count = local_low - high;
+            
+            debug("prefetching %d (%d) for %s (local_low=%d)", high, prefetch_count, to_string(),
+                local_low);
+            
+            // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
+            // as fields for duplicate detection
+            Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(high, prefetch_count,
+                local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, cancellable);
+            if (list == null || list.size != prefetch_count) {
+                throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
+                    count, low, to_string());
+            }
+            
+            NonblockingBatch batch = new NonblockingBatch();
+            
+            foreach (Geary.Email email in list)
+                batch.add(new CreateEmailOperation(local_folder, email));
+            
+            yield batch.execute_all_async(cancellable);
+            batch.throw_first_exception();
+        } catch (Error e) {
+            local_count = 0; // prevent compiler warning
+            error = e;
+        }
         
-        yield batch.execute_all_async(cancellable);
-        batch.throw_first_exception();
+        normalize_email_positions_mutex.release(ref mutex_token);
         
-        debug("prefetched %d for %s", prefetch_count, to_string());
+        if (error != null)
+            throw error;
     }
     
     public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error {
-        if (!yield wait_for_remote_to_open())
+        if (!yield wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
         send_replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
