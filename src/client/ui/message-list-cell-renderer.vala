@@ -8,7 +8,7 @@
 public class FormattedMessageData : Object {
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
     private const int LINE_SPACING = 4;
-    private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.instance.UNREAD_ICON_SIZE;
+    private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
     
     private const int FONT_SIZE_DATE = 11;
     private const int FONT_SIZE_SUBJECT = 9;
@@ -194,7 +194,7 @@ public class FormattedMessageData : Object {
         // Unread indicator.
         if (is_unread) {
             Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,
-                cell_area.y + (cell_area.height / 2) - (IconFactory.instance.UNREAD_ICON_SIZE / 2));
+                cell_area.y + (cell_area.height / 2) - (IconFactory.UNREAD_ICON_SIZE / 2));
             ctx.paint();
         }
     }
