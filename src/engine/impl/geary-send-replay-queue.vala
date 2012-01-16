@@ -148,9 +148,9 @@ private class Geary.SendReplayQueue {
                 } catch (Error err) {
                     error("Unable to schedule operation on remote replay queue: %s", err.message);
                 }
+            } else {
+                op.set_ready(null);
             }
-            
-            op.set_ready(null);
         }
     }
     

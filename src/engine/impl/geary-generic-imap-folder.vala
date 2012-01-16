@@ -326,6 +326,9 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         Gee.List<Geary.Email>? list_remote = yield list_email_by_id_async(low, int.MAX,
             Email.Field.PROPERTIES, ListFlags.FORCE_UPDATE, flag_watch_cancellable);
         
+        if (list_remote == null)
+            return;
+        
         // Build map of emails that have changed.
         foreach (Geary.Email e in list_remote) {
             if (!local_map.has_key(e.id))
