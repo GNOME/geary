@@ -107,11 +107,11 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             email.set_full_references(
                 (message_id != null) ? new RFC822.MessageID(message_id) : null,
                 (in_reply_to != null) ? new RFC822.MessageID(in_reply_to) : null,
-                (references != null) ? new RFC822.MessageIDList(references) : null);
+                (references != null) ? new RFC822.MessageIDList.from_rfc822_string(references) : null);
         }
         
         if (((fields & Geary.Email.Field.SUBJECT) != 0) && (subject != null))
-            email.set_message_subject(new RFC822.Subject(subject));
+            email.set_message_subject(new RFC822.Subject.decode(subject));
         
         if (((fields & Geary.Email.Field.HEADER) != 0) && (header != null))
             email.set_message_header(new RFC822.Header(new Geary.Memory.StringBuffer(header)));
@@ -192,7 +192,7 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         if ((fields & Geary.Email.Field.REFERENCES) != 0) {
             message_id = (email.message_id != null) ? email.message_id.value : null;
             in_reply_to = (email.in_reply_to != null) ? email.in_reply_to.value : null;
-            references = (email.references != null) ? email.references.value : null;
+            references = (email.references != null) ? email.references.to_rfc822_string() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.REFERENCES);
         }

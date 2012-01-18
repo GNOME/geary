@@ -482,13 +482,13 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             if (references == null) {
                 string? value = headers.get_header("References");
                 if (!String.is_empty(value))
-                    references = new RFC822.MessageIDList(value);
+                    references = new RFC822.MessageIDList.from_rfc822_string(value);
             }
             
             // SUBJECT
             if (!email.fields.is_all_set(Geary.Email.Field.SUBJECT) && fields.require(Geary.Email.Field.SUBJECT)) {
                 string? value = headers.get_header("Subject");
-                email.set_message_subject(!String.is_empty(value) ? new RFC822.Subject(value) : null);
+                email.set_message_subject(!String.is_empty(value) ? new RFC822.Subject.decode(value) : null);
             }
         }
         

@@ -22,11 +22,28 @@ public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC8
 /**
  * A Message-ID list stores its IDs from earliest to latest.
  */
-public class Geary.RFC822.MessageIDList : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
-    public Gee.List<MessageID>? list { get; private set; }
+public class Geary.RFC822.MessageIDList : Geary.Common.MessageData, Geary.RFC822.MessageData {
+    public Gee.List<MessageID> list { get; private set; }
     
-    public MessageIDList(string value) {
-        base (value);
+    public MessageIDList() {
+        list = new Gee.ArrayList<MessageID>();
+    }
+    
+    public MessageIDList.from_list(Gee.List<MessageID> list) {
+        this ();
+        
+        foreach(MessageID msg_id in list)
+            this.list.add(msg_id);
+    }
+    
+    public MessageIDList.single(MessageID msg_id) {
+        this ();
+        
+        list.add(msg_id);
+    }
+    
+    public MessageIDList.from_rfc822_string(string value) {
+        this ();
         
         string[] ids = value.split_set(" \n\r\t");
         foreach (string id in ids) {
@@ -63,11 +80,20 @@ public class Geary.RFC822.MessageIDList : Geary.Common.StringMessageData, Geary.
             if (id != valid)
                 debug("Corrected Message-ID: \"%s\" -> \"%s\"", id, valid);
             
-            if (list == null)
-                list = new Gee.ArrayList<MessageID>();
-            
             list.add(new MessageID(valid));
         }
+    }
+    
+    public override string to_string() {
+        return "MessageIDList (%d)".printf(list.size);
+    }
+    
+    public virtual string to_rfc822_string() {
+        string[] strings = new string[list.size];
+        for(int i = 0; i < list.size; ++i)
+            strings[i] = list[i].value;
+        
+        return string.joinv(" ", strings);
     }
 }
 
@@ -112,11 +138,27 @@ public class Geary.RFC822.Size : Geary.Common.LongMessageData, Geary.RFC822.Mess
 }
 
 public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
+    public const string REPLY_PREFACE = "Re:";
+    
     public string original { get; private set; }
     
     public Subject(string value) {
+        base (value);
+        original = value;
+    }
+    
+    public Subject.decode(string value) {
         base (GMime.utils_header_decode_text(value));
         original = value;
+    }
+    
+    public bool is_reply() {
+        return value.down().has_prefix(REPLY_PREFACE);
+    }
+    
+    public Subject create_reply() {
+        return is_reply() ? new Subject(value) : new Subject("%s %s".printf(REPLY_PREFACE.down(),
+            value));
     }
 }
 

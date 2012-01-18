@@ -44,6 +44,17 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
         return addrs.read_only_view;
     }
     
+    public bool contains(string address) {
+        if (addrs.size < 1)
+            return false;
+        
+        foreach (MailboxAddress a in addrs)
+            if (a.address == address)
+                return true;
+        
+        return false;
+    }
+    
     public string to_rfc822_string() {
         switch (addrs.size) {
             case 0:

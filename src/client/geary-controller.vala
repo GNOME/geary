@@ -64,6 +64,8 @@ public class GearyController {
     public const string ACTION_ABOUT = "GearyAbout";
     public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
+    public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
+    public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
     public const string ACTION_PREFERENCES = "GearyPreferences";
@@ -93,6 +95,10 @@ public class GearyController {
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
         
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_TO_MESSAGE).sensitive
+            = false;
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_ALL_MESSAGE).sensitive
+            = false;
         GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
             = false;
         
@@ -133,6 +139,14 @@ public class GearyController {
             null, on_new_message };
         new_message.label = _("_New Message");
         entries += new_message;
+        
+        Gtk.ActionEntry reply_to_message = { ACTION_REPLY_TO_MESSAGE, Gtk.Stock.GO_BACK,
+            TRANSLATABLE, "<Ctrl>R", null, on_reply_to_message };
+        entries += reply_to_message;
+        
+        Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, Gtk.Stock.MEDIA_REWIND,
+            TRANSLATABLE, "<Ctrl><Shift>R", null, on_reply_all_message };
+        entries += reply_all_message;
         
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "Delete",
             null, on_delete_message };
@@ -395,6 +409,10 @@ public class GearyController {
         
         current_conversation = conversation;
         
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_TO_MESSAGE).sensitive
+            = (conversation != null);
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_ALL_MESSAGE).sensitive
+            = (conversation != null);
         GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
             = (conversation != null);
         
@@ -575,11 +593,27 @@ public class GearyController {
         }
     }
     
-    private void on_new_message() {
-        ComposerWindow w = new ComposerWindow();
+    private void create_compose_window(Geary.ComposedEmail? prefill = null) {
+        ComposerWindow w = new ComposerWindow(prefill);
         w.set_position(Gtk.WindowPosition.CENTER);
         w.send.connect(on_send);
         w.show_all();
+    }
+    
+    private void on_new_message() {
+        create_compose_window();
+    }
+    
+    private void on_reply_to_message() {
+        // TODO: allow replying to other messages in the conversation (not just the last)
+        create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
+            get_from(), main_window.message_viewer.messages.last()));
+    }
+    
+    private void on_reply_all_message() {
+        // TODO: allow replying to other messages in the conversation (not just the last)
+        create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
+            get_from(), main_window.message_viewer.messages.last()));
     }
     
     private void on_delete_message() {
@@ -616,7 +650,7 @@ public class GearyController {
         set_busy(false);
     }
     
-    private void on_send(ComposerWindow cw) {
+    private Geary.RFC822.MailboxAddress get_sender() {
         string username;
         try {
             // TODO: Multiple accounts.
@@ -625,31 +659,17 @@ public class GearyController {
         } catch (Error e) {
             error("Unable to get username. Error: %s", e.message);
         }
+        
         Geary.AccountInformation acct_info = account.get_account_information();
+        return new Geary.RFC822.MailboxAddress(acct_info.real_name, username);
+    }
         
-        Geary.ComposedEmail email = new Geary.ComposedEmail(
-            new DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.single(
-                new Geary.RFC822.MailboxAddress(acct_info.real_name, username)
-            )
-        );
+    private Geary.RFC822.MailboxAddresses get_from() {
+        return new Geary.RFC822.MailboxAddresses.single(get_sender());
+    }
         
-        if (!Geary.String.is_empty(cw.to))
-            email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.to);
-        
-        if (!Geary.String.is_empty(cw.cc))
-            email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.cc);
-        
-        if (!Geary.String.is_empty(cw.bcc))
-            email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cw.bcc);
-        
-        if (!Geary.String.is_empty(cw.subject))
-            email.subject = new Geary.RFC822.Subject(cw.subject);
-        
-        email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(cw.message));
-        
-        account.send_email_async.begin(email);
-        
+    private void on_send(ComposerWindow cw) {
+        account.send_email_async.begin(cw.get_composed_email(get_from()));
         cw.destroy();
     }
     

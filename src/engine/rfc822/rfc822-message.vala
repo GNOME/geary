@@ -12,6 +12,8 @@ public class Geary.RFC822.Message : Object {
     public RFC822.MailboxAddresses? to { get; private set; default = null; }
     public RFC822.MailboxAddresses? cc { get; private set; default = null; }
     public RFC822.MailboxAddresses? bcc { get; private set; default = null; }
+    public RFC822.MessageID? in_reply_to { get; private set; default = null; }
+    public RFC822.MessageIDList? references { get; private set; default = null; }
     public RFC822.Subject? subject { get; private set; default = null; }
     
     private GMime.Message message;
@@ -69,6 +71,16 @@ public class Geary.RFC822.Message : Object {
                 message.add_recipient(GMime.RecipientType.BCC, mailbox.name, mailbox.address);
         }
         
+        if (email.in_reply_to != null) {
+            in_reply_to = email.in_reply_to;
+            message.set_header("In-Reply-To", email.in_reply_to.value);
+        }
+        
+        if (email.references != null) {
+            references = email.references;
+            message.set_header("References", email.references.to_rfc822_string());
+        }
+        
         if (email.subject != null) {
             subject = email.subject;
             message.set_subject(email.subject.value);
@@ -110,7 +122,7 @@ public class Geary.RFC822.Message : Object {
             bcc = new RFC822.MailboxAddresses(converted);
         
         if (!String.is_empty(message.get_subject()))
-            subject = new RFC822.Subject(message.get_subject());
+            subject = new RFC822.Subject.decode(message.get_subject());
     }
     
     private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist) {
