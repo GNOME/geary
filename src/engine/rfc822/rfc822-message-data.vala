@@ -153,11 +153,11 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
     }
     
     public bool is_reply() {
-        return value.down().has_prefix(REPLY_PREFACE);
+        return value.down().has_prefix(REPLY_PREFACE.down());
     }
     
     public Subject create_reply() {
-        return is_reply() ? new Subject(value) : new Subject("%s %s".printf(REPLY_PREFACE.down(),
+        return is_reply() ? new Subject(value) : new Subject("%s %s".printf(REPLY_PREFACE,
             value));
     }
 }
