@@ -25,9 +25,11 @@ public class Geary.ComposedEmail : Object {
     public RFC822.Subject? subject { get; set; default = null; }
     public RFC822.Text? body { get; set; default = null; }
     
-    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
+    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
+        RFC822.MailboxAddresses? to = null) {
         this.date = date;
         this.from = from;
+        this.to = to;
     }
     
     public ComposedEmail.as_reply(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {

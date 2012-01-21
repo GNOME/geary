@@ -87,6 +87,20 @@ def configure(conf):
 		atleast_version='2.32.0',
 		mandatory=1,
 		args='--cflags --libs')
+	
+	conf.check_cfg(
+		package='webkitgtk-3.0',
+		uselib_store='WEBKITGTK',
+		atleast_version='1.6.1',
+		mandatory=1,
+		args='--cflags --libs')
+	
+	conf.check_cfg(
+		package='javascriptcoregtk-3.0',
+		uselib_store='JAVASCRIPTCOREGTK',
+		atleast_version='1.6.1',
+		mandatory=1,
+		args='--cflags --libs')
 
 def build(bld):
 	bld.add_post_fun(post_build)

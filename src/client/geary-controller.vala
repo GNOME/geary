@@ -105,6 +105,7 @@ public class GearyController {
         main_window.message_list_view.conversation_selected.connect(on_conversation_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.folder_list_view.folder_selected.connect(on_folder_selected);
+        main_window.message_viewer.link_selected.connect(on_link_selected);
         
         main_window.message_list_view.grab_focus();
         
@@ -585,18 +586,24 @@ public class GearyController {
         dialog.run();
     }
     
-    public void on_donate() {
+    // Opens a link in an external browser.
+    private void open_uri(string link) {
         try {
-            Gtk.show_uri(main_window.get_screen(), "http://yorba.org/donate/", Gdk.CURRENT_TIME);
+            Gtk.show_uri(main_window.get_screen(), link, Gdk.CURRENT_TIME);
         } catch (Error err) {
             debug("Unable to open URL. %s", err.message);
         }
+    }
+    
+    public void on_donate() {
+        open_uri("http://yorba.org/donate/");
     }
     
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
         ComposerWindow w = new ComposerWindow(prefill);
         w.set_position(Gtk.WindowPosition.CENTER);
         w.send.connect(on_send);
+        
         w.show_all();
     }
     
@@ -679,6 +686,18 @@ public class GearyController {
             busy_count = 0;
         
         main_window.set_busy(busy_count > 0);
+    }
+    
+    public void on_link_selected(string link) {
+        const string MAILTO = "mailto:";
+        if (link.down().has_prefix(MAILTO)) {
+            // TODO: handle more complex mailto links (subject, body, etc.)
+            create_compose_window(new Geary.ComposedEmail(new DateTime.now_local(),
+                get_from(), new Geary.RFC822.MailboxAddresses.single(
+                new Geary.RFC822.MailboxAddress(null, link.substring(MAILTO.length)))));
+        } else {
+            open_uri(link);
+        }
     }
 }
 

@@ -38,7 +38,7 @@
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
@@ -63,14 +63,13 @@
       </packing>
     </child>
     <child>
-      <object class="GtkTextView" id="body">
+      <object class="GtkBox" id="body">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
-        <property name="editable">False</property>
-        <property name="wrap_mode">word-char</property>
-        <property name="cursor_visible">False</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <placeholder/>
+        </child>
       </object>
       <packing>
         <property name="expand">False</property>
