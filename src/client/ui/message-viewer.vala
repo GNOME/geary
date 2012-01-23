@@ -22,6 +22,9 @@ public class MessageViewer : WebKit.WebView {
             padding: 0;
             background-color: #ccc;
         }
+        td, th {
+            vertical-align: top;
+        }
         .email {
             padding: 15px;
             margin: 15px;
@@ -32,16 +35,21 @@ public class MessageViewer : WebKit.WebView {
         }
         .header_title {
             font-size: smaller;
-            color: #aaaaaa;
+            color: #777;
+            text-align: right;
+            padding-right: 7px;
         }
-        .header_normal {
+        .header_text {
             font-size: smaller;
             color: black;
         }
-        .header_bold {
-            font-size: smaller;
+        .header_address_name {
             color: black;
-            font-weight: bold;
+            font-size: smaller;
+        }
+        .header_address_value {
+            color: #777;
+            font-size: smaller;
         }
         hr {
             background-color: #999;
@@ -131,21 +139,17 @@ public class MessageViewer : WebKit.WebView {
             error("Unable to get username. Error: %s", e.message);
         }
         
+        insert_header_address(ref header, _("From:"), email.from != null ? email.from : 
+            email.sender, true);
+        
         // Only include to string if it's not just this account.
         // TODO: multiple accounts.
-        string to = "";
         if (email.to != null) {
             if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == username))
-                to = email.to.to_string();
+                 insert_header_address(ref header, _("To:"), email.to);
         }
         
-        if (email.from != null)
-            insert_header(ref header, _("From:"), email.from.to_string(), true);
-        
-        insert_header(ref header, _("To:"), to);
-        
-        if (email.cc != null)
-            insert_header(ref header, _("Cc:"), email.cc.to_string());
+        insert_header_address(ref header, _("Cc:"), email.cc);
             
         if (email.subject != null)
             insert_header(ref header, _("Subject:"), email.subject.value);
@@ -175,17 +179,44 @@ public class MessageViewer : WebKit.WebView {
         }
     }
     
-    // Appends a header field (to, from, subject, etc.) to header_text
+    // Appends a header field to header_text
     private void insert_header(ref string header_text, string _title, string? _value,
-        bool bold = false) {
+        bool escape_value = true) {
         if (Geary.String.is_empty(_value))
             return;
         
         string title = Geary.String.escape_markup(_title);
-        string value = Geary.String.escape_markup(_value);
+        string value = escape_value ? Geary.String.escape_markup(_value) : _value;
         
-        header_text += "<tr><td class='header_title'>%s</td><td class='%s'>%s</td></tr>"
-            .printf(title, bold ? "header_bold" : "header_normal", value);
+        header_text += "<tr><td class='header_title'>%s</td><td class='header_text'>%s</td></tr>"
+            .printf(title, value);
+    }
+    
+    // Appends email address fields to the header.
+    private void insert_header_address(ref string header_text, string title,
+        Geary.RFC822.MailboxAddresses? addresses, bool bold = false) {
+        if (addresses == null)
+            return;
+        
+        string bold_val = bold ? " style='font-weight: bold'" : "";
+        
+        string value = "";
+        Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
+        int i = 0;
+        foreach (Geary.RFC822.MailboxAddress a in list) {
+            if (a.name != null) {
+                value += "<span class='header_address_name'%s>%s</span> ".printf(bold_val, a.name);
+                value += "<span class='header_address_value'>%s</span>".printf(a.address);
+            } else {
+                value += "<span class='header_address_name'%s>%s</span>".printf(bold_val, a.address);
+            }
+            
+            i++;
+            if (i < list.size)
+                value += ", ";
+        }
+        
+        insert_header(ref header_text, title, value, false);
     }
     
     private WebKit.NavigationResponse on_navigation_requested(WebKit.WebFrame frame, 
