@@ -247,12 +247,11 @@ public class GearyController {
         cancel_folder();
         main_window.message_list_store.clear();
         
-        current_conversations = null;
-        
         if (current_folder != null) {
             yield current_folder.close_async();
         }
         
+        current_conversations = null;
         current_folder = folder;
         
         yield current_folder.open_async(false, cancellable_folder);
