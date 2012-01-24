@@ -165,8 +165,9 @@ public class MessageViewer : WebKit.WebView {
             body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_utf8();
         } catch (Error err) {
             try {
-                body_text = "<pre>" + email.get_message().get_first_mime_part_of_content_type(
-                    "text/plain").to_utf8() + "</pre>";
+                body_text = "<pre>" + linkify_plain_text(Geary.String.escape_markup(
+                    email.get_message().get_first_mime_part_of_content_type("text/plain").to_utf8()))
+                    + "</pre>";
             } catch (Error err2) {
                 debug("Could not get message text. %s", err2.message);
             }
@@ -217,6 +218,17 @@ public class MessageViewer : WebKit.WebView {
         }
         
         insert_header(ref header_text, title, value, false);
+    }
+    
+    private string linkify_plain_text(string input) throws Error {
+        // Converts text links that start with http, https, or ftp into HTML links.
+        // Will NOT convert links that appear immediately after href="
+        // Based on the regex from http://snippets.dzone.com/posts/show/6721
+        Regex r = new Regex(
+            "(((?<!href=\")https?:\\/\\/|((?<!href=\")ftp:\\/\\/))([-\\w\\.]+)+(:\\d+)?(\\/([\\w\\/_\\.]*(\\?\\S+)?)?)?)",
+            RegexCompileFlags.CASELESS);
+        
+        return r.replace(input, -1, 0, "<a href=\"\\g<1>\">\\g<1></a>");
     }
     
     private WebKit.NavigationResponse on_navigation_requested(WebKit.WebFrame frame, 
