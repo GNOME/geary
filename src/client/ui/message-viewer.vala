@@ -45,11 +45,11 @@ public class MessageViewer : WebKit.WebView {
         }
         .header_address_name {
             color: black;
-            font-size: smaller;
+            font-size: inherit;
         }
         .header_address_value {
             color: #777;
-            font-size: smaller;
+            font-size: inherit;
         }
         hr {
             background-color: #999;
