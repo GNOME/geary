@@ -2,4 +2,7 @@
     <accelerator action="GearyNewMessage" />
     <accelerator action="GearyDebugPrint" />
     <accelerator action="GearyDeleteMessage" />
+    <accelerator action="GearyReplyToMessage" />
+    <accelerator action="GearyReplyAllMessage" />
+    <accelerator action="GearyForwardMessage" />
 </ui>

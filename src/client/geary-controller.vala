@@ -153,7 +153,7 @@ public class GearyController {
         entries += reply_all_message;
         
         Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE,
-            "<Ctrl><Shift>F", null, on_forward_message };
+            "<Ctrl>L", null, on_forward_message };
         entries += forward_message;
         
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "Delete",
