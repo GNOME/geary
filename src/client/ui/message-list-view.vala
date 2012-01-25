@@ -102,13 +102,15 @@ public class MessageListView : Gtk.TreeView {
     
     private void on_row_deleted(Gtk.TreePath path) {
         if (GearyApplication.instance.config.autoselect) {
-            // Move to next conversation.
+            Gtk.TreePath old_path = path.copy();
+            
+            // Move up to newer conversation.
+            path.prev();
             set_cursor(path, null, false);
             
-            // If the current path is no longer valid, try the previous message.
+            // If the current path is no longer valid, try the next conversation.
             if (get_selected_path() == null) {
-                path.prev();
-                set_cursor(path, null, false);
+                set_cursor(old_path, null, false);
             }
         }
     }
