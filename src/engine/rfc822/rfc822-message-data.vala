@@ -139,6 +139,7 @@ public class Geary.RFC822.Size : Geary.Common.LongMessageData, Geary.RFC822.Mess
 
 public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
     public const string REPLY_PREFACE = "Re:";
+    public const string FORWARD_PREFACE = "Fwd:";
     
     public string original { get; private set; }
     
@@ -158,6 +159,15 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
     
     public Subject create_reply() {
         return is_reply() ? new Subject(value) : new Subject("%s %s".printf(REPLY_PREFACE,
+            value));
+    }
+    
+    public bool is_forward() {
+        return value.down().has_prefix(FORWARD_PREFACE.down());
+    }
+    
+    public Subject create_forward() {
+        return is_forward() ? new Subject(value) : new Subject("%s %s".printf(FORWARD_PREFACE,
             value));
     }
 }

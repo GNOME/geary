@@ -32,6 +32,11 @@ public class MainToolbar : Gtk.VBox {
         reply_all_message.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_REPLY_ALL_MESSAGE));
         
+        Gtk.ToolButton forward_message = builder.get_object(GearyController.ACTION_FORWARD_MESSAGE)
+            as Gtk.ToolButton;
+        forward_message.set_related_action(GearyApplication.instance.actions.get_action(
+            GearyController.ACTION_FORWARD_MESSAGE));
+        
         Gtk.ToolButton archive_message = builder.get_object(GearyController.ACTION_DELETE_MESSAGE)
             as Gtk.ToolButton;
         archive_message.set_related_action(GearyApplication.instance.actions.get_action(

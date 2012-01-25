@@ -41,7 +41,7 @@ public class Geary.ComposedEmail : Object {
         set_reply_references(source);
         
         body = new RFC822.Text(new Geary.Memory.StringBuffer("\n" +
-            Geary.RFC822.Utils.quote_email(source)));
+            Geary.RFC822.Utils.quote_email_for_reply(source)));
     }
     
     public ComposedEmail.as_reply_all(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -54,7 +54,16 @@ public class Geary.ComposedEmail : Object {
         set_reply_references(source);
         
         body = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
-            Geary.RFC822.Utils.quote_email(source)));
+            Geary.RFC822.Utils.quote_email_for_reply(source)));
+    }
+    
+    public ComposedEmail.as_forward(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
+        this (date, from);
+        
+        subject = create_subject_for_forward(source);
+        
+        body = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_forward(source)));
     }
     
     private void set_reply_references(Geary.Email source) {
@@ -83,6 +92,10 @@ public class Geary.ComposedEmail : Object {
     
     private Geary.RFC822.Subject create_subject_for_reply(Geary.Email email) {
         return (email.subject ?? new Geary.RFC822.Subject("")).create_reply();
+    }
+    
+    private Geary.RFC822.Subject create_subject_for_forward(Geary.Email email) {
+        return (email.subject ?? new Geary.RFC822.Subject("")).create_forward();
     }
     
     // Removes address from the list of addresses.  If the list contains only the given address, the

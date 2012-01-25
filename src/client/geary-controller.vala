@@ -66,6 +66,7 @@ public class GearyController {
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
     public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
     public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
+    public const string ACTION_FORWARD_MESSAGE = "GearyForwardMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
     public const string ACTION_PREFERENCES = "GearyPreferences";
@@ -98,6 +99,8 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_TO_MESSAGE).sensitive
             = false;
         GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_ALL_MESSAGE).sensitive
+            = false;
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_FORWARD_MESSAGE).sensitive
             = false;
         GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
             = false;
@@ -148,6 +151,10 @@ public class GearyController {
         Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, Gtk.Stock.MEDIA_REWIND,
             TRANSLATABLE, "<Ctrl><Shift>R", null, on_reply_all_message };
         entries += reply_all_message;
+        
+        Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE,
+            "<Ctrl><Shift>F", null, on_forward_message };
+        entries += forward_message;
         
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "Delete",
             null, on_delete_message };
@@ -413,6 +420,8 @@ public class GearyController {
             = (conversation != null);
         GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_ALL_MESSAGE).sensitive
             = (conversation != null);
+        GearyApplication.instance.actions.get_action(GearyController.ACTION_FORWARD_MESSAGE).sensitive
+            = (conversation != null);
         GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
             = (conversation != null);
         
@@ -619,6 +628,12 @@ public class GearyController {
     private void on_reply_all_message() {
         // TODO: allow replying to other messages in the conversation (not just the last)
         create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
+            get_from(), main_window.message_viewer.messages.last()));
+    }
+    
+    private void on_forward_message() {
+        // TODO: allow forwarding other messages in the conversation (not just the last)
+        create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
             get_from(), main_window.message_viewer.messages.last()));
     }
     
