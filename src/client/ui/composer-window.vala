@@ -152,10 +152,25 @@ public class ComposerWindow : Gtk.Window {
     }
     
     public override bool key_press_event(Gdk.EventKey event) {
-        if (Gdk.keyval_name(event.keyval) == "Return" && 
-            (event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive) {
-            on_send();
+        bool handled = true;
+        
+        switch (Gdk.keyval_name(event.keyval)) {
+            case "Return":
+                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive)
+                    on_send();
+            break;
+            
+            case "Escape":
+                this.destroy();
+            break;
+            
+            default:
+                handled = false;
+            break;
         }
+        
+        if (handled)
+            return true;
         
         return base.key_press_event(event);
     }
