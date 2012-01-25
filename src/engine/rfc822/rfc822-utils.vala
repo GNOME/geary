@@ -21,7 +21,7 @@ public string quote_email_for_reply(Geary.Email email) {
     string quoted = "";
     
     if (email.date != null)
-        quoted += _("On %s, ").printf(email.date.to_string());
+        quoted += _("On %s, ").printf(email.date.value.format(_("%a, %b %-e, %Y at %-l:%M %p")));
     
     if (email.from != null)
         quoted += _("%s wrote:").printf(email.from.to_string());
