@@ -595,7 +595,13 @@ public class GearyController {
     }
     
     // Opens a link in an external browser.
-    private void open_uri(string link) {
+    private void open_uri(string _link) {
+        string link = _link;
+        
+        // Support web URLs that ommit the protocol.
+        if (!link.contains(":"))
+            link = "http://" + link;
+        
         try {
             Gtk.show_uri(main_window.get_screen(), link, Gdk.CURRENT_TIME);
         } catch (Error err) {
