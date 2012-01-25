@@ -225,12 +225,12 @@ public class MessageListStore : Gtk.TreeStore {
         Gee.SortedSet<Geary.Email>? apool = a.get_pool_sorted(compare_email);
         Gee.SortedSet<Geary.Email>? bpool = b.get_pool_sorted(compare_email);
         
-        if (apool == null || apool.first() == null)
+        if (apool == null || apool.last() == null)
             return -1;
-        else if (bpool == null || bpool.first() == null)
+        else if (bpool == null || bpool.last() == null)
             return 1;
         
-        return compare_email(apool.first(), bpool.first());
+        return compare_email(apool.last(), bpool.last());
     }
 }
 
