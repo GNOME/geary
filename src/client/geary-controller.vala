@@ -60,7 +60,6 @@ public class GearyController {
     }
     
     // Named actions.
-    public const string ACTION_DONATE = "GearyDonate";
     public const string ACTION_ABOUT = "GearyAbout";
     public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
@@ -126,10 +125,6 @@ public class GearyController {
         Gtk.ActionEntry prefs = { ACTION_PREFERENCES, null, TRANSLATABLE, null, null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
-        
-        Gtk.ActionEntry donate = { ACTION_DONATE, null, TRANSLATABLE, null, null, on_donate };
-        donate.label = _("_Donate");
-        entries += donate;
         
         Gtk.ActionEntry about = { ACTION_ABOUT, Gtk.Stock.ABOUT, TRANSLATABLE, null, null, on_about };
         about.label = _("_About");
@@ -607,10 +602,6 @@ public class GearyController {
         } catch (Error err) {
             debug("Unable to open URL. %s", err.message);
         }
-    }
-    
-    public void on_donate() {
-        open_uri("http://yorba.org/donate/");
     }
     
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
