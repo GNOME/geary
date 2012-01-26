@@ -34,7 +34,7 @@ public class IconFactory {
     // Creats the icon factory.
     private IconFactory() {
         // Load icons here.
-        unread = load(Gtk.Stock.YES, UNREAD_ICON_SIZE);
+        unread = load("mail-unread", UNREAD_ICON_SIZE);
     }
 }
 

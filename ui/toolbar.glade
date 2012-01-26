@@ -5,7 +5,6 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="toolbar_style">icons</property>
-    <property name="icon_size">2</property>
     <child>
       <object class="GtkToolButton" id="GearyNewMessage">
         <property name="use_action_appearance">False</property>
@@ -79,7 +78,7 @@
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Delete</property>
         <property name="use_underline">True</property>
-        <property name="icon_name">user-trash</property>
+        <property name="icon_name">archive</property>
       </object>
       <packing>
         <property name="expand">False</property>

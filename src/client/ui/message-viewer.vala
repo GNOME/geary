@@ -32,6 +32,8 @@ public class MessageViewer : WebKit.WebView {
             background-color: white;
             color: black;
             font-size: small;
+            border-radius: 4px;
+            -webkit-box-shadow: 0 3px 5px #aaa;
         }
         .header_title {
             font-size: smaller;
