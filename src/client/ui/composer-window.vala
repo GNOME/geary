@@ -156,8 +156,11 @@ public class ComposerWindow : Gtk.Window {
         
         switch (Gdk.keyval_name(event.keyval)) {
             case "Return":
+            case "KP_Enter":
                 if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive)
                     on_send();
+                else
+                    handled = false;
             break;
             
             case "Escape":
