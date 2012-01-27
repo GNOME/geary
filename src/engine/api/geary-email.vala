@@ -168,7 +168,7 @@ public class Geary.Email : Object {
         fields |= Field.REFERENCES;
     }
     
-    public void set_message_subject(Geary.RFC822.Subject subject) {
+    public void set_message_subject(Geary.RFC822.Subject? subject) {
         this.subject = subject;
         
         fields |= Field.SUBJECT;
