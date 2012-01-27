@@ -58,7 +58,7 @@ public class MainToolbar : Gtk.VBox {
         menu.realize();
         
         int rx, ry;
-        get_window().get_root_origin(out rx, out ry);
+        get_window().get_origin(out rx, out ry);
         
         Gtk.Allocation menu_button_allocation;
         menu_button.get_allocation(out menu_button_allocation);
@@ -67,7 +67,7 @@ public class MainToolbar : Gtk.VBox {
         get_allocation(out toolbar_allocation);
         
         x = rx + menu_button_allocation.x;
-        y = ry + menu_button_allocation.height + toolbar_allocation.height;
+        y = ry + toolbar_allocation.height;
         
         push_in = false;
     }
