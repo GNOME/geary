@@ -40,7 +40,7 @@ public class Geary.ComposedEmail : Object {
         subject = create_subject_for_reply(source);
         set_reply_references(source);
         
-        body = new RFC822.Text(new Geary.Memory.StringBuffer("\n" +
+        body = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
             Geary.RFC822.Utils.quote_email_for_reply(source)));
     }
     

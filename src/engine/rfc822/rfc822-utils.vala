@@ -27,7 +27,7 @@ public string quote_email_for_reply(Geary.Email email) {
         quoted += _("%s wrote:").printf(email.from.to_string());
     
     if (email.body != null)
-        quoted += "\n\n" + quote_body(email);
+        quoted += "\n" + quote_body(email);
     
     return quoted;
 }
