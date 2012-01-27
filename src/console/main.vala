@@ -26,7 +26,7 @@ class ImapConsole : Gtk.Window {
         destroy.connect(() => { Gtk.main_quit(); });
         set_default_size(800, 600);
         
-        Gtk.VBox layout = new Gtk.VBox(false, 4);
+        Gtk.Box layout = new Gtk.Box(Gtk.Orientation.VERTICAL, 4);
         
         console.editable = false;
         Gtk.ScrolledWindow scrolled_console = new Gtk.ScrolledWindow(null, null);

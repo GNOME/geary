@@ -42,7 +42,8 @@ public class Geary.AccountInformation : Object {
         KeyFile key_file = new KeyFile();
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
         string data = key_file.to_data();
-        yield file.replace_contents_async(data, data.length, null, false, FileCreateFlags.NONE,
-            cancellable);
+        string new_etag;
+        yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
+            cancellable, out new_etag);
     }
 }

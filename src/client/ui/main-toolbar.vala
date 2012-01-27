@@ -5,12 +5,14 @@
  */
 
 // Draws the main toolbar.
-public class MainToolbar : Gtk.VBox {
+public class MainToolbar : Gtk.Box {
     private Gtk.Toolbar toolbar;
     private Gtk.Menu menu;
     private Gtk.ToolButton menu_button;
     
     public MainToolbar() {
+        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
+        
         GearyApplication.instance.load_ui_file("toolbar_menu.ui");
         menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu") as Gtk.Menu;
         

@@ -72,7 +72,7 @@ public class MessageViewer : WebKit.WebView {
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
     
-    // List of emails corresponding with VBox.
+    // List of emails in this view.
     public Gee.LinkedList<Geary.Email> messages { get; private set; default = 
         new Gee.LinkedList<Geary.Email>(); }
     

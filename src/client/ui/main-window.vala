@@ -80,7 +80,7 @@ public class MainWindow : Gtk.Window {
     }
     
     private void create_layout() {
-        Gtk.VBox main_layout = new Gtk.VBox(false, 0);
+        Gtk.Box main_layout = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         
         // Toolbar.
         main_toolbar = new MainToolbar();
