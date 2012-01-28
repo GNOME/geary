@@ -18,9 +18,9 @@ public class MessageViewer : WebKit.WebView {
         <html><head><title>Geary</title>
         <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #ccc;
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #ccc !important;
         }
         td, th {
             vertical-align: top;
@@ -78,6 +78,8 @@ public class MessageViewer : WebKit.WebView {
     
     private int width = 0;
     private int height = 0;
+    private string? hover_url = null;
+    private Gtk.Menu? context_menu = null;
     
     public MessageViewer() {
         valign = Gtk.Align.START;
@@ -86,6 +88,8 @@ public class MessageViewer : WebKit.WebView {
         
         navigation_requested.connect(on_navigation_requested);
         parent_set.connect(on_parent_set);
+        hovering_over_link.connect(on_hovering_over_link);
+        button_press_event.connect(on_button_press_event);
         
         WebKit.WebSettings s = new WebKit.WebSettings();
         s.auto_load_images = false;
@@ -255,6 +259,64 @@ public class MessageViewer : WebKit.WebView {
         height = allocation.height;
         
         queue_resize();
+    }
+    
+    private void on_hovering_over_link(string? title, string? url) {
+        // Copy the link the user is hovering over.  Note that when the user mouses-out, 
+        // this signal is called again with null for both parameters.
+        hover_url = url;
+    }
+    
+    private void on_copy_text() {
+        copy_clipboard();
+    }
+    
+    private void on_copy_link() {
+        // Put the current link in clipboard.
+        Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        c.set_text(hover_url, -1);
+        c.store();
+    }
+    
+    private void on_select_all() {
+        select_all();
+    }
+    
+    private bool on_button_press_event(Gdk.EventButton event) {
+        // Ignore right-clicks on images.
+        if (event.button == 3) {
+            create_context_menu(event);
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void create_context_menu(Gdk.EventButton event) {
+        context_menu = new Gtk.Menu();
+        
+        if (can_copy_clipboard()) {
+            // Add a menu item for copying the current selection.
+            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("_Copy"));
+            item.activate.connect(on_copy_text);
+            context_menu.append(item);
+        }
+        
+        if (hover_url != null) {
+            // Add a menu item for copying the link.
+            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
+            item.activate.connect(on_copy_link);
+            context_menu.append(item);
+        }
+        
+        // Select all.
+        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
+        select_all_item.activate.connect(on_select_all);
+        context_menu.append(select_all_item);
+        
+        context_menu.show_all();
+        context_menu.popup(null, null, null, event.button, event.time);
     }
     
     public override void get_preferred_height (out int minimum_height, out int natural_height) {
