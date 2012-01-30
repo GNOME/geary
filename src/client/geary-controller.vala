@@ -95,14 +95,7 @@ public class GearyController {
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
         
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_TO_MESSAGE).sensitive
-            = false;
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_ALL_MESSAGE).sensitive
-            = false;
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_FORWARD_MESSAGE).sensitive
-            = false;
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
-            = false;
+        enable_message_buttons(false);
         
         main_window.message_list_view.conversation_selected.connect(on_conversation_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
@@ -411,14 +404,8 @@ public class GearyController {
         
         current_conversation = conversation;
         
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_TO_MESSAGE).sensitive
-            = (conversation != null);
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_REPLY_ALL_MESSAGE).sensitive
-            = (conversation != null);
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_FORWARD_MESSAGE).sensitive
-            = (conversation != null);
-        GearyApplication.instance.actions.get_action(GearyController.ACTION_DELETE_MESSAGE).sensitive
-            = (conversation != null);
+        // Disable message buttons until conversation loads.
+        enable_message_buttons(false);
         
         if (conversation != null)
             do_select_message.begin(conversation, cancellable_message, on_select_message_completed);
@@ -464,6 +451,7 @@ public class GearyController {
     private void on_select_message_completed(Object? source, AsyncResult result) {
         try {
             do_select_message.end(result);
+            enable_message_buttons(current_conversation != null);
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Unable to select message: %s", err.message);
@@ -709,6 +697,14 @@ public class GearyController {
         } else {
             open_uri(link);
         }
+    }
+    
+    // Enables or disables the message buttons on the toolbar.
+    public void enable_message_buttons(bool sensitive) {
+        GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive;
     }
 }
 
