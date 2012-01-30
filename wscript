@@ -94,6 +94,13 @@ def configure(conf):
 		atleast_version='1.4.3',
 		mandatory=1,
 		args='--cflags --libs')
+	
+	conf.check_cfg(
+		package='gtksourceview-3.0',
+		uselib_store='GTKSOURCEVIEW',
+		atleast_version='3.2',
+		mandatory=1,
+		args='--cflags --libs')
 
 def build(bld):
 	bld.add_post_fun(post_build)

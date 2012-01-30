@@ -30,9 +30,9 @@ gsettings_schemas = [
 'org.yorba.geary.gschema.xml'
 ]
 
-client_uselib = 'GLIB GEE GTK GNOME-KEYRING WEBKITGTK JAVASCRIPTCOREGTK'
+client_uselib = 'GLIB GEE GTK GNOME-KEYRING WEBKITGTK JAVASCRIPTCOREGTK GTKSOURCEVIEW'
 client_packages = [ 'gtk+-3.0', 'glib-2.0', 'gee-1.0', 'gnome-keyring-1', 'webkitgtk-3.0',
-	'javascriptcoregtk-3.0' ]
+	'javascriptcoregtk-3.0', 'gtksourceview-3.0' ]
 
 app = bld.program(
 	target		= 'geary',

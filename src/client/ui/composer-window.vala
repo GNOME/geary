@@ -12,7 +12,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Entry cc_entry;
     private Gtk.Entry bcc_entry;
     private Gtk.Entry subject_entry;
-    private Gtk.TextView message_text;
+    private Gtk.SourceView message_text = new Gtk.SourceView();
     private Gtk.Button send_button;
     
     public string from { get; set; }
@@ -60,7 +60,9 @@ public class ComposerWindow : Gtk.Window {
         cc_entry = builder.get_object("cc") as Gtk.Entry;
         bcc_entry = builder.get_object("bcc") as Gtk.Entry;
         subject_entry = builder.get_object("subject") as Gtk.Entry;
-        message_text = builder.get_object("message") as Gtk.TextView;
+        Gtk.ScrolledWindow scroll = builder.get_object("scrolledwindow") as Gtk.ScrolledWindow;
+        scroll.add(message_text);
+        ((Gtk.SourceBuffer) message_text.buffer).highlight_matching_brackets = false;
         
         title = DEFAULT_TITLE;
         subject_entry.changed.connect(on_subject_changed);

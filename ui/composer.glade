@@ -175,6 +175,15 @@
             <property name="height">1</property>
           </packing>
         </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -183,21 +192,14 @@
       </packing>
     </child>
     <child>
-      <object class="GtkScrolledWindow" id="scrolledwindow1">
+      <object class="GtkScrolledWindow" id="scrolledwindow">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="margin_top">6</property>
         <property name="hscrollbar_policy">never</property>
         <property name="shadow_type">in</property>
         <child>
-          <object class="GtkTextView" id="message">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
-            <property name="vscroll_policy">natural</property>
-            <property name="wrap_mode">word</property>
-          </object>
+          <placeholder/>
         </child>
       </object>
       <packing>
