@@ -10,7 +10,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose new message</property>
+        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose message</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">New Message</property>
         <property name="use_underline">True</property>
@@ -26,7 +26,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Reply to the sender of the last message in the selected conversation</property>
+        <property name="tooltip_text" translatable="yes">Reply to sender</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Reply To</property>
         <property name="use_underline">True</property>
@@ -42,7 +42,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Reply to everyone involved in the last message of the selected conversation</property>
+        <property name="tooltip_text" translatable="yes">Reply to all</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Reply All</property>
         <property name="use_underline">True</property>
