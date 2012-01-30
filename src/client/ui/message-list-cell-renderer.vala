@@ -60,12 +60,12 @@ public class FormattedMessageData : Object {
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
         Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
-        render_internal(widget, cell_area, ctx);
+        render_internal(widget, cell_area, ctx, (flags & Gtk.CellRendererState.SELECTED) != 0);
     }
     
     // Call this on style changes.
     public void calculate_sizes(Gtk.Widget widget) {
-        render_internal(widget, null, null, true);
+        render_internal(widget, null, null, false, true);
     }
     
     // Must call calculate_sizes() first.
@@ -81,7 +81,7 @@ public class FormattedMessageData : Object {
     
     // Can be used for rendering or calculating height.
     private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area = null, 
-        Cairo.Context? ctx = null, bool recalc_dims = false) {
+        Cairo.Context? ctx = null, bool selected, bool recalc_dims = false) {
         
         Pango.Rectangle? ink_rect;
         Pango.Rectangle? logical_rect;
@@ -165,7 +165,9 @@ public class FormattedMessageData : Object {
         Pango.FontDescription font_preview = new Pango.FontDescription();
         font_preview.set_size(FONT_SIZE_PREVIEW * Pango.SCALE);
         Pango.AttrList list_preview = new Pango.AttrList();
-        list_preview.insert(Pango.attr_foreground_new(28671, 28671, 28671)); // #777
+
+        uint16 shade = selected ? 0x3000 : 0x7000;
+        list_preview.insert(Pango.attr_foreground_new(shade, shade, shade));
         
         Pango.Layout layout_preview = widget.create_pango_layout(null);
         layout_preview.set_font_description(font_preview);
