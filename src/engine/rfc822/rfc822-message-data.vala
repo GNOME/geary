@@ -240,6 +240,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         if (preview_header != null) {
             string? charset = null;
             string? encoding = null;
+            bool is_html = false;
             
             // Parse the header.
             GMime.Stream header_stream = new GMime.StreamMem.with_buffer(
@@ -247,6 +248,8 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
             GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
             GMime.Part? part = parser.construct_part() as GMime.Part;
             if (part != null) {
+                is_html = (part.get_content_type().to_string() == "text/html");
+                
                 charset = part.get_content_type_parameter("charset");
                 encoding = part.get_header("Content-Transfer-Encoding");
             }
@@ -268,7 +271,8 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
             input_stream.write_to_stream(filter);
             uint8[] data = output.data;
             data += (uint8) '\0';
-            buffer = new Geary.Memory.StringBuffer((string) data);
+            buffer = new Geary.Memory.StringBuffer(is_html ? Geary.HTML.remove_html_tags(
+                (string) data) : (string) data);
         }
         
         base (buffer);

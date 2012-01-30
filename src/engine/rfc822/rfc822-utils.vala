@@ -60,18 +60,25 @@ public string quote_email_for_forward(Geary.Email email) {
 }
 
 private string quote_body(Geary.Email email, bool line_start_char = true) {
-    string ret = "";
+    string body_text = "";
     try {
-        string[] lines = email.get_message().get_first_mime_part_of_content_type("text/plain")
-            .to_utf8().split("\n");
-        for (int i = 0; i < lines.length; i++) {
-            if (line_start_char)
-                ret += "> ";
-            
-            ret += lines[i];
-        }
+        body_text = email.get_message().get_first_mime_part_of_content_type("text/plain").to_utf8();
     } catch (Error err) {
-        debug("Could not get message text. %s", err.message);
+        try {
+            body_text = Geary.HTML.remove_html_tags(email.get_message().
+                get_first_mime_part_of_content_type("text/html").to_utf8());
+        } catch (Error err2) {
+            debug("Could not get message text. %s", err2.message);
+        }
+    }
+    
+    string ret = "";
+    string[] lines = body_text.split("\n");
+    for (int i = 0; i < lines.length; i++) {
+        if (line_start_char)
+            ret += "> ";
+        
+        ret += lines[i];
     }
     
     return ret;
