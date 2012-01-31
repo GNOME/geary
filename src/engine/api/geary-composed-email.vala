@@ -10,6 +10,7 @@ public class Geary.ComposedEmail : Object {
         | Geary.Email.Field.BODY
         | Geary.Email.Field.ORIGINATORS
         | Geary.Email.Field.RECEIVERS
+        | Geary.Email.Field.REFERENCES
         | Geary.Email.Field.SUBJECT
         | Geary.Email.Field.DATE
         | Geary.Email.Field.PROPERTIES;
@@ -34,6 +35,7 @@ public class Geary.ComposedEmail : Object {
     
     public ComposedEmail.as_reply(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
         this (date, from);
+        assert(source.fields.fulfills(REQUIRED_REPLY_FIELDS));
         
         string? sender_address = (from.size > 0 ? from.get_all().first().address : null);
         to = create_to_addresses_for_reply(source, sender_address);
@@ -46,6 +48,7 @@ public class Geary.ComposedEmail : Object {
     
     public ComposedEmail.as_reply_all(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
         this (date, from);
+        assert(source.fields.fulfills(REQUIRED_REPLY_FIELDS));
         
         string? sender_address = (from.size > 0 ? from.get_all().first().address : null);
         to = create_to_addresses_for_reply(source, sender_address);

@@ -428,7 +428,8 @@ public class GearyController {
         
         foreach (Geary.Email email in email_set) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
-                MessageViewer.REQUIRED_FIELDS, cancellable);
+                MessageViewer.REQUIRED_FIELDS | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
+                cancellable);
             
             if (cancellable.is_cancelled())
                 throw new IOError.CANCELLED("do_select_message cancelled");
