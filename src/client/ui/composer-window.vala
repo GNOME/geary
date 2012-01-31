@@ -62,6 +62,7 @@ public class ComposerWindow : Gtk.Window {
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.ScrolledWindow scroll = builder.get_object("scrolledwindow") as Gtk.ScrolledWindow;
         scroll.add(message_text);
+        message_text.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
         ((Gtk.SourceBuffer) message_text.buffer).highlight_matching_brackets = false;
         
         title = DEFAULT_TITLE;
