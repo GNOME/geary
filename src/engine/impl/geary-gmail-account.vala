@@ -60,6 +60,8 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         
         ignored_paths = new Gee.HashSet<Geary.FolderPath>(Hashable.hash_func, Equalable.equal_func);
         ignored_paths.add(gmail_root);
+        ignored_paths.add(new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
+            true));
     }
     
     public override string get_user_folders_label() {
