@@ -12,8 +12,7 @@ client_src = [
 'ui/composer-window.vala',
 'ui/geary-login.vala',
 'ui/icon-factory.vala',
-'ui/folder-list-store.vala',
-'ui/folder-list-view.vala',
+'ui/folder-list.vala',
 'ui/main-toolbar.vala',
 'ui/main-window.vala',
 'ui/message-list-cell-renderer.vala',
@@ -21,6 +20,11 @@ client_src = [
 'ui/message-list-view.vala',
 'ui/message-viewer.vala',
 'ui/preferences-dialog.vala',
+
+'ui/sidebar/sidebar-branch.vala',
+'ui/sidebar/sidebar-common.vala',
+'ui/sidebar/sidebar-entry.vala',
+'ui/sidebar/sidebar-tree.vala',
 
 'util/util-email.vala',
 'util/util-keyring.vala',

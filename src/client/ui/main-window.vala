@@ -6,12 +6,12 @@
 
 public class MainWindow : Gtk.Window {
     private const int MESSAGE_LIST_WIDTH = 250;
+    private const int FOLDER_LIST_WIDTH = 100;
     
-    public FolderListStore folder_list_store { get; private set; default = new FolderListStore(); }
+    public FolderList folder_list { get; private set; default = new FolderList(); }
     public MessageListStore message_list_store { get; private set; default = new MessageListStore(); }
     public MainToolbar main_toolbar { get; private set; }
     public MessageListView message_list_view  { get; private set; }
-    public FolderListView folder_list_view  { get; private set; }
     public MessageViewer message_viewer { get; private set; default = new MessageViewer(); }
     
     private int window_width;
@@ -25,7 +25,6 @@ public class MainWindow : Gtk.Window {
         title = GearyApplication.NAME;
         
         message_list_view = new MessageListView(message_list_store);
-        folder_list_view = new FolderListView(folder_list_store);
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
@@ -88,8 +87,9 @@ public class MainWindow : Gtk.Window {
         
         // folder list
         Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
+        folder_list_scrolled.set_size_request(FOLDER_LIST_WIDTH, -1);
         folder_list_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-        folder_list_scrolled.add(folder_list_view);
+        folder_list_scrolled.add(folder_list);
         
         // message list
         Gtk.ScrolledWindow message_list_scrolled = new Gtk.ScrolledWindow(null, null);

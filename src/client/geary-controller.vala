@@ -99,7 +99,7 @@ public class GearyController {
         
         main_window.message_list_view.conversation_selected.connect(on_conversation_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
-        main_window.folder_list_view.folder_selected.connect(on_folder_selected);
+        main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.message_viewer.link_selected.connect(on_link_selected);
         
         main_window.message_list_view.grab_focus();
@@ -168,7 +168,7 @@ public class GearyController {
                 _("Archive the selected conversation");
         }
         
-        main_window.folder_list_store.set_user_folders_root_name(account.get_user_folders_label());
+        main_window.folder_list.set_user_folders_root_name(account.get_user_folders_label());
         
         main_window.show_all();
         do_start.begin(cancellable_folder);
@@ -192,7 +192,7 @@ public class GearyController {
                         batch.get_operation(id);
                     try {
                         Geary.Folder folder = (Geary.Folder) batch.get_result(id);
-                        main_window.folder_list_store.add_special_folder(op.special_folder, folder);
+                        main_window.folder_list.add_special_folder(op.special_folder, folder);
                     } catch (Error inner_error) {
                         message("Unable to fetch special folder %s: %s", 
                             op.special_folder.path.to_string(), inner_error.message);
@@ -205,7 +205,7 @@ public class GearyController {
                 // If inbox is specified, select that
                 Geary.SpecialFolder? inbox = special_folders.get_folder(Geary.SpecialFolderType.INBOX);
                 if (inbox != null)
-                    main_window.folder_list_view.select_path(inbox.path);
+                    main_window.folder_list.select_path(inbox.path);
             }
             
             // pull down the root-level user folders
@@ -472,7 +472,7 @@ public class GearyController {
                 if (ignored_paths != null && ignored_paths.contains(folder.get_path()))
                     skipped.add(folder);
                 else
-                    main_window.folder_list_store.add_user_folder(folder);
+                    main_window.folder_list.add_folder(folder);
             }
             
             Gee.Collection<Geary.Folder> remaining = added;

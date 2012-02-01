@@ -4,6 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+// These are defined here due to this bug:
+// https://bugzilla.gnome.org/show_bug.cgi?id=653379
+public enum TreeSortable {
+    DEFAULT_SORT_COLUMN_ID = -1,
+    UNSORTED_SORT_COLUMN_ID = -2
+}
+
 public class MessageListStore : Gtk.TreeStore {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.PROPERTIES;
