@@ -264,8 +264,8 @@ public class Sidebar.Tree : Gtk.TreeView {
       
         selected_wrapper = wrapper;
         
-        if (editing_disabled == 0 && wrapper != null)
-            text_renderer.editable = wrapper.entry is Sidebar.RenameableEntry;
+        if (editing_disabled == 0 && wrapper != null && wrapper.entry is Sidebar.RenameableEntry)
+            text_renderer.editable = ((Sidebar.RenameableEntry) wrapper.entry).is_user_renameable();
         
         if (wrapper != null && !mask_entry_selected_signal) {
             Sidebar.SelectableEntry? selectable = wrapper.entry as Sidebar.SelectableEntry;
@@ -286,7 +286,9 @@ public class Sidebar.Tree : Gtk.TreeView {
         Gtk.TreePath? path = get_selected_path();
         if (path != null && editing_disabled > 0 && --editing_disabled == 0) {
             EntryWrapper? wrapper = get_wrapper_at_path(path);
-            text_renderer.editable = (wrapper != null && (wrapper.entry is Sidebar.RenameableEntry));
+            if (wrapper != null && (wrapper.entry is Sidebar.RenameableEntry))
+                text_renderer.editable = ((Sidebar.RenameableEntry) wrapper.entry).
+                    is_user_renameable();
         }
     }
     
@@ -841,7 +843,7 @@ public class Sidebar.Tree : Gtk.TreeView {
             }
         } else if (event.button == 1 && event.type == Gdk.EventType.BUTTON_PRESS) {
             // Is this a click on an already-highlighted tree item?
-            if ((old_path_ref != null) && (old_path_ref.get_path() != null)
+            if (path != null && (old_path_ref != null) && (old_path_ref.get_path() != null)
                 && (old_path_ref.get_path().compare(path) == 0)) {
                 // yes, don't allow single-click editing, but 
                 // pass the event on for dragging.
@@ -1036,6 +1038,9 @@ public class Sidebar.Tree : Gtk.TreeView {
         
         Sidebar.RenameableEntry? renameable = wrapper.entry as Sidebar.RenameableEntry;
         if (renameable == null)
+            return false;
+        
+        if (wrapper.entry is Sidebar.Grouping)
             return false;
         
         get_selection().select_path(path);

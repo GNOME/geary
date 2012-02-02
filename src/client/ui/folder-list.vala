@@ -78,7 +78,7 @@ public class FolderList : Sidebar.Tree {
         }
         
         public Icon? get_sidebar_icon() {
-            return new ThemedIcon("folder");
+            return IconFactory.instance.label_icon;
         }
         
         public string to_string() {
@@ -90,14 +90,14 @@ public class FolderList : Sidebar.Tree {
     
     private Sidebar.Grouping user_folder_group;
     private Sidebar.Branch user_folder_branch;
-    private Gee.HashMap<Geary.FolderPath, Sidebar.Entry> entries = new Gee.HashMap<Geary.FolderPath,
+    internal Gee.HashMap<Geary.FolderPath, Sidebar.Entry> entries = new Gee.HashMap<Geary.FolderPath,
         Sidebar.Entry>();
     
     public FolderList() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
         entry_selected.connect(on_entry_selected);
         
-        user_folder_group = new Sidebar.Grouping("", new ThemedIcon("folder"));
+        user_folder_group = new Sidebar.Grouping("", IconFactory.instance.label_folder_icon);
         user_folder_branch = new Sidebar.Branch(user_folder_group,
             Sidebar.Branch.Options.STARTUP_OPEN_GROUPING, user_folder_comparator);
         graft(user_folder_branch, int.MAX);
@@ -139,7 +139,9 @@ public class FolderList : Sidebar.Tree {
     }
     
     public void add_special_folder(Geary.SpecialFolder special, Geary.Folder folder) {
-        graft(new SpecialFolderBranch(special, folder), (int) special.folder_type);
+        SpecialFolderBranch branch = new SpecialFolderBranch(special, folder);
+        graft(branch, (int) special.folder_type);
+        entries.set(folder.get_path(), branch.get_root());
     }
     
     public void select_path(Geary.FolderPath path) {
