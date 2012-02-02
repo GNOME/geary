@@ -102,6 +102,7 @@ public class MainWindow : Gtk.Window {
         Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
         message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_viewer_scrolled.add(message_viewer);
+        message_viewer.link_hover.connect(on_link_hover);
         
         // three-pane display: folder list on left and messages on right separated by grippable
         folder_paned.pack1(folder_list_scrolled, false, false);
@@ -121,6 +122,17 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_end(messages_paned, true, true, 0);
         
         add(main_layout);
+    }
+    
+    private void on_link_hover(string? link) {
+        tooltip_text = link;
+        trigger_tooltip_query();
+    }
+    
+    public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
+        tooltip.set_text(tooltip_text);
+        
+        return true;
     }
 }
 

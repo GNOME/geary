@@ -72,6 +72,9 @@ public class MessageViewer : WebKit.WebView {
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
     
+    // Fired when the user hovers over or stops hovering over a link.
+    public signal void link_hover(string? link);
+    
     // List of emails in this view.
     public Gee.LinkedList<Geary.Email> messages { get; private set; default = 
         new Gee.LinkedList<Geary.Email>(); }
@@ -265,6 +268,7 @@ public class MessageViewer : WebKit.WebView {
         // Copy the link the user is hovering over.  Note that when the user mouses-out, 
         // this signal is called again with null for both parameters.
         hover_url = url;
+        link_hover(hover_url);
     }
     
     private void on_copy_text() {
@@ -317,6 +321,11 @@ public class MessageViewer : WebKit.WebView {
         
         context_menu.show_all();
         context_menu.popup(null, null, null, event.button, event.time);
+    }
+    
+    public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
+        // Disable tooltips from within WebKit itself.
+        return false;
     }
     
     public override void get_preferred_height (out int minimum_height, out int natural_height) {
