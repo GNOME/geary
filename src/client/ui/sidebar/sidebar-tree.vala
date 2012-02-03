@@ -261,16 +261,18 @@ public class Sidebar.Tree : Gtk.TreeView {
         }
         
         EntryWrapper? wrapper = get_wrapper_at_path(path);
-      
-        selected_wrapper = wrapper;
         
-        if (editing_disabled == 0 && wrapper != null && wrapper.entry is Sidebar.RenameableEntry)
-            text_renderer.editable = ((Sidebar.RenameableEntry) wrapper.entry).is_user_renameable();
-        
-        if (wrapper != null && !mask_entry_selected_signal) {
-            Sidebar.SelectableEntry? selectable = wrapper.entry as Sidebar.SelectableEntry;
-            if (selectable != null)
-                entry_selected(selectable);
+        if (selected_wrapper != wrapper) {
+            selected_wrapper = wrapper;
+            
+            if (editing_disabled == 0 && wrapper != null && wrapper.entry is Sidebar.RenameableEntry)
+                text_renderer.editable = ((Sidebar.RenameableEntry) wrapper.entry).is_user_renameable();
+            
+            if (wrapper != null && !mask_entry_selected_signal) {
+                Sidebar.SelectableEntry? selectable = wrapper.entry as Sidebar.SelectableEntry;
+                if (selectable != null)
+                    entry_selected(selectable);
+            }
         }
         
         if (base.cursor_changed != null)
