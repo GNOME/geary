@@ -634,6 +634,10 @@ public class GearyController {
         if (pool == null)
             return;
         
+        // If the user clicked the toolbar button, we want to
+        // move focus back to the message list.
+        main_window.message_list_view.grab_focus();
+        
         set_busy(true);
         delete_messages.begin(pool, cancellable_folder, on_delete_messages_completed);
     }
