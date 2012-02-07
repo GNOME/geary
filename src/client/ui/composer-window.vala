@@ -73,13 +73,13 @@ public class ComposerWindow : Gtk.Window {
         
         if (prefill != null) {
             if (prefill.from != null)
-                from = prefill.from.to_rfc822_string();
+                from = prefill.from.to_string();
             if (prefill.to != null)
-                to = prefill.to.to_rfc822_string();
+                to = prefill.to.to_string();
             if (prefill.cc != null)
-                cc = prefill.cc.to_rfc822_string();
+                cc = prefill.cc.to_string();
             if (prefill.bcc != null)
-                bcc = prefill.bcc.to_rfc822_string();
+                bcc = prefill.bcc.to_string();
             if (prefill.in_reply_to != null)
                 in_reply_to = prefill.in_reply_to.value;
             if (prefill.references != null)

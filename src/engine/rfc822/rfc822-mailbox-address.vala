@@ -49,7 +49,7 @@ public class Geary.RFC822.MailboxAddress {
      * address in angled brackets.
      */
     public string get_full_address() {
-        return String.is_empty(name) ? "<%s>".printf(address) : "%s <%s>".printf(name, address);
+        return String.is_empty(name) ? address : "%s <%s>".printf(name, address);
     }
     
     /**
