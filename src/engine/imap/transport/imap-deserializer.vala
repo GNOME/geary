@@ -143,7 +143,7 @@ public class Geary.Imap.Deserializer {
             break;
             
             case Mode.BLOCK:
-                assert(literal_length_remaining > 0);
+                assert(literal_length_remaining >= 0);
                 
                 if (block_buffer == null)
                     block_buffer = new Geary.Memory.GrowableBuffer();
@@ -182,11 +182,6 @@ public class Geary.Imap.Deserializer {
     private void on_read_block(Object? source, AsyncResult result) {
         try {
             size_t bytes_read = dins.read_async.end(result);
-            if (bytes_read == 0) {
-                eos();
-                
-                return;
-            }
             
             // adjust the current buffer's size to the amount that was actually read in
             block_buffer.adjust(current_buffer, bytes_read);
