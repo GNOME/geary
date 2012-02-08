@@ -312,10 +312,17 @@ public class GearyController {
     public void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         main_window.message_list_store.update_conversation(conversation);
+        
+        // If we're viewing this conversation, fetch the messages and add them to the view.
+        if (conversation == current_conversation)
+            do_show_message.begin(email, cancellable_message, on_show_message_completed);
     }
     
     public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
         main_window.message_list_store.update_conversation(conversation);
+        
+        if (conversation == current_conversation)
+            main_window.message_viewer.remove_message(email);
     }
     
     public void on_conversation_removed(Geary.Conversation conversation) {
@@ -407,26 +414,21 @@ public class GearyController {
         // Disable message buttons until conversation loads.
         enable_message_buttons(false);
         
-        if (conversation != null)
-            do_select_message.begin(conversation, cancellable_message, on_select_message_completed);
+        if (current_conversation != null && current_folder != null) {
+            Gee.SortedSet<Geary.Email>? email_set = conversation.get_pool_sorted(compare_email);
+            if (email_set == null)
+                return;
+            
+            do_show_message.begin(email_set, cancellable_message, on_show_message_completed);
+        }
     }
     
-    private async void do_select_message(Geary.Conversation conversation, Cancellable? 
+    private async void do_show_message(Gee.Collection<Geary.Email> messages, Cancellable? 
         cancellable = null) throws Error {
-        Gee.List<Geary.EmailIdentifier> messages = new Gee.ArrayList<Geary.EmailIdentifier>();
-        if (current_folder == null) {
-            debug("Conversation selected with no folder selected");
-            
-            return;
-        }
-        
-        Gee.SortedSet<Geary.Email>? email_set = conversation.get_pool_sorted(compare_email);
-        if (email_set == null)
-            return;
-        
+        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         set_busy(true);
         
-        foreach (Geary.Email email in email_set) {
+        foreach (Geary.Email email in messages) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
                 MessageViewer.REQUIRED_FIELDS | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
                 cancellable);
@@ -437,25 +439,25 @@ public class GearyController {
             main_window.message_viewer.add_message(full_email);
             
             if (full_email.properties.email_flags.is_unread())
-                messages.add(full_email.id);
+                ids.add(full_email.id);
         }
         
         // Mark as read.
-        if (messages.size > 0) {
+        if (ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
             
-            yield current_folder.mark_email_async(messages, null, flags, cancellable);
+            yield current_folder.mark_email_async(ids, null, flags, cancellable);
         }
     }
     
-    private void on_select_message_completed(Object? source, AsyncResult result) {
+    private void on_show_message_completed(Object? source, AsyncResult result) {
         try {
-            do_select_message.end(result);
+            do_show_message.end(result);
             enable_message_buttons(current_conversation != null);
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
-                debug("Unable to select message: %s", err.message);
+                debug("Unable to show message: %s", err.message);
         }
         
         set_busy(false);

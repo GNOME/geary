@@ -76,8 +76,15 @@ public class MessageViewer : WebKit.WebView {
     public signal void link_hover(string? link);
     
     // List of emails in this view.
-    public Gee.LinkedList<Geary.Email> messages { get; private set; default = 
-        new Gee.LinkedList<Geary.Email>(); }
+    public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
+        new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) compare_email); }
+    
+    // HTML element that contains message DIVs.
+    private WebKit.DOM.HTMLDivElement container;
+    
+    // Maps emails to their corresponding elements.
+    private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
+        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
     
     private int width = 0;
     private int height = 0;
@@ -102,42 +109,70 @@ public class MessageViewer : WebKit.WebView {
         s.enable_plugins = false;
         settings = s;
         
-        clear(); // loads HTML page
+        // Load the HTML into WebKit.
+        load_finished.connect(on_load_finished);
+        load_string(HTML_BODY, "text/html", "UTF8", "");
+    }
+    
+    private void on_load_finished(WebKit.WebFrame frame) {
+        // Grab the HTML container.
+        WebKit.DOM.Element? _container = get_dom_document().get_element_by_id("message_container");
+        assert(_container != null);
+        container = _container as WebKit.DOM.HTMLDivElement;
+        assert(container != null);
     }
     
     // Removes all displayed e-mails from the view.
     public void clear() {
+        // Remove all messages from DOM.
+        try {
+            foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
+                if (element.get_parent_element() != null)
+                    element.get_parent_element().remove_child(element);
+            }
+        } catch (Error e) {
+            debug("Error clearing message viewer: %s", e.message);
+        }
+        email_to_element.clear();
         messages.clear();
-        load_string(HTML_BODY, "text/html", "UTF8", "");
     }
     
-    // Adds a message to the view.
+    // Converts an email ID into HTML ID used by the <div> for the email.
+    private string get_div_id(Geary.EmailIdentifier id) {
+        return "message_%s".printf(id.to_string());
+    }
+    
     public void add_message(Geary.Email email) {
-        messages.add(email);
         debug("Message id: %s", email.id.to_string());
+        if (messages.contains(email))
+            return;
         
-        string message_id = "message_%s".printf(email.id.to_string());
+        string message_id = get_div_id(email.id);
         string header = "<table>";
         
-        WebKit.DOMHTMLDivElement? container = null;
-        WebKit.DOMHTMLElement? div_message = null;
+        WebKit.DOM.Node insert_before = container.get_last_child();
         
+        messages.add(email);
+        Geary.Email? higher = messages.higher(email);
+        if (higher != null)
+            insert_before = get_dom_document().get_element_by_id(get_div_id(higher.id));
+        
+        WebKit.DOM.HTMLElement div_message;
         try {
-            WebKit.DOMElement? _container = get_dom_document().get_element_by_id("message_container");
-            assert(_container != null);
-            container = _container as WebKit.DOMHTMLDivElement;
-            assert(container != null);
-            
-            WebKit.DOMElement? _div_message = get_dom_document().create_element("div");
+            WebKit.DOM.Element? _div_message = get_dom_document().create_element("div");
             assert(_div_message != null);
-            div_message = _div_message as WebKit.DOMHTMLElement;
-            assert(div_message != null);
+            div_message = _div_message as WebKit.DOM.HTMLElement;
+            
             div_message.set_attribute("id", message_id);
             div_message.set_attribute("class", "email");
-            container.insert_before(div_message, container.get_last_child());
+            container.insert_before(div_message, insert_before);
         } catch (Error setup_error) {
             warning("Error setting up webkit: %s", setup_error.message);
+            
+            return;
         }
+        
+        email_to_element.set(email.id, div_message);
         
         string username;
         try {
@@ -185,6 +220,21 @@ public class MessageViewer : WebKit.WebView {
             div_message.set_inner_html(header + body_text);
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
+        }
+    }
+    
+    public void remove_message(Geary.Email email) {
+        if (!messages.contains(email))
+            return;
+        
+        WebKit.DOM.HTMLElement element = email_to_element.get(email.id);
+        email_to_element.unset(email.id);
+        
+        try {
+            if (element.get_parent_element() != null)
+                element.get_parent_element().remove_child(element);
+        } catch (Error err) {
+            debug("Could not remove message: %s", err.message);
         }
     }
     
