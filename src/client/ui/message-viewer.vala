@@ -34,6 +34,18 @@ public class MessageViewer : WebKit.WebView {
             font-size: small;
             border-radius: 4px;
             -webkit-box-shadow: 0 3px 5px #aaa;
+            display: inline-block;
+        }
+        .email_box {
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            width: 100% !important;
+        }
+        .geary_spacer {
+            display: table;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            width: 100% !important;
         }
         .header_title {
             font-size: smaller;
@@ -215,6 +227,8 @@ public class MessageViewer : WebKit.WebView {
                 debug("Could not get message text. %s", err2.message);
             }
         }
+        
+        body_text = "<div class='geary_spacer'></div><div class='email_container'>" + body_text + "</div>";
         
         try {
             div_message.set_inner_html(header + body_text);
