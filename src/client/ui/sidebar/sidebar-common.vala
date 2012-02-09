@@ -9,13 +9,15 @@ public class Sidebar.Grouping : Object, Sidebar.Entry, Sidebar.ExpandableEntry,
     Sidebar.RenameableEntry {
     
     private string name;
+    private string? tooltip;
     private Icon? open_icon;
     private Icon? closed_icon;
     
-    public Grouping(string name, Icon? open_icon, Icon? closed_icon = null) {
+    public Grouping(string name, Icon? open_icon, Icon? closed_icon = null, string? tooltip = null) {
         this.name = name;
         this.open_icon = open_icon;
         this.closed_icon = closed_icon ?? open_icon;
+        this.tooltip = tooltip;
     }
     
     public void rename(string name) {
@@ -32,7 +34,7 @@ public class Sidebar.Grouping : Object, Sidebar.Entry, Sidebar.ExpandableEntry,
     }
     
     public string? get_sidebar_tooltip() {
-        return name;
+        return tooltip;
     }
     
     public Icon? get_sidebar_icon() {
