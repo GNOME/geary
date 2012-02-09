@@ -212,8 +212,10 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         // remove anything left over ... use local count rather than remote as we're still in a stage
         // where only the local messages are available
-        for (; local_ctr < local_length; local_ctr++)
+        for (; local_ctr < local_length; local_ctr++) {
             batch.add(new RemoveEmailOperation(local_folder, old_local[local_ctr].id));
+            removed_ids.add(old_local[local_ctr].id);
+        }
         
         // execute them all at once
         yield batch.execute_all_async(cancellable);
