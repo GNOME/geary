@@ -21,6 +21,9 @@ public class IconFactory {
     public const int UNREAD_ICON_SIZE = 12;
     public Gdk.Pixbuf? unread { get; private set; }
     
+    public const int GEARY_ICON_SIZE = 95;
+    public Gdk.Pixbuf? geary { get; private set; }
+    
     public ThemedIcon label_icon { get; private set; default = new ThemedIcon("one-tag"); }
     public ThemedIcon label_folder_icon { get; private set; default = new ThemedIcon("multiple-tags"); }
     
@@ -38,12 +41,13 @@ public class IconFactory {
     
     // Creates the icon factory.
     private IconFactory() {
-        // Load icons here.
-        unread = load("mail-unread", UNREAD_ICON_SIZE);
-        
         icon_theme= Gtk.IconTheme.get_default();
         icon_theme.append_search_path(GearyApplication.instance.get_resource_directory().
             get_child("icons").get_path());
+        
+        // Load icons here.
+        unread = load("mail-unread", UNREAD_ICON_SIZE);
+        geary = load("geary", GEARY_ICON_SIZE);
     }
 }
 

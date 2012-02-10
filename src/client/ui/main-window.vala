@@ -28,6 +28,10 @@ public class MainWindow : Gtk.Window {
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
+        GLib.List<Gdk.Pixbuf> pixbuf_list = new GLib.List<Gdk.Pixbuf>();
+        pixbuf_list.append(IconFactory.instance.geary);
+        set_default_icon_list(pixbuf_list);
+        
         create_layout();
     }
     
