@@ -14,3 +14,19 @@ public int compare_email(Geary.Email aenvelope, Geary.Email benvelope) {
 public int compare_email_id_desc(Geary.Email aenvelope, Geary.Email benvelope) {
     return (int) (aenvelope.id.ordering - benvelope.id.ordering);
 }
+
+public int compare_conversation(Geary.Conversation a, Geary.Conversation b) {
+    Gee.SortedSet<Geary.Email>? apool = a.get_pool_sorted(compare_email);
+    Gee.SortedSet<Geary.Email>? bpool = b.get_pool_sorted(compare_email);
+    
+    if (apool == null || apool.last() == null)
+        return -1;
+    else if (bpool == null || bpool.last() == null)
+        return 1;
+    
+    return compare_email(apool.last(), bpool.last());
+}
+
+public int compare_conversation_desc(Geary.Conversation a, Geary.Conversation b) {
+    return -compare_conversation(a, b);
+}

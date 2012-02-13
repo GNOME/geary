@@ -84,6 +84,8 @@ public class GearyController {
     private int busy_count = 0;
     private Geary.Conversation? current_conversation = null;
     private Geary.Conversation? last_deleted_conversation = null;
+    private Gee.SortedSet<Geary.Conversation>? conversations_awaiting_preview = null;
+    private bool scan_in_progress = false;
     
     public GearyController() {
         // Setup actions.
@@ -281,11 +283,18 @@ public class GearyController {
             low, count);
         main_window.message_list_view.enable_load_more = false;
         set_busy(true);
+        
+        conversations_awaiting_preview = new Gee.TreeSet<Geary.Conversation>(
+            (CompareFunc<Geary.Conversation>) compare_conversation_desc);
+        scan_in_progress = true;
     }
     
     public void on_scan_error(Error err) {
         debug("Scan error: %s", err.message);
         set_busy(false);
+        
+        conversations_awaiting_preview = null;
+        scan_in_progress = false;
     }
     
     public void on_scan_completed() {
@@ -293,7 +302,11 @@ public class GearyController {
         
         set_busy(false);
         
-        do_fetch_previews.begin(cancellable_folder);
+        Gee.SortedSet<Geary.Conversation> conversations = conversations_awaiting_preview;
+        conversations_awaiting_preview = null;
+        scan_in_progress = false;
+        do_fetch_previews.begin(conversations, cancellable_folder, on_fetch_previews_completed);
+        
         main_window.message_list_view.enable_load_more = true;
         
         // Select first conversation.
@@ -307,22 +320,24 @@ public class GearyController {
             if (!main_window.message_list_store.has_conversation(c))
                 main_window.message_list_store.append_conversation(c);
         }
+        
+        update_conversations(conversations, null);
     }
     
     public void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
-        main_window.message_list_store.update_conversation(conversation);
-        
         // If we're viewing this conversation, fetch the messages and add them to the view.
         if (conversation == current_conversation)
             do_show_message.begin(email, cancellable_message, on_show_message_completed);
+        
+        update_conversations(null, conversation);
     }
     
     public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
-        main_window.message_list_store.update_conversation(conversation);
-        
         if (conversation == current_conversation)
             main_window.message_viewer.remove_message(email);
+        
+        update_conversations(null, conversation);
     }
     
     public void on_conversation_removed(Geary.Conversation conversation) {
@@ -331,7 +346,8 @@ public class GearyController {
     
     public void on_updated_placeholders(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
-        main_window.message_list_store.update_conversation(conversation);
+        
+        update_conversations(null, conversation);
     }
     
     private void on_load_more() {
@@ -363,35 +379,66 @@ public class GearyController {
             main_window.message_list_store.update_flags(id, map.get(id));
     }
     
-    private async void do_fetch_previews(Cancellable? cancellable) throws Error {
+    private void update_conversations(Gee.Collection<Geary.Conversation>? conversation_set,
+        Geary.Conversation? conversation) {
+        if (scan_in_progress) {
+            if (conversation != null)
+                conversations_awaiting_preview.add(conversation);
+                
+            if (conversation_set != null)
+                conversations_awaiting_preview.add_all(conversation_set);
+        } else {
+            Gee.SortedSet<Geary.Conversation> conversations = new Gee.TreeSet<Geary.Conversation>(
+                (CompareFunc<Geary.Conversation>) compare_conversation_desc);
+                
+            if (conversation != null)
+                conversations.add(conversation);
+            
+            if (conversation_set != null)
+                conversations.add_all(conversation_set);
+            
+            if (conversations.size > 0) {
+                do_fetch_previews.begin(conversations, cancellable_folder,
+                    on_fetch_previews_completed);
+            }
+        }
+    }
+    
+    // Updates previews of a set of conversations.
+    private async Gee.Set<Geary.Conversation> do_fetch_previews(Gee.SortedSet<Geary.Conversation>
+        conversations, Cancellable? cancellable) throws Error {
         set_busy(true);
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
         
-        int count = main_window.message_list_store.get_count();
-        for (int ctr = 0; ctr < count; ctr++) {
-            Geary.Conversation? conversation;
-            Geary.Email? email = main_window.message_list_store.get_email_for_preview(
-                ctr, out conversation);
+        foreach (Geary.Conversation c in conversations) {
+            Geary.Email? email = MessageListStore.email_for_preview(c);
             
             if (email != null)
-                batch.add(new FetchPreviewOperation(main_window, current_folder, email.id,
-                    conversation));
+                batch.add(new FetchPreviewOperation(main_window, current_folder, email.id, c));
         }
         
-        debug("Fetching %d previews", count);
         yield batch.execute_all_async(cancellable);
-        debug("Completed fetching %d previews", count);
+        batch.throw_first_exception();
+        
+        return conversations;
+    }
+    
+    private void on_fetch_previews_completed(Object? source, AsyncResult result) {
+        Gee.Set<Geary.Conversation>? conversations = null;
+        try {
+             conversations = do_fetch_previews.end(result);
+        } catch (Error err) {
+            debug("Unable to select folder: %s", err.message);
+        }
         
         set_busy(false);
-        
-        batch.throw_first_exception();
         
         // with all the previews fetched, now go back and do a full list (if required)
         if (second_list_pass_required) {
             second_list_pass_required = false;
             debug("Doing second list pass now");
             current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
-                cancellable);
+                cancellable_folder);
         }
     }
     

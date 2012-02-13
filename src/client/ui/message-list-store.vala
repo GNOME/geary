@@ -82,15 +82,11 @@ public class MessageListStore : Gtk.TreeStore {
             return;
         }
         
-        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
-        if (pool == null) {
-            // empty conversation, remove from store
-            remove_conversation(conversation);
-            
+        Geary.Email? preview = email_for_preview(conversation);
+        if (preview == null) {
+            debug("Unexpected empty conversation");
             return;
         }
-        
-        Geary.Email preview = pool.first();
         
         FormattedMessageData? existing = null;
         get(iter, Column.MESSAGE_DATA, out existing);
@@ -102,8 +98,8 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         if (!only_update_flags && (existing == null || !existing.email.id.equals(preview.id))) {
-            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview, pool.size,
-                conversation.is_unread()));
+            set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview,
+                conversation.get_count(), conversation.is_unread()));
         }
     }
     
@@ -131,11 +127,8 @@ public class MessageListStore : Gtk.TreeStore {
         return get_conversation_at(new Gtk.TreePath.from_indices(index, -1));
     }
     
-    public Geary.Email? get_email_for_preview(int index, out Geary.Conversation? conversation) {
-        conversation = get_conversation_at_index(index);
-        if (conversation == null)
-            return null;
-        
+    // Returns the email to use for a preview in a conversation.
+    public static Geary.Email? email_for_preview(Geary.Conversation conversation) {
         Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
         if (pool == null)
             return null;
@@ -229,15 +222,7 @@ public class MessageListStore : Gtk.TreeStore {
         get(aiter, Column.MESSAGE_OBJECT, out a);
         get(biter, Column.MESSAGE_OBJECT, out b);
         
-        Gee.SortedSet<Geary.Email>? apool = a.get_pool_sorted(compare_email);
-        Gee.SortedSet<Geary.Email>? bpool = b.get_pool_sorted(compare_email);
-        
-        if (apool == null || apool.last() == null)
-            return -1;
-        else if (bpool == null || bpool.last() == null)
-            return 1;
-        
-        return compare_email(apool.last(), bpool.last());
+        return compare_conversation(a, b);
     }
 }
 
