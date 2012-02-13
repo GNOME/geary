@@ -302,10 +302,12 @@ public class GearyController {
         
         set_busy(false);
         
-        Gee.SortedSet<Geary.Conversation> conversations = conversations_awaiting_preview;
+        Gee.SortedSet<Geary.Conversation>? conversations = conversations_awaiting_preview;
         conversations_awaiting_preview = null;
         scan_in_progress = false;
-        do_fetch_previews.begin(conversations, cancellable_folder, on_fetch_previews_completed);
+        
+        if (conversations != null)
+            do_fetch_previews.begin(conversations, cancellable_folder, on_fetch_previews_completed);
         
         main_window.message_list_view.enable_load_more = true;
         
