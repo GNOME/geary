@@ -121,8 +121,6 @@ public class Geary.Imap.StoreCommand : Command {
             list.add(new StringParameter(flag.value));
         
         add(list);
-        
-        debug("command: %s", this.to_string());
     }
 }
 

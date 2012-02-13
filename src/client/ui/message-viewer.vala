@@ -155,7 +155,6 @@ public class MessageViewer : WebKit.WebView {
     }
     
     public void add_message(Geary.Email email) {
-        debug("Message id: %s", email.id.to_string());
         if (messages.contains(email))
             return;
         

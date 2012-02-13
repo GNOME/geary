@@ -138,11 +138,10 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         }
         
         Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid);
-        int full_id_count = (int) full_uid_count;
         
         // Get the local emails in the range
         Gee.List<Geary.Email>? old_local = yield imap_local_folder.list_email_by_id_async(
-            earliest_id, full_id_count, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
+            earliest_id, int.MAX, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
             cancellable);
         int local_length = (old_local != null) ? old_local.size : 0;
         
@@ -156,7 +155,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // Get the remote emails in the range to either add any not known, remove deleted messages,
         // and update the flags of the remainder
         Gee.List<Geary.Email>? old_remote = yield imap_remote_folder.list_email_by_id_async(
-            earliest_id, full_id_count, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
+            earliest_id, int.MAX, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
             cancellable);
         int remote_length = (old_remote != null) ? old_remote.size : 0;
         
@@ -219,6 +218,11 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         // execute them all at once
         yield batch.execute_all_async(cancellable);
+        
+        if (batch.get_first_exception_message() != null) {
+            debug("Error while preparing opened folder %s: %s", to_string(),
+                batch.get_first_exception_message());
+        }
         
         // throw the first exception, if one occurred
         batch.throw_first_exception();

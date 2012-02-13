@@ -228,6 +228,13 @@ public class Geary.NonblockingBatch : Object {
             throw first_exception;
     }
     
+    /**
+     * Returns the message if an exception was encountered, null otherwise.
+     */
+    public string? get_first_exception_message() {
+        return (first_exception != null) ? first_exception.message : null;
+    }
+    
     private void on_context_completed(BatchContext context) {
         if (first_exception == null && context.threw != null)
             first_exception = context.threw;
