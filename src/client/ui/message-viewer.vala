@@ -96,7 +96,8 @@ public class MessageViewer : WebKit.WebView {
     
     // Maps emails to their corresponding elements.
     private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
-        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
+        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>(Geary.Hashable.hash_func,
+        Geary.Equalable.equal_func);
     
     private int width = 0;
     private int height = 0;
