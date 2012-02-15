@@ -21,6 +21,7 @@ public class MessageViewer : WebKit.WebView {
             margin: 0 !important;
             padding: 0 !important;
             background-color: #ccc !important;
+            font-size: 10pt !important;
         }
         td, th {
             vertical-align: top;
@@ -48,13 +49,13 @@ public class MessageViewer : WebKit.WebView {
             width: 100% !important;
         }
         .header_title {
-            font-size: smaller;
+            font-size: 9pt;
             color: #777;
             text-align: right;
             padding-right: 7px;
         }
         .header_text {
-            font-size: smaller;
+            font-size: 9pt;
             color: black;
         }
         .header_address_name {
@@ -160,7 +161,7 @@ public class MessageViewer : WebKit.WebView {
             return;
         
         string message_id = get_div_id(email.id);
-        string header = "<table>";
+        string header = "";
         
         WebKit.DOM.Node insert_before = container.get_last_child();
         
@@ -169,15 +170,29 @@ public class MessageViewer : WebKit.WebView {
         if (higher != null)
             insert_before = get_dom_document().get_element_by_id(get_div_id(higher.id));
         
+        WebKit.DOM.HTMLElement div_email_container;
         WebKit.DOM.HTMLElement div_message;
         try {
-            WebKit.DOM.Element? _div_message = get_dom_document().create_element("div");
-            assert(_div_message != null);
-            div_message = _div_message as WebKit.DOM.HTMLElement;
-            
+            // The HTML is like this:
+            // <div id="$MESSAGE_ID" class="email">
+            //     <div class="geary spacer"></div>
+            //     <div class="email_container">
+            //         $EMAIL_BODY
+            //     </div>
+            // </div>
+            div_message = get_dom_document().create_element("div") as WebKit.DOM.HTMLElement;
             div_message.set_attribute("id", message_id);
             div_message.set_attribute("class", "email");
             container.insert_before(div_message, insert_before);
+            
+            WebKit.DOM.Element spacer = get_dom_document().create_element("div") as
+                WebKit.DOM.HTMLElement;
+            spacer.set_attribute("class", "geary_spacer");
+            div_message.append_child(spacer);
+            
+            div_email_container = get_dom_document().create_element("div") as WebKit.DOM.HTMLElement;
+            div_email_container.set_attribute("class", "email_container");
+            div_message.append_child(div_email_container);
         } catch (Error setup_error) {
             warning("Error setting up webkit: %s", setup_error.message);
             
@@ -214,8 +229,6 @@ public class MessageViewer : WebKit.WebView {
             insert_header(ref header, _("Date:"), Date.pretty_print_verbose(
                 email.date.value));
         
-        header += "</table><hr noshade>";
-        
         string body_text = "";
         try {
             body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_utf8();
@@ -228,10 +241,19 @@ public class MessageViewer : WebKit.WebView {
             }
         }
         
-        body_text = "<div class='geary_spacer'></div><div class='email_container'>" + body_text + "</div>";
+        body_text = "<hr noshade>" + body_text;
         
+        // Graft header and email body into the email container.
         try {
-            div_message.set_inner_html(header + body_text);
+            WebKit.DOM.HTMLElement table_header = get_dom_document().create_element("table")
+                as WebKit.DOM.HTMLElement;
+            table_header.set_inner_html(header);
+            div_email_container.append_child(table_header);
+            
+            WebKit.DOM.HTMLElement span_body = get_dom_document().create_element("span")
+                as WebKit.DOM.HTMLElement;
+            span_body.set_inner_html(body_text);
+            div_email_container.append_child(span_body);
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
         }
