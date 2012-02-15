@@ -43,13 +43,20 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
         if (rfc822_size == null || other.rfc822_size == null)
             return false;
         
-        return get_message_flags().equals(get_message_flags()) && 
+        return get_message_flags().equals(other.get_message_flags()) && 
             internaldate.equals(other.internaldate) && 
             rfc822_size.equals(other.rfc822_size);
     }
     
     public Geary.Imap.MessageFlags get_message_flags() {
         return ((Geary.Imap.EmailFlags) this.email_flags).message_flags;
+    }
+    
+    public override string to_string() {
+        return base.to_string() + "/answered:%s/deleted:%s/draft:%s/flagged:%s/seen:%s/internaldate:%s/size:%s".printf(
+            answered.to_string(), deleted.to_string(), draft.to_string(), flagged.to_string(),
+            seen.to_string(), (internaldate != null) ? internaldate.to_string() : "(none)",
+            (rfc822_size != null) ? rfc822_size.to_string() : "(none)");
     }
 }
 

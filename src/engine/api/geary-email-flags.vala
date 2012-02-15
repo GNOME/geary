@@ -5,7 +5,6 @@
  */
 
 public class Geary.EmailFlags : Geary.Equalable {
-    
     private static EmailFlag? _unread = null;
     public static EmailFlag UNREAD { get {
         if (_unread == null)
@@ -60,12 +59,12 @@ public class Geary.EmailFlags : Geary.Equalable {
     }
     
     public string to_string() {
-        string ret = "";
+        string ret = "[";
         foreach (EmailFlag flag in list) {
             ret += flag.to_string() + " ";
         }
         
-        return "[" + ret + "]";
+        return ret + "]";
     }
 }
 

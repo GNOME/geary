@@ -162,38 +162,43 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         int remote_ctr = 0;
         int local_ctr = 0;
         Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
+            Geary.EmailFlags>();
         for (;;) {
             if (local_ctr >= local_length || remote_ctr >= remote_length)
                 break;
             
-            Geary.Imap.UID remote_uid = 
-                ((Geary.Imap.EmailIdentifier) old_remote[remote_ctr].id).uid;
-            Geary.Imap.UID local_uid =
-                ((Geary.Imap.EmailIdentifier) old_local[local_ctr].id).uid;
+            Geary.Email remote_email = old_remote[remote_ctr];
+            Geary.Email local_email = old_local[local_ctr];
+            
+            Geary.Imap.UID remote_uid = ((Geary.Imap.EmailIdentifier) remote_email.id).uid;
+            Geary.Imap.UID local_uid = ((Geary.Imap.EmailIdentifier) local_email.id).uid;
             
             if (remote_uid.value == local_uid.value) {
                 // same, update flags (if changed) and move on
                 Geary.Imap.EmailProperties local_email_properties =
-                    (Geary.Imap.EmailProperties) old_local[local_ctr].properties;
+                    (Geary.Imap.EmailProperties) local_email.properties;
                 Geary.Imap.EmailProperties remote_email_properties =
-                    (Geary.Imap.EmailProperties) old_remote[remote_ctr].properties;
+                    (Geary.Imap.EmailProperties) remote_email.properties;
                 
-                if (!local_email_properties.equals(remote_email_properties))
-                    batch.add(new CreateEmailOperation(local_folder, old_remote[remote_ctr]));
+                if (!local_email_properties.equals(remote_email_properties)) {
+                    batch.add(new CreateEmailOperation(local_folder, remote_email));
+                    flags_changed.set(remote_email.id, remote_email.properties.email_flags);
+                }
                 
                 remote_ctr++;
                 local_ctr++;
             } else if (remote_uid.value < local_uid.value) {
                 // one we'd not seen before is present, add and move to next remote
-                batch.add(new CreateEmailOperation(local_folder, old_remote[remote_ctr]));
+                batch.add(new CreateEmailOperation(local_folder, remote_email));
                 
                 remote_ctr++;
             } else {
                 assert(remote_uid.value > local_uid.value);
                 
                 // local's email on the server has been removed, remove locally
-                batch.add(new RemoveEmailOperation(local_folder, old_local[local_ctr].id));
-                removed_ids.add(old_local[local_ctr].id);
+                batch.add(new RemoveEmailOperation(local_folder, local_email.id));
+                removed_ids.add(local_email.id);
                 
                 local_ctr++;
             }
@@ -229,14 +234,25 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         // notify emails that have been removed (see note above about why not all Creates are
         // signalled)
-        foreach (Geary.EmailIdentifier removed_id in removed_ids)
-            notify_message_removed(removed_id);
+        if (removed_ids.size > 0) {
+            debug("Notifying of %d removed emails since %s last seen", removed_ids.size, to_string());
+            foreach (Geary.EmailIdentifier removed_id in removed_ids)
+                notify_message_removed(removed_id);
+        }
         
         // notify additions
-        if (appended > 0)
+        if (appended > 0) {
+            debug("Notifying of %d appended emails since %s last seen", appended, to_string());
             notify_messages_appended(appended);
+        }
         
-        debug("completed prepare_opened_folder %s", to_string());
+        // notify flag changes
+        if (flags_changed.size > 0) {
+            debug("Notifying of %d changed flags since %s last seen", flags_changed.size, to_string());
+            notify_email_flags_changed(flags_changed);
+        }
+        
+        debug("Completed prepare_opened_folder %s", to_string());
         
         return true;
     }
