@@ -456,7 +456,6 @@ public class GearyController {
     
     private void on_conversation_selected(Geary.Conversation? conversation) {
         cancel_message();
-        main_window.message_viewer.clear();
         
         current_conversation = conversation;
         
@@ -477,6 +476,9 @@ public class GearyController {
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         set_busy(true);
         
+        Gee.HashSet<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
+        
+        // Fetch full messages.
         foreach (Geary.Email email in messages) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
                 MessageViewer.REQUIRED_FIELDS | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
@@ -485,11 +487,18 @@ public class GearyController {
             if (cancellable.is_cancelled())
                 throw new IOError.CANCELLED("do_select_message cancelled");
             
-            main_window.message_viewer.add_message(full_email);
+            messages_to_add.add(full_email);
             
             if (full_email.properties.email_flags.is_unread())
                 ids.add(full_email.id);
         }
+        
+        // Clear message viewer and add messages.
+        main_window.message_viewer.clear();
+        foreach (Geary.Email email in messages_to_add)
+            main_window.message_viewer.add_message(email);
+        
+        main_window.message_viewer.scroll_to_first_unread();
         
         // Mark as read.
         if (ids.size > 0) {

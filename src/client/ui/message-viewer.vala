@@ -329,6 +329,19 @@ public class MessageViewer : WebKit.WebView {
         return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
     }
     
+    // Scrolls to the first unread message in the view, if any exist.
+    public void scroll_to_first_unread() {
+        foreach (Geary.Email email in messages) {
+            if (email.properties.email_flags.is_unread()) {
+                WebKit.DOM.HTMLElement? element = email_to_element.get(email.id);
+                if (element != null)
+                    element.scroll_into_view(true);
+                
+                break;
+            }
+        }
+    }
+    
     private WebKit.NavigationResponse on_navigation_requested(WebKit.WebFrame frame, 
         WebKit.NetworkRequest request) {
         link_selected(request.uri);
