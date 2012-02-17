@@ -415,9 +415,9 @@ public class Sidebar.Tree : Gtk.TreeView {
         assert(!entry_map.has_key(entry));
         entry_map.set(entry, wrapper);
         
-        store.set(assoc_iter, Columns.NAME, Geary.String.escape_markup(entry.get_sidebar_name()));
+        store.set(assoc_iter, Columns.NAME, Geary.HTML.escape_markup(entry.get_sidebar_name()));
         store.set(assoc_iter, Columns.TOOLTIP, entry.get_sidebar_tooltip() != null ?
-            Geary.String.escape_markup(entry.get_sidebar_tooltip()) : null);
+            Geary.HTML.escape_markup(entry.get_sidebar_tooltip()) : null);
         store.set(assoc_iter, Columns.WRAPPER, wrapper);
         load_entry_icons(assoc_iter);
         
@@ -444,8 +444,8 @@ public class Sidebar.Tree : Gtk.TreeView {
         EntryWrapper new_wrapper = new EntryWrapper(store, entry, store.get_path(new_iter));
         entry_map.set(entry, new_wrapper);
         
-        store.set(new_iter, Columns.NAME, Geary.String.escape_markup(entry.get_sidebar_name()));
-        store.set(new_iter, Columns.TOOLTIP, Geary.String.escape_markup(entry.get_sidebar_tooltip()));
+        store.set(new_iter, Columns.NAME, Geary.HTML.escape_markup(entry.get_sidebar_name()));
+        store.set(new_iter, Columns.TOOLTIP, Geary.HTML.escape_markup(entry.get_sidebar_tooltip()));
         store.set(new_iter, Columns.WRAPPER, new_wrapper);
         load_entry_icons(new_iter);
         
@@ -658,7 +658,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         assert(wrapper != null);
         
         store.set(wrapper.get_iter(), Columns.TOOLTIP, tooltip != null ? 
-            Geary.String.escape_markup(tooltip) : null);
+            Geary.HTML.escape_markup(tooltip) : null);
     }
     
     private void on_sidebar_icon_changed(Sidebar.Entry entry, Icon? icon) {
@@ -681,7 +681,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         EntryWrapper? wrapper = get_wrapper(entry);
         assert(wrapper != null);
         
-        store.set(wrapper.get_iter(), Columns.NAME, Geary.String.escape_markup(name));
+        store.set(wrapper.get_iter(), Columns.NAME, Geary.HTML.escape_markup(name));
     }
     
     private Gdk.Pixbuf? fetch_icon_pixbuf(GLib.Icon? gicon) {

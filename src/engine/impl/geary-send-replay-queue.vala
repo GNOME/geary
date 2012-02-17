@@ -62,6 +62,10 @@ private abstract class Geary.SendReplayOperation {
             debug("Unable to compelte send replay queue operation [%s] error: %s", name, e.message);
         }
     }
+    
+    public string to_string() {
+        return name;
+    }
 }
 
 private class Geary.SendReplayQueue {
@@ -171,7 +175,7 @@ private class Geary.SendReplayQueue {
             try {
                 completed = yield op.replay_remote();
             } catch (Error e) {
-                debug("Error: could not replay remote");
+                debug("Error: could not replay remote %s: %s", op.to_string(), e.message);
                 remote_error = e;
             }
             

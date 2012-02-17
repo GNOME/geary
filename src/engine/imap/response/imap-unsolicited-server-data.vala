@@ -112,6 +112,22 @@ public class Geary.Imap.UnsolicitedServerData : Object {
             return null;
         }
     }
+    
+    public string to_string() {
+        if (exists >= 0)
+            return "EXISTS %d".printf(exists);
+        
+        if (recent >= 0)
+            return "RECENT %d".printf(recent);
+        
+        if (expunge != null)
+            return "EXPUNGE %s".printf(expunge.to_string());
+        
+        if (flags != null)
+            return "FLAGS %s".printf(flags.to_string());
+        
+        return "(invalid unsolicited data)";
+    }
 }
 
 

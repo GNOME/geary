@@ -6,10 +6,12 @@
 
 public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
     public const string UNTAGGED_VALUE = "*";
+    public const string CONTINUATION_VALUE = "+";
     public const string UNASSIGNED_VALUE = "----";
     
     private static Tag? untagged = null;
     private static Tag? unassigned = null;
+    private static Tag? continuation = null;
     
     public Tag(string value) {
         base (value);
@@ -26,6 +28,13 @@ public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
         return untagged;
     }
     
+    public static Tag get_continuation() {
+        if (continuation == null)
+            continuation = new Tag(CONTINUATION_VALUE);
+        
+        return continuation;
+    }
+    
     public static Tag get_unassigned() {
         if (unassigned == null)
             unassigned = new Tag(UNASSIGNED_VALUE);
@@ -34,11 +43,15 @@ public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
     }
     
     public bool is_tagged() {
-        return value != UNTAGGED_VALUE;
+        return (value != UNTAGGED_VALUE) && (value != CONTINUATION_VALUE);
+    }
+    
+    public bool is_continuation() {
+        return value == CONTINUATION_VALUE;
     }
     
     public bool is_assigned() {
-        return value != UNASSIGNED_VALUE;
+        return (value != UNASSIGNED_VALUE) && (value != CONTINUATION_VALUE);
     }
     
     public uint to_hash() {

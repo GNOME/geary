@@ -15,6 +15,7 @@ public class Geary.Imap.ClientSessionManager {
     private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
     private int unselected_keepalive_sec = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC;
     private int selected_keepalive_sec = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC;
+    private int selected_with_idle_keepalive_sec = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC;
     
     public signal void login_failed();
     
@@ -57,6 +58,16 @@ public class Geary.Imap.ClientSessionManager {
      */
     public void set_selected_keepalive(int selected_keepalive_sec) {
         this.selected_keepalive_sec = selected_keepalive_sec;
+    }
+    
+    /**
+     * Set to zero or negative value if keepalives should be disabled when a mailbox is selected
+     * or examined and IDLE is supported.  (This is not recommended.)
+     *
+     * This only affects newly selected/examined sessions.
+     */
+    public void set_selected_with_idle_keepalive(int selected_with_idle_keepalive_sec) {
+        this.selected_with_idle_keepalive_sec = selected_with_idle_keepalive_sec;
     }
     
     public async Gee.Collection<Geary.Imap.MailboxInformation> list_roots(
@@ -183,7 +194,8 @@ public class Geary.Imap.ClientSessionManager {
         yield new_session.login_async(credentials, cancellable);
         
         // do this after logging in
-        new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec);
+        new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
+            selected_with_idle_keepalive_sec);
         
         // since "disconnected" is used to remove the ClientSession from the sessions list, want
         // to only connect to the signal once the object has been added to the list; otherwise it's

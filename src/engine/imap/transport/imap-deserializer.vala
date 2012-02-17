@@ -405,7 +405,8 @@ public class Geary.Imap.Deserializer {
         // Atom specials includes space and close-parens, but those are handled in particular ways
         // while in the ATOM state, so they're excluded here.  Like atom specials, the space is 
         // treated in a particular way for tags, but unlike atom, the close-parens character is not.
-        if (state == State.TAG && DataFormat.is_tag_special(ch, " "))
+        // The + symbol indicates a continuation and needs to be excepted when searching for a tag.
+        if (state == State.TAG && DataFormat.is_tag_special(ch, " +"))
             return state;
         else if (state == State.ATOM && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
             return state;

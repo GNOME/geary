@@ -7,6 +7,9 @@
 public delegate uint Geary.State.Transition(uint state, uint event, void *user = null,
     Object? object = null, Error? err = null);
 
+public delegate void Geary.State.PostTransition(void *user = null, Object? object = null,
+    Error? err = null);
+
 public class Geary.State.Mapping {
     public uint state;
     public uint event;

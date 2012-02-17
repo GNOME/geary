@@ -12,6 +12,10 @@ public class Geary.State.Machine {
     private bool locked = false;
     private bool abort_on_no_transition = true;
     private bool logging = false;
+    private unowned PostTransition? post_transition = null;
+    private void *post_user = null;
+    private Object? post_object = null;
+    private Error? post_err = null;
     
     public Machine(MachineDescriptor descriptor, Mapping[] mappings, Transition? default_transition) {
         this.descriptor = descriptor;
@@ -86,12 +90,51 @@ public class Geary.State.Machine {
         assert(locked);
         locked = false;
         
-        if (is_logging()) {
-            message("%s: %s@%s -> %s", to_string(), descriptor.get_event_string(event),
-                descriptor.get_state_string(old_state), descriptor.get_state_string(state));
+        if (is_logging())
+            message("%s: %s", to_string(), get_transition_string(old_state, event, state));
+        
+        // Perform post-transition if registered
+        if (post_transition != null) {
+            // clear post-transition before calling, in case this method is re-entered
+            unowned PostTransition? perform = post_transition;
+            void* perform_user = post_user;
+            Object? perform_object = post_object;
+            Error? perform_err = post_err;
+            
+            post_transition = null;
+            post_user = null;
+            post_object = null;
+            post_err = null;
+            
+            perform(perform_user, perform_object, perform_err);
         }
         
         return state;
+    }
+    
+    // Must be used carefully: this allows for a delegate (callback) to be called after the
+    // *current* transition has occurred; thus, this method can *only* be called from within
+    // a TransitionHandler.
+    //
+    // Note that if a second call to this method is made inside the same transition, the earlier
+    // PostTransition is silently dropped.  Only one PostTransition call may be registered.
+    //
+    // Returns false if unable to register the PostTransition delegate for the reasons specified
+    // above.
+    public bool do_post_transition(PostTransition post_transition, void *user = null,
+        Object? object = null, Error? err = null) {
+        if (!locked) {
+            warning("%s: Attempt to register post-transition while machine is unlocked", to_string());
+            
+            return false;
+        }
+        
+        this.post_transition = post_transition;
+        post_user = user;
+        post_object = object;
+        post_err = err;
+        
+        return true;
     }
     
     public string get_state_string(uint state) {
@@ -100,6 +143,15 @@ public class Geary.State.Machine {
     
     public string get_event_string(uint event) {
         return descriptor.get_event_string(event);
+    }
+    
+    public string get_event_issued_string(uint state, uint event) {
+        return "%s@%s".printf(descriptor.get_state_string(state), descriptor.get_event_string(event));
+    }
+    
+    public string get_transition_string(uint old_state, uint event, uint new_state) {
+        return "%s@%s -> %s".printf(descriptor.get_state_string(old_state), descriptor.get_event_string(event),
+            descriptor.get_state_string(new_state));
     }
     
     public string to_string() {

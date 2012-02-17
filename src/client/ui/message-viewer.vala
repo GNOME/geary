@@ -280,8 +280,8 @@ public class MessageViewer : WebKit.WebView {
         if (Geary.String.is_empty(_value))
             return;
         
-        string title = Geary.String.escape_markup(_title);
-        string value = escape_value ? Geary.String.escape_markup(_value) : _value;
+        string title = Geary.HTML.escape_markup(_title);
+        string value = escape_value ? Geary.HTML.escape_markup(_value) : _value;
         
         header_text += "<tr><td class='header_title'>%s</td><td class='header_text'>%s</td></tr>"
             .printf(title, value);

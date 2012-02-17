@@ -133,3 +133,11 @@ public class Geary.Imap.ExpungeCommand : Command {
     }
 }
 
+public class Geary.Imap.IdleCommand : Command {
+    public const string NAME = "idle";
+    
+    public IdleCommand() {
+        base (NAME);
+    }
+}
+

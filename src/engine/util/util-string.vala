@@ -38,8 +38,12 @@ public inline bool ascii_equali(string a, string b) {
     return ascii_cmpi(a, b) == 0;
 }
 
-public inline string escape_markup(string? plain) {
-    return (!is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
+public uint stri_hash(void *str) {
+    return str_hash(((string *) str)->down());
+}
+
+public bool stri_equal(void *a, void *b) {
+    return str_equal(((string *) a)->down(), ((string *) b)->down());
 }
 
 /**

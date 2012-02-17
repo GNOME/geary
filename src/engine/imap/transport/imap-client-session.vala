@@ -10,8 +10,9 @@ public class Geary.Imap.ClientSession {
     
     // NOOP is only sent after this amount of time has passed since the last received
     // message on the connection dependant on connection state (selected/examined vs. authorized)
-    public const int DEFAULT_SELECTED_KEEPALIVE_SEC = 45;
+    public const int DEFAULT_SELECTED_KEEPALIVE_SEC = 60;
     public const int DEFAULT_UNSELECTED_KEEPALIVE_SEC = MIN_KEEPALIVE_SEC;
+    public const int DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = MIN_KEEPALIVE_SEC;
     
     public enum Context {
         UNCONNECTED,
@@ -174,10 +175,14 @@ public class Geary.Imap.ClientSession {
         Hashable.hash_func, Equalable.equal_func);
     private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>(
         Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashSet<string> current_capabilities = new Gee.HashSet<string>(String.stri_hash,
+        String.stri_equal);
     private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
     private int selected_keepalive_secs = 0;
     private int unselected_keepalive_secs = 0;
+    private int selected_with_idle_keepalive_secs = 0;
+    private bool allow_idle = true;
     
     // state used only during connect and disconnect
     private bool awaiting_connect_response = false;
@@ -346,6 +351,11 @@ public class Geary.Imap.ClientSession {
         fsm.set_logging(false);
     }
     
+    ~ClientSession() {
+        if (keepalive_id != 0)
+            Source.remove(keepalive_id);
+    }
+    
     public string? get_current_mailbox() {
         return current_mailbox;
     }
@@ -416,10 +426,14 @@ public class Geary.Imap.ClientSession {
         cx.flush_failure.connect(on_network_flush_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
+        cx.received_unsolicited_server_data.connect(on_received_unsolicited_server_data);
         cx.received_bad_response.connect(on_received_bad_response);
         cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
         cx.deserialize_failure.connect(on_network_receive_failure);
+        
+        // only use IDLE when in SELECTED or EXAMINED state
+        cx.set_idle_when_quiet(false);
         
         cx.connect_async.begin(connect_params.cancellable, on_connect_completed);
         
@@ -520,6 +534,7 @@ public class Geary.Imap.ClientSession {
     
     private uint on_login_failed(uint state, uint event, void *user) {
         login_failed();
+        
         return State.NOAUTH;
     }
     
@@ -534,9 +549,10 @@ public class Geary.Imap.ClientSession {
      * Although keepalives can be enabled at any time, if they're enabled and trigger sending
      * a command prior to connection, error signals may be fired.
      */
-    public void enable_keepalives(int seconds_while_selected = DEFAULT_SELECTED_KEEPALIVE_SEC,
-        int seconds_while_unselected = DEFAULT_UNSELECTED_KEEPALIVE_SEC) {
+    public void enable_keepalives(int seconds_while_selected,
+        int seconds_while_unselected, int seconds_while_selected_with_idle) {
         selected_keepalive_secs = seconds_while_selected;
+        selected_with_idle_keepalive_secs = seconds_while_selected_with_idle;
         unselected_keepalive_secs = seconds_while_unselected;
         
         // schedule one now, although will be rescheduled if traffic is received before it fires
@@ -556,10 +572,24 @@ public class Geary.Imap.ClientSession {
         return true;
     }
     
+    /**
+     * If enabled, an IDLE command will be used for notification of unsolicited server data whenever
+     * a mailbox is selected or examined.  IDLE will only be used if ClientSession has seen a
+     * CAPABILITY server data response with IDLE listed as a supported extension.
+     *
+     * This will *not* break a connection out of IDLE mode; a command must be sent as well to force
+     * the connection back to de-idled state.
+     */
+    public void allow_idle_when_selected(bool allow_idle) {
+        this.allow_idle = allow_idle;
+    }
+    
     private void schedule_keepalive() {
         // if old one was scheduled, unschedule and schedule anew
-        if (keepalive_id != 0)
+        if (keepalive_id != 0) {
             Source.remove(keepalive_id);
+            keepalive_id = 0;
+        }
         
         int seconds;
         switch (get_context(null)) {
@@ -569,14 +599,15 @@ public class Geary.Imap.ClientSession {
             case Context.IN_PROGRESS:
             case Context.EXAMINED:
             case Context.SELECTED:
-                seconds = selected_keepalive_secs;
-                break;
+                seconds = (allow_idle && supports_idle()) ? selected_with_idle_keepalive_secs
+                    : selected_keepalive_secs;
+            break;
             
             case Context.UNAUTHORIZED:
             case Context.AUTHORIZED:
             default:
                 seconds = unselected_keepalive_secs;
-                break;
+            break;
         }
         
         // Possible to not have keepalives in one state but in another, or for neither
@@ -587,6 +618,7 @@ public class Geary.Imap.ClientSession {
     }
     
     private bool on_keepalive() {
+        debug("Sending keepalive...");
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
         
         // Reschedule to reflect current connection state, although will be rescheduled again if
@@ -609,6 +641,29 @@ public class Geary.Imap.ClientSession {
         
         if (response.status_response.status != Status.OK)
             debug("Keepalive failed: %s", response.status_response.to_string());
+    }
+    
+    /**
+     * ClientSession tracks server extensions reported via the CAPABILITY server data response.
+     * This comes automatically when logging in and can be fetched by the CAPABILITY command.
+     * ClientSession stores the last seen list as a service for users and uses it internally
+     * (specifically for IDLE support).  However, ClientSession will not automatically fetch
+     * capabilities, only watch for them as they're reported.  Thus, it's recommended that users
+     * of ClientSession issue a CapabilityCommand (if needed) before login.
+     *
+     * has_capability returns true if the extension was reported.  Some extensions (COMPRESS)
+     * report values as well; accessing these will be added in the future.
+     */
+    public bool has_capability(string name) {
+        return current_capabilities.contains(name);
+    }
+    
+    public Gee.Set<string> get_current_capabilities() {
+        return current_capabilities.read_only_view;
+    }
+    
+    public bool supports_idle() {
+        return has_capability("idle");
     }
     
     //
@@ -648,33 +703,12 @@ public class Geary.Imap.ClientSession {
         Gee.ArrayList<ServerData>? to_remove = null;
         foreach (ServerData data in params.cmd_response.server_data) {
             UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data(data);
-            if (unsolicited == null)
-                continue;
-            
-            if (unsolicited.exists >= 0) {
-                debug("UNSOLICITED EXISTS %d", unsolicited.exists);
-                unsolicited_exists(unsolicited.exists);
+            if (unsolicited != null && report_unsolicited_server_data(unsolicited)) {
+                if (to_remove == null)
+                    to_remove = new Gee.ArrayList<ServerData>();
+                
+                to_remove.add(data);
             }
-            
-            if (unsolicited.recent >= 0) {
-                debug("UNSOLICITED RECENT %d", unsolicited.recent);
-                unsolicited_recent(unsolicited.recent);
-            }
-            
-            if (unsolicited.expunge != null) {
-                debug("UNSOLICITED EXPUNGE %s", unsolicited.expunge.to_string());
-                unsolicited_expunged(unsolicited.expunge);
-            }
-            
-            if (unsolicited.flags != null) {
-                debug("UNSOLICITED FLAGS %s", unsolicited.flags.to_string());
-                unsolicited_flags(unsolicited.flags);
-            }
-            
-            if (to_remove == null)
-                to_remove = new Gee.ArrayList<ServerData>();
-            
-            to_remove.add(data);
         }
         
         if (to_remove != null) {
@@ -775,6 +809,8 @@ public class Geary.Imap.ClientSession {
         current_mailbox = params.mailbox;
         current_mailbox_readonly = !params.is_select;
         
+        cx.set_idle_when_quiet(allow_idle && supports_idle());
+        
         return State.SELECTED;
     }
     
@@ -818,6 +854,8 @@ public class Geary.Imap.ClientSession {
     
     private uint on_close_mailbox(uint state, uint event, void *user, Object? object) {
         assert(object != null);
+        
+        cx.set_idle_when_quiet(false);
         
         AsyncParams params = (AsyncParams) object;
         
@@ -1092,6 +1130,41 @@ public class Geary.Imap.ClientSession {
         return success;
     }
     
+    private bool report_unsolicited_server_data(UnsolicitedServerData unsolicited) {
+        bool reported = false;
+        
+        if (unsolicited.exists >= 0) {
+            debug("UNSOLICITED EXISTS %d", unsolicited.exists);
+            unsolicited_exists(unsolicited.exists);
+            
+            reported = true;
+        }
+        
+        if (unsolicited.recent >= 0) {
+            debug("UNSOLICITED RECENT %d", unsolicited.recent);
+            unsolicited_recent(unsolicited.recent);
+            
+            reported = true;
+        }
+        
+        if (unsolicited.expunge != null) {
+            debug("UNSOLICITED EXPUNGE %s", unsolicited.expunge.to_string());
+            unsolicited_expunged(unsolicited.expunge);
+            
+            reported = true;
+        }
+        
+        if (unsolicited.flags != null) {
+            debug("UNSOLICITED FLAGS %s", unsolicited.flags.to_string());
+            unsolicited_flags(unsolicited.flags);
+            
+            reported = true;
+        }
+        
+        return reported;
+    }
+    
+    
     //
     // network connection event handlers
     //
@@ -1147,6 +1220,17 @@ public class Geary.Imap.ClientSession {
         // reschedule keepalive, now that traffic has been seen
         schedule_keepalive();
         
+        // Watch for CAPABILITY and store all reported extensions
+        StringParameter? name = server_data.get_if_string(1);
+        if (name != null && name.equals_ci(CapabilityCommand.NAME)) {
+            current_capabilities.clear();
+            for (int ctr = 2; ctr < server_data.get_count(); ctr++) {
+                StringParameter? param = server_data.get_if_string(ctr);
+                if (param != null)
+                    current_capabilities.add(param.value.down());
+            }
+        }
+        
         // The first response from the server is an untagged status response, which is considered
         // ServerData in our model.  This captures that and treats it as such.
         if (awaiting_connect_response) {
@@ -1159,6 +1243,10 @@ public class Geary.Imap.ClientSession {
         }
         
         current_cmd_response.add_server_data(server_data);
+    }
+    
+    private void on_received_unsolicited_server_data(UnsolicitedServerData unsolicited) {
+        report_unsolicited_server_data(unsolicited);
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {

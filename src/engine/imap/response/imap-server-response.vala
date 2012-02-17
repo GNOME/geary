@@ -5,6 +5,12 @@
  */
 
 public abstract class Geary.Imap.ServerResponse : RootParameters {
+    public enum Type {
+        STATUS_RESPONSE,
+        SERVER_DATA,
+        CONTINUATION_RESPONSE
+    }
+    
     public Tag tag { get; private set; }
     
     public ServerResponse(Tag tag) {
@@ -19,29 +25,28 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
     
     // Returns true if the RootParameters represents a StatusResponse, otherwise they should be
     // treated as ServerData.
-    public static ServerResponse from_server(RootParameters root, out bool is_status_response)
+    public static ServerResponse from_server(RootParameters root, out Type response_type)
         throws ImapError {
-        // must be at least two parameters: a tag and a status or a value
-        if (root.get_count() < 2) {
-            throw new ImapError.TYPE_ERROR("Too few parameters (%d) for server response",
-                root.get_count());
-        }
-        
-        Tag tag = new Tag.from_parameter((StringParameter) root.get_as(0, typeof(StringParameter)));
+        Tag tag = new Tag.from_parameter(root.get_as_string(0));
         if (tag.is_tagged()) {
             // Attempt to decode second parameter for predefined status codes (piggyback on
             // Status.decode's exception if this is invalid)
-            StringParameter? statusparam = root.get(1) as StringParameter;
+            StringParameter? statusparam = root.get_if_string(1);
             if (statusparam != null)
                 Status.decode(statusparam.value);
             
             // tagged and has proper status, so it's a status response
-            is_status_response = true;
+            response_type = Type.STATUS_RESPONSE;
             
             return new StatusResponse.reconstitute(root);
+        } else if (tag.is_continuation()) {
+            // nothing to decode; everything after the tag is human-readable stuff
+            response_type = Type.CONTINUATION_RESPONSE;
+            
+            return new ContinuationResponse.reconstitute(root);
         }
         
-        is_status_response = false;
+        response_type = Type.SERVER_DATA;
         
         return new ServerData.reconstitute(root);
     }

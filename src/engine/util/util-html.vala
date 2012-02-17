@@ -6,6 +6,10 @@
 
 namespace Geary.HTML {
 
+public inline string escape_markup(string? plain) {
+    return (!String.is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
+}
+
 // Removes any text between < and >.  Additionally, if input terminates in the middle of a tag, 
 // the tag will be removed.
 // If the HTML is invalid, the original string will be returned.
