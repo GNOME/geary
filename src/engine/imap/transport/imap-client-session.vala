@@ -703,7 +703,7 @@ public class Geary.Imap.ClientSession {
         Gee.ArrayList<ServerData>? to_remove = null;
         foreach (ServerData data in params.cmd_response.server_data) {
             UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data(data);
-            if (unsolicited != null && report_unsolicited_server_data(unsolicited)) {
+            if (unsolicited != null && report_unsolicited_server_data(unsolicited, "SOLICITED")) {
                 if (to_remove == null)
                     to_remove = new Gee.ArrayList<ServerData>();
                 
@@ -1130,32 +1130,32 @@ public class Geary.Imap.ClientSession {
         return success;
     }
     
-    private bool report_unsolicited_server_data(UnsolicitedServerData unsolicited) {
+    private bool report_unsolicited_server_data(UnsolicitedServerData unsolicited, string label) {
         bool reported = false;
         
         if (unsolicited.exists >= 0) {
-            debug("UNSOLICITED EXISTS %d", unsolicited.exists);
+            debug("%s EXISTS %d", label, unsolicited.exists);
             unsolicited_exists(unsolicited.exists);
             
             reported = true;
         }
         
         if (unsolicited.recent >= 0) {
-            debug("UNSOLICITED RECENT %d", unsolicited.recent);
+            debug("%s RECENT %d", label, unsolicited.recent);
             unsolicited_recent(unsolicited.recent);
             
             reported = true;
         }
         
         if (unsolicited.expunge != null) {
-            debug("UNSOLICITED EXPUNGE %s", unsolicited.expunge.to_string());
+            debug("%s EXPUNGE %s", label, unsolicited.expunge.to_string());
             unsolicited_expunged(unsolicited.expunge);
             
             reported = true;
         }
         
         if (unsolicited.flags != null) {
-            debug("UNSOLICITED FLAGS %s", unsolicited.flags.to_string());
+            debug("%s FLAGS %s", label, unsolicited.flags.to_string());
             unsolicited_flags(unsolicited.flags);
             
             reported = true;
@@ -1246,7 +1246,7 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_unsolicited_server_data(UnsolicitedServerData unsolicited) {
-        report_unsolicited_server_data(unsolicited);
+        report_unsolicited_server_data(unsolicited, "UNSOLICITED");
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {

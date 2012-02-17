@@ -157,7 +157,7 @@ public class Geary.Imap.ClientConnection {
             new Geary.State.Mapping(State.DEIDLING, Event.SEND_IDLE, on_send_idle),
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_STATUS_RESPONSE, on_idle_status_response),
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_SERVER_DATA, on_idle_server_data),
-            new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_bad_continuation),
+            new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_dropped_continuation),
             new Geary.State.Mapping(State.DEIDLING, Event.DISCONNECTED, on_disconnected),
             
             new Geary.State.Mapping(State.DISCONNECTED, Event.SEND, on_no_proceed),
@@ -575,6 +575,16 @@ public class Geary.Imap.ClientConnection {
         }
         
         fsm.do_post_transition(signal_unsolicited_server_data, user, unsolicited);
+        
+        return state;
+    }
+    
+    private uint on_dropped_continuation(uint state, uint event, void *user, Object? object) {
+        // Continuation received while de-idling, this is due to prior IDLE finally catching up with
+        // the receive channel, ignore as the IDLE will be dropped momentarily from the "done"
+        // previously sent
+        Logging.debug(Logging.Flag.NETWORK, "[%s] Continuation received, dropped: %s", to_string(),
+            ((ContinuationResponse) object).to_string());
         
         return state;
     }
