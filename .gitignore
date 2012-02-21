@@ -1,8 +1,9 @@
-.waf-*
+*~
 .lock-wafbuild
 .valencia
+.waf-*
 build/
-/geary
 /console
+/geary
 /norman
 /theseus
