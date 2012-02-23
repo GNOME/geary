@@ -204,8 +204,7 @@ public class MessageViewer : WebKit.WebView {
         string username;
         try {
             // TODO: Multiple accounts.
-            username = Geary.Engine.get_usernames(GearyApplication.instance.
-                get_user_data_directory()).get(0);
+            username = Geary.Engine.get_usernames().get(0);
         } catch (Error e) {
             error("Unable to get username. Error: %s", e.message);
         }

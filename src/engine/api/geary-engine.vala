@@ -5,25 +5,75 @@
  */
 
 public class Geary.Engine {
-    private static bool gmime_inited = false;
+    public const string SETTINGS_FILENAME = "geary.ini";
     
-    public static Geary.EngineAccount open(Geary.Credentials cred, File user_data_dir, 
-        File resource_dir) throws Error {
+    private static bool gmime_inited = false;
+    private static File? user_data_dir = null;
+    private static File? resource_dir = null;
+    
+    public static void init(File _user_data_dir, File _resource_dir) {
+        user_data_dir = _user_data_dir;
+        resource_dir = _resource_dir;
+        
         // Initialize GMime
         if (!gmime_inited) {
             GMime.init(0);
             gmime_inited = true;
         }
+    }
+    
+    public static Geary.EngineAccount create(Geary.Credentials cred,
+        Geary.AccountInformation account_info) throws Error {
         
-        // Only Gmail today
-        return new GmailAccount(
-            "Gmail account %s".printf(cred.to_string()), cred.user, user_data_dir,
-            new Geary.Imap.Account(GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, cred),
-            new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
+        account_info.file = get_settings_file(cred);
+        return get_account(cred, account_info);
+    }
+    
+    public static Geary.EngineAccount open(Geary.Credentials cred) throws Error {
+        return get_account(cred, new AccountInformation.from_file(get_settings_file(cred)));
+    }
+    
+    private static Geary.EngineAccount get_account(Geary.Credentials cred,
+        Geary.AccountInformation account_info) throws Error {
+        
+        switch (account_info.service_provider) {
+            case ServiceProvider.GMAIL:
+                return new GmailAccount(
+                    "Gmail account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
+                    new Geary.Imap.Account(GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, cred),
+                    new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
+            
+            case ServiceProvider.YAHOO:
+                return new YahooAccount(
+                    "Yahoo account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
+                    new Geary.Imap.Account(YahooAccount.IMAP_ENDPOINT, YahooAccount.SMTP_ENDPOINT, cred),
+                    new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
+            
+            case ServiceProvider.OTHER:
+                Endpoint imap_endpoint = new Endpoint(account_info.imap_server_host,
+                    account_info.imap_server_port, account_info.imap_server_tls ?
+                    Geary.Endpoint.Flags.TLS : Geary.Endpoint.Flags.NONE);
+                    
+                Endpoint smtp_endpoint = new Endpoint(account_info.smtp_server_host,
+                    account_info.smtp_server_port, account_info.smtp_server_tls ?
+                    Geary.Endpoint.Flags.TLS : Geary.Endpoint.Flags.NONE);
+                    
+                return new OtherAccount(
+                    "Other account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
+                    new Geary.Imap.Account(imap_endpoint, smtp_endpoint, cred),
+                    new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
+                
+            default:
+                assert_not_reached();
+        }
+    }
+    
+    private static File get_settings_file(Geary.Credentials cred) {
+        return user_data_dir.get_child(cred.user).get_child(SETTINGS_FILENAME);
     }
     
     // Returns a list of usernames associated with Geary.
-    public static Gee.List<string> get_usernames(File user_data_dir) throws Error {
+    public static Gee.List<string> get_usernames() throws Error {
         Gee.ArrayList<string> list = new Gee.ArrayList<string>();
         
         FileEnumerator enumerator = user_data_dir.enumerate_children("standard::*", 

@@ -18,9 +18,9 @@ class TheseusAsync : MainAsync {
     }
     
     protected override async int exec_async() throws Error {
-        Geary.Account account = Geary.Engine.open(new Geary.Credentials(username, password),
-            File.new_for_path(Environment.get_user_data_dir()).get_child("geary"),
+        Geary.Engine.init(File.new_for_path(Environment.get_user_data_dir()).get_child("geary"),
             File.new_for_path(Environment.get_current_dir()));
+        Geary.Account account = Geary.Engine.open(new Geary.Credentials(username, password));
         
         Geary.Folder inbox = yield account.fetch_folder_async(new Geary.FolderRoot(folder, null, true));
         yield inbox.open_async(true);

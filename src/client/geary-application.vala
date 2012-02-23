@@ -105,6 +105,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
         
         // Start Geary.
+        Geary.Engine.init(get_user_data_directory(), get_resource_directory());
         config = new Configuration(GearyApplication.instance.get_install_dir() != null,
             GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
         
@@ -119,45 +120,38 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // Get saved credentials. If not present, ask user.
         string username = get_username();
         string? password = query_keyring ? keyring_get_password(username) : null;
-        string real_name = null;
+        string? real_name = null;
         
         Geary.Credentials cred;
         if (password == null) {
+            // No account set up yet.
+            Geary.AccountInformation? account_info = null;
             real_name = get_default_real_name();
-            cred = request_login(username, ref real_name);
+            cred = request_login(username, ref real_name, ref account_info);
+            
+            try {
+                account = Geary.Engine.create(cred, account_info);
+            } catch (Error err) {
+                error("Unable to open mail database for %s: %s", cred.user, err.message);
+            }
         } else {
+            // Log into existing account.
             cred = new Geary.Credentials(username, password);
-        }
-        
-        try {
-            account = Geary.Engine.open(cred, get_user_data_directory(), get_resource_directory());
-        } catch (Error err) {
-            error("Unable to open mail database for %s: %s", cred.user, err.message);
-        }
-        
-        if (!Geary.String.is_empty(real_name)) {
-            Geary.AccountInformation acct_info = account.get_account_information();
-            acct_info.real_name = real_name;
-            acct_info.store_async.begin(null, on_acct_info_store_async_completed);
+            
+            try {
+                account = Geary.Engine.open(cred);
+            } catch (Error err) {
+                error("Unable to open mail database for %s: %s", cred.user, err.message);
+            }
         }
         
         account.report_problem.connect(on_report_problem);
-        
         controller.start(account);
-    }
-    
-    private void on_acct_info_store_async_completed(Object? source, AsyncResult result) {
-        Geary.AccountInformation acct_info = account.get_account_information();
-        try {
-            acct_info.store_async.end(result);
-        } catch (Error err) {
-            warning("Error saving account information: %s", err.message);
-        }
     }
     
     private string get_username() {
         try {
-            Gee.List<string> accounts = Geary.Engine.get_usernames(get_user_data_directory());
+            Gee.List<string> accounts = Geary.Engine.get_usernames();
             if (accounts.size > 0) {
                 return accounts.get(0);
             }
@@ -174,16 +168,27 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     // Prompt the user for a username and password, and try to start Geary.
-    private Geary.Credentials request_login(string _username = "", ref string real_name) {
-        LoginDialog login = new LoginDialog(_username, "", real_name);
+    private Geary.Credentials request_login(string _username = "", ref string real_name, 
+        ref Geary.AccountInformation? account_info) {
+        LoginDialog login = new LoginDialog(_username, "", account_info);
         login.show();
         if (login.get_response() == Gtk.ResponseType.OK) {
             keyring_save_password(login.username, login.password);
+            
+            account_info = new Geary.AccountInformation();
+            account_info.real_name = login.real_name;
+            account_info.service_provider = login.provider;
+            
+            account_info.imap_server_host = login.imap_host;
+            account_info.imap_server_port = login.imap_port;
+            account_info.imap_server_tls = login.imap_tls;
+            account_info.smtp_server_host = login.smtp_host;
+            account_info.smtp_server_port = login.smtp_port;
+            account_info.smtp_server_tls = login.smtp_tls;
         } else {
             exit(1);
         }
         
-        real_name = login.real_name;
         return new Geary.Credentials(login.username, login.password);
     }
     
