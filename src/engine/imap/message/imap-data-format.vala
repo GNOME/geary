@@ -7,7 +7,7 @@
 namespace Geary.Imap.DataFormat {
 
 private const unichar[] ATOM_SPECIALS = {
-    '(', ')', '{', ' ', '%', '*', '\"'
+    '(', ')', '{', ' ', '%', '*', '"'
 };
 
 private const unichar[] TAG_SPECIALS = {
@@ -56,10 +56,6 @@ public Quoting is_quoting_required(string str) {
     if (String.is_empty(str))
         return Quoting.REQUIRED;
     
-    // if a system flag, do not quote
-    if (str.get_char(0) == '\\')
-        return Quoting.OPTIONAL;
-    
     int index = 0;
     unichar ch;
     while (str.get_next_char(ref index, out ch)) {
@@ -71,10 +67,6 @@ public Quoting is_quoting_required(string str) {
             case '\r':
             case '\0':
                 return Quoting.UNALLOWED;
-            
-            case '"':
-            case '\\':
-                return Quoting.REQUIRED;
             
             default:
                 if (is_atom_special(ch))
