@@ -56,6 +56,10 @@ public Quoting is_quoting_required(string str) {
     if (String.is_empty(str))
         return Quoting.REQUIRED;
     
+    // if a system flag, do not quote
+    if (str.get_char(0) == '\\')
+        return Quoting.OPTIONAL;
+    
     int index = 0;
     unichar ch;
     while (str.get_next_char(ref index, out ch)) {

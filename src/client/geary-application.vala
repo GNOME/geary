@@ -86,6 +86,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
                     Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
                 break;
                 
+                case "--log-serializer":
+                    Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
+                break;
+                
                 default:
                     // ignore
                 break;

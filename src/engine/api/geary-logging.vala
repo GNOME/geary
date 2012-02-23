@@ -9,7 +9,8 @@ namespace Geary.Logging {
 [Flags]
 public enum Flag {
     NONE,
-    NETWORK;
+    NETWORK,
+    SERIALIZER;
     
     public inline bool is_all_set(Flag flags) {
         return (flags & this) == flags;
@@ -49,6 +50,13 @@ public void disable_flags(Flag flags) {
  */
 public Flag get_flags() {
     return logging_flags;
+}
+
+/**
+ * Returns true if all the flag(s) are set.
+ */
+public inline bool are_all_flags_set(Flag flags) {
+    return logging_flags.is_all_set(flags);
 }
 
 public inline void error(Flag flags, string fmt, ...) {

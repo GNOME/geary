@@ -94,6 +94,14 @@ public class Geary.Imap.Serializer {
         if (length == 0)
             return;
         
+        if (Logging.are_all_flags_set(Logging.Flag.SERIALIZER)) {
+            StringBuilder builder = new StringBuilder();
+            for (size_t ctr = 0; ctr < length; ctr++)
+                builder.append_c((char) mouts.get_data()[ctr]);
+            
+            Logging.debug(Logging.Flag.SERIALIZER, "COMMIT:\n%s", builder.str);
+        }
+        
         ssize_t index = 0;
         do {
             index += yield outs.write_async(mouts.get_data()[index:length], priority, cancellable);
