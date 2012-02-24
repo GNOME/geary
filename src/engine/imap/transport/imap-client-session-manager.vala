@@ -9,6 +9,7 @@ public class Geary.Imap.ClientSessionManager {
     
     private Endpoint endpoint;
     private Credentials credentials;
+    private AccountInformation account_info;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
@@ -19,9 +20,11 @@ public class Geary.Imap.ClientSessionManager {
     
     public signal void login_failed();
     
-    public ClientSessionManager(Endpoint endpoint, Credentials credentials) {
+    public ClientSessionManager(Endpoint endpoint, Credentials credentials,
+        AccountInformation account_info) {
         this.endpoint = endpoint;
         this.credentials = credentials;
+        this.account_info = account_info;
         
         adjust_session_pool.begin();
     }
@@ -186,7 +189,7 @@ public class Geary.Imap.ClientSessionManager {
     
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
-        ClientSession new_session = new ClientSession(endpoint);
+        ClientSession new_session = new ClientSession(endpoint, account_info);
         
         add_session(new_session);
         

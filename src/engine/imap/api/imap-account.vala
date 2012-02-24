@@ -32,12 +32,13 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     private Geary.Smtp.ClientSession smtp;
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     
-    public Account(Geary.Endpoint imap_endpoint, Geary.Endpoint smtp_endpoint, Geary.Credentials cred) {
+    public Account(Geary.Endpoint imap_endpoint, Geary.Endpoint smtp_endpoint, Geary.Credentials cred,
+        Geary.AccountInformation account_info) {
         base ("IMAP Account for %s".printf(cred.to_string()));
         
         this.cred = cred;
         
-        session_mgr = new ClientSessionManager(imap_endpoint, cred);
+        session_mgr = new ClientSessionManager(imap_endpoint, cred, account_info);
         session_mgr.login_failed.connect(on_login_failed);
         smtp = new Geary.Smtp.ClientSession(smtp_endpoint);
     }

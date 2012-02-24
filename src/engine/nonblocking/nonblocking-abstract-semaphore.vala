@@ -88,8 +88,6 @@ public abstract class Geary.NonblockingAbstractSemaphore {
             reset();
     }
     
-    // TODO: Allow the caller to pass their own cancellable in if they want to be able to cancel
-    // this particular wait (and not all waiting threads of execution)
     public async void wait_async(Cancellable? cancellable = null) throws Error {
         for (;;) {
             check_user_cancelled(cancellable);

@@ -40,14 +40,14 @@ public class Geary.Engine {
             case ServiceProvider.GMAIL:
                 return new GmailAccount(
                     "Gmail account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
-                    new Geary.Imap.Account(GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, cred),
-                    new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
+                    new Geary.Imap.Account(GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, cred,
+                    account_info), new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
             
             case ServiceProvider.YAHOO:
                 return new YahooAccount(
                     "Yahoo account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
-                    new Geary.Imap.Account(YahooAccount.IMAP_ENDPOINT, YahooAccount.SMTP_ENDPOINT, cred),
-                    new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
+                    new Geary.Imap.Account(YahooAccount.IMAP_ENDPOINT, YahooAccount.SMTP_ENDPOINT, cred,
+                    account_info), new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
             
             case ServiceProvider.OTHER:
                 Endpoint imap_endpoint = new Endpoint(account_info.imap_server_host,
@@ -60,7 +60,7 @@ public class Geary.Engine {
                     
                 return new OtherAccount(
                     "Other account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
-                    new Geary.Imap.Account(imap_endpoint, smtp_endpoint, cred),
+                    new Geary.Imap.Account(imap_endpoint, smtp_endpoint, cred, account_info),
                     new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
                 
             default:

@@ -186,6 +186,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             account_info.imap_server_host = login.imap_host;
             account_info.imap_server_port = login.imap_port;
             account_info.imap_server_tls = login.imap_tls;
+            account_info.imap_server_pipeline = (login.provider != Geary.ServiceProvider.OTHER);
             account_info.smtp_server_host = login.smtp_host;
             account_info.smtp_server_port = login.smtp_port;
             account_info.smtp_server_tls = login.smtp_tls;
