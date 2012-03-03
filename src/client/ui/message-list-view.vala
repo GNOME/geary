@@ -26,7 +26,9 @@ public class MessageListView : Gtk.TreeView {
         append_column(create_column(MessageListStore.Column.MESSAGE_DATA, new MessageListCellRenderer(),
             MessageListStore.Column.MESSAGE_DATA.to_string(), 0));
         
-        get_selection().changed.connect(on_selection_changed);
+        Gtk.TreeSelection selection = get_selection();
+        selection.changed.connect(on_selection_changed);
+        selection.set_mode(Gtk.SelectionMode.MULTIPLE);
         style_set.connect(on_style_changed);
         show.connect(on_show);
         
