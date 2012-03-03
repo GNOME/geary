@@ -699,16 +699,19 @@ public class GearyController {
         
         last_deleted_conversation = selected_conversations[0];
         
-        Gee.Set<Geary.Email>? pool = selected_conversations[0].get_pool();
-        if (pool == null)
-            return;
-        
         // If the user clicked the toolbar button, we want to
         // move focus back to the message list.
         main_window.message_list_view.grab_focus();
-        
         set_busy(true);
-        delete_messages.begin(pool, cancellable_folder, on_delete_messages_completed);
+
+        // Collect all the emails into one pool and then delete.
+        Gee.Set<Geary.Email> all_emails = new Gee.TreeSet<Geary.Email>();
+        foreach (Geary.Conversation conversation in selected_conversations) {
+            Gee.Set<Geary.Email>? pool = conversation.get_pool();
+            if (pool != null)
+                all_emails.add_all(pool);
+        }
+        delete_messages.begin(all_emails, cancellable_folder, on_delete_messages_completed);
     }
     
     private async void delete_messages(Gee.Collection<Geary.Email> messages, Cancellable? cancellable)
