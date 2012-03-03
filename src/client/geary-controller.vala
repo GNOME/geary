@@ -516,7 +516,12 @@ public class GearyController {
     private void on_show_message_completed(Object? source, AsyncResult result) {
         try {
             do_show_message.end(result);
-            enable_message_buttons(selected_conversations != null && selected_conversations.length == 1);
+            int selection_count = selected_conversations == null ? 0 : selected_conversations.length;
+            if (selection_count > 1){
+                enable_multiple_message_buttons();
+            } else {
+                enable_message_buttons(selection_count == 1);
+            }
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Unable to show message: %s", err.message);
@@ -765,6 +770,17 @@ public class GearyController {
         } else {
             open_uri(link);
         }
+    }
+    
+    // Disables all single-message buttons and enables all multi-message buttons.
+    public void enable_multiple_message_buttons(){
+        // Single message only buttons.
+        GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = false;
+        GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = false;
+        GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = false;
+
+        // Mutliple message buttons.
+        GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = true;
     }
     
     // Enables or disables the message buttons on the toolbar.
