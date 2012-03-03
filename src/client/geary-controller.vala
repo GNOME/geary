@@ -82,7 +82,7 @@ public class GearyController {
     private Geary.Conversations? current_conversations = null;
     private bool second_list_pass_required = false;
     private int busy_count = 0;
-    private Geary.Conversation? current_conversation = null;
+    private Geary.Conversation[]? selected_conversations = null;
     private Geary.Conversation? last_deleted_conversation = null;
     private Gee.SortedSet<Geary.Conversation>? conversations_awaiting_preview = null;
     private bool scan_in_progress = false;
@@ -155,6 +155,10 @@ public class GearyController {
         entries += secret_debug;
         
         return entries;
+    }
+    
+    private bool is_viewed_conversation(Geary.Conversation conversation) {
+        return selected_conversations != null && selected_conversations[0] == conversation;
     }
     
     public void start(Geary.EngineAccount account) {
@@ -329,14 +333,14 @@ public class GearyController {
     public void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         // If we're viewing this conversation, fetch the messages and add them to the view.
-        if (conversation == current_conversation)
+        if (is_viewed_conversation(conversation))
             do_show_message.begin(email, cancellable_message, on_show_message_completed);
         
         update_conversations(null, conversation);
     }
     
     public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
-        if (conversation == current_conversation)
+        if (is_viewed_conversation(conversation))
             main_window.message_viewer.remove_message(email);
         
         update_conversations(null, conversation);
@@ -457,12 +461,12 @@ public class GearyController {
     private void on_conversations_selected(Geary.Conversation[]? conversations) {
         cancel_message();
 
-        current_conversation = conversations == null ? null : conversations[0];
+        selected_conversations = conversations;
         
         // Disable message buttons until conversation loads.
         enable_message_buttons(false);
         
-        if (current_conversation != null && current_folder != null) {
+        if (conversations != null && current_folder != null) {
             Gee.SortedSet<Geary.Email>? email_set = conversations[0].get_pool_sorted(compare_email);
             if (email_set == null)
                 return;
@@ -512,7 +516,7 @@ public class GearyController {
     private void on_show_message_completed(Object? source, AsyncResult result) {
         try {
             do_show_message.end(result);
-            enable_message_buttons(current_conversation != null);
+            enable_message_buttons(selected_conversations != null && selected_conversations.length == 1);
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Unable to show message: %s", err.message);
@@ -685,12 +689,12 @@ public class GearyController {
     
     private void on_delete_message() {
         // Prevent deletes of the same conversation from repeating.
-        if (current_conversation == last_deleted_conversation)
+        if (is_viewed_conversation(last_deleted_conversation))
             return;
         
-        last_deleted_conversation = current_conversation;
+        last_deleted_conversation = selected_conversations[0];
         
-        Gee.Set<Geary.Email>? pool = current_conversation.get_pool();
+        Gee.Set<Geary.Email>? pool = selected_conversations[0].get_pool();
         if (pool == null)
             return;
         
