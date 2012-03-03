@@ -13,7 +13,7 @@ public class MessageListView : Gtk.TreeView {
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
     
-    public signal void conversation_selected(Geary.Conversation? conversation);
+    public signal void conversations_selected(Geary.Conversation[]? conversation);
     public signal void load_more();
     
     public MessageListView(MessageListStore store) {
@@ -77,22 +77,33 @@ public class MessageListView : Gtk.TreeView {
         return (MessageListStore) get_model();
     }
     
-    private Gtk.TreePath? get_selected_path() {
+    private List<Gtk.TreePath> get_all_selected_paths() {
         Gtk.TreeModel model;
-        return get_selection().get_selected_rows(out model).nth_data(0);
+        return get_selection().get_selected_rows(out model);
+    }
+    
+    private Gtk.TreePath? get_selected_path() {
+        return get_all_selected_paths().nth_data(0);
     }
     
     private void on_selection_changed() {
-        Gtk.TreePath? path = get_selected_path();
-        if (path == null) {
-            conversation_selected(null);
+        List<Gtk.TreePath> paths = get_all_selected_paths();
+        if (paths.length() == 0) {
+            conversations_selected(null);
             
             return;
         }
-        
-        Geary.Conversation? conversation = get_store().get_conversation_at(path);
-        if (conversation != null)
-            conversation_selected(conversation);
+
+        Geary.Conversation[] conversations = new Geary.Conversation[0];
+        foreach (Gtk.TreePath path in paths) {
+            Geary.Conversation? conversation = get_store().get_conversation_at(path);
+            if (conversation != null) {
+                conversations += conversation;
+            }
+        }
+        if (conversations.length != 0) {
+                conversations_selected(conversations);
+        }
     }
     
     // Selects the first conversation, if nothing has been selected yet.

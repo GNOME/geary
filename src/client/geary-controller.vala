@@ -99,7 +99,7 @@ public class GearyController {
         
         enable_message_buttons(false);
         
-        main_window.message_list_view.conversation_selected.connect(on_conversation_selected);
+        main_window.message_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.message_viewer.link_selected.connect(on_link_selected);
@@ -454,16 +454,16 @@ public class GearyController {
         set_busy(false);
     }
     
-    private void on_conversation_selected(Geary.Conversation? conversation) {
+    private void on_conversations_selected(Geary.Conversation[]? conversations) {
         cancel_message();
-        
-        current_conversation = conversation;
+
+        current_conversation = conversations == null ? null : conversations[0];
         
         // Disable message buttons until conversation loads.
         enable_message_buttons(false);
         
         if (current_conversation != null && current_folder != null) {
-            Gee.SortedSet<Geary.Email>? email_set = conversation.get_pool_sorted(compare_email);
+            Gee.SortedSet<Geary.Email>? email_set = conversations[0].get_pool_sorted(compare_email);
             if (email_set == null)
                 return;
             
