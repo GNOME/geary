@@ -77,9 +77,21 @@ public class MessageViewer : WebKit.WebView {
             font-family: sans-serif;
             white-space: pre-wrap;
         }
+        #multiple_messages {
+            display: none;
+        }
+        #multiple_messages > .email {
+            margin: 100px auto;
+            display: block;
+            text-align: center;
+            width: 200px;
+        }
         </style>
         </head><body>
         <div id="message_container"><div id="placeholder"></div></div>
+        <div id="multiple_messages"><div class="email">
+            <span id="selection_counter">0</span> conversations selected.
+        </div></div>
         </body></html>""";
     
     // Fired when the user clicks a link.
@@ -156,7 +168,39 @@ public class MessageViewer : WebKit.WebView {
         return "message_%s".printf(id.to_string());
     }
     
+    private void hide_element_by_id(string element_id) throws Error {
+        get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:none");
+    }
+
+    private void show_element_by_id(string element_id) throws Error {
+        get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:block");
+    }
+    
+    public void show_multiple_selected(uint selected_count) {
+        // Remove any messages and hide the message container, then show the counter.
+        clear();
+        try {
+            hide_element_by_id("message_container");
+            show_element_by_id("multiple_messages");
+            
+            // Update the counter's count.
+            WebKit.DOM.HTMLElement counter =
+                get_dom_document().get_element_by_id("selection_counter") as WebKit.DOM.HTMLElement;
+            counter.set_inner_html("%u".printf(selected_count));
+        } catch (Error e) {
+            debug("Error updating counterL %s", e.message);
+        }
+    }
+    
     public void add_message(Geary.Email email) {
+        // Make sure the message container is showing and the multi-message counter hidden.
+        try {
+            show_element_by_id("message_container");
+            hide_element_by_id("multiple_messages");
+        } catch (Error e) {
+            debug("Error showing/hiding containers: %s", e.message);
+        }
+
         if (messages.contains(email))
             return;
         
