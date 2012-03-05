@@ -13,7 +13,7 @@ public class MessageListView : Gtk.TreeView {
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
     
-    public signal void conversations_selected(Geary.Conversation[]? conversation);
+    public signal void conversations_selected(Geary.Conversation[] conversations);
     public signal void load_more();
     
     public MessageListView(MessageListStore store) {
@@ -88,13 +88,13 @@ public class MessageListView : Gtk.TreeView {
     
     private void on_selection_changed() {
         List<Gtk.TreePath> paths = get_all_selected_paths();
+        Geary.Conversation[] conversations = new Geary.Conversation[0];
         if (paths.length() == 0) {
-            conversations_selected(null);
+            conversations_selected(conversations);
             
             return;
         }
 
-        Geary.Conversation[] conversations = new Geary.Conversation[0];
         foreach (Gtk.TreePath path in paths) {
             Geary.Conversation? conversation = get_store().get_conversation_at(path);
             if (conversation != null) {
@@ -102,7 +102,7 @@ public class MessageListView : Gtk.TreeView {
             }
         }
         if (conversations.length != 0) {
-                conversations_selected(conversations);
+            conversations_selected(conversations);
         }
     }
     

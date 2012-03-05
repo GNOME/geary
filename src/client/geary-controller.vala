@@ -82,7 +82,7 @@ public class GearyController {
     private Geary.Conversations? current_conversations = null;
     private bool second_list_pass_required = false;
     private int busy_count = 0;
-    private Geary.Conversation[]? selected_conversations = null;
+    private Geary.Conversation[] selected_conversations = new Geary.Conversation[0];
     private Geary.Conversation? last_deleted_conversation = null;
     private Gee.SortedSet<Geary.Conversation>? conversations_awaiting_preview = null;
     private bool scan_in_progress = false;
@@ -158,7 +158,7 @@ public class GearyController {
     }
     
     private bool is_viewed_conversation(Geary.Conversation conversation) {
-        return selected_conversations != null && selected_conversations[0] == conversation;
+        return selected_conversations[0] == conversation;
     }
     
     public void start(Geary.EngineAccount account) {
@@ -458,7 +458,7 @@ public class GearyController {
         set_busy(false);
     }
     
-    private void on_conversations_selected(Geary.Conversation[]? conversations) {
+    private void on_conversations_selected(Geary.Conversation[] conversations) {
         cancel_message();
 
         selected_conversations = conversations;
@@ -466,12 +466,19 @@ public class GearyController {
         // Disable message buttons until conversation loads.
         enable_message_buttons(false);
         
-        if (conversations != null && current_folder != null) {
+        if (conversations.length == 1 && current_folder != null) {
             Gee.SortedSet<Geary.Email>? email_set = conversations[0].get_pool_sorted(compare_email);
             if (email_set == null)
                 return;
             
             do_show_message.begin(email_set, cancellable_message, on_show_message_completed);
+        } else if (current_folder != null) {
+            main_window.message_viewer.show_multiple_selected(conversations.length);
+            if (conversations.length > 1) {
+                enable_multiple_message_buttons();
+            } else {
+                enable_message_buttons(false);
+            }
         }
     }
     
@@ -516,12 +523,7 @@ public class GearyController {
     private void on_show_message_completed(Object? source, AsyncResult result) {
         try {
             do_show_message.end(result);
-            int selection_count = selected_conversations == null ? 0 : selected_conversations.length;
-            if (selection_count > 1){
-                enable_multiple_message_buttons();
-            } else {
-                enable_message_buttons(selection_count == 1);
-            }
+            enable_message_buttons(true);
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Unable to show message: %s", err.message);
