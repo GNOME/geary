@@ -89,9 +89,7 @@ public class MessageViewer : WebKit.WebView {
         </style>
         </head><body>
         <div id="message_container"><div id="placeholder"></div></div>
-        <div id="multiple_messages"><div class="email">
-            <span id="selection_counter">0</span> conversations selected.
-        </div></div>
+        <div id="multiple_messages"><div id="selection_counter" class="email"></div></div>
         </body></html>""";
     
     // Fired when the user clicks a link.
@@ -186,7 +184,7 @@ public class MessageViewer : WebKit.WebView {
             // Update the counter's count.
             WebKit.DOM.HTMLElement counter =
                 get_dom_document().get_element_by_id("selection_counter") as WebKit.DOM.HTMLElement;
-            counter.set_inner_html("%u".printf(selected_count));
+            counter.set_inner_html("%u %s.".printf(selected_count, _("conversations selected")));
         } catch (Error e) {
             debug("Error updating counterL %s", e.message);
         }
