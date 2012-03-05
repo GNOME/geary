@@ -14,6 +14,8 @@ public class MessageViewer : WebKit.WebView {
         | Geary.Email.Field.DATE
         | Geary.Email.Field.PROPERTIES;
     
+    private const string MESSAGE_CONTAINER_ID = "message_container";
+    private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string HTML_BODY = """
         <html><head><title>Geary</title>
         <style>
@@ -178,13 +180,13 @@ public class MessageViewer : WebKit.WebView {
         // Remove any messages and hide the message container, then show the counter.
         clear();
         try {
-            hide_element_by_id("message_container");
-            show_element_by_id("multiple_messages");
+            hide_element_by_id(MESSAGE_CONTAINER_ID);
+            show_element_by_id(SELECTION_COUNTER_ID);
             
             // Update the counter's count.
             WebKit.DOM.HTMLElement counter =
                 get_dom_document().get_element_by_id("selection_counter") as WebKit.DOM.HTMLElement;
-            counter.set_inner_html("%u %s.".printf(selected_count, _("conversations selected")));
+            counter.set_inner_html(_("%u conversations selected.").printf(selected_count));
         } catch (Error e) {
             debug("Error updating counterL %s", e.message);
         }
@@ -193,8 +195,8 @@ public class MessageViewer : WebKit.WebView {
     public void add_message(Geary.Email email) {
         // Make sure the message container is showing and the multi-message counter hidden.
         try {
-            show_element_by_id("message_container");
-            hide_element_by_id("multiple_messages");
+            show_element_by_id(MESSAGE_CONTAINER_ID);
+            hide_element_by_id(SELECTION_COUNTER_ID);
         } catch (Error e) {
             debug("Error showing/hiding containers: %s", e.message);
         }
