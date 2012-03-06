@@ -158,7 +158,7 @@ public class GearyController {
     }
     
     private bool is_viewed_conversation(Geary.Conversation conversation) {
-        return selected_conversations[0] == conversation;
+        return selected_conversations.length > 0 && selected_conversations[0] == conversation;
     }
     
     public void start(Geary.EngineAccount account) {
@@ -699,7 +699,9 @@ public class GearyController {
         if (is_viewed_conversation(last_deleted_conversation))
             return;
         
-        last_deleted_conversation = selected_conversations[0];
+        // There should always be at least one conversation selected here, otherwise the archive
+        // button is disabled, but better safe than segfaulted.
+        last_deleted_conversation = selected_conversations.length > 0 ? selected_conversations[0] : null;
         
         // If the user clicked the toolbar button, we want to
         // move focus back to the message list.

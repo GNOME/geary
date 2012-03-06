@@ -188,7 +188,7 @@ public class MessageViewer : WebKit.WebView {
                 get_dom_document().get_element_by_id("selection_counter") as WebKit.DOM.HTMLElement;
             counter.set_inner_html(_("%u conversations selected.").printf(selected_count));
         } catch (Error e) {
-            debug("Error updating counterL %s", e.message);
+            debug("Error updating counter: %s", e.message);
         }
     }
     
