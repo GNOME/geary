@@ -157,8 +157,9 @@ public class GearyController {
         return entries;
     }
     
-    private bool is_viewed_conversation(Geary.Conversation conversation) {
-        return selected_conversations.length > 0 && selected_conversations[0] == conversation;
+    private bool is_viewed_conversation(Geary.Conversation? conversation) {
+        return conversation != null && selected_conversations.length > 0 &&
+            selected_conversations[0] == conversation;
     }
     
     public void start(Geary.EngineAccount account) {
