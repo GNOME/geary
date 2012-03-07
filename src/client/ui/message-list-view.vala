@@ -127,5 +127,14 @@ public class MessageListView : Gtk.TreeView {
             }
         }
     }
+    
+    public void refresh() {
+        model.foreach(refresh_path);
+    }
+    
+    private bool refresh_path(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
+        model.row_changed(path, iter);
+        return false;
+    }
 }
 

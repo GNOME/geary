@@ -93,6 +93,7 @@ public class GearyController {
         GearyApplication.instance.ui_manager.insert_action_group(
             GearyApplication.instance.actions, 0);
         GearyApplication.instance.load_ui_file("accelerators.ui");
+        GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
         
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
@@ -257,6 +258,13 @@ public class GearyController {
         current_folder = folder;
         
         yield current_folder.open_async(false, cancellable_folder);
+
+        // The current folder may be null if the user rapidly switches between folders. If they have
+        // done that then this folder selection is invalid anyways, so just return.
+        if (current_folder == null) {
+            warning("Can not open folder: %s", folder.to_string());
+            return;
+        }
         
         current_conversations = new Geary.Conversations(current_folder, 
             MessageListStore.REQUIRED_FIELDS);
@@ -306,23 +314,19 @@ public class GearyController {
         debug("on scan completed");
         
         set_busy(false);
-        
-        Gee.SortedSet<Geary.Conversation>? conversations = conversations_awaiting_preview;
-        conversations_awaiting_preview = null;
+
         scan_in_progress = false;
-        
-        if (conversations != null)
-            do_fetch_previews.begin(conversations, cancellable_folder, on_fetch_previews_completed);
-        
+        fetch_previews_if_needed();
+
         main_window.message_list_view.enable_load_more = true;
         
         // Select first conversation.
-        if (!second_list_pass_required && GearyApplication.instance.config.autoselect)
+        if (GearyApplication.instance.config.autoselect)
             main_window.message_list_view.select_first_conversation();
     }
     
     public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
-        debug("on conversation added");
+        debug("on conversations added");
         foreach (Geary.Conversation c in conversations) {
             if (!main_window.message_list_store.has_conversation(c))
                 main_window.message_list_store.append_conversation(c);
@@ -408,6 +412,17 @@ public class GearyController {
                 do_fetch_previews.begin(conversations, cancellable_folder,
                     on_fetch_previews_completed);
             }
+        }
+    }
+
+    private void fetch_previews_if_needed() {
+        if (GearyApplication.instance.config.display_preview && !scan_in_progress) {
+            Gee.SortedSet<Geary.Conversation>? conversations = conversations_awaiting_preview;
+            conversations_awaiting_preview = null;
+
+            if (conversations != null)
+                do_fetch_previews.begin(conversations, cancellable_folder,
+                    on_fetch_previews_completed);
         }
     }
     
@@ -766,6 +781,12 @@ public class GearyController {
             busy_count = 0;
         
         main_window.set_busy(busy_count > 0);
+    }
+
+    private void on_display_preview_changed() {
+        fetch_previews_if_needed();
+        main_window.message_list_view.style_set(null);
+        main_window.message_list_view.refresh();
     }
     
     public void on_link_selected(string link) {

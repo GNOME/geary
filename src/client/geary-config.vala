@@ -44,6 +44,13 @@ public class Configuration {
         set { settings.set_boolean(AUTOSELECT_NAME, value); }
     }
     
+    private const string DISPLAY_PREVIEW_NAME = "display-preview";
+    public bool display_preview {
+        get { return settings.get_boolean(DISPLAY_PREVIEW_NAME); }
+        set { settings.set_boolean(DISPLAY_PREVIEW_NAME, value); display_preview_changed(); }
+    }
+    public signal void display_preview_changed();
+    
     // Creates a configuration object.
     // is_installed: set to true if installed, else false.
     // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.

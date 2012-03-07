@@ -83,12 +83,56 @@ public class FormattedMessageData : Object {
     private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area = null, 
         Cairo.Context? ctx = null, bool selected, bool recalc_dims = false) {
         
-        Pango.Rectangle? ink_rect;
-        Pango.Rectangle? logical_rect;
-        
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
         
         // Date field.
+        Pango.Rectangle ink_rect = render_date(widget, cell_area, ctx, y);
+
+        // From field.
+        ink_rect = render_from(widget, cell_area, ctx, y, ink_rect);
+        y += ink_rect.height + ink_rect.y + LINE_SPACING;
+
+        // If we are displaying a preview then the message counter goes on the same line as the
+        // preview, otherwise it is with the subject.
+        int preview_height = 0;
+        if (GearyApplication.instance.config.display_preview) {
+            // Subject field.
+            render_subject(widget, cell_area, ctx, y);
+            y += ink_rect.height + ink_rect.y + LINE_SPACING;
+            
+            // Number of e-mails field.
+            int counter_width = render_counter(widget, cell_area, ctx, y);
+            
+            // Body preview.
+            ink_rect = render_preview(widget, cell_area, ctx, y, selected, counter_width);
+            preview_height = ink_rect.height + ink_rect.y + LINE_SPACING;
+        } else {
+            // Number of e-mails field.
+            int counter_width = render_counter(widget, cell_area, ctx, y);
+
+            // Subject field.
+            render_subject(widget, cell_area, ctx, y, counter_width);
+            y += ink_rect.height + ink_rect.y + LINE_SPACING;
+        }
+
+        if (recalc_dims) {
+            this.preview_height = preview_height;
+            this.cell_height = y + preview_height;
+        }
+        
+        // Unread indicator.
+        if (is_unread) {
+            Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,
+                cell_area.y + (cell_area.height / 2) - (IconFactory.UNREAD_ICON_SIZE / 2));
+            ctx.paint();
+        }
+    }
+    
+    private Pango.Rectangle render_date(Gtk.Widget widget, Gdk.Rectangle? cell_area,
+        Cairo.Context? ctx, int y) {
+
+        Pango.Rectangle? ink_rect;
+        Pango.Rectangle? logical_rect;
         Pango.FontDescription font_date = new Pango.FontDescription();
         font_date.set_size(FONT_SIZE_DATE * Pango.SCALE);
         Pango.AttrList list_date = new Pango.AttrList();
@@ -103,8 +147,12 @@ public class FormattedMessageData : Object {
             ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - LINE_SPACING, y);
             Pango.cairo_show_layout(ctx, layout_date);
         }
-        
-        // From field.
+        return ink_rect;
+    }
+    
+    private Pango.Rectangle render_from(Gtk.Widget widget, Gdk.Rectangle? cell_area,
+        Cairo.Context? ctx, int y, Pango.Rectangle ink_rect) {
+
         Pango.FontDescription font_from = new Pango.FontDescription();
         font_from.set_size(FONT_SIZE_FROM * Pango.SCALE);
         font_from.set_weight(Pango.Weight.BOLD);
@@ -119,31 +167,14 @@ public class FormattedMessageData : Object {
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
             Pango.cairo_show_layout(ctx, layout_from);
         }
-        
-        y += ink_rect.height + ink_rect.y + LINE_SPACING;
-        
-        // Subject field.
-        Pango.FontDescription font_subject = new Pango.FontDescription();
-        font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
-        Pango.Layout layout_subject = widget.create_pango_layout(null);
-        layout_subject.set_font_description(font_subject);
-        layout_subject.set_text(subject, -1);
-        if (cell_area != null)
-            layout_subject.set_width((cell_area.width - TEXT_LEFT) * Pango.SCALE);
-        layout_subject.set_ellipsize(Pango.EllipsizeMode.END);
-        layout_date.get_pixel_extents(out ink_rect, out logical_rect);
-        if (ctx != null && cell_area != null) {
-            ctx.move_to(cell_area.x + TEXT_LEFT, y);
-            Pango.cairo_show_layout(ctx, layout_subject);
-        }
-        
-        y += ink_rect.height + ink_rect.y + LINE_SPACING;
-        
-        // Number of e-mails field.
+        return ink_rect;
+    }
+    
+    private int render_counter(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx, int y) {
         int num_email_width = 0;
         if (num_emails > 1) {
-            Pango.Rectangle? num_ink_rect;
-            Pango.Rectangle? num_logical_rect;
+            Pango.Rectangle? ink_rect;
+            Pango.Rectangle? logical_rect;
             string mails = 
                 "<span background='#999999' foreground='white' size='x-small' weight='bold'> %d </span>"
                 .printf(num_emails);
@@ -151,17 +182,38 @@ public class FormattedMessageData : Object {
             Pango.Layout layout_num = widget.create_pango_layout(null);
             layout_num.set_markup(mails, -1);
             layout_num.set_alignment(Pango.Alignment.RIGHT);
-            layout_num.get_pixel_extents(out num_ink_rect, out num_logical_rect);
+            layout_num.get_pixel_extents(out ink_rect, out logical_rect);
             if (ctx != null && cell_area != null) {
-                ctx.move_to(cell_area.width - cell_area.x - num_ink_rect.width - num_ink_rect.x - 
+                ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - 
                     LINE_SPACING, y);
                 Pango.cairo_show_layout(ctx, layout_num);
             }
             
-            num_email_width = num_ink_rect.width + (LINE_SPACING * 3);
+            num_email_width = ink_rect.width + (LINE_SPACING * 3);
         }
-        
-        // Body preview.
+        return num_email_width;
+    }
+    
+    private void render_subject(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx,
+        int y, int counter_width = 0) {
+
+        Pango.FontDescription font_subject = new Pango.FontDescription();
+        font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
+        Pango.Layout layout_subject = widget.create_pango_layout(null);
+        layout_subject.set_font_description(font_subject);
+        layout_subject.set_text(subject, -1);
+        if (cell_area != null)
+            layout_subject.set_width((cell_area.width - TEXT_LEFT - counter_width) * Pango.SCALE);
+        layout_subject.set_ellipsize(Pango.EllipsizeMode.END);
+        if (ctx != null && cell_area != null) {
+            ctx.move_to(cell_area.x + TEXT_LEFT, y);
+            Pango.cairo_show_layout(ctx, layout_subject);
+        }
+    }
+    
+    private Pango.Rectangle render_preview(Gtk.Widget widget, Gdk.Rectangle? cell_area,
+        Cairo.Context? ctx, int y, bool selected, int counter_width = 0) {
+
         Pango.FontDescription font_preview = new Pango.FontDescription();
         font_preview.set_size(FONT_SIZE_PREVIEW * Pango.SCALE);
         Pango.AttrList list_preview = new Pango.AttrList();
@@ -177,7 +229,7 @@ public class FormattedMessageData : Object {
         layout_preview.set_wrap(Pango.WrapMode.WORD);
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
-            layout_preview.set_width((cell_area.width - TEXT_LEFT - num_email_width) * Pango.SCALE);
+            layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width) * Pango.SCALE);
             layout_preview.set_height(preview_height * Pango.SCALE);
             
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
@@ -186,20 +238,13 @@ public class FormattedMessageData : Object {
             layout_preview.set_width(int.MAX);
             layout_preview.set_height(int.MAX);
         }
-        
-        if (recalc_dims) {
-            layout_preview.get_pixel_extents(out ink_rect, out logical_rect);
-            preview_height = ink_rect.height + ink_rect.y + LINE_SPACING;
-            cell_height = y + preview_height;
-        }
-        
-        // Unread indicator.
-        if (is_unread) {
-            Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,
-                cell_area.y + (cell_area.height / 2) - (IconFactory.UNREAD_ICON_SIZE / 2));
-            ctx.paint();
-        }
+
+        Pango.Rectangle? ink_rect;
+        Pango.Rectangle? logical_rect;
+        layout_preview.get_pixel_extents(out ink_rect, out logical_rect);
+        return ink_rect;
     }
+    
 }
 
 public class MessageListCellRenderer : Gtk.CellRenderer {

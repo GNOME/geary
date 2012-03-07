@@ -38,6 +38,12 @@
         <description>True if we should autoselect the next available conversation.</description>
     </key>
     
+    <key name="display-preview" type="b">
+        <default>true</default>
+        <summary>display message previews</summary>
+        <description>True if we should display a short preview of each message.</description>
+    </key>
+    
 </schema>
 
 </schemalist>
