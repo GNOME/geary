@@ -118,7 +118,7 @@ public class GearyController {
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
         
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, null, TRANSLATABLE, null, null, on_preferences };
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, null, null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
         
