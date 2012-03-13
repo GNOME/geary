@@ -28,15 +28,10 @@ public class PreferencesDialog : Object {
         // Connect to element signals.
         autoselect.toggled.connect(on_autoselect_toggled);
         display_preview.toggled.connect(on_display_preview_toggled);
-        close_button.clicked.connect(on_close);
-        dialog.close.connect(on_escape);
     }
     
     public void run() {
         dialog.run();
-    }
-    
-    private void on_close() {
         dialog.destroy();
     }
     
@@ -46,9 +41,5 @@ public class PreferencesDialog : Object {
     
     private void on_display_preview_toggled() {
         config.display_preview = display_preview.active;
-    }
-    
-    private void on_escape() {
-        dialog.hide();
     }
 }
