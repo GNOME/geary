@@ -208,9 +208,11 @@ public interface Geary.Folder : Object {
      * deal with this.  Callers from outside the Engine don't need to worry about this; it's taken
      * care of under the covers.
      *
+     * Returns true if the email was created in the folder, false if it was merged.
+     *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async void create_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public abstract async bool create_email_async(Geary.Email email, Cancellable? cancellable = null)
         throws Error;
     
     /**

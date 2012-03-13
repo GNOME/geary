@@ -42,7 +42,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
     
-    public abstract async void create_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public abstract async bool create_email_async(Geary.Email email, Cancellable? cancellable = null)
         throws Error;
     
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,

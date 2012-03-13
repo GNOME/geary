@@ -8,12 +8,13 @@
  * CreateEmailOperation is a common Geary.NonblockingBatchOperation that can be used with
  * Geary.NonblockingBatch.
  *
- * Note that this operation always returns null, as Geary.Folder.create_email_async() has no returned
- * value.
+ * Note that this operation always returns null.  The result of Geary.Folder.create_email_async()
+ * is stored in the created property.
  */
 public class Geary.CreateEmailOperation : Geary.NonblockingBatchOperation {
     public Geary.Folder folder { get; private set; }
     public Geary.Email email { get; private set; }
+    public bool created { get; private set; default = false; }
     
     public CreateEmailOperation(Geary.Folder folder, Geary.Email email) {
         this.folder = folder;
@@ -21,7 +22,7 @@ public class Geary.CreateEmailOperation : Geary.NonblockingBatchOperation {
     }
     
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
-        yield folder.create_email_async(email, cancellable);
+        created = yield folder.create_email_async(email, cancellable);
         
         return null;
     }

@@ -7,9 +7,15 @@
 private class Geary.GenericImapFolder : Geary.EngineFolder {
     public const int DEFAULT_FLAG_WATCH_SEC = 3 * 60;
     
+    private const int PREFETCH_DELAY_SEC = 10;
+    
     private uint flag_watch_id = 0;
     private Cancellable flag_watch_cancellable = new Cancellable();
     private bool in_flag_watch = false;
+    private Cancellable prefetch_cancellable = new Cancellable();
+    private NonblockingMutex prefetch_mutex = new NonblockingMutex();
+    private Gee.HashSet<Geary.EmailIdentifier> prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>(
+        Hashable.hash_func, Equalable.equal_func);
     
     public GenericImapFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         base (remote, local, local_folder);
@@ -263,6 +269,9 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         if (state == Geary.Folder.OpenState.BOTH) {
             flag_watch_cancellable = new Cancellable();
             enable_flag_watch();
+            
+            prefetch_cancellable = new Cancellable();
+            schedule_prefetch_all();
         }
     }
     
@@ -270,7 +279,15 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         disable_flag_watch();
         flag_watch_cancellable.cancel();
         
+        prefetch_cancellable.cancel();
+        
         base.notify_closed(reason);
+    }
+    
+    protected override void notify_local_added(Gee.Collection<Geary.EmailIdentifier> added) {
+        schedule_prefetch(added);
+        
+        base.notify_local_added(added);
     }
     
     /**
@@ -362,5 +379,141 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         if (!flag_watch_cancellable.is_cancelled() && changed_map.size > 0)
             notify_email_flags_changed(changed_map);
+    }
+    
+    private void schedule_prefetch_all() {
+        // Async method will schedule prefetch once ids are known
+        do_prefetch_all.begin();
+    }
+    
+    private void schedule_prefetch(Gee.Collection<Geary.EmailIdentifier> ids) {
+        prefetch_ids.add_all(ids);
+        
+        Timeout.add_seconds(PREFETCH_DELAY_SEC, on_start_prefetch, Priority.LOW);
+    }
+    
+    private bool on_start_prefetch() {
+        do_prefetch.begin();
+        
+        return false;
+    }
+    
+    private async void do_prefetch_all() {
+        Gee.List<Geary.Email>? list = null;
+        try {
+            // by listing NONE, retrieving only the EmailIdentifier for the range (which here is all)
+            list = yield local_folder.list_email_async(1, -1, Geary.Email.Field.NONE,
+                Geary.Folder.ListFlags.FAST, prefetch_cancellable);
+        } catch (Error err) {
+            debug("Error while prefetching all emails for %s: %s", to_string(), err.message);
+        }
+        
+        if (list == null || list.size == 0)
+            return;
+        
+        Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>(
+            Hashable.hash_func, Equalable.equal_func);
+        foreach (Geary.Email email in list)
+            ids.add(email.id);
+        
+        if (ids.size > 0)
+            schedule_prefetch(ids);
+    }
+    
+    private async void do_prefetch() {
+        try {
+            yield do_prefetch_batch();
+        } catch (Error err) {
+            debug("Error while prefetching emails for %s: %s", to_string(), err.message);
+        }
+    }
+    
+    private async void do_prefetch_batch() throws Error {
+        int token = yield prefetch_mutex.claim_async(prefetch_cancellable);
+        
+        if (prefetch_ids.size == 0)
+            return;
+        
+        debug("do_prefetch_batch %s %d", to_string(), prefetch_ids.size);
+        
+        // snarf up all requested EmailIdentifiers for this round
+        Gee.HashSet<Geary.EmailIdentifier> ids = prefetch_ids;
+        prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>(Hashable.hash_func, Equalable.equal_func);
+        
+        // Get the stored fields of all the local email
+        Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? local_fields =
+            yield local_folder.get_email_fields_by_id_async(ids, prefetch_cancellable);
+        
+        if (local_fields == null || local_fields.size == 0) {
+            debug("No local fields in %s", to_string());
+            
+            prefetch_mutex.release(ref token);
+            
+            return;
+        }
+        
+        // Sort email by size
+        Gee.TreeSet<Geary.Email> sorted_email = new Gee.TreeSet<Geary.Email>(email_size_ascending_comparator);
+        foreach (Geary.EmailIdentifier id in local_fields.keys) {
+            sorted_email.add(yield local_folder.fetch_email_async(id, Geary.Email.Field.PROPERTIES,
+                prefetch_cancellable));
+        }
+        
+        // Big TODO: The engine needs to be able to synthesize ENVELOPE (and any of the fields
+        // constituting it) and PREVIEW from HEADER and BODY if available.  When it can do that
+        // won't need to prefetch ENVELOPE or PREVIEW; prefetching HEADER and BODY will be enough.
+        
+        foreach (Geary.Email email in sorted_email) {
+            Geary.EmailIdentifier id = email.id;
+            Geary.Email.Field field = local_fields.get(id);
+            
+            if (!field.is_all_set(Geary.Email.Field.ENVELOPE)) {
+                try {
+                    yield fetch_email_async(id, Geary.Email.Field.ENVELOPE, prefetch_cancellable);
+                } catch (Error env_error) {
+                    debug("Error prefetching envelope for %s: %s", id.to_string(), env_error.message);
+                }
+            }
+            
+            if (!field.is_all_set(Geary.Email.Field.HEADER)) {
+                try {
+                    yield fetch_email_async(id, Geary.Email.Field.HEADER, prefetch_cancellable);
+                } catch (Error header_err) {
+                    debug("Error prefetching headers for %s: %s", id.to_string(), header_err.message);
+                }
+            }
+            
+            if (!field.is_all_set(Geary.Email.Field.BODY)) {
+                try {
+                    yield fetch_email_async(email.id, Geary.Email.Field.BODY, prefetch_cancellable);
+                } catch (Error body_err) {
+                    debug("Error background fetching body from %s: %s", email.id.to_string(),
+                        body_err.message);
+                }
+            }
+        }
+        
+        prefetch_mutex.release(ref token);
+        
+        debug("finished do_prefetch_batch %s %d", to_string(), ids.size);
+    }
+    
+    private static int email_size_ascending_comparator(void *a, void *b) {
+        long asize = 0;
+        Geary.Imap.EmailProperties? aprop = (Geary.Imap.EmailProperties) ((Geary.Email *) a)->properties;
+        if (aprop != null && aprop.rfc822_size != null)
+            asize = aprop.rfc822_size.value;
+        
+        long bsize = 0;
+        Geary.Imap.EmailProperties? bprop = (Geary.Imap.EmailProperties) ((Geary.Email *) b)->properties;
+        if (bprop != null && bprop.rfc822_size != null)
+            bsize = bprop.rfc822_size.value;
+        
+        if (asize < bsize)
+            return -1;
+        else if (asize > bsize)
+            return 1;
+        else
+            return 0;
     }
 }
