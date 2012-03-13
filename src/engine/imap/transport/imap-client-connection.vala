@@ -102,10 +102,6 @@ public class Geary.Imap.ClientConnection {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), continuation_response.to_string());
     }
     
-    public virtual signal void received_unsolicited_server_data(UnsolicitedServerData unsolicited) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), unsolicited.to_string());
-    }
-    
     public virtual signal void received_bad_response(RootParameters root, ImapError err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] recv bad response %s: %s", to_string(),
             root.to_string(), err.message);
@@ -149,15 +145,15 @@ public class Geary.Imap.ClientConnection {
             new Geary.State.Mapping(State.IDLE, Event.SEND, on_idle_send),
             new Geary.State.Mapping(State.IDLE, Event.SEND_IDLE, on_no_proceed),
             new Geary.State.Mapping(State.IDLE, Event.RECVD_STATUS_RESPONSE, on_idle_status_response),
-            new Geary.State.Mapping(State.IDLE, Event.RECVD_SERVER_DATA, on_idle_server_data),
-            new Geary.State.Mapping(State.IDLE, Event.RECVD_CONTINUATION_RESPONSE, on_bad_continuation),
+            new Geary.State.Mapping(State.IDLE, Event.RECVD_SERVER_DATA, on_server_data),
+            new Geary.State.Mapping(State.IDLE, Event.RECVD_CONTINUATION_RESPONSE, on_idle_continuation),
             new Geary.State.Mapping(State.IDLE, Event.DISCONNECTED, on_disconnected),
             
             new Geary.State.Mapping(State.DEIDLING, Event.SEND, on_proceed),
             new Geary.State.Mapping(State.DEIDLING, Event.SEND_IDLE, on_send_idle),
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_STATUS_RESPONSE, on_idle_status_response),
-            new Geary.State.Mapping(State.DEIDLING, Event.RECVD_SERVER_DATA, on_idle_server_data),
-            new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_dropped_continuation),
+            new Geary.State.Mapping(State.DEIDLING, Event.RECVD_SERVER_DATA, on_server_data),
+            new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_idling_continuation),
             new Geary.State.Mapping(State.DEIDLING, Event.DISCONNECTED, on_disconnected),
             
             new Geary.State.Mapping(State.DISCONNECTED, Event.SEND, on_no_proceed),
@@ -333,6 +329,12 @@ public class Geary.Imap.ClientConnection {
         send_mutex.release(ref token);
         
         // Reset flush timer so it only fires after n msec after last command pushed out to stream
+        reschedule_flush_timeout();
+        
+        sent_command(cmd);
+    }
+    
+    private void reschedule_flush_timeout() {
         if (flush_timeout_id != 0) {
             Source.remove(flush_timeout_id);
             flush_timeout_id = 0;
@@ -340,8 +342,6 @@ public class Geary.Imap.ClientConnection {
         
         if (flush_timeout_id == 0)
             flush_timeout_id = Timeout.add_full(Priority.LOW, FLUSH_TIMEOUT_MSEC, on_flush_timeout);
-        
-        sent_command(cmd);
     }
     
     private bool on_flush_timeout() {
@@ -441,10 +441,6 @@ public class Geary.Imap.ClientConnection {
         received_continuation_response((ContinuationResponse) object);
     }
     
-    private void signal_unsolicited_server_data(void *user, Object? object) {
-        received_unsolicited_server_data((UnsolicitedServerData) object);
-    }
-    
     private void signal_entered_idle() {
         in_idle(true);
     }
@@ -474,6 +470,12 @@ public class Geary.Imap.ClientConnection {
     }
     
     private uint on_connected(uint state, uint event, void *user) {
+        // don't stay in connected state if IDLE is to be used; schedule an IDLE command (which
+        // may be rescheduled if commands immediately start being issued, which they most likely
+        // will)
+        if (idle_when_quiet)
+            reschedule_flush_timeout();
+        
         return State.CONNECTED;
     }
     
@@ -547,11 +549,11 @@ public class Geary.Imap.ClientConnection {
         
         // StatusResponse for one of our IDLE commands; either way, no longer in IDLE mode
         if (status_response.status == Status.OK) {
-            Logging.debug(Logging.Flag.NETWORK, "[%s] Leaving IDLE: %s", to_string(),
-                status_response.to_string());
+            Logging.debug(Logging.Flag.NETWORK, "[%s] Leaving IDLE (%d outstanding): %s", to_string(),
+                posted_idle_tags.size, status_response.to_string());
         } else {
-            Logging.debug(Logging.Flag.NETWORK, "[%s] Unable to enter IDLE: %s", to_string(),
-                status_response.to_string());
+            Logging.debug(Logging.Flag.NETWORK, "[%s] Unable to enter IDLE (%d outstanding): %s", to_string(),
+                posted_idle_tags.size, status_response.to_string());
         }
         
         // Only return to CONNECTED if no other IDLE commands are outstanding (and only signal
@@ -561,30 +563,19 @@ public class Geary.Imap.ClientConnection {
         if (state == State.IDLE && next != State.IDLE)
             fsm.do_post_transition(signal_left_idle);
         
+        // If leaving IDLE for CONNECTED but user has asked to stay in IDLE whenever quiet, reschedule
+        // flush (which will automatically send IDLE command)
+        if (next == State.CONNECTED && idle_when_quiet)
+            reschedule_flush_timeout();
+        
         return next;
     }
     
-    private uint on_idle_server_data(uint state, uint event, void *user, Object? object) {
-        // all server data received during IDLE is, by definition, unsolicited server data
-        UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data((ServerData) object);
-        if (unsolicited == null) {
-            Logging.debug(Logging.Flag.NETWORK, "[%s] Unknown unsolicited server data: %s",
-                to_string(), ((ServerData) object).to_string());
-            
-            return state;
+    private uint on_idle_continuation(uint state, uint event, void *user, Object? object) {
+        if (posted_idle_tags.size == 0) {
+            debug("[%s] Bad continuation received during IDLE: %s", to_string(),
+                ((ContinuationResponse) object).to_string());
         }
-        
-        fsm.do_post_transition(signal_unsolicited_server_data, user, unsolicited);
-        
-        return state;
-    }
-    
-    private uint on_dropped_continuation(uint state, uint event, void *user, Object? object) {
-        // Continuation received while de-idling, this is due to prior IDLE finally catching up with
-        // the receive channel, ignore as the IDLE will be dropped momentarily from the "done"
-        // previously sent
-        Logging.debug(Logging.Flag.NETWORK, "[%s] Continuation received, dropped: %s", to_string(),
-            ((ContinuationResponse) object).to_string());
         
         return state;
     }
