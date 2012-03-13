@@ -416,13 +416,30 @@ public class GearyController {
     }
 
     private void fetch_previews_if_needed() {
-        if (GearyApplication.instance.config.display_preview && !scan_in_progress) {
+        // Don't do anything while a scan is going.
+        if (scan_in_progress) {
+            return;
+        }
+
+        // If we are fetching previews, do that, otherwise go straight to the second pass.
+        if (GearyApplication.instance.config.display_preview) {
             Gee.SortedSet<Geary.Conversation>? conversations = conversations_awaiting_preview;
             conversations_awaiting_preview = null;
 
             if (conversations != null)
                 do_fetch_previews.begin(conversations, cancellable_folder,
                     on_fetch_previews_completed);
+        } else {
+            do_second_pass_if_needed();
+        }
+    }
+    
+    private void do_second_pass_if_needed() {
+        if (second_list_pass_required) {
+            second_list_pass_required = false;
+            debug("Doing second list pass now");
+            current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
+                cancellable_folder);
         }
     }
     
@@ -456,12 +473,7 @@ public class GearyController {
         set_busy(false);
         
         // with all the previews fetched, now go back and do a full list (if required)
-        if (second_list_pass_required) {
-            second_list_pass_required = false;
-            debug("Doing second list pass now");
-            current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
-                cancellable_folder);
-        }
+        do_second_pass_if_needed();
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
