@@ -430,7 +430,6 @@ public class Geary.Imap.ClientSession {
         cx.flush_failure.connect(on_network_flush_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
-        cx.received_unsolicited_server_data.connect(on_received_unsolicited_server_data);
         cx.received_bad_response.connect(on_received_bad_response);
         cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
@@ -1272,11 +1271,16 @@ public class Geary.Imap.ClientSession {
             return;
         }
         
+        // If no outstanding commands, treat as unsolicited so it's reported immediately
+        if (tag_cb.size == 0) {
+            UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data(server_data);
+            if (unsolicited != null && report_unsolicited_server_data(unsolicited, "UNSOLICITED"))
+                return;
+            
+            debug("Received server data for no outstanding cmd: %s", server_data.to_string());
+        }
+        
         current_cmd_response.add_server_data(server_data);
-    }
-    
-    private void on_received_unsolicited_server_data(UnsolicitedServerData unsolicited) {
-        report_unsolicited_server_data(unsolicited, "UNSOLICITED");
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {
