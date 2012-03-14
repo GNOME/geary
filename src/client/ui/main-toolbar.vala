@@ -8,11 +8,16 @@
 public class MainToolbar : Gtk.Box {
     private Gtk.Toolbar toolbar;
     private Gtk.Menu menu;
+    private Gtk.Menu mark_menu;
     private Gtk.ToolButton menu_button;
+    private Gtk.ToolButton mark_menu_button;
     
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
+        GearyApplication.instance.load_ui_file("toolbar_mark_menu.ui");
+        mark_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu") as Gtk.Menu;
+
         GearyApplication.instance.load_ui_file("toolbar_menu.ui");
         menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu") as Gtk.Menu;
         
@@ -43,10 +48,15 @@ public class MainToolbar : Gtk.Box {
             as Gtk.ToolButton;
         archive_message.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_DELETE_MESSAGE));
+
+        mark_menu_button = builder.get_object(GearyController.ACTION_MARK_AS_MENU) as Gtk.ToolButton;
+        mark_menu_button.set_related_action(GearyApplication.instance.actions.get_action(
+            GearyController.ACTION_MARK_AS_MENU));
+        mark_menu_button.clicked.connect(on_show_mark_menu);
         
         menu_button = builder.get_object("menu_button") as Gtk.ToolButton;
         menu_button.clicked.connect(on_show_menu);
-        
+
         toolbar.get_style_context().add_class("primary-toolbar");
         
         add(toolbar);
@@ -55,7 +65,12 @@ public class MainToolbar : Gtk.Box {
     private void on_show_menu() {
         menu.popup(null, null, popup_pos, 0, 0);
     }
-    
+
+    public void on_show_mark_menu() {
+        mark_menu.popup(null, null, popup_pos, 0, 0);
+    }
+
+    // Calculates the position of menu popups. It handles both menus in the toolbar.
     private void popup_pos(Gtk.Menu menu, out int x, out int y, out bool push_in) {
         menu.realize();
         
@@ -63,7 +78,11 @@ public class MainToolbar : Gtk.Box {
         get_window().get_origin(out rx, out ry);
         
         Gtk.Allocation menu_button_allocation;
-        menu_button.get_allocation(out menu_button_allocation);
+        if (menu == mark_menu) {
+            mark_menu_button.get_allocation(out menu_button_allocation);
+        } else {
+            menu_button.get_allocation(out menu_button_allocation);
+        }
         
         Gtk.Allocation toolbar_allocation;
         get_allocation(out toolbar_allocation);

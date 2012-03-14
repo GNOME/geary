@@ -1,0 +1,7 @@
+<ui>
+    <popup name="ToolbarMarkMenu">
+        <menuitem name="MarkAsRead" action="GearyMarkAsRead" />
+        <menuitem name="MarkAsUnread" action="GearyMarkAsUnread" />
+    </popup>
+</ui>
+
