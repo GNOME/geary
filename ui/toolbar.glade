@@ -7,7 +7,6 @@
     <property name="toolbar_style">icons</property>
     <child>
       <object class="GtkToolButton" id="GearyNewMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose message</property>
@@ -23,7 +22,6 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyReplyToMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Reply to sender</property>
@@ -39,7 +37,6 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyReplyAllMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Reply to all</property>
@@ -55,7 +52,6 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyForwardMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Forward email</property>
@@ -71,7 +67,6 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyDeleteMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Delete the selected conversation</property>
@@ -86,8 +81,21 @@
       </packing>
     </child>
     <child>
-      <object class="GtkToolItem" id="filler">
+      <object class="GtkToolButton" id="GearyMarkAsMenuButton">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
+        <property name="label" translatable="yes">Mark as...</property>
+        <property name="use_underline">True</property>
+        <property name="icon_name">mail-mark-notjunk</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolItem" id="filler">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
@@ -102,7 +110,6 @@
     </child>
     <child>
       <object class="GtkToolButton" id="menu_button">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>

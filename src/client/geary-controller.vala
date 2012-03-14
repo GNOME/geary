@@ -69,6 +69,9 @@ public class GearyController {
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
     public const string ACTION_PREFERENCES = "GearyPreferences";
+    public const string ACTION_MARK_AS_MENU = "GearyMarkAsMenuButton";
+    public const string ACTION_MARK_AS_READ = "GearyMarkAsRead";
+    public const string ACTION_MARK_AS_UNREAD = "GearyMarkAsUnread";
     
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
@@ -129,6 +132,21 @@ public class GearyController {
         Gtk.ActionEntry quit = { ACTION_QUIT, Gtk.Stock.QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
         quit.label = _("_Quit");
         entries += quit;
+        
+        Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, "mail-mark-notjunk", TRANSLATABLE, null,
+            null, on_show_mark_menu };
+        mark_menu.label = _("_Mark as...");
+        entries += mark_menu;
+
+        Gtk.ActionEntry mark_read = { ACTION_MARK_AS_READ, "mail-mark-read", TRANSLATABLE, null, null,
+            on_mark_as_read };
+        mark_read.label = _("Mark as _read");
+        entries += mark_read;
+
+        Gtk.ActionEntry mark_unread = { ACTION_MARK_AS_UNREAD, "mail-mark-unread", TRANSLATABLE, null,
+            null, on_mark_as_unread };
+        mark_unread.label = _("Mark as _unread");
+        entries += mark_unread;
         
         Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", 
             null, on_new_message };
@@ -677,6 +695,62 @@ public class GearyController {
         dialog.run();
     }
     
+    private void mark_selected_conversations(Geary.EmailFlags? flags_to_add, Geary.EmailFlags?
+        flags_to_remove) {
+
+        // Get the IDs of all selected emails.
+        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (Geary.Conversation conversation in selected_conversations) {
+            Gee.Set<Geary.Email>? messages = conversation.get_pool();
+            if (messages != null) {
+                foreach (Geary.Email email in messages) {
+                    ids.add(email.id);
+                }
+            }
+        }
+        
+        // Mark the emails.
+        if (ids.size > 0) {
+            set_busy(true);
+            current_folder.mark_email_async.begin(ids, flags_to_add, flags_to_remove,
+                cancellable_message, on_mark_complete);
+        }
+    }
+    
+    private void on_show_mark_menu() {
+        bool unread_selected = false;
+        bool read_selected = false;
+        foreach (Geary.Conversation conversation in selected_conversations) {
+            if (conversation.is_unread()) {
+                unread_selected = true;
+            } else {
+                read_selected = true;
+            }
+            if (unread_selected && read_selected) {
+                break;
+            }
+        }
+        var actions = GearyApplication.instance.actions;
+        actions.get_action(ACTION_MARK_AS_READ).sensitive = unread_selected;
+        actions.get_action(ACTION_MARK_AS_UNREAD).sensitive = read_selected;
+    }
+    
+    private void on_mark_as_read() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+        mark_selected_conversations(null, flags);
+    }
+
+    private void on_mark_as_unread() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+        mark_selected_conversations(flags, null);
+    }
+    
+    private void on_mark_complete() {
+        set_busy(false);
+    }
+    
     // Opens a link in an external browser.
     private void open_uri(string _link) {
         string link = _link;
@@ -822,6 +896,7 @@ public class GearyController {
 
         // Mutliple message buttons.
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = true;
+        GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive = true;
     }
     
     // Enables or disables the message buttons on the toolbar.
@@ -830,6 +905,7 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive = sensitive;
     }
 }
 
