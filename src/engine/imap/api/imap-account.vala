@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
+private class Geary.Imap.Account : Object {
     // all references to Inbox are converted to this string, purely for sanity sake when dealing
     // with Inbox's case issues
     public const string INBOX_NAME = "INBOX";
@@ -27,15 +27,17 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         }
     }
     
+    private string name;
     private Geary.Credentials cred;
     private ClientSessionManager session_mgr;
     private Geary.Smtp.ClientSession smtp;
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     
+    public signal void login_failed(Geary.Credentials cred);
+    
     public Account(Geary.Endpoint imap_endpoint, Geary.Endpoint smtp_endpoint, Geary.Credentials cred,
         Geary.AccountInformation account_info) {
-        base ("IMAP Account for %s".printf(cred.to_string()));
-        
+        name = "IMAP Account for %s".printf(cred.to_string());
         this.cred = cred;
         
         session_mgr = new ClientSessionManager(imap_endpoint, cred, account_info);
@@ -43,11 +45,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         smtp = new Geary.Smtp.ClientSession(smtp_endpoint);
     }
     
-    public override Geary.Email.Field get_required_fields_for_writing() {
-        return Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
-    }
-    
-    public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
+    public async Gee.Collection<Geary.Imap.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
         Geary.FolderPath? processed = process_path(parent, null,
             (parent != null) ? parent.get_root().default_separator : ASSUMED_SEPARATOR);
@@ -65,7 +63,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
                 throw err;
         }
         
-        Gee.Collection<Geary.Folder> folders = new Gee.ArrayList<Geary.Folder>();
+        Gee.Collection<Geary.Imap.Folder> folders = new Gee.ArrayList<Geary.Imap.Folder>();
         
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
         foreach (MailboxInformation mbox in mboxes) {
@@ -97,7 +95,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         return folders;
     }
     
-    public override async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
+    public async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
         throws Error {
         Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
         if (processed == null)
@@ -106,7 +104,7 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
         return yield session_mgr.folder_exists_async(processed.get_fullpath(), cancellable);
     }
     
-    public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
+    public async Geary.Imap.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
         Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
         if (processed == null)
@@ -195,7 +193,11 @@ private class Geary.Imap.Account : Geary.AbstractAccount, Geary.RemoteAccount {
     }
     
     private void on_login_failed() {
-        notify_report_problem(Geary.Account.Problem.LOGIN_FAILED, cred, null);
+        login_failed(cred);
+    }
+    
+    public string to_string() {
+        return name;
     }
 }
 

@@ -7,8 +7,8 @@
 // TODO: This class currently deals with generic email storage as well as IMAP-specific issues; in
 // the future, to support other email services, will need to break this up.
 
-private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Geary.ReferenceSemantics {
-    private const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = 
+private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
+    public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = 
         Geary.Email.Field.REFERENCES | Geary.Email.Field.PROPERTIES;
     
     protected int manual_ref_count { get; protected set; }
@@ -39,46 +39,34 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
     
-    public override Geary.FolderPath get_path() {
+    public Geary.FolderPath get_path() {
         return path;
     }
     
-    public override Geary.FolderProperties? get_properties() {
+    public Geary.Imap.FolderProperties? get_properties() {
         // TODO: TBD: alteration/updated signals for folders
         return properties;
-    }
-    
-    public override Geary.Folder.ListFlags get_supported_list_flags() {
-        return Geary.Folder.ListFlags.NONE;
-    }
-    
-    public Geary.Email.Field get_duplicate_detection_fields() {
-        return REQUIRED_FOR_DUPLICATE_DETECTION;
     }
     
     internal void update_properties(Geary.Imap.FolderProperties? properties) {
         this.properties = properties;
     }
     
-    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
         if (opened)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
         opened = true;
-        
-        notify_opened(Geary.Folder.OpenState.LOCAL, yield get_email_count_async(cancellable));
     }
     
-    public override async void close_async(Cancellable? cancellable = null) throws Error {
+    public async void close_async(Cancellable? cancellable = null) throws Error {
         if (!opened)
             return;
         
         opened = false;
-        
-        notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
-    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
+    public async int get_email_count_async(Cancellable? cancellable = null) throws Error {
         check_open();
         
         // TODO: This can be cached and updated when changes occur
@@ -112,7 +100,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             cancellable);
     }
     
-    public override async bool create_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public async bool create_email_async(Geary.Email email, Cancellable? cancellable = null)
         throws Error {
         return yield atomic_create_email_async(null, email, cancellable);
     }
@@ -248,24 +236,20 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             yield imap_message_properties_table.create_async(transaction, properties_row, cancellable);
         }
         
-        int count = yield location_table.fetch_count_for_folder_async(transaction, folder_row.id,
-            false, cancellable);
-        
         // only commit if not supplied a transaction
         if (supplied_transaction == null)
             yield transaction.commit_async(cancellable);
         
-        notify_messages_appended(count);
-        
         return true;
     }
     
-    public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
+    public async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable)
         throws Error {
         check_open();
         
-        normalize_span_specifiers(ref low, ref count, yield get_email_count_async(cancellable));
+        Geary.Folder.normalize_span_specifiers(ref low, ref count,
+            yield get_email_count_async(cancellable));
         
         if (count == 0)
             return null;
@@ -276,7 +260,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<MessageLocationRow>? list = yield location_table.list_async(transaction,
             folder_row.id, low, count, false, cancellable);
         
-        return yield list_email(transaction, list, required_fields, false, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, false, cancellable);
     }
     
     private async Gee.List<Geary.Email>? list_email_including_removed_async(int low, int count,
@@ -284,8 +268,8 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         throws Error {
         check_open();
         
-        normalize_span_specifiers(ref low, ref count, yield get_email_count_including_removed_async(
-            cancellable));
+        Geary.Folder.normalize_span_specifiers(ref low, ref count,
+            yield get_email_count_including_removed_async(cancellable));
         
         if (count == 0)
             return null;
@@ -296,10 +280,10 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<MessageLocationRow>? list = yield location_table.list_async(transaction,
             folder_row.id, low, count, true, cancellable);
         
-        return yield list_email(transaction, list, required_fields, true, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, true, cancellable);
     }
     
-    public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
+    public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
         check_open();
@@ -310,10 +294,10 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<MessageLocationRow>? list = yield location_table.list_sparse_async(transaction,
             folder_row.id, by_position, cancellable);
         
-        return yield list_email(transaction, list, required_fields, false, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, false, cancellable);
     }
     
-    public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
+    public async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
         if (count == 0 || count == 1) {
@@ -346,10 +330,10 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         Gee.List<MessageLocationRow>? list = yield location_table.list_ordering_async(transaction,
             folder_row.id, low, high, cancellable);
         
-        return yield list_email(transaction, list, required_fields, false, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, false, cancellable);
     }
     
-    private async Gee.List<Geary.Email>? list_email(Transaction transaction,
+    private async Gee.List<Geary.Email>? do_list_email_async(Transaction transaction,
         Gee.List<MessageLocationRow>? list, Geary.Email.Field required_fields,
         bool include_removed, Cancellable? cancellable) throws Error {
         check_open();
@@ -407,7 +391,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         return (emails.size > 0) ? emails : null;
     }
     
-    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
+    public async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         check_open();
         
@@ -482,32 +466,20 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         return (ordering >= 1) ? new Geary.Imap.UID(ordering) : null;
     }
     
-    public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
+    public async void remove_single_email_async(Geary.EmailIdentifier email_id,
         Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        Transaction transaction = yield db.begin_transaction_async("Folder.remove_email_async",
-            cancellable);
-        
         // TODO: Right now, deleting an email is merely detaching its association with a folder
         // (since it may be located in multiple folders).  This means at some point in the future
         // a vacuum will be required to remove emails that are completely unassociated with the
         // account
-        foreach (Geary.EmailIdentifier id in email_ids) {
-            if (!yield location_table.remove_by_ordering_async(transaction, folder_row.id, id.ordering,
-                cancellable)) {
-                throw new EngineError.NOT_FOUND("Message %s in local store of %s not found", id.to_string(),
-                    to_string());
-            }
+        if (!yield location_table.remove_by_ordering_async(null, folder_row.id, email_id.ordering,
+            cancellable)) {
+            throw new EngineError.NOT_FOUND("Message %s not found in %s", email_id.to_string(),
+                to_string());
         }
-        
-        yield transaction.commit_async(cancellable);
-        
-        foreach (Geary.EmailIdentifier id in email_ids)
-            notify_message_removed(id);
     }
     
-    public override async void mark_email_async(
+    public async void mark_email_async(
         Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
         
@@ -725,6 +697,10 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         }
         
         return (map.size > 0) ? map : null;
+    }
+    
+    public string to_string() {
+        return path.to_string();
     }
 }
 

@@ -99,7 +99,12 @@ public class Geary.Conversations : Object {
             // be true.  Other accessors return null instead because it's possible the caller is
             // passing in ConversationNodes for another Conversation, and would rather warn than
             // assert on that case.
-            assert(node.conversation == this);
+            if (node.conversation != this) {
+                debug("Origin of conversation is not queried conversation: (%s vs. %s)",
+                    node.conversation.origin.to_string(), this.origin.to_string());
+                
+                assert(node.conversation == this);
+            }
             
             return node;
         }

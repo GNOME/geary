@@ -6,8 +6,7 @@
 
 private class Geary.OtherAccount : Geary.GenericImapAccount {
     public OtherAccount(string name, string username, AccountInformation account_info,
-        File user_data_dir, RemoteAccount remote,
-        LocalAccount local) {
+        File user_data_dir, Imap.Account remote, Sqlite.Account local) {
         base (name, username, account_info, user_data_dir, remote, local);
     }
     

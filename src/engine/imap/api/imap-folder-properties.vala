@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.FolderProperties : Geary.FolderProperties {
+public class Geary.Imap.FolderProperties {
     public int messages { get; private set; }
     public int recent { get; private set; }
     public int unseen { get; private set; }

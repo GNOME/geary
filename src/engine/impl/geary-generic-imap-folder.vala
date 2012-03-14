@@ -17,7 +17,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
     private Gee.HashSet<Geary.EmailIdentifier> prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>(
         Hashable.hash_func, Equalable.equal_func);
     
-    public GenericImapFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
+    public GenericImapFolder(Imap.Account remote, Sqlite.Account local, Sqlite.Folder local_folder) {
         base (remote, local, local_folder);
     }
     
@@ -27,14 +27,12 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
     }
     
     // Check if the remote folder's ordering has changed since last opened
-    protected override async bool prepare_opened_folder(Geary.Folder local_folder,
-        Geary.Folder remote_folder, Cancellable? cancellable) throws Error {
+    protected override async bool normalize_folders(Geary.Sqlite.Folder local_folder,
+        Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
         debug("prepare_opened_folder %s", to_string());
         
-        Geary.Imap.FolderProperties? local_properties =
-            (Geary.Imap.FolderProperties?) local_folder.get_properties();
-        Geary.Imap.FolderProperties? remote_properties =
-            (Geary.Imap.FolderProperties?) remote_folder.get_properties();
+        Geary.Imap.FolderProperties? local_properties = local_folder.get_properties();
+        Geary.Imap.FolderProperties? remote_properties = remote_folder.get_properties();
         
         // both sets of properties must be available
         if (local_properties == null) {
@@ -117,7 +115,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                 
                 if (newest != null && newest.size > 0) {
                     foreach (Geary.Email email in newest)
-                        batch.add(new CreateEmailOperation(local_folder, email));
+                        batch.add(new CreateLocalEmailOperation(local_folder, email));
                 }
             }
         }
@@ -188,7 +186,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                     (Geary.Imap.EmailProperties) remote_email.properties;
                 
                 if (!local_email_properties.equals(remote_email_properties)) {
-                    batch.add(new CreateEmailOperation(local_folder, remote_email));
+                    batch.add(new CreateLocalEmailOperation(local_folder, remote_email));
                     flags_changed.set(remote_email.id, remote_email.properties.email_flags);
                 }
                 
@@ -196,14 +194,14 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
                 local_ctr++;
             } else if (remote_uid.value < local_uid.value) {
                 // one we'd not seen before is present, add and move to next remote
-                batch.add(new CreateEmailOperation(local_folder, remote_email));
+                batch.add(new CreateLocalEmailOperation(local_folder, remote_email));
                 
                 remote_ctr++;
             } else {
                 assert(remote_uid.value > local_uid.value);
                 
                 // local's email on the server has been removed, remove locally
-                batch.add(new RemoveEmailOperation(local_folder, local_email.id));
+                batch.add(new RemoveLocalEmailOperation(local_folder, local_email.id));
                 removed_ids.add(local_email.id);
                 
                 local_ctr++;
@@ -216,14 +214,14 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // added to the top of the stack)
         int appended = 0;
         for (; remote_ctr < remote_length; remote_ctr++) {
-            batch.add(new CreateEmailOperation(local_folder, old_remote[remote_ctr]));
+            batch.add(new CreateLocalEmailOperation(local_folder, old_remote[remote_ctr]));
             appended++;
         }
         
         // remove anything left over ... use local count rather than remote as we're still in a stage
         // where only the local messages are available
         for (; local_ctr < local_length; local_ctr++) {
-            batch.add(new RemoveEmailOperation(local_folder, old_local[local_ctr].id));
+            batch.add(new RemoveLocalEmailOperation(local_folder, old_local[local_ctr].id));
             removed_ids.add(old_local[local_ctr].id);
         }
         

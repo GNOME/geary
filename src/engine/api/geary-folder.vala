@@ -145,8 +145,6 @@ public interface Geary.Folder : Object {
     
     public abstract Geary.FolderPath get_path();
     
-    public abstract Geary.FolderProperties? get_properties();
-    
     public abstract ListFlags get_supported_list_flags();
     
     /**

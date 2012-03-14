@@ -7,12 +7,12 @@
 private class Geary.EngineFolder : Geary.AbstractFolder {
     private const int REMOTE_FETCH_CHUNK_COUNT = 5;
     
-    internal LocalFolder local_folder  { get; protected set; }
-    internal RemoteFolder? remote_folder { get; protected set; default = null; }
+    internal Sqlite.Folder local_folder  { get; protected set; }
+    internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
     
-    private RemoteAccount remote;
-    private LocalAccount local;
+    private Imap.Account remote;
+    private Sqlite.Account local;
     private bool opened = false;
     private NonblockingSemaphore remote_semaphore;
     private ReceiveReplayQueue? recv_replay_queue = null;
@@ -22,7 +22,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     public virtual signal void local_added(Gee.Collection<Geary.EmailIdentifier> added) {
     }
     
-    public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
+    public EngineFolder(Imap.Account remote, Sqlite.Account local, Sqlite.Folder local_folder) {
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
@@ -39,10 +39,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     
     public override Geary.FolderPath get_path() {
         return local_folder.get_path();
-    }
-    
-    public override Geary.FolderProperties? get_properties() {
-        return null;
     }
     
     public override Geary.Folder.ListFlags get_supported_list_flags() {
@@ -65,8 +61,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
      *
      * This will only be called if both the local and remote folder have been opened.
      */
-    protected virtual async bool prepare_opened_folder(Geary.Folder local_folder, Geary.Folder remote_folder,
-        Cancellable? cancellable) throws Error {
+    protected virtual async bool normalize_folders(Geary.Sqlite.Folder local_folder,
+        Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
         return true;
     }
     
@@ -98,24 +94,23 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private async void open_remote_async(bool readonly, Cancellable? cancellable) {
         try {
             debug("Opening remote %s", local_folder.get_path().to_string());
-            RemoteFolder folder = (RemoteFolder) yield remote.fetch_folder_async(local_folder.get_path(),
+            Imap.Folder folder = (Imap.Folder) yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
             
             yield folder.open_async(readonly, cancellable);
             
             // allow subclasses to examine the opened folder and resolve any vital
             // inconsistencies
-            if (yield prepare_opened_folder(local_folder, folder, cancellable)) {
+            if (yield normalize_folders(local_folder, folder, cancellable)) {
                 // update flags, properties, etc.
                 yield local.update_folder_async(folder, cancellable);
                 
                 // signals
                 folder.messages_appended.connect(on_remote_messages_appended);
-                folder.message_removed.connect(on_remote_message_removed);
                 folder.message_at_removed.connect(on_remote_message_at_removed);
                 
                 // state
-                remote_count = yield folder.get_email_count_async(cancellable);
+                remote_count = folder.get_email_count();
                 
                 // all set; bless the remote folder as opened
                 remote_folder = folder;
@@ -172,12 +167,12 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             if (remote_folder != null) {
                 yield remote_semaphore.wait_async();
                 
-                RemoteFolder? folder = remote_folder;
+                Imap.Folder? folder = remote_folder;
                 remote_folder = null;
                 
                 // signals
                 folder.messages_appended.disconnect(on_remote_messages_appended);
-                folder.message_removed.disconnect(on_remote_message_removed);
+                folder.message_at_removed.disconnect(on_remote_message_at_removed);
                 
                 folder.close_async.begin(cancellable);
             }
@@ -244,7 +239,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(remote_count + 1, -1,
-                local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, null);
+                Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, Geary.Folder.ListFlags.NONE,
+                null);
             assert(list != null && list.size > 0);
             
             Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
@@ -266,11 +262,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
                 to_string(), err.message);
         }
-    }
-    
-    private void on_remote_message_removed(Geary.EmailIdentifier id) {
-        debug("on_remote_message_removed: %s", id.to_string());
-        recv_replay_queue.schedule(new ReplayRemoval.with_id(this, id));
     }
     
     private void on_remote_message_at_removed(int position, int total) {
@@ -489,7 +480,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // Always get the flags for normalization and whatever the local store requires for duplicate
         // detection
         Geary.Email.Field full_fields =
-            required_fields | Geary.Email.Field.PROPERTIES | local_folder.get_duplicate_detection_fields();
+            required_fields | Geary.Email.Field.PROPERTIES | Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
         
         Gee.List<Geary.Email> full = new Gee.ArrayList<Geary.Email>();
         
@@ -522,7 +513,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             NonblockingBatch batch = new NonblockingBatch();
             
             foreach (Geary.Email email in remote_list)
-                batch.add(new CreateEmailOperation(local_folder, email));
+                batch.add(new CreateLocalEmailOperation(local_folder, email));
             
             yield batch.execute_all_async(cancellable);
             
@@ -532,7 +523,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
                 Hashable.hash_func, Equalable.equal_func);
             foreach (int id in batch.get_ids()) {
-                CreateEmailOperation? op = batch.get_operation(id) as CreateEmailOperation;
+                CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
                 if (op != null && op.created)
                     created_ids.add(op.email.id);
             }
@@ -656,7 +647,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
             // as fields for duplicate detection
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(high, prefetch_count,
-                local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, cancellable);
+                Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, Geary.Folder.ListFlags.NONE,
+                cancellable);
             if (list == null || list.size != prefetch_count) {
                 throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
                     count, low, to_string());
@@ -665,7 +657,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             NonblockingBatch batch = new NonblockingBatch();
             
             foreach (Geary.Email email in list)
-                batch.add(new CreateEmailOperation(local_folder, email));
+                batch.add(new CreateLocalEmailOperation(local_folder, email));
             
             yield batch.execute_all_async(cancellable);
             batch.throw_first_exception();
@@ -674,7 +666,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
                 Hashable.hash_func, Equalable.equal_func);
             foreach (int id in batch.get_ids()) {
-                CreateEmailOperation? op = batch.get_operation(id) as CreateEmailOperation;
+                CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
                 if (op != null && op.created)
                     created_ids.add(op.email.id);
             }

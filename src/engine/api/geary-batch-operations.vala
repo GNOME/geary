@@ -5,18 +5,18 @@
  */
 
 /**
- * CreateEmailOperation is a common Geary.NonblockingBatchOperation that can be used with
+ * CreateLocalEmailOperation is a common Geary.NonblockingBatchOperation that can be used with
  * Geary.NonblockingBatch.
  *
- * Note that this operation always returns null.  The result of Geary.Folder.create_email_async()
+ * Note that this operation always returns null.  The result of Geary.Sqlite.Folder.create_email_async()
  * is stored in the created property.
  */
-public class Geary.CreateEmailOperation : Geary.NonblockingBatchOperation {
-    public Geary.Folder folder { get; private set; }
+private class Geary.CreateLocalEmailOperation : Geary.NonblockingBatchOperation {
+    public Geary.Sqlite.Folder folder { get; private set; }
     public Geary.Email email { get; private set; }
     public bool created { get; private set; default = false; }
     
-    public CreateEmailOperation(Geary.Folder folder, Geary.Email email) {
+    public CreateLocalEmailOperation(Geary.Sqlite.Folder folder, Geary.Email email) {
         this.folder = folder;
         this.email = email;
     }
@@ -29,17 +29,17 @@ public class Geary.CreateEmailOperation : Geary.NonblockingBatchOperation {
 }
 
 /**
- * RemoveEmailOperation is a common NonblockingBatchOperation that can be used with
+ * RemoveLocalEmailOperation is a common NonblockingBatchOperation that can be used with
  * NonblockingBatch.
  *
- * Note that this operation always returns null, as Geary.Folder.remove_email_async() has no returned
- * value.
+ * Note that this operation always returns null, as Geary.Sqlite.Folder.remove_email_async() has no
+ * returned value.
  */
-public class Geary.RemoveEmailOperation : Geary.NonblockingBatchOperation {
-    public Geary.Folder folder { get; private set; }
+private class Geary.RemoveLocalEmailOperation : Geary.NonblockingBatchOperation {
+    public Geary.Sqlite.Folder folder { get; private set; }
     public Geary.EmailIdentifier email_id { get; private set; }
     
-    public RemoveEmailOperation(Geary.Folder folder, Geary.EmailIdentifier email_id) {
+    public RemoveLocalEmailOperation(Geary.Sqlite.Folder folder, Geary.EmailIdentifier email_id) {
         this.folder = folder;
         this.email_id = email_id;
     }

@@ -32,8 +32,6 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract Geary.FolderPath get_path();
     
-    public abstract Geary.FolderProperties? get_properties();
-    
     public abstract Geary.Folder.ListFlags get_supported_list_flags();
     
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
@@ -49,77 +47,24 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error;
     
-    public virtual void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
-        Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
-        do_lazy_list_email_async.begin(low, count, required_fields, flags, cb, cancellable);
-    }
-    
-    private async void do_lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
-        Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
-        try {
-            Gee.List<Geary.Email>? list = yield list_email_async(low, count, required_fields, flags,
-                cancellable);
-            
-            if (list != null && list.size > 0)
-                cb(list, null);
-            
-            cb(null, null);
-        } catch (Error err) {
-            cb(null, err);
-        }
-    }
+    public abstract void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
+        Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
     
     public abstract async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error;
     
-    public virtual void lazy_list_email_sparse(int[] by_position,
+    public abstract void lazy_list_email_sparse(int[] by_position,
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null) {
-        do_lazy_list_email_sparse_async.begin(by_position, required_fields, flags, cb, cancellable);
-    }
-    
-    private async void do_lazy_list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null) {
-        try {
-            Gee.List<Geary.Email>? list = yield list_email_sparse_async(by_position,
-                required_fields, flags, cancellable);
-            
-            if (list != null && list.size > 0)
-                cb(list, null);
-            
-            cb(null, null);
-        } catch(Error err) {
-            cb(null, err);
-        }
-    }
+        Cancellable? cancellable = null);
     
     public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error;
     
-    public virtual void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
+    public abstract void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null) {
-        do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, flags, cb, cancellable);
-    }
-    
-    private async void do_lazy_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable) {
-        try {
-            Gee.List<Geary.Email>? list = yield list_email_by_id_async(initial_id, count,
-                required_fields, flags, cancellable);
-            
-            if (list != null && list.size > 0)
-                cb(list, null);
-            
-            cb(null, null);
-        } catch (Error err) {
-            cb(null, err);
-        }
-    }
+        Cancellable? cancellable = null);
     
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;

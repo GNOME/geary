@@ -7,19 +7,17 @@
 private class Geary.GenericImapAccount : Geary.EngineAccount {
     private SpecialFolderMap? special_folders = null;
     
-    private RemoteAccount remote;
-    private LocalAccount local;
+    private Imap.Account remote;
+    private Sqlite.Account local;
     
     public GenericImapAccount(string name, string username, AccountInformation? account_info,
-        File user_data_dir, RemoteAccount remote,
-        LocalAccount local) {
+        File user_data_dir, Imap.Account remote, Sqlite.Account local) {
         base (name, username, account_info, user_data_dir);
         
         this.remote = remote;
         this.local = local;
         
-        this.remote.report_problem.connect(on_report_problem);
-        this.local.report_problem.connect(on_report_problem);
+        this.remote.login_failed.connect(on_login_failed);
         
         if (special_folders == null) {
             special_folders = new SpecialFolderMap();
@@ -43,7 +41,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
     
     public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
-        Gee.Collection<Geary.Folder>? local_list = null;
+        Gee.Collection<Geary.Sqlite.Folder>? local_list = null;
         try {
             local_list = yield local.list_folders_async(parent, cancellable);
         } catch (EngineError err) {
@@ -54,8 +52,8 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         
         Gee.Collection<Geary.Folder> engine_list = new Gee.ArrayList<Geary.Folder>();
         if (local_list != null && local_list.size > 0) {
-            foreach (Geary.Folder local_folder in local_list)
-                engine_list.add(new GenericImapFolder(remote, local, (LocalFolder) local_folder));
+            foreach (Geary.Sqlite.Folder local_folder in local_list)
+                engine_list.add(new GenericImapFolder(remote, local, local_folder));
         }
         
         background_update_folders.begin(parent, engine_list, cancellable);
@@ -73,9 +71,9 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
     
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
-        LocalFolder? local_folder = null;
+        Sqlite.Folder? local_folder = null;
         try {
-            local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
+            local_folder = (Sqlite.Folder) yield local.fetch_folder_async(path, cancellable);
             
             return new GenericImapFolder(remote, local, local_folder);
         } catch (EngineError err) {
@@ -93,51 +91,46 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
             if (yield local.folder_exists_async(folder))
                 continue;
             
-            RemoteFolder remote_folder = (RemoteFolder) yield remote.fetch_folder_async(folder,
+            Imap.Folder remote_folder = (Imap.Folder) yield remote.fetch_folder_async(folder,
                 cancellable);
             
             yield local.clone_folder_async(remote_folder, cancellable);
         }
         
         // Fetch the local account's version of the folder for the GenericImapFolder
-        local_folder = (LocalFolder) yield local.fetch_folder_async(path, cancellable);
+        local_folder = (Sqlite.Folder) yield local.fetch_folder_async(path, cancellable);
         
         return new GenericImapFolder(remote, local, local_folder);
     }
     
-    private Gee.Set<string> get_folder_names(Gee.Collection<Geary.Folder> folders) {
-        Gee.Set<string> names = new Gee.HashSet<string>();
-        foreach (Geary.Folder folder in folders)
-            names.add(folder.get_path().basename);
-        
-        return names;
-    }
-    
-    private Gee.List<Geary.Folder> get_excluded_folders(Gee.Collection<Geary.Folder> folders,
-        Gee.Set<string> names) {
-        Gee.List<Geary.Folder> excluded = new Gee.ArrayList<Geary.Folder>();
-        foreach (Geary.Folder folder in folders) {
-            if (!names.contains(folder.get_path().basename))
-                excluded.add(folder);
-        }
-        
-        return excluded;
-    }
-    
     private async void background_update_folders(Geary.FolderPath? parent,
         Gee.Collection<Geary.Folder> engine_folders, Cancellable? cancellable) {
-        Gee.Collection<Geary.Folder> remote_folders;
+        Gee.Collection<Geary.Imap.Folder> remote_folders;
         try {
             remote_folders = yield remote.list_folders_async(parent, cancellable);
         } catch (Error remote_error) {
             error("Unable to retrieve folder list from server: %s", remote_error.message);
         }
         
-        Gee.Set<string> local_names = get_folder_names(engine_folders);
-        Gee.Set<string> remote_names = get_folder_names(remote_folders);
+        Gee.Set<string> local_names = new Gee.HashSet<string>();
+        foreach (Geary.Folder folder in engine_folders)
+            local_names.add(folder.get_path().basename);
         
-        Gee.List<Geary.Folder>? to_add = get_excluded_folders(remote_folders, local_names);
-        Gee.List<Geary.Folder>? to_remove = get_excluded_folders(engine_folders, remote_names);
+        Gee.Set<string> remote_names = new Gee.HashSet<string>();
+        foreach (Geary.Imap.Folder folder in remote_folders)
+            remote_names.add(folder.get_path().basename);
+        
+        Gee.List<Geary.Imap.Folder> to_add = new Gee.ArrayList<Geary.Imap.Folder>();
+        foreach (Geary.Imap.Folder folder in remote_folders) {
+            if (!local_names.contains(folder.get_path().basename))
+                to_add.add(folder);
+        }
+        
+        Gee.List<Geary.Folder>? to_remove = new Gee.ArrayList<Geary.Imap.Folder>();
+        foreach (Geary.Folder folder in engine_folders) {
+            if (!remote_names.contains(folder.get_path().basename))
+                to_remove.add(folder);
+        }
         
         if (to_add.size == 0)
             to_add = null;
@@ -146,7 +139,7 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
             to_remove = null;
         
         if (to_add != null) {
-            foreach (Geary.Folder folder in to_add) {
+            foreach (Geary.Imap.Folder folder in to_add) {
                 try {
                     yield local.clone_folder_async(folder, cancellable);
                 } catch (Error err) {
@@ -159,9 +152,9 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         Gee.Collection<Geary.Folder> engine_added = null;
         if (to_add != null) {
             engine_added = new Gee.ArrayList<Geary.Folder>();
-            foreach (Geary.Folder remote_folder in to_add) {
+            foreach (Geary.Imap.Folder remote_folder in to_add) {
                 try {
-                    LocalFolder local_folder = (LocalFolder) yield local.fetch_folder_async(
+                    Sqlite.Folder local_folder = (Sqlite.Folder) yield local.fetch_folder_async(
                         remote_folder.get_path(), cancellable);
                     engine_added.add(new GenericImapFolder(remote, local, local_folder));
                 } catch (Error convert_err) {
@@ -195,9 +188,8 @@ private class Geary.GenericImapAccount : Geary.EngineAccount {
         yield remote.send_email_async(composed, cancellable);
     }
     
-    private void on_report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
-        Error? err) {
-        notify_report_problem(problem, credentials, err);
+    private void on_login_failed(Geary.Credentials? credentials) {
+        notify_report_problem(Geary.Account.Problem.LOGIN_FAILED, credentials, null);
     }
 }
 
