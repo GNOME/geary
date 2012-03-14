@@ -28,10 +28,17 @@ public class PreferencesDialog : Object {
         // Connect to element signals.
         autoselect.toggled.connect(on_autoselect_toggled);
         display_preview.toggled.connect(on_display_preview_toggled);
+        
+        GearyApplication.instance.exiting.connect(on_exit);
     }
     
     public void run() {
-        dialog.run();
+        if (dialog.run() != Gtk.ResponseType.NONE) {
+            dialog.destroy();
+        }
+    }
+    
+    private void on_exit(bool panicked) {
         dialog.destroy();
     }
     
