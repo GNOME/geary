@@ -106,7 +106,7 @@ private class Geary.Imap.Folder : Geary.AbstractFolder, Geary.RemoteFolder {
         return mailbox.exists;
     }
     
-    public override async void create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
+    public override async bool create_email_async(Geary.Email email, Cancellable? cancellable = null) throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         

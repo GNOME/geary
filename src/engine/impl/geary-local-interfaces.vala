@@ -69,5 +69,11 @@ private interface Geary.LocalFolder : Object, Geary.Folder {
      */
     public async abstract Geary.EmailIdentifier? id_from_remote_position(int remote_position, 
         int new_remote_count) throws Error;
+    
+    /**
+     * Returns a map of local emails and their stored fields.
+     */
+    public async abstract Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? get_email_fields_by_id_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
 }
 

@@ -51,24 +51,13 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         Transaction locked = yield obtain_lock_async(transaction, "MessageLocationTable.list_async",
             cancellable);
         
-        SQLHeavy.Query query;
-        if (count >= 0) {
-            query = locked.prepare(
-                "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "%s ORDER BY ordering LIMIT ? OFFSET ?".printf(include_marked ? "" : 
-                "AND remove_marker = 0"));
-            query.bind_int64(0, folder_id);
-            query.bind_int(1, count);
-            query.bind_int(2, low - 1);
-        } else {
-            // count == -1
-            query = locked.prepare(
-                "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
-                + "%s ORDER BY ordering OFFSET ?".printf(include_marked ? "" : 
-                "AND remove_marker = 0"));
-            query.bind_int64(0, folder_id);
-            query.bind_int(1, low - 1);
-        }
+        SQLHeavy.Query query = locked.prepare(
+            "SELECT id, message_id, ordering FROM MessageLocationTable WHERE folder_id = ? "
+            + "%s ORDER BY ordering LIMIT ? OFFSET ?".printf(include_marked ? "" : 
+            "AND remove_marker = 0"));
+        query.bind_int64(0, folder_id);
+        query.bind_int(1, count);
+        query.bind_int(2, low - 1);
         
         SQLHeavy.QueryResult results = yield query.execute_async();
         check_cancel(cancellable, "list_async");

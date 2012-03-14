@@ -112,9 +112,9 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             cancellable);
     }
     
-    public override async void create_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public override async bool create_email_async(Geary.Email email, Cancellable? cancellable = null)
         throws Error {
-        yield atomic_create_email_async(null, email, cancellable);
+        return yield atomic_create_email_async(null, email, cancellable);
     }
     
     // TODO: Need to break out IMAP-specific functionality
@@ -201,7 +201,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         return true;
     }
     
-    private async void atomic_create_email_async(Transaction? supplied_transaction, Geary.Email email,
+    private async bool atomic_create_email_async(Transaction? supplied_transaction, Geary.Email email,
         Cancellable? cancellable) throws Error {
         check_open();
         
@@ -217,7 +217,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         if (!associated || message_id == Sqlite.Row.INVALID_ID)
             message_id = yield search_for_duplicate_async(transaction, email, cancellable);
         
-        // if already associated or a duplicate, associated
+        // if already associated or a duplicate, merge and/or associate
         if (message_id != Sqlite.Row.INVALID_ID) {
             if (!associated)
                 yield associate_with_folder_async(transaction, message_id, email, cancellable);
@@ -227,7 +227,7 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             if (supplied_transaction == null)
                 yield transaction.commit_if_required_async(cancellable);
             
-            return;
+            return false;
         }
         
         // not found, so create and associate with this folder
@@ -256,6 +256,8 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
             yield transaction.commit_async(cancellable);
         
         notify_messages_appended(count);
+        
+        return true;
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
@@ -528,8 +530,8 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
     public async Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> get_email_flags_async(
         Gee.List<Geary.EmailIdentifier> to_get, Cancellable? cancellable) throws Error {
         
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<Geary.EmailIdentifier,
-            Geary.EmailFlags>();
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<
+            Geary.EmailIdentifier, Geary.EmailFlags>(Hashable.hash_func, Equalable.equal_func);
         
         Transaction transaction = yield db.begin_transaction_async("Folder.get_email_flags_async",
             cancellable);
@@ -694,6 +696,35 @@ private class Geary.Sqlite.Folder : Geary.AbstractFolder, Geary.LocalFolder, Gea
         }
         
         return id;
+    }
+    
+    public async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? get_email_fields_by_id_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        if (ids.size == 0)
+            return null;
+        
+        Gee.HashMap<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
+            Geary.EmailIdentifier, Geary.Email.Field>(Hashable.hash_func, Equalable.equal_func);
+        
+        Transaction transaction = yield db.begin_transaction_async("get_email_fields_by_id_async",
+            cancellable);
+        
+        foreach (Geary.EmailIdentifier id in ids) {
+            MessageLocationRow? row = yield location_table.fetch_by_ordering_async(transaction,
+                folder_row.id, ((Geary.Imap.EmailIdentifier) id).uid.value, cancellable);
+            if (row == null)
+                continue;
+            
+            Geary.Email.Field fields;
+            if (yield message_table.fetch_fields_async(transaction, row.message_id, out fields,
+                cancellable)) {
+                map.set(id, fields);
+            }
+        }
+        
+        return (map.size > 0) ? map : null;
     }
 }
 

@@ -7,22 +7,6 @@
 private class Geary.EngineFolder : Geary.AbstractFolder {
     private const int REMOTE_FETCH_CHUNK_COUNT = 5;
     
-    private class CommitOperation : NonblockingBatchOperation {
-        public Folder folder;
-        public Geary.Email email;
-        
-        public CommitOperation(Folder folder, Geary.Email email) {
-            this.folder = folder;
-            this.email = email;
-        }
-        
-        public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            yield folder.create_email_async(email, cancellable);
-            
-            return null;
-        }
-    }
-    
     internal LocalFolder local_folder  { get; protected set; }
     internal RemoteFolder? remote_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
@@ -35,6 +19,9 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private SendReplayQueue? send_replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
+    public virtual signal void local_added(Gee.Collection<Geary.EmailIdentifier> added) {
+    }
+    
     public EngineFolder(RemoteAccount remote, LocalAccount local, LocalFolder local_folder) {
         this.remote = remote;
         this.local = local;
@@ -44,6 +31,10 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     ~EngineFolder() {
         if (opened)
             warning("Folder %s destroyed without closing", to_string());
+    }
+    
+    protected virtual void notify_local_added(Gee.Collection<Geary.EmailIdentifier> added) {
+        local_added(added);
     }
     
     public override Geary.FolderPath get_path() {
@@ -59,7 +50,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             Geary.Folder.ListFlags.EXCLUDING_ID;
     }
     
-    public override async void create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
+    public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
         throw new EngineError.READONLY("Engine currently read-only");
     }
     
@@ -256,15 +247,21 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 local_folder.get_duplicate_detection_fields(), Geary.Folder.ListFlags.NONE, null);
             assert(list != null && list.size > 0);
             
+            Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
+                Hashable.hash_func, Equalable.equal_func);
             foreach (Geary.Email email in list) {
                 debug("Creating Email ID %s", email.id.to_string());
-                yield local_folder.create_email_async(email, null);
+                if (yield local_folder.create_email_async(email, null))
+                    created.add(email.id);
             }
             
             // save new remote count
             remote_count = new_remote_count;
             
             notify_messages_appended(new_remote_count);
+            
+            if (created.size > 0)
+                notify_local_added(created);
         } catch (Error err) {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
                 to_string(), err.message);
@@ -525,11 +522,23 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             NonblockingBatch batch = new NonblockingBatch();
             
             foreach (Geary.Email email in remote_list)
-                batch.add(new CommitOperation(local_folder, email));
+                batch.add(new CreateEmailOperation(local_folder, email));
             
             yield batch.execute_all_async(cancellable);
             
             batch.throw_first_exception();
+            
+            // report locally added (non-duplicate, not unknown) emails
+            Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
+                Hashable.hash_func, Equalable.equal_func);
+            foreach (int id in batch.get_ids()) {
+                CreateEmailOperation? op = batch.get_operation(id) as CreateEmailOperation;
+                if (op != null && op.created)
+                    created_ids.add(op.email.id);
+            }
+            
+            if (created_ids.size > 0)
+                notify_local_added(created_ids);
             
             if (cb != null)
                 cb(remote_list, null);
@@ -570,7 +579,13 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Email email = yield remote_folder.fetch_email_async(id, fields, cancellable);
         
         // save to local store
-        yield local_folder.create_email_async(email, cancellable);
+        if (yield local_folder.create_email_async(email, cancellable)) {
+            // TODO: A Singleton collection would be useful here.
+            Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+            ids.add(email.id);
+            
+            notify_local_added(ids);
+        }
         
         return email;
     }
@@ -654,6 +669,18 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             
             yield batch.execute_all_async(cancellable);
             batch.throw_first_exception();
+            
+            // Collect which EmailIdentifiers were created and report them
+            Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
+                Hashable.hash_func, Equalable.equal_func);
+            foreach (int id in batch.get_ids()) {
+                CreateEmailOperation? op = batch.get_operation(id) as CreateEmailOperation;
+                if (op != null && op.created)
+                    created_ids.add(op.email.id);
+            }
+            
+            if (created_ids.size > 0)
+                notify_local_added(created_ids);
         } catch (Error e) {
             local_count = 0; // prevent compiler warning
             error = e;
