@@ -38,6 +38,7 @@ public class MessageViewer : WebKit.WebView {
             border-radius: 4px;
             -webkit-box-shadow: 0 3px 5px #aaa;
             display: inline-block;
+            word-break: break-all;
         }
         .email_box {
             box-sizing: border-box;
