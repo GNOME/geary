@@ -70,7 +70,7 @@ public class Geary.RFC822.MailboxAddress {
     
     public string to_rfc822_string() {
         return String.is_empty(name)
-            ? "<%s>".printf(address)
+            ? address
             : "%s <%s>".printf(GMime.utils_quote_string(name), address);
     }
     
