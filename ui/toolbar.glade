@@ -84,6 +84,7 @@
       <object class="GtkToolButton" id="GearyMarkAsMenuButton">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Mark as read/unread</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Mark as...</property>
         <property name="use_underline">True</property>
