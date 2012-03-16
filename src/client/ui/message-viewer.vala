@@ -69,6 +69,10 @@ public class MessageViewer : WebKit.WebView {
             color: #777;
             font-size: inherit;
         }
+        .signature {
+            color: #777;
+            display: inline;
+        }
         hr {
             background-color: #999;
             height: 1px;
@@ -276,10 +280,12 @@ public class MessageViewer : WebKit.WebView {
         string body_text = "";
         try {
             body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_utf8();
+            body_text = insert_html_markup(body_text);
         } catch (Error err) {
             try {
-                body_text = "<pre>" + linkify_and_escape_plain_text(email.get_message().
-                    get_first_mime_part_of_content_type("text/plain").to_utf8()) + "</pre>";
+                body_text = linkify_and_escape_plain_text(email.get_message().
+                    get_first_mime_part_of_content_type("text/plain").to_utf8());
+                body_text = "<pre>" + insert_plain_text_markup(body_text) + "</pre>";
             } catch (Error err2) {
                 debug("Could not get message text. %s", err2.message);
             }
@@ -302,7 +308,97 @@ public class MessageViewer : WebKit.WebView {
             warning("Error setting HTML for message: %s", html_error.message);
         }
     }
-    
+
+    private string[] split_message_and_signature(string text) {
+        try {
+            Regex signature_regex = new Regex("(?:\\R--\\s*\\R|<div>-- </div>)",
+                RegexCompileFlags.MULTILINE);
+            return signature_regex.split_full(text, -1, 0, 0, 2);
+        } catch (RegexError e) {
+            debug("Regex error searching for signature: %s", e.message);
+            return new string[0];
+        }
+    }
+
+    private string insert_plain_text_markup(string text) {
+        // Plain text signature and quote:
+        // -- 
+        // Nate
+        //
+        // 2012/3/14 Nate Lillich &lt;nate@yorba.org&gt;#015
+        // &gt;
+        // &gt;
+        //
+        // Find the signature marker (--) at the beginning of a line.
+        string[] message_chunks = split_message_and_signature(text);
+        if (message_chunks.length < 2) {
+            return text;
+        }
+        string message = message_chunks[0];
+        string signature = text.substring(message.length);
+
+        // Next look for any quoted text.
+        string quote = "";
+        try {
+            Regex quote_regex = new Regex("(?:.+?\\R)?^&gt;", RegexCompileFlags.MULTILINE);
+            string[] signature_chunks = quote_regex.split_full(signature, -1, 0, 0, 2);
+            if (signature_chunks.length == 2) {
+                signature = signature_chunks[0];
+                quote = text.substring(message.length + signature.length);
+            }
+        } catch (RegexError e) {
+            debug("Regex error searching for quoted text: %s", e.message);
+        }
+
+        // Now insert the signature div around just the signature.
+        return message + "<div class=\"signature\">" + signature + "</div>" + quote;
+    }
+
+    private string insert_html_markup(string text) {
+        // HTML signature and quote (note, this is actually all one line):
+        // <div>-- </div>
+        // <div>
+        //      Nate<br><br>
+        //      <div class="gmail_quote">
+        //          On Tue, Mar 13, 2012 at 11:35 AM, Nate Lillich
+        //          <span>&lt;<a href="mailto:nate@yorba.org">nate@yorba.org</a>&gt;</span> 
+        //          wrote:<br>
+        //          <blockquote class="gmail_quote">
+        //              Quoted message.
+        //          </blockquote>
+        //      </div><br>
+        // </div>
+        // \u000d
+        //
+        // Find the signature marker (--) at the beginning of a line.
+        try {
+            string[] message_chunks = split_message_and_signature(text);
+            if (message_chunks.length < 2) {
+                return text;
+            }
+            string message = message_chunks[0];
+            string signature = text.substring(message.length);
+
+            // Create a workspace for manipulating the HTML.
+            WebKit.DOM.HTMLElement signature_container = get_dom_document().create_element("div") as
+                WebKit.DOM.HTMLElement;
+            signature_container.set_inner_html(signature);
+            signature_container.set_attribute("class", "signature");
+            WebKit.DOM.HTMLElement container = get_dom_document().create_element("div") as
+                WebKit.DOM.HTMLElement;
+            container.append_child(signature_container);
+
+            // Extract the quote container and move it outside the signature block.
+            // TODO: Make this work with non-gmail HTML quotes.
+            WebKit.DOM.Element quote = container.query_selector("div.signature > div > div.gmail_quote");
+            container.append_child(quote);
+            return message + container.get_inner_html();
+        } catch (Error e) {
+            debug("Error modifying HTML message: %s", e.message);
+            return text;
+        }
+    }
+
     public void remove_message(Geary.Email email) {
         if (!messages.contains(email))
             return;
