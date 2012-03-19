@@ -30,7 +30,6 @@ public class MessageViewer : WebKit.WebView {
         }
         .email {
             padding: 15px;
-            margin: 15px;
             border: 1px #999 solid;
             background-color: white;
             color: black;
@@ -38,7 +37,10 @@ public class MessageViewer : WebKit.WebView {
             border-radius: 4px;
             -webkit-box-shadow: 0 3px 5px #aaa;
             display: inline-block;
-            word-break: break-all;
+            word-wrap: break-word;
+            width: 100%;
+            box-sizing:border-box;
+            margin: 0 0 15px 0px !important;
         }
         .email_box {
             box-sizing: border-box;
@@ -83,6 +85,12 @@ public class MessageViewer : WebKit.WebView {
         pre {
             font-family: sans-serif;
             white-space: pre-wrap;
+        }
+        #message_container {
+            position: absolute;
+            left: 0;
+            right: 0;
+            padding: 15px;
         }
         #multiple_messages {
             display: none;
