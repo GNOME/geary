@@ -22,8 +22,9 @@ public class GearyController {
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            Geary.Email? preview = yield folder.fetch_email_async(email_id,
-                MessageListStore.WITH_PREVIEW_FIELDS, cancellable);
+            Geary.Email.Field fetch_fields = GearyApplication.instance.config.display_preview ?
+                MessageListStore.WITH_PREVIEW_FIELDS : MessageListStore.REQUIRED_FIELDS;
+            Geary.Email? preview = yield folder.fetch_email_async(email_id, fetch_fields, cancellable);
             if (preview != null)
                 owner.message_list_store.set_preview_for_conversation(conversation, preview);
             
@@ -315,8 +316,10 @@ public class GearyController {
         main_window.message_list_view.enable_load_more = false;
         set_busy(true);
         
-        conversations_awaiting_preview = new Gee.TreeSet<Geary.Conversation>(
-            (CompareFunc<Geary.Conversation>) compare_conversation_desc);
+        if (conversations_awaiting_preview == null) {
+            conversations_awaiting_preview = new Gee.TreeSet<Geary.Conversation>(
+                (CompareFunc<Geary.Conversation>) compare_conversation_desc);
+        }
         scan_in_progress = true;
     }
     
@@ -357,7 +360,8 @@ public class GearyController {
         Gee.Collection<Geary.Email> email) {
         // If we're viewing this conversation, fetch the messages and add them to the view.
         if (is_viewed_conversation(conversation))
-            do_show_message.begin(email, cancellable_message, on_show_message_completed);
+            do_show_message.begin(conversation.get_pool(), cancellable_message,
+                on_show_message_completed);
         
         update_conversations(null, conversation);
     }
@@ -435,20 +439,15 @@ public class GearyController {
 
     private void fetch_previews_if_needed() {
         // Don't do anything while a scan is going.
-        if (scan_in_progress) {
-            return;
-        }
-
-        // If we are fetching previews, do that, otherwise go straight to the second pass.
-        if (GearyApplication.instance.config.display_preview) {
+        if (!scan_in_progress) {
             Gee.SortedSet<Geary.Conversation>? conversations = conversations_awaiting_preview;
-            conversations_awaiting_preview = null;
+            if (GearyApplication.instance.config.display_preview) {
+                conversations_awaiting_preview = null;
+            }
 
             if (conversations != null)
                 do_fetch_previews.begin(conversations, cancellable_folder,
                     on_fetch_previews_completed);
-        } else {
-            do_second_pass_if_needed();
         }
     }
     
