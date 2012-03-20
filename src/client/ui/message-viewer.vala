@@ -40,7 +40,7 @@ public class MessageViewer : WebKit.WebView {
             word-wrap: break-word;
             width: 100%;
             box-sizing:border-box;
-            margin: 0 0 15px 0px !important;
+            margin: 0 0 15px 0px;
         }
         .email_box {
             box-sizing: border-box;
@@ -94,12 +94,12 @@ public class MessageViewer : WebKit.WebView {
         }
         #multiple_messages {
             display: none;
+            text-align: center;
         }
         #multiple_messages > .email {
             margin: 100px auto;
-            display: block;
-            text-align: center;
-            width: 200px;
+            display: inline-block;
+            width: auto;
         }
         </style>
         </head><body>
