@@ -347,7 +347,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         // Fetch all email properties in local folder.
         Gee.List<Geary.Email>? list_local = yield local_folder.list_email_async(-1, int.MAX, 
-            Email.Field.PROPERTIES, ListFlags.FAST, flag_watch_cancellable);
+            Email.Field.PROPERTIES, ListFlags.LOCAL_ONLY, flag_watch_cancellable);
         
         if (list_local == null)
             return;
@@ -403,7 +403,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         try {
             // by listing NONE, retrieving only the EmailIdentifier for the range (which here is all)
             list = yield local_folder.list_email_async(1, -1, Geary.Email.Field.NONE,
-                Geary.Folder.ListFlags.FAST, prefetch_cancellable);
+                Geary.Folder.ListFlags.LOCAL_ONLY, prefetch_cancellable);
         } catch (Error err) {
             debug("Error while prefetching all emails for %s: %s", to_string(), err.message);
         }

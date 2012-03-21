@@ -33,7 +33,7 @@ public interface Geary.Folder : Object {
     [Flags]
     public enum ListFlags {
         NONE = 0,
-        FAST,
+        LOCAL_ONLY,
         FORCE_UPDATE,
         EXCLUDING_ID;
         

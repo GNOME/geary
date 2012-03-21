@@ -304,10 +304,10 @@ public class GearyController {
         // Do a quick-list of the messages (which should return what's in the local store) if
         // supported by the Folder, followed by a complete list if needed
         second_list_pass_required =
-            current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.FAST);
+            current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.LOCAL_ONLY);
         
         // Load all conversations from the DB.
-        current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.FAST, cancellable_folder);
+        current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
     }
     
     public void on_scan_started(Geary.EmailIdentifier? id, int low, int count) {

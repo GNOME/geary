@@ -46,7 +46,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     }
     
     public override Geary.Folder.ListFlags get_supported_list_flags() {
-        return Geary.Folder.ListFlags.FAST | Geary.Folder.ListFlags.FORCE_UPDATE |
+        return Geary.Folder.ListFlags.LOCAL_ONLY | Geary.Folder.ListFlags.FORCE_UPDATE |
             Geary.Folder.ListFlags.EXCLUDING_ID;
     }
     
@@ -341,7 +341,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // them all at once to the caller
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_async(low, count, required_fields, accumulator, null, cancellable,
-            flags.is_any_set(Folder.ListFlags.FAST), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
+            flags.is_any_set(Folder.ListFlags.LOCAL_ONLY), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
         
         return accumulator;
     }
@@ -351,7 +351,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
         // schedule do_list_email_async(), using the callback to drive availability of email
         do_list_email_async.begin(low, count, required_fields, null, cb, cancellable,
-            flags.is_any_set(Folder.ListFlags.FAST), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
+            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
     }
     
     // TODO: A great optimization would be to fetch message "fragments" from the local database
@@ -392,7 +392,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_sparse_async(by_position, required_fields, accumulator, null,
-            cancellable, flags.is_any_set(Folder.ListFlags.FAST));
+            cancellable, flags.is_all_set(Folder.ListFlags.LOCAL_ONLY));
         
         return accumulator;
     }
@@ -402,7 +402,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
         // schedule listing in the background, using the callback to drive availability of email
         do_list_email_sparse_async.begin(by_position, required_fields, null, cb, cancellable,
-            flags.is_any_set(Folder.ListFlags.FAST));
+            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY));
     }
     
     private async void do_list_email_sparse_async(int[] by_position, Geary.Email.Field required_fields,
@@ -431,7 +431,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Cancellable? cancellable = null) throws Error {
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_by_id_async(initial_id, count, required_fields, list, null, cancellable,
-            flags.is_all_set(Folder.ListFlags.FAST), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
+            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
             flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
         
         return (list.size > 0) ? list : null;
@@ -441,7 +441,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
         Cancellable? cancellable = null) {
         do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, cb, cancellable,
-            flags.is_all_set(Folder.ListFlags.FAST), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
+            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
             flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
     }
     
