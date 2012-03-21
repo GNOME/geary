@@ -49,7 +49,7 @@ def configure(conf):
 	conf.check_cfg(
 		package='gtk+-3.0',
 		uselib_store='GTK',
-		atleast_version='3.0.',
+		atleast_version='3.2.',
 		mandatory=1,
 		args='--cflags --libs')
 	

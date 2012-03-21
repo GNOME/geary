@@ -13,6 +13,7 @@ public class MainWindow : Gtk.Window {
     public MainToolbar main_toolbar { get; private set; }
     public MessageListView message_list_view  { get; private set; }
     public MessageViewer message_viewer { get; private set; default = new MessageViewer(); }
+    private Gtk.Label message_overlay_label;
     
     private int window_width;
     private int window_height;
@@ -121,7 +122,16 @@ public class MainWindow : Gtk.Window {
          // three-pane display: message list left of current message on bottom separated by
         // grippable
         messages_paned.pack1(status_bar_box, false, false);
-        messages_paned.pack2(message_viewer_scrolled, true, true);
+        
+        Gtk.Overlay message_overlay = new Gtk.Overlay();
+        message_overlay.add(message_viewer_scrolled);
+        messages_paned.pack2(message_overlay, true, true);
+        
+        message_overlay_label = new Gtk.Label(null);
+        message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
+        message_overlay_label.halign = Gtk.Align.START;
+        message_overlay_label.valign = Gtk.Align.END;
+        message_overlay.add_overlay(message_overlay_label);
         
         main_layout.pack_end(messages_paned, true, true, 0);
         
@@ -129,14 +139,7 @@ public class MainWindow : Gtk.Window {
     }
     
     private void on_link_hover(string? link) {
-        tooltip_text = link;
-        trigger_tooltip_query();
-    }
-    
-    public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
-        tooltip.set_text(tooltip_text);
-        
-        return true;
+        message_overlay_label.label = link;
     }
 }
 
