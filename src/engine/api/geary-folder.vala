@@ -164,8 +164,6 @@ public interface Geary.Folder : Object {
     
     public abstract Geary.FolderPath get_path();
     
-    public abstract ListFlags get_supported_list_flags();
-    
     /**
      * The Folder must be opened before most operations may be performed on it.  Depending on the
      * implementation this might entail opening a network connection or setting the connection to
@@ -266,9 +264,6 @@ public interface Geary.Folder : Object {
      * The best use of this method is to quickly retrieve a block of email for display or processing
      * purposes, immediately followed by a non-fast list operation and then merging the two results.
      *
-     * Note that implementing ListFlags.FAST is advisory, not required.  The implementation may
-     * ignore it completely.  See get_supported_list_flags() for more information.
-     *
      * The Folder must be opened prior to attempting this operation.
      *
      * low is one-based, unless -1 is specified, as explained above.
@@ -311,10 +306,9 @@ public interface Geary.Folder : Object {
      * a range inevitably requires positional addressing under the covers.  However, since it's
      * some times desirable to list messages excluding the specified EmailIdentifier, callers may
      * use ListFlags.EXCLUDING_ID (which is a flag only recognized by this method and
-     * lazy_list_email_by_id()).  This ListFlag *must* be supported by all Folders and will not
-     * necessarily be returned by get_supported_flags().  If the count is zero or one (or 
-     * the number of messages remaining on the stack from the initial ID's position is zero or one)
-     * *and* this flag is set, no messages will be returned.
+     * lazy_list_email_by_id()).  If the count is zero or one (or the number of messages remaining
+     * on the stack from the initial ID's position is zero or one) *and* this flag is set, no
+     * messages will be returned.
      *
      * There's no guarantee of the returned messages' order.
      *

@@ -58,7 +58,7 @@ public class GearyController {
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
     private Geary.Conversations? current_conversations = null;
-    private bool second_list_pass_required = false;
+    private bool loading_local_only = true;
     private int busy_count = 0;
     private Geary.Conversation[] selected_conversations = new Geary.Conversation[0];
     private Geary.Conversation? last_deleted_conversation = null;
@@ -276,8 +276,7 @@ public class GearyController {
         
         // Do a quick-list of the messages (which should return what's in the local store) if
         // supported by the Folder, followed by a complete list if needed
-        second_list_pass_required =
-            current_folder.get_supported_list_flags().is_all_set(Geary.Folder.ListFlags.LOCAL_ONLY);
+        loading_local_only = true;
         
         // Load all conversations from the DB.
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
@@ -321,7 +320,7 @@ public class GearyController {
         if (current_folder == null || !GearyApplication.instance.config.display_preview)
             return;
         
-        Geary.Folder.ListFlags flags = second_list_pass_required ? Geary.Folder.ListFlags.LOCAL_ONLY
+        Geary.Folder.ListFlags flags = (loading_local_only) ? Geary.Folder.ListFlags.LOCAL_ONLY
             : Geary.Folder.ListFlags.NONE;
         
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
@@ -423,9 +422,10 @@ public class GearyController {
     }
     
     private void do_second_pass_if_needed() {
-        if (second_list_pass_required) {
-            second_list_pass_required = false;
-            debug("Doing second list pass now");
+        if (loading_local_only) {
+            loading_local_only = false;
+            
+            debug("Loading all emails now");
             current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
                 cancellable_folder);
         }

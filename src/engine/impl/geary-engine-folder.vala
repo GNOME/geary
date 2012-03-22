@@ -34,11 +34,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         return local_folder.get_path();
     }
     
-    public override Geary.Folder.ListFlags get_supported_list_flags() {
-        return Geary.Folder.ListFlags.LOCAL_ONLY | Geary.Folder.ListFlags.FORCE_UPDATE |
-            Geary.Folder.ListFlags.EXCLUDING_ID;
-    }
-    
     public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
         throw new EngineError.READONLY("Engine currently read-only");
     }
