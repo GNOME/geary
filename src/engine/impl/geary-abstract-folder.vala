@@ -67,7 +67,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Cancellable? cancellable = null);
     
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
+        Cancellable? cancellable = null) throws Error;
     
     public abstract async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
         Cancellable? cancellable = null) throws Error;

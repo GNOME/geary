@@ -467,7 +467,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             
             if (!field.is_all_set(Geary.Email.Field.ENVELOPE)) {
                 try {
-                    yield fetch_email_async(id, Geary.Email.Field.ENVELOPE, prefetch_cancellable);
+                    yield fetch_email_async(id, Geary.Email.Field.ENVELOPE, Geary.Folder.ListFlags.NONE,
+                        prefetch_cancellable);
                 } catch (Error env_error) {
                     debug("Error prefetching envelope for %s: %s", id.to_string(), env_error.message);
                 }
@@ -475,7 +476,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             
             if (!field.is_all_set(Geary.Email.Field.HEADER)) {
                 try {
-                    yield fetch_email_async(id, Geary.Email.Field.HEADER, prefetch_cancellable);
+                    yield fetch_email_async(id, Geary.Email.Field.HEADER, Geary.Folder.ListFlags.NONE,
+                    prefetch_cancellable);
                 } catch (Error header_err) {
                     debug("Error prefetching headers for %s: %s", id.to_string(), header_err.message);
                 }
@@ -483,7 +485,8 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             
             if (!field.is_all_set(Geary.Email.Field.BODY)) {
                 try {
-                    yield fetch_email_async(email.id, Geary.Email.Field.BODY, prefetch_cancellable);
+                    yield fetch_email_async(email.id, Geary.Email.Field.BODY, Geary.Folder.ListFlags.NONE,
+                        prefetch_cancellable);
                 } catch (Error body_err) {
                     debug("Error background fetching body from %s: %s", email.id.to_string(),
                         body_err.message);

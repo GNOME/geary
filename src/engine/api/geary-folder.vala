@@ -358,10 +358,14 @@ public interface Geary.Folder : Object {
      * error is thrown.  If the requested fields are not available, EngineError.INCOMPLETE_MESSAGE
      * is thrown.
      *
+     * Because fetch_email_async() is a form of listing (listing exactly one email), it takes
+     * ListFlags as a parameter.  See list_email_async() for more information.  Note that one
+     * flag (ListFlags.EXCLUDING_ID) makes no sense in this context.
+     *
      * The Folder must be opened prior to attempting this operation.
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
     
     /**
      * Removes the specified emails from the folder.

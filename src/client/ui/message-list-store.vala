@@ -154,6 +154,20 @@ public class MessageListStore : Gtk.TreeStore {
             conversation.get_usable_count(), conversation.is_unread()));
     }
     
+    public Geary.Email? get_preview_for_conversation(Geary.Conversation conversation) {
+        Gtk.TreeIter iter;
+        if (!find_conversation(conversation, out iter)) {
+            debug("Unable to find preview for conversation");
+            
+            return null;
+        }
+        
+        FormattedMessageData? message_data;
+        get(iter, Column.MESSAGE_DATA, out message_data);
+        
+        return (message_data != null) ? message_data.email : null;
+    }
+    
     public int get_count() {
         return iter_n_children(null);
     }

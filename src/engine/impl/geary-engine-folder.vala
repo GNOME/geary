@@ -543,16 +543,25 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     }
     
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field fields, Cancellable? cancellable = null) throws Error {
+        Geary.Email.Field fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
+        throws Error {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         
-        try {
-            return yield local_folder.fetch_email_async(id, fields, cancellable);
-        } catch (Error err) {
-            // TODO: Better parsing of error; currently merely falling through and trying network
-            // for copy
+        // If not forcing an update, see if the email is present in the local store
+        if (!flags.is_all_set(ListFlags.FORCE_UPDATE)) {
+            try {
+                return yield local_folder.fetch_email_async(id, fields, cancellable);
+            } catch (Error err) {
+                // TODO: Better parsing of error; currently merely falling through and trying network
+                // for copy
+            }
         }
+        
+        // If local only and not found in local store, throw NOT_FOUND; there is no fallback and
+        // this method does not return null
+        if (flags.is_all_set(ListFlags.LOCAL_ONLY))
+            throw new EngineError.NOT_FOUND("Email %s not found in %s", id.to_string(), to_string());
         
         // To reach here indicates either the local version does not have all the requested fields
         // or it's simply not present.  If it's not present, want to ensure that the Message-ID

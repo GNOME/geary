@@ -323,6 +323,12 @@ public class Geary.Conversations : Object {
         return conversations.read_only_view;
     }
     
+    public Geary.Conversation? get_conversation_for_email(Geary.EmailIdentifier email_id) {
+        Node? node = geary_id_map.get(email_id);
+        
+        return (node != null) ? node.conversation : null;
+    }
+    
     public bool monitor_new_messages(Cancellable? cancellable = null) {
         if (monitor_new)
             return false;
