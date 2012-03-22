@@ -85,8 +85,9 @@ def build(bld):
 	
 	'../engine/impl/geary-abstract-account.vala',
 	'../engine/impl/geary-abstract-folder.vala',
+	'../engine/impl/geary-email-flag-watcher.vala',
+	'../engine/impl/geary-email-prefetcher.vala',
 	'../engine/impl/geary-engine-account.vala',
-	'../engine/impl/geary-engine-folder.vala',
 	'../engine/impl/geary-generic-imap-account.vala',
 	'../engine/impl/geary-generic-imap-folder.vala',
 	'../engine/impl/geary-gmail-account.vala',

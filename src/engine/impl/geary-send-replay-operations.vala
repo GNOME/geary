@@ -5,14 +5,14 @@
  */
 
 private class Geary.MarkEmail : Geary.SendReplayOperation {
-    private EngineFolder engine;
+    private GenericImapFolder engine;
     private Gee.List<Geary.EmailIdentifier> to_mark;
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
     private Cancellable? cancellable;
     
-    public MarkEmail(EngineFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
+    public MarkEmail(GenericImapFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) {
         base("MarkEmail");
@@ -52,12 +52,12 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
 }
 
 private class Geary.RemoveEmail : Geary.SendReplayOperation {
-    private EngineFolder engine;
+    private GenericImapFolder engine;
     private Gee.List<Geary.EmailIdentifier> to_remove;
     private Cancellable? cancellable;
     private int original_count = 0;
     
-    public RemoveEmail(EngineFolder engine, Gee.List<Geary.EmailIdentifier> to_remove,
+    public RemoveEmail(GenericImapFolder engine, Gee.List<Geary.EmailIdentifier> to_remove,
         Cancellable? cancellable = null) {
         base("RemoveEmail");
         
@@ -99,7 +99,7 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
 }
 
 private class Geary.ListEmail : Geary.SendReplayOperation {
-    protected EngineFolder engine;
+    protected GenericImapFolder engine;
     protected int low;
     protected int count;
     protected Geary.Email.Field required_fields;
@@ -112,7 +112,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     private Gee.List<Geary.Email>? local_list = null;
     private int local_list_size = 0;
     
-    public ListEmail(EngineFolder engine, int low, int count, Geary.Email.Field required_fields,
+    public ListEmail(GenericImapFolder engine, int low, int count, Geary.Email.Field required_fields,
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
         bool local_only, bool remote_only) {
         base("ListEmail");
@@ -259,7 +259,7 @@ private class Geary.ListEmailByID : Geary.ListEmail {
     private Geary.EmailIdentifier initial_id;
     private bool excluding_id;
     
-    public ListEmailByID(EngineFolder engine, Geary.EmailIdentifier initial_id, int count,
+    public ListEmailByID(GenericImapFolder engine, Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
         Cancellable? cancellable, bool local_only, bool remote_only, bool excluding_id) {
         base(engine, 0, count, required_fields, accumulator, cb, cancellable, local_only, remote_only);
@@ -328,7 +328,7 @@ private class Geary.ListEmailByID : Geary.ListEmail {
 }
 
 private class Geary.ListEmailSparse : Geary.SendReplayOperation {
-    private EngineFolder engine;
+    private GenericImapFolder engine;
     private int[] by_position;
     private Geary.Email.Field required_fields;
     private Gee.List<Geary.Email>? accumulator = null;
@@ -338,7 +338,7 @@ private class Geary.ListEmailSparse : Geary.SendReplayOperation {
     
     private int[] needed_by_position = new int[0];
     
-    public ListEmailSparse(EngineFolder engine, int[] by_position, Geary.Email.Field required_fields,
+    public ListEmailSparse(GenericImapFolder engine, int[] by_position, Geary.Email.Field required_fields,
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
         bool local_only) {
         base("ListEmailSparse");

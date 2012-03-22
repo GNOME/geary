@@ -337,6 +337,19 @@ public interface Geary.Folder : Object {
         Cancellable? cancellable = null);
     
     /**
+     * Returns the locally available Geary.Email.Field fields for the specified emails.  If a
+     * list or fetch operation occurs on the emails that specifies a field not returned here,
+     * the Engine will either have to go out to the remote server to get it, or (if
+     * ListFlags.LOCAL_ONLY is specified) not return it to the caller.
+     *
+     * If the EmailIdentifier is unknown locally, it will not be present in the returned Map.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
+    
+    /**
      * Returns a single email that fulfills the required_fields flag at the ordered position in
      * the folder.  If the email_id is invalid for the folder's contents, an EngineError.NOT_FOUND
      * error is thrown.  If the requested fields are not available, EngineError.INCOMPLETE_MESSAGE

@@ -5,10 +5,10 @@
  */
 
 private class Geary.ReplayAppend : Geary.ReceiveReplayOperation {
-    public EngineFolder owner;
+    public GenericImapFolder owner;
     public int new_remote_count;
     
-    public ReplayAppend(EngineFolder owner, int new_remote_count) {
+    public ReplayAppend(GenericImapFolder owner, int new_remote_count) {
         base ("Append");
         
         this.owner = owner;
@@ -21,12 +21,12 @@ private class Geary.ReplayAppend : Geary.ReceiveReplayOperation {
 }
 
 private class Geary.ReplayRemoval : Geary.ReceiveReplayOperation {
-    public EngineFolder owner;
+    public GenericImapFolder owner;
     public int position;
     public int new_remote_count;
     public EmailIdentifier? id;
     
-    public ReplayRemoval(EngineFolder owner, int position, int new_remote_count) {
+    public ReplayRemoval(GenericImapFolder owner, int position, int new_remote_count) {
         base ("Removal");
         
         this.owner = owner;
@@ -35,7 +35,7 @@ private class Geary.ReplayRemoval : Geary.ReceiveReplayOperation {
         this.id = null;
     }
     
-    public ReplayRemoval.with_id(EngineFolder owner, EmailIdentifier id) {
+    public ReplayRemoval.with_id(GenericImapFolder owner, EmailIdentifier id) {
         base ("Removal.with_id");
         
         this.owner = owner;

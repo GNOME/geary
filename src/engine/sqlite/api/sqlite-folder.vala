@@ -670,7 +670,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         return id;
     }
     
-    public async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? get_email_fields_by_id_async(
+    public async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_email_fields_by_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         check_open();
         
