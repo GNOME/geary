@@ -5,20 +5,29 @@
  */
 
 public abstract class Geary.AbstractFolder : Object, Geary.Folder {
-    protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
+    /*
+     * notify_* methods for AbstractFolder are marked internal because the SendReplayOperations
+     * need access to them to report changes as they occur.
+     */
+    
+    internal virtual void notify_opened(Geary.Folder.OpenState state, int count) {
         opened(state, count);
     }
     
-    protected virtual void notify_closed(Geary.Folder.CloseReason reason) {
+    internal virtual void notify_closed(Geary.Folder.CloseReason reason) {
         closed(reason);
     }
     
-    internal virtual void notify_messages_appended(int total) {
-        messages_appended(total);
+    internal virtual void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_appended(ids);
     }
     
-    internal virtual void notify_message_removed(Geary.EmailIdentifier id) {
-        message_removed(id);
+    internal virtual void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_appended(ids);
+    }
+    
+    internal virtual void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_removed(ids);
     }
     
     internal virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
@@ -49,14 +58,6 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
-    
-    public abstract async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
-        throws Error;
-    
-    public abstract void lazy_list_email_sparse(int[] by_position,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null);
     
     public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)

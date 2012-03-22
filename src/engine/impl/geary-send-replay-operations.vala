@@ -11,7 +11,7 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
     private Cancellable? cancellable;
-        
+    
     public MarkEmail(EngineFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) {
@@ -70,7 +70,7 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
     public override async bool replay_local() throws Error {
         foreach (Geary.EmailIdentifier id in to_remove) {
             yield engine.local_folder.mark_removed_async(id, true, cancellable);
-            engine.notify_message_removed(id);
+            engine.notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(id));
         }
         
         original_count = engine.remote_count;
@@ -93,8 +93,8 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
         foreach (Geary.EmailIdentifier id in to_remove)
             yield engine.local_folder.mark_removed_async(id, false, cancellable);
         
-        engine.notify_messages_appended(to_remove.size);
-        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.REMOVED);
+        engine.notify_email_appended(to_remove);
+        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.ADDED);
     }
 }
 

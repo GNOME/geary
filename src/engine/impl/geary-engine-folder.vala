@@ -19,9 +19,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     private SendReplayQueue? send_replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
-    public virtual signal void local_added(Gee.Collection<Geary.EmailIdentifier> added) {
-    }
-    
     public EngineFolder(Imap.Account remote, Sqlite.Account local, Sqlite.Folder local_folder) {
         this.remote = remote;
         this.local = local;
@@ -31,10 +28,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
     ~EngineFolder() {
         if (opened)
             warning("Folder %s destroyed without closing", to_string());
-    }
-    
-    protected virtual void notify_local_added(Gee.Collection<Geary.EmailIdentifier> added) {
-        local_added(added);
     }
     
     public override Geary.FolderPath get_path() {
@@ -245,19 +238,25 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             
             Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
                 Hashable.hash_func, Equalable.equal_func);
+            Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
+                Hashable.hash_func, Equalable.equal_func);
             foreach (Geary.Email email in list) {
                 debug("Creating Email ID %s", email.id.to_string());
+                
+                // need to report both if it was created (not known before) and appended (which
+                // could mean created or simply a known email associated with this folder)
                 if (yield local_folder.create_email_async(email, null))
                     created.add(email.id);
+                
+                appended.add(email.id);
             }
             
             // save new remote count
             remote_count = new_remote_count;
             
-            notify_messages_appended(new_remote_count);
-            
+            notify_email_appended(appended);
             if (created.size > 0)
-                notify_local_added(created);
+                notify_email_locally_appended(created);
         } catch (Error err) {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
                 to_string(), err.message);
@@ -295,7 +294,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
                 yield local_folder.remove_marked_email_async(owned_id, out marked, null);
                 
                 if (!marked)
-                    notify_message_removed(owned_id);
+                    notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(owned_id));
             } catch (Error err2) {
                 debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
                     err2.message);
@@ -371,48 +370,6 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         // Schedule list operation and wait for completion.
         ListEmail op = new ListEmail(this, low, count, required_fields, accumulator, cb, cancellable,
             local_only, remote_only);
-        send_replay_queue.schedule(op);
-        yield op.wait_for_ready();
-    }
-    
-    public override async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
-        throws Error {
-        if (by_position.length == 0)
-            return null;
-        
-        Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
-        yield do_list_email_sparse_async(by_position, required_fields, accumulator, null,
-            cancellable, flags.is_all_set(Folder.ListFlags.LOCAL_ONLY));
-        
-        return accumulator;
-    }
-    
-    // TODO: Capture Error and report via EmailCallback.
-    public override void lazy_list_email_sparse(int[] by_position, Geary.Email.Field required_fields,
-        Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
-        // schedule listing in the background, using the callback to drive availability of email
-        do_list_email_sparse_async.begin(by_position, required_fields, null, cb, cancellable,
-            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY));
-    }
-    
-    private async void do_list_email_sparse_async(int[] by_position, Geary.Email.Field required_fields,
-        Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable, bool local_only)
-        throws Error {
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
-        
-        if (by_position.length == 0) {
-            // signal finished
-            if (cb != null)
-                cb(null, null);
-            
-            return;
-        }
-        
-        // Schedule list operation and wait for completion.
-        ListEmailSparse op = new ListEmailSparse(this, by_position, required_fields, accumulator,
-            cb, cancellable, local_only);
         send_replay_queue.schedule(op);
         yield op.wait_for_ready();
     }
@@ -529,7 +486,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             }
             
             if (created_ids.size > 0)
-                notify_local_added(created_ids);
+                notify_email_locally_appended(created_ids);
             
             if (cb != null)
                 cb(remote_list, null);
@@ -579,13 +536,8 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
         Geary.Email email = yield remote_folder.fetch_email_async(id, fields, cancellable);
         
         // save to local store
-        if (yield local_folder.create_email_async(email, cancellable)) {
-            // TODO: A Singleton collection would be useful here.
-            Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-            ids.add(email.id);
-            
-            notify_local_added(ids);
-        }
+        if (yield local_folder.create_email_async(email, cancellable))
+            notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
         
         return email;
     }
@@ -681,7 +633,7 @@ private class Geary.EngineFolder : Geary.AbstractFolder {
             }
             
             if (created_ids.size > 0)
-                notify_local_added(created_ids);
+                notify_email_locally_appended(created_ids);
         } catch (Error e) {
             local_count = 0; // prevent compiler warning
             error = e;

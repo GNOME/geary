@@ -65,14 +65,27 @@ public interface Geary.Folder : Object {
     public signal void closed(CloseReason reason);
     
     /**
-     * "messages-appended" is fired when new messages have been appended to the list of messages in
+     * "email-appended" is fired when new messages have been appended to the list of messages in
      * the folder (and therefore old message position numbers remain valid, but the total count of
      * the messages in the folder has changed).
      */
-    public signal void messages_appended(int total);
+    public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
-     * "message-removed" is fired when a message has been removed (deleted or moved) from the
+     * "email-locally-appended" is fired when previously unknown messages have been appended to the
+     * list of messages in the folder.  This is similar to "email-appended", but that signal
+     * lists all messages appended to the folder.  "email-locally-appended" only reports emails that
+     * have not been seen prior.  Hence, an email that is removed from the folder and returned
+     * later will not be listed here (unless it was removed from the local store in the meantime).
+     *
+     * Note that these messages were appended as well, hence their positional addressing may have
+     * changed since last seen in this folder.  However, it's important to realize that this list
+     * does *not* represent all newly appended messages.
+     */
+    public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * "email-removed" is fired when a message has been removed (deleted or moved) from the
      * folder (and therefore old message position numbers may no longer be valid, i.e. those after
      * the removed message).
      *
@@ -80,14 +93,14 @@ public interface Geary.Folder : Object {
      * known locally (and therefore the caller could not have record of).  If this happens, this
      * signal will *not* fire, although "email-count-changed" will.
      */
-    public signal void message_removed(Geary.EmailIdentifier id);
+    public signal void email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * "email-count-changed" is fired when the total count of email in a folder has changed in any way.
      *
      * Note that this signal will be fired alongside "messages-appended" or "message-removed".
      * That is, do not use both signals to process email count changes; one will suffice.
-     * This signal will fire after those (although see the note at "message-removed").
+     * This signal will fire after those (although see the note at "messages-removed").
      */
     public signal void email_count_changed(int new_count, CountChangeReason reason);
     
@@ -97,8 +110,7 @@ public interface Geary.Folder : Object {
      * This signal will be fired both when changes occur on the client side via the
      * mark_email_async() method as well as changes occur remotely.
      */
-    public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier,
-        Geary.EmailFlags> flag_map);
+    public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
@@ -119,14 +131,21 @@ public interface Geary.Folder : Object {
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected abstract void notify_messages_appended(int total);
+    protected abstract void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
      * directly.  This allows subclasses and superclasses the opportunity to inspect the email
      * and update state before and/or after the signal has been fired.
      */
-    protected abstract void notify_message_removed(Geary.EmailIdentifier id);
+    protected abstract void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * This helper method should be called by implementors of Folder rather than firing the signal
+     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
+     * and update state before and/or after the signal has been fired.
+     */
+    protected abstract void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * This helper method should be called by implementors of Folder rather than firing the signal
@@ -270,35 +289,6 @@ public interface Geary.Folder : Object {
      */
     public abstract void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
-    
-    /**
-     * Like list_email_async(), but the caller passes a sparse list of email by it's ordered
-     * position in the folder.  If any of the positions in the sparse list are out of range,
-     * only the emails within range are reported.  The list is not guaranteed to be in any
-     * particular order.
-     *
-     * See the notes in list_email_async() regarding issues about local versus remote stores.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     *
-     * All positions are one-based.
-     */
-    public abstract async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
-        throws Error;
-    
-    /**
-     * Similar in contract to list_email_sparse_async(), but like lazy_list_email(), the
-     * messages are passed back to the caller in chunks as they're retrieved.  When null is passed
-     * as the first parameter, all the messages have been fetched.  If an Error occurs during
-     * processing, it's passed as the second parameter.  There's no guarantee of the returned
-     * messages' order.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract void lazy_list_email_sparse(int[] by_position,
-        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null);
     
     /**
      * Similar in contract to list_email_async(), but uses Geary.EmailIdentifier rather than

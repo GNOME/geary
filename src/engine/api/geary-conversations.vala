@@ -276,8 +276,8 @@ public class Geary.Conversations : Object {
     
     ~Conversations() {
         if (monitor_new) {
-            folder.messages_appended.disconnect(on_folder_messages_appended);
-            folder.message_removed.disconnect(on_folder_message_removed);
+            folder.email_appended.disconnect(on_folder_email_appended);
+            folder.email_removed.disconnect(on_folder_email_removed);
         }
         
         // Manually detach all the weak refs in the Conversation objects
@@ -335,8 +335,8 @@ public class Geary.Conversations : Object {
         
         monitor_new = true;
         cancellable_monitor = cancellable;
-        folder.messages_appended.connect(on_folder_messages_appended);
-        folder.message_removed.connect(on_folder_message_removed);
+        folder.email_appended.connect(on_folder_email_appended);
+        folder.email_removed.connect(on_folder_email_removed);
         
         return true;
     }
@@ -709,7 +709,7 @@ public class Geary.Conversations : Object {
         }
     }
     
-    private void on_folder_messages_appended() {
+    private void on_folder_email_appended() {
         // Find highest identifier by ordering
         // TODO: optimize.
         Geary.EmailIdentifier? highest = null;
@@ -733,8 +733,9 @@ public class Geary.Conversations : Object {
         lazy_load_by_id(highest, int.MAX, Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
     }
     
-    private void on_folder_message_removed(Geary.EmailIdentifier removed_id) {
-        remove_email(removed_id);
+    private void on_folder_email_removed(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
+        foreach (Geary.EmailIdentifier id in removed_ids)
+            remove_email(id);
     }
 }
 

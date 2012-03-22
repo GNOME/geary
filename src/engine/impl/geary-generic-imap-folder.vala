@@ -165,6 +165,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         
         int remote_ctr = 0;
         int local_ctr = 0;
+        Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
             Geary.EmailFlags>();
@@ -195,6 +196,7 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
             } else if (remote_uid.value < local_uid.value) {
                 // one we'd not seen before is present, add and move to next remote
                 batch.add(new CreateLocalEmailOperation(local_folder, remote_email));
+                appended_ids.add(remote_email.id);
                 
                 remote_ctr++;
             } else {
@@ -212,10 +214,9 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // CreateEmailOperations were updates of emails existing previously or additions of emails
         // that were on the server earlier but not stored locally (i.e. this value represents emails
         // added to the top of the stack)
-        int appended = 0;
         for (; remote_ctr < remote_length; remote_ctr++) {
             batch.add(new CreateLocalEmailOperation(local_folder, old_remote[remote_ctr]));
-            appended++;
+            appended_ids.add(old_remote[remote_ctr].id);
         }
         
         // remove anything left over ... use local count rather than remote as we're still in a stage
@@ -240,14 +241,13 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         // signalled)
         if (removed_ids.size > 0) {
             debug("Notifying of %d removed emails since %s last seen", removed_ids.size, to_string());
-            foreach (Geary.EmailIdentifier removed_id in removed_ids)
-                notify_message_removed(removed_id);
+            notify_email_removed(removed_ids);
         }
         
         // notify additions
-        if (appended > 0) {
-            debug("Notifying of %d appended emails since %s last seen", appended, to_string());
-            notify_messages_appended(appended);
+        if (appended_ids.size > 0) {
+            debug("Notifying of %d appended emails since %s last seen", appended_ids.size, to_string());
+            notify_email_appended(appended_ids);
         }
         
         // notify flag changes
@@ -282,10 +282,10 @@ private class Geary.GenericImapFolder : Geary.EngineFolder {
         base.notify_closed(reason);
     }
     
-    protected override void notify_local_added(Gee.Collection<Geary.EmailIdentifier> added) {
-        schedule_prefetch(added);
+    protected override void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
+        schedule_prefetch(ids);
         
-        base.notify_local_added(added);
+        base.notify_email_locally_appended(ids);
     }
     
     /**
