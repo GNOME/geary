@@ -737,8 +737,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             try {
                 return yield local_folder.fetch_email_async(id, fields, cancellable);
             } catch (Error err) {
-                // if NOT_FOUND, then fall through, otherwise return to sender
-                if (!(err is Geary.EngineError.NOT_FOUND))
+                // If NOT_FOUND or INCOMPLETE_MESSAGE, then fall through, otherwise return to sender
+                if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
                     throw err;
             }
         }
