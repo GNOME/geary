@@ -341,7 +341,7 @@ public class GearyController {
             
             if (need_preview != null) {
                 current_folder.fetch_email_async.begin(need_preview.id, MessageListStore.WITH_PREVIEW_FIELDS,
-                    flags, cancellable_message, on_fetch_preview_completed);
+                    flags, cancellable_folder, on_fetch_preview_completed);
             }
         }
     }
@@ -359,7 +359,9 @@ public class GearyController {
             } else
                 debug("Couldn't find conversation for %s", email.id.to_string());
         } catch (Error err) {
-            debug("Unable to fetch preview: %s", err.message);
+            // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
+            if (!(err is Geary.EngineError.NOT_FOUND))
+                debug("Unable to fetch preview: %s", err.message);
         }
     }
     
@@ -451,10 +453,8 @@ public class GearyController {
         
         if (conversations.length == 1 && current_folder != null) {
             Gee.SortedSet<Geary.Email>? email_set = conversations[0].get_pool_sorted(compare_email);
-            if (email_set == null)
-                return;
-            
-            do_show_message.begin(email_set, cancellable_message, on_show_message_completed);
+            if (email_set != null)
+                do_show_message.begin(email_set, cancellable_message, on_show_message_completed);
         } else if (current_folder != null) {
             main_window.message_viewer.show_multiple_selected(conversations.length);
             if (conversations.length > 1) {

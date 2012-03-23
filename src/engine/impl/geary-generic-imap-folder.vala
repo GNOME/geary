@@ -737,15 +737,18 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             try {
                 return yield local_folder.fetch_email_async(id, fields, cancellable);
             } catch (Error err) {
-                // TODO: Better parsing of error; currently merely falling through and trying network
-                // for copy
+                // if NOT_FOUND, then fall through, otherwise return to sender
+                if (!(err is Geary.EngineError.NOT_FOUND))
+                    throw err;
             }
         }
         
         // If local only and not found in local store, throw NOT_FOUND; there is no fallback and
         // this method does not return null
-        if (flags.is_all_set(ListFlags.LOCAL_ONLY))
-            throw new EngineError.NOT_FOUND("Email %s not found in %s", id.to_string(), to_string());
+        if (flags.is_all_set(ListFlags.LOCAL_ONLY)) {
+            throw new EngineError.NOT_FOUND("Email %s with fields %Xh not found in %s", id.to_string(),
+                fields, to_string());
+        }
         
         // To reach here indicates either the local version does not have all the requested fields
         // or it's simply not present.  If it's not present, want to ensure that the Message-ID
