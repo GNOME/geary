@@ -169,4 +169,5 @@ def build(bld):
 	bld.recurse('console')
 	bld.recurse('norman')
 	bld.recurse('theseus')
+	bld.recurse('dbusservice')
 

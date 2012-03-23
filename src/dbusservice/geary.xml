@@ -1,0 +1,76 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+    
+    <!-- The main API. Eventually we'll need an Engine interface and a Folder
+         interface, but for now we're only concerned with fetching conversations
+         from whatever account and inbox the D-Bus server is providing. -->
+    <interface name="org.yorba.Geary.Conversations">
+        <signal name="ScanStarted">
+        </signal>
+        <signal name="ScanError">
+        </signal>
+        <signal name="ScanCompleted">
+        </signal>
+        
+        <signal name="ConversationsAdded">
+            <!-- Type: array of Conversation objects -->
+            <arg name="conversations" type="ao" direction="out"/>
+        </signal>
+        <signal name="ConversationRemoved">
+            <!-- Type: a Conversation object -->
+            <arg name="conversation" type="o" direction="out"/>
+        </signal>
+        <signal name="ConversationAppended">
+            <!-- Type: a Conversation object -->
+            <arg name="conversation" type="o" direction="out"/>
+            <!-- Type: array of email objects -->
+            <arg name="emails" type="ao" direction="out"/>
+        </signal>
+        <signal name="ConversationTrimmed">
+            <!-- Type: a Conversation object -->
+            <arg name="conversation" type="o" direction="out"/>
+            <!-- Type: an email object -->
+            <arg name="email" type="o" direction="out"/>
+        </signal>
+        
+        <!-- Begins the scan, fetching the number of messages provided.
+             -->
+        <method name="FetchMessages">
+            <arg name="num_messages" type="i" direction="in"/>
+        </method>
+        
+    </interface>
+    
+    <!-- Represents a single conversation, used for managing groups of emails.
+         -->
+    <interface name="org.yorba.Geary.Conversation">
+        <method name="GetEmails">
+            <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
+            <!-- Type: array of emails -->
+            <arg type="ao" direction="out"/>
+        </method>
+    </interface>
+    
+    <!-- This represents a single email. The properties may be squished into
+          a D-Bus struct if they turns out to be expensive.  Additionally, we may
+          want to add functions for marking an email read, adding/removing a flag,
+          and perhaps other feature for the demo -->
+    <interface name="org.yorba.Geary.Email">
+        <property name="To" type="s" access="read"/>
+        <property name="From" type="s" access="read"/>
+        <property name="Cc" type="s" access="read"/>
+        <property name="Subject" type="s" access="read"/>
+        <property name="Date" type="x" access="read"/>
+        <property name="Read" type="b" access="read"/>
+        
+        <method name="GetBody">
+            <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
+            <arg type="s" direction="out"/>
+        </method>
+        
+        <method name="Remove">
+            <annotation name="org.freedesktop.DBus.GLib.Async" value="true"/>
+        </method>
+    </interface>
+    
+</node>

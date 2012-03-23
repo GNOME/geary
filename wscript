@@ -121,6 +121,12 @@ def build(bld):
 		
 		if os.path.isfile('norman') :
 			os.remove('norman')
+		
+		if os.path.isfile('theseus') :
+			os.remove('theseus')
+		
+		if os.path.isfile('gearyd') :
+			os.remove('gearyd')
 
 def post_build(bld):
 	# Copy executables to root folder.
@@ -128,6 +134,7 @@ def post_build(bld):
 	console_path = 'build/src/console/console'
 	norman_path = 'build/src/norman/norman'
 	theseus_path = 'build/src/theseus/theseus'
+	gearyd_path = 'build/src/dbusservice/gearyd'
 	
 	if os.path.isfile(geary_path) :
 		shutil.copy2(geary_path, 'geary')
@@ -140,6 +147,9 @@ def post_build(bld):
 	
 	if os.path.isfile(theseus_path) :
 		shutil.copy2(theseus_path, 'theseus')
+	
+	if os.path.isfile(gearyd_path) :
+		shutil.copy2(gearyd_path, 'gearyd')
 	
 	# Compile schemas for local (non-intall) build.
 	client_build_path = 'build/src/client'
