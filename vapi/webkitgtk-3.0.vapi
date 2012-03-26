@@ -3135,7 +3135,9 @@ namespace WebKit {
 		[CCode (cheader_filename = "webkit/webkit.h", type_id = "webkit_dom_event_target_get_type ()")]
 		[GIR (name = "DOMEventTarget")]
 		public interface EventTarget : GLib.Object {
-			public abstract void dispatch_event (WebKit.DOM.Event event) throws GLib.Error;
+		    public abstract bool add_event_listener (string eventName, GLib.Callback handler, bool bubble, void* userData);
+		    public abstract void dispatch_event (WebKit.DOM.Event event) throws GLib.Error;
+		    public abstract bool remove_event_listener (string eventName, GLib.Callback handler, bool bubble);
 		}
 	}
 	namespace Version {

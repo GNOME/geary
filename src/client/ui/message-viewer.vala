@@ -35,7 +35,7 @@ public class MessageViewer : WebKit.WebView {
             color: black;
             font-size: small;
             border-radius: 4px;
-            -webkit-box-shadow: 0 3px 5px #aaa;
+            box-shadow: 0 3px 5px #aaa;
             display: inline-block;
             word-wrap: break-word;
             width: 100%;
@@ -53,6 +53,7 @@ public class MessageViewer : WebKit.WebView {
             -webkit-box-sizing: border-box;
             width: 100% !important;
         }
+
         .header_title {
             font-size: 9pt;
             color: #777;
@@ -71,10 +72,45 @@ public class MessageViewer : WebKit.WebView {
             color: #777;
             font-size: inherit;
         }
+
         .signature {
             color: #777;
             display: inline;
         }
+        
+        .quote_container {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f4f4f4;
+            border-radius: 4px;
+            box-shadow: inset 0 2px 8px 1px #ccc;
+        }
+        .quote_container > .shower,
+        .quote_container > .hider {
+            color: #777;
+            font-size: 75%;
+            cursor: pointer;
+            display: none;
+        }
+        .quote_container.controllable > .shower {
+            display: block;
+        }
+        .quote_container.controllable > .hider,
+        .quote_container.controllable > .quote {
+            display: none;
+        }
+        .quote_container.controllable.show > .shower {
+            display: none;
+        }
+        .quote_container.controllable.show > .hider,
+        .quote_container.controllable.show > .quote {
+            display: block;
+        }
+        .quote_container > .shower:hover,
+        .quote_container > .hider:hover {
+            color: black;
+        }
+
         hr {
             background-color: #999;
             height: 1px;
@@ -238,7 +274,21 @@ public class MessageViewer : WebKit.WebView {
             // <div id="$MESSAGE_ID" class="email">
             //     <div class="geary spacer"></div>
             //     <div class="email_container">
+            //         <div class="quote_container">
+            //             <div class="shower">[show]</div>
+            //             <div class="hider">[hide]</div>
+            //             <div class="quote">$PRE_BODY_QUOTE</div>
+            //         </div>
+            //
             //         $EMAIL_BODY
+            //
+            //         <div class="signature">$SIGNATURE</div>
+            //
+            //         <div class="end quote_container">
+            //             <div class="shower">[show]</div>
+            //             <div class="hider">[hide]</div>
+            //             <div class="quote">$POST_BODY_QUOTE</div>
+            //         </div>
             //     </div>
             // </div>
             div_message = get_dom_document().create_element("div") as WebKit.DOM.HTMLElement;
@@ -297,10 +347,33 @@ public class MessageViewer : WebKit.WebView {
             try {
                 body_text = linkify_and_escape_plain_text(email.get_message().
                     get_first_mime_part_of_content_type("text/plain").to_utf8());
-                body_text = "<pre>" + insert_plain_text_markup(body_text) + "</pre>";
+                body_text = insert_plain_text_markup(body_text);
             } catch (Error err2) {
                 debug("Could not get message text. %s", err2.message);
             }
+        }
+        
+        try {
+            // Extract any quote containers from the signature block and make them controllable.
+            WebKit.DOM.HTMLElement container = get_dom_document().create_element("div")
+                as WebKit.DOM.HTMLElement;
+            container.set_inner_html(body_text);
+            WebKit.DOM.NodeList quote_list = container.query_selector_all(".signature .quote_container");
+            for (int i = 0; i < quote_list.length; ++i) {
+                WebKit.DOM.Element quote = quote_list.item(i) as WebKit.DOM.Element;
+                quote.set_attribute("class", "quote_container controllable hide");
+                container.append_child(quote);
+            }
+            
+            // If there is only one quote container in the message, set it up as controllable.
+            quote_list = container.query_selector_all(".quote_container");
+            if (quote_list.length == 1) {
+                ((WebKit.DOM.Element) quote_list.item(0)).set_attribute("class",
+                    "quote_container controllable hide");
+            }
+            body_text = container.get_inner_html();
+        } catch (Error error) {
+            debug("Error adjusting final quote block: %s", error.message);
         }
         
         body_text = "<hr noshade>" + body_text;
@@ -319,12 +392,66 @@ public class MessageViewer : WebKit.WebView {
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
         }
+        
+        // Attach to the click events for hiding/showing.
+        try {
+            // Get the show/hide elements.
+            WebKit.DOM.NodeList hide_quotes = get_dom_document()
+                .query_selector_all(".quote_container > .hider");
+            WebKit.DOM.NodeList show_quotes = get_dom_document()
+                .query_selector_all(".quote_container > .shower");
+
+            for (int i = 0; i < hide_quotes.length; ++i) {
+			    WebKit.DOM.EventTarget hide_quote = hide_quotes.item(i) as WebKit.DOM.EventTarget;
+			    WebKit.DOM.EventTarget show_quote = show_quotes.item(i) as WebKit.DOM.EventTarget;
+			
+                // Remove any existing handlers they may have so we don't double bind.
+                hide_quote.remove_event_listener("click", (Callback) on_hide_quote_clicked, false);
+                show_quote.remove_event_listener("click", (Callback) on_show_quote_clicked, false);
+                
+                // And bind the new ones.
+                // TODO: Why does this not work with non-static methods?
+                hide_quote.add_event_listener("click", (Callback) on_hide_quote_clicked, false, null);
+                show_quote.add_event_listener("click", (Callback) on_show_quote_clicked, false, null);
+            }
+        } catch (Error error) {
+            warning("Error setting up click handlers: %s", error.message);
+        }
+    }
+    
+    private static void on_hide_quote_clicked(WebKit.DOM.Element element) {
+        try {
+            WebKit.DOM.Element parent = element.get_parent_element();
+            parent.set_attribute("class", "quote_container controllable hide");
+        } catch (Error error) {
+            warning("Error hiding quote: %s", error.message);
+        }
+    }
+
+    private static void on_show_quote_clicked(WebKit.DOM.Element element) {
+        try {
+            WebKit.DOM.Element parent = element.get_parent_element();
+            parent.set_attribute("class", "quote_container controllable show");
+        } catch (Error error) {
+            warning("Error hiding quote: %s", error.message);
+        }
+    }
+
+    private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
+        WebKit.DOM.HTMLDivElement quote_container = get_dom_document().create_element("div")
+            as WebKit.DOM.HTMLDivElement;
+        quote_container.set_attribute("class", "quote_container");
+        quote_container.set_inner_html("""
+            <div class="shower">[show]</div>
+            <div class="hider">[hide]</div>
+            <div class="quote"></div>
+            """);
+        return quote_container;
     }
 
     private string[] split_message_and_signature(string text) {
         try {
-            Regex signature_regex = new Regex("(?:\\R--\\s*\\R|<div>-- </div>)",
-                RegexCompileFlags.MULTILINE);
+            Regex signature_regex = new Regex("<br>--(?:&#8196;)*<br>", RegexCompileFlags.MULTILINE);
             return signature_regex.split_full(text, -1, 0, 0, 2);
         } catch (RegexError e) {
             debug("Regex error searching for signature: %s", e.message);
@@ -332,7 +459,7 @@ public class MessageViewer : WebKit.WebView {
         }
     }
 
-    private string insert_plain_text_markup(string text) {
+    private string insert_plain_text_markup(string input) {
         // Plain text signature and quote:
         // -- 
         // Nate
@@ -341,29 +468,69 @@ public class MessageViewer : WebKit.WebView {
         // &gt;
         // &gt;
         //
-        // Find the signature marker (--) at the beginning of a line.
-        string[] message_chunks = split_message_and_signature(text);
-        if (message_chunks.length < 2) {
+        // First replace all newlines with <br>s and normal spaces with non-collapsible spaces. This
+        // is easier to manage than "<pre>" tags.
+        string text = input.replace("\r\n", "<br>").replace("\n", "<br>").replace(" ", "&#8196;");
+        try {
+            text = (new Regex("(?:<br>)+$")).replace(text, -1, 0, "");
+        } catch (Error error) {
+            debug("Failed to replace newlines with brs: %s", error.message);
+        }
+
+        // Wrap all quotes in hide/show controllers.
+        string message = "";
+        try {
+            WebKit.DOM.HTMLElement container = get_dom_document().create_element("div")
+                as WebKit.DOM.HTMLElement;
+            int offset = 0;
+            while (offset < text.length) {
+                // Find the beginning of a quote block.
+                int quote_start = text.index_of("&gt;") == 0 && message.length == 0 ? 0 :
+                    text.index_of("<br>&gt;", offset);
+                if (quote_start == -1) {
+                    break;
+                }
+                
+                // Find the end of the quote block.
+                int quote_end = quote_start;
+                do {
+                    quote_end = text.index_of("<br>", quote_end + 1);
+                } while (quote_end != -1 && quote_end == text.index_of("<br>&gt;", quote_end));
+                if (quote_end == -1) {
+                    quote_end = text.length;
+                }
+
+                // Copy the stuff before the quote, then the wrapped quote.
+                WebKit.DOM.Element quote_container = create_quote_container();
+                ((WebKit.DOM.HTMLElement) quote_container.query_selector(".quote")).set_inner_html(
+                    text.substring(quote_start, quote_end - quote_start));
+                container.append_child(quote_container);
+                if (quote_start > 0) {
+                    message += text.substring(offset, quote_start - offset);
+                }
+                message += container.get_inner_html();
+                offset = quote_end;
+                container.set_inner_html("");
+            }
+            
+            // Append everything that's left.
+            if (offset != text.length) {
+                message += text.substring(offset);
+            }
+        } catch (Error error) {
+            debug("Error wrapping plaintext quotes: %s", error.message);
             return text;
         }
-        string message = message_chunks[0];
-        string signature = text.substring(message.length);
 
-        // Next look for any quoted text.
-        string quote = "";
-        try {
-            Regex quote_regex = new Regex("(?:.+?\\R)?^&gt;", RegexCompileFlags.MULTILINE);
-            string[] signature_chunks = quote_regex.split_full(signature, -1, 0, 0, 2);
-            if (signature_chunks.length == 2) {
-                signature = signature_chunks[0];
-                quote = text.substring(message.length + signature.length);
-            }
-        } catch (RegexError e) {
-            debug("Regex error searching for quoted text: %s", e.message);
+        // Find the signature marker (--) at the beginning of a line.
+        string[] message_chunks = split_message_and_signature(message);
+        string signature = "";
+        if (message_chunks.length == 2) {
+            signature = "<div class=\"signature\">" +
+                message.substring(message_chunks[0].length).strip() + "</div>";
+            message = message_chunks[0];
         }
-
-        // Now insert the signature div around just the signature.
-        return message + "<div class=\"signature\">" + signature + "</div>" + quote;
+        return message + signature;
     }
 
     private string insert_html_markup(string text) {
@@ -381,34 +548,83 @@ public class MessageViewer : WebKit.WebView {
         //      </div><br>
         // </div>
         // \u000d
-        //
-        // Find the signature marker (--) at the beginning of a line.
         try {
-            string[] message_chunks = split_message_and_signature(text);
-            if (message_chunks.length < 2) {
-                return text;
-            }
-            string message = message_chunks[0];
-            string signature = text.substring(message.length);
-
             // Create a workspace for manipulating the HTML.
-            WebKit.DOM.HTMLElement signature_container = get_dom_document().create_element("div") as
-                WebKit.DOM.HTMLElement;
-            signature_container.set_inner_html(signature);
-            signature_container.set_attribute("class", "signature");
-            WebKit.DOM.HTMLElement container = get_dom_document().create_element("div") as
-                WebKit.DOM.HTMLElement;
-            container.append_child(signature_container);
+            WebKit.DOM.Document document = get_dom_document();
+            WebKit.DOM.HTMLElement container = document.create_element("div") as WebKit.DOM.HTMLElement;
+            container.set_inner_html(text);
 
-            // Extract the quote container and move it outside the signature block.
-            // TODO: Make this work with non-gmail HTML quotes.
-            WebKit.DOM.Element quote = container.query_selector("div.signature > div > div.gmail_quote");
-            container.append_child(quote);
-            return message + container.get_inner_html();
+            // Get all the top level block quotes and stick them into a hide/show controller.
+            WebKit.DOM.NodeList blockquote_list = container.query_selector_all("blockquote");
+            for (int i = 0; i < blockquote_list.length; ++i) {
+                // Get the nodes we need.
+                WebKit.DOM.Node blockquote_node = blockquote_list.item(i);
+                WebKit.DOM.Node? next_sibling = blockquote_node.get_next_sibling();
+                WebKit.DOM.Node parent = blockquote_node.get_parent_node();
+
+                // Make sure this is a top level blockquote.
+                if (node_is_child_of(blockquote_node, "BLOCKQUOTE")) {
+                    continue;
+                }
+
+                // parent
+                //     quote_container
+                //         blockquote
+                //     sibling
+                WebKit.DOM.Element quote_container = create_quote_container();
+                quote_container.query_selector(".quote").append_child(blockquote_node);
+                if (next_sibling == null) {
+                    parent.append_child(quote_container);
+                } else {
+                    parent.insert_before(quote_container, next_sibling);
+                }
+            }
+
+            // Now look for the signature.
+            WebKit.DOM.NodeList div_list = container.query_selector_all("div");
+            int i = 0;
+            for (; i < div_list.length; ++i) {
+                // Get the div and check that it starts a signature block and is not inside a quote.
+                WebKit.DOM.HTMLElement div = div_list.item(i) as WebKit.DOM.HTMLElement;
+                if (div.get_inner_text().has_prefix("--") && !node_is_child_of(div, "BLOCKQUOTE")) {
+                    break;
+                }
+            }
+
+            // If we have a signature, move it and all of its following siblings that are not quotes
+            // inside a signature div.
+            if (i != div_list.length) {
+                WebKit.DOM.Element elem = div_list.item(i) as WebKit.DOM.Element;
+                WebKit.DOM.HTMLElement signature_container = document.create_element("div")
+                    as WebKit.DOM.HTMLElement;
+                signature_container.set_attribute("class", "signature");
+                do {
+                    // Get its sibling _before_ we move it into the signature div.
+                    WebKit.DOM.Element? sibling = elem.get_next_element_sibling() as WebKit.DOM.Element;
+                    if (!elem.get_attribute("class").contains("quote_container")) {
+                        signature_container.append_child(elem);
+                    }
+                    elem = sibling;
+                } while (elem != null);
+                container.append_child(signature_container);
+            }
+
+            // Now return the whole message.
+            return container.get_inner_html();
         } catch (Error e) {
             debug("Error modifying HTML message: %s", e.message);
             return text;
         }
+    }
+    
+    private bool node_is_child_of(WebKit.DOM.Node node, string ancestorTag) {
+        WebKit.DOM.Element? ancestor = node.get_parent_element();
+        for (; ancestor != null; ancestor = ancestor.get_parent_element()) {
+            if (ancestor.get_tag_name() == ancestorTag) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void remove_message(Geary.Email email) {
