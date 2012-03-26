@@ -74,10 +74,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         _instance = this;
     }
     
+    static bool log_debug = false;
     static bool log_network = false;
     static bool log_serializer = false;
     static bool version = false;
     const OptionEntry[] options = {
+        { "debug", 0, 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
         { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
@@ -105,9 +107,16 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (log_network)
             Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+        
         if (log_serializer)
             Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
         
+        if (log_debug) {
+            // Debug messages in green
+            Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, log_print);
+        } else {
+            Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, log_ignore);
+        }
         return 0;
      }
     
@@ -245,6 +254,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child(Environment.get_prgname());
+    }
+    
+    private void log_print(string? log_domain, LogLevelFlags log_levels, string message) {
+        stdout.printf("\x001b[%dm [%s]\x001b[0m %s\n", 2 + 30 + 60, "debug", message);
+    }
+    
+    private void log_ignore(string? log_domain, LogLevelFlags log_levels, string message) {
     }
     
     /**
