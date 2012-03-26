@@ -753,6 +753,34 @@ public class MessageViewer : WebKit.WebView {
         select_all();
     }
     
+    public void on_view_source() {
+        StringBuilder source = new StringBuilder();
+        foreach(Geary.Email email in messages) {
+            try {
+                source.append_printf("%s\n\n", email.get_message().to_string());
+            } catch (Error error) {
+                source.append_printf("Error: %s\n", error.message);
+            }
+        }
+        
+        try {
+            string temporary_filename;
+            int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
+                                                      out temporary_filename);
+            FileUtils.set_contents(temporary_filename, source.str);
+            FileUtils.close(temporary_handle);
+            string temporary_uri = Filename.to_uri(temporary_filename, null);
+            Gtk.show_uri(get_screen(), temporary_uri, Gdk.CURRENT_TIME);
+        } catch (Error error) {
+            var dialog = new Gtk.MessageDialog(null, 0,
+                Gtk.MessageType.ERROR, Gtk.ButtonsType.OK,
+                _("Failed to open default text editor."));
+            dialog.format_secondary_text(error.message);
+            dialog.run();
+            dialog.destroy();
+        }
+    }
+
     private bool on_button_press_event(Gdk.EventButton event) {
         // Ignore right-clicks on images.
         if (event.button == 3) {
@@ -781,6 +809,11 @@ public class MessageViewer : WebKit.WebView {
             context_menu.append(item);
         }
         
+        // View original message source
+        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
+        view_source_item.activate.connect(on_view_source);
+        context_menu.append(view_source_item);
+
         // Select all.
         Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
         select_all_item.activate.connect(on_select_all);
