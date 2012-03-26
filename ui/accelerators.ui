@@ -5,4 +5,7 @@
     <accelerator action="GearyReplyToMessage" />
     <accelerator action="GearyReplyAllMessage" />
     <accelerator action="GearyForwardMessage" />
+    <accelerator action="GearyZoomIn" />
+    <accelerator action="GearyZoomOut" />
+    <accelerator action="GearyZoomNormal" />
 </ui>

@@ -43,6 +43,9 @@ public class GearyController {
     public const string ACTION_FORWARD_MESSAGE = "GearyForwardMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
+    public const string ACTION_ZOOM_IN = "GearyZoomIn";
+    public const string ACTION_ZOOM_OUT = "GearyZoomOut";
+    public const string ACTION_ZOOM_NORMAL = "GearyZoomNormal";
     public const string ACTION_PREFERENCES = "GearyPreferences";
     public const string ACTION_MARK_AS_MENU = "GearyMarkAsMenuButton";
     public const string ACTION_MARK_AS_READ = "GearyMarkAsRead";
@@ -147,6 +150,18 @@ public class GearyController {
             null, debug_print_selected };
         entries += secret_debug;
         
+        Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>plus",
+            null, on_zoom_in };
+        entries += zoom_in;
+
+        Gtk.ActionEntry zoom_out = { ACTION_ZOOM_OUT, null, null, "<Ctrl>minus",
+            null, on_zoom_out };
+        entries += zoom_out;
+
+        Gtk.ActionEntry zoom_normal = { ACTION_ZOOM_NORMAL, null, null, "<Ctrl>0",
+            null, on_zoom_normal };
+        entries += zoom_normal;
+
         return entries;
     }
     
@@ -766,6 +781,18 @@ public class GearyController {
         yield current_folder.remove_email_async(list, cancellable);
     }
     
+    private void on_zoom_in() {
+        main_window.message_viewer.zoom_in();
+    }
+
+    private void on_zoom_out() {
+        main_window.message_viewer.zoom_out();
+    }
+
+    private void on_zoom_normal() {
+        main_window.message_viewer.zoom_level = 1.0f;
+    }
+
     private void on_delete_messages_completed(Object? source, AsyncResult result) {
         try {
             delete_messages.end(result);

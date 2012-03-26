@@ -804,5 +804,19 @@ public class MessageViewer : WebKit.WebView {
         minimum_width = width;
         natural_width = width;
     }
+
+    public override bool scroll_event(Gdk.EventScroll event) {
+        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+            if (event.direction == Gdk.ScrollDirection.UP) {
+                zoom_in();
+                return true;
+            } else if (event.direction == Gdk.ScrollDirection.DOWN) {
+                zoom_out();
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
 
