@@ -118,6 +118,7 @@ public class MainWindow : Gtk.Window {
         status_bar.add(spinner);
         status_bar_box.pack_start(folder_paned);
         status_bar_box.pack_start(status_bar, false, false, 0);
+        get_style_context().add_class("sidebar-pane-separator");
         
          // three-pane display: message list left of current message on bottom separated by
         // grippable
