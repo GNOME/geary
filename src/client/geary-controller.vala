@@ -42,7 +42,6 @@ public class GearyController {
     public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
     public const string ACTION_FORWARD_MESSAGE = "GearyForwardMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
-    public const string ACTION_DEBUG_PRINT = "GearyDebugPrint";
     public const string ACTION_ZOOM_IN = "GearyZoomIn";
     public const string ACTION_ZOOM_OUT = "GearyZoomOut";
     public const string ACTION_ZOOM_NORMAL = "GearyZoomNormal";
@@ -145,10 +144,6 @@ public class GearyController {
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "Delete",
             null, on_delete_message };
         entries += delete_message;
-        
-        Gtk.ActionEntry secret_debug = { ACTION_DEBUG_PRINT, null, null, "<Ctrl><Alt>P",
-            null, debug_print_selected };
-        entries += secret_debug;
         
         Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>plus",
             null, on_zoom_in };
@@ -588,24 +583,6 @@ public class GearyController {
             on_folders_added_removed(accumulator, null);
         
         set_busy(false);
-    }
-    
-    public void debug_print_selected() {
-        if (main_window.message_viewer.messages.size == 0) {
-            debug("Nothing to print");
-            return;
-        }
-        
-        debug("---------------------------");
-        foreach (Geary.Email e in main_window.message_viewer.messages) {
-            debug("Message: %s", e.id.to_string());
-            if (e.header != null)
-                debug("\n%s", e.header.buffer.to_utf8());
-            else
-                debug("No message data.");
-            
-            debug("---------------------------");
-        }
     }
     
     private void cancel_folder() {
