@@ -139,6 +139,28 @@ public class ComposerWindow : Gtk.Window {
         base.show_all();
     }
     
+    private bool should_close() {
+        // TODO: Check if the message was (automatically) saved
+        if (((Gtk.SourceBuffer) message_text.buffer).can_undo) {
+            var dialog = new Gtk.MessageDialog(this, 0,
+                Gtk.MessageType.WARNING, Gtk.ButtonsType.NONE,
+                _("Do you want to discard the unsaved message?"));
+            dialog.add_buttons(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.Stock.DISCARD, Gtk.ResponseType.OK);
+            dialog.set_default_response(Gtk.ResponseType.CANCEL);
+            int response = dialog.run();
+            dialog.destroy();
+            
+            if (response != Gtk.ResponseType.OK)
+                return false;
+        }
+        return true;
+    }
+    
+    public override bool delete_event(Gdk.EventAny event) {
+        return !should_close();
+    }
+    
     private void on_send() {
         send(this);
     }
