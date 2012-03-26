@@ -101,6 +101,8 @@ public abstract class YorbaApplication {
         
         running = true;
         exitcode = startup();
+        if (exitcode != 0)
+            return exitcode;
         
         try {
             if (!register()) {

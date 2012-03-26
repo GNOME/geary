@@ -16,6 +16,7 @@ public class GearyApplication : YorbaApplication {
     public const string COPYRIGHT = "Copyright 2011-2012 Yorba Foundation";
     public const string WEBSITE = "http://www.yorba.org";
     public static string WEBSITE_LABEL = _("Visit the Yorba web site");
+    public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
     
     public const string PREFIX = _PREFIX;
     
@@ -73,29 +74,46 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         _instance = this;
     }
     
-    public override int startup() {
-        int result = base.startup();
-        
-        // TODO: Use OptionArg to properly parse the command line
-        for (int ctr = 1; ctr < args.length; ctr++) {
-            if (args[ctr] == null)
-                continue;
-            
-            switch (args[ctr].down()) {
-                case "--log-network":
-                    Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
-                break;
-                
-                case "--log-serializer":
-                    Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
-                break;
-                
-                default:
-                    // ignore
-                break;
-            }
+    static bool log_network = false;
+    static bool log_serializer = false;
+    static bool version = false;
+    const OptionEntry[] options = {
+        { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
+        { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
+        { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
+        { null }
+    };
+    
+    private int parse_arguments (string[] args) {
+        var context = new GLib.OptionContext("");
+        context.set_help_enabled(true);
+        context.add_main_entries(options, null);
+        context.add_group(Gtk.get_option_group(false));
+        try {
+            context.parse (ref args);
+        } catch (GLib.Error error) {
+            // i18n: Command line arguments are invalid
+            GLib.error (_("Failed to parse command line: %s"), error.message);
         }
         
+        if (version) {
+            stdout.printf("%s %s\n\n%s\n\n%s\n\t%s\n",
+                PRGNAME, VERSION, COPYRIGHT,
+                _("Please report comments, suggestions and bugs to:"), BUGREPORT);
+            return 1;
+        }
+        
+        if (log_network)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
+        if (log_serializer)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
+        
+        return 0;
+     }
+    
+    public override int startup() {
+        int result = base.startup();
+        result = parse_arguments(args);
         return result;
     }
     
