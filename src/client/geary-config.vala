@@ -57,9 +57,17 @@ public class Configuration {
     private const string TIME_FORMAT_NAME = "time-format";
     public Date.ClockFormat clock_format {
         get {
-            if (indicator_datetime != null
-              && indicator_datetime.get_string(TIME_FORMAT_NAME) == "12-hour")
-                return Date.ClockFormat.TWELVE_HOURS;
+            if (indicator_datetime != null) {
+                string format = indicator_datetime.get_string(TIME_FORMAT_NAME);
+                if (format == "12-hour")
+                    return Date.ClockFormat.TWELVE_HOURS;
+                else if (format == "24-hour")
+                    return Date.ClockFormat.TWENTY_FOUR_HOURS;
+                else {
+                    // locale-default or custom
+                    return Date.ClockFormat.LOCALE_DEFAULT;
+                }
+            }
             if (gnome_interface.get_string(CLOCK_FORMAT_NAME) == "12h")
                 return Date.ClockFormat.TWELVE_HOURS;
             else

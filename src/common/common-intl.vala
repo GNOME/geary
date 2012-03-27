@@ -9,6 +9,10 @@ public unowned string _(string text) {
     return text;
 }
 
+public unowned string C_(string context, string text) {
+    return text;
+}
+
 public const string TRANSLATABLE = "TRANSLATABLE";
 
 namespace Intl {

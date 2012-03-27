@@ -19,6 +19,7 @@ public bool equals(DateTime a, DateTime b) {
 public enum ClockFormat {
     TWELVE_HOURS,
     TWENTY_FOUR_HOURS,
+    LOCALE_DEFAULT,
 }
 
 public string pretty_print(DateTime datetime, ClockFormat clock_format) {
@@ -28,16 +29,19 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
         if (clock_format == ClockFormat.TWELVE_HOURS) {
             // 8:31 am
             fmt = _("%l:%M %P");
-        } else {
+        } else if (clock_format == ClockFormat.TWENTY_FOUR_HOURS) {
             // 16:35
             fmt = _("%H:%M");
+        } else {
+            // locale default, 8:31 am or 16:35
+            fmt = C_("DefaultClockFormat", "%l:%M %P");
         }
     } else if (datetime.get_year() == now.get_year()) {
         // Nov 8
-        fmt = "%b %-e";
+        fmt = _("%b %-e");
     } else {
         // 02/04/10
-        fmt = "%m/%e/%y";
+        fmt = "%x";
     }
     
     return datetime.format(fmt);
@@ -47,9 +51,12 @@ public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) 
     if (clock_format == ClockFormat.TWELVE_HOURS) {
         // November 8, 2010 8:42 am
         return datetime.format(_("%B %-e, %Y %-l:%M %P"));
-    } else {
+    } else if (clock_format == ClockFormat.TWENTY_FOUR_HOURS) {
         // November 8, 2010 16:35
         return datetime.format(_("%B %-e, %Y %-H:%M"));
+    } else {
+        // locale default full month, day and time
+        return datetime.format(C_("DefaultFullDate", "%B %-e, %Y %-l:%M %P"));
     }
 }
 
