@@ -16,12 +16,22 @@ public bool equals(DateTime a, DateTime b) {
     return year1 == year2 && month1 == month2 && day1 == day2;
 }
 
-public string pretty_print(DateTime datetime) {
+public enum ClockFormat {
+    TWELVE_HOURS,
+    TWENTY_FOUR_HOURS,
+}
+
+public string pretty_print(DateTime datetime, ClockFormat clock_format) {
     DateTime now = new DateTime.now_local();
     string fmt;
     if (equals(datetime, now)) {
-        // 8:31 am
-        fmt = "%l:%M %P";
+        if (clock_format == ClockFormat.TWELVE_HOURS) {
+            // 8:31 am
+            fmt = _("%l:%M %P");
+        } else {
+            // 16:35
+            fmt = _("%H:%M");
+        }
     } else if (datetime.get_year() == now.get_year()) {
         // Nov 8
         fmt = "%b %-e";
@@ -33,9 +43,14 @@ public string pretty_print(DateTime datetime) {
     return datetime.format(fmt);
 }
 
-public string pretty_print_verbose(DateTime datetime) {
-    // November 8, 2010 8:42 am
-    return datetime.format("%B %-e, %Y %-l:%M %P");
+public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) {
+    if (clock_format == ClockFormat.TWELVE_HOURS) {
+        // November 8, 2010 8:42 am
+        return datetime.format(_("%B %-e, %Y %-l:%M %P"));
+    } else {
+        // November 8, 2010 16:35
+        return datetime.format(_("%B %-e, %Y %-H:%M"));
+    }
 }
 
 }

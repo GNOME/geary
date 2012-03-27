@@ -7,6 +7,8 @@
 // Wrapper class for GSettings.
 public class Configuration {
     private Settings settings;
+    private Settings gnome_interface;
+    private Settings? indicator_datetime;
     
     private const string WINDOW_WIDTH_NAME = "window-width";
     public int window_width {
@@ -50,6 +52,20 @@ public class Configuration {
         set { settings.set_boolean(DISPLAY_PREVIEW_NAME, value); display_preview_changed(); }
     }
     public signal void display_preview_changed();
+
+    private const string CLOCK_FORMAT_NAME = "clock-format";
+    private const string TIME_FORMAT_NAME = "time-format";
+    public Date.ClockFormat clock_format {
+        get {
+            if (indicator_datetime != null
+              && indicator_datetime.get_string(TIME_FORMAT_NAME) == "12-hour")
+                return Date.ClockFormat.TWELVE_HOURS;
+            if (gnome_interface.get_string(CLOCK_FORMAT_NAME) == "12h")
+                return Date.ClockFormat.TWELVE_HOURS;
+            else
+                return Date.ClockFormat.TWENTY_FOUR_HOURS;
+        }
+    }
     
     // Creates a configuration object.
     // is_installed: set to true if installed, else false.
@@ -64,6 +80,13 @@ public class Configuration {
         
         // Start GSettings.
         settings = new Settings("org.yorba.geary");
+        gnome_interface = new Settings("org.gnome.desktop.interface");
+        foreach(string schema in GLib.Settings.list_schemas()) {
+            if (schema == "com.canonical.indicator.datetime") {
+                indicator_datetime = new Settings("com.canonical.indicator.datetime");
+                break;
+            }
+        }
     }
 }
 

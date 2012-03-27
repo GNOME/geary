@@ -337,7 +337,7 @@ public class MessageViewer : WebKit.WebView {
             
         if (email.date != null)
             insert_header(ref header, _("Date:"), Date.pretty_print_verbose(
-                email.date.value));
+                email.date.value, GearyApplication.instance.config.clock_format));
         
         string body_text = "";
         try {
