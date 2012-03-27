@@ -573,10 +573,11 @@ public class MessageViewer : WebKit.WebView {
             // Now look for the signature.
             WebKit.DOM.NodeList div_list = container.query_selector_all("div");
             int i = 0;
+            Regex signature_regex = new Regex("^--\\s*$");
             for (; i < div_list.length; ++i) {
                 // Get the div and check that it starts a signature block and is not inside a quote.
                 WebKit.DOM.HTMLElement div = div_list.item(i) as WebKit.DOM.HTMLElement;
-                if (div.get_inner_text().has_prefix("--") && !node_is_child_of(div, "BLOCKQUOTE")) {
+                if (signature_regex.match(div.get_inner_text()) && !node_is_child_of(div, "BLOCKQUOTE")) {
                     break;
                 }
             }
@@ -607,10 +608,10 @@ public class MessageViewer : WebKit.WebView {
         }
     }
     
-    private bool node_is_child_of(WebKit.DOM.Node node, string ancestorTag) {
+    private bool node_is_child_of(WebKit.DOM.Node node, string ancestor_tag) {
         WebKit.DOM.Element? ancestor = node.get_parent_element();
         for (; ancestor != null; ancestor = ancestor.get_parent_element()) {
-            if (ancestor.get_tag_name() == ancestorTag) {
+            if (ancestor.get_tag_name() == ancestor_tag) {
                 return true;
             }
         }
