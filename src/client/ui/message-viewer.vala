@@ -352,30 +352,6 @@ public class MessageViewer : WebKit.WebView {
                 debug("Could not get message text. %s", err2.message);
             }
         }
-        
-        try {
-            // Extract any quote containers from the signature block and make them controllable.
-            WebKit.DOM.HTMLElement container = get_dom_document().create_element("div")
-                as WebKit.DOM.HTMLElement;
-            container.set_inner_html(body_text);
-            WebKit.DOM.NodeList quote_list = container.query_selector_all(".signature .quote_container");
-            for (int i = 0; i < quote_list.length; ++i) {
-                WebKit.DOM.Element quote = quote_list.item(i) as WebKit.DOM.Element;
-                quote.set_attribute("class", "quote_container controllable hide");
-                container.append_child(quote);
-            }
-            
-            // If there is only one quote container in the message, set it up as controllable.
-            quote_list = container.query_selector_all(".quote_container");
-            if (quote_list.length == 1) {
-                ((WebKit.DOM.Element) quote_list.item(0)).set_attribute("class",
-                    "quote_container controllable hide");
-            }
-            body_text = container.get_inner_html();
-        } catch (Error error) {
-            debug("Error adjusting final quote block: %s", error.message);
-        }
-        
         body_text = "<hr noshade>" + body_text;
         
         // Graft header and email body into the email container.
@@ -441,25 +417,48 @@ public class MessageViewer : WebKit.WebView {
         WebKit.DOM.HTMLDivElement quote_container = get_dom_document().create_element("div")
             as WebKit.DOM.HTMLDivElement;
         quote_container.set_attribute("class", "quote_container");
-        quote_container.set_inner_html("""
-            <div class="shower">[show]</div>
-            <div class="hider">[hide]</div>
-            <div class="quote"></div>
-            """);
+        quote_container.set_inner_html("%s%s%s".printf("<div class=\"shower\">[show]</div>",
+            "<div class=\"hider\">[hide]</div>", "<div class=\"quote\"></div>"));
         return quote_container;
     }
 
     private string[] split_message_and_signature(string text) {
         try {
-            Regex signature_regex = new Regex("<br>--(?:&#8196;)*<br>", RegexCompileFlags.MULTILINE);
+            Regex signature_regex = new Regex("\\R--\\s*\\R", RegexCompileFlags.MULTILINE);
             return signature_regex.split_full(text, -1, 0, 0, 2);
         } catch (RegexError e) {
             debug("Regex error searching for signature: %s", e.message);
             return new string[0];
         }
     }
+    
+    private string set_up_quotes(string text) {
+        try {
+            // Extract any quote containers from the signature block and make them controllable.
+            WebKit.DOM.HTMLElement container = get_dom_document().create_element("div")
+                as WebKit.DOM.HTMLElement;
+            container.set_inner_html(text);
+            WebKit.DOM.NodeList quote_list = container.query_selector_all(".signature .quote_container");
+            for (int i = 0; i < quote_list.length; ++i) {
+                WebKit.DOM.Element quote = quote_list.item(i) as WebKit.DOM.Element;
+                quote.set_attribute("class", "quote_container controllable hide");
+                container.append_child(quote);
+            }
+            
+            // If there is only one quote container in the message, set it up as controllable.
+            quote_list = container.query_selector_all(".quote_container");
+            if (quote_list.length == 1) {
+                ((WebKit.DOM.Element) quote_list.item(0)).set_attribute("class",
+                    "quote_container controllable hide");
+            }
+            return container.get_inner_html();
+        } catch (Error error) {
+            debug("Error adjusting final quote block: %s", error.message);
+            return text;
+        }
+    }
 
-    private string insert_plain_text_markup(string input) {
+    private string insert_plain_text_markup(string text) {
         // Plain text signature and quote:
         // -- 
         // Nate
@@ -468,15 +467,6 @@ public class MessageViewer : WebKit.WebView {
         // &gt;
         // &gt;
         //
-        // First replace all newlines with <br>s and normal spaces with non-collapsible spaces. This
-        // is easier to manage than "<pre>" tags.
-        string text = input.replace("\r\n", "<br>").replace("\n", "<br>").replace(" ", "&#8196;");
-        try {
-            text = (new Regex("(?:<br>)+$")).replace(text, -1, 0, "");
-        } catch (Error error) {
-            debug("Failed to replace newlines with brs: %s", error.message);
-        }
-
         // Wrap all quotes in hide/show controllers.
         string message = "";
         try {
@@ -486,7 +476,7 @@ public class MessageViewer : WebKit.WebView {
             while (offset < text.length) {
                 // Find the beginning of a quote block.
                 int quote_start = text.index_of("&gt;") == 0 && message.length == 0 ? 0 :
-                    text.index_of("<br>&gt;", offset);
+                    text.index_of("\n&gt;", offset);
                 if (quote_start == -1) {
                     break;
                 }
@@ -494,8 +484,8 @@ public class MessageViewer : WebKit.WebView {
                 // Find the end of the quote block.
                 int quote_end = quote_start;
                 do {
-                    quote_end = text.index_of("<br>", quote_end + 1);
-                } while (quote_end != -1 && quote_end == text.index_of("<br>&gt;", quote_end));
+                    quote_end = text.index_of("\n", quote_end + 1);
+                } while (quote_end != -1 && quote_end == text.index_of("\n&gt;", quote_end));
                 if (quote_end == -1) {
                     quote_end = text.length;
                 }
@@ -505,7 +495,7 @@ public class MessageViewer : WebKit.WebView {
                 ((WebKit.DOM.HTMLElement) quote_container.query_selector(".quote")).set_inner_html(
                     text.substring(quote_start, quote_end - quote_start));
                 container.append_child(quote_container);
-                if (quote_start > 0) {
+                if (quote_start > offset) {
                     message += text.substring(offset, quote_start - offset);
                 }
                 message += container.get_inner_html();
@@ -526,11 +516,11 @@ public class MessageViewer : WebKit.WebView {
         string[] message_chunks = split_message_and_signature(message);
         string signature = "";
         if (message_chunks.length == 2) {
-            signature = "<div class=\"signature\">" +
-                message.substring(message_chunks[0].length).strip() + "</div>";
-            message = message_chunks[0];
+            signature = "<div class=\"signature\">%s</div>".printf(
+                message.substring(message_chunks[0].length).strip());
+            message = "<div>%s</div>".printf(message_chunks[0]);
         }
-        return message + signature;
+        return "<pre>" + set_up_quotes(message + signature) + "</pre>";
     }
 
     private string insert_html_markup(string text) {
@@ -610,7 +600,7 @@ public class MessageViewer : WebKit.WebView {
             }
 
             // Now return the whole message.
-            return container.get_inner_html();
+            return set_up_quotes(container.get_inner_html());
         } catch (Error e) {
             debug("Error modifying HTML message: %s", e.message);
             return text;
