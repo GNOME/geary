@@ -7,7 +7,7 @@
 namespace Stream {
 
 public async void write_all_async(OutputStream outs, uint8[] data, ssize_t offset = 0, int length = -1,
-    int priority = Priority.DEFAULT, Cancellable? cancellable = null) throws Error {
+    int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Error {
     if (length < 0)
         length = data.length;
     

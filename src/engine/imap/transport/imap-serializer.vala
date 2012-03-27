@@ -76,7 +76,7 @@ public class Geary.Imap.Serializer {
     }
     
     public async void push_input_stream_literal_data_async(InputStream ins,
-        int priority = Priority.DEFAULT, Cancellable? cancellable = null) throws Error {
+        int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null) throws Error {
         // commit the in-memory buffer to the output stream
         yield commit_async(priority, cancellable);
         
@@ -88,7 +88,7 @@ public class Geary.Imap.Serializer {
     // to the wrapped OutputStream.  Note that this is *not* a flush, as it's possible the
     // serialized data will be stored in a buffer in the OutputStream.  Use flush_async() to force
     // data onto the wire.
-    public async void commit_async(int priority = Priority.DEFAULT, Cancellable? cancellable = null)
+    public async void commit_async(int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null)
         throws Error {
         size_t length = mouts.get_data_size();
         if (length == 0)
@@ -113,7 +113,7 @@ public class Geary.Imap.Serializer {
     
     // This pushes all serialized data onto the wire.  This calls commit_async() before 
     // flushing.
-    public async void flush_async(int priority = Priority.DEFAULT, Cancellable? cancellable = null)
+    public async void flush_async(int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null)
         throws Error {
         yield commit_async(priority, cancellable);
         yield outs.flush_async(priority, cancellable);

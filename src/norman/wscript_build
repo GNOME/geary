@@ -14,8 +14,9 @@ bld.program(
 	target		= 'norman',
 	vapi_dirs	= '../../vapi',
 	threading	= True,
+	use			='geary-static',
 	uselib		= norman_uselib + ' ' + bld.engine_uselib + ' ' + bld.common_uselib,
 	packages	= norman_packages + bld.engine_packages + bld.common_packages,
-	source 		= norman_src + bld.common_src + bld.engine_src
+	source 		= norman_src
 )
 

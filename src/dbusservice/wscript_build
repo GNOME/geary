@@ -19,8 +19,9 @@ bld.program(
 	target		= 'gearyd',
 	vapi_dirs	= '../../vapi',
 	threading	= True,
+	use			= 'geary-static',
 	uselib		= dbusservice_uselib + ' ' + bld.engine_uselib + ' ' + bld.common_uselib,
 	packages	= dbusservice_packages + bld.engine_packages + bld.common_packages,
-	source 		= dbusservice_src + bld.common_src + bld.engine_src
+	source 		= dbusservice_src
 )
 

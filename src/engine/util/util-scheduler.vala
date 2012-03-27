@@ -101,15 +101,15 @@ public class Scheduled : Geary.SmartReference {
     }
 }
 
-public Scheduled on_idle(SourceFunc cb, int priority = Priority.DEFAULT_IDLE) {
+public Scheduled on_idle(SourceFunc cb, int priority = GLib.Priority.DEFAULT_IDLE) {
     return schedule_instance(new ScheduledInstance.on_idle(cb, priority));
 }
 
-public Scheduled after_msec(uint msec, SourceFunc cb, int priority = Priority.DEFAULT) {
+public Scheduled after_msec(uint msec, SourceFunc cb, int priority = GLib.Priority.DEFAULT) {
     return schedule_instance(new ScheduledInstance.after_msec(msec, cb, priority));
 }
 
-public Scheduled after_sec(uint sec, SourceFunc cb, int priority = Priority.DEFAULT) {
+public Scheduled after_sec(uint sec, SourceFunc cb, int priority = GLib.Priority.DEFAULT) {
     return schedule_instance(new ScheduledInstance.after_sec(sec, cb, priority));
 }
 

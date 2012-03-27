@@ -42,9 +42,10 @@ app = bld.program(
 	target		= 'geary',
 	vapi_dirs	= '../../vapi',
 	threading	= True,
+	use			='geary-static',
 	uselib		= client_uselib + ' ' + bld.common_uselib + ' ' + bld.engine_uselib,
 	packages	= client_packages + bld.common_packages + bld.engine_packages,
-	source 		= client_src + bld.common_src + bld.engine_src
+	source 		= client_src
 )
 
 app.add_settings_schemas(gsettings_schemas)

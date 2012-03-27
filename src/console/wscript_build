@@ -14,8 +14,9 @@ bld.program(
 	target		= 'console',
 	vapi_dirs	= '../../vapi',
 	threading	= True,
+	use			='geary-static',
 	uselib		= console_uselib + ' ' + bld.engine_uselib + ' ' + bld.common_uselib,
 	packages	= console_packages + bld.engine_packages + bld.common_packages,
-	source 		= console_src + bld.common_src + bld.engine_src
+	source 		= console_src
 )
 

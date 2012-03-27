@@ -12,7 +12,7 @@
  * The EmailPrefetcher does not maintain a reference to the folder.
  */
 public class Geary.EmailPrefetcher : Object {
-    private const int PREFETCH_DELAY_SEC = 5;
+    public const int PREFETCH_DELAY_SEC = 5;
     
     private unowned Geary.Folder folder;
     private int start_delay_sec;

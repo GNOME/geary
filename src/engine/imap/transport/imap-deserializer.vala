@@ -115,7 +115,7 @@ public class Geary.Imap.Deserializer {
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
     }
     
-    public void xon(int priority = Priority.DEFAULT) {
+    public void xon(int priority = GLib.Priority.DEFAULT) {
         if (!flow_controlled || get_mode() == Mode.FAILED)
             return;
         

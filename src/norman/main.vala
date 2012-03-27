@@ -10,7 +10,8 @@ Geary.Credentials? credentials = null;
 Geary.ComposedEmail? composed_email = null;
 
 async void main_async() throws Error {
-    Geary.Smtp.ClientSession session = new Geary.Smtp.ClientSession(Geary.GmailAccount.SMTP_ENDPOINT);
+    Geary.Smtp.ClientSession session = new Geary.Smtp.ClientSession(new Geary.Endpoint(
+        "imap.gmail.com", Geary.Imap.ClientConnection.DEFAULT_PORT_TLS, Geary.Endpoint.Flags.TLS));
     
     Geary.Smtp.Greeting? greeting = yield session.login_async(credentials);
     stdout.printf("%s\n", greeting.to_string());
