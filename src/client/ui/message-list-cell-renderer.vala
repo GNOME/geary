@@ -46,9 +46,18 @@ public class FormattedMessageData : Object {
         
         string from = (email.from != null && email.from.size > 0) ? email.from[0].get_short_address() : "";
         
+        string clean_subject;
+        try {
+            Regex subject_regex = new Regex("^(?i:Re:\\s*)+");
+            clean_subject = subject_regex.replace(email.subject.value, -1, 0, "");
+        } catch (RegexError e) {
+            debug("Failed to clean up subject line: %s", e.message);
+            clean_subject = email.subject.value;
+        }
+        
         this(unread,
             Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format),
-            from, email.subject.value,
+            from, clean_subject,
             Geary.String.reduce_whitespace(preview), num_emails);
         
         this.email = email;

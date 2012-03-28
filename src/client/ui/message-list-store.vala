@@ -65,8 +65,8 @@ public class MessageListStore : Gtk.TreeStore {
         
         if (pool != null && pool.size > 0)
             set(iter,
-                Column.MESSAGE_DATA, new FormattedMessageData.from_email(pool.first(), pool.size, 
-                    conversation.is_unread()),
+                Column.MESSAGE_DATA, new FormattedMessageData.from_email(
+                    email_for_preview(conversation), pool.size, conversation.is_unread()),
                 Column.MESSAGE_OBJECT, conversation
             );
     }
