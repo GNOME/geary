@@ -41,7 +41,7 @@ public class FolderList : Sidebar.Tree {
                     return new ThemedIcon("mail-sent");
                 
                 case Geary.SpecialFolderType.FLAGGED:
-                    return new ThemedIcon("emblem-favorite");
+                    return new ThemedIcon("starred");
                 
                 case Geary.SpecialFolderType.ALL_MAIL:
                     return new ThemedIcon("archive");
