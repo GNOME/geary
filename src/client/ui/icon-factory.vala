@@ -18,7 +18,7 @@ public class IconFactory {
         private set { _instance = value; }
     }
     
-    public const int UNREAD_ICON_SIZE = 12;
+    public const int UNREAD_ICON_SIZE = 16;
     public Gdk.Pixbuf? unread { get; private set; }
     
     public const int GEARY_ICON_SIZE = 95;
