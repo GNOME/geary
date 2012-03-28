@@ -73,7 +73,7 @@
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Delete</property>
         <property name="use_underline">True</property>
-        <property name="icon_name">archive-icon</property>
+        <property name="icon_name">archive-insert</property>
       </object>
       <packing>
         <property name="expand">False</property>
