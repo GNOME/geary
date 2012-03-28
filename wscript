@@ -19,11 +19,18 @@ def options(opt):
 	opt.load('compiler_c')
 	opt.load('vala')
 	opt.load('glib2')
+	
+	opt.add_option(
+		'--debug',
+		help='performs a debug build',
+		action='store_true',
+		default=False)
 
 def configure(conf):
 	conf.load('compiler_c vala glib2')
 	
 	conf.check_vala((0, 15, 1))
+	conf.env.DEBUG = conf.options.debug
 	
 	conf.check_cfg(
 		package='glib-2.0',
@@ -105,9 +112,15 @@ def configure(conf):
 def build(bld):
 	bld.add_post_fun(post_build)
 	
-	bld.env.append_value('CFLAGS', ['-O2', '-g', '-D_PREFIX="' + bld.env.PREFIX + '"'])
-	bld.env.append_value('LINKFLAGS', ['-O2', '-g'])
-	bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])	
+	# Options for debug/release builds.
+	if bld.env.DEBUG:
+		bld.env.append_value('CFLAGS', ['-O0', '-g', '-D_PREFIX="' + bld.env.PREFIX + '"'])
+		bld.env.append_value('LINKFLAGS', ['-O0', '-g'])
+		bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])
+	else:
+		bld.env.append_value('CFLAGS', ['-O2', '-g', '-D_PREFIX="' + bld.env.PREFIX + '"'])
+		bld.env.append_value('LINKFLAGS', ['-O2', '-g'])
+		bld.env.append_value('VALAFLAGS', ['-g', '--enable-checking', '--fatal-warnings'])
 	
 	bld.recurse('src')
 	
