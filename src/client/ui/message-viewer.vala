@@ -683,9 +683,24 @@ public class MessageViewer : WebKit.WebView {
             "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))",
             RegexCompileFlags.CASELESS);
         
-        output = r.replace(output, -1, 0, "<a href=\"\\g<1>\">\\g<1></a>");
-        
+        output = r.replace_eval(output, -1, 0, 0, is_valid_url);
         return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
+    }
+    
+    // Validates a URL.
+    // Ensures the URL begins with a valid protocol specifier.  (If not, we don't
+    // want to linkify it.)
+    private bool is_valid_url(MatchInfo match_info, StringBuilder result) {
+        try {
+            string? url = match_info.fetch(0);
+            Regex r = new Regex("^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):",
+                RegexCompileFlags.CASELESS);
+            
+            result.append(r.match(url) ? "<a href=\"%s\">%s</a>".printf(url, url) : url);
+        } catch (Error e) {
+            debug("URL parsing error: %s\n", e.message);
+        }
+        return false; // False to continue processing.
     }
     
     // Scrolls to the first unread message in the view, if any exist.
