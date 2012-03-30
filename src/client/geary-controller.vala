@@ -258,7 +258,8 @@ public class GearyController {
         
         current_conversations = null;
         current_folder = folder;
-        
+        main_window.message_list_store.set_current_folder(current_folder);
+
         yield current_folder.open_async(false, cancellable_folder);
 
         // The current folder may be null if the user rapidly switches between folders. If they have

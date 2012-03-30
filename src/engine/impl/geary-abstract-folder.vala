@@ -41,6 +41,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract Geary.FolderPath get_path();
     
+    public abstract Geary.SpecialFolderType? get_special_folder_type();
+    
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;

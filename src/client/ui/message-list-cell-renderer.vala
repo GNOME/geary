@@ -37,14 +37,21 @@ public class FormattedMessageData : Object {
     }
     
     // Creates a formatted message data from an e-mail.
-    public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread) {
+    public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread,
+        Geary.Folder folder) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
         
         string preview = "";
         if (email.fields.fulfills(Geary.Email.Field.PREVIEW) && email.preview != null)
             preview = email.preview.buffer.to_utf8();
         
-        string from = (email.from != null && email.from.size > 0) ? email.from[0].get_short_address() : "";
+        string who = "";
+        if (folder.get_special_folder_type() == Geary.SpecialFolderType.SENT &&
+            email.to != null && email.to.size > 0) {
+            who = email.to[0].get_short_address();
+        } else if (email.from != null && email.from.size > 0) {
+            who = email.from[0].get_short_address();
+        }
         
         string clean_subject;
         try {
@@ -57,7 +64,7 @@ public class FormattedMessageData : Object {
         
         this(unread,
             Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format),
-            from, clean_subject,
+            who, clean_subject,
             Geary.String.reduce_whitespace(preview), num_emails);
         
         this.email = email;

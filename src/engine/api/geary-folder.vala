@@ -165,6 +165,12 @@ public interface Geary.Folder : Object {
     public abstract Geary.FolderPath get_path();
     
     /**
+     * Returns the special folder type of the folder. If the the folder is not a special one then
+     * null is returned.
+     */
+    public abstract Geary.SpecialFolderType? get_special_folder_type();
+    
+    /**
      * The Folder must be opened before most operations may be performed on it.  Depending on the
      * implementation this might entail opening a network connection or setting the connection to
      * a particular state, opening a file or database, and so on.
@@ -195,7 +201,7 @@ public interface Geary.Folder : Object {
      */
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
-    /*
+    /**
      * Returns the number of messages in the Folder.  They can be addressed by their position,
      * from 1 to n.
      *

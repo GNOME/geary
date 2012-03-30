@@ -9,6 +9,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     internal Sqlite.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
+    internal SpecialFolder? special_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
     
     private Imap.Account remote;
@@ -21,10 +22,12 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     private SendReplayQueue? send_replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
-    public GenericImapFolder(Imap.Account remote, Sqlite.Account local, Sqlite.Folder local_folder) {
+    public GenericImapFolder(Imap.Account remote, Sqlite.Account local, Sqlite.Folder local_folder,
+        SpecialFolder? special_folder) {
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
+        this.special_folder = special_folder;
         
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
@@ -39,6 +42,14 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     public override Geary.FolderPath get_path() {
         return local_folder.get_path();
+    }
+    
+    public override Geary.SpecialFolderType? get_special_folder_type() {
+        if (special_folder == null) {
+            return null;
+        } else {
+            return special_folder.folder_type;
+        }
     }
     
     public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {

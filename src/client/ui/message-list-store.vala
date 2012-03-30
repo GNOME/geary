@@ -50,10 +50,16 @@ public class MessageListStore : Gtk.TreeStore {
         }
     }
     
+    private Geary.Folder current_folder;
+    
     public MessageListStore() {
         set_column_types(Column.get_types());
         set_default_sort_func(sort_by_date);
         set_sort_column_id(TreeSortable.DEFAULT_SORT_COLUMN_ID, Gtk.SortType.DESCENDING);
+    }
+    
+    public void set_current_folder(Geary.Folder folder) {
+        current_folder = folder;
     }
     
     // The Email should've been fetched with REQUIRED_FIELDS.
@@ -66,7 +72,8 @@ public class MessageListStore : Gtk.TreeStore {
         if (pool != null && pool.size > 0)
             set(iter,
                 Column.MESSAGE_DATA, new FormattedMessageData.from_email(
-                    email_for_preview(conversation), pool.size, conversation.is_unread()),
+                    email_for_preview(conversation), pool.size, conversation.is_unread(),
+                    current_folder),
                 Column.MESSAGE_OBJECT, conversation
             );
     }
@@ -99,7 +106,7 @@ public class MessageListStore : Gtk.TreeStore {
         
         if (!only_update_flags && (existing == null || !existing.email.id.equals(preview.id))) {
             set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview,
-                conversation.get_count(), conversation.is_unread()));
+                conversation.get_count(), conversation.is_unread(), current_folder));
         }
     }
     
@@ -151,7 +158,7 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, 
-            conversation.get_usable_count(), conversation.is_unread()));
+            conversation.get_usable_count(), conversation.is_unread(), current_folder));
     }
     
     public Geary.Email? get_preview_for_conversation(Geary.Conversation conversation) {

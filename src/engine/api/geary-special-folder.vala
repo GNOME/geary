@@ -31,8 +31,6 @@ public class Geary.SpecialFolder : Object {
 public class Geary.SpecialFolderMap : Object {
     private Gee.HashMap<SpecialFolderType, SpecialFolder> map = new Gee.HashMap<SpecialFolderType,
         SpecialFolder>();
-    private Gee.HashSet<Geary.FolderPath> paths = new Gee.HashSet<Geary.FolderPath>(
-        Hashable.hash_func, Equalable.equal_func);
     
     public SpecialFolderMap() {
     }
@@ -45,16 +43,21 @@ public class Geary.SpecialFolderMap : Object {
         return map.get(folder_type);
     }
     
+    public SpecialFolder? get_folder_by_path(FolderPath path) {
+        foreach (SpecialFolder folder in map.values) {
+            if (folder.path == path) {
+                return folder;
+            }
+        }
+        return null;
+    }
+    
     public Gee.Set<SpecialFolderType> get_supported_types() {
         return map.keys.read_only_view;
     }
     
     public Gee.Collection<SpecialFolder> get_all() {
         return map.values.read_only_view;
-    }
-    
-    public bool has_path(Geary.FolderPath path) {
-        return paths.contains(path);
     }
 }
 
