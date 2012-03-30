@@ -171,7 +171,8 @@ public class MessageViewer : WebKit.WebView {
         vexpand = true;
         set_border_width(0);
         
-        navigation_requested.connect(on_navigation_requested);
+        navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
+        new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         parent_set.connect(on_parent_set);
         hovering_over_link.connect(on_hovering_over_link);
         button_press_event.connect(on_button_press_event);
@@ -376,11 +377,11 @@ public class MessageViewer : WebKit.WebView {
                 .query_selector_all(".quote_container > .hider");
             WebKit.DOM.NodeList show_quotes = get_dom_document()
                 .query_selector_all(".quote_container > .shower");
-
+            
             for (int i = 0; i < hide_quotes.length; ++i) {
-			    WebKit.DOM.EventTarget hide_quote = hide_quotes.item(i) as WebKit.DOM.EventTarget;
-			    WebKit.DOM.EventTarget show_quote = show_quotes.item(i) as WebKit.DOM.EventTarget;
-			
+                WebKit.DOM.EventTarget hide_quote = hide_quotes.item(i) as WebKit.DOM.EventTarget;
+                WebKit.DOM.EventTarget show_quote = show_quotes.item(i) as WebKit.DOM.EventTarget;
+                
                 // Remove any existing handlers they may have so we don't double bind.
                 hide_quote.remove_event_listener("click", (Callback) on_hide_quote_clicked, false);
                 show_quote.remove_event_listener("click", (Callback) on_show_quote_clicked, false);
@@ -716,10 +717,12 @@ public class MessageViewer : WebKit.WebView {
         }
     }
     
-    private WebKit.NavigationResponse on_navigation_requested(WebKit.WebFrame frame, 
-        WebKit.NetworkRequest request) {
+    private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
+        WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
+        WebKit.WebPolicyDecision policy_decision) {
+        policy_decision.ignore();
         link_selected(request.uri);
-        return WebKit.NavigationResponse.IGNORE;
+        return true;
     }
     
     private void on_parent_set(Gtk.Widget? previous_parent) {
