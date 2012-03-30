@@ -210,6 +210,8 @@ public class FormattedMessageData : Object {
 
         Pango.FontDescription font_subject = new Pango.FontDescription();
         font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
+        if (is_unread)
+            font_subject.set_weight(Pango.Weight.BOLD);
         Pango.Layout layout_subject = widget.create_pango_layout(null);
         layout_subject.set_font_description(font_subject);
         layout_subject.set_text(subject, -1);
