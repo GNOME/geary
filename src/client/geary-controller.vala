@@ -387,6 +387,9 @@ public class GearyController {
     public void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         // If we're viewing this conversation, fetch the messages and add them to the view.
+        if (main_window.message_list_store.has_conversation(conversation)) {
+            main_window.message_list_store.update_conversation(conversation);
+        }
         if (is_viewed_conversation(conversation))
             do_show_message.begin(conversation.get_pool(), cancellable_message,
                 on_show_message_completed);
