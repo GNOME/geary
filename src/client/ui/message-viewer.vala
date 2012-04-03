@@ -78,6 +78,10 @@ public class MessageViewer : WebKit.WebView {
             display: inline;
         }
         
+        .signature a {
+            color: #66f;
+        }
+        
         .quote_container {
             margin: 5px 0;
             padding: 5px;
