@@ -529,25 +529,18 @@ public class MessageViewer : WebKit.WebView {
     }
 
     private string insert_html_markup(string text) {
-        // HTML signature and quote (note, this is actually all one line):
-        // <div>-- </div>
-        // <div>
-        //      Nate<br><br>
-        //      <div class="gmail_quote">
-        //          On Tue, Mar 13, 2012 at 11:35 AM, Nate Lillich
-        //          <span>&lt;<a href="mailto:nate@yorba.org">nate@yorba.org</a>&gt;</span> 
-        //          wrote:<br>
-        //          <blockquote class="gmail_quote">
-        //              Quoted message.
-        //          </blockquote>
-        //      </div><br>
-        // </div>
-        // \u000d
         try {
             // Create a workspace for manipulating the HTML.
             WebKit.DOM.Document document = get_dom_document();
             WebKit.DOM.HTMLElement container = document.create_element("div") as WebKit.DOM.HTMLElement;
             container.set_inner_html(text);
+            
+            // Some HTML messages like to wrap themselves in full, proper html, head, and body tags.
+            // If we have that here, lets remove it since we are sticking it in our own document.
+            WebKit.DOM.HTMLElement? body = container.query_selector("body") as WebKit.DOM.HTMLElement;
+            if (body != null) {
+                container.set_inner_html(body.get_inner_html());
+            }
 
             // Get all the top level block quotes and stick them into a hide/show controller.
             WebKit.DOM.NodeList blockquote_list = container.query_selector_all("blockquote");
@@ -576,34 +569,7 @@ public class MessageViewer : WebKit.WebView {
             }
 
             // Now look for the signature.
-            WebKit.DOM.NodeList div_list = container.query_selector_all("div");
-            int i = 0;
-            Regex signature_regex = new Regex("^--\\s*$");
-            for (; i < div_list.length; ++i) {
-                // Get the div and check that it starts a signature block and is not inside a quote.
-                WebKit.DOM.HTMLElement div = div_list.item(i) as WebKit.DOM.HTMLElement;
-                if (signature_regex.match(div.get_inner_text()) && !node_is_child_of(div, "BLOCKQUOTE")) {
-                    break;
-                }
-            }
-
-            // If we have a signature, move it and all of its following siblings that are not quotes
-            // inside a signature div.
-            if (i != div_list.length) {
-                WebKit.DOM.Element elem = div_list.item(i) as WebKit.DOM.Element;
-                WebKit.DOM.HTMLElement signature_container = document.create_element("div")
-                    as WebKit.DOM.HTMLElement;
-                signature_container.set_attribute("class", "signature");
-                do {
-                    // Get its sibling _before_ we move it into the signature div.
-                    WebKit.DOM.Element? sibling = elem.get_next_element_sibling() as WebKit.DOM.Element;
-                    if (!elem.get_attribute("class").contains("quote_container")) {
-                        signature_container.append_child(elem);
-                    }
-                    elem = sibling;
-                } while (elem != null);
-                container.append_child(signature_container);
-            }
+            wrap_html_signature(ref container);
 
             // Now return the whole message.
             return set_up_quotes(container.get_inner_html());
@@ -611,6 +577,47 @@ public class MessageViewer : WebKit.WebView {
             debug("Error modifying HTML message: %s", e.message);
             return text;
         }
+    }
+    
+    private void wrap_html_signature(ref WebKit.DOM.HTMLElement container) throws Error {
+        // Most HTML signatures fall into one of these designs which are handled by this method:
+        //
+        // 1. GMail:            <div>-- </div>$SIGNATURE
+        // 2. GMail Alternate:  <div><span>-- </span></div>$SIGNATURE
+        // 3. Thunderbird:      <div>-- <br>$SIGNATURE</div>
+        //
+        WebKit.DOM.NodeList div_list = container.query_selector_all("div,span,p");
+        int i = 0;
+        Regex sig_regex = new Regex("^--\\s*$");
+        Regex alternate_sig_regex = new Regex("^--\\s*(?:<br|\\R)");
+        for (; i < div_list.length; ++i) {
+            // Get the div and check that it starts a signature block and is not inside a quote.
+            WebKit.DOM.HTMLElement div = div_list.item(i) as WebKit.DOM.HTMLElement;
+            string inner_html = div.get_inner_html();
+            if ((sig_regex.match(inner_html) || alternate_sig_regex.match(inner_html)) &&
+                !node_is_child_of(div, "BLOCKQUOTE")) {
+                break;
+            }
+        }
+
+        // If we have a signature, move it and all of its following siblings that are not quotes
+        // inside a signature div.
+        if (i == div_list.length) {
+            return;
+        }
+        WebKit.DOM.Element elem = div_list.item(i) as WebKit.DOM.Element;
+        WebKit.DOM.HTMLElement signature_container = get_dom_document().create_element("div")
+            as WebKit.DOM.HTMLElement;
+        signature_container.set_attribute("class", "signature");
+        do {
+            // Get its sibling _before_ we move it into the signature div.
+            WebKit.DOM.Element? sibling = elem.get_next_element_sibling() as WebKit.DOM.Element;
+            if (!elem.get_attribute("class").contains("quote_container")) {
+                signature_container.append_child(elem);
+            }
+            elem = sibling;
+        } while (elem != null);
+        container.append_child(signature_container);
     }
     
     private bool node_is_child_of(WebKit.DOM.Node node, string ancestor_tag) {
