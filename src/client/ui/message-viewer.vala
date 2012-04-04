@@ -28,6 +28,49 @@ public class MessageViewer : WebKit.WebView {
         td, th {
             vertical-align: top;
         }
+        hr {
+            background-color: #999;
+            height: 1px;
+            border: 0;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        pre {
+            font-family: sans-serif;
+            white-space: pre-wrap;
+        }
+        img {
+            display: none;
+        }
+        img[src^="data:"] {
+            display: inline;
+        }
+
+        .button {
+            border: 1px #fff solid;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 4px;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            text-align: center;
+        }
+        .button * {
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+        }
+        .button:hover {
+            border-color: #ccc;
+            background-color: #ddd;
+            box-shadow: inset 2px 2px 7px #f8f8f8;
+        }
+        .button:active {
+            border-color: #aaa;
+            background-color: #ddd;
+            padding: 5px 3px 3px 5px;
+            box-shadow: inset 2px 2px 7px #ccc;
+        }
+
         .email {
             padding: 15px;
             border: 1px #999 solid;
@@ -47,6 +90,20 @@ public class MessageViewer : WebKit.WebView {
             -webkit-box-sizing: border-box;
             width: 100% !important;
         }
+        .email_container {
+            overflow: hidden;
+        }
+        .email_container > .menu {
+            float: right;
+        }
+        .email_container > .menu > .icon {
+            width: 16px;
+            height: 16px;
+        }
+        .email_container > hr {
+            clear: both;
+        }
+
         .geary_spacer {
             display: table;
             box-sizing: border-box;
@@ -115,17 +172,6 @@ public class MessageViewer : WebKit.WebView {
             color: black;
         }
 
-        hr {
-            background-color: #999;
-            height: 1px;
-            border: 0;
-            margin-top: 15px;
-            margin-bottom: 15px;
-        }
-        pre {
-            font-family: sans-serif;
-            white-space: pre-wrap;
-        }
         #message_container {
             position: absolute;
             left: 0;
@@ -141,10 +187,21 @@ public class MessageViewer : WebKit.WebView {
             display: inline-block;
             width: auto;
         }
+        #email_template {
+            display: none;
+        }
         </style>
         </head><body>
         <div id="message_container"><div id="placeholder"></div></div>
         <div id="multiple_messages"><div id="selection_counter" class="email"></div></div>
+        <div id="email_template" class="email">
+            <div class="geary_spacer"></div>
+            <div class="email_container">
+                <div class="menu button"><img src="" class="icon" /></div>
+                <table class="header"><tbody></tbody></table>
+                <span class="body"></span>
+            </div>
+        </div>
         </body></html>""";
     
     // Fired when the user clicks a link.
@@ -152,10 +209,20 @@ public class MessageViewer : WebKit.WebView {
     
     // Fired when the user hovers over or stops hovering over a link.
     public signal void link_hover(string? link);
-    
+
+    // Fired when the user clicks "reply" in the message menu.
+    public signal void reply_to_message();
+
+    // Fired when the user clicks "reply all" in the message menu.
+    public signal void reply_all_message();
+
+    // Fired when the user clicks "forward" in the message menu.
+    public signal void forward_message();
+
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) compare_email); }
+    public Geary.Email? active_email = null;
     
     // HTML element that contains message DIVs.
     private WebKit.DOM.HTMLDivElement container;
@@ -169,6 +236,7 @@ public class MessageViewer : WebKit.WebView {
     private int height = 0;
     private string? hover_url = null;
     private Gtk.Menu? context_menu = null;
+    private Gtk.Menu? message_menu = null;
     
     public MessageViewer() {
         valign = Gtk.Align.START;
@@ -180,9 +248,9 @@ public class MessageViewer : WebKit.WebView {
         parent_set.connect(on_parent_set);
         hovering_over_link.connect(on_hovering_over_link);
         button_press_event.connect(on_button_press_event);
+        resource_request_starting.connect(on_resource_request_starting);
         
         WebKit.WebSettings s = new WebKit.WebSettings();
-        s.auto_load_images = false;
         s.enable_default_context_menu = false;
         s.enable_scripts = false;
         s.enable_java_applet = false;
@@ -191,7 +259,7 @@ public class MessageViewer : WebKit.WebView {
         
         // Load the HTML into WebKit.
         load_finished.connect(on_load_finished);
-        load_string(HTML_BODY, "text/html", "UTF8", "");
+        load_string(HTML_BODY, "text/html", "utf8", "");
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
@@ -200,6 +268,29 @@ public class MessageViewer : WebKit.WebView {
         assert(_container != null);
         container = _container as WebKit.DOM.HTMLDivElement;
         assert(container != null);
+
+        // Then load the settings icon.
+        try {
+            string icon_content;
+            FileUtils.get_contents(
+                Gtk.IconTheme.get_default().lookup_icon("down", 16, 0).get_filename(),
+                out icon_content);
+            WebKit.DOM.HTMLImageElement icon = get_dom_document()
+                .query_selector("#email_template .menu .icon") as WebKit.DOM.HTMLImageElement;
+            icon.set_attribute("src", "data:image/svg+xml;base64,%s".printf(
+                Base64.encode(icon_content.data)));
+        } catch (Error error) {
+            warning("Failed to load menu icon: %s", error.message);
+        }
+    }
+
+    private void on_resource_request_starting(WebKit.WebFrame web_frame,
+        WebKit.WebResource web_resource, WebKit.NetworkRequest request,
+        WebKit.NetworkResponse? response) {
+
+        if (!request.get_uri().has_prefix("data:")) {
+            request.set_uri("about:blank");
+        }
     }
     
     // Removes all displayed e-mails from the view.
@@ -277,38 +368,29 @@ public class MessageViewer : WebKit.WebView {
         try {
             // The HTML is like this:
             // <div id="$MESSAGE_ID" class="email">
-            //     <div class="geary spacer"></div>
+            //     <div class="geary_spacer"></div>
             //     <div class="email_container">
-            //         <div class="quote_container">
-            //             <div class="shower">[show]</div>
-            //             <div class="hider">[hide]</div>
-            //             <div class="quote">$PRE_BODY_QUOTE</div>
-            //         </div>
+            //         <div class="menu"><img class="icon" /></div>
+            //         <table>$HEADER</table>
+            //         <span>
+            //             $EMAIL_BODY
             //
-            //         $EMAIL_BODY
+            //             <div class="signature">$SIGNATURE</div>
             //
-            //         <div class="signature">$SIGNATURE</div>
-            //
-            //         <div class="end quote_container">
-            //             <div class="shower">[show]</div>
-            //             <div class="hider">[hide]</div>
-            //             <div class="quote">$POST_BODY_QUOTE</div>
-            //         </div>
+            //             <div class="quote_container controllable">
+            //                 <div class="shower">[show]</div>
+            //                 <div class="hider">[hide]</div>
+            //                 <div class="quote">$QUOTE</div>
+            //             </div>
+            //         </span>
             //     </div>
             // </div>
-            div_message = get_dom_document().create_element("div") as WebKit.DOM.HTMLElement;
+            div_message = get_dom_document().get_element_by_id("email_template").clone_node(true)
+                as WebKit.DOM.HTMLElement;
             div_message.set_attribute("id", message_id);
-            div_message.set_attribute("class", "email");
             container.insert_before(div_message, insert_before);
-            
-            WebKit.DOM.Element spacer = get_dom_document().create_element("div") as
-                WebKit.DOM.HTMLElement;
-            spacer.set_attribute("class", "geary_spacer");
-            div_message.append_child(spacer);
-            
-            div_email_container = get_dom_document().create_element("div") as WebKit.DOM.HTMLElement;
-            div_email_container.set_attribute("class", "email_container");
-            div_message.append_child(div_email_container);
+            div_email_container = div_message.query_selector("div.email_container")
+                as WebKit.DOM.HTMLElement;
         } catch (Error setup_error) {
             warning("Error setting up webkit: %s", setup_error.message);
             
@@ -361,42 +443,46 @@ public class MessageViewer : WebKit.WebView {
         
         // Graft header and email body into the email container.
         try {
-            WebKit.DOM.HTMLElement table_header = get_dom_document().create_element("table")
-                as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement table_header = div_email_container
+                .query_selector("table.header > tbody") as WebKit.DOM.HTMLElement;
             table_header.set_inner_html(header);
-            div_email_container.append_child(table_header);
             
-            WebKit.DOM.HTMLElement span_body = get_dom_document().create_element("span")
+            WebKit.DOM.HTMLElement span_body = div_email_container.query_selector("span.body")
                 as WebKit.DOM.HTMLElement;
             span_body.set_inner_html(body_text);
-            div_email_container.append_child(span_body);
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
         }
         
-        // Attach to the click events for hiding/showing.
+        // Attach to the click events for hiding/showing quotes and opening the menu.
+        bind_event(".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
+        bind_event(".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
+        bind_event(".email_container > .menu", "click", (Callback) on_menu_clicked, this);
+    }
+    
+    private void bind_event(string selector, string event, Callback callback, Object? extra = null) {
         try {
-            // Get the show/hide elements.
-            WebKit.DOM.NodeList hide_quotes = get_dom_document()
-                .query_selector_all(".quote_container > .hider");
-            WebKit.DOM.NodeList show_quotes = get_dom_document()
-                .query_selector_all(".quote_container > .shower");
-            
-            for (int i = 0; i < hide_quotes.length; ++i) {
-                WebKit.DOM.EventTarget hide_quote = hide_quotes.item(i) as WebKit.DOM.EventTarget;
-                WebKit.DOM.EventTarget show_quote = show_quotes.item(i) as WebKit.DOM.EventTarget;
-                
-                // Remove any existing handlers they may have so we don't double bind.
-                hide_quote.remove_event_listener("click", (Callback) on_hide_quote_clicked, false);
-                show_quote.remove_event_listener("click", (Callback) on_show_quote_clicked, false);
-                
-                // And bind the new ones.
-                // TODO: Why does this not work with non-static methods?
-                hide_quote.add_event_listener("click", (Callback) on_hide_quote_clicked, false, null);
-                show_quote.add_event_listener("click", (Callback) on_show_quote_clicked, false, null);
+            WebKit.DOM.NodeList node_list = get_dom_document().query_selector_all(selector);
+            for (int i = 0; i < node_list.length; ++i) {
+                WebKit.DOM.EventTarget node = node_list.item(i) as WebKit.DOM.EventTarget;
+                node.remove_event_listener(event, callback, false);
+                node.add_event_listener(event, callback, false, extra);
             }
         } catch (Error error) {
             warning("Error setting up click handlers: %s", error.message);
+        }
+    }
+    
+    private WebKit.DOM.Element? closest_ancestor(WebKit.DOM.Element element, string selector) {
+        try {
+            WebKit.DOM.Element? parent = element.get_parent_element();
+            while (parent != null && !parent.webkit_matches_selector(selector)) {
+                parent = parent.get_parent_element();
+            }
+            return parent;
+        } catch (Error error) {
+            warning("Failed to find ancestor: %s", error.message);
+            return null;
         }
     }
     
@@ -416,6 +502,84 @@ public class MessageViewer : WebKit.WebView {
         } catch (Error error) {
             warning("Error hiding quote: %s", error.message);
         }
+    }
+
+    private static void on_menu_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        message_viewer.on_menu_clicked_self(element);
+    }
+
+    private void on_menu_clicked_self(WebKit.DOM.Element element) {
+        // First get the email container.
+        WebKit.DOM.Element email_element = closest_ancestor(element, ".email");
+
+        // Next find the ID in the email-to-element map.
+        Geary.EmailIdentifier? email_id = null;
+        foreach (var entry in email_to_element.entries) {
+            if (entry.value == email_element) {
+                email_id = entry.key;
+                break;
+            }
+        }
+
+        // Finally, find the email itself in the messages set.
+        foreach (Geary.Email email in messages) {
+            if (email.id == email_id) {
+                active_email = email;
+                break;
+            }
+        }
+
+        // And show.
+        show_message_menu(element);
+    }
+
+    private void on_message_menu_selection_done() {
+        active_email = null;
+        message_menu = null;
+    }
+
+    private void on_reply_to_message() {
+        reply_to_message();
+    }
+
+    private void on_reply_all_message() {
+        reply_all_message();
+    }
+
+    private void on_forward_message() {
+        forward_message();
+    }
+
+    private void show_message_menu(WebKit.DOM.Element element) {
+        message_menu = new Gtk.Menu();
+        message_menu.selection_done.connect(on_message_menu_selection_done);
+
+        // Reply to a message.
+        Gtk.MenuItem reply_item = new Gtk.MenuItem.with_mnemonic(_("_Reply"));
+        reply_item.activate.connect(on_reply_to_message);
+        message_menu.append(reply_item);
+
+        // Reply to all on a message.
+        Gtk.MenuItem reply_all_item = new Gtk.MenuItem.with_mnemonic(_("Reply to _All"));
+        reply_all_item.activate.connect(on_reply_all_message);
+        message_menu.append(reply_all_item);
+
+        // Forward a message.
+        Gtk.MenuItem forward_item = new Gtk.MenuItem.with_mnemonic(_("_Forward"));
+        forward_item.activate.connect(on_forward_message);
+        message_menu.append(forward_item);
+
+        // Separator.
+        message_menu.append(new Gtk.SeparatorMenuItem());
+
+        // View original message source.
+        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
+        view_source_item.activate.connect(on_view_source);
+        message_menu.append(view_source_item);
+
+        message_menu.show_all();
+        message_menu.popup(null, null, null, 0, 0);
     }
 
     private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
@@ -774,6 +938,16 @@ public class MessageViewer : WebKit.WebView {
     }
     
     public void on_view_source() {
+        if (active_email != null) {
+            Gee.ArrayList<Geary.Email> active_list = new Gee.ArrayList<Geary.Email>();
+            active_list.add(active_email);
+            show_message_source(active_list);
+        } else {
+            show_message_source(messages);
+        }
+    }
+    
+    private void show_message_source(Gee.Collection<Geary.Email> messages) {
         StringBuilder source = new StringBuilder();
         foreach(Geary.Email email in messages) {
             try {

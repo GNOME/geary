@@ -83,6 +83,9 @@ public class GearyController {
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.message_viewer.link_selected.connect(on_link_selected);
+        main_window.message_viewer.reply_to_message.connect(on_reply_to_message);
+        main_window.message_viewer.reply_all_message.connect(on_reply_all_message);
+        main_window.message_viewer.forward_message.connect(on_forward_message);
         
         main_window.message_list_view.grab_focus();
         
@@ -711,22 +714,24 @@ public class GearyController {
         create_compose_window();
     }
     
+    private Geary.Email get_email_from_message_viewer() {
+        return main_window.message_viewer.active_email == null ?
+            main_window.message_viewer.messages.last() : main_window.message_viewer.active_email;
+    }
+    
     private void on_reply_to_message() {
-        // TODO: allow replying to other messages in the conversation (not just the last)
         create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
-            get_from(), main_window.message_viewer.messages.last()));
+            get_from(), get_email_from_message_viewer()));
     }
     
     private void on_reply_all_message() {
-        // TODO: allow replying to other messages in the conversation (not just the last)
         create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
-            get_from(), main_window.message_viewer.messages.last()));
+            get_from(), get_email_from_message_viewer()));
     }
     
     private void on_forward_message() {
-        // TODO: allow forwarding other messages in the conversation (not just the last)
         create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
-            get_from(), main_window.message_viewer.messages.last()));
+            get_from(), get_email_from_message_viewer()));
     }
     
     private void on_delete_message() {
