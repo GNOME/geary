@@ -6,6 +6,9 @@
 
 // Wrapper class for GSettings.
 public class Configuration {
+    public signal void display_preview_changed();
+    public signal void spell_check_changed();
+    
     private Settings settings;
     private Settings gnome_interface;
     private Settings? indicator_datetime;
@@ -49,10 +52,21 @@ public class Configuration {
     private const string DISPLAY_PREVIEW_NAME = "display-preview";
     public bool display_preview {
         get { return settings.get_boolean(DISPLAY_PREVIEW_NAME); }
-        set { settings.set_boolean(DISPLAY_PREVIEW_NAME, value); display_preview_changed(); }
+        set {
+            settings.set_boolean(DISPLAY_PREVIEW_NAME, value);
+            display_preview_changed(); 
+        }
     }
-    public signal void display_preview_changed();
-
+    
+    private const string SPELL_CHECK_NAME = "spell-check";
+    public bool spell_check {
+        get { return settings.get_boolean(SPELL_CHECK_NAME); }
+        set {
+            settings.set_boolean(SPELL_CHECK_NAME, value);
+            spell_check_changed();
+        }
+    }
+    
     private const string CLOCK_FORMAT_NAME = "clock-format";
     private const string TIME_FORMAT_NAME = "time-format";
     public Date.ClockFormat clock_format {

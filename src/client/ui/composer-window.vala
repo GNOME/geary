@@ -180,8 +180,10 @@ public class ComposerWindow : Gtk.Window {
         editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         
+        GearyApplication.instance.config.spell_check_changed.connect(on_spell_check_changed);
+        
         WebKit.WebSettings s = new WebKit.WebSettings();
-        s.enable_spell_checking = true;
+        s.enable_spell_checking = GearyApplication.instance.config.spell_check;
         s.auto_load_images = false;
         s.enable_default_context_menu = true;
         s.enable_scripts = false;
@@ -378,6 +380,10 @@ public class ComposerWindow : Gtk.Window {
     
     private void on_hovering_over_link(string? title, string? url) {
         message_overlay_label.label = url;
+    }
+    
+    private void on_spell_check_changed() {
+        editor.settings.enable_spell_checking = GearyApplication.instance.config.spell_check;
     }
     
     public override bool key_press_event(Gdk.EventKey event) {

@@ -44,6 +44,12 @@
         <description>True if we should display a short preview of each message.</description>
     </key>
     
+    <key name="spell-check" type="b">
+        <default>true</default>
+        <summary>enable inline spell checking</summary>
+        <description>True to spell check while typing.</description>
+    </key>
+    
 </schema>
 
 </schemalist>
