@@ -23,6 +23,7 @@ public class GearyApplication : YorbaApplication {
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
         "Eric Gregory <eric@yorba.org>",
+        "Nate Lillich <nate@yorba.org>",
         null
     };
     
