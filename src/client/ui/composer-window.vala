@@ -8,12 +8,32 @@
 public class ComposerWindow : Gtk.Window {
     private static string DEFAULT_TITLE = _("New Message");
     
-    private Gtk.Entry to_entry;
-    private Gtk.Entry cc_entry;
-    private Gtk.Entry bcc_entry;
-    private Gtk.Entry subject_entry;
-    private Gtk.SourceView message_text = new Gtk.SourceView();
-    private Gtk.Button send_button;
+    private const string REPLY_ID = "reply";
+    private const string HTML_BODY = """
+        <html><head><title></title>
+        <style>
+        body {
+            margin: 10px !important;
+            padding: 0 !important;
+            background-color: white !important;
+            font-size: 11pt !important;
+        }
+        blockquote {
+            margin: 10px;
+            padding: 5px;
+            background-color: white;
+            border: 0;
+            border-left: 3px #aaa solid;
+        }
+        </style>
+        </head><body>
+        <p id="top"></p><br /><br />
+        <span id="reply"></span>
+        <br />
+        </body></html>""";
+    
+    // Signal sent when the "Send" button is clicked.
+    public signal void send(ComposerWindow composer);
     
     public string from { get; set; }
     
@@ -41,12 +61,24 @@ public class ComposerWindow : Gtk.Window {
     }
     
     public string message {
-        owned get { return message_text.buffer.text; }
-        set { message_text.buffer.text = value; }
+        owned get { return get_html(); }
+        set {
+            reply_body = value;
+            editor.load_string(HTML_BODY, "text/html", "UTF8", "");
+        }
     }
     
-    // Signal sent when the "Send" button is clicked.
-    public signal void send(ComposerWindow composer);
+    private string? reply_body = null;
+    
+    private Gtk.Entry to_entry;
+    private Gtk.Entry cc_entry;
+    private Gtk.Entry bcc_entry;
+    private Gtk.Entry subject_entry;
+    private Gtk.Button send_button;
+    private Gtk.Label message_overlay_label;
+    
+    private WebKit.WebView editor;
+    private Gtk.UIManager ui;
     
     public ComposerWindow(Geary.ComposedEmail? prefill = null) {
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
@@ -60,16 +92,58 @@ public class ComposerWindow : Gtk.Window {
         cc_entry = builder.get_object("cc") as Gtk.Entry;
         bcc_entry = builder.get_object("bcc") as Gtk.Entry;
         subject_entry = builder.get_object("subject") as Gtk.Entry;
-        Gtk.ScrolledWindow scroll = builder.get_object("scrolledwindow") as Gtk.ScrolledWindow;
-        scroll.add(message_text);
-        message_text.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
-        ((Gtk.SourceBuffer) message_text.buffer).highlight_matching_brackets = false;
+        Gtk.Alignment msg_area = builder.get_object("message area") as Gtk.Alignment;
+        Gtk.ActionGroup actions = builder.get_object("compose actions") as Gtk.ActionGroup;
+        
+        Gtk.ScrolledWindow scroll = new Gtk.ScrolledWindow(null, null);
+        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        
+        Gtk.Overlay message_overlay = new Gtk.Overlay();
+        message_overlay.add(scroll);
+        msg_area.add(message_overlay);
+        
+        message_overlay_label = new Gtk.Label(null);
+        message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
+        message_overlay_label.halign = Gtk.Align.START;
+        message_overlay_label.valign = Gtk.Align.END;
+        message_overlay.add_overlay(message_overlay_label);
         
         title = DEFAULT_TITLE;
         subject_entry.changed.connect(on_subject_changed);
         to_entry.changed.connect(validate_send_button);
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
+        
+        actions.get_action("undo").activate.connect(on_action);
+        actions.get_action("redo").activate.connect(on_action);
+        
+        actions.get_action("cut").activate.connect(on_cut);
+        actions.get_action("copy").activate.connect(on_copy);
+        actions.get_action("paste").activate.connect(on_paste);
+        
+        actions.get_action("bold").activate.connect(on_action);
+        actions.get_action("italic").activate.connect(on_action);
+        actions.get_action("underline").activate.connect(on_action);
+        actions.get_action("strikethrough").activate.connect(on_action);
+        
+        actions.get_action("removeformat").activate.connect(on_remove_format);
+        
+        actions.get_action("indent").activate.connect(on_action);
+        actions.get_action("outdent").activate.connect(on_action);
+        
+        actions.get_action("justifyleft").activate.connect(on_action);
+        actions.get_action("justifyright").activate.connect(on_action);
+        actions.get_action("justifycenter").activate.connect(on_action);
+        actions.get_action("justifyfull").activate.connect(on_action);
+        
+        actions.get_action("font").activate.connect(on_select_font);
+        actions.get_action("color").activate.connect(on_select_color);
+        actions.get_action("insertlink").activate.connect(on_insert_link);
+        
+        ui = new Gtk.UIManager();
+        ui.insert_action_group(actions, 0);
+        add_accel_group(ui.get_accel_group());
+        GearyApplication.instance.load_ui_file_for_manager(ui, "composer_accelerators.ui");
         
         if (prefill != null) {
             if (prefill.from != null)
@@ -86,19 +160,40 @@ public class ComposerWindow : Gtk.Window {
                 references = prefill.references.to_rfc822_string();
             if (prefill.subject != null)
                 subject = prefill.subject.value;
-            if (prefill.body != null)
-                message = prefill.body.buffer.to_utf8();
-            
-            if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject))
-                message_text.grab_focus();
-            else if (!Geary.String.is_empty(to))
-                subject_entry.grab_focus();
+            if (prefill.body_html != null)
+                reply_body = prefill.body_html.buffer.to_utf8();
+            if (reply_body == null && prefill.body_text != null)
+                reply_body = "<pre>" + prefill.body_text.buffer.to_utf8();
         }
+        
+        editor = new WebKit.WebView();
+        editor.set_editable(true);
+        editor.load_finished.connect(on_load_finished);
+        editor.hovering_over_link.connect(on_hovering_over_link);
+        editor.load_string(HTML_BODY, "text/html", "UTF8", ""); // only do this after setting reply_body
+        
+        if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject))
+            editor.grab_focus();
+        else if (!Geary.String.is_empty(to))
+            subject_entry.grab_focus();
+        
+        editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
+        editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
+        
+        WebKit.WebSettings s = new WebKit.WebSettings();
+        s.enable_spell_checking = true;
+        s.auto_load_images = false;
+        s.enable_default_context_menu = true;
+        s.enable_scripts = false;
+        s.enable_java_applet = false;
+        s.enable_plugins = false;
+        editor.settings = s;
+        
+        scroll.add(editor);
+        scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         
         add(box);
         validate_send_button();
-        
-        message_text.move_cursor(Gtk.MovementStep.BUFFER_ENDS, -1, false);
     }
     
     public Geary.ComposedEmail get_composed_email(
@@ -128,20 +223,21 @@ public class ComposerWindow : Gtk.Window {
         if (!Geary.String.is_empty(subject))
             email.subject = new Geary.RFC822.Subject(subject);
         
-        email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(message));
+        email.body_html = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_html()));
+        email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_text()));
         
         return email;
     }
     
     public override void show_all() {
-        set_default_size(650, 550);
+        set_default_size(680, 600);
         
         base.show_all();
     }
     
     private bool should_close() {
         // TODO: Check if the message was (automatically) saved
-        if (((Gtk.SourceBuffer) message_text.buffer).can_undo) {
+        if (editor.can_undo()) {
             var dialog = new Gtk.MessageDialog(this, 0,
                 Gtk.MessageType.WARNING, Gtk.ButtonsType.NONE,
                 _("Do you want to discard the unsaved message?"));
@@ -174,6 +270,114 @@ public class ComposerWindow : Gtk.Window {
         send_button.sensitive = !Geary.String.is_empty(to_entry.get_text().strip()) ||
             !Geary.String.is_empty(cc_entry.get_text().strip()) ||
             !Geary.String.is_empty(bcc_entry.get_text().strip());
+    }
+    
+    private void on_action(Gtk.Action action) {
+        editor.get_dom_document().exec_command(action.get_name(), false, "");
+    }
+    
+    private void on_cut() {
+        editor.cut_clipboard();
+    }
+    
+    private void on_copy() {
+        editor.copy_clipboard();
+    }
+    
+    private void on_paste() {
+        editor.paste_clipboard();
+    }
+    
+    private void on_remove_format() {
+        editor.get_dom_document().exec_command("removeformat", false, "");
+        editor.get_dom_document().exec_command("removeparaformat", false, "");
+        editor.get_dom_document().exec_command("unlink", false, "");
+        editor.get_dom_document().exec_command("backcolor", false, "#ffffff");
+        editor.get_dom_document().exec_command("forecolor", false, "#000000");
+    }
+    
+    private void on_select_font() {
+        Gtk.FontChooserDialog dialog = new Gtk.FontChooserDialog("Select font", this);
+        if (dialog.run() == Gtk.ResponseType.OK) {
+            editor.get_dom_document().exec_command("fontname", false, dialog.get_font_family().
+                get_name());
+            editor.get_dom_document().exec_command("fontsize", false,
+                (((double) dialog.get_font_size()) / 4000.0).to_string());
+        }
+        
+        dialog.destroy();
+    }
+    
+    private void on_select_color() {
+        Gtk.ColorSelectionDialog dialog = new Gtk.ColorSelectionDialog("Select Color");
+        if (dialog.run() == Gtk.ResponseType.OK) {
+            string color = ((Gtk.ColorSelection) dialog.get_color_selection()).
+                current_rgba.to_string();
+            
+            editor.get_dom_document().exec_command("forecolor", false, color);
+        }
+        
+        dialog.destroy();
+    }
+    
+    private void on_insert_link() {
+        link_dialog("http://");
+    }
+    
+    private void link_dialog(string link) {
+        Gtk.Dialog dialog = new Gtk.Dialog.with_buttons("", this, 0,
+            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.OK, Gtk.ResponseType.OK);
+        Gtk.Entry entry = new Gtk.Entry();
+        dialog.get_content_area().pack_start(new Gtk.Label("Link URL:"));
+        dialog.get_content_area().pack_start(entry);
+        dialog.set_default_response(Gtk.ResponseType.OK);
+        dialog.show_all();
+        
+        entry.set_text(link);
+        
+        if (dialog.run() == Gtk.ResponseType.OK) {
+            if (!Geary.String.is_empty(entry.text.strip()))
+                editor.get_dom_document().exec_command("createLink", false, entry.text);
+            else
+                editor.get_dom_document().exec_command("unlink", false, "");
+        }
+        
+        dialog.destroy();
+    }
+    
+    private string get_html() {
+        return editor.get_dom_document().get_body().get_inner_html();
+    }
+    
+    private string get_text() {
+        return editor.get_dom_document().get_body().get_inner_text();
+    }
+    
+    private void on_load_finished(WebKit.WebFrame frame) {
+        if (reply_body == null)
+            return;
+        
+        WebKit.DOM.HTMLElement? reply = editor.get_dom_document().get_element_by_id(
+            REPLY_ID) as WebKit.DOM.HTMLElement;
+        assert(reply != null);
+        
+        try {
+            reply.set_inner_html(reply_body);
+        } catch (Error e) {
+            debug("Failed to load email for reply: %s", e.message);
+        }
+    }
+    
+    private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
+        WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
+        WebKit.WebPolicyDecision policy_decision) {
+        policy_decision.ignore();
+        link_dialog(request.uri);
+        return true;
+    }
+    
+    private void on_hovering_over_link(string? title, string? url) {
+        message_overlay_label.label = url;
     }
     
     public override bool key_press_event(Gdk.EventKey event) {

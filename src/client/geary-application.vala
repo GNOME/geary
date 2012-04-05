@@ -301,14 +301,19 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return builder;
     }
     
-    // Loads a UI file (in the ui directory) into the UI manager.
-    public void load_ui_file(string ui_filename) {
+    // Loads a UI file (in the ui directory) into the specified UI manager.
+    public void load_ui_file_for_manager(Gtk.UIManager ui, string ui_filename) {
         try {
-            ui_manager.add_ui_from_file(get_resource_directory().get_child("ui").get_child(
+            ui.add_ui_from_file(get_resource_directory().get_child("ui").get_child(
                 ui_filename).get_path());
         } catch(GLib.Error error) {
             warning("Unable to create Gtk.UIManager: %s".printf(error.message));
         }
+    }
+    
+    // Loads a UI file (in the ui directory) into the UI manager.
+    public void load_ui_file(string ui_filename) {
+        load_ui_file_for_manager(ui_manager, ui_filename);
     }
     
     public Gtk.Window get_main_window() {

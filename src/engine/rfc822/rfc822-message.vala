@@ -43,6 +43,8 @@ public class Geary.RFC822.Message : Object {
     }
     
     public Message.from_composed_email(Geary.ComposedEmail email) {
+        GMime.Part? body_html = null;
+        GMime.Part? body_text = null;
         message = new GMime.Message(true);
         
         // Required headers
@@ -86,16 +88,38 @@ public class Geary.RFC822.Message : Object {
             message.set_subject(email.subject.value);
         }
         
-        // Body (also optional)
-        if (email.body != null) {
+        // Body: text format (optional)
+        if (email.body_text != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body.buffer.get_array()),
+                new GMime.StreamMem.with_buffer(email.body_text.buffer.get_array()),
                 GMime.ContentEncoding.DEFAULT);
             
-            GMime.Part part = new GMime.Part();
-            part.set_content_object(content);
+            body_text = new GMime.Part();
+            body_text.set_content_type(new GMime.ContentType("text", "plain"));
+            body_text.set_content_object(content);
+        }
+        
+        // Body: HTML format (also optional)
+        if (email.body_html != null) {
+            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
+                new GMime.StreamMem.with_buffer(email.body_html.buffer.get_array()),
+                GMime.ContentEncoding.DEFAULT);
             
-            message.set_mime_part(part);
+            body_html = new GMime.Part();
+            body_html.set_content_type(new GMime.ContentType("text", "html"));
+            body_html.set_content_object(content);
+        }
+        
+        // Setup body depending on what MIME components were filled out.
+        if (body_text != null && body_html != null) {
+            GMime.Multipart multipart = new GMime.Multipart.with_subtype("alternative");
+            multipart.add(body_text);
+            multipart.add(body_html);
+            message.set_mime_part(multipart);
+        } else if (body_text != null) {
+            message.set_mime_part(body_text);
+        } else if (body_html != null) {
+            message.set_mime_part(body_html);
         }
     }
     

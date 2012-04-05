@@ -28,6 +28,7 @@ client_src = [
 
 'util/util-email.vala',
 'util/util-keyring.vala',
+'util/util-menu.vala',
 ]
 
 gsettings_schemas = [

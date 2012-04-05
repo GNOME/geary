@@ -1,0 +1,27 @@
+<ui>
+    <accelerator action="undo" />
+    <accelerator action="redo" />
+    
+    <accelerator action="cut" />
+    <accelerator action="copy" />
+    <accelerator action="paste" />
+    
+    <accelerator action="bold" />
+    <accelerator action="italic" />
+    <accelerator action="underline" />
+    <accelerator action="strikethrough" />
+    
+    <accelerator action="removeformat" />
+    
+    <accelerator action="indent" />
+    <accelerator action="outdent" />
+    
+    <accelerator action="justifyleft" />
+    <accelerator action="justifyright" />
+    <accelerator action="justifycenter" />
+    <accelerator action="justifyfull" />
+    
+    <accelerator action="font" />
+    <accelerator action="color" />
+    <accelerator action="insertlink" />
+</ui>

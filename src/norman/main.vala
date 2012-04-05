@@ -84,7 +84,7 @@ int main(string[] args) {
     if (!Geary.String.is_empty(subject))
         composed_email.subject = new Geary.RFC822.Subject(subject);
     if (!Geary.String.is_empty(builder.str))
-        composed_email.body = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(builder.str));
+        composed_email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(builder.str));
     
     main_loop = new MainLoop();
     

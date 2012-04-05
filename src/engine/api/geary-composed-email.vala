@@ -24,7 +24,8 @@ public class Geary.ComposedEmail : Object {
     public Geary.Email? reply_to_email { get; set; default = null; }
     public RFC822.MessageIDList? references { get; set; default = null; }
     public RFC822.Subject? subject { get; set; default = null; }
-    public RFC822.Text? body { get; set; default = null; }
+    public RFC822.Text? body_text { get; set; default = null; }
+    public RFC822.Text? body_html { get; set; default = null; }
     
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
         RFC822.MailboxAddresses? to = null) {
@@ -42,8 +43,10 @@ public class Geary.ComposedEmail : Object {
         subject = create_subject_for_reply(source);
         set_reply_references(source);
         
-        body = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
-            Geary.RFC822.Utils.quote_email_for_reply(source)));
+        body_text = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_reply(source, false)));
+        body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_reply(source, true)));
     }
     
     public ComposedEmail.as_reply_all(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -56,8 +59,10 @@ public class Geary.ComposedEmail : Object {
         subject = create_subject_for_reply(source);
         set_reply_references(source);
         
-        body = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
-            Geary.RFC822.Utils.quote_email_for_reply(source)));
+        body_text = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_reply(source, false)));
+        body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_reply(source, true)));
     }
     
     public ComposedEmail.as_forward(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -65,8 +70,10 @@ public class Geary.ComposedEmail : Object {
         
         subject = create_subject_for_forward(source);
         
-        body = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
-            Geary.RFC822.Utils.quote_email_for_forward(source)));
+        body_text = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_forward(source, false)));
+        body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
+            Geary.RFC822.Utils.quote_email_for_forward(source, true)));
     }
     
     private void set_reply_references(Geary.Email source) {
