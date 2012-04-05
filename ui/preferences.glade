@@ -90,26 +90,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label2">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_right">5</property>
-                <property name="margin_top">5</property>
-                <property name="margin_bottom">5</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Preview</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkCheckButton" id="display_preview">
                 <property name="label" translatable="yes">_Display message preview</property>
                 <property name="use_action_appearance">False</property>
@@ -154,7 +134,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="spell_check">
-                <property name="label" translatable="yes">_Spell check while typing</property>
+                <property name="label" translatable="yes">Enable _spell checking</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
