@@ -27,9 +27,8 @@ public class ComposerWindow : Gtk.Window {
         }
         </style>
         </head><body>
-        <p id="top"></p><br /><br />
+        <p id="top"></p>
         <span id="reply"></span>
-        <br />
         </body></html>""";
     
     // Signal sent when the "Send" button is clicked.
@@ -364,7 +363,7 @@ public class ComposerWindow : Gtk.Window {
         assert(reply != null);
         
         try {
-            reply.set_inner_html(reply_body);
+            reply.set_inner_html("<br /><br />" + reply_body + "<br />");
         } catch (Error e) {
             debug("Failed to load email for reply: %s", e.message);
         }
