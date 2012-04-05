@@ -367,6 +367,13 @@ public class ComposerWindow : Gtk.Window {
         } catch (Error e) {
             debug("Failed to load email for reply: %s", e.message);
         }
+        
+        // Set focus.
+        if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject)) {
+            editor.grab_focus();
+        } else if (!Geary.String.is_empty(to)) {
+            subject_entry.grab_focus();
+        }
     }
     
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
@@ -398,7 +405,8 @@ public class ComposerWindow : Gtk.Window {
             break;
             
             case "Escape":
-                this.destroy();
+                if (should_close())
+                    destroy();
             break;
             
             default:
