@@ -39,8 +39,8 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_remote() throws Error {
-        yield engine.remote_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove,
-            cancellable);
+        yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
+            flags_to_add, flags_to_remove, cancellable);
         
         return true;
     }
@@ -84,7 +84,8 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
         // that the signal has already been fired.
-        yield engine.remote_folder.remove_email_async(to_remove, cancellable);
+        yield engine.remote_folder.remove_email_async(new Imap.MessageSet.email_id_collection(to_remove),
+            cancellable);
         
         return true;
     }
@@ -324,155 +325,6 @@ private class Geary.ListEmailByID : Geary.ListEmail {
         this.low = low;
         this.count = actual_count;
         return yield base.replay_local();
-    }
-}
-
-private class Geary.ListEmailSparse : Geary.SendReplayOperation {
-    private GenericImapFolder engine;
-    private int[] by_position;
-    private Geary.Email.Field required_fields;
-    private Gee.List<Geary.Email>? accumulator = null;
-    private weak EmailCallback? cb;
-    private Cancellable? cancellable;
-    private bool local_only;
-    
-    private int[] needed_by_position = new int[0];
-    
-    public ListEmailSparse(GenericImapFolder engine, int[] by_position, Geary.Email.Field required_fields,
-        Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
-        bool local_only) {
-        base("ListEmailSparse");
-        
-        this.engine = engine;
-        this.by_position = by_position;
-        this.required_fields = required_fields;
-        this.accumulator = accumulator;
-        this.cb = cb;
-        this.cancellable = cancellable;
-        this.local_only = local_only;
-    }
-    
-    public override async bool replay_local() throws Error {
-        int low, high;
-        Arrays.int_find_high_low(by_position, out low, out high);
-        
-        int local_count, local_offset;
-        if (!local_only) {
-            // normalize the position (ordering) of what's available locally with the situation on
-            // the server
-            yield engine.normalize_email_positions_async(low, high - low + 1, out local_count,
-                cancellable);
-            
-            local_offset = (engine.remote_count > local_count) ? (engine.remote_count - local_count
-                - 1) : 0;
-        } else {
-            local_count = yield engine.local_folder.get_email_count_async(cancellable);
-            local_offset = 0;
-        }
-        
-        // Fixup all the positions to match the local store's notions
-        if (local_offset > 0) {
-            int[] local_by_position = new int[by_position.length];
-            for (int ctr = 0; ctr < by_position.length; ctr++)
-                local_by_position[ctr] = by_position[ctr] - local_offset;
-            
-            by_position = local_by_position;
-        }
-        
-        Gee.List<Geary.Email>? local_list = null;
-        try {
-            local_list = yield engine.local_folder.list_email_sparse_async(by_position,
-                required_fields, Folder.ListFlags.NONE, cancellable);
-        } catch (Error local_err) {
-            if (cb != null)
-                cb(null, local_err);
-            
-            throw local_err;
-        }
-        
-        int local_list_size = (local_list != null) ? local_list.size : 0;
-        
-        // reverse the process, fixing up all the returned messages to match the server's notions
-        if (local_list_size > 0 && local_offset > 0) {
-            foreach (Geary.Email email in local_list)
-                email.update_position(email.position + local_offset);
-        }
-        
-        if (local_list_size == by_position.length || local_only) {
-            if (accumulator != null)
-                accumulator.add_all(local_list);
-            
-            // report and signal finished
-            if (cb != null) {
-                cb(local_list, null);
-                cb(null, null);
-            }
-            
-            return true;
-        }
-        
-        // go through the list looking for anything not already in the sparse by_position list
-        // to fetch from the server; since by_position is not guaranteed to be sorted, the local
-        // list needs to be searched each iteration.
-        //
-        // TODO: Optimize this, especially if large lists/sparse sets are supplied
-        foreach (int position in by_position) {
-            bool found = false;
-            if (local_list != null) {
-                foreach (Geary.Email email2 in local_list) {
-                    if (email2.position == position) {
-                        found = true;
-                        
-                        break;
-                    }
-                }
-            }
-            
-            if (!found)
-                needed_by_position += position;
-        }
-        
-        if (needed_by_position.length == 0) {
-            if (local_list != null && local_list.size > 0) {
-                if (accumulator != null)
-                    accumulator.add_all(local_list);
-                
-                if (cb != null)
-                    cb(local_list, null);
-            }
-            
-            // signal finished
-            if (cb != null)
-                cb(null, null);
-            
-            return true;
-        }
-        
-        return false;
-    }
-    
-    public override async bool replay_remote() throws Error {
-        Gee.List<Geary.Email>? remote_list = null;
-        try {
-            // if cb != null, it will be called by remote_list_email(), so don't call again with
-            // returned list
-            remote_list = yield engine.remote_list_email(needed_by_position, required_fields, cb,
-                cancellable);
-        } catch (Error remote_err) {
-            if (cb != null)
-                cb(null, remote_err);
-            
-            throw remote_err;
-        }
-        
-        if (accumulator != null && remote_list != null && remote_list.size > 0)
-            accumulator.add_all(remote_list);
-        
-        // signal finished
-        if (cb != null)
-            cb(null, null);
-        
-        return true;
     }
 }
 

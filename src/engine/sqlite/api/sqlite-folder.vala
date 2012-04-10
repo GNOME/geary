@@ -283,20 +283,6 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         return yield do_list_email_async(transaction, list, required_fields, true, cancellable);
     }
     
-    public async Gee.List<Geary.Email>? list_email_sparse_async(int[] by_position,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
-        throws Error {
-        check_open();
-        
-        Transaction transaction = yield db.begin_transaction_async("Folder.list_email_sparse_async",
-            cancellable);
-        
-        Gee.List<MessageLocationRow>? list = yield location_table.list_sparse_async(transaction,
-            folder_row.id, by_position, cancellable);
-        
-        return yield do_list_email_async(transaction, list, required_fields, false, cancellable);
-    }
-    
     public async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {

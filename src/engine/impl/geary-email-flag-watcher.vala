@@ -121,10 +121,11 @@ private class Geary.EmailFlagWatcher : Object {
                 changed_map.set(e.id, e.properties.email_flags);
         }
         
-        debug("FlagWatcher: %d email flags changed in %s", changed_map.size, folder.to_string());
-        
-        if (!cancellable.is_cancelled() && changed_map.size > 0)
+        if (!cancellable.is_cancelled() && changed_map.size > 0) {
+            debug("FlagWatcher: %d email flags changed in %s", changed_map.size, folder.to_string());
+            
             email_flags_changed(changed_map);
+        }
     }
 }
 
