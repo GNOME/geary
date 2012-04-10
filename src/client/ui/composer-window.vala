@@ -278,15 +278,24 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_cut() {
-        editor.cut_clipboard();
+        if (get_focus() == editor)
+            editor.cut_clipboard();
+        else if (get_focus() is Gtk.Editable)
+            ((Gtk.Editable) get_focus()).cut_clipboard();
     }
     
     private void on_copy() {
-        editor.copy_clipboard();
+        if (get_focus() == editor)
+            editor.copy_clipboard();
+        else if (get_focus() is Gtk.Editable)
+            ((Gtk.Editable) get_focus()).copy_clipboard();
     }
     
     private void on_paste() {
-        editor.paste_clipboard();
+        if (get_focus() == editor)
+            editor.paste_clipboard();
+        else if (get_focus() is Gtk.Editable)
+            ((Gtk.Editable) get_focus()).paste_clipboard();
     }
     
     private void on_remove_format() {
