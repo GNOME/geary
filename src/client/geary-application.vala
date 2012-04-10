@@ -122,6 +122,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
      }
     
     public override int startup() {
+        exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
+        Configuration.init(GearyApplication.instance.get_install_dir() != null,
+            GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
+        
         int result = base.startup();
         result = parse_arguments(args);
         return result;
@@ -134,12 +138,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             return;
         }
         
-        exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
-        
         // Start Geary.
         Geary.Engine.init(get_user_data_directory(), get_resource_directory());
-        config = new Configuration(GearyApplication.instance.get_install_dir() != null,
-            GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
+        config = new Configuration();
         
         controller = new GearyController();
         

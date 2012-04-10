@@ -90,16 +90,7 @@ public class Configuration {
     }
     
     // Creates a configuration object.
-    // is_installed: set to true if installed, else false.
-    // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.
-    public Configuration(bool is_installed, string? schema_dir = null) {
-        if (!is_installed) {
-            assert(schema_dir != null);
-            // If not installed, set an environment variable pointing to where the GSettings schema
-            // is to be found.
-            GLib.Environment.set_variable("GSETTINGS_SCHEMA_DIR", schema_dir, true);
-        }
-        
+    public Configuration() {
         // Start GSettings.
         settings = new Settings("org.yorba.geary");
         gnome_interface = new Settings("org.gnome.desktop.interface");
@@ -108,6 +99,17 @@ public class Configuration {
                 indicator_datetime = new Settings("com.canonical.indicator.datetime");
                 break;
             }
+        }
+    }
+    
+    // is_installed: set to true if installed, else false.
+    // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.
+    public static void init(bool is_installed, string? schema_dir = null) {
+        if (!is_installed) {
+            assert(schema_dir != null);
+            // If not installed, set an environment variable pointing to where the GSettings schema
+            // is to be found.
+            GLib.Environment.set_variable("GSETTINGS_SCHEMA_DIR", schema_dir, true);
         }
     }
 }
