@@ -196,6 +196,22 @@ public class Geary.Imap.ClientSessionManager {
         yield new_session.connect_async(cancellable);
         yield new_session.login_async(credentials, cancellable);
         
+        Gee.Set<string> caps = new_session.get_current_capabilities();
+        if (caps.contains("compress=deflate")) {
+            debug("Attempting compression...");
+            CommandResponse resp = yield new_session.send_command_async(
+                new Command("COMPRESS", { "DEFLATE" }));
+            if (resp.status_response.status == Status.OK) {
+                debug("Starting compression!");
+                assert(new_session.install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW)));
+                assert(new_session.install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW)));
+            } else {
+                debug("Unable to start compression: %s", resp.to_string());
+            }
+        } else {
+            debug("No compress available");
+        }
+        
         // do this after logging in
         new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
             selected_with_idle_keepalive_sec);

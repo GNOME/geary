@@ -646,6 +646,18 @@ public class Geary.Imap.ClientSession {
             debug("Keepalive failed: %s", response.status_response.to_string());
     }
     
+    //
+    // Converters
+    //
+    
+    public bool install_send_converter(Converter converter) {
+        return (cx != null) ? cx.install_send_converter(converter) : false;
+    }
+    
+    public bool install_recv_converter(Converter converter) {
+        return (cx != null) ? cx.install_recv_converter(converter) : false;
+    }
+    
     /**
      * ClientSession tracks server extensions reported via the CAPABILITY server data response.
      * This comes automatically when logging in and can be fetched by the CAPABILITY command.

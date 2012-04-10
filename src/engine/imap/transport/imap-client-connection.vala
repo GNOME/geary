@@ -223,6 +223,14 @@ public class Geary.Imap.ClientConnection {
         }
     }
     
+    public bool install_send_converter(Converter converter) {
+        return ser.install_converter(converter);
+    }
+    
+    public bool install_recv_converter(Converter converter) {
+        return des.install_converter(converter);
+    }
+    
     /**
      * Returns silently if a connection is already established.
      */

@@ -21,13 +21,20 @@
 
 public class Geary.Imap.Serializer {
     private OutputStream outs;
+    private ConverterOutputStream couts;
     private MemoryOutputStream mouts;
     private DataOutputStream douts;
+    private Geary.MidstreamConverter midstream = new Geary.MidstreamConverter("Serializer");
     
     public Serializer(OutputStream outs) {
         this.outs = outs;
+        couts = new ConverterOutputStream(outs, midstream);
         mouts = new MemoryOutputStream(null, realloc, free);
         douts = new DataOutputStream(mouts);
+    }
+    
+    public bool install_converter(Converter converter) {
+        return midstream.install(converter);
     }
     
     public void push_ascii(char ch) throws Error {
@@ -81,7 +88,7 @@ public class Geary.Imap.Serializer {
         yield commit_async(priority, cancellable);
         
         // splice the literal data directly to the output stream
-        yield outs.splice_async(ins, OutputStreamSpliceFlags.NONE, priority, cancellable);
+        yield couts.splice_async(ins, OutputStreamSpliceFlags.NONE, priority, cancellable);
     }
     
     // commit_async() takes the stored (in-memory) serialized data and writes it asynchronously
@@ -104,7 +111,7 @@ public class Geary.Imap.Serializer {
         
         ssize_t index = 0;
         do {
-            index += yield outs.write_async(mouts.get_data()[index:length], priority, cancellable);
+            index += yield couts.write_async(mouts.get_data()[index:length], priority, cancellable);
         } while (index < length);
         
         mouts = new MemoryOutputStream(null, realloc, free);
@@ -116,6 +123,7 @@ public class Geary.Imap.Serializer {
     public async void flush_async(int priority = GLib.Priority.DEFAULT, Cancellable? cancellable = null)
         throws Error {
         yield commit_async(priority, cancellable);
+        yield couts.flush_async(priority, cancellable);
         yield outs.flush_async(priority, cancellable);
     }
 }

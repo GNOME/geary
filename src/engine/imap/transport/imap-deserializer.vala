@@ -59,9 +59,11 @@ public class Geary.Imap.Deserializer {
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
+    private ConverterInputStream cins;
     private DataInputStream dins;
     private Geary.State.Machine fsm;
     private ListParameter context;
+    private Geary.MidstreamConverter midstream = new Geary.MidstreamConverter("Deserializer");
     private RootParameters root = new RootParameters();
     private StringBuilder? current_string = null;
     private size_t literal_length_remaining = 0;
@@ -82,7 +84,8 @@ public class Geary.Imap.Deserializer {
     public signal void deserialize_failure();
     
     public Deserializer(InputStream ins) {
-        dins = new DataInputStream(ins);
+        cins = new ConverterInputStream(ins, midstream);
+        dins = new DataInputStream(cins);
         dins.set_newline_type(DataStreamNewlineType.CR_LF);
         
         context = root;
@@ -113,6 +116,10 @@ public class Geary.Imap.Deserializer {
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
+    }
+    
+    public bool install_converter(Converter converter) {
+        return midstream.install(converter);
     }
     
     public void xon(int priority = GLib.Priority.DEFAULT) {
