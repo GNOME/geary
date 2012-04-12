@@ -69,9 +69,9 @@ public class ComposerWindow : Gtk.Window {
     
     private string? reply_body = null;
     
-    private Gtk.Entry to_entry;
-    private Gtk.Entry cc_entry;
-    private Gtk.Entry bcc_entry;
+    private EmailEntry to_entry;
+    private EmailEntry cc_entry;
+    private EmailEntry bcc_entry;
     private Gtk.Entry subject_entry;
     private Gtk.Button send_button;
     private Gtk.Label message_overlay_label;
@@ -87,9 +87,12 @@ public class ComposerWindow : Gtk.Window {
         send_button = builder.get_object("Send") as Gtk.Button;
         send_button.clicked.connect(on_send);
         
-        to_entry = builder.get_object("to") as Gtk.Entry;
-        cc_entry = builder.get_object("cc") as Gtk.Entry;
-        bcc_entry = builder.get_object("bcc") as Gtk.Entry;
+        to_entry = new EmailEntry();
+        (builder.get_object("to") as Gtk.EventBox).add(to_entry);
+        cc_entry = new EmailEntry();
+        (builder.get_object("cc") as Gtk.EventBox).add(cc_entry);
+        bcc_entry = new EmailEntry();
+        (builder.get_object("bcc") as Gtk.EventBox).add(bcc_entry);
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment msg_area = builder.get_object("message area") as Gtk.Alignment;
         Gtk.ActionGroup actions = builder.get_object("compose actions") as Gtk.ActionGroup;
@@ -206,14 +209,14 @@ public class ComposerWindow : Gtk.Window {
                 : new Geary.RFC822.MailboxAddresses.from_rfc822_string(from)
         );
         
-        if (!Geary.String.is_empty(to))
-            email.to = new Geary.RFC822.MailboxAddresses.from_rfc822_string(to);
+        if (to_entry.addresses != null)
+            email.to = to_entry.addresses;
         
-        if (!Geary.String.is_empty(cc))
-            email.cc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(cc);
+        if (cc_entry.addresses != null)
+            email.cc = cc_entry.addresses;
         
-        if (!Geary.String.is_empty(bcc))
-            email.bcc = new Geary.RFC822.MailboxAddresses.from_rfc822_string(bcc);
+        if (bcc_entry.addresses != null)
+            email.bcc = bcc_entry.addresses;
         
         if (!Geary.String.is_empty(in_reply_to))
             email.in_reply_to = new Geary.RFC822.MessageID(in_reply_to);
@@ -268,9 +271,9 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void validate_send_button() {
-        send_button.sensitive = !Geary.String.is_empty(to_entry.get_text().strip()) ||
-            !Geary.String.is_empty(cc_entry.get_text().strip()) ||
-            !Geary.String.is_empty(bcc_entry.get_text().strip());
+        send_button.sensitive =
+            to_entry.valid_or_empty && cc_entry.valid_or_empty && bcc_entry.valid_or_empty
+         && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
     }
     
     private void on_action(Gtk.Action action) {

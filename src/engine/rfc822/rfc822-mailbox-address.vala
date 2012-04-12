@@ -67,6 +67,23 @@ public class Geary.RFC822.MailboxAddress {
     public string get_short_address() {
         return name ?? mailbox;
     }
+
+    /**
+     * Returns true if the email syntax is valid.
+     */
+    public bool is_valid() {
+        try {
+            // http://www.regular-expressions.info/email.html
+            // matches john@dep.aol.museum not john@aol...com
+            Regex email_regex =
+                new Regex("[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\\.)+[A-Z]{2,5}",
+                    RegexCompileFlags.CASELESS);
+            return email_regex.match(address);
+        } catch (RegexError e) {
+            debug("Regex error validating email address: %s", e.message);
+            return false;
+        }
+    }
     
     public string to_rfc822_string() {
         return String.is_empty(name)

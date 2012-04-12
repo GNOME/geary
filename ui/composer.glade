@@ -179,7 +179,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkGrid" id="grid1">
+      <object class="GtkGrid" id="recipients">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="row_spacing">6</property>
@@ -217,13 +217,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="to">
+          <object class="GtkEventBox" id="to">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="has_focus">True</property>
             <property name="hexpand">True</property>
-            <property name="invisible_char">•</property>
-            <property name="invisible_char_set">True</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -233,12 +229,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="cc">
+          <object class="GtkEventBox" id="cc">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="hexpand">True</property>
-            <property name="invisible_char">•</property>
-            <property name="invisible_char_set">True</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -295,12 +288,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="bcc">
+          <object class="GtkEventBox" id="bcc">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="hexpand">True</property>
-            <property name="invisible_char">•</property>
-            <property name="invisible_char_set">True</property>
           </object>
           <packing>
             <property name="left_attach">1</property>

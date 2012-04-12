@@ -19,6 +19,9 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
     
     public MailboxAddresses.from_rfc822_string(string rfc822) {
         InternetAddressList addrlist = InternetAddressList.parse_string(rfc822);
+        if (addrlist == null)
+            return;
+
         int length = addrlist.length();
         for (int ctr = 0; ctr < length; ctr++) {
             InternetAddress? addr = addrlist.get_address(ctr);
