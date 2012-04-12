@@ -229,6 +229,9 @@ public class ComposerWindow : Gtk.Window {
         
         email.body_html = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_html()));
         email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_text()));
+
+        // User-Agent
+        email.mailer = GearyApplication.PRGNAME + "/" + GearyApplication.VERSION;
         
         return email;
     }

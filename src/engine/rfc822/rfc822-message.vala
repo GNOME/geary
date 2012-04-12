@@ -15,6 +15,7 @@ public class Geary.RFC822.Message : Object {
     public RFC822.MessageID? in_reply_to { get; private set; default = null; }
     public RFC822.MessageIDList? references { get; private set; default = null; }
     public RFC822.Subject? subject { get; private set; default = null; }
+    public string? mailer { get; private set; default = null; }
     
     private GMime.Message message;
     
@@ -87,7 +88,13 @@ public class Geary.RFC822.Message : Object {
             subject = email.subject;
             message.set_subject(email.subject.value);
         }
-        
+
+        // User-Agent
+        if (!Geary.String.is_empty(email.mailer)) {
+            mailer = email.mailer;
+            message.set_header("X-Mailer", email.mailer);
+        }
+
         // Body: text format (optional)
         if (email.body_text != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(

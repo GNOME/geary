@@ -26,6 +26,7 @@ public class Geary.ComposedEmail : Object {
     public RFC822.Subject? subject { get; set; default = null; }
     public RFC822.Text? body_text { get; set; default = null; }
     public RFC822.Text? body_html { get; set; default = null; }
+    public string? mailer { get; set; default = null; }
     
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
         RFC822.MailboxAddresses? to = null) {
