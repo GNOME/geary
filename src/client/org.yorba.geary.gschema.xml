@@ -1,6 +1,6 @@
 <schemalist>
 
-<schema id="org.yorba.geary" path="/apps/geary/">
+<schema id="org.yorba.geary" path="/org/yorba/geary/">
     
     <key name="window-maximize" type="b">
         <default>false</default>
