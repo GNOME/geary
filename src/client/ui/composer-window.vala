@@ -26,10 +26,7 @@ public class ComposerWindow : Gtk.Window {
             border-left: 3px #aaa solid;
         }
         </style>
-        </head><body>
-        <p id="top"></p>
-        <span id="reply"></span>
-        </body></html>""";
+        </head><body id="reply"></body></html>""";
     
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
@@ -200,6 +197,28 @@ public class ComposerWindow : Gtk.Window {
         validate_send_button();
     }
     
+    private void on_load_finished(WebKit.WebFrame frame) {
+        if (reply_body == null)
+            return;
+        
+        WebKit.DOM.HTMLElement? reply = editor.get_dom_document().get_element_by_id(
+            REPLY_ID) as WebKit.DOM.HTMLElement;
+        assert(reply != null);
+        
+        try {
+            reply.set_inner_html("<br /><br />" + reply_body + "<br />");
+        } catch (Error e) {
+            debug("Failed to load email for reply: %s", e.message);
+        }
+        
+        // Set focus.
+        if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject)) {
+            editor.grab_focus();
+        } else if (!Geary.String.is_empty(to)) {
+            subject_entry.grab_focus();
+        }
+    }
+    
     public Geary.ComposedEmail get_composed_email(
         Geary.RFC822.MailboxAddresses? default_from = null, DateTime? date_override = null) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
@@ -361,34 +380,52 @@ public class ComposerWindow : Gtk.Window {
         dialog.destroy();
     }
     
+    // Inserts a newline that's fully unindented.
+    private void newline_unindented(Gdk.EventKey event) {
+        
+        bool inside_quote = false;
+        int indent_level = 0;
+        
+        WebKit.DOM.Node? active = editor.get_dom_document().get_default_view().get_selection().
+            focus_node as WebKit.DOM.Node;
+        if (active == null)
+            return;
+        
+        // Count number of parent elements.
+        while (active != null && !(active is WebKit.DOM.HTMLBodyElement)) {
+            if (active is WebKit.DOM.HTMLQuoteElement)
+                inside_quote = true;
+            
+            active = active.get_parent_node();
+            indent_level++;
+        }
+        
+        // Only un-indent automatically if we're inside a blockquote.
+        if (inside_quote) {
+            editor.get_dom_document().exec_command("insertlinebreak", false, "");
+            editor.key_press_event(event);
+            
+            // Send an up key.
+            event.keyval = Gdk.keyval_from_name("Up");
+            Gdk.KeymapKey[] keys;
+            Gdk.Keymap.get_default().get_entries_for_keyval(event.keyval, out keys);
+            event.hardware_keycode = (uint16) keys[0].keycode;
+            event.group = (uint8) keys[0].group;
+            editor.key_press_event(event);
+            
+            for (int i = 0; i < indent_level; i++)
+                editor.get_dom_document().exec_command("outdent", false, "");
+        } else {
+            editor.key_press_event(event);
+        }
+    }
+    
     private string get_html() {
         return editor.get_dom_document().get_body().get_inner_html();
     }
     
     private string get_text() {
         return editor.get_dom_document().get_body().get_inner_text();
-    }
-    
-    private void on_load_finished(WebKit.WebFrame frame) {
-        if (reply_body == null)
-            return;
-        
-        WebKit.DOM.HTMLElement? reply = editor.get_dom_document().get_element_by_id(
-            REPLY_ID) as WebKit.DOM.HTMLElement;
-        assert(reply != null);
-        
-        try {
-            reply.set_inner_html("<br /><br />" + reply_body + "<br />");
-        } catch (Error e) {
-            debug("Failed to load email for reply: %s", e.message);
-        }
-        
-        // Set focus.
-        if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject)) {
-            editor.grab_focus();
-        } else if (!Geary.String.is_empty(to)) {
-            subject_entry.grab_focus();
-        }
     }
     
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
@@ -415,6 +452,9 @@ public class ComposerWindow : Gtk.Window {
             case "KP_Enter":
                 if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive)
                     on_send();
+                else if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && 
+                    get_focus() == editor)
+                    newline_unindented(event);
                 else
                     handled = false;
             break;
