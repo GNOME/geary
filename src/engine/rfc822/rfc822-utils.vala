@@ -6,6 +6,16 @@
 
 namespace Geary.RFC822.Utils {
 
+public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses,
+    bool html_format) {
+    
+    if (addresses == null)
+        return "";
+    
+    return html_format ? HTML.escape_markup(addresses.to_string()) : addresses.to_string();
+}
+
+
 /**
  * Returns a quoted text string needed for a reply.
  *
@@ -25,7 +35,7 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
         quoted += _("On %s, ").printf(email.date.value.format(_("%a, %b %-e, %Y at %-l:%M %p")));
     
     if (email.from != null)
-        quoted += _("%s wrote:").printf(email.from.to_string());
+        quoted += _("%s wrote:").printf(email_addresses_for_reply(email.from, html_format));
     
     if (html_format)
         quoted += "<br />";
@@ -53,10 +63,10 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
     
     quoted += _("---------- Forwarded message ----------");
     quoted += "\n\n";
-    quoted += _("From: %s\n").printf(email.from != null ? email.from.to_string() : "");
+    quoted += _("From: %s\n").printf(email_addresses_for_reply(email.from, html_format));
     quoted += _("Subject %s\n").printf(email.subject != null ? email.subject.to_string() : "");
     quoted += _("Date: %s\n").printf(email.date != null ? email.date.to_string() : "");
-    quoted += _("To: %s\n").printf(email.to != null ? email.to.to_string() : "");
+    quoted += _("To: %s\n").printf(email_addresses_for_reply(email.to, html_format));
     
     if (html_format)
         quoted = quoted.replace("\n", "<br />");
