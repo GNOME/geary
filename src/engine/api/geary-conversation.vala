@@ -166,12 +166,28 @@ public abstract class Geary.Conversation : Object {
         Gee.Set<Geary.Email>? list = get_pool();
         if (list == null)
             return false;
-        
+
         foreach (Geary.Email email in list) {
-            if (email.properties.email_flags.is_unread())
+            if (email.is_unread().to_boolean(false))
                 return true;
         }
-        
+
+        return false;
+    }
+
+    /**
+     * Returns true if *any* message in the conversation is flagged.
+     */
+    public virtual bool is_flagged() {
+        Gee.Set<Geary.Email>? list = get_pool();
+        if (list == null)
+            return false;
+
+        foreach (Geary.Email email in list) {
+            if (email.is_flagged().to_boolean(false))
+                return true;
+        }
+
         return false;
     }
 }

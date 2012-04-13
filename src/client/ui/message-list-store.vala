@@ -73,7 +73,7 @@ public class MessageListStore : Gtk.TreeStore {
             set(iter,
                 Column.MESSAGE_DATA, new FormattedMessageData.from_email(
                     email_for_preview(conversation), pool.size, conversation.is_unread(),
-                    current_folder),
+                    conversation.is_flagged(), current_folder),
                 Column.MESSAGE_OBJECT, conversation
             );
     }
@@ -98,15 +98,17 @@ public class MessageListStore : Gtk.TreeStore {
         FormattedMessageData? existing = null;
         get(iter, Column.MESSAGE_DATA, out existing);
         
-        // Update preview if text or unread status changed.
-        if (existing != null && existing.is_unread != conversation.is_unread()) {
+        // Update preview if text or status changed.
+        if (existing != null) {
             existing.is_unread = conversation.is_unread();
+            existing.is_flagged = conversation.is_flagged();
             set(iter, Column.MESSAGE_DATA, existing);
         }
         
         if (!only_update_flags && (existing == null || !existing.email.id.equals(preview.id))) {
             set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(preview,
-                conversation.get_count(), conversation.is_unread(), current_folder));
+                conversation.get_count(), conversation.is_unread(), conversation.is_flagged(),
+                current_folder));
         }
     }
     
@@ -158,7 +160,8 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, 
-            conversation.get_usable_count(), conversation.is_unread(), current_folder));
+            conversation.get_usable_count(), conversation.is_unread(), conversation.is_flagged(),
+            current_folder));
     }
     
     public Geary.Email? get_preview_for_conversation(Geary.Conversation conversation) {

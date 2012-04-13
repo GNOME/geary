@@ -20,15 +20,17 @@ public class FormattedMessageData : Object {
     
     public Geary.Email email { get; private set; default = null; }
     public bool is_unread { get; set; default = false; }
+    public bool is_flagged { get; set; default = false; }
     public string date { get; private set; default = ""; } 
     public string from { get; private set; default = ""; }
     public string subject { get; private set; default = ""; }
     public string? body { get; private set; default = null; } // optional
     public int num_emails { get; private set; default = 1; }
     
-    private FormattedMessageData(bool is_unread, string date, string from, string subject, 
-        string preview, int num_emails) {
+    private FormattedMessageData(bool is_unread, bool is_flagged, string date, string from,
+        string subject, string preview, int num_emails) {
         this.is_unread = is_unread;
+        this.is_flagged = is_flagged;
         this.date = date;
         this.from = from;
         this.subject = subject;
@@ -38,7 +40,7 @@ public class FormattedMessageData : Object {
     
     // Creates a formatted message data from an e-mail.
     public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread,
-        Geary.Folder folder) {
+        bool flagged, Geary.Folder folder) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
         
         string preview = "";
@@ -62,7 +64,7 @@ public class FormattedMessageData : Object {
             clean_subject = email.subject.value;
         }
         
-        this(unread,
+        this(unread, flagged,
             Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format),
             who, clean_subject,
             Geary.String.reduce_whitespace(preview), num_emails);
@@ -72,7 +74,7 @@ public class FormattedMessageData : Object {
     
     // Creates an example message (used interally for styling calculations.)
     public FormattedMessageData.create_example() {
-        this(false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE + "\n" +
+        this(false, false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE + "\n" +
             STYLE_EXAMPLE, 1);
     }
     
@@ -136,13 +138,24 @@ public class FormattedMessageData : Object {
         if (recalc_dims) {
             this.preview_height = preview_height;
             this.cell_height = y + preview_height;
-        }
-        
-        // Unread indicator.
-        if (is_unread) {
-            Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,
-                cell_area.y + (cell_area.height / 2) - (IconFactory.UNREAD_ICON_SIZE / 2));
-            ctx.paint();
+        } else {
+            // Flagged indicator.
+            if (is_flagged) {
+                Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.starred, cell_area.x + LINE_SPACING,
+                    cell_area.y + LINE_SPACING);
+                ctx.paint();
+            } else {
+                Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unstarred, cell_area.x + LINE_SPACING,
+                    cell_area.y + LINE_SPACING);
+                ctx.paint();
+            }
+
+            // Unread indicator.
+            if (is_unread) {
+                Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,
+                    cell_area.y + (cell_area.height / 2) + LINE_SPACING);
+                ctx.paint();
+            }
         }
     }
     

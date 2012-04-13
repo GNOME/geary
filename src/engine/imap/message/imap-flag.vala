@@ -104,15 +104,19 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         out Gee.List<MessageFlag> msg_flags_remove) {
         msg_flags_add = new Gee.ArrayList<MessageFlag>();
         msg_flags_remove = new Gee.ArrayList<MessageFlag>();
-        
+
         if (email_flags_add != null) {
             if (email_flags_add.contains(Geary.EmailFlags.UNREAD))
                 msg_flags_remove.add(MessageFlag.SEEN);
+            if (email_flags_add.contains(Geary.EmailFlags.FLAGGED))
+                msg_flags_add.add(MessageFlag.FLAGGED);
         }
-        
+
         if (email_flags_remove != null) {
             if (email_flags_remove.contains(Geary.EmailFlags.UNREAD))
                 msg_flags_add.add(MessageFlag.SEEN);
+            if (email_flags_remove.contains(Geary.EmailFlags.FLAGGED))
+                msg_flags_remove.add(MessageFlag.FLAGGED);
         }
     }
 }

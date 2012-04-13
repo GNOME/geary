@@ -49,6 +49,8 @@ public class GearyController {
     public const string ACTION_MARK_AS_MENU = "GearyMarkAsMenuButton";
     public const string ACTION_MARK_AS_READ = "GearyMarkAsRead";
     public const string ACTION_MARK_AS_UNREAD = "GearyMarkAsUnread";
+    public const string ACTION_MARK_AS_STARRED = "GearyMarkAsStarred";
+    public const string ACTION_MARK_AS_UNSTARRED = "GearyMarkAsUnStarred";
     
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
@@ -81,11 +83,13 @@ public class GearyController {
         
         main_window.message_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
+        main_window.message_list_view.mark_conversation.connect(on_mark_conversation);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.message_viewer.link_selected.connect(on_link_selected);
         main_window.message_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.message_viewer.reply_all_message.connect(on_reply_all_message);
         main_window.message_viewer.forward_message.connect(on_forward_message);
+        main_window.message_viewer.mark_message.connect(on_message_viewer_mark_message);
         
         main_window.message_list_view.grab_focus();
         
@@ -127,6 +131,16 @@ public class GearyController {
         mark_unread.label = _("Mark as _unread");
         entries += mark_unread;
         
+        Gtk.ActionEntry mark_starred = { ACTION_MARK_AS_STARRED, "starred", TRANSLATABLE, null, null,
+            on_mark_as_starred };
+        mark_starred.label = _("_Star");
+        entries += mark_starred;
+
+        Gtk.ActionEntry mark_unstarred = { ACTION_MARK_AS_UNSTARRED, "non-starred", TRANSLATABLE, null,
+            null, on_mark_as_unstarred };
+        mark_unstarred.label = _("U_nstar");
+        entries += mark_unstarred;
+
         Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", 
             null, on_new_message };
         new_message.label = _("_New Message");
@@ -436,8 +450,10 @@ public class GearyController {
     }
     
     private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
-        foreach (Geary.EmailIdentifier id in map.keys)
+        foreach (Geary.EmailIdentifier id in map.keys) {
             main_window.message_list_store.update_flags(id, map.get(id));
+            main_window.message_viewer.update_flags(id, map.get(id));
+        }
     }
     
     private void do_second_pass_if_needed() {
@@ -630,13 +646,73 @@ public class GearyController {
         PreferencesDialog dialog = new PreferencesDialog(GearyApplication.instance.config);
         dialog.run();
     }
-    
-    private void mark_selected_conversations(Geary.EmailFlags? flags_to_add, Geary.EmailFlags?
-        flags_to_remove) {
 
-        // Get the IDs of all selected emails.
+    private Gee.List<Geary.EmailIdentifier> get_selected_ids(bool only_get_preview_message = false) {
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.Conversation conversation in selected_conversations) {
+            if (only_get_preview_message) {
+                Geary.Email? preview_message = MessageListStore.email_for_preview(conversation);
+                if (preview_message != null) {
+                    ids.add(preview_message.id);
+                }
+            } else {
+                Gee.Set<Geary.Email>? messages = conversation.get_pool();
+                if (messages != null) {
+                    foreach (Geary.Email email in messages) {
+                        ids.add(email.id);
+                    }
+                }
+            }
+        }
+        return ids;
+    }
+
+    private void mark_selected_conversations(Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove, bool only_get_preview_message = false) {
+
+        // Mark the emails.
+        Gee.List<Geary.EmailIdentifier> ids = get_selected_ids(only_get_preview_message);
+        if (ids.size > 0) {
+            set_busy(true);
+            current_folder.mark_email_async.begin(ids, flags_to_add, flags_to_remove,
+                cancellable_message, on_mark_complete);
+        }
+    }
+
+    private void on_show_mark_menu() {
+        bool unread_selected = false;
+        bool read_selected = false;
+        bool starred_selected = false;
+        bool unstarred_selected = false;
+        foreach (Geary.Conversation conversation in selected_conversations) {
+            if (conversation.is_unread()) {
+                unread_selected = true;
+            } else {
+                read_selected = true;
+            }
+            if (conversation.is_flagged()) {
+                starred_selected = true;
+            } else {
+                unstarred_selected = true;
+            }
+        }
+        var actions = GearyApplication.instance.actions;
+        actions.get_action(ACTION_MARK_AS_READ).set_visible(unread_selected);
+        actions.get_action(ACTION_MARK_AS_UNREAD).set_visible(read_selected);
+        actions.get_action(ACTION_MARK_AS_STARRED).set_visible(unstarred_selected);
+        actions.get_action(ACTION_MARK_AS_UNSTARRED).set_visible(starred_selected);
+    }
+
+    private void on_mark_conversation(Geary.Conversation conversation,
+        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview = false) {
+
+        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        if (only_mark_preview) {
+            Geary.Email? email = MessageListStore.email_for_preview(conversation);
+            if (email != null) {
+                ids.add(email.id);
+            }
+        } else {
             Gee.Set<Geary.Email>? messages = conversation.get_pool();
             if (messages != null) {
                 foreach (Geary.Email email in messages) {
@@ -644,31 +720,21 @@ public class GearyController {
                 }
             }
         }
-        
-        // Mark the emails.
         if (ids.size > 0) {
             set_busy(true);
             current_folder.mark_email_async.begin(ids, flags_to_add, flags_to_remove,
                 cancellable_message, on_mark_complete);
         }
     }
-    
-    private void on_show_mark_menu() {
-        bool unread_selected = false;
-        bool read_selected = false;
-        foreach (Geary.Conversation conversation in selected_conversations) {
-            if (conversation.is_unread()) {
-                unread_selected = true;
-            } else {
-                read_selected = true;
-            }
-            if (unread_selected && read_selected) {
-                break;
-            }
-        }
-        var actions = GearyApplication.instance.actions;
-        actions.get_action(ACTION_MARK_AS_READ).sensitive = unread_selected;
-        actions.get_action(ACTION_MARK_AS_UNREAD).sensitive = read_selected;
+
+    private void on_message_viewer_mark_message(Geary.EmailFlags? flags_to_add,
+        Geary.EmailFlags? flags_to_remove) {
+
+        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        ids.add(get_email_from_message_viewer().id);
+        set_busy(true);
+        current_folder.mark_email_async.begin(ids, flags_to_add, flags_to_remove,
+            cancellable_message, on_mark_complete);
     }
     
     private void on_mark_as_read() {
@@ -681,6 +747,18 @@ public class GearyController {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
         mark_selected_conversations(flags, null);
+    }
+
+    private void on_mark_as_starred() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+        mark_selected_conversations(flags, null, true);
+    }
+
+    private void on_mark_as_unstarred() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+        mark_selected_conversations(null, flags);
     }
     
     private void on_mark_complete() {

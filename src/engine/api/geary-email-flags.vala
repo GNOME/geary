@@ -12,7 +12,15 @@ public class Geary.EmailFlags : Geary.Equalable {
         
         return _unread;
     } }
-    
+
+    private static EmailFlag? _flagged = null;
+    public static EmailFlag FLAGGED { get {
+        if (_flagged == null)
+            _flagged = new EmailFlag("FLAGGED");
+
+        return _flagged;
+    } }
+
     private Gee.Set<EmailFlag> list = new Gee.HashSet<EmailFlag>(Hashable.hash_func, Equalable.equal_func);
     
     public EmailFlags() {
@@ -38,7 +46,11 @@ public class Geary.EmailFlags : Geary.Equalable {
     public inline bool is_unread() {
         return contains(UNREAD);
     }
-    
+
+    public inline bool is_flagged() {
+        return contains(FLAGGED);
+    }
+
     public bool equals(Equalable o) {
         Geary.EmailFlags? other = o as Geary.EmailFlags;
         if (other == null)

@@ -85,6 +85,18 @@ public class MessageViewer : WebKit.WebView {
             box-sizing:border-box;
             margin: 0 0 15px 0px;
         }
+        .email .starred {
+            display: none;
+        }
+        .email .unstarred {
+            display: block;
+        }
+        .email.starred .starred {
+            display: block;
+        }
+        .email.starred .unstarred {
+            display: none;
+        }
         .email_box {
             box-sizing: border-box;
             -webkit-box-sizing: border-box;
@@ -93,10 +105,13 @@ public class MessageViewer : WebKit.WebView {
         .email_container {
             overflow: hidden;
         }
-        .email_container > .menu {
+        .email_container > .button_bar {
             float: right;
         }
-        .email_container > .menu > .icon {
+        .email_container > .button_bar > .button {
+            float: left;
+        }
+        .email_container > .button_bar > .button > .icon {
             width: 16px;
             height: 16px;
         }
@@ -134,11 +149,10 @@ public class MessageViewer : WebKit.WebView {
             color: #777;
             display: inline;
         }
-        
         .signature a {
             color: #66f;
         }
-        
+
         .quote_container {
             margin: 5px 0;
             padding: 5px;
@@ -197,7 +211,11 @@ public class MessageViewer : WebKit.WebView {
         <div id="email_template" class="email">
             <div class="geary_spacer"></div>
             <div class="email_container">
-                <div class="menu button"><img src="" class="icon" /></div>
+                <div class="button_bar">
+                    <div class="starred button"><img src="" class="icon" /></div>
+                    <div class="unstarred button"><img src="" class="icon" /></div>
+                    <div class="menu button"><img src="" class="icon" /></div>
+                </div>
                 <table class="header"><tbody></tbody></table>
                 <span class="body"></span>
             </div>
@@ -218,6 +236,9 @@ public class MessageViewer : WebKit.WebView {
 
     // Fired when the user clicks "forward" in the message menu.
     public signal void forward_message();
+
+    // Fired when the user marks a message.
+    public signal void mark_message(Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
@@ -269,19 +290,10 @@ public class MessageViewer : WebKit.WebView {
         container = _container as WebKit.DOM.HTMLDivElement;
         assert(container != null);
 
-        // Then load the settings icon.
-        try {
-            string icon_content;
-            FileUtils.get_contents(
-                Gtk.IconTheme.get_default().lookup_icon("down", 16, 0).get_filename(),
-                out icon_content);
-            WebKit.DOM.HTMLImageElement icon = get_dom_document()
-                .query_selector("#email_template .menu .icon") as WebKit.DOM.HTMLImageElement;
-            icon.set_attribute("src", "data:image/svg+xml;base64,%s".printf(
-                Base64.encode(icon_content.data)));
-        } catch (Error error) {
-            warning("Failed to load menu icon: %s", error.message);
-        }
+        // Load the icons.
+        set_icon_src("#email_template .menu .icon", "down");
+        set_icon_src("#email_template .starred .icon", "starred");
+        set_icon_src("#email_template .unstarred .icon", "non-starred-grey");
     }
 
     private void on_resource_request_starting(WebKit.WebFrame web_frame,
@@ -292,7 +304,29 @@ public class MessageViewer : WebKit.WebView {
             request.set_uri("about:blank");
         }
     }
-    
+
+    private void set_icon_src(string selector, string icon_name) {
+        try {
+            // Load the icon.
+            string icon_filename = IconFactory.instance.lookup_icon(icon_name, 16, 0).get_filename();
+            uint8[] icon_content;
+            FileUtils.get_data(icon_filename, out icon_content);
+
+            // Fetch its mime type.
+            bool uncertain_content_type;
+            string icon_mimetype = ContentType.get_mime_type(ContentType.guess(icon_filename,
+                icon_content, out uncertain_content_type));
+
+            // Then set the source to a data url.
+            WebKit.DOM.HTMLImageElement icon = get_dom_document().query_selector(selector)
+                as WebKit.DOM.HTMLImageElement;
+            icon.set_attribute("src", "data:%s;base64,%s".printf(icon_mimetype,
+                Base64.encode(icon_content)));
+        } catch (Error error) {
+            warning("Failed to load icon '%s': %s", icon_name, error.message);
+        }
+    }
+
     // Removes all displayed e-mails from the view.
     public void clear() {
         // Remove all messages from DOM.
@@ -370,7 +404,11 @@ public class MessageViewer : WebKit.WebView {
             // <div id="$MESSAGE_ID" class="email">
             //     <div class="geary_spacer"></div>
             //     <div class="email_container">
-            //         <div class="menu"><img class="icon" /></div>
+            //         <div class="button_bar">
+            //             <div class="starred button"><img class="icon" /></div>
+            //             <div class="unstarred button"><img class="icon" /></div>
+            //             <div class="menu button"><img class="icon" /></div>
+            //         </div>
             //         <table>$HEADER</table>
             //         <span>
             //             $EMAIL_BODY
@@ -453,13 +491,18 @@ public class MessageViewer : WebKit.WebView {
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
         }
-        
-        // Attach to the click events for hiding/showing quotes and opening the menu.
+
+        // Add classes according to the state of the email.
+        update_flags(email.id, email.get_flags());
+
+        // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
         bind_event(".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
         bind_event(".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
-        bind_event(".email_container > .menu", "click", (Callback) on_menu_clicked, this);
+        bind_event(".email_container .menu", "click", (Callback) on_menu_clicked, this);
+        bind_event(".email_container .starred", "click", (Callback) on_unstar_clicked, this);
+        bind_event(".email_container .unstarred", "click", (Callback) on_star_clicked, this);
     }
-    
+
     private void bind_event(string selector, string event, Callback callback, Object? extra = null) {
         try {
             WebKit.DOM.NodeList node_list = get_dom_document().query_selector_all(selector);
@@ -485,6 +528,61 @@ public class MessageViewer : WebKit.WebView {
             return null;
         }
     }
+
+    private Geary.Email? get_email_from_element(WebKit.DOM.Element element) {
+        // First get the email container.
+        WebKit.DOM.Element email_element = closest_ancestor(element, ".email");
+
+        // Next find the ID in the email-to-element map.
+        Geary.EmailIdentifier? email_id = null;
+        foreach (var entry in email_to_element.entries) {
+            if (entry.value == email_element) {
+                email_id = entry.key;
+                break;
+            }
+        }
+
+        // Now lookup the email in our messages set.
+        foreach (Geary.Email message in messages) {
+            if (message.id == email_id) {
+                return message;
+            }
+        }
+        return null;
+    }
+
+    public void update_flags(Geary.EmailIdentifier email_id, Geary.EmailFlags flags) {
+        // Nothing to do if we aren't displaying this email.
+        if (!email_to_element.has_key(email_id)) {
+            return;
+        }
+
+        // Update the flags in out message set.
+        foreach (Geary.Email message in messages) {
+            if (message.id == email_id) {
+                message.set_flags(flags);
+                break;
+            }
+        }
+
+        // Get the email div and update its state.
+        WebKit.DOM.HTMLElement container = email_to_element.get(email_id);
+        try {
+            WebKit.DOM.DOMTokenList class_list = container.get_class_list();
+            if (flags.is_unread()) {
+                class_list.remove("read");
+            } else {
+                class_list.add("read");
+            }
+            if (flags.is_flagged()) {
+                class_list.add("starred");
+            } else {
+                class_list.remove("starred");
+            }
+        } catch (Error e) {
+            warning("Failed to set classes on .email: %s", e.message);
+        }
+    }
     
     private static void on_hide_quote_clicked(WebKit.DOM.Element element) {
         try {
@@ -506,32 +604,32 @@ public class MessageViewer : WebKit.WebView {
 
     private static void on_menu_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
-        message_viewer.on_menu_clicked_self(element);
+        message_viewer.on_menu_clicked_async(element);
     }
 
-    private void on_menu_clicked_self(WebKit.DOM.Element element) {
-        // First get the email container.
-        WebKit.DOM.Element email_element = closest_ancestor(element, ".email");
-
-        // Next find the ID in the email-to-element map.
-        Geary.EmailIdentifier? email_id = null;
-        foreach (var entry in email_to_element.entries) {
-            if (entry.value == email_element) {
-                email_id = entry.key;
-                break;
-            }
-        }
-
-        // Finally, find the email itself in the messages set.
-        foreach (Geary.Email email in messages) {
-            if (email.id == email_id) {
-                active_email = email;
-                break;
-            }
-        }
-
-        // And show.
+    private void on_menu_clicked_async(WebKit.DOM.Element element) {
+        active_email = get_email_from_element(element);
         show_message_menu(element);
+    }
+
+    private static void on_unstar_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        message_viewer.on_unstar_clicked_async(element);
+    }
+
+    private void on_unstar_clicked_async(WebKit.DOM.Element element){
+        active_email = get_email_from_element(element);
+        on_unflag_message();
+    }
+
+    private static void on_star_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        message_viewer.on_star_clicked_async(element);
+    }
+
+    private void on_star_clicked_async(WebKit.DOM.Element element){
+        active_email = get_email_from_element(element);
+        on_flag_message();
     }
 
     private void on_message_menu_selection_done() {
@@ -549,6 +647,30 @@ public class MessageViewer : WebKit.WebView {
 
     private void on_forward_message() {
         forward_message();
+    }
+
+    private void on_mark_read_message() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+        mark_message(null, flags);
+    }
+
+    private void on_mark_unread_message() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+        mark_message(flags, null);
+    }
+
+    private void on_flag_message() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+        mark_message(flags, null);
+    }
+
+    private void on_unflag_message() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+        mark_message(null, flags);
     }
 
     private void show_message_menu(WebKit.DOM.Element element) {
@@ -569,6 +691,31 @@ public class MessageViewer : WebKit.WebView {
         Gtk.MenuItem forward_item = new Gtk.MenuItem.with_mnemonic(_("_Forward"));
         forward_item.activate.connect(on_forward_message);
         message_menu.append(forward_item);
+
+        // Separator.
+        message_menu.append(new Gtk.SeparatorMenuItem());
+
+        // Mark as read/unread.
+        if (active_email.is_unread().to_boolean(false)) {
+            Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
+            mark_read_item.activate.connect(on_mark_read_message);
+            message_menu.append(mark_read_item);
+        } else {
+            Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
+            mark_unread_item.activate.connect(on_mark_unread_message);
+            message_menu.append(mark_unread_item);
+        }
+
+        // Flag/unflag.
+        if (active_email.is_flagged().to_boolean(false)) {
+            Gtk.MenuItem unflag_item = new Gtk.MenuItem.with_mnemonic(_("Un_star"));
+            unflag_item.activate.connect(on_unflag_message);
+            message_menu.append(unflag_item);
+        } else {
+            Gtk.MenuItem flag_item = new Gtk.MenuItem.with_mnemonic(_("_Star"));
+            flag_item.activate.connect(on_flag_message);
+            message_menu.append(flag_item);
+        }
 
         // Separator.
         message_menu.append(new Gtk.SeparatorMenuItem());

@@ -15,6 +15,8 @@ public class MessageListView : Gtk.TreeView {
     
     public signal void conversations_selected(Geary.Conversation[] conversations);
     public signal void load_more();
+    public signal void mark_conversation(Geary.Conversation conversation,
+        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
     public MessageListView(MessageListStore store) {
         set_model(store);
@@ -33,8 +35,34 @@ public class MessageListView : Gtk.TreeView {
         show.connect(on_show);
         
         store.row_deleted.connect(on_row_deleted);
+        button_press_event.connect(on_button_press);
     }
-    
+
+    private bool on_button_press(Gdk.EventButton event) {
+        // Get the coordinates on the cell as well as the clicked path.
+        int cell_x;
+        int cell_y;
+        Gtk.TreePath path;
+        get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
+
+        // If this is an unmodified click in the top-left of the cell, it is a star-click.
+        if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0 &&
+            (event.state & Gdk.ModifierType.CONTROL_MASK) == 0 &&
+            event.type == Gdk.EventType.BUTTON_PRESS && cell_x < 25 && cell_y < 25) {
+
+            Geary.Conversation conversation = get_store().get_conversation_at(path);
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.FLAGGED);
+            if (conversation.is_flagged()) {
+                mark_conversation(conversation, null, flags, false);
+            } else {
+                mark_conversation(conversation, flags, null, true);
+            }
+            return true;
+        }
+        return false;
+    }
+
     private void on_style_changed() {
         // Recalculate dimensions of child cells.
         MessageListCellRenderer.style_changed(this);
@@ -42,7 +70,7 @@ public class MessageListView : Gtk.TreeView {
     
     private void on_show() {
         // Wait until we're visible to set this signal up.
-        get_vadjustment().value_changed.connect(on_value_changed);
+        this.get_vadjustment().value_changed.connect(on_value_changed);
     }
     
     private void on_value_changed() {
@@ -51,11 +79,12 @@ public class MessageListView : Gtk.TreeView {
         
         // Check if we're at the very bottom of the list. If we are, it's time to
         // issue a load_more signal.
-        if (get_vadjustment().get_value() >= get_vadjustment().get_upper() - 
-            get_vadjustment().page_size - LOAD_MORE_HEIGHT && get_vadjustment().get_upper() 
-            > last_upper) {
+        Gtk.Adjustment adjustment = this.get_vadjustment();
+        double upper = adjustment.get_upper();
+        if (adjustment.get_value() >= upper - adjustment.page_size - LOAD_MORE_HEIGHT &&
+            upper > last_upper) {
             load_more();
-            last_upper = get_vadjustment().get_upper();
+            last_upper = upper;
         }
     }
     
@@ -85,16 +114,17 @@ public class MessageListView : Gtk.TreeView {
     private Gtk.TreePath? get_selected_path() {
         return get_all_selected_paths().nth_data(0);
     }
-    
+
     private void on_selection_changed() {
+        // Get the selected paths. If no paths are selected then notify of that immediately.
         List<Gtk.TreePath> paths = get_all_selected_paths();
         Geary.Conversation[] conversations = new Geary.Conversation[0];
         if (paths.length() == 0) {
             conversations_selected(conversations);
-            
             return;
         }
 
+        // Conversations are selected, so lets collect all of their conversations and signal.
         foreach (Gtk.TreePath path in paths) {
             Geary.Conversation? conversation = get_store().get_conversation_at(path);
             if (conversation != null) {
@@ -127,7 +157,7 @@ public class MessageListView : Gtk.TreeView {
             }
         }
     }
-    
+
     public void refresh() {
         model.foreach(refresh_path);
     }

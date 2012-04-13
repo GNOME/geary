@@ -2,6 +2,8 @@
     <popup name="ToolbarMarkMenu">
         <menuitem name="MarkAsRead" action="GearyMarkAsRead" />
         <menuitem name="MarkAsUnread" action="GearyMarkAsUnread" />
+        <menuitem name="MarkAsStarred" action="GearyMarkAsStarred" />
+        <menuitem name="MarkAsUnStarred" action="GearyMarkAsUnStarred" />
     </popup>
 </ui>
 

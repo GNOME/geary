@@ -134,7 +134,27 @@ public class Geary.Email : Object {
         
         this.position = position;
     }
-    
+
+    public inline Trillian is_unread() {
+        return properties == null ? Trillian.UNKNOWN :
+            Trillian.from_boolean(properties.email_flags.is_unread());
+    }
+
+    public inline Trillian is_flagged() {
+        return properties == null ? Trillian.UNKNOWN :
+            Trillian.from_boolean(properties.email_flags.is_flagged());
+    }
+
+    public inline EmailFlags? get_flags() {
+        return properties == null ? null : properties.email_flags;
+    }
+
+    public void set_flags(Geary.EmailFlags flags) {
+        if (properties != null) {
+            properties.email_flags = flags;
+        }
+    }
+
     public void set_send_date(Geary.RFC822.Date date) {
         this.date = date;
         
