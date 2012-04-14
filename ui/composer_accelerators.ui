@@ -4,7 +4,9 @@
     
     <accelerator action="cut" />
     <accelerator action="copy" />
+    <accelerator action="copy link" />
     <accelerator action="paste" />
+    <accelerator action="paste with formatting" />
     
     <accelerator action="bold" />
     <accelerator action="italic" />

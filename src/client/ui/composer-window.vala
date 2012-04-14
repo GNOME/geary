@@ -8,6 +8,28 @@
 public class ComposerWindow : Gtk.Window {
     private static string DEFAULT_TITLE = _("New Message");
     
+    private const string ACTION_UNDO = "undo";
+    private const string ACTION_REDO = "redo";
+    private const string ACTION_CUT = "cut";
+    private const string ACTION_COPY = "copy";
+    private const string ACTION_COPY_LINK = "copy link";
+    private const string ACTION_PASTE = "paste";
+    private const string ACTION_PASTE_FORMAT = "paste with formatting";
+    private const string ACTION_BOLD = "bold";
+    private const string ACTION_ITALIC = "italic";
+    private const string ACTION_UNDERLINE = "underline";
+    private const string ACTION_STRIKETHROUGH = "strikethrough";
+    private const string ACTION_REMOVE_FORMAT = "removeformat";
+    private const string ACTION_INDENT = "indent";
+    private const string ACTION_OUTDENT = "outdent";
+    private const string ACTION_JUSTIFY_LEFT = "justifyleft";
+    private const string ACTION_JUSTIFY_RIGHT = "justifyright";
+    private const string ACTION_JUSTIFY_CENTER = "justifycenter";
+    private const string ACTION_JUSTIFY_FULL = "justifyfull";
+    private const string ACTION_FONT = "font";
+    private const string ACTION_COLOR = "color";
+    private const string ACTION_INSERT_LINK = "insertlink";
+    
     private const string REPLY_ID = "reply";
     private const string HTML_BODY = """
         <html><head><title></title>
@@ -72,6 +94,9 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Entry subject_entry;
     private Gtk.Button send_button;
     private Gtk.Label message_overlay_label;
+    private Gtk.Menu? context_menu = null;
+    private Gtk.ActionGroup actions;
+    private string? hover_url = null;
     
     private WebKit.WebView editor;
     private Gtk.UIManager ui;
@@ -92,7 +117,7 @@ public class ComposerWindow : Gtk.Window {
         (builder.get_object("bcc") as Gtk.EventBox).add(bcc_entry);
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment msg_area = builder.get_object("message area") as Gtk.Alignment;
-        Gtk.ActionGroup actions = builder.get_object("compose actions") as Gtk.ActionGroup;
+        actions = builder.get_object("compose actions") as Gtk.ActionGroup;
         
         Gtk.ScrolledWindow scroll = new Gtk.ScrolledWindow(null, null);
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -113,31 +138,33 @@ public class ComposerWindow : Gtk.Window {
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
         
-        actions.get_action("undo").activate.connect(on_action);
-        actions.get_action("redo").activate.connect(on_action);
+        actions.get_action(ACTION_UNDO).activate.connect(on_action);
+        actions.get_action(ACTION_REDO).activate.connect(on_action);
         
-        actions.get_action("cut").activate.connect(on_cut);
-        actions.get_action("copy").activate.connect(on_copy);
-        actions.get_action("paste").activate.connect(on_paste);
+        actions.get_action(ACTION_CUT).activate.connect(on_cut);
+        actions.get_action(ACTION_COPY).activate.connect(on_copy);
+        actions.get_action(ACTION_COPY_LINK).activate.connect(on_copy_link);
+        actions.get_action(ACTION_PASTE).activate.connect(on_paste);
+        actions.get_action(ACTION_PASTE_FORMAT).activate.connect(on_paste_with_formatting);
         
-        actions.get_action("bold").activate.connect(on_action);
-        actions.get_action("italic").activate.connect(on_action);
-        actions.get_action("underline").activate.connect(on_action);
-        actions.get_action("strikethrough").activate.connect(on_action);
+        actions.get_action(ACTION_BOLD).activate.connect(on_action);
+        actions.get_action(ACTION_ITALIC).activate.connect(on_action);
+        actions.get_action(ACTION_UNDERLINE).activate.connect(on_action);
+        actions.get_action(ACTION_STRIKETHROUGH).activate.connect(on_action);
         
-        actions.get_action("removeformat").activate.connect(on_remove_format);
+        actions.get_action(ACTION_REMOVE_FORMAT).activate.connect(on_remove_format);
         
-        actions.get_action("indent").activate.connect(on_action);
-        actions.get_action("outdent").activate.connect(on_action);
+        actions.get_action(ACTION_INDENT).activate.connect(on_action);
+        actions.get_action(ACTION_OUTDENT).activate.connect(on_action);
         
-        actions.get_action("justifyleft").activate.connect(on_action);
-        actions.get_action("justifyright").activate.connect(on_action);
-        actions.get_action("justifycenter").activate.connect(on_action);
-        actions.get_action("justifyfull").activate.connect(on_action);
+        actions.get_action(ACTION_JUSTIFY_LEFT).activate.connect(on_action);
+        actions.get_action(ACTION_JUSTIFY_RIGHT).activate.connect(on_action);
+        actions.get_action(ACTION_JUSTIFY_CENTER).activate.connect(on_action);
+        actions.get_action(ACTION_JUSTIFY_FULL).activate.connect(on_action);
         
-        actions.get_action("font").activate.connect(on_select_font);
-        actions.get_action("color").activate.connect(on_select_color);
-        actions.get_action("insertlink").activate.connect(on_insert_link);
+        actions.get_action(ACTION_FONT).activate.connect(on_select_font);
+        actions.get_action(ACTION_COLOR).activate.connect(on_select_color);
+        actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
         ui = new Gtk.UIManager();
         ui.insert_action_group(actions, 0);
@@ -169,7 +196,18 @@ public class ComposerWindow : Gtk.Window {
         editor.set_editable(true);
         editor.load_finished.connect(on_load_finished);
         editor.hovering_over_link.connect(on_hovering_over_link);
-        editor.load_string(HTML_BODY, "text/html", "UTF8", ""); // only do this after setting reply_body
+        editor.button_press_event.connect(on_button_press_event);
+        editor.move_focus.connect(update_actions);
+        editor.copy_clipboard.connect(update_actions);
+        editor.cut_clipboard.connect(update_actions);
+        editor.paste_clipboard.connect(update_actions);
+        editor.undo.connect(update_actions);
+        editor.redo.connect(update_actions);
+        editor.selection_changed.connect(update_actions);
+        editor.user_changed_contents.connect(update_actions);
+        
+        // only do this after setting reply_body
+        editor.load_string(HTML_BODY, "text/html", "UTF8", "");
         
         if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject))
             editor.grab_focus();
@@ -188,6 +226,7 @@ public class ComposerWindow : Gtk.Window {
         s.enable_scripts = false;
         s.enable_java_applet = false;
         s.enable_plugins = false;
+        s.enable_default_context_menu = false;
         editor.settings = s;
         
         scroll.add(editor);
@@ -217,6 +256,8 @@ public class ComposerWindow : Gtk.Window {
         } else if (!Geary.String.is_empty(to)) {
             subject_entry.grab_focus();
         }
+        
+        update_actions();
     }
     
     public Geary.ComposedEmail get_composed_email(
@@ -316,11 +357,36 @@ public class ComposerWindow : Gtk.Window {
             ((Gtk.Editable) get_focus()).copy_clipboard();
     }
     
+    private void on_copy_link() {
+        Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        c.set_text(hover_url, -1);
+        c.store();
+    }
+    
+    private void on_clipboard_text_received(Gtk.Clipboard clipboard, string? text) {
+        if (text == null)
+            return;
+        
+        // Insert plain text from clipboard.
+        editor.get_dom_document().exec_command("inserthtml", false, 
+            Geary.HTML.newlines_to_br(Geary.HTML.escape_markup(text)));
+    }
+    
     private void on_paste() {
         if (get_focus() == editor)
-            editor.paste_clipboard();
+            //editor.paste_clipboard();
+            get_clipboard(Gdk.SELECTION_CLIPBOARD).request_text(on_clipboard_text_received);
         else if (get_focus() is Gtk.Editable)
             ((Gtk.Editable) get_focus()).paste_clipboard();
+    }
+    
+    private void on_paste_with_formatting() {
+        if (get_focus() == editor)
+            editor.paste_clipboard();
+    }
+    
+    private void on_select_all() {
+        editor.select_all();
     }
     
     private void on_remove_format() {
@@ -438,6 +504,8 @@ public class ComposerWindow : Gtk.Window {
     
     private void on_hovering_over_link(string? title, string? url) {
         message_overlay_label.label = url;
+        hover_url = url;
+        update_actions();
     }
     
     private void on_spell_check_changed() {
@@ -473,6 +541,75 @@ public class ComposerWindow : Gtk.Window {
             return true;
         
         return base.key_press_event(event);
+    }
+    
+    private bool on_button_press_event(Gdk.EventButton event) {
+        if (event.button == 3)
+            create_context_menu(event);
+        
+        return false;
+    }
+    
+    private void create_context_menu(Gdk.EventButton event) {
+        context_menu = new Gtk.Menu();
+        
+        // Undo
+        Gtk.MenuItem undo = new Gtk.MenuItem();
+        undo.related_action = actions.get_action(ACTION_UNDO);
+        context_menu.append(undo);
+        
+        // Redo
+        Gtk.MenuItem redo = new Gtk.MenuItem();
+        redo.related_action = actions.get_action(ACTION_REDO);
+        context_menu.append(redo);
+        
+        context_menu.append(new Gtk.MenuItem());
+        
+        // Cut
+        Gtk.MenuItem cut = new Gtk.MenuItem();
+        cut.related_action = actions.get_action(ACTION_CUT);
+        context_menu.append(cut);
+        
+        // Copy
+        Gtk.MenuItem copy = new Gtk.MenuItem();
+        copy.related_action = actions.get_action(ACTION_COPY);
+        context_menu.append(copy);
+        
+        // Copy link.
+        Gtk.MenuItem copy_link = new Gtk.MenuItem();
+        copy_link.related_action = actions.get_action(ACTION_COPY_LINK);
+        context_menu.append(copy_link);
+        
+        // Paste
+        Gtk.MenuItem paste = new Gtk.MenuItem();
+        paste.related_action = actions.get_action(ACTION_PASTE);
+        context_menu.append(paste);
+        
+        // Paste with formatting
+        Gtk.MenuItem paste_format = new Gtk.MenuItem();
+        paste_format.related_action = actions.get_action(ACTION_PASTE_FORMAT);
+        context_menu.append(paste_format);
+        
+        context_menu.append(new Gtk.MenuItem());
+        
+        // Select all.
+        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
+        select_all_item.activate.connect(on_select_all);
+        context_menu.append(select_all_item);
+        
+        context_menu.show_all();
+        context_menu.popup(null, null, null, event.button, event.time);
+    }
+    
+    private void update_actions() {
+        actions.get_action(ACTION_UNDO).sensitive = editor.can_undo();
+        actions.get_action(ACTION_REDO).sensitive = editor.can_redo();
+        
+        actions.get_action(ACTION_CUT).sensitive = editor.can_cut_clipboard();
+        actions.get_action(ACTION_COPY).sensitive = editor.can_copy_clipboard();
+        actions.get_action(ACTION_COPY_LINK).sensitive = hover_url != null;
+        actions.get_action(ACTION_PASTE).sensitive = editor.can_paste_clipboard();
+        actions.get_action(ACTION_PASTE_FORMAT).sensitive = editor.can_paste_clipboard();
     }
 }
 
