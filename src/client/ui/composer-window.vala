@@ -48,7 +48,7 @@ public class ComposerWindow : Gtk.Window {
             border-left: 3px #aaa solid;
         }
         </style>
-        </head><body id="reply"></body></html>""";
+        </head><body id="reply" contenteditable="true"></body></html>""";
     
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
@@ -193,7 +193,6 @@ public class ComposerWindow : Gtk.Window {
         }
         
         editor = new WebKit.WebView();
-        editor.set_editable(true);
         editor.load_finished.connect(on_load_finished);
         editor.hovering_over_link.connect(on_hovering_over_link);
         editor.button_press_event.connect(on_button_press_event);
