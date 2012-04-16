@@ -67,9 +67,8 @@ public class MessageListStore : Gtk.TreeStore {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
-        
-        if (pool != null && pool.size > 0)
+        Gee.SortedSet<Geary.Email> pool = conversation.get_email_sorted(compare_email);
+        if (pool.size > 0)
             set(iter,
                 Column.MESSAGE_DATA, new FormattedMessageData.from_email(
                     email_for_preview(conversation), pool.size, conversation.is_unread(),
@@ -138,8 +137,8 @@ public class MessageListStore : Gtk.TreeStore {
     
     // Returns the email to use for a preview in a conversation.
     public static Geary.Email? email_for_preview(Geary.Conversation conversation) {
-        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
-        if (pool == null)
+        Gee.SortedSet<Geary.Email> pool = conversation.get_email_sorted(compare_email);
+        if (pool.size == 0)
             return null;
         
         // If it exists, return oldest unread message.
@@ -160,7 +159,7 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         set(iter, Column.MESSAGE_DATA, new FormattedMessageData.from_email(email, 
-            conversation.get_usable_count(), conversation.is_unread(), conversation.is_flagged(),
+            conversation.get_count(), conversation.is_unread(), conversation.is_flagged(),
             current_folder));
     }
     
@@ -198,8 +197,8 @@ public class MessageListStore : Gtk.TreeStore {
         int count = get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Conversation c = get_conversation_at_index(ctr);
-            Gee.SortedSet<Geary.Email>? mail = c.get_pool_sorted(compare_email_id_desc);
-            if (mail == null)
+            Gee.SortedSet<Geary.Email> mail = c.get_email_sorted(compare_email_id_desc);
+            if (mail.size == 0)
                 continue;
             
             Geary.EmailIdentifier pos = mail.first().id;
@@ -214,11 +213,7 @@ public class MessageListStore : Gtk.TreeStore {
         int count = get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Conversation c = get_conversation_at_index(ctr);
-            Gee.SortedSet<Geary.Email>? mail = c.get_pool_sorted(compare_email_id_desc);
-            if (mail == null)
-                continue;
-            
-            foreach (Geary.Email e in mail) {
+            foreach (Geary.Email e in c.get_email_sorted(compare_email_id_desc)) {
                 if (e.id.equals(id)) {
                     e.properties.email_flags = flags;
                     update_conversation(c, true);

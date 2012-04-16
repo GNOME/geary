@@ -39,7 +39,6 @@ public class Geary.DBus.Conversations : Object {
         conversations.conversation_appended.connect(on_conversation_appended);
         conversations.conversation_trimmed.connect(on_conversation_trimmed);
         conversations.conversation_removed.connect(on_conversation_removed);
-        conversations.updated_placeholders.connect(on_updated_placeholders);
         
         folder.email_flags_changed.connect(on_email_flags_changed);
     }
@@ -104,13 +103,7 @@ public class Geary.DBus.Conversations : Object {
         Database.instance.remove_by_path(email_path);
     }
     
-    private void on_updated_placeholders(Geary.Conversation conversation,
-        Gee.Collection<Geary.Email> email) {
-        // TODO
-    }
-    
-    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
-        Geary.EmailFlags> flag_map) {
+    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
         //TODO
     }
 }

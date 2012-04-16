@@ -18,8 +18,8 @@ public class Geary.DBus.Conversation : Object {
     }
     
     public async ObjectPath[] get_emails() throws IOError {
-        Gee.SortedSet<Geary.Email>? pool = conversation.get_pool_sorted(compare_email);
-        if (pool == null)
+        Gee.SortedSet<Geary.Email> pool = conversation.get_email_sorted(compare_email);
+        if (pool.size == 0)
             return new ObjectPath[0];
         
         ObjectPath[] paths = new ObjectPath[0];

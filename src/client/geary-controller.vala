@@ -298,7 +298,6 @@ public class GearyController {
         current_conversations.conversation_appended.connect(on_conversation_appended);
         current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
         current_conversations.conversation_removed.connect(on_conversation_removed);
-        current_conversations.updated_placeholders.connect(on_updated_placeholders);
         
         current_folder.email_flags_changed.connect(on_email_flags_changed);
         
@@ -408,7 +407,7 @@ public class GearyController {
             main_window.message_list_store.update_conversation(conversation);
         }
         if (is_viewed_conversation(conversation))
-            do_show_message.begin(conversation.get_pool(), cancellable_message,
+            do_show_message.begin(conversation.get_email(), cancellable_message,
                 on_show_message_completed);
     }
     
@@ -419,10 +418,6 @@ public class GearyController {
     
     public void on_conversation_removed(Geary.Conversation conversation) {
         main_window.message_list_store.remove_conversation(conversation);
-    }
-    
-    public void on_updated_placeholders(Geary.Conversation conversation,
-        Gee.Collection<Geary.Email> email) {
     }
     
     private void on_load_more() {
@@ -485,9 +480,8 @@ public class GearyController {
         enable_message_buttons(false);
         
         if (conversations.length == 1 && current_folder != null) {
-            Gee.SortedSet<Geary.Email>? email_set = conversations[0].get_pool_sorted(compare_email);
-            if (email_set != null)
-                do_show_message.begin(email_set, cancellable_message, on_show_message_completed);
+            do_show_message.begin(conversations[0].get_email_sorted(compare_email), cancellable_message,
+                on_show_message_completed);
         } else if (current_folder != null) {
             main_window.message_viewer.show_multiple_selected(conversations.length);
             if (conversations.length > 1) {
@@ -656,12 +650,8 @@ public class GearyController {
                     ids.add(preview_message.id);
                 }
             } else {
-                Gee.Set<Geary.Email>? messages = conversation.get_pool();
-                if (messages != null) {
-                    foreach (Geary.Email email in messages) {
-                        ids.add(email.id);
-                    }
-                }
+                foreach (Geary.Email email in conversation.get_email())
+                    ids.add(email.id);
             }
         }
         return ids;
@@ -828,11 +818,9 @@ public class GearyController {
 
         // Collect all the emails into one pool and then delete.
         Gee.Set<Geary.Email> all_emails = new Gee.TreeSet<Geary.Email>();
-        foreach (Geary.Conversation conversation in selected_conversations) {
-            Gee.Set<Geary.Email>? pool = conversation.get_pool();
-            if (pool != null)
-                all_emails.add_all(pool);
-        }
+        foreach (Geary.Conversation conversation in selected_conversations)
+            all_emails.add_all(conversation.get_email());
+        
         delete_messages.begin(all_emails, cancellable_folder, on_delete_messages_completed);
     }
     
