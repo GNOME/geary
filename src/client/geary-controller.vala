@@ -703,12 +703,8 @@ public class GearyController {
                 ids.add(email.id);
             }
         } else {
-            Gee.Set<Geary.Email>? messages = conversation.get_pool();
-            if (messages != null) {
-                foreach (Geary.Email email in messages) {
-                    ids.add(email.id);
-                }
-            }
+            foreach (Geary.Email email in conversation.get_email())
+                ids.add(email.id);
         }
         if (ids.size > 0) {
             set_busy(true);
