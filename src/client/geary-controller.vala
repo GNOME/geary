@@ -100,11 +100,30 @@ public class GearyController {
         if (account != null)
             account.folders_added_removed.disconnect(on_folders_added_removed);
     }
-    
+
+    private void add_accelerator(string accelerator, string action) {
+        // Parse the accelerator.
+        uint key = 0;
+        Gdk.ModifierType modifiers = 0;
+        Gtk.accelerator_parse(accelerator, out key, out modifiers);
+        if (key == 0 && modifiers == 0) {
+            debug("Failed to parse accelerator '%s'", accelerator);
+            return;
+        }
+
+        // Connect the accelerator to the action.
+        GearyApplication.instance.ui_manager.get_accel_group().connect(key, modifiers,
+            Gtk.AccelFlags.VISIBLE, (group, obj, key, modifiers) => {
+                GearyApplication.instance.actions.get_action(action).activate();
+                return false;
+            });
+    }
+
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
         
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, null, null, on_preferences };
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, null,
+            null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
         
@@ -141,38 +160,46 @@ public class GearyController {
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
 
-        Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", 
-            null, on_new_message };
+        Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", null,
+            on_new_message };
         new_message.label = _("_New Message");
         entries += new_message;
-        
+        add_accelerator("N", ACTION_NEW_MESSAGE);
+
         Gtk.ActionEntry reply_to_message = { ACTION_REPLY_TO_MESSAGE, Gtk.Stock.GO_BACK,
             TRANSLATABLE, "<Ctrl>R", null, on_reply_to_message };
         entries += reply_to_message;
+        add_accelerator("R", ACTION_REPLY_TO_MESSAGE);
         
         Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, Gtk.Stock.MEDIA_REWIND,
             TRANSLATABLE, "<Ctrl><Shift>R", null, on_reply_all_message };
         entries += reply_all_message;
+        add_accelerator("<Shift>R", ACTION_REPLY_ALL_MESSAGE);
         
-        Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE,
-            "<Ctrl>L", null, on_forward_message };
+        Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE, "<Ctrl>F", null,
+            on_forward_message };
         entries += forward_message;
+        add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "Delete",
-            null, on_delete_message };
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE,
+            "<Ctrl>A", null, on_delete_message };
         entries += delete_message;
+        add_accelerator("A", ACTION_DELETE_MESSAGE);
         
-        Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>plus",
+        Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>equal",
             null, on_zoom_in };
         entries += zoom_in;
+        add_accelerator("equal", ACTION_ZOOM_IN);
 
         Gtk.ActionEntry zoom_out = { ACTION_ZOOM_OUT, null, null, "<Ctrl>minus",
             null, on_zoom_out };
         entries += zoom_out;
+        add_accelerator("minus", ACTION_ZOOM_OUT);
 
         Gtk.ActionEntry zoom_normal = { ACTION_ZOOM_NORMAL, null, null, "<Ctrl>0",
             null, on_zoom_normal };
         entries += zoom_normal;
+        add_accelerator("0", ACTION_ZOOM_NORMAL);
 
         return entries;
     }
