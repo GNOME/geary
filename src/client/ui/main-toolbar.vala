@@ -9,8 +9,8 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Toolbar toolbar;
     private Gtk.Menu menu;
     private Gtk.Menu mark_menu;
-    private Gtk.ToolButton menu_button;
-    private Gtk.ToolButton mark_menu_button;
+    private Gtk.ToggleToolButton menu_button;
+    private Gtk.ToggleToolButton mark_menu_button;
     
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -49,14 +49,16 @@ public class MainToolbar : Gtk.Box {
         archive_message.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_DELETE_MESSAGE));
         
-        mark_menu_button = builder.get_object(GearyController.ACTION_MARK_AS_MENU) as Gtk.ToolButton;
+        mark_menu_button = builder.get_object(GearyController.ACTION_MARK_AS_MENU) as Gtk.ToggleToolButton;
         mark_menu_button.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_MARK_AS_MENU));
         mark_menu.attach_to_widget(mark_menu_button, null);
+        mark_menu.deactivate.connect(on_deactivate_mark_menu);
         mark_menu_button.clicked.connect(on_show_mark_menu);
         
-        menu_button = builder.get_object("menu_button") as Gtk.ToolButton;
+        menu_button = builder.get_object("menu_button") as Gtk.ToggleToolButton;
         menu.attach_to_widget(menu_button, null);
+        menu.deactivate.connect(on_deactivate_menu);
         menu_button.clicked.connect(on_show_menu);
         
         toolbar.get_style_context().add_class("primary-toolbar");
@@ -65,10 +67,28 @@ public class MainToolbar : Gtk.Box {
     }
     
     private void on_show_menu() {
+        // Prevent loop
+        if (!menu_button.active)
+            return;
+        
         menu.popup(null, null, menu_popup_relative, 0, 0);
+        menu.select_first(true);
+    }
+
+    private void on_deactivate_menu() {
+        menu_button.active = false;
     }
     
     private void on_show_mark_menu() {
+        // Prevent loop
+        if (!mark_menu_button.active)
+            return;
+        
         mark_menu.popup(null, null, menu_popup_relative, 0, 0);
+        mark_menu.select_first(true);
+    }
+
+    private void on_deactivate_mark_menu() {
+        mark_menu_button.active = false;
     }
 }
