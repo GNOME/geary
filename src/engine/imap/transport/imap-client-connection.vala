@@ -339,6 +339,9 @@ public class Geary.Imap.ClientConnection {
         // Reset flush timer so it only fires after n msec after last command pushed out to stream
         reschedule_flush_timeout();
         
+        // TODO: technically lying a little bit here; there's currently not much gained by reporting
+        // commands as sent only when the pipe is flushed, but in the future we may want to do
+        // exactly that
         sent_command(cmd);
     }
     

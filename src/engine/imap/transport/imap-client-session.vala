@@ -621,13 +621,15 @@ public class Geary.Imap.ClientSession {
     }
     
     private bool on_keepalive() {
+        // by returning false, this will not automatically be called again, so the SourceFunc
+        // is now dead
+        keepalive_id = 0;
+        
         debug("Sending keepalive...");
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
         
-        // Reschedule to reflect current connection state, although will be rescheduled again if
-        // traffic is received
-        keepalive_id = 0;
-        schedule_keepalive();
+        // No need to reschedule keepalive, as the notification that the command was sent should
+        // do that automatically
         
         return false;
     }
@@ -1226,6 +1228,9 @@ public class Geary.Imap.ClientSession {
 #if VERBOSE_SESSION
         debug("Sent command %s", cmd.to_string());
 #endif
+        
+        // reschedule keepalive, now that traffic has been seen
+        schedule_keepalive();
     }
     
     private void on_network_flush_error(Error err) {
@@ -1234,9 +1239,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_status_response(StatusResponse status_response) {
-        // reschedule keepalive, now that traffic has been seen
-        schedule_keepalive();
-        
         assert(!current_cmd_response.is_sealed());
         current_cmd_response.seal(status_response);
         assert(current_cmd_response.is_sealed());
@@ -1258,9 +1260,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_server_data(ServerData server_data) {
-        // reschedule keepalive, now that traffic has been seen
-        schedule_keepalive();
-        
         // Watch for CAPABILITY and store all reported extensions
         StringParameter? name = server_data.get_if_string(1);
         if (name != null && name.equals_ci(CapabilityCommand.NAME)) {
@@ -1296,9 +1295,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {
-        // reschedule keepalive, now that traffic has been seen
-        schedule_keepalive();
-        
         debug("Received bad response %s: %s", root.to_string(), err.message);
     }
     
