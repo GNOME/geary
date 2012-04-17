@@ -505,7 +505,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             }
             
             ImapMessagePropertiesRow? row = yield imap_message_properties_table.fetch_async(
-                transaction, location_row.id, cancellable);
+                transaction, location_row.message_id, cancellable);
             if (row == null)
                 continue;
             
@@ -534,7 +534,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             
             Geary.Imap.MessageFlags flags = ((Geary.Imap.EmailFlags) map.get(id)).message_flags;
             
-            yield imap_message_properties_table.update_flags_async(transaction, location_row.id,
+            yield imap_message_properties_table.update_flags_async(transaction, location_row.message_id,
                  flags.serialize(), cancellable);
         }
         
