@@ -208,11 +208,6 @@ public class ComposerWindow : Gtk.Window {
         // only do this after setting reply_body
         editor.load_string(HTML_BODY, "text/html", "UTF8", "");
         
-        if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject))
-            editor.grab_focus();
-        else if (!Geary.String.is_empty(to))
-            subject_entry.grab_focus();
-        
         editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         
@@ -252,6 +247,7 @@ public class ComposerWindow : Gtk.Window {
         // Set focus.
         if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject)) {
             editor.grab_focus();
+            reply.focus();
         } else if (!Geary.String.is_empty(to)) {
             subject_entry.grab_focus();
         }
