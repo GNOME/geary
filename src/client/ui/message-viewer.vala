@@ -242,7 +242,7 @@ public class MessageViewer : WebKit.WebView {
 
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) compare_email_date_ascending); }
+        new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
     public Geary.Email? active_email = null;
     
     // HTML element that contains message DIVs.

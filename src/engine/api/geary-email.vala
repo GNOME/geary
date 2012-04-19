@@ -250,5 +250,43 @@ public class Geary.Email : Object {
         
         return builder.str;
     }
+    
+    /**
+     * CompareFunc to sort Email by date.  If the date field is not available on both Emails, their
+     * identifiers are compared.
+     */
+    public static int compare_date_ascending(void* a, void *b) {
+        Geary.Email *aemail = (Geary.Email *) a;
+        Geary.Email *bemail = (Geary.Email *) b;
+        
+        int diff = 0;
+        if (aemail->date != null && bemail->date != null)
+            diff = aemail->date.value.compare(bemail->date.value);
+        
+        // stabilize sort by using the mail's ordering, which is always unique in a folder
+        return (diff != 0) ? diff : aemail->id.compare(bemail->id);
+    }
+    
+    /**
+     * CompareFunc to sort Email by date.  If the date field is not available on both Emails, their
+     * identifiers are compared.
+     */
+    public static int compare_date_descending(void* a, void *b) {
+        return compare_date_ascending(b, a);
+    }
+    
+    /**
+     * CompareFunc to sort Email by EmailIdentifier.
+     */
+    public static int compare_id_ascending(void* a, void *b) {
+        return ((Email *) a)->id.compare(((Email *) b)->id);
+    }
+    
+    /**
+     * CompareFunc to sort Email by EmailIdentifier.
+     */
+    public static int compare_id_descending(void* a, void *b) {
+        return compare_id_ascending(b, a);
+    }
 }
 

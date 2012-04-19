@@ -419,11 +419,12 @@ public class GearyController {
     }
     
     public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
-        debug("on conversations added");
+        debug("adding %d conversations...", conversations.size);
         foreach (Geary.Conversation c in conversations) {
             if (!main_window.message_list_store.has_conversation(c))
                 main_window.message_list_store.append_conversation(c);
         }
+        debug("added %d conversations", conversations.size);
     }
     
     public void on_conversation_appended(Geary.Conversation conversation,
