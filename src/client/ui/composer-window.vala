@@ -97,6 +97,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Menu? context_menu = null;
     private Gtk.ActionGroup actions;
     private string? hover_url = null;
+    private bool action_flag = false;
     
     private WebKit.WebView editor;
     private Gtk.UIManager ui;
@@ -203,7 +204,6 @@ public class ComposerWindow : Gtk.Window {
         editor.undo.connect(update_actions);
         editor.redo.connect(update_actions);
         editor.selection_changed.connect(update_actions);
-        editor.user_changed_contents.connect(update_actions);
         
         // only do this after setting reply_body
         editor.load_string(HTML_BODY, "text/html", "UTF8", "");
@@ -335,7 +335,9 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_action(Gtk.Action action) {
+        action_flag = true; // prevents recursion
         editor.get_dom_document().exec_command(action.get_name(), false, "");
+        action_flag = false;
     }
     
     private void on_cut() {
@@ -448,7 +450,7 @@ public class ComposerWindow : Gtk.Window {
         int indent_level = 0;
         
         WebKit.DOM.Node? active = editor.get_dom_document().get_default_view().get_selection().
-            focus_node as WebKit.DOM.Node;
+            focus_node;
         if (active == null)
             return;
         
@@ -508,6 +510,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     public override bool key_press_event(Gdk.EventKey event) {
+        update_actions();
         bool handled = true;
         
         switch (Gdk.keyval_name(event.keyval)) {
@@ -541,6 +544,8 @@ public class ComposerWindow : Gtk.Window {
     private bool on_button_press_event(Gdk.EventButton event) {
         if (event.button == 3)
             create_context_menu(event);
+        
+        update_actions();
         
         return false;
     }
@@ -597,14 +602,38 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void update_actions() {
+        // Undo/redo.
         actions.get_action(ACTION_UNDO).sensitive = editor.can_undo();
         actions.get_action(ACTION_REDO).sensitive = editor.can_redo();
         
+        // Clipboard.
         actions.get_action(ACTION_CUT).sensitive = editor.can_cut_clipboard();
         actions.get_action(ACTION_COPY).sensitive = editor.can_copy_clipboard();
         actions.get_action(ACTION_COPY_LINK).sensitive = hover_url != null;
         actions.get_action(ACTION_PASTE).sensitive = editor.can_paste_clipboard();
         actions.get_action(ACTION_PASTE_FORMAT).sensitive = editor.can_paste_clipboard();
+        
+        // Style toggle buttons.
+        WebKit.DOM.DOMWindow window = editor.get_dom_document().get_default_view();
+        WebKit.DOM.Element? active = window.get_selection().focus_node as WebKit.DOM.Element;
+        if (active == null && window.get_selection().focus_node != null)
+            active = window.get_selection().focus_node.get_parent_element();
+        
+        if (active != null && !action_flag) {
+            WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
+            
+            ((Gtk.ToggleAction) actions.get_action(ACTION_BOLD)).active = 
+                styles.get_property_value("font-weight") == "bold";
+            
+            ((Gtk.ToggleAction) actions.get_action(ACTION_ITALIC)).active = 
+                styles.get_property_value("font-style") == "italic";
+            
+            ((Gtk.ToggleAction) actions.get_action(ACTION_UNDERLINE)).active = 
+                styles.get_property_value("text-decoration") == "underline";
+            
+            ((Gtk.ToggleAction) actions.get_action(ACTION_STRIKETHROUGH)).active = 
+                styles.get_property_value("text-decoration") == "line-through";
+        }
     }
 }
 
