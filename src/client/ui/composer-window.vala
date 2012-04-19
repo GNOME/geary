@@ -554,46 +554,46 @@ public class ComposerWindow : Gtk.Window {
         context_menu = new Gtk.Menu();
         
         // Undo
-        Gtk.MenuItem undo = new Gtk.MenuItem();
+        Gtk.MenuItem undo = new Gtk.ImageMenuItem();
         undo.related_action = actions.get_action(ACTION_UNDO);
         context_menu.append(undo);
         
         // Redo
-        Gtk.MenuItem redo = new Gtk.MenuItem();
+        Gtk.MenuItem redo = new Gtk.ImageMenuItem();
         redo.related_action = actions.get_action(ACTION_REDO);
         context_menu.append(redo);
         
         context_menu.append(new Gtk.MenuItem());
         
         // Cut
-        Gtk.MenuItem cut = new Gtk.MenuItem();
+        Gtk.MenuItem cut = new Gtk.ImageMenuItem();
         cut.related_action = actions.get_action(ACTION_CUT);
         context_menu.append(cut);
         
         // Copy
-        Gtk.MenuItem copy = new Gtk.MenuItem();
+        Gtk.MenuItem copy = new Gtk.ImageMenuItem();
         copy.related_action = actions.get_action(ACTION_COPY);
         context_menu.append(copy);
         
         // Copy link.
-        Gtk.MenuItem copy_link = new Gtk.MenuItem();
+        Gtk.MenuItem copy_link = new Gtk.ImageMenuItem();
         copy_link.related_action = actions.get_action(ACTION_COPY_LINK);
         context_menu.append(copy_link);
         
         // Paste
-        Gtk.MenuItem paste = new Gtk.MenuItem();
+        Gtk.MenuItem paste = new Gtk.ImageMenuItem();
         paste.related_action = actions.get_action(ACTION_PASTE);
         context_menu.append(paste);
         
         // Paste with formatting
-        Gtk.MenuItem paste_format = new Gtk.MenuItem();
+        Gtk.MenuItem paste_format = new Gtk.ImageMenuItem();
         paste_format.related_action = actions.get_action(ACTION_PASTE_FORMAT);
         context_menu.append(paste_format);
         
         context_menu.append(new Gtk.MenuItem());
         
         // Select all.
-        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
+        Gtk.MenuItem select_all_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.SELECT_ALL, null);
         select_all_item.activate.connect(on_select_all);
         context_menu.append(select_all_item);
         

@@ -4,35 +4,30 @@
   <object class="GtkActionGroup" id="compose actions">
     <child>
       <object class="GtkAction" id="undo">
-        <property name="label" translatable="yes">Undo</property>
         <property name="stock_id">gtk-undo</property>
       </object>
       <accelerator key="z" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="redo">
-        <property name="label" translatable="yes">Redo</property>
         <property name="stock_id">gtk-redo</property>
       </object>
       <accelerator key="z" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="cut">
-        <property name="label" translatable="yes">Cut</property>
         <property name="stock_id">gtk-cut</property>
       </object>
       <accelerator key="x" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="copy">
-        <property name="label" translatable="yes">Copy</property>
         <property name="stock_id">gtk-copy</property>
       </object>
       <accelerator key="c" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="paste">
-        <property name="label" translatable="yes">Paste</property>
         <property name="stock_id">gtk-paste</property>
       </object>
       <accelerator key="v" modifiers="GDK_CONTROL_MASK"/>
@@ -119,28 +114,24 @@
     </child>
     <child>
       <object class="GtkToggleAction" id="bold">
-        <property name="label" translatable="yes">Bold</property>
         <property name="stock_id">gtk-bold</property>
       </object>
       <accelerator key="b" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkToggleAction" id="italic">
-        <property name="label" translatable="yes">Italic</property>
         <property name="stock_id">gtk-italic</property>
       </object>
       <accelerator key="i" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkToggleAction" id="underline">
-        <property name="label" translatable="yes">Underline</property>
         <property name="stock_id">gtk-underline</property>
       </object>
       <accelerator key="u" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkToggleAction" id="strikethrough">
-        <property name="label" translatable="yes">Strikethrough</property>
         <property name="stock_id">gtk-strikethrough</property>
       </object>
       <accelerator key="k" modifiers="GDK_CONTROL_MASK"/>
