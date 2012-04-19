@@ -94,7 +94,9 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         try {
             remote_folders = yield remote.list_folders_async(parent, cancellable);
         } catch (Error remote_error) {
-            error("Unable to retrieve folder list from server: %s", remote_error.message);
+            debug("Unable to retrieve folder list from server: %s", remote_error.message);
+            
+            return;
         }
         
         Gee.Set<string> local_names = new Gee.HashSet<string>();
