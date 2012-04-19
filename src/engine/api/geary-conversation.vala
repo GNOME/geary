@@ -5,6 +5,14 @@
  */
 
 public abstract class Geary.Conversation : Object {
+    public enum Ordering {
+        ANY,
+        DATE_ASCENDING,
+        DATE_DESCENDING,
+        ID_ASCENDING,
+        ID_DESCENDING
+    }
+    
     protected Conversation() {
     }
     
@@ -14,41 +22,40 @@ public abstract class Geary.Conversation : Object {
     public abstract int get_count();
     
     /**
-     * Returns all the email in the conversation, unsorted.
+     * Returns all the email in the conversation sorted according to the specifier.
      */
-    public abstract Gee.Collection<Geary.Email> get_email();
+    public abstract Gee.SortedSet<Geary.Email> get_email(Ordering ordering);
     
     /**
-     * Returns all emails in the conversation sorted by the supplied CompareFunc.
+     * Returns the email associated with the EmailIdentifier, if present in this conversation.
      */
-    public Gee.SortedSet<Geary.Email> get_email_sorted(CompareFunc<Geary.Email> compare_func) {
-        Gee.TreeSet<Geary.Email> sorted = new Gee.TreeSet<Geary.Email>(compare_func);
-        sorted.add_all(get_email());
-        
-        return sorted;
-    }
+    public abstract Geary.Email? get_email_by_id(Geary.EmailIdentifier id);
+    
+    /**
+     * Returns all EmailIdentifiers in the conversation, unsorted.
+     */
+    public abstract Gee.Collection<Geary.EmailIdentifier> get_email_ids();
     
     /**
      * Returns true if *any* message in the conversation is unread.
      */
-    public virtual bool is_unread() {
-        foreach (Geary.Email email in get_email()) {
-            if (email.is_unread().to_boolean(false))
-                return true;
-        }
-
-        return false;
+    public bool is_unread() {
+        return has_flag(Geary.EmailFlags.UNREAD);
     }
 
     /**
      * Returns true if *any* message in the conversation is flagged.
      */
-    public virtual bool is_flagged() {
-        foreach (Geary.Email email in get_email()) {
-            if (email.is_flagged().to_boolean(false))
+    public bool is_flagged() {
+        return has_flag(Geary.EmailFlags.FLAGGED);
+    }
+    
+    private bool has_flag(Geary.EmailFlag flag) {
+        foreach (Geary.Email email in get_email(Ordering.ANY)) {
+            if (email.properties != null && email.properties.email_flags.contains(flag))
                 return true;
         }
-
+        
         return false;
     }
 }

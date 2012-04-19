@@ -67,14 +67,15 @@ public class MessageListStore : Gtk.TreeStore {
         Gtk.TreeIter iter;
         append(out iter, null);
         
-        Gee.SortedSet<Geary.Email> pool = conversation.get_email_sorted(compare_email);
-        if (pool.size > 0)
+        int count = conversation.get_count();
+        if (count > 0) {
             set(iter,
                 Column.MESSAGE_DATA, new FormattedMessageData.from_email(
-                    email_for_preview(conversation), pool.size, conversation.is_unread(),
+                    email_for_preview(conversation), count, conversation.is_unread(),
                     conversation.is_flagged(), current_folder),
                 Column.MESSAGE_OBJECT, conversation
             );
+        }
     }
     
     // Updates a converstaion.
@@ -137,7 +138,7 @@ public class MessageListStore : Gtk.TreeStore {
     
     // Returns the email to use for a preview in a conversation.
     public static Geary.Email? email_for_preview(Geary.Conversation conversation) {
-        Gee.SortedSet<Geary.Email> pool = conversation.get_email_sorted(compare_email);
+        Gee.SortedSet<Geary.Email> pool = conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
         if (pool.size == 0)
             return null;
         
@@ -197,7 +198,7 @@ public class MessageListStore : Gtk.TreeStore {
         int count = get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Conversation c = get_conversation_at_index(ctr);
-            Gee.SortedSet<Geary.Email> mail = c.get_email_sorted(compare_email_id_desc);
+            Gee.SortedSet<Geary.Email> mail = c.get_email(Geary.Conversation.Ordering.ID_DESCENDING);
             if (mail.size == 0)
                 continue;
             
@@ -207,21 +208,6 @@ public class MessageListStore : Gtk.TreeStore {
         }
         
         return low;
-    }
-    
-    public void update_flags(Geary.EmailIdentifier id, Geary.EmailFlags flags) {
-        int count = get_count();
-        for (int ctr = 0; ctr < count; ctr++) {
-            Geary.Conversation c = get_conversation_at_index(ctr);
-            foreach (Geary.Email e in c.get_email_sorted(compare_email_id_desc)) {
-                if (e.id.equals(id)) {
-                    e.properties.email_flags = flags;
-                    update_conversation(c, true);
-                    
-                    return;
-                }
-            }
-        }
     }
     
     private bool find_conversation(Geary.Conversation conversation, out Gtk.TreeIter iter) {
@@ -241,7 +227,7 @@ public class MessageListStore : Gtk.TreeStore {
         get(aiter, Column.MESSAGE_OBJECT, out a);
         get(biter, Column.MESSAGE_OBJECT, out b);
         
-        return compare_conversation(a, b);
+        return compare_conversation_ascending(a, b);
     }
 }
 

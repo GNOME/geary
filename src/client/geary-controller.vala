@@ -325,8 +325,7 @@ public class GearyController {
         current_conversations.conversation_appended.connect(on_conversation_appended);
         current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
         current_conversations.conversation_removed.connect(on_conversation_removed);
-        
-        current_folder.email_flags_changed.connect(on_email_flags_changed);
+        current_conversations.email_flags_changed.connect(on_email_flags_changed);
         
         // Do a quick-list of the messages (which should return what's in the local store) if
         // supported by the Folder, followed by a complete list if needed
@@ -380,7 +379,7 @@ public class GearyController {
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
         Gee.TreeSet<Geary.Conversation> sorted_conversations = new Gee.TreeSet<Geary.Conversation>(
-            (CompareFunc) compare_conversation_desc);
+            (CompareFunc) compare_conversation_descending);
         sorted_conversations.add_all(current_conversations.get_conversations());
         
         foreach (Geary.Conversation conversation in sorted_conversations) {
@@ -434,7 +433,7 @@ public class GearyController {
             main_window.message_list_store.update_conversation(conversation);
         }
         if (is_viewed_conversation(conversation))
-            do_show_message.begin(conversation.get_email(), cancellable_message,
+            do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.ANY), cancellable_message,
                 on_show_message_completed);
     }
     
@@ -471,11 +470,9 @@ public class GearyController {
         set_busy(false);
     }
     
-    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
-        foreach (Geary.EmailIdentifier id in map.keys) {
-            main_window.message_list_store.update_flags(id, map.get(id));
-            main_window.message_viewer.update_flags(id, map.get(id));
-        }
+    private void on_email_flags_changed(Geary.Conversation conversation, Geary.Email email) {
+        main_window.message_list_store.update_conversation(conversation, true);
+        main_window.message_viewer.update_flags(email);
     }
     
     private void do_second_pass_if_needed() {
@@ -507,8 +504,8 @@ public class GearyController {
         enable_message_buttons(false);
         
         if (conversations.length == 1 && current_folder != null) {
-            do_show_message.begin(conversations[0].get_email_sorted(compare_email), cancellable_message,
-                on_show_message_completed);
+            do_show_message.begin(conversations[0].get_email(Geary.Conversation.Ordering.DATE_ASCENDING),
+                cancellable_message, on_show_message_completed);
         } else if (current_folder != null) {
             main_window.message_viewer.show_multiple_selected(conversations.length);
             if (conversations.length > 1) {
@@ -677,8 +674,7 @@ public class GearyController {
                     ids.add(preview_message.id);
                 }
             } else {
-                foreach (Geary.Email email in conversation.get_email())
-                    ids.add(email.id);
+                ids.add_all(conversation.get_email_ids());
             }
         }
         return ids;
@@ -730,8 +726,7 @@ public class GearyController {
                 ids.add(email.id);
             }
         } else {
-            foreach (Geary.Email email in conversation.get_email())
-                ids.add(email.id);
+            ids.add_all(conversation.get_email_ids());
         }
         if (ids.size > 0) {
             set_busy(true);
@@ -842,7 +837,7 @@ public class GearyController {
         // Collect all the emails into one pool and then delete.
         Gee.Set<Geary.Email> all_emails = new Gee.TreeSet<Geary.Email>();
         foreach (Geary.Conversation conversation in selected_conversations)
-            all_emails.add_all(conversation.get_email());
+            all_emails.add_all(conversation.get_email(Geary.Conversation.Ordering.ANY));
         
         delete_messages.begin(all_emails, cancellable_folder, on_delete_messages_completed);
     }

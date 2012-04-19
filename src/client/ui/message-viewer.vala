@@ -242,7 +242,7 @@ public class MessageViewer : WebKit.WebView {
 
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) compare_email); }
+        new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) compare_email_date_ascending); }
     public Geary.Email? active_email = null;
     
     // HTML element that contains message DIVs.
@@ -493,7 +493,7 @@ public class MessageViewer : WebKit.WebView {
         }
 
         // Add classes according to the state of the email.
-        update_flags(email.id, email.get_flags());
+        update_flags(email);
 
         // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
         bind_event(".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
@@ -551,22 +551,24 @@ public class MessageViewer : WebKit.WebView {
         return null;
     }
 
-    public void update_flags(Geary.EmailIdentifier email_id, Geary.EmailFlags flags) {
+    public void update_flags(Geary.Email email) {
         // Nothing to do if we aren't displaying this email.
-        if (!email_to_element.has_key(email_id)) {
+        if (!email_to_element.has_key(email.id)) {
             return;
         }
 
+        Geary.EmailFlags flags = email.properties.email_flags;
+        
         // Update the flags in out message set.
         foreach (Geary.Email message in messages) {
-            if (message.id == email_id) {
+            if (message.id.equals(email.id)) {
                 message.set_flags(flags);
                 break;
             }
         }
-
+        
         // Get the email div and update its state.
-        WebKit.DOM.HTMLElement container = email_to_element.get(email_id);
+        WebKit.DOM.HTMLElement container = email_to_element.get(email.id);
         try {
             WebKit.DOM.DOMTokenList class_list = container.get_class_list();
             if (flags.is_unread()) {

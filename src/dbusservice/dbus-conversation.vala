@@ -18,7 +18,7 @@ public class Geary.DBus.Conversation : Object {
     }
     
     public async ObjectPath[] get_emails() throws IOError {
-        Gee.SortedSet<Geary.Email> pool = conversation.get_email_sorted(compare_email);
+        Gee.SortedSet<Geary.Email> pool = conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
         if (pool.size == 0)
             return new ObjectPath[0];
         
@@ -30,12 +30,4 @@ public class Geary.DBus.Conversation : Object {
         
         return paths;
     }
-    
-    private static int compare_email(Geary.Email aenvelope, Geary.Email benvelope) {
-        int diff = aenvelope.date.value.compare(benvelope.date.value);
-    
-        // stabilize sort by using the mail's ordering, which is always unique in a folder
-        return (diff != 0) ? diff : aenvelope.id.compare(benvelope.id);
-    }
-    
 }

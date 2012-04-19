@@ -10,31 +10,110 @@ public class Geary.Conversations : Object {
      * be retrieved irregardless of the Field parameter passed to the constructor.
      */
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES | 
-        Geary.Email.Field.PROPERTIES;
+        Geary.Email.Field.PROPERTIES | Geary.Email.Field.DATE;
     
     private class ImplConversation : Conversation {
-        public weak Geary.Conversations? owner;
-        public Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>(
+        private weak Geary.Conversations? owner;
+        private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>(
             Hashable.hash_func, Equalable.equal_func);
+        
+        // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
+        // the number of times they're accessed makes it worth it
+        private Gee.SortedSet<Email> date_ascending = new Gee.TreeSet<Email>(
+            (CompareFunc) compare_date_ascending);
+        private Gee.SortedSet<Email> date_descending = new Gee.TreeSet<Email>(
+            (CompareFunc) compare_date_descending);
+        private Gee.SortedSet<Email> id_ascending = new Gee.TreeSet<Email>(
+            (CompareFunc) compare_id_ascending);
+        private Gee.SortedSet<Email> id_descending = new Gee.TreeSet<Email>(
+            (CompareFunc) compare_id_descending);
         
         public ImplConversation(Geary.Conversations owner) {
             this.owner = owner;
+        }
+        
+        public void clear_owner() {
+            owner = null;
         }
         
         public override int get_count() {
             return emails.size;
         }
         
-        public override Gee.Collection<Geary.Email> get_email() {
-            return emails.values.read_only_view;
+        public override Gee.SortedSet<Geary.Email> get_email(Conversation.Ordering ordering) {
+            // TODO: Really would like to return a read-only view here, but Gee doesn't make that
+            // easy ... since read_only_view simply makes a copy, perhaps there's no great loss
+            // here.  In either case, the email itself should never be copied; original references
+            // must be returned, as Geary.Email is mutable
+            switch (ordering) {
+                case Conversation.Ordering.DATE_ASCENDING:
+                    return date_ascending;
+                
+                case Conversation.Ordering.ID_ASCENDING:
+                    return id_ascending;
+                
+                case Conversation.Ordering.ID_DESCENDING:
+                    return id_descending;
+                
+                case Conversation.Ordering.DATE_DESCENDING:
+                case Conversation.Ordering.ANY:
+                default:
+                    return date_descending;
+            }
+        }
+        
+        public override Geary.Email? get_email_by_id(EmailIdentifier id) {
+            return emails.get(id);
+        }
+        
+        public override Gee.Collection<Geary.EmailIdentifier> get_email_ids() {
+            return emails.keys;
         }
         
         public void add(Email email) {
+            // since Email is mutable (and Conversations itself mutates them, and callers might as
+            // well), don't replace known email with new
+            if (emails.has_key(email.id))
+                return;
+            
             emails.set(email.id, email);
+            date_ascending.add(email);
+            date_descending.add(email);
+            id_ascending.add(email);
+            id_descending.add(email);
         }
         
         public void remove(Email email) {
             emails.unset(email.id);
+            date_ascending.remove(email);
+            date_descending.remove(email);
+            id_ascending.remove(email);
+            id_descending.remove(email);
+        }
+        
+        private static int compare_date_ascending(Email a, Email b) {
+            int diff = a.date.value.compare(b.date.value);
+            
+            // stabilize the sort if the same date
+            return (diff != 0) ? diff : compare_id_ascending(a, b);
+        }
+        
+        private static int compare_date_descending(Email a, Email b) {
+            return compare_date_ascending(b, a);
+        }
+        
+        private static int compare_id_ascending(Email a, Email b) {
+            int64 diff = a.id.ordering - b.id.ordering;
+            if (diff < 0)
+                return -1;
+            else if (diff > 0)
+                return 1;
+            else
+                return 0;
+        }
+        
+        private static int compare_id_descending(Email a, Email b) {
+            return compare_id_ascending(b, a);
         }
     }
     
@@ -112,6 +191,18 @@ public class Geary.Conversations : Object {
     public virtual signal void conversation_trimmed(Conversation conversation, Geary.Email email) {
     }
     
+    /**
+     * "email-flags-changed" is fired when the flags of an email in a conversation have changed,
+     * as reported by the monitored folder.  The local copy of the Email is updated and this
+     * signal is fired.
+     *
+     * Note that if the flags of an email not captured by the Conversations object, no signal
+     * is fired.  To know of all changes to flags, subscribe to the Geary.Folder's
+     * "email-flags-changed" signal.
+     */
+    public virtual signal void email_flags_changed(Conversation conversation, Geary.Email email) {
+    }
+    
     public Conversations(Geary.Folder folder, Geary.Email.Field required_fields) {
         this.folder = folder;
         this.required_fields = required_fields | REQUIRED_FIELDS;
@@ -121,11 +212,12 @@ public class Geary.Conversations : Object {
         if (monitor_new) {
             folder.email_appended.disconnect(on_folder_email_appended);
             folder.email_removed.disconnect(on_folder_email_removed);
+            folder.email_flags_changed.disconnect(on_email_flags_changed);
         }
         
         // Manually detach all the weak refs in the Conversation objects
         foreach (ImplConversation conversation in conversations)
-            conversation.owner = null;
+            conversation.clear_owner();
     }
     
     protected virtual void notify_scan_started(Geary.EmailIdentifier? id, int low, int count) {
@@ -157,6 +249,10 @@ public class Geary.Conversations : Object {
         conversation_trimmed(conversation, email);
     }
     
+    protected virtual void notify_email_flags_changed(Conversation conversation, Geary.Email email) {
+        email_flags_changed(conversation, email);
+    }
+    
     public Gee.Collection<Conversation> get_conversations() {
         return conversations.read_only_view;
     }
@@ -173,6 +269,7 @@ public class Geary.Conversations : Object {
         cancellable_monitor = cancellable;
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
+        folder.email_flags_changed.connect(on_email_flags_changed);
         
         return true;
     }
@@ -330,7 +427,7 @@ public class Geary.Conversations : Object {
             return;
         }
         
-        Geary.Email? found = conversation.emails.get(removed_id);
+        Geary.Email? found = conversation.get_email_by_id(removed_id);
         if (found == null) {
             debug("WARNING: Unable to locate email ID %s in conversation", removed_id.to_string());
             
@@ -355,13 +452,11 @@ public class Geary.Conversations : Object {
     
     private void on_folder_email_appended() {
         // Find highest identifier by ordering
-        // TODO: optimize.
         Geary.EmailIdentifier? highest = null;
         foreach (Conversation c in conversations) {
-            foreach (Email e in c.get_email()) {
-                if (highest == null || (e.id.compare(highest) > 0))
-                    highest = e.id;
-            }
+            Geary.Email head = c.get_email(Conversation.Ordering.ID_DESCENDING).first();
+            if (highest == null || (head.id.compare(highest) > 0))
+                highest = head.id;
         }
         
         if (highest == null) {
@@ -380,6 +475,21 @@ public class Geary.Conversations : Object {
     private void on_folder_email_removed(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
         foreach (Geary.EmailIdentifier id in removed_ids)
             remove_email(id);
+    }
+    
+    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
+        foreach (Geary.EmailIdentifier id in map.keys) {
+            ImplConversation? conversation = geary_id_map.get(id);
+            if (conversation == null)
+                continue;
+            
+            Email? email = conversation.get_email_by_id(id);
+            if (email == null)
+                continue;
+            
+            email.set_flags(map.get(id));
+            notify_email_flags_changed(conversation, email);
+        }
     }
 }
 
