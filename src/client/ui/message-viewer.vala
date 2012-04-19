@@ -118,6 +118,14 @@ public class MessageViewer : WebKit.WebView {
         .email_container > hr {
             clear: both;
         }
+        .avatar {
+            display: none;
+        }
+        .avatar[src^=file], .avatar[src^=http] {
+            display: inline;
+            width: 48px; height: 48px;
+            float: right;
+        }
 
         .geary_spacer {
             display: table;
@@ -211,6 +219,7 @@ public class MessageViewer : WebKit.WebView {
         <div id="email_template" class="email">
             <div class="geary_spacer"></div>
             <div class="email_container">
+                <img src="" class="avatar" />
                 <div class="button_bar">
                     <div class="starred button"><img src="" class="icon" /></div>
                     <div class="unstarred button"><img src="" class="icon" /></div>
@@ -294,13 +303,15 @@ public class MessageViewer : WebKit.WebView {
         set_icon_src("#email_template .menu .icon", "down");
         set_icon_src("#email_template .starred .icon", "starred");
         set_icon_src("#email_template .unstarred .icon", "non-starred-grey");
+
     }
 
     private void on_resource_request_starting(WebKit.WebFrame web_frame,
         WebKit.WebResource web_resource, WebKit.NetworkRequest request,
         WebKit.NetworkResponse? response) {
 
-        if (!request.get_uri().has_prefix("data:")) {
+        if (!request.get_uri().has_prefix("http://www.gravatar.com/avatar/")
+         && !request.get_uri().has_prefix("data:")) {
             request.set_uri("about:blank");
         }
     }
@@ -464,6 +475,17 @@ public class MessageViewer : WebKit.WebView {
             insert_header(ref header, _("Date:"), Date.pretty_print_verbose(
                 email.date.value, GearyApplication.instance.config.clock_format));
         
+        try {
+            WebKit.DOM.HTMLImageElement icon = get_dom_document().query_selector("#%s .avatar".printf(message_id))
+                as WebKit.DOM.HTMLImageElement;
+            string checksum = GLib.Checksum.compute_for_string (
+                GLib.ChecksumType.MD5, email.sender.get(0).address);
+            string gravatar = "http://www.gravatar.com/avatar/%s?d=mm".printf (checksum);
+            icon.set_attribute("src", gravatar);
+        } catch (Error error) {
+            warning("Failed to load avatar: %s\n", error.message);
+        }
+
         string body_text = "";
         try {
             body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_utf8();
