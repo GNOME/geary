@@ -1120,13 +1120,8 @@ public class MessageViewer : WebKit.WebView {
     
     private void show_message_source(Gee.Collection<Geary.Email> messages) {
         StringBuilder source = new StringBuilder();
-        foreach(Geary.Email email in messages) {
-            try {
-                source.append_printf("%s\n\n", email.get_message().to_string());
-            } catch (Error error) {
-                source.append_printf("Error: %s\n", error.message);
-            }
-        }
+        foreach(Geary.Email email in messages)
+            source.append_printf("%s%s\n\n", email.header.buffer.to_utf8(), email.body.buffer.to_utf8());
         
         try {
             string temporary_filename;
