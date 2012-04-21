@@ -434,7 +434,7 @@ public class GearyController {
             main_window.message_list_store.update_conversation(conversation);
         }
         if (is_viewed_conversation(conversation))
-            do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.ANY), cancellable_message,
+            do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.NONE), cancellable_message,
                 on_show_message_completed);
     }
     
@@ -838,7 +838,7 @@ public class GearyController {
         // Collect all the emails into one pool and then delete.
         Gee.Set<Geary.Email> all_emails = new Gee.TreeSet<Geary.Email>();
         foreach (Geary.Conversation conversation in selected_conversations)
-            all_emails.add_all(conversation.get_email(Geary.Conversation.Ordering.ANY));
+            all_emails.add_all(conversation.get_email(Geary.Conversation.Ordering.NONE));
         
         delete_messages.begin(all_emails, cancellable_folder, on_delete_messages_completed);
     }

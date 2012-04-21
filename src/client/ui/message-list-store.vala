@@ -138,7 +138,7 @@ public class MessageListStore : Gtk.TreeStore {
     
     // Returns the email to use for a preview in a conversation.
     public static Geary.Email? email_for_preview(Geary.Conversation conversation) {
-        Gee.SortedSet<Geary.Email> pool = conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
+        Gee.List<Geary.Email> pool = conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
         if (pool.size == 0)
             return null;
         
@@ -198,7 +198,7 @@ public class MessageListStore : Gtk.TreeStore {
         int count = get_count();
         for (int ctr = 0; ctr < count; ctr++) {
             Geary.Conversation c = get_conversation_at_index(ctr);
-            Gee.SortedSet<Geary.Email> mail = c.get_email(Geary.Conversation.Ordering.ID_DESCENDING);
+            Gee.List<Geary.Email> mail = c.get_email(Geary.Conversation.Ordering.ID_DESCENDING);
             if (mail.size == 0)
                 continue;
             

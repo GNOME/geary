@@ -40,25 +40,23 @@ public class Geary.Conversations : Object {
             return emails.size;
         }
         
-        public override Gee.SortedSet<Geary.Email> get_email(Conversation.Ordering ordering) {
-            // TODO: Really would like to return a read-only view here, but Gee doesn't make that
-            // easy ... since read_only_view simply makes a copy, perhaps there's no great loss
-            // here.  In either case, the email itself should never be copied; original references
-            // must be returned, as Geary.Email is mutable
+        public override Gee.List<Geary.Email> get_email(Conversation.Ordering ordering) {
             switch (ordering) {
                 case Conversation.Ordering.DATE_ASCENDING:
-                    return date_ascending;
+                    return Collection.to_array_list<Email>(date_ascending);
                 
                 case Conversation.Ordering.ID_ASCENDING:
-                    return id_ascending;
+                    return Collection.to_array_list<Email>(id_ascending);
                 
                 case Conversation.Ordering.ID_DESCENDING:
-                    return id_descending;
+                    return Collection.to_array_list<Email>(id_descending);
                 
                 case Conversation.Ordering.DATE_DESCENDING:
-                case Conversation.Ordering.ANY:
+                    return Collection.to_array_list<Email>(date_descending);
+                
+                case Conversation.Ordering.NONE:
                 default:
-                    return date_descending;
+                    return Collection.to_array_list<Email>(emails.values);
             }
         }
         

@@ -6,7 +6,7 @@
 
 public abstract class Geary.Conversation : Object {
     public enum Ordering {
-        ANY,
+        NONE,
         DATE_ASCENDING,
         DATE_DESCENDING,
         ID_ASCENDING,
@@ -24,7 +24,7 @@ public abstract class Geary.Conversation : Object {
     /**
      * Returns all the email in the conversation sorted according to the specifier.
      */
-    public abstract Gee.SortedSet<Geary.Email> get_email(Ordering ordering);
+    public abstract Gee.List<Geary.Email> get_email(Ordering ordering);
     
     /**
      * Returns the email associated with the EmailIdentifier, if present in this conversation.
@@ -51,7 +51,7 @@ public abstract class Geary.Conversation : Object {
     }
     
     private bool has_flag(Geary.EmailFlag flag) {
-        foreach (Geary.Email email in get_email(Ordering.ANY)) {
+        foreach (Geary.Email email in get_email(Ordering.NONE)) {
             if (email.properties != null && email.properties.email_flags.contains(flag))
                 return true;
         }

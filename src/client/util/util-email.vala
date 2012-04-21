@@ -5,8 +5,8 @@
  */
 
 public int compare_conversation_ascending(Geary.Conversation a, Geary.Conversation b) {
-    Gee.SortedSet<Geary.Email> apool = a.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
-    Gee.SortedSet<Geary.Email> bpool = b.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
+    Gee.List<Geary.Email> apool = a.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
+    Gee.List<Geary.Email> bpool = b.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
     
     if (apool.last() == null)
         return (bpool.last() != null) ? -1 : 0;
