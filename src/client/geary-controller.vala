@@ -106,7 +106,7 @@ public class GearyController {
         uint key = 0;
         Gdk.ModifierType modifiers = 0;
         Gtk.accelerator_parse(accelerator, out key, out modifiers);
-        if (key == 0 && modifiers == 0) {
+        if (key == 0) {
             debug("Failed to parse accelerator '%s'", accelerator);
             return;
         }
@@ -185,7 +185,11 @@ public class GearyController {
             "<Ctrl>A", null, on_delete_message };
         entries += delete_message;
         add_accelerator("A", ACTION_DELETE_MESSAGE);
-        
+        add_accelerator("Delete", ACTION_DELETE_MESSAGE);
+        add_accelerator("<Ctrl>Delete", ACTION_DELETE_MESSAGE);
+        add_accelerator("BackSpace", ACTION_DELETE_MESSAGE);
+        add_accelerator("<Ctrl>BackSpace", ACTION_DELETE_MESSAGE);
+
         Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>equal",
             null, on_zoom_in };
         entries += zoom_in;

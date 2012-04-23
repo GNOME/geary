@@ -745,7 +745,7 @@ public class MessageViewer : WebKit.WebView {
         message_menu.append(new Gtk.SeparatorMenuItem());
 
         // View original message source.
-        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
+        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("_View Source"));
         view_source_item.activate.connect(on_view_source);
         message_menu.append(view_source_item);
 
