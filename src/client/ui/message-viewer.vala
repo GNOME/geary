@@ -277,7 +277,6 @@ public class MessageViewer : WebKit.WebView {
         new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         parent_set.connect(on_parent_set);
         hovering_over_link.connect(on_hovering_over_link);
-        button_press_event.connect(on_button_press_event);
         resource_request_starting.connect(on_resource_request_starting);
         
         WebKit.WebSettings s = new WebKit.WebSettings();
@@ -518,6 +517,7 @@ public class MessageViewer : WebKit.WebView {
         update_flags(email);
 
         // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
+        bind_event(".email", "contextmenu", (Callback) on_context_menu, this);
         bind_event(".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
         bind_event(".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
         bind_event(".email_container .menu", "click", (Callback) on_menu_clicked, this);
@@ -553,7 +553,17 @@ public class MessageViewer : WebKit.WebView {
 
     private Geary.Email? get_email_from_element(WebKit.DOM.Element element) {
         // First get the email container.
-        WebKit.DOM.Element email_element = closest_ancestor(element, ".email");
+        WebKit.DOM.Element email_element;
+        try {
+            if (element.webkit_matches_selector(".email")) {
+                email_element = element;
+            } else {
+                email_element = closest_ancestor(element, ".email");
+            }
+        } catch (Error error) {
+            debug("Failed to find div.email from element: %s", error.message);
+            return null;
+        }
 
         // Next find the ID in the email-to-element map.
         Geary.EmailIdentifier? email_id = null;
@@ -608,6 +618,12 @@ public class MessageViewer : WebKit.WebView {
         }
     }
     
+    private static void on_context_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        message_viewer.active_email = message_viewer.get_email_from_element(element);
+        message_viewer.create_context_menu();
+    }
+
     private static void on_hide_quote_clicked(WebKit.DOM.Element element) {
         try {
             WebKit.DOM.Element parent = element.get_parent_element();
@@ -1140,19 +1156,8 @@ public class MessageViewer : WebKit.WebView {
             dialog.destroy();
         }
     }
-
-    private bool on_button_press_event(Gdk.EventButton event) {
-        // Ignore right-clicks on images.
-        if (event.button == 3) {
-            create_context_menu(event);
-            
-            return true;
-        }
-        
-        return false;
-    }
     
-    private void create_context_menu(Gdk.EventButton event) {
+    private void create_context_menu() {
         context_menu = new Gtk.Menu();
         
         if (can_copy_clipboard()) {
@@ -1180,7 +1185,7 @@ public class MessageViewer : WebKit.WebView {
         context_menu.append(select_all_item);
         
         context_menu.show_all();
-        context_menu.popup(null, null, null, event.button, event.time);
+        context_menu.popup(null, null, null, 0, 0);
     }
     
     public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
