@@ -51,6 +51,7 @@ public class MessageViewer : WebKit.WebView {
             border-radius: 4px;
             cursor: pointer;
             padding: 4px;
+            margin-top: 7px;
             -webkit-user-select: none;
             -webkit-user-drag: none;
             text-align: center;
@@ -72,7 +73,6 @@ public class MessageViewer : WebKit.WebView {
         }
 
         .email {
-            padding: 15px;
             border: 1px #999 solid;
             background-color: white;
             color: black;
@@ -105,13 +105,17 @@ public class MessageViewer : WebKit.WebView {
         .email_container {
             overflow: hidden;
         }
-        .email_container > .button_bar {
-            float: right;
+        .email_container .header_container {
+            padding: 15px;
         }
-        .email_container > .button_bar > .button {
+        .email_container .header_container .button_bar {
+            float: right;
+            margin-top: -6px;
+        }
+        .email_container .header_container .button_bar > .button {
             float: left;
         }
-        .email_container > .button_bar > .button > .icon {
+        .email_container .header_container .button_bar > .button > .icon {
             width: 16px;
             height: 16px;
         }
@@ -120,11 +124,85 @@ public class MessageViewer : WebKit.WebView {
         }
         .avatar {
             display: none;
+            image-rendering: optimizeQuality;
+            margin-left: 2px;
         }
         .avatar[src^=file], .avatar[src^=http] {
             display: inline;
-            width: 48px; height: 48px;
+            width: 48px;
+            height: 48px;
             float: right;
+        }
+        .email.hide:not(:last-of-type) .header_container .avatar {
+            width: 24px;
+            height: 24px;
+        }
+
+        .email .body {
+            border-top: 1px solid #999;
+            margin: 15px;
+            margin-top: 0;
+            padding-top: 15px;
+        }
+        .email.hide:not(:last-of-type) {
+            opacity: 0.5;
+        }
+        .email.hide:not(:last-of-type) .body {
+            display: none;
+        }
+        .email:not(:last-of-type) .header_container {
+            cursor: pointer;
+        }
+        .email.hide:not(:last-of-type) .header {
+            padding: 5px 0;
+        }
+        .email.hide:not(:last-of-type) .header .field {
+            display: inline;
+        }
+        .email.hide:not(:last-of-type) .header .field:not(.important) {
+            display: none;
+        }
+        .email.hide:not(:last-of-type) .header .title {
+            display: none;
+        }
+        .email.hide:not(:last-of-type) .header .value {
+            margin-left: 0;
+        }
+        .email.hide:not(:last-of-type) .header .field + .field .value::before {
+            content: "";
+            border-left: 1px solid #777;
+            margin: 0 5px;
+        }
+
+        .header {
+            overflow: hidden;
+        }
+        .header .field {
+            clear: both;
+            overflow: hidden;
+            font-size: 9pt;
+        }
+        .header .field .title,
+        .header .field .value {
+            float: left;
+            padding: 2px 0;
+        }
+        .header .field .title {
+            width: 5em;
+            text-align: right;
+            padding-right: 7px;
+            color: #777;
+            position: absolute;
+        }
+        .header .field .value {
+            color: black;
+            margin-left: 5.25em;
+        }
+        .header .field.important .address_name {
+            font-weight: bold;
+        }
+        .header .field .address_value {
+            color: #777;
         }
 
         .geary_spacer {
@@ -132,25 +210,6 @@ public class MessageViewer : WebKit.WebView {
             box-sizing: border-box;
             -webkit-box-sizing: border-box;
             width: 100% !important;
-        }
-
-        .header_title {
-            font-size: 9pt;
-            color: #777;
-            text-align: right;
-            padding-right: 7px;
-        }
-        .header_text {
-            font-size: 9pt;
-            color: black;
-        }
-        .header_address_name {
-            color: black;
-            font-size: inherit;
-        }
-        .header_address_value {
-            color: #777;
-            font-size: inherit;
         }
 
         .signature {
@@ -208,25 +267,28 @@ public class MessageViewer : WebKit.WebView {
             margin: 100px auto;
             display: inline-block;
             width: auto;
+            padding: 15px;
         }
         #email_template {
             display: none;
         }
         </style>
         </head><body>
-        <div id="message_container"><div id="placeholder"></div></div>
+        <div id="message_container"><span id="placeholder"></span></div>
         <div id="multiple_messages"><div id="selection_counter" class="email"></div></div>
         <div id="email_template" class="email">
             <div class="geary_spacer"></div>
             <div class="email_container">
-                <img src="" class="avatar" />
-                <div class="button_bar">
-                    <div class="starred button"><img src="" class="icon" /></div>
-                    <div class="unstarred button"><img src="" class="icon" /></div>
-                    <div class="menu button"><img src="" class="icon" /></div>
+                <div class="header_container">
+                    <img src="" class="avatar" />
+                    <div class="button_bar">
+                        <div class="starred button"><img src="" class="icon" /></div>
+                        <div class="unstarred button"><img src="" class="icon" /></div>
+                        <div class="menu button"><img src="" class="icon" /></div>
+                    </div>
+                    <div class="header"></div>
                 </div>
-                <table class="header"><tbody></tbody></table>
-                <span class="body"></span>
+                <div class="body"></div>
             </div>
         </div>
         </body></html>""";
@@ -340,6 +402,7 @@ public class MessageViewer : WebKit.WebView {
     // Removes all displayed e-mails from the view.
     public void clear() {
         // Remove all messages from DOM.
+        debug("Clearing message viewer");
         try {
             foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
                 if (element.get_parent_element() != null)
@@ -439,6 +502,9 @@ public class MessageViewer : WebKit.WebView {
             container.insert_before(div_message, insert_before);
             div_email_container = div_message.query_selector("div.email_container")
                 as WebKit.DOM.HTMLElement;
+            if (email.is_unread() == Geary.Trillian.FALSE) {
+                div_message.get_class_list().add("hide");
+            }
         } catch (Error setup_error) {
             warning("Error setting up webkit: %s", setup_error.message);
             
@@ -455,8 +521,8 @@ public class MessageViewer : WebKit.WebView {
             error("Unable to get username. Error: %s", e.message);
         }
         
-        insert_header_address(ref header, _("From:"), email.from != null ? email.from : 
-            email.sender, true);
+        insert_header_address(ref header, _("From:"), email.from != null ? email.from : email.sender,
+            true);
         
         // Only include to string if it's not just this account.
         // TODO: multiple accounts.
@@ -468,7 +534,7 @@ public class MessageViewer : WebKit.WebView {
         insert_header_address(ref header, _("Cc:"), email.cc);
             
         if (email.subject != null)
-            insert_header(ref header, _("Subject:"), email.subject.value);
+            insert_header(ref header, _("Subject:"), email.subject.value, true);
             
         if (email.date != null)
             insert_header(ref header, _("Date:"), Date.pretty_print_verbose(
@@ -498,15 +564,14 @@ public class MessageViewer : WebKit.WebView {
                 debug("Could not get message text. %s", err2.message);
             }
         }
-        body_text = "<hr noshade>" + body_text;
         
         // Graft header and email body into the email container.
         try {
             WebKit.DOM.HTMLElement table_header = div_email_container
-                .query_selector("table.header > tbody") as WebKit.DOM.HTMLElement;
+                .query_selector(".header_container .header") as WebKit.DOM.HTMLElement;
             table_header.set_inner_html(header);
             
-            WebKit.DOM.HTMLElement span_body = div_email_container.query_selector("span.body")
+            WebKit.DOM.HTMLElement span_body = div_email_container.query_selector(".body")
                 as WebKit.DOM.HTMLElement;
             span_body.set_inner_html(body_text);
         } catch (Error html_error) {
@@ -523,6 +588,7 @@ public class MessageViewer : WebKit.WebView {
         bind_event(".email_container .menu", "click", (Callback) on_menu_clicked, this);
         bind_event(".email_container .starred", "click", (Callback) on_unstar_clicked, this);
         bind_event(".email_container .unstarred", "click", (Callback) on_star_clicked, this);
+        bind_event(".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
     }
 
     private void bind_event(string selector, string event, Callback callback, Object? extra = null) {
@@ -538,13 +604,13 @@ public class MessageViewer : WebKit.WebView {
         }
     }
     
-    private WebKit.DOM.Element? closest_ancestor(WebKit.DOM.Element element, string selector) {
+    private WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
         try {
             WebKit.DOM.Element? parent = element.get_parent_element();
             while (parent != null && !parent.webkit_matches_selector(selector)) {
                 parent = parent.get_parent_element();
             }
-            return parent;
+            return parent as WebKit.DOM.HTMLElement;
         } catch (Error error) {
             warning("Failed to find ancestor: %s", error.message);
             return null;
@@ -644,6 +710,7 @@ public class MessageViewer : WebKit.WebView {
 
     private static void on_menu_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
+        event.stop_propagation();
         message_viewer.on_menu_clicked_async(element);
     }
 
@@ -654,6 +721,7 @@ public class MessageViewer : WebKit.WebView {
 
     private static void on_unstar_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
+        event.stop_propagation();
         message_viewer.on_unstar_clicked_async(element);
     }
 
@@ -664,12 +732,34 @@ public class MessageViewer : WebKit.WebView {
 
     private static void on_star_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
+        event.stop_propagation();
         message_viewer.on_star_clicked_async(element);
     }
 
     private void on_star_clicked_async(WebKit.DOM.Element element){
         active_email = get_email_from_element(element);
         on_flag_message();
+    }
+    
+    private static void on_body_toggle_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        message_viewer.on_body_toggle_clicked_self(element);
+    }
+
+    private void on_body_toggle_clicked_self(WebKit.DOM.Element element) {
+        try {
+            WebKit.DOM.HTMLElement email = closest_ancestor(element, ".email");
+            WebKit.DOM.DOMTokenList class_list = email.get_class_list();
+            if (class_list.contains("hide")) {
+                class_list.add("show");
+                class_list.remove("hide");
+            } else {
+                class_list.remove("show");
+                class_list.add("hide");
+            }
+        } catch (Error error) {
+            warning("Error toggline message: %s", error.message);
+        }
     }
 
     private void on_message_menu_selection_done() {
@@ -995,45 +1085,49 @@ public class MessageViewer : WebKit.WebView {
             debug("Could not remove message: %s", err.message);
         }
     }
-    
+
+    private string create_header_row(string title, string value, bool important) {
+        return """
+            <div class="field %s">
+                <div class="title">%s</div>
+                <div class="value">%s</div>
+            </div>""".printf(important ? "important" : "", title, value);
+    }
+
     // Appends a header field to header_text
     private void insert_header(ref string header_text, string _title, string? _value,
-        bool escape_value = true) {
+        bool important = false) {
         if (Geary.String.is_empty(_value))
             return;
         
         string title = Geary.HTML.escape_markup(_title);
-        string value = escape_value ? Geary.HTML.escape_markup(_value) : _value;
+        string value = Geary.HTML.escape_markup(_value);
         
-        header_text += "<tr><td class='header_title'>%s</td><td class='header_text'>%s</td></tr>"
-            .printf(title, value);
+        header_text += create_header_row(title, value, important);
     }
-    
+
     // Appends email address fields to the header.
     private void insert_header_address(ref string header_text, string title,
-        Geary.RFC822.MailboxAddresses? addresses, bool bold = false) {
+        Geary.RFC822.MailboxAddresses? addresses, bool important = false) {
         if (addresses == null)
             return;
-        
-        string bold_val = bold ? " style='font-weight: bold'" : "";
-        
+
+        int i = 0;
         string value = "";
         Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
-        int i = 0;
         foreach (Geary.RFC822.MailboxAddress a in list) {
             if (a.name != null) {
-                value += "<span class='header_address_name'%s>%s</span> ".printf(bold_val, a.name);
-                value += "<span class='header_address_value'>%s</span>".printf(a.address);
+                value += "<span class='address_name'>%s</span> ".printf(a.name);
+                value += "<span class='address_value'>%s</span>".printf(a.address);
             } else {
-                value += "<span class='header_address_name'%s>%s</span>".printf(bold_val, a.address);
+                value += "<span class='address_name'>%s</span>".printf(a.address);
             }
-            
-            i++;
-            if (i < list.size)
+
+            if (++i < list.size)
                 value += ", ";
         }
-        
-        insert_header(ref header_text, title, value, false);
+
+        header_text += create_header_row(Geary.HTML.escape_markup(title), value, important);
     }
     
     private string linkify_and_escape_plain_text(string input) throws Error {
