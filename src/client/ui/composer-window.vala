@@ -335,6 +335,9 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_action(Gtk.Action action) {
+        if (action_flag)
+            return;
+        
         action_flag = true; // prevents recursion
         editor.get_dom_document().exec_command(action.get_name(), false, "");
         action_flag = false;
@@ -620,6 +623,8 @@ public class ComposerWindow : Gtk.Window {
             active = window.get_selection().focus_node.get_parent_element();
         
         if (active != null && !action_flag) {
+            action_flag = true;
+            
             WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
             
             ((Gtk.ToggleAction) actions.get_action(ACTION_BOLD)).active = 
@@ -633,6 +638,8 @@ public class ComposerWindow : Gtk.Window {
             
             ((Gtk.ToggleAction) actions.get_action(ACTION_STRIKETHROUGH)).active = 
                 styles.get_property_value("text-decoration") == "line-through";
+            
+            action_flag = false;
         }
     }
 }
