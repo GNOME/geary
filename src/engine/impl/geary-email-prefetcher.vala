@@ -158,36 +158,28 @@ public class Geary.EmailPrefetcher : Object {
             Geary.EmailIdentifier id = email.id;
             Geary.Email.Field field = local_fields.get(id);
             
-            if (!field.is_all_set(Geary.Email.Field.ENVELOPE)) {
-                try {
-                    yield folder.fetch_email_async(id, Geary.Email.Field.ENVELOPE, Geary.Folder.ListFlags.NONE,
-                        cancellable);
-                } catch (Error env_error) {
-                    debug("Error prefetching envelope for %s: %s", id.to_string(), env_error.message);
-                }
-            }
+            if (!field.is_all_set(Geary.Email.Field.ENVELOPE))
+                yield prefetch_field_async(id, Geary.Email.Field.ENVELOPE, "envelope");
             
-            if (!field.is_all_set(Geary.Email.Field.HEADER)) {
-                try {
-                    yield folder.fetch_email_async(id, Geary.Email.Field.HEADER, Geary.Folder.ListFlags.NONE,
-                        cancellable);
-                } catch (Error header_err) {
-                    debug("Error prefetching headers for %s: %s", id.to_string(), header_err.message);
-                }
-            }
+            if (!field.is_all_set(Geary.Email.Field.HEADER))
+                yield prefetch_field_async(id, Geary.Email.Field.HEADER, "headers");
             
-            if (!field.is_all_set(Geary.Email.Field.BODY)) {
-                try {
-                    yield folder.fetch_email_async(email.id, Geary.Email.Field.BODY, Geary.Folder.ListFlags.NONE,
-                        cancellable);
-                } catch (Error body_err) {
-                    debug("Error background fetching body from %s: %s", email.id.to_string(),
-                        body_err.message);
-                }
-            }
+            if (!field.is_all_set(Geary.Email.Field.BODY))
+                yield prefetch_field_async(id, Geary.Email.Field.BODY, "body");
+            
+            if (!field.is_all_set(Geary.Email.Field.PREVIEW))
+                yield prefetch_field_async(id, Geary.Email.Field.PREVIEW, "preview");
         }
         
         debug("finished do_prefetch_batch %s %d", folder.to_string(), ids.size);
+    }
+    
+    private async void prefetch_field_async(Geary.EmailIdentifier id, Geary.Email.Field field, string name) {
+        try {
+            yield folder.fetch_email_async(id, field, Geary.Folder.ListFlags.NONE, cancellable);
+        } catch (Error error) {
+            debug("Error prefetching %s for %s: %s", name, id.to_string(), error.message);
+        }
     }
     
     private static int email_size_ascending_comparator(void *a, void *b) {
