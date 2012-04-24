@@ -4,8 +4,10 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-// Defined by wscript
-extern const string _PREFIX;
+// Defined by CMake build script.
+extern const string _INSTALL_PREFIX;
+extern const string _GSETTINGS_DIR;
+extern const string _SOURCE_ROOT_DIR;
 
 public class GearyApplication : YorbaApplication {
     // TODO: replace static strings with const strings when gettext is integrated properly
@@ -18,7 +20,9 @@ public class GearyApplication : YorbaApplication {
     public static string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
     
-    public const string PREFIX = _PREFIX;
+    public const string INSTALL_PREFIX = _INSTALL_PREFIX;
+    public const string GSETTINGS_DIR = _GSETTINGS_DIR;
+    public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
     
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
@@ -123,8 +127,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public override int startup() {
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
-        Configuration.init(GearyApplication.instance.get_install_dir() != null,
-            GearyApplication.instance.get_exec_dir().get_child("build/src/client").get_path());
+        Configuration.init(GearyApplication.instance.get_install_dir() != null, GSETTINGS_DIR);
         
         int result = base.startup();
         result = parse_arguments(args);
@@ -270,12 +273,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
      * application is running from its installed directory, this will point to
      * $(BASEDIR)/share/<program name>.  If it's running from the build directory, this points to
      * that.
-     *
-     * TODO: Implement.  This is placeholder code for build environments and assumes you're running
-     * the program in the build directory.
      */
     public File get_resource_directory() {
-        return File.new_for_path(Environment.get_current_dir());
+        if (get_install_dir() != null)
+            return get_install_dir().get_child("share").get_child("geary");
+        else
+            return File.new_for_path(SOURCE_ROOT_DIR);
     }
     
     // Returns the directory the application is currently executing from.
@@ -286,7 +289,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     // Returns the installation directory, or null if we're running outside of the installation
     // directory.
     public File? get_install_dir() {
-        File prefix_dir = File.new_for_path(PREFIX);
+        File prefix_dir = File.new_for_path(INSTALL_PREFIX);
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
     

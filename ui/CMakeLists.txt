@@ -1,0 +1,11 @@
+set(UI_DEST share/geary/ui)
+
+install(FILES accelerators.ui DESTINATION ${UI_DEST})
+install(FILES composer.glade DESTINATION ${UI_DEST})
+install(FILES composer_accelerators.ui DESTINATION ${UI_DEST})
+install(FILES login.glade DESTINATION ${UI_DEST})
+install(FILES message.glade DESTINATION ${UI_DEST})
+install(FILES preferences.glade DESTINATION ${UI_DEST})
+install(FILES toolbar.glade DESTINATION ${UI_DEST})
+install(FILES toolbar_mark_menu.ui DESTINATION ${UI_DEST})
+install(FILES toolbar_menu.ui DESTINATION ${UI_DEST})
