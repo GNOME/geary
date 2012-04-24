@@ -374,7 +374,6 @@ public class ComposerWindow : Gtk.Window {
     
     private void on_paste() {
         if (get_focus() == editor)
-            //editor.paste_clipboard();
             get_clipboard(Gdk.SELECTION_CLIPBOARD).request_text(on_clipboard_text_received);
         else if (get_focus() is Gtk.Editable)
             ((Gtk.Editable) get_focus()).paste_clipboard();
@@ -397,8 +396,15 @@ public class ComposerWindow : Gtk.Window {
         editor.get_dom_document().exec_command("forecolor", false, "#000000");
     }
     
+    private bool select_font_filter(Pango.FontFamily family, Pango.FontFace face) {
+        // Don't show bold or italic variants.
+        return face.describe().get_weight() == Pango.Weight.NORMAL &&
+            face.describe().get_style() == Pango.Style.NORMAL;
+    }
+    
     private void on_select_font() {
         Gtk.FontChooserDialog dialog = new Gtk.FontChooserDialog("Select font", this);
+        dialog.set_filter_func(select_font_filter);
         if (dialog.run() == Gtk.ResponseType.OK) {
             editor.get_dom_document().exec_command("fontname", false, dialog.get_font_family().
                 get_name());
