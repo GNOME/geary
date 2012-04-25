@@ -181,19 +181,16 @@ public class GearyController {
         entries += reply_all_message;
         add_accelerator("<Shift>R", ACTION_REPLY_ALL_MESSAGE);
         
-        Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE, "<Ctrl>F", null,
+        Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE, "<Ctrl>L", null,
             on_forward_message };
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE,
-            "<Ctrl>A", null, on_delete_message };
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "A",
+            null, on_delete_message };
         entries += delete_message;
-        add_accelerator("A", ACTION_DELETE_MESSAGE);
         add_accelerator("Delete", ACTION_DELETE_MESSAGE);
-        add_accelerator("<Ctrl>Delete", ACTION_DELETE_MESSAGE);
         add_accelerator("BackSpace", ACTION_DELETE_MESSAGE);
-        add_accelerator("<Ctrl>BackSpace", ACTION_DELETE_MESSAGE);
 
         Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>equal",
             null, on_zoom_in };
