@@ -2,6 +2,7 @@
     <popup name="ToolbarMenu">
         <menuitem name="Preferences" action="GearyPreferences" />
         <separator />
+        <menuitem name="Help" action="GearyHelp" />
         <menuitem name="About" action="GearyAbout" />
         <separator />
         <menuitem name="Quit" action="GearyQuit" />

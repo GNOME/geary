@@ -22,6 +22,7 @@ add_subdirectory(src)
 add_subdirectory(icons)
 add_subdirectory(sql)
 add_subdirectory(ui)
+add_subdirectory(help)
 
 #
 # Install geary.desktop

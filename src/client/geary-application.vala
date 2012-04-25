@@ -128,7 +128,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public override int startup() {
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
-        Configuration.init(GearyApplication.instance.get_install_dir() != null, GSETTINGS_DIR);
+        Configuration.init(is_installed(), GSETTINGS_DIR);
         
         int result = base.startup();
         result = parse_arguments(args);
@@ -286,7 +286,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public File get_exec_dir() {
         return exec_dir;
     }
-    
+
+    public bool is_installed() {
+        return exec_dir.has_prefix(File.new_for_path(INSTALL_PREFIX));
+    }
+
     // Returns the installation directory, or null if we're running outside of the installation
     // directory.
     public File? get_install_dir() {
