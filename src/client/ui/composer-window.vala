@@ -27,6 +27,7 @@ public class ComposerWindow : Gtk.Window {
     private const string ACTION_JUSTIFY_CENTER = "justifycenter";
     private const string ACTION_JUSTIFY_FULL = "justifyfull";
     private const string ACTION_FONT = "font";
+    private const string ACTION_FONT_SIZE = "fontsize";
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_LINK = "insertlink";
     
@@ -38,7 +39,7 @@ public class ComposerWindow : Gtk.Window {
             margin: 10px !important;
             padding: 0 !important;
             background-color: white !important;
-            font-size: 11pt !important;
+            font-size: medium !important;
         }
         blockquote {
             margin: 10px;
@@ -93,8 +94,20 @@ public class ComposerWindow : Gtk.Window {
     private EmailEntry bcc_entry;
     private Gtk.Entry subject_entry;
     private Gtk.Button send_button;
+    private Gtk.ToggleToolButton font_button;
+    private Gtk.ToggleToolButton font_size_button;
     private Gtk.Label message_overlay_label;
     private Gtk.Menu? context_menu = null;
+    
+    private Gtk.RadioMenuItem font_small;
+    private Gtk.RadioMenuItem font_medium;
+    private Gtk.RadioMenuItem font_large;
+    private Gtk.Menu font_size_menu;
+    private Gtk.RadioMenuItem font_sans;
+    private Gtk.RadioMenuItem font_serif;
+    private Gtk.RadioMenuItem font_monospace;
+    private Gtk.Menu font_menu;
+    
     private Gtk.ActionGroup actions;
     private string? hover_url = null;
     private bool action_flag = false;
@@ -164,6 +177,7 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_JUSTIFY_FULL).activate.connect(on_action);
         
         actions.get_action(ACTION_FONT).activate.connect(on_select_font);
+        actions.get_action(ACTION_FONT_SIZE).activate.connect(on_select_font_size);
         actions.get_action(ACTION_COLOR).activate.connect(on_select_color);
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
@@ -213,10 +227,42 @@ public class ComposerWindow : Gtk.Window {
         
         GearyApplication.instance.config.spell_check_changed.connect(on_spell_check_changed);
         
+        font_button = builder.get_object("font button") as Gtk.ToggleToolButton;
+        font_size_button = builder.get_object("font size button") as Gtk.ToggleToolButton;
+        
+        // Build font menu.
+        font_menu = new Gtk.Menu();
+        font_menu.deactivate.connect(on_deactivate_font_menu);
+        font_menu.attach_to_widget(font_button, null);
+        font_sans = new Gtk.RadioMenuItem.with_label(new SList<Gtk.RadioMenuItem>(),
+            _("Sans Serif"));
+        font_sans.activate.connect(on_font_sans);
+        font_menu.append(font_sans);
+        font_serif = new Gtk.RadioMenuItem.with_label_from_widget(font_sans, _("Serif"));
+        font_serif.activate.connect(on_font_serif);
+        font_menu.append(font_serif);
+        font_monospace = new Gtk.RadioMenuItem.with_label_from_widget(font_sans,
+            _("Fixed width"));
+        font_monospace.activate.connect(on_font_monospace);
+        font_menu.append(font_monospace);
+        
+        // Build font size menu.
+        font_size_menu = new Gtk.Menu();
+        font_size_menu.deactivate.connect(on_deactivate_font_size_menu);
+        font_size_menu.attach_to_widget(font_size_button, null);
+        font_small = new Gtk.RadioMenuItem.with_label(new SList<Gtk.RadioMenuItem>(), _("Small"));
+        font_small.activate.connect(on_font_size_small);
+        font_size_menu.append(font_small);
+        font_medium = new Gtk.RadioMenuItem.with_label_from_widget(font_small, _("Medium"));
+        font_medium.activate.connect(on_font_size_medium);
+        font_size_menu.append(font_medium);
+        font_large = new Gtk.RadioMenuItem.with_label_from_widget(font_small, _("Large"));
+        font_large.activate.connect(on_font_size_large);
+        font_size_menu.append(font_large);
+        
         WebKit.WebSettings s = new WebKit.WebSettings();
         s.enable_spell_checking = GearyApplication.instance.config.spell_check;
         s.auto_load_images = false;
-        s.enable_default_context_menu = true;
         s.enable_scripts = false;
         s.enable_java_applet = false;
         s.enable_plugins = false;
@@ -396,23 +442,58 @@ public class ComposerWindow : Gtk.Window {
         editor.get_dom_document().exec_command("forecolor", false, "#000000");
     }
     
-    private bool select_font_filter(Pango.FontFamily family, Pango.FontFace face) {
-        // Don't show bold or italic variants.
-        return face.describe().get_weight() == Pango.Weight.NORMAL &&
-            face.describe().get_style() == Pango.Style.NORMAL;
+    private void on_select_font() {
+        if (!font_button.active)
+            return;
+        
+        font_menu.show_all();
+        font_menu.popup(null, null, menu_popup_relative, 0, 0);
     }
     
-    private void on_select_font() {
-        Gtk.FontChooserDialog dialog = new Gtk.FontChooserDialog("Select font", this);
-        dialog.set_filter_func(select_font_filter);
-        if (dialog.run() == Gtk.ResponseType.OK) {
-            editor.get_dom_document().exec_command("fontname", false, dialog.get_font_family().
-                get_name());
-            editor.get_dom_document().exec_command("fontsize", false,
-                (((double) dialog.get_font_size()) / 4000.0).to_string());
-        }
+    private void on_deactivate_font_menu() {
+        font_button.active = false;
+    }
+    
+    private void on_select_font_size() {
+        if (!font_size_button.active)
+            return;
         
-        dialog.destroy();
+        font_size_menu.show_all();
+        font_size_menu.popup(null, null, menu_popup_relative, 0, 0);
+    }
+    
+    private void on_deactivate_font_size_menu() {
+        font_size_button.active = false;
+    }
+    
+    private void on_font_sans() {
+        if (!action_flag)
+            editor.get_dom_document().exec_command("fontname", false, "sans");
+    }
+    
+    private void on_font_serif() {
+        if (!action_flag)
+            editor.get_dom_document().exec_command("fontname", false, "serif");
+    }
+    
+    private void on_font_monospace() {
+        if (!action_flag)
+            editor.get_dom_document().exec_command("fontname", false, "monospace");
+    }
+    
+    private void on_font_size_small() {
+        if (!action_flag)
+            editor.get_dom_document().exec_command("fontsize", false, "1");
+    }
+    
+    private void on_font_size_medium() {
+        if (!action_flag)
+            editor.get_dom_document().exec_command("fontsize", false, "3");
+    }
+    
+    private void on_font_size_large() {
+        if (!action_flag)
+            editor.get_dom_document().exec_command("fontsize", false, "7");
     }
     
     private void on_select_color() {
@@ -454,7 +535,6 @@ public class ComposerWindow : Gtk.Window {
     
     // Inserts a newline that's fully unindented.
     private void newline_unindented(Gdk.EventKey event) {
-        
         bool inside_quote = false;
         int indent_level = 0;
         
@@ -644,6 +724,32 @@ public class ComposerWindow : Gtk.Window {
             
             ((Gtk.ToggleAction) actions.get_action(ACTION_STRIKETHROUGH)).active = 
                 styles.get_property_value("text-decoration") == "line-through";
+            
+            // Font family.
+            string font_name = styles.get_property_value("font-family").down();
+            if (font_name.contains("sans-serif") ||
+                font_name.contains("arial") ||
+                font_name.contains("trebuchet") ||
+                font_name.contains("helvetica"))
+                font_sans.activate();
+            else if (font_name.contains("serif") ||
+                font_name.contains("georgia") ||
+                font_name.contains("times"))
+                font_serif.activate();
+            else if (font_name.contains("monospace") ||
+                font_name.contains("courier") ||
+                font_name.contains("console"))
+                font_monospace.activate();
+            
+            // Font size.
+            int font_size;
+            styles.get_property_value("font-size").scanf("%dpx", out font_size);
+            if (font_size < 11)
+                font_small.activate();
+            else if (font_size > 20)
+                font_large.activate();
+            else
+                font_medium.activate();
             
             action_flag = false;
         }

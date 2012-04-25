@@ -136,6 +136,12 @@
       </object>
       <accelerator key="k" modifiers="GDK_CONTROL_MASK"/>
     </child>
+    <child>
+      <object class="GtkAction" id="fontsize">
+        <property name="label" translatable="yes">Font size</property>
+        <property name="icon_name">font</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="composer">
     <property name="visible">True</property>
@@ -319,6 +325,7 @@
         <property name="margin_left">6</property>
         <property name="margin_right">6</property>
         <property name="toolbar_style">icons</property>
+        <property name="icon_size">1</property>
         <child>
           <object class="GtkToggleToolButton" id="bold button">
             <property name="related_action">bold</property>
@@ -434,13 +441,28 @@
           </packing>
         </child>
         <child>
-          <object class="GtkToolButton" id="font button">
+          <object class="GtkToggleToolButton" id="font button">
             <property name="related_action">font</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Fonts</property>
             <property name="related_action">font</property>
             <property name="label" translatable="yes">toolbutton4</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToggleToolButton" id="font size button">
+            <property name="related_action">fontsize</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Font size</property>
+            <property name="related_action">fontsize</property>
+            <property name="label" translatable="yes">toolbutton1</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
