@@ -42,11 +42,7 @@ public class FormattedMessageData : Object {
     public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread,
         bool flagged, Geary.Folder folder) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
-        
-        string preview = "";
-        if (email.fields.fulfills(Geary.Email.Field.PREVIEW) && email.preview != null)
-            preview = email.preview.buffer.to_utf8();
-        
+
         string who = "";
         if (folder.get_special_folder_type() == Geary.SpecialFolderType.SENT &&
             email.to != null && email.to.size > 0) {
@@ -58,16 +54,16 @@ public class FormattedMessageData : Object {
         string clean_subject;
         try {
             Regex subject_regex = new Regex("^(?i:Re:\\s*)+");
-            clean_subject = subject_regex.replace(email.subject.value, -1, 0, "");
+            clean_subject = subject_regex.replace(email.get_subject_as_string(), -1, 0, "");
         } catch (RegexError e) {
             debug("Failed to clean up subject line: %s", e.message);
-            clean_subject = email.subject.value;
+            clean_subject = email.get_subject_as_string();
         }
         
         this(unread, flagged,
             Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format),
             who, clean_subject,
-            Geary.String.reduce_whitespace(preview), num_emails);
+            Geary.String.reduce_whitespace(email.get_preview_as_string()), num_emails);
         
         this.email = email;
     }

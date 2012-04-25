@@ -239,7 +239,15 @@ public class Geary.Email : Object {
         
         return message;
     }
-    
+
+    public string get_preview_as_string() {
+        return (preview != null) ? preview.buffer.to_utf8() : "";
+    }
+
+    public string get_subject_as_string() {
+        return (subject != null) ? subject.value : "";
+    }
+
     public string to_string() {
         StringBuilder builder = new StringBuilder();
         

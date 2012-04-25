@@ -12,7 +12,8 @@ public class MessageViewer : WebKit.WebView {
         | Geary.Email.Field.RECEIVERS
         | Geary.Email.Field.SUBJECT
         | Geary.Email.Field.DATE
-        | Geary.Email.Field.PROPERTIES;
+        | Geary.Email.Field.PROPERTIES
+        | Geary.Email.Field.PREVIEW;
     
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
@@ -119,8 +120,12 @@ public class MessageViewer : WebKit.WebView {
             width: 16px;
             height: 16px;
         }
-        .email_container > hr {
-            clear: both;
+        .email_container .header_container .preview {
+            font-size: 8pt;
+            color: #777;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
         .avatar {
             display: none;
@@ -147,7 +152,9 @@ public class MessageViewer : WebKit.WebView {
         .email.hide:not(:last-of-type) {
             background-color: #e8e8e8
         }
-        .email.hide:not(:last-of-type) .body {
+        .email.hide:not(:last-of-type) .body,
+        .email:not(.hide) .preview,
+        .email:last-of-type .preview {
             display: none;
         }
         .email:not(:last-of-type) .header_container {
@@ -291,6 +298,7 @@ public class MessageViewer : WebKit.WebView {
                         <div class="menu button"><img src="" class="icon" /></div>
                     </div>
                     <div class="header"></div>
+                    <div class="preview"></div>
                 </div>
                 <div class="body"></div>
             </div>
@@ -538,20 +546,34 @@ public class MessageViewer : WebKit.WebView {
         insert_header_address(ref header, _("Cc:"), email.cc);
             
         if (email.subject != null)
-            insert_header(ref header, _("Subject:"), email.subject.value);
+            insert_header(ref header, _("Subject:"), email.get_subject_as_string());
             
         if (email.date != null)
             insert_header_date(ref header, _("Date:"), email.date.value, true);
-        
+
+        // Add the avatar.
         try {
             WebKit.DOM.HTMLImageElement icon = get_dom_document().query_selector("#%s .avatar".printf(message_id))
                 as WebKit.DOM.HTMLImageElement;
             string checksum = GLib.Checksum.compute_for_string (
                 GLib.ChecksumType.MD5, email.sender.get(0).address);
-            string gravatar = "http://www.gravatar.com/avatar/%s?d=mm".printf (checksum);
+            string gravatar = "http://www.gravatar.com/avatar/%s?d=mm&size=48".printf (checksum);
             icon.set_attribute("src", gravatar);
         } catch (Error error) {
-            warning("Failed to load avatar: %s\n", error.message);
+            warning("Failed to load avatar: %s", error.message);
+        }
+
+        // Insert the preview text.
+        try {
+            WebKit.DOM.HTMLElement preview = div_message.query_selector(".header_container .preview")
+                as WebKit.DOM.HTMLElement;
+            string preview_str = email.get_preview_as_string();
+            if (preview_str.length == Geary.Email.MAX_PREVIEW_BYTES) {
+                preview_str += "…";
+            }
+            preview.set_inner_text(Geary.String.reduce_whitespace(preview_str));
+        } catch (Error error) {
+            debug("Failed to add preview text: %s", error.message);
         }
 
         string body_text = "";
