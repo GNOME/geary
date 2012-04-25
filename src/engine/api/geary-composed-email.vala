@@ -29,10 +29,14 @@ public class Geary.ComposedEmail : Object {
     public string? mailer { get; set; default = null; }
     
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
-        RFC822.MailboxAddresses? to = null) {
+        RFC822.MailboxAddresses? to = null, RFC822.MailboxAddresses? cc = null,
+        RFC822.MailboxAddresses? bcc = null, RFC822.Subject? subject = null) {
         this.date = date;
         this.from = from;
         this.to = to;
+        this.cc = cc;
+        this.bcc = bcc;
+        this.subject = subject;
     }
     
     public ComposedEmail.as_reply(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -76,7 +80,59 @@ public class Geary.ComposedEmail : Object {
         body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
             Geary.RFC822.Utils.quote_email_for_forward(source, true)));
     }
-    
+
+    public ComposedEmail.from_mailto(string mailto, RFC822.MailboxAddresses default_from) {
+        DateTime date = new DateTime.now_local();
+        RFC822.MailboxAddresses from = default_from; 
+        RFC822.MailboxAddresses? to = null;
+        RFC822.MailboxAddresses? cc = null;
+        RFC822.MailboxAddresses? bcc = null;
+        RFC822.Subject? subject = null;
+
+        if (mailto.length > "mailto:".length) {
+            // Parse the mailto link.
+            string[] parts = mailto.substring("mailto:".length).split("?", 2);
+            string email = Uri.unescape_string(parts[0]);
+            string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
+            Gee.HashMap<string, string> headers = new Gee.HashMap<string, string>();
+            foreach (string param in params) {
+                string[] param_parts = param.split("=", 2);
+                if (param_parts.length == 2) {
+                    headers.set(Uri.unescape_string(param_parts[0]).down(),
+                        Uri.unescape_string(param_parts[1]));
+                }
+            }
+
+            // Assemble the headers.
+            if (headers.has_key("from")) {
+                from = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("from"));
+            }
+
+            if (email.length > 0 && headers.has_key("to")) {
+                to = new RFC822.MailboxAddresses.from_rfc822_string("%s,%s".printf(email, headers.get("to")));
+            } else if (email.length > 0) {
+                to = new RFC822.MailboxAddresses.from_rfc822_string(email);
+            } else if (headers.has_key("to")) {
+                to = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("to"));
+            }
+
+            if (headers.has_key("cc")) {
+                cc = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("cc"));
+            }
+
+            if (headers.has_key("bcc")) {
+                bcc = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("bcc"));
+            }
+
+            if (headers.has_key("subject")) {
+                subject = new RFC822.Subject(headers.get("subject"));
+            }
+        }
+
+        // And construct!
+        this(date, from, to, cc, bcc, subject);
+    }
+
     private void set_reply_references(Geary.Email source) {
         in_reply_to = source.message_id;
         reply_to_email = source;

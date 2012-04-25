@@ -37,7 +37,7 @@ public abstract class YorbaApplication {
         return 0;
     }
     
-    public virtual signal void activate() {
+    public virtual signal void activate(string[] args) {
     }
     
     public virtual signal void exiting(bool panicked) {
@@ -65,7 +65,10 @@ public abstract class YorbaApplication {
         
         // If app already running, activate it and exit
         if (unique_app.is_running()) {
-            unique_app.send_message((int) Unique.Command.ACTIVATE, null);
+            Unique.MessageData data = new Unique.MessageData();
+            string argstr = string.joinv(", ", args);
+            data.set_text(argstr, argstr.length);
+            unique_app.send_message((int) Unique.Command.ACTIVATE, data);
             
             return false;
         }
@@ -79,7 +82,7 @@ public abstract class YorbaApplication {
         Unique.MessageData data, uint timestamp) {
         switch (command) {
             case Unique.Command.ACTIVATE:
-                activate();
+                activate(data.get_text().split(", "));
             break;
             
             default:
@@ -112,7 +115,7 @@ public abstract class YorbaApplication {
             error("Unable to register application: %s", e.message);
         }
         
-        activate();
+        activate(args);
         
         // enter the main loop
         if (exitcode == 0)

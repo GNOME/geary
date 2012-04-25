@@ -102,7 +102,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             // i18n: Command line arguments are invalid
             GLib.error (_("Failed to parse command line: %s"), error.message);
         }
-        
+
         if (version) {
             stdout.printf("%s %s\n\n%s\n\n%s\n\t%s\n",
                 PRGNAME, VERSION, COPYRIGHT,
@@ -122,6 +122,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         } else {
             Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, log_ignore);
         }
+
         return 0;
      }
     
@@ -134,24 +135,24 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return result;
     }
     
-    public override void activate() {
+    public override void activate(string[] args) {
         // If Geary is already running, show the main window and return.
         if (controller != null && controller.main_window != null) {
             controller.main_window.present();
+            handle_args(args);
             return;
         }
-        
+
         // Start Geary.
         Geary.Engine.init(get_user_data_directory(), get_resource_directory());
         config = new Configuration();
-        
         controller = new GearyController();
-        
         login();
-        
+        handle_args(args);
+
         return;
     }
-    
+
     private void login(bool query_keyring = true) {
         // Get saved credentials. If not present, ask user.
         string username = get_username();
@@ -323,6 +324,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public Gtk.Window get_main_window() {
         return controller.main_window;
+    }
+
+    private void handle_args(string[] args) {
+        foreach(string arg in args) {
+            if (arg.has_prefix("mailto:")) {
+                controller.compose_mailto(arg);
+            }
+        }
     }
 }
 

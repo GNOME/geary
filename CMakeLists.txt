@@ -24,6 +24,20 @@ add_subdirectory(sql)
 add_subdirectory(ui)
 
 #
+# Install geary.desktop
+#
+install(
+    FILES
+        geary.desktop
+    DESTINATION
+        share/applications
+)
+install(
+    CODE
+        "execute_process (COMMAND update-desktop-database)"
+)
+
+#
 # Uninstall target
 #
 configure_file(
@@ -38,5 +52,7 @@ add_custom_target(
         ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     COMMAND 
         ${glib_schema_compiler} ${GSETTINGS_DIR}
+    COMMAND
+        update-desktop-database
 )
 

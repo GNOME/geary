@@ -917,10 +917,7 @@ public class GearyController {
     public void on_link_selected(string link) {
         const string MAILTO = "mailto:";
         if (link.down().has_prefix(MAILTO)) {
-            // TODO: handle more complex mailto links (subject, body, etc.)
-            create_compose_window(new Geary.ComposedEmail(new DateTime.now_local(),
-                get_from(), new Geary.RFC822.MailboxAddresses.single(
-                new Geary.RFC822.MailboxAddress(null, link.substring(MAILTO.length)))));
+            compose_mailto(link);
         } else {
             open_uri(link);
         }
@@ -945,6 +942,10 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive = sensitive;
+    }
+
+    public void compose_mailto(string mailto) {
+        create_compose_window(new Geary.ComposedEmail.from_mailto(mailto, get_from()));
     }
 }
 

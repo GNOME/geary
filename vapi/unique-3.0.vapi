@@ -52,12 +52,13 @@ namespace Unique {
 		public unowned Gdk.Screen get_screen ();
 		public unowned string get_startup_id ();
 		public unowned string get_text ();
-		public unowned string get_uris ();
+		[CCode (array_length = false)]
+		public unowned string[] get_uris ();
 		public uint get_workspace ();
 		public void  @set (uchar[] data, ssize_t length);
 		public void set_filename (string filename);
 		public bool set_text (string str, ssize_t length);
-		public bool set_uris (string uris);
+		public bool set_uris ([CCode (array_length = false)] string[] uris);
 	}
 	[CCode (cprefix = "UNIQUE_", cheader_filename = "unique/uniqueenumtypes.h")]
 	public enum Command {
