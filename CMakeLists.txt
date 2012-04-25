@@ -36,6 +36,8 @@ install(
 install(
     CODE
         "execute_process (COMMAND update-desktop-database)"
+    CODE
+        "execute_process (COMMAND gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor)"
 )
 
 #
@@ -55,5 +57,7 @@ add_custom_target(
         ${glib_schema_compiler} ${GSETTINGS_DIR}
     COMMAND
         update-desktop-database
+    COMMAND
+        gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor
 )
 
