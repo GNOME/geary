@@ -83,7 +83,7 @@ public class MessageViewer : WebKit.WebView {
             word-wrap: break-word;
             width: 100%;
             box-sizing:border-box;
-            margin: 0 0 15px 0px;
+            margin-top: 15px;
         }
         .email .starred {
             display: none;
@@ -155,23 +155,27 @@ public class MessageViewer : WebKit.WebView {
         }
         .email.hide:not(:last-of-type) .header {
             padding: 5px 0;
+            text-align: right;
         }
         .email.hide:not(:last-of-type) .header .field {
             display: inline;
+            margin-right: 2px;
+            text-align: left;
         }
-        .email.hide:not(:last-of-type) .header .field:not(.important) {
+        .email.hide:not(:last-of-type) .header .field:not(:first-child) {
+            display: inline-block;
+        }
+        .email.hide:not(:last-of-type) .header .field:not(.important),
+        .email.hide:not(:last-of-type) .header .field .title {
             display: none;
         }
-        .email.hide:not(:last-of-type) .header .title {
-            display: none;
-        }
-        .email.hide:not(:last-of-type) .header .value {
+        .email.hide:not(:last-of-type) .header .field .value {
             margin-left: 0;
         }
-        .email.hide:not(:last-of-type) .header .field + .field .value::before {
-            content: "";
-            border-left: 1px solid #777;
-            margin: 0 5px;
+        .email.hide:not(:last-of-type) .header .field .not_hidden_only,
+        .email:not(.hide) .header .field .hidden_only,
+        .email:last-of-type .header .field .hidden_only {
+            display: none;
         }
 
         .header {
@@ -257,7 +261,7 @@ public class MessageViewer : WebKit.WebView {
             position: absolute;
             left: 0;
             right: 0;
-            padding: 15px;
+            padding: 0 15px 15px;
         }
         #multiple_messages {
             display: none;
@@ -534,11 +538,10 @@ public class MessageViewer : WebKit.WebView {
         insert_header_address(ref header, _("Cc:"), email.cc);
             
         if (email.subject != null)
-            insert_header(ref header, _("Subject:"), email.subject.value, true);
+            insert_header(ref header, _("Subject:"), email.subject.value);
             
         if (email.date != null)
-            insert_header(ref header, _("Date:"), Date.pretty_print_verbose(
-                email.date.value, GearyApplication.instance.config.clock_format));
+            insert_header_date(ref header, _("Date:"), email.date.value, true);
         
         try {
             WebKit.DOM.HTMLImageElement icon = get_dom_document().query_selector("#%s .avatar".printf(message_id))
@@ -1092,6 +1095,19 @@ public class MessageViewer : WebKit.WebView {
         string title = Geary.HTML.escape_markup(_title);
         string value = Geary.HTML.escape_markup(_value);
         
+        header_text += create_header_row(title, value, important);
+    }
+
+    private void insert_header_date(ref string header_text, string _title, DateTime _value,
+        bool important = false){
+
+        Date.ClockFormat clock_format = GearyApplication.instance.config.clock_format;
+        string title = Geary.HTML.escape_markup(_title);
+        string value = """
+                <span class="hidden_only">%s</span>
+                <span class="not_hidden_only">%s</span>
+            """.printf(Date.pretty_print(_value, clock_format),
+                Date.pretty_print_verbose(_value, clock_format));
         header_text += create_header_row(title, value, important);
     }
 
