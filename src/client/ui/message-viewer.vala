@@ -47,7 +47,7 @@ public class MessageViewer : WebKit.WebView {
         }
 
         .button {
-            border: 1px #fff solid;
+            border: 1px transparent solid;
             border-radius: 4px;
             cursor: pointer;
             padding: 4px;
@@ -145,7 +145,7 @@ public class MessageViewer : WebKit.WebView {
             padding-top: 15px;
         }
         .email.hide:not(:last-of-type) {
-            opacity: 0.5;
+            background-color: #e8e8e8
         }
         .email.hide:not(:last-of-type) .body {
             display: none;
