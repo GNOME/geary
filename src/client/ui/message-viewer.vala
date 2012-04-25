@@ -836,17 +836,6 @@ public class MessageViewer : WebKit.WebView {
             message_menu.append(mark_unread_item);
         }
 
-        // Flag/unflag.
-        if (active_email.is_flagged().to_boolean(false)) {
-            Gtk.MenuItem unflag_item = new Gtk.MenuItem.with_mnemonic(_("Un_star"));
-            unflag_item.activate.connect(on_unflag_message);
-            message_menu.append(unflag_item);
-        } else {
-            Gtk.MenuItem flag_item = new Gtk.MenuItem.with_mnemonic(_("_Star"));
-            flag_item.activate.connect(on_flag_message);
-            message_menu.append(flag_item);
-        }
-
         // Separator.
         message_menu.append(new Gtk.SeparatorMenuItem());
 
