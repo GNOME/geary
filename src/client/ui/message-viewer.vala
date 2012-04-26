@@ -578,12 +578,12 @@ public class MessageViewer : WebKit.WebView {
 
         string body_text = "";
         try {
-            body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_utf8();
+            body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_string();
             body_text = insert_html_markup(body_text);
         } catch (Error err) {
             try {
                 body_text = linkify_and_escape_plain_text(email.get_message().
-                    get_first_mime_part_of_content_type("text/plain").to_utf8());
+                    get_first_mime_part_of_content_type("text/plain").to_string());
                 body_text = insert_plain_text_markup(body_text);
             } catch (Error err2) {
                 debug("Could not get message text. %s", err2.message);
@@ -1245,7 +1245,7 @@ public class MessageViewer : WebKit.WebView {
     private void show_message_source(Gee.Collection<Geary.Email> messages) {
         StringBuilder source = new StringBuilder();
         foreach(Geary.Email email in messages)
-            source.append_printf("%s%s\n\n", email.header.buffer.to_utf8(), email.body.buffer.to_utf8());
+            source.append_printf("%s%s\n\n", email.header.buffer.to_string(), email.body.buffer.to_string());
         
         try {
             string temporary_filename;

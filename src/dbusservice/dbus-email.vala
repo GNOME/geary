@@ -45,11 +45,11 @@ public class Geary.DBus.Email : Object {
         
         try {
             body_text = full_email.get_message().get_first_mime_part_of_content_type("text/html").
-                to_utf8();
+                to_string();
         } catch (Error err) {
             try {
                 body_text = full_email.get_message().get_first_mime_part_of_content_type("text/plain").
-                    to_utf8();
+                    to_string();
             } catch (Error err2) {
                 debug("Could not get message text. %s", err2.message);
             }

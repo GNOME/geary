@@ -79,9 +79,9 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
 
 private string text_from_message(Geary.Email email, bool html_format) throws Error {
     if (html_format) {
-        return email.get_message().get_first_mime_part_of_content_type("text/html").to_utf8();
+        return email.get_message().get_first_mime_part_of_content_type("text/html").to_string();
     } else {
-        return email.get_message().get_first_mime_part_of_content_type("text/plain").to_utf8();
+        return email.get_message().get_first_mime_part_of_content_type("text/plain").to_string();
     }
 }
 

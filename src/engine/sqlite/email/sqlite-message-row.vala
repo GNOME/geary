@@ -204,19 +204,19 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         }
         
         if ((fields & Geary.Email.Field.HEADER) != 0) {
-            header = (email.header != null) ? email.header.buffer.to_utf8() : null;
+            header = (email.header != null) ? email.header.buffer.to_string() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.HEADER);
         }
         
         if ((fields & Geary.Email.Field.BODY) != 0) {
-            body = (email.body != null) ? email.body.buffer.to_utf8() : null;
+            body = (email.body != null) ? email.body.buffer.to_string() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.BODY);
         }
         
         if ((fields & Geary.Email.Field.PREVIEW) != 0) {
-            preview = (email.preview != null) ? email.preview.buffer.to_utf8() : null;
+            preview = (email.preview != null) ? email.preview.buffer.to_string() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.PREVIEW);
         }

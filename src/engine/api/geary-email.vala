@@ -241,7 +241,7 @@ public class Geary.Email : Object {
     }
 
     public string get_preview_as_string() {
-        return (preview != null) ? preview.buffer.to_utf8() : "";
+        return (preview != null) ? preview.buffer.to_string() : "";
     }
 
     public string get_subject_as_string() {

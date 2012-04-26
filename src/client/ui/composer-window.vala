@@ -203,9 +203,9 @@ public class ComposerWindow : Gtk.Window {
             if (prefill.subject != null)
                 subject = prefill.subject.value;
             if (prefill.body_html != null)
-                reply_body = prefill.body_html.buffer.to_utf8();
+                reply_body = prefill.body_html.buffer.to_string();
             if (reply_body == null && prefill.body_text != null)
-                reply_body = "<pre>" + prefill.body_text.buffer.to_utf8();
+                reply_body = "<pre>" + prefill.body_text.buffer.to_string();
         }
         
         editor = new WebKit.WebView();
