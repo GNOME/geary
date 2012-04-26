@@ -931,6 +931,9 @@ public class MessageViewer : WebKit.WebView {
                     text.index_of("\n&gt;", offset);
                 if (quote_start == -1) {
                     break;
+                } else if (text.get(quote_start) == '\n') {
+                    // Don't include the newline.
+                    ++quote_start;
                 }
                 
                 // Find the end of the quote block.
