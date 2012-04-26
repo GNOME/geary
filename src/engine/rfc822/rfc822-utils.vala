@@ -101,7 +101,7 @@ private string quote_body(Geary.Email email, bool use_quotes, bool html_format) 
         
         // Wrap the whole thing in a blockquote.
         if (use_quotes)
-            body_text = "<blockquote>%s</blockquote>".printf(body_text);
+            body_text = "<blockquote type=\"cite\">%s</blockquote>".printf(body_text);
         
         return body_text;
     } else {

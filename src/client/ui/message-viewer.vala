@@ -283,6 +283,11 @@ public class MessageViewer : WebKit.WebView {
         #email_template {
             display: none;
         }
+        blockquote {
+            margin: 10px;
+            padding: 5px;
+            border-left: 3px #aaa solid;
+        }
         </style>
         </head><body>
         <div id="message_container"><span id="placeholder"></span></div>
