@@ -278,29 +278,29 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
-        if (reply_body == null)
-            return;
-        
         WebKit.DOM.HTMLElement? reply = editor.get_dom_document().get_element_by_id(
             REPLY_ID) as WebKit.DOM.HTMLElement;
         assert(reply != null);
-        
-        try {
-            reply.set_inner_html("<br /><br />" + reply_body + "<br />");
-        } catch (Error e) {
-            debug("Failed to load email for reply: %s", e.message);
+
+        if (!Geary.String.is_empty(reply_body)) {
+            try {
+                reply.set_inner_html("<br /><br />" + reply_body + "<br />");
+            } catch (Error e) {
+                debug("Failed to load email for reply: %s", e.message);
+            }
         }
-        
+
         // Set focus.
-        if (!Geary.String.is_empty(to) && !Geary.String.is_empty(subject)) {
+        if (Geary.String.is_empty(to)) {
+            to_entry.grab_focus();
+        } else if (Geary.String.is_empty(subject)) {
+            subject_entry.grab_focus();
+        } else {
             editor.grab_focus();
             reply.focus();
-        } else if (!Geary.String.is_empty(to)) {
-            subject_entry.grab_focus();
         }
-        
+
         bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
-        
         update_actions();
     }
     
@@ -342,7 +342,6 @@ public class ComposerWindow : Gtk.Window {
     
     public override void show_all() {
         set_default_size(680, 600);
-        
         base.show_all();
     }
     
