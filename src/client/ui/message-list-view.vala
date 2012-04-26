@@ -42,14 +42,18 @@ public class MessageListView : Gtk.TreeView {
         // Get the coordinates on the cell as well as the clicked path.
         int cell_x;
         int cell_y;
-        Gtk.TreePath path;
+        Gtk.TreePath? path;
         get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
-
+        
+        // If the user clicked in an empty area, do nothing.
+        if (path == null)
+            return false;
+        
         // If this is an unmodified click in the top-left of the cell, it is a star-click.
         if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0 &&
             (event.state & Gdk.ModifierType.CONTROL_MASK) == 0 &&
             event.type == Gdk.EventType.BUTTON_PRESS && cell_x < 25 && cell_y < 25) {
-
+            
             Geary.Conversation conversation = get_store().get_conversation_at(path);
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.FLAGGED);
