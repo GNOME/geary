@@ -34,6 +34,17 @@ public abstract class YorbaApplication {
     public virtual signal int startup() {
         unowned string[] a = args;
         Gtk.init(ref a);
+        
+        // Sanitize the args.  Gtk's init function will leave null elements
+        // in the array, which then causes OptionContext to crash.
+        // See ticket: https://bugzilla.gnome.org/show_bug.cgi?id=674837
+        string[] fixed_args = new string[0];
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] != null)
+                fixed_args += args[i];
+        }
+        args = fixed_args;
+        
         return 0;
     }
     

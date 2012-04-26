@@ -92,12 +92,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     };
     
     private int parse_arguments (string[] args) {
-        var context = new GLib.OptionContext("");
+        var context = new OptionContext("");
         context.set_help_enabled(true);
         context.add_main_entries(options, null);
         context.add_group(Gtk.get_option_group(false));
         try {
-            context.parse (ref args);
+            context.parse(ref args);
         } catch (GLib.Error error) {
             // i18n: Command line arguments are invalid
             GLib.error (_("Failed to parse command line: %s"), error.message);
