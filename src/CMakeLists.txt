@@ -185,6 +185,7 @@ client/ui/sidebar/sidebar-tree.vala
 client/util/util-email.vala
 client/util/util-keyring.vala
 client/util/util-menu.vala
+client/util/util-webkit.vala
 )
 
 set(CONSOLE_SRC

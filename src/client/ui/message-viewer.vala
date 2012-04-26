@@ -607,26 +607,13 @@ public class MessageViewer : WebKit.WebView {
         update_flags(email);
 
         // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
-        bind_event(".email", "contextmenu", (Callback) on_context_menu, this);
-        bind_event(".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
-        bind_event(".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
-        bind_event(".email_container .menu", "click", (Callback) on_menu_clicked, this);
-        bind_event(".email_container .starred", "click", (Callback) on_unstar_clicked, this);
-        bind_event(".email_container .unstarred", "click", (Callback) on_star_clicked, this);
-        bind_event(".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
-    }
-
-    private void bind_event(string selector, string event, Callback callback, Object? extra = null) {
-        try {
-            WebKit.DOM.NodeList node_list = get_dom_document().query_selector_all(selector);
-            for (int i = 0; i < node_list.length; ++i) {
-                WebKit.DOM.EventTarget node = node_list.item(i) as WebKit.DOM.EventTarget;
-                node.remove_event_listener(event, callback, false);
-                node.add_event_listener(event, callback, false, extra);
-            }
-        } catch (Error error) {
-            warning("Error setting up click handlers: %s", error.message);
-        }
+        bind_event(this, ".email", "contextmenu", (Callback) on_context_menu, this);
+        bind_event(this,".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
+        bind_event(this,".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
+        bind_event(this,".email_container .menu", "click", (Callback) on_menu_clicked, this);
+        bind_event(this,".email_container .starred", "click", (Callback) on_unstar_clicked, this);
+        bind_event(this,".email_container .unstarred", "click", (Callback) on_star_clicked, this);
+        bind_event(this,".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
     }
     
     private WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {

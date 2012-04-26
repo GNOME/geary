@@ -98,6 +98,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.ToggleToolButton font_size_button;
     private Gtk.Label message_overlay_label;
     private Gtk.Menu? context_menu = null;
+    private WebKit.DOM.Element? prev_selected_link = null;
     
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
@@ -297,6 +298,8 @@ public class ComposerWindow : Gtk.Window {
         } else if (!Geary.String.is_empty(to)) {
             subject_entry.grab_focus();
         }
+        
+        bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
         
         update_actions();
     }
@@ -512,25 +515,76 @@ public class ComposerWindow : Gtk.Window {
         link_dialog("http://");
     }
     
+    private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ComposerWindow composer) {
+        try {
+            composer.editor.get_dom_document().get_default_view().get_selection().
+                select_all_children(element);
+        } catch (Error e) {
+            debug("Error selecting link: %s", e.message);
+        }
+        
+        composer.prev_selected_link = element;
+    }
+    
     private void link_dialog(string link) {
-        Gtk.Dialog dialog = new Gtk.Dialog.with_buttons("", this, 0,
-            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.OK, Gtk.ResponseType.OK);
+        Gtk.Dialog dialog = new Gtk.Dialog();
+        bool existing_link = false;
+        
+        // Allow user to remove link if they're editing an existing one.
+        WebKit.DOM.Node selected = editor.get_dom_document().get_default_view().
+            get_selection().focus_node;
+        if (selected != null && (selected is WebKit.DOM.HTMLAnchorElement ||
+            selected.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
+            existing_link = true;
+            dialog.add_buttons(Gtk.Stock. REMOVE, Gtk.ResponseType.REJECT);
+        }
+        
+        dialog.add_buttons(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.OK,
+            Gtk.ResponseType.OK);
+        
         Gtk.Entry entry = new Gtk.Entry();
+        entry.changed.connect(() => {
+            // Only allow OK when there's text in the box.
+            dialog.set_response_sensitive(Gtk.ResponseType.OK, 
+                !Geary.String.is_empty(entry.text.strip()));
+        });
+        
+        dialog.width_request = 350;
+        dialog.get_content_area().spacing = 7;
+        dialog.get_content_area().border_width = 10;
         dialog.get_content_area().pack_start(new Gtk.Label("Link URL:"));
         dialog.get_content_area().pack_start(entry);
+        dialog.get_widget_for_response(Gtk.ResponseType.OK).can_default = true;
         dialog.set_default_response(Gtk.ResponseType.OK);
         dialog.show_all();
         
         entry.set_text(link);
+        entry.activates_default = true;
+        entry.move_cursor(Gtk.MovementStep.BUFFER_ENDS, 0, false);
         
-        if (dialog.run() == Gtk.ResponseType.OK) {
-            if (!Geary.String.is_empty(entry.text.strip()))
-                editor.get_dom_document().exec_command("createLink", false, entry.text);
-            else
-                editor.get_dom_document().exec_command("unlink", false, "");
+        int response = dialog.run();
+        
+        // If it's an existing link, re-select it.  This is necessary because selecting
+        // text in the Gtk.Entry will de-select all in the WebView.
+        if (existing_link) {
+            try {
+                editor.get_dom_document().get_default_view().get_selection().
+                    select_all_children(prev_selected_link);
+            } catch (Error e) {
+                debug("Error selecting link: %s", e.message);
+            }
         }
         
+        if (response == Gtk.ResponseType.OK)
+            editor.get_dom_document().exec_command("createLink", false, entry.text);
+        else if (response == Gtk.ResponseType.REJECT)
+            editor.get_dom_document().exec_command("unlink", false, "");
+        
         dialog.destroy();
+        
+        // Re-bind to anchor links.  This must be done every time link have changed.
+        bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
     }
     
     // Inserts a newline that's fully unindented.
