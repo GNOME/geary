@@ -243,21 +243,24 @@ public class Sidebar.Tree : Gtk.TreeView {
     public bool is_any_selected() {
         return get_selection().count_selected_rows() != 0;
     }
-    
+
     private Gtk.TreePath? get_selected_path() {
         Gtk.TreeModel model;
-        GLib.List<Gtk.TreePath> rows = get_selection().get_selected_rows(out model);
+        Gtk.TreeSelection? selection = get_selection();
+        if (selection == null){
+            return null;
+        }
+        GLib.List<Gtk.TreePath> rows = selection.get_selected_rows(out model);
         assert(rows.length() == 0 || rows.length() == 1);
-        
+
         return rows.length() != 0 ? rows.nth_data(0) : null;
     }
-    
+
     public override void cursor_changed() {
         Gtk.TreePath? path = get_selected_path();
         if (path == null) {
             if (base.cursor_changed != null)
                 base.cursor_changed();
-            
             return;
         }
         
