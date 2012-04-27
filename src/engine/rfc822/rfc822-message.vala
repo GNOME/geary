@@ -102,7 +102,7 @@ public class Geary.RFC822.Message : Object {
                 GMime.ContentEncoding.DEFAULT);
             
             body_text = new GMime.Part();
-            body_text.set_content_type(new GMime.ContentType("text", "plain"));
+            body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8"));
             body_text.set_content_object(content);
         }
         
@@ -113,7 +113,7 @@ public class Geary.RFC822.Message : Object {
                 GMime.ContentEncoding.DEFAULT);
             
             body_html = new GMime.Part();
-            body_html.set_content_type(new GMime.ContentType("text", "html"));
+            body_html.set_content_type(new GMime.ContentType.from_string("text/html; charset=utf-8"));
             body_html.set_content_object(content);
         }
         
