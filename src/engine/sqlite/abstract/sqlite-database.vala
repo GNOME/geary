@@ -16,6 +16,7 @@ public abstract class Geary.Sqlite.Database {
         
         db = new SQLHeavy.VersionedDatabase(db_file.get_path(), schema_dir.get_path());
         db.foreign_keys = true;
+        db.synchronous = SQLHeavy.SynchronousMode.OFF;
     }
     
     protected Geary.Sqlite.Table? get_table(string name, out SQLHeavy.Table heavy_table) {

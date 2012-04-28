@@ -5,7 +5,7 @@
  */
 
 private class Geary.GenericImapFolder : Geary.AbstractFolder {
-    private const int REMOTE_FETCH_CHUNK_COUNT = 5;
+    private const int REMOTE_FETCH_CHUNK_COUNT = 50;
     
     internal Sqlite.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }

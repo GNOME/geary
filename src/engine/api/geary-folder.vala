@@ -26,8 +26,8 @@ public interface Geary.Folder : Object {
     
     /**
      * Flags used for retrieving email.
-     *   FAST:         fetch from the DB only
-     *   FORCE_UPDATE: fetch from remote only
+     *   LOCAL_ONLY:   fetch from the local store only
+     *   FORCE_UPDATE: fetch from remote only (results merged into local store)
      *   EXCLUDING_ID: exclude the provided ID
      */
     [Flags]
@@ -112,53 +112,18 @@ public interface Geary.Folder : Object {
      */
     public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_opened(OpenState state, int count);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_closed(CloseReason reason);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_email_count_changed(int new_count, CountChangeReason reason);
     
-    /**
-     * This helper method should be called by implementors of Folder rather than firing the signal
-     * directly.  This allows subclasses and superclasses the opportunity to inspect the email
-     * and update state before and/or after the signal has been fired.
-     */
     protected abstract void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
         Geary.EmailFlags> flag_map);
     
