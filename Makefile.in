@@ -1,0 +1,29 @@
+# Makefile.in
+#
+# Copyright 2012 Yorba Foundation
+
+BUILD_DIR := build
+BINARIES := geary gearyd geary-console geary-mailer
+
+BUILD_BINARIES := $(addprefix $(BUILD_DIR)/,$(BINARIES))
+
+.PHONY: all
+all:
+	@$(MAKE) -C $(BUILD_DIR)
+	@cp $(BUILD_BINARIES) .
+
+.PHONY: install uninstall
+install uninstall:
+	@$(MAKE) -C $(BUILD_DIR) $@
+
+.PHONY: clean
+clean:
+	@-$(MAKE) -C $(BUILD_DIR) clean
+	@-rm -f $(BINARIES)
+	@-rm -f .stamp
+
+.PHONY: distclean
+distclean: clean
+	@-rm -rf $(BUILD_DIR)
+	@-rm -f Makefile
+

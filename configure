@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+#
+# Copyright 2012 Yorba Foundation
+#
+# This software is licensed under the GNU LGPL (version 2.1 or later).
+# See the COPYING file in this distribution. 
+
+DEFAULT_PREFIX="/usr/local"
+
+PREFIX=$DEFAULT_PREFIX
+
+configure_help() {
+    printf "Usage:\n"
+    printf "\t./configure [OPTIONS]...\n"
+    printf "\n"
+    printf "Options:\n"
+    
+    printf "\t-h, --help\t\tPrint this help and exit.\n"
+    
+    printf "\t--prefix=PREFIX\t\tPrepend PREFIX to program installation paths.\n"
+    printf "\t\t\t\t[%s]\n" $DEFAULT_PREFIX
+    
+    printf "\n"
+}
+
+abort() {
+    printf "%s: Invalid argument %s\n" $0 $1
+    configure_help
+    exit 1
+}
+
+while [ $# != 0 ]
+do
+    option=`echo $1 | sed 's/=.*//'`
+    if [ `echo $1 | grep '='` ]
+    then
+        value=`echo $1 | sed 's/.*=//'`
+    fi
+
+    case $option in
+        -h | --help)        configure_help
+                            exit 0
+                            ;;
+        
+        --prefix)           if [ ! $value ]
+                            then
+                                abort $1
+                            fi
+                            
+                            CMDLINE="${CMDLINE}-DCMAKE_INSTALL_PREFIX=${value} "
+                            ;;
+        
+        *)                  abort $option
+                            ;;
+    esac
+    
+    shift
+done
+
+# Verify cmake is installed
+# TODO: Check for minimum version number
+if ! cmake --version
+then
+    printf "cmake must be installed to configure and build.\n"
+    exit 1
+fi
+
+# Simple check to verify this script is running in the root of the source tree
+if ! [ -e Makefile.in ]
+then
+    printf "configure script must be executed in source directory (Makefile.in not found).\n"
+    exit 1
+fi
+
+# Remove existing Makefile so it's not left around if configure fails
+rm -f Makefile
+
+if ! mkdir -p build
+then
+    printf "Unable to create build directory.\n"
+    exit 1
+fi
+
+cd build
+
+if ! cmake $CMDLINE ..
+then
+    printf "Unable to prepare build directory.\n"
+    exit 1
+fi
+
+cd ..
+
+if ! cp -f Makefile.in Makefile
+then
+    printf "Unable to prepare Makefile.\n"
+    exit 1
+fi
+
+printf "Configured.  Type 'make' to build, 'make install' to install.\n"

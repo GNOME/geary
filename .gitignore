@@ -1,10 +1,10 @@
 *~
-.lock-wafbuild
 .valencia
-.waf-*
+/Makefile
+/.stamp
 build/
-/console
 /geary
-/norman
-/theseus
 /gearyd
+/geary-mailer
+/geary-console
+
