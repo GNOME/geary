@@ -451,6 +451,9 @@ public class GearyController {
     
     public void on_conversation_removed(Geary.Conversation conversation) {
         main_window.message_list_store.remove_conversation(conversation);
+        if (!GearyApplication.instance.config.autoselect) {
+            main_window.message_list_view.unselect_all();
+        }
     }
     
     private void on_load_more() {
@@ -863,9 +866,10 @@ public class GearyController {
         // button is disabled, but better safe than segfaulted.
         last_deleted_conversation = selected_conversations.length > 0 ? selected_conversations[0] : null;
         
-        // If the user clicked the toolbar button, we want to
-        // move focus back to the message list.
-        main_window.message_list_view.grab_focus();
+        // If the user clicked the toolbar button, we want to move focus back to the message list.
+        if (GearyApplication.instance.config.autoselect) {
+            main_window.message_list_view.grab_focus();
+        }
         set_busy(true);
 
         // Collect all the emails into one pool and then delete.
@@ -884,6 +888,16 @@ public class GearyController {
         
         yield current_folder.remove_email_async(list, cancellable);
     }
+
+    private void on_delete_messages_completed(Object? source, AsyncResult result) {
+        try {
+            delete_messages.end(result);
+        } catch (Error err) {
+            debug("Error, unable to delete messages: %s", err.message);
+        }
+        
+        set_busy(false);
+    }
     
     private void on_zoom_in() {
         main_window.message_viewer.zoom_in();
@@ -895,16 +909,6 @@ public class GearyController {
 
     private void on_zoom_normal() {
         main_window.message_viewer.zoom_level = 1.0f;
-    }
-
-    private void on_delete_messages_completed(Object? source, AsyncResult result) {
-        try {
-            delete_messages.end(result);
-        } catch (Error err) {
-            debug("Error, unable to delete messages: %s", err.message);
-        }
-        
-        set_busy(false);
     }
     
     private Geary.RFC822.MailboxAddress get_sender() {
