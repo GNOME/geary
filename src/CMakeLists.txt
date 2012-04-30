@@ -221,14 +221,14 @@ pkg_check_modules(DEPS REQUIRED
     gee-1.0>=0.6.0
     unique-3.0>=3.0.0
     sqlite3>=3.7.4
-    sqlheavy-0.2>=0.2.0
+    sqlheavy-0.1>=0.1.1
     gmime-2.6>=2.6.0
     gnome-keyring-1>=2.32.0
     webkitgtk-3.0>=1.4.3
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-1.0 gio-2.0 sqlheavy-0.2 gmime-2.6 unique-3.0 posix
+    glib-2.0 gee-1.0 gio-2.0 sqlheavy-0.1 gmime-2.6 unique-3.0 posix
 )
 
 set(CLIENT_PACKAGES
