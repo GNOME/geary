@@ -21,6 +21,7 @@ public class MainWindow : Gtk.Window {
     private Gtk.HPaned folder_paned = new Gtk.HPaned();
     private Gtk.HPaned messages_paned = new Gtk.HPaned();
     private Gtk.Spinner spinner = new Gtk.Spinner();
+    private bool is_shown = false;
     
     public MainWindow() {
         title = GearyApplication.NAME;
@@ -46,17 +47,20 @@ public class MainWindow : Gtk.Window {
         messages_paned.set_position(GearyApplication.instance.config.messages_pane_position);
         
         base.show_all();
+        is_shown = true;
     }
     
     public override void destroy() {
-        // Save window dimensions.
-        GearyApplication.instance.config.window_width = window_width;
-        GearyApplication.instance.config.window_height = window_height;
-        GearyApplication.instance.config.window_maximize = window_maximized;
-        
-        // Save pane positions.
-        GearyApplication.instance.config.folder_list_pane_position = folder_paned.get_position();
-        GearyApplication.instance.config.messages_pane_position = messages_paned.get_position();
+        if (is_shown) {
+            // Save window dimensions.
+            GearyApplication.instance.config.window_width = window_width;
+            GearyApplication.instance.config.window_height = window_height;
+            GearyApplication.instance.config.window_maximize = window_maximized;
+            
+            // Save pane positions.
+            GearyApplication.instance.config.folder_list_pane_position = folder_paned.get_position();
+            GearyApplication.instance.config.messages_pane_position = messages_paned.get_position();
+        }
         
         GearyApplication.instance.exit();
         
