@@ -139,16 +139,7 @@ public class MessageListStore : Gtk.TreeStore {
     // Returns the email to use for a preview in a conversation.
     public static Geary.Email? email_for_preview(Geary.Conversation conversation) {
         Gee.List<Geary.Email> pool = conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
-        if (pool.size == 0)
-            return null;
-        
-        // If it exists, return oldest unread message.
-        foreach (Geary.Email email in pool)
-            if (email.properties.email_flags.is_unread())
-                return email;
-        
-        // All e-mail was read, so return the newest one.
-        return pool.last();
+        return pool.size == 0 ? null : pool.last();
     }
     
     public void set_preview_for_conversation(Geary.Conversation conversation, Geary.Email email) {
