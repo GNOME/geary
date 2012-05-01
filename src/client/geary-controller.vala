@@ -140,7 +140,7 @@ public class GearyController {
         quit.label = _("_Quit");
         entries += quit;
         
-        Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, "mail-mark-notjunk", TRANSLATABLE, null,
+        Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, null, TRANSLATABLE, null,
             null, on_show_mark_menu };
         mark_menu.label = _("_Mark as...");
         entries += mark_menu;
@@ -165,19 +165,19 @@ public class GearyController {
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
 
-        Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, Gtk.Stock.NEW, TRANSLATABLE, "<Ctrl>N", null,
+        Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, null, TRANSLATABLE, "<Ctrl>N", null,
             on_new_message };
         new_message.label = _("_New Message");
         entries += new_message;
         add_accelerator("N", ACTION_NEW_MESSAGE);
 
-        Gtk.ActionEntry reply_to_message = { ACTION_REPLY_TO_MESSAGE, Gtk.Stock.GO_BACK,
-            TRANSLATABLE, "<Ctrl>R", null, on_reply_to_message };
+        Gtk.ActionEntry reply_to_message = { ACTION_REPLY_TO_MESSAGE, null, TRANSLATABLE, "<Ctrl>R",
+            null, on_reply_to_message };
         entries += reply_to_message;
         add_accelerator("R", ACTION_REPLY_TO_MESSAGE);
         
-        Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, Gtk.Stock.MEDIA_REWIND,
-            TRANSLATABLE, "<Ctrl><Shift>R", null, on_reply_all_message };
+        Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, null, TRANSLATABLE,
+            "<Ctrl><Shift>R", null, on_reply_all_message };
         entries += reply_all_message;
         add_accelerator("<Shift>R", ACTION_REPLY_ALL_MESSAGE);
         
@@ -186,7 +186,7 @@ public class GearyController {
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, Gtk.Stock.CLOSE, TRANSLATABLE, "A",
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, null, TRANSLATABLE, "A",
             null, on_delete_message };
         entries += delete_message;
         add_accelerator("Delete", ACTION_DELETE_MESSAGE);

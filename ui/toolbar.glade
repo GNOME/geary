@@ -133,7 +133,7 @@
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">menu</property>
         <property name="use_underline">True</property>
-        <property name="stock_id">gtk-properties</property>
+        <property name="icon_name">application-menu</property>
       </object>
       <packing>
         <property name="expand">False</property>
