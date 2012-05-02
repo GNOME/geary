@@ -5,6 +5,7 @@
  */
 
 // Defined by CMake build script.
+extern const string _VERSION;
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
 extern const string _SOURCE_ROOT_DIR;
@@ -14,12 +15,12 @@ public class GearyApplication : YorbaApplication {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
     public static string DESCRIPTION = _("Email Client");
-    public const string VERSION = "0.0.0+trunk";
     public const string COPYRIGHT = "Copyright 2011-2012 Yorba Foundation";
     public const string WEBSITE = "http://www.yorba.org";
     public static string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
     
+    public const string VERSION = _VERSION;
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
     public const string GSETTINGS_DIR = _GSETTINGS_DIR;
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
