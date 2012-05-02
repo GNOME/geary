@@ -128,7 +128,7 @@ public class GearyController {
         prefs.label = _("_Preferences");
         entries += prefs;
 
-        Gtk.ActionEntry help = { ACTION_HELP, Gtk.Stock.HELP, TRANSLATABLE, null, null, on_help };
+        Gtk.ActionEntry help = { ACTION_HELP, Gtk.Stock.HELP, TRANSLATABLE, "F1", null, on_help };
         help.label = _("_Help");
         entries += help;
 
