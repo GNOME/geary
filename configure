@@ -20,6 +20,15 @@ configure_help() {
     printf "\t--prefix=PREFIX\t\tPrepend PREFIX to program installation paths.\n"
     printf "\t\t\t\t[%s]\n" $DEFAULT_PREFIX
     
+    printf "\t--disable-schemas-compile\n"
+    printf "\t\t\t\tDisable compiling the GSettings schema.\n"
+    
+    printf "\t--disable-desktop-update\n"
+    printf "\t\t\t\tDisable desktop database update.\n"
+    
+    printf "\t--disable-icon-update\n"
+    printf "\t\t\t\tDisable icon cache update.\n"
+    
     printf "\n"
 }
 
@@ -47,7 +56,20 @@ do
                                 abort $1
                             fi
                             
-                            CMDLINE="${CMDLINE}-DCMAKE_INSTALL_PREFIX=${value} "
+                            CMDLINE="${CMDLINE} -DCMAKE_INSTALL_PREFIX=${value}"
+                            ;;
+        
+        --disable-schemas-compile)
+                            CMDLINE="${CMDLINE} -DGSETTINGS_COMPILE=OFF"
+                            CMDLINE="${CMDLINE} -DGSETTINGS_COMPILE_IN_PLACE=OFF"
+                            ;;
+        
+        --disable-icon-update)
+                            CMDLINE="${CMDLINE} -DICON_UPDATE=OFF"
+                            ;;
+        
+        --disable-desktop-update)
+                            CMDLINE="${CMDLINE} -DDESKTOP_UPDATE=OFF"
                             ;;
         
         *)                  abort $option

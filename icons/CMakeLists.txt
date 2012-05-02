@@ -16,3 +16,22 @@ set(ICON_FILES
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
 install(FILES geary.png DESTINATION share/icons/hicolor/scalable/apps)
 
+
+# Optional: update icon cache at install time.
+if (ICON_UPDATE)
+    install(
+        CODE
+            "execute_process (COMMAND gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor)"
+        CODE
+            "message (STATUS \"Updating icon cache\")"
+    )
+    
+    add_custom_target(
+        uninstall-icon-cache
+        DEPENDS
+            uninstall
+        COMMAND
+            gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor
+    )
+endif ()
+

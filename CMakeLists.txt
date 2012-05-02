@@ -18,6 +18,18 @@ set(RELEASE_NAME "Lightweight email client for GNOME.")
 set(VERSION "0.0.0+trunk")
 set(VERSION_INFO "Release")
 
+option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
+option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
+
+if (ICON_UPDATE)
+    message(STATUS "Icon cache will be updated")
+endif ()
+
+if (DESKTOP_UPDATE)
+    message(STATUS "Desktop database will be updated")
+endif ()
+
+
 add_subdirectory(src)
 add_subdirectory(icons)
 add_subdirectory(sql)
@@ -32,12 +44,6 @@ install(
         geary.desktop
     DESTINATION
         share/applications
-)
-install(
-    CODE
-        "execute_process (COMMAND update-desktop-database)"
-    CODE
-        "execute_process (COMMAND gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor)"
 )
 
 #
@@ -55,9 +61,23 @@ add_custom_target(
         ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     COMMAND 
         ${glib_schema_compiler} ${GSETTINGS_DIR}
-    COMMAND
-        update-desktop-database
-    COMMAND
-        gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor
 )
+
+# Optional: run update-desktop-database at install time.
+if (DESKTOP_UPDATE)
+    install(
+        CODE
+            "execute_process (COMMAND update-desktop-database)"
+        CODE
+            "message (STATUS \"Updating desktop database\")"
+    )
+    
+    add_custom_target(
+        uninstall-desktop-update
+        DEPENDS
+            uninstall
+        COMMAND
+            update-desktop-database
+    )
+endif ()
 
