@@ -516,16 +516,21 @@ public class Geary.Conversations : Object {
         if (found.message_id != null)
             message_id_map.unset(found.message_id);
         
-        notify_conversation_trimmed(conversation, found);
-        
+        bool removed = false;
         if (conversation.get_count() == 0) {
             // remove the Conversation from the master list
-            bool removed = conversations.remove((ImplConversation) conversation);
-            assert(removed);
-            
-            // done
-            notify_conversation_removed(conversation);
+            removed = conversations.remove((ImplConversation) conversation);
+            if (removed) {
+                debug("Removing Email ID %s evaporates conversation", removed_id.to_string());
+            } else {
+                debug("WARNING: Conversation already removed from master list (Email ID %s)",
+                    removed_id.to_string());
+            }
         }
+        
+        notify_conversation_trimmed(conversation, found);
+        if (removed)
+            notify_conversation_removed(conversation);
     }
     
     private void on_folder_email_appended() {
