@@ -118,7 +118,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
                     break;
                 }
             } catch (ImapError ierr) {
-                message("SELECT/EXAMINE decode error for \"%s\": %s", data.to_string(), ierr.message);
+                debug("SELECT/EXAMINE: unable to decode \"%s\", ignored: %s", data.to_string(), ierr.message);
             }
         }
         

@@ -92,6 +92,7 @@ class ImapConsole : Gtk.Window {
         "exit",
         "quit",
         "gmail",
+        "yahoo",
         "keepalive",
         "status",
         "preview",
@@ -186,6 +187,12 @@ class ImapConsole : Gtk.Window {
                     case "gmail":
                         string[] fake_args = new string[1];
                         fake_args[0] = "imap.gmail.com:993";
+                        connect_cmd("connect", fake_args);
+                    break;
+                    
+                    case "yahoo":
+                        string[] fake_args = new string[1];
+                        fake_args[0] = "imap.mail.yahoo.com:993";
                         connect_cmd("connect", fake_args);
                     break;
                     
