@@ -7,6 +7,7 @@
     <property name="toolbar_style">icons</property>
     <child>
       <object class="GtkToolButton" id="GearyNewMessage">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose message</property>
@@ -22,6 +23,7 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyReplyToMessage">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Reply to sender</property>
@@ -37,6 +39,7 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyReplyAllMessage">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Reply to all</property>
@@ -52,6 +55,7 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyForwardMessage">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Forward email</property>
@@ -67,6 +71,7 @@
     </child>
     <child>
       <object class="GtkToolItem" id="separatorContainer">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
@@ -84,6 +89,7 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyDeleteMessage">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Delete the selected conversation</property>
@@ -99,9 +105,10 @@
     </child>
     <child>
       <object class="GtkToggleToolButton" id="GearyMarkAsMenuButton">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Mark as read/unread</property>
+        <property name="tooltip_text" translatable="yes" context="Toggles menu for marking a message as read/unread or starred/unstarred">Mark email</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Mark as...</property>
         <property name="use_underline">True</property>
@@ -114,6 +121,7 @@
     </child>
     <child>
       <object class="GtkToolItem" id="filler">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
@@ -128,6 +136,7 @@
     </child>
     <child>
       <object class="GtkToggleToolButton" id="menu_button">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
