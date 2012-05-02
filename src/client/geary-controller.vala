@@ -865,11 +865,9 @@ public class GearyController {
         // There should always be at least one conversation selected here, otherwise the archive
         // button is disabled, but better safe than segfaulted.
         last_deleted_conversation = selected_conversations.length > 0 ? selected_conversations[0] : null;
-        
+
         // If the user clicked the toolbar button, we want to move focus back to the message list.
-        if (GearyApplication.instance.config.autoselect) {
-            main_window.message_list_view.grab_focus();
-        }
+        main_window.message_list_view.grab_focus();
         set_busy(true);
 
         // Collect all the emails into one pool and then delete.
