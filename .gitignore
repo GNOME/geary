@@ -7,6 +7,5 @@ build/
 /gearyd
 /geary-mailer
 /geary-console
-*.gz
-*.bz2
+*.xz
 

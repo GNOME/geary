@@ -86,8 +86,6 @@ endif ()
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 add_custom_target(dist
     COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
-        | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
-    COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
-        | gzip > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.gz
+        | xz -z > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.xz
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 

@@ -30,6 +30,5 @@ distclean: clean
 .PHONY: dist
 dist:
 	@$(MAKE) -C $(BUILD_DIR) dist
-	@cp build/*.gz .
-	@cp build/*.bz2 .
+	@cp build/*.xz .
 
