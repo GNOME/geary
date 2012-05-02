@@ -27,7 +27,7 @@ public class Geary.DBus.Conversations : Object {
     
     public Conversations(Geary.Folder folder) {
         this.folder = folder;
-        conversations = new Geary.Conversations(folder, Geary.Email.Field.ENVELOPE |
+        conversations = new Geary.Conversations(folder, false, Geary.Email.Field.ENVELOPE |
             Geary.Email.Field.PROPERTIES);
         
         start_monitoring_async.begin();

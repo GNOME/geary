@@ -59,7 +59,7 @@ private abstract class Geary.SendReplayOperation {
         try {
             semaphore.notify();
         } catch (Error e) {
-            debug("Unable to compelte send replay queue operation [%s] error: %s", name, e.message);
+            debug("Unable to complete send replay queue operation [%s] error: %s", name, e.message);
         }
     }
     
@@ -140,7 +140,7 @@ private class Geary.SendReplayQueue {
             try {
                 completed = yield op.replay_local();
             } catch (Error e) {
-                debug("Replay local error: %s", e.message);
+                debug("Replay local error for %s: %s", op.to_string(), e.message);
                 op.set_ready(e);
                 
                 continue;
@@ -150,7 +150,8 @@ private class Geary.SendReplayQueue {
                 try {
                     remote_queue.send(op);
                 } catch (Error err) {
-                    error("Unable to schedule operation on remote replay queue: %s", err.message);
+                    error("Unable to schedule operation %s on remote replay queue: %s", op.to_string(),
+                        err.message);
                 }
             } else {
                 op.set_ready(null);

@@ -61,9 +61,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         else if (remote_folder != null)
             return Geary.Folder.OpenState.REMOTE;
         
-        // opened flag set but neither open; potentially indicates opening state, but call CLOSED
-        // for now
-        return Geary.Folder.OpenState.CLOSED;
+        // opened flag set but neither open; indicates opening state
+        return Geary.Folder.OpenState.OPENING;
     }
     
     public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
@@ -406,17 +405,21 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // fired here
         opened = false;
         
-        // if remote is still opening, need to wait for it to open before closing (otherwise risk
-        // calls being made in a screwy state ... note that if the client properly cancels their
-        // open, this problem is effectively minimized)
-        //
-        // NOTE: This should be the only call in this method that throws an error (specifically,
-        // IOError.CANCELLED).  Once past this hurdle, everything else is caught as they can
-        // be done quickly.
-        if (yield wait_for_remote_to_open(cancellable)) {
-            remote_folder.messages_appended.disconnect(on_remote_messages_appended);
-            remote_folder.message_at_removed.disconnect(on_remote_message_at_removed);
-            remote_folder.disconnected.disconnect(on_remote_disconnected);
+        // Notify all callers waiting for the remote folder that it's not coming available
+        Imap.Folder? closing_remote_folder = remote_folder;
+        remote_folder = null;
+        remote_count = -1;
+        
+        try {
+            remote_semaphore.notify();
+        } catch (Error err) {
+            debug("close_internal_async: Unable to fire remote semaphore: %s", err.message);
+        }
+        
+        if (closing_remote_folder != null) {
+            closing_remote_folder.messages_appended.disconnect(on_remote_messages_appended);
+            closing_remote_folder.message_at_removed.disconnect(on_remote_message_at_removed);
+            closing_remote_folder.disconnected.disconnect(on_remote_disconnected);
             
             // to avoid keeping the caller waiting while the remote end closes, close it in the
             // background
@@ -425,10 +428,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             // because by the time this operation completes the folder is considered closed.  That
             // may not be important to most callers, however.
             if (remote_reason == CloseReason.REMOTE_CLOSE)
-                remote_folder.close_async.begin(cancellable);
-            
-            remote_folder = null;
-            remote_count = -1;
+                closing_remote_folder.close_async.begin(cancellable);
             
             notify_closed(remote_reason);
         } else {

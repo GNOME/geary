@@ -304,15 +304,15 @@ public class GearyController {
         
         // stop monitoring for conversations and close the folder
         if (current_conversations != null) {
-            yield current_conversations.stop_monitoring_async(true);
+            yield current_conversations.stop_monitoring_async(true, null);
             current_conversations = null;
+        } else if (current_folder != null) {
+            yield current_folder.close_async();
         }
         
         current_folder = folder;
         main_window.message_list_store.set_current_folder(current_folder);
-
-        yield current_folder.open_async(false, cancellable_folder);
-
+        
         // The current folder may be null if the user rapidly switches between folders. If they have
         // done that then this folder selection is invalid anyways, so just return.
         if (current_folder == null) {
@@ -320,7 +320,7 @@ public class GearyController {
             return;
         }
         
-        current_conversations = new Geary.Conversations(current_folder, 
+        current_conversations = new Geary.Conversations(current_folder, false,
             MessageListStore.REQUIRED_FIELDS);
         yield current_conversations.start_monitoring_async(cancellable_folder);
         
@@ -333,11 +333,8 @@ public class GearyController {
         current_conversations.conversation_removed.connect(on_conversation_removed);
         current_conversations.email_flags_changed.connect(on_email_flags_changed);
         
-        // Do a quick-list of the messages (which should return what's in the local store) if
-        // supported by the Folder, followed by a complete list if needed
+        // Do a quick-list of the messages in the local store), followed by a complete list if needed
         loading_local_only = true;
-        
-        // Load all conversations from the DB.
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
     }
     

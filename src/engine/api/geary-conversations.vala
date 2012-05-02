@@ -122,6 +122,7 @@ public class Geary.Conversations : Object {
     public bool monitoring { get; private set; default = false; }
     
     private Geary.Email.Field required_fields;
+    private bool readonly;
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
     private Gee.HashMap<RFC822.MessageID, ImplConversation> message_id_map = new Gee.HashMap<
         RFC822.MessageID, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
@@ -223,8 +224,9 @@ public class Geary.Conversations : Object {
     public virtual signal void email_flags_changed(Conversation conversation, Geary.Email email) {
     }
     
-    public Conversations(Geary.Folder folder, Geary.Email.Field required_fields) {
+    public Conversations(Geary.Folder folder, bool readonly, Geary.Email.Field required_fields) {
         this.folder = folder;
+        this.readonly = readonly;
         this.required_fields = required_fields | REQUIRED_FIELDS;
     }
     
@@ -295,7 +297,7 @@ public class Geary.Conversations : Object {
         
         if (folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
             try {
-                yield folder.open_async(false, cancellable);
+                yield folder.open_async(readonly, cancellable);
             } catch (Error err) {
                 monitoring = false;
                 
@@ -314,7 +316,13 @@ public class Geary.Conversations : Object {
         return true;
     }
     
-    public async void stop_monitoring_async(bool close_folder, Cancellable? cancellable = null) throws Error {
+    /**
+     * Halt monitoring of the Folder and, if specified, close it.  Note that the Cancellable
+     * supplied to start_monitoring_async() is used during monitoring but *not* for this method.
+     * If null is supplied as the Cancellable, no cancellable is used; pass the original Cancellable
+     * here to use that.
+     */
+    public async void stop_monitoring_async(bool close_folder, Cancellable? cancellable) throws Error {
         yield stop_monitoring_internal_async(close_folder, false, cancellable);
     }
     
@@ -337,11 +345,13 @@ public class Geary.Conversations : Object {
         Error? close_err = null;
         if (close_folder) {
             try {
-                yield folder.close_async(cancellable ?? cancellable_monitor);
+                yield folder.close_async(cancellable);
             } catch (Error err) {
                 // throw, but only after cleaning up (which is to say, if close_async() fails,
                 // then the Folder is still treated as closed, which is the best that can be
                 // expected; it definitely shouldn't still be considered open).
+                debug("Unable to close monitored folder %s: %s", folder.to_string(), err.message);
+                
                 close_err = err;
             }
         }
@@ -607,7 +617,7 @@ public class Geary.Conversations : Object {
     
     private async void do_restart_monitoring_async() {
         try {
-            yield stop_monitoring_internal_async(false, true, cancellable_monitor);
+            yield stop_monitoring_internal_async(false, true, null);
         } catch (Error stop_err) {
             debug("Error closing folder %s while reestablishing connection: %s", folder.to_string(),
                 stop_err.message);
