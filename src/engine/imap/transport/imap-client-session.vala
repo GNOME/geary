@@ -5,14 +5,18 @@
  */
 
 public class Geary.Imap.ClientSession {
-    // 30 min keepalive required to maintain session; back off by 1 min for breathing room
-    public const int MIN_KEEPALIVE_SEC = 29 * 60;
+    // 30 min keepalive required to maintain session
+    public const uint MIN_KEEPALIVE_SEC = 30 * 60;
+    
+    // 10 minutes is more realistic, as underlying sockets will not necessarily report errors if
+    // physical connection is lost
+    public const uint RECOMMENDED_KEEPALIVE_SEC = 10 * 60;
     
     // NOOP is only sent after this amount of time has passed since the last received
     // message on the connection dependant on connection state (selected/examined vs. authorized)
-    public const int DEFAULT_SELECTED_KEEPALIVE_SEC = 60;
-    public const int DEFAULT_UNSELECTED_KEEPALIVE_SEC = MIN_KEEPALIVE_SEC;
-    public const int DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = MIN_KEEPALIVE_SEC;
+    public const uint DEFAULT_SELECTED_KEEPALIVE_SEC = 60;
+    public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
+    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
     
     public enum Context {
         UNCONNECTED,
@@ -180,9 +184,9 @@ public class Geary.Imap.ClientSession {
         String.stri_equal);
     private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
-    private int selected_keepalive_secs = 0;
-    private int unselected_keepalive_secs = 0;
-    private int selected_with_idle_keepalive_secs = 0;
+    private uint selected_keepalive_secs = 0;
+    private uint unselected_keepalive_secs = 0;
+    private uint selected_with_idle_keepalive_secs = 0;
     private bool allow_idle = true;
     private NonblockingMutex serialized_cmds_mutex = new NonblockingMutex();
     private int waiting_to_send = 0;
@@ -355,11 +359,6 @@ public class Geary.Imap.ClientSession {
         fsm.set_logging(false);
     }
     
-    ~ClientSession() {
-        if (keepalive_id != 0)
-            Source.remove(keepalive_id);
-    }
-    
     public string? get_current_mailbox() {
         return current_mailbox;
     }
@@ -427,7 +426,7 @@ public class Geary.Imap.ClientSession {
         cx.connected.connect(on_network_connected);
         cx.disconnected.connect(on_network_disconnected);
         cx.sent_command.connect(on_network_sent_command);
-        cx.flush_failure.connect(on_network_flush_error);
+        cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
         cx.received_bad_response.connect(on_received_bad_response);
@@ -443,6 +442,26 @@ public class Geary.Imap.ClientSession {
         connect_params.do_yield = true;
         
         return State.CONNECTING;
+    }
+    
+    private void drop_connection() {
+        unschedule_keepalive();
+        
+        if (cx == null)
+            return;
+        
+        cx.connected.disconnect(on_network_connected);
+        cx.disconnected.disconnect(on_network_disconnected);
+        cx.sent_command.disconnect(on_network_sent_command);
+        cx.send_failure.disconnect(on_network_send_error);
+        cx.received_status_response.disconnect(on_received_status_response);
+        cx.received_server_data.disconnect(on_received_server_data);
+        cx.received_bad_response.disconnect(on_received_bad_response);
+        cx.recv_closed.disconnect(on_received_closed);
+        cx.receive_failure.disconnect(on_network_receive_failure);
+        cx.deserialize_failure.disconnect(on_network_receive_failure);
+        
+        cx = null;
     }
     
     private void on_connect_completed(Object? source, AsyncResult result) {
@@ -552,8 +571,8 @@ public class Geary.Imap.ClientSession {
      * Although keepalives can be enabled at any time, if they're enabled and trigger sending
      * a command prior to connection, error signals may be fired.
      */
-    public void enable_keepalives(int seconds_while_selected,
-        int seconds_while_unselected, int seconds_while_selected_with_idle) {
+    public void enable_keepalives(uint seconds_while_selected,
+        uint seconds_while_unselected, uint seconds_while_selected_with_idle) {
         selected_keepalive_secs = seconds_while_selected;
         selected_with_idle_keepalive_secs = seconds_while_selected_with_idle;
         unselected_keepalive_secs = seconds_while_unselected;
@@ -566,6 +585,10 @@ public class Geary.Imap.ClientSession {
      * Returns true if keepalives are disactivated, false if already disabled.
      */
     public bool disable_keepalives() {
+        return unschedule_keepalive();
+    }
+    
+    private bool unschedule_keepalive() {
         if (keepalive_id == 0)
             return false;
         
@@ -589,12 +612,9 @@ public class Geary.Imap.ClientSession {
     
     private void schedule_keepalive() {
         // if old one was scheduled, unschedule and schedule anew
-        if (keepalive_id != 0) {
-            Source.remove(keepalive_id);
-            keepalive_id = 0;
-        }
+        unschedule_keepalive();
         
-        int seconds;
+        uint seconds;
         switch (get_context(null)) {
             case Context.UNCONNECTED:
                 return;
@@ -625,7 +645,7 @@ public class Geary.Imap.ClientSession {
         // is now dead
         keepalive_id = 0;
         
-        debug("Sending keepalive...");
+        debug("[%s] Sending keepalive...", to_full_string());
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
         
         // No need to reschedule keepalive, as the notification that the command was sent should
@@ -639,13 +659,12 @@ public class Geary.Imap.ClientSession {
         try {
             response = send_command_async.end(result);
         } catch (Error err) {
-            debug("Keepalive error: %s", err.message);
+            debug("[%s] Keepalive error: %s", to_full_string(), err.message);
             
             return;
         }
         
-        if (response.status_response.status != Status.OK)
-            debug("Keepalive failed: %s", response.status_response.to_string());
+        debug("[%s] Keepalive result: %s", to_full_string(), response.status_response.to_string());
     }
     
     //
@@ -986,7 +1005,7 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_disconnected(uint state, uint event) {
-        cx = null;
+        drop_connection();
         
         // although we could go to the DISCONNECTED state, that implies the object can be reused ...
         // while possible, that requires all state (not just the FSM) be reset at this point, and
@@ -1006,7 +1025,7 @@ public class Geary.Imap.ClientSession {
         if (err is IOError.CANCELLED)
             return state;
         
-        debug("Send error on %s: %s", to_full_string(), err.message);
+        debug("[%s] Send error, disconnecting: %s", to_full_string(), err.message);
         
         cx.disconnect_async.begin(null, on_fire_send_error_signal);
         
@@ -1014,20 +1033,12 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_fire_send_error_signal(Object? object, AsyncResult result) {
-        try {
-            cx.disconnect_async.end(result);
-        } catch (Error err) {
-            // ignored
-        }
-        
-        cx = null;
-        
-        disconnected(DisconnectReason.LOCAL_ERROR);
+        dispatch_send_recv_results(DisconnectReason.LOCAL_ERROR, result);
     }
     
     private uint on_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);
-        debug("Receive error on %s: %s", to_full_string(), err.message);
+        debug("[%s] Receive error, disconnecting: %s", to_full_string(), err.message);
         
         cx.disconnect_async.begin(null, on_fire_recv_error_signal);
         
@@ -1035,15 +1046,21 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_fire_recv_error_signal(Object? object, AsyncResult result) {
+        dispatch_send_recv_results(DisconnectReason.REMOTE_ERROR, result);
+    }
+    
+    private void dispatch_send_recv_results(DisconnectReason reason, AsyncResult result) {
+        debug("[%s] Disconnected due to %s", to_full_string(), reason.to_string());
+        
         try {
             cx.disconnect_async.end(result);
         } catch (Error err) {
-            // ignored
+            debug("[%s] Send/recv disconnect failed: %s", to_full_string(), err.message);
         }
         
-        cx = null;
+        drop_connection();
         
-        disconnected(DisconnectReason.REMOTE_ERROR);
+        disconnected(reason);
     }
     
     // This handles the situation where the user submits a command before the connection has been
@@ -1105,9 +1122,9 @@ public class Geary.Imap.ClientSession {
         int claim_stub = NonblockingMutex.INVALID_TOKEN;
         if (!account_info.imap_server_pipeline) {
             try {
-                debug("[%s] Waiting to send cmd %s: %d", to_string(), cmd.to_string(), ++waiting_to_send);
+                debug("[%s] Waiting to send cmd %s: %d", to_full_string(), cmd.to_string(), ++waiting_to_send);
                 claim_stub = yield serialized_cmds_mutex.claim_async(cancellable);
-                debug("[%s] Ready, now waiting to send cmd %s: %d", to_string(), cmd.to_string(), --waiting_to_send);
+                debug("[%s] Ready, now waiting to send cmd %s: %d", to_full_string(), cmd.to_string(), --waiting_to_send);
             } catch (Error wait_err) {
                 return new AsyncCommandResponse(null, user, wait_err);
             }
@@ -1214,27 +1231,27 @@ public class Geary.Imap.ClientSession {
     
     private void on_network_connected() {
 #if VERBOSE_SESSION
-        debug("Connected to %s", server);
+        debug("[%s] Connected to %s", to_full_string(), server);
 #endif
     }
     
     private void on_network_disconnected() {
 #if VERBOSE_SESSION
-        debug("Disconnected from %s", server);
+        debug("[%s] Disconnected from %s", to_full_string(), server);
 #endif
     }
     
     private void on_network_sent_command(Command cmd) {
 #if VERBOSE_SESSION
-        debug("Sent command %s", cmd.to_string());
+        debug("[%s] Sent command %s", to_full_string(), cmd.to_string());
 #endif
         
         // reschedule keepalive, now that traffic has been seen
         schedule_keepalive();
     }
     
-    private void on_network_flush_error(Error err) {
-        debug("Flush error on %s: %s", to_string(), err.message);
+    private void on_network_send_error(Error err) {
+        debug("[%s] Send error: %s", to_full_string(), err.message);
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
     
@@ -1295,19 +1312,19 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {
-        debug("Received bad response %s: %s", root.to_string(), err.message);
+        debug("[%s] Received bad response %s: %s", to_full_string(), root.to_string(), err.message);
     }
     
     private void on_received_closed(ClientConnection cx) {
 #if VERBOSE_SESSION
         // This currently doesn't generate any Events, but it does mean the connection has closed
         // due to EOS
-        debug("Received closed from %s", cx.to_string());
+        debug("[%s] Received closed", to_full_string());
 #endif
     }
     
     private void on_network_receive_failure(Error err) {
-        debug("Receive failed: %s", err.message);
+        debug("[%s] Receive failed: %s", to_full_string(), err.message);
         fsm.issue(Event.RECV_ERROR, null, null, err);
     }
     

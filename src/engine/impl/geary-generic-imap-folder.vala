@@ -52,6 +52,20 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         }
     }
     
+    public override Geary.Folder.OpenState get_open_state() {
+        if (!opened)
+            return Geary.Folder.OpenState.CLOSED;
+        
+        if (local_folder.opened)
+            return (remote_folder != null) ? Geary.Folder.OpenState.BOTH : Geary.Folder.OpenState.LOCAL;
+        else if (remote_folder != null)
+            return Geary.Folder.OpenState.REMOTE;
+        
+        // opened flag set but neither open; potentially indicates opening state, but call CLOSED
+        // for now
+        return Geary.Folder.OpenState.CLOSED;
+    }
+    
     public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
         throw new EngineError.READONLY("Engine currently read-only");
     }
@@ -260,13 +274,24 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         if (opened)
             throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
         
+        opened = true;
+        
         remote_semaphore = new Geary.NonblockingSemaphore();
         
         // start the replay queues
         recv_replay_queue = new ReceiveReplayQueue();
         send_replay_queue = new SendReplayQueue();
         
-        yield local_folder.open_async(readonly, cancellable);
+        try {
+            yield local_folder.open_async(readonly, cancellable);
+        } catch (Error err) {
+            notify_open_failed(OpenFailed.LOCAL_FAILED, err);
+            
+            // schedule close now
+            close_internal_async.begin(CloseReason.LOCAL_ERROR, CloseReason.REMOTE_CLOSE, cancellable);
+            
+            throw err;
+        }
         
         // Rather than wait for the remote folder to open (which blocks completion of this method),
         // attempt to open in the background and treat this folder as "opened".  If the remote
@@ -277,8 +302,6 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // is open (or has failed to open).  This allows for early calls to list and fetch emails
         // can work out of the local cache until the remote is ready.
         open_remote_async.begin(readonly, cancellable);
-        
-        opened = true;
     }
     
     private async void open_remote_async(bool readonly, Cancellable? cancellable) {
@@ -298,6 +321,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 // signals
                 folder.messages_appended.connect(on_remote_messages_appended);
                 folder.message_at_removed.connect(on_remote_message_at_removed);
+                folder.disconnected.connect(on_remote_disconnected);
                 
                 // state
                 remote_count = folder.get_email_count();
@@ -306,9 +330,21 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 remote_folder = folder;
             } else {
                 debug("Unable to prepare remote folder %s: prepare_opened_file() failed", to_string());
+                notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, null);
+                
+                // schedule immediate close
+                close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, cancellable);
+                
+                return;
             }
         } catch (Error open_err) {
             debug("Unable to open or prepare remote folder %s: %s", to_string(), open_err.message);
+            notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, open_err);
+            
+            // schedule immediate close
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, cancellable);
+            
+            return;
         }
         
         int count;
@@ -329,6 +365,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         } catch (Error notify_err) {
             debug("Unable to fire semaphore notifying remote folder ready/not ready: %s",
                 notify_err.message);
+            
+            remote_folder = null;
+            remote_count = -1;
+            
+            notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, notify_err);
+            
+            // schedule immediate close
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, cancellable);
+            
+            return;
         }
         
         // notify any subscribers with similar information
@@ -348,26 +394,55 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
-        Error error = null;
-        try {
-            yield local_folder.close_async(cancellable);
+        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, cancellable);
+    }
+    
+    private async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
+        Cancellable? cancellable) throws Error {
+        if (!opened)
+            return;
+        
+        // set this now to avoid multiple close_async(), particularly nested inside one of the signals
+        // fired here
+        opened = false;
+        
+        // if remote is still opening, need to wait for it to open before closing (otherwise risk
+        // calls being made in a screwy state ... note that if the client properly cancels their
+        // open, this problem is effectively minimized)
+        //
+        // NOTE: This should be the only call in this method that throws an error (specifically,
+        // IOError.CANCELLED).  Once past this hurdle, everything else is caught as they can
+        // be done quickly.
+        if (yield wait_for_remote_to_open(cancellable)) {
+            remote_folder.messages_appended.disconnect(on_remote_messages_appended);
+            remote_folder.message_at_removed.disconnect(on_remote_message_at_removed);
+            remote_folder.disconnected.disconnect(on_remote_disconnected);
             
-            // if the remote folder is open, close it in the background so the caller isn't waiting for
-            // this method to complete (much like open_async())
-            if (remote_folder != null) {
-                yield remote_semaphore.wait_async();
-                
-                Imap.Folder? folder = remote_folder;
-                remote_folder = null;
-                
-                // signals
-                folder.messages_appended.disconnect(on_remote_messages_appended);
-                folder.message_at_removed.disconnect(on_remote_message_at_removed);
-                
-                folder.close_async.begin(cancellable);
-            }
-        } catch (Error e) {
-            error = e;
+            // to avoid keeping the caller waiting while the remote end closes, close it in the
+            // background
+            //
+            // TODO: Problem with this is that we cannot effectively signal or report a close error,
+            // because by the time this operation completes the folder is considered closed.  That
+            // may not be important to most callers, however.
+            if (remote_reason == CloseReason.REMOTE_CLOSE)
+                remote_folder.close_async.begin(cancellable);
+            
+            remote_folder = null;
+            remote_count = -1;
+            
+            notify_closed(remote_reason);
+        } else {
+            notify_closed(Geary.Folder.CloseReason.REMOTE_CLOSE);
+        }
+        
+        // close local store
+        try {
+            if (local_reason == CloseReason.LOCAL_CLOSE)
+                yield local_folder.close_async(cancellable);
+            
+            notify_closed(local_reason);
+        } catch (Error local_err) {
+            debug("Error closing %s local store: %s", to_string(), local_err.message);
         }
         
         // Close the replay queues *after* the folder has been closed (in case any final upcalls
@@ -375,28 +450,21 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         try {
             if (recv_replay_queue != null)
                 yield recv_replay_queue.close_async();
-        } catch (Error e) {
-            if (error != null)
-                error = e;
+        } catch (Error recv_replay_err) {
+            debug("Error closing %s recv replay queue: %s", to_string(), recv_replay_err.message);
         }
         
         try {
             if (send_replay_queue != null)
                 yield send_replay_queue.close_async();
-        } catch (Error e) {
-            if (error != null)
-                error = e;
+        } catch (Error send_replay_err) {
+            debug("Error closing %s send replay queue: %s", to_string(), send_replay_err.message);
         }
         
         recv_replay_queue = null;
         send_replay_queue = null;
         
         notify_closed(CloseReason.FOLDER_CLOSED);
-        
-        opened = false;
-        
-        if (error != null)
-            throw error;
     }
     
     private void on_remote_messages_appended(int total) {
@@ -412,6 +480,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     //
     // This MUST only be called from ReplayAppend.
     internal async void do_replay_appended_messages(int new_remote_count) {
+        debug("do_replay_appended_messages: new_remote_count=%d", new_remote_count);
+        
         // this only works when the list is grown
         if (remote_count >= new_remote_count) {
             debug("Message reported appended by server but remote count %d already known",
@@ -468,6 +538,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     // This MUST only be called from ReplayRemoval.
     internal async void do_replay_remove_message(int remote_position, int new_remote_count,
         Geary.EmailIdentifier? id) {
+        debug("do_replay_remove_message: remote_position=%d new_remote_count=%d id=%s",
+            remote_position, new_remote_count, (id != null) ? id.to_string() : "(null)");
+        
         if (remote_position < 1)
             assert(id != null);
         else
@@ -503,6 +576,21 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         if (!marked)
             notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
+    }
+    
+    private void on_remote_disconnected(Geary.Folder.CloseReason reason) {
+        debug("on_remote_disconnected: reason=%s", reason.to_string());
+        recv_replay_queue.schedule(new ReplayDisconnect(this, reason));
+    }
+    
+    internal async void do_replay_remote_disconnected(Geary.Folder.CloseReason reason) {
+        debug("do_replay_remote_disconnected reason=%s", reason.to_string());
+        assert(reason == CloseReason.REMOTE_CLOSE || reason == CloseReason.REMOTE_ERROR);
+        
+        // because close_internal_async() issues ReceiveReplayQueue.close_async() (which cannot
+        // be called from within a ReceiveReplayOperation), schedule the close rather than
+        // yield for it
+        close_internal_async.begin(CloseReason.LOCAL_CLOSE, reason, null);
     }
     
     public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {

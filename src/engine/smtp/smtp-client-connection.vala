@@ -9,6 +9,8 @@ public class Geary.Smtp.ClientConnection {
     public const uint16 SUBMISSION_PORT = 587;
     public const uint16 SECURE_SMTP_PORT = 465;
     
+    public const uint DEFAULT_TIMEOUT_SEC = 60;
+    
     private Geary.Endpoint endpoint;
     private SocketConnection? cx = null;
     private DataInputStream? dins = null;

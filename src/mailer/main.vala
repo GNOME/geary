@@ -11,7 +11,9 @@ Geary.ComposedEmail? composed_email = null;
 
 async void main_async() throws Error {
     Geary.Smtp.ClientSession session = new Geary.Smtp.ClientSession(new Geary.Endpoint(
-        "imap.gmail.com", Geary.Imap.ClientConnection.DEFAULT_PORT_TLS, Geary.Endpoint.Flags.TLS));
+        "imap.gmail.com", Geary.Imap.ClientConnection.DEFAULT_PORT_TLS,
+        Geary.Endpoint.Flags.TLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+        Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC));
     
     Geary.Smtp.Greeting? greeting = yield session.login_async(credentials);
     stdout.printf("%s\n", greeting.to_string());
@@ -40,7 +42,7 @@ void on_main_completed(Object? object, AsyncResult result) {
 
 int main(string[] args) {
     if (args.length < 3 || Geary.String.is_empty(args[1]) || Geary.String.is_empty(args[2])) {
-        stdout.printf("usage: norman <user> <pass>\n");
+        stdout.printf("usage: geary-mailer <user> <pass>\n");
         
         return 1;
     }

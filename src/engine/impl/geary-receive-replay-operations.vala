@@ -48,3 +48,19 @@ private class Geary.ReplayRemoval : Geary.ReceiveReplayOperation {
         yield owner.do_replay_remove_message(position, new_remote_count, id);
     }
 }
+
+private class Geary.ReplayDisconnect : Geary.ReceiveReplayOperation {
+    public GenericImapFolder owner;
+    public Geary.Folder.CloseReason reason;
+    
+    public ReplayDisconnect(GenericImapFolder owner, Geary.Folder.CloseReason reason) {
+        base ("Disconnect");
+        
+        this.owner = owner;
+        this.reason = reason;
+    }
+    
+    public override async void replay() {
+        yield owner.do_replay_remote_disconnected(reason);
+    }
+}

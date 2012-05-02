@@ -8,14 +8,34 @@ public delegate void Geary.EmailCallback(Gee.List<Geary.Email>? emails, Error? e
 
 public interface Geary.Folder : Object {
     public enum OpenState {
+        CLOSED,
         REMOTE,
         LOCAL,
         BOTH
     }
     
+    public enum OpenFailed {
+        LOCAL_FAILED,
+        REMOTE_FAILED
+    }
+    
+    /**
+     * The "closed" signal will be fired multiple times after a Folder is opened.  It is fired
+     * after the remote and local sessions close for various reasons, and fires once and only
+     * once when the folder is completely closed.
+     *
+     * LOCAL_CLOSE or LOCAL_ERROR is only called once, depending on the situation determining the
+     * value.  The same is true for REMOTE_CLOSE and REMOTE_ERROR.  A REMOTE_ERROR can trigger
+     * a LOCAL_CLOSE and vice-versa.  The values may be called in any order.
+     *
+     * When the local and remote stores have closed (either normally or due to errors, FOLDER_CLOSED
+     * will be sent.
+     */
     public enum CloseReason {
         LOCAL_CLOSE,
+        LOCAL_ERROR,
         REMOTE_CLOSE,
+        REMOTE_ERROR,
         FOLDER_CLOSED
     }
     
@@ -49,18 +69,36 @@ public interface Geary.Folder : Object {
     /**
      * This is fired when the Folder is successfully opened by a caller.  It will only fire once
      * until the Folder is closed, with the OpenState indicating what has been opened and the count
-     * indicating the number of messages in the folder (in the case of OpenState.BOTH, it refers
-     * to the authoritative number).
+     * indicating the number of messages in the folder (in the case of OpenState.BOTH or
+     * OpenState.REMOTE, it refers to the authoritative number).
+     *
+     * In general, OpenState.REMOTE won't fire as that indicates an underlying error in the local
+     * store, which is problematic for synchronization.
+     *
+     * This signal will never fire with Geary.OpenState.CLOSED as a parameter.
      */
     public signal void opened(OpenState state, int count);
     
     /**
-     * This is fired when the Folder is successfully closed by a caller.  It will only fire once
-     * until the Folder is re-opened.
+     * This is fired when open_async() fails for one or more reasons.
      *
-     * The CloseReason enum can be used to inspect why the folder was closed: the connection was
-     * broken locally or remotely, or the Folder was simply closed (and the underlying connection
-     * is still available).
+     * See open_async() and "opened" for more information on how opening a Folder works, in particular
+     * how open_async() may return immediately although the remote has not completely opened.
+     * This signal may be called in the context of, or after completion of, open_async().  It will
+     * *not* be called after close_async() has completed, however.
+     *
+     * Note that this signal may be fired *and* open_async() throw an Error.
+     *
+     * This signal may be fired more than once before the Folder is closed.  It will only fire once
+     * for each type of failure, however.
+     */
+    public signal void open_failed(OpenFailed failure, Error? err);
+    
+    /**
+     * This is fired when the Folder is closed, either by the caller or due to errors in the local
+     * or remote store(s).  It will fire three times: to report how the local store closed
+     * (gracefully or due to error), how the remote closed (similarly) and finally with
+     * FOLDER_CLOSED.  The first two may come in either order; the third is always the last.
      */
     public signal void closed(CloseReason reason);
     
@@ -114,6 +152,8 @@ public interface Geary.Folder : Object {
     
     protected abstract void notify_opened(OpenState state, int count);
     
+    protected abstract void notify_open_failed(OpenFailed failure, Error? err);
+    
     protected abstract void notify_closed(CloseReason reason);
     
     protected abstract void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
@@ -136,6 +176,11 @@ public interface Geary.Folder : Object {
     public abstract Geary.SpecialFolderType? get_special_folder_type();
     
     /**
+     * Returns the state of the Folder's connections to the local and remote stores.
+     */
+    public abstract OpenState get_open_state();
+    
+    /**
      * The Folder must be opened before most operations may be performed on it.  Depending on the
      * implementation this might entail opening a network connection or setting the connection to
      * a particular state, opening a file or database, and so on.
@@ -143,17 +188,28 @@ public interface Geary.Folder : Object {
      * In the case of a Folder that is aggregating the contents of synchronized folder, it's possible
      * for this method to complete even though all internal opens haven't completed.  The "opened"
      * signal is the final say on when a Folder is fully opened with its OpenState parameter
-     * indicating how open it really is.  In general, a Folder's local state will occur immediately
+     * indicating how open it really is.  In general, a Folder's local store will open immediately
      * while it may take time (if ever) for the remote state to open.  Thus, it's possible for
      * the "opened" signal to fire some time *after* this method completes.
      *
      * However, even if the method returns before the Folder's OpenState is BOTH, this Folder is
      * ready for operation if this method returns without error.  The messages the folder returns
      * may not reflect the full state of the Folder, however, and returned emails may subsequently
-     * have their state changed (such as their EmailLocation).
+     * have their state changed (such as their EmailLocation).  Making a call that requires
+     * accessing the remote store before OpenState.BOTH has been signalled will result in that
+     * call blocking until the remote is open or an error state has occurred.
+     *
+     * If there's an error while opening, "open-failed" will be fired.  (See that signal for more
+     * information on how many times it may fire, and when.)  To prevent the Folder from going into
+     * a halfway state, it will immediately schedule a close_async() to cleanup, and those
+     * associated signals will be fired as well.
      *
      * If the Folder has been opened previously, EngineError.ALREADY_OPEN is thrown.  There are no
      * other side-effects.
+     *
+     * A Folder may be reopened after it has been closed.  This allows for Folder objects to be
+     * emitted by the Account object cheaply, but the client should only have a few open at a time,
+     * as each may represent an expensive resource (such as a network connection).
      */
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     

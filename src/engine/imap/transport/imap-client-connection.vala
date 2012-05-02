@@ -8,6 +8,11 @@ public class Geary.Imap.ClientConnection {
     public const uint16 DEFAULT_PORT = 143;
     public const uint16 DEFAULT_PORT_TLS = 993;
     
+    // TODO: This is set very high to allow for IDLE connections to remain connected even when
+    // there is no traffic on them.  The side-effect is that if the physical connection is dropped,
+    // no error is reported and the connection won't know about it until the next send operation.
+    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MIN_KEEPALIVE_SEC + 60;
+    
     private const int FLUSH_TIMEOUT_MSEC = 100;
     
     private enum State {
@@ -82,10 +87,6 @@ public class Geary.Imap.ClientConnection {
         Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), cmd.to_string());
     }
     
-    public virtual signal void flush_failure(Error err) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s] flush failure: %s", to_string(), err.message);
-    }
-    
     public virtual signal void in_idle(bool idling) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] in idle: %s", to_string(), idling.to_string());
     }
@@ -111,6 +112,10 @@ public class Geary.Imap.ClientConnection {
         Logging.debug(Logging.Flag.NETWORK, "[%s] recv closed", to_string());
     }
     
+    public virtual signal void send_failure(Error err) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] send failure: %s", to_string(), err.message);
+    }
+    
     public virtual signal void receive_failure(Error err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] recv failure: %s", to_string(), err.message);
     }
@@ -118,6 +123,10 @@ public class Geary.Imap.ClientConnection {
     public virtual signal void deserialize_failure(Error err) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] deserialize failure: %s", to_string(),
             err.message);
+    }
+    
+    public virtual signal void close_error(Error err) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s] close error: %s", to_string(), err.message);
     }
     
     public ClientConnection(Geary.Endpoint endpoint) {
@@ -156,22 +165,21 @@ public class Geary.Imap.ClientConnection {
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_idling_continuation),
             new Geary.State.Mapping(State.DEIDLING, Event.DISCONNECTED, on_disconnected),
             
+            // TODO: A DISCONNECTING state would be helpful here, allowing for responses and data
+            // received from the server after a send error caused a disconnect to be signalled to
+            // subscribers before moving to the DISCONNECTED state.  That would require more work,
+            // allowing for the caller (ClientSession) to close the receive channel and wait for
+            // everything to flush out before it shifted to a DISCONNECTED state as well.
             new Geary.State.Mapping(State.DISCONNECTED, Event.SEND, on_no_proceed),
             new Geary.State.Mapping(State.DISCONNECTED, Event.SEND_IDLE, on_no_proceed),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_STATUS_RESPONSE, on_status_response),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_SERVER_DATA, on_server_data),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_CONTINUATION_RESPONSE, on_bad_continuation),
+            new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_STATUS_RESPONSE, Geary.State.nop),
+            new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_SERVER_DATA, Geary.State.nop),
+            new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_CONTINUATION_RESPONSE, Geary.State.nop),
             new Geary.State.Mapping(State.DISCONNECTED, Event.DISCONNECTED, Geary.State.nop)
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
         fsm.set_logging(false);
-    }
-    
-    ~ClientConnection() {
-        // TODO: Close connection as gracefully as possible
-        if (flush_timeout_id != 0)
-            Source.remove(flush_timeout_id);
     }
     
     /**
@@ -189,8 +197,8 @@ public class Geary.Imap.ClientConnection {
     }
     
     /**
-     * When the connection is not sending commands ("quiet"), it will issue an IDLE command to
-     * enter a state where unsolicited server data may be sent from the server without resorting
+     * If true, when the connection is not sending commands ("quiet"), it will issue an IDLE command
+     * to enter a state where unsolicited server data may be sent from the server without resorting
      * to NOOP keepalives.  (Note that keepalives are still required to hold the connection open,
      * according to the IMAP specification.)
      *
@@ -208,7 +216,7 @@ public class Geary.Imap.ClientConnection {
     /**
      * Returns true if the connection is in an IDLE state.  The or_idling parameter means to return
      * true if the connection is working toward an IDLE state (but additional responses are being
-     * returned from the server before getting there.
+     * returned from the server before getting there).
      */
     public bool is_in_idle(bool or_idling) {
         switch (fsm.get_state()) {
@@ -242,8 +250,12 @@ public class Geary.Imap.ClientConnection {
         }
         
         cx = yield endpoint.connect_async(cancellable);
-        ser = new Serializer(new BufferedOutputStream(cx.output_stream));
-        des = new Deserializer(new BufferedInputStream(cx.input_stream));
+        
+        // not buffering the Serializer because it buffers using a MemoryOutputStream and not
+        // buffering the Deserializer because it uses a DataInputStream, which is buffered
+        ser = new Serializer(cx.output_stream);
+        des = new Deserializer(cx.input_stream);
+        
         des.parameters_ready.connect(on_parameters_ready);
         des.receive_failure.connect(on_receive_failure);
         des.deserialize_failure.connect(on_deserialize_failure);
@@ -261,15 +273,29 @@ public class Geary.Imap.ClientConnection {
             return;
         
         des.xoff();
+        unschedule_flush_timeout();
         
+        des.parameters_ready.disconnect(on_parameters_ready);
+        des.receive_failure.disconnect(on_receive_failure);
+        des.deserialize_failure.disconnect(on_deserialize_failure);
+        des.eos.disconnect(on_eos);
+        
+        // TODO: May need to commit Serializer before disconnecting
+        
+        Error? close_err = null;
         try {
             yield cx.close_async(Priority.DEFAULT, cancellable);
+        } catch (Error err) {
+            close_err = err;
         } finally {
             cx = null;
             ser = null;
             des = null;
             
             fsm.issue(Event.DISCONNECTED);
+            
+            if (close_err != null)
+                close_error(close_err);
             
             disconnected();
         }
@@ -332,27 +358,42 @@ public class Geary.Imap.ClientConnection {
         // an IMAP requirement but makes tracing commands easier.)
         cmd.assign_tag(generate_tag());
         
-        yield cmd.serialize(ser);
+        Error? ser_err = null;
+        try {
+            yield cmd.serialize(ser);
+        } catch (Error err) {
+            debug("[%s] Error serializing command: %s", to_string(), err.message);
+            ser_err = err;
+        }
         
         send_mutex.release(ref token);
+        
+        if (ser_err != null) {
+            send_failure(ser_err);
+            
+            throw ser_err;
+        }
         
         // Reset flush timer so it only fires after n msec after last command pushed out to stream
         reschedule_flush_timeout();
         
-        // TODO: technically lying a little bit here; there's currently not much gained by reporting
-        // commands as sent only when the pipe is flushed, but in the future we may want to do
-        // exactly that
+        // TODO: technically lying a little bit here; since ClientSession keepalives are rescheduled
+        // by this signal, will want to tighten this up a bit in the future
         sent_command(cmd);
     }
     
     private void reschedule_flush_timeout() {
+        unschedule_flush_timeout();
+        
+        if (flush_timeout_id == 0)
+            flush_timeout_id = Timeout.add_full(Priority.LOW, FLUSH_TIMEOUT_MSEC, on_flush_timeout);
+    }
+    
+    private void unschedule_flush_timeout() {
         if (flush_timeout_id != 0) {
             Source.remove(flush_timeout_id);
             flush_timeout_id = 0;
         }
-        
-        if (flush_timeout_id == 0)
-            flush_timeout_id = Timeout.add_full(Priority.LOW, FLUSH_TIMEOUT_MSEC, on_flush_timeout);
     }
     
     private bool on_flush_timeout() {
@@ -387,15 +428,13 @@ public class Geary.Imap.ClientConnection {
                     idle_cmd.to_string());
                 
                 yield idle_cmd.serialize(ser);
-            } else if (idle_when_quiet) {
-                debug("[%s] Flush w/o initiating IDLE", to_string());
             }
             
             if (ser != null)
                 yield ser.flush_async();
         } catch (Error err) {
             idle_cmd = null;
-            flush_failure(err);
+            send_failure(err);
         } finally {
             if (token != NonblockingMutex.INVALID_TOKEN) {
                 try {
@@ -491,6 +530,8 @@ public class Geary.Imap.ClientConnection {
     }
     
     private uint on_disconnected(uint state, uint event, void *user) {
+        unschedule_flush_timeout();
+        
         return State.DISCONNECTED;
     }
     
@@ -587,13 +628,6 @@ public class Geary.Imap.ClientConnection {
             debug("[%s] Bad continuation received during IDLE: %s", to_string(),
                 ((ContinuationResponse) object).to_string());
         }
-        
-        return state;
-    }
-    
-    private uint on_bad_continuation(uint state, uint event, void *user, Object? object) {
-        debug("[%s] Bad continuation received: %s", to_string(),
-            ((ContinuationResponse) object).to_string());
         
         return state;
     }

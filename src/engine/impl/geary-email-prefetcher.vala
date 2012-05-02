@@ -55,6 +55,11 @@ public class Geary.EmailPrefetcher : Object {
             return;
         
         cancellable.cancel();
+        
+        if (schedule_id != 0) {
+            Source.remove(schedule_id);
+            schedule_id = 0;
+        }
     }
     
     private void on_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids) {

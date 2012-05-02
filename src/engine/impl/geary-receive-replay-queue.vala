@@ -5,7 +5,7 @@
  */
 
 private abstract class Geary.ReceiveReplayOperation {
-    private string name;
+    public string name;
     
     public ReceiveReplayOperation(string name) {
         this.name = name;
@@ -34,6 +34,7 @@ private class Geary.ReceiveReplayQueue {
     private NonblockingMailbox<ReceiveReplayOperation> queue = new
         NonblockingMailbox<ReceiveReplayOperation>();
     private bool closed = false;
+    private ReceiveReplayOperation? executing = null;
     
     public ReceiveReplayQueue() {
         do_process_queue.begin();
@@ -47,7 +48,14 @@ private class Geary.ReceiveReplayQueue {
         }
     }
     
+    // NOTE: close_async() must not be called within another executing operation; close_async()
+    // yields for its own operation to complete, which can never happen while inside another
     public async void close_async() throws EngineError {
+        if (executing != null) {
+            error("ReceiveReplayQueue.close_async() called from within another operation: %s",
+                executing.name);
+        }
+        
         if (closed)
             throw new EngineError.ALREADY_CLOSED("Closed");
         
@@ -70,14 +78,15 @@ private class Geary.ReceiveReplayQueue {
             if (queue.size == 0 && closed)
                 break;
             
-            ReceiveReplayOperation op;
             try {
-                op = yield queue.recv_async();
+                assert(executing == null);
+                executing = yield queue.recv_async();
             } catch (Error err) {
                 error("Unable to receive next replay operation on queue: %s", err.message);
             }
             
-            yield op.replay();
+            yield executing.replay();
+            executing = null;
         }
     }
 }

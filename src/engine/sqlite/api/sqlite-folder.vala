@@ -11,6 +11,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = 
         Geary.Email.Field.REFERENCES | Geary.Email.Field.PROPERTIES;
     
+    public bool opened { get; private set; default = false; }
+    
     protected int manual_ref_count { get; protected set; }
     
     private ImapDatabase db;
@@ -20,7 +22,6 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     private MessageLocationTable location_table;
     private ImapMessagePropertiesTable imap_message_properties_table;
     private Geary.FolderPath path;
-    private bool opened = false;
     
     internal Folder(ImapDatabase db, FolderRow folder_row, Geary.Imap.FolderProperties? properties,
         Geary.FolderPath path) throws Error {

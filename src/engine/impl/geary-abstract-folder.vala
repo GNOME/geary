@@ -14,6 +14,10 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         opened(state, count);
     }
     
+    internal virtual void notify_open_failed(Geary.Folder.OpenFailed failure, Error? err) {
+        open_failed(failure, err);
+    }
+    
     internal virtual void notify_closed(Geary.Folder.CloseReason reason) {
         closed(reason);
     }
@@ -42,6 +46,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     public abstract Geary.FolderPath get_path();
     
     public abstract Geary.SpecialFolderType? get_special_folder_type();
+    
+    public abstract Geary.Folder.OpenState get_open_state();
     
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     

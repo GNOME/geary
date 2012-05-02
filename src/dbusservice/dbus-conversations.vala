@@ -30,7 +30,18 @@ public class Geary.DBus.Conversations : Object {
         conversations = new Geary.Conversations(folder, Geary.Email.Field.ENVELOPE |
             Geary.Email.Field.PROPERTIES);
         
-        conversations.monitor_new_messages();
+        start_monitoring_async.begin();
+    }
+    
+    private async void start_monitoring_async() {
+        try {
+            yield conversations.start_monitoring_async();
+        } catch (Error err) {
+            debug("Unable to start monitoring %s for conversations: %s", folder.to_string(),
+                err.message);
+            
+            return;
+        }
         
         conversations.scan_started.connect(on_scan_started);
         conversations.scan_error.connect(on_scan_error);

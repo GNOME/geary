@@ -302,11 +302,12 @@ public class GearyController {
         cancel_folder();
         main_window.message_list_store.clear();
         
-        if (current_folder != null) {
-            yield current_folder.close_async();
+        // stop monitoring for conversations and close the folder
+        if (current_conversations != null) {
+            yield current_conversations.stop_monitoring_async(true);
+            current_conversations = null;
         }
         
-        current_conversations = null;
         current_folder = folder;
         main_window.message_list_store.set_current_folder(current_folder);
 
@@ -321,8 +322,7 @@ public class GearyController {
         
         current_conversations = new Geary.Conversations(current_folder, 
             MessageListStore.REQUIRED_FIELDS);
-            
-        current_conversations.monitor_new_messages(cancellable_folder);
+        yield current_conversations.start_monitoring_async(cancellable_folder);
         
         current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);

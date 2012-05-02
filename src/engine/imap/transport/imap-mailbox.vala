@@ -39,7 +39,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     public signal void closed();
     
-    public signal void disconnected(bool local);
+    public signal void disconnected(Geary.Folder.CloseReason reason);
     
     internal Mailbox(SelectedContext context) {
         base (context);
@@ -250,8 +250,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         closed();
     }
     
-    private void on_disconnected(bool local) {
-        disconnected(local);
+    private void on_disconnected(Geary.Folder.CloseReason reason) {
+        disconnected(reason);
     }
     
     private void on_exists_altered(int old_exists, int new_exists) {
@@ -607,7 +607,7 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     
     public signal void closed();
     
-    public signal void disconnected(bool local);
+    public signal void disconnected(Geary.Folder.CloseReason reason);
     
     public signal void login_failed();
     
@@ -688,21 +688,24 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     
     private void on_session_logged_out() {
         session = null;
-        disconnected(true);
+        disconnected(Geary.Folder.CloseReason.REMOTE_CLOSE);
     }
     
     private void on_session_disconnected(ClientSession.DisconnectReason reason) {
+        if (session == null)
+            return;
+        
         session = null;
         
         switch (reason) {
             case ClientSession.DisconnectReason.LOCAL_CLOSE:
-            case ClientSession.DisconnectReason.LOCAL_ERROR:
-                disconnected(true);
+            case ClientSession.DisconnectReason.REMOTE_CLOSE:
+                disconnected(Geary.Folder.CloseReason.REMOTE_CLOSE);
             break;
             
-            case ClientSession.DisconnectReason.REMOTE_CLOSE:
+            case ClientSession.DisconnectReason.LOCAL_ERROR:
             case ClientSession.DisconnectReason.REMOTE_ERROR:
-                disconnected(false);
+                disconnected(Geary.Folder.CloseReason.REMOTE_ERROR);
             break;
             
             default:

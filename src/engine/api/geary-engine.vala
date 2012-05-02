@@ -50,14 +50,20 @@ public class Geary.Engine {
                     account_info), new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
             
             case ServiceProvider.OTHER:
+                Endpoint.Flags imap_flags = account_info.imap_server_tls ? Endpoint.Flags.TLS
+                    : Endpoint.Flags.NONE;
+                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
+                Endpoint.Flags smtp_flags = account_info.smtp_server_tls ? Endpoint.Flags.TLS
+                    : Endpoint.Flags.NONE;
+                smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
                 Endpoint imap_endpoint = new Endpoint(account_info.imap_server_host,
-                    account_info.imap_server_port, account_info.imap_server_tls ?
-                    Geary.Endpoint.Flags.TLS : Geary.Endpoint.Flags.NONE);
+                    account_info.imap_server_port, imap_flags, Imap.ClientConnection.DEFAULT_TIMEOUT_SEC);
                     
                 Endpoint smtp_endpoint = new Endpoint(account_info.smtp_server_host,
-                    account_info.smtp_server_port, account_info.smtp_server_tls ?
-                    Geary.Endpoint.Flags.TLS : Geary.Endpoint.Flags.NONE);
-                    
+                    account_info.smtp_server_port, smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
+                
                 return new OtherAccount(
                     "Other account %s".printf(cred.to_string()), cred.user, account_info, user_data_dir,
                     new Geary.Imap.Account(imap_endpoint, smtp_endpoint, cred, account_info),

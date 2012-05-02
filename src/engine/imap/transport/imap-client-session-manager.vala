@@ -14,9 +14,9 @@ public class Geary.Imap.ClientSessionManager {
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
     private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
-    private int unselected_keepalive_sec = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC;
-    private int selected_keepalive_sec = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC;
-    private int selected_with_idle_keepalive_sec = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC;
+    private uint unselected_keepalive_sec = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC;
+    private uint selected_keepalive_sec = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC;
+    private uint selected_with_idle_keepalive_sec = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC;
     
     public signal void login_failed();
     
@@ -32,12 +32,29 @@ public class Geary.Imap.ClientSessionManager {
     // TODO: Need a more thorough and bulletproof system for maintaining a pool of ready
     // authorized sessions.
     private async void adjust_session_pool() {
+        int token;
+        try {
+            token = yield sessions_mutex.claim_async();
+        } catch (Error claim_err) {
+            debug("Unable to claim session table mutex for adjusting pool: %s", claim_err.message);
+            
+            return;
+        }
+        
         while (sessions.size < MIN_POOL_SIZE) {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {
                 debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
+                
+                break;
             }
+        }
+        
+        try {
+            sessions_mutex.release(ref token);
+        } catch (Error release_err) {
+            debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
         }
     }
     
@@ -183,33 +200,55 @@ public class Geary.Imap.ClientSessionManager {
         bool removed = contexts.remove(context);
         assert(removed);
         
-        if (context.session != null)
-            context.session.close_mailbox_async.begin();
+        do_close_mailbox_async.begin(context);
+    }
+    
+    private async void do_close_mailbox_async(SelectedContext context) {
+        try {
+            if (context.session != null)
+                yield context.session.close_mailbox_async();
+        } catch (Error err) {
+            debug("Error closing IMAP mailbox: %s", err.message);
+            
+            if (context.session != null)
+                remove_session(context.session);
+        }
     }
     
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         ClientSession new_session = new ClientSession(endpoint, account_info);
         
+        // add session to pool before launching all the connect activity so error cases can properly
+        // back it out
         add_session(new_session);
         
-        yield new_session.connect_async(cancellable);
-        yield new_session.login_async(credentials, cancellable);
-        
-        Gee.Set<string> caps = new_session.get_current_capabilities();
-        if (caps.contains("compress=deflate")) {
-            debug("Attempting compression...");
-            CommandResponse resp = yield new_session.send_command_async(
-                new Command("COMPRESS", { "DEFLATE" }));
-            if (resp.status_response.status == Status.OK) {
-                debug("Starting compression!");
-                assert(new_session.install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW)));
-                assert(new_session.install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW)));
+        try {
+            yield new_session.connect_async(cancellable);
+            yield new_session.login_async(credentials, cancellable);
+            
+            Gee.Set<string> caps = new_session.get_current_capabilities();
+            if (caps.contains("compress=deflate")) {
+                CommandResponse resp = yield new_session.send_command_async(
+                    new Command("COMPRESS", { "DEFLATE" }));
+                if (resp.status_response.status == Status.OK) {
+                    assert(new_session.install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW)));
+                    assert(new_session.install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW)));
+                    debug("Compression started on %s", new_session.to_string());
+                } else {
+                    debug("Unable to start compression on %s: %s", new_session.to_string(), resp.to_string());
+                }
             } else {
-                debug("Unable to start compression: %s", resp.to_string());
+                debug("No compression available on %s", new_session.to_string());
             }
-        } else {
-            debug("No compress available");
+        } catch (Error err) {
+            debug("Connect failure on %s: %s", new_session.to_string(), err.message);
+            
+            // possible session was already removed in error handling inside a signal call;
+            // don't assert on the removal
+            remove_session(new_session);
+            
+            throw err;
         }
         
         // do this after logging in
@@ -286,6 +325,8 @@ public class Geary.Imap.ClientSessionManager {
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
         bool removed = remove_session(session);
         assert(removed);
+        
+        adjust_session_pool.begin();
     }
     
     private void on_login_failed() {
@@ -295,6 +336,8 @@ public class Geary.Imap.ClientSessionManager {
     private void add_session(ClientSession session) {
         sessions.add(session);
         
+        // See create_new_authorized_session() for why the "disconnected" signal is not subscribed
+        // to here (but *is* unsubscribed to in remove_session())
         session.login_failed.connect(on_login_failed);
     }
     

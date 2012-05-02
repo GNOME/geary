@@ -18,6 +18,8 @@ private class Geary.Imap.Folder : Object {
     
     public signal void message_at_removed(int position, int total);
     
+    public signal void disconnected(Geary.Folder.CloseReason reason);
+    
     internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusResults? status,
         MailboxInformation info) {
         this.session_mgr = session_mgr;
@@ -53,18 +55,24 @@ private class Geary.Imap.Folder : Object {
         mailbox.exists_altered.connect(on_exists_altered);
         mailbox.flags_altered.connect(on_flags_altered);
         mailbox.expunged.connect(on_expunged);
+        mailbox.disconnected.connect(on_disconnected);
         
         properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, mailbox.unseen,
             mailbox.uid_validity, mailbox.uid_next, properties.attrs);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
+        disconnect_mailbox();
+    }
+    
+    private void disconnect_mailbox() {
         if (mailbox == null)
             return;
         
         mailbox.exists_altered.disconnect(on_exists_altered);
         mailbox.flags_altered.disconnect(on_flags_altered);
         mailbox.expunged.disconnect(on_expunged);
+        mailbox.disconnected.disconnect(on_disconnected);
         
         mailbox = null;
         readonly = Trillian.UNKNOWN;
@@ -91,6 +99,12 @@ private class Geary.Imap.Folder : Object {
         message_at_removed(expunged.value, total);
     }
     
+    private void on_disconnected(Geary.Folder.CloseReason reason) {
+        disconnect_mailbox();
+        
+        disconnected(reason);
+    }
+    
     public int get_email_count() throws Error {
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
@@ -114,7 +128,10 @@ private class Geary.Imap.Folder : Object {
         flags.add(MessageFlag.DELETED);
         
         yield mailbox.mark_email_async(msg_set, flags, null, cancellable);
-        yield mailbox.expunge_email_async(cancellable);
+        
+        // mailbox could've closed during call
+        if (mailbox != null)
+            yield mailbox.expunge_email_async(cancellable);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,

@@ -12,6 +12,8 @@ public class Geary.Conversations : Object {
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES | 
         Geary.Email.Field.PROPERTIES | Geary.Email.Field.DATE;
     
+    private const int RETRY_CONNECTION_SEC = 15;
+    
     private class ImplConversation : Conversation {
         private weak Geary.Conversations? owner;
         private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>(
@@ -116,6 +118,8 @@ public class Geary.Conversations : Object {
     }
     
     public Geary.Folder folder { get; private set; }
+    public bool reestablish_connections { get; set; default = true; }
+    public bool monitoring { get; private set; default = false; }
     
     private Geary.Email.Field required_fields;
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
@@ -123,8 +127,26 @@ public class Geary.Conversations : Object {
         RFC822.MessageID, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
     private Gee.HashMap<Geary.EmailIdentifier, ImplConversation> geary_id_map = new Gee.HashMap<
         Geary.EmailIdentifier, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
-    private bool monitor_new = false;
     private Cancellable? cancellable_monitor = null;
+    private bool retry_connection = false;
+    private uint retry_id = 0;
+    
+    /**
+     * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
+     * This may be called multiple times if a connection is being reestablished.
+     */
+    public virtual signal void monitoring_started() {
+    }
+    
+    /**
+     * "monitoring-stopped" is fired when the Geary.Folder object has closed (either due to error
+     * or user) and the Conversations object is therefore unable to continue monitoring.
+     *
+     * retrying is set to true if the Conversations object will, in the background, attempt to
+     * reestablish a connection to the Folder and continue operating.
+     */
+    public virtual signal void monitoring_stopped(bool retrying) {
+    }
     
     /**
      * "scan-started" is fired whenever beginning to load messages into the Conversations object.
@@ -207,15 +229,20 @@ public class Geary.Conversations : Object {
     }
     
     ~Conversations() {
-        if (monitor_new) {
-            folder.email_appended.disconnect(on_folder_email_appended);
-            folder.email_removed.disconnect(on_folder_email_removed);
-            folder.email_flags_changed.disconnect(on_email_flags_changed);
-        }
+        if (monitoring)
+            debug("Warning: Conversations object destroyed without stopping monitoring");
         
         // Manually detach all the weak refs in the Conversation objects
         foreach (ImplConversation conversation in conversations)
             conversation.clear_owner();
+    }
+    
+    protected virtual void notify_monitoring_started() {
+        monitoring_started();
+    }
+    
+    protected virtual void notify_monitoring_stopped(bool retrying) {
+        monitoring_stopped(retrying);
     }
     
     protected virtual void notify_scan_started(Geary.EmailIdentifier? id, int low, int count) {
@@ -259,17 +286,70 @@ public class Geary.Conversations : Object {
         return geary_id_map.get(email_id);
     }
     
-    public bool monitor_new_messages(Cancellable? cancellable = null) {
-        if (monitor_new)
+    public async bool start_monitoring_async(Cancellable? cancellable = null) throws Error {
+        if (monitoring)
             return false;
         
-        monitor_new = true;
+        // set before yield to guard against reentrancy
+        monitoring = true;
+        
+        if (folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
+            try {
+                yield folder.open_async(false, cancellable);
+            } catch (Error err) {
+                monitoring = false;
+                
+                throw err;
+            }
+        }
+        
         cancellable_monitor = cancellable;
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
-        folder.email_flags_changed.connect(on_email_flags_changed);
+        folder.email_flags_changed.connect(on_folder_email_flags_changed);
+        folder.closed.connect(on_folder_closed);
+        
+        notify_monitoring_started();
         
         return true;
+    }
+    
+    public async void stop_monitoring_async(bool close_folder, Cancellable? cancellable = null) throws Error {
+        yield stop_monitoring_internal_async(close_folder, false, cancellable);
+    }
+    
+    private async void stop_monitoring_internal_async(bool close_folder, bool retrying,
+        Cancellable? cancellable) throws Error {
+        // always unschedule, as Timeout will hold a reference to this object
+        unschedule_retry();
+        
+        if (!monitoring)
+            return;
+        
+        // set now to prevent reentrancy during yield or signal
+        monitoring = false;
+        
+        folder.email_appended.disconnect(on_folder_email_appended);
+        folder.email_removed.disconnect(on_folder_email_removed);
+        folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+        folder.closed.disconnect(on_folder_closed);
+        
+        Error? close_err = null;
+        if (close_folder) {
+            try {
+                yield folder.close_async(cancellable ?? cancellable_monitor);
+            } catch (Error err) {
+                // throw, but only after cleaning up (which is to say, if close_async() fails,
+                // then the Folder is still treated as closed, which is the best that can be
+                // expected; it definitely shouldn't still be considered open).
+                close_err = err;
+            }
+        }
+        
+        notify_monitoring_stopped(retrying);
+        
+        if (close_err != null)
+            throw close_err;
     }
     
     /**
@@ -475,7 +555,7 @@ public class Geary.Conversations : Object {
             remove_email(id);
     }
     
-    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
+    private void on_folder_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
         foreach (Geary.EmailIdentifier id in map.keys) {
             ImplConversation? conversation = geary_id_map.get(id);
             if (conversation == null)
@@ -488,6 +568,84 @@ public class Geary.Conversations : Object {
             email.set_flags(map.get(id));
             notify_email_flags_changed(conversation, email);
         }
+    }
+    
+    private void on_folder_closed(Folder.CloseReason reason) {
+        // watch for errors; these indicate a retry should occur
+        if (reason == Folder.CloseReason.LOCAL_ERROR || reason == Folder.CloseReason.REMOTE_ERROR) {
+            // only retry if configured to do so
+            if (reestablish_connections)
+                retry_connection = true;
+            
+            return;
+        }
+        
+        // wait for the folder to be completely closed before retrying
+        if (reason != Folder.CloseReason.FOLDER_CLOSED)
+            return;
+        
+        if (!retry_connection) {
+            stop_monitoring_internal_async.begin(false, false, null);
+            
+            return;
+        }
+        
+        // reset
+        retry_connection = false;
+        
+        debug("Folder %s closed, restablishing connection to continue monitoring conversations",
+            folder.to_string());
+        
+        // First retry is immediate; thereafter, a delay
+        do_restart_monitoring_async.begin();
+    }
+    
+    private async void do_restart_monitoring_async() {
+        try {
+            yield stop_monitoring_internal_async(false, true, cancellable_monitor);
+        } catch (Error stop_err) {
+            debug("Error closing folder %s while reestablishing connection: %s", folder.to_string(),
+                stop_err.message);
+        }
+        
+        // TODO: Get smarter about this, especially since this might be an authentication error
+        // and not a hard error
+        try {
+            yield start_monitoring_async(cancellable_monitor);
+            debug("Reestablished connection to %s, continuing to monitor conversations",
+                folder.to_string());
+        } catch (Error start_err) {
+            debug("Unable to restablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
+                RETRY_CONNECTION_SEC, start_err.message);
+            
+            schedule_retry(true);
+        }
+    }
+    
+    // TODO: A back-off algorithm would make tons of sense here; the reschedule flag can assist
+    // in that calculation
+    private void schedule_retry(bool reschedule) {
+        if (reschedule)
+            unschedule_retry();
+        else if (retry_id != 0)
+            return;
+        
+        Timeout.add_seconds(RETRY_CONNECTION_SEC, on_delayed_retry);
+    }
+    
+    private void unschedule_retry() {
+        if (retry_id != 0) {
+            Source.remove(retry_id);
+            retry_id = 0;
+        }
+    }
+    
+    private bool on_delayed_retry() {
+        retry_id = 0;
+        
+        do_restart_monitoring_async.begin();
+        
+        return false;
     }
 }
 
