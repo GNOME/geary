@@ -160,12 +160,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         string? password = query_keyring ? keyring_get_password(username) : null;
         string? real_name = null;
         
-        Geary.Credentials cred;
+        Geary.Credentials? cred;
         if (password == null) {
             // No account set up yet.
             Geary.AccountInformation? account_info = null;
             real_name = get_default_real_name();
             cred = request_login(username, ref real_name, ref account_info);
+            if (cred == null)
+                return;
             
             try {
                 account = Geary.Engine.create(cred, account_info);
@@ -206,7 +208,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     // Prompt the user for a username and password, and try to start Geary.
-    private Geary.Credentials request_login(string _username = "", ref string real_name, 
+    private Geary.Credentials? request_login(string _username = "", ref string real_name, 
         ref Geary.AccountInformation? account_info) {
         LoginDialog login = new LoginDialog(_username, "", account_info);
         login.show();
@@ -226,6 +228,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             account_info.smtp_server_tls = login.smtp_tls;
         } else {
             exit(1);
+            return null;
         }
         
         return new Geary.Credentials(login.username, login.password);
