@@ -129,16 +129,6 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             return true;
         }
         
-        int64 full_uid_count = local_properties.uid_next.value - 1 - earliest_uid.value;
-        
-        // If no UID's, nothing to update
-        if (full_uid_count <= 0 || (full_uid_count > int.MAX)) {
-            debug("No valid UID range in local folder %s (count=%lld), nothing to update", to_string(),
-                full_uid_count);
-            
-            return true;
-        }
-        
         Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid);
         
         // Get the local emails in the range

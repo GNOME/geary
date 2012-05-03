@@ -552,8 +552,11 @@ public class Geary.Conversations : Object {
                 highest = head.id;
         }
         
+        // Means the folder is empty, so scoop up all the new emails
         if (highest == null) {
-            debug("Unable to find highest message position in %s", folder.to_string());
+            debug("Unable to find highest message position in %s, getting all", folder.to_string());
+            
+            lazy_load(1, -1, Folder.ListFlags.NONE, cancellable_monitor);
             
             return;
         }
