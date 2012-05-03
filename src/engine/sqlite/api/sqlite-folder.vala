@@ -445,10 +445,19 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     }
     
     public async Geary.Imap.UID? get_earliest_uid_async(Cancellable? cancellable = null) throws Error {
+        return yield get_uid_extremes_async(true, cancellable);
+    }
+    
+    public async Geary.Imap.UID? get_latest_uid_async(Cancellable? cancellable = null) throws Error {
+        return yield get_uid_extremes_async(false, cancellable);
+    }
+    
+    private async Geary.Imap.UID? get_uid_extremes_async(bool earliest, Cancellable? cancellable)
+        throws Error {
         check_open();
         
-        int64 ordering = yield location_table.get_earliest_ordering_async(null, folder_row.id,
-            cancellable);
+        int64 ordering = yield location_table.get_ordering_extremes_async(null, folder_row.id,
+            earliest, cancellable);
         
         return (ordering >= 1) ? new Geary.Imap.UID(ordering) : null;
     }

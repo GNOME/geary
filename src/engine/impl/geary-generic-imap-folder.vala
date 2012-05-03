@@ -470,15 +470,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     //
     // This MUST only be called from ReplayAppend.
     internal async void do_replay_appended_messages(int new_remote_count) {
-        debug("do_replay_appended_messages: new_remote_count=%d", new_remote_count);
-        
-        // this only works when the list is grown
-        if (remote_count >= new_remote_count) {
-            debug("Message reported appended by server but remote count %d already known",
-                remote_count);
-            
-            return;
-        }
+        debug("do_replay_appended_messages %s: remote_count=%d new_remote_count=%d", to_string(),
+            remote_count, new_remote_count);
         
         try {
             // If remote doesn't fully open, then don't fire signal, as we'll be unable to
@@ -486,34 +479,56 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             if (!yield wait_for_remote_to_open())
                 return;
             
+            Geary.Imap.UID? next_uid = yield local_folder.get_latest_uid_async(null);
+            if (next_uid != null)
+                next_uid = next_uid.next();
+            else
+                next_uid = new Geary.Imap.UID(Geary.Imap.UID.MIN);
+            
+            debug("do_replay_appended_messages %s: next_uid=%s", to_string(),
+                next_uid.to_string());
+            
+            // want to list UIDs starting at the next one, which is where the newest will go
+            // (if not beyond)
+            
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
-                new Imap.MessageSet.range_to_highest(remote_count + 1),
+                new Imap.MessageSet.uid_range_to_highest(next_uid),
                 Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
-            assert(list != null && list.size > 0);
-            
-            Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
-                Hashable.hash_func, Equalable.equal_func);
-            Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
-                Hashable.hash_func, Equalable.equal_func);
-            foreach (Geary.Email email in list) {
-                debug("Creating Email ID %s", email.id.to_string());
+            if (list != null && list.size > 0) {
+                debug("%d new messages in %s", list.size, to_string());
                 
-                // need to report both if it was created (not known before) and appended (which
-                // could mean created or simply a known email associated with this folder)
-                if (yield local_folder.create_email_async(email, null))
-                    created.add(email.id);
+                Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
+                    Hashable.hash_func, Equalable.equal_func);
+                Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
+                    Hashable.hash_func, Equalable.equal_func);
+                foreach (Geary.Email email in list) {
+                    // need to report both if it was created (not known before) and appended (which
+                    // could mean created or simply a known email associated with this folder)
+                    if (yield local_folder.create_email_async(email, null)) {
+                        created.add(email.id);
+                    } else {
+                        debug("Appended email ID %s already known in account, associating with %s...",
+                            email.id.to_string(), to_string());
+                    }
+                    
+                    appended.add(email.id);
+                }
                 
-                appended.add(email.id);
+                // save new remote count
+                bool changed = (remote_count != new_remote_count);
+                remote_count = new_remote_count;
+                
+                if (appended.size > 0)
+                    notify_email_appended(appended);
+                
+                if (created.size > 0)
+                    notify_email_locally_appended(created);
+                
+                if (changed)
+                    notify_email_count_changed(remote_count, CountChangeReason.ADDED);
             }
-            
-            // save new remote count
-            remote_count = new_remote_count;
-            
-            notify_email_appended(appended);
-            if (created.size > 0)
-                notify_email_locally_appended(created);
         } catch (Error err) {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
                 to_string(), err.message);
@@ -562,9 +577,10 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         }
         
         // save new remote count and notify of change
+        bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         
-        if (!marked)
+        if (!marked && changed)
             notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
     }
     

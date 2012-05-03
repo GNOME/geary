@@ -298,18 +298,18 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         return true;
     }
     
-    public async int64 get_earliest_ordering_async(Transaction? transaction, int64 folder_id,
-        Cancellable? cancellable) throws Error {
+    public async int64 get_ordering_extremes_async(Transaction? transaction, int64 folder_id,
+        bool earliest, Cancellable? cancellable) throws Error {
         Transaction locked = yield obtain_lock_async(transaction,
-            "MessageLocationTable.get_earliest_ordering_async", cancellable);
+            "MessageLocationTable.get_ordering_extremes_async", cancellable);
         
         SQLHeavy.Query query = locked.prepare(
-            "SELECT MIN(ordering) FROM MessageLocationTable WHERE folder_id = ? " + 
-            "AND remove_marker = 0");
+            "SELECT %s FROM MessageLocationTable WHERE folder_id = ? AND remove_marker = 0".printf(
+                earliest ? "MIN(ordering)" : "MAX(ordering)"));
         query.bind_int64(0, folder_id);
         
         SQLHeavy.QueryResult result = yield query.execute_async();
-        check_cancel(cancellable, "get_earliest_ordering_async");
+        check_cancel(cancellable, "get_ordering_extremes_async");
         
         return (!result.finished) ? result.fetch_int64(0) : -1;
     }

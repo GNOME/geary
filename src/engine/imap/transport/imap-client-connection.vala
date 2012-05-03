@@ -203,7 +203,9 @@ public class Geary.Imap.ClientConnection {
      * according to the IMAP specification.)
      *
      * Note that this will *not* break a connection out of IDLE state alone; a command needs to be
-     * flushed down the pipe to do that.  (NOOP would be a good choice.)
+     * flushed down the pipe to do that.  (NOOP would be a good choice.)  Nor will this initiate
+     * an IDLE command either; it can only do that after sending a command (again, NOOP would be
+     * a good choice).
      */
     public void set_idle_when_quiet(bool idle_when_quiet) {
         this.idle_when_quiet = idle_when_quiet;

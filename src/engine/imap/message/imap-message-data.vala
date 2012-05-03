@@ -20,12 +20,42 @@ public interface Geary.Imap.MessageData : Geary.Common.MessageData {
 }
 
 public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageData {
+    // Using statics because int32.MAX is static, not const (??)
+    public static int64 MIN = 1;
+    public static int64 MAX = int32.MAX;
+    
     public UID(int64 value) {
         base (value);
     }
     
     public bool is_valid() {
-        return value >= 1;
+        return Numeric.int64_in_range_exclusive(value, MIN, MAX);
+    }
+    
+    /**
+     * Returns a valid UID, which means returning MIN or MAX if the value is out of range (either
+     * direction) or MAX if this value is already MAX.
+     */
+    public UID next() {
+        if (value < MIN)
+            return new UID(MIN);
+        else if (value > MAX)
+            return new UID(MAX);
+        else
+            return new UID(Numeric.int64_ceiling(value + 1, MAX));
+    }
+    
+    /**
+     * Returns a valid UID, which means returning MIN or MAX if the value is out of range (either
+     * direction) or MIN if this value is already MIN.
+     */
+    public UID previous() {
+        if (value < MIN)
+            return new UID(MIN);
+        else if (value > MAX)
+            return new UID(MAX);
+        else
+            return new UID(Numeric.int64_floor(value - 1, MIN));
     }
 }
 

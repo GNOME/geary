@@ -820,6 +820,13 @@ public class Geary.Imap.ClientSession {
         // asked for without closing
         assert(current_mailbox == null);
         
+        // Allow IDLE *before* issuing SELECT/EXAMINE because there's no guarantee another command
+        // will be issued any time soon, which is necessary for the IDLE command to be tacked on
+        // to the end of it.  In other words, telling ClientConnection to go into IDLE after the
+        // SELECT/EXAMINE command is too late unless another command is sent (set_idle_when_quiet()
+        // performs no I/O).
+        cx.set_idle_when_quiet(allow_idle && supports_idle());
+        
         Command cmd;
         if (params.is_select)
             cmd = new SelectCommand(params.mailbox);
@@ -845,13 +852,14 @@ public class Geary.Imap.ClientSession {
         current_mailbox = params.mailbox;
         current_mailbox_readonly = !params.is_select;
         
-        cx.set_idle_when_quiet(allow_idle && supports_idle());
-        
         return State.SELECTED;
     }
     
     private uint on_select_failed(uint state, uint event, void *user, Object? object) {
         assert(object != null);
+        
+        // turn off idle, not entering SELECTED/EXAMINED state
+        cx.set_idle_when_quiet(false);
         
         SelectParams params = (SelectParams) object;
         
@@ -891,6 +899,7 @@ public class Geary.Imap.ClientSession {
     private uint on_close_mailbox(uint state, uint event, void *user, Object? object) {
         assert(object != null);
         
+        // returning to AUTHORIZED state, turn off IDLE
         cx.set_idle_when_quiet(false);
         
         AsyncParams params = (AsyncParams) object;
