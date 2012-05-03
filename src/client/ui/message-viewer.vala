@@ -1182,24 +1182,9 @@ public class MessageViewer : WebKit.WebView {
         return false; // False to continue processing.
     }
     
-    // Scrolls to the first unread message in the view, if any exist.
-    public void scroll_to_first_unread() {
-        bool scrolled = false;
-        foreach (Geary.Email email in messages) {
-            if (email.properties.email_flags.is_unread()) {
-                WebKit.DOM.HTMLElement? element = email_to_element.get(email.id);
-                if (element != null) {
-                    element.scroll_into_view(true);
-                    scrolled = true;
-                }
-                
-                break;
-            }
-        }
-        
-        // If we didn't scroll, just scroll up to the top.
-        if (!scrolled)
-            get_dom_document().get_default_view().scroll(0, 0);
+    // Scrolls back up to the top.
+    public void scroll_reset() {
+        get_dom_document().get_default_view().scroll(0, 0);
     }
     
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
