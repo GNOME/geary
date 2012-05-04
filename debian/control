@@ -1,0 +1,34 @@
+Source: geary
+Section: gnome
+Priority: optional
+Maintainer: Jim Nelson <jim@yorba.org>
+Build-Depends: debhelper (>= 7), 
+ libgee-dev (>= 0.6.0),
+ libglib2.0-dev (>= 2.26.0),
+ libgtk-3-dev (>= 3.2.0),
+ libunique-3.0-dev (>= 3.0.0),
+ libwebkitgtk-3.0-dev (>= 1.4.3),
+ libgmime-2.6-dev (>= 2.6.0),
+ valac-0.16 (>= 0.16.0),
+ cmake (>= 2.8.0),
+ libsqlheavy0.1-dev (>= 0.1.1),
+ libgnome-keyring-dev (>= 3.2.0)
+Standards-Version: 3.8.3
+Homepage: http://www.yorba.org
+
+Package: geary
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, 
+ libgee2 (>= 0.6.0),
+ libglib2.0-0 (>= 2.26.0),
+ libgtk-3-0 (>= 3.2.0),
+ libunique-3.0-0 (>= 3.0.0),
+ libwebkitgtk-3.0-0 (>= 1.4.3),
+ libxml2 (>= 2.6.32),
+ libsqlheavy0.1-0 (>= 0.1.1)
+Description: Email client
+ Geary is an email client built for the GNOME desktop environment.  It
+ allows you to read and write email with a simple, modern interface.
+ .
+ Visit http://www.yorba.org to read about the current state of 
+ Geary's development.

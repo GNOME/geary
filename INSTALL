@@ -1,0 +1,24 @@
+
+    Geary Installation
+    ------------------
+
+    To build and install Geary, type the following commands:
+
+    $ ./configure
+    $ make
+    $ make install
+
+    * By default, Geary will install under /usr/local.  The configure script
+      can customize the prefix directory.  Run ./configure --help for
+      instructions and other installation options.
+  
+    * You may need to execute "make install" as root (i.e. sudo make install)
+      if installing to system directories.
+
+    * If you wish to try Geary before installing it, you may execute it
+      directly from its build directory.  Note that certain desktop integration
+      (such as being listed in an application menu) requires full installation.
+
+
+    Copyright 2012 Yorba Foundation
+
