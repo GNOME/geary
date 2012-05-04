@@ -1,0 +1,16 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="editor">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="shortcuts"/>
+    </info>
+	<title>Email composer</title>
+	<p>Geary's email composer allows you to adjust the font style, size and color of text. You can also insert hyperlinks into messages.</p>
+	
+	<p>To use the email composer, you may either reply to a message or create a new message by clicking the icon located in the toolbar.</p>
+	
+</page>
+

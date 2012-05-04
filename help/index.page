@@ -1,5 +1,17 @@
-<page xmlns="http://projectmallard.org/1.0/" type="guide" id="index">
-    <title>Geary Help</title>
-    <p>Documentation coming soon</p>
-</page>
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="index">
 
+<title><media type="image" src="figures/Mail.png"></media>  
+Geary</title>
+<p>A lightweight email reader for the GNOME desktop.</p>
+
+    <section id="overview" style="2column">
+        <title>Using Geary</title>
+    </section>
+
+    <section id="bug" style="2column">
+        <title>Bugs</title>
+    </section>
+
+</page>

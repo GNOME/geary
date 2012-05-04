@@ -1,0 +1,51 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="topic"
+      id="shortcuts">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="spell" />
+    </info>
+  
+   <title>Keyboard shortcuts</title>   
+   <p>Geary has a growing list of keyboard shortcuts. </p>
+     <table frame="all" rules="rows">
+  	<tr>
+  		<td><p>Compose a new email</p></td> 			<td><p><keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key></p></td>
+  	</tr>
+ 	<tr>
+  		<td><p>Reply to email</p></td> 
+  		<td><p><keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key></p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Reply to all</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or <keyseq><key>Shift</key><key>R</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Forward</p></td>
+  		<td><p><keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key> </p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Archive</p></td>
+  		<td><p> <key>A</key> or <key>Delete</key> or <key>Backspace</key></p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Quit</p></td>
+  		<td><p><keyseq><key>Ctrl</key><key>Q</key></keyseq></p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Zoom in</p></td>
+  		<td><p><keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key> </p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Zoom out</p></td>
+  		<td><p><keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key> </p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Reset zoom</p></td>
+  		<td><p><keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key> </p></td>
+  	</tr>
+     </table>
+</page>
+

@@ -1,0 +1,24 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="spell">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="send" />
+    </info>
+   <title>Preferences</title>
+	<p>Geary has several optional features, all of which are enabled by default. If you would like to turn any of these defaults off, click the gear menu at the top right of the toolbar and choose Preferences.</p>
+	<section>
+	<title>Spell Checking</title>
+	<p>Geary automatically spell checks messages as they are being composed.</p>
+	</section>
+	<section>
+	<title>Autoselect Next Message</title>
+	<p>When this option is enabled, Geary automatically selects the latest message in a folder when you enter the folder. In addition, after archiving a message, Geary automatically selects an adjacent message.</p>
+	</section>
+	<section>
+	<title>Display Message Preview</title>
+	<p>Geary shows message previews in the conversation list by default. The preview shows the first lines of the message to provide additional information beyond what is written in the subject line. </p>
+	</section>
+</page>

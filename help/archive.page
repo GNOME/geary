@@ -1,0 +1,17 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="archive">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="conversation"/>
+    </info>
+	<title>Archive messages</title>
+
+	<p>To archive a message, select the message from the conversation list and press the archive button located in the toolbar. To select multiple messages to archive, hold down the <key>Shift</key> key and click on the messages to be archived from the conversation list.</p>
+	<p>Archived messages will appear in the All Mail folder located in the folder list.</p>
+
+	
+</page>
+

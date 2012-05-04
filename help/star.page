@@ -1,0 +1,22 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="star">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="archive"/>
+    </info>
+	<title>Star messages and mark as read</title>
+	<section>
+	<title>Star messages</title>
+	<p>You can star messages by selecting it and clicking on the star icon in the conversation list. Messages may also be starred within the message view area by clicking the star at the top right of the message.</p>
+	<p>Starred messages will appear in your Starred folder located in the folder list.</p>
+	<p>Learn about the <link xref="shortcuts">keyboard shortcuts</link> to star messages.</p>
+	</section>
+	<section>
+	<title>Mark messages as read or unread</title>
+	<p>Messages are marked as read when they are selected from the conversation list. To mark a message as unread, select Mark as Unread from the dropdown menu inside the message viewer. If you would like to mark a message as read, you may select Mark as Read option from the dropdown menu.</p>
+	
+	</section>
+</page>
