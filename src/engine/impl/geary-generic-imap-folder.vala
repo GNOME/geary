@@ -595,8 +595,14 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         // because close_internal_async() issues ReceiveReplayQueue.close_async() (which cannot
         // be called from within a ReceiveReplayOperation), schedule the close rather than
-        // yield for it
-        close_internal_async.begin(CloseReason.LOCAL_CLOSE, reason, null);
+        // yield for it ... can't simply call the async .begin variant because, depending on
+        // the situation, it may not yield until it attempts to close the ReceiveReplayQueue,
+        // which is the problem we're attempting to work around
+        Idle.add(() => {
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, reason, null);
+            
+            return false;
+        });
     }
     
     public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
