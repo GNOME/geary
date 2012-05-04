@@ -444,6 +444,13 @@ public class Geary.Conversations : Object {
         Gee.MultiMap<Conversation, Geary.Email> appended_conversations = new Gee.HashMultiMap<
             Conversation, Geary.Email>();
         foreach (Geary.Email email in emails) {
+            // Skip messages already assigned to a conversation; this also deals with the problem
+            // of messages with no Message-ID being loaded twice (most often encountered when
+            // the first pass is loading messages directly from the database and the second pass
+            // are messages loaded from both)
+            if (geary_id_map.has_key(email.id))
+                continue;
+            
             // Right now, all threading is done with Message-IDs (no parsing of subject lines, etc.)
             // If a message doesn't have a Message-ID, it's treated as its own conversation
             

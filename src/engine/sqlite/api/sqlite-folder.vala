@@ -8,8 +8,7 @@
 // the future, to support other email services, will need to break this up.
 
 private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
-    public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = 
-        Geary.Email.Field.REFERENCES | Geary.Email.Field.PROPERTIES;
+    public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = Geary.Email.Field.PROPERTIES;
     
     public bool opened { get; private set; default = false; }
     
@@ -113,19 +112,6 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         if (!email.fields.is_all_set(REQUIRED_FOR_DUPLICATE_DETECTION))
             return Sqlite.Row.INVALID_ID;
         
-        // what's more, actually need all those fields to be available, not merely attempted,
-        // to err on the side of safety
-        if (email.message_id == null)
-            return Sqlite.Row.INVALID_ID;
-        
-        Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
-        string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
-            ? imap_properties.internaldate.original : null;
-        long rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
-        
-        if (String.is_empty(internaldate) || rfc822_size < 0)
-            return Sqlite.Row.INVALID_ID;
-        
         // See if it already exists; first by UID (which is only guaranteed to be unique in a folder,
         // not account-wide)
         int64 message_id;
@@ -134,39 +120,30 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             return message_id;
         }
         
+        // what's more, actually need all those fields to be available, not merely attempted,
+        // to err on the side of safety
+        Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
+        string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
+            ? imap_properties.internaldate.original : null;
+        long rfc822_size = (imap_properties != null && imap_properties.rfc822_size != null)
+            ? imap_properties.rfc822_size.value : -1;
+        
+        if (String.is_empty(internaldate) || rfc822_size < 0)
+            return Sqlite.Row.INVALID_ID;
+        
         // reset
         message_id = Sqlite.Row.INVALID_ID;
-        
-        // look for duplicate via Message-ID
-        Gee.List<int64?>? list = yield message_table.search_message_id_async(transaction, 
-            email.message_id, cancellable);
-        
-        // only a duplicate candidate if exactly one found, otherwise err on the side of safety
-        if (list != null && list.size == 1)
-            message_id = list[0];
         
         // look for duplicate in IMAP message properties
         Gee.List<int64?>? duplicate_ids = yield imap_message_properties_table.search_for_duplicates_async(
             transaction, internaldate, rfc822_size, cancellable);
         if (duplicate_ids != null && duplicate_ids.size > 0) {
-            // if a message_id was found via Message-ID, search for a match; else if one duplicate
-            // was found via IMAP properties, use that, otherwise err on the side of safety
-            if (message_id != Sqlite.Row.INVALID_ID) {
-                int64 match_id = Sqlite.Row.INVALID_ID;
-                foreach (int64 duplicate_id in duplicate_ids) {
-                    if (message_id == duplicate_id) {
-                        match_id = duplicate_id;
-                        
-                        break;
-                    }
-                }
-                
-                // use the matched ID, which if not found, invalidates the discovered ID
-                message_id = match_id;
+            if (duplicate_ids.size > 1) {
+                debug("Warning: Multiple messages with the same internaldate (%s) and size (%lu) found in %s",
+                    internaldate, rfc822_size, to_string());
+                message_id = duplicate_ids[0];
             } else if (duplicate_ids.size == 1) {
                 message_id = duplicate_ids[0];
-            } else {
-                message_id = Sqlite.Row.INVALID_ID;
             }
         }
         
@@ -177,8 +154,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     private async bool associate_with_folder_async(Transaction transaction, int64 message_id,
         Geary.Email email, Cancellable? cancellable) throws Error {
         // see if an email exists at this position
-        MessageLocationRow? location_row = yield location_table.fetch_async(transaction,
-            folder_row.id, email.position, cancellable);
+        MessageLocationRow? location_row = yield location_table.fetch_by_ordering_async(transaction,
+            folder_row.id, email.id.ordering, cancellable);
         if (location_row != null)
             return false;
         
@@ -208,8 +185,12 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         
         // if already associated or a duplicate, merge and/or associate
         if (message_id != Sqlite.Row.INVALID_ID) {
-            if (!associated)
-                yield associate_with_folder_async(transaction, message_id, email, cancellable);
+            if (!associated) {
+                if (!yield associate_with_folder_async(transaction, message_id, email, cancellable)) {
+                    debug("Warning: Unable to associate %s (%lld) with %s", email.id.to_string(), message_id,
+                        to_string());
+                }
+            }
             
             yield merge_email_async(transaction, message_id, email, cancellable);
             

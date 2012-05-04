@@ -194,35 +194,6 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         yield release_lock_async(transaction, locked, cancellable);
     }
     
-    public async Gee.List<MessageRow>? list_by_message_id_async(Transaction? transaction,
-        Geary.RFC822.MessageID message_id, Geary.Email.Field fields, Cancellable? cancellable)
-        throws Error {
-        assert(fields != Geary.Email.Field.NONE);
-        
-        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.list_by_message_id_async",
-            cancellable);
-        
-        SQLHeavy.Query query = locked.prepare(
-            "SELECT %s FROM MessageTable WHERE message_id=?".printf(fields_to_columns(fields)));
-        query.bind_string(0, message_id.value);
-        
-        SQLHeavy.QueryResult results = yield query.execute_async();
-        if (results.finished)
-            return null;
-        
-       check_cancel(cancellable, "list_by_message_id_async");
-        
-        Gee.List<MessageRow> list = new Gee.ArrayList<MessageRow>();
-        do {
-            list.add(new MessageRow.from_query_result(this, fields, results));
-            yield results.next_async();
-            
-            check_cancel(cancellable, "list_by_message_id_async");
-        } while (!results.finished);
-        
-        return (list.size > 0) ? list : null;
-    }
-    
     public async MessageRow? fetch_async(Transaction? transaction, int64 id,
         Geary.Email.Field requested_fields, Cancellable? cancellable = null) throws Error {
         assert(requested_fields != Geary.Email.Field.NONE);
@@ -316,45 +287,6 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
         }
         
         return builder.str;
-    }
-    
-    public async int search_message_id_count_async(Transaction? transaction,
-        Geary.RFC822.MessageID message_id, Cancellable? cancellable) throws Error {
-        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.search_message_id_count",
-            cancellable);
-        
-        SQLHeavy.Query query = locked.prepare(
-            "SELECT COUNT(*) FROM MessageTable WHERE message_id=?");
-        query.bind_string(0, message_id.value);
-        
-        SQLHeavy.QueryResult result = yield query.execute_async();
-        check_cancel(cancellable, "search_message_id_count_async");
-        
-        return (result.finished) ? 0 : result.fetch_int(0);
-    }
-    
-    public async Gee.List<int64?>? search_message_id_async(Transaction? transaction,
-        Geary.RFC822.MessageID message_id, Cancellable? cancellable) throws Error {
-        Transaction locked = yield obtain_lock_async(transaction, "MessageTable.search_message_id_async",
-            cancellable);
-        
-        SQLHeavy.Query query = locked.prepare(
-            "SELECT id FROM MessageTable WHERE message_id=?");
-        query.bind_string(0, message_id.value);
-        
-        SQLHeavy.QueryResult result = yield query.execute_async();
-        check_cancel(cancellable, "search_message_id_async");
-        if (result.finished)
-            return null;
-        
-        Gee.List<int64?> list = new Gee.ArrayList<int64?>();
-        do {
-            list.add(result.fetch_int64(0));
-            yield result.next_async();
-            check_cancel(cancellable, "search_message_id_async");
-        } while (!result.finished);
-        
-        return list;
     }
 }
 

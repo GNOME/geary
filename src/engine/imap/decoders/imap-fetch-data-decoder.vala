@@ -39,6 +39,10 @@ public abstract class Geary.Imap.FetchDataDecoder {
         if (literalp != null)
             return decode_literal(literalp);
         
+        NilParameter? nilp = param as NilParameter;
+        if (nilp != null)
+            return decode_nil(nilp);
+        
         // bad news; this means this function isn't handling a Parameter type properly
         assert_not_reached();
     }
@@ -53,6 +57,10 @@ public abstract class Geary.Imap.FetchDataDecoder {
     
     protected virtual MessageData decode_literal(LiteralParameter literal) throws ImapError {
         throw new ImapError.TYPE_ERROR("%s does not accept a literal parameter", data_item.to_string());
+    }
+    
+    protected virtual MessageData decode_nil(NilParameter nil) throws ImapError {
+        throw new ImapError.TYPE_ERROR("%s does not accept a nil parameter", data_item.to_string());
     }
 }
 
@@ -115,11 +123,11 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         ListParameter? cc = listp.get_as_nullable_list(6);
         ListParameter? bcc = listp.get_as_nullable_list(7);
         StringParameter? in_reply_to = listp.get_as_nullable_string(8);
-        StringParameter? message_id = listp.get_as_string(9);
+        StringParameter? message_id = listp.get_as_nullable_string(9);
         
         // Although Message-ID is required to be returned by IMAP, it may be blank if the email
         // does not supply it (optional according to RFC822); deal with this cognitive dissonance
-        if (String.is_empty(message_id.value))
+        if (message_id != null && String.is_empty(message_id.value))
             message_id = null;
         
         return new Envelope(new Geary.RFC822.Date(sent.value),
@@ -172,6 +180,10 @@ public class Geary.Imap.RFC822TextDecoder : Geary.Imap.FetchDataDecoder {
     
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
         return new Geary.Imap.RFC822Text(literalp.get_buffer());
+    }
+    
+    protected override MessageData decode_nil(NilParameter nilp) throws ImapError {
+        return new Geary.Imap.RFC822Text(Memory.EmptyBuffer.instance);
     }
 }
 

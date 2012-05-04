@@ -42,10 +42,16 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
         for (int ctr = 0; ctr < list.get_count(); ctr += 2) {
             StringParameter data_item_param = list.get_as_string(ctr);
             
+            // watch for truncated lists, which indicate an empty return value
+            bool has_value = (ctr < (list.get_count() - 1));
+            
             if (FetchBodyDataType.is_fetch_body(data_item_param)) {
                 // FETCH body data items are merely a literal of all requested fields formatted
-                // in RFC822 header format
-                results.body_data.add(list.get_as_literal(ctr + 1).get_buffer());
+                // in RFC822 header format ... watch for empty return values
+                if (has_value)
+                    results.body_data.add(list.get_as_literal(ctr + 1).get_buffer());
+                else
+                    results.body_data.add(Memory.EmptyBuffer.instance);
             } else {
                 FetchDataType data_item = FetchDataType.decode(data_item_param.value);
                 FetchDataDecoder? decoder = data_item.get_decoder();
@@ -56,7 +62,11 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
                     continue;
                 }
                 
-                results.set_data(data_item, decoder.decode(list.get_required(ctr + 1)));
+                // watch for empty return values
+                if (has_value)
+                    results.set_data(data_item, decoder.decode(list.get_required(ctr + 1)));
+                else
+                    results.set_data(data_item, decoder.decode(NilParameter.instance));
             }
         }
         
