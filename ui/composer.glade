@@ -97,7 +97,7 @@
     <child>
       <object class="GtkAction" id="removeformat">
         <property name="label" translatable="yes">Remove formatting</property>
-        <property name="stock_id">gtk-cancel</property>
+        <property name="icon_name">remove-formatting</property>
       </object>
       <accelerator key="space" modifiers="GDK_CONTROL_MASK"/>
     </child>
