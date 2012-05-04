@@ -68,6 +68,7 @@ public class GearyController {
     private Geary.Conversation[] selected_conversations = new Geary.Conversation[0];
     private Geary.Conversation? last_deleted_conversation = null;
     private bool scan_in_progress = false;
+    private int conversations_added_counter = 0;
     
     public GearyController() {
         // Setup actions.
@@ -420,16 +421,32 @@ public class GearyController {
                 debug("Unable to fetch preview: %s", err.message);
         }
     }
-    
+
     public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
-        debug("adding %d conversations...", conversations.size);
+        Gtk.Adjustment adjustment = (main_window.message_list_view.get_parent() as Gtk.ScrolledWindow)
+            .get_vadjustment();
+        int stage = ++conversations_added_counter;
+        double scroll = adjustment.get_value();
+        debug("Adding %d conversations (%d).", conversations.size, stage);
         foreach (Geary.Conversation c in conversations) {
             if (!main_window.message_list_store.has_conversation(c))
                 main_window.message_list_store.append_conversation(c);
         }
-        debug("added %d conversations", conversations.size);
+        debug("Added %d conversations (%d).", conversations.size, stage);
+
+        // If we are at the top of the message list we want to stay at the top. We need to spin the
+        // event loop until they make it from the store to the view. We also don't want to have two
+        // of these going, so if another conversation gets appended, we just return.
+        if (scroll == 0) {
+            while (Gtk.events_pending()) {
+                if (Gtk.main_iteration() || conversations_added_counter != stage) {
+                    return;
+                }
+            }
+            adjustment.set_value(0);
+        }
     }
-    
+
     public void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
         // If we're viewing this conversation, fetch the messages and add them to the view.
