@@ -186,8 +186,8 @@ public class GearyController {
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, null, TRANSLATABLE, "A",
-            null, on_delete_message };
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, "user-trash-full", TRANSLATABLE,
+            "A", null, on_delete_message };
         entries += delete_message;
         add_accelerator("Delete", ACTION_DELETE_MESSAGE);
         add_accelerator("BackSpace", ACTION_DELETE_MESSAGE);
@@ -222,10 +222,10 @@ public class GearyController {
         
         // Personality-specific setup.
         if (account.delete_is_archive()) {
-            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).label =
-                _("Archive Message");
-            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip =
-                _("Archive the selected conversation");
+            Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
+            delete_message.label = _("Archive Message");
+            delete_message.tooltip = _("Archive the selected conversation");
+            delete_message.icon_name = "archive-insert";
         }
         
         main_window.folder_list.set_user_folders_root_name(account.get_user_folders_label());

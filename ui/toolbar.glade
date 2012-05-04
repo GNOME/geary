@@ -82,14 +82,12 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyDeleteMessage">
-        <property name="use_action_appearance">False</property>
+        <property name="use_action_appearance">True</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Delete the selected conversation</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Delete</property>
         <property name="use_underline">True</property>
-        <property name="icon_name">archive-insert</property>
       </object>
       <packing>
         <property name="expand">False</property>
