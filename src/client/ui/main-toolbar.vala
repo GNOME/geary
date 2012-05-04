@@ -48,14 +48,21 @@ public class MainToolbar : Gtk.Box {
             as Gtk.ToolButton;
         archive_message.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_DELETE_MESSAGE));
-        
+
         mark_menu_button = builder.get_object(GearyController.ACTION_MARK_AS_MENU) as Gtk.ToggleToolButton;
         mark_menu_button.set_related_action(GearyApplication.instance.actions.get_action(
             GearyController.ACTION_MARK_AS_MENU));
         mark_menu.attach_to_widget(mark_menu_button, null);
         mark_menu.deactivate.connect(on_deactivate_mark_menu);
         mark_menu_button.clicked.connect(on_show_mark_menu);
-        
+
+        Gtk.ToggleButton button = mark_menu_button.get_child() as Gtk.ToggleButton;
+        button.remove(button.get_child());
+        Gtk.Box box = new Gtk.HBox(false, 0);
+        button.add(box);
+        box.pack_start(new Gtk.Label(_("Mark")));
+        box.pack_start(new Gtk.Image.from_icon_name("menu-down", Gtk.IconSize.LARGE_TOOLBAR));
+
         menu_button = builder.get_object("menu_button") as Gtk.ToggleToolButton;
         menu.attach_to_widget(menu_button, null);
         menu.deactivate.connect(on_deactivate_menu);
