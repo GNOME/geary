@@ -1,20 +1,18 @@
 set(HELP_DEST share/gnome/help/geary/C)
 
 set(HELP_FILES
-    archive.page
-    bugs.page
-    conversation.page
-    editor.page
-    index.page
-    limits.page
-    send.page
-    shortcuts.page
-    spell.page
-    star.page
-    figures/Mail.png
-   
-    
+    C/archive.page
+    C/bugs.page
+    C/conversation.page
+    C/editor.page
+    C/index.page
+    C/limits.page
+    C/send.page
+    C/shortcuts.page
+    C/spell.page
+    C/star.page
 )
 
 install(FILES ${HELP_FILES} DESTINATION ${HELP_DEST})
+install(FILES C/figures/Mail.png DESTINATION ${HELP_DEST}/figures)
 

@@ -7,9 +7,11 @@ set(ICON_FILES
     geary.png
     mail-inbox.png
     mail-sent.png
+    menu-down.svg
     multiple-tags.png
     non-starred-grey.png
     one-tag.png
+    remove-formatting.png
     starred.png
 )
 

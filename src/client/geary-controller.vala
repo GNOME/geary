@@ -680,7 +680,7 @@ public class GearyController {
                 File exec_dir = GearyApplication.instance.get_exec_dir();
                 string[] argv = new string[3];
                 argv[0] = "gnome-help";
-                argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help";
+                argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
                 argv[2] = null;
                 if (!Process.spawn_async(exec_dir.get_path(), argv, null,
                     SpawnFlags.SEARCH_PATH | SpawnFlags.STDERR_TO_DEV_NULL, null, out pid)) {
