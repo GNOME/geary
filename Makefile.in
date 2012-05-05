@@ -32,3 +32,7 @@ dist:
 	@$(MAKE) -C $(BUILD_DIR) dist
 	@cp build/*.xz .
 
+.PHONY: ubuntu
+ubuntu:
+	@$(MAKE) -C $(BUILD_DIR) ubuntu
+

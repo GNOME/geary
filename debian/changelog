@@ -1,5 +1,9 @@
-geary (0.0.0+trunk-1) precise; urgency=low
+geary (0.1.0-1~precise1) precise; urgency=low
 
-  * Initial release
+  * Initial release.  Features include:
+    - Lightweight IMAP/SMTP email client
+    - Integration with GMail and Yahoo Mail features
+    - Read/write HTML email
+    - Support for starring, archiving, mark as read/unread
 
- -- Eric Gregory <eric@yorba.org>  Wed, 02 May 2012 17:47:58 -0700
+ -- Eric Gregory <eric@yorba.org>  Wed, 04 May 2012 17:30:00 -0700

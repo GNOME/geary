@@ -15,8 +15,13 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
 #
 set(GETTEXT_PACKAGE "geary")
 set(RELEASE_NAME "Lightweight email client for GNOME.")
-set(VERSION "0.0.0+trunk")
+set(VERSION "0.1.0")
 set(VERSION_INFO "Release")
+
+# Packaging filenamesnames.
+set(ARCHIVE_BASE_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
+set(ARCHIVE_FULL_NAME ${ARCHIVE_BASE_NAME}.tar.xz)
+set(ARCHIVE_DEBUILD_FULL_NAME ${CMAKE_PROJECT_NAME}_${VERSION}.orig.tar.xz)
 
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
 option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
@@ -83,9 +88,37 @@ endif ()
 
 # Dist
 # This generates the dist tarballs
-set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
-add_custom_target(dist
-    COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
-        | xz -z > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.xz
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_custom_target(
+    dist
+    COMMAND 
+        git archive --prefix=${ARCHIVE_BASE_NAME}/ HEAD
+        | xz -z > ${CMAKE_BINARY_DIR}/${ARCHIVE_FULL_NAME}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+# Ubuntu
+# Builds the source Debian package used for the Launchpad PPA
+add_custom_target(
+    ubuntu_pre
+    DEPENDS
+        dist
+    COMMAND 
+        ${CMAKE_COMMAND} -E copy ${ARCHIVE_FULL_NAME} ${ARCHIVE_DEBUILD_FULL_NAME}
+    COMMAND
+        tar xvfx ${ARCHIVE_FULL_NAME}
+)
+
+add_custom_target(
+    ubuntu
+    DEPENDS
+        ubuntu_pre
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/debian" 
+        "${CMAKE_CURRENT_BINARY_DIR}/${ARCHIVE_BASE_NAME}/debian"
+    COMMAND 
+        debuild -S -k$ENV{GPGKEY}
+    COMMAND
+
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${ARCHIVE_BASE_NAME}"
+)
 

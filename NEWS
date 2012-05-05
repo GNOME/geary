@@ -1,0 +1,9 @@
+Geary 0.1.0 - 04 May 2012
+-------------------------
+
+  * Initial release.  Features include:
+    - Lightweight IMAP/SMTP email client
+    - Integration with GMail and Yahoo Mail features
+    - Read/write HTML email
+    - Support for starring, archiving, mark as read/unread
+
