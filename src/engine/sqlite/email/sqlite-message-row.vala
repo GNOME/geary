@@ -88,10 +88,13 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
     }
     
     public Geary.Email to_email(int position, Geary.EmailIdentifier id) throws Error {
+        // Important to set something in the Email object if the field bit is set ... for example,
+        // if the caller expects to see a DATE field, that field is set in the Email's bitmask,
+        // even if the Date object is null
         Geary.Email email = new Geary.Email(position, id);
         
-        if (((fields & Geary.Email.Field.DATE) != 0) && (date != null))
-            email.set_send_date(new RFC822.Date(date));
+        if ((fields & Geary.Email.Field.DATE) != 0)
+            email.set_send_date(!String.is_empty(date) ? new RFC822.Date(date) : null);
         
         if ((fields & Geary.Email.Field.ORIGINATORS) != 0) {
             email.set_originators(unflatten_addresses(from), unflatten_addresses(sender),
@@ -110,17 +113,17 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
                 (references != null) ? new RFC822.MessageIDList.from_rfc822_string(references) : null);
         }
         
-        if (((fields & Geary.Email.Field.SUBJECT) != 0) && (subject != null))
-            email.set_message_subject(new RFC822.Subject.decode(subject));
+        if ((fields & Geary.Email.Field.SUBJECT) != 0)
+            email.set_message_subject(new RFC822.Subject.decode(subject ?? ""));
         
-        if (((fields & Geary.Email.Field.HEADER) != 0) && (header != null))
-            email.set_message_header(new RFC822.Header(new Geary.Memory.StringBuffer(header)));
+        if ((fields & Geary.Email.Field.HEADER) != 0)
+            email.set_message_header(new RFC822.Header(new Geary.Memory.StringBuffer(header ?? "")));
         
-        if (((fields & Geary.Email.Field.BODY) != 0) && (body != null))
-            email.set_message_body(new RFC822.Text(new Geary.Memory.StringBuffer(body)));
+        if ((fields & Geary.Email.Field.BODY) != 0)
+            email.set_message_body(new RFC822.Text(new Geary.Memory.StringBuffer(body ?? "")));
         
-        if (((fields & Geary.Email.Field.PREVIEW) != 0) && (preview != null))
-            email.set_message_preview(new RFC822.PreviewText(new Geary.Memory.StringBuffer(preview)));
+        if ((fields & Geary.Email.Field.PREVIEW) != 0)
+            email.set_message_preview(new RFC822.PreviewText(new Geary.Memory.StringBuffer(preview ?? "")));
         
         return email;
     }

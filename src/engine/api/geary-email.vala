@@ -155,7 +155,7 @@ public class Geary.Email : Object {
         }
     }
 
-    public void set_send_date(Geary.RFC822.Date date) {
+    public void set_send_date(Geary.RFC822.Date? date) {
         this.date = date;
         
         fields |= Field.DATE;

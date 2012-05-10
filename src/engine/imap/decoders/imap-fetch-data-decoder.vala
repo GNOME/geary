@@ -114,7 +114,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
-        StringParameter sent = listp.get_as_empty_string(0);
+        StringParameter? sent = listp.get_as_nullable_string(0);
         StringParameter subject = listp.get_as_empty_string(1);
         ListParameter from = listp.get_as_empty_list(2);
         ListParameter sender = listp.get_as_empty_list(3);
@@ -130,7 +130,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         if (message_id != null && String.is_empty(message_id.value))
             message_id = null;
         
-        return new Envelope(new Geary.RFC822.Date(sent.value),
+        return new Envelope((sent != null) ? new Geary.RFC822.Date(sent.value) : null,
             new Geary.RFC822.Subject.decode(subject.value),
             parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null, 

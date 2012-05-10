@@ -60,9 +60,11 @@ public class FormattedMessageData : Object {
             clean_subject = email.get_subject_as_string();
         }
         
-        this(unread, flagged,
-            Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format),
-            who, clean_subject,
+        string date = (email.date != null)
+            ? Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format)
+            : "";
+        
+        this(unread, flagged, date, who, clean_subject,
             Geary.String.reduce_whitespace(email.get_preview_as_string()), num_emails);
         
         this.email = email;

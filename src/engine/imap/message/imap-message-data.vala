@@ -198,7 +198,7 @@ public class Geary.Imap.RFC822Size : Geary.RFC822.Size, Geary.Imap.MessageData {
 }
 
 public class Geary.Imap.Envelope : Geary.Common.MessageData, Geary.Imap.MessageData {
-    public Geary.RFC822.Date sent { get; private set; }
+    public Geary.RFC822.Date? sent { get; private set; }
     public Geary.RFC822.Subject subject { get; private set; }
     public Geary.RFC822.MailboxAddresses from { get; private set; }
     public Geary.RFC822.MailboxAddresses sender { get; private set; }
@@ -209,7 +209,7 @@ public class Geary.Imap.Envelope : Geary.Common.MessageData, Geary.Imap.MessageD
     public Geary.RFC822.MessageID? in_reply_to { get; private set; }
     public Geary.RFC822.MessageID? message_id { get; private set; }
     
-    public Envelope(Geary.RFC822.Date sent, Geary.RFC822.Subject subject,
+    public Envelope(Geary.RFC822.Date? sent, Geary.RFC822.Subject subject,
         Geary.RFC822.MailboxAddresses from, Geary.RFC822.MailboxAddresses sender,
         Geary.RFC822.MailboxAddresses? reply_to, Geary.RFC822.MailboxAddresses? to,
         Geary.RFC822.MailboxAddresses? cc, Geary.RFC822.MailboxAddresses? bcc,
@@ -227,7 +227,8 @@ public class Geary.Imap.Envelope : Geary.Common.MessageData, Geary.Imap.MessageD
     }
     
     public override string to_string() {
-        return "[%s] %s: \"%s\"".printf(sent.to_string(), from.to_string(), subject.to_string());
+        return "[%s] %s: \"%s\"".printf((sent != null) ? sent.to_string() : "(no date)",
+            from.to_string(), subject.to_string());
     }
 }
 
