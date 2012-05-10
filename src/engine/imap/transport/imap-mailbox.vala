@@ -562,12 +562,16 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
     }
     
-    public async void expunge_email_async(Cancellable? cancellable = null) throws Error {
+    public async void expunge_email_async(MessageSet? msg_set, Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
-        // Response automatically handled by unsolicited server data.
-        yield context.session.send_command_async(new ExpungeCommand(), cancellable);
+        // Response automatically handled by unsolicited server data. ... use UID EXPUNGE whenever
+        // possible
+        if (msg_set == null || !context.session.get_capabilities().has_capability("uidplus"))
+            yield context.session.send_command_async(new ExpungeCommand(), cancellable);
+        else
+            yield context.session.send_command_async(new ExpungeCommand.uid(msg_set), cancellable);
     }
 }
 

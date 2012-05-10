@@ -227,8 +227,12 @@ public class Geary.Imap.ClientSessionManager {
             yield new_session.connect_async(cancellable);
             yield new_session.login_async(credentials, cancellable);
             
-            Gee.Set<string> caps = new_session.get_current_capabilities();
-            if (caps.contains("compress=deflate")) {
+            // If no capabilities were returned at login, ask for them now
+            if (new_session.get_capabilities().is_empty())
+                yield new_session.send_command_async(new CapabilityCommand());
+            
+            // Attempt compression
+            if (new_session.get_capabilities().has_setting("compress", "deflate")) {
                 CommandResponse resp = yield new_session.send_command_async(
                     new Command("COMPRESS", { "DEFLATE" }));
                 if (resp.status_response.status == Status.OK) {

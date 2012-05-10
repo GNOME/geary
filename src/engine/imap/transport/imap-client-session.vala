@@ -180,8 +180,7 @@ public class Geary.Imap.ClientSession {
         Hashable.hash_func, Equalable.equal_func);
     private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>(
         Hashable.hash_func, Equalable.equal_func);
-    private Gee.HashSet<string> current_capabilities = new Gee.HashSet<string>(String.stri_hash,
-        String.stri_equal);
+    private Capabilities capabilities = new Capabilities();
     private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
@@ -218,6 +217,9 @@ public class Geary.Imap.ClientSession {
      * ignored.
      */
     public virtual signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly) {
+    }
+    
+    public virtual signal void capabilities_changed(Capabilities new_caps) {
     }
     
     public virtual signal void unsolicited_expunged(MessageNumber msg) {
@@ -686,20 +688,13 @@ public class Geary.Imap.ClientSession {
      * (specifically for IDLE support).  However, ClientSession will not automatically fetch
      * capabilities, only watch for them as they're reported.  Thus, it's recommended that users
      * of ClientSession issue a CapabilityCommand (if needed) before login.
-     *
-     * has_capability returns true if the extension was reported.  Some extensions (COMPRESS)
-     * report values as well; accessing these will be added in the future.
      */
-    public bool has_capability(string name) {
-        return current_capabilities.contains(name);
-    }
-    
-    public Gee.Set<string> get_current_capabilities() {
-        return current_capabilities.read_only_view;
+    public Capabilities get_capabilities() {
+        return capabilities;
     }
     
     public bool supports_idle() {
-        return has_capability("idle");
+        return get_capabilities().has_capability("idle");
     }
     
     //
@@ -1274,6 +1269,22 @@ public class Geary.Imap.ClientSession {
         // store the result for the caller to index
         assert(!tag_response.has_key(tag));
         tag_response.set(tag, current_cmd_response);
+        
+        // Store most recently seen CAPABILITY results
+        if (current_cmd_response.status_response.status == Status.OK
+            && CapabilityResults.is_capability_response(current_cmd_response)) {
+            try {
+                capabilities = CapabilityResults.decode(current_cmd_response).capabilities;
+                debug("CAPABILITY: %s", capabilities.to_string());
+                
+                capabilities_changed(capabilities);
+            } catch (ImapError err) {
+                debug("Warning: Unable to decode CAPABILITY results %s: %s", current_cmd_response.to_string(),
+                    err.message);
+            }
+        }
+        
+        // create new CommandResponse for the next received response
         current_cmd_response = new CommandResponse();
         
         // The caller may not have had a chance to register a callback (if the receive came in in
@@ -1286,17 +1297,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_server_data(ServerData server_data) {
-        // Watch for CAPABILITY and store all reported extensions
-        StringParameter? name = server_data.get_if_string(1);
-        if (name != null && name.equals_ci(CapabilityCommand.NAME)) {
-            current_capabilities.clear();
-            for (int ctr = 2; ctr < server_data.get_count(); ctr++) {
-                StringParameter? param = server_data.get_if_string(ctr);
-                if (param != null)
-                    current_capabilities.add(param.value.down());
-            }
-        }
-        
         // The first response from the server is an untagged status response, which is considered
         // ServerData in our model.  This captures that and treats it as such.
         if (awaiting_connect_response) {

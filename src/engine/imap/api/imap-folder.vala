@@ -131,7 +131,7 @@ private class Geary.Imap.Folder : Object {
         
         // mailbox could've closed during call
         if (mailbox != null)
-            yield mailbox.expunge_email_async(cancellable);
+            yield mailbox.expunge_email_async(msg_set, cancellable);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,

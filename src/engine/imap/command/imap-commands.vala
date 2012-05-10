@@ -127,9 +127,18 @@ public class Geary.Imap.StoreCommand : Command {
 // Results of this command automatically handled by Geary.Imap.UnsolicitedServerData
 public class Geary.Imap.ExpungeCommand : Command {
     public const string NAME = "expunge";
+    public const string UID_NAME = "uid expunge";
     
     public ExpungeCommand() {
         base (NAME);
+    }
+    
+    public ExpungeCommand.uid(MessageSet message_set) {
+        base (UID_NAME);
+        
+        assert(message_set.is_uid);
+        
+        add(message_set.to_parameter());
     }
 }
 

@@ -44,6 +44,8 @@ engine/imap/command/imap-command-response.vala
 engine/imap/command/imap-commands.vala
 engine/imap/command/imap-command.vala
 engine/imap/command/imap-fetch-command.vala
+engine/imap/decoders/imap-capabilities.vala
+engine/imap/decoders/imap-capability-results.vala
 engine/imap/decoders/imap-command-results.vala
 engine/imap/decoders/imap-fetch-data-decoder.vala
 engine/imap/decoders/imap-fetch-results.vala
