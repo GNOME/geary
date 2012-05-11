@@ -40,9 +40,14 @@ public class Geary.Imap.FolderProperties {
     
     private void init_flags() {
         supports_children = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_INFERIORS));
-        // \HasNoChildren is an optional attribute and lack of presence doesn't indiciate anything
-        supports_children = attrs.contains(MailboxAttribute.HAS_NO_CHILDREN) ? Trillian.TRUE
-            : Trillian.UNKNOWN;
+        // \HasNoChildren & \HasChildren are optional attributes (could check for CHILDREN extension,
+        // but unnecessary here)
+        if (attrs.contains(MailboxAttribute.HAS_NO_CHILDREN))
+            has_children = Trillian.FALSE;
+        else if (attrs.contains(MailboxAttribute.HAS_CHILDREN))
+            has_children = Trillian.TRUE;
+        else
+            has_children = Trillian.UNKNOWN;
         is_openable = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_SELECT));
     }
 }

@@ -618,10 +618,13 @@ public class GearyController {
     private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
         set_busy(true);
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
-        foreach (Geary.Folder folder in folders)
-            batch.add(new ListFoldersOperation(account, folder.get_path()));
+        foreach (Geary.Folder folder in folders) {
+            // Search for children unless Folder is absolutely certain it doesn't have any
+            if (folder.has_children().is_possible())
+                batch.add(new ListFoldersOperation(account, folder.get_path()));
+        }
         
-        debug("Listing folder children");
+        debug("Listing %d folder children", batch.size);
         try {
             yield batch.execute_all_async();
         } catch (Error err) {

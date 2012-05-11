@@ -12,6 +12,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     internal SpecialFolder? special_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
     
+    private weak GenericImapAccount account;
     private Imap.Account remote;
     private Sqlite.Account local;
     private EmailFlagWatcher email_flag_watcher;
@@ -22,8 +23,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     private SendReplayQueue? send_replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
-    public GenericImapFolder(Imap.Account remote, Sqlite.Account local, Sqlite.Folder local_folder,
-        SpecialFolder? special_folder) {
+    public GenericImapFolder(GenericImapAccount account, Imap.Account remote, Sqlite.Account local,
+        Sqlite.Folder local_folder, SpecialFolder? special_folder) {
+        this.account = account;
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
@@ -50,6 +52,31 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         } else {
             return special_folder.folder_type;
         }
+    }
+    
+    private Imap.FolderProperties? get_folder_properties() {
+        Imap.FolderProperties? properties = null;
+        
+        // Get properties in order of authoritativeness:
+        // - Ask open remote folder
+        // - Query account object if it's seen them in its traversals
+        // - Fetch from local store
+        if (remote_folder != null)
+            properties = remote_folder.get_properties();
+        
+        if (properties == null)
+            properties = account.get_properties_for_folder(local_folder.get_path());
+        
+        if (properties == null)
+            properties = local_folder.get_properties();
+        
+        return properties;
+    }
+    
+    public override Geary.Trillian has_children() {
+        Imap.FolderProperties? properties = get_folder_properties();
+        
+        return (properties != null) ? properties.has_children : Trillian.UNKNOWN;
     }
     
     public override Geary.Folder.OpenState get_open_state() {

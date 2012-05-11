@@ -162,6 +162,14 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
         return _has_no_children;
     } }
     
+    private static MailboxAttribute? _has_children = null;
+    public static MailboxAttribute HAS_CHILDREN { get {
+        if (_has_children == null)
+            _has_children = new MailboxAttribute("\\haschildren");
+        
+        return _has_children;
+    } }
+    
     private static MailboxAttribute? _allows_new = null;
     public static MailboxAttribute ALLOWS_NEW { get {
         if (_allows_new == null)

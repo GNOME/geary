@@ -37,7 +37,7 @@ private class Geary.Imap.Folder : Object {
         return path;
     }
     
-    public Geary.Imap.FolderProperties? get_properties() {
+    public Geary.Imap.FolderProperties get_properties() {
         return properties;
     }
     

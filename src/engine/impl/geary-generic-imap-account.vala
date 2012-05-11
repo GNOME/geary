@@ -7,6 +7,8 @@
 private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     private Imap.Account remote;
     private Sqlite.Account local;
+    private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
+        FolderPath, Imap.FolderProperties>(Hashable.hash_func, Equalable.equal_func);
     
     public GenericImapAccount(string name, string username, AccountInformation? account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
@@ -16,6 +18,10 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         this.local = local;
         
         this.remote.login_failed.connect(on_login_failed);
+    }
+    
+    internal Imap.FolderProperties? get_properties_for_folder(FolderPath path) {
+        return properties_map.get(path);
     }
     
     public override Geary.Email.Field get_required_fields_for_writing() {
@@ -38,8 +44,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         Gee.Collection<Geary.Folder> engine_list = new Gee.ArrayList<Geary.Folder>();
         if (local_list != null && local_list.size > 0) {
             foreach (Geary.Sqlite.Folder local_folder in local_list) {
-                engine_list.add(new GenericImapFolder(remote, local, local_folder,
-                    get_special_folder(local_folder)));
+                engine_list.add(new GenericImapFolder(this, remote, local, local_folder,
+                    get_special_folder(local_folder.get_path())));
             }
         }
         
@@ -61,7 +67,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         Sqlite.Folder? local_folder = null;
         try {
             local_folder = (Sqlite.Folder) yield local.fetch_folder_async(path, cancellable);
-            return new GenericImapFolder(remote, local, local_folder, get_special_folder(local_folder));
+            return new GenericImapFolder(this, remote, local, local_folder,
+                get_special_folder(local_folder.get_path()));
         } catch (EngineError err) {
             // don't thrown NOT_FOUND's, that means we need to fall through and clone from the
             // server
@@ -85,7 +92,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         
         // Fetch the local account's version of the folder for the GenericImapFolder
         local_folder = (Sqlite.Folder) yield local.fetch_folder_async(path, cancellable);
-        return new GenericImapFolder(remote, local, local_folder, get_special_folder(local_folder));
+        return new GenericImapFolder(this, remote, local, local_folder,
+            get_special_folder(local_folder.get_path()));
     }
     
     private async void background_update_folders(Geary.FolderPath? parent,
@@ -104,8 +112,12 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             local_names.add(folder.get_path().basename);
         
         Gee.Set<string> remote_names = new Gee.HashSet<string>();
-        foreach (Geary.Imap.Folder folder in remote_folders)
+        foreach (Geary.Imap.Folder folder in remote_folders) {
             remote_names.add(folder.get_path().basename);
+            
+            // use this iteration to add discovered properties to map
+            properties_map.set(folder.get_path(), folder.get_properties());
+        }
         
         Gee.List<Geary.Imap.Folder> to_add = new Gee.ArrayList<Geary.Imap.Folder>();
         foreach (Geary.Imap.Folder folder in remote_folders) {
@@ -143,8 +155,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
                 try {
                     Sqlite.Folder local_folder = (Sqlite.Folder) yield local.fetch_folder_async(
                         remote_folder.get_path(), cancellable);
-                    engine_added.add(new GenericImapFolder(remote, local, local_folder,
-                        get_special_folder(local_folder)));
+                    engine_added.add(new GenericImapFolder(this, remote, local, local_folder,
+                        get_special_folder(local_folder.get_path())));
                 } catch (Error convert_err) {
                     error("Unable to fetch local folder: %s", convert_err.message);
                 }
@@ -176,9 +188,9 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         notify_report_problem(Geary.Account.Problem.LOGIN_FAILED, credentials, null);
     }
     
-    private SpecialFolder? get_special_folder(Sqlite.Folder folder) {
+    private SpecialFolder? get_special_folder(FolderPath path) {
         if (get_special_folder_map() != null) {
-            return get_special_folder_map().get_folder_by_path(folder.get_path());
+            return get_special_folder_map().get_folder_by_path(path);
         }
         return null;
     }

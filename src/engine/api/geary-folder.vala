@@ -170,6 +170,8 @@ public interface Geary.Folder : Object {
     
     public abstract Geary.FolderPath get_path();
     
+    public abstract Geary.Trillian has_children();
+    
     /**
      * Returns the special folder type of the folder. If the the folder is not a special one then
      * null is returned.

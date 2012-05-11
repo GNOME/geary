@@ -34,11 +34,11 @@ public enum Geary.Trillian {
         return b ? TRUE : FALSE;
     }
     
-    public int to_int() {
+    public inline int to_int() {
         return (int) this;
     }
     
-    public inline static Trillian from_int(int i) {
+    public static Trillian from_int(int i) {
         switch (i) {
             case 0:
                 return FALSE;
@@ -49,6 +49,22 @@ public enum Geary.Trillian {
             default:
                 return UNKNOWN;
         }
+    }
+    
+    public inline bool is_certain() {
+        return this == TRUE;
+    }
+    
+    public inline bool is_uncertain() {
+        return this != TRUE;
+    }
+    
+    public inline bool is_possible() {
+        return this != FALSE;
+    }
+    
+    public inline bool is_impossible() {
+        return this == FALSE;
     }
     
     public string to_string() {

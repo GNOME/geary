@@ -45,6 +45,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract Geary.FolderPath get_path();
     
+    public abstract Geary.Trillian has_children();
+    
     public abstract Geary.SpecialFolderType? get_special_folder_type();
     
     public abstract Geary.Folder.OpenState get_open_state();
