@@ -547,8 +547,14 @@ public class MessageViewer : WebKit.WebView {
             if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == username))
                  insert_header_address(ref header, _("To:"), email.to);
         }
-        
-        insert_header_address(ref header, _("Cc:"), email.cc);
+
+        if (email.cc != null) {
+            insert_header_address(ref header, _("Cc:"), email.cc);
+        }
+
+        if (email.bcc != null) {
+            insert_header_address(ref header, _("Bcc:"), email.bcc);
+        }
             
         if (email.subject != null)
             insert_header(ref header, _("Subject:"), email.get_subject_as_string());
