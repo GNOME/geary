@@ -90,8 +90,8 @@ public class FolderList : Sidebar.Tree {
     
     private Sidebar.Grouping user_folder_group;
     private Sidebar.Branch user_folder_branch;
-    internal Gee.HashMap<Geary.FolderPath, Sidebar.Entry> entries = new Gee.HashMap<Geary.FolderPath,
-        Sidebar.Entry>();
+    internal Gee.HashMap<Geary.FolderPath, Sidebar.Entry> entries = new Gee.HashMap<
+        Geary.FolderPath, Sidebar.Entry>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
     
     public FolderList() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
@@ -126,16 +126,25 @@ public class FolderList : Sidebar.Tree {
     }
     
     public void add_folder(Geary.Folder folder) {
+        FolderEntry folder_entry = new FolderEntry(folder);
+        
+        bool added = false;
         if (folder.get_path().get_parent() == null) {
             // Top-level folder.
-            user_folder_branch.graft(user_folder_group, new FolderEntry(folder));
+            user_folder_branch.graft(user_folder_group, folder_entry);
+            added = true;
         } else {
             Sidebar.Entry? entry = get_entry_for_folder_path(folder.get_path().get_parent());
-            if (entry != null)
-                user_folder_branch.graft(entry, new FolderEntry(folder));
-            else
-                debug("Could not add folder: %s", folder.to_string());
+            if (entry != null) {
+                user_folder_branch.graft(entry, folder_entry);
+                added = true;
+            }
         }
+        
+        if (added)
+            entries.set(folder.get_path(), folder_entry);
+        else
+            debug("Could not add folder to folder list: %s", folder.to_string());
     }
     
     public void add_special_folder(Geary.SpecialFolder special, Geary.Folder folder) {
@@ -151,9 +160,6 @@ public class FolderList : Sidebar.Tree {
     }
     
     private Sidebar.Entry? get_entry_for_folder_path(Geary.FolderPath path) {
-        if (!entries.has_key(path))
-            return null;
-        
         return entries.get(path);
     }
 }

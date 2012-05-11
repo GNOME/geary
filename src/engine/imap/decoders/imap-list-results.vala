@@ -16,12 +16,13 @@ public class Geary.Imap.MailboxInformation {
     }
     
     /**
-     * Will always return a list with at least one element in it.
+     * Will always return a list with at least one element in it.  If no delimiter is specified,
+     * the name is returned as a single element.
      */
     public Gee.List<string> get_path() {
         Gee.List<string> path = new Gee.ArrayList<string>();
         
-        if (delim != null) {
+        if (!String.is_empty(delim)) {
             string[] split = name.split(delim);
             foreach (string str in split) {
                 if (!String.is_empty(str))
@@ -33,6 +34,23 @@ public class Geary.Imap.MailboxInformation {
             path.add(name);
         
         return path;
+    }
+    
+    /**
+     * If name is non-empty, will return a non-empty value which is the final folder name (i.e.
+     * the parent components are stripped).  If no delimiter is specified, the name is returned.
+     */
+    public string get_basename() {
+        if (String.is_empty(delim))
+            return name;
+        
+        int index = name.last_index_of(delim);
+        if (index < 0)
+            return name;
+        
+        string basename = name.substring(index + 1);
+        
+        return !String.is_empty(basename) ? basename : name;
     }
 }
 

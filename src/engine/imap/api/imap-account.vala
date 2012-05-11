@@ -67,7 +67,7 @@ private class Geary.Imap.Account : Object {
         
         Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
         foreach (MailboxInformation mbox in mboxes) {
-            Geary.FolderPath path = process_path(processed, mbox.name, mbox.delim);
+            Geary.FolderPath path = process_path(processed, mbox.get_basename(), mbox.delim);
             
             // only add to delims map if root-level folder (all sub-folders respect its delimiter)
             // also use the processed name, not the one reported off the wire
