@@ -1157,10 +1157,7 @@ public class MessageViewer : WebKit.WebView {
         string output = input.replace("<", " \01 ").replace(">", " \02 ");
         
         // Converts text links into HTML hyperlinks.
-        // Regex is from here: http://daringfireball.net/2010/07/improved_regex_for_matching_urls
-        Regex r = new Regex(
-            "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))",
-            RegexCompileFlags.CASELESS);
+        Regex r = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
         
         output = r.replace_eval(output, -1, 0, 0, is_valid_url);
         return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
@@ -1172,8 +1169,7 @@ public class MessageViewer : WebKit.WebView {
     private bool is_valid_url(MatchInfo match_info, StringBuilder result) {
         try {
             string? url = match_info.fetch(0);
-            Regex r = new Regex("^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):",
-                RegexCompileFlags.CASELESS);
+            Regex r = new Regex(PROTOCOL_REGEX, RegexCompileFlags.CASELESS);
             
             result.append(r.match(url) ? "<a href=\"%s\">%s</a>".printf(url, url) : url);
         } catch (Error e) {

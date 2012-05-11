@@ -368,6 +368,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_send() {
+        linkify_document(editor.get_dom_document());
         send(this);
     }
     
