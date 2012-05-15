@@ -80,14 +80,20 @@ public class Geary.State.Machine {
         
         // guard against reentrancy ... don't want to use a non-reentrant lock because then
         // the machine will simply hang; assertion is better to ferret out design flaws
-        assert(!locked);
+        if (locked) {
+            error("Fatal reentrancy on locked state machine %s: %s", descriptor.name,
+                get_event_issued_string(state, event));
+        }
         locked = true;
         
         uint old_state = state;
         state = transition(state, event, user, object, err);
         assert(state < descriptor.state_count);
         
-        assert(locked);
+        if (!locked) {
+            error("Exited transition to unlocked state machine %s: %s", descriptor.name,
+                get_transition_string(old_state, event, state));
+        }
         locked = false;
         
         if (is_logging())
