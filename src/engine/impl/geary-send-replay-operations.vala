@@ -29,7 +29,7 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
         Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail.replay_local %s: %d email IDs add=%s remove=%s",
             engine.to_string(), to_mark.size,
             (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
-            (flags_to_remove != null) ? flags_to_add.to_string() : "(none)");
+            (flags_to_remove != null) ? flags_to_remove.to_string() : "(none)");
         
         // Save original flags, then set new ones.
         original_flags = yield engine.local_folder.get_email_flags_async(to_mark, cancellable);
@@ -47,7 +47,7 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
         Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail.replay_remote %s: %d email IDs add=%d remove=%d",
             engine.to_string(), to_mark.size,
             (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
-            (flags_to_remove != null) ? flags_to_add.to_string() : "(none)");
+            (flags_to_remove != null) ? flags_to_remove.to_string() : "(none)");
         
         yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
             flags_to_add, flags_to_remove, cancellable);
