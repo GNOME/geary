@@ -32,18 +32,37 @@ public class Geary.RFC822.MailboxAddress {
         
         address = "%s@%s".printf(mailbox, domain);
     }
-    
+
     // Borrowed liberally from GMime's internal _internet_address_decode_name() function.
     private static string decode_name(string name) {
         // see if a broken mailer has sent raw 8-bit information
-        string phrase = name.validate() ? name : GMime.utils_decode_8bit(name, name.length);
-        
-        // unquote the string and decode the phrase
-        GMime.utils_unquote_string(phrase);
-        
-        return GMime.utils_header_decode_phrase(phrase);
+        string text = name.validate() ? name : GMime.utils_decode_8bit(name, name.length);
+
+        // unquote the string and decode the text
+        GMime.utils_unquote_string(text);
+
+        // Sometimes quoted printables contain unencoded spaces which trips up GMime, so we want to
+        // encode them all here.
+        int offset = 0;
+        int start;
+        while ((start = text.index_of("=?", offset)) != -1) {
+            // Find the closing marker.
+            int end = text.index_of("?=", start + 2) + 2;
+            if (end == -1) {
+                end = text.length;
+            }
+
+            // Replace any spaces inside the encoded string.
+            string encoded = text.substring(start, end - start);
+            if (encoded.contains("\x20")) {
+                text = text.replace(encoded, encoded.replace("\x20", "_"));
+            }
+            offset = end;
+        }
+
+        return GMime.utils_header_decode_text(text);
     }
-    
+
     /**
      * Returns a human-readable formatted address, showing the name (if available) and the email 
      * address in angled brackets.
