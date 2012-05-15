@@ -26,8 +26,10 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail %s: %d email IDs", engine.to_string(),
-            to_mark.size);
+        Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail.replay_local %s: %d email IDs add=%s remove=%s",
+            engine.to_string(), to_mark.size,
+            (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
+            (flags_to_remove != null) ? flags_to_add.to_string() : "(none)");
         
         // Save original flags, then set new ones.
         original_flags = yield engine.local_folder.get_email_flags_async(to_mark, cancellable);
@@ -42,6 +44,11 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_remote() throws Error {
+        Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail.replay_remote %s: %d email IDs add=%d remove=%d",
+            engine.to_string(), to_mark.size,
+            (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
+            (flags_to_remove != null) ? flags_to_add.to_string() : "(none)");
+        
         yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
             flags_to_add, flags_to_remove, cancellable);
         
@@ -71,7 +78,7 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "RemoveEmail %s: %d Email IDs", engine.to_string(),
+        Logging.debug(Logging.Flag.OPERATIONS, "RemoveEmail.replay_local %s: %d Email IDs", engine.to_string(),
             to_remove.size);
         
         // TODO: Use a local_folder method that operates on all messages at once
@@ -88,6 +95,9 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_remote() throws Error {
+        Logging.debug(Logging.Flag.OPERATIONS, "RemoveEmail.replay_remote %s: %d Email IDs", engine.to_string(),
+            to_remove.size);
+        
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
         // that the signal has already been fired.
@@ -203,7 +213,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         }
         
         Logging.debug(Logging.Flag.OPERATIONS,
-            "ListEmail %s: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
+            "ListEmail.replay_local %s: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
             engine.to_string(), low, count, local_count, engine.remote_count, local_low);
         
         if (!remote_only && local_low > 0) {
@@ -289,6 +299,9 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 needed_by_position += position;
         }
         
+        Logging.debug(Logging.Flag.OPERATIONS, "ListEmail.replay_remote %s: %d by position, %d unfulfilled",
+            engine.to_string(), needed_by_position.length, unfulfilled.get_values().size);
+        
         NonblockingBatch batch = new NonblockingBatch();
         
         // fetch in full whatever is needed wholesale
@@ -302,7 +315,8 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 batch.add(new RemoteListPartial(this, remaining_fields, unfulfilled.get(remaining_fields)));
         }
         
-        Logging.debug(Logging.Flag.OPERATIONS, "ListEmail: Scheduling %d FETCH operations", batch.size);
+        Logging.debug(Logging.Flag.OPERATIONS, "ListEmail.replay_remote %s: Scheduling %d FETCH operations",
+            engine.to_string(), batch.size);
         
         yield batch.execute_all_async(cancellable);
         
@@ -433,6 +447,9 @@ private class Geary.ListEmailByID : Geary.ListEmail {
     }
     
     public override async bool replay_local() throws Error {
+        Logging.debug(Logging.Flag.OPERATIONS, "ListEmailByID.replay_local: %s initial=%s excl=%s",
+            engine.to_string(), initial_id.to_string(), excluding_id.to_string());
+        
         int local_count = yield engine.local_folder.get_email_count_async(cancellable);
         
         int initial_position = yield engine.local_folder.get_id_position_async(initial_id, cancellable);
@@ -515,8 +532,8 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "FetchEmail %s: %s %Xh", engine.to_string(),
-            id.to_string(), flags);
+        Logging.debug(Logging.Flag.OPERATIONS, "FetchEmail.replay_local %s: %s flags=%Xh required_fields=%Xh",
+            engine.to_string(), id.to_string(), flags, required_fields);
         
         // If forcing an update, skip local operation and go direct to replay_remote()
         if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
@@ -553,6 +570,9 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_remote() throws Error {
+        Logging.debug(Logging.Flag.OPERATIONS, "FetchEmail.replay_remote %s: %s flags=%Xh required_fields=%Xh remaining_fields=%Xh",
+            engine.to_string(), id.to_string(), flags, required_fields, remaining_fields);
+        
         if (!yield engine.wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
         
@@ -565,16 +585,17 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());
         
         // save to local store
-        Geary.Email? remote_email = list[0];
-        if (yield engine.local_folder.create_email_async(remote_email, cancellable))
+        email = list[0];
+        assert(email != null);
+        if (yield engine.local_folder.create_email_async(email, cancellable))
             engine.notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that
-        if (remote_email.fields.fulfills(required_fields))
-            email = remote_email;
-        else
+        if (!email.fields.fulfills(required_fields)) {
             email = yield engine.local_folder.fetch_email_async(id, required_fields, false, cancellable);
+            assert(email != null);
+        }
         
         return true;
     }
