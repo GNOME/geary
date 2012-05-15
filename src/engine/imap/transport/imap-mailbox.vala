@@ -63,6 +63,27 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         context.recent_altered.disconnect(on_recent_altered);
     }
     
+    // This helper function is tightly tied to list_set_async().  It assumes that if a new Email
+    // must be created from the FETCH results, a UID is available in the results, either because it
+    // was queried for or because UID addressing was used.  It adds the new email to the msgs list
+    // and maps it into the positional map.  fields_to_fetch_data_types() is a key part of this
+    // arrangement.
+    private Geary.Email accumulate_email(FetchResults results, Gee.List<Email> msgs,
+        Gee.HashMap<int, Email> pos_map) {
+        // TODO: It's always assumed that the FetchResults will have a UID (due to UID addressing
+        // or because it was requested as part of the FETCH command); however; some servers
+        // (i.e. Dovecot) may split up their FetchResults to multiple lines.  If the UID comes in
+        // first, no problem here, otherwise this scheme will fail
+        UID? uid = results.get_data(FetchDataType.UID) as UID;
+        assert(uid != null);
+        
+        Geary.Email email = new Geary.Email(results.msg_num, new Geary.Imap.EmailIdentifier(uid));
+        msgs.add(email);
+        pos_map.set(email.position, email);
+        
+        return email;
+    }
+    
     public async Gee.List<Geary.Email>? list_set_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
@@ -73,27 +94,21 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         NonblockingBatch batch = new NonblockingBatch();
         
-        Gee.List<Geary.Email> msgs = new Gee.ArrayList<Geary.Email>();
-        Gee.HashMap<int, Geary.Email> map = new Gee.HashMap<int, Geary.Email>();
-        
         Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
         Gee.List<FetchBodyDataType> body_data_type_list = new Gee.ArrayList<FetchBodyDataType>();
-        fields_to_fetch_data_types(fields, data_type_list, body_data_type_list);
+        fields_to_fetch_data_types(msg_set.is_uid, fields, data_type_list, body_data_type_list);
         
         // if nothing else, should always fetch the UID, which is gotten via data_type_list
         // (necessary to create the EmailIdentifier, also provides mappings of position -> UID)
-        assert(data_type_list.size > 0);
-        
-        FetchCommand fetch_cmd = new FetchCommand.from_collection(msg_set, data_type_list,
-            body_data_type_list);
-        
-        int plain_id = batch.add(new MailboxOperation(context, fetch_cmd));
+        // *unless* MessageSet is UID addressing
+        int plain_id = NonblockingBatch.INVALID_ID;
+        if (data_type_list.size > 0 || body_data_type_list.size > 0) {
+            FetchCommand fetch_cmd = new FetchCommand.from_collection(msg_set, data_type_list,
+                body_data_type_list);
+            plain_id = batch.add(new MailboxOperation(context, fetch_cmd));
+        }
         
         int body_id = NonblockingBatch.INVALID_ID;
-        int preview_id = NonblockingBatch.INVALID_ID;
-        int preview_charset_id = NonblockingBatch.INVALID_ID;
-        int properties_id = NonblockingBatch.INVALID_ID;
-        
         if (fields.require(Geary.Email.Field.BODY)) {
             // Fetch the body.
             Gee.List<FetchBodyDataType> types = new Gee.ArrayList<FetchBodyDataType>();
@@ -104,6 +119,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             body_id = batch.add(new MailboxOperation(context, fetch_body));
         }
         
+        int preview_id = NonblockingBatch.INVALID_ID;
+        int preview_charset_id = NonblockingBatch.INVALID_ID;
         if (fields.require(Geary.Email.Field.PREVIEW)) {
             // Preview text.
             FetchBodyDataType fetch_preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
@@ -127,6 +144,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             preview_charset_id = batch.add(new MailboxOperation(context, preview_charset_cmd));
         }
         
+        int properties_id = NonblockingBatch.INVALID_ID;
         if (fields.require(Geary.Email.Field.PROPERTIES)) {
             // Properties.
             Gee.List<FetchDataType> properties_data_types_list = new Gee.ArrayList<FetchDataType>();
@@ -142,28 +160,32 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         yield batch.execute_all_async(cancellable);
         
-        // process "plain" FETCH results ... these are fetched every time for, if nothing else,
-        // the UID which provides a position -> UID mapping that is kept in the map.
+        // Keep list of generated messages (which are returned) and a map of the messages according
+        // to their position addressing (which is built up as results are processed)
+        Gee.List<Geary.Email> msgs = new Gee.ArrayList<Geary.Email>();
+        Gee.HashMap<int, Geary.Email> pos_map = new Gee.HashMap<int, Geary.Email>();
         
-        MailboxOperation plain_op = (MailboxOperation) batch.get_operation(plain_id);
-        CommandResponse plain_resp = (CommandResponse) batch.get_result(plain_id);
-        
-        if (plain_resp.status_response.status != Status.OK) {
-            throw new ImapError.SERVER_ERROR("Server error for %s: %s", plain_op.cmd.to_string(),
-                plain_resp.to_string());
-        }
-        
-        FetchResults[] plain_results = FetchResults.decode(plain_resp);
-        foreach (FetchResults plain_res in plain_results) {
-            UID? uid = plain_res.get_data(FetchDataType.UID) as UID;
-            // see fields_to_fetch_data_types() for why this is guaranteed
-            assert(uid != null);
+        // process "plain" fetch results (i.e. simple IMAP data)
+        if (plain_id != NonblockingBatch.INVALID_ID) {
+            MailboxOperation plain_op = (MailboxOperation) batch.get_operation(plain_id);
+            CommandResponse plain_resp = (CommandResponse) batch.get_result(plain_id);
             
-            Geary.Email email = new Geary.Email(plain_res.msg_num, new Geary.Imap.EmailIdentifier(uid));
-            fetch_results_to_email(plain_res, fields, email);
+            if (plain_resp.status_response.status != Status.OK) {
+                throw new ImapError.SERVER_ERROR("Server error for %s: %s", plain_op.cmd.to_string(),
+                    plain_resp.to_string());
+            }
             
-            msgs.add(email);
-            map.set(plain_res.msg_num, email);
+            FetchResults[] plain_results = FetchResults.decode(plain_resp);
+            foreach (FetchResults plain_res in plain_results) {
+                // even though msgs and pos_map are empty before this loop, it's possible the server
+                // will send back multiple FetchResults for the same message, so always merge results
+                // whenever possible
+                Geary.Email? email = pos_map.get(plain_res.msg_num);
+                if (email == null)
+                    email = accumulate_email(plain_res, msgs, pos_map);
+                
+                fetch_results_to_email(plain_res, fields, email);
+            }
         }
         
         // Process body results.
@@ -178,9 +200,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             
             FetchResults[] body_results = FetchResults.decode(body_resp);
             foreach (FetchResults body_res in body_results) {
-                Geary.Email? body_email = map.get(body_res.msg_num);
+                Geary.Email? body_email = pos_map.get(body_res.msg_num);
                 if (body_email == null)
-                    continue;
+                    body_email = accumulate_email(body_res, msgs, pos_map);
                 
                 body_email.set_message_body(new Geary.RFC822.Text(body_res.get_body_data().get(0)));
             }
@@ -198,16 +220,15 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             
             FetchResults[] properties_results = FetchResults.decode(properties_resp);
             foreach (FetchResults properties_res in properties_results) {
-                Geary.Email? properties_email = map.get(properties_res.msg_num);
+                Geary.Email? properties_email = pos_map.get(properties_res.msg_num);
                 if (properties_email == null)
-                    continue;
+                    properties_email = accumulate_email(properties_res, msgs, pos_map);
                 
                 fetch_results_to_email(properties_res, Geary.Email.Field.PROPERTIES, properties_email);
             }
         }
         
         // process preview FETCH results
-        
         if (preview_id != NonblockingBatch.INVALID_ID && 
             preview_charset_id != NonblockingBatch.INVALID_ID) {
             
@@ -233,9 +254,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             FetchResults[] preview_header_results = FetchResults.decode(preview_charset_resp);
             int i = 0;
             foreach (FetchResults preview_res in preview_results) {
-                Geary.Email? preview_email = map.get(preview_res.msg_num);
+                Geary.Email? preview_email = pos_map.get(preview_res.msg_num);
                 if (preview_email == null)
-                    continue;
+                    preview_email = accumulate_email(preview_res, msgs, pos_map);
                 
                 preview_email.set_message_preview(new RFC822.PreviewText(
                     preview_res.get_body_data()[0], preview_header_results[i].get_body_data()[0]));
@@ -270,17 +291,21 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         flags_altered(flags);
     }
     
-    private void fields_to_fetch_data_types(Geary.Email.Field fields, Gee.List<FetchDataType> data_types_list,
-        Gee.List<FetchBodyDataType> body_data_types_list) {
-        // always fetch UID because it's needed for EmailIdentifier
-        data_types_list.add(FetchDataType.UID);
+    private void fields_to_fetch_data_types(bool is_uid, Geary.Email.Field fields,
+        Gee.List<FetchDataType> data_types_list, Gee.List<FetchBodyDataType> body_data_types_list) {
+        // always fetch UID because it's needed for EmailIdentifier UNLESS UID addressing is being
+        // used, in which case UID will return with the response
+        if (!is_uid)
+            data_types_list.add(FetchDataType.UID);
         
         // pack all the needed headers into a single FetchBodyDataType
         string[] field_names = new string[0];
         
         // The assumption here is that because ENVELOPE is such a common fetch command, the
         // server will have optimizations for it, whereas if we called for each header in the
-        // envelope separately, the server has to chunk harder parsing the RFC822 header
+        // envelope separately, the server has to chunk harder parsing the RFC822 header ... have
+        // to add References because IMAP ENVELOPE doesn't return them for some reason (but does
+        // return Message-ID and In-Reply-To)
         if (fields.is_all_set(Geary.Email.Field.ENVELOPE)) {
             data_types_list.add(FetchDataType.ENVELOPE);
             field_names += "References";

@@ -83,11 +83,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_debug = false;
     static bool log_network = false;
     static bool log_serializer = false;
+    static bool log_operations = false;
     static bool version = false;
     const OptionEntry[] options = {
         { "debug", 0, 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
         { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
+        { "log-operations", 0, 0, OptionArg.NONE, ref log_operations, N_("Output operations log"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
         { null }
     };
@@ -116,6 +118,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (log_serializer)
             Geary.Logging.enable_flags(Geary.Logging.Flag.SERIALIZER);
+        
+        if (log_operations)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.OPERATIONS);
         
         if (log_debug) {
             // Debug messages in green

@@ -5,7 +5,9 @@
  */
 
 private class Geary.GenericImapFolder : Geary.AbstractFolder {
-    private const int REMOTE_FETCH_CHUNK_COUNT = 50;
+    internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
+    
+    private const Geary.Email.Field NORMALIZATION_FIELDS = Geary.Email.Field.PROPERTIES;
     
     internal Sqlite.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
@@ -160,7 +162,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         // Get the local emails in the range
         Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-            earliest_id, int.MAX, Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE,
+            earliest_id, int.MAX, NORMALIZATION_FIELDS, Geary.Folder.ListFlags.NONE, false,
             cancellable);
         
         // be sure they're sorted from earliest to latest
@@ -179,7 +181,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // Get the remote emails in the range to either add any not known, remove deleted messages,
         // and update the flags of the remainder
         Gee.List<Geary.Email>? old_remote = yield remote_folder.list_email_async(
-            new Imap.MessageSet.uid_range_to_highest(earliest_uid), Geary.Email.Field.PROPERTIES,
+            new Imap.MessageSet.uid_range_to_highest(earliest_uid), NORMALIZATION_FIELDS,
             cancellable);
         
         // sort earliest to latest
@@ -212,7 +214,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                     (Geary.Imap.EmailProperties) remote_email.properties;
                 
                 if (!local_email_properties.equals(remote_email_properties)) {
-                    batch.add(new CreateLocalEmailOperation(local_folder, remote_email));
+                    batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
                     flags_changed.set(remote_email.id, remote_email.properties.email_flags);
                 }
                 
@@ -220,7 +222,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 local_ctr++;
             } else if (remote_uid.value < local_uid.value) {
                 // one we'd not seen before is present, add and move to next remote
-                batch.add(new CreateLocalEmailOperation(local_folder, remote_email));
+                batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
                 appended_ids.add(remote_email.id);
                 
                 remote_ctr++;
@@ -240,7 +242,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // that were on the server earlier but not stored locally (i.e. this value represents emails
         // added to the top of the stack)
         for (; remote_ctr < remote_length; remote_ctr++) {
-            batch.add(new CreateLocalEmailOperation(local_folder, old_remote[remote_ctr]));
+            batch.add(new CreateLocalEmailOperation(local_folder, old_remote[remote_ctr],
+                NORMALIZATION_FIELDS));
             appended_ids.add(old_remote[remote_ctr].id);
         }
         
@@ -740,87 +743,14 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // TODO: Need to deal with this in a sane manner when offline
         if (!yield wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("Must be synchronized with server for listing by ID");
-        
         assert(remote_count >= 0);
         
         // Schedule list operation and wait for completion.
         ListEmailByID op = new ListEmailByID(this, initial_id, count, required_fields, accumulator,
             cb, cancellable, local_only, remote_only, excluding_id);
         send_replay_queue.schedule(op);
+        
         yield op.wait_for_ready();
-    }
-    
-    internal async Gee.List<Geary.Email>? remote_list_email(int[] needed_by_position,
-        Geary.Email.Field required_fields, EmailCallback? cb, Cancellable? cancellable) throws Error {
-        // possible to call remote multiple times, wait for it to open once and go
-        if (!yield wait_for_remote_to_open(cancellable))
-            return null;
-        
-        debug("Background fetching %d emails for %s", needed_by_position.length, to_string());
-        
-        // Always get the flags for normalization and whatever the local store requires for duplicate
-        // detection
-        Geary.Email.Field full_fields =
-            required_fields | Geary.Email.Field.PROPERTIES | Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
-        
-        Gee.List<Geary.Email> full = new Gee.ArrayList<Geary.Email>();
-        
-        // pull in reverse order because callers to this method tend to order messages from oldest
-        // to newest, but for user satisfaction, should be fetched from newest to oldest
-        int remaining = needed_by_position.length;
-        while (remaining > 0) {
-            // if a callback is specified, pull the messages down in chunks, so they can be reported
-            // incrementally
-            int[] list;
-            if (cb != null) {
-                int list_count = int.min(REMOTE_FETCH_CHUNK_COUNT, remaining);
-                list = needed_by_position[remaining - list_count:remaining];
-                assert(list.length == list_count);
-            } else {
-                list = needed_by_position;
-            }
-            
-            // pull from server
-            Gee.List<Geary.Email>? remote_list = yield remote_folder.list_email_async(
-                new Imap.MessageSet.sparse(list), full_fields, cancellable);
-            
-            if (remote_list == null || remote_list.size == 0)
-                break;
-            
-            // if any were fetched, store locally ... must be stored before they can be reported
-            // via the callback because if, in the context of the callback, these messages are
-            // requested, they won't be found in the database, causing another remote fetch to
-            // occur
-            NonblockingBatch batch = new NonblockingBatch();
-            
-            foreach (Geary.Email email in remote_list)
-                batch.add(new CreateLocalEmailOperation(local_folder, email));
-            
-            yield batch.execute_all_async(cancellable);
-            
-            batch.throw_first_exception();
-            
-            // report locally added (non-duplicate, not unknown) emails
-            Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
-                Hashable.hash_func, Equalable.equal_func);
-            foreach (int id in batch.get_ids()) {
-                CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
-                if (op != null && op.created)
-                    created_ids.add(op.email.id);
-            }
-            
-            if (created_ids.size > 0)
-                notify_email_locally_appended(created_ids);
-            
-            if (cb != null)
-                cb(remote_list, null);
-            
-            full.add_all(remote_list);
-            
-            remaining -= list.length;
-        }
-        
-        return full;
     }
     
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
@@ -832,54 +762,17 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     }
     
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
+        FetchEmail op = new FetchEmail(this, id, required_fields, flags, cancellable);
+        send_replay_queue.schedule(op);
         
-        // If not forcing an update, see if the email is present in the local store
-        if (!flags.is_all_set(ListFlags.FORCE_UPDATE)) {
-            try {
-                return yield local_folder.fetch_email_async(id, fields, cancellable);
-            } catch (Error err) {
-                // If NOT_FOUND or INCOMPLETE_MESSAGE, then fall through, otherwise return to sender
-                if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
-                    throw err;
-            }
-        }
+        yield op.wait_for_ready();
         
-        // If local only and not found in local store, throw NOT_FOUND; there is no fallback and
-        // this method does not return null
-        if (flags.is_all_set(ListFlags.LOCAL_ONLY)) {
-            throw new EngineError.NOT_FOUND("Email %s with fields %Xh not found in %s", id.to_string(),
-                fields, to_string());
-        }
+        // to get to this point indicates success, so there must be an email waiting
+        assert(op.email != null);
         
-        // To reach here indicates either the local version does not have all the requested fields
-        // or it's simply not present.  If it's not present, want to ensure that the Message-ID
-        // is requested, as that's a good way to manage duplicate messages in the system
-        Geary.Email.Field available_fields;
-        bool is_present = yield local_folder.is_email_present_async(id, out available_fields,
-            cancellable);
-        if (!is_present)
-            fields = fields.set(Geary.Email.Field.REFERENCES);
-        
-        // fetch from network
-        if (!yield wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
-        
-        Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(new Imap.MessageSet.email_id(id),
-            fields, cancellable);
-        
-        if (list == null || list.size != 1)
-            throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), to_string());
-        
-        // save to local store
-        Geary.Email email = list[0];
-        if (yield local_folder.create_email_async(email, cancellable))
-            notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
-        
-        return email;
+        return op.email;
     }
     
     public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
@@ -957,8 +850,10 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             
             NonblockingBatch batch = new NonblockingBatch();
             
-            foreach (Geary.Email email in list)
-                batch.add(new CreateLocalEmailOperation(local_folder, email));
+            foreach (Geary.Email email in list) {
+                batch.add(new CreateLocalEmailOperation(local_folder, email,
+                    Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION));
+            }
             
             yield batch.execute_all_async(cancellable);
             batch.throw_first_exception();

@@ -26,6 +26,9 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_local() throws Error {
+        Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail %s: %d email IDs", engine.to_string(),
+            to_mark.size);
+        
         // Save original flags, then set new ones.
         original_flags = yield engine.local_folder.get_email_flags_async(to_mark, cancellable);
         yield engine.local_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove,
@@ -68,10 +71,14 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
     }
     
     public override async bool replay_local() throws Error {
-        foreach (Geary.EmailIdentifier id in to_remove) {
+        Logging.debug(Logging.Flag.OPERATIONS, "RemoveEmail %s: %d Email IDs", engine.to_string(),
+            to_remove.size);
+        
+        // TODO: Use a local_folder method that operates on all messages at once
+        foreach (Geary.EmailIdentifier id in to_remove)
             yield engine.local_folder.mark_removed_async(id, true, cancellable);
-            engine.notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(id));
-        }
+        
+        engine.notify_email_removed(to_remove);
         
         original_count = engine.remote_count;
         engine.notify_email_count_changed(original_count - to_remove.size,
@@ -91,6 +98,7 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
     }
     
     public override async void backout_local() throws Error {
+        // TODO: Use a local_folder method that operates on all messages at once
         foreach (Geary.EmailIdentifier id in to_remove)
             yield engine.local_folder.mark_removed_async(id, false, cancellable);
         
@@ -100,6 +108,41 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
 }
 
 private class Geary.ListEmail : Geary.SendReplayOperation {
+    private class RemoteListPositional : NonblockingBatchOperation {
+        private ListEmail owner;
+        private int[] needed_by_position;
+        
+        public RemoteListPositional(ListEmail owner, int[] needed_by_position) {
+            this.owner = owner;
+            this.needed_by_position = needed_by_position;
+        }
+        
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            yield owner.remote_list_positional(needed_by_position);
+            
+            return null;
+        }
+    }
+    
+    private class RemoteListPartial : NonblockingBatchOperation {
+        private ListEmail owner;
+        private Geary.Email.Field remaining_fields;
+        private Gee.Collection<EmailIdentifier> ids;
+        
+        public RemoteListPartial(ListEmail owner, Geary.Email.Field remaining_fields,
+            Gee.Collection<EmailIdentifier> ids) {
+            this.owner = owner;
+            this.remaining_fields = remaining_fields;
+            this.ids = ids;
+        }
+        
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            yield owner.remote_list_partials(ids, remaining_fields);
+            
+            return null;
+        }
+    }
+    
     protected GenericImapFolder engine;
     protected int low;
     protected int count;
@@ -112,6 +155,8 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     
     private Gee.List<Geary.Email>? local_list = null;
     private int local_list_size = 0;
+    private Gee.HashMultiMap<Geary.Email.Field, Geary.EmailIdentifier> unfulfilled = new Gee.HashMultiMap<
+        Geary.Email.Field, Geary.EmailIdentifier>();
     
     public ListEmail(GenericImapFolder engine, int low, int count, Geary.Email.Field required_fields,
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
@@ -157,13 +202,14 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
             local_low = low.clamp(1, local_count);
         }
         
-        debug("ListEmail: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
-            low, count, local_count, engine.remote_count, local_low);
+        Logging.debug(Logging.Flag.OPERATIONS,
+            "ListEmail %s: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
+            engine.to_string(), low, count, local_count, engine.remote_count, local_low);
         
         if (!remote_only && local_low > 0) {
             try {
                 local_list = yield engine.local_folder.list_email_async(local_low, count, required_fields,
-                    Geary.Folder.ListFlags.NONE, cancellable);
+                    Geary.Folder.ListFlags.NONE, true, cancellable);
             } catch (Error local_err) {
                 if (cb != null && !(local_err is IOError.CANCELLED))
                     cb (null, local_err);
@@ -173,7 +219,8 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         
         local_list_size = (local_list != null) ? local_list.size : 0;
         
-        debug("Fetched %d emails from local store for %s", local_list_size, engine.to_string());
+        Logging.debug(Logging.Flag.OPERATIONS, "Fetched %d emails from local store for %s",
+            local_list_size, engine.to_string());
         
         // fixup local email positions to match server's positions
         if (local_list_size > 0 && engine.remote_count > 0 && local_count < engine.remote_count) {
@@ -182,17 +229,35 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 email.update_position(email.position + adjustment);
         }
         
-        // report list
+        // Break into two pools: a list of emails where all field requirements are met and a hash
+        // table of messages keyed by what fields are required
+        Gee.List<Geary.Email> fulfilled = new Gee.ArrayList<Geary.Email>();
         if (local_list_size > 0) {
+            foreach (Geary.Email email in local_list) {
+                if (email.fields.fulfills(required_fields)) {
+                    fulfilled.add(email);
+                } else {
+                    // strip fulfilled fields so only remaining are fetched from server
+                    Geary.Email.Field remaining = required_fields.clear(email.fields);
+                    unfulfilled.set(remaining, email.id);
+                }
+            }
+        }
+        
+        // report fulfilled
+        if (fulfilled.size > 0) {
             if (accumulator != null)
-                accumulator.add_all(local_list);
+                accumulator.add_all(fulfilled);
             
             if (cb != null)
-                cb(local_list, null);
+                cb(fulfilled, null);
         }
         
         // if local list matches total asked for, or if only returning local versions, exit
-        if (local_list_size == count || local_only) {
+        if (fulfilled.size == count || local_only) {
+            if (!local_only)
+                assert(unfulfilled.size == 0);
+            
             if (cb != null)
                 cb(null, null);
             
@@ -204,7 +269,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     
     public override async bool replay_remote() throws Error {
         // go through the positions from (low) to (low + count) and see if they're not already
-        // present in local_list; whatever isn't present needs to be fetched
+        // present in local_list; whatever isn't present needs to be fetched in full
         //
         // TODO: This is inefficient because we can't assume the returned emails are sorted or
         // contiguous (it's possible local email is present but doesn't fulfill all the fields).
@@ -224,35 +289,132 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 needed_by_position += position;
         }
         
-        if (needed_by_position.length == 0) {
-            // signal finished
-            if (cb != null)
-                cb(null, null);
-            
-            return true;
+        NonblockingBatch batch = new NonblockingBatch();
+        
+        // fetch in full whatever is needed wholesale
+        if (needed_by_position.length > 0)
+            batch.add(new RemoteListPositional(this, needed_by_position));
+        
+        // fetch the partial emails that do not fulfill all required fields, getting only those
+        // fields that are missing for each email
+        if (unfulfilled.size > 0) {
+            foreach (Geary.Email.Field remaining_fields in unfulfilled.get_keys())
+                batch.add(new RemoteListPartial(this, remaining_fields, unfulfilled.get(remaining_fields)));
         }
         
-        Gee.List<Geary.Email>? remote_list = null;
-        try {
-            // if cb != null, it will be called by remote_list_email(), so don't call again with
-            // returned list
-            remote_list = yield engine.remote_list_email(needed_by_position, required_fields, cb,
-                cancellable);
-        } catch (Error remote_err) {
-            if (cb != null)
-                cb(null, remote_err);
-            
-            throw remote_err;
-        }
+        Logging.debug(Logging.Flag.OPERATIONS, "ListEmail: Scheduling %d FETCH operations", batch.size);
         
-        if (accumulator != null && remote_list != null && remote_list.size > 0)
-            accumulator.add_all(remote_list);
+        yield batch.execute_all_async(cancellable);
+        
+        // Notify of first error encountered before throwing
+        if (cb != null && batch.first_exception != null)
+            cb(null, batch.first_exception);
+        
+        batch.throw_first_exception();
         
         // signal finished
         if (cb != null)
             cb(null, null);
         
         return true;
+    }
+    
+    private async void remote_list_positional(int[] needed_by_position) throws Error {
+        // possible to call remote multiple times, wait for it to open once and go
+        if (!yield engine.wait_for_remote_to_open(cancellable))
+            return;
+        
+        // pull in reverse order because callers to this method tend to order messages from oldest
+        // to newest, but for user satisfaction, should be fetched from newest to oldest
+        int remaining = needed_by_position.length;
+        while (remaining > 0) {
+            // if a callback is specified, pull the messages down in chunks, so they can be reported
+            // incrementally
+            int[] list;
+            if (cb != null) {
+                int list_count = int.min(GenericImapFolder.REMOTE_FETCH_CHUNK_COUNT, remaining);
+                list = needed_by_position[remaining - list_count:remaining];
+                assert(list.length == list_count);
+            } else {
+                list = needed_by_position;
+            }
+            
+            // pull from server
+            Gee.List<Geary.Email>? remote_list = yield engine.remote_folder.list_email_async(
+                new Imap.MessageSet.sparse(list), required_fields, cancellable);
+            if (remote_list == null || remote_list.size == 0)
+                break;
+            
+            // if any were fetched, store locally ... must be stored before they can be reported
+            // via the callback because if, in the context of the callback, these messages are
+            // requested, they won't be found in the database, causing another remote fetch to
+            // occur
+            remote_list = yield merge_emails(remote_list, cancellable);
+            
+            if (accumulator != null && remote_list != null && remote_list.size > 0)
+                accumulator.add_all(remote_list);
+            
+            if (cb != null)
+                cb(remote_list, null);
+            
+            remaining -= list.length;
+        }
+    }
+    
+    private async void remote_list_partials(Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field remaining_fields) throws Error {
+        // possible to call remote multiple times, wait for it to open once and go
+        if (!yield engine.wait_for_remote_to_open(cancellable))
+            return;
+        
+        Imap.MessageSet msg_set = new Imap.MessageSet.email_id_collection(ids);
+        
+        Gee.List<Geary.Email>? remote_list = yield engine.remote_folder.list_email_async(msg_set,
+            remaining_fields, cancellable);
+        if (remote_list == null || remote_list.size == 0)
+            return;
+        
+        remote_list = yield merge_emails(remote_list, cancellable);
+        
+        if (accumulator != null && remote_list != null && remote_list.size > 0)
+            accumulator.add_all(remote_list);
+        
+        if (cb != null)
+            cb(remote_list, null);
+    }
+    
+    private async Gee.List<Geary.Email> merge_emails(Gee.List<Geary.Email> list,
+        Cancellable? cancellable) throws Error {
+        NonblockingBatch batch = new NonblockingBatch();
+        foreach (Geary.Email email in list)
+            batch.add(new CreateLocalEmailOperation(engine.local_folder, email, required_fields));
+        
+        yield batch.execute_all_async(cancellable);
+        
+        batch.throw_first_exception();
+        
+        // report locally added (non-duplicate, not unknown) emails & collect emails post-merge
+        Gee.List<Geary.Email> merged_email = new Gee.ArrayList<Geary.Email>();
+        Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
+            Hashable.hash_func, Equalable.equal_func);
+        foreach (int id in batch.get_ids()) {
+            CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
+            if (op != null) {
+                if (op.created)
+                    created_ids.add(op.email.id);
+                
+                assert(op.merged != null);
+                merged_email.add(op.merged);
+            }
+        }
+        
+        if (created_ids.size > 0)
+            engine.notify_email_locally_appended(created_ids);
+        
+        if (cb != null)
+            cb(merged_email, null);
+        
+        return merged_email;
     }
 }
 
@@ -309,8 +471,9 @@ private class Geary.ListEmailByID : Geary.ListEmail {
         
         // one more check
         if (actual_count == 0) {
-            debug("ListEmailByID: no actual count to return (%d) (excluding=%s %s)",
-                actual_count, excluding_id.to_string(), initial_id.to_string());
+            Logging.debug(Logging.Flag.OPERATIONS,
+                "ListEmailByID %s: no actual count to return (%d) (excluding=%s %s)",
+                engine.to_string(), actual_count, excluding_id.to_string(), initial_id.to_string());
             
             if (cb != null)
                 cb(null, null);
@@ -318,13 +481,102 @@ private class Geary.ListEmailByID : Geary.ListEmail {
             return true;
         }
         
-        debug("ListEmailByID: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d excl=%s",
-            initial_id.to_string(), initial_position, count, actual_count, low, high, local_count,
-            engine.remote_count, excluding_id.to_string());
+        Logging.debug(Logging.Flag.OPERATIONS,
+            "ListEmailByID %s: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d excl=%s",
+            engine.to_string(), initial_id.to_string(), initial_position, count, actual_count, low,
+            high, local_count, engine.remote_count, excluding_id.to_string());
         
         this.low = low;
         this.count = actual_count;
         return yield base.replay_local();
+    }
+}
+
+private class Geary.FetchEmail : Geary.SendReplayOperation {
+    public Email? email = null;
+    
+    private GenericImapFolder engine;
+    private EmailIdentifier id;
+    private Email.Field required_fields;
+    private Email.Field remaining_fields;
+    private Folder.ListFlags flags;
+    private Cancellable? cancellable;
+    
+    public FetchEmail(GenericImapFolder engine, EmailIdentifier id, Email.Field required_fields,
+        Folder.ListFlags flags, Cancellable? cancellable) {
+        base ("FetchEmail");
+        
+        this.engine = engine;
+        this.id = id;
+        this.required_fields = required_fields;
+        remaining_fields = required_fields;
+        this.flags = flags;
+        this.cancellable = cancellable;
+    }
+    
+    public override async bool replay_local() throws Error {
+        Logging.debug(Logging.Flag.OPERATIONS, "FetchEmail %s: %s %Xh", engine.to_string(),
+            id.to_string(), flags);
+        
+        // If forcing an update, skip local operation and go direct to replay_remote()
+        if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
+            return false;
+        
+        try {
+            email = yield engine.local_folder.fetch_email_async(id, required_fields, true,
+                cancellable);
+        } catch (Error err) {
+            // If NOT_FOUND or INCOMPLETE_MESSAGE, then fall through, otherwise return to sender
+            if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
+                throw err;
+        }
+        
+        // If returned in full, done
+        if (email != null && email.fields.fulfills(required_fields))
+            return true;
+        
+        // If local only and not found fully in local store, throw NOT_FOUND; there is no fallback
+        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
+            throw new EngineError.NOT_FOUND("Email %s with fields %Xh not found in %s", id.to_string(),
+                required_fields, to_string());
+        }
+        
+        // only fetch what's missing
+        if (email != null)
+            remaining_fields = required_fields.clear(email.fields);
+        else
+            remaining_fields = required_fields;
+        
+        assert(remaining_fields != 0);
+        
+        return false;
+    }
+    
+    public override async bool replay_remote() throws Error {
+        if (!yield engine.wait_for_remote_to_open(cancellable))
+            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        
+        // fetch only the remaining fields from the remote folder (if only pulling partial information,
+        // will merge at end of this method)
+        Gee.List<Geary.Email>? list = yield engine.remote_folder.list_email_async(
+            new Imap.MessageSet.email_id(id), remaining_fields, cancellable);
+        
+        if (list == null || list.size != 1)
+            throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());
+        
+        // save to local store
+        Geary.Email? remote_email = list[0];
+        if (yield engine.local_folder.create_email_async(remote_email, cancellable))
+            engine.notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
+        
+        // if remote_email doesn't fulfill all required, pull from local database, which should now
+        // be able to do all of that
+        if (remote_email.fields.fulfills(required_fields))
+            email = remote_email;
+        else
+            email = yield engine.local_folder.fetch_email_async(id, required_fields, false, cancellable);
+        
+        return true;
     }
 }
 

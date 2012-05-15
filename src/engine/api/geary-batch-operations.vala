@@ -14,15 +14,24 @@
 private class Geary.CreateLocalEmailOperation : Geary.NonblockingBatchOperation {
     public Geary.Sqlite.Folder folder { get; private set; }
     public Geary.Email email { get; private set; }
+    public Geary.Email.Field required_fields { get; private set; }
     public bool created { get; private set; default = false; }
+    public Geary.Email? merged { get; private set; default = null; }
     
-    public CreateLocalEmailOperation(Geary.Sqlite.Folder folder, Geary.Email email) {
+    public CreateLocalEmailOperation(Geary.Sqlite.Folder folder, Geary.Email email,
+        Geary.Email.Field required_fields) {
         this.folder = folder;
         this.email = email;
+        this.required_fields = required_fields;
     }
     
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
         created = yield folder.create_email_async(email, cancellable);
+        
+        if (email.fields.fulfills(required_fields))
+            merged = email;
+        else
+            merged = yield folder.fetch_email_async(email.id, required_fields, false, cancellable);
         
         return null;
     }

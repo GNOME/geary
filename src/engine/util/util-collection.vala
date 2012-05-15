@@ -6,7 +6,7 @@
 
 namespace Geary.Collection {
 
-public Gee.ArrayList to_array_list<G>(Gee.Collection<G> c) {
+public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
     Gee.ArrayList<G> list = new Gee.ArrayList<G>();
     list.add_all(c);
     

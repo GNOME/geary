@@ -10,7 +10,8 @@ namespace Geary.Logging {
 public enum Flag {
     NONE,
     NETWORK,
-    SERIALIZER;
+    SERIALIZER,
+    OPERATIONS;
     
     public inline bool is_all_set(Flag flags) {
         return (flags & this) == flags;

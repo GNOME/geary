@@ -226,8 +226,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     }
     
     public async Gee.List<Geary.Email>? list_email_async(int low, int count,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable)
-        throws Error {
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, bool partial_ok,
+        Cancellable? cancellable) throws Error {
         check_open();
         
         Geary.Folder.normalize_span_specifiers(ref low, ref count,
@@ -242,12 +242,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         Gee.List<MessageLocationRow>? list = yield location_table.list_async(transaction,
             folder_row.id, low, count, false, cancellable);
         
-        return yield do_list_email_async(transaction, list, required_fields, false, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, false, partial_ok,
+            cancellable);
     }
     
     private async Gee.List<Geary.Email>? list_email_including_removed_async(int low, int count,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable)
-        throws Error {
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, bool partial_ok,
+        Cancellable? cancellable) throws Error {
         check_open();
         
         Geary.Folder.normalize_span_specifiers(ref low, ref count,
@@ -262,14 +263,16 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         Gee.List<MessageLocationRow>? list = yield location_table.list_async(transaction,
             folder_row.id, low, count, true, cancellable);
         
-        return yield do_list_email_async(transaction, list, required_fields, true, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, true, partial_ok,
+            cancellable);
     }
     
     public async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
-        int count, Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
+        int count, Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, bool partial_ok,
         Cancellable? cancellable = null) throws Error {
         if (count == 0 || count == 1) {
-            Geary.Email email = yield fetch_email_async(initial_id, required_fields, cancellable);
+            Geary.Email email = yield fetch_email_async(initial_id, required_fields, partial_ok,
+                cancellable);
             
             Gee.List<Geary.Email> singleton = new Gee.ArrayList<Geary.Email>();
             singleton.add(email);
@@ -298,12 +301,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         Gee.List<MessageLocationRow>? list = yield location_table.list_ordering_async(transaction,
             folder_row.id, low, high, cancellable);
         
-        return yield do_list_email_async(transaction, list, required_fields, false, cancellable);
+        return yield do_list_email_async(transaction, list, required_fields, false, partial_ok,
+            cancellable);
     }
     
     private async Gee.List<Geary.Email>? do_list_email_async(Transaction transaction,
         Gee.List<MessageLocationRow>? list, Geary.Email.Field required_fields,
-        bool include_removed, Cancellable? cancellable) throws Error {
+        bool include_removed, bool partial_ok, Cancellable? cancellable) throws Error {
         check_open();
         
         if (list == null || list.size == 0)
@@ -323,7 +327,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
                 
                 // only add to the list if the email contains all the required fields (because
                 // properties comes out of a separate table, skip this if properties are requested)
-                if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES)))
+                if (!partial_ok && !message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES)))
                     continue;
             }
             
@@ -331,7 +335,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
                 properties = yield imap_message_properties_table.fetch_async(transaction,
                     location_row.message_id, cancellable);
-                if (properties == null)
+                if (!partial_ok && properties == null)
                     continue;
             }
             
@@ -339,7 +343,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             int position = yield location_row.get_position_async(transaction, include_removed,
                  cancellable);
             if (position == -1) {
-                debug("Unable to locate position of email during list of %s, dropping", to_string());
+                debug("WARNING: Unable to locate position of email during list of %s, dropping",
+                    to_string());
                 
                 continue;
             }
@@ -360,7 +365,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     }
     
     public async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
+        Geary.Email.Field required_fields, bool partial_ok, Cancellable? cancellable = null) throws Error {
         check_open();
         
         Geary.Imap.UID uid = ((Imap.EmailIdentifier) id).uid;
@@ -397,7 +402,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             
             // see if the message row fulfills everything but properties, which are held in
             // separate table
-            if (!message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
+            if (!partial_ok && !message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s in folder %s only fulfills %Xh fields (required: %Xh)", id.to_string(),
                     to_string(), message_row.fields, required_fields);
@@ -408,7 +413,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
             properties = yield imap_message_properties_table.fetch_async(transaction,
                 location_row.message_id, cancellable);
-            if (properties == null) {
+            if (!partial_ok && properties == null) {
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s in folder %s does not have PROPERTIES field", id.to_string(),
                         to_string());
@@ -632,7 +637,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         if (local_position >= 1) {
             // get EmailIdentifier
             Gee.List<Geary.Email>? local = yield list_email_including_removed_async(local_position, 1,
-                Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, null);
+                Geary.Email.Field.NONE, Geary.Folder.ListFlags.NONE, false, null);
             if (local != null && local.size == 1) {
                 id = local[0].id;
             } else {

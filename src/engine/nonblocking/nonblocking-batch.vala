@@ -93,12 +93,17 @@ public class Geary.NonblockingBatch : Object {
         get { return contexts.size; }
     }
     
+    /**
+     * Returns the first exception encountered after completing execute_all_async().  Will be null
+     * before that.
+     */
+    public Error? first_exception { get; private set; default = null; }
+    
     private Gee.HashMap<int, BatchContext> contexts = new Gee.HashMap<int, BatchContext>();
     private NonblockingSemaphore sem = new NonblockingSemaphore();
     private int next_result_id = START_ID;
     private bool locked = false;
     private int completed_ops = 0;
-    private Error? first_exception = null;
     
     public signal void added(NonblockingBatchOperation op, int id);
     
