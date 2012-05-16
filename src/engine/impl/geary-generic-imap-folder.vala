@@ -769,8 +769,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         yield op.wait_for_ready();
         
-        // to get to this point indicates success, so there must be an email waiting
-        assert(op.email != null);
+        if (op.email == null)
+            throw new EngineError.NOT_FOUND("Email %s not found in %s", id.to_string(), to_string());
         
         return op.email;
     }
