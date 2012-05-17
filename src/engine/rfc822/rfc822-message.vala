@@ -42,10 +42,8 @@ public class Geary.RFC822.Message : Object {
         
         stock_from_gmime();
     }
-    
+
     public Message.from_composed_email(Geary.ComposedEmail email) {
-        GMime.Part? body_html = null;
-        GMime.Part? body_text = null;
         message = new GMime.Message(true);
         
         // Required headers
@@ -67,13 +65,13 @@ public class Geary.RFC822.Message : Object {
             foreach (RFC822.MailboxAddress mailbox in email.cc)
                 message.add_recipient(GMime.RecipientType.CC, mailbox.name, mailbox.address);
         }
-        
+
         if (email.bcc != null) {
             bcc = email.bcc;
             foreach (RFC822.MailboxAddress mailbox in email.bcc)
                 message.add_recipient(GMime.RecipientType.BCC, mailbox.name, mailbox.address);
         }
-        
+
         if (email.in_reply_to != null) {
             in_reply_to = email.in_reply_to;
             message.set_header("In-Reply-To", email.in_reply_to.value);
@@ -96,6 +94,7 @@ public class Geary.RFC822.Message : Object {
         }
 
         // Body: text format (optional)
+        GMime.Part? body_text = null;
         if (email.body_text != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
                 new GMime.StreamMem.with_buffer(email.body_text.buffer.get_array()),
@@ -107,6 +106,7 @@ public class Geary.RFC822.Message : Object {
         }
         
         // Body: HTML format (also optional)
+        GMime.Part? body_html = null;
         if (email.body_html != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
                 new GMime.StreamMem.with_buffer(email.body_html.buffer.get_array()),
@@ -129,7 +129,54 @@ public class Geary.RFC822.Message : Object {
             message.set_mime_part(body_html);
         }
     }
-    
+
+    // Makes a copy of the given message without the BCC fields. This is used for sending the email
+    // without sending the BCC headers to all recipients.
+    public Message.without_bcc(Message email) {
+        // Required headers.
+        message = new GMime.Message(true);
+        sender = email.sender;
+        message.set_sender(email.message.get_sender());
+        message.set_date_as_string(email.message.get_date_as_string());
+
+        // Optional headers.
+        if (email.to != null) {
+            to = email.to;
+            foreach (RFC822.MailboxAddress mailbox in email.to)
+                message.add_recipient(GMime.RecipientType.TO, mailbox.name, mailbox.address);
+        }
+
+        if (email.cc != null) {
+            cc = email.cc;
+            foreach (RFC822.MailboxAddress mailbox in email.cc)
+                message.add_recipient(GMime.RecipientType.CC, mailbox.name, mailbox.address);
+        }
+
+        if (email.in_reply_to != null) {
+            in_reply_to = email.in_reply_to;
+            message.set_header("In-Reply-To", email.in_reply_to.value);
+        }
+
+        if (email.references != null) {
+            references = email.references;
+            message.set_header("References", email.references.to_rfc822_string());
+        }
+
+        if (email.subject != null) {
+            subject = email.subject;
+            message.set_subject(email.subject.value);
+        }
+
+        // User-Agent
+        if (!Geary.String.is_empty(email.mailer)) {
+            mailer = email.mailer;
+            message.set_header("X-Mailer", email.mailer);
+        }
+
+        // Setup body depending on what MIME components were filled out.
+        message.set_mime_part(email.message.get_mime_part());
+    }
+
     private void stock_from_gmime() {
         from = new RFC822.MailboxAddresses.from_rfc822_string(message.get_sender());
         if (from.size == 0) {

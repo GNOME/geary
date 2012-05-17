@@ -133,10 +133,11 @@ public class Geary.Smtp.ClientSession {
         yield send_rcpts_async(addrlist, cancellable);
         
         // DATA
-        response = yield cx.send_data_async(email.get_body_rfc822_buffer().get_array(), cancellable);
+        Geary.RFC822.Message email_copy = new Geary.RFC822.Message.without_bcc(email);
+        response = yield cx.send_data_async(email_copy.get_body_rfc822_buffer().get_array(), cancellable);
         if (!response.code.is_success_completed())
             response.throw_error("Unable to send message");
-        
+
         // if message was transmitted successfully, the state machine resets automatically
         rset_required = false;
     }
