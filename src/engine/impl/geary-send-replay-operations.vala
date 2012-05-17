@@ -166,8 +166,10 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     protected Gee.List<Geary.Email>? accumulator = null;
     protected weak EmailCallback? cb;
     protected Cancellable? cancellable;
+    protected Folder.ListFlags flags;
     protected bool local_only;
     protected bool remote_only;
+    protected bool excluding_id;
     
     private Gee.List<Geary.Email>? local_list = null;
     private int local_list_size = 0;
@@ -175,8 +177,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         Geary.Email.Field, Geary.EmailIdentifier>();
     
     public ListEmail(GenericImapFolder engine, int low, int count, Geary.Email.Field required_fields,
-        Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
-        bool local_only, bool remote_only) {
+        Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable) {
         base("ListEmail");
         
         this.engine = engine;
@@ -186,8 +187,11 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         this.accumulator = accumulator;
         this.cb = cb;
         this.cancellable = cancellable;
-        this.local_only = local_only;
-        this.remote_only = remote_only;
+        this.flags = flags;
+        
+        local_only = flags.is_all_set(Folder.ListFlags.LOCAL_ONLY);
+        remote_only = flags.is_all_set(Folder.ListFlags.FORCE_UPDATE);
+        excluding_id = flags.is_all_set(Folder.ListFlags.EXCLUDING_ID);
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
@@ -446,17 +450,15 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
 
 private class Geary.ListEmailByID : Geary.ListEmail {
     private Geary.EmailIdentifier initial_id;
-    private bool excluding_id;
     
     public ListEmailByID(GenericImapFolder engine, Geary.EmailIdentifier initial_id, int count,
-        Geary.Email.Field required_fields, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
-        Cancellable? cancellable, bool local_only, bool remote_only, bool excluding_id) {
-        base(engine, 0, count, required_fields, accumulator, cb, cancellable, local_only, remote_only);
+        Geary.Email.Field required_fields, Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator,
+        EmailCallback? cb, Cancellable? cancellable) {
+        base(engine, 0, count, required_fields, flags, accumulator, cb, cancellable);
         
         name = "ListEmailByID";
         
         this.initial_id = initial_id;
-        this.excluding_id = excluding_id;
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
