@@ -21,8 +21,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     private EmailPrefetcher email_prefetcher;
     private bool opened = false;
     private NonblockingSemaphore remote_semaphore;
-    private ReceiveReplayQueue? recv_replay_queue = null;
-    private SendReplayQueue? send_replay_queue = null;
+    private ReplayQueue? replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
     public GenericImapFolder(GenericImapAccount account, Imap.Account remote, Sqlite.Account local,
@@ -297,9 +296,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         remote_semaphore = new Geary.NonblockingSemaphore();
         
-        // start the replay queues
-        recv_replay_queue = new ReceiveReplayQueue();
-        send_replay_queue = new SendReplayQueue();
+        // start the replay queue
+        replay_queue = new ReplayQueue();
         
         try {
             yield local_folder.open_async(readonly, cancellable);
@@ -468,28 +466,20 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // Close the replay queues *after* the folder has been closed (in case any final upcalls
         // come and can be handled)
         try {
-            if (recv_replay_queue != null)
-                yield recv_replay_queue.close_async();
-        } catch (Error recv_replay_err) {
-            debug("Error closing %s recv replay queue: %s", to_string(), recv_replay_err.message);
+            if (replay_queue != null)
+                yield replay_queue.close_async();
+        } catch (Error replay_queue_err) {
+            debug("Error closing %s replay queue: %s", to_string(), replay_queue_err.message);
         }
         
-        try {
-            if (send_replay_queue != null)
-                yield send_replay_queue.close_async();
-        } catch (Error send_replay_err) {
-            debug("Error closing %s send replay queue: %s", to_string(), send_replay_err.message);
-        }
-        
-        recv_replay_queue = null;
-        send_replay_queue = null;
+        replay_queue = null;
         
         notify_closed(CloseReason.FOLDER_CLOSED);
     }
     
     private void on_remote_messages_appended(int total) {
         debug("on_remote_messages_appended: total=%d", total);
-        recv_replay_queue.schedule(new ReplayAppend(this, total));
+        replay_queue.schedule(new ReplayAppend(this, total));
     }
     
     // Need to prefetch at least an EmailIdentifier (and duplicate detection fields) to create a
@@ -509,14 +499,17 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             if (!yield wait_for_remote_to_open())
                 return;
             
-            Geary.Imap.UID? next_uid = yield local_folder.get_latest_uid_async(null);
-            if (next_uid != null)
-                next_uid = next_uid.next();
+            // Fetch everything after the latest (highest) known UID in the local store
+            Geary.Imap.UID? latest_uid = yield local_folder.get_latest_uid_async(null);
+            
+            Geary.Imap.UID next_uid;
+            if (latest_uid != null)
+                next_uid = latest_uid.next();
             else
                 next_uid = new Geary.Imap.UID(Geary.Imap.UID.MIN);
             
-            debug("do_replay_appended_messages %s: next_uid=%s", to_string(),
-                next_uid.to_string());
+            debug("do_replay_appended_messages %s: latest_uid=%s next_uid=%s", to_string(),
+                (latest_uid != null) ? latest_uid.to_string() : "(null)", next_uid.to_string());
             
             // want to list UIDs starting at the next one, which is where the newest will go
             // (if not beyond)
@@ -527,7 +520,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 new Imap.MessageSet.uid_range_to_highest(next_uid),
                 Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
             if (list != null && list.size > 0) {
-                debug("%d new messages in %s", list.size, to_string());
+                debug("do_replay_appended_messages: %d new messages after UID (incl.) %s in %s", list.size,
+                    next_uid.to_string(), to_string());
                 
                 Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
                     Hashable.hash_func, Equalable.equal_func);
@@ -539,7 +533,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                     if (yield local_folder.create_email_async(email, null)) {
                         created.add(email.id);
                     } else {
-                        debug("Appended email ID %s already known in account, associating with %s...",
+                        debug("do_replay_appended_messages: appended email ID %s already known in account, associating with %s...",
                             email.id.to_string(), to_string());
                     }
                     
@@ -558,6 +552,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 
                 if (changed)
                     notify_email_count_changed(remote_count, CountChangeReason.ADDED);
+            } else {
+                debug("do_replay_appended_messages: no new messages after UID %s in %S",
+                    next_uid.to_string(), to_string());
             }
         } catch (Error err) {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
@@ -567,7 +564,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     private void on_remote_message_at_removed(int position, int total) {
         debug("on_remote_message_at_removed: position=%d total=%d", position, total);
-        recv_replay_queue.schedule(new ReplayRemoval(this, position, total));
+        replay_queue.schedule(new ReplayRemoval(this, position, total));
     }
     
     // This MUST only be called from ReplayRemoval.
@@ -593,7 +590,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         bool marked = false;
         if (owned_id != null) {
-            debug("Removing from local store Email ID %s", owned_id.to_string());
+            debug("do_replay_remove_message: removing from local store Email ID %s", owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
                 yield local_folder.remove_marked_email_async(owned_id, out marked, null);
@@ -616,7 +613,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     private void on_remote_disconnected(Geary.Folder.CloseReason reason) {
         debug("on_remote_disconnected: reason=%s", reason.to_string());
-        recv_replay_queue.schedule(new ReplayDisconnect(this, reason));
+        replay_queue.schedule(new ReplayDisconnect(this, reason));
     }
     
     internal async void do_replay_remote_disconnected(Geary.Folder.CloseReason reason) {
@@ -697,8 +694,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // Schedule list operation and wait for completion.
         ListEmail op = new ListEmail(this, low, count, required_fields, accumulator, cb, cancellable,
             local_only, remote_only);
-        send_replay_queue.schedule(op);
-        yield op.wait_for_ready();
+        replay_queue.schedule(op);
+        
+        yield op.wait_for_ready_async(cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
@@ -748,9 +746,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // Schedule list operation and wait for completion.
         ListEmailByID op = new ListEmailByID(this, initial_id, count, required_fields, accumulator,
             cb, cancellable, local_only, remote_only, excluding_id);
-        send_replay_queue.schedule(op);
+        replay_queue.schedule(op);
         
-        yield op.wait_for_ready();
+        yield op.wait_for_ready_async(cancellable);
     }
     
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
@@ -765,12 +763,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
         FetchEmail op = new FetchEmail(this, id, required_fields, flags, cancellable);
-        send_replay_queue.schedule(op);
+        replay_queue.schedule(op);
         
-        yield op.wait_for_ready();
+        yield op.wait_for_ready_async(cancellable);
         
-        if (op.email == null)
+        if (op.email == null) {
             throw new EngineError.NOT_FOUND("Email %s not found in %s", id.to_string(), to_string());
+        } else if (!op.email.fields.fulfills(required_fields)) {
+            throw new EngineError.INCOMPLETE_MESSAGE("Email %s in %s does not fulfill required fields %Xh (has %Xh)",
+                id.to_string(), to_string(), required_fields, op.email.fields);
+        }
         
         return op.email;
     }
@@ -780,7 +782,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         if (!opened)
             throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
         
-        send_replay_queue.schedule(new RemoveEmail(this, email_ids, cancellable));
+        replay_queue.schedule(new RemoveEmail(this, email_ids, cancellable));
     }
     
     // Converts a remote position to a local position, assuming that the remote has been completely
@@ -886,7 +888,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         if (!yield wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
         
-        send_replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
+        replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
             cancellable));
     }
     

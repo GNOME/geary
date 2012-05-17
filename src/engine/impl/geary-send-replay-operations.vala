@@ -4,6 +4,16 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+private abstract class Geary.SendReplayOperation : Geary.ReplayOperation {
+    public SendReplayOperation(string name) {
+        base (name, ReplayOperation.Scope.LOCAL_AND_REMOTE);
+    }
+    
+    public SendReplayOperation.only_remote(string name) {
+        base (name, ReplayOperation.Scope.REMOTE_ONLY);
+    }
+}
+
 private class Geary.MarkEmail : Geary.SendReplayOperation {
     private GenericImapFolder engine;
     private Gee.List<Geary.EmailIdentifier> to_mark;
@@ -25,12 +35,7 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
         this.cancellable = cancellable;
     }
     
-    public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail.replay_local %s: %d email IDs add=%s remove=%s",
-            engine.to_string(), to_mark.size,
-            (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
-            (flags_to_remove != null) ? flags_to_remove.to_string() : "(none)");
-        
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         // Save original flags, then set new ones.
         original_flags = yield engine.local_folder.get_email_flags_async(to_mark, cancellable);
         yield engine.local_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove,
@@ -40,24 +45,27 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
         engine.notify_email_flags_changed(yield engine.local_folder.get_email_flags_async(to_mark,
             cancellable));
         
-        return false;
+        return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async bool replay_remote() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "MarkEmail.replay_remote %s: %d email IDs add=%d remove=%d",
-            engine.to_string(), to_mark.size,
-            (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
-            (flags_to_remove != null) ? flags_to_remove.to_string() : "(none)");
-        
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
             flags_to_add, flags_to_remove, cancellable);
         
-        return true;
+        return ReplayOperation.Status.COMPLETED;
     }
     
-    public override async void backout_local() throws Error {
-        // Restore original flags.
-        yield engine.local_folder.set_email_flags_async(original_flags, cancellable);
+    public override async void backout_local_async() throws Error {
+        // Restore original flags (if fetched, which may not have occurred if an error happened
+        // during transaction)
+        if (original_flags != null)
+            yield engine.local_folder.set_email_flags_async(original_flags, cancellable);
+    }
+    
+    public override string describe_state() {
+        return "to_mark=%d flags_to_add=%s flags_to_remove=%s".printf(to_mark.size,
+            (flags_to_add != null) ? flags_to_add.to_string() : "(none)",
+            (flags_to_remove != null) ? flags_to_remove.to_string() : "(none)");
     }
 }
 
@@ -77,10 +85,7 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
         this.cancellable = cancellable;
     }
     
-    public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "RemoveEmail.replay_local %s: %d Email IDs", engine.to_string(),
-            to_remove.size);
-        
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         // TODO: Use a local_folder method that operates on all messages at once
         foreach (Geary.EmailIdentifier id in to_remove)
             yield engine.local_folder.mark_removed_async(id, true, cancellable);
@@ -91,29 +96,30 @@ private class Geary.RemoveEmail : Geary.SendReplayOperation {
         engine.notify_email_count_changed(original_count - to_remove.size,
             Geary.Folder.CountChangeReason.REMOVED);
         
-        return false;
+        return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async bool replay_remote() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "RemoveEmail.replay_remote %s: %d Email IDs", engine.to_string(),
-            to_remove.size);
-        
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
         // that the signal has already been fired.
         yield engine.remote_folder.remove_email_async(new Imap.MessageSet.email_id_collection(to_remove),
             cancellable);
         
-        return true;
+        return ReplayOperation.Status.COMPLETED;
     }
     
-    public override async void backout_local() throws Error {
+    public override async void backout_local_async() throws Error {
         // TODO: Use a local_folder method that operates on all messages at once
         foreach (Geary.EmailIdentifier id in to_remove)
             yield engine.local_folder.mark_removed_async(id, false, cancellable);
         
         engine.notify_email_appended(to_remove);
         engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.ADDED);
+    }
+    
+    public override string describe_state() {
+        return "to_remove=%d".printf(to_remove.size);
     }
 }
 
@@ -184,7 +190,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         this.remote_only = remote_only;
     }
     
-    public override async bool replay_local() throws Error {
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         int local_count;
         if (!local_only) {
             // normalize the position (ordering) of what's available locally with the situation on
@@ -212,7 +218,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
             local_low = low.clamp(1, local_count);
         }
         
-        Logging.debug(Logging.Flag.OPERATIONS,
+        Logging.debug(Logging.Flag.REPLAY,
             "ListEmail.replay_local %s: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
             engine.to_string(), low, count, local_count, engine.remote_count, local_low);
         
@@ -228,9 +234,6 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         }
         
         local_list_size = (local_list != null) ? local_list.size : 0;
-        
-        Logging.debug(Logging.Flag.OPERATIONS, "Fetched %d emails from local store for %s",
-            local_list_size, engine.to_string());
         
         // fixup local email positions to match server's positions
         if (local_list_size > 0 && engine.remote_count > 0 && local_count < engine.remote_count) {
@@ -271,13 +274,13 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
             if (cb != null)
                 cb(null, null);
             
-            return true;
+            return ReplayOperation.Status.COMPLETED;
         }
         
-        return false;
+        return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async bool replay_remote() throws Error {
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         // go through the positions from (low) to (low + count) and see if they're not already
         // present in local_list; whatever isn't present needs to be fetched in full
         //
@@ -299,7 +302,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 needed_by_position += position;
         }
         
-        Logging.debug(Logging.Flag.OPERATIONS, "ListEmail.replay_remote %s: %d by position, %d unfulfilled",
+        Logging.debug(Logging.Flag.REPLAY, "ListEmail.replay_remote %s: %d by position, %d unfulfilled",
             engine.to_string(), needed_by_position.length, unfulfilled.get_values().size);
         
         NonblockingBatch batch = new NonblockingBatch();
@@ -315,7 +318,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
                 batch.add(new RemoteListPartial(this, remaining_fields, unfulfilled.get(remaining_fields)));
         }
         
-        Logging.debug(Logging.Flag.OPERATIONS, "ListEmail.replay_remote %s: Scheduling %d FETCH operations",
+        Logging.debug(Logging.Flag.REPLAY, "ListEmail.replay_remote %s: Scheduling %d FETCH operations",
             engine.to_string(), batch.size);
         
         yield batch.execute_all_async(cancellable);
@@ -330,7 +333,11 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         if (cb != null)
             cb(null, null);
         
-        return true;
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override async void backout_local_async() throws Error {
+        // R/O, no backout
     }
     
     private async void remote_list_positional(int[] needed_by_position) throws Error {
@@ -430,6 +437,11 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         
         return merged_email;
     }
+    
+    public override string describe_state() {
+        return "low=%d count=%d required_fields=%Xh local_only=%s remote_only=%s".printf(low, count,
+            required_fields, local_only.to_string(), remote_only.to_string());
+    }
 }
 
 private class Geary.ListEmailByID : Geary.ListEmail {
@@ -440,16 +452,14 @@ private class Geary.ListEmailByID : Geary.ListEmail {
         Geary.Email.Field required_fields, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
         Cancellable? cancellable, bool local_only, bool remote_only, bool excluding_id) {
         base(engine, 0, count, required_fields, accumulator, cb, cancellable, local_only, remote_only);
-        set_name("ListEmailByID");
+        
+        name = "ListEmailByID";
         
         this.initial_id = initial_id;
         this.excluding_id = excluding_id;
     }
     
-    public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "ListEmailByID.replay_local: %s initial=%s excl=%s",
-            engine.to_string(), initial_id.to_string(), excluding_id.to_string());
-        
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         int local_count = yield engine.local_folder.get_email_count_async(cancellable);
         
         int initial_position = yield engine.local_folder.get_id_position_async(initial_id, cancellable);
@@ -488,24 +498,25 @@ private class Geary.ListEmailByID : Geary.ListEmail {
         
         // one more check
         if (actual_count == 0) {
-            Logging.debug(Logging.Flag.OPERATIONS,
+            Logging.debug(Logging.Flag.REPLAY,
                 "ListEmailByID %s: no actual count to return (%d) (excluding=%s %s)",
                 engine.to_string(), actual_count, excluding_id.to_string(), initial_id.to_string());
             
             if (cb != null)
                 cb(null, null);
             
-            return true;
+            return ReplayOperation.Status.COMPLETED;
         }
-        
-        Logging.debug(Logging.Flag.OPERATIONS,
-            "ListEmailByID %s: initial_id=%s initial_position=%d count=%d actual_count=%d low=%d high=%d local_count=%d remote_count=%d excl=%s",
-            engine.to_string(), initial_id.to_string(), initial_position, count, actual_count, low,
-            high, local_count, engine.remote_count, excluding_id.to_string());
         
         this.low = low;
         this.count = actual_count;
-        return yield base.replay_local();
+        
+        return yield base.replay_local_async();
+    }
+    
+    public override string describe_state() {
+        return "%s initial_id=%s excl=%s".printf(base.describe_state(), initial_id.to_string(),
+            excluding_id.to_string());
     }
 }
 
@@ -531,13 +542,10 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
         this.cancellable = cancellable;
     }
     
-    public override async bool replay_local() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "FetchEmail.replay_local %s: %s flags=%Xh required_fields=%Xh",
-            engine.to_string(), id.to_string(), flags, required_fields);
-        
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         // If forcing an update, skip local operation and go direct to replay_remote()
         if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
-            return false;
+            return ReplayOperation.Status.CONTINUE;
         
         try {
             email = yield engine.local_folder.fetch_email_async(id, required_fields, true,
@@ -550,7 +558,7 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
         
         // If returned in full, done
         if (email != null && email.fields.fulfills(required_fields))
-            return true;
+            return ReplayOperation.Status.COMPLETED;
         
         // If local only and not found fully in local store, throw NOT_FOUND; there is no fallback
         if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
@@ -566,13 +574,10 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
         
         assert(remaining_fields != 0);
         
-        return false;
+        return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async bool replay_remote() throws Error {
-        Logging.debug(Logging.Flag.OPERATIONS, "FetchEmail.replay_remote %s: %s flags=%Xh required_fields=%Xh remaining_fields=%Xh",
-            engine.to_string(), id.to_string(), flags, required_fields, remaining_fields);
-        
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         if (!yield engine.wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
         
@@ -597,7 +602,16 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
             assert(email != null);
         }
         
-        return true;
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override async void backout_local_async() throws Error {
+        // read-only
+    }
+    
+    public override string describe_state() {
+        return "id=%s required_fields=%Xh remaining_fields=%Xh flags=%Xh".printf(id.to_string(),
+            required_fields, remaining_fields, flags);
     }
 }
 

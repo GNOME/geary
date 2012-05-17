@@ -90,9 +90,9 @@ engine/impl/geary-gmail-account.vala
 engine/impl/geary-yahoo-account.vala
 engine/impl/geary-other-account.vala
 engine/impl/geary-receive-replay-operations.vala
-engine/impl/geary-receive-replay-queue.vala
+engine/impl/geary-replay-operation.vala
+engine/impl/geary-replay-queue.vala
 engine/impl/geary-send-replay-operations.vala
-engine/impl/geary-send-replay-queue.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala

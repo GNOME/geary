@@ -4,6 +4,22 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+private abstract class Geary.ReceiveReplayOperation : Geary.ReplayOperation {
+    public ReceiveReplayOperation(string name) {
+        base (name, ReplayOperation.Scope.LOCAL_ONLY);
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
+        debug("Warning: ReceiveReplayOperation.replay_remote_async() called");
+        
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override async void backout_local_async() throws Error {
+        debug("Warning: ReceiveReplayOperation.backout_local_async() called");
+    }
+}
+
 private class Geary.ReplayAppend : Geary.ReceiveReplayOperation {
     public GenericImapFolder owner;
     public int new_remote_count;
@@ -15,8 +31,14 @@ private class Geary.ReplayAppend : Geary.ReceiveReplayOperation {
         this.new_remote_count = new_remote_count;
     }
     
-    public override async void replay() {
+    public override async ReplayOperation.Status replay_local_async() {
         yield owner.do_replay_appended_messages(new_remote_count);
+        
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override string describe_state() {
+        return "new_remote_count=%d".printf(new_remote_count);
     }
 }
 
@@ -44,8 +66,15 @@ private class Geary.ReplayRemoval : Geary.ReceiveReplayOperation {
         this.id = id;
     }
     
-    public override async void replay() {
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         yield owner.do_replay_remove_message(position, new_remote_count, id);
+        
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override string describe_state() {
+        return "position=%d new_remote_count=%d id=%s".printf(position, new_remote_count,
+            (id != null) ? id.to_string() : "(null)");
     }
 }
 
@@ -60,7 +89,13 @@ private class Geary.ReplayDisconnect : Geary.ReceiveReplayOperation {
         this.reason = reason;
     }
     
-    public override async void replay() {
+    public override async ReplayOperation.Status replay_local_async() throws Error {
         yield owner.do_replay_remote_disconnected(reason);
+        
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override string describe_state() {
+        return "reason=%s".printf(reason.to_string());
     }
 }
