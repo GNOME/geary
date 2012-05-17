@@ -8,9 +8,9 @@ public class Geary.Credentials {
     public string user { get; private set; }
     public string pass { get; private set; }
     
-    public Credentials(string user, string pass) {
-        this.user = user;
-        this.pass = pass;
+    public Credentials(string? user, string? pass) {
+        this.user = user ?? "";
+        this.pass = pass ?? "";
     }
     
     public string to_string() {
