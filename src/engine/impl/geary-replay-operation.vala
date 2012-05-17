@@ -106,7 +106,10 @@ private abstract class Geary.ReplayOperation {
     public abstract string describe_state();
     
     public string to_string() {
-        return "[%d] %s: %s".printf(opnum, name, describe_state());
+        string state = describe_state();
+        
+        return (String.is_empty(state)) ? "[%d] %s".printf(opnum, name)
+            : "[%d] %s: %s".printf(opnum, name, state);
     }
 }
 

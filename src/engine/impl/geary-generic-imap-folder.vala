@@ -94,6 +94,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     }
     
     public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
+        check_open("create_email_async");
+        
         throw new EngineError.READONLY("Engine currently read-only");
     }
     
@@ -297,7 +299,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         remote_semaphore = new Geary.NonblockingSemaphore();
         
         // start the replay queue
-        replay_queue = new ReplayQueue();
+        replay_queue = new ReplayQueue(get_path().to_string());
         
         try {
             yield local_folder.open_async(readonly, cancellable);
@@ -633,9 +635,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     }
     
     public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
-        // TODO: Use monitoring to avoid round-trip to the server
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
+        check_open("get_email_count_async");
         
         // if connected, use stashed remote count (which is always kept current once remote folder
         // is opened)
@@ -654,8 +654,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // block on do_list_email_async(), using an accumulator to gather the emails and return
         // them all at once to the caller
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
-        yield do_list_email_async(low, count, required_fields, accumulator, null, cancellable,
-            flags.is_any_set(Folder.ListFlags.LOCAL_ONLY), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
+        yield do_list_email_async("list_email_async", low, count, required_fields, accumulator, null,
+            cancellable, flags.is_any_set(Folder.ListFlags.LOCAL_ONLY),
+            flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
         
         return accumulator;
     }
@@ -664,21 +665,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     public override void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         Geary.Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
         // schedule do_list_email_async(), using the callback to drive availability of email
-        do_list_email_async.begin(low, count, required_fields, null, cb, cancellable,
+        do_list_email_async.begin("lazy_list_email", low, count, required_fields, null, cb, cancellable,
             flags.is_all_set(Folder.ListFlags.LOCAL_ONLY), flags.is_any_set(Folder.ListFlags.FORCE_UPDATE));
     }
     
-    // TODO: A great optimization would be to fetch message "fragments" from the local database
-    // (retrieve all stored fields that match required_fields, although not all of required_fields
-    // are present) and only fetch the missing parts from the remote; to do this right, requests
-    // would have to be parallelized.
-    private async void do_list_email_async(int low, int count, Geary.Email.Field required_fields,
+    private async void do_list_email_async(string method, int low, int count, Geary.Email.Field required_fields,
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable,
         bool local_only, bool remote_only) throws Error {
         check_span_specifiers(low, count);
         
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
+        check_open(method);
         
         if (local_only && remote_only)
             throw new EngineError.BAD_PARAMETERS("local_only and remote_only are mutually exlusive");
@@ -703,8 +699,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
-        yield do_list_email_by_id_async(initial_id, count, required_fields, list, null, cancellable,
-            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
+        yield do_list_email_by_id_async("list_email_by_id_async", initial_id, count, required_fields,
+            list, null, cancellable, flags.is_all_set(Folder.ListFlags.LOCAL_ONLY),
+            flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
             flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
         
         return (list.size > 0) ? list : null;
@@ -713,27 +710,27 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     public override void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
         Cancellable? cancellable = null) {
-        do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, cb, cancellable,
-            flags.is_all_set(Folder.ListFlags.LOCAL_ONLY), flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
+        do_lazy_list_email_by_id_async.begin("lazy_list_email_by_id", initial_id, count, required_fields,
+            cb, cancellable, flags.is_all_set(Folder.ListFlags.LOCAL_ONLY),
+            flags.is_all_set(Folder.ListFlags.FORCE_UPDATE),
             flags.is_all_set(Folder.ListFlags.EXCLUDING_ID));
     }
     
-    private async void do_lazy_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
-        Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable, bool local_only,
-        bool remote_only, bool excluding_id) {
+    private async void do_lazy_list_email_by_id_async(string method, Geary.EmailIdentifier initial_id,
+        int count, Geary.Email.Field required_fields, EmailCallback cb, Cancellable? cancellable,
+        bool local_only, bool remote_only, bool excluding_id) {
         try {
-            yield do_list_email_by_id_async(initial_id, count, required_fields, null, cb, cancellable,
-                local_only, remote_only, excluding_id);
+            yield do_list_email_by_id_async(method, initial_id, count, required_fields, null, cb,
+                cancellable, local_only, remote_only, excluding_id);
         } catch (Error err) {
             cb(null, err);
         }
     }
     
-    private async void do_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
+    private async void do_list_email_by_id_async(string method, Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
         Cancellable? cancellable, bool local_only, bool remote_only, bool excluding_id) throws Error {
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("%s is not open", to_string());
+        check_open(method);
         
         // listing by ID requires the remote to be open and fully synchronized, as there's no
         // reliable way to determine certain counts and positions without it
@@ -753,8 +750,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
+        check_open("list_local_email_fields_async");
         
         return yield local_folder.list_email_fields_by_id_async(ids, cancellable);
     }
@@ -762,6 +758,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
+        check_open("fetch_email_async");
+        
         FetchEmail op = new FetchEmail(this, id, required_fields, flags, cancellable);
         replay_queue.schedule(op);
         
@@ -779,10 +777,14 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
-        if (!opened)
-            throw new EngineError.OPEN_REQUIRED("Folder %s not opened", to_string());
+        check_open("remove_email_async");
         
         replay_queue.schedule(new RemoveEmail(this, email_ids, cancellable));
+    }
+    
+    private void check_open(string method) throws EngineError {
+        if (!opened)
+            throw new EngineError.OPEN_REQUIRED("%s failed: folder %s is not open", method, to_string());
     }
     
     // Converts a remote position to a local position, assuming that the remote has been completely
