@@ -215,7 +215,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     // Prompt the user for a username and password, and try to start Geary.
     private Geary.Credentials? request_login(string _username = "", ref string real_name, 
         ref Geary.AccountInformation? account_info) {
-        LoginDialog login = new LoginDialog(_username, "", account_info);
+        LoginDialog login = new LoginDialog(real_name, _username, "", account_info);
         login.show();
         if (login.get_response() == Gtk.ResponseType.OK) {
             keyring_save_password(login.username, login.password);

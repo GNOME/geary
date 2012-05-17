@@ -41,7 +41,7 @@ public class LoginDialog {
         default = Geary.Smtp.ClientConnection.SECURE_SMTP_PORT; }
     public bool smtp_tls { get; private set; default = true; }
     
-    public LoginDialog(string default_username = "", string default_password = "",
+    public LoginDialog(string default_real_name = "", string default_username = "", string default_password = "",
         Geary.AccountInformation? default_account_info = null) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
@@ -73,13 +73,17 @@ public class LoginDialog {
         if (combo_service.get_active() == -1)
             combo_service.set_active(0);
         
+        entry_real_name.set_text(default_real_name);
         entry_username.set_text(default_username);
         entry_password.set_text(default_password);
         
         if (default_account_info != null && !Geary.String.is_empty(default_account_info.real_name))
             entry_real_name.set_text(default_account_info.real_name);
         
-        entry_real_name.grab_focus();
+        if (Geary.String.is_empty(entry_real_name.text))
+            entry_real_name.grab_focus();
+        else
+            entry_username.grab_focus();
         
         entry_username.changed.connect(on_changed);
         entry_password.changed.connect(on_changed);
