@@ -113,20 +113,16 @@ public class MainWindow : Gtk.Window {
         message_viewer_scrolled.add(message_viewer);
         message_viewer.link_hover.connect(on_link_hover);
         
-        // three-pane display: folder list on left and messages on right separated by grippable
-        folder_paned.pack1(folder_list_scrolled, false, false);
-        folder_paned.pack2(message_list_scrolled, true, false);
-        
+        // Three-pane display.
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         Gtk.Statusbar status_bar = new Gtk.Statusbar();
         status_bar.add(spinner);
-        status_bar_box.pack_start(folder_paned);
+        status_bar_box.pack_start(folder_list_scrolled);
         status_bar_box.pack_start(status_bar, false, false, 0);
         get_style_context().add_class("sidebar-pane-separator");
         
-         // three-pane display: message list left of current message on bottom separated by
-        // grippable
-        messages_paned.pack1(status_bar_box, false, false);
+         // Message list left of message viewer.
+        messages_paned.pack1(message_list_scrolled, false, false);
         
         Gtk.Overlay message_overlay = new Gtk.Overlay();
         message_overlay.add(message_viewer_scrolled);
@@ -138,7 +134,11 @@ public class MainWindow : Gtk.Window {
         message_overlay_label.valign = Gtk.Align.END;
         message_overlay.add_overlay(message_overlay_label);
         
-        main_layout.pack_end(messages_paned, true, true, 0);
+        // Folder list to the left of everything.
+        folder_paned.pack1(status_bar_box, false, false);
+        folder_paned.pack2(messages_paned, true, false);
+        
+        main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
     }
