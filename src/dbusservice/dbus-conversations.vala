@@ -58,18 +58,15 @@ public class Geary.DBus.Conversations : Object {
         conversations.lazy_load(-1, num_messages, Geary.Folder.ListFlags.NONE, null);
     }
     
-    private void on_scan_started(Geary.EmailIdentifier? id, int low, int count) {
-        debug("scan started");
+    private void on_scan_started() {
         scan_started();
     }
     
     private void on_scan_error(Error err) {
-        debug("scan error");
         scan_error();
     }
     
     private void on_scan_completed() {
-        debug("scan completed");
         scan_completed();
     }
     

@@ -339,9 +339,7 @@ public class GearyController {
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
     }
     
-    public void on_scan_started(Geary.EmailIdentifier? id, int low, int count) {
-        debug("on scan started. id = %s low = %d count = %d", id != null ? id.to_string() : "(null)", 
-            low, count);
+    public void on_scan_started() {
         main_window.message_list_view.enable_load_more = false;
         set_busy(true);
         
@@ -349,15 +347,12 @@ public class GearyController {
     }
     
     public void on_scan_error(Error err) {
-        debug("Scan error: %s", err.message);
         set_busy(false);
         
         scan_in_progress = false;
     }
     
     public void on_scan_completed() {
-        debug("on scan completed");
-        
         set_busy(false);
         
         scan_in_progress = false;

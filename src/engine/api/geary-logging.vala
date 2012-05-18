@@ -11,7 +11,8 @@ public enum Flag {
     NONE,
     NETWORK,
     SERIALIZER,
-    REPLAY;
+    REPLAY,
+    CONVERSATIONS;
     
     public inline bool is_all_set(Flag flags) {
         return (flags & this) == flags;

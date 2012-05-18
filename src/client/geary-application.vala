@@ -84,9 +84,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_network = false;
     static bool log_serializer = false;
     static bool log_replay_queue = false;
+    static bool log_conversations = false;
     static bool version = false;
     const OptionEntry[] options = {
         { "debug", 0, 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
+        { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Output conversations log"), null },
         { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
         { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Output replay queue log"), null },
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
@@ -121,6 +123,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (log_replay_queue)
             Geary.Logging.enable_flags(Geary.Logging.Flag.REPLAY);
+        
+        if (log_conversations)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
         
         if (log_debug) {
             // Debug messages in green
