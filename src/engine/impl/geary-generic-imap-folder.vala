@@ -501,30 +501,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             if (!yield wait_for_remote_to_open())
                 return;
             
-            // Fetch everything after the latest (highest) known UID in the local store
-            Geary.Imap.UID? latest_uid = yield local_folder.get_latest_uid_async(null);
-            
-            Geary.Imap.UID next_uid;
-            if (latest_uid != null)
-                next_uid = latest_uid.next();
-            else
-                next_uid = new Geary.Imap.UID(Geary.Imap.UID.MIN);
-            
-            debug("do_replay_appended_messages %s: latest_uid=%s next_uid=%s", to_string(),
-                (latest_uid != null) ? latest_uid.to_string() : "(null)", next_uid.to_string());
-            
-            // want to list UIDs starting at the next one, which is where the newest will go
-            // (if not beyond)
-            
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
+            Imap.MessageSet msg_set = new Imap.MessageSet.range_to_highest(remote_count + 1);
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
-                new Imap.MessageSet.uid_range_to_highest(next_uid),
-                Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
+                msg_set, Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
             if (list != null && list.size > 0) {
-                debug("do_replay_appended_messages: %d new messages after UID (incl.) %s in %s", list.size,
-                    next_uid.to_string(), to_string());
+                debug("do_replay_appended_messages: %d new messages from %s in %s", list.size,
+                    msg_set.to_string(), to_string());
                 
+                // add new messages to local store
                 Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
                     Hashable.hash_func, Equalable.equal_func);
                 Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
@@ -555,8 +541,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 if (changed)
                     notify_email_count_changed(remote_count, CountChangeReason.ADDED);
             } else {
-                debug("do_replay_appended_messages: no new messages after UID %s in %S",
-                    next_uid.to_string(), to_string());
+                debug("do_replay_appended_messages: no new messages in %s in %s",
+                    msg_set.to_string(), to_string());
             }
         } catch (Error err) {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
