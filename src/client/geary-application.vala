@@ -263,9 +263,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
-    public override void exiting(bool panicked) {
+    public override bool exiting(bool panicked) {
         if (controller.main_window != null)
             controller.main_window.destroy();
+            
+        return true;
     }
     
     public File get_user_data_directory() {

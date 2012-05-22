@@ -34,6 +34,8 @@ public class MainWindow : Gtk.Window {
         pixbuf_list.append(IconFactory.instance.geary);
         set_default_icon_list(pixbuf_list);
         
+        delete_event.connect(on_delete_event);
+        
         create_layout();
     }
     
@@ -62,9 +64,13 @@ public class MainWindow : Gtk.Window {
             GearyApplication.instance.config.messages_pane_position = messages_paned.get_position();
         }
         
+        base.destroy();
+    }
+    
+    private bool on_delete_event() {
         GearyApplication.instance.exit();
         
-        base.destroy();
+        return true;
     }
     
     public override bool configure_event(Gdk.EventConfigure event) {

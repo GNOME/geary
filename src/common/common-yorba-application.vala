@@ -51,7 +51,14 @@ public abstract class YorbaApplication {
     public virtual signal void activate(string[] args) {
     }
     
-    public virtual signal void exiting(bool panicked) {
+    /**
+     * Signal that is activated when 'exit' is called, but before the application actually exits.
+     *
+     * To cancel an exit, a callback should return YorbaApplication.cancel_exit(). To procede with
+     * an exit, a callback should return true.
+     */
+    public virtual signal bool exiting(bool panicked) {
+        return true;
     }
     
     /**
@@ -143,12 +150,26 @@ public abstract class YorbaApplication {
         this.exitcode = exitcode;
         
         exiting_fired = true;
-        exiting(false);
+        if (!exiting(false)) {
+            exiting_fired = false;
+            this.exitcode = 0;
+            
+            return;
+        }
         
         if (Gtk.main_level() > 0)
             Gtk.main_quit();
         else
             Posix.exit(exitcode);
+    }
+    
+    /**
+     * A callback for GearyApplication.exiting should return cancel_exit() to prevent the
+     * application from exiting.
+     */
+    public bool cancel_exit() {
+        Signal.stop_emission_by_name(this, "exiting");
+        return false;
     }
     
     // This call will fire "exiting" only if it's not already been fired and halt the application

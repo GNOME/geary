@@ -345,7 +345,7 @@ public class ComposerWindow : Gtk.Window {
         base.show_all();
     }
     
-    private bool should_close() {
+    public bool should_close() {
         // TODO: Check if the message was (automatically) saved
         if (editor.can_undo()) {
             var dialog = new Gtk.MessageDialog(this, 0,

@@ -42,8 +42,10 @@ public class PreferencesDialog : Object {
         }
     }
     
-    private void on_exit(bool panicked) {
+    private bool on_exit(bool panicked) {
         dialog.destroy();
+        
+        return true;
     }
     
     private void on_autoselect_toggled() {

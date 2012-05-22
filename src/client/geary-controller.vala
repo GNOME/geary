@@ -71,6 +71,7 @@ public class GearyController {
     private Geary.Conversation? last_deleted_conversation = null;
     private bool scan_in_progress = false;
     private int conversations_added_counter = 0;
+    private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
     
     public GearyController() {
         // Setup actions.
@@ -79,6 +80,9 @@ public class GearyController {
             GearyApplication.instance.actions, 0);
         GearyApplication.instance.load_ui_file("accelerators.ui");
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
+        
+        // Listen for attempts to close the application.
+        GearyApplication.instance.exiting.connect(on_application_exiting);
         
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
@@ -695,6 +699,15 @@ public class GearyController {
         old_cancellable.cancel();
     }
     
+    // We need to include the second parameter, or valac doesn't recognize the function as matching
+    // YorbaApplication.exiting's signature.
+    private bool on_application_exiting(YorbaApplication sender, bool panicked) {
+        if (close_composition_windows())
+            return true;
+        
+        return sender.cancel_exit();
+    }
+    
     public void on_quit() {
         GearyApplication.instance.exit();
     }
@@ -911,12 +924,39 @@ public class GearyController {
         }
     }
     
+    private bool close_composition_windows() {
+        // We want to allow the user to cancel a quit when they have unsent text.
+        
+        // We are modifying the list as we go, so we can't simply iterate through it.
+        while (composer_windows.size > 0) {
+            ComposerWindow composer_window = composer_windows.first();
+            if (!composer_window.should_close())
+                return false;
+            
+            // This will remove composer_window from composer_windows.
+            // See GearyController.on_composer_window_destroy.
+            composer_window.destroy();
+        }
+        
+        // If we deleted all composer windows without the user cancelling, we can exit.
+        return true;
+    }
+    
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
         ComposerWindow w = new ComposerWindow(prefill);
         w.set_position(Gtk.WindowPosition.CENTER);
         w.send.connect(on_send);
         
+        // We want to keep track of the open composer windows, so we can allow the user to cancel
+        // an exit without losing their data.
+        composer_windows.add(w);
+        w.destroy.connect(on_composer_window_destroy);
+        
         w.show_all();
+    }
+    
+    private void on_composer_window_destroy(Gtk.Widget sender) {
+        composer_windows.remove((ComposerWindow) sender);
     }
     
     private void on_new_message() {
