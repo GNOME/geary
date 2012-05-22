@@ -398,6 +398,8 @@ public class GearyController {
             (CompareFunc) compare_conversation_descending);
         sorted_conversations.add_all(current_conversations.get_conversations());
         
+        Gee.HashSet<Geary.EmailIdentifier> need_previews = new Gee.HashSet<Geary.EmailIdentifier>(
+            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
         foreach (Geary.Conversation conversation in sorted_conversations) {
             Geary.Email? need_preview = MessageListStore.email_for_preview(conversation);
             Geary.Email? current_preview = main_window.message_list_store.get_preview_for_conversation(conversation);
@@ -408,25 +410,33 @@ public class GearyController {
                 continue;
             }
             
-            if (need_preview != null) {
-                current_folder.fetch_email_async.begin(need_preview.id, MessageListStore.WITH_PREVIEW_FIELDS,
-                    flags, cancellable_folder, on_fetch_preview_completed);
-            }
+            if (need_preview != null)
+                need_previews.add(need_preview.id);
+        }
+        
+        if (need_previews.size > 0) {
+            current_folder.list_email_by_sparse_id_async.begin(need_previews,
+                MessageListStore.WITH_PREVIEW_FIELDS, flags, cancellable_folder,
+                on_fetch_previews_completed);
         }
     }
     
-    private void on_fetch_preview_completed(Object? source, AsyncResult result) {
+    private void on_fetch_previews_completed(Object? source, AsyncResult result) {
         if (current_folder == null || current_conversations == null)
             return;
         
         try {
-            Geary.Email email = current_folder.fetch_email_async.end(result);
-            Geary.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
-            
-            if (conversation != null) {
-                main_window.message_list_store.set_preview_for_conversation(conversation, email);
-            } else
-                debug("Couldn't find conversation for %s", email.id.to_string());
+            Gee.List<Geary.Email>? emails = current_folder.list_email_by_sparse_id_async.end(result);
+            if (emails != null) {
+                foreach (Geary.Email email in emails) {
+                    Geary.Conversation? conversation = current_conversations.get_conversation_for_email(
+                        email.id);
+                    if (conversation != null)
+                        main_window.message_list_store.set_preview_for_conversation(conversation, email);
+                    else
+                        debug("Couldn't find conversation for %s", email.id.to_string());
+                }
+            }
         } catch (Error err) {
             // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
             if (!(err is Geary.EngineError.NOT_FOUND))

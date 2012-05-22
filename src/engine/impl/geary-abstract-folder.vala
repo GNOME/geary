@@ -75,6 +75,14 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
         Cancellable? cancellable = null);
     
+    public abstract async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
+        Cancellable? cancellable = null) throws Error;
+    
+    public abstract void lazy_list_email_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
+        Cancellable? cancellable = null);
+    
     public abstract async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
     

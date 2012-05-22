@@ -633,27 +633,33 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         return yield local_folder.get_email_count_async(cancellable);
     }
     
+    //
+    // list_email variants
+    //
+    
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
-        if (count == 0)
-            return null;
-        
-        // block on do_list_email_async(), using an accumulator to gather the emails and return
-        // them all at once to the caller
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_async("list_email_async", low, count, required_fields, flags, accumulator,
             null, cancellable);
         
-        return accumulator;
+        return (accumulator.size > 0) ? accumulator : null;
     }
     
-    // TODO: Capture Error and report via EmailCallback.
     public override void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
         Geary.Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
-        // schedule do_list_email_async(), using the callback to drive availability of email
-        do_list_email_async.begin("lazy_list_email", low, count, required_fields, flags, null, cb,
-            cancellable);
+        do_lazy_list_email_async.begin(low, count, required_fields, flags, cb, cancellable);
+    }
+    
+    private async void do_lazy_list_email_async(int low, int count, Geary.Email.Field required_fields,
+        Geary.Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable) {
+        try {
+            yield do_list_email_async("lazy_list_email", low, count, required_fields, flags,
+                null, cb, cancellable);
+        } catch (Error err) {
+            cb(null, err);
+        }
     }
     
     private async void do_list_email_async(string method, int low, int count, Geary.Email.Field required_fields,
@@ -679,30 +685,31 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         yield op.wait_for_ready_async(cancellable);
     }
     
+    //
+    // list_email_by_id variants
+    //
+    
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
-        Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
+        Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
         yield do_list_email_by_id_async("list_email_by_id_async", initial_id, count, required_fields,
-            flags, list, null, cancellable);
+            flags, accumulator, null, cancellable);
         
-        return (list.size > 0) ? list : null;
+        return (accumulator.size > 0) ? accumulator : null;
     }
     
-    // TODO: Capture Error and report via EmailCallback.
     public override void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
         Cancellable? cancellable = null) {
-        do_lazy_list_email_by_id_async.begin("lazy_list_email_by_id", initial_id, count, required_fields,
-            flags, cb, cancellable);
+        do_lazy_list_email_by_id_async.begin(initial_id, count, required_fields, flags, cb, cancellable);
     }
     
-    private async void do_lazy_list_email_by_id_async(string method, Geary.EmailIdentifier initial_id,
-        int count, Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable) {
+    private async void do_lazy_list_email_by_id_async(Geary.EmailIdentifier initial_id, int count,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable) {
         try {
-            yield do_list_email_by_id_async(method, initial_id, count, required_fields, flags, null, cb,
-                cancellable);
+            yield do_list_email_by_id_async("lazy_list_email_by_id", initial_id, count, required_fields,
+                flags, null, cb, cancellable);
         } catch (Error err) {
             cb(null, err);
         }
@@ -724,6 +731,50 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         // Schedule list operation and wait for completion.
         ListEmailByID op = new ListEmailByID(this, initial_id, count, required_fields, flags, accumulator,
+            cb, cancellable);
+        replay_queue.schedule(op);
+        
+        yield op.wait_for_ready_async(cancellable);
+    }
+    
+    //
+    // list_email_by_sparse_id variants
+    //
+    
+    public async override Gee.List<Geary.Email>? list_email_by_sparse_id_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
+        Cancellable? cancellable = null) throws Error {
+        Gee.ArrayList<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
+        yield do_list_email_by_sparse_id_async("list_email_by_sparse_id_async", ids, required_fields,
+            flags, accumulator, null, cancellable);
+        
+        return (accumulator.size > 0) ? accumulator : null;
+    }
+    
+    public override void lazy_list_email_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable = null) {
+        do_lazy_list_email_by_sparse_id_async.begin(ids, required_fields, flags, cb, cancellable);
+    }
+    
+    private async void do_lazy_list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields, Folder.ListFlags flags, EmailCallback cb, Cancellable? cancellable) {
+        try {
+            yield do_list_email_by_sparse_id_async("lazy_list_email_by_sparse_id", ids, required_fields,
+                flags, null, cb, cancellable);
+        } catch (Error err) {
+            cb(null, err);
+        }
+    }
+    
+    private async void do_list_email_by_sparse_id_async(string method,
+        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
+        Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable = null) throws Error {
+        check_open(method);
+        check_flags(method, flags);
+        
+        // Unlike list_email_by_id, don't need to wait for remote to open because not dealing with
+        // a range of emails, but specific ones by ID
+        ListEmailBySparseID op = new ListEmailBySparseID(this, ids, required_fields, flags, accumulator,
             cb, cancellable);
         replay_queue.schedule(op);
         
