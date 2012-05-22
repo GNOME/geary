@@ -150,3 +150,15 @@ public class Geary.Imap.IdleCommand : Command {
     }
 }
 
+public class Geary.Imap.CopyCommand : Command {
+    public const string NAME = "copy";
+    public const string UID_NAME = "uid copy";
+
+    public CopyCommand(MessageSet message_set, string destination) {
+        base (message_set.is_uid ? UID_NAME : NAME);
+
+        add(message_set.to_parameter());
+        add(new StringParameter(destination));
+    }
+}
+

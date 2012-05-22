@@ -586,7 +586,17 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             }
         }
     }
-    
+
+    public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
+        Cancellable? cancellable = null) throws Error {
+
+        if (context.is_closed())
+            throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
+
+        yield context.session.send_command_async(new CopyCommand(msg_set, destination.to_string()),
+            cancellable);
+    }
+
     public async void expunge_email_async(MessageSet? msg_set, Cancellable? cancellable = null) throws Error {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);

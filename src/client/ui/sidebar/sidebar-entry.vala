@@ -54,7 +54,7 @@ public interface Sidebar.DestroyableEntry : Sidebar.Entry {
 
 public interface Sidebar.InternalDropTargetEntry : Sidebar.Entry {
     // Returns true if drop was successful
-    public abstract bool internal_drop_received(Gtk.SelectionData data);
+    public abstract bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data);
 }
 
 public interface Sidebar.InternalDragSourceEntry : Sidebar.Entry {

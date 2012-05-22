@@ -36,6 +36,10 @@ public class MessageListView : Gtk.TreeView {
         
         store.row_deleted.connect(on_row_deleted);
         button_press_event.connect(on_button_press);
+
+        // Set up drag and drop.
+        Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.TARGET_ENTRY_LIST,
+            Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
     }
 
     private bool on_button_press(Gdk.EventButton event) {

@@ -617,3 +617,96 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
     }
 }
 
+private class Geary.CopyEmail : Geary.SendReplayOperation {
+    private GenericImapFolder engine;
+    private Gee.List<Geary.EmailIdentifier> to_copy;
+    private Geary.FolderPath destination;
+    private Cancellable? cancellable;
+
+    public CopyEmail(GenericImapFolder engine, Gee.List<Geary.EmailIdentifier> to_copy, 
+        Geary.FolderPath destination, Cancellable? cancellable = null) {
+        base("CopyEmail");
+
+        this.engine = engine;
+
+        this.to_copy = to_copy;
+        this.destination = destination;
+        this.cancellable = cancellable;
+    }
+
+    public override async ReplayOperation.Status replay_local_async() throws Error {
+        // The local DB will be updated when the remote folder is opened and we see a new message
+        // existing there.
+        return ReplayOperation.Status.CONTINUE;
+    }
+
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
+        yield engine.remote_folder.copy_email_async(new Imap.MessageSet.email_id_collection(to_copy),
+            destination, cancellable);
+
+        return ReplayOperation.Status.COMPLETED;
+    }
+
+    public override async void backout_local_async() throws Error {
+        // Nothing to undo.
+    }
+
+    public override string describe_state() {
+        return "%d email IDs to %s".printf(to_copy.size, destination.to_string());
+    }
+}
+
+private class Geary.MoveEmail : Geary.SendReplayOperation {
+    private GenericImapFolder engine;
+    private Gee.List<Geary.EmailIdentifier> to_move;
+    private Geary.FolderPath destination;
+    private Cancellable? cancellable;
+    private int original_count = 0;
+
+    public MoveEmail(GenericImapFolder engine, Gee.List<Geary.EmailIdentifier> to_move, 
+        Geary.FolderPath destination, Cancellable? cancellable = null) {
+        base("MoveEmail");
+
+        this.engine = engine;
+
+        this.to_move = to_move;
+        this.destination = destination;
+        this.cancellable = cancellable;
+    }
+
+    public override async ReplayOperation.Status replay_local_async() throws Error {
+        // Remove the email from the folder.
+        // TODO: Use a local_folder method that operates on all messages at once
+        foreach (Geary.EmailIdentifier id in to_move)
+            yield engine.local_folder.mark_removed_async(id, true, cancellable);
+        engine.notify_email_removed(to_move);
+
+        original_count = engine.remote_count;
+        engine.notify_email_count_changed(original_count - to_move.size,
+            Geary.Folder.CountChangeReason.REMOVED);
+
+        return ReplayOperation.Status.CONTINUE;
+    }
+
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
+        yield engine.remote_folder.move_email_async(new Imap.MessageSet.email_id_collection(to_move),
+            destination, cancellable);
+
+        return ReplayOperation.Status.COMPLETED;
+    }
+
+    public override async void backout_local_async() throws Error {
+        // Add the email back in.
+        // TODO: Use a local_folder method that operates on all messages at once
+        foreach (Geary.EmailIdentifier id in to_move)
+            yield engine.local_folder.mark_removed_async(id, false, cancellable);
+
+        engine.notify_email_appended(to_move);
+        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.ADDED);
+    }
+
+    public override string describe_state() {
+        return "%d email IDs to %s".printf(to_move.size, destination.to_string());
+    }
+}
+

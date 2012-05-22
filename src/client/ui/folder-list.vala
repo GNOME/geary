@@ -5,31 +5,70 @@
  */
 
 public class FolderList : Sidebar.Tree {
-    
+
+    public const Gtk.TargetEntry[] TARGET_ENTRY_LIST = {
+        { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
+    };
+
     private class SpecialFolderBranch : Sidebar.RootOnlyBranch {
         public SpecialFolderBranch(Geary.SpecialFolder special, Geary.Folder folder) {
             base(new SpecialFolderEntry(special, folder));
         }
     }
     
-    private class SpecialFolderEntry : Object, Sidebar.Entry, Sidebar.SelectableEntry {
-        public Geary.SpecialFolder special { get; private set; }
+    private class FolderEntry : Object, Sidebar.Entry, Sidebar.InternalDropTargetEntry,
+        Sidebar.SelectableEntry {
         public Geary.Folder folder { get; private set; }
         
-        public SpecialFolderEntry(Geary.SpecialFolder special, Geary.Folder folder) {
-            this.special = special;
+        public FolderEntry(Geary.Folder folder) {
             this.folder = folder;
         }
         
-        public string get_sidebar_name() {
-            return special.name;
+        public virtual string get_sidebar_name() {
+            return folder.get_path().basename;
         }
         
         public string? get_sidebar_tooltip() {
             return null;
         }
         
-        public Icon? get_sidebar_icon() {
+        public virtual Icon? get_sidebar_icon() {
+            return IconFactory.instance.label_icon;
+        }
+        
+        public virtual string to_string() {
+            return "FolderEntry: " + get_sidebar_name();
+        }
+
+        public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
+            // Copy or move?
+            Gdk.ModifierType mask;
+            double[] axes = new double[2];
+            context.get_device().get_state(context.get_dest_window(), axes, out mask);
+            MainWindow main_window = GearyApplication.instance.get_main_window() as MainWindow;
+            if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                main_window.folder_list.copy_conversation(folder);
+            } else {
+                main_window.folder_list.move_conversation(folder);
+            }
+
+            return true;
+        }
+    }
+
+    private class SpecialFolderEntry : FolderEntry {
+        public Geary.SpecialFolder special { get; private set; }
+        
+        public SpecialFolderEntry(Geary.SpecialFolder special, Geary.Folder folder) {
+            base (folder);
+            this.special = special;
+        }
+        
+        public override string get_sidebar_name() {
+            return special.name;
+        }
+        
+        public override Icon? get_sidebar_icon() {
             switch (special.folder_type) {
                 case Geary.SpecialFolderType.INBOX:
                     return new ThemedIcon("mail-inbox");
@@ -57,36 +96,14 @@ public class FolderList : Sidebar.Tree {
             }
         }
         
-        public string to_string() {
+        public override string to_string() {
             return "SpecialFolderEntry: " + get_sidebar_name();
         }
     }
     
-    private class FolderEntry : Object, Sidebar.Entry, Sidebar.SelectableEntry {
-        public Geary.Folder folder { get; private set; }
-        
-        public FolderEntry(Geary.Folder folder) {
-            this.folder = folder;
-        }
-        
-        public string get_sidebar_name() {
-            return folder.get_path().basename;
-        }
-        
-        public string? get_sidebar_tooltip() {
-            return null;
-        }
-        
-        public Icon? get_sidebar_icon() {
-            return IconFactory.instance.label_icon;
-        }
-        
-        public string to_string() {
-            return "FolderEntry: " + get_sidebar_name();
-        }
-    }
-    
     public signal void folder_selected(Geary.Folder? folder);
+    public signal void copy_conversation(Geary.Folder folder);
+    public signal void move_conversation(Geary.Folder folder);
     
     private Sidebar.Grouping user_folder_group;
     private Sidebar.Branch user_folder_branch;
@@ -96,13 +113,17 @@ public class FolderList : Sidebar.Tree {
     public FolderList() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
         entry_selected.connect(on_entry_selected);
-        
+
         user_folder_group = new Sidebar.Grouping("", IconFactory.instance.label_folder_icon);
         user_folder_branch = new Sidebar.Branch(user_folder_group,
             Sidebar.Branch.Options.STARTUP_OPEN_GROUPING, user_folder_comparator);
         graft(user_folder_branch, int.MAX);
+
+        // Set self as a drag destination.
+        Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
+            TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
     }
-    
+
     private static int user_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         int result = a.get_sidebar_name().collate(b.get_sidebar_name());
         
@@ -120,7 +141,7 @@ public class FolderList : Sidebar.Tree {
             folder_selected(((FolderEntry) selectable).folder);
         }
     }
-    
+
     public void set_user_folders_root_name(string name) {
         user_folder_group.rename(name);
     }
@@ -161,5 +182,21 @@ public class FolderList : Sidebar.Tree {
     
     private Sidebar.Entry? get_entry_for_folder_path(Geary.FolderPath path) {
         return entries.get(path);
+    }
+
+    public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
+        // Run the base version first.
+        bool ret = base.drag_motion(context, x, y, time);
+
+        // Update the cursor for copy or move.
+        Gdk.ModifierType mask;
+        double[] axes = new double[2];
+        context.get_device().get_state(context.get_dest_window(), axes, out mask);
+        if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
+            Gdk.drag_status(context, Gdk.DragAction.COPY, time);
+        } else {
+            Gdk.drag_status(context, Gdk.DragAction.MOVE, time);
+        }
+        return ret;
     }
 }

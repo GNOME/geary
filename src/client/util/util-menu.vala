@@ -24,3 +24,13 @@ public void menu_popup_relative(Gtk.Menu menu, out int x, out int y, out bool pu
     push_in = false;
 }
 
+public void make_menu_dropdown_button(Gtk.ToggleToolButton toolbutton, string label) {
+    Gtk.ToggleButton button = toolbutton.get_child() as Gtk.ToggleButton;
+    button.remove(button.get_child());
+    Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+    box.set_homogeneous(false);
+    button.add(box);
+    box.pack_start(new Gtk.Label(label));
+    box.pack_start(new Gtk.Image.from_icon_name("menu-down", Gtk.IconSize.SMALL_TOOLBAR));
+}
+

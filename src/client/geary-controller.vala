@@ -52,7 +52,9 @@ public class GearyController {
     public const string ACTION_MARK_AS_UNREAD = "GearyMarkAsUnread";
     public const string ACTION_MARK_AS_STARRED = "GearyMarkAsStarred";
     public const string ACTION_MARK_AS_UNSTARRED = "GearyMarkAsUnStarred";
-    
+    public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
+    public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
+
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
     public MainWindow main_window { get; private set; }
@@ -82,17 +84,22 @@ public class GearyController {
         main_window = new MainWindow();
         
         enable_message_buttons(false);
-        
+
+        // Connect to various UI signals.
         main_window.message_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.message_list_view.load_more.connect(on_load_more);
         main_window.message_list_view.mark_conversation.connect(on_mark_conversation);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
+        main_window.folder_list.copy_conversation.connect(on_copy_conversation);
+        main_window.folder_list.move_conversation.connect(on_move_conversation);
+        main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
+        main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         main_window.message_viewer.link_selected.connect(on_link_selected);
         main_window.message_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.message_viewer.reply_all_message.connect(on_reply_all_message);
         main_window.message_viewer.forward_message.connect(on_forward_message);
         main_window.message_viewer.mark_message.connect(on_message_viewer_mark_message);
-        
+
         main_window.message_list_view.grab_focus();
         
         set_busy(false);
@@ -141,8 +148,8 @@ public class GearyController {
         quit.label = _("_Quit");
         entries += quit;
         
-        Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, null, TRANSLATABLE, null,
-            null, on_show_mark_menu };
+        Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, null, TRANSLATABLE, null, null,
+            on_show_mark_menu };
         mark_menu.label = _("_Mark as...");
         entries += mark_menu;
 
@@ -165,6 +172,16 @@ public class GearyController {
             null, on_mark_as_unstarred };
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
+
+        Gtk.ActionEntry copy_menu = { ACTION_COPY_MENU, null, TRANSLATABLE, "L", null,
+            on_show_copy_menu };
+        copy_menu.label = _("_Label");
+        entries += copy_menu;
+
+        Gtk.ActionEntry move_menu = { ACTION_MOVE_MENU, null, TRANSLATABLE, "M", null,
+            on_show_move_menu };
+        move_menu.label = _("_Move");
+        entries += move_menu;
 
         Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, null, TRANSLATABLE, "<Ctrl>N", null,
             on_new_message };
@@ -595,8 +612,11 @@ public class GearyController {
             foreach (Geary.Folder folder in added) {
                 if (ignored_paths != null && ignored_paths.contains(folder.get_path()))
                     skipped.add(folder);
-                else
+                else {
                     main_window.folder_list.add_folder(folder);
+                    main_window.main_toolbar.copy_folder_menu.add_folder(folder);
+                    main_window.main_toolbar.move_folder_menu.add_folder(folder);
+                }
             }
             
             Gee.Collection<Geary.Folder> remaining = added;
@@ -821,7 +841,51 @@ public class GearyController {
     private void on_mark_complete() {
         set_busy(false);
     }
-    
+
+    private void on_show_copy_menu() {
+        main_window.main_toolbar.copy_folder_menu.show();
+    }
+
+    private void on_show_move_menu() {
+        main_window.main_toolbar.move_folder_menu.show();
+    }
+
+    private void on_copy_conversation(Geary.Folder destination) {
+        // Nothing to do if nothing selected.
+        if (selected_conversations == null || selected_conversations.length == 0) {
+            return;
+        }
+
+        Gee.List<Geary.EmailIdentifier> ids = get_selected_ids();
+        if (ids.size > 0) {
+            set_busy(true);
+            current_folder.copy_email_async.begin(ids, destination.get_path(), cancellable_message,
+                on_copy_complete);
+        }
+    }
+
+    private void on_copy_complete() {
+        set_busy(false);
+    }
+
+    private void on_move_conversation(Geary.Folder destination) {
+        // Nothing to do if nothing selected.
+        if (selected_conversations == null || selected_conversations.length == 0) {
+            return;
+        }
+
+        Gee.List<Geary.EmailIdentifier> ids = get_selected_ids();
+        if (ids.size > 0) {
+            set_busy(true);
+            current_folder.move_email_async.begin(ids, destination.get_path(), cancellable_message,
+                on_move_complete);
+        }
+    }
+
+    private void on_move_complete() {
+        set_busy(false);
+    }
+
     // Opens a link in an external browser.
     private void open_uri(string _link) {
         string link = _link;
@@ -965,7 +1029,7 @@ public class GearyController {
             open_uri(link);
         }
     }
-    
+
     // Disables all single-message buttons and enables all multi-message buttons.
     public void enable_multiple_message_buttons(){
         // Single message only buttons.
@@ -976,8 +1040,10 @@ public class GearyController {
         // Mutliple message buttons.
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = true;
         GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive = true;
+        GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).sensitive = true;
+        GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive = true;
     }
-    
+
     // Enables or disables the message buttons on the toolbar.
     public void enable_message_buttons(bool sensitive) {
         GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = sensitive;
@@ -985,6 +1051,8 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive = sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).sensitive = sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive = sensitive;
     }
 
     public void compose_mailto(string mailto) {

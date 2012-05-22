@@ -146,7 +146,24 @@ private class Geary.Imap.Folder : Object {
         
         yield mailbox.mark_email_async(msg_set, msg_flags_add, msg_flags_remove, cancellable);
     }
-    
+
+    public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
+        Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+
+        yield mailbox.copy_email_async(msg_set, destination, cancellable);
+    }
+
+    public async void move_email_async(MessageSet msg_set, Geary.FolderPath destination,
+        Cancellable? cancellable = null) throws Error {
+        if (mailbox == null)
+            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
+
+        yield copy_email_async(msg_set, destination, cancellable);
+        yield remove_email_async(msg_set, cancellable);
+    }
+
     public string to_string() {
         return path.to_string();
     }

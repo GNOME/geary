@@ -877,13 +877,32 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error {
+        check_open("mark_email_async");
         if (!yield wait_for_remote_to_open(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
-        
+
         replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
             cancellable));
     }
-    
+
+    public override async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
+        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+        check_open("copy_email_async");
+        if (!yield wait_for_remote_to_open(cancellable))
+            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
+
+        replay_queue.schedule(new CopyEmail(this, to_copy, destination));
+    }
+
+    public override async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
+        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+        check_open("move_email_async");
+        if (!yield wait_for_remote_to_open(cancellable))
+            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
+
+        replay_queue.schedule(new MoveEmail(this, to_move, destination));
+    }
+
     private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> changed) {
         notify_email_flags_changed(changed);
     }

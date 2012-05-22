@@ -1009,7 +1009,7 @@ public class Sidebar.Tree : Gtk.TreeView {
             return;
         }
         
-        bool success = targetable.internal_drop_received(selection_data);
+        bool success = targetable.internal_drop_received(context, selection_data);
         
         Gtk.drag_finish(context, success, false, time);
     }

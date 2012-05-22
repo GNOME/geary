@@ -171,6 +171,7 @@ client/ui/geary-login.vala
 client/ui/email-entry.vala
 client/ui/icon-factory.vala
 client/ui/folder-list.vala
+client/ui/folder-menu.vala
 client/ui/main-toolbar.vala
 client/ui/main-window.vala
 client/ui/message-list-cell-renderer.vala

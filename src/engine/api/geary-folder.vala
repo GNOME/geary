@@ -418,7 +418,23 @@ public interface Geary.Folder : Object {
     public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error;
-    
+
+    /**
+     * Copies messages into another folder.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
+        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;
+
+    /**
+     * Moves messages to another folder.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
+        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;
+
     /**
      * check_span_specifiers() verifies that the span specifiers match the requirements set by
      * list_email_async() and lazy_list_email_async().  If not, this method throws

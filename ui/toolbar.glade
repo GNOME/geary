@@ -95,6 +95,36 @@
       </packing>
     </child>
     <child>
+      <object class="GtkToggleToolButton" id="GearyMoveMenuButton">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes" context="Toggles menu for applying labels to emails.">Move the selected conversation</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">False</property>
+        <property name="icon_name">folder</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToggleToolButton" id="GearyCopyMenuButton">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes" context="Toggles menu for applying labels to emails.">Label the selected conversation</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">False</property>
+        <property name="icon_name">multiple-tags</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">False</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkSeparatorToolItem" id="separator2">
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
