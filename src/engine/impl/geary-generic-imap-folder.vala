@@ -417,7 +417,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     }
     
     private async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
-        Cancellable? cancellable) throws Error {
+        Cancellable? cancellable) {
         if (!opened)
             return;
         
@@ -447,8 +447,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             // TODO: Problem with this is that we cannot effectively signal or report a close error,
             // because by the time this operation completes the folder is considered closed.  That
             // may not be important to most callers, however.
-            if (remote_reason == CloseReason.REMOTE_CLOSE)
-                closing_remote_folder.close_async.begin(cancellable);
+            closing_remote_folder.close_async.begin(cancellable);
             
             notify_closed(remote_reason);
         } else {
@@ -457,8 +456,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         // close local store
         try {
-            if (local_reason == CloseReason.LOCAL_CLOSE)
-                yield local_folder.close_async(cancellable);
+            yield local_folder.close_async(cancellable);
             
             notify_closed(local_reason);
         } catch (Error local_err) {
@@ -468,8 +466,11 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // Close the replay queues *after* the folder has been closed (in case any final upcalls
         // come and can be handled)
         try {
-            if (replay_queue != null)
+            if (replay_queue != null) {
+                debug("Closing replay queue for %s...", to_string());
                 yield replay_queue.close_async();
+                debug("Closed replay queue for %s", to_string());
+            }
         } catch (Error replay_queue_err) {
             debug("Error closing %s replay queue: %s", to_string(), replay_queue_err.message);
         }
@@ -477,6 +478,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         replay_queue = null;
         
         notify_closed(CloseReason.FOLDER_CLOSED);
+        
+        debug("Folder %s closed", to_string());
     }
     
     private void on_remote_messages_appended(int total) {

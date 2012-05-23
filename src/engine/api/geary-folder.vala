@@ -37,7 +37,11 @@ public interface Geary.Folder : Object {
         LOCAL_ERROR,
         REMOTE_CLOSE,
         REMOTE_ERROR,
-        FOLDER_CLOSED
+        FOLDER_CLOSED;
+        
+        public bool is_error() {
+            return (this == LOCAL_ERROR) || (this == REMOTE_ERROR);
+        }
     }
     
     public enum CountChangeReason {

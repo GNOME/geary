@@ -109,12 +109,15 @@ private class Geary.ReplayQueue {
         do_replay_remote_async.begin();
     }
     
-    public void schedule(ReplayOperation op) {
+    /**
+     * Returns false if the operation was not schedule (queue already closed).
+     */
+    public bool schedule(ReplayOperation op) {
         if (is_closed) {
             debug("Unable to scheduled replay operation %s on %s: replay queue closed", op.to_string(),
                 to_string());
             
-            return;
+            return false;
         }
         
         // note that in order for this to work (i.e. for sent and received operations to be handled
@@ -126,9 +129,13 @@ private class Geary.ReplayQueue {
         } catch (Error err) {
             debug("Replay operation %s not scheduled on local queue %s: %s", op.to_string(),
                 to_string(), err.message);
+            
+            return false;
         }
         
         scheduled(op);
+        
+        return true;
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
@@ -138,22 +145,22 @@ private class Geary.ReplayQueue {
         closing();
         
         // flush a ReplayClose operation down the pipe so all enqueued operations complete
-        ReplayClose close_op = new ReplayClose();
-        schedule(close_op);
+        ReplayClose? close_op = new ReplayClose();
+        if (!schedule(close_op))
+            close_op = null;
         
         // mark as closed *after* scheduling, otherwise schedule() will fail
         is_closed = true;
         
-        yield close_op.wait_for_ready_async(cancellable);
+        if (close_op != null)
+            yield close_op.wait_for_ready_async(cancellable);
         
         closed();
     }
     
     private async void do_replay_local_async() {
-        for (;;) {
-            if (local_queue.size == 0 && is_closed)
-                break;
-            
+        bool queue_running = true;
+        while (queue_running) {
             ReplayOperation op;
             try {
                 op = yield local_queue.recv_async();
@@ -163,6 +170,10 @@ private class Geary.ReplayQueue {
                 
                 continue;
             }
+            
+            // If this is a Close operation, shut down the queue after processing it
+            if (op is ReplayClose)
+                queue_running = false;
             
             bool local_execute = false;
             bool remote_enqueue = false;
@@ -250,10 +261,8 @@ private class Geary.ReplayQueue {
     }
     
     private async void do_replay_remote_async() {
-        for (;;) {
-            if (remote_queue.size == 0 && is_closed)
-                break;
-            
+        bool queue_running = true;
+        while (queue_running) {
             ReplayOperation op;
             try {
                 op = yield remote_queue.recv_async();
@@ -263,6 +272,9 @@ private class Geary.ReplayQueue {
                 
                 continue;
             }
+            
+            if (op is ReplayClose)
+                queue_running = false;
             
             remotely_executing(op);
             

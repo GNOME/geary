@@ -615,19 +615,16 @@ public class Geary.Conversations : Object {
     
     private void on_folder_closed(Folder.CloseReason reason) {
         // watch for errors; these indicate a retry should occur
-        if (reason == Folder.CloseReason.LOCAL_ERROR || reason == Folder.CloseReason.REMOTE_ERROR) {
-            // only retry if configured to do so
-            if (reestablish_connections)
-                retry_connection = true;
-            
-            return;
-        }
+        if (reason.is_error() && reestablish_connections)
+            retry_connection = true;
         
         // wait for the folder to be completely closed before retrying
         if (reason != Folder.CloseReason.FOLDER_CLOSED)
             return;
         
         if (!retry_connection) {
+            debug("Folder %s closed due to error, not reestablishing connection", folder.to_string());
+            
             stop_monitoring_internal_async.begin(false, false, null);
             
             return;
@@ -636,7 +633,7 @@ public class Geary.Conversations : Object {
         // reset
         retry_connection = false;
         
-        debug("Folder %s closed, restablishing connection to continue monitoring conversations",
+        debug("Folder %s closed due to error, restablishing connection to continue monitoring conversations",
             folder.to_string());
         
         // First retry is immediate; thereafter, a delay
@@ -645,6 +642,8 @@ public class Geary.Conversations : Object {
     
     private async void do_restart_monitoring_async() {
         try {
+            debug("Restarting conversation monitoring of folder %s, stopping previous monitoring...",
+                folder.to_string());
             yield stop_monitoring_internal_async(false, true, null);
         } catch (Error stop_err) {
             debug("Error closing folder %s while reestablishing connection: %s", folder.to_string(),
@@ -653,6 +652,7 @@ public class Geary.Conversations : Object {
         
         // TODO: Get smarter about this, especially since this might be an authentication error
         // and not a hard error
+        debug("Restarting conversation monitoring of folder %s...", folder.to_string());
         try {
             yield start_monitoring_async(cancellable_monitor);
             debug("Reestablished connection to %s, continuing to monitor conversations",
