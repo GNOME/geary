@@ -8,4 +8,5 @@ build/
 /geary-mailer
 /geary-console
 *.xz
+*.swp
 
