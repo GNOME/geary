@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Conversations : Object {
+public class Geary.ConversationMonitor : Object {
     /**
      * These are the fields Conversations require to thread emails together.  These fields will
      * be retrieved irregardless of the Field parameter passed to the constructor.
@@ -18,7 +18,7 @@ public class Geary.Conversations : Object {
         private static int next_convnum = 0;
         
         private int convnum;
-        private weak Geary.Conversations? owner;
+        private weak Geary.ConversationMonitor? owner;
         private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>(
             Hashable.hash_func, Equalable.equal_func);
         private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>(
@@ -35,7 +35,7 @@ public class Geary.Conversations : Object {
         private Gee.SortedSet<Email> id_descending = new Gee.TreeSet<Email>(
             (CompareFunc) compare_id_descending);
         
-        public ImplConversation(Geary.Conversations owner) {
+        public ImplConversation(Geary.ConversationMonitor owner) {
             convnum = next_convnum++;
             this.owner = owner;
         }
@@ -257,7 +257,7 @@ public class Geary.Conversations : Object {
             folder.to_string());
     }
     
-    public Conversations(Geary.Folder folder, bool readonly, Geary.Email.Field required_fields) {
+    public ConversationMonitor(Geary.Folder folder, bool readonly, Geary.Email.Field required_fields) {
         this.folder = folder;
         this.readonly = readonly;
         this.required_fields = required_fields | REQUIRED_FIELDS;

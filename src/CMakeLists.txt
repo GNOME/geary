@@ -15,7 +15,7 @@ engine/api/geary-account-information.vala
 engine/api/geary-batch-operations.vala
 engine/api/geary-composed-email.vala
 engine/api/geary-conversation.vala
-engine/api/geary-conversations.vala
+engine/api/geary-conversation-monitor.vala
 engine/api/geary-credentials.vala
 engine/api/geary-email-flag.vala
 engine/api/geary-email-flags.vala

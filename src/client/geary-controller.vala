@@ -64,7 +64,7 @@ public class GearyController {
     private Cancellable cancellable_message = new Cancellable();
     private Geary.EngineAccount? account = null;
     private Geary.Folder? current_folder = null;
-    private Geary.Conversations? current_conversations = null;
+    private Geary.ConversationMonitor? current_conversations = null;
     private bool loading_local_only = true;
     private int busy_count = 0;
     private Geary.Conversation[] selected_conversations = new Geary.Conversation[0];
@@ -342,7 +342,7 @@ public class GearyController {
             return;
         }
         
-        current_conversations = new Geary.Conversations(current_folder, false,
+        current_conversations = new Geary.ConversationMonitor(current_folder, false,
             MessageListStore.REQUIRED_FIELDS);
         yield current_conversations.start_monitoring_async(cancellable_folder);
         
