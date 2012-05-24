@@ -23,6 +23,7 @@ engine/api/geary-email-identifier.vala
 engine/api/geary-email-properties.vala
 engine/api/geary-email.vala
 engine/api/geary-endpoint.vala
+engine/api/geary-engine-account.vala
 engine/api/geary-engine-error.vala
 engine/api/geary-engine.vala
 engine/api/geary-folder-path.vala
@@ -83,7 +84,6 @@ engine/impl/geary-abstract-account.vala
 engine/impl/geary-abstract-folder.vala
 engine/impl/geary-email-flag-watcher.vala
 engine/impl/geary-email-prefetcher.vala
-engine/impl/geary-engine-account.vala
 engine/impl/geary-generic-imap-account.vala
 engine/impl/geary-generic-imap-folder.vala
 engine/impl/geary-gmail-account.vala
