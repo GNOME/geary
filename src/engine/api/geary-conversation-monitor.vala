@@ -614,6 +614,8 @@ public class Geary.ConversationMonitor : Object {
     }
     
     private void on_folder_closed(Folder.CloseReason reason) {
+        debug("Folder %s close reason %s", folder.to_string(), reason.to_string());
+        
         // watch for errors; these indicate a retry should occur
         if (reason.is_error() && reestablish_connections)
             retry_connection = true;

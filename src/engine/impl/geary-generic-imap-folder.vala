@@ -448,20 +448,22 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             // because by the time this operation completes the folder is considered closed.  That
             // may not be important to most callers, however.
             closing_remote_folder.close_async.begin(cancellable);
-            
-            notify_closed(remote_reason);
-        } else {
-            notify_closed(Geary.Folder.CloseReason.REMOTE_CLOSE);
         }
+        
+        // use remote_reason even if remote_folder was null; it could be that the error occurred
+        // while opening and remote_folder was yet unassigned ... also, need to call this every
+        // time, even if remote was not fully opened, as some callers rely on order of signals
+        notify_closed(remote_reason);
         
         // close local store
         try {
             yield local_folder.close_async(cancellable);
-            
-            notify_closed(local_reason);
         } catch (Error local_err) {
             debug("Error closing %s local store: %s", to_string(), local_err.message);
         }
+        
+        // see above note for why this must be called every time
+        notify_closed(local_reason);
         
         // Close the replay queues *after* the folder has been closed (in case any final upcalls
         // come and can be handled)
