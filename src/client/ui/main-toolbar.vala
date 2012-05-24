@@ -65,7 +65,6 @@ public class MainToolbar : Gtk.Box {
             }
 
             menu.popup(null, null, menu_popup_relative, 0, 0);
-            menu.select_first(true);
         });
     }
 
