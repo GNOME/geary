@@ -24,6 +24,7 @@ public enum Flag {
 }
 
 private Flag logging_flags = Flag.NONE;
+private unowned FileStream? stream = null;
 
 /**
  * Replaces the current logging flags with flags.  Use Geary.Logging.Flag.NONE to clear all
@@ -84,6 +85,21 @@ public inline void message(Flag flags, string fmt, ...) {
 public inline void debug(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
         logv(null, LogLevelFlags.LEVEL_DEBUG, fmt, va_list());
+}
+
+public void log_to(FileStream stream) {
+    Logging.stream = stream;
+    
+    // TODO: Should handle all LogLevels
+    Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, on_log_debug);
+}
+
+private void on_log_debug(string? log_domain, LogLevelFlags log_levels, string message) {
+    if (stream != null) {
+        Time tm = Time.local(time_t());
+        stream.printf(" \x001b[%dm[deb]\x001b[0m %02d:%02d:%02d %s\n", 2 + 30 + 60, tm.hour,
+            tm.minute, tm.second, message);
+    }
 }
 
 }   // namespace

@@ -127,13 +127,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (log_conversations)
             Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
         
-        if (log_debug) {
-            // Debug messages in green
-            Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, log_print);
-        } else {
-            Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, log_ignore);
-        }
-
+        if (log_debug)
+            Geary.Logging.log_to(stdout);
+        
         return 0;
      }
     
@@ -274,13 +270,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child(Environment.get_prgname());
-    }
-    
-    private void log_print(string? log_domain, LogLevelFlags log_levels, string message) {
-        stdout.printf("\x001b[%dm [%s]\x001b[0m %s\n", 2 + 30 + 60, "debug", message);
-    }
-    
-    private void log_ignore(string? log_domain, LogLevelFlags log_levels, string message) {
     }
     
     /**
