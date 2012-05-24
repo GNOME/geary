@@ -61,7 +61,13 @@ public class Geary.MidstreamConverter : Object, Converter {
         total_bytes_read += copied;
         total_bytes_written += copied;
         
-        return (flags & ConverterFlags.FLUSH) == 0 ? ConverterResult.CONVERTED : ConverterResult.FLUSHED;
+        if ((flags & ConverterFlags.FLUSH) != 0)
+            return ConverterResult.FLUSHED;
+        
+        if ((flags & ConverterFlags.INPUT_AT_END) != 0)
+            return ConverterResult.FINISHED;
+        
+        return ConverterResult.CONVERTED;
     }
     
     public void reset() {
