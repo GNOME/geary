@@ -6,7 +6,6 @@
 
 public class Geary.Smtp.ClientSession {
     private ClientConnection cx;
-    private Gee.List<string>? capabilities = null;
     private bool rset_required = false;
     
     public virtual signal void connected(Greeting greeting) {
@@ -37,35 +36,21 @@ public class Geary.Smtp.ClientSession {
     public async Greeting? login_async(Credentials? creds, Cancellable? cancellable = null) throws Error {
         if (cx.is_connected())
             throw new SmtpError.ALREADY_CONNECTED("Connection to %s already exists", to_string());
-        
+
+        // Greet the SMTP server.
         Greeting? greeting = yield cx.connect_async(cancellable);
         if (greeting == null)
             throw new SmtpError.ALREADY_CONNECTED("Connection to %s already exists", to_string());
-        
-        // try EHLO first, then fall back on HELO
-        Response response = yield cx.transaction_async(new Request(Command.EHLO), cancellable);
-        if (response.code.is_success_completed()) {
-            // save list of caps returned in EHLO command, skipping first line because it's the 
-            // EHLO response
-            capabilities = new Gee.ArrayList<string>();
-            for (int ctr = 1; ctr < response.lines.size; ctr++) {
-                if (!String.is_empty(response.lines[ctr].explanation))
-                    capabilities.add(response.lines[ctr].explanation);
-            }
-        } else {
-            response = yield cx.transaction_async(new Request(Command.HELO), cancellable);
-            if (!response.code.is_success_completed())
-                throw new SmtpError.SERVER_ERROR("Refused service: %s", response.to_string());
-        }
-        
+        yield cx.say_hello_async(cancellable);
+
         notify_connected(greeting);
-        
+
         // authenticate if credentials supplied (in almost every case they should be)
         // TODO: Select an authentication method based on AUTH capabilities line, falling back on
         // LOGIN or PLAIN if none match or are present
         if (creds != null) {
             Authenticator authenticator = new LoginAuthenticator(creds);
-            response = yield cx.authenticate_async(authenticator, cancellable);
+            Response response = yield cx.authenticate_async(authenticator, cancellable);
             if (!response.code.is_success_completed())
                 throw new SmtpError.AUTHENTICATION_FAILED("Unable to authenticate with %s", to_string());
             
@@ -74,11 +59,11 @@ public class Geary.Smtp.ClientSession {
         
         return greeting;
     }
-    
+
     public async Response? logout_async(Cancellable? cancellable = null) throws Error {
         Response? response = null;
         try {
-            response = yield cx.transaction_async(new Request(Command.QUIT), cancellable);
+            response = yield cx.quit_async(cancellable);
         } catch (Error err) {
             // catch because although error occurred, still attempt to close the connection
             message("Unable to QUIT: %s", err.message);
@@ -93,8 +78,7 @@ public class Geary.Smtp.ClientSession {
         }
         
         rset_required = false;
-        capabilities = null;
-        
+
         return response;
     }
     

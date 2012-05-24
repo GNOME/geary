@@ -14,7 +14,8 @@ public enum Geary.Smtp.Command {
     AUTH,
     MAIL,
     RCPT,
-    DATA;
+    DATA,
+    STARTTLS;
     
     public string serialize() {
         switch (this) {
@@ -47,7 +48,10 @@ public enum Geary.Smtp.Command {
             
             case DATA:
                 return "data";
-            
+
+            case STARTTLS:
+                return "starttls";
+
             default:
                 assert_not_reached();
         }
@@ -84,7 +88,10 @@ public enum Geary.Smtp.Command {
             
             case "data":
                 return DATA;
-            
+
+            case "starttls":
+                return STARTTLS;
+
             default:
                 throw new SmtpError.PARSE_ERROR("Unknown command \"%s\"", str);
         }

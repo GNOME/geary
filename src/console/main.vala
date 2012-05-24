@@ -279,8 +279,8 @@ class ImapConsole : Gtk.Window {
         check_args(cmd, args, 1, "hostname[:port]");
         
         cx = new Geary.Imap.ClientConnection(
-            new Geary.Endpoint(args[0], Geary.Imap.ClientConnection.DEFAULT_PORT_TLS,
-                Geary.Endpoint.Flags.TLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+            new Geary.Endpoint(args[0], Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
+                Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
                 Geary.Imap.ClientConnection.DEFAULT_TIMEOUT_SEC));
         
         cx.sent_command.connect(on_sent_command);

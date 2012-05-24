@@ -6,7 +6,7 @@
 
 public class Geary.Imap.ClientConnection {
     public const uint16 DEFAULT_PORT = 143;
-    public const uint16 DEFAULT_PORT_TLS = 993;
+    public const uint16 DEFAULT_PORT_SSL = 993;
     
     // TODO: This is set very high to allow for IDLE connections to remain connected even when
     // there is no traffic on them.  The side-effect is that if the physical connection is dropped,

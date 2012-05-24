@@ -6,6 +6,7 @@
 
 public errordomain Geary.SmtpError {
     PARSE_ERROR,
+    STARTTLS_FAILED,
     AUTHENTICATION_FAILED,
     SERVER_ERROR,
     ALREADY_CONNECTED,

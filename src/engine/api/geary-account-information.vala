@@ -10,24 +10,24 @@ public class Geary.AccountInformation : Object {
     private const string SERVICE_PROVIDER_KEY = "service_provider";
     private const string IMAP_HOST = "imap_host";
     private const string IMAP_PORT = "imap_port";
-    private const string IMAP_TLS = "imap_tls";
+    private const string IMAP_SSL = "imap_ssl";
     private const string IMAP_PIPELINE = "imap_pipeline";
     private const string SMTP_HOST = "smtp_host";
     private const string SMTP_PORT = "smtp_port";
-    private const string SMTP_TLS = "smtp_tls";
+    private const string SMTP_SSL = "smtp_ssl";
     
     internal File? file = null;
     public string real_name { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
     
     public string imap_server_host { get; set; default = ""; }
-    public uint16 imap_server_port { get; set; default = Imap.ClientConnection.DEFAULT_PORT_TLS; }
-    public bool imap_server_tls { get; set; default = true; }
+    public uint16 imap_server_port { get; set; default = Imap.ClientConnection.DEFAULT_PORT_SSL; }
+    public bool imap_server_ssl { get; set; default = true; }
     public bool imap_server_pipeline { get; set; default = true; }
     
     public string smtp_server_host { get; set; default = ""; }
-    public uint16 smtp_server_port { get; set; default = Smtp.ClientConnection.SECURE_SMTP_PORT; }
-    public bool smtp_server_tls { get; set; default = true; }
+    public uint16 smtp_server_port { get; set; default = Smtp.ClientConnection.DEFAULT_PORT_SSL; }
+    public bool smtp_server_ssl { get; set; default = true; }
     
     public AccountInformation() {
     }
@@ -46,14 +46,14 @@ public class Geary.AccountInformation : Object {
             
             imap_server_host = get_string_value(key_file, GROUP, IMAP_HOST);
             imap_server_port = get_uint16_value(key_file, GROUP, IMAP_PORT,
-                Imap.ClientConnection.DEFAULT_PORT_TLS);
-            imap_server_tls = get_bool_value(key_file, GROUP, IMAP_TLS, true);
+                Imap.ClientConnection.DEFAULT_PORT_SSL);
+            imap_server_ssl = get_bool_value(key_file, GROUP, IMAP_SSL, true);
             imap_server_pipeline = get_bool_value(key_file, GROUP, IMAP_PIPELINE, true);
             
             smtp_server_host = get_string_value(key_file, GROUP, SMTP_HOST);
             smtp_server_port = get_uint16_value(key_file, GROUP, SMTP_PORT,
-                Geary.Smtp.ClientConnection.SECURE_SMTP_PORT);
-            smtp_server_tls = get_bool_value(key_file, GROUP, SMTP_TLS, true);
+                Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
+            smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
         }
     }
     
@@ -99,12 +99,12 @@ public class Geary.AccountInformation : Object {
         
         key_file.set_value(GROUP, IMAP_HOST, imap_server_host);
         key_file.set_integer(GROUP, IMAP_PORT, imap_server_port);
-        key_file.set_boolean(GROUP, IMAP_TLS, imap_server_tls);
+        key_file.set_boolean(GROUP, IMAP_SSL, imap_server_ssl);
         key_file.set_boolean(GROUP, IMAP_PIPELINE, imap_server_pipeline);
         
         key_file.set_value(GROUP, SMTP_HOST, smtp_server_host);
         key_file.set_integer(GROUP, SMTP_PORT, smtp_server_port);
-        key_file.set_boolean(GROUP, SMTP_TLS, smtp_server_tls);
+        key_file.set_boolean(GROUP, SMTP_SSL, smtp_server_ssl);
         
         string data = key_file.to_data();
         string new_etag;

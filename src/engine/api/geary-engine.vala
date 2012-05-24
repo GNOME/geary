@@ -50,11 +50,11 @@ public class Geary.Engine {
                     account_info), new Geary.Sqlite.Account(cred, user_data_dir, resource_dir));
             
             case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = account_info.imap_server_tls ? Endpoint.Flags.TLS
+                Endpoint.Flags imap_flags = account_info.imap_server_ssl ? Endpoint.Flags.SSL
                     : Endpoint.Flags.NONE;
                 imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
                 
-                Endpoint.Flags smtp_flags = account_info.smtp_server_tls ? Endpoint.Flags.TLS
+                Endpoint.Flags smtp_flags = account_info.smtp_server_ssl ? Endpoint.Flags.SSL
                     : Endpoint.Flags.NONE;
                 smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
                 

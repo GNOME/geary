@@ -12,8 +12,8 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         if (_imap_endpoint == null) {
             _imap_endpoint = new Geary.Endpoint(
                 "imap.gmail.com",
-                Imap.ClientConnection.DEFAULT_PORT_TLS,
-                Geary.Endpoint.Flags.TLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+                Imap.ClientConnection.DEFAULT_PORT_SSL,
+                Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
                 Imap.ClientConnection.DEFAULT_TIMEOUT_SEC);
         }
         
@@ -25,8 +25,8 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         if (_smtp_endpoint == null) {
             _smtp_endpoint = new Geary.Endpoint(
                 "smtp.gmail.com",
-                Smtp.ClientConnection.SECURE_SMTP_PORT,
-                Geary.Endpoint.Flags.TLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+                Smtp.ClientConnection.DEFAULT_PORT_SSL,
+                Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
                 Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
         }
         

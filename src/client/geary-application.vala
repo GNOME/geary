@@ -131,7 +131,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             Geary.Logging.log_to(stdout);
         
         return 0;
-     }
+    }
     
     public override int startup() {
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
@@ -227,11 +227,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             
             account_info.imap_server_host = login.imap_host;
             account_info.imap_server_port = login.imap_port;
-            account_info.imap_server_tls = login.imap_tls;
+            account_info.imap_server_ssl = login.imap_ssl;
             account_info.imap_server_pipeline = (login.provider != Geary.ServiceProvider.OTHER);
             account_info.smtp_server_host = login.smtp_host;
             account_info.smtp_server_port = login.smtp_port;
-            account_info.smtp_server_tls = login.smtp_tls;
+            account_info.smtp_server_ssl = login.smtp_ssl;
         } else {
             exit(1);
             return null;

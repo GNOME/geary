@@ -293,7 +293,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="imap tls">
+                  <object class="GtkCheckButton" id="imap ssl">
                     <property name="label" translatable="yes">SS_L/TLS encryption</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
@@ -398,7 +398,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="smtp tls">
+                  <object class="GtkCheckButton" id="smtp ssl">
                     <property name="label" translatable="yes">SS_L/TLS encryption</property>
                     <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>

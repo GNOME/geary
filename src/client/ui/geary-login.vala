@@ -15,10 +15,10 @@ public class LoginDialog {
     private Gtk.Alignment other_info;
     private Gtk.Entry entry_imap_host;
     private Gtk.Entry entry_imap_port;
-    private Gtk.CheckButton check_imap_tls;
+    private Gtk.CheckButton check_imap_ssl;
     private Gtk.Entry entry_smtp_host;
     private Gtk.Entry entry_smtp_port;
-    private Gtk.CheckButton check_smtp_tls;
+    private Gtk.CheckButton check_smtp_ssl;
     
     private Gtk.ResponseType response;
     private Gtk.Button ok_button;
@@ -34,12 +34,12 @@ public class LoginDialog {
     
     public string imap_host { get; private set; default = ""; }
     public uint16 imap_port { get; private set;
-        default = Geary.Imap.ClientConnection.DEFAULT_PORT_TLS; }
-    public bool imap_tls { get; private set; default = true; }
+        default = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL; }
+    public bool imap_ssl { get; private set; default = true; }
     public string smtp_host { get; private set; default = ""; }
     public uint16 smtp_port { get; private set;
-        default = Geary.Smtp.ClientConnection.SECURE_SMTP_PORT; }
-    public bool smtp_tls { get; private set; default = true; }
+        default = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL; }
+    public bool smtp_ssl { get; private set; default = true; }
     
     public LoginDialog(string default_real_name = "", string default_username = "", string default_password = "",
         Geary.AccountInformation? default_account_info = null) {
@@ -57,10 +57,10 @@ public class LoginDialog {
         other_info = builder.get_object("other_info") as Gtk.Alignment;
         entry_imap_host = builder.get_object("imap host") as Gtk.Entry;
         entry_imap_port = builder.get_object("imap port") as Gtk.Entry;
-        check_imap_tls = builder.get_object("imap tls") as Gtk.CheckButton;
+        check_imap_ssl = builder.get_object("imap ssl") as Gtk.CheckButton;
         entry_smtp_host = builder.get_object("smtp host") as Gtk.Entry;
         entry_smtp_port = builder.get_object("smtp port") as Gtk.Entry;
-        check_smtp_tls = builder.get_object("smtp tls") as Gtk.CheckButton;
+        check_smtp_ssl = builder.get_object("smtp ssl") as Gtk.CheckButton;
         
         combo_service.changed.connect(on_service_changed);
         
@@ -94,8 +94,8 @@ public class LoginDialog {
         entry_smtp_host.changed.connect(on_changed);
         entry_smtp_port.changed.connect(on_changed);
         
-        check_imap_tls.toggled.connect(on_check_imap_tls_toggled);
-        check_smtp_tls.toggled.connect(on_check_smtp_tls_toggled);
+        check_imap_ssl.toggled.connect(on_check_imap_ssl_toggled);
+        check_smtp_ssl.toggled.connect(on_check_smtp_ssl_toggled);
         
         entry_imap_port.insert_text.connect(on_port_insert_text);
         entry_smtp_port.insert_text.connect(on_port_insert_text);
@@ -122,10 +122,10 @@ public class LoginDialog {
         provider = get_service_provider();
         imap_host = entry_imap_host.text.strip();
         imap_port = (uint16) int.parse(entry_imap_port.text.strip());
-        imap_tls = check_imap_tls.active;
+        imap_ssl = check_imap_ssl.active;
         smtp_host = entry_smtp_host.text.strip();
         smtp_port = (uint16) int.parse(entry_smtp_port.text.strip());
-        smtp_tls = check_smtp_tls.active;
+        smtp_ssl = check_smtp_ssl.active;
         
         dialog.destroy();
     }
@@ -160,20 +160,20 @@ public class LoginDialog {
         }
     }
     
-    private void on_check_imap_tls_toggled() {
+    private void on_check_imap_ssl_toggled() {
         if (edited_imap_port)
             return;
         
-        entry_imap_port.text = (check_imap_tls.active ? Geary.Imap.ClientConnection.DEFAULT_PORT_TLS :
+        entry_imap_port.text = (check_imap_ssl.active ? Geary.Imap.ClientConnection.DEFAULT_PORT_SSL :
             Geary.Imap.ClientConnection.DEFAULT_PORT).to_string();
         edited_imap_port = false;
     }
     
-    private void on_check_smtp_tls_toggled() {
+    private void on_check_smtp_ssl_toggled() {
         if (edited_smtp_port)
             return;
         
-        entry_smtp_port.text = (check_smtp_tls.active ? Geary.Smtp.ClientConnection.SECURE_SMTP_PORT :
+        entry_smtp_port.text = (check_smtp_ssl.active ? Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL :
             Geary.Smtp.ClientConnection.DEFAULT_PORT).to_string();
         edited_smtp_port = false;
     }

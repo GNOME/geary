@@ -47,6 +47,7 @@ void on_main_completed(Object? object, AsyncResult result) {
 
 string arg_hostname;
 int arg_port = 25;
+bool arg_debug = false;
 bool arg_gmail = false;
 bool arg_no_tls = false;
 string arg_user;
@@ -55,6 +56,7 @@ string arg_from;
 string arg_to;
 int arg_count = 1;
 const OptionEntry[] options = {
+    { "debug",    0,    0,  OptionArg.NONE,     ref arg_debug,  "Output debugging information", null },
     { "host",   'h',    0,  OptionArg.STRING,   ref arg_hostname, "SMTP server host",   "<hostname-or-dotted-address>" },
     { "port",   'P',    0,  OptionArg.INT,      ref arg_port,   "SMTP server port",     "<port-number>" },
     { "gmail",  'G',    0,  OptionArg.NONE,     ref arg_gmail,  "Gmail SMTP (no-tls ignored)", null },
@@ -105,18 +107,22 @@ int main(string[] args) {
         arg_count = 1;
     
     if (arg_gmail) {
-        endpoint = new Geary.Endpoint("smtp.gmail.com", Geary.Smtp.ClientConnection.SECURE_SMTP_PORT,
-            Geary.Endpoint.Flags.TLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+        endpoint = new Geary.Endpoint("smtp.gmail.com", Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
+            Geary.Endpoint.Flags.STARTTLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
             Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     } else {
         Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
         if (!arg_no_tls)
-            flags |= Geary.Endpoint.Flags.TLS;
+            flags |= Geary.Endpoint.Flags.SSL;
         
         endpoint = new Geary.Endpoint(arg_hostname, (uint16) arg_port, flags,
             Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
-    
+
+    stdout.printf("Enabling debug: %s\n", arg_debug.to_string());
+    if (arg_debug)
+        Geary.Logging.log_to(stdout);
+
     credentials = new Geary.Credentials(arg_user, arg_pass);
     
     composed_email = new Geary.ComposedEmail(new DateTime.now_local(),
