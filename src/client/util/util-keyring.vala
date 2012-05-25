@@ -6,11 +6,11 @@
 
 const string GEARY_USERNAME_PREFIX = "org.yorba.geary username:";
 
-public static bool keyring_save_password(string username, string password) {
-    string name = GEARY_USERNAME_PREFIX + username;
+public static bool keyring_save_password(Geary.Credentials credentials) {
+    string name = GEARY_USERNAME_PREFIX + credentials.user;
     
     GnomeKeyring.Result res = GnomeKeyring.store_password_sync(GnomeKeyring.NETWORK_PASSWORD, null, 
-        name, password, "user", name);
+        name, credentials.pass, "user", name);
 
     return res == GnomeKeyring.Result.OK;
 }

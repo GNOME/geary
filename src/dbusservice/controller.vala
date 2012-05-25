@@ -32,7 +32,10 @@ public class Geary.DBus.Controller {
             connection = yield Bus.get(GLib.BusType.SESSION);
             
             // Open the account.
-            account = Geary.Engine.open(new Geary.Credentials(args[1], args[2]));
+            Geary.Credentials credentials = new Geary.Credentials(args[1], args[2]);
+            Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
+            account_information.load_info_from_file();
+            account = account_information.get_account();
             account.report_problem.connect(on_report_problem);
             
             // Open the Inbox folder.

@@ -16,6 +16,8 @@ public class Geary.AccountInformation : Object {
     private const string SMTP_PORT = "smtp_port";
     private const string SMTP_SSL = "smtp_ssl";
     
+    public const string SETTINGS_FILENAME = "geary.ini";
+    
     internal File? file = null;
     public string real_name { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
@@ -29,11 +31,14 @@ public class Geary.AccountInformation : Object {
     public uint16 smtp_server_port { get; set; default = Smtp.ClientConnection.DEFAULT_PORT_SSL; }
     public bool smtp_server_ssl { get; set; default = true; }
     
-    public AccountInformation() {
+    public Geary.Credentials credentials { get; private set; }
+    
+    public AccountInformation(Geary.Credentials credentials) {
+        this.credentials = credentials;
+        this.file = get_settings_file();
     }
     
-    public AccountInformation.from_file(File file) throws Error {
-        this.file = file;
+    public void load_info_from_file() throws Error {
         KeyFile key_file = new KeyFile();
         try {
             key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
@@ -54,6 +59,88 @@ public class Geary.AccountInformation : Object {
             smtp_server_port = get_uint16_value(key_file, GROUP, SMTP_PORT,
                 Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
             smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
+        }
+    }
+    
+    public async bool validate_async(Cancellable? cancellable = null) throws IOError {
+        Geary.Endpoint endpoint;
+        switch (service_provider) {
+            case ServiceProvider.GMAIL:
+                endpoint = GmailAccount.IMAP_ENDPOINT;
+            break;
+            
+            case ServiceProvider.YAHOO:
+                endpoint = YahooAccount.IMAP_ENDPOINT;
+            break;
+            
+            case ServiceProvider.OTHER:
+                Endpoint.Flags imap_flags = imap_server_ssl ? Endpoint.Flags.SSL : Endpoint.Flags.NONE;
+                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
+                endpoint = new Endpoint(imap_server_host, imap_server_port, imap_flags,
+                    Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+            break;
+            
+            default:
+                assert_not_reached();
+        }
+        
+        Geary.Imap.ClientSessionManager client_session_manager =
+            new Geary.Imap.ClientSessionManager(endpoint, credentials, this);
+        Geary.Imap.ClientSession? client_session = null;
+        try {
+            client_session = yield client_session_manager.get_authorized_session_async(cancellable);
+        } catch (Error err) {
+            debug("Error validating account info: %s", err.message);
+        }
+        
+        if (client_session != null) {
+            string current_mailbox;
+            Geary.Imap.ClientSession.Context context = client_session.get_context(out current_mailbox);
+            return context == Geary.Imap.ClientSession.Context.AUTHORIZED;
+        }
+        
+        return false;
+    }
+    
+    public Geary.EngineAccount get_account() {
+        File? user_data_dir = Geary.Engine.user_data_dir;
+        File? resource_dir = Geary.Engine.resource_dir;
+        Geary.Sqlite.Account sqlite_account =
+            new Geary.Sqlite.Account(credentials, user_data_dir, resource_dir);
+            
+        switch (service_provider) {
+            case ServiceProvider.GMAIL:
+                return new GmailAccount("Gmail account %s".printf(credentials.to_string()),
+                    credentials.user, this, user_data_dir, new Geary.Imap.Account(
+                    GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, credentials, this),
+                    sqlite_account);
+            
+            case ServiceProvider.YAHOO:
+                return new YahooAccount("Yahoo account %s".printf(credentials.to_string()),
+                    credentials.user, this, user_data_dir, new Geary.Imap.Account(
+                    YahooAccount.IMAP_ENDPOINT, YahooAccount.SMTP_ENDPOINT, credentials, this),
+                    sqlite_account);
+            
+            case ServiceProvider.OTHER:
+                Endpoint.Flags imap_flags = imap_server_ssl ? Endpoint.Flags.SSL : Endpoint.Flags.NONE;
+                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
+                Endpoint.Flags smtp_flags = smtp_server_ssl ? Endpoint.Flags.SSL : Endpoint.Flags.NONE;
+                smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
+                Endpoint imap_endpoint = new Endpoint(imap_server_host, imap_server_port,
+                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+                    
+                Endpoint smtp_endpoint = new Endpoint(smtp_server_host, smtp_server_port,
+                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
+                
+                return new OtherAccount("Other account %s".printf(credentials.to_string()),
+                    credentials.user, this, user_data_dir, new Geary.Imap.Account(imap_endpoint,
+                    smtp_endpoint, credentials, this), sqlite_account);
+                
+            default:
+                assert_not_reached();
         }
     }
     
@@ -87,10 +174,16 @@ public class Geary.AccountInformation : Object {
         return v;
     }
     
-    public async void store_async(Cancellable? cancellable = null) throws Error {
+    public async void store_async(Cancellable? cancellable = null) {
         assert(file != null);
         
-        yield file.create_async(FileCreateFlags.REPLACE_DESTINATION);
+        if (!file.query_exists(cancellable)) {
+            try {
+                yield file.create_async(FileCreateFlags.REPLACE_DESTINATION);
+            } catch (Error err) {
+                debug("Error creating account info file: %s", err.message);
+            }
+        }
         
         KeyFile key_file = new KeyFile();
         
@@ -108,7 +201,16 @@ public class Geary.AccountInformation : Object {
         
         string data = key_file.to_data();
         string new_etag;
-        yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
-            cancellable, out new_etag);
+        
+        try {
+            yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
+                cancellable, out new_etag);
+        } catch (Error err) {
+            debug("Error writign to account info file: %s", err.message);
+        }
+    }
+    
+    private File get_settings_file() {
+        return Geary.Engine.user_data_dir.get_child(credentials.user).get_child(SETTINGS_FILENAME);
     }
 }

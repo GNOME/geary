@@ -12,7 +12,6 @@ public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Persona
         base (name);
         
         this.account_information = account_information;
-        account_information.store_async.begin();
     }
     
     public virtual AccountInformation get_account_information() {

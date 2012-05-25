@@ -92,7 +92,7 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Gee.Collection<Geary.Imap.MailboxInformation> list_roots(
         Cancellable? cancellable = null) throws Error {
-        ClientSession session = yield get_authorized_session(cancellable);
+        ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
             new ListCommand.wildcarded("", "%"), cancellable));
@@ -109,7 +109,7 @@ public class Geary.Imap.ClientSessionManager {
         string specifier = parent;
         specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
         
-        ClientSession session = yield get_authorized_session(cancellable);
+        ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
             new ListCommand(specifier), cancellable));
@@ -121,7 +121,7 @@ public class Geary.Imap.ClientSessionManager {
     }
     
     public async bool folder_exists_async(string path, Cancellable? cancellable = null) throws Error {
-        ClientSession session = yield get_authorized_session(cancellable);
+        ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
             new ListCommand(path), cancellable));
@@ -131,7 +131,7 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Geary.Imap.MailboxInformation? fetch_async(string path,
         Cancellable? cancellable = null) throws Error {
-        ClientSession session = yield get_authorized_session(cancellable);
+        ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
             new ListCommand(path), cancellable));
@@ -144,7 +144,7 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Geary.Imap.StatusResults status_async(string path, StatusDataType[] types,
         Cancellable? cancellable = null) throws Error {
-        ClientSession session = yield get_authorized_session(cancellable);
+        ClientSession session = yield get_authorized_session_async(cancellable);
         
         StatusResults results = StatusResults.decode(yield session.send_command_async(
             new StatusCommand(path, types), cancellable));
@@ -268,7 +268,7 @@ public class Geary.Imap.ClientSessionManager {
         return new_session;
     }
     
-    private async ClientSession get_authorized_session(Cancellable? cancellable) throws Error {
+    public async ClientSession get_authorized_session_async(Cancellable? cancellable) throws Error {
         int token = yield sessions_mutex.claim_async(cancellable);
         
         ClientSession? found_session = null;
@@ -316,7 +316,7 @@ public class Geary.Imap.ClientSessionManager {
                 return c;
         }
         
-        ClientSession authd = yield get_authorized_session(cancellable);
+        ClientSession authd = yield get_authorized_session_async(cancellable);
         
         SelectExamineResults results = yield authd.select_examine_async(folder, is_select, cancellable);
         

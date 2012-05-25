@@ -159,90 +159,163 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         Geary.Engine.init(get_user_data_directory(), get_resource_directory());
         config = new Configuration();
         controller = new GearyController();
-        login();
+        initialize_account();
         handle_args(args);
 
         return;
     }
-
-    private void login(bool query_keyring = true) {
-        // Get saved credentials. If not present, ask user.
-        string username = get_username();
-        string? password = query_keyring ? keyring_get_password(username) : null;
-        string? real_name = null;
-        
-        Geary.Credentials? cred;
-        if (password == null) {
-            // No account set up yet.
-            Geary.AccountInformation? account_info = null;
-            real_name = get_default_real_name();
-            cred = request_login(username, ref real_name, ref account_info);
-            if (cred == null)
-                return;
-            
+    
+    private void initialize_account(bool replace_existing_data = false) {
+        string? username = get_username();
+        if (username == null || replace_existing_data)
+            create_account(username);
+        else
+            open_account(username);
+    }
+    
+    private void create_account(string? username) {
+        Geary.AccountInformation? old_account_information = null;
+        if (username != null) {
+            Geary.Credentials credentials = new Geary.Credentials(username, null);
+            old_account_information = new Geary.AccountInformation(credentials);
             try {
-                account = Geary.Engine.create(cred, account_info);
+                old_account_information.load_info_from_file();
             } catch (Error err) {
-                error("Unable to open mail database for %s: %s", cred.user, err.message);
-            }
-        } else {
-            // Log into existing account.
-            cred = new Geary.Credentials(username, password);
-            
-            try {
-                account = Geary.Engine.open(cred);
-            } catch (Error err) {
-                error("Unable to open mail database for %s: %s", cred.user, err.message);
+                debug("Problem loading account information: %s", err.message);
+                old_account_information = null;
             }
         }
         
+        Geary.AccountInformation account_information =
+            request_account_information(old_account_information);
+        do_validate_until_successful_async.begin(account_information, null,
+            on_do_validate_until_successful_async_finished);
+    }
+    
+    private void on_do_validate_until_successful_async_finished(Object? source, AsyncResult result) {
+        try {
+            do_validate_until_successful_async.end(result);
+        } catch (IOError err) {
+            debug("Caught validation error: %s", err.message);
+        }
+    }
+    
+    private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
+        Cancellable? cancellable = null)
+        throws IOError {
+        yield validate_until_successful_async(account_information, cancellable);
+    }
+    
+    private async void validate_until_successful_async(Geary.AccountInformation account_information,
+        Cancellable? cancellable = null) 
+        throws IOError {
+        bool success = yield account_information.validate_async(cancellable);
+        
+        if (success) {
+            account_information.store_async.begin(cancellable);
+            account = account_information.get_account();
+            account.report_problem.connect(on_report_problem);
+            controller.start(account);
+        } else {
+            Geary.AccountInformation new_account_information =
+                request_account_information(account_information);
+            
+            // If the user refused to enter account information.
+            if (new_account_information == null) {
+                account = null;
+                return;
+            }
+            
+            yield validate_until_successful_async(new_account_information, cancellable);
+        }
+    }
+    
+    private void open_account(string username) {
+        string? password = get_password(username);
+        if (password == null) {
+            password = request_password(username);
+            
+            // If the user refused to enter a password.
+            if (password == null) {
+                account = null;
+                return;
+            }
+        }
+        
+        // Now we know password is non-null.
+        Geary.Credentials credentials = new Geary.Credentials(username, password);
+        Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
+        try {
+            account_information.load_info_from_file();
+        } catch (Error err) {
+            error("Problem loading account information: %s", err.message);
+        }
+        
+        account = account_information.get_account();
         account.report_problem.connect(on_report_problem);
         controller.start(account);
     }
     
-    private string get_username() {
+    private string? get_username() {
         try {
-            Gee.List<string> accounts = Geary.Engine.get_usernames();
-            if (accounts.size > 0) {
-                return accounts.get(0);
+            Gee.List<string> usernames = Geary.Engine.get_usernames();
+            if (usernames.size > 0) {
+                string username = usernames.get(0);
+                return Geary.String.is_empty(username) ? null : username;
             }
         } catch (Error e) {
             debug("Unable to fetch accounts. Error: %s", e.message);
         }
         
-        return "";
+        return null;
     }
+    
+    private string? get_password(string username) {
+        // TODO: For now we always get the password from the keyring. This will change when we
+        // allow users to not save their password.
+        string? password = keyring_get_password(username);
+        return Geary.String.is_empty(password) ? null : password;
+     }
     
     private string get_default_real_name() {
         string real_name = Environment.get_real_name();
         return real_name == "Unknown" ? "" : real_name;
     }
     
-    // Prompt the user for a username and password, and try to start Geary.
-    private Geary.Credentials? request_login(string _username = "", ref string real_name, 
-        ref Geary.AccountInformation? account_info) {
-        LoginDialog login = new LoginDialog(real_name, _username, "", account_info);
-        login.show();
-        if (login.get_response() == Gtk.ResponseType.OK) {
-            keyring_save_password(login.username, login.password);
-            
-            account_info = new Geary.AccountInformation();
-            account_info.real_name = login.real_name;
-            account_info.service_provider = login.provider;
-            
-            account_info.imap_server_host = login.imap_host;
-            account_info.imap_server_port = login.imap_port;
-            account_info.imap_server_ssl = login.imap_ssl;
-            account_info.imap_server_pipeline = (login.provider != Geary.ServiceProvider.OTHER);
-            account_info.smtp_server_host = login.smtp_host;
-            account_info.smtp_server_port = login.smtp_port;
-            account_info.smtp_server_ssl = login.smtp_ssl;
-        } else {
+    private string? request_password(string username) {
+        // TODO: For now we use the full LoginDialog. This should be changed to a dialog that only
+        // allows editting the password.
+        
+        Geary.Credentials credentials = new Geary.Credentials(username, null);
+        
+        Geary.AccountInformation old_account_information = new Geary.AccountInformation(credentials);
+        try {
+            old_account_information.load_info_from_file();
+        } catch (Error err) {
+            debug("Problem loading account information: %s", err.message);
+            old_account_information = null;
+        }
+        
+        Geary.AccountInformation account_information = request_account_information(old_account_information);
+        return account_information == null ? null : account_information.credentials.pass;
+    }
+    
+    // Prompt the user for a service, real name, username, and password, and try to start Geary.
+    private Geary.AccountInformation? request_account_information(
+        Geary.AccountInformation? old_account_information = null) {
+        LoginDialog login_dialog = old_account_information == null ?
+            new LoginDialog(get_default_real_name()) :
+            new LoginDialog.from_account_information(old_account_information);
+        
+        if (!login_dialog.show()) {
             exit(1);
             return null;
         }
         
-        return new Geary.Credentials(login.username, login.password);
+        // TODO: This should be optional.
+        keyring_save_password(login_dialog.account_information.credentials);
+          
+        return login_dialog.account_information;  
     }
     
     private void on_report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
@@ -260,7 +333,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
                 if (controller != null)
                     controller.stop();
                 account.report_problem.disconnect(on_report_problem);
-                login(false);
+                initialize_account(true);
             break;
             
             default:

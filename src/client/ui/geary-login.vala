@@ -20,29 +20,26 @@ public class LoginDialog {
     private Gtk.Entry entry_smtp_port;
     private Gtk.CheckButton check_smtp_ssl;
     
-    private Gtk.ResponseType response;
     private Gtk.Button ok_button;
     
     private bool edited_imap_port = false;
     private bool edited_smtp_port = false;
     
-    public string username { get; private set; default = ""; }
-    public string password { get; private set; default = ""; }
-    public string real_name { get; private set; default = ""; }
-    public Geary.ServiceProvider provider { get; private set;
-        default = Geary.ServiceProvider.GMAIL; }
+    public Geary.AccountInformation account_information { get; private set; }
     
-    public string imap_host { get; private set; default = ""; }
-    public uint16 imap_port { get; private set;
-        default = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL; }
-    public bool imap_ssl { get; private set; default = true; }
-    public string smtp_host { get; private set; default = ""; }
-    public uint16 smtp_port { get; private set;
-        default = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL; }
-    public bool smtp_ssl { get; private set; default = true; }
+    public LoginDialog.from_account_information(Geary.AccountInformation default_account_information) {
+        this(default_account_information.real_name, default_account_information.credentials.user,
+            default_account_information.credentials.pass, default_account_information.service_provider,
+            default_account_information.imap_server_host, default_account_information.imap_server_port,
+            default_account_information.imap_server_ssl, default_account_information.smtp_server_host,
+            default_account_information.smtp_server_port, default_account_information.smtp_server_ssl);
+    }
     
-    public LoginDialog(string default_real_name = "", string default_username = "", string default_password = "",
-        Geary.AccountInformation? default_account_info = null) {
+    public LoginDialog(string default_real_name, string? default_username = null,
+        string? default_password = null, int default_service_provider = -1,string? default_imap_host = null,
+        uint16 default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL, bool default_imap_ssl = true,
+        string? default_smtp_host = null, uint16 default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
+        bool default_smtp_ssl = true) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
         dialog = builder.get_object("LoginDialog") as Gtk.Dialog;
@@ -66,19 +63,23 @@ public class LoginDialog {
         
         foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers()) {
             combo_service.append_text(p.display_name());
-            if (default_account_info != null && p == default_account_info.service_provider)
+            if (p == default_service_provider)
                 combo_service.set_active(p);
         }
         
         if (combo_service.get_active() == -1)
             combo_service.set_active(0);
         
-        entry_real_name.set_text(default_real_name);
-        entry_username.set_text(default_username);
-        entry_password.set_text(default_password);
-        
-        if (default_account_info != null && !Geary.String.is_empty(default_account_info.real_name))
-            entry_real_name.set_text(default_account_info.real_name);
+        // Set defaults (other than service provider, which is set above)
+        entry_real_name.set_text(default_real_name ?? "");
+        entry_username.set_text(default_username ?? "");
+        entry_password.set_text(default_password ?? "");
+        entry_imap_host.set_text(default_imap_host ?? "");
+        entry_imap_port.set_text(default_imap_port.to_string());
+        check_imap_ssl.active = default_imap_ssl;
+        entry_smtp_host.set_text(default_smtp_host ?? "");
+        entry_smtp_port.set_text(default_smtp_port.to_string());
+        check_smtp_ssl.active = default_smtp_ssl;
         
         if (Geary.String.is_empty(entry_real_name.text))
             entry_real_name.grab_focus();
@@ -109,30 +110,30 @@ public class LoginDialog {
     }
     
     // Runs the dialog.
-    public void show() {
+    public bool show() {
         dialog.show();
         dialog.get_action_area().show_all();
         on_service_changed(); // shows/hides server settings
         
-        response = (Gtk.ResponseType) dialog.run();
+        Gtk.ResponseType response = (Gtk.ResponseType) dialog.run();
+        if (response != Gtk.ResponseType.OK)
+            return false;
         
-        username = entry_username.text.strip();
-        password = entry_password.text.strip();
-        real_name = entry_real_name.text.strip();
-        provider = get_service_provider();
-        imap_host = entry_imap_host.text.strip();
-        imap_port = (uint16) int.parse(entry_imap_port.text.strip());
-        imap_ssl = check_imap_ssl.active;
-        smtp_host = entry_smtp_host.text.strip();
-        smtp_port = (uint16) int.parse(entry_smtp_port.text.strip());
-        smtp_ssl = check_smtp_ssl.active;
+        Geary.Credentials credentials = new Geary.Credentials(entry_username.text.strip(),
+            entry_password.text.strip());
+        account_information = new Geary.AccountInformation(credentials);
+        
+        account_information.real_name = entry_real_name.text.strip();
+        account_information.service_provider = get_service_provider();
+        account_information.imap_server_host = entry_imap_host.text.strip();
+        account_information.imap_server_port = (uint16) int.parse(entry_imap_port.text.strip());
+        account_information.imap_server_ssl = check_imap_ssl.active;
+        account_information.smtp_server_host = entry_smtp_host.text.strip();
+        account_information.smtp_server_port = (uint16) int.parse(entry_smtp_port.text.strip());
+        account_information.smtp_server_ssl = check_smtp_ssl.active;
         
         dialog.destroy();
-    }
-    
-    // Call this after Show to get the response.  Will either be OK or cancel.
-    public Gtk.ResponseType get_response() {
-        return response;
+        return true;
     }
     
     private void on_service_changed() {
