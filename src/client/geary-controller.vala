@@ -250,6 +250,9 @@ public class GearyController {
             delete_message.icon_name = "archive-insert";
         }
         
+        if (account.get_account_information().service_provider == Geary.ServiceProvider.YAHOO)
+            main_window.title += "!";
+        
         main_window.folder_list.set_user_folders_root_name(account.get_user_folders_label());
         
         main_window.show_all();
