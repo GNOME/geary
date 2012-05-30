@@ -20,10 +20,35 @@ public class MessageViewer : WebKit.WebView {
     private const string HTML_BODY = """
         <html><head><title>Geary</title>
         <style>
+
+        @media print {
+
+            body {
+                background-color: white !important;
+            }
+            .avatar, .button, .starred {
+                display: none !important;
+            }
+            .email {
+                display: none !important;
+            }
+            .email.print {
+                display: inline-block !important;
+                background-color: white !important;
+            }
+            .email.print .body {
+                display: block !important;
+                background-color: white !important;
+            }
+            .email.print .preview {
+                display: none !important;
+            }
+
+        }
+
         body {
             margin: 0 !important;
             padding: 0 !important;
-            background-color: #ccc !important;
             font-size: 10pt !important;
         }
         td, th {
@@ -149,40 +174,49 @@ public class MessageViewer : WebKit.WebView {
             margin-top: 0;
             padding-top: 15px;
         }
-        .email.hide:not(:last-of-type) {
-            background-color: #e8e8e8
-        }
-        .email.hide:not(:last-of-type) .body,
-        .email:not(.hide) .preview,
-        .email:last-of-type .preview {
-            display: none;
-        }
-        .email:not(:last-of-type) .header_container {
-            cursor: pointer;
-        }
-        .email.hide:not(:last-of-type) .header {
-            padding: 5px 0;
-            text-align: right;
-        }
-        .email.hide:not(:last-of-type) .header .field {
-            display: inline;
-            margin-right: 2px;
-            text-align: left;
-        }
-        .email.hide:not(:last-of-type) .header .field:not(:first-child) {
-            display: inline-block;
-        }
-        .email.hide:not(:last-of-type) .header .field:not(.important),
-        .email.hide:not(:last-of-type) .header .field .title {
-            display: none;
-        }
-        .email.hide:not(:last-of-type) .header .field .value {
-            margin-left: 0;
-        }
-        .email.hide:not(:last-of-type) .header .field .not_hidden_only,
-        .email:not(.hide) .header .field .hidden_only,
-        .email:last-of-type .header .field .hidden_only {
-            display: none;
+
+        @media screen {
+
+            body {
+                background-color: #ccc !important;
+            }
+
+            .email.hide:not(:last-of-type) {
+                background-color: #e8e8e8
+            }
+            .email.hide:not(:last-of-type) .body,
+            .email:not(.hide) .preview,
+            .email:last-of-type .preview {
+                display: none;
+            }
+            .email:not(:last-of-type) .header_container {
+                cursor: pointer;
+            }
+            .email.hide:not(:last-of-type) .header {
+                padding: 5px 0;
+                text-align: right;
+            }
+            .email.hide:not(:last-of-type) .header .field {
+                display: inline;
+                margin-right: 2px;
+                text-align: left;
+            }
+            .email.hide:not(:last-of-type) .header .field:not(:first-child) {
+                display: inline-block;
+            }
+            .email.hide:not(:last-of-type) .header .field:not(.important),
+            .email.hide:not(:last-of-type) .header .field .title {
+                display: none;
+            }
+            .email.hide:not(:last-of-type) .header .field .value {
+                margin-left: 0;
+            }
+            .email.hide:not(:last-of-type) .header .field .not_hidden_only,
+            .email:not(.hide) .header .field .hidden_only,
+            .email:last-of-type .header .field .hidden_only {
+                display: none;
+            }
+
         }
 
         .header {
@@ -814,6 +848,16 @@ public class MessageViewer : WebKit.WebView {
         mark_message(flags, null);
     }
 
+    public void on_print_message() {
+        try {
+            email_to_element.get(active_email.id).get_class_list().add("print");
+            get_main_frame().print();
+            email_to_element.get(active_email.id).get_class_list().remove("print");
+        } catch (GLib.Error error) {
+            debug("Hiding elements for printing failed: %s", error.message);
+        }
+    }
+
     private void on_flag_message() {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
@@ -858,6 +902,11 @@ public class MessageViewer : WebKit.WebView {
             mark_unread_item.activate.connect(on_mark_unread_message);
             message_menu.append(mark_unread_item);
         }
+
+        // Print a message.
+        Gtk.MenuItem print_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.PRINT, null);
+        print_item.activate.connect(on_print_message);
+        message_menu.append(print_item);
 
         // Separator.
         message_menu.append(new Gtk.SeparatorMenuItem());
