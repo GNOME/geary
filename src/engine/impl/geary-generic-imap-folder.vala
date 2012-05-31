@@ -593,28 +593,23 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 to_string(), err.message);
         }
         
-        debug("do_replay_remove_message: remote_count=%d new_remote_count=%d local_count=%d remote_position=%d local_position=%d",
-            remote_count, new_remote_count, local_count, remote_position, local_position);
-        
         bool marked = false;
         if (owned_id != null) {
             debug("do_replay_remove_message: removing from local store Email ID %s", owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
                 yield local_folder.remove_marked_email_async(owned_id, out marked, null);
-                
-                // TODO: Should move this signal to after the remote_count has changed
-                if (!marked)
-                    notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(owned_id));
             } catch (Error err2) {
                 debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
                     err2.message);
             }
         } else {
-            debug("do_replay_remove_message: remote_position=%d unknown in local store (remote_count=%d new_remote_count=%d local_position=%d local_count=%d)",
+            debug("do_replay_remove_message: remote_position=%d unknown in local store "
+                + "(remote_count=%d new_remote_count=%d local_position=%d local_count=%d)",
                 remote_position, remote_count, new_remote_count, local_position, local_count);
         }
         
+        // for debugging
         int new_local_count = -1;
         try {
             new_local_count = yield local_folder.get_email_count_async();
@@ -626,11 +621,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         
+        if (!marked && owned_id != null)
+            notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(owned_id));
+        
         if (!marked && changed)
             notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
         
-        debug("do_replay_remove_message: completed for %s (remote_count=%d local_count=%d new_local_count=%d marked=%s)",
-            to_string(), remote_count, local_count, new_local_count, marked.to_string());
+        debug("do_replay_remove_message: completed for %s "
+            + "(remote_count=%d local_count=%d new_local_count=%d remote_position=%d local_position=%d marked=%s)",
+            to_string(), remote_count, local_count, new_local_count, remote_position, local_position,
+            marked.to_string());
     }
     
     private void on_remote_disconnected(Geary.Folder.CloseReason reason) {

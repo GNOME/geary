@@ -73,6 +73,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
         opened = true;
+        
+        // Possible some messages were marked for removal in prior session and not properly deleted
+        // (for example, if the EXPUNGE message didn't come back before closing the folder, or
+        // the app is shut down or crashes) ... folder normalization will take care of messages that
+        // are still in folder even if they're marked here, so go ahead and remove them from the
+        // location table
+        yield location_table.remove_all_marked_for_remove(null, folder_row.id, cancellable);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {

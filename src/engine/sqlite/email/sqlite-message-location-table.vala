@@ -353,5 +353,20 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         
         return (bool) results.fetch_int(0);
     }
+    
+    public async void remove_all_marked_for_remove(Transaction? transaction, int64 folder_id,
+        Cancellable? cancellable) throws Error {
+        Transaction locked = yield obtain_lock_async(transaction,
+            "MessageLocationTable.remove_all_marked_for_remove", cancellable);
+        
+        SQLHeavy.Query query = locked.prepare(
+            "DELETE FROM MessageLocationTable WHERE folder_id=? AND remove_marker=1");
+        query.bind_int64(0, folder_id);
+        
+        yield query.execute_async(cancellable);
+        locked.set_commit_required();
+        
+        yield release_lock_async(transaction, locked, cancellable);
+    }
 }
 
