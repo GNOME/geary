@@ -647,7 +647,6 @@ public class Geary.Imap.ClientSession {
         // is now dead
         keepalive_id = 0;
         
-        debug("[%s] Sending keepalive...", to_full_string());
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
         
         // No need to reschedule keepalive, as the notification that the command was sent should
@@ -665,8 +664,6 @@ public class Geary.Imap.ClientSession {
             
             return;
         }
-        
-        debug("[%s] Keepalive result: %s", to_full_string(), response.status_response.to_string());
     }
     
     //
@@ -1275,7 +1272,7 @@ public class Geary.Imap.ClientSession {
             && CapabilityResults.is_capability_response(current_cmd_response)) {
             try {
                 capabilities = CapabilityResults.decode(current_cmd_response).capabilities;
-                debug("CAPABILITY: %s", capabilities.to_string());
+                debug("[%s] CAPABILITY: %s", to_string(), capabilities.to_string());
                 
                 capabilities_changed(capabilities);
             } catch (ImapError err) {

@@ -238,15 +238,15 @@ public class Geary.Imap.ClientSessionManager {
                 if (resp.status_response.status == Status.OK) {
                     assert(new_session.install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW)));
                     assert(new_session.install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW)));
-                    debug("Compression started on %s", new_session.to_string());
+                    debug("[%s] Compression started", new_session.to_string());
                 } else {
-                    debug("Unable to start compression on %s: %s", new_session.to_string(), resp.to_string());
+                    debug("[%s] Unable to start compression: %s", new_session.to_string(), resp.to_string());
                 }
             } else {
-                debug("No compression available on %s", new_session.to_string());
+                debug("[%s] No compression available", new_session.to_string());
             }
         } catch (Error err) {
-            debug("Connect failure on %s: %s", new_session.to_string(), err.message);
+            debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
             // possible session was already removed in error handling inside a signal call;
             // don't assert on the removal

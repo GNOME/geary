@@ -656,9 +656,11 @@ public class Geary.ConversationMonitor : Object {
         // and not a hard error
         debug("Restarting conversation monitoring of folder %s...", folder.to_string());
         try {
-            yield start_monitoring_async(cancellable_monitor);
-            debug("Reestablished connection to %s, continuing to monitor conversations",
-                folder.to_string());
+            if (!yield start_monitoring_async(cancellable_monitor))
+                debug("Unable to restart monitoring of %s: already monitoring", folder.to_string());
+            else
+                debug("Reestablished connection to %s, continuing to monitor conversations",
+                    folder.to_string());
         } catch (Error start_err) {
             debug("Unable to restablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
                 RETRY_CONNECTION_SEC, start_err.message);
