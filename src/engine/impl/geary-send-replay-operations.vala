@@ -229,7 +229,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         if (!remote_only && local_low > 0) {
             try {
                 local_list = yield engine.local_folder.list_email_async(local_low, count, required_fields,
-                    Geary.Folder.ListFlags.NONE, true, cancellable);
+                    Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
             } catch (Error local_err) {
                 if (cb != null && !(local_err is IOError.CANCELLED))
                     cb (null, local_err);
@@ -537,8 +537,8 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
             try {
-                return yield owner.local_folder.fetch_email_async(id, required_fields, true,
-                    cancellable);
+                return yield owner.local_folder.fetch_email_async(id, required_fields,
+                    Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
             } catch (Error err) {
                 // only throw errors that are not NOT_FOUND and INCOMPLETE_MESSAGE, as these two
                 // are recoverable
@@ -580,7 +580,7 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
                 // if remote email doesn't fulfills all required fields, fetch full and return that
                 if (!email.fields.fulfills(required_fields)) {
                     email = yield owner.local_folder.fetch_email_async(email.id, required_fields,
-                        false, cancellable);
+                        Sqlite.Folder.ListFlags.NONE, cancellable);
                     list[ctr] = email;
                 }
             }
@@ -744,8 +744,8 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
             return ReplayOperation.Status.CONTINUE;
         
         try {
-            email = yield engine.local_folder.fetch_email_async(id, required_fields, true,
-                cancellable);
+            email = yield engine.local_folder.fetch_email_async(id, required_fields,
+                Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
         } catch (Error err) {
             // If NOT_FOUND or INCOMPLETE_MESSAGE, then fall through, otherwise return to sender
             if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
@@ -794,7 +794,8 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that
         if (!email.fields.fulfills(required_fields)) {
-            email = yield engine.local_folder.fetch_email_async(id, required_fields, false, cancellable);
+            email = yield engine.local_folder.fetch_email_async(id, required_fields,
+                Sqlite.Folder.ListFlags.NONE, cancellable);
             assert(email != null);
         }
         

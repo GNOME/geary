@@ -46,7 +46,6 @@ private class Geary.ReplayRemoval : Geary.ReceiveReplayOperation {
     public GenericImapFolder owner;
     public int position;
     public int new_remote_count;
-    public EmailIdentifier? id;
     
     public ReplayRemoval(GenericImapFolder owner, int position, int new_remote_count) {
         base ("Removal");
@@ -54,27 +53,16 @@ private class Geary.ReplayRemoval : Geary.ReceiveReplayOperation {
         this.owner = owner;
         this.position = position;
         this.new_remote_count = new_remote_count;
-        this.id = null;
-    }
-    
-    public ReplayRemoval.with_id(GenericImapFolder owner, EmailIdentifier id) {
-        base ("Removal.with_id");
-        
-        this.owner = owner;
-        position = -1;
-        new_remote_count = -1;
-        this.id = id;
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        yield owner.do_replay_remove_message(position, new_remote_count, id);
+        yield owner.do_replay_remove_message(position, new_remote_count);
         
         return ReplayOperation.Status.COMPLETED;
     }
     
     public override string describe_state() {
-        return "position=%d new_remote_count=%d id=%s".printf(position, new_remote_count,
-            (id != null) ? id.to_string() : "(null)");
+        return "position=%d new_remote_count=%d".printf(position, new_remote_count);
     }
 }
 

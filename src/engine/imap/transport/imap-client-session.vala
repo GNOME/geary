@@ -1195,28 +1195,28 @@ public class Geary.Imap.ClientSession {
         bool reported = false;
         
         if (unsolicited.exists >= 0) {
-            debug("%s EXISTS %d", label, unsolicited.exists);
+            debug("[%s] %s EXISTS %d", to_string(), label, unsolicited.exists);
             unsolicited_exists(unsolicited.exists);
             
             reported = true;
         }
         
         if (unsolicited.recent >= 0) {
-            debug("%s RECENT %d", label, unsolicited.recent);
+            debug("[%s] %s RECENT %d", to_string(), label, unsolicited.recent);
             unsolicited_recent(unsolicited.recent);
             
             reported = true;
         }
         
         if (unsolicited.expunge != null) {
-            debug("%s EXPUNGE %s", label, unsolicited.expunge.to_string());
+            debug("[%s] %s EXPUNGE %s", to_string(), label, unsolicited.expunge.to_string());
             unsolicited_expunged(unsolicited.expunge);
             
             reported = true;
         }
         
         if (unsolicited.flags != null) {
-            debug("%s FLAGS %s", label, unsolicited.flags.to_string());
+            debug("[%s] %s FLAGS %s", to_string(), label, unsolicited.flags.to_string());
             unsolicited_flags(unsolicited.flags);
             
             reported = true;

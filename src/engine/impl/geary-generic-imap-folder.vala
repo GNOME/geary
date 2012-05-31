@@ -163,8 +163,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         // Get the local emails in the range
         Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-            earliest_id, int.MAX, NORMALIZATION_FIELDS, Geary.Folder.ListFlags.NONE, false,
-            cancellable);
+            earliest_id, int.MAX, NORMALIZATION_FIELDS, Sqlite.Folder.ListFlags.NONE, cancellable);
         
         // be sure they're sorted from earliest to latest
         if (old_local != null)
@@ -500,11 +499,19 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         debug("do_replay_appended_messages %s: remote_count=%d new_remote_count=%d", to_string(),
             remote_count, new_remote_count);
         
+        Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
+            Hashable.hash_func, Equalable.equal_func);
+        Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
+            Hashable.hash_func, Equalable.equal_func);
+        
         try {
             // If remote doesn't fully open, then don't fire signal, as we'll be unable to
             // normalize the folder
-            if (!yield wait_for_remote_to_open())
+            if (!yield wait_for_remote_to_open()) {
+                debug("do_replay_appended_messages: remote never opened for %s", to_string());
+                
                 return;
+            }
             
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
@@ -516,43 +523,44 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                     msg_set.to_string(), to_string());
                 
                 // add new messages to local store
-                Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
-                    Hashable.hash_func, Equalable.equal_func);
-                Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
-                    Hashable.hash_func, Equalable.equal_func);
                 foreach (Geary.Email email in list) {
+                    debug("do_replay_appended_messages: appending email ID %s to %s", email.id.to_string(),
+                        to_string());
+                    
                     // need to report both if it was created (not known before) and appended (which
                     // could mean created or simply a known email associated with this folder)
                     if (yield local_folder.create_email_async(email, null)) {
                         created.add(email.id);
                     } else {
-                        debug("do_replay_appended_messages: appended email ID %s already known in account, associating with %s...",
+                        debug("do_replay_appended_messages: appended email ID %s already known in account, now associated with %s...",
                             email.id.to_string(), to_string());
                     }
                     
                     appended.add(email.id);
                 }
-                
-                // save new remote count
-                bool changed = (remote_count != new_remote_count);
-                remote_count = new_remote_count;
-                
-                if (appended.size > 0)
-                    notify_email_appended(appended);
-                
-                if (created.size > 0)
-                    notify_email_locally_appended(created);
-                
-                if (changed)
-                    notify_email_count_changed(remote_count, CountChangeReason.ADDED);
             } else {
-                debug("do_replay_appended_messages: no new messages in %s in %s",
-                    msg_set.to_string(), to_string());
+                debug("do_replay_appended_messages: no new messages in %s in %s", msg_set.to_string(),
+                    to_string());
             }
         } catch (Error err) {
             debug("Unable to normalize local store of newly appended messages to %s: %s",
                 to_string(), err.message);
         }
+        
+        // save new remote count
+        bool changed = (remote_count != new_remote_count);
+        remote_count = new_remote_count;
+        
+        if (appended.size > 0)
+            notify_email_appended(appended);
+        
+        if (created.size > 0)
+            notify_email_locally_appended(created);
+        
+        if (changed)
+            notify_email_count_changed(remote_count, CountChangeReason.ADDED);
+        
+        debug("do_replay_appended_messages: completed for %s", to_string());
     }
     
     private void on_remote_message_at_removed(int position, int total) {
@@ -561,25 +569,32 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     }
     
     // This MUST only be called from ReplayRemoval.
-    internal async void do_replay_remove_message(int remote_position, int new_remote_count,
-        Geary.EmailIdentifier? id) {
-        debug("do_replay_remove_message: remote_position=%d new_remote_count=%d id=%s",
-            remote_position, new_remote_count, (id != null) ? id.to_string() : "(null)");
+    internal async void do_replay_remove_message(int remote_position, int new_remote_count) {
+        debug("do_replay_remove_message: remote_position=%d new_remote_count=%d", remote_position,
+            new_remote_count);
         
-        if (remote_position < 1)
-            assert(id != null);
-        else
-            assert(new_remote_count >= 0);
+        assert(remote_position >= 1);
+        assert(new_remote_count >= 0);
         
-        Geary.EmailIdentifier? owned_id = id;
-        if (owned_id == null) {
-            try {
-                owned_id = yield local_folder.id_from_remote_position(remote_position, remote_count);
-            } catch (Error err) {
-                debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
-                    to_string(), err.message);
-            }
+        int local_count = -1;
+        int local_position = -1;
+        
+        Geary.EmailIdentifier? owned_id = null;
+        try {
+            local_count = yield local_folder.get_email_count_async();
+            local_position = remote_position_to_local_position(remote_position, local_count);
+            
+             Gee.List<Geary.Email>? list = yield local_folder.list_email_async(local_position,
+                1, Geary.Email.Field.NONE, Sqlite.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
+            if (list != null && list.size > 0)
+                owned_id = list[0].id;
+        } catch (Error err) {
+            debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
+                to_string(), err.message);
         }
+        
+        debug("do_replay_remove_message: remote_count=%d new_remote_count=%d local_count=%d remote_position=%d local_position=%d",
+            remote_count, new_remote_count, local_count, remote_position, local_position);
         
         bool marked = false;
         if (owned_id != null) {
@@ -588,12 +603,23 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
                 // Reflect change in the local store and notify subscribers
                 yield local_folder.remove_marked_email_async(owned_id, out marked, null);
                 
+                // TODO: Should move this signal to after the remote_count has changed
                 if (!marked)
                     notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(owned_id));
             } catch (Error err2) {
                 debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
                     err2.message);
             }
+        } else {
+            debug("do_replay_remove_message: remote_position=%d unknown in local store (remote_count=%d new_remote_count=%d local_position=%d local_count=%d)",
+                remote_position, remote_count, new_remote_count, local_position, local_count);
+        }
+        
+        int new_local_count = -1;
+        try {
+            new_local_count = yield local_folder.get_email_count_async();
+        } catch (Error new_count_err) {
+            debug("Error fetching new local count for %s: %s", to_string(), new_count_err.message);
         }
         
         // save new remote count and notify of change
@@ -602,6 +628,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         if (!marked && changed)
             notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
+        
+        debug("do_replay_remove_message: completed for %s (remote_count=%d local_count=%d new_local_count=%d marked=%s)",
+            to_string(), remote_count, local_count, new_local_count, marked.to_string());
     }
     
     private void on_remote_disconnected(Geary.Folder.CloseReason reason) {
@@ -835,10 +864,19 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     // Converts a remote position to a local position, assuming that the remote has been completely
     // opened.  local_count must be supplied because that's not held by EngineFolder (unlike
-    // remote_count).
+    // remote_count).  remote_pos is 1-based.
     //
     // Returns a negative value if not available in local folder or remote is not open yet.
     internal int remote_position_to_local_position(int remote_pos, int local_count) {
+        assert(remote_pos >= 1);
+        
+        if (remote_count < 0) {
+            debug("[%s] remote_position_to_local_position called before remote opened", to_string());
+        } else if (remote_count < local_count) {
+            debug("[%s] remote_position_to_local_position: remote_count=%d < local_count=%d",
+                to_string(), remote_count, local_count);
+        }
+        
         return (remote_count >= 0) ? remote_pos - (remote_count - local_count) : -1;
     }
     
@@ -847,6 +885,15 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     //
     // Returns a negative value if remote is not open.
     internal int local_position_to_remote_position(int local_pos, int local_count) {
+        assert(local_pos >= 1);
+        
+        if (remote_count < 0) {
+            debug("[%s] local_position_to_remote_position called before remote opened", to_string());
+        } else if (remote_count < local_count) {
+            debug("[%s] local_position_to_remote_position: remote_count=%d < local_count=%d",
+                to_string(), remote_count, local_count);
+        }
+        
         return (remote_count >= 0) ? remote_count - (local_count - local_pos) : -1;
     }
     

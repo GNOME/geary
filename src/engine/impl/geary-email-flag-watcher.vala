@@ -81,12 +81,16 @@ private class Geary.EmailFlagWatcher : Object {
     }
     
     private async void do_flag_watch_async() throws Error {
+        debug("do_flag_watch_async begin %s", folder.to_string());
+        
         // Fetch all email properties in local folder.
         Gee.List<Geary.Email>? list_local = yield folder.list_email_async(-1, int.MAX, 
             Email.Field.PROPERTIES, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
-        
-        if (list_local == null || list_local.size == 0)
+        if (list_local == null || list_local.size == 0) {
+            debug("do_flag_watch_async: no local email in %s", folder.to_string());
+            
             return;
+        }
         
         Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = 
             new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
@@ -104,9 +108,11 @@ private class Geary.EmailFlagWatcher : Object {
         // Fetch corresponding e-mail from folder.
         Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_id_async(low, int.MAX,
             Email.Field.PROPERTIES, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
-        
-        if (list_remote == null || list_remote.size == 0)
+        if (list_remote == null || list_remote.size == 0) {
+            debug("do_flag_watch_async: no remote mail in %s", folder.to_string());
+            
             return;
+        }
         
         Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
             new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
@@ -122,10 +128,12 @@ private class Geary.EmailFlagWatcher : Object {
         }
         
         if (!cancellable.is_cancelled() && changed_map.size > 0) {
-            debug("FlagWatcher: %d email flags changed in %s", changed_map.size, folder.to_string());
+            debug("do_flag_watch_async: %d email flags changed in %s", changed_map.size, folder.to_string());
             
             email_flags_changed(changed_map);
         }
+        
+        debug("do_flag_watch_async: completed %s", folder.to_string());
     }
 }
 

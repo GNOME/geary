@@ -28,10 +28,12 @@ private class Geary.CreateLocalEmailOperation : Geary.NonblockingBatchOperation 
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
         created = yield folder.create_email_async(email, cancellable);
         
-        if (email.fields.fulfills(required_fields))
+        if (email.fields.fulfills(required_fields)) {
             merged = email;
-        else
-            merged = yield folder.fetch_email_async(email.id, required_fields, false, cancellable);
+        } else {
+            merged = yield folder.fetch_email_async(email.id, required_fields, Sqlite.Folder.ListFlags.NONE,
+                cancellable);
+        }
         
         return null;
     }
