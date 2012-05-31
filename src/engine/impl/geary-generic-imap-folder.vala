@@ -570,8 +570,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     
     // This MUST only be called from ReplayRemoval.
     internal async void do_replay_remove_message(int remote_position, int new_remote_count) {
-        debug("do_replay_remove_message: remote_position=%d new_remote_count=%d", remote_position,
-            new_remote_count);
+        debug("do_replay_remove_message: remote_position=%d remote_count=%d new_remote_count=%d",
+            remote_position, remote_count, new_remote_count);
         
         assert(remote_position >= 1);
         assert(new_remote_count >= 0);
@@ -581,8 +581,12 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         Geary.EmailIdentifier? owned_id = null;
         try {
-            local_count = yield local_folder.get_email_count_async();
-            local_position = remote_position_to_local_position(remote_position, local_count);
+            local_count = yield local_folder.get_email_count_including_marked_async();
+            // can't use remote_position_to_local_position() because local_count includes messages
+            // marked for removal, which that helper function doesn't like
+            local_position = remote_position - (remote_count - local_count);
+            
+            debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
             
              Gee.List<Geary.Email>? list = yield local_folder.list_email_async(local_position,
                 1, Geary.Email.Field.NONE, Sqlite.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
@@ -612,7 +616,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // for debugging
         int new_local_count = -1;
         try {
-            new_local_count = yield local_folder.get_email_count_async();
+            new_local_count = yield local_folder.get_email_count_including_marked_async();
         } catch (Error new_count_err) {
             debug("Error fetching new local count for %s: %s", to_string(), new_count_err.message);
         }

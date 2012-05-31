@@ -90,16 +90,21 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     }
     
     public async int get_email_count_async(Cancellable? cancellable = null) throws Error {
-        return yield internal_get_email_count_async(null, cancellable);
+        return yield internal_get_email_count_async(null, false, cancellable);
     }
     
-    private async int internal_get_email_count_async(Transaction? transaction, Cancellable? cancellable)
+    public async int get_email_count_including_marked_async(Cancellable? cancellable = null)
         throws Error {
+        return yield internal_get_email_count_async(null, true, cancellable);
+    }
+    
+    private async int internal_get_email_count_async(Transaction? transaction, bool include_marked,
+        Cancellable? cancellable) throws Error {
         check_open();
         
         // TODO: This can be cached and updated when changes occur
-        return yield location_table.fetch_count_for_folder_async(transaction, folder_row.id, false,
-            cancellable);
+        return yield location_table.fetch_count_for_folder_async(transaction, folder_row.id,
+            include_marked, cancellable);
     }
     
     public async int get_id_position_async(Geary.EmailIdentifier id, Cancellable? cancellable)
@@ -251,8 +256,9 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         Transaction transaction = yield db.begin_transaction_async("Folder.list_email_async",
             cancellable);
         
-        Geary.Folder.normalize_span_specifiers(ref low, ref count,
-            yield internal_get_email_count_async(transaction, cancellable));
+        int local_count = yield internal_get_email_count_async(transaction,
+            flags.is_all_set(ListFlags.INCLUDE_MARKED_FOR_REMOVE), cancellable);
+        Geary.Folder.normalize_span_specifiers(ref low, ref count, local_count);
         
         if (count == 0)
             return null;
