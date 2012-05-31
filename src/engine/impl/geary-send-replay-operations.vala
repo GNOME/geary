@@ -620,8 +620,12 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        if (force_update)
+        if (force_update) {
+            foreach (EmailIdentifier id in ids)
+                unfulfilled.set(required_fields, id);
+            
             return ReplayOperation.Status.CONTINUE;
+        }
         
         NonblockingBatch batch = new NonblockingBatch();
         

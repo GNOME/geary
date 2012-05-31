@@ -92,21 +92,15 @@ private class Geary.EmailFlagWatcher : Object {
             return;
         }
         
-        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = 
-            new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
-            Geary.Equalable.equal_func);
-        
-        // Build local map and find lowest ID.
-        Geary.EmailIdentifier? low = null;
-        foreach (Geary.Email e in list_local) {
+        // Get all email identifiers in the local folder
+        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
+            Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+        foreach (Geary.Email e in list_local)
             local_map.set(e.id, e.properties.email_flags);
-            
-            if (low == null || e.id.compare(low) < 0)
-                low = e.id;
-        }
         
-        // Fetch corresponding e-mail from folder.
-        Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_id_async(low, int.MAX,
+        // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
+        // and the latest to be gotten from the server (updating the cache in the process)
+        Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
             Email.Field.PROPERTIES, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
         if (list_remote == null || list_remote.size == 0) {
             debug("do_flag_watch_async: no remote mail in %s", folder.to_string());
@@ -114,11 +108,10 @@ private class Geary.EmailFlagWatcher : Object {
             return;
         }
         
+        // Build map of emails that have changed.
         Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
             new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
             Geary.Equalable.equal_func);
-        
-        // Build map of emails that have changed.
         foreach (Geary.Email e in list_remote) {
             if (!local_map.has_key(e.id))
                 continue;
