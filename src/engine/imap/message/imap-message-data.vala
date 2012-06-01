@@ -29,7 +29,7 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
     }
     
     public bool is_valid() {
-        return Numeric.int64_in_range_exclusive(value, MIN, MAX);
+        return Numeric.int64_in_range_inclusive(value, MIN, MAX);
     }
     
     /**
