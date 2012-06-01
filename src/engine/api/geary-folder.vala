@@ -482,6 +482,8 @@ public interface Geary.Folder : Object {
      * implementations to convert 'low' and 'count' into positive values (1-based in the case of
      * low) that are within an appropriate range.
      *
+     * If total is zero, low and count will return as zero as well.
+     *
      * The caller should plug in 'low' and 'count' passed from the user as well as the total
      * number of emails available (i.e. the complete span is 1..total).
      */
@@ -492,14 +494,21 @@ public interface Geary.Folder : Object {
         if (total < 0)
             throw new EngineError.BAD_PARAMETERS("total=%d", total);
         
+        if (total == 0) {
+            low = 0;
+            count = 0;
+            
+            return;
+        }
+        
         // if both are -1, it's no different than low=1 count=-1 (that is, return all email)
         if (low == -1 && count == -1)
             low = 1;
         
         // if count is -1, it's like a globbed star (return everything starting at low)
-        if (count == -1 || total == 0)
+        if (count == -1)
             count = total;
-            
+        
         if (low == -1)
             low = ((total - count) + 1).clamp(1, total);
         

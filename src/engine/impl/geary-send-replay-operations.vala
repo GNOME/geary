@@ -208,18 +208,19 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         
         // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
         // if the folder is in the process of opening
-        int local_low;
-        if (!local_only && (yield engine.wait_for_remote_to_open(cancellable)) &&
-            engine.remote_count >= 0) {
+        int local_low = 0;
+        if (!local_only && yield engine.wait_for_remote_to_open(cancellable)) {
             engine.normalize_span_specifiers(ref low, ref count, engine.remote_count);
             
             // because the local store caches messages starting from the newest (at the end of the list)
             // to the earliest fetched by the user, need to adjust the low value to match its offset
             // and range
-            local_low = engine.remote_position_to_local_position(low, local_count);
+            if (low > 0)
+                local_low = engine.remote_position_to_local_position(low, local_count);
         } else {
             engine.normalize_span_specifiers(ref low, ref count, local_count);
-            local_low = low.clamp(1, local_count);
+            if (low > 0)
+                local_low = low.clamp(1, local_count);
         }
         
         Logging.debug(Logging.Flag.REPLAY,
