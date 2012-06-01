@@ -161,9 +161,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid);
         
-        // Get the local emails in the range
+        // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
         Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-            earliest_id, int.MAX, NORMALIZATION_FIELDS, Sqlite.Folder.ListFlags.NONE, cancellable);
+            earliest_id, int.MAX, NORMALIZATION_FIELDS, Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
         
         // be sure they're sorted from earliest to latest
         if (old_local != null)
@@ -208,12 +208,13 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             
             if (remote_uid.value == local_uid.value) {
                 // same, update flags (if changed) and move on
-                Geary.Imap.EmailProperties local_email_properties =
+                // Because local is PARTIAL_OK, EmailProperties may not be present
+                Geary.Imap.EmailProperties? local_email_properties =
                     (Geary.Imap.EmailProperties) local_email.properties;
                 Geary.Imap.EmailProperties remote_email_properties =
                     (Geary.Imap.EmailProperties) remote_email.properties;
                 
-                if (!local_email_properties.equals(remote_email_properties)) {
+                if ((local_email_properties == null) || !local_email_properties.equals(remote_email_properties)) {
                     batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
                     flags_changed.set(remote_email.id, remote_email.properties.email_flags);
                 }
