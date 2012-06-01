@@ -10,7 +10,7 @@ public class Geary.ConversationMonitor : Object {
      * be retrieved irregardless of the Field parameter passed to the constructor.
      */
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES | 
-        Geary.Email.Field.PROPERTIES | Geary.Email.Field.DATE;
+        Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
     
     private const int RETRY_CONNECTION_SEC = 15;
     

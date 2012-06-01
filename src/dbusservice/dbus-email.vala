@@ -27,7 +27,7 @@ public class Geary.DBus.Email : Object {
         cc = email.cc != null ? email.cc.to_string() : "";
         subject = email.subject != null ? email.subject.to_string() : "";
         date = email.date != null ? email.date.as_time_t : 0;
-        read = email.properties != null ? email.properties.email_flags.contains(EmailFlags.UNREAD)
+        read = email.email_flags != null ? email.email_flags.contains(EmailFlags.UNREAD)
             : true;
     }
     

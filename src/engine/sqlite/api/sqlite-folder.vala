@@ -236,9 +236,12 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         // only write out the IMAP email properties if they're supplied and there's something to
         // write out -- no need to create an empty row
         Geary.Imap.EmailProperties? properties = (Geary.Imap.EmailProperties?) email.properties;
-        if (email.fields.fulfills(Geary.Email.Field.PROPERTIES) && properties != null) {
+        Geary.Imap.EmailFlags? email_flags = (Geary.Imap.EmailFlags?) email.email_flags;
+        if (email.fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
             ImapMessagePropertiesRow properties_row = new ImapMessagePropertiesRow.from_imap_properties(
-                imap_message_properties_table, message_id, properties);
+                imap_message_properties_table, message_id, properties,
+                (email_flags != null) ? email_flags.message_flags : null);
+            
             yield imap_message_properties_table.create_async(transaction, properties_row, cancellable);
         }
         
@@ -333,7 +336,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         foreach (MessageLocationRow location_row in list) {
             // fetch the message itself
             MessageRow? message_row = null;
-            if (required_fields != Geary.Email.Field.NONE && required_fields != Geary.Email.Field.PROPERTIES) {
+            if (required_fields != Geary.Email.Field.NONE
+                && required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0) {
                 message_row = yield message_table.fetch_async(transaction, location_row.message_id,
                     required_fields, cancellable);
                 assert(message_row != null);
@@ -345,7 +349,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             }
             
             ImapMessagePropertiesRow? properties = null;
-            if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
+            if (required_fields.require(Geary.Email.Field.PROPERTIES)
+                || required_fields.require(Geary.Email.Field.FLAGS)) {
                 properties = yield imap_message_properties_table.fetch_async(transaction,
                     location_row.message_id, cancellable);
                 if (!partial_ok && properties == null)
@@ -368,8 +373,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
                 ? message_row.to_email(position, email_id)
                 : new Geary.Email(position, email_id);
                 
-            if (properties != null)
-                email.set_email_properties(properties.get_imap_email_properties());
+            if (properties != null) {
+                if (required_fields.require(Geary.Email.Field.PROPERTIES))
+                    email.set_email_properties(properties.get_imap_email_properties());
+                
+                if (required_fields.require(Geary.Email.Field.FLAGS))
+                    email.set_flags(properties.get_email_flags());
+            }
             
             emails.add(email);
         }
@@ -405,9 +415,9 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         if (required_fields == Geary.Email.Field.NONE)
             return new Geary.Email(position, id);
         
-        // Only fetch message row if we have fields other than Properties.
+        // Only fetch message row if we have fields other than Properties and Flags
         MessageRow? message_row = null;
-        if (required_fields != Geary.Email.Field.PROPERTIES) {
+        if (required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0) {
             message_row = yield message_table.fetch_async(transaction,
                 location_row.message_id, required_fields, cancellable);
             if (message_row == null) {
@@ -417,7 +427,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             
             // see if the message row fulfills everything but properties, which are held in
             // separate table
-            if (!partial_ok && !message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES))) {
+            if (!partial_ok &&
+                !message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS))) {
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s in folder %s only fulfills %Xh fields (required: %Xh)", id.to_string(),
                     to_string(), message_row.fields, required_fields);
@@ -425,13 +436,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         }
         
         ImapMessagePropertiesRow? properties = null;
-        if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
+        if (required_fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
             properties = yield imap_message_properties_table.fetch_async(transaction,
                 location_row.message_id, cancellable);
             if (!partial_ok && properties == null) {
                 throw new EngineError.INCOMPLETE_MESSAGE(
-                    "Message %s in folder %s does not have PROPERTIES field", id.to_string(),
-                        to_string());
+                    "Message %s in folder %s does not have PROPERTIES and/or FLAGS fields",
+                        id.to_string(), to_string());
             }
         }
         
@@ -439,8 +450,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         email = message_row != null ? message_row.to_email(position, id) : email =
             new Geary.Email(position, id);
         
-        if (properties != null)
-            email.set_email_properties(properties.get_imap_email_properties());
+        if (properties != null) {
+            if (required_fields.require(Geary.Email.Field.PROPERTIES))
+                email.set_email_properties(properties.get_imap_email_properties());
+            
+            if (required_fields.require(Geary.Email.Field.FLAGS))
+                email.set_flags(properties.get_email_flags());
+        }
         
         return email;
     }
@@ -520,7 +536,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             if (row == null)
                 continue;
             
-            map.set(id, row.get_imap_email_properties().email_flags);
+            map.set(id, row.get_email_flags());
         }
         
         yield transaction.commit_async(cancellable);
@@ -580,7 +596,8 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         if (email.fields == Geary.Email.Field.NONE)
             return;
         
-        if (email.fields != Geary.Email.Field.PROPERTIES) {
+        // Only merge with MessageTable if has fields applicable to it
+        if (email.fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0) {
             MessageRow? message_row = yield message_table.fetch_async(transaction, message_id, email.fields,
                 cancellable);
             assert(message_row != null);
@@ -600,8 +617,16 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             long rfc822_size =
                 (properties.rfc822_size != null) ? properties.rfc822_size.value : -1;
             
-            yield imap_message_properties_table.update_async(transaction, message_id,
-                properties.get_message_flags().serialize(), internaldate, rfc822_size, cancellable);
+            yield imap_message_properties_table.update_properties_async(transaction, message_id,
+                internaldate, rfc822_size, cancellable);
+        }
+        
+        // update IMAP flags
+        if (email.fields.fulfills(Geary.Email.Field.FLAGS)) {
+            string? flags = ((Geary.Imap.EmailFlags) email.email_flags).message_flags.serialize();
+            
+            yield imap_message_properties_table.update_flags_async(transaction, message_id,
+                flags, cancellable);
         }
     }
     

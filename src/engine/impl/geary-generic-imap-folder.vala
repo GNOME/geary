@@ -7,7 +7,8 @@
 private class Geary.GenericImapFolder : Geary.AbstractFolder {
     internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
     
-    private const Geary.Email.Field NORMALIZATION_FIELDS = Geary.Email.Field.PROPERTIES;
+    private const Geary.Email.Field NORMALIZATION_FIELDS = Geary.Email.Field.PROPERTIES
+        | Geary.Email.Field.FLAGS;
     
     internal Sqlite.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
@@ -208,15 +209,13 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             
             if (remote_uid.value == local_uid.value) {
                 // same, update flags (if changed) and move on
-                // Because local is PARTIAL_OK, EmailProperties may not be present
-                Geary.Imap.EmailProperties? local_email_properties =
-                    (Geary.Imap.EmailProperties) local_email.properties;
-                Geary.Imap.EmailProperties remote_email_properties =
-                    (Geary.Imap.EmailProperties) remote_email.properties;
+                // Because local is PARTIAL_OK, EmailFlags may not be present
+                Geary.Imap.EmailFlags? local_email_flags = (Geary.Imap.EmailFlags) local_email.email_flags;
+                Geary.Imap.EmailFlags remote_email_flags = (Geary.Imap.EmailFlags) remote_email.email_flags;
                 
-                if ((local_email_properties == null) || !local_email_properties.equals(remote_email_properties)) {
+                if ((local_email_flags == null) || !local_email_flags.equals(remote_email_flags)) {
                     batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
-                    flags_changed.set(remote_email.id, remote_email.properties.email_flags);
+                    flags_changed.set(remote_email.id, remote_email.email_flags);
                 }
                 
                 remote_ctr++;

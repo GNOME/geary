@@ -148,7 +148,6 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (fields.require(Geary.Email.Field.PROPERTIES)) {
             // Properties.
             Gee.List<FetchDataType> properties_data_types_list = new Gee.ArrayList<FetchDataType>();
-            properties_data_types_list.add(FetchDataType.FLAGS);
             properties_data_types_list.add(FetchDataType.INTERNALDATE);
             properties_data_types_list.add(FetchDataType.RFC822_SIZE);
             
@@ -156,6 +155,17 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 properties_data_types_list, null);
             
             properties_id = batch.add(new MailboxOperation(context, properties_cmd));
+        }
+        
+        int flags_id = NonblockingBatch.INVALID_ID;
+        if (fields.require(Geary.Email.Field.FLAGS)) {
+            // Flags
+            FetchDataType[] flags_data_types = new FetchDataType[1];
+            flags_data_types[0] = FetchDataType.FLAGS;
+            
+            FetchCommand flags_cmd = new FetchCommand(msg_set, flags_data_types, null);
+            
+            flags_id = batch.add(new MailboxOperation(context, flags_cmd));
         }
         
         yield batch.execute_all_async(cancellable);
@@ -225,6 +235,25 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                     properties_email = accumulate_email(properties_res, msgs, pos_map);
                 
                 fetch_results_to_email(properties_res, Geary.Email.Field.PROPERTIES, properties_email);
+            }
+        }
+        
+        if (flags_id != NonblockingBatch.INVALID_ID) {
+            MailboxOperation flags_op = (MailboxOperation) batch.get_operation(flags_id);
+            CommandResponse flags_resp = (CommandResponse) batch.get_result(flags_id);
+            
+            if (flags_resp.status_response.status != Status.OK) {
+                throw new ImapError.SERVER_ERROR("Server error for %s: %s", 
+                    flags_op.cmd.to_string(), flags_resp.to_string());
+            }
+            
+            FetchResults[] flags_results = FetchResults.decode(flags_resp);
+            foreach (FetchResults flags_res in flags_results) {
+                Geary.Email? flags_email = pos_map.get(flags_res.msg_num);
+                if (flags_email == null)
+                    flags_email = accumulate_email(flags_res, msgs, pos_map);
+                
+                fetch_results_to_email(flags_res, Geary.Email.Field.FLAGS, flags_email);
             }
         }
         
@@ -348,6 +377,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 
                 case Geary.Email.Field.BODY:
                 case Geary.Email.Field.PROPERTIES:
+                case Geary.Email.Field.FLAGS:
                 case Geary.Email.Field.NONE:
                 case Geary.Email.Field.PREVIEW:
                     // not set (or, for body previews and properties, fetched separately)
@@ -366,8 +396,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     private static void fetch_results_to_email(FetchResults res, Geary.Email.Field fields,
         Geary.Email email) throws Error {
-        // accumulate these to submit Imap.EmailProperties all at once
         Geary.Imap.MessageFlags? flags = null;
+        
+        // accumulate these to submit Imap.EmailProperties all at once
         InternalDate? internaldate = null;
         RFC822.Size? rfc822_size = null;
         
@@ -430,8 +461,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         // Only set PROPERTIES if all have been found
-        if (flags != null && internaldate != null && rfc822_size != null)
-            email.set_email_properties(new Geary.Imap.EmailProperties(flags, internaldate, rfc822_size));
+        if (internaldate != null && rfc822_size != null)
+            email.set_email_properties(new Geary.Imap.EmailProperties(internaldate, rfc822_size));
+        
+        if (flags != null)
+            email.set_flags(new Geary.Imap.EmailFlags(flags));
         
         // fields_to_fetch_data_types() will always generate a single FetchBodyDataType for all
         // the header fields it needs

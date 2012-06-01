@@ -52,7 +52,7 @@ public abstract class Geary.Conversation : Object {
     
     private bool has_flag(Geary.EmailFlag flag) {
         foreach (Geary.Email email in get_email(Ordering.NONE)) {
-            if (email.properties != null && email.properties.email_flags.contains(flag))
+            if (email.email_flags != null && email.email_flags.contains(flag))
                 return true;
         }
         

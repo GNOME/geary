@@ -587,7 +587,7 @@ public class GearyController {
             
             messages_to_add.add(full_email);
             
-            if (full_email.properties.email_flags.is_unread())
+            if (full_email.email_flags.is_unread())
                 ids.add(full_email.id);
         }
         

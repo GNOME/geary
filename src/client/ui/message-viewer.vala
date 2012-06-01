@@ -12,7 +12,7 @@ public class MessageViewer : WebKit.WebView {
         | Geary.Email.Field.RECEIVERS
         | Geary.Email.Field.SUBJECT
         | Geary.Email.Field.DATE
-        | Geary.Email.Field.PROPERTIES
+        | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
     
     private const string MESSAGE_CONTAINER_ID = "message_container";
@@ -712,7 +712,7 @@ public class MessageViewer : WebKit.WebView {
             return;
         }
 
-        Geary.EmailFlags flags = email.properties.email_flags;
+        Geary.EmailFlags flags = email.email_flags;
         
         // Update the flags in out message set.
         foreach (Geary.Email message in messages) {

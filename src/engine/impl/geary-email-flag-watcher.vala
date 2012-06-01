@@ -83,9 +83,9 @@ private class Geary.EmailFlagWatcher : Object {
     private async void do_flag_watch_async() throws Error {
         debug("do_flag_watch_async begin %s", folder.to_string());
         
-        // Fetch all email properties in local folder.
+        // Fetch all email flags in local folder.
         Gee.List<Geary.Email>? list_local = yield folder.list_email_async(-1, int.MAX, 
-            Email.Field.PROPERTIES, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
         if (list_local == null || list_local.size == 0) {
             debug("do_flag_watch_async: no local email in %s", folder.to_string());
             
@@ -96,12 +96,12 @@ private class Geary.EmailFlagWatcher : Object {
         Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
             Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
         foreach (Geary.Email e in list_local)
-            local_map.set(e.id, e.properties.email_flags);
+            local_map.set(e.id, e.email_flags);
         
         // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
         // and the latest to be gotten from the server (updating the cache in the process)
         Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
-            Email.Field.PROPERTIES, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
+            Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
         if (list_remote == null || list_remote.size == 0) {
             debug("do_flag_watch_async: no remote mail in %s", folder.to_string());
             
@@ -116,8 +116,8 @@ private class Geary.EmailFlagWatcher : Object {
             if (!local_map.has_key(e.id))
                 continue;
             
-            if (!local_map.get(e.id).equals(e.properties.email_flags))
-                changed_map.set(e.id, e.properties.email_flags);
+            if (!local_map.get(e.id).equals(e.email_flags))
+                changed_map.set(e.id, e.email_flags);
         }
         
         if (!cancellable.is_cancelled() && changed_map.size > 0) {

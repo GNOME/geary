@@ -12,8 +12,7 @@ public class Geary.ComposedEmail : Object {
         | Geary.Email.Field.RECEIVERS
         | Geary.Email.Field.REFERENCES
         | Geary.Email.Field.SUBJECT
-        | Geary.Email.Field.DATE
-        | Geary.Email.Field.PROPERTIES;
+        | Geary.Email.Field.DATE;
     
     public DateTime date { get; set; }
     public RFC822.MailboxAddresses from { get; set; }

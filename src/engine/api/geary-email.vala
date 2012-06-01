@@ -21,6 +21,7 @@ public class Geary.Email : Object {
         BODY =              1 << 6,
         PROPERTIES =        1 << 7,
         PREVIEW =           1 << 8,
+        FLAGS =             1 << 9,
         
         ENVELOPE =          DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT,
         ALL =               0xFFFFFFFF;
@@ -35,7 +36,8 @@ public class Geary.Email : Object {
                 HEADER,
                 BODY,
                 PROPERTIES,
-                PREVIEW
+                PREVIEW,
+                FLAGS
             };
         }
         
@@ -118,6 +120,9 @@ public class Geary.Email : Object {
     // PREVIEW
     public RFC822.PreviewText? preview { get; private set; default = null; }
     
+    // FLAGS
+    public Geary.EmailFlags? email_flags { get; private set; default = null; }
+    
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
     
     private Geary.RFC822.Message? message = null;
@@ -136,23 +141,11 @@ public class Geary.Email : Object {
     }
 
     public inline Trillian is_unread() {
-        return properties == null ? Trillian.UNKNOWN :
-            Trillian.from_boolean(properties.email_flags.is_unread());
+        return email_flags != null ? Trillian.from_boolean(email_flags.is_unread()) : Trillian.UNKNOWN;
     }
 
     public inline Trillian is_flagged() {
-        return properties == null ? Trillian.UNKNOWN :
-            Trillian.from_boolean(properties.email_flags.is_flagged());
-    }
-
-    public inline EmailFlags? get_flags() {
-        return properties == null ? null : properties.email_flags;
-    }
-
-    public void set_flags(Geary.EmailFlags flags) {
-        if (properties != null) {
-            properties.email_flags = flags;
-        }
+        return email_flags != null ? Trillian.from_boolean(email_flags.is_flagged()) : Trillian.UNKNOWN;
     }
 
     public void set_send_date(Geary.RFC822.Date? date) {
@@ -222,6 +215,12 @@ public class Geary.Email : Object {
         this.preview = preview;
         
         fields |= Field.PREVIEW;
+    }
+    
+    public void set_flags(Geary.EmailFlags email_flags) {
+        this.email_flags = email_flags;
+        
+        fields |= Field.FLAGS;
     }
     
     /**

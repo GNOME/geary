@@ -23,14 +23,14 @@ public class Geary.Sqlite.ImapMessagePropertiesRow : Geary.Sqlite.Row {
     }
     
     public ImapMessagePropertiesRow.from_imap_properties(ImapMessagePropertiesTable table,
-        int64 message_id, Geary.Imap.EmailProperties properties) {
+        int64 message_id, Geary.Imap.EmailProperties? properties, Imap.MessageFlags? message_flags) {
         base (table);
         
         id = Row.INVALID_ID;
         this.message_id = message_id;
-        flags = properties.get_message_flags().serialize();
-        internaldate = properties.internaldate.original;
-        rfc822_size = properties.rfc822_size.value;
+        flags = (message_flags != null) ? message_flags.serialize() : "";
+        internaldate = (properties != null) ? properties.internaldate.original : "";
+        rfc822_size = (properties != null) ? properties.rfc822_size.value : -1;
     }
     
     public Geary.Imap.EmailProperties get_imap_email_properties() {
@@ -42,8 +42,11 @@ public class Geary.Sqlite.ImapMessagePropertiesRow : Geary.Sqlite.Row {
                 err.message);
         }
         
-        return new Geary.Imap.EmailProperties(Geary.Imap.MessageFlags.deserialize(flags),
-            constructed, new RFC822.Size(rfc822_size));
+        return new Geary.Imap.EmailProperties(constructed, new RFC822.Size(rfc822_size));
+    }
+    
+    public Geary.EmailFlags get_email_flags() {
+        return new Geary.Imap.EmailFlags(Geary.Imap.MessageFlags.deserialize(flags));
     }
 }
 

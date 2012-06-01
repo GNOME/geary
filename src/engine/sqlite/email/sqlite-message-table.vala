@@ -197,8 +197,8 @@ public class Geary.Sqlite.MessageTable : Geary.Sqlite.Table {
     public async MessageRow? fetch_async(Transaction? transaction, int64 id,
         Geary.Email.Field requested_fields, Cancellable? cancellable = null) throws Error {
         assert(requested_fields != Geary.Email.Field.NONE);
-        // PROPERTIES are handled by the appropriate PropertiesTable
-        assert(requested_fields != Geary.Email.Field.PROPERTIES);
+        // PROPERTIES and FLAGS are handled by the appropriate PropertiesTable
+        assert(requested_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0);
         
         Transaction locked = yield obtain_lock_async(transaction, "MessageTable.fetch_async",
             cancellable);
