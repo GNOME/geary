@@ -81,7 +81,7 @@ private class Geary.EmailFlagWatcher : Object {
     }
     
     private async void do_flag_watch_async() throws Error {
-        debug("do_flag_watch_async begin %s", folder.to_string());
+        Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async begin %s", folder.to_string());
         
         // Fetch all email flags in local folder.
         Gee.List<Geary.Email>? list_local = yield folder.list_email_async(-1, int.MAX, 
@@ -126,7 +126,7 @@ private class Geary.EmailFlagWatcher : Object {
             email_flags_changed(changed_map);
         }
         
-        debug("do_flag_watch_async: completed %s", folder.to_string());
+        Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: completed %s", folder.to_string());
     }
 }
 

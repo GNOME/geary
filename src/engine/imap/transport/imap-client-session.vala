@@ -8,9 +8,9 @@ public class Geary.Imap.ClientSession {
     // 30 min keepalive required to maintain session
     public const uint MIN_KEEPALIVE_SEC = 30 * 60;
     
-    // 10 minutes is more realistic, as underlying sockets will not necessarily report errors if
+    // 5 minutes is more realistic, as underlying sockets will not necessarily report errors if
     // physical connection is lost
-    public const uint RECOMMENDED_KEEPALIVE_SEC = 10 * 60;
+    public const uint RECOMMENDED_KEEPALIVE_SEC = 5 * 60;
     
     // NOOP is only sent after this amount of time has passed since the last received
     // message on the connection dependant on connection state (selected/examined vs. authorized)
@@ -648,6 +648,7 @@ public class Geary.Imap.ClientSession {
         keepalive_id = 0;
         
         send_command_async.begin(new NoopCommand(), null, on_keepalive_completed);
+        Logging.debug(Logging.Flag.PERIODIC, "[%s] Sending keepalive...", to_string());
         
         // No need to reschedule keepalive, as the notification that the command was sent should
         // do that automatically
@@ -659,6 +660,8 @@ public class Geary.Imap.ClientSession {
         CommandResponse response;
         try {
             response = send_command_async.end(result);
+            Logging.debug(Logging.Flag.PERIODIC, "[%s] Keepalive result: %s", to_string(),
+                response.to_string());
         } catch (Error err) {
             debug("[%s] Keepalive error: %s", to_full_string(), err.message);
             

@@ -12,7 +12,7 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
                 "imap.mail.yahoo.com",
                 Imap.ClientConnection.DEFAULT_PORT_SSL,
                 Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
-                Imap.ClientConnection.DEFAULT_TIMEOUT_SEC);
+                Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
         }
         
         return _imap_endpoint;

@@ -8,10 +8,20 @@ public class Geary.Imap.ClientConnection {
     public const uint16 DEFAULT_PORT = 143;
     public const uint16 DEFAULT_PORT_SSL = 993;
     
-    // TODO: This is set very high to allow for IDLE connections to remain connected even when
-    // there is no traffic on them.  The side-effect is that if the physical connection is dropped,
-    // no error is reported and the connection won't know about it until the next send operation.
-    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MIN_KEEPALIVE_SEC + 60;
+    /**
+     * This is set very high to allow for IDLE connections to remain connected even when
+     * there is no traffic on them.  The side-effect is that if the physical connection is dropped,
+     * no error is reported and the connection won't know about it until the next send operation.
+     *
+     * RECOMMENDED_TIMEOUT_SEC is more realistic in that if a connection is hung it's important
+     * to detect it early and drop it, at the expense of more keepalive traffic.
+     *
+     * In general, whatever timeout is used for the ClientConnection must be slightly higher than
+     * the keepalive timeout used by ClientSession, otherwise the ClientConnection will be dropped
+     * before the keepalive is sent.
+     */
+    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MIN_KEEPALIVE_SEC + 15;
+    public const uint RECOMMENDED_TIMEOUT_SEC = ClientSession.RECOMMENDED_KEEPALIVE_SEC + 15;
     
     private const int FLUSH_TIMEOUT_MSEC = 100;
     

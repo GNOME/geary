@@ -85,6 +85,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_serializer = false;
     static bool log_replay_queue = false;
     static bool log_conversations = false;
+    static bool log_periodic = false;
     static bool version = false;
     const OptionEntry[] options = {
         { "debug", 0, 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
@@ -92,6 +93,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
         { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Output replay queue log"), null },
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
+        { "log-periodic", 0, 0, OptionArg.NONE, ref log_periodic, N_("Output periodic activity"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
         { null }
     };
@@ -126,6 +128,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (log_conversations)
             Geary.Logging.enable_flags(Geary.Logging.Flag.CONVERSATIONS);
+        
+        if (log_periodic)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
         
         if (log_debug)
             Geary.Logging.log_to(stdout);

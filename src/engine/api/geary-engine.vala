@@ -60,7 +60,7 @@ private Geary.EngineAccount get_account(Geary.Credentials cred,
             smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
             
             Endpoint imap_endpoint = new Endpoint(account_info.imap_server_host,
-                account_info.imap_server_port, imap_flags, Imap.ClientConnection.DEFAULT_TIMEOUT_SEC);
+                account_info.imap_server_port, imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
                 
             Endpoint smtp_endpoint = new Endpoint(account_info.smtp_server_host,
                 account_info.smtp_server_port, smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
