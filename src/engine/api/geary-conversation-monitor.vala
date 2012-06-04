@@ -328,6 +328,12 @@ public class Geary.ConversationMonitor : Object {
         // set before yield to guard against reentrancy
         monitoring = true;
         
+        cancellable_monitor = cancellable;
+        folder.email_appended.connect(on_folder_email_appended);
+        folder.email_removed.connect(on_folder_email_removed);
+        folder.email_flags_changed.connect(on_folder_email_flags_changed);
+        folder.closed.connect(on_folder_closed);
+        
         if (folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
             try {
                 yield folder.open_async(readonly, cancellable);
@@ -337,12 +343,6 @@ public class Geary.ConversationMonitor : Object {
                 throw err;
             }
         }
-        
-        cancellable_monitor = cancellable;
-        folder.email_appended.connect(on_folder_email_appended);
-        folder.email_removed.connect(on_folder_email_removed);
-        folder.email_flags_changed.connect(on_folder_email_flags_changed);
-        folder.closed.connect(on_folder_closed);
         
         notify_monitoring_started();
         
