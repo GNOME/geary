@@ -215,7 +215,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             account_information.store_async.begin(cancellable);
             account = account_information.get_account();
             account.report_problem.connect(on_report_problem);
-            controller.start(account);
+            controller.connect_account(account);
         } else {
             Geary.AccountInformation new_account_information =
                 request_account_information(account_information);
@@ -253,7 +253,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         account = account_information.get_account();
         account.report_problem.connect(on_report_problem);
-        controller.start(account);
+        controller.connect_account(account);
     }
     
     private string? get_username() {
