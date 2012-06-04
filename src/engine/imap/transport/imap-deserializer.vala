@@ -168,7 +168,8 @@ public class Geary.Imap.Deserializer {
     
     private void on_read_line(Object? source, AsyncResult result) {
         try {
-            string? line = dins.read_line_async.end(result);
+            size_t length;
+            string? line = dins.read_line_async.end(result, out length);
             if (line == null) {
                 eos();
                 
