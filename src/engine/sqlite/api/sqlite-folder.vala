@@ -334,23 +334,26 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         // together when all the information is fetched
         Gee.List<Geary.Email> emails = new Gee.ArrayList<Geary.Email>();
         foreach (MessageLocationRow location_row in list) {
+            // PROPERTIES and FLAGS are held in separate table from messages, pull from MessageTable
+            // only if something is needed from there
+            Geary.Email.Field message_fields =
+                required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS);
+            
             // fetch the message itself
             MessageRow? message_row = null;
-            if (required_fields != Geary.Email.Field.NONE
-                && required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0) {
+            if (message_fields != Geary.Email.Field.NONE) {
                 message_row = yield message_table.fetch_async(transaction, location_row.message_id,
-                    required_fields, cancellable);
+                    message_fields, cancellable);
                 assert(message_row != null);
                 
                 // only add to the list if the email contains all the required fields (because
                 // properties comes out of a separate table, skip this if properties are requested)
-                if (!partial_ok && !message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES)))
+                if (!partial_ok && !message_row.fields.fulfills(message_fields))
                     continue;
             }
             
             ImapMessagePropertiesRow? properties = null;
-            if (required_fields.require(Geary.Email.Field.PROPERTIES)
-                || required_fields.require(Geary.Email.Field.FLAGS)) {
+            if (required_fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
                 properties = yield imap_message_properties_table.fetch_async(transaction,
                     location_row.message_id, cancellable);
                 if (!partial_ok && properties == null)

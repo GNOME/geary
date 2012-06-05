@@ -192,6 +192,12 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         local_only = flags.is_all_set(Folder.ListFlags.LOCAL_ONLY);
         remote_only = flags.is_all_set(Folder.ListFlags.FORCE_UPDATE);
         excluding_id = flags.is_all_set(Folder.ListFlags.EXCLUDING_ID);
+        
+        // always fetch required fields unless a modified list, in which case only fetch the fields
+        // requested by user ... this ensures the local store is seeded with certain fields required
+        // for it to operate properly
+        if (!remote_only && !local_only)
+            this.required_fields |= Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
