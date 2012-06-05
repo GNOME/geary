@@ -8,6 +8,7 @@ public class Geary.AccountInformation : Object {
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
+    private const string REMEMBER_PASSWORD_KEY = "remember_password";
     private const string IMAP_HOST = "imap_host";
     private const string IMAP_PORT = "imap_port";
     private const string IMAP_SSL = "imap_ssl";
@@ -18,6 +19,7 @@ public class Geary.AccountInformation : Object {
     
     public const string SETTINGS_FILENAME = "geary.ini";
     
+    internal File? settings_dir;
     internal File? file = null;
     public string real_name { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
@@ -32,10 +34,13 @@ public class Geary.AccountInformation : Object {
     public bool smtp_server_ssl { get; set; default = true; }
     
     public Geary.Credentials credentials { get; private set; }
+    public bool remember_password { get; set; default = true; }
     
     public AccountInformation(Geary.Credentials credentials) {
         this.credentials = credentials;
-        this.file = get_settings_file();
+        
+        this.settings_dir = Geary.Engine.user_data_dir.get_child(credentials.user);
+        this.file = settings_dir.get_child(SETTINGS_FILENAME);
     }
     
     public void load_info_from_file() throws Error {
@@ -46,6 +51,7 @@ public class Geary.AccountInformation : Object {
             // The file didn't exist.  No big deal -- just means we give you the defaults.
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
+            remember_password = get_bool_value(key_file, GROUP, REMEMBER_PASSWORD_KEY);
             service_provider = Geary.ServiceProvider.from_string(get_string_value(key_file, GROUP,
                 SERVICE_PROVIDER_KEY));
             
@@ -177,6 +183,15 @@ public class Geary.AccountInformation : Object {
     public async void store_async(Cancellable? cancellable = null) {
         assert(file != null);
         
+        if (!settings_dir.query_exists(cancellable)) {
+            try {
+                settings_dir.make_directory_with_parents();
+            } catch (Error err) {
+                error("Error creating settings directory for user '%s': %s", credentials.user,
+                    err.message);
+            }
+        }
+        
         if (!file.query_exists(cancellable)) {
             try {
                 yield file.create_async(FileCreateFlags.REPLACE_DESTINATION);
@@ -189,6 +204,7 @@ public class Geary.AccountInformation : Object {
         
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
+        key_file.set_boolean(GROUP, REMEMBER_PASSWORD_KEY, remember_password);
         
         key_file.set_value(GROUP, IMAP_HOST, imap_server_host);
         key_file.set_integer(GROUP, IMAP_PORT, imap_server_port);
@@ -206,11 +222,7 @@ public class Geary.AccountInformation : Object {
             yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
                 cancellable, out new_etag);
         } catch (Error err) {
-            debug("Error writign to account info file: %s", err.message);
+            debug("Error writing to account info file: %s", err.message);
         }
-    }
-    
-    private File get_settings_file() {
-        return Geary.Engine.user_data_dir.get_child(credentials.user).get_child(SETTINGS_FILENAME);
     }
 }

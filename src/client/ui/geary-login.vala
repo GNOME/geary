@@ -11,6 +11,7 @@ public class LoginDialog {
     private Gtk.Entry entry_password;
     private Gtk.Entry entry_real_name;
     private Gtk.ComboBoxText combo_service;
+    private Gtk.CheckButton check_remember_password;
     
     private Gtk.Alignment other_info;
     private Gtk.Entry entry_imap_host;
@@ -29,17 +30,18 @@ public class LoginDialog {
     
     public LoginDialog.from_account_information(Geary.AccountInformation default_account_information) {
         this(default_account_information.real_name, default_account_information.credentials.user,
-            default_account_information.credentials.pass, default_account_information.service_provider,
-            default_account_information.imap_server_host, default_account_information.imap_server_port,
-            default_account_information.imap_server_ssl, default_account_information.smtp_server_host,
-            default_account_information.smtp_server_port, default_account_information.smtp_server_ssl);
+            default_account_information.credentials.pass, default_account_information.remember_password, 
+            default_account_information.service_provider, default_account_information.imap_server_host,
+            default_account_information.imap_server_port, default_account_information.imap_server_ssl,
+            default_account_information.smtp_server_host, default_account_information.smtp_server_port,
+            default_account_information.smtp_server_ssl);
     }
     
-    public LoginDialog(string default_real_name, string? default_username = null,
-        string? default_password = null, int default_service_provider = -1,string? default_imap_host = null,
-        uint16 default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL, bool default_imap_ssl = true,
-        string? default_smtp_host = null, uint16 default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
-        bool default_smtp_ssl = true) {
+    public LoginDialog(string? default_real_name = null, string? default_username = null,
+        string? default_password = null, bool default_remember_password = true, int default_service_provider = -1,
+        string? default_imap_host = null, uint16 default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
+        bool default_imap_ssl = true, string? default_smtp_host = null,
+        uint16 default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL, bool default_smtp_ssl = true) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
         dialog = builder.get_object("LoginDialog") as Gtk.Dialog;
@@ -50,6 +52,7 @@ public class LoginDialog {
         combo_service =  builder.get_object("service") as Gtk.ComboBoxText;
         entry_username = builder.get_object("username") as Gtk.Entry;
         entry_password = builder.get_object("password") as Gtk.Entry;
+        check_remember_password = builder.get_object("remember_password") as Gtk.CheckButton;
         
         other_info = builder.get_object("other_info") as Gtk.Alignment;
         entry_imap_host = builder.get_object("imap host") as Gtk.Entry;
@@ -74,6 +77,7 @@ public class LoginDialog {
         entry_real_name.set_text(default_real_name ?? "");
         entry_username.set_text(default_username ?? "");
         entry_password.set_text(default_password ?? "");
+        check_remember_password.active = default_remember_password;
         entry_imap_host.set_text(default_imap_host ?? "");
         entry_imap_port.set_text(default_imap_port.to_string());
         check_imap_ssl.active = default_imap_ssl;
@@ -89,6 +93,7 @@ public class LoginDialog {
         entry_username.changed.connect(on_changed);
         entry_password.changed.connect(on_changed);
         entry_real_name.changed.connect(on_changed);
+        check_remember_password.toggled.connect(on_changed);
         combo_service.changed.connect(on_changed);
         entry_imap_host.changed.connect(on_changed);
         entry_imap_port.changed.connect(on_changed);
@@ -124,6 +129,7 @@ public class LoginDialog {
         account_information = new Geary.AccountInformation(credentials);
         
         account_information.real_name = entry_real_name.text.strip();
+        account_information.remember_password = check_remember_password.active;
         account_information.service_provider = get_service_provider();
         account_information.imap_server_host = entry_imap_host.text.strip();
         account_information.imap_server_port = (uint16) int.parse(entry_imap_port.text.strip());

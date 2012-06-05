@@ -6,6 +6,10 @@
 
 namespace Geary.String {
 
+public inline bool is_null_or_whitespace(string? str) {
+    return str == null || str.strip()[0] == 0;
+}
+
 public inline bool is_empty(string? str) {
     return (str == null || str[0] == 0);
 }

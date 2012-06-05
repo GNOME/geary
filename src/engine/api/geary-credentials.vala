@@ -6,7 +6,7 @@
 
 public class Geary.Credentials {
     public string user { get; private set; }
-    public string pass { get; private set; }
+    public string pass { get; set; }
     
     public Credentials(string? user, string? pass) {
         this.user = user ?? "";
