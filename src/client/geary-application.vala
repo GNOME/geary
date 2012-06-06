@@ -230,28 +230,27 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
-    private void open_account(string username, Cancellable? cancellable = null) {
-        Geary.Credentials credentials = new Geary.Credentials(username, null);
+    private void open_account(string username) {
+        string? password = get_password(username);
+        if (password == null) {
+            password = request_password(username);
+            
+            // If the user refused to enter a password.
+            if (password == null) {
+                account = null;
+                return;
+            }
+        }
+        
+        // Now we know password is non-null.
+        Geary.Credentials credentials = new Geary.Credentials(username, password);
         Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
         try {
             account_information.load_info_from_file();
         } catch (Error err) {
-            // TODO: Handle this more gracefully?
-            error("Problem loading account information from file: %s", err.message);
+            error("Problem loading account information: %s", err.message);
         }
         
-        bool remember_password = account_information.remember_password;
-        string? password = get_password(account_information.credentials.user, ref remember_password);
-        // If there was no saved password and the user refused to enter a password.
-        if (password == null) {
-            account = null;
-            return;
-        }
-        
-        account_information.remember_password = remember_password;
-        account_information.store_async.begin(cancellable);
-        
-        account_information.credentials.pass = password;
         account = account_information.get_account();
         account.report_problem.connect(on_report_problem);
         controller.connect_account(account);
@@ -271,28 +270,22 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return null;
     }
     
-    private string? get_password(string username, ref bool remember_password) {
-        string? password = null;
-        if (remember_password)
-            password = keyring_get_password(username);
-        
-        if (Geary.String.is_null_or_whitespace(password)) {
-            password = request_password(username, out remember_password);
-            if (remember_password)
-                keyring_save_password(new Geary.Credentials(username, password));
-        }
-        
-        return password;
-    }
+    private string? get_password(string username) {
+        // TODO: For now we always get the password from the keyring. This will change when we
+        // allow users to not save their password.
+        string? password = keyring_get_password(username);
+        return Geary.String.is_empty(password) ? null : password;
+     }
     
     private string get_default_real_name() {
         string real_name = Environment.get_real_name();
         return real_name == "Unknown" ? "" : real_name;
     }
     
-    private string? request_password(string username, out bool remember_password) {
-        // TODO: For now we use the full LoginDialog. This will be changed to a dialog that only
+    private string? request_password(string username) {
+        // TODO: For now we use the full LoginDialog. This should be changed to a dialog that only
         // allows editting the password.
+        
         Geary.Credentials credentials = new Geary.Credentials(username, null);
         
         Geary.AccountInformation old_account_information = new Geary.AccountInformation(credentials);
@@ -303,17 +296,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             old_account_information = null;
         }
         
-        // TODO: When we start using a specialized login dialog, instead of delegating this work
-        // to request_account_information, we will need to save the password here as well.
         Geary.AccountInformation account_information = request_account_information(old_account_information);
-        if (account_information == null) {
-            remember_password = false;
-            return null;
-        }
-        
-        remember_password = account_information.remember_password;
-        return Geary.String.is_null_or_whitespace(account_information.credentials.pass) ? null :
-            account_information.credentials.pass;
+        return account_information == null ? null : account_information.credentials.pass;
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
@@ -328,8 +312,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             return null;
         }
         
-        if (login_dialog.account_information.remember_password)
-            keyring_save_password(login_dialog.account_information.credentials);
+        // TODO: This should be optional.
+        keyring_save_password(login_dialog.account_information.credentials);
           
         return login_dialog.account_information;  
     }
