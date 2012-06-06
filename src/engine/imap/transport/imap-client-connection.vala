@@ -23,6 +23,12 @@ public class Geary.Imap.ClientConnection {
     public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MIN_KEEPALIVE_SEC + 15;
     public const uint RECOMMENDED_TIMEOUT_SEC = ClientSession.RECOMMENDED_KEEPALIVE_SEC + 15;
     
+    /**
+     * The default timeout for an issued command to result in a response code from the server.
+     * A timed-out command will result in the connection being forcibly closed.
+     */
+    public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 15;
+    
     private const int FLUSH_TIMEOUT_MSEC = 100;
     
     private enum State {
@@ -69,6 +75,8 @@ public class Geary.Imap.ClientConnection {
     // Used solely for debugging
     private static int next_cx_id = 0;
     
+    public uint command_timeout_sec { get; set; default = DEFAULT_COMMAND_TIMEOUT_SEC; }
+    
     private Geary.Endpoint endpoint;
     private int cx_id;
     private Geary.State.Machine fsm;
@@ -82,6 +90,7 @@ public class Geary.Imap.ClientConnection {
     private bool idle_when_quiet = false;
     private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>(Hashable.hash_func,
         Equalable.equal_func);
+    private TimerPool<Tag> cmd_timer = new TimerPool<Tag>(Hashable.hash_func, Equalable.equal_func);
     
     public virtual signal void connected() {
         Logging.debug(Logging.Flag.NETWORK, "[%s] connected to %s", to_string(),
@@ -190,6 +199,8 @@ public class Geary.Imap.ClientConnection {
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
         fsm.set_logging(false);
+        
+        cmd_timer.timed_out.connect(on_cmd_timed_out);
     }
     
     /**
@@ -277,14 +288,18 @@ public class Geary.Imap.ClientConnection {
         
         connected();
         
-        des.xon();
+        yield des.start_async();
     }
     
     public async void disconnect_async(Cancellable? cancellable = null) throws Error {
         if (cx == null)
             return;
         
-        des.xoff();
+        // To guard against reentrancy
+        SocketConnection close_cx = cx;
+        cx = null;
+        
+        // unschedule before yielding to stop the Deserializer
         unschedule_flush_timeout();
         
         des.parameters_ready.disconnect(on_parameters_ready);
@@ -292,18 +307,21 @@ public class Geary.Imap.ClientConnection {
         des.deserialize_failure.disconnect(on_deserialize_failure);
         des.eos.disconnect(on_eos);
         
+        yield des.stop_async();
+        
         // TODO: May need to commit Serializer before disconnecting
+        ser = null;
+        des = null;
         
         Error? close_err = null;
         try {
-            yield cx.close_async(Priority.DEFAULT, cancellable);
+            debug("[%s] Disconnecting...", to_string());
+            yield close_cx.close_async(Priority.DEFAULT, cancellable);
+            debug("[%s] Disconnected", to_string());
         } catch (Error err) {
+            debug("[%s] Error disconnecting: %s", to_string(), err.message);
             close_err = err;
         } finally {
-            cx = null;
-            ser = null;
-            des = null;
-            
             fsm.issue(Event.DISCONNECTED);
             
             if (close_err != null)
@@ -351,6 +369,23 @@ public class Geary.Imap.ClientConnection {
         recv_closed();
     }
     
+    private void on_cmd_timed_out(Tag tag) {
+        debug("[%s] on_cmd_timed_out: %s", to_string(), tag.to_string());
+        
+        // one timeout is enough; recv error is reported and it's up to caller to nuke connection
+        cmd_timer.timed_out.disconnect(on_cmd_timed_out);
+        
+        // turn off graceful disconnect ... if the connection is hung, don't want to be stalled
+        // trying to flush the pipe
+        TcpConnection? tcp_cx = cx as TcpConnection;
+        if (tcp_cx != null)
+            tcp_cx.set_graceful_disconnect(false);
+        
+        receive_failure(new ImapError.TIMED_OUT("No response to command %s after %u seconds",
+            tag.to_string(), command_timeout_sec));
+    }
+    
+    // TODO: Guard against reentrancy
     public async void send_async(Command cmd, Cancellable? cancellable = null) throws Error {
         check_for_connection();
         
@@ -370,8 +405,15 @@ public class Geary.Imap.ClientConnection {
         // an IMAP requirement but makes tracing commands easier.)
         cmd.assign_tag(generate_tag());
         
+        // set the timeout on this command; note that a zero-second timeout means no timeout,
+        // and that there's no timeout on serialization
+        bool started = cmd_timer.start(cmd.tag, command_timeout_sec);
+        assert(started);
+        
         Error? ser_err = null;
         try {
+            // TODO: Make serialize non-blocking; this would also remove the need for a send_mutex
+            // (although reentrancy should still be checked for)
             yield cmd.serialize(ser);
         } catch (Error err) {
             debug("[%s] Error serializing command: %s", to_string(), err.message);
@@ -422,6 +464,10 @@ public class Geary.Imap.ClientConnection {
         
         // Like send_async(), need to use mutex when flushing as OutputStream must be accessed in
         // serialized fashion
+        //
+        // NOTE: Because this is happening in the background, it's possible for ser to go to null
+        // after any yield (if a close occurs while blocking); this is why all the checking is
+        // required
         int token = NonblockingMutex.INVALID_TOKEN;
         try {
             token = yield send_mutex.claim_async();
@@ -496,7 +542,13 @@ public class Geary.Imap.ClientConnection {
     }
     
     private void signal_status_response(void *user, Object? object) {
-        received_status_response((StatusResponse) object);
+        StatusResponse status_response = (StatusResponse) object;
+        
+        // stop the countdown timer on the associated command
+        bool cancelled = cmd_timer.cancel(status_response.tag);
+        assert(cancelled);
+        
+        received_status_response(status_response);
     }
     
     private void signal_continuation(void *user, Object? object) {

@@ -13,6 +13,7 @@ public errordomain Geary.ImapError {
     UNAUTHENTICATED,
     NOT_SUPPORTED,
     NOT_SELECTED,
-    INVALID_PATH
+    INVALID_PATH,
+    TIMED_OUT
 }
 

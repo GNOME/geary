@@ -173,6 +173,7 @@ public class Geary.Imap.ClientSession {
     private Geary.Endpoint endpoint;
     private Geary.AccountInformation account_info;
     private Geary.State.Machine fsm;
+    private ImapError not_connected_err;
     private ClientConnection? cx = null;
     private string? current_mailbox = null;
     private bool current_mailbox_readonly = false;
@@ -237,6 +238,8 @@ public class Geary.Imap.ClientSession {
     public ClientSession(Geary.Endpoint endpoint, Geary.AccountInformation account_info) {
         this.endpoint = endpoint;
         this.account_info = account_info;
+        
+        not_connected_err = new ImapError.NOT_CONNECTED("Not connected to %s", endpoint.to_string());
         
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.DISCONNECTED, Event.CONNECT, on_connect),
@@ -361,6 +364,18 @@ public class Geary.Imap.ClientSession {
         fsm.set_logging(false);
     }
     
+    ~ClientSession() {
+        switch (fsm.get_state()) {
+            case State.DISCONNECTED:
+            case State.BROKEN:
+                // no problem-o
+            break;
+            
+            default:
+                error("[%s] ClientSession ref dropped while still active", to_string());
+        }
+    }
+    
     public string? get_current_mailbox() {
         return current_mailbox;
     }
@@ -464,6 +479,15 @@ public class Geary.Imap.ClientSession {
         cx.deserialize_failure.disconnect(on_network_receive_failure);
         
         cx = null;
+        
+        // if there are any outstanding commands waiting for responses, wake them up now
+        if (tag_cb.size > 0) {
+            debug("[%s] Cancelling %d pending commands", to_string(), tag_cb.size);
+            foreach (Tag tag in tag_cb.keys)
+                Scheduler.on_idle(tag_cb.get(tag).callback);
+            
+            tag_cb.clear();
+        }
     }
     
     private void on_connect_completed(Object? source, AsyncResult result) {
@@ -1118,10 +1142,8 @@ public class Geary.Imap.ClientSession {
     
     private async AsyncCommandResponse issue_command_async(Command cmd, Object? user = null,
         Cancellable? cancellable = null) {
-        if (cx == null) {
-            return new AsyncCommandResponse(null, user,
-                new ImapError.NOT_CONNECTED("Not connected to %s", endpoint.to_string()));
-        }
+        if (cx == null)
+            return new AsyncCommandResponse(null, user, not_connected_err);
         
         int claim_stub = NonblockingMutex.INVALID_TOKEN;
         if (!account_info.imap_server_pipeline) {
@@ -1133,6 +1155,10 @@ public class Geary.Imap.ClientSession {
                 return new AsyncCommandResponse(null, user, wait_err);
             }
         }
+        
+        // watch for connection dropped after waiting for pipeline mutex
+        if (cx == null)
+            return new AsyncCommandResponse(null, user, not_connected_err);
         
         try {
             yield cx.send_async(cmd, cancellable);
@@ -1155,7 +1181,13 @@ public class Geary.Imap.ClientSession {
         }
         
         CommandResponse? cmd_response = tag_response.get(cmd.tag);
-        assert(cmd_response != null);
+        if (cmd_response == null) {
+            // this only happens when disconnected while waiting for response
+            assert(cx == null);
+            
+            return new AsyncCommandResponse(null, user, not_connected_err);
+        }
+        
         assert(cmd_response.is_sealed());
         assert(cmd_response.status_response.tag.equals(cmd.tag));
         

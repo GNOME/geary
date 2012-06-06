@@ -7,13 +7,15 @@
 /**
  * The Deserializer performs asynchronous I/O on a supplied input stream and transforms the raw
  * bytes into IMAP Parameters (which can then be converted into ServerResponses or ServerData).
- * The Deserializer will only begin reading from the stream when xon() is called.  Calling xoff()
- * will flow control the stream, halting reading without closing the stream itself.  Since all
- * results from the Deserializer are reported via signals, those signals should be connected to
- * prior to calling xon(), or the caller risks missing early messages.  (Note that since 
- * Deserializer uses async I/O, this isn't technically possible unless the signals are connected
- * after the Idle loop has a chance to run; however, this is an implementation detail and shouldn't
- * be relied upon.)
+ * The Deserializer will only begin reading from the stream when start_async() is called.  Calling
+ * stop_async() will halt reading without closing the stream itself.  A Deserializer may not be
+ * reused once stop_async() has been invoked.
+ * 
+ * Since all results from the Deserializer are reported via signals, those signals should be
+ * connected to prior to calling start_async(), or the caller risks missing early messages.  (Note
+ * that since Deserializer uses async I/O, this isn't technically possible unless the signals are
+ * connected after the Idle loop has a chance to run; however, this is an implementation detail and
+ * shouldn't be relied upon.)
  */
 
 public class Geary.Imap.Deserializer {
@@ -63,17 +65,16 @@ public class Geary.Imap.Deserializer {
     private DataInputStream dins;
     private Geary.State.Machine fsm;
     private ListParameter context;
+    private Cancellable? cancellable = null;
+    private NonblockingSemaphore closed_semaphore = new NonblockingSemaphore();
     private Geary.MidstreamConverter midstream = new Geary.MidstreamConverter("Deserializer");
     private RootParameters root = new RootParameters();
     private StringBuilder? current_string = null;
     private size_t literal_length_remaining = 0;
     private Geary.Memory.GrowableBuffer? block_buffer = null;
     private unowned uint8[]? current_buffer = null;
-    private bool flow_controlled = true;
     private int ins_priority = Priority.DEFAULT;
     private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
-    
-    public signal void flow_control(bool xon);
     
     public signal void parameters_ready(RootParameters root);
     
@@ -122,31 +123,40 @@ public class Geary.Imap.Deserializer {
         return midstream.install(converter);
     }
     
-    public void xon(int priority = GLib.Priority.DEFAULT) {
-        if (!flow_controlled || get_mode() == Mode.FAILED)
-            return;
+    public async void start_async(int priority = GLib.Priority.DEFAULT) throws Error {
+        if (cancellable != null)
+            throw new EngineError.ALREADY_OPEN("Deserializer already open");
         
-        flow_controlled = false;
+        if (get_mode() == Mode.FAILED)
+            throw new EngineError.ALREADY_CLOSED("Deserializer failed");
+        
+        if (cancellable.is_cancelled())
+            throw new EngineError.ALREADY_CLOSED("Deserializer closed");
+        
+        cancellable = new Cancellable();
         ins_priority = priority;
         
         next_deserialize_step();
-        
-        flow_control(true);
     }
     
-    public void xoff() {
-        if (flow_controlled || get_mode() == Mode.FAILED)
+    public async void stop_async() throws Error {
+        // quietly fail when not opened or already closed
+        if (cancellable == null || cancellable.is_cancelled() || get_mode() == Mode.FAILED)
             return;
         
-        flow_controlled = true;
+        // cancel any outstanding I/O
+        cancellable.cancel();
         
-        flow_control(false);
+        // wait for outstanding I/O to exit
+        debug("Waiting for deserializer to close...");
+        yield closed_semaphore.wait_async();
+        debug("Deserializer closed");
     }
     
     private void next_deserialize_step() {
         switch (get_mode()) {
             case Mode.LINE:
-                dins.read_line_async.begin(ins_priority, null, on_read_line);
+                dins.read_line_async.begin(ins_priority, cancellable, on_read_line);
             break;
             
             case Mode.BLOCK:
@@ -158,7 +168,11 @@ public class Geary.Imap.Deserializer {
                 current_buffer = block_buffer.allocate(
                     size_t.min(MAX_BLOCK_READ_SIZE, literal_length_remaining));
                 
-                dins.read_async.begin(current_buffer, ins_priority, null, on_read_block);
+                dins.read_async.begin(current_buffer, ins_priority, cancellable, on_read_block);
+            break;
+            
+            case Mode.FAILED:
+                // do nothing; Deserializer is effectively closed
             break;
             
             default:
@@ -178,13 +192,16 @@ public class Geary.Imap.Deserializer {
             
             push_line(line);
         } catch (Error err) {
-            receive_failure(err);
+            // only Cancellable allowed is internal used to notify when closed
+            if (err is IOError.CANCELLED)
+                closed_semaphore.blind_notify();
+            else
+                receive_failure(err);
             
             return;
         }
         
-        if (!flow_controlled)
-            next_deserialize_step();
+        next_deserialize_step();
     }
     
     private void on_read_block(Object? source, AsyncResult result) {
@@ -196,13 +213,16 @@ public class Geary.Imap.Deserializer {
             
             push_data(bytes_read);
         } catch (Error err) {
-            receive_failure(err);
+            // only Cancellable allowed is internal used to notify when closed
+            if (err is IOError.CANCELLED)
+                closed_semaphore.blind_notify();
+            else
+                receive_failure(err);
             
             return;
         }
         
-        if (!flow_controlled)
-            next_deserialize_step();
+        next_deserialize_step();
     }
     
     // Push a line (without the CRLF!).

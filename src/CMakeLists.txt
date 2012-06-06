@@ -157,6 +157,7 @@ engine/util/util-scheduler.vala
 engine/util/util-singleton.vala
 engine/util/util-stream.vala
 engine/util/util-string.vala
+engine/util/util-timer-pool.vala
 engine/util/util-trillian.vala
 )
 

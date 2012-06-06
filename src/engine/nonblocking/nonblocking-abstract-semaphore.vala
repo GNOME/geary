@@ -88,6 +88,17 @@ public abstract class Geary.NonblockingAbstractSemaphore {
             reset();
     }
     
+    /**
+     * Calls notify() without throwing an Exception, which is merely logged if encountered.
+     */
+    public void blind_notify() {
+        try {
+            notify();
+        } catch (Error err) {
+            message("Error notifying semaphore: %s", err.message);
+        }
+    }
+    
     public async void wait_async(Cancellable? cancellable = null) throws Error {
         for (;;) {
             check_user_cancelled(cancellable);
