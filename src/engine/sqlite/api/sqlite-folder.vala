@@ -377,11 +377,21 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
                 : new Geary.Email(position, email_id);
                 
             if (properties != null) {
-                if (required_fields.require(Geary.Email.Field.PROPERTIES))
-                    email.set_email_properties(properties.get_imap_email_properties());
+                if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
+                    Imap.EmailProperties? email_properties = properties.get_imap_email_properties();
+                    if (email_properties != null)
+                        email.set_email_properties(email_properties);
+                    else if (!partial_ok)
+                        continue;
+                }
                 
-                if (required_fields.require(Geary.Email.Field.FLAGS))
-                    email.set_flags(properties.get_email_flags());
+                if (required_fields.require(Geary.Email.Field.FLAGS)) {
+                    EmailFlags? email_flags = properties.get_email_flags();
+                    if (email_flags != null)
+                        email.set_flags(email_flags);
+                    else if (!partial_ok)
+                        continue;
+                }
             }
             
             emails.add(email);
@@ -454,11 +464,25 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             new Geary.Email(position, id);
         
         if (properties != null) {
-            if (required_fields.require(Geary.Email.Field.PROPERTIES))
-                email.set_email_properties(properties.get_imap_email_properties());
+            if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
+                Imap.EmailProperties? email_properties = properties.get_imap_email_properties();
+                if (email_properties != null) {
+                    email.set_email_properties(email_properties);
+                } else if (!partial_ok) {
+                    throw new EngineError.INCOMPLETE_MESSAGE("Message %s in folder %s does not have PROPERTIES fields",
+                        id.to_string(), to_string());
+                }
+            }
             
-            if (required_fields.require(Geary.Email.Field.FLAGS))
-                email.set_flags(properties.get_email_flags());
+            if (required_fields.require(Geary.Email.Field.FLAGS)) {
+                EmailFlags? email_flags = properties.get_email_flags();
+                if (email_flags != null) {
+                    email.set_flags(email_flags);
+                } else if (!partial_ok) {
+                    throw new EngineError.INCOMPLETE_MESSAGE("Message %s in folder %s does not have FLAGS fields",
+                        id.to_string(), to_string());
+                }
+            }
         }
         
         return email;
@@ -539,7 +563,9 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             if (row == null)
                 continue;
             
-            map.set(id, row.get_email_flags());
+            EmailFlags? email_flags = row.get_email_flags();
+            if (email_flags != null)
+                map.set(id, email_flags);
         }
         
         yield transaction.commit_async(cancellable);
