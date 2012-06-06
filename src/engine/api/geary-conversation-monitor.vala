@@ -92,7 +92,9 @@ public class Geary.ConversationMonitor : Object {
             id_ascending.add(email);
             id_descending.add(email);
             
-            message_ids.add_all(email.get_ancestors());
+            Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
+            if (ancestors != null)
+                message_ids.add_all(ancestors);
         }
         
         public void remove(Email email) {
@@ -502,21 +504,23 @@ public class Geary.ConversationMonitor : Object {
             
             // Right now, all threading is done with Message-IDs (no parsing of subject lines, etc.)
             // If a message doesn't have a Message-ID, it's treated as its own conversation
-            Gee.Set<RFC822.MessageID> ancestors = email.get_ancestors();
+            Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
             
             // see if any of these ancestor IDs maps to an existing conversation
             ImplConversation? conversation = null;
-            foreach (ImplConversation known in conversations) {
-                foreach (RFC822.MessageID ancestor in ancestors) {
-                    if (known.tracks_message_id(ancestor)) {
-                        conversation = known;
-                        
-                        break;
+            if (ancestors != null) {
+                foreach (ImplConversation known in conversations) {
+                    foreach (RFC822.MessageID ancestor in ancestors) {
+                        if (known.tracks_message_id(ancestor)) {
+                            conversation = known;
+                            
+                            break;
+                        }
                     }
+                    
+                    if (conversation != null)
+                        break;
                 }
-                
-                if (conversation != null)
-                    break;
             }
             
             // create new conversation if not seen before

@@ -114,9 +114,7 @@ public class FolderList : Sidebar.Tree {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
         entry_selected.connect(on_entry_selected);
 
-        user_folder_group = new Sidebar.Grouping("", IconFactory.instance.label_folder_icon);
-        user_folder_branch = new Sidebar.Branch(user_folder_group,
-            Sidebar.Branch.Options.STARTUP_OPEN_GROUPING, user_folder_comparator);
+        reset_user_folder_group();
         graft(user_folder_branch, int.MAX);
 
         // Set self as a drag destination.
@@ -146,6 +144,12 @@ public class FolderList : Sidebar.Tree {
         user_folder_group.rename(name);
     }
     
+    private void reset_user_folder_group() {
+        user_folder_group = new Sidebar.Grouping("", IconFactory.instance.label_folder_icon);
+        user_folder_branch = new Sidebar.Branch(user_folder_group,
+            Sidebar.Branch.Options.STARTUP_OPEN_GROUPING, user_folder_comparator);
+    }
+    
     public void add_folder(Geary.Folder folder) {
         FolderEntry folder_entry = new FolderEntry(folder);
         
@@ -172,6 +176,12 @@ public class FolderList : Sidebar.Tree {
         SpecialFolderBranch branch = new SpecialFolderBranch(special, folder);
         graft(branch, (int) special.folder_type);
         entries.set(folder.get_path(), branch.get_root());
+    }
+    
+    public void remove_all_branches() {
+        prune_all();
+        entries.clear();
+        reset_user_folder_group();
     }
     
     public void select_path(Geary.FolderPath path) {

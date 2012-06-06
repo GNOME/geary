@@ -165,9 +165,24 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return;
     }
     
-    private void initialize_account(bool replace_existing_data = false) {
+    private void set_account(Geary.EngineAccount? account) {
+        if (this.account == account)
+            return;
+            
+        if (this.account != null)
+            this.account.report_problem.disconnect(on_report_problem);
+        
+        this.account = account;
+        
+        if (this.account != null)
+            this.account.report_problem.connect(on_report_problem);
+        
+        controller.connect_account(this.account);
+    }
+    
+    private void initialize_account() {
         string? username = get_username();
-        if (username == null || replace_existing_data)
+        if (username == null)
             create_account(username);
         else
             open_account(username);
@@ -213,16 +228,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (success) {
             account_information.store_async.begin(cancellable);
-            account = account_information.get_account();
-            account.report_problem.connect(on_report_problem);
-            controller.connect_account(account);
+            set_account(account_information.get_account());
         } else {
             Geary.AccountInformation new_account_information =
                 request_account_information(account_information);
             
             // If the user refused to enter account information.
             if (new_account_information == null) {
-                account = null;
+                set_account(null);
                 return;
             }
             
@@ -230,30 +243,29 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
-    private void open_account(string username) {
-        string? password = get_password(username);
-        if (password == null) {
-            password = request_password(username);
-            
-            // If the user refused to enter a password.
-            if (password == null) {
-                account = null;
-                return;
-            }
-        }
-        
-        // Now we know password is non-null.
-        Geary.Credentials credentials = new Geary.Credentials(username, password);
+    private void open_account(string username, string? old_password = null, Cancellable? cancellable = null) {
+        Geary.Credentials credentials = new Geary.Credentials(username, null);
         Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
         try {
             account_information.load_info_from_file();
         } catch (Error err) {
-            error("Problem loading account information: %s", err.message);
+            // TODO: Handle this more gracefully?
+            error("Problem loading account information from file: %s", err.message);
         }
         
-        account = account_information.get_account();
-        account.report_problem.connect(on_report_problem);
-        controller.connect_account(account);
+        bool remember_password = account_information.remember_password;
+        string? password = get_password(account_information.credentials.user, old_password, ref remember_password);
+        // If there was no saved password and the user refused to enter a password.
+        if (password == null) {
+            set_account(null);
+            return;
+        }
+        
+        account_information.remember_password = remember_password;
+        account_information.store_async.begin(cancellable);
+        
+        account_information.credentials.pass = password;
+        set_account(account_information.get_account());
     }
     
     private string? get_username() {
@@ -270,34 +282,51 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return null;
     }
     
-    private string? get_password(string username) {
-        // TODO: For now we always get the password from the keyring. This will change when we
-        // allow users to not save their password.
-        string? password = keyring_get_password(username);
-        return Geary.String.is_empty(password) ? null : password;
-     }
+    private string? get_password(string username, string? old_password, ref bool remember_password) {
+        string? password = null;
+        if (old_password == null && remember_password)
+            password = keyring_get_password(username);
+        
+        if (Geary.String.is_null_or_whitespace(password))
+            password = request_password(username, old_password, out remember_password);
+        
+        return password;
+    }
     
     private string get_default_real_name() {
         string real_name = Environment.get_real_name();
         return real_name == "Unknown" ? "" : real_name;
     }
     
-    private string? request_password(string username) {
-        // TODO: For now we use the full LoginDialog. This should be changed to a dialog that only
-        // allows editting the password.
-        
-        Geary.Credentials credentials = new Geary.Credentials(username, null);
+    private string? request_password(string username, string? old_password, out bool remember_password) {
+        Geary.Credentials credentials = new Geary.Credentials(username, old_password);
         
         Geary.AccountInformation old_account_information = new Geary.AccountInformation(credentials);
         try {
             old_account_information.load_info_from_file();
         } catch (Error err) {
-            debug("Problem loading account information: %s", err.message);
-            old_account_information = null;
+            // TODO: Handle this more gracefully?
+            error("Error loading account information: %s", err.message);
         }
         
-        Geary.AccountInformation account_information = request_account_information(old_account_information);
-        return account_information == null ? null : account_information.credentials.pass;
+        PasswordDialog password_dialog = new PasswordDialog(old_account_information);
+        if (!password_dialog.run()) {
+            exit(1);
+            remember_password = false;
+            return null;
+        }
+            
+        // password_dialog.password should never be null at this point. It will only be null when
+        // password_dialog.run() returns false, in which case we have already exited/returned.
+        string? password = password_dialog.password;
+        remember_password = password_dialog.remember_password;
+        
+        if (remember_password)
+            keyring_save_password(new Geary.Credentials(username, password));
+        else
+            keyring_delete_password(username);
+        
+        return password;
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
@@ -312,8 +341,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             return null;
         }
         
-        // TODO: This should be optional.
-        keyring_save_password(login_dialog.account_information.credentials);
+        if (login_dialog.account_information.remember_password)
+            keyring_save_password(login_dialog.account_information.credentials);
+        else
+            keyring_delete_password(login_dialog.account_information.credentials.user);
           
         return login_dialog.account_information;  
     }
@@ -330,10 +361,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             
             case Geary.Account.Problem.LOGIN_FAILED:
                 debug("Login failed.");
-                if (controller != null)
-                    controller.stop();
+                Geary.Credentials old_credentials = account.get_account_information().credentials;
                 account.report_problem.disconnect(on_report_problem);
-                initialize_account(true);
+                open_account(old_credentials.user, old_credentials.pass);
             break;
             
             default:

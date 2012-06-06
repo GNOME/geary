@@ -237,7 +237,13 @@ public class Sidebar.Tree : Gtk.TreeView {
     public bool is_selected(Sidebar.Entry entry) {
         EntryWrapper? wrapper = get_wrapper(entry);
         
-        return (wrapper != null) ? get_selection().path_is_selected(wrapper.get_path()) : false;
+        // Even though get_selection() does not report its return type as nullable, it can be null
+        // if the window has been destroyed.
+        Gtk.TreeSelection selection = get_selection();
+        if (selection == null)
+            return false;
+        
+        return (wrapper != null) ? selection.path_is_selected(wrapper.get_path()) : false;
     }
     
     public bool is_any_selected() {
@@ -454,6 +460,16 @@ public class Sidebar.Tree : Gtk.TreeView {
         load_entry_icons(new_iter);
         
         return new_wrapper;
+    }
+    
+    protected void prune_all() {
+        while (branches.keys.size > 0) {
+            Gee.Iterator<Sidebar.Branch> iterator = branches.keys.iterator();
+            if (!iterator.next())
+                break;
+                
+            prune(iterator.get());
+        }
     }
     
     public void prune(Sidebar.Branch branch) {

@@ -77,10 +77,7 @@ public class GearyController {
     private int conversations_added_counter = 0;
     private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
 
-    private Geary.EngineAccount? _account = null;
-    private Geary.EngineAccount? account {
-        get { return _account; }
-    }
+    private Geary.EngineAccount? account { get; private set; }
     
     public GearyController() {
         // Setup actions.
@@ -245,13 +242,16 @@ public class GearyController {
         return entries;
     }
     
-    public void connect_account(Geary.EngineAccount? account) {
-        if (_account == account)
+    public void connect_account(Geary.EngineAccount? new_account) {
+        if (account == new_account)
             return;
-            
+        
         // Disconnect the old account, if any.
-        if (_account != null) {
-            _account.folders_added_removed.disconnect(on_folders_added_removed);
+        if (account != null) {
+            cancel_folder();
+            cancel_message();
+            
+            account.folders_added_removed.disconnect(on_folders_added_removed);
             
             Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
             delete_message.label = DEFAULT_DELETE_MESSAGE_LABEL;
@@ -260,30 +260,29 @@ public class GearyController {
             
             main_window.title = GearyApplication.NAME;
             
-            main_window.folder_list.set_user_folders_root_name("");
+            main_window.folder_list.remove_all_branches();
         }
         
-        _account = account;
+        account = new_account;
         
         // Connect the new account, if any.
-        if (_account != null) {
-            _account.folders_added_removed.connect(on_folders_added_removed);
+        if (account != null) {
+            account.folders_added_removed.connect(on_folders_added_removed);
             
             // Personality-specific setup.
-            if (_account.delete_is_archive()) {
+            if (account.delete_is_archive()) {
                 Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
                 delete_message.label = _("Archive Message");
                 delete_message.tooltip = _("Archive the selected conversation");
                 delete_message.icon_name = "archive-insert";
             }
             
-            if (_account.get_account_information().service_provider == Geary.ServiceProvider.YAHOO)
+            if (account.get_account_information().service_provider == Geary.ServiceProvider.YAHOO)
                 main_window.title = GearyApplication.NAME + "!";
             
-            main_window.folder_list.set_user_folders_root_name(_account.get_user_folders_label());
+            main_window.folder_list.set_user_folders_root_name(account.get_user_folders_label());
+            load_folders.begin(cancellable_folder);
         }
-        
-        load_folders.begin(cancellable_folder);
     }
     
     private bool is_viewed_conversation(Geary.Conversation? conversation) {
@@ -334,12 +333,6 @@ public class GearyController {
         } catch (Error err) {
             message("%s", err.message);
         }
-    }
-    
-    public void stop() {
-        cancel_folder();
-        cancel_message();
-        connect_account(null);
     }
     
     private void on_folder_selected(Geary.Folder? folder) {
