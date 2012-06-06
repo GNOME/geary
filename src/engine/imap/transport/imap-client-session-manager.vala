@@ -5,11 +5,12 @@
  */
 
 public class Geary.Imap.ClientSessionManager {
-    private const int MIN_POOL_SIZE = 2;
+    public const int DEFAULT_MIN_POOL_SIZE = 2;
     
     private Endpoint endpoint;
     private Credentials credentials;
     private AccountInformation account_info;
+    private int min_pool_size;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
@@ -21,10 +22,11 @@ public class Geary.Imap.ClientSessionManager {
     public signal void login_failed();
     
     public ClientSessionManager(Endpoint endpoint, Credentials credentials,
-        AccountInformation account_info) {
+        AccountInformation account_info, int min_pool_size = DEFAULT_MIN_POOL_SIZE) {
         this.endpoint = endpoint;
         this.credentials = credentials;
         this.account_info = account_info;
+        this.min_pool_size = min_pool_size;
         
         adjust_session_pool.begin();
     }
@@ -41,7 +43,7 @@ public class Geary.Imap.ClientSessionManager {
             return;
         }
         
-        while (sessions.size < MIN_POOL_SIZE) {
+        while (sessions.size < min_pool_size) {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {

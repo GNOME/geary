@@ -86,7 +86,7 @@ public class Geary.AccountInformation : Object {
         }
         
         Geary.Imap.ClientSessionManager client_session_manager =
-            new Geary.Imap.ClientSessionManager(endpoint, credentials, this);
+            new Geary.Imap.ClientSessionManager(endpoint, credentials, this, 0);
         Geary.Imap.ClientSession? client_session = null;
         try {
             client_session = yield client_session_manager.get_authorized_session_async(cancellable);
