@@ -148,11 +148,9 @@ public class Geary.Imap.Deserializer {
         cancellable.cancel();
         
         // wait for outstanding I/O to exit
-        debug("[%s/%s] Waiting for deserializer to close...", get_mode().to_string(),
-                fsm.to_string());
+        debug("[%s] Waiting for deserializer to close...", to_string());
         yield closed_semaphore.wait_async();
-        debug("[%s/%s] Deserializer closed", get_mode().to_string(),
-                fsm.to_string());
+        debug("[%s] Deserializer closed", to_string());
     }
     
     private void next_deserialize_step() {
@@ -187,6 +185,8 @@ public class Geary.Imap.Deserializer {
             size_t length;
             string? line = dins.read_line_async.end(result, out length);
             if (line == null) {
+                debug("[%s] on_read_line EOS", to_string());
+                
                 closed_semaphore.blind_notify();
                 eos();
                 
@@ -195,11 +195,14 @@ public class Geary.Imap.Deserializer {
             
             push_line(line);
         } catch (Error err) {
+            debug("[%s] on_read_line: %s", to_string(), err.message);
+            
             // only Cancellable allowed is internal used to notify when closed
-            if (err is IOError.CANCELLED)
-                closed_semaphore.blind_notify();
-            else
+            if (!(err is IOError.CANCELLED))
                 receive_failure(err);
+            
+            // always signal as closed
+            closed_semaphore.blind_notify();
             
             return;
         }
@@ -211,6 +214,8 @@ public class Geary.Imap.Deserializer {
         try {
             size_t bytes_read = dins.read_async.end(result);
             if (bytes_read == 0) {
+                debug("[%s] on_read_block EOS", to_string());
+                
                 closed_semaphore.blind_notify();
                 eos();
                 
@@ -222,11 +227,14 @@ public class Geary.Imap.Deserializer {
             
             push_data(bytes_read);
         } catch (Error err) {
+            debug("[%s] on_read_block: %s", to_string(), err.message);
+            
             // only Cancellable allowed is internal used to notify when closed
-            if (err is IOError.CANCELLED)
-                closed_semaphore.blind_notify();
-            else
+            if (!(err is IOError.CANCELLED))
                 receive_failure(err);
+            
+            // always signal as closed
+            closed_semaphore.blind_notify();
             
             return;
         }
@@ -606,6 +614,10 @@ public class Geary.Imap.Deserializer {
         warning("Bad event %s at state %s", event_to_string(event), state_to_string(state));
         
         return State.FAILED;
+    }
+    
+    public string to_string() {
+        return "%s/%s".printf(fsm.to_string(), get_mode().to_string());
     }
 }
 
