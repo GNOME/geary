@@ -4,6 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+extern void qsort(void *base, size_t num, size_t size, CompareFunc compare_func);
+
 public class Geary.Imap.MessageSet {
     public bool is_uid { get; private set; default = false; }
     
@@ -145,21 +147,61 @@ public class Geary.Imap.MessageSet {
     }
     
     // Builds sparse range of either UID values or message numbers.
-    // TODO: It would be more efficient to look for runs in the numbers and form the set specifier
-    // with them.
+    // NOTE: This method assumes the supplied array is internally allocated, and so an in-place sort
+    // is allowable
     private static string build_sparse_range(int64[] msg_nums) {
         assert(msg_nums.length > 0);
         
+        // sort array to search for spans
+        qsort(msg_nums, msg_nums.length, sizeof(int64), Comparable.int64_compare);
+        
+        int64 start_of_span = -1;
+        int64 last_msg_num = -1;
+        int span_count = 0;
         StringBuilder builder = new StringBuilder();
-        for (int ctr = 0; ctr < msg_nums.length; ctr++) {
-            int64 msg_num = msg_nums[ctr];
+        foreach (int64 msg_num in msg_nums) {
             assert(msg_num >= 0);
             
-            if (ctr < (msg_nums.length - 1))
-                builder.append_printf("%lld,", msg_num);
-            else
+            // the first number is automatically the start of a span, although it may be a span of one
+            // (start_of_span < 0 should only happen on first iteration; can't easily break out of
+            // loop because foreach/Iterator would still require a special case to skip it)
+            if (start_of_span < 0) {
+                // start of first span
                 builder.append_printf("%lld", msg_num);
+                
+                start_of_span = msg_num;
+                span_count = 1;
+            } else if ((start_of_span + span_count) == msg_num) {
+                // span continues
+                span_count++;
+            } else {
+                assert(span_count >= 1);
+                
+                // span ends, another begins
+                if (span_count == 1)
+                    builder.append_printf(",%lld", msg_num);
+                else if (span_count == 2)
+                    builder.append_printf(",%lld,%lld", start_of_span + 1, msg_num);
+                else
+                    builder.append_printf(":%lld,%lld", start_of_span + span_count - 1, msg_num);
+                
+                start_of_span = msg_num;
+                span_count = 1;
+            }
+            
+            last_msg_num = msg_num;
         }
+        
+        // there should always be one msg_num in sorted, so the loop should exit with some state
+        assert(start_of_span >= 0);
+        assert(span_count > 0);
+        assert(last_msg_num >= 0);
+        
+        // look for open-ended span
+        if (span_count == 2)
+            builder.append_printf(",%lld", last_msg_num);
+        else
+            builder.append_printf(":%lld", last_msg_num);
         
         return builder.str;
     }

@@ -20,6 +20,16 @@ public interface Geary.Comparable {
     public static int date_time_compare(void *a, void *b) {
         return ((DateTime) a).compare((DateTime) b);
     }
+    
+    public static int int64_compare(void* a, void *b) {
+        int64 diff = *((int64 *) a) - *((int64 *) b);
+        if (diff < 0)
+            return -1;
+        else if (diff > 0)
+            return 1;
+        else
+            return 0;
+    }
 }
 
 public interface Geary.Equalable {
