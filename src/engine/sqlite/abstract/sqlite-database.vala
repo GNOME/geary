@@ -6,11 +6,17 @@
 
 public abstract class Geary.Sqlite.Database {
     internal SQLHeavy.VersionedDatabase db;
-    
+    internal File schema_dir;
+
     private Gee.HashMap<SQLHeavy.Table, Geary.Sqlite.Table> table_map = new Gee.HashMap<
         SQLHeavy.Table, Geary.Sqlite.Table>();
-    
+
+    public signal void pre_upgrade(int version);
+
+    public signal void post_upgrade(int version);
+
     public Database(File db_file, File schema_dir) throws Error {
+        this.schema_dir = schema_dir;
         if (!db_file.get_parent().query_exists())
             db_file.get_parent().make_directory_with_parents();
         
@@ -40,6 +46,37 @@ public abstract class Geary.Sqlite.Database {
         yield t.begin_async(cancellable);
         
         return t;
+    }
+
+    public void upgrade() throws Error {
+        // Get the SQLite database version.
+        SQLHeavy.QueryResult result = db.execute("PRAGMA user_version;");
+        int db_version = result.fetch_int();
+        debug("Current db version: %d", db_version);
+
+        // Go through all the version scripts in the schema directory and apply each of them.
+        File upgrade_script;
+        while ((upgrade_script = get_upgrade_script(++db_version)).query_exists()) {
+            pre_upgrade(db_version);
+
+            try {
+                debug("Upgrading to %d", db_version);
+                string upgrade_contents;
+                FileUtils.get_contents(upgrade_script.get_path(), out upgrade_contents);
+                db.run(upgrade_contents);
+                db.run("PRAGMA user_version = %d;".printf(db_version));
+            } catch (Error e) {
+                // TODO Add rollback of changes here when switching away from SQLHeavy.
+                warning("Error upgrading database: %s", e.message);
+                throw e;
+            }
+
+            post_upgrade(db_version);
+        }
+    }
+
+    private File get_upgrade_script(int version) {
+        return File.new_for_path("%s/Version-%03d.sql".printf(schema_dir.get_path(), version));
     }
 }
 

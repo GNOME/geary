@@ -28,6 +28,9 @@ private class Geary.Sqlite.Account : Object {
         
         try {
             db = new ImapDatabase(cred.user, user_data_dir, resource_dir);
+            db.pre_upgrade.connect(on_pre_upgrade);
+            db.post_upgrade.connect(on_post_upgrade);
+            db.upgrade();
         } catch (Error err) {
             error("Unable to open database: %s", err.message);
         }
@@ -208,6 +211,14 @@ private class Geary.Sqlite.Account : Object {
         
         // drop from folder references table, all cleaned up
         folder_refs.unset(folder_ref.path);
+    }
+
+    private void on_pre_upgrade(int version){
+        // TODO Add per-version data massaging.
+    }
+
+    private void on_post_upgrade(int version){
+        // TODO Add per-version data massaging.
     }
 }
 
