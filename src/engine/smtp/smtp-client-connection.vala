@@ -16,7 +16,7 @@ public class Geary.Smtp.ClientConnection {
     private SocketConnection? socket_cx = null;
     private DataInputStream? dins = null;
     private DataOutputStream douts = null;
-    private Gee.List<string>? capabilities = null;
+    private Geary.Smtp.Capabilities? capabilities = null;
     
     public ClientConnection(Geary.Endpoint endpoint) {
         this.endpoint = endpoint;
@@ -57,8 +57,12 @@ public class Geary.Smtp.ClientConnection {
         throws Error {
         check_connected();
 
+        // Use STARTTLS if it has been explicitly enabled or if the server supports it and we are
+        // not using SSL encryption.
         Response response;
-        if (endpoint.flags.is_all_set(Endpoint.Flags.STARTTLS)) {
+        if (endpoint.flags.is_all_set(Endpoint.Flags.STARTTLS) ||
+            (!endpoint.flags.is_all_set(Endpoint.Flags.SSL) &&
+                capabilities.has_capability(Capabilities.STARTTLS))) {
             response = yield transaction_async(new Request(Command.STARTTLS));
             if (!response.code.is_starttls_ready()) {
                 throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
@@ -157,10 +161,10 @@ public class Geary.Smtp.ClientConnection {
         if (response.code.is_success_completed()) {
             // save list of caps returned in EHLO command, skipping first line because it's the 
             // EHLO response
-            capabilities = new Gee.ArrayList<string>();
+            capabilities = new Geary.Smtp.Capabilities();
             for (int ctr = 1; ctr < response.lines.size; ctr++) {
                 if (!String.is_empty(response.lines[ctr].explanation))
-                    capabilities.add(response.lines[ctr].explanation);
+                    capabilities.add_capability(response.lines[ctr].explanation);
             }
         } else {
             response = yield transaction_async(new Request(Command.HELO), cancellable);

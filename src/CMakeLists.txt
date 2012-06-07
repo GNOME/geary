@@ -84,6 +84,7 @@ engine/impl/geary-abstract-account.vala
 engine/impl/geary-abstract-folder.vala
 engine/impl/geary-email-flag-watcher.vala
 engine/impl/geary-email-prefetcher.vala
+engine/impl/geary-generic-capabilities.vala
 engine/impl/geary-generic-imap-account.vala
 engine/impl/geary-generic-imap-folder.vala
 engine/impl/geary-gmail-account.vala
@@ -109,6 +110,7 @@ engine/rfc822/rfc822-utils.vala
 
 engine/smtp/smtp-abstract-authenticator.vala
 engine/smtp/smtp-authenticator.vala
+engine/smtp/smtp-capabilities.vala
 engine/smtp/smtp-client-connection.vala
 engine/smtp/smtp-client-session.vala
 engine/smtp/smtp-command.vala
