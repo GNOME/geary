@@ -148,9 +148,11 @@ public class Geary.Imap.Deserializer {
         cancellable.cancel();
         
         // wait for outstanding I/O to exit
-        debug("Waiting for deserializer to close...");
+        debug("[%s/%s] Waiting for deserializer to close...", get_mode().to_string(),
+                fsm.to_string());
         yield closed_semaphore.wait_async();
-        debug("Deserializer closed");
+        debug("[%s/%s] Deserializer closed", get_mode().to_string(),
+                fsm.to_string());
     }
     
     private void next_deserialize_step() {
@@ -185,6 +187,7 @@ public class Geary.Imap.Deserializer {
             size_t length;
             string? line = dins.read_line_async.end(result, out length);
             if (line == null) {
+                closed_semaphore.blind_notify();
                 eos();
                 
                 return;
@@ -207,6 +210,12 @@ public class Geary.Imap.Deserializer {
     private void on_read_block(Object? source, AsyncResult result) {
         try {
             size_t bytes_read = dins.read_async.end(result);
+            if (bytes_read == 0) {
+                closed_semaphore.blind_notify();
+                eos();
+                
+                return;
+            }
             
             // adjust the current buffer's size to the amount that was actually read in
             block_buffer.adjust(current_buffer, bytes_read);
