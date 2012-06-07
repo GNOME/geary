@@ -145,27 +145,22 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         int properties_id = NonblockingBatch.INVALID_ID;
-        if (fields.require(Geary.Email.Field.PROPERTIES)) {
-            // Properties.
+        if (fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
+            // Properties and flags.
             Gee.List<FetchDataType> properties_data_types_list = new Gee.ArrayList<FetchDataType>();
-            properties_data_types_list.add(FetchDataType.INTERNALDATE);
-            properties_data_types_list.add(FetchDataType.RFC822_SIZE);
+            
+            if (fields.require(Geary.Email.Field.PROPERTIES)) {
+                properties_data_types_list.add(FetchDataType.INTERNALDATE);
+                properties_data_types_list.add(FetchDataType.RFC822_SIZE);
+            }
+            
+            if (fields.require(Geary.Email.Field.FLAGS))
+                properties_data_types_list.add(FetchDataType.FLAGS);
             
             FetchCommand properties_cmd = new FetchCommand.from_collection(msg_set,
                 properties_data_types_list, null);
             
             properties_id = batch.add(new MailboxOperation(context, properties_cmd));
-        }
-        
-        int flags_id = NonblockingBatch.INVALID_ID;
-        if (fields.require(Geary.Email.Field.FLAGS)) {
-            // Flags
-            FetchDataType[] flags_data_types = new FetchDataType[1];
-            flags_data_types[0] = FetchDataType.FLAGS;
-            
-            FetchCommand flags_cmd = new FetchCommand(msg_set, flags_data_types, null);
-            
-            flags_id = batch.add(new MailboxOperation(context, flags_cmd));
         }
         
         yield batch.execute_all_async(cancellable);
@@ -234,26 +229,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 if (properties_email == null)
                     properties_email = accumulate_email(properties_res, msgs, pos_map);
                 
-                fetch_results_to_email(properties_res, Geary.Email.Field.PROPERTIES, properties_email);
-            }
-        }
-        
-        if (flags_id != NonblockingBatch.INVALID_ID) {
-            MailboxOperation flags_op = (MailboxOperation) batch.get_operation(flags_id);
-            CommandResponse flags_resp = (CommandResponse) batch.get_result(flags_id);
-            
-            if (flags_resp.status_response.status != Status.OK) {
-                throw new ImapError.SERVER_ERROR("Server error for %s: %s", 
-                    flags_op.cmd.to_string(), flags_resp.to_string());
-            }
-            
-            FetchResults[] flags_results = FetchResults.decode(flags_resp);
-            foreach (FetchResults flags_res in flags_results) {
-                Geary.Email? flags_email = pos_map.get(flags_res.msg_num);
-                if (flags_email == null)
-                    flags_email = accumulate_email(flags_res, msgs, pos_map);
-                
-                fetch_results_to_email(flags_res, Geary.Email.Field.FLAGS, flags_email);
+                fetch_results_to_email(properties_res,
+                    fields & (Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS), properties_email);
             }
         }
         
