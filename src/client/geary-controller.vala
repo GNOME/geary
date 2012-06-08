@@ -112,6 +112,8 @@ public class GearyController {
         main_window.message_viewer.reply_all_message.connect(on_reply_all_message);
         main_window.message_viewer.forward_message.connect(on_forward_message);
         main_window.message_viewer.mark_message.connect(on_message_viewer_mark_message);
+        main_window.message_viewer.open_attachment.connect(on_open_attachment);
+        main_window.message_viewer.save_attachments.connect(on_save_attachments);
 
         main_window.message_list_view.grab_focus();
         
@@ -940,6 +942,54 @@ public class GearyController {
 
     private void on_move_complete() {
         set_busy(false);
+    }
+
+    private void on_open_attachment(Geary.Attachment attachment) {
+        open_uri("file://" + attachment.filepath);
+    }
+
+    private void on_save_attachments(Gee.List<Geary.Attachment> attachments) {
+        Gtk.FileChooserAction action = attachments.size == 1
+            ? Gtk.FileChooserAction.SAVE
+            : Gtk.FileChooserAction.SELECT_FOLDER;
+        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
+            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.SAVE, Gtk.ResponseType.ACCEPT, null);
+        dialog.set_filename(attachments[0].filepath);
+        if (dialog.run() != Gtk.ResponseType.ACCEPT) {
+            dialog.destroy();
+            return;
+        }
+
+        // Get the selected location.
+        string filename = dialog.get_filename();
+        debug("Saving attachment to: %s", filename);
+
+        // Save the attachments.
+        // TODO Handle attachments with the same name being saved into the same directory.
+        File destination = File.new_for_path(filename);
+        if (attachments.size == 1) {
+            File source = File.new_for_path(attachments[0].filepath);
+            source.copy_async.begin(destination, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
+                null, on_save_completed);
+        } else {
+            foreach (Geary.Attachment attachment in attachments) {
+                File dest_name = destination.get_child(attachment.filename);
+                File source = File.new_for_path(attachment.filepath);
+                debug("Saving %s to %s", source.get_path(), dest_name.get_path());
+                source.copy_async.begin(dest_name, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
+                    null, on_save_completed);
+            }
+        }
+
+        dialog.destroy();
+    }
+
+    private void on_save_completed(Object? source, AsyncResult result) {
+        try {
+            ((File) source).copy_async.end(result);
+        } catch (Error error) {
+            warning("Failed to copy attachment to destination: %s", error.message);
+        }
     }
 
     // Opens a link in an external browser.

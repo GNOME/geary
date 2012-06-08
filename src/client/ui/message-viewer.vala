@@ -14,7 +14,8 @@ public class MessageViewer : WebKit.WebView {
         | Geary.Email.Field.DATE
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
-    
+
+    private const int ATTACHMENT_PREVIEW_SIZE = 50;
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string HTML_BODY = """
@@ -185,8 +186,9 @@ public class MessageViewer : WebKit.WebView {
                 background-color: #e8e8e8
             }
             .email.hide:not(:last-of-type) .body,
-            .email:not(.hide) .preview,
-            .email:last-of-type .preview {
+            .email.hide:not(:last-of-type) > .attachment_container,
+            .email:not(.hide) .header_container .preview,
+            .email:last-of-type .header_container .preview {
                 display: none;
             }
             .email:not(:last-of-type) .header_container {
@@ -217,6 +219,76 @@ public class MessageViewer : WebKit.WebView {
                 display: none;
             }
 
+        }
+
+        .email:not(.attachment) .attachment.icon {
+            display: none;
+        }
+        .email .header_container .attachment.icon {
+            float: right;
+            margin-top: 7px;
+        }
+        .email > .attachment_container {
+            background-color: #ddd;
+            border-radius: 4px;
+            padding-bottom: 10px;
+        }
+        .email > .attachment_container > .top_border {
+            border-bottom: 1px solid #999;
+            border-radius: 0 0 4px 4px;
+            height: 10px;
+            background-color: white;
+            margin-bottom: 5px;
+            box-shadow: 0 3px 5px #c0c0c0;
+        }
+        .email > .attachment_container > .attachment {
+            margin: 10px 10px 0 10px;
+            padding: 2px;
+            overflow: hidden;
+            font-size: 10pt;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            display: inline;
+        }
+        .email > .attachment_container > .attachment:hover,
+        .email > .attachment_container > .attachment:active {
+            border-color: #999;
+            background-color: #e8e8e8;
+        }
+        .email > .attachment_container > .attachment:active {
+            padding: 3px 1px 1px 3px;
+            box-shadow: inset 3px 3px 5px #ccc, inset -1px -1px 3px #ccc;
+        }
+        .email > .attachment_container > .attachment .preview {
+            width: 52px;
+            height: 52px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .email > .attachment_container > .attachment .preview img {
+            max-width: 50px;
+            max-height: 50px;
+        }
+        .email > .attachment_container > .attachment .preview .thumbnail {
+            border: 1px solid #999;
+            box-shadow: 0 0 5px #b8b8b8;
+            background-size: 16px 16px;
+            background-position:0 0, 8px 0, 8px -8px, 0px 8px;
+        }
+        .email > .attachment_container > .attachment:hover .preview .thumbnail {
+            background-image:
+                -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent),
+                -webkit-linear-gradient(-45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent),
+                -webkit-linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.1) 75%),
+                -webkit-linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.1) 75%);
+        }
+        .email > .attachment_container > .attachment .info {
+            vertical-align: middle;
+            padding-left: 5px;
+        }
+        .email > .attachment_container > .attachment .info > :not(.filename) {
+            color: #666;
         }
 
         .header {
@@ -314,7 +386,8 @@ public class MessageViewer : WebKit.WebView {
             width: auto;
             padding: 15px;
         }
-        #email_template {
+        #email_template,
+        #attachment_template {
             display: none;
         }
         blockquote {
@@ -336,11 +409,22 @@ public class MessageViewer : WebKit.WebView {
                         <div class="unstarred button"><img src="" class="icon" /></div>
                         <div class="menu button"><img src="" class="icon" /></div>
                     </div>
+                    <img src="" class="attachment icon" />
                     <div class="header"></div>
                     <div class="preview"></div>
                 </div>
                 <div class="body"></div>
             </div>
+        </div>
+        <div id="attachment_template" class="attachment_container">
+            <div class="top_border"></div>
+            <table class="attachment"><tr>
+                <td class="preview"><img src="" /></td>
+                <td class="info">
+                    <div class="filename"></div>
+                    <div class="filesize"></div>                
+                </td>
+            </tr></table>
         </div>
         </body></html>""";
     
@@ -362,10 +446,17 @@ public class MessageViewer : WebKit.WebView {
     // Fired when the user marks a message.
     public signal void mark_message(Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
+    // Fired when the user opens an attachment.
+    public signal void open_attachment(Geary.Attachment attachment);
+
+    // Fired when the user wants to save one or more attachments.
+    public signal void save_attachments(Gee.List<Geary.Attachment> attachment);
+
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
     public Geary.Email? active_email = null;
+    public Geary.Attachment? active_attachment = null;
     
     // HTML element that contains message DIVs.
     private WebKit.DOM.HTMLDivElement container;
@@ -415,6 +506,7 @@ public class MessageViewer : WebKit.WebView {
         set_icon_src("#email_template .menu .icon", "down");
         set_icon_src("#email_template .starred .icon", "starred");
         set_icon_src("#email_template .unstarred .icon", "non-starred-grey");
+        set_icon_src("#email_template .attachment.icon", "mail-attachment");
 
     }
 
@@ -431,7 +523,7 @@ public class MessageViewer : WebKit.WebView {
     private void set_icon_src(string selector, string icon_name) {
         try {
             // Load the icon.
-            string icon_filename = IconFactory.instance.lookup_icon(icon_name, 16, 0).get_filename();
+            string icon_filename = IconFactory.instance.lookup_icon(icon_name, 16).get_filename();
             uint8[] icon_content;
             FileUtils.get_data(icon_filename, out icon_content);
 
@@ -441,13 +533,54 @@ public class MessageViewer : WebKit.WebView {
                 icon_content, out uncertain_content_type));
 
             // Then set the source to a data url.
-            WebKit.DOM.HTMLImageElement icon = get_dom_document().query_selector(selector)
+            WebKit.DOM.HTMLImageElement img = Util.DOM.select(get_dom_document(), selector)
                 as WebKit.DOM.HTMLImageElement;
-            icon.set_attribute("src", "data:%s;base64,%s".printf(icon_mimetype,
-                Base64.encode(icon_content)));
+            set_data_url(img, icon_mimetype, icon_content);
         } catch (Error error) {
             warning("Failed to load icon '%s': %s", icon_name, error.message);
         }
+    }
+
+    private void set_image_src(WebKit.DOM.HTMLImageElement img, string mime_type, string filename,
+        int maxwidth, int maxheight = -1) {
+        if( maxheight == -1 ){
+            maxheight = maxwidth;
+        }
+
+        try {
+            // If the file is an image, use it. Otherwise get the icon for this mime_type.
+            uint8[] content;
+            string content_type = ContentType.from_mime_type(mime_type);
+            string icon_mime_type = mime_type;
+            if (mime_type.has_prefix("image/")) {
+                // Get a thumbnail for the image.
+                // TODO Generate and save the thumbnail when extracting the attachments rather than
+                // when showing them in the viewer.
+                img.get_class_list().add("thumbnail");
+                Gdk.Pixbuf image = new Gdk.Pixbuf.from_file_at_scale(filename, maxwidth, maxheight,
+                    true);
+                image.save_to_buffer(out content, "png");
+                icon_mime_type = "image/png";
+            } else {
+                // Load the icon for this mime type.
+                ThemedIcon icon = ContentType.get_icon(content_type) as ThemedIcon;
+                string icon_filename = IconFactory.instance.lookup_icon(icon.names[0], maxwidth)
+                    .get_filename();
+                FileUtils.get_data(icon_filename, out content);
+                icon_mime_type = ContentType.get_mime_type(ContentType.guess(icon_filename, content,
+                    null));
+            }
+
+            // Then set the source to a data url.
+            set_data_url(img, icon_mime_type, content);
+        } catch (Error error) {
+            warning("Failed to load image '%s': %s", filename, error.message);
+        }
+    }
+
+    private void set_data_url(WebKit.DOM.HTMLImageElement img, string mime_type, uint8[] content)
+        throws Error {
+        img.set_attribute("src", "data:%s;base64,%s".printf(mime_type, Base64.encode(content)));
     }
 
     // Removes all displayed e-mails from the view.
@@ -547,12 +680,10 @@ public class MessageViewer : WebKit.WebView {
             //         </span>
             //     </div>
             // </div>
-            div_message = get_dom_document().get_element_by_id("email_template").clone_node(true)
-                as WebKit.DOM.HTMLElement;
+            div_message = Util.DOM.clone_select(get_dom_document(), "#email_template");
             div_message.set_attribute("id", message_id);
             container.insert_before(div_message, insert_before);
-            div_email_container = div_message.query_selector("div.email_container")
-                as WebKit.DOM.HTMLElement;
+            div_email_container = Util.DOM.select(div_message, "div.email_container");
             if (email.is_unread() == Geary.Trillian.FALSE) {
                 div_message.get_class_list().add("hide");
             }
@@ -598,7 +729,7 @@ public class MessageViewer : WebKit.WebView {
 
         // Add the avatar.
         try {
-            WebKit.DOM.HTMLImageElement icon = get_dom_document().query_selector("#%s .avatar".printf(message_id))
+            WebKit.DOM.HTMLImageElement icon = Util.DOM.select(div_message, ".avatar")
                 as WebKit.DOM.HTMLImageElement;
             string checksum = GLib.Checksum.compute_for_string (
                 GLib.ChecksumType.MD5, email.sender.get(0).address);
@@ -610,8 +741,8 @@ public class MessageViewer : WebKit.WebView {
 
         // Insert the preview text.
         try {
-            WebKit.DOM.HTMLElement preview = div_message.query_selector(".header_container .preview")
-                as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement preview =
+                Util.DOM.select(div_message, ".header_container .preview");
             string preview_str = email.get_preview_as_string();
             if (preview_str.length == Geary.Email.MAX_PREVIEW_BYTES) {
                 preview_str += "…";
@@ -637,15 +768,20 @@ public class MessageViewer : WebKit.WebView {
         
         // Graft header and email body into the email container.
         try {
-            WebKit.DOM.HTMLElement table_header = div_email_container
-                .query_selector(".header_container .header") as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement table_header =
+                Util.DOM.select(div_email_container, ".header_container .header");
             table_header.set_inner_html(header);
             
-            WebKit.DOM.HTMLElement span_body = div_email_container.query_selector(".body")
-                as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement span_body = Util.DOM.select(div_email_container, ".body");
             span_body.set_inner_html(body_text);
+
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
+        }
+
+        // Add the attachments container if we have any attachments.
+        if (email.attachments.size > 0) {
+            insert_attachments(div_message, email.attachments);
         }
 
         // Add classes according to the state of the email.
@@ -653,12 +789,14 @@ public class MessageViewer : WebKit.WebView {
 
         // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
         bind_event(this, ".email", "contextmenu", (Callback) on_context_menu, this);
-        bind_event(this,".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
-        bind_event(this,".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
-        bind_event(this,".email_container .menu", "click", (Callback) on_menu_clicked, this);
-        bind_event(this,".email_container .starred", "click", (Callback) on_unstar_clicked, this);
-        bind_event(this,".email_container .unstarred", "click", (Callback) on_star_clicked, this);
-        bind_event(this,".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
+        bind_event(this, ".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
+        bind_event(this, ".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
+        bind_event(this, ".email_container .menu", "click", (Callback) on_menu_clicked, this);
+        bind_event(this, ".email_container .starred", "click", (Callback) on_unstar_clicked, this);
+        bind_event(this, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
+        bind_event(this, ".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
+        bind_event(this, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
+        bind_event(this, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
     }
     
     private WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
@@ -714,7 +852,7 @@ public class MessageViewer : WebKit.WebView {
 
         Geary.EmailFlags flags = email.email_flags;
         
-        // Update the flags in out message set.
+        // Update the flags in our message set.
         foreach (Geary.Email message in messages) {
             if (message.id.equals(email.id)) {
                 message.set_flags(flags);
@@ -726,21 +864,14 @@ public class MessageViewer : WebKit.WebView {
         WebKit.DOM.HTMLElement container = email_to_element.get(email.id);
         try {
             WebKit.DOM.DOMTokenList class_list = container.get_class_list();
-            if (flags.is_unread()) {
-                class_list.remove("read");
-            } else {
-                class_list.add("read");
-            }
-            if (flags.is_flagged()) {
-                class_list.add("starred");
-            } else {
-                class_list.remove("starred");
-            }
+            Util.DOM.toggle_class(class_list, "read", !flags.is_unread());
+            Util.DOM.toggle_class(class_list, "starred", flags.is_flagged());
+            Util.DOM.toggle_class(class_list, "attachment", email.attachments.size > 0);
         } catch (Error e) {
             warning("Failed to set classes on .email: %s", e.message);
         }
     }
-    
+
     private static void on_context_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         message_viewer.active_email = message_viewer.get_email_from_element(element);
@@ -768,10 +899,10 @@ public class MessageViewer : WebKit.WebView {
     private static void on_menu_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         event.stop_propagation();
-        message_viewer.on_menu_clicked_async(element);
+        message_viewer.on_menu_clicked_self(element);
     }
 
-    private void on_menu_clicked_async(WebKit.DOM.Element element) {
+    private void on_menu_clicked_self(WebKit.DOM.Element element) {
         active_email = get_email_from_element(element);
         show_message_menu(element);
     }
@@ -779,10 +910,10 @@ public class MessageViewer : WebKit.WebView {
     private static void on_unstar_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         event.stop_propagation();
-        message_viewer.on_unstar_clicked_async(element);
+        message_viewer.on_unstar_clicked_self(element);
     }
 
-    private void on_unstar_clicked_async(WebKit.DOM.Element element){
+    private void on_unstar_clicked_self(WebKit.DOM.Element element){
         active_email = get_email_from_element(element);
         on_unflag_message();
     }
@@ -790,10 +921,10 @@ public class MessageViewer : WebKit.WebView {
     private static void on_star_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         event.stop_propagation();
-        message_viewer.on_star_clicked_async(element);
+        message_viewer.on_star_clicked_self(element);
     }
 
-    private void on_star_clicked_async(WebKit.DOM.Element element){
+    private void on_star_clicked_self(WebKit.DOM.Element element){
         active_email = get_email_from_element(element);
         on_flag_message();
     }
@@ -815,13 +946,51 @@ public class MessageViewer : WebKit.WebView {
                 class_list.add("hide");
             }
         } catch (Error error) {
-            warning("Error toggline message: %s", error.message);
+            warning("Error toggling message: %s", error.message);
+        }
+    }
+
+    private static void on_attachment_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        message_viewer.on_attachment_clicked_self(element);
+    }
+
+    private void on_attachment_clicked_self(WebKit.DOM.Element element) {
+        try {
+            int64 attachment_id = int64.parse(element.get_attribute("data-attachment-id"));
+            open_attachment(get_email_from_element(element).get_attachment(attachment_id));
+        } catch (Error error) {
+            warning("Error opening attachment: %s", error.message);
+        }
+    }
+
+    private static void on_attachment_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        try {
+            event.stop_propagation();
+            message_viewer.active_email = message_viewer.get_email_from_element(element);
+            message_viewer.active_attachment = message_viewer.active_email.get_attachment(
+                int64.parse(element.get_attribute("data-attachment-id")));
+            message_viewer.show_message_menu(element);
+        } catch (Error error) {
+            warning("Error opening attachment menu: %s", error.message);
         }
     }
 
     private void on_message_menu_selection_done() {
         active_email = null;
+        active_attachment = null;
         message_menu = null;
+    }
+
+    private void on_save_attachment() {
+        Gee.List<Geary.Attachment> attachments = new Gee.ArrayList<Geary.Attachment>();
+        attachments.add(active_attachment != null ? active_attachment : active_email.attachments[0]);
+        save_attachments(attachments);
+    }
+
+    private void on_save_all_attachments() {
+        save_attachments(active_email.attachments);
     }
 
     private void on_reply_to_message() {
@@ -873,6 +1042,29 @@ public class MessageViewer : WebKit.WebView {
     private void show_message_menu(WebKit.DOM.Element element) {
         message_menu = new Gtk.Menu();
         message_menu.selection_done.connect(on_message_menu_selection_done);
+
+        if (active_email.attachments.size > 0) {
+            // Save attachment as...
+            if (active_attachment != null) {
+                Gtk.MenuItem save_attachment_item = new Gtk.MenuItem.with_mnemonic(_("_Save As..."));
+                save_attachment_item.activate.connect(on_save_attachment);
+                message_menu.append(save_attachment_item);
+            }
+
+            // Save all attachments
+            if (active_email.attachments.size > 1) {
+                Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
+                save_all_item.activate.connect(on_save_all_attachments);
+                message_menu.append(save_all_item);
+            } else if (active_attachment == null) {
+                Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save A_ttachment..."));
+                save_all_item.activate.connect(on_save_attachment);
+                message_menu.append(save_all_item);
+            }
+
+            // Separator.
+            message_menu.append(new Gtk.SeparatorMenuItem());
+        }
 
         // Reply to a message.
         Gtk.MenuItem reply_item = new Gtk.MenuItem.with_mnemonic(_("_Reply"));
@@ -1002,7 +1194,7 @@ public class MessageViewer : WebKit.WebView {
 
                 // Copy the stuff before the quote, then the wrapped quote.
                 WebKit.DOM.Element quote_container = create_quote_container();
-                ((WebKit.DOM.HTMLElement) quote_container.query_selector(".quote")).set_inner_html(
+                Util.DOM.select(quote_container, ".quote").set_inner_html(
                     text.substring(quote_start, quote_end - quote_start));
                 container.append_child(quote_container);
                 if (quote_start > offset) {
@@ -1042,7 +1234,7 @@ public class MessageViewer : WebKit.WebView {
             
             // Some HTML messages like to wrap themselves in full, proper html, head, and body tags.
             // If we have that here, lets remove it since we are sticking it in our own document.
-            WebKit.DOM.HTMLElement? body = container.query_selector("body") as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement? body = Util.DOM.select(container, "body");
             if (body != null) {
                 container.set_inner_html(body.get_inner_html());
             }
@@ -1065,7 +1257,7 @@ public class MessageViewer : WebKit.WebView {
                 //         blockquote
                 //     sibling
                 WebKit.DOM.Element quote_container = create_quote_container();
-                quote_container.query_selector(".quote").append_child(blockquote_node);
+                Util.DOM.select(quote_container, ".quote").append_child(blockquote_node);
                 if (next_sibling == null) {
                     parent.append_child(quote_container);
                 } else {
@@ -1217,7 +1409,59 @@ public class MessageViewer : WebKit.WebView {
         output = r.replace_eval(output, -1, 0, 0, is_valid_url);
         return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
     }
-    
+
+    private void insert_attachments(WebKit.DOM.HTMLElement email_container,
+        Gee.List<Geary.Attachment> attachments) {
+
+        // <div class="attachment_container">
+        //     <div class="top_border"></div>
+        //     <table class="attachment" data-attachment-id="">
+        //         <tr>
+        //             <td class="preview">
+        //                 <img src="" />
+        //             </td>
+        //             <td class="info">
+        //                 <div class="filename"></div>
+        //                 <div class="filesize"></div>
+        //             </td>
+        //         </tr>
+        //     </table>
+        // </div>
+
+        try {
+            // Prepare the dom for our attachments.
+            WebKit.DOM.Document document = get_dom_document();
+            WebKit.DOM.HTMLElement attachment_container =
+                Util.DOM.clone_select(document, "#attachment_template");
+            WebKit.DOM.HTMLElement attachment_template =
+                Util.DOM.select(attachment_container, ".attachment");
+            attachment_container.remove_attribute("id");
+            attachment_container.remove_child(attachment_template);
+
+            // Create an attachment table for each attachment.
+            foreach (Geary.Attachment attachment in attachments) {
+                // Generate the attachment table.
+                WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
+                Util.DOM.select(attachment_table, ".info .filename")
+                    .set_inner_text(attachment.filename);
+                Util.DOM.select(attachment_table, ".info .filesize")
+                    .set_inner_text(Files.get_filesize_as_string(attachment.filesize));
+                attachment_table.set_attribute("data-attachment-id", "%lld".printf(attachment.id));
+
+                // Set the image preview and insert it into the container.
+                WebKit.DOM.HTMLImageElement img =
+                    Util.DOM.select(attachment_table, ".preview img") as WebKit.DOM.HTMLImageElement;
+                set_image_src(img, attachment.mime_type, attachment.filepath, ATTACHMENT_PREVIEW_SIZE);
+                attachment_container.append_child(attachment_table);
+            }
+
+            // Append the attachments to the email.
+            email_container.append_child(attachment_container);
+        } catch (Error error) {
+            debug("Failed to insert attachments: %s", error.message);
+        }
+    }
+
     // Validates a URL.
     // Ensures the URL begins with a valid protocol specifier.  (If not, we don't
     // want to linkify it.)

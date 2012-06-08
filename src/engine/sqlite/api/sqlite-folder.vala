@@ -35,6 +35,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     private Geary.Imap.FolderProperties? properties;
     private MessageTable message_table;
     private MessageLocationTable location_table;
+    private MessageAttachmentTable attachment_table;
     private ImapMessagePropertiesTable imap_message_properties_table;
     private Geary.FolderPath path;
     
@@ -47,6 +48,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         
         message_table = db.get_message_table();
         location_table = db.get_message_location_table();
+        attachment_table = db.get_message_attachment_table();
         imap_message_properties_table = db.get_imap_message_properties_table();
     }
     
@@ -232,7 +234,13 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         MessageLocationRow location_row = new MessageLocationRow(location_table, Row.INVALID_ID,
             message_id, folder_row.id, email.id.ordering, email.position);
         yield location_table.create_async(transaction, location_row, cancellable);
-        
+
+        // Also add attachments if we have them.
+        if (email.fields.fulfills(Attachment.REQUIRED_FIELDS)) {
+            Gee.List<GMime.Part> attachments = email.get_message().get_attachments();
+            yield save_attachments_async(transaction, attachments, message_id, cancellable);
+        }
+
         // only write out the IMAP email properties if they're supplied and there's something to
         // write out -- no need to create an empty row
         Geary.Imap.EmailProperties? properties = (Geary.Imap.EmailProperties?) email.properties;
@@ -251,7 +259,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         
         return true;
     }
-    
+
     public async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
         check_open();
@@ -325,76 +333,22 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         
         if (list == null || list.size == 0)
             return null;
-        
-        bool partial_ok = flags.is_all_set(ListFlags.PARTIAL_OK);
-        bool include_removed = flags.is_all_set(ListFlags.INCLUDE_MARKED_FOR_REMOVE);
-        
+
         // TODO: As this loop involves multiple database operations to form an email, might make
         // sense in the future to launch each async method separately, putting the final results
         // together when all the information is fetched
         Gee.List<Geary.Email> emails = new Gee.ArrayList<Geary.Email>();
         foreach (MessageLocationRow location_row in list) {
-            // PROPERTIES and FLAGS are held in separate table from messages, pull from MessageTable
-            // only if something is needed from there
-            Geary.Email.Field message_fields =
-                required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS);
-            
-            // fetch the message itself
-            MessageRow? message_row = null;
-            if (message_fields != Geary.Email.Field.NONE) {
-                message_row = yield message_table.fetch_async(transaction, location_row.message_id,
-                    message_fields, cancellable);
-                assert(message_row != null);
-                
-                // only add to the list if the email contains all the required fields (because
-                // properties comes out of a separate table, skip this if properties are requested)
-                if (!partial_ok && !message_row.fields.fulfills(message_fields))
-                    continue;
-            }
-            
-            ImapMessagePropertiesRow? properties = null;
-            if (required_fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
-                properties = yield imap_message_properties_table.fetch_async(transaction,
-                    location_row.message_id, cancellable);
-                if (!partial_ok && properties == null)
-                    continue;
-            }
-            
-            Geary.Imap.UID uid = new Geary.Imap.UID(location_row.ordering);
-            int position = yield location_row.get_position_async(transaction, include_removed,
-                 cancellable);
-            if (position == -1) {
-                debug("WARNING: Unable to locate position of email during list of %s, dropping",
-                    to_string());
-                
-                continue;
-            }
-            
-            Geary.Imap.EmailIdentifier email_id = new Geary.Imap.EmailIdentifier(uid);
-            
-            Geary.Email email = (message_row != null)
-                ? message_row.to_email(position, email_id)
-                : new Geary.Email(position, email_id);
-                
-            if (properties != null) {
-                if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
-                    Imap.EmailProperties? email_properties = properties.get_imap_email_properties();
-                    if (email_properties != null)
-                        email.set_email_properties(email_properties);
-                    else if (!partial_ok)
-                        continue;
-                }
-                
-                if (required_fields.require(Geary.Email.Field.FLAGS)) {
-                    EmailFlags? email_flags = properties.get_email_flags();
-                    if (email_flags != null)
-                        email.set_flags(email_flags);
-                    else if (!partial_ok)
-                        continue;
+            try {
+                emails.add(yield location_to_email_async(transaction, location_row, required_fields,
+                    flags, cancellable));
+            } catch (EngineError error) {
+                if (error is EngineError.NOT_FOUND) {
+                    debug("WARNING: Message not found, dropping: %s", error.message);
+                } else if (!(error is EngineError.INCOMPLETE_MESSAGE)) {
+                    throw error;
                 }
             }
-            
-            emails.add(email);
         }
         
         return (emails.size > 0) ? emails : null;
@@ -405,8 +359,6 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         check_open();
         
         Geary.Imap.UID uid = ((Imap.EmailIdentifier) id).uid;
-        bool partial_ok = flags.is_all_set(ListFlags.PARTIAL_OK);
-        bool include_removed = flags.is_all_set(ListFlags.INCLUDE_MARKED_FOR_REMOVE);
         
         Transaction transaction = yield db.begin_transaction_async("Folder.fetch_email_async",
             cancellable);
@@ -417,37 +369,55 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             throw new EngineError.NOT_FOUND("No message with ID %s in folder %s", id.to_string(),
                 to_string());
         }
-        
+
+        return yield location_to_email_async(transaction, location_row, required_fields, flags,
+            cancellable);
+    }
+
+    public async Geary.Email location_to_email_async(Transaction transaction,
+        MessageLocationRow location_row, Geary.Email.Field required_fields, ListFlags flags,
+        Cancellable? cancellable = null) throws Error {
+
+        // Prepare our IDs and flags.
+        Geary.Imap.UID uid = new Geary.Imap.UID(location_row.ordering);
+        Geary.Imap.EmailIdentifier id = new Geary.Imap.EmailIdentifier(uid);
+        bool partial_ok = flags.is_all_set(ListFlags.PARTIAL_OK);
+        bool include_removed = flags.is_all_set(ListFlags.INCLUDE_MARKED_FOR_REMOVE);
+
+        // PROPERTIES and FLAGS are held in separate table from messages, pull from MessageTable
+        // only if something is needed from there
+        Geary.Email.Field message_fields =
+            required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS);
+
         int position = yield location_row.get_position_async(transaction, include_removed, cancellable);
         if (position == -1) {
             throw new EngineError.NOT_FOUND("Unable to determine position of email %s in %s",
                 id.to_string(), to_string());
         }
-        
+
         // loopback on perverse case
         if (required_fields == Geary.Email.Field.NONE)
             return new Geary.Email(position, id);
-        
+
         // Only fetch message row if we have fields other than Properties and Flags
         MessageRow? message_row = null;
-        if (required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0) {
-            message_row = yield message_table.fetch_async(transaction,
-                location_row.message_id, required_fields, cancellable);
+        if (message_fields != Geary.Email.Field.NONE) {
+            message_row = yield message_table.fetch_async(transaction, location_row.message_id,
+                message_fields, cancellable);
             if (message_row == null) {
                 throw new EngineError.NOT_FOUND("No message with ID %s in folder %s", id.to_string(),
                     to_string());
             }
-            
+
             // see if the message row fulfills everything but properties, which are held in
             // separate table
-            if (!partial_ok &&
-                !message_row.fields.fulfills(required_fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS))) {
+            if (!partial_ok && !message_row.fields.fulfills(message_fields)) {
                 throw new EngineError.INCOMPLETE_MESSAGE(
-                    "Message %s in folder %s only fulfills %Xh fields (required: %Xh)", id.to_string(),
-                    to_string(), message_row.fields, required_fields);
+                    "Message %s in folder %s only fulfills %Xh fields (required: %Xh)",
+                    id.to_string(), to_string(), message_row.fields, required_fields);
             }
         }
-        
+
         ImapMessagePropertiesRow? properties = null;
         if (required_fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
             properties = yield imap_message_properties_table.fetch_async(transaction,
@@ -458,19 +428,20 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
                         id.to_string(), to_string());
             }
         }
-        
-        Geary.Email email;
-        email = message_row != null ? message_row.to_email(position, id) : email =
-            new Geary.Email(position, id);
-        
+
+        Geary.Email email = message_row != null
+            ? message_row.to_email(position, id)
+            : new Geary.Email(position, id);
+
         if (properties != null) {
             if (required_fields.require(Geary.Email.Field.PROPERTIES)) {
                 Imap.EmailProperties? email_properties = properties.get_imap_email_properties();
                 if (email_properties != null) {
                     email.set_email_properties(email_properties);
                 } else if (!partial_ok) {
-                    throw new EngineError.INCOMPLETE_MESSAGE("Message %s in folder %s does not have PROPERTIES fields",
-                        id.to_string(), to_string());
+                    throw new EngineError.INCOMPLETE_MESSAGE(
+                        "Message %s in folder %s does not have PROPERTIES fields", id.to_string(),
+                        to_string());
                 }
             }
             
@@ -479,15 +450,26 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
                 if (email_flags != null) {
                     email.set_flags(email_flags);
                 } else if (!partial_ok) {
-                    throw new EngineError.INCOMPLETE_MESSAGE("Message %s in folder %s does not have FLAGS fields",
-                        id.to_string(), to_string());
+                    throw new EngineError.INCOMPLETE_MESSAGE(
+                        "Message %s in folder %s does not have FLAGS fields", id.to_string(),
+                        to_string());
                 }
             }
         }
-        
+
+        // Load the attachments as well if we have the full message.
+        if (required_fields.fulfills(Geary.Attachment.REQUIRED_FIELDS)) {
+            Gee.List<MessageAttachmentRow> attachments = yield attachment_table.list_async(
+                transaction, location_row.message_id, cancellable);
+            foreach (MessageAttachmentRow row in attachments) {
+                email.add_attachment(row.to_attachment());
+            }
+        }
+
         return email;
+
     }
-    
+
     public async Geary.Imap.UID? get_earliest_uid_async(Cancellable? cancellable = null) throws Error {
         return yield get_uid_extremes_async(true, cancellable);
     }
@@ -624,20 +606,34 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         // if nothing to merge, nothing to do
         if (email.fields == Geary.Email.Field.NONE)
             return;
-        
+
         // Only merge with MessageTable if has fields applicable to it
         if (email.fields.clear(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS) != 0) {
-            MessageRow? message_row = yield message_table.fetch_async(transaction, message_id, email.fields,
-                cancellable);
+            MessageRow? message_row = yield message_table.fetch_async(transaction, message_id,
+                (email.fields | Attachment.REQUIRED_FIELDS), cancellable);
+
             assert(message_row != null);
-            
+            Geary.Email.Field db_fields = message_row.fields;
             message_row.merge_from_remote(email);
-            
-            // possible nothing has changed or been added
-            if (message_row.fields != Geary.Email.Field.NONE)
+
+            // Get the combined email from the merge which will be used below to save the attachments.
+            Geary.Email combined_email = message_row.to_email(email.position, email.id);
+
+            // Next see if all the fields we've received are already in the DB. If they are then
+            // there is nothing for us to do.
+            if ((db_fields & email.fields) != email.fields) {
                 yield message_table.merge_async(transaction, message_row, cancellable);
+
+                // Also update the saved attachments if we don't already have them in the database
+                // and between the database and the new fields we have what is required.
+                if (!db_fields.fulfills(Attachment.REQUIRED_FIELDS) &&
+                    combined_email.fields.fulfills(Attachment.REQUIRED_FIELDS)) {
+                    yield save_attachments_async(transaction,
+                        combined_email.get_message().get_attachments(), message_id, cancellable);
+                }
+            }
         }
-        
+
         // update IMAP properties
         if (email.fields.fulfills(Geary.Email.Field.PROPERTIES)) {
             Geary.Imap.EmailProperties properties = (Geary.Imap.EmailProperties) email.properties;
@@ -658,7 +654,63 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
                 flags, cancellable);
         }
     }
-    
+
+    private async void save_attachments_async(Transaction transaction,
+        Gee.List<GMime.Part> attachments, int64 message_id, Cancellable? cancellable = null)
+        throws Error {
+
+        // Nothing to do if no attachments.
+        if (attachments.size == 0){
+            return;
+        }
+
+        foreach (GMime.Part attachment in attachments) {
+            // Get the info about the attachment.
+            string? filename = attachment.get_filename();
+            string mime_type = attachment.get_content_type().to_string();
+            if (filename == null || filename.length == 0) {
+                filename = _("none");
+            }
+
+            // Convert the attachment content into a usable ByteArray.
+            GMime.DataWrapper attachment_data = attachment.get_content_object();
+            ByteArray byte_array = new ByteArray();
+            GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
+            stream.set_owner(false);
+            attachment_data.write_to_stream(stream);
+            uint filesize = byte_array.len;
+
+            // Insert it into the database.
+            MessageAttachmentRow attachment_row = new MessageAttachmentRow(attachment_table, 0,
+                message_id, filename, mime_type, filesize);
+            int64 attachment_id = yield attachment_table.create_async(transaction, attachment_row,
+                cancellable);
+
+            try {
+                // Create the file where the attachment will be saved and get the output stream.
+                string saved_name = Attachment.get_path(db.data_dir, message_id, attachment_id,
+                    filename);
+                debug("Saving attachment to %s", saved_name);
+                File saved_file = File.new_for_path(saved_name);
+                saved_file.get_parent().make_directory_with_parents();
+                FileOutputStream saved_stream = yield saved_file.create_async(
+                    FileCreateFlags.REPLACE_DESTINATION, Priority.DEFAULT, cancellable);
+
+                // Save the data to disk and flush it.
+                yield saved_stream.write_async(byte_array.data[0:filesize], Priority.DEFAULT,
+                    cancellable);
+                yield saved_stream.flush_async();
+            } catch (Error error) {
+                // An error occurred while saving the attachment, so lets remove the attachment from
+                // the database.
+                // TODO Use SQLite transactions here and do a rollback.
+                debug("Failed to save attachment: %s", error.message);
+                yield attachment_table.remove_async(transaction, attachment_id, cancellable);
+                throw error;
+            }
+        }
+    }
+
     public async void remove_marked_email_async(Geary.EmailIdentifier id, out bool marked,
         Cancellable? cancellable) throws Error {
         check_open();

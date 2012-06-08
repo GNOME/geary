@@ -5,6 +5,7 @@ set(COMMON_SRC
 common/common-arrays.vala
 common/common-async.vala
 common/common-date.vala
+common/common-files.vala
 common/common-intl.vala
 common/common-yorba-application.vala
 )
@@ -12,6 +13,7 @@ common/common-yorba-application.vala
 set(ENGINE_SRC
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
+engine/api/geary-attachment.vala
 engine/api/geary-batch-operations.vala
 engine/api/geary-composed-email.vala
 engine/api/geary-conversation.vala
@@ -133,6 +135,8 @@ engine/sqlite/api/sqlite-folder.vala
 engine/sqlite/email/sqlite-folder-row.vala
 engine/sqlite/email/sqlite-folder-table.vala
 engine/sqlite/email/sqlite-mail-database.vala
+engine/sqlite/email/sqlite-message-attachment-row.vala
+engine/sqlite/email/sqlite-message-attachment-table.vala
 engine/sqlite/email/sqlite-message-location-row.vala
 engine/sqlite/email/sqlite-message-location-table.vala
 engine/sqlite/email/sqlite-message-row.vala

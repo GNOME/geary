@@ -6,10 +6,9 @@
 
 public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
     public const string FILENAME = "geary.db";
-    
+
     public MailDatabase(string user, File user_data_dir, File resource_dir) throws Error {
-        base (user_data_dir.get_child(user).get_child(FILENAME),
-            resource_dir.get_child("sql"));
+        base (user_data_dir.get_child(user).get_child(FILENAME), resource_dir.get_child("sql"));
     }
     
     public Geary.Sqlite.FolderTable get_folder_table() {
@@ -38,6 +37,16 @@ public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
         return (location_table != null)
             ? location_table
             : (MessageLocationTable) add_table(new MessageLocationTable(this, heavy_table));
+    }
+    
+    public Geary.Sqlite.MessageAttachmentTable get_message_attachment_table() {
+        SQLHeavy.Table heavy_table;
+        MessageAttachmentTable? attachment_table = get_table("MessageAttachmentTable", out heavy_table)
+            as MessageAttachmentTable;
+        
+        return (attachment_table != null)
+            ? attachment_table
+            : (MessageAttachmentTable) add_table(new MessageAttachmentTable(this, heavy_table));
     }
 }
 

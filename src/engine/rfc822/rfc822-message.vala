@@ -265,28 +265,9 @@ public class Geary.RFC822.Message : Object {
         }
         
         // convert payload to a buffer
-        GMime.DataWrapper? wrapper = part.get_content_object();
-        if (wrapper == null) {
-            throw new RFC822Error.INVALID("Could not get the content wrapper for content-type %s",
-                content_type);
-        }
-        
-        ByteArray byte_array = new ByteArray();
-        GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
-        stream.set_owner(false);
-        
-        // Convert encoding to UTF-8.
-        GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
-        string? charset = part.get_content_type_parameter("charset");
-        if (charset == null)
-            charset = DEFAULT_ENCODING;
-        stream_filter.add(new GMime.FilterCharset(charset, "UTF8"));
-        
-        wrapper.write_to_stream(stream_filter);
-        
-        return new Geary.Memory.Buffer(byte_array.data, byte_array.len);
+        return mime_part_to_memory_buffer(part, true);
     }
-    
+
     private GMime.Part? find_first_mime_part(GMime.Object current_root, string content_type) {
         // descend looking for the content type in a GMime.Part
         GMime.Multipart? multipart = current_root as GMime.Multipart;
@@ -298,14 +279,68 @@ public class Geary.RFC822.Message : Object {
                     return child_part;
             }
         }
-        
+
         GMime.Part? part = current_root as GMime.Part;
-        if (part != null && part.get_content_type().to_string() == content_type)
+        if (part != null && part.get_content_type().to_string() == content_type &&
+            part.get_disposition() != "attachment") {
             return part;
-        
+        }
+
         return null;
     }
-    
+
+    internal Gee.List<GMime.Part> get_attachments() throws RFC822Error {
+        Gee.List<GMime.Part> attachments = new Gee.ArrayList<GMime.Part>();
+        find_attachments( ref attachments, message.get_mime_part() );
+        return attachments;
+    }
+
+    private void find_attachments(ref Gee.List<GMime.Part> attachments, GMime.Object root)
+        throws RFC822Error {
+
+        // If this is a multipart container, dive into each of its children.
+        if (root is GMime.Multipart) {
+            GMime.Multipart multipart = root as GMime.Multipart;
+            int count = multipart.get_count();
+            for (int i = 0; i < count; ++i) {
+                find_attachments(ref attachments, multipart.get_part(i));
+            }
+            return;
+        }
+
+        // Otherwise see if it has a content disposition of "attachment."
+        if (root is GMime.Part && root.get_disposition() == "attachment") {
+            attachments.add(root as GMime.Part);
+        }
+    }
+
+    private Geary.Memory.AbstractBuffer mime_part_to_memory_buffer(GMime.Part part,
+        bool to_utf8 = false) throws RFC822Error {
+
+        GMime.DataWrapper? wrapper = part.get_content_object();
+        if (wrapper == null) {
+            throw new RFC822Error.INVALID("Could not get the content wrapper for content-type %s",
+                part.get_content_type().to_string());
+        }
+        
+        ByteArray byte_array = new ByteArray();
+        GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
+        stream.set_owner(false);
+        
+        // Convert encoding to UTF-8.
+        GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
+        if (to_utf8) {
+            string? charset = part.get_content_type_parameter("charset");
+            if (charset == null)
+                charset = DEFAULT_ENCODING;
+            stream_filter.add(new GMime.FilterCharset(charset, "UTF8"));
+        }
+
+        wrapper.write_to_stream(stream_filter);
+        
+        return new Geary.Memory.Buffer(byte_array.data, byte_array.len);
+    }
+
     public string to_string() {
         return message.to_string();
     }

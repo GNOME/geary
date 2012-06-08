@@ -6,6 +6,7 @@
 
 public abstract class Geary.Sqlite.Database {
     internal SQLHeavy.VersionedDatabase db;
+    internal File data_dir;
     internal File schema_dir;
 
     private Gee.HashMap<SQLHeavy.Table, Geary.Sqlite.Table> table_map = new Gee.HashMap<
@@ -17,8 +18,9 @@ public abstract class Geary.Sqlite.Database {
 
     public Database(File db_file, File schema_dir) throws Error {
         this.schema_dir = schema_dir;
-        if (!db_file.get_parent().query_exists())
-            db_file.get_parent().make_directory_with_parents();
+        data_dir = db_file.get_parent();
+        if (!data_dir.query_exists())
+            data_dir.make_directory_with_parents();
         
         db = new SQLHeavy.VersionedDatabase(db_file.get_path(), schema_dir.get_path());
         db.foreign_keys = true;

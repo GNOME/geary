@@ -113,6 +113,8 @@ public class Geary.Email : Object {
     
     // BODY
     public RFC822.Text? body { get; private set; default = null; }
+    public Gee.List<Geary.Attachment> attachments { get; private set;
+        default = new Gee.ArrayList<Geary.Attachment>(); }
     
     // PROPERTIES
     public Geary.EmailProperties? properties { get; private set; default = null; }
@@ -216,13 +218,17 @@ public class Geary.Email : Object {
         
         fields |= Field.PREVIEW;
     }
-    
+
     public void set_flags(Geary.EmailFlags email_flags) {
         this.email_flags = email_flags;
         
         fields |= Field.FLAGS;
     }
-    
+
+    public void add_attachment(Geary.Attachment attachment) {
+        attachments.add(attachment);
+    }
+
     /**
      * This method requires Geary.Email.Field.HEADER and Geary.Email.Field.BODY be present.
      * If not, EngineError.INCOMPLETE_MESSAGE is thrown.
@@ -238,7 +244,19 @@ public class Geary.Email : Object {
         
         return message;
     }
-    
+
+    public Geary.Attachment? get_attachment(int64 attachment_id) throws EngineError, RFC822Error {
+        if (!fields.fulfills(Field.HEADER | Field.BODY))
+            throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
+
+        foreach (Geary.Attachment attachment in attachments) {
+            if (attachment.id == attachment_id) {
+                return attachment;
+            }
+        }
+        return null;
+    }
+
     /**
      * Returns a list of this email's ancestry by Message-ID.  IDs are not returned in any
      * particular order.  The ancestry is made up from this email's Message-ID, its References,

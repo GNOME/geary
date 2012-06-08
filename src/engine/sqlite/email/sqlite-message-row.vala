@@ -132,8 +132,6 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
         foreach (Geary.Email.Field field in Geary.Email.Field.all()) {
             if ((email.fields & field) != 0)
                 set_from_email(field, email);
-            else
-                unset_fields(field);
         }
     }
     
@@ -222,63 +220,6 @@ public class Geary.Sqlite.MessageRow : Geary.Sqlite.Row {
             preview = (email.preview != null) ? email.preview.buffer.to_string() : null;
             
             this.fields = this.fields.set(Geary.Email.Field.PREVIEW);
-        }
-    }
-    
-    private void unset_fields(Geary.Email.Field fields) {
-        if ((fields & Geary.Email.Field.DATE) != 0) {
-            date = null;
-            date_time_t = -1;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.DATE);
-        }
-        
-        if ((fields & Geary.Email.Field.ORIGINATORS) != 0) {
-            from = null;
-            sender = null;
-            reply_to = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.ORIGINATORS);
-        }
-        
-        if ((fields & Geary.Email.Field.RECEIVERS) != 0) {
-            to = null;
-            cc = null;
-            bcc = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.RECEIVERS);
-        }
-        
-        if ((fields & Geary.Email.Field.REFERENCES) != 0) {
-            message_id = null;
-            in_reply_to = null;
-            references = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.REFERENCES);
-        }
-        
-        if ((fields & Geary.Email.Field.SUBJECT) != 0) {
-            subject = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.SUBJECT);
-        }
-        
-        if ((fields & Geary.Email.Field.HEADER) != 0) {
-            header = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.HEADER);
-        }
-        
-        if ((fields & Geary.Email.Field.BODY) != 0) {
-            body = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.BODY);
-        }
-        
-        if ((fields & Geary.Email.Field.PREVIEW) != 0) {
-            preview = null;
-            
-            this.fields = this.fields.clear(Geary.Email.Field.PREVIEW);
         }
     }
 }

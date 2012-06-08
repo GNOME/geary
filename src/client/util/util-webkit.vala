@@ -11,6 +11,39 @@ public const string URL_REGEX = "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|ww
 // Regex to determine if a URL has a known protocol.
 public const string PROTOCOL_REGEX = "^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):";
 
+// TODO Move these other functions and variables into this namespace.
+namespace Util.DOM {
+    public WebKit.DOM.HTMLElement? select(WebKit.DOM.Node node, string selector) {
+        try {
+            if (node is WebKit.DOM.Document) {
+                return (node as WebKit.DOM.Document).query_selector(selector) as WebKit.DOM.HTMLElement;
+            } else {
+                return (node as WebKit.DOM.Element).query_selector(selector) as WebKit.DOM.HTMLElement;
+            }
+        } catch (Error error) {
+            debug("Error selecting element %s: %s", selector, error.message);
+            return null;
+        }
+    }
+
+    public WebKit.DOM.HTMLElement? clone_node(WebKit.DOM.Node node, bool deep = true) {
+        return node.clone_node(deep) as WebKit.DOM.HTMLElement;
+    }
+
+    public WebKit.DOM.HTMLElement? clone_select(WebKit.DOM.Node node, string selector,
+        bool deep = true) {
+        return clone_node(select(node, selector), deep);
+    }
+
+    public void toggle_class(WebKit.DOM.DOMTokenList class_list, string clas, bool add) throws Error {
+        if (add) {
+            class_list.add(clas);
+        } else {
+            class_list.remove(clas);
+        }
+    }
+}
+
 public void bind_event(WebKit.WebView view, string selector, string event, Callback callback,
     Object? extra = null) {
     try {
