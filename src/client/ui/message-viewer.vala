@@ -1040,76 +1040,82 @@ public class MessageViewer : WebKit.WebView {
     }
 
     private void show_message_menu(WebKit.DOM.Element element) {
-        message_menu = new Gtk.Menu();
-        message_menu.selection_done.connect(on_message_menu_selection_done);
+        message_menu = build_message_menu(element);
+        message_menu.show_all();
+        message_menu.popup(null, null, null, 0, 0);
+    }
+
+    private Gtk.Menu build_message_menu(WebKit.DOM.Element clicked_element) {
+        Gtk.Menu menu = new Gtk.Menu();
+        menu.selection_done.connect(on_message_menu_selection_done);
 
         if (active_email.attachments.size > 0) {
-            // Save attachment as...
-            if (active_attachment != null) {
-                Gtk.MenuItem save_attachment_item = new Gtk.MenuItem.with_mnemonic(_("_Save As..."));
-                save_attachment_item.activate.connect(on_save_attachment);
-                message_menu.append(save_attachment_item);
-            }
-
             // Save all attachments
             if (active_email.attachments.size > 1) {
                 Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
                 save_all_item.activate.connect(on_save_all_attachments);
-                message_menu.append(save_all_item);
+                menu.append(save_all_item);
             } else if (active_attachment == null) {
                 Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save A_ttachment..."));
                 save_all_item.activate.connect(on_save_attachment);
-                message_menu.append(save_all_item);
+                menu.append(save_all_item);
+            }
+
+            // Save attachment as...
+            if (active_attachment != null) {
+                Gtk.MenuItem save_attachment_item = new Gtk.MenuItem.with_mnemonic(_("_Save As..."));
+                save_attachment_item.activate.connect(on_save_attachment);
+                menu.prepend(save_attachment_item);
+                return menu;
             }
 
             // Separator.
-            message_menu.append(new Gtk.SeparatorMenuItem());
+            menu.append(new Gtk.SeparatorMenuItem());
         }
 
         // Reply to a message.
         Gtk.MenuItem reply_item = new Gtk.MenuItem.with_mnemonic(_("_Reply"));
         reply_item.activate.connect(on_reply_to_message);
-        message_menu.append(reply_item);
+        menu.append(reply_item);
 
         // Reply to all on a message.
         Gtk.MenuItem reply_all_item = new Gtk.MenuItem.with_mnemonic(_("Reply to _All"));
         reply_all_item.activate.connect(on_reply_all_message);
-        message_menu.append(reply_all_item);
+        menu.append(reply_all_item);
 
         // Forward a message.
         Gtk.MenuItem forward_item = new Gtk.MenuItem.with_mnemonic(_("_Forward"));
         forward_item.activate.connect(on_forward_message);
-        message_menu.append(forward_item);
+        menu.append(forward_item);
 
         // Separator.
-        message_menu.append(new Gtk.SeparatorMenuItem());
+        menu.append(new Gtk.SeparatorMenuItem());
 
         // Mark as read/unread.
         if (active_email.is_unread().to_boolean(false)) {
             Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
             mark_read_item.activate.connect(on_mark_read_message);
-            message_menu.append(mark_read_item);
+            menu.append(mark_read_item);
         } else {
             Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
             mark_unread_item.activate.connect(on_mark_unread_message);
-            message_menu.append(mark_unread_item);
+            menu.append(mark_unread_item);
         }
 
         // Print a message.
         Gtk.MenuItem print_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.PRINT, null);
         print_item.activate.connect(on_print_message);
-        message_menu.append(print_item);
+        menu.append(print_item);
 
         // Separator.
-        message_menu.append(new Gtk.SeparatorMenuItem());
+        menu.append(new Gtk.SeparatorMenuItem());
 
         // View original message source.
         Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("_View Source"));
         view_source_item.activate.connect(on_view_source);
-        message_menu.append(view_source_item);
+        menu.append(view_source_item);
 
-        message_menu.show_all();
-        message_menu.popup(null, null, null, 0, 0);
+        return menu;
     }
 
     private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
