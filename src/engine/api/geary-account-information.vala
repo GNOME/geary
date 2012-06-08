@@ -109,7 +109,7 @@ public class Geary.AccountInformation : Object {
         return false;
     }
     
-    public Geary.EngineAccount get_account() throws Error {
+    public Geary.EngineAccount get_account() throws EngineError {
         Geary.Sqlite.Account sqlite_account =
             new Geary.Sqlite.Account(credentials.user);
             

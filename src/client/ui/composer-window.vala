@@ -42,8 +42,12 @@ public class ComposerWindow : Gtk.Window {
             font-size: medium !important;
         }
         blockquote {
-            margin: 10px;
-            padding: 5px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            margin-left: 10px;
+            margin-right: 10px;
+            padding-left: 5px;
+            padding-right: 5px;
             background-color: white;
             border: 0;
             border-left: 3px #aaa solid;
@@ -114,6 +118,9 @@ public class ComposerWindow : Gtk.Window {
     private bool action_flag = false;
     
     private WebKit.WebView editor;
+    // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
+    // garbage-collected.
+    private WebViewEditFixer edit_fixer;
     private Gtk.UIManager ui;
     
     public ComposerWindow(Geary.ComposedEmail? prefill = null) {
@@ -209,6 +216,7 @@ public class ComposerWindow : Gtk.Window {
         }
         
         editor = new WebKit.WebView();
+        edit_fixer = new WebViewEditFixer(editor);
         editor.load_finished.connect(on_load_finished);
         editor.hovering_over_link.connect(on_hovering_over_link);
         editor.button_press_event.connect(on_button_press_event);
@@ -587,45 +595,6 @@ public class ComposerWindow : Gtk.Window {
         bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
     }
     
-    // Inserts a newline that's fully unindented.
-    private void newline_unindented(Gdk.EventKey event) {
-        bool inside_quote = false;
-        int indent_level = 0;
-        
-        WebKit.DOM.Node? active = editor.get_dom_document().get_default_view().get_selection().
-            focus_node;
-        if (active == null)
-            return;
-        
-        // Count number of parent elements.
-        while (active != null && !(active is WebKit.DOM.HTMLBodyElement)) {
-            if (active is WebKit.DOM.HTMLQuoteElement)
-                inside_quote = true;
-            
-            active = active.get_parent_node();
-            indent_level++;
-        }
-        
-        // Only un-indent automatically if we're inside a blockquote.
-        if (inside_quote) {
-            editor.get_dom_document().exec_command("insertlinebreak", false, "");
-            editor.key_press_event(event);
-            
-            // Send an up key.
-            event.keyval = Gdk.keyval_from_name("Up");
-            Gdk.KeymapKey[] keys;
-            Gdk.Keymap.get_default().get_entries_for_keyval(event.keyval, out keys);
-            event.hardware_keycode = (uint16) keys[0].keycode;
-            event.group = (uint8) keys[0].group;
-            editor.key_press_event(event);
-            
-            for (int i = 0; i < indent_level; i++)
-                editor.get_dom_document().exec_command("outdent", false, "");
-        } else {
-            editor.key_press_event(event);
-        }
-    }
-    
     private string get_html() {
         return editor.get_dom_document().get_body().get_inner_html();
     }
@@ -654,32 +623,23 @@ public class ComposerWindow : Gtk.Window {
     
     public override bool key_press_event(Gdk.EventKey event) {
         update_actions();
-        bool handled = true;
         
         switch (Gdk.keyval_name(event.keyval)) {
             case "Return":
             case "KP_Enter":
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive)
+                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive) {
                     on_send();
-                else if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && 
-                    get_focus() == editor)
-                    newline_unindented(event);
-                else
-                    handled = false;
+                    return true;
+                }
             break;
             
             case "Escape":
-                if (should_close())
+                if (should_close()) {
                     destroy();
-            break;
-            
-            default:
-                handled = false;
+                    return true;
+                }
             break;
         }
-        
-        if (handled)
-            return true;
         
         return base.key_press_event(event);
     }

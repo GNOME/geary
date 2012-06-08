@@ -35,7 +35,12 @@ public class Geary.DBus.Controller {
             Geary.Credentials credentials = new Geary.Credentials(args[1], args[2]);
             Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
             account_information.load_info_from_file();
-            account = account_information.get_account();
+            try {
+                account = account_information.get_account();
+            } catch (EngineError err) {
+                error("Problem loading account from account information: %s", err.message);
+            }
+
             account.report_problem.connect(on_report_problem);
             
             // Open the Inbox folder.

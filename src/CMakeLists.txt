@@ -192,6 +192,7 @@ client/ui/message-list-view.vala
 client/ui/message-viewer.vala
 client/ui/password-dialog.vala
 client/ui/preferences-dialog.vala
+client/ui/webview-edit-fixer.vala
 
 client/ui/sidebar/sidebar-branch.vala
 client/ui/sidebar/sidebar-common.vala
