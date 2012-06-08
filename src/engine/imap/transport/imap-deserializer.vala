@@ -24,7 +24,8 @@ public class Geary.Imap.Deserializer {
     private enum Mode {
         LINE,
         BLOCK,
-        FAILED
+        FAILED,
+        CLOSED
     }
     
     private enum State {
@@ -39,6 +40,7 @@ public class Geary.Imap.Deserializer {
         LITERAL_DATA_BEGIN,
         LITERAL_DATA,
         FAILED,
+        CLOSED,
         COUNT
     }
     
@@ -50,6 +52,8 @@ public class Geary.Imap.Deserializer {
         CHAR,
         EOL,
         DATA,
+        EOS,
+        ERROR,
         COUNT
     }
     
@@ -78,6 +82,10 @@ public class Geary.Imap.Deserializer {
     
     public signal void parameters_ready(RootParameters root);
     
+    /**
+     * "eos" is fired when the underlying InputStream is closed, whether due to normal EOS or input
+     * error.  Subscribe to "receive-failure" to be notified of errors.
+     */
     public signal void eos();
     
     public signal void receive_failure(Error err);
@@ -93,27 +101,53 @@ public class Geary.Imap.Deserializer {
         
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_or_atom_char),
+            new Geary.State.Mapping(State.TAG, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.TAG, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.START_PARAM, Event.CHAR, on_first_param_char),
             new Geary.State.Mapping(State.START_PARAM, Event.EOL, on_eol),
+            new Geary.State.Mapping(State.START_PARAM, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.START_PARAM, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.ATOM, Event.CHAR, on_tag_or_atom_char),
             new Geary.State.Mapping(State.ATOM, Event.EOL, on_atom_eol),
+            new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.QUOTED, Event.CHAR, on_quoted_char),
+            new Geary.State.Mapping(State.QUOTED, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.QUOTED, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.CHAR, on_quoted_escape_char),
+            new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.QUOTED_ESCAPE, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.CHAR, on_partial_body_atom_char),
+            new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.PARTIAL_BODY_ATOM, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.CHAR,
                 on_partial_body_atom_terminating_char),
+            new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.PARTIAL_BODY_ATOM_TERMINATING, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.LITERAL, Event.CHAR, on_literal_char),
+            new Geary.State.Mapping(State.LITERAL, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.LITERAL, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.LITERAL_DATA_BEGIN, Event.EOL, on_literal_data_begin_eol),
+            new Geary.State.Mapping(State.LITERAL_DATA_BEGIN, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.LITERAL_DATA_BEGIN, Event.ERROR, on_error),
             
-            new Geary.State.Mapping(State.LITERAL_DATA, Event.DATA, on_literal_data)
+            new Geary.State.Mapping(State.LITERAL_DATA, Event.DATA, on_literal_data),
+            new Geary.State.Mapping(State.LITERAL_DATA, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.LITERAL_DATA, Event.ERROR, on_error),
+            
+            new Geary.State.Mapping(State.FAILED, Event.EOS, Geary.State.nop),
+            new Geary.State.Mapping(State.FAILED, Event.ERROR, Geary.State.nop),
+            
+            new Geary.State.Mapping(State.CLOSED, Event.EOS, Geary.State.nop),
+            new Geary.State.Mapping(State.CLOSED, Event.ERROR, Geary.State.nop)
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
@@ -127,10 +161,12 @@ public class Geary.Imap.Deserializer {
         if (cancellable != null)
             throw new EngineError.ALREADY_OPEN("Deserializer already open");
         
-        if (get_mode() == Mode.FAILED)
+        Mode mode = get_mode();
+        
+        if (mode == Mode.FAILED)
             throw new EngineError.ALREADY_CLOSED("Deserializer failed");
         
-        if (cancellable.is_cancelled())
+        if ((mode == Mode.CLOSED) || (cancellable != null && cancellable.is_cancelled()))
             throw new EngineError.ALREADY_CLOSED("Deserializer closed");
         
         cancellable = new Cancellable();
@@ -141,7 +177,7 @@ public class Geary.Imap.Deserializer {
     
     public async void stop_async() throws Error {
         // quietly fail when not opened or already closed
-        if (cancellable == null || cancellable.is_cancelled() || get_mode() == Mode.FAILED)
+        if (cancellable == null || cancellable.is_cancelled() || is_halted())
             return;
         
         // cancel any outstanding I/O
@@ -172,6 +208,7 @@ public class Geary.Imap.Deserializer {
             break;
             
             case Mode.FAILED:
+            case Mode.CLOSED:
                 // do nothing; Deserializer is effectively closed
             break;
             
@@ -185,24 +222,14 @@ public class Geary.Imap.Deserializer {
             size_t length;
             string? line = dins.read_line_async.end(result, out length);
             if (line == null) {
-                debug("[%s] on_read_line EOS", to_string());
-                
-                closed_semaphore.blind_notify();
-                eos();
+                push_eos();
                 
                 return;
             }
             
             push_line(line);
         } catch (Error err) {
-            debug("[%s] on_read_line: %s", to_string(), err.message);
-            
-            // only Cancellable allowed is internal used to notify when closed
-            if (!(err is IOError.CANCELLED))
-                receive_failure(err);
-            
-            // always signal as closed
-            closed_semaphore.blind_notify();
+            push_error(err);
             
             return;
         }
@@ -214,10 +241,7 @@ public class Geary.Imap.Deserializer {
         try {
             size_t bytes_read = dins.read_async.end(result);
             if (bytes_read == 0) {
-                debug("[%s] on_read_block EOS", to_string());
-                
-                closed_semaphore.blind_notify();
-                eos();
+                push_eos();
                 
                 return;
             }
@@ -227,14 +251,7 @@ public class Geary.Imap.Deserializer {
             
             push_data(bytes_read);
         } catch (Error err) {
-            debug("[%s] on_read_block: %s", to_string(), err.message);
-            
-            // only Cancellable allowed is internal used to notify when closed
-            if (!(err is IOError.CANCELLED))
-                receive_failure(err);
-            
-            // always signal as closed
-            closed_semaphore.blind_notify();
+            push_error(err);
             
             return;
         }
@@ -278,6 +295,16 @@ public class Geary.Imap.Deserializer {
         return get_mode();
     }
     
+    // Push an EOS event
+    private void push_eos() {
+        fsm.issue(Event.EOS);
+    }
+    
+    // Push an Error event
+    private void push_error(Error err) {
+        fsm.issue(Event.ERROR, null, null, err);
+    }
+    
     private Mode get_mode() {
         switch (fsm.get_state()) {
             case State.LITERAL_DATA:
@@ -286,8 +313,23 @@ public class Geary.Imap.Deserializer {
             case State.FAILED:
                 return Mode.FAILED;
             
+            case State.CLOSED:
+                return Mode.CLOSED;
+            
             default:
                 return Mode.LINE;
+        }
+    }
+    
+    // True if the Deserializer is FAILED or CLOSED.
+    private bool is_halted() {
+        switch (get_mode()) {
+            case Mode.FAILED:
+            case Mode.CLOSED:
+                return true;
+            
+            default:
+                return false;
         }
     }
     
@@ -608,6 +650,33 @@ public class Geary.Imap.Deserializer {
         save_literal_parameter();
         
         return State.START_PARAM;
+    }
+    
+    private uint on_eos() {
+        debug("[%s] EOS", to_string());
+        
+        // always signal as closed and notify subscribers
+        closed_semaphore.blind_notify();
+        eos();
+        
+        return State.CLOSED;
+    }
+    
+    private uint on_error(uint state, uint event, void *user, Object? object, Error? err) {
+        assert(err != null);
+        
+        debug("[%s] input error: %s", to_string(), err.message);
+        
+        // only Cancellable allowed is internal used to notify when closed; all other errors should
+        // be reported
+        if (!(err is IOError.CANCELLED))
+            receive_failure(err);
+        
+        // always signal as closed and notify
+        closed_semaphore.blind_notify();
+        eos();
+        
+        return State.CLOSED;
     }
     
     private uint on_bad_transition(uint state, uint event, void *user) {
