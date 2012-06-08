@@ -289,6 +289,36 @@ public class Geary.RFC822.Message : Object {
         return null;
     }
 
+    public Geary.Memory.AbstractBuffer get_content_by_mime_id(string mime_id) throws RFC822Error {
+        GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
+        if (part == null) {
+            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with content-id %s",
+                mime_id);
+        }
+        return mime_part_to_memory_buffer(part);
+    }
+
+    private GMime.Part? find_mime_part_by_mime_id(GMime.Object root, string mime_id) {
+        // If this is a multipart container, check each of its children.
+        if (root is GMime.Multipart) {
+            GMime.Multipart multipart = root as GMime.Multipart;
+            int count = multipart.get_count();
+            for (int i = 0; i < count; ++i) {
+                GMime.Part? child_part = find_mime_part_by_mime_id(multipart.get_part(i), mime_id);
+                if (child_part != null) {
+                    return child_part;
+                }
+            }
+        }
+
+        // Otherwise, check this part's content id.
+        GMime.Part? part = root as GMime.Part;
+        if (part != null && part.get_content_id() == mime_id) {
+            return part;
+        }
+        return null;
+    }
+
     internal Gee.List<GMime.Part> get_attachments() throws RFC822Error {
         Gee.List<GMime.Part> attachments = new Gee.ArrayList<GMime.Part>();
         find_attachments( ref attachments, message.get_mime_part() );

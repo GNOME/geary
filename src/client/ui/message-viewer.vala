@@ -755,7 +755,7 @@ public class MessageViewer : WebKit.WebView {
         string body_text = "";
         try {
             body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_string();
-            body_text = insert_html_markup(body_text);
+            body_text = insert_html_markup(body_text, email);
         } catch (Error err) {
             try {
                 body_text = linkify_and_escape_plain_text(email.get_message().
@@ -765,7 +765,7 @@ public class MessageViewer : WebKit.WebView {
                 debug("Could not get message text. %s", err2.message);
             }
         }
-        
+
         // Graft header and email body into the email container.
         try {
             WebKit.DOM.HTMLElement table_header =
@@ -1225,7 +1225,7 @@ public class MessageViewer : WebKit.WebView {
         return "<pre>" + set_up_quotes(message + signature) + "</pre>";
     }
 
-    private string insert_html_markup(string text) {
+    private string insert_html_markup(string text, Geary.Email email) {
         try {
             // Create a workspace for manipulating the HTML.
             WebKit.DOM.Document document = get_dom_document();
@@ -1267,6 +1267,25 @@ public class MessageViewer : WebKit.WebView {
 
             // Now look for the signature.
             wrap_html_signature(ref container);
+
+            // Then get all inline images and replace them with data URLs.
+            WebKit.DOM.NodeList inline_list = container.query_selector_all("img[src^=\"cid:\"]");
+            for (int i = 0; i < inline_list.length; ++i) {
+                // Get the MIME content for the image.
+                WebKit.DOM.HTMLImageElement img = (WebKit.DOM.HTMLImageElement) inline_list.item(i);
+                string mime_id = img.get_attribute("src").substring(4);
+                Geary.Memory.AbstractBuffer image_content =
+                    email.get_message().get_content_by_mime_id(mime_id);
+                uint8[] image_data = image_content.get_array();
+
+                // Get the content type.
+                bool uncertain_content_type;
+                string mimetype = ContentType.get_mime_type(ContentType.guess(null, image_data,
+                    out uncertain_content_type));
+
+                // Then set the source to a data url.
+                set_data_url(img, mimetype, image_data);
+            }
 
             // Now return the whole message.
             return set_up_quotes(container.get_inner_html());
