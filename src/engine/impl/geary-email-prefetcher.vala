@@ -51,9 +51,8 @@ public class Geary.EmailPrefetcher : Object {
     }
     
     private void on_closed(Geary.Folder.CloseReason close_reason) {
-        if (close_reason != Geary.Folder.CloseReason.FOLDER_CLOSED)
-            return;
-        
+        // cancel for any reason ... this will be called multiple times, but the following operations
+        // can be executed any number of times and still get the desired results
         cancellable.cancel();
         
         if (schedule_id != 0) {
@@ -116,7 +115,8 @@ public class Geary.EmailPrefetcher : Object {
             token = yield mutex.claim_async(cancellable);
             yield do_prefetch_batch();
         } catch (Error err) {
-            debug("Error while prefetching emails for %s: %s", folder.to_string(), err.message);
+            if (!(err is IOError.CANCELLED))
+                debug("Error while prefetching emails for %s: %s", folder.to_string(), err.message);
         }
         
         if (token != NonblockingMutex.INVALID_TOKEN) {
@@ -161,30 +161,43 @@ public class Geary.EmailPrefetcher : Object {
         
         foreach (Geary.Email email in sorted_email) {
             Geary.EmailIdentifier id = email.id;
-            Geary.Email.Field field = local_fields.get(id);
+            Geary.Email.Field has_fields = local_fields.get(id);
             
-            if (!field.is_all_set(Geary.Email.Field.ENVELOPE))
-                yield prefetch_field_async(id, Geary.Email.Field.ENVELOPE, "envelope");
+            if (!yield prefetch_field_async(Geary.Email.Field.ENVELOPE, has_fields, id, "envelope"))
+                break;
             
-            if (!field.is_all_set(Geary.Email.Field.HEADER))
-                yield prefetch_field_async(id, Geary.Email.Field.HEADER, "headers");
+            if (!yield prefetch_field_async(Geary.Email.Field.HEADER, has_fields, id, "headers"))
+                break;
             
-            if (!field.is_all_set(Geary.Email.Field.BODY))
-                yield prefetch_field_async(id, Geary.Email.Field.BODY, "body");
+            if (!yield prefetch_field_async(Geary.Email.Field.BODY, has_fields, id, "body"))
+                break;
             
-            if (!field.is_all_set(Geary.Email.Field.PREVIEW))
-                yield prefetch_field_async(id, Geary.Email.Field.PREVIEW, "preview");
+            if (!yield prefetch_field_async(Geary.Email.Field.PREVIEW, has_fields, id, "preview"))
+                break;
+            
+            if (cancellable.is_cancelled())
+                break;
         }
         
         debug("finished do_prefetch_batch %s %d", folder.to_string(), ids.size);
     }
     
-    private async void prefetch_field_async(Geary.EmailIdentifier id, Geary.Email.Field field, string name) {
+    private async bool prefetch_field_async(Geary.Email.Field field, Geary.Email.Field has_fields,
+        Geary.EmailIdentifier id, string name) {
+        if (has_fields.fulfills(field))
+            return true;
+        
+        if (cancellable.is_cancelled())
+            return false;
+        
         try {
             yield folder.fetch_email_async(id, field, Geary.Folder.ListFlags.NONE, cancellable);
-        } catch (Error error) {
-            debug("Error prefetching %s for %s: %s", name, id.to_string(), error.message);
+        } catch (Error err) {
+            if (!(err is IOError.CANCELLED))
+                debug("Error prefetching %s for %s: %s", name, id.to_string(), err.message);
         }
+        
+        return true;
     }
     
     private static int email_size_ascending_comparator(void *a, void *b) {
