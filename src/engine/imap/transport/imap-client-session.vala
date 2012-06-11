@@ -504,9 +504,6 @@ public class Geary.Imap.ClientSession {
             
             return;
         }
-        
-        // wait for the initial greeting from the server
-        awaiting_connect_response = true;
     }
     
     private bool on_connect_response_received() {
@@ -1266,15 +1263,15 @@ public class Geary.Imap.ClientSession {
     //
     
     private void on_network_connected() {
-#if VERBOSE_SESSION
-        debug("[%s] Connected to %s", to_full_string(), server);
-#endif
+        debug("[%s] Connected to %s", to_full_string(), endpoint.to_string());
+        
+        // the first ServerData from the server is a greeting; this flag indicates to treat it
+        // differently than the other data thereafter
+        awaiting_connect_response = true;
     }
     
     private void on_network_disconnected() {
-#if VERBOSE_SESSION
-        debug("[%s] Disconnected from %s", to_full_string(), server);
-#endif
+        debug("[%s] Disconnected from %s", to_full_string(), endpoint.to_string());
     }
     
     private void on_network_sent_command(Command cmd) {
