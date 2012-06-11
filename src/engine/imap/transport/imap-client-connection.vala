@@ -302,6 +302,10 @@ public class Geary.Imap.ClientConnection {
         // unschedule before yielding to stop the Deserializer
         unschedule_flush_timeout();
         
+        // cancel all outstanding commmand timeouts
+        cmd_timer.cancel_all();
+        
+        // disconnect from Deserializer before yielding to stop it
         des.parameters_ready.disconnect(on_parameters_ready);
         des.receive_failure.disconnect(on_receive_failure);
         des.deserialize_failure.disconnect(on_deserialize_failure);
