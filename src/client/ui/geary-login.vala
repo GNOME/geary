@@ -28,20 +28,22 @@ public class LoginDialog {
     
     public Geary.AccountInformation account_information { get; private set; }
     
-    public LoginDialog.from_account_information(Geary.AccountInformation default_account_information) {
-        this(default_account_information.real_name, default_account_information.credentials.user,
-            default_account_information.credentials.pass, default_account_information.remember_password, 
-            default_account_information.service_provider, default_account_information.imap_server_host,
-            default_account_information.imap_server_port, default_account_information.imap_server_ssl,
-            default_account_information.smtp_server_host, default_account_information.smtp_server_port,
-            default_account_information.smtp_server_ssl);
+    public LoginDialog.from_account_information(Geary.AccountInformation initial_account_information) {
+        this(initial_account_information.real_name, initial_account_information.credentials.user,
+            initial_account_information.credentials.pass, initial_account_information.remember_password, 
+            initial_account_information.service_provider, initial_account_information.default_imap_server_host,
+            initial_account_information.default_imap_server_port, initial_account_information.default_imap_server_ssl,
+            initial_account_information.default_smtp_server_host, initial_account_information.default_smtp_server_port,
+            initial_account_information.default_smtp_server_ssl);
     }
     
-    public LoginDialog(string? default_real_name = null, string? default_username = null,
-        string? default_password = null, bool default_remember_password = true, int default_service_provider = -1,
-        string? default_imap_host = null, uint16 default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
-        bool default_imap_ssl = true, string? default_smtp_host = null,
-        uint16 default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL, bool default_smtp_ssl = true) {
+    public LoginDialog(string? initial_real_name = null, string? initial_username = null,
+        string? initial_password = null, bool initial_remember_password = true,
+        int initial_service_provider = -1, string? initial_default_imap_host = null,
+        uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
+        bool initial_default_imap_ssl = true, string? initial_default_smtp_host = null,
+        uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
+        bool initial_default_smtp_ssl = true) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
         dialog = builder.get_object("LoginDialog") as Gtk.Dialog;
@@ -66,7 +68,7 @@ public class LoginDialog {
         
         foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers()) {
             combo_service.append_text(p.display_name());
-            if (p == default_service_provider)
+            if (p == initial_service_provider)
                 combo_service.set_active(p);
         }
         
@@ -74,16 +76,16 @@ public class LoginDialog {
             combo_service.set_active(0);
         
         // Set defaults (other than service provider, which is set above)
-        entry_real_name.set_text(default_real_name ?? "");
-        entry_username.set_text(default_username ?? "");
-        entry_password.set_text(default_password ?? "");
-        check_remember_password.active = default_remember_password;
-        entry_imap_host.set_text(default_imap_host ?? "");
-        entry_imap_port.set_text(default_imap_port.to_string());
-        check_imap_ssl.active = default_imap_ssl;
-        entry_smtp_host.set_text(default_smtp_host ?? "");
-        entry_smtp_port.set_text(default_smtp_port.to_string());
-        check_smtp_ssl.active = default_smtp_ssl;
+        entry_real_name.set_text(initial_real_name ?? "");
+        entry_username.set_text(initial_username ?? "");
+        entry_password.set_text(initial_password ?? "");
+        check_remember_password.active = initial_remember_password;
+        entry_imap_host.set_text(initial_default_imap_host ?? "");
+        entry_imap_port.set_text(initial_default_imap_port.to_string());
+        check_imap_ssl.active = initial_default_imap_ssl;
+        entry_smtp_host.set_text(initial_default_smtp_host ?? "");
+        entry_smtp_port.set_text(initial_default_smtp_port.to_string());
+        check_smtp_ssl.active = initial_default_smtp_ssl;
         
         if (Geary.String.is_empty(entry_real_name.text))
             entry_real_name.grab_focus();
@@ -131,12 +133,12 @@ public class LoginDialog {
         account_information.real_name = entry_real_name.text.strip();
         account_information.remember_password = check_remember_password.active;
         account_information.service_provider = get_service_provider();
-        account_information.imap_server_host = entry_imap_host.text.strip();
-        account_information.imap_server_port = (uint16) int.parse(entry_imap_port.text.strip());
-        account_information.imap_server_ssl = check_imap_ssl.active;
-        account_information.smtp_server_host = entry_smtp_host.text.strip();
-        account_information.smtp_server_port = (uint16) int.parse(entry_smtp_port.text.strip());
-        account_information.smtp_server_ssl = check_smtp_ssl.active;
+        account_information.default_imap_server_host = entry_imap_host.text.strip();
+        account_information.default_imap_server_port = (uint16) int.parse(entry_imap_port.text.strip());
+        account_information.default_imap_server_ssl = check_imap_ssl.active;
+        account_information.default_smtp_server_host = entry_smtp_host.text.strip();
+        account_information.default_smtp_server_port = (uint16) int.parse(entry_smtp_port.text.strip());
+        account_information.default_smtp_server_ssl = check_smtp_ssl.active;
         
         on_changed();
         

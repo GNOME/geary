@@ -198,70 +198,67 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (username != null) {
             Geary.Credentials credentials = new Geary.Credentials(username, null);
             old_account_information = new Geary.AccountInformation(credentials);
-            try {
-                old_account_information.load_info_from_file();
-            } catch (Error err) {
-                debug("Problem loading account information: %s", err.message);
-                old_account_information = null;
-            }
+            old_account_information.load_info_from_file();
         }
         
         Geary.AccountInformation account_information =
             request_account_information(old_account_information);
-        do_validate_until_successful_async.begin(account_information, null,
-            on_do_validate_until_successful_async_finished);
-    }
-    
-    private void on_do_validate_until_successful_async_finished(Object? source, AsyncResult result) {
-        try {
-            do_validate_until_successful_async.end(result);
-        } catch (IOError err) {
-            debug("Caught validation error: %s", err.message);
-        }
+        do_validate_until_successful_async.begin(account_information);
     }
     
     private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null)
-        throws IOError {
-        yield validate_until_successful_async(account_information, cancellable);
+        Cancellable? cancellable = null) {
+        Geary.AccountInformation? result = account_information;
+        do {
+            result = yield validate_async(result, cancellable);
+        } while (result != null);
     }
     
-    private async void validate_until_successful_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) 
-        throws IOError {
-        bool success = yield account_information.validate_async(cancellable);
+    // Returns null if we are done validating, or the revised account information if we should retry.
+    private async Geary.AccountInformation? validate_async(Geary.AccountInformation account_information,
+        Cancellable? cancellable = null) {
+        bool success = false;
+        try {
+            success = yield account_information.validate_async(cancellable);
+        } catch (Geary.EngineError err) {
+            debug("Error validating account: %s", err.message);
+            success = false;
+        }
         
         if (success) {
             account_information.store_async.begin(cancellable);
+
             try {
                 set_account(account_information.get_account());
-            } catch (Error err) {
-                // TODO: Handle more gracefully
-                error("Unable to retrieve email account: %s", err.message);
+                debug("Successfully validated account information");
+                return null;
+            } catch (Geary.EngineError err) {
+                debug("Unable to retrieve email account: %s", err.message);
             }
-        } else {
-            Geary.AccountInformation new_account_information =
-                request_account_information(account_information);
-            
-            // If the user refused to enter account information.
-            if (new_account_information == null) {
-                set_account(null);
-                return;
-            }
-            
-            yield validate_until_successful_async(new_account_information, cancellable);
         }
+
+        debug("Validation failed. Prompting user for revised account information");
+        Geary.AccountInformation new_account_information =
+            request_account_information(account_information);
+        
+        // If the user refused to enter account information. There is currently no way that we
+        // could see this--we exit in request_account_information, and the only way that an
+        // exit could be canceled is if there are unsaved composer windows open (which won't
+        // happen before an account is created). However, best to include this check for the
+        // future.
+        if (new_account_information == null) {
+            set_account(null);
+            return null;
+        }
+        
+        debug("User entered revised account information, retrying validation");
+        return new_account_information;
     }
     
     private void open_account(string username, string? old_password = null, Cancellable? cancellable = null) {
         Geary.Credentials credentials = new Geary.Credentials(username, null);
         Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
-        try {
-            account_information.load_info_from_file();
-        } catch (Error err) {
-            // TODO: Handle this more gracefully?
-            error("Problem loading account information from file: %s", err.message);
-        }
+        account_information.load_info_from_file();
         
         bool remember_password = account_information.remember_password;
         string? password = get_password(account_information.credentials.user, old_password, ref remember_password);
@@ -278,9 +275,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         try {
             set_account(account_information.get_account());
-        } catch (Error err) {
-            // TODO: Handle more gracefull
-            error("Unable to retrieve email account: %s", err.message);
+        } catch (Geary.EngineError err) {
+            // Our service provider is wrong. But we can't change it, because we don't want to
+            // change the service provider for an existing account.
+            debug("Unable to retrieve email account: %s", err.message);
+            set_account(null);
         }
     }
     
@@ -318,14 +317,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         Geary.Credentials credentials = new Geary.Credentials(username, old_password);
         
         Geary.AccountInformation old_account_information = new Geary.AccountInformation(credentials);
-        try {
-            old_account_information.load_info_from_file();
-        } catch (Error err) {
-            // TODO: Handle this more gracefully?
-            error("Error loading account information: %s", err.message);
-        }
+        old_account_information.load_info_from_file();
         
-        PasswordDialog password_dialog = new PasswordDialog(old_account_information);
+        PasswordDialog password_dialog = new PasswordDialog(old_account_information, old_password == null);
         if (!password_dialog.run()) {
             exit(1);
             remember_password = false;
@@ -353,6 +347,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             new LoginDialog.from_account_information(old_account_information);
         
         if (!login_dialog.show()) {
+            debug("User refused to enter account information. Exiting...");
             exit(1);
             return null;
         }

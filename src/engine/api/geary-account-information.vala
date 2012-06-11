@@ -23,16 +23,16 @@ public class Geary.AccountInformation : Object {
     internal File? file = null;
     public string real_name { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
-    
-    public string imap_server_host { get; set; default = ""; }
-    public uint16 imap_server_port { get; set; default = Imap.ClientConnection.DEFAULT_PORT_SSL; }
-    public bool imap_server_ssl { get; set; default = true; }
     public bool imap_server_pipeline { get; set; default = true; }
-    
-    public string smtp_server_host { get; set; default = ""; }
-    public uint16 smtp_server_port { get; set; default = Smtp.ClientConnection.DEFAULT_PORT_SSL; }
-    public bool smtp_server_ssl { get; set; default = true; }
-    
+
+    // These properties are only used if the service provider's account type does not override them.
+    public string default_imap_server_host { get; set; }
+    public uint16 default_imap_server_port  { get; set; }
+    public bool default_imap_server_ssl  { get; set; }
+    public string default_smtp_server_host  { get; set; }
+    public uint16 default_smtp_server_port  { get; set; }
+    public bool default_smtp_server_ssl  { get; set; }
+
     public Geary.Credentials credentials { get; private set; }
     public bool remember_password { get; set; default = true; }
     
@@ -43,53 +43,38 @@ public class Geary.AccountInformation : Object {
         this.file = settings_dir.get_child(SETTINGS_FILENAME);
     }
     
-    public void load_info_from_file() throws Error {
+    public void load_info_from_file() {
         KeyFile key_file = new KeyFile();
         try {
             key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
-        } catch (FileError.NOENT err) {
-            // The file didn't exist.  No big deal -- just means we give you the defaults.
+        } catch (FileError err) {
+            // See comment in next catch block.
+        } catch (KeyFileError err) {
+            // It's no big deal if we couldn't load the key file -- just means we give you the defaults.
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
             remember_password = get_bool_value(key_file, GROUP, REMEMBER_PASSWORD_KEY, true);
             service_provider = Geary.ServiceProvider.from_string(get_string_value(key_file, GROUP,
                 SERVICE_PROVIDER_KEY));
             
-            imap_server_host = get_string_value(key_file, GROUP, IMAP_HOST);
-            imap_server_port = get_uint16_value(key_file, GROUP, IMAP_PORT,
-                Imap.ClientConnection.DEFAULT_PORT_SSL);
-            imap_server_ssl = get_bool_value(key_file, GROUP, IMAP_SSL, true);
             imap_server_pipeline = get_bool_value(key_file, GROUP, IMAP_PIPELINE, true);
-            
-            smtp_server_host = get_string_value(key_file, GROUP, SMTP_HOST);
-            smtp_server_port = get_uint16_value(key_file, GROUP, SMTP_PORT,
-                Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
-            smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
+
+            if (service_provider == ServiceProvider.OTHER) {
+                default_imap_server_host = get_string_value(key_file, GROUP, IMAP_HOST);
+                default_imap_server_port = get_uint16_value(key_file, GROUP, IMAP_PORT,
+                    Imap.ClientConnection.DEFAULT_PORT_SSL);
+                default_imap_server_ssl = get_bool_value(key_file, GROUP, IMAP_SSL, true);
+                
+                default_smtp_server_host = get_string_value(key_file, GROUP, SMTP_HOST);
+                default_smtp_server_port = get_uint16_value(key_file, GROUP, SMTP_PORT,
+                    Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
+                default_smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
+            }
         }
     }
     
-    public async bool validate_async(Cancellable? cancellable = null) throws IOError {
-        Geary.Endpoint endpoint;
-        switch (service_provider) {
-            case ServiceProvider.GMAIL:
-                endpoint = GmailAccount.IMAP_ENDPOINT;
-            break;
-            
-            case ServiceProvider.YAHOO:
-                endpoint = YahooAccount.IMAP_ENDPOINT;
-            break;
-            
-            case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = imap_server_ssl ? Endpoint.Flags.SSL : Endpoint.Flags.NONE;
-                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
-                
-                endpoint = new Endpoint(imap_server_host, imap_server_port, imap_flags,
-                    Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-            break;
-            
-            default:
-                assert_not_reached();
-        }
+    public async bool validate_async(Cancellable? cancellable = null) throws EngineError {
+        Geary.Endpoint endpoint = get_imap_endpoint();
         
         Geary.Imap.ClientSessionManager client_session_manager =
             new Geary.Imap.ClientSessionManager(endpoint, credentials, this, 0);
@@ -108,37 +93,69 @@ public class Geary.AccountInformation : Object {
         
         return false;
     }
-    
+
+    public Endpoint get_imap_endpoint() throws EngineError {
+        switch (service_provider) {
+            case ServiceProvider.GMAIL:
+                return GmailAccount.IMAP_ENDPOINT;
+            
+            case ServiceProvider.YAHOO:
+                return YahooAccount.IMAP_ENDPOINT;
+            
+            case ServiceProvider.OTHER:
+                Endpoint.Flags imap_flags = default_imap_server_ssl ? Endpoint.Flags.SSL :
+                    Endpoint.Flags.NONE;
+                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
+                return new Endpoint(default_imap_server_host, default_imap_server_port,
+                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+            
+            default:
+                throw new EngineError.NOT_FOUND("Service provider of type %s not known",
+                    service_provider.to_string());
+        }
+    }
+
+    public Endpoint get_smtp_endpoint() throws EngineError {
+        switch (service_provider) {
+            case ServiceProvider.GMAIL:
+                return GmailAccount.SMTP_ENDPOINT;
+            
+            case ServiceProvider.YAHOO:
+                return YahooAccount.SMTP_ENDPOINT;
+            
+            case ServiceProvider.OTHER:
+                Endpoint.Flags smtp_flags = default_smtp_server_ssl ? Endpoint.Flags.SSL :
+                    Endpoint.Flags.NONE;
+                smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+                
+                return new Endpoint(default_smtp_server_host, default_smtp_server_port,
+                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
+            
+            default:
+                throw new EngineError.NOT_FOUND("Service provider of type %s not known",
+                    service_provider.to_string());
+        }
+    }
+
     public Geary.EngineAccount get_account() throws EngineError {
         Geary.Sqlite.Account sqlite_account =
             new Geary.Sqlite.Account(credentials.user);
-            
+        Endpoint imap_endpoint = get_imap_endpoint();
+        Endpoint smtp_endpoint = get_smtp_endpoint();
+
         switch (service_provider) {
             case ServiceProvider.GMAIL:
                 return new GmailAccount("Gmail account %s".printf(credentials.to_string()),
-                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(
-                    GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, credentials, this),
-                    sqlite_account);
+                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
+                    smtp_endpoint, credentials, this), sqlite_account);
             
             case ServiceProvider.YAHOO:
                 return new YahooAccount("Yahoo account %s".printf(credentials.to_string()),
-                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(
-                    YahooAccount.IMAP_ENDPOINT, YahooAccount.SMTP_ENDPOINT, credentials, this),
-                    sqlite_account);
+                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
+                    smtp_endpoint, credentials, this), sqlite_account);
             
             case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = imap_server_ssl ? Endpoint.Flags.SSL : Endpoint.Flags.NONE;
-                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
-                
-                Endpoint.Flags smtp_flags = smtp_server_ssl ? Endpoint.Flags.SSL : Endpoint.Flags.NONE;
-                smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
-                
-                Endpoint imap_endpoint = new Endpoint(imap_server_host, imap_server_port,
-                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-                    
-                Endpoint smtp_endpoint = new Endpoint(smtp_server_host, smtp_server_port,
-                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-                
                 return new OtherAccount("Other account %s".printf(credentials.to_string()),
                     credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
                     smtp_endpoint, credentials, this), sqlite_account);
@@ -205,14 +222,17 @@ public class Geary.AccountInformation : Object {
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
         key_file.set_boolean(GROUP, REMEMBER_PASSWORD_KEY, remember_password);
         
-        key_file.set_value(GROUP, IMAP_HOST, imap_server_host);
-        key_file.set_integer(GROUP, IMAP_PORT, imap_server_port);
-        key_file.set_boolean(GROUP, IMAP_SSL, imap_server_ssl);
         key_file.set_boolean(GROUP, IMAP_PIPELINE, imap_server_pipeline);
-        
-        key_file.set_value(GROUP, SMTP_HOST, smtp_server_host);
-        key_file.set_integer(GROUP, SMTP_PORT, smtp_server_port);
-        key_file.set_boolean(GROUP, SMTP_SSL, smtp_server_ssl);
+
+        if (service_provider == ServiceProvider.OTHER) {
+            key_file.set_value(GROUP, IMAP_HOST, default_imap_server_host);
+            key_file.set_integer(GROUP, IMAP_PORT, default_imap_server_port);
+            key_file.set_boolean(GROUP, IMAP_SSL, default_imap_server_ssl);
+            
+            key_file.set_value(GROUP, SMTP_HOST, default_smtp_server_host);
+            key_file.set_integer(GROUP, SMTP_PORT, default_smtp_server_port);
+            key_file.set_boolean(GROUP, SMTP_SSL, default_smtp_server_ssl);
+        }
         
         string data = key_file.to_data();
         string new_etag;
