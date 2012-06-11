@@ -261,7 +261,7 @@ public interface Geary.Folder : Object {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async bool create_email_async(Geary.Email email, Cancellable? cancellable = null)
+    public abstract async bool create_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable = null)
         throws Error;
     
     /**

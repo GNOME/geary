@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
+private class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
     public const string FILENAME = "geary.db";
 
     public MailDatabase(string user, File user_data_dir, File resource_dir) throws Error {
@@ -47,6 +47,15 @@ public class Geary.Sqlite.MailDatabase : Geary.Sqlite.Database {
         return (attachment_table != null)
             ? attachment_table
             : (MessageAttachmentTable) add_table(new MessageAttachmentTable(this, heavy_table));
+    }
+    
+    public Geary.Sqlite.SmtpOutboxTable get_smtp_outbox_table() {
+        SQLHeavy.Table heavy_table;
+        SmtpOutboxTable? outbox_table = get_table("OutboxTable", out heavy_table) as SmtpOutboxTable;
+        
+        return (outbox_table != null)
+            ? outbox_table
+            : (SmtpOutboxTable) add_table(new SmtpOutboxTable(this, heavy_table));
     }
 }
 

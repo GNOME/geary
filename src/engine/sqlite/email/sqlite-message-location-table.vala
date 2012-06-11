@@ -14,7 +14,7 @@ public class Geary.Sqlite.MessageLocationTable : Geary.Sqlite.Table {
         REMOVE_MARKER
     }
     
-    public MessageLocationTable(Geary.Sqlite.Database db, SQLHeavy.Table table) {
+    internal MessageLocationTable(Geary.Sqlite.Database db, SQLHeavy.Table table) {
         base (db, table);
     }
     

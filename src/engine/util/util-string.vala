@@ -4,6 +4,10 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+// GLib's character-based substring function.
+[CCode (cname = "g_utf8_substring")]
+extern string glib_substring(string str, long start_pos, long end_pos);
+
 namespace Geary.String {
 
 public inline bool is_null_or_whitespace(string? str) {
@@ -87,6 +91,17 @@ public string reduce_whitespace(string _s) {
     }
     
     return s;
+}
+
+// Slices a string to, at most, max_length number of bytes (NOT including the null.)
+// Due to the nature of UTF-8, it may be a few bytes shorter than the maximum.
+//
+// If the string is less than max_length bytes, it will be return unchanged.
+public string safe_byte_substring(string s, ssize_t max_length) {
+    if (s.length < max_length)
+        return s;
+    
+    return glib_substring(s, 0, s.char_count(max_length));
 }
 
 }

@@ -53,6 +53,7 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
         FolderRoot spam_folder = new Geary.FolderRoot("Bulk Mail", Imap.Account.ASSUMED_SEPARATOR,
             false);
         FolderRoot trash_folder = new Geary.FolderRoot("Trash", Imap.Account.ASSUMED_SEPARATOR, false);
+        FolderRoot outbox_folder = new SmtpOutboxFolderRoot();
         
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.INBOX, _("Inbox"),
             inbox_folder, 0));
@@ -62,14 +63,17 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
             sent_folder, 2));
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SPAM, _("Spam"),
             spam_folder, 3));
+        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.OUTBOX,
+            _("Outbox"), outbox_folder, 4));
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.TRASH, _("Trash"),
-            trash_folder, 4));
+            trash_folder, 5));
         
         ignored_paths = new Gee.HashSet<Geary.FolderPath>(Hashable.hash_func, Equalable.equal_func);
         ignored_paths.add(inbox_folder);
         ignored_paths.add(drafts_folder);
         ignored_paths.add(sent_folder);
         ignored_paths.add(spam_folder);
+        ignored_paths.add(outbox_folder);
         ignored_paths.add(trash_folder);
     }
     

@@ -5,13 +5,12 @@
  */
 
 private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
-    public override int64 ordering { get; protected set; }
-    
     public Imap.UID uid { get; private set; }
     
     public EmailIdentifier(Imap.UID uid) {
+        base (uid.value);
+        
         this.uid = uid;
-        ordering = uid.value;
     }
     
     public override uint to_hash() {
@@ -26,7 +25,7 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
         if (this == other)
             return true;
         
-        return uid.value == other.uid.value;
+        return ordering == other.ordering;
     }
     
     public override string to_string() {

@@ -11,7 +11,8 @@ public enum Geary.SpecialFolderType {
     FLAGGED,
     ALL_MAIL,
     SPAM,
-    TRASH
+    TRASH,
+    OUTBOX
 }
 
 public class Geary.SpecialFolder : Object {

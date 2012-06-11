@@ -7,6 +7,7 @@
 public class Geary.Sqlite.Transaction {
     private static NonblockingMutex? transaction_lock = null;
     private static int next_id = 0;
+    private static string? held_by = null;
     
     public bool is_locked { get {
         return claim_stub != NonblockingMutex.INVALID_TOKEN;
@@ -41,13 +42,12 @@ public class Geary.Sqlite.Transaction {
     
     public async void begin_async(Cancellable? cancellable = null) throws Error {
         assert(!is_locked);
-#if TRACE_TRANSACTIONS
-        debug("[%s] claiming lock", to_string());
-#endif
+        
+        Logging.debug(Logging.Flag.TRANSACTIONS, "[%s] claiming lock held by %s", to_string(),
+            !String.is_empty(held_by) ? held_by : "(no one)");
         claim_stub = yield transaction_lock.claim_async(cancellable);
-#if TRACE_TRANSACTIONS
-        debug("[%s] lock claimed", to_string());
-#endif
+        held_by = name;
+        Logging.debug(Logging.Flag.TRANSACTIONS, "[%s] lock claimed", to_string());
     }
     
     private void resolve(bool commit, Cancellable? cancellable) throws Error {
@@ -60,13 +60,11 @@ public class Geary.Sqlite.Transaction {
         if (commit)
             is_commit_required = false;
         
-#if TRACE_TRANSACTIONS
-        debug("[%s] releasing lock", to_string());
-#endif
+        Logging.debug(Logging.Flag.TRANSACTIONS, "[%s] releasing lock held by %s", to_string(),
+            !String.is_empty(held_by) ? held_by : "(no one)");
         transaction_lock.release(ref claim_stub);
-#if TRACE_TRANSACTIONS
-        debug("[%s] released lock", to_string());
-#endif
+        held_by = null;
+        Logging.debug(Logging.Flag.TRANSACTIONS, "[%s] released lock", to_string());
     }
     
     public SQLHeavy.Query prepare(string sql) throws Error {
@@ -87,9 +85,8 @@ public class Geary.Sqlite.Transaction {
     }
     
     public void set_commit_required() {
-#if TRACE_TRANSACTIONS
-        debug("[%s] commit required", to_string());
-#endif
+        Logging.debug(Logging.Flag.TRANSACTIONS, "[%s] commit required", to_string());
+        
         is_commit_required = true;
     }
     

@@ -17,14 +17,26 @@
  * fields in the same Folder that match the email's position within it.  The ordering field may
  * or may not be the actual unique identifier; in IMAP, for example, it is, while in other systems
  * it may not be.
+ *
+ * TODO:
+ * EmailIdentifier currently does not verify it is in the same Folder as the other EmailIdentifier
+ * passed to equals() and compare().  This may be added in the future.
  */
 
 public abstract class Geary.EmailIdentifier : Object, Geary.Equalable, Geary.Comparable, Geary.Hashable {
-    public abstract int64 ordering { get; protected set; }
+    public int64 ordering { get; protected set; }
     
+    protected EmailIdentifier(int64 ordering) {
+        this.ordering = ordering;
+    }
+    
+    public virtual uint to_hash() {
+        return Geary.Hashable.int64_hash(ordering);
+    }
+    
+    // Virtual default implementation not provided because base class *must* verify that the
+    // Equalable is of its own type.
     public abstract bool equals(Geary.Equalable other);
-    
-    public abstract uint to_hash();
     
     public virtual int compare(Geary.Comparable o) {
         Geary.EmailIdentifier? other = o as Geary.EmailIdentifier;
@@ -43,6 +55,8 @@ public abstract class Geary.EmailIdentifier : Object, Geary.Equalable, Geary.Com
             return 0;
     }
     
-    public abstract string to_string();
+    public virtual string to_string() {
+        return ordering.to_string();
+    }
 }
 

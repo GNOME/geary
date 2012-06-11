@@ -86,6 +86,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_replay_queue = false;
     static bool log_conversations = false;
     static bool log_periodic = false;
+    static bool log_transactions = false;
     static bool version = false;
     const OptionEntry[] options = {
         { "debug", 0, 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
@@ -94,6 +95,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Output replay queue log"), null },
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
         { "log-periodic", 0, 0, OptionArg.NONE, ref log_periodic, N_("Output periodic activity"), null },
+        { "log-transactions", 0, 0, OptionArg.NONE, ref log_transactions, N_("Output database transactions"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
         { null }
     };
@@ -131,6 +133,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (log_periodic)
             Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
+        
+        if (log_transactions)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.TRANSACTIONS);
         
         if (log_debug)
             Geary.Logging.log_to(stdout);
@@ -177,7 +182,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (this.account != null)
             this.account.report_problem.connect(on_report_problem);
         
-        controller.connect_account(this.account);
+        controller.connect_account_async.begin(this.account, null);
     }
     
     private void initialize_account() {
@@ -228,7 +233,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (success) {
             account_information.store_async.begin(cancellable);
-            set_account(account_information.get_account());
+            try {
+                set_account(account_information.get_account());
+            } catch (Error err) {
+                // TODO: Handle more gracefully
+                error("Unable to retrieve email account: %s", err.message);
+            }
         } else {
             Geary.AccountInformation new_account_information =
                 request_account_information(account_information);
@@ -265,7 +275,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         account_information.store_async.begin(cancellable);
         
         account_information.credentials.pass = password;
-        set_account(account_information.get_account());
+        
+        try {
+            set_account(account_information.get_account());
+        } catch (Error err) {
+            // TODO: Handle more gracefull
+            error("Unable to retrieve email account: %s", err.message);
+        }
     }
     
     private string? get_username() {
@@ -374,7 +390,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public override bool exiting(bool panicked) {
         if (controller.main_window != null)
             controller.main_window.destroy();
-            
+        
+        controller.disconnect_account_async.begin(null);
+        
         return true;
     }
     

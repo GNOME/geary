@@ -47,10 +47,13 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
     private static void initialize_personality() {
         Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER, Imap.Account.ASSUMED_SEPARATOR,
             true);
+        Geary.FolderRoot inbox_folder = new Geary.FolderRoot(Imap.Account.INBOX_NAME,
+            Imap.Account.ASSUMED_SEPARATOR, false);
+        Geary.FolderRoot outbox_folder = new SmtpOutboxFolderRoot();
         
         special_folder_map = new SpecialFolderMap();
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.INBOX, _("Inbox"),
-            new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR, false), 0));
+            inbox_folder, 0));
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.DRAFTS, _("Drafts"),
             gmail_root.get_child("Drafts"), 1));
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SENT, _("Sent Mail"),
@@ -61,13 +64,15 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
             gmail_root.get_child("All Mail"), 4));
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SPAM, _("Spam"),
             gmail_root.get_child("Spam"), 5));
+        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.OUTBOX,
+            _("Outbox"), outbox_folder, 6));
         special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.TRASH, _("Trash"),
-            gmail_root.get_child("Trash"), 6));
+            gmail_root.get_child("Trash"), 7));
         
         ignored_paths = new Gee.HashSet<Geary.FolderPath>(Hashable.hash_func, Equalable.equal_func);
         ignored_paths.add(gmail_root);
-        ignored_paths.add(new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
-            true));
+        ignored_paths.add(inbox_folder);
+        ignored_paths.add(outbox_folder);
     }
     
     public override string get_user_folders_label() {

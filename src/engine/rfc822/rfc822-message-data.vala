@@ -277,5 +277,9 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         
         base (buffer);
     }
+    
+    public PreviewText.from_string(string preview) {
+        base (new Geary.Memory.StringBuffer(preview));
+    }
 }
 

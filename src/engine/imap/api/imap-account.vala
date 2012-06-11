@@ -45,6 +45,16 @@ private class Geary.Imap.Account : Object {
         smtp = new Geary.Smtp.ClientSession(smtp_endpoint);
     }
     
+    public async void open_async(Cancellable? cancellable) throws Error {
+        // Nothing to do -- ClientSessionManager deals with maintaining connections
+        // TODO: Start ClientSessionManager here, not in ctor
+    }
+    
+    public async void close_async(Cancellable? cancellable) throws Error {
+        // Nothing to do -- ClientSessionManager deals with maintaining connections
+        // TODO: Stop ClientSessionManager here
+    }
+    
     public async Gee.Collection<Geary.Imap.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
         Geary.FolderPath? processed = process_path(parent, null,
@@ -175,10 +185,8 @@ private class Geary.Imap.Account : Object {
         return parent;
     }
     
-    public async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
+    public async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable = null)
         throws Error {
-        Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(composed);
-        
         yield smtp.login_async(cred, cancellable);
         try {
             yield smtp.send_email_async(rfc822, cancellable);

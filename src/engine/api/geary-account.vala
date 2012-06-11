@@ -12,29 +12,47 @@ public interface Geary.Account : Object {
         DATABASE_FAILURE
     }
     
+    public signal void opened();
+    
+    public signal void closed();
+    
     public signal void report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
         Error? err);
     
     public signal void folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
     
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_opened();
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_closed();
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
     protected abstract void notify_report_problem(Geary.Account.Problem problem,
         Geary.Credentials? credentials, Error? err);
     
+    /**
+     * Signal notification method for subclasses to use.
+     */
     protected abstract void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
     
     /**
-     * This method returns which Geary.Email.Field fields must be available in a Geary.Email to
-     * write (or save or store) the message to the backing medium.  Different implementations will
-     * have different requirements, which must be reconciled.
      *
-     * In this case, Geary.Email.Field.NONE means "any".
-     *
-     * If a write operation is attempted on an email that does not have all these fields fulfilled,
-     * an EngineError.INCOMPLETE_MESSAGE will be thrown.
      */
-    public abstract Geary.Email.Field get_required_fields_for_writing();
+    public abstract async void open_async(Cancellable? cancellable = null) throws Error;
+    
+    /**
+     *
+     */
+    public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     /**
      * Lists all the folders found under the parent path unless it's null, in which case it lists
@@ -60,6 +78,9 @@ public interface Geary.Account : Object {
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
     
+    /**
+     * Used only for debugging.  Should not be used for user-visible strings.
+     */
     public abstract string to_string();
 }
 

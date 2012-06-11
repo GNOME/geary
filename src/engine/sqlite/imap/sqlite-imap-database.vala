@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Sqlite.ImapDatabase : Geary.Sqlite.MailDatabase {
+private class Geary.Sqlite.ImapDatabase : Geary.Sqlite.MailDatabase {
     public ImapDatabase(string user, File user_data_dir, File resource_dir) throws Error {
         base (user, user_data_dir, resource_dir);
     }

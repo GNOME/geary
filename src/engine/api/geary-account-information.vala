@@ -109,22 +109,20 @@ public class Geary.AccountInformation : Object {
         return false;
     }
     
-    public Geary.EngineAccount get_account() {
-        File? user_data_dir = Geary.Engine.user_data_dir;
-        File? resource_dir = Geary.Engine.resource_dir;
+    public Geary.EngineAccount get_account() throws Error {
         Geary.Sqlite.Account sqlite_account =
-            new Geary.Sqlite.Account(credentials, user_data_dir, resource_dir);
+            new Geary.Sqlite.Account(credentials.user);
             
         switch (service_provider) {
             case ServiceProvider.GMAIL:
                 return new GmailAccount("Gmail account %s".printf(credentials.to_string()),
-                    credentials.user, this, user_data_dir, new Geary.Imap.Account(
+                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(
                     GmailAccount.IMAP_ENDPOINT, GmailAccount.SMTP_ENDPOINT, credentials, this),
                     sqlite_account);
             
             case ServiceProvider.YAHOO:
                 return new YahooAccount("Yahoo account %s".printf(credentials.to_string()),
-                    credentials.user, this, user_data_dir, new Geary.Imap.Account(
+                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(
                     YahooAccount.IMAP_ENDPOINT, YahooAccount.SMTP_ENDPOINT, credentials, this),
                     sqlite_account);
             
@@ -142,11 +140,12 @@ public class Geary.AccountInformation : Object {
                     smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
                 
                 return new OtherAccount("Other account %s".printf(credentials.to_string()),
-                    credentials.user, this, user_data_dir, new Geary.Imap.Account(imap_endpoint,
+                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
                     smtp_endpoint, credentials, this), sqlite_account);
                 
             default:
-                assert_not_reached();
+                throw new EngineError.NOT_FOUND("Service provider of type %s not known",
+                    service_provider.to_string());
         }
     }
     

@@ -120,7 +120,7 @@ public class GearyController {
     }
     
     ~GearyController() {
-        connect_account(null);
+        assert(account == null);
     }
 
     private void add_accelerator(string accelerator, string action) {
@@ -242,7 +242,7 @@ public class GearyController {
         return entries;
     }
     
-    public void connect_account(Geary.EngineAccount? new_account) {
+    public async void connect_account_async(Geary.EngineAccount? new_account, Cancellable? cancellable) {
         if (account == new_account)
             return;
         
@@ -261,12 +261,29 @@ public class GearyController {
             main_window.title = GearyApplication.NAME;
             
             main_window.folder_list.remove_all_branches();
+            
+            try {
+                yield account.close_async(cancellable);
+            } catch (Error close_err) {
+                debug("Unable to close account %s: %s", account.to_string(), close_err.message);
+            }
         }
         
         account = new_account;
         
         // Connect the new account, if any.
         if (account != null) {
+            try {
+                yield account.open_async(cancellable);
+            } catch (Error open_err) {
+                // TODO: Better error reporting to user
+                debug("Unable to open account %s: %s", account.to_string(), open_err.message);
+                
+                account = null;
+                
+                GearyApplication.instance.panic();
+            }
+            
             account.folders_added_removed.connect(on_folders_added_removed);
             
             // Personality-specific setup.
@@ -283,6 +300,10 @@ public class GearyController {
             main_window.folder_list.set_user_folders_root_name(account.get_user_folders_label());
             load_folders.begin(cancellable_folder);
         }
+    }
+    
+    public async void disconnect_account_async(Cancellable? cancellable) throws Error {
+        yield connect_account_async(null, cancellable);
     }
     
     private bool is_viewed_conversation(Geary.Conversation? conversation) {

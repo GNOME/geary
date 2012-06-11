@@ -21,7 +21,17 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
         folders_added_removed(added, removed);
     }
     
-    public abstract Geary.Email.Field get_required_fields_for_writing();
+    protected virtual void notify_opened() {
+        opened();
+    }
+    
+    protected virtual void notify_closed() {
+        closed();
+    }
+    
+    public abstract async void open_async(Cancellable? cancellable = null) throws Error;
+    
+    public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error;

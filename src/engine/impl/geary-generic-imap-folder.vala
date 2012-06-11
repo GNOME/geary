@@ -94,9 +94,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         return Geary.Folder.OpenState.OPENING;
     }
     
-    public override async bool create_email_async(Geary.Email email, Cancellable? cancellable) throws Error {
-        check_open("create_email_async");
-        
+    public override async bool create_email_async(Geary.RFC822.Message rfc822, Cancellable?
+        cancellable) throws Error {
         throw new EngineError.READONLY("Engine currently read-only");
     }
     

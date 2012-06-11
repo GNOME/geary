@@ -16,32 +16,65 @@ private class Geary.Sqlite.Account : Object {
     }
     
     private string name;
-    private ImapDatabase db;
-    private FolderTable folder_table;
-    private ImapFolderPropertiesTable folder_properties_table;
-    private MessageTable message_table;
+    private ImapDatabase? db = null;
+    private FolderTable? folder_table = null;
+    private ImapFolderPropertiesTable? folder_properties_table = null;
+    private MessageTable? message_table = null;
+    private SmtpOutboxTable? outbox_table = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>(Hashable.hash_func, Equalable.equal_func);
     
-    public Account(Geary.Credentials cred, File user_data_dir, File resource_dir) {
-        name = "SQLite account for %s".printf(cred.to_string());
+    public Account(string username) {
+        name = "SQLite account for %s".printf(username);
+    }
+    
+    private void check_open() throws Error {
+        if (db == null)
+            throw new EngineError.OPEN_REQUIRED("Database not open");
+    }
+    
+    public async void open_async(Geary.Credentials cred, File user_data_dir, File resource_dir,
+        Cancellable? cancellable) throws Error {
+        if (db != null)
+            throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
         try {
             db = new ImapDatabase(cred.user, user_data_dir, resource_dir);
             db.pre_upgrade.connect(on_pre_upgrade);
             db.post_upgrade.connect(on_post_upgrade);
+            
             db.upgrade();
         } catch (Error err) {
-            error("Unable to open database: %s", err.message);
+            warning("Unable to open database: %s", err.message);
+            
+            // close database before exiting
+            db = null;
+            
+            throw err;
         }
         
         folder_table = db.get_folder_table();
         folder_properties_table = db.get_imap_folder_properties_table();
         message_table = db.get_message_table();
+        outbox_table = db.get_smtp_outbox_table();
+    }
+    
+    public async void close_async(Cancellable? cancellable) throws Error {
+        if (db == null)
+            return;
+        
+        folder_table = null;
+        folder_properties_table = null;
+        message_table = null;
+        outbox_table = null;
+        
+        db = null;
     }
     
     private async int64 fetch_id_async(Transaction? transaction, Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         FolderRow? row = yield folder_table.fetch_descend_async(transaction, path.as_list(),
             cancellable);
         if (row == null)
@@ -52,12 +85,16 @@ private class Geary.Sqlite.Account : Object {
     
     private async int64 fetch_parent_id_async(Transaction? transaction, Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         return path.is_root() ? Row.INVALID_ID : yield fetch_id_async(transaction, path.get_parent(),
             cancellable);
     }
     
     public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
         throws Error {
+        check_open();
+        
         Geary.Imap.FolderProperties? imap_folder_properties = imap_folder.get_properties();
         
         // properties *must* be available to perform a clone
@@ -80,6 +117,8 @@ private class Geary.Sqlite.Account : Object {
     
     public async void update_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
         throws Error {
+        check_open();
+        
         Geary.Imap.FolderProperties? imap_folder_properties = (Geary.Imap.FolderProperties?)
             imap_folder.get_properties();
         
@@ -111,6 +150,8 @@ private class Geary.Sqlite.Account : Object {
     
     public async Gee.Collection<Geary.Sqlite.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Transaction transaction = yield db.begin_transaction_async("Account.list_folders_async",
             cancellable);
         
@@ -149,6 +190,8 @@ private class Geary.Sqlite.Account : Object {
     
     public async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
         throws Error {
+        check_open();
+        
         try {
             int64 id = yield fetch_id_async(null, path, cancellable);
             
@@ -163,6 +206,8 @@ private class Geary.Sqlite.Account : Object {
     
     public async Geary.Sqlite.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         // check references table first
         Geary.Sqlite.Folder? folder = get_sqlite_folder(path);
         if (folder != null)
@@ -191,8 +236,14 @@ private class Geary.Sqlite.Account : Object {
         return (folder_ref != null) ? (Geary.Sqlite.Folder) folder_ref.get_reference() : null;
     }
     
+    public SmtpOutboxTable get_outbox() {
+        return outbox_table;
+    }
+    
     private Geary.Sqlite.Folder create_sqlite_folder(FolderRow row, Imap.FolderProperties? properties,
         Geary.FolderPath path) throws Error {
+        check_open();
+        
         // create folder
         Geary.Sqlite.Folder folder = new Geary.Sqlite.Folder(db, row, properties, path);
         

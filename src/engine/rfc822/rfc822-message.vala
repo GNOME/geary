@@ -30,6 +30,10 @@ public class Geary.RFC822.Message : Object {
         stock_from_gmime();
     }
     
+    public Message.from_string(string full_email) throws RFC822Error {
+        this(new Geary.RFC822.Full(new Geary.Memory.StringBuffer(full_email)));
+    }
+    
     public Message.from_parts(Header header, Text body) throws RFC822Error {
         GMime.StreamCat stream_cat = new GMime.StreamCat();
         stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_array()));
@@ -129,7 +133,7 @@ public class Geary.RFC822.Message : Object {
             message.set_mime_part(body_html);
         }
     }
-
+    
     // Makes a copy of the given message without the BCC fields. This is used for sending the email
     // without sending the BCC headers to all recipients.
     public Message.without_bcc(Message email) {
@@ -176,7 +180,44 @@ public class Geary.RFC822.Message : Object {
         // Setup body depending on what MIME components were filled out.
         message.set_mime_part(email.message.get_mime_part());
     }
-
+    
+    public Geary.Email get_email(int position, Geary.EmailIdentifier id) throws Error {
+        Geary.Email email = new Geary.Email(position, id);
+        
+        email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
+            message.get_headers())));
+        email.set_send_date(new Geary.RFC822.Date(message.get_date_as_string()));
+        email.set_originators(from, new Geary.RFC822.MailboxAddresses.single(sender), null);
+        email.set_receivers(to, cc, bcc);
+        email.set_full_references(null, in_reply_to, references);
+        email.set_message_subject(subject);
+        email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.StringBuffer(
+            message.get_body().to_string())));
+        email.set_message_preview(new Geary.RFC822.PreviewText.from_string(
+            preview_from_email(email)));
+        
+        return email;
+    }
+    
+    // Takes an e-mail object with a body and generates a preview.  If there is no body
+    // or the body is the empty string, the empty string will be returned.
+    //
+    // Note that this is intended for outgoing messages, and as such we rely on the text
+    // section existing.
+    private string preview_from_email(Geary.Email email) {
+        try {
+            return Geary.String.safe_byte_substring(email.get_message().
+                get_first_mime_part_of_content_type("text/plain").to_string().
+                chug(), Geary.Email.MAX_PREVIEW_BYTES);
+        } catch (Error e) {
+            debug("Could not generate outbox preview: %s", e.message);
+            
+            // fall through
+        }
+        
+        return "";
+    }
+    
     private void stock_from_gmime() {
         from = new RFC822.MailboxAddresses.from_rfc822_string(message.get_sender());
         if (from.size == 0) {

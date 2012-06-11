@@ -64,6 +64,20 @@ public class Geary.Email : Object {
         public inline bool require(Field required_fields) {
             return is_all_set(required_fields);
         }
+        
+        public string to_list_string() {
+            StringBuilder builder = new StringBuilder();
+            foreach (Field f in all()) {
+                if (is_all_set(f)) {
+                    if (!String.is_empty(builder.str))
+                        builder.append(", ");
+                    
+                    builder.append(f.to_string());
+                }
+            }
+            
+            return builder.str;
+        }
     }
     
     /**

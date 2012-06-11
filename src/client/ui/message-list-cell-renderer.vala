@@ -42,9 +42,10 @@ public class FormattedMessageData : Object {
     public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread,
         bool flagged, Geary.Folder folder) {
         assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
-
+        
         string who = "";
-        if (folder.get_special_folder_type() == Geary.SpecialFolderType.SENT &&
+        if ((folder.get_special_folder_type() == Geary.SpecialFolderType.SENT ||
+            folder.get_special_folder_type() == Geary.SpecialFolderType.OUTBOX) &&
             email.to != null && email.to.size > 0) {
             who = email.to[0].get_short_address();
         } else if (email.from != null && email.from.size > 0) {
@@ -147,7 +148,7 @@ public class FormattedMessageData : Object {
                     cell_area.y + LINE_SPACING);
                 ctx.paint();
             }
-
+            
             // Unread indicator.
             if (is_unread) {
                 Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,

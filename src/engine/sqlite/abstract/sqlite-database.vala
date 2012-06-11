@@ -60,25 +60,24 @@ public abstract class Geary.Sqlite.Database {
         File upgrade_script;
         while ((upgrade_script = get_upgrade_script(++db_version)).query_exists()) {
             pre_upgrade(db_version);
-
+            
             try {
-                debug("Upgrading to %d", db_version);
-                string upgrade_contents;
-                FileUtils.get_contents(upgrade_script.get_path(), out upgrade_contents);
-                db.run(upgrade_contents);
+                debug("Upgrading database to to version %d at %s", db_version, upgrade_script.get_path());
+                
+                db.run_script(upgrade_script.get_path());
                 db.run("PRAGMA user_version = %d;".printf(db_version));
             } catch (Error e) {
                 // TODO Add rollback of changes here when switching away from SQLHeavy.
                 warning("Error upgrading database: %s", e.message);
                 throw e;
             }
-
+            
             post_upgrade(db_version);
         }
     }
 
     private File get_upgrade_script(int version) {
-        return File.new_for_path("%s/Version-%03d.sql".printf(schema_dir.get_path(), version));
+        return schema_dir.get_child("Version-%03d.sql".printf(version));
     }
 }
 

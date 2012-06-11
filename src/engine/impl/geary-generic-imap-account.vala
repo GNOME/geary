@@ -9,6 +9,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     private Sqlite.Account local;
     private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
         FolderPath, Imap.FolderProperties>(Hashable.hash_func, Equalable.equal_func);
+    private SmtpOutboxFolder? outbox = null;
     
     public GenericImapAccount(string name, string username, AccountInformation? account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
@@ -24,10 +25,52 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         return properties_map.get(path);
     }
     
-    public override Geary.Email.Field get_required_fields_for_writing() {
-        // Return the more restrictive of the two, which is the NetworkAccount's.
-        // TODO: This could be determined at runtime rather than fixed in stone here.
-        return Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
+    public override async void open_async(Cancellable? cancellable = null) throws Error {
+        yield local.open_async(get_account_information().credentials, Engine.user_data_dir, Engine.resource_dir,
+            cancellable);
+        
+        // need to back out local.open_async() if remote fails
+        try {
+            yield remote.open_async(cancellable);
+        } catch (Error err) {
+            // back out
+            try {
+                yield local.close_async(cancellable);
+            } catch (Error close_err) {
+                // ignored
+            }
+            
+            throw err;
+        }
+        
+        outbox = new SmtpOutboxFolder(remote, local.get_outbox());
+        
+        notify_opened();
+    }
+    
+    public override async void close_async(Cancellable? cancellable = null) throws Error {
+        // attempt to close both regardless of errors
+        Error? local_err = null;
+        try {
+            yield local.close_async(cancellable);
+        } catch (Error lclose_err) {
+            local_err = lclose_err;
+        }
+        
+        Error? remote_err = null;
+        try {
+            yield remote.close_async(cancellable);
+        } catch (Error rclose_err) {
+            remote_err = rclose_err;
+        }
+        
+        outbox = null;
+        
+        if (local_err != null)
+            throw local_err;
+        
+        if (remote_err != null)
+            throw remote_err;
     }
     
     public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
@@ -50,6 +93,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         }
         
         background_update_folders.begin(parent, engine_list, cancellable);
+        engine_list.add(outbox);
         
         return engine_list;
     }
@@ -64,6 +108,10 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        
+        if (path.equals(outbox.get_path()))
+            return outbox;
+        
         Sqlite.Folder? local_folder = null;
         try {
             local_folder = (Sqlite.Folder) yield local.fetch_folder_async(path, cancellable);
@@ -179,9 +227,10 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         return false;
     }
     
-    public override async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
-        throws Error {
-        yield remote.send_email_async(composed, cancellable);
+    public override async void send_email_async(Geary.ComposedEmail composed,
+        Cancellable? cancellable = null) throws Error {
+        Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(composed);
+        yield outbox.create_email_async(rfc822, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

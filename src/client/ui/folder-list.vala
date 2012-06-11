@@ -87,10 +87,13 @@ public class FolderList : Sidebar.Tree {
                 
                 case Geary.SpecialFolderType.SPAM:
                     return new ThemedIcon("mail-mark-junk");
-                    
+                
                 case Geary.SpecialFolderType.TRASH:
                     return new ThemedIcon("user-trash");
-                    
+                
+                case Geary.SpecialFolderType.OUTBOX:
+                    return new ThemedIcon("mail-outbox");
+                
                 default:
                     assert_not_reached();
             }

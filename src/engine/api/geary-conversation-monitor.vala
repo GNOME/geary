@@ -104,7 +104,9 @@ public class Geary.ConversationMonitor : Object {
             id_ascending.remove(email);
             id_descending.remove(email);
             
-            message_ids.remove_all(email.get_ancestors());
+            Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
+            if (ancestors != null)
+                message_ids.remove_all(ancestors);
         }
         
         private static int compare_date_ascending(Email a, Email b) {
@@ -491,6 +493,9 @@ public class Geary.ConversationMonitor : Object {
     }
     
     private void process_email(Gee.List<Geary.Email> emails) {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email: %d emails",
+            folder.to_string(), emails.size);
+        
         Gee.HashSet<Conversation> new_conversations = new Gee.HashSet<Conversation>();
         Gee.MultiMap<Conversation, Geary.Email> appended_conversations = new Gee.HashMultiMap<
             Conversation, Geary.Email>();

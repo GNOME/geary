@@ -96,6 +96,9 @@ engine/impl/geary-receive-replay-operations.vala
 engine/impl/geary-replay-operation.vala
 engine/impl/geary-replay-queue.vala
 engine/impl/geary-send-replay-operations.vala
+engine/impl/outbox/smtp-outbox-folder.vala
+engine/impl/outbox/smtp-outbox-email-identifier.vala
+engine/impl/outbox/smtp-outbox-email-properties.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
@@ -146,6 +149,8 @@ engine/sqlite/imap/sqlite-imap-folder-properties-row.vala
 engine/sqlite/imap/sqlite-imap-folder-properties-table.vala
 engine/sqlite/imap/sqlite-imap-message-properties-row.vala
 engine/sqlite/imap/sqlite-imap-message-properties-table.vala
+engine/sqlite/smtp/sqlite-smtp-outbox-row.vala
+engine/sqlite/smtp/sqlite-smtp-outbox-table.vala
 
 engine/state/state-machine-descriptor.vala
 engine/state/state-machine.vala
