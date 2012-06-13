@@ -196,6 +196,8 @@ public class Geary.Imap.Deserializer {
             break;
             
             case Mode.BLOCK:
+                // Can't merely skip zero-byte literal, need to go through async transaction to
+                // properly send events to the FSM
                 assert(literal_length_remaining >= 0);
                 
                 if (block_buffer == null)
@@ -239,8 +241,10 @@ public class Geary.Imap.Deserializer {
     
     private void on_read_block(Object? source, AsyncResult result) {
         try {
+            // Zero-byte literals are legal (see note in next_deserialize_step()), so EOS only
+            // happens when actually pulling data
             size_t bytes_read = dins.read_async.end(result);
-            if (bytes_read == 0) {
+            if (bytes_read == 0 && literal_length_remaining > 0) {
                 push_eos();
                 
                 return;
