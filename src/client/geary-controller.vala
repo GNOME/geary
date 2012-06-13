@@ -76,6 +76,7 @@ public class GearyController {
     private bool scan_in_progress = false;
     private int conversations_added_counter = 0;
     private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
+    private File? last_save_directory = null;
 
     private Geary.EngineAccount? account { get; private set; }
     
@@ -968,7 +969,9 @@ public class GearyController {
             : Gtk.FileChooserAction.SELECT_FOLDER;
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
             Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.SAVE, Gtk.ResponseType.ACCEPT, null);
-        dialog.set_filename(attachments[0].filepath);
+        if (last_save_directory != null)
+            dialog.set_current_folder(last_save_directory.get_path());
+        dialog.set_current_name(attachments[0].filename);
         if (dialog.run() != Gtk.ResponseType.ACCEPT) {
             dialog.destroy();
             return;
@@ -981,6 +984,7 @@ public class GearyController {
         // Save the attachments.
         // TODO Handle attachments with the same name being saved into the same directory.
         File destination = File.new_for_path(filename);
+        last_save_directory = destination.get_parent();
         if (attachments.size == 1) {
             File source = File.new_for_path(attachments[0].filepath);
             source.copy_async.begin(destination, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
