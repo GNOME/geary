@@ -38,6 +38,7 @@ endif ()
 add_subdirectory(src)
 add_subdirectory(icons)
 add_subdirectory(sql)
+add_subdirectory(theming)
 add_subdirectory(ui)
 add_subdirectory(help)
 

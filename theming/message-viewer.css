@@ -1,0 +1,373 @@
+@media print {
+
+    body {
+        background-color: white !important;
+    }
+    .avatar, .button, .starred {
+        display: none !important;
+    }
+    .email {
+        display: none !important;
+    }
+    .email.print {
+        display: inline-block !important;
+        background-color: white !important;
+    }
+    .email.print .body {
+        display: block !important;
+        background-color: white !important;
+    }
+    .email.print .preview {
+        display: none !important;
+    }
+
+}
+
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10pt !important;
+}
+td, th {
+    vertical-align: top;
+}
+hr {
+    background-color: #999;
+    height: 1px;
+    border: 0;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+pre {
+    font-family: sans-serif;
+    white-space: pre-wrap;
+}
+img {
+    display: none;
+}
+img[src^="data:"] {
+    display: inline;
+}
+
+.button {
+    border: 1px transparent solid;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px;
+    margin-top: 7px;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    text-align: center;
+}
+.button * {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+.button:hover {
+    border-color: #ccc;
+    background-color: #ddd;
+    box-shadow: inset 2px 2px 7px #f8f8f8;
+}
+.button:active {
+    border-color: #aaa;
+    background-color: #ddd;
+    padding: 5px 3px 3px 5px;
+    box-shadow: inset 2px 2px 7px #ccc;
+}
+
+.email {
+    border: 1px #999 solid;
+    background-color: white;
+    color: black;
+    font-size: small;
+    border-radius: 4px;
+    box-shadow: 0 3px 5px #aaa;
+    display: inline-block;
+    word-wrap: break-word;
+    width: 100%;
+    box-sizing:border-box;
+    margin-top: 15px;
+}
+.email .starred {
+    display: none;
+}
+.email .unstarred {
+    display: block;
+}
+.email.starred .starred {
+    display: block;
+}
+.email.starred .unstarred {
+    display: none;
+}
+.email_box {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 100% !important;
+}
+.email_container {
+    overflow: hidden;
+}
+.email_container .header_container {
+    padding: 15px;
+}
+.email_container .header_container .button_bar {
+    float: right;
+    margin-top: -6px;
+}
+.email_container .header_container .button_bar > .button {
+    float: left;
+}
+.email_container .header_container .button_bar > .button > .icon {
+    width: 16px;
+    height: 16px;
+}
+.email_container .header_container .preview {
+    font-size: 8pt;
+    color: #777;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.avatar {
+    display: none;
+    image-rendering: optimizeQuality;
+    margin-left: 2px;
+}
+.avatar[src^=file], .avatar[src^=http] {
+    display: inline;
+    width: 48px;
+    height: 48px;
+    float: right;
+}
+.email.hide:not(:last-of-type) .header_container .avatar {
+    width: 24px;
+    height: 24px;
+}
+
+.email .body {
+    border-top: 1px solid #999;
+    margin: 15px;
+    margin-top: 0;
+    padding-top: 15px;
+}
+
+@media screen {
+
+    body {
+        background-color: #ccc !important;
+    }
+
+    .email.hide:not(:last-of-type) {
+        background-color: #e8e8e8
+    }
+    .email.hide:not(:last-of-type) .body,
+    .email.hide:not(:last-of-type) > .attachment_container,
+    .email:not(.hide) .header_container .preview,
+    .email:last-of-type .header_container .preview {
+        display: none;
+    }
+    .email:not(:last-of-type) .header_container {
+        cursor: pointer;
+    }
+    .email.hide:not(:last-of-type) .header {
+        padding: 5px 0;
+        text-align: right;
+    }
+    .email.hide:not(:last-of-type) .header .field {
+        display: inline;
+        margin-right: 2px;
+        text-align: left;
+    }
+    .email.hide:not(:last-of-type) .header .field:not(:first-child) {
+        display: inline-block;
+    }
+    .email.hide:not(:last-of-type) .header .field:not(.important),
+    .email.hide:not(:last-of-type) .header .field .title {
+        display: none;
+    }
+    .email.hide:not(:last-of-type) .header .field .value {
+        margin-left: 0;
+    }
+    .email.hide:not(:last-of-type) .header .field .not_hidden_only,
+    .email:not(.hide) .header .field .hidden_only,
+    .email:last-of-type .header .field .hidden_only {
+        display: none;
+    }
+
+}
+
+.email:not(.attachment) .attachment.icon {
+    display: none;
+}
+.email .header_container .attachment.icon {
+    float: right;
+    margin-top: 7px;
+}
+.email > .attachment_container {
+    background-color: #ddd;
+    border-radius: 4px;
+    padding-bottom: 10px;
+}
+.email > .attachment_container > .top_border {
+    border-bottom: 1px solid #999;
+    border-radius: 0 0 4px 4px;
+    height: 10px;
+    background-color: white;
+    margin-bottom: 5px;
+    box-shadow: 0 3px 5px #c0c0c0;
+}
+.email > .attachment_container > .attachment {
+    margin: 10px 10px 0 10px;
+    padding: 2px;
+    overflow: hidden;
+    font-size: 10pt;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    display: inline;
+}
+.email > .attachment_container > .attachment:hover,
+.email > .attachment_container > .attachment:active {
+    border-color: #999;
+    background-color: #e8e8e8;
+}
+.email > .attachment_container > .attachment:active {
+    padding: 3px 1px 1px 3px;
+    box-shadow: inset 3px 3px 5px #ccc, inset -1px -1px 3px #ccc;
+}
+.email > .attachment_container > .attachment .preview {
+    width: 52px;
+    height: 52px;
+    text-align: center;
+    vertical-align: middle;
+}
+.email > .attachment_container > .attachment .preview img {
+    max-width: 50px;
+    max-height: 50px;
+}
+.email > .attachment_container > .attachment .preview .thumbnail {
+    border: 1px solid #999;
+    box-shadow: 0 0 5px #b8b8b8;
+    background-size: 16px 16px;
+    background-position:0 0, 8px 0, 8px -8px, 0px 8px;
+}
+.email > .attachment_container > .attachment:hover .preview .thumbnail {
+    background-image:
+        -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent),
+        -webkit-linear-gradient(-45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent),
+        -webkit-linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.1) 75%),
+        -webkit-linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.1) 75%);
+}
+.email > .attachment_container > .attachment .info {
+    vertical-align: middle;
+    padding-left: 5px;
+}
+.email > .attachment_container > .attachment .info > :not(.filename) {
+    color: #666;
+}
+
+.header {
+    overflow: hidden;
+}
+.header .field {
+    clear: both;
+    overflow: hidden;
+    font-size: 9pt;
+}
+.header .field .title,
+.header .field .value {
+    float: left;
+    padding: 2px 0;
+}
+.header .field .title {
+    width: 5em;
+    text-align: right;
+    padding-right: 7px;
+    color: #777;
+    position: absolute;
+}
+.header .field .value {
+    color: black;
+    margin-left: 5.25em;
+}
+.header .field.important .address_name {
+    font-weight: bold;
+}
+.header .field .address_value {
+    color: #777;
+}
+
+.geary_spacer {
+    display: table;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 100% !important;
+}
+
+.signature {
+    color: #777;
+    display: inline;
+}
+.signature a {
+    color: #66f;
+}
+
+.quote_container {
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 8px 1px #ccc;
+}
+.quote_container > .shower,
+.quote_container > .hider {
+    color: #777;
+    font-size: 75%;
+    cursor: pointer;
+    display: none;
+}
+.quote_container.controllable > .shower {
+    display: block;
+}
+.quote_container.controllable > .hider,
+.quote_container.controllable > .quote {
+    display: none;
+}
+.quote_container.controllable.show > .shower {
+    display: none;
+}
+.quote_container.controllable.show > .hider,
+.quote_container.controllable.show > .quote {
+    display: block;
+}
+.quote_container > .shower:hover,
+.quote_container > .hider:hover {
+    color: black;
+}
+
+#message_container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    padding: 0 15px 15px;
+}
+#multiple_messages {
+    display: none;
+    text-align: center;
+}
+#multiple_messages > .email {
+    margin: 100px auto;
+    display: inline-block;
+    width: auto;
+    padding: 15px;
+}
+#email_template,
+#attachment_template {
+    display: none;
+}
+blockquote {
+    margin: 10px;
+    padding: 5px;
+    border-left: 3px #aaa solid;
+}

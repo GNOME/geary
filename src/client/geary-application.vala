@@ -441,6 +441,19 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         return builder;
     }
+
+    public string? read_theme_file(string filename) {
+        try {
+            File file = get_resource_directory().get_child("theming").get_child(filename);
+            DataInputStream data_input_stream = new DataInputStream(file.read());
+            
+            size_t length;
+            return data_input_stream.read_upto("\0", 1, out length);
+        } catch(Error error) {
+            debug("Unable to load text from theme file: %s", error.message);
+            return null;
+        }
+    }
     
     // Loads a UI file (in the ui directory) into the specified UI manager.
     public void load_ui_file_for_manager(Gtk.UIManager ui, string ui_filename) {
