@@ -227,9 +227,9 @@ public class WebViewEditFixer {
             return;
         }
         
-        left = copy_name_and_attributes(node);
-        right = copy_name_and_attributes(node);
-        
+        left = node.clone_node(false);
+        right = node.clone_node(false);
+
         // Move the first $offset children to the left node.
         for (long i = 0; i < offset; i++)
             move_first_child(node, left);
@@ -265,45 +265,6 @@ public class WebViewEditFixer {
         // Hopefully, this should never happen. But if it does, better to split in a wrong location
         // than to crash.
         return 0;
-    }
-    
-    // Creates a new node with the same name and attributes (but empty children) as the given node.
-    private WebKit.DOM.Node copy_name_and_attributes(WebKit.DOM.Node node) {
-        string node_name = node.node_name;
-        WebKit.DOM.Document document = get_document();
-        WebKit.DOM.NamedNodeMap attributes = node.attributes;
-        
-        WebKit.DOM.Node copy;
-        try {
-            copy = document.create_element(node_name);
-        } catch (Error err) {
-            debug("Error in copy_name_and_attributes (trying to create node with name: '%s'): '%s'." + 
-                " Defaulting to '%s' instead.", node_name, err.message, DIV_NAME);
-            try {
-                copy = document.create_element(DIV_NAME);
-            } catch (Error err) {
-                // Something is really wrong.
-                error("Error in copy_name_and_attribute while trying to create fallback div: '%s'",
-                    err.message);
-            }
-        }
-        
-        for (ulong i = 0; i < attributes.length; i++) {
-            WebKit.DOM.Node attribute = attributes.item(i);
-            
-            // We put the try/catch block inside the loop so that we can continue copying attributes
-            // if one fails.
-            try {
-                WebKit.DOM.Attr new_attribute = document.create_attribute(attribute.node_name);
-                new_attribute.set_node_value(attribute.node_value);
-                copy.attributes.set_named_item(new_attribute);
-            } catch (Error err) {
-                debug("Error in copy_name_and_attributes (trying to copy attribute with name: '%s'): '%s'",
-                    attribute.node_name, err.message);
-            }
-        }
-        
-        return copy;
     }
     
     // Removes the first child of source and appends it to destination.
