@@ -335,17 +335,18 @@ public class MessageViewer : WebKit.WebView {
             insert_header_date(ref header, _("Date:"), email.date.value, true);
 
         // Add the avatar.
-        try {
-            WebKit.DOM.HTMLImageElement icon = Util.DOM.select(div_message, ".avatar")
-                as WebKit.DOM.HTMLImageElement;
-            string checksum = GLib.Checksum.compute_for_string (
-                GLib.ChecksumType.MD5, email.sender.get(0).address);
-            string gravatar = "http://www.gravatar.com/avatar/%s?d=mm&size=48".printf (checksum);
-            icon.set_attribute("src", gravatar);
-        } catch (Error error) {
-            warning("Failed to load avatar: %s", error.message);
+        Geary.RFC822.MailboxAddress? primary = email.get_primary_originator();
+        if (primary != null) {
+            try {
+                WebKit.DOM.HTMLImageElement icon = Util.DOM.select(div_message, ".avatar")
+                    as WebKit.DOM.HTMLImageElement;
+                icon.set_attribute("src",
+                    Gravatar.get_image_uri(primary, Gravatar.Default.MYSTERY_MAN, 48));
+            } catch (Error error) {
+                warning("Failed to load avatar: %s", error.message);
+            }
         }
-
+        
         // Insert the preview text.
         try {
             WebKit.DOM.HTMLElement preview =

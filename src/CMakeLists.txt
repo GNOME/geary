@@ -193,6 +193,7 @@ client/ui/message-viewer.vala
 client/ui/password-dialog.vala
 client/ui/preferences-dialog.vala
 client/ui/webview-edit-fixer.vala
+client/ui/notification-bubble.vala
 
 client/ui/sidebar/sidebar-branch.vala
 client/ui/sidebar/sidebar-common.vala
@@ -200,6 +201,7 @@ client/ui/sidebar/sidebar-entry.vala
 client/ui/sidebar/sidebar-tree.vala
 
 client/util/util-email.vala
+client/util/util-gravatar.vala
 client/util/util-keyring.vala
 client/util/util-menu.vala
 client/util/util-webkit.vala
@@ -237,6 +239,8 @@ pkg_check_modules(DEPS REQUIRED
     gtk+-3.0>=3.2.0
     gee-1.0>=0.6.0
     unique-3.0>=3.0.0
+    libnotify>=0.7.5
+    libcanberra>=0.28
     sqlite3>=3.7.4
     sqlheavy-0.1>=0.1.1
     gmime-2.6>=2.6.0
@@ -249,7 +253,7 @@ set(ENGINE_PACKAGES
 )
 
 set(CLIENT_PACKAGES
-    gtk+-3.0 gnome-keyring-1 webkitgtk-3.0
+    gtk+-3.0 gnome-keyring-1 webkitgtk-3.0 libnotify libcanberra
 )
 
 set(CONSOLE_PACKAGES

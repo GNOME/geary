@@ -264,11 +264,28 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         // throw the first exception, if one occurred
         batch.throw_first_exception();
         
+        // look for local additions (email not known to the local store)
+        Gee.ArrayList<Geary.EmailIdentifier> locally_appended = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (int id in batch.get_ids()) {
+            CreateLocalEmailOperation? create_op = batch.get_operation(id) as CreateLocalEmailOperation;
+            if (create_op != null) {
+                if (create_op.created)
+                    locally_appended.add(create_op.email.id);
+            }
+        }
+        
         // notify emails that have been removed (see note above about why not all Creates are
         // signalled)
         if (removed_ids.size > 0) {
             debug("Notifying of %d removed emails since %s last seen", removed_ids.size, to_string());
             notify_email_removed(removed_ids);
+        }
+        
+        // notify local additions
+        if (locally_appended.size > 0) {
+            debug("Notifying of %d locally appended emails since %s last seen", locally_appended.size,
+                to_string());
+            notify_email_locally_appended(locally_appended);
         }
         
         // notify additions

@@ -66,8 +66,10 @@ public class GearyController {
     public bool enable_load_more { get; set; default = true; }
     
     private Cancellable cancellable_folder = new Cancellable();
+    private Cancellable cancellable_inbox = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
     private Geary.Folder? current_folder = null;
+    private Geary.Folder? inbox_folder = null;
     private Geary.ConversationMonitor? current_conversations = null;
     private bool loading_local_only = true;
     private int busy_count = 0;
@@ -250,6 +252,7 @@ public class GearyController {
         // Disconnect the old account, if any.
         if (account != null) {
             cancel_folder();
+            cancel_inbox();
             cancel_message();
             
             account.folders_added_removed.disconnect(on_folders_added_removed);
@@ -262,6 +265,16 @@ public class GearyController {
             main_window.title = GearyApplication.NAME;
             
             main_window.folder_list.remove_all_branches();
+            
+            if (inbox_folder != null) {
+                try {
+                    yield inbox_folder.close_async(cancellable);
+                } catch (Error close_inbox_err) {
+                    debug("Unable to close monitored inbox: %s", close_inbox_err.message);
+                }
+                
+                inbox_folder.email_locally_appended.disconnect(on_inbox_new_email);
+            }
             
             try {
                 yield account.close_async(cancellable);
@@ -340,13 +353,23 @@ public class GearyController {
                 if (cancellable.is_cancelled())
                     return;
                 
-                // If inbox is specified, select that
+                // If inbox is available (should be!), monitor it and select it for the user
                 Geary.SpecialFolder? inbox = special_folders.get_folder(Geary.SpecialFolderType.INBOX);
-                if (inbox != null)
+                if (inbox != null) {
+                    // create and leave open the Inbox, which is constantly monitored for notifications
+                    inbox_folder = yield account.fetch_folder_async(inbox.path, cancellable_inbox);
+                    assert(inbox_folder != null);
+                    
+                    yield inbox_folder.open_async(false, cancellable_inbox);
+                    
+                    inbox_folder.email_locally_appended.connect(on_inbox_new_email);
+                    
+                    // select the inbox and get the show started
                     main_window.folder_list.select_path(inbox.path);
+                }
             }
             
-            // pull down the root-level user folders
+            // pull down the root-level user folders and recursively add to sidebar
             Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null);
             if (folders != null)
                 on_folders_added_removed(folders, null);
@@ -374,13 +397,17 @@ public class GearyController {
         cancel_folder();
         main_window.message_list_store.clear();
         
-        // stop monitoring for conversations and close the folder
+        // stop monitoring for conversations and close the folder (but only if not the inbox_folder,
+        // which we leave open for notifications)
         if (current_conversations != null) {
-            yield current_conversations.stop_monitoring_async(true, null);
+            yield current_conversations.stop_monitoring_async((current_folder != inbox_folder), null);
             current_conversations = null;
-        } else if (current_folder != null) {
+        } else if (current_folder != null && current_folder != inbox_folder) {
             yield current_folder.close_async();
         }
+        
+        if (folder != null)
+            debug("switching to %s", folder.to_string());
         
         current_folder = folder;
         main_window.message_list_store.set_current_folder(current_folder);
@@ -497,7 +524,44 @@ public class GearyController {
                 debug("Unable to fetch preview: %s", err.message);
         }
     }
-
+    
+    public void on_inbox_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
+        debug("on_inbox_new_email: %d locally appended", email_ids.size);
+        do_notify_new_email.begin(email_ids);
+    }
+    
+    public async void do_notify_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
+        try {
+            Gee.List<Geary.Email>? list = yield inbox_folder.list_email_by_sparse_id_async(email_ids,
+                NotificationBubble.REQUIRED_FIELDS | Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.NONE,
+                cancellable_inbox);
+            if (list == null || list.size == 0) {
+                debug("Warning: %d new emails, but none could be listed", email_ids.size);
+                
+                return;
+            }
+            
+            int unread = 0;
+            Geary.Email? last_unread = null;
+            foreach (Geary.Email email in list) {
+                if (email.email_flags.is_unread()) {
+                    unread++;
+                    last_unread = email;
+                }
+            }
+            
+            debug("do_notify_new_email: %d messages listed, %d unread", list.size, unread);
+            
+            NotificationBubble notification = new NotificationBubble();
+            if (unread == 1 && last_unread != null)
+                notification.notify_one_message(last_unread);
+            else if (unread > 0)
+                notification.notify_new_mail(unread);
+        } catch (Error err) {
+            debug("Unable to notify of new email: %s", err.message);
+        }
+    }
+    
     public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
         Gtk.Adjustment adjustment = (main_window.message_list_view.get_parent() as Gtk.ScrolledWindow)
             .get_vadjustment();
@@ -737,6 +801,12 @@ public class GearyController {
         cancellable_folder = new Cancellable();
         cancel_message();
         
+        old_cancellable.cancel();
+    }
+     private void cancel_inbox() {
+        Cancellable old_cancellable = cancellable_inbox;
+        cancellable_inbox = new Cancellable();
+
         old_cancellable.cancel();
     }
     

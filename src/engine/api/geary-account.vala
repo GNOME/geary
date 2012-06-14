@@ -59,6 +59,11 @@ public interface Geary.Account : Object {
      * all the root folders.  If the parent path cannot be found, EngineError.NOT_FOUND is thrown.
      * If no folders exist in the root, EngineError.NOT_FOUND may be thrown as well.  However,
      * the caller should be prepared to deal with an empty list being returned instead.
+     *
+     * The same Geary.Folder objects (instances) will be returned if the same path is submitted
+     * multiple times.  This means that multiple callers may be holding references to the same
+     * Folders.  This is important when thinking of opening and closing folders and signal
+     * notifications.
      */
     public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error;
@@ -74,6 +79,11 @@ public interface Geary.Account : Object {
     /**
      * Fetches a Folder object corresponding to the supplied path.  If the backing medium does
      * not have a record of a folder at the path, EngineError.NOT_FOUND will be thrown.
+     *
+     * The same Geary.Folder object (instance) will be returned if the same path is submitted
+     * multiple times.  This means that multiple callers may be holding references to the same
+     * Folders.  This is important when thinking of opening and closing folders and signal
+     * notifications.
      */
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;

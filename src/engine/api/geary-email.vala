@@ -304,7 +304,26 @@ public class Geary.Email : Object {
     public string get_subject_as_string() {
         return (subject != null) ? subject.value : "";
     }
-
+    
+    /**
+     * Returns the primary originator of an email, which is defined as the first mailbox address
+     * in From:, Sender:, or Reply-To:, in that order, depending on availability.
+     *
+     * Returns null if no originators are present.
+     */
+    public RFC822.MailboxAddress? get_primary_originator() {
+        if (from != null && from.size > 0)
+            return from[0];
+        
+        if (sender != null && sender.size > 0)
+            return sender[0];
+        
+        if (reply_to != null && reply_to.size > 0)
+            return reply_to[0];
+        
+        return null;
+    }
+    
     public string to_string() {
         StringBuilder builder = new StringBuilder();
         

@@ -13,6 +13,10 @@ public unowned string C_(string context, string text) {
     return text;
 }
 
+public unowned string ngettext (string msgid, string msgid_plural, ulong n) {
+    return n > 1 ? msgid_plural : msgid;
+}
+
 public const string TRANSLATABLE = "TRANSLATABLE";
 
 namespace Intl {
