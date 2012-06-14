@@ -56,8 +56,15 @@ public abstract class Geary.NonblockingAbstractSemaphore {
     }
     
     ~NonblockingAbstractSemaphore() {
-        if (pending_queue.size > 0)
+        if (pending_queue.size > 0) {
             warning("Nonblocking semaphore destroyed with %d pending callers", pending_queue.size);
+            
+            foreach (Pending pending in pending_queue)
+                pending.cancelled.disconnect(on_pending_cancelled);
+        }
+        
+        if (cancellable != null)
+            cancellable.cancelled.disconnect(on_cancelled);
     }
     
     private void trigger(bool all) {

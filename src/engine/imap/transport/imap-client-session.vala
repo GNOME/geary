@@ -170,8 +170,8 @@ public class Geary.Imap.ClientSession {
         "Geary.Imap.ClientSession", State.DISCONNECTED, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
-    private Geary.Endpoint endpoint;
-    private Geary.AccountInformation account_info;
+    private Endpoint imap_endpoint;
+    private bool imap_server_pipeline;
     private Geary.State.Machine fsm;
     private ImapError not_connected_err;
     private ClientConnection? cx = null;
@@ -235,11 +235,11 @@ public class Geary.Imap.ClientSession {
     public virtual signal void unsolicited_flags(MailboxAttributes attrs) {
     }
     
-    public ClientSession(Geary.Endpoint endpoint, Geary.AccountInformation account_info) {
-        this.endpoint = endpoint;
-        this.account_info = account_info;
+    public ClientSession(Endpoint imap_endpoint, bool imap_server_pipeline) {
+        this.imap_endpoint = imap_endpoint;
+        this.imap_server_pipeline = imap_server_pipeline;
         
-        not_connected_err = new ImapError.NOT_CONNECTED("Not connected to %s", endpoint.to_string());
+        not_connected_err = new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
         
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.DISCONNECTED, Event.CONNECT, on_connect),
@@ -439,7 +439,7 @@ public class Geary.Imap.ClientSession {
         connect_params = (AsyncParams) object;
         
         assert(cx == null);
-        cx = new ClientConnection(endpoint);
+        cx = new ClientConnection(imap_endpoint);
         cx.connected.connect(on_network_connected);
         cx.disconnected.connect(on_network_disconnected);
         cx.sent_command.connect(on_network_sent_command);
@@ -1143,7 +1143,7 @@ public class Geary.Imap.ClientSession {
             return new AsyncCommandResponse(null, user, not_connected_err);
         
         int claim_stub = NonblockingMutex.INVALID_TOKEN;
-        if (!account_info.imap_server_pipeline) {
+        if (!imap_server_pipeline) {
             try {
                 debug("[%s] Waiting to send cmd %s: %d", to_full_string(), cmd.to_string(), ++waiting_to_send);
                 claim_stub = yield serialized_cmds_mutex.claim_async(cancellable);
@@ -1161,7 +1161,7 @@ public class Geary.Imap.ClientSession {
             yield cx.send_async(cmd, cancellable);
         } catch (Error send_err) {
             try {
-                if (!account_info.imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN)
+                if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN)
                     serialized_cmds_mutex.release(ref claim_stub);
             } catch (Error abort_err) {
                 debug("Error attempting to abort from send operation: %s", abort_err.message);
@@ -1188,7 +1188,7 @@ public class Geary.Imap.ClientSession {
         assert(cmd_response.is_sealed());
         assert(cmd_response.status_response.tag.equals(cmd.tag));
         
-        if (!account_info.imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN) {
+        if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN) {
             try {
                 serialized_cmds_mutex.release(ref claim_stub);
             } catch (Error notify_err) {
@@ -1263,7 +1263,7 @@ public class Geary.Imap.ClientSession {
     //
     
     private void on_network_connected() {
-        debug("[%s] Connected to %s", to_full_string(), endpoint.to_string());
+        debug("[%s] Connected to %s", to_full_string(), imap_endpoint.to_string());
         
         // the first ServerData from the server is a greeting; this flag indicates to treat it
         // differently than the other data thereafter
@@ -1271,7 +1271,7 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_network_disconnected() {
-        debug("[%s] Disconnected from %s", to_full_string(), endpoint.to_string());
+        debug("[%s] Disconnected from %s", to_full_string(), imap_endpoint.to_string());
     }
     
     private void on_network_sent_command(Command cmd) {
@@ -1367,7 +1367,7 @@ public class Geary.Imap.ClientSession {
     }
     
     public string to_string() {
-        return "ClientSession:%s".printf((cx == null) ? endpoint.to_string() : cx.to_string());
+        return "ClientSession:%s".printf((cx == null) ? imap_endpoint.to_string() : cx.to_string());
     }
     
     public string to_full_string() {

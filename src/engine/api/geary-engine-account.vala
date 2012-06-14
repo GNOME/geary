@@ -5,27 +5,20 @@
  */
 
 public abstract class Geary.EngineAccount : Geary.AbstractAccount {
-    private AccountInformation account_information;
+    public virtual Geary.AccountSettings settings { get; private set; }
     
     public virtual signal void email_sent(Geary.RFC822.Message rfc822) {
     }
     
-    public EngineAccount(string name, string username, AccountInformation account_information,
-        File user_data_dir) {
+    internal EngineAccount(string name, AccountSettings settings) {
         base (name);
         
-        this.account_information = account_information;
+        this.settings = settings;
     }
     
     protected virtual void notify_email_sent(Geary.RFC822.Message rfc822) {
         email_sent(rfc822);
     }
-    
-    public virtual AccountInformation get_account_information() {
-        return account_information;
-    }
-    
-    public abstract bool delete_is_archive();
     
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;

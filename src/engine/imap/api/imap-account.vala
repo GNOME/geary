@@ -30,21 +30,18 @@ private class Geary.Imap.Account : Object {
     }
     
     private string name;
-    private Geary.Credentials cred;
+    private AccountSettings settings;
     private ClientSessionManager session_mgr;
-    private Geary.Smtp.ClientSession smtp;
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     
     public signal void login_failed(Geary.Credentials cred);
     
-    public Account(Geary.Endpoint imap_endpoint, Geary.Endpoint smtp_endpoint, Geary.Credentials cred,
-        Geary.AccountInformation account_info) {
-        name = "IMAP Account for %s".printf(cred.to_string());
-        this.cred = cred;
+    public Account(Geary.AccountSettings settings) {
+        name = "IMAP Account for %s".printf(settings.credentials.to_string());
+        this.settings = settings;
         
-        session_mgr = new ClientSessionManager(imap_endpoint, cred, account_info);
+        session_mgr = new ClientSessionManager(settings);
         session_mgr.login_failed.connect(on_login_failed);
-        smtp = new Geary.Smtp.ClientSession(smtp_endpoint);
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -187,24 +184,8 @@ private class Geary.Imap.Account : Object {
         return parent;
     }
     
-    public async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable = null)
-        throws Error {
-        yield smtp.login_async(cred, cancellable);
-        try {
-            yield smtp.send_email_async(rfc822, cancellable);
-            email_sent(rfc822);
-        } finally {
-            // always logout
-            try {
-                yield smtp.logout_async(cancellable);
-            } catch (Error err) {
-                message("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
-            }
-        }
-    }
-    
     private void on_login_failed() {
-        login_failed(cred);
+        login_failed(settings.credentials);
     }
     
     public string to_string() {

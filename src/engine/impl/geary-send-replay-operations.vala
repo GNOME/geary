@@ -89,9 +89,7 @@ private class Geary.ExpungeEmail : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        // TODO: Use a local_folder method that operates on all messages at once
-        foreach (Geary.EmailIdentifier id in to_remove)
-            yield engine.local_folder.mark_removed_async(id, true, cancellable);
+        yield engine.local_folder.mark_removed_async(to_remove, true, cancellable);
         
         engine.notify_email_removed(to_remove);
         
@@ -116,9 +114,7 @@ private class Geary.ExpungeEmail : Geary.SendReplayOperation {
     }
     
     public override async void backout_local_async() throws Error {
-        // TODO: Use a local_folder method that operates on all messages at once
-        foreach (Geary.EmailIdentifier id in to_remove)
-            yield engine.local_folder.mark_removed_async(id, false, cancellable);
+        yield engine.local_folder.mark_removed_async(to_remove, false, cancellable);
         
         engine.notify_email_appended(to_remove);
         engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.ADDED);
@@ -203,7 +199,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         // requested by user ... this ensures the local store is seeded with certain fields required
         // for it to operate properly
         if (!remote_only && !local_only)
-            this.required_fields |= Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
+            this.required_fields |= ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
@@ -215,7 +211,8 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
             yield engine.normalize_email_positions_async(low, count, out local_count, cancellable);
         } else {
             // local_only means just that
-            local_count = yield engine.local_folder.get_email_count_async(cancellable);
+            local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+                cancellable);
         }
         
         // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
@@ -242,7 +239,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         if (!remote_only && local_low > 0) {
             try {
                 local_list = yield engine.local_folder.list_email_async(local_low, count, required_fields,
-                    Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
+                    ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
             } catch (Error local_err) {
                 if (cb != null && !(local_err is IOError.CANCELLED))
                     cb (null, local_err);
@@ -478,9 +475,11 @@ private class Geary.ListEmailByID : Geary.ListEmail {
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        int local_count = yield engine.local_folder.get_email_count_async(cancellable);
+        int local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+            cancellable);
         
-        int initial_position = yield engine.local_folder.get_id_position_async(initial_id, cancellable);
+        int initial_position = yield engine.local_folder.get_id_position_async(initial_id,
+            ImapDB.Folder.ListFlags.NONE, cancellable);
         if (initial_position <= 0) {
             throw new EngineError.NOT_FOUND("Email ID %s in %s not known to local store",
                 initial_id.to_string(), engine.to_string());
@@ -554,7 +553,7 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
             try {
                 return yield owner.local_folder.fetch_email_async(id, required_fields,
-                    Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
+                    ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
             } catch (Error err) {
                 // only throw errors that are not NOT_FOUND and INCOMPLETE_MESSAGE, as these two
                 // are recoverable
@@ -594,12 +593,12 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];
                 
-                yield owner.local_folder.create_email_async(email, cancellable);
+                yield owner.local_folder.create_or_merge_email_async(email, cancellable);
                 
                 // if remote email doesn't fulfills all required fields, fetch full and return that
                 if (!email.fields.fulfills(required_fields)) {
                     email = yield owner.local_folder.fetch_email_async(email.id, required_fields,
-                        Sqlite.Folder.ListFlags.NONE, cancellable);
+                        ImapDB.Folder.ListFlags.NONE, cancellable);
                     list[ctr] = email;
                 }
             }
@@ -768,7 +767,7 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
         
         try {
             email = yield engine.local_folder.fetch_email_async(id, required_fields,
-                Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
+                ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
         } catch (Error err) {
             // If NOT_FOUND or INCOMPLETE_MESSAGE, then fall through, otherwise return to sender
             if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
@@ -811,14 +810,14 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
         // save to local store
         email = list[0];
         assert(email != null);
-        if (yield engine.local_folder.create_email_async(email, cancellable))
+        if (yield engine.local_folder.create_or_merge_email_async(email, cancellable))
             engine.notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that
         if (!email.fields.fulfills(required_fields)) {
             email = yield engine.local_folder.fetch_email_async(id, required_fields,
-                Sqlite.Folder.ListFlags.NONE, cancellable);
+                ImapDB.Folder.ListFlags.NONE, cancellable);
             assert(email != null);
         }
         
@@ -896,10 +895,7 @@ private class Geary.MoveEmail : Geary.SendReplayOperation {
     }
 
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        // Remove the email from the folder.
-        // TODO: Use a local_folder method that operates on all messages at once
-        foreach (Geary.EmailIdentifier id in to_move)
-            yield engine.local_folder.mark_removed_async(id, true, cancellable);
+        yield engine.local_folder.mark_removed_async(to_move, true, cancellable);
         engine.notify_email_removed(to_move);
 
         original_count = engine.remote_count;
@@ -920,10 +916,7 @@ private class Geary.MoveEmail : Geary.SendReplayOperation {
     }
 
     public override async void backout_local_async() throws Error {
-        // Add the email back in.
-        // TODO: Use a local_folder method that operates on all messages at once
-        foreach (Geary.EmailIdentifier id in to_move)
-            yield engine.local_folder.mark_removed_async(id, false, cancellable);
+        yield engine.local_folder.mark_removed_async(to_move, false, cancellable);
 
         engine.notify_email_appended(to_move);
         engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.ADDED);

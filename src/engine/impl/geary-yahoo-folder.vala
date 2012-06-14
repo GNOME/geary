@@ -5,8 +5,8 @@
  */
 
 private class Geary.YahooFolder : GenericImapFolder, Geary.FolderSupportsRemove {
-    public YahooFolder(YahooAccount account, Imap.Account remote, Sqlite.Account local,
-        Sqlite.Folder local_folder, SpecialFolderType special_folder_type) {
+    public YahooFolder(YahooAccount account, Imap.Account remote, ImapDB.Account local,
+        ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         base (account, remote, local, local_folder, special_folder_type);
     }
     

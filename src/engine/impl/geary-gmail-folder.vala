@@ -5,8 +5,8 @@
  */
 
 private class Geary.GmailFolder : GenericImapFolder, FolderSupportsArchive {
-    public GmailFolder(GmailAccount account, Imap.Account remote, Sqlite.Account local,
-        Sqlite.Folder local_folder, SpecialFolderType special_folder_type) {
+    public GmailFolder(GmailAccount account, Imap.Account remote, ImapDB.Account local,
+        ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         base (account, remote, local, local_folder, special_folder_type);
     }
     

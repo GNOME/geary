@@ -8,16 +8,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     Geary.FolderSupportsMark, Geary.FolderSupportsMove {
     internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
     
-    private const Geary.Email.Field NORMALIZATION_FIELDS = Geary.Email.Field.PROPERTIES
-        | Geary.Email.Field.FLAGS;
+    private const Geary.Email.Field NORMALIZATION_FIELDS =
+        Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
-    internal Sqlite.Folder local_folder  { get; protected set; }
+    internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
     
     private weak GenericImapAccount account;
     private Imap.Account remote;
-    private Sqlite.Account local;
+    private ImapDB.Account local;
     private EmailFlagWatcher email_flag_watcher;
     private EmailPrefetcher email_prefetcher;
     private SpecialFolderType special_folder_type;
@@ -26,8 +26,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     private ReplayQueue? replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
-    public GenericImapFolder(GenericImapAccount account, Imap.Account remote, Sqlite.Account local,
-        Sqlite.Folder local_folder, SpecialFolderType special_folder_type) {
+    public GenericImapFolder(GenericImapAccount account, Imap.Account remote, ImapDB.Account local,
+        ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         this.account = account;
         this.remote = remote;
         this.local = local;
@@ -165,7 +165,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         
         // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
         Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-            earliest_id, int.MAX, NORMALIZATION_FIELDS, Sqlite.Folder.ListFlags.PARTIAL_OK, cancellable);
+            earliest_id, int.MAX, NORMALIZATION_FIELDS, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
         
         // be sure they're sorted from earliest to latest
         if (old_local != null)
@@ -387,7 +387,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         try {
             count = (remote_folder != null)
                 ? remote_count
-                : yield local_folder.get_email_count_async(cancellable);
+                : yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE, cancellable);
         } catch (Error count_err) {
             debug("Unable to fetch count from local folder: %s", count_err.message);
             
@@ -424,6 +424,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         if (remote_folder != null)
             return true;
         
+        debug("waiting for remote to open, replay queue blocked...");
         yield remote_semaphore.wait_async(cancellable);
         
         return (remote_folder != null);
@@ -535,7 +536,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             // which has now changed
             Imap.MessageSet msg_set = new Imap.MessageSet.range_to_highest(remote_count + 1);
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
-                msg_set, Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
+                msg_set, ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
             if (list != null && list.size > 0) {
                 debug("do_replay_appended_messages: %d new messages from %s in %s", list.size,
                     msg_set.to_string(), to_string());
@@ -547,7 +548,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
                     
                     // need to report both if it was created (not known before) and appended (which
                     // could mean created or simply a known email associated with this folder)
-                    if (yield local_folder.create_email_async(email, null)) {
+                    if (yield local_folder.create_or_merge_email_async(email, null)) {
                         created.add(email.id);
                     } else {
                         debug("do_replay_appended_messages: appended email ID %s already known in account, now associated with %s...",
@@ -599,7 +600,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         
         Geary.EmailIdentifier? owned_id = null;
         try {
-            local_count = yield local_folder.get_email_count_including_marked_async();
+            local_count = yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                null);
             // can't use remote_position_to_local_position() because local_count includes messages
             // marked for removal, which that helper function doesn't like
             local_position = remote_position - (remote_count - local_count);
@@ -607,7 +609,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
             
              Gee.List<Geary.Email>? list = yield local_folder.list_email_async(local_position,
-                1, Geary.Email.Field.NONE, Sqlite.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
+                1, Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
             if (list != null && list.size > 0)
                 owned_id = list[0].id;
         } catch (Error err) {
@@ -634,7 +636,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // for debugging
         int new_local_count = -1;
         try {
-            new_local_count = yield local_folder.get_email_count_including_marked_async();
+            new_local_count = yield local_folder.get_email_count_async(
+                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
         } catch (Error new_count_err) {
             debug("Error fetching new local count for %s: %s", to_string(), new_count_err.message);
         }
@@ -686,7 +689,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
                 return remote_count;
         }
         
-        return yield local_folder.get_email_count_async(cancellable);
+        return yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE, cancellable);
     }
     
     //
@@ -776,6 +779,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         EmailCallback? cb, Cancellable? cancellable) throws Error {
         check_open(method);
         check_flags(method, flags);
+        check_id(method, initial_id);
         
         // listing by ID requires the remote to be open and fully synchronized, as there's no
         // reliable way to determine certain counts and positions without it
@@ -827,6 +831,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable = null) throws Error {
         check_open(method);
         check_flags(method, flags);
+        check_ids(method, ids);
         
         // Unlike list_email_by_id, don't need to wait for remote to open because not dealing with
         // a range of emails, but specific ones by ID
@@ -840,6 +845,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         check_open("list_local_email_fields_async");
+        check_ids("list_local_email_fields_async", ids);
         
         return yield local_folder.list_email_fields_by_id_async(ids, cancellable);
     }
@@ -849,6 +855,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         throws Error {
         check_open("fetch_email_async");
         check_flags("fetch_email_async", flags);
+        check_id("fetch_email_async", id);
         
         FetchEmail op = new FetchEmail(this, id, required_fields, flags, cancellable);
         replay_queue.schedule(op);
@@ -870,6 +877,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     protected async void expunge_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
         check_open("expunge_email_async");
+        check_ids("expunge_email_async", email_ids);
         
         replay_queue.schedule(new ExpungeEmail(this, email_ids, cancellable));
     }
@@ -884,6 +892,16 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             throw new EngineError.BAD_PARAMETERS("%s %s failed: LOCAL_ONLY and FORCE_UPDATE are mutually exclusive",
                 to_string(), method);
         }
+    }
+    
+    private void check_id(string method, EmailIdentifier id) throws EngineError {
+        if (!(id is Imap.EmailIdentifier))
+            throw new EngineError.BAD_PARAMETERS("Email ID %s is not IMAP Email ID", id.to_string());
+    }
+    
+    private void check_ids(string method, Gee.Collection<EmailIdentifier> ids) throws EngineError {
+        foreach (EmailIdentifier id in ids)
+            check_id(method, id);
     }
     
     // Converts a remote position to a local position, assuming that the remote has been completely
@@ -938,7 +956,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         
         Error? error = null;
         try {
-            local_count = yield local_folder.get_email_count_async(cancellable);
+            local_count = yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+                cancellable);
             
             // fixup span specifier
             normalize_span_specifiers(ref low, ref count, remote_count);
@@ -963,7 +982,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             // as fields for duplicate detection
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
                 new Imap.MessageSet.range(high, prefetch_count),
-                Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, cancellable);
+                ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, cancellable);
             if (list == null || list.size != prefetch_count) {
                 throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
                     count, low, to_string());
@@ -973,7 +992,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             
             foreach (Geary.Email email in list) {
                 batch.add(new CreateLocalEmailOperation(local_folder, email,
-                    Geary.Sqlite.Folder.REQUIRED_FOR_DUPLICATE_DETECTION));
+                    ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION));
             }
             
             yield batch.execute_all_async(cancellable);

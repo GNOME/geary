@@ -373,7 +373,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             
             case Geary.Account.Problem.LOGIN_FAILED:
                 debug("Login failed.");
-                Geary.Credentials old_credentials = account.get_account_information().credentials;
+                Geary.Credentials old_credentials = account.settings.credentials;
                 account.report_problem.disconnect(on_report_problem);
                 open_account(old_credentials.user, old_credentials.pass);
             break;

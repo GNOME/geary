@@ -1,0 +1,233 @@
+/* Copyright 2012 Yorba Foundation
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later).  See the COPYING file in this distribution. 
+ */
+
+public class Geary.Db.Statement : Geary.Db.Context {
+    private unowned string? raw;
+    public unowned string sql { get {
+        return !String.is_empty(raw) ? raw : stmt.sql();
+    } }
+    
+    public Connection connection { get; private set; }
+    
+    internal Sqlite.Statement stmt;
+    
+    private Gee.HashMap<string, int>? column_map = null;
+    
+    /**
+     * Fired when the Statement is executed the first time (after creation or after a reset).
+     */
+    public signal void executed();
+    
+    /**
+     * Fired when the Statement is reset.
+     */
+    public signal void resetted();
+    
+    /**
+     * Fired when the Statement's bindings are cleared.
+     */
+    public signal void bindings_cleared();
+    
+    internal Statement(Connection connection, string sql) throws DatabaseError {
+        this.connection = connection;
+        // save for logging in case prepare_v2() fails
+        raw = sql;
+        
+        throw_on_error("Statement.ctor", connection.db.prepare_v2(sql, -1, out stmt, null), sql);
+        
+        // not needed any longer
+        raw = null;
+    }
+    
+    /**
+     * Reset the Statement for reuse, optionally clearing all bindings as well.  If bindings are
+     * not cleared, valued bound previously will be maintained.
+     *
+     * See http://www.sqlite.org/c3ref/reset.html and http://www.sqlite.org/c3ref/clear_bindings.html
+     */
+    public Statement reset(ResetScope reset_scope) throws DatabaseError {
+        if (reset_scope == ResetScope.CLEAR_BINDINGS)
+            throw_on_error("Statement.clear_bindings", stmt.clear_bindings());
+        
+        throw_on_error("Statement.reset", stmt.reset());
+        
+        // fire signals after Statement has been altered -- this prevents reentrancy while the
+        // Statement is in a halfway state
+        if (reset_scope == ResetScope.CLEAR_BINDINGS)
+            bindings_cleared();
+        
+        resetted();
+        
+        return this;
+    }
+    
+    /**
+     * Returns the number of columns the Statement will return in a Result.
+     */
+    public int get_column_count() {
+        return stmt.column_count();
+    }
+    
+    /**
+     * Returns the column name for column at the zero-based index.
+     *
+     * The name may be used with Result.int_for() (and other *_for() variants).
+     */
+    public unowned string? get_column_name(int index) {
+        return stmt.column_name(index);
+    }
+    
+    /**
+     * Returns the zero-based column index matching the column name.  Column names are
+     * case-insensitive.
+     *
+     * Returns -1 if column name is unknown.
+     */
+    public int get_column_index(string name) {
+        // prepare column map only if names requested
+        if (column_map == null) {
+            column_map = new Gee.HashMap<string, int>(Geary.String.stri_hash, Geary.String.stri_equal);
+            
+            int cols = stmt.column_count();
+            for (int ctr = 0; ctr < cols; ctr++) {
+                string? column_name = stmt.column_name(ctr);
+                if (!String.is_empty(column_name))
+                    column_map.set(column_name, ctr);
+            }
+        }
+        
+        return column_map.has_key(name) ? column_map.get(name) : -1;
+    }
+    
+    /**
+     * Executes the Statement and returns a Result object.  The Result starts pointing at the first
+     * row in the result set.  If empty, Result.finished will be true.
+     */
+    public Result exec(Cancellable? cancellable = null) throws Error {
+        Result results = new Result(this, cancellable);
+        
+        executed();
+        
+        return results;
+    }
+    
+    /**
+     * Executes the Statement and returns the last inserted rowid.  If this Statement is not
+     * an INSERT, it will return the rowid of the last prior INSERT.
+     *
+     * See Connection.last_insert_rowid.
+     */
+    public int64 exec_insert(Cancellable? cancellable = null) throws Error {
+        new Result(this, cancellable);
+        int64 rowid = connection.last_insert_rowid;
+        
+        // fire signal after safely retrieving the rowid
+        executed();
+        
+        return rowid;
+    }
+    
+    /**
+     * Executes the Statement and returns the number of rows modified by the operation.  This
+     * Statement should be an INSERT, UPDATE, or DELETE, otherwise this will return the number
+     * of modified rows from the last INSERT, UPDATE, or DELETE.
+     *
+     * See Connection.last_modified_rows.
+     */
+    public int exec_get_modified(Cancellable? cancellable = null) throws Error {
+        new Result(this, cancellable);
+        int modified = connection.last_modified_rows;
+        
+        // fire signal after safely retrieving the count
+        executed();
+        
+        return modified;
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_double(int index, double d) throws DatabaseError {
+        throw_on_error("Statement.bind_double", stmt.bind_double(index + 1, d));
+        
+        return this;
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_int(int index, int i) throws DatabaseError {
+        throw_on_error("Statement.bind_int", stmt.bind_int(index + 1, i));
+        
+        return this;
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_uint(int index, uint u) throws DatabaseError {
+        return bind_int64(index, (int64) u);
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_long(int index, long l) throws DatabaseError {
+        return bind_int64(index, (int64) l);
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_int64(int index, int64 i64) throws DatabaseError {
+        throw_on_error("Statement.bind_int64", stmt.bind_int64(index + 1, i64));
+        
+        return this;
+    }
+    
+    /**
+     * Binds a bool to the column.  A bool is stored as an integer, false == 0, true == 1.  Note
+     * that fetching a bool via Result is more lenient; see Result.bool_at() and Result.bool_from().
+     *
+     * index is zero-based.
+     */
+    public Statement bind_bool(int index, bool b) throws DatabaseError {
+        return bind_int(index, b ? 1 : 0);
+    }
+    
+    /**
+     * index is zero-based.
+     *
+     * This is merely a front for bind_int64().  It's provided to offer more verbosity in the
+     * caller's code.
+     */
+    public Statement bind_rowid(int index, int64 rowid) throws DatabaseError {
+        return bind_int64(index, rowid);
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_null(int index) throws DatabaseError {
+        throw_on_error("Statement.bind_null", stmt.bind_null(index + 1));
+        
+        return this;
+    }
+    
+    /**
+     * index is zero-based.
+     */
+    public Statement bind_string(int index, string? s) throws DatabaseError {
+        throw_on_error("Statement.bind_string", stmt.bind_text(index + 1, s));
+        
+        return this;
+    }
+    
+    public override Statement? get_statement() {
+        return this;
+    }
+}
+

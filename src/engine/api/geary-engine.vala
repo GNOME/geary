@@ -5,19 +5,22 @@
  */
 
 public class Geary.Engine {
-    private static bool gmime_inited = false;
     public static File? user_data_dir { get; private set; default = null; }
     public static File? resource_dir { get; private set; default = null; }
+    
+    private static bool inited = false;
 
     public static void init(File _user_data_dir, File _resource_dir) {
+        if (inited)
+            return;
+        
         user_data_dir = _user_data_dir;
         resource_dir = _resource_dir;
         
         // Initialize GMime
-        if (!gmime_inited) {
-            GMime.init(0);
-            gmime_inited = true;
-        }
+        GMime.init(0);
+        
+        inited = true;
     }
     
     // Returns a list of usernames associated with Geary.

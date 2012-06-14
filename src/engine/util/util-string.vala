@@ -26,7 +26,7 @@ public int ascii_cmpi(string a, string b) {
     char *aptr = a;
     char *bptr = b;
     for (;;) {
-        int diff = *aptr - *bptr;
+        int diff = (int) (*aptr).tolower() - (int) (*bptr).tolower();
         if (diff != 0)
             return diff;
         

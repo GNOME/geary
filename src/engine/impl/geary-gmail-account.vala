@@ -36,9 +36,9 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
     
     private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? path_type_map = null;
     
-    public GmailAccount(string name, string username, AccountInformation account_info,
-        File user_data_dir, Imap.Account remote, Sqlite.Account local) {
-        base (name, username, account_info, user_data_dir, remote, local);
+    public GmailAccount(string name, Geary.AccountSettings settings, Imap.Account remote,
+        ImapDB.Account local) {
+        base (name, settings, remote, local);
         
         if (path_type_map == null) {
             path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(
@@ -73,7 +73,7 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
     }
     
     protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        Sqlite.Account local_account, Sqlite.Folder local_folder) {
+        ImapDB.Account local_account, ImapDB.Folder local_folder) {
         // although Gmail supports XLIST, this will be called on startup if the XLIST properties
         // for the folders hasn't been retrieved yet.  Once they've been retrieved and stored in
         // the local database, this won't be called again

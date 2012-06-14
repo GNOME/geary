@@ -242,7 +242,11 @@ public class Geary.Email : Object {
     public void add_attachment(Geary.Attachment attachment) {
         attachments.add(attachment);
     }
-
+    
+    public void add_attachments(Gee.Collection<Geary.Attachment> attachments) {
+        this.attachments.add_all(attachments);
+    }
+    
     /**
      * This method requires Geary.Email.Field.HEADER and Geary.Email.Field.BODY be present.
      * If not, EngineError.INCOMPLETE_MESSAGE is thrown.

@@ -1,0 +1,246 @@
+/* Copyright 2012 Yorba Foundation
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later).  See the COPYING file in this distribution. 
+ */
+
+/**
+ * Database represents an SQLite file.  Multiple Connections may be opened to against the
+ * Database.
+ *
+ * Since it's often just more bookkeeping to maintain a single global connection, Database also
+ * offers a master connection which may be used to perform queries and transactions.
+ *
+ * Database also offers asynchronous transactions which work via connection and thread pools.
+ *
+ * NOTE: In-memory databases are currently unsupported.
+ */
+
+public class Geary.Db.Database : Geary.Db.Context {
+    public const int DEFAULT_MAX_CONCURRENCY = 8;
+    
+    public File db_file { get; private set; }
+    public DatabaseFlags flags { get; private set; }
+    
+    private bool _is_open = false;
+    public bool is_open {
+        get {
+            lock (_is_open) {
+                return _is_open;
+            }
+        }
+        
+        private set {
+            lock (_is_open) {
+                _is_open = value;
+            }
+        }
+    }
+    
+    private Connection? master_connection = null;
+    private int outstanding_async_jobs = 0;
+    private ThreadPool<TransactionAsyncJob>? thread_pool = null;
+    private unowned PrepareConnection? prepare_cb = null;
+    
+    public Database(File db_file) {
+        this.db_file = db_file;
+    }
+    
+    ~Database() {
+        // Not thrilled about using lock in a dtor
+        lock (outstanding_async_jobs) {
+            assert(outstanding_async_jobs == 0);
+        }
+    }
+    
+    /**
+     * Opens the Database, creating any files and directories it may need in the process depending
+     * on the DatabaseFlags.
+     *
+     * NOTE: A Database may be closed, but the Connections it creates will always be valid as
+     * they hold a reference to their source Database.  To release a Database's resources, drop all
+     * references to it and its associated Connections, Statements, and Results.
+     */
+    public virtual void open(DatabaseFlags flags, PrepareConnection? prepare_cb,
+        Cancellable? cancellable = null) throws Error {
+        if (is_open)
+            return;
+        
+        this.flags = flags;
+        this.prepare_cb = prepare_cb;
+        
+        if ((flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
+            File db_dir = db_file.get_parent();
+            if (!db_dir.query_exists(cancellable))
+                db_dir.make_directory_with_parents(cancellable);
+        }
+        
+        if (threadsafe()) {
+            assert(thread_pool == null);
+            thread_pool = new ThreadPool<TransactionAsyncJob>.with_owned_data(on_async_job,
+                DEFAULT_MAX_CONCURRENCY, true);
+        } else {
+            warning("SQLite not thread-safe: asynchronous queries will not be available");
+        }
+        
+        is_open = true;
+    }
+    
+    /**
+     * Closes the Database, releasing any resources it may hold, including the master connection.
+     *
+     * Note that closing a Database does not close or invalidate Connections it has spawned nor does
+     * it cancel any scheduled asynchronous jobs pending or in execution.  All Connections,
+     * Statements, and Results will be able to communicate with the database.  Only when they are
+     * destroyed is the Database object finally destroyed.
+     */
+    public virtual void close(Cancellable? cancellable = null) throws Error {
+        if (!is_open)
+            return;
+        
+        // drop the master connection, which holds a ref back to this object
+        master_connection = null;
+        
+        is_open = false;
+    }
+    
+    private void check_open() throws Error {
+        if (!is_open)
+            throw new DatabaseError.OPEN_REQUIRED("Database %s not open", db_file.get_path());
+    }
+    
+    /**
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public Connection open_connection(Cancellable? cancellable = null) throws Error {
+        return internal_open_connection(false, cancellable);
+    }
+    
+    private Connection internal_open_connection(bool master, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
+        int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0 ? Sqlite.OPEN_READONLY
+            : Sqlite.OPEN_READWRITE;
+        if ((flags & DatabaseFlags.CREATE_FILE) != 0)
+            sqlite_flags |= Sqlite.OPEN_CREATE;
+        
+        Connection cx = new Connection(this, sqlite_flags, cancellable);
+        if (prepare_cb != null)
+            prepare_cb(cx, master);
+        
+        return cx;
+    }
+    
+    /**
+     * The master connection is a general-use connection many of the calls in Database (including
+     * exec(), exec_file(), query(), prepare(), and exec_trnasaction()) use to perform their work.
+     * It can also be used by the caller if a dedicated Connection is not required.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public Connection get_master_connection() throws Error {
+        if (master_connection == null)
+            master_connection = internal_open_connection(true);
+        
+        return master_connection;
+    }
+    
+    /**
+     * Calls Connection.exec() on the master connection.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public void exec(string sql, Cancellable? cancellable = null) throws Error {
+        get_master_connection().exec(sql, cancellable);
+    }
+    
+    /**
+     * Calls Connection.exec_file() on the master connection.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public void exec_file(File file, Cancellable? cancellable = null) throws Error {
+        get_master_connection().exec_file(file, cancellable);
+    }
+    
+    /**
+     * Calls Connection.prepare() on the master connection.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public Statement prepare(string sql) throws Error {
+        return get_master_connection().prepare(sql);
+    }
+    
+    /**
+     * Calls Connection.query() on the master connection.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public Result query(string sql, Cancellable? cancellable = null) throws Error {
+        return get_master_connection().query(sql, cancellable);
+    }
+    
+    /**
+     * Calls Connection.exec_transaction() on the master connection.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public TransactionOutcome exec_transaction(TransactionType type, TransactionMethod cb,
+        Cancellable? cancellable = null) throws Error {
+        return get_master_connection().exec_transaction(type, cb, cancellable);
+    }
+    
+    /**
+     * Asynchronous transactions are handled via background threads using a pool of Connections.
+     * The background thread calls Connection.exec_transaction(); see that method for more
+     * information about coding a transaction.  The only caveat is that the TransactionMethod
+     * must be thread-safe.
+     *
+     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     */
+    public async TransactionOutcome exec_transaction_async(TransactionType type, TransactionMethod cb,
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        if (thread_pool == null)
+            throw new DatabaseError.GENERAL("SQLite thread safety disabled, async operations unallowed");
+        
+        // create job to execute in background thread
+        TransactionAsyncJob job = new TransactionAsyncJob(type, cb, cancellable);
+        
+        lock (outstanding_async_jobs) {
+            outstanding_async_jobs++;
+        }
+        
+        thread_pool.add(job);
+        
+        return yield job.wait_for_completion_async(cancellable);
+    }
+    
+    // This method must be thread-safe.
+    private void on_async_job(owned TransactionAsyncJob job) {
+        // create connection for this thread
+        // TODO: Use connection pool -- *never* use master connection
+        Connection? cx = null;
+        try {
+            cx = open_connection();
+        } catch (Error err) {
+            debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
+                db_file.get_path(), err.message);
+        }
+        
+        if (cx != null)
+            job.execute(cx);
+        
+        lock (outstanding_async_jobs) {
+            assert(outstanding_async_jobs > 0);
+            --outstanding_async_jobs;
+        }
+    }
+    
+    public override Database? get_database() {
+        return this;
+    }
+}
+

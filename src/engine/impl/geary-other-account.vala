@@ -5,13 +5,13 @@
  */
 
 private class Geary.OtherAccount : Geary.GenericImapAccount {
-    public OtherAccount(string name, string username, AccountInformation account_info,
-        File user_data_dir, Imap.Account remote, Sqlite.Account local) {
-        base (name, username, account_info, user_data_dir, remote, local);
+    public OtherAccount(string name, AccountSettings settings, Imap.Account remote,
+        ImapDB.Account local) {
+        base (name, settings, remote, local);
     }
     
     protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        Sqlite.Account local_account, Sqlite.Folder local_folder) {
+        ImapDB.Account local_account, ImapDB.Folder local_folder) {
         return new OtherFolder(this, remote_account, local_account, local_folder,
             (path.basename == Imap.Account.INBOX_NAME) ? SpecialFolderType.INBOX : SpecialFolderType.NONE);
     }

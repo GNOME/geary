@@ -7,9 +7,7 @@
 public class Geary.Imap.ClientSessionManager {
     public const int DEFAULT_MIN_POOL_SIZE = 2;
     
-    private Endpoint endpoint;
-    private Credentials credentials;
-    private AccountInformation account_info;
+    private AccountSettings settings;
     private int min_pool_size;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
@@ -21,11 +19,8 @@ public class Geary.Imap.ClientSessionManager {
     
     public signal void login_failed();
     
-    public ClientSessionManager(Endpoint endpoint, Credentials credentials,
-        AccountInformation account_info, int min_pool_size = DEFAULT_MIN_POOL_SIZE) {
-        this.endpoint = endpoint;
-        this.credentials = credentials;
-        this.account_info = account_info;
+    public ClientSessionManager(AccountSettings settings, int min_pool_size = DEFAULT_MIN_POOL_SIZE) {
+        this.settings = settings;
         this.min_pool_size = min_pool_size;
         
         adjust_session_pool.begin();
@@ -47,7 +42,7 @@ public class Geary.Imap.ClientSessionManager {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {
-                debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
+                debug("Unable to create authorized session to %s: %s", settings.imap_endpoint.to_string(), err.message);
                 
                 break;
             }
@@ -223,7 +218,7 @@ public class Geary.Imap.ClientSessionManager {
     
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
-        ClientSession new_session = new ClientSession(endpoint, account_info);
+        ClientSession new_session = new ClientSession(settings.imap_endpoint, settings.imap_server_pipeline);
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
@@ -231,7 +226,7 @@ public class Geary.Imap.ClientSessionManager {
         
         try {
             yield new_session.connect_async(cancellable);
-            yield new_session.login_async(credentials, cancellable);
+            yield new_session.login_async(settings.credentials, cancellable);
             
             // If no capabilities were returned at login, ask for them now
             if (new_session.get_capabilities().is_empty())
@@ -365,7 +360,7 @@ public class Geary.Imap.ClientSessionManager {
      * Use only for debugging and logging.
      */
     public string to_string() {
-        return endpoint.to_string();
+        return settings.imap_endpoint.to_string();
     }
 }
 

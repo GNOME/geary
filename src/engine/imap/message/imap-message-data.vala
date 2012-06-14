@@ -23,13 +23,18 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
     // Using statics because int32.MAX is static, not const (??)
     public static int64 MIN = 1;
     public static int64 MAX = int32.MAX;
+    public static int64 INVALID = -1;
     
     public UID(int64 value) {
         base (value);
     }
     
     public bool is_valid() {
-        return Numeric.int64_in_range_inclusive(value, MIN, MAX);
+        return is_value_valid(value);
+    }
+    
+    public static bool is_value_valid(int64 val) {
+        return Numeric.int64_in_range_inclusive(val, MIN, MAX);
     }
     
     /**

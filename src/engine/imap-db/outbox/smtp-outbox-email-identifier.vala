@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.OutboxEmailIdentifier : Geary.EmailIdentifier {
-    public OutboxEmailIdentifier(int64 ordering) {
+private class Geary.SmtpOutboxEmailIdentifier : Geary.EmailIdentifier {
+    public SmtpOutboxEmailIdentifier(int64 ordering) {
         base (ordering);
     }
     
     public override bool equals(Geary.Equalable o) {
-        EmailIdentifier? other = o as EmailIdentifier;
+        SmtpOutboxEmailIdentifier? other = o as SmtpOutboxEmailIdentifier;
         if (other == null)
             return false;
         

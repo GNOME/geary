@@ -74,10 +74,10 @@ public class Geary.AccountInformation : Object {
     }
     
     public async bool validate_async(Cancellable? cancellable = null) throws EngineError {
-        Geary.Endpoint endpoint = get_imap_endpoint();
+        AccountSettings settings = new AccountSettings(this);
         
-        Geary.Imap.ClientSessionManager client_session_manager =
-            new Geary.Imap.ClientSessionManager(endpoint, credentials, this, 0);
+        Geary.Imap.ClientSessionManager client_session_manager = new Geary.Imap.ClientSessionManager(
+            settings, 0);
         Geary.Imap.ClientSession? client_session = null;
         try {
             client_session = yield client_session_manager.get_authorized_session_async(cancellable);
@@ -87,8 +87,7 @@ public class Geary.AccountInformation : Object {
         
         if (client_session != null) {
             string current_mailbox;
-            Geary.Imap.ClientSession.Context context = client_session.get_context(out current_mailbox);
-            return context == Geary.Imap.ClientSession.Context.AUTHORIZED;
+            return client_session.get_context(out current_mailbox) == Geary.Imap.ClientSession.Context.AUTHORIZED;
         }
         
         return false;
@@ -139,26 +138,23 @@ public class Geary.AccountInformation : Object {
     }
 
     public Geary.EngineAccount get_account() throws EngineError {
-        Geary.Sqlite.Account sqlite_account =
-            new Geary.Sqlite.Account(credentials.user);
-        Endpoint imap_endpoint = get_imap_endpoint();
-        Endpoint smtp_endpoint = get_smtp_endpoint();
+        AccountSettings settings = new AccountSettings(this);
+        
+        ImapDB.Account local_account = new ImapDB.Account(settings);
+        Imap.Account remote_account = new Imap.Account(settings);
 
         switch (service_provider) {
             case ServiceProvider.GMAIL:
-                return new GmailAccount("Gmail account %s".printf(credentials.to_string()),
-                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
-                    smtp_endpoint, credentials, this), sqlite_account);
+                return new GmailAccount("Gmail account %s".printf(credentials.to_string()), settings,
+                    remote_account, local_account);
             
             case ServiceProvider.YAHOO:
-                return new YahooAccount("Yahoo account %s".printf(credentials.to_string()),
-                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
-                    smtp_endpoint, credentials, this), sqlite_account);
+                return new YahooAccount("Yahoo account %s".printf(credentials.to_string()), settings,
+                    remote_account, local_account);
             
             case ServiceProvider.OTHER:
-                return new OtherAccount("Other account %s".printf(credentials.to_string()),
-                    credentials.user, this, Engine.user_data_dir, new Geary.Imap.Account(imap_endpoint,
-                    smtp_endpoint, credentials, this), sqlite_account);
+                return new OtherAccount("Other account %s".printf(credentials.to_string()), settings,
+                    remote_account, local_account);
                 
             default:
                 throw new EngineError.NOT_FOUND("Service provider of type %s not known",

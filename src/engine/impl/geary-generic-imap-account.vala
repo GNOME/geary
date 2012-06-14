@@ -9,18 +9,18 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     private static Geary.FolderPath? outbox_path = null;
     
     private Imap.Account remote;
-    private Sqlite.Account local;
+    private ImapDB.Account local;
+    private bool open = false;
     private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
         FolderPath, Imap.FolderProperties>(Hashable.hash_func, Equalable.equal_func);
-    private SmtpOutboxFolder? outbox = null;
     private Gee.HashMap<FolderPath, GenericImapFolder> existing_folders = new Gee.HashMap<
         FolderPath, GenericImapFolder>(Hashable.hash_func, Equalable.equal_func);
     private Gee.HashSet<FolderPath> local_only = new Gee.HashSet<FolderPath>(
         Hashable.hash_func, Equalable.equal_func);
     
-    public GenericImapAccount(string name, string username, AccountInformation? account_info,
-        File user_data_dir, Imap.Account remote, Sqlite.Account local) {
-        base (name, username, account_info, user_data_dir);
+    public GenericImapAccount(string name, Geary.AccountSettings settings, Imap.Account remote,
+        ImapDB.Account local) {
+        base (name, settings);
         
         this.remote = remote;
         this.local = local;
@@ -43,9 +43,17 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         return properties_map.get(path);
     }
     
+    private void check_open() throws EngineError {
+        if (!open)
+            throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
+    }
+    
     public override async void open_async(Cancellable? cancellable = null) throws Error {
-        yield local.open_async(get_account_information().credentials, Engine.user_data_dir, Engine.resource_dir,
-            cancellable);
+        if (open)
+            throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
+        
+        yield local.open_async(Engine.user_data_dir.get_child(settings.credentials.user),
+            Engine.resource_dir.get_child("sql"), cancellable);
         
         // need to back out local.open_async() if remote fails
         try {
@@ -61,12 +69,15 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             throw err;
         }
         
-        outbox = new SmtpOutboxFolder(remote, local.get_outbox());
+        open = true;
         
         notify_opened();
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
+        if (!open)
+            return;
+        
         // attempt to close both regardless of errors
         Error? local_err = null;
         try {
@@ -82,8 +93,6 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             remote_err = rclose_err;
         }
         
-        outbox = null;
-        
         if (local_err != null)
             throw local_err;
         
@@ -97,9 +106,9 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     //
     // This won't be called to build the Outbox, but for all others (including Inbox) it will.
     protected abstract GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        Sqlite.Account local_account, Sqlite.Folder local_folder);
+        ImapDB.Account local_account, ImapDB.Folder local_folder);
     
-    private GenericImapFolder build_folder(Sqlite.Folder local_folder) {
+    private GenericImapFolder build_folder(ImapDB.Folder local_folder) {
         GenericImapFolder? folder = existing_folders.get(local_folder.get_path());
         if (folder != null)
             return folder;
@@ -112,7 +121,9 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     
     public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
-        Gee.Collection<Geary.Sqlite.Folder>? local_list = null;
+        check_open();
+        
+        Gee.Collection<ImapDB.Folder>? local_list = null;
         try {
             local_list = yield local.list_folders_async(parent, cancellable);
         } catch (EngineError err) {
@@ -123,13 +134,13 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         
         Gee.Collection<Geary.Folder> engine_list = new Gee.ArrayList<Geary.Folder>();
         if (local_list != null && local_list.size > 0) {
-            foreach (Geary.Sqlite.Folder local_folder in local_list)
+            foreach (ImapDB.Folder local_folder in local_list)
                 engine_list.add(build_folder(local_folder));
         }
         
         // Add Outbox to root
         if (parent == null)
-            engine_list.add(outbox);
+            engine_list.add(local.outbox);
         
         background_update_folders.begin(parent, engine_list, cancellable);
         
@@ -138,6 +149,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     
     public override async bool folder_exists_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         if (yield local.folder_exists_async(path, cancellable))
             return true;
         
@@ -147,12 +160,13 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     // TODO: This needs to be made into a single transaction
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
+        check_open();
         
-        if (path.equals(outbox.get_path()))
-            return outbox;
+        if (path.equals(local.outbox.get_path()))
+            return local.outbox;
         
         try {
-            return build_folder((Sqlite.Folder) yield local.fetch_folder_async(path, cancellable));
+            return build_folder((ImapDB.Folder) yield local.fetch_folder_async(path, cancellable));
         } catch (EngineError err) {
             // don't thrown NOT_FOUND's, that means we need to fall through and clone from the
             // server
@@ -175,7 +189,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         }
         
         // Fetch the local account's version of the folder for the GenericImapFolder
-        return build_folder((Sqlite.Folder) yield local.fetch_folder_async(path, cancellable));
+        return build_folder((ImapDB.Folder) yield local.fetch_folder_async(path, cancellable));
     }
     
     private async void background_update_folders(Geary.FolderPath? parent,
@@ -259,7 +273,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             engine_added = new Gee.ArrayList<Geary.Folder>();
             foreach (Geary.Imap.Folder remote_folder in to_add) {
                 try {
-                    engine_added.add(build_folder((Sqlite.Folder) yield local.fetch_folder_async(
+                    engine_added.add(build_folder((ImapDB.Folder) yield local.fetch_folder_async(
                         remote_folder.get_path(), cancellable)));
                 } catch (Error convert_err) {
                     error("Unable to fetch local folder: %s", convert_err.message);
@@ -278,14 +292,14 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             notify_folders_added_removed(engine_added, null);
     }
     
-    public override bool delete_is_archive() {
-        return false;
-    }
-    
     public override async void send_email_async(Geary.ComposedEmail composed,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(composed);
-        yield outbox.create_email_async(rfc822, cancellable);
+        
+        // don't use create_email_async() as that requires the folder be open to use
+        yield local.outbox.enqueue_email_async(rfc822, cancellable);
     }
 
     private void on_email_sent(Geary.RFC822.Message rfc822) {

@@ -12,13 +12,13 @@
  * is stored in the created property.
  */
 private class Geary.CreateLocalEmailOperation : Geary.NonblockingBatchOperation {
-    public Geary.Sqlite.Folder folder { get; private set; }
+    public ImapDB.Folder folder { get; private set; }
     public Geary.Email email { get; private set; }
     public Geary.Email.Field required_fields { get; private set; }
     public bool created { get; private set; default = false; }
     public Geary.Email? merged { get; private set; default = null; }
     
-    public CreateLocalEmailOperation(Geary.Sqlite.Folder folder, Geary.Email email,
+    public CreateLocalEmailOperation(ImapDB.Folder folder, Geary.Email email,
         Geary.Email.Field required_fields) {
         this.folder = folder;
         this.email = email;
@@ -26,12 +26,12 @@ private class Geary.CreateLocalEmailOperation : Geary.NonblockingBatchOperation 
     }
     
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
-        created = yield folder.create_email_async(email, cancellable);
+        created = yield folder.create_or_merge_email_async(email, cancellable);
         
         if (email.fields.fulfills(required_fields)) {
             merged = email;
         } else {
-            merged = yield folder.fetch_email_async(email.id, required_fields, Sqlite.Folder.ListFlags.NONE,
+            merged = yield folder.fetch_email_async(email.id, required_fields, ImapDB.Folder.ListFlags.NONE,
                 cancellable);
         }
         
@@ -47,16 +47,19 @@ private class Geary.CreateLocalEmailOperation : Geary.NonblockingBatchOperation 
  * returned value.
  */
 private class Geary.RemoveLocalEmailOperation : Geary.NonblockingBatchOperation {
-    public Geary.Sqlite.Folder folder { get; private set; }
+    public ImapDB.Folder folder { get; private set; }
     public Geary.EmailIdentifier email_id { get; private set; }
     
-    public RemoveLocalEmailOperation(Geary.Sqlite.Folder folder, Geary.EmailIdentifier email_id) {
+    public RemoveLocalEmailOperation(ImapDB.Folder folder, Geary.EmailIdentifier email_id) {
         this.folder = folder;
         this.email_id = email_id;
     }
     
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
-        yield folder.remove_single_email_async(email_id, cancellable);
+        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
+        list.add(email_id);
+        
+        yield folder.remove_email_async(list, cancellable);
         
         return null;
     }

@@ -13,6 +13,7 @@ common/common-yorba-application.vala
 set(ENGINE_SRC
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
+engine/api/geary-account-settings.vala
 engine/api/geary-attachment.vala
 engine/api/geary-batch-operations.vala
 engine/api/geary-composed-email.vala
@@ -41,6 +42,19 @@ engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
 
 engine/common/common-message-data.vala
+
+engine/db/database-error.vala
+engine/db/db.vala
+engine/db/db-connection.vala
+engine/db/db-context.vala
+engine/db/db-database.vala
+engine/db/db-result.vala
+engine/db/db-statement.vala
+engine/db/db-synchronous-mode.vala
+engine/db/db-transaction-async-job.vala
+engine/db/db-transaction-outcome.vala
+engine/db/db-transaction-type.vala
+engine/db/db-versioned-database.vala
 
 engine/imap/api/imap-account.vala
 engine/imap/api/imap-email-flags.vala
@@ -87,6 +101,15 @@ engine/imap/transport/imap-mailbox.vala
 engine/imap/transport/imap-serializable.vala
 engine/imap/transport/imap-serializer.vala
 
+engine/imap-db/imap-db-account.vala
+engine/imap-db/imap-db-database.vala
+engine/imap-db/imap-db-folder.vala
+engine/imap-db/imap-db-message-row.vala
+engine/imap-db/outbox/smtp-outbox-email-identifier.vala
+engine/imap-db/outbox/smtp-outbox-email-properties.vala
+engine/imap-db/outbox/smtp-outbox-folder.vala
+engine/imap-db/outbox/smtp-outbox-folder-root.vala
+
 engine/impl/geary-abstract-account.vala
 engine/impl/geary-abstract-folder.vala
 engine/impl/geary-email-flag-watcher.vala
@@ -104,9 +127,6 @@ engine/impl/geary-replay-queue.vala
 engine/impl/geary-send-replay-operations.vala
 engine/impl/geary-yahoo-account.vala
 engine/impl/geary-yahoo-folder.vala
-engine/impl/outbox/smtp-outbox-folder.vala
-engine/impl/outbox/smtp-outbox-email-identifier.vala
-engine/impl/outbox/smtp-outbox-email-properties.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
@@ -137,29 +157,6 @@ engine/smtp/smtp-request.vala
 engine/smtp/smtp-response.vala
 engine/smtp/smtp-response-code.vala
 engine/smtp/smtp-response-line.vala
-
-engine/sqlite/abstract/sqlite-database.vala
-engine/sqlite/abstract/sqlite-row.vala
-engine/sqlite/abstract/sqlite-table.vala
-engine/sqlite/abstract/sqlite-transaction.vala
-engine/sqlite/api/sqlite-account.vala
-engine/sqlite/api/sqlite-folder.vala
-engine/sqlite/email/sqlite-folder-row.vala
-engine/sqlite/email/sqlite-folder-table.vala
-engine/sqlite/email/sqlite-mail-database.vala
-engine/sqlite/email/sqlite-message-attachment-row.vala
-engine/sqlite/email/sqlite-message-attachment-table.vala
-engine/sqlite/email/sqlite-message-location-row.vala
-engine/sqlite/email/sqlite-message-location-table.vala
-engine/sqlite/email/sqlite-message-row.vala
-engine/sqlite/email/sqlite-message-table.vala
-engine/sqlite/imap/sqlite-imap-database.vala
-engine/sqlite/imap/sqlite-imap-folder-properties-row.vala
-engine/sqlite/imap/sqlite-imap-folder-properties-table.vala
-engine/sqlite/imap/sqlite-imap-message-properties-row.vala
-engine/sqlite/imap/sqlite-imap-message-properties-table.vala
-engine/sqlite/smtp/sqlite-smtp-outbox-row.vala
-engine/sqlite/smtp/sqlite-smtp-outbox-table.vala
 
 engine/state/state-machine-descriptor.vala
 engine/state/state-machine.vala
@@ -224,6 +221,10 @@ set(MAILER_SRC
 mailer/main.vala
 )
 
+set(DBTEST_SRC
+db-test/main.vala
+)
+
 set(DBUSSERVICE_SRC
 dbusservice/controller.vala
 dbusservice/database.vala
@@ -251,14 +252,13 @@ pkg_check_modules(DEPS REQUIRED
     libnotify>=0.7.5
     libcanberra>=0.28
     sqlite3>=3.7.4
-    sqlheavy-0.1>=0.1.1
     gmime-2.6>=2.6.0
     gnome-keyring-1>=2.32.0
     webkitgtk-3.0>=1.4.3
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-1.0 gio-2.0 sqlheavy-0.1 gmime-2.6 unique-3.0 posix
+    glib-2.0 gee-1.0 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3
 )
 
 set(CLIENT_PACKAGES
@@ -395,6 +395,31 @@ add_custom_command(
     POST_BUILD
     COMMAND 
         ${CMAKE_COMMAND} -E copy geary-mailer ${CMAKE_BINARY_DIR}/
+)
+
+# db-test app
+#################################################
+vala_precompile(DBTEST_VALA_C
+    ${DBTEST_SRC}
+PACKAGES
+    ${ENGINE_PACKAGES}
+    geary-static
+OPTIONS
+    --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    --vapidir=${CMAKE_BINARY_DIR}/src
+    --thread
+    --enable-checking
+    --fatal-warnings
+)
+
+add_executable(geary-db-test ${DBTEST_VALA_C})
+target_link_libraries(geary-db-test ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+add_custom_command(
+    TARGET
+        geary-db-test
+    POST_BUILD
+    COMMAND 
+        ${CMAKE_COMMAND} -E copy geary-db-test ${CMAKE_BINARY_DIR}/
 )
 
 # DBus Service

@@ -33,9 +33,9 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
     
     private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? special_map = null;
     
-    public YahooAccount(string name, string username, AccountInformation account_info,
-        File user_data_dir, Imap.Account remote, Sqlite.Account local) {
-        base (name, username, account_info, user_data_dir, remote, local);
+    public YahooAccount(string name, AccountSettings settings, Imap.Account remote,
+        ImapDB.Account local) {
+        base (name, settings, remote, local);
         
         if (special_map == null) {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(
@@ -55,7 +55,7 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
     }
     
     protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        Sqlite.Account local_account, Sqlite.Folder local_folder) {
+        ImapDB.Account local_account, ImapDB.Folder local_folder) {
         return new YahooFolder(this, remote_account, local_account, local_folder,
             special_map.has_key(path) ? special_map.get(path) : Geary.SpecialFolderType.NONE);
     }

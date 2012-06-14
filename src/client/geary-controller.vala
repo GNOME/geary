@@ -298,7 +298,7 @@ public class GearyController {
             account.folders_added_removed.connect(on_folders_added_removed);
             account.email_sent.connect(on_sent);
             
-            if (account.get_account_information().service_provider == Geary.ServiceProvider.YAHOO)
+            if (account.settings.service_provider == Geary.ServiceProvider.YAHOO)
                 main_window.title = GearyApplication.NAME + "!";
             
             main_window.folder_list.set_user_folders_root_name(_("Labels"));
@@ -1243,8 +1243,7 @@ public class GearyController {
             error("Unable to get username. Error: %s", e.message);
         }
         
-        Geary.AccountInformation acct_info = account.get_account_information();
-        return new Geary.RFC822.MailboxAddress(acct_info.real_name, username);
+        return new Geary.RFC822.MailboxAddress(account.settings.real_name, username);
     }
         
     private Geary.RFC822.MailboxAddresses get_from() {
