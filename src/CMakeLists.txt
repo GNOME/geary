@@ -273,6 +273,7 @@ set(CFLAGS
     -D_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
+    -g
 )
 
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
@@ -293,6 +294,7 @@ OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/vapi
     --thread
     --enable-checking
+    --debug
     --fatal-warnings
 )
 
@@ -312,6 +314,7 @@ OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
     --thread
     --enable-checking
+    --debug
     --fatal-warnings
 )
 
@@ -343,6 +346,7 @@ OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
     --thread
     --enable-checking
+    --debug
     --fatal-warnings
 )
 
@@ -368,6 +372,7 @@ OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
     --thread
     --enable-checking
+    --debug
     --fatal-warnings
 )
 
@@ -394,6 +399,7 @@ OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
     --thread
     --enable-checking
+    --debug
     --fatal-warnings
 )
 
