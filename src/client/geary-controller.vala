@@ -20,17 +20,17 @@ public class GearyController {
         }
     }
     
-    private class FetchSpecialFolderOperation : Geary.NonblockingBatchOperation {
+    private class FetchFolderOperation : Geary.NonblockingBatchOperation {
         public Geary.Account account;
-        public Geary.SpecialFolder special_folder;
+        public Geary.FolderPath folder_path;
         
-        public FetchSpecialFolderOperation(Geary.Account account, Geary.SpecialFolder special_folder) {
+        public FetchFolderOperation(Geary.Account account, Geary.FolderPath folder_path) {
             this.account = account;
-            this.special_folder = special_folder;
+            this.folder_path = folder_path;
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            return yield account.fetch_folder_async(special_folder.path);
+            return yield account.fetch_folder_async(folder_path);
         }
     }
     
@@ -311,7 +311,7 @@ public class GearyController {
             if (account.get_account_information().service_provider == Geary.ServiceProvider.YAHOO)
                 main_window.title = GearyApplication.NAME + "!";
             
-            main_window.folder_list.set_user_folders_root_name(account.get_user_folders_label());
+            main_window.folder_list.set_user_folders_root_name(_("Labels"));
             load_folders.begin(cancellable_folder);
         }
     }
@@ -327,48 +327,6 @@ public class GearyController {
     
     private async void load_folders(Cancellable? cancellable) {
         try {
-            // add all the special folders, which are assumed to always exist
-            Geary.SpecialFolderMap? special_folders = account.get_special_folder_map();
-            if (special_folders != null) {
-                Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
-                foreach (Geary.SpecialFolder special_folder in special_folders.get_all())
-                    batch.add(new FetchSpecialFolderOperation(account, special_folder));
-                
-                debug("Listing special folders");
-                yield batch.execute_all_async(cancellable);
-                debug("Completed list of special folders");
-                
-                foreach (int id in batch.get_ids()) {
-                    FetchSpecialFolderOperation op = (FetchSpecialFolderOperation) 
-                        batch.get_operation(id);
-                    try {
-                        Geary.Folder folder = (Geary.Folder) batch.get_result(id);
-                        main_window.folder_list.add_special_folder(op.special_folder, folder);
-                    } catch (Error inner_error) {
-                        message("Unable to fetch special folder %s: %s", 
-                            op.special_folder.path.to_string(), inner_error.message);
-                    }
-                }
-                
-                if (cancellable.is_cancelled())
-                    return;
-                
-                // If inbox is available (should be!), monitor it and select it for the user
-                Geary.SpecialFolder? inbox = special_folders.get_folder(Geary.SpecialFolderType.INBOX);
-                if (inbox != null) {
-                    // create and leave open the Inbox, which is constantly monitored for notifications
-                    inbox_folder = yield account.fetch_folder_async(inbox.path, cancellable_inbox);
-                    assert(inbox_folder != null);
-                    
-                    yield inbox_folder.open_async(false, cancellable_inbox);
-                    
-                    inbox_folder.email_locally_appended.connect(on_inbox_new_email);
-                    
-                    // select the inbox and get the show started
-                    main_window.folder_list.select_path(inbox.path);
-                }
-            }
-            
             // pull down the root-level user folders and recursively add to sidebar
             Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null);
             if (folders != null)
@@ -730,31 +688,35 @@ public class GearyController {
         set_busy(false);
     }
     
+    private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
+        Geary.SpecialFolderType new_type) {
+        main_window.folder_list.remove_folder(folder);
+        main_window.folder_list.add_folder(folder);
+    }
+    
     private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
         
         if (added != null && added.size > 0) {
-            Gee.Set<Geary.FolderPath>? ignored_paths = account.get_ignored_paths();
-            
-            Gee.ArrayList<Geary.Folder> skipped = new Gee.ArrayList<Geary.Folder>();
             foreach (Geary.Folder folder in added) {
-                if (ignored_paths != null && ignored_paths.contains(folder.get_path()))
-                    skipped.add(folder);
-                else {
-                    main_window.folder_list.add_folder(folder);
-                    main_window.main_toolbar.copy_folder_menu.add_folder(folder);
-                    main_window.main_toolbar.move_folder_menu.add_folder(folder);
+                main_window.folder_list.add_folder(folder);
+                main_window.main_toolbar.copy_folder_menu.add_folder(folder);
+                main_window.main_toolbar.move_folder_menu.add_folder(folder);
+                
+                // monitor the Inbox for notifications
+                if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX && inbox_folder == null) {
+                    inbox_folder = folder;
+                    inbox_folder.email_locally_appended.connect(on_inbox_new_email);
+                    
+                    // select the inbox and get the show started
+                    main_window.folder_list.select_path(folder.get_path());
+                    inbox_folder.open_async.begin(false, cancellable_inbox);
                 }
+                
+                folder.special_folder_type_changed.connect(on_special_folder_type_changed);
             }
             
-            Gee.Collection<Geary.Folder> remaining = added;
-            if (skipped.size > 0) {
-                remaining = new Gee.ArrayList<Geary.Folder>();
-                remaining.add_all(added);
-                remaining.remove_all(skipped);
-            }
-            
-            search_folders_for_children.begin(remaining);
+            search_folders_for_children.begin(added);
         }
     }
     

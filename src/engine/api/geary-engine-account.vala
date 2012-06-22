@@ -18,12 +18,6 @@ public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Persona
         return account_information;
     }
     
-    public abstract string get_user_folders_label();
-    
-    public abstract Geary.SpecialFolderMap? get_special_folder_map();
-    
-    public abstract Gee.Set<Geary.FolderPath>? get_ignored_paths();
-    
     public abstract bool delete_is_archive();
     
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)

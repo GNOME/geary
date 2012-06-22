@@ -50,7 +50,7 @@ public abstract class Geary.Sqlite.Database {
         return t;
     }
 
-    public void upgrade() throws Error {
+    public int upgrade() throws Error {
         // Get the SQLite database version.
         SQLHeavy.QueryResult result = db.execute("PRAGMA user_version;");
         int db_version = result.fetch_int();
@@ -74,6 +74,8 @@ public abstract class Geary.Sqlite.Database {
             
             post_upgrade(db_version);
         }
+        
+        return db.execute("PRAGMA user_version;").fetch_int();
     }
 
     private File get_upgrade_script(int version) {

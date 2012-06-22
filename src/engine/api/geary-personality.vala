@@ -5,12 +5,6 @@
  */
 
 public interface Geary.Personality : Object {
-    public abstract string get_user_folders_label();
-    
-    public abstract Geary.SpecialFolderMap? get_special_folder_map();
-    
-    public abstract Gee.Set<Geary.FolderPath>? get_ignored_paths();
-    
     public abstract bool delete_is_archive();
 }
 

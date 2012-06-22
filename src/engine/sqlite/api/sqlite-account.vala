@@ -43,10 +43,8 @@ private class Geary.Sqlite.Account : Object {
             db.pre_upgrade.connect(on_pre_upgrade);
             db.post_upgrade.connect(on_post_upgrade);
             
-            db.upgrade();
-            
-            // Need to clear duplicate folders (due to ticket #nnnn)
-            clear_duplicate_folders();
+            // upgrade and do any processing that should be done on this version of the database
+            process_database(db.upgrade());
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             
@@ -296,6 +294,25 @@ private class Geary.Sqlite.Account : Object {
         // TODO Add per-version data massaging.
     }
     
+    // Called every run after executing db.upgrade(); this gives a chance to perform work that
+    // cannot be easily expressed in an upgrade script and should happen whether an upgrade to that
+    // version has happened or not
+    private void process_database(int version) {
+        switch (version) {
+            case 3:
+                try {
+                    clear_duplicate_folders();
+                } catch (SQLHeavy.Error err) {
+                    debug("Unable to clear duplicate folders in version %d: %s", version, err.message);
+                }
+            break;
+            
+            default:
+                // nothing to do
+            break;
+        }
+    }
+    
     private void clear_duplicate_folders() throws SQLHeavy.Error {
         int count = 0;
         
@@ -320,7 +337,7 @@ private class Geary.Sqlite.Account : Object {
             SQLHeavy.QueryResult message_result = message_query.execute();
             
             if (child_result.finished && message_result.finished) {
-                // no children, delete it
+                // no children and no messages, delete it
                 SQLHeavy.Query child_delete = db.db.prepare(
                     "DELETE FROM FolderTable WHERE id=?");
                 child_delete.bind_int64(0, id);

@@ -97,7 +97,8 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand.wildcarded("", "%"), cancellable));
+            new ListCommand.wildcarded("", "%", session.get_capabilities().has_capability("XLIST")),
+            cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
@@ -114,7 +115,8 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(specifier), cancellable));
+            new ListCommand(specifier, session.get_capabilities().has_capability("XLIST")),
+            cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());
@@ -126,7 +128,8 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(path), cancellable));
+            new ListCommand(path, session.get_capabilities().has_capability("XLIST")),
+            cancellable));
         
         return (results.status_response.status == Status.OK) && (results.get_count() == 1);
     }
@@ -136,7 +139,8 @@ public class Geary.Imap.ClientSessionManager {
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
-            new ListCommand(path), cancellable));
+            new ListCommand(path, session.get_capabilities().has_capability("XLIST")),
+            cancellable));
         
         if (results.status_response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Server error: %s", results.to_string());

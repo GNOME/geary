@@ -117,7 +117,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
         return Geary.Trillian.FALSE;
     }
     
-    public override Geary.SpecialFolderType? get_special_folder_type() {
+    public override Geary.SpecialFolderType get_special_folder_type() {
         return Geary.SpecialFolderType.OUTBOX;
     }
     

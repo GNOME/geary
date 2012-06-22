@@ -6,6 +6,7 @@
 
 private class Geary.GmailAccount : Geary.GenericImapAccount {
     private const string GMAIL_FOLDER = "[Gmail]";
+    private const string GOOGLEMAIL_FOLDER = "[Google Mail]";
     
     private static Geary.Endpoint? _imap_endpoint = null;
     public static Geary.Endpoint IMAP_ENDPOINT { get {
@@ -33,58 +34,9 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         return _smtp_endpoint;
     } }
     
-    private static SpecialFolderMap? special_folder_map = null;
-    private static Gee.Set<Geary.FolderPath>? ignored_paths = null;
-    
     public GmailAccount(string name, string username, AccountInformation account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
         base (name, username, account_info, user_data_dir, remote, local);
-        
-        if (special_folder_map == null || ignored_paths == null)
-            initialize_personality();
-    }
-    
-    private static void initialize_personality() {
-        Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER, Imap.Account.ASSUMED_SEPARATOR,
-            true);
-        Geary.FolderRoot inbox_folder = new Geary.FolderRoot(Imap.Account.INBOX_NAME,
-            Imap.Account.ASSUMED_SEPARATOR, false);
-        Geary.FolderRoot outbox_folder = new SmtpOutboxFolderRoot();
-        
-        special_folder_map = new SpecialFolderMap();
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.INBOX, _("Inbox"),
-            inbox_folder, 0));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.DRAFTS, _("Drafts"),
-            gmail_root.get_child("Drafts"), 1));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SENT, _("Sent Mail"),
-            gmail_root.get_child("Sent Mail"), 2));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.FLAGGED, _("Starred"),
-            gmail_root.get_child("Starred"), 3));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.ALL_MAIL, _("All Mail"),
-            gmail_root.get_child("All Mail"), 4));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SPAM, _("Spam"),
-            gmail_root.get_child("Spam"), 5));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.OUTBOX,
-            _("Outbox"), outbox_folder, 6));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.TRASH, _("Trash"),
-            gmail_root.get_child("Trash"), 7));
-        
-        ignored_paths = new Gee.HashSet<Geary.FolderPath>(Hashable.hash_func, Equalable.equal_func);
-        ignored_paths.add(gmail_root);
-        ignored_paths.add(inbox_folder);
-        ignored_paths.add(outbox_folder);
-    }
-    
-    public override string get_user_folders_label() {
-        return _("Labels");
-    }
-    
-    public override Geary.SpecialFolderMap? get_special_folder_map() {
-        return special_folder_map;
-    }
-    
-    public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
-        return ignored_paths.read_only_view;
     }
     
     public override bool delete_is_archive() {

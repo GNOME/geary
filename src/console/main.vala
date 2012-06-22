@@ -150,11 +150,8 @@ class ImapConsole : Gtk.Window {
                     break;
                     
                     case "list":
-                        list(cmd, args);
-                    break;
-                    
                     case "xlist":
-                        xlist(cmd, args);
+                        list(cmd, args);
                     break;
                     
                     case "examine":
@@ -362,7 +359,7 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
         status("Listing...");
-        cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(args[0], args[1]),
+        cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(args[0], args[1], (cmd.down() == "xlist")),
             null, on_list);
     }
     
@@ -373,13 +370,6 @@ class ImapConsole : Gtk.Window {
         } catch (Error err) {
             exception(err);
         }
-    }
-    
-    private void xlist(string cmd, string[] args) throws Error {
-        check_connected(cmd, args, 2, "<reference> <mailbox>");
-        
-        status("Xlisting...");
-        cx.send_async.begin(new Geary.Imap.XListCommand.wildcarded(args[0], args[1]), null, on_list);
     }
     
     private void examine(string cmd, string[] args) throws Error {

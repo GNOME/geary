@@ -42,25 +42,14 @@ public class Geary.Imap.LogoutCommand : Command {
 
 public class Geary.Imap.ListCommand : Command {
     public const string NAME = "list";
+    public const string XLIST_NAME = "xlist";
     
-    public ListCommand(string mailbox) {
-        base (NAME, { "", mailbox });
+    public ListCommand(string mailbox, bool use_xlist) {
+        base (use_xlist ? XLIST_NAME : NAME, { "", mailbox });
     }
     
-    public ListCommand.wildcarded(string reference, string mailbox) {
-        base (NAME, { reference, mailbox });
-    }
-}
-
-public class Geary.Imap.XListCommand : Command {
-    public const string NAME = "xlist";
-    
-    public XListCommand(string mailbox) {
-        base (NAME, { "", mailbox });
-    }
-    
-    public XListCommand.wildcarded(string reference, string mailbox) {
-        base (NAME, { reference, mailbox });
+    public ListCommand.wildcarded(string reference, string mailbox, bool use_xlist) {
+        base (use_xlist ? XLIST_NAME : NAME, { reference, mailbox });
     }
 }
 

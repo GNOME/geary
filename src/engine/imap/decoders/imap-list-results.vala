@@ -78,7 +78,7 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                 StringParameter? delim = data.get_as_nullable_string(3);
                 StringParameter mailbox = data.get_as_string(4);
                 
-                if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(XListCommand.NAME)) {
+                if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(ListCommand.XLIST_NAME)) {
                     debug("Bad list response \"%s\": Not marked as list or xlist response",
                         data.to_string());
                     
@@ -98,9 +98,17 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                     attrlist.add(new MailboxAttribute(stringp.value));
                 }
                 
-                MailboxInformation info = new MailboxInformation(mailbox.value, delim.nullable_value,
-                    new MailboxAttributes(attrlist));
-                
+                // Set \Inbox to standard path
+                MailboxInformation info;
+                MailboxAttributes attributes = new MailboxAttributes(attrlist);
+                if (Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
+                    info = new MailboxInformation(Geary.Imap.Account.INBOX_NAME, delim.nullable_value,
+                        attributes);                    
+                } else {
+                    info = new MailboxInformation(mailbox.value, delim.nullable_value,
+                        attributes);
+                }
+
                 map.set(mailbox.value, info);
                 list.add(info);
             } catch (ImapError ierr) {

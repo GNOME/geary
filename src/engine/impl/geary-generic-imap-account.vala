@@ -5,6 +5,9 @@
  */
 
 private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
+    private static Geary.FolderPath? inbox_path = null;
+    private static Geary.FolderPath? outbox_path = null;
+    
     private Imap.Account remote;
     private Sqlite.Account local;
     private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
@@ -12,6 +15,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     private SmtpOutboxFolder? outbox = null;
     private Gee.HashMap<FolderPath, GenericImapFolder> existing_folders = new Gee.HashMap<
         FolderPath, GenericImapFolder>(Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashSet<FolderPath> local_only = new Gee.HashSet<FolderPath>(
+        Hashable.hash_func, Equalable.equal_func);
     
     public GenericImapAccount(string name, string username, AccountInformation? account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
@@ -21,6 +26,16 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         this.local = local;
         
         this.remote.login_failed.connect(on_login_failed);
+        
+        if (inbox_path == null) {
+            inbox_path = new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
+                Imap.Folder.CASE_SENSITIVE);
+        }
+        
+        if (outbox_path == null) {
+            outbox_path = new SmtpOutboxFolderRoot();
+            local_only.add(outbox_path);
+        }
     }
     
     internal Imap.FolderProperties? get_properties_for_folder(FolderPath path) {
@@ -75,13 +90,33 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             throw remote_err;
     }
     
+    // Subclasses should implement this for hardcoded paths that correspond to special folders ...
+    // if the server supports XLIST, this doesn't have to be implemented.
+    //
+    // This won't be called for INBOX or the Outbox.
+    protected virtual Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
+        return Geary.SpecialFolderType.NONE;
+    }
+    
+    private Geary.SpecialFolderType internal_get_special_folder_type_for_path(Geary.FolderPath path) {
+        if (path.equals(inbox_path))
+            return Geary.SpecialFolderType.INBOX;
+        
+        if (path.equals(outbox_path))
+            return Geary.SpecialFolderType.OUTBOX;
+        
+        return get_special_folder_type_for_path(path);
+    }
+    
     private GenericImapFolder build_folder(Sqlite.Folder local_folder) {
         GenericImapFolder? folder = existing_folders.get(local_folder.get_path());
         if (folder != null)
             return folder;
         
-        folder = new GenericImapFolder(this, remote, local, local_folder,
-            get_special_folder(local_folder.get_path()));
+        folder = new GenericImapFolder(this, remote, local, local_folder);
+        if (folder.get_special_folder_type() == Geary.SpecialFolderType.NONE)
+            folder.set_special_folder_type(internal_get_special_folder_type_for_path(local_folder.get_path()));
+        
         existing_folders.set(folder.get_path(), folder);
         
         return folder;
@@ -104,8 +139,11 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
                 engine_list.add(build_folder(local_folder));
         }
         
+        // Add Outbox to root
+        if (parent == null)
+            engine_list.add(outbox);
+        
         background_update_folders.begin(parent, engine_list, cancellable);
-        engine_list.add(outbox);
         
         return engine_list;
     }
@@ -163,27 +201,49 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             return;
         }
         
-        Gee.Set<string> local_names = new Gee.HashSet<string>();
-        foreach (Geary.Folder folder in engine_folders)
-            local_names.add(folder.get_path().basename);
-        
-        Gee.Set<string> remote_names = new Gee.HashSet<string>();
-        foreach (Geary.Imap.Folder folder in remote_folders) {
-            remote_names.add(folder.get_path().basename);
-            
-            // use this iteration to add discovered properties to map
-            properties_map.set(folder.get_path(), folder.get_properties());
+        // update all remote folders properties in the local store and active in the system
+        foreach (Imap.Folder remote_folder in remote_folders) {
+            try {
+                yield local.update_folder_async(remote_folder, cancellable);
+            } catch (Error update_error) {
+                debug("Unable to update local folder %s with remote properties: %s",
+                    remote_folder.to_string(), update_error.message);
+            }
         }
         
+        // Get local paths of all engine (local) folders
+        Gee.Set<Geary.FolderPath> local_paths = new Gee.HashSet<Geary.FolderPath>(
+            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+        foreach (Geary.Folder local_folder in engine_folders)
+            local_paths.add(local_folder.get_path());
+        
+        // Get remote paths of all remote folders
+        Gee.Set<Geary.FolderPath> remote_paths = new Gee.HashSet<Geary.FolderPath>(
+            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+        foreach (Geary.Imap.Folder remote_folder in remote_folders) {
+            remote_paths.add(remote_folder.get_path());
+            
+            // use this iteration to add discovered properties to map
+            properties_map.set(remote_folder.get_path(), remote_folder.get_properties());
+            
+            // also use this iteration to set the local folder's special type
+            GenericImapFolder? local_folder = existing_folders.get(remote_folder.get_path());
+            if (local_folder != null)
+                local_folder.set_special_folder_type(remote_folder.get_properties().attrs.get_special_folder_type());
+        }
+        
+        // If path in remote but not local, need to add it
         Gee.List<Geary.Imap.Folder> to_add = new Gee.ArrayList<Geary.Imap.Folder>();
         foreach (Geary.Imap.Folder folder in remote_folders) {
-            if (!local_names.contains(folder.get_path().basename))
+            if (!local_paths.contains(folder.get_path()))
                 to_add.add(folder);
         }
         
+        // If path in local but not remote (and isn't local-only, i.e. the Outbox), need to remove
+        // it
         Gee.List<Geary.Folder>? to_remove = new Gee.ArrayList<Geary.Imap.Folder>();
         foreach (Geary.Folder folder in engine_folders) {
-            if (!remote_names.contains(folder.get_path().basename))
+            if (!remote_paths.contains(folder.get_path()) && !local_only.contains(folder.get_path()))
                 to_remove.add(folder);
         }
         
@@ -193,6 +253,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         if (to_remove.size == 0)
             to_remove = null;
         
+        // For folders to add, clone them and their properties locally
         if (to_add != null) {
             foreach (Geary.Imap.Folder folder in to_add) {
                 try {
@@ -204,6 +265,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             }
         }
         
+        // Create Geary.Folder objects for all added folders
         Gee.Collection<Geary.Folder> engine_added = null;
         if (to_add != null) {
             engine_added = new Gee.ArrayList<Geary.Folder>();
@@ -217,16 +279,15 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             }
         }
         
+        // TODO: Remove local folders no longer available remotely.
+        if (to_remove != null) {
+            foreach (Geary.Folder folder in to_remove) {
+                debug(@"Need to remove folder $folder");
+            }
+        }
+        
         if (engine_added != null)
             notify_folders_added_removed(engine_added, null);
-    }
-    
-    public override string get_user_folders_label() {
-        return _("Folders");
-    }
-    
-    public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
-        return null;
     }
     
     public override bool delete_is_archive() {
@@ -241,13 +302,6 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     
     private void on_login_failed(Geary.Credentials? credentials) {
         notify_report_problem(Geary.Account.Problem.LOGIN_FAILED, credentials, null);
-    }
-    
-    private SpecialFolder? get_special_folder(FolderPath path) {
-        if (get_special_folder_map() != null) {
-            return get_special_folder_map().get_folder_by_path(path);
-        }
-        return null;
     }
 }
 

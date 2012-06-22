@@ -154,6 +154,15 @@ public interface Geary.Folder : Object {
      * mark_email_async() method as well as changes occur remotely.
      */
     public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
+
+    /**
+    * "special-folder-type-changed" is fired when the special folder type has changed.
+    *
+    * This will usually happen when the local account object has been updated with data
+    * from the remote account.
+    */
+    public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
+        Geary.SpecialFolderType new_type);
     
     protected abstract void notify_opened(OpenState state, int count);
     
@@ -172,15 +181,22 @@ public interface Geary.Folder : Object {
     protected abstract void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
         Geary.EmailFlags> flag_map);
     
+    protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
+        Geary.SpecialFolderType new_type);
+    
     public abstract Geary.FolderPath get_path();
     
     public abstract Geary.Trillian has_children();
     
     /**
-     * Returns the special folder type of the folder. If the the folder is not a special one then
-     * null is returned.
+     * Returns the special folder type of the folder.
      */
-    public abstract Geary.SpecialFolderType? get_special_folder_type();
+    public abstract Geary.SpecialFolderType get_special_folder_type();
+    
+    /**
+     * Returns a name suitable for displaying to the user.
+     */
+    public abstract string get_display_name();
     
     /**
      * Returns the state of the Folder's connections to the local and remote stores.

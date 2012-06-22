@@ -10,16 +10,8 @@ private class Geary.OtherAccount : Geary.GenericImapAccount {
         base (name, username, account_info, user_data_dir, remote, local);
     }
     
-    public override string get_user_folders_label() {
-        return _("Folders");
-    }
-    
-    public override Geary.SpecialFolderMap? get_special_folder_map() {
-        return null;
-    }
-    
-    public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
-        return null;
+    protected override Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
+        return Geary.SpecialFolderType.NONE;
     }
     
     public override bool delete_is_archive() {

@@ -150,7 +150,6 @@ public class Geary.FolderPath : Object, Hashable, Equalable {
         if (other.get_path_length() != path_length)
             return false;
         
-        
         bool cs = get_root().case_sensitive;
         if (other.get_root().case_sensitive != cs) {
             message("Comparing %s and %s with different case sensitivities", to_string(),

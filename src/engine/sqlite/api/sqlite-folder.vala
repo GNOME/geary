@@ -32,14 +32,14 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
     
     private ImapDatabase db;
     private FolderRow folder_row;
-    private Geary.Imap.FolderProperties? properties;
+    private Geary.Imap.FolderProperties properties;
     private MessageTable message_table;
     private MessageLocationTable location_table;
     private MessageAttachmentTable attachment_table;
     private ImapMessagePropertiesTable imap_message_properties_table;
     private Geary.FolderPath path;
     
-    internal Folder(ImapDatabase db, FolderRow folder_row, Geary.Imap.FolderProperties? properties,
+    internal Folder(ImapDatabase db, FolderRow folder_row, Geary.Imap.FolderProperties properties,
         Geary.FolderPath path) throws Error {
         this.db = db;
         this.folder_row = folder_row;
@@ -61,12 +61,12 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
         return path;
     }
     
-    public Geary.Imap.FolderProperties? get_properties() {
-        // TODO: TBD: alteration/updated signals for folders
+    public Geary.Imap.FolderProperties get_properties() {
         return properties;
     }
     
-    internal void update_properties(Geary.Imap.FolderProperties? properties) {
+    internal void update_properties(Geary.Imap.FolderProperties properties) {
+        // TODO: TBD: alteration/updated signals for folders
         this.properties = properties;
     }
     

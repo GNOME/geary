@@ -178,6 +178,62 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
         return _allows_new;
     } }
     
+    private static MailboxAttribute? _xlist_inbox = null;
+    public static MailboxAttribute SPECIAL_FOLDER_INBOX { get {
+        if (_xlist_inbox == null)
+            _xlist_inbox = new MailboxAttribute("\\Inbox");
+        
+        return _xlist_inbox;
+    } }
+    
+    private static MailboxAttribute? _xlist_all_mail = null;
+    public static MailboxAttribute SPECIAL_FOLDER_ALL_MAIL { get {
+        if (_xlist_all_mail == null)
+            _xlist_all_mail = new MailboxAttribute("\\AllMail");
+        
+        return _xlist_all_mail;
+    } }
+    
+    private static MailboxAttribute? _xlist_trash = null;
+    public static MailboxAttribute SPECIAL_FOLDER_TRASH { get {
+        if (_xlist_trash == null)
+            _xlist_trash = new MailboxAttribute("\\Trash");
+        
+        return _xlist_trash;
+    } }
+    
+    private static MailboxAttribute? _xlist_drafts = null;
+    public static MailboxAttribute SPECIAL_FOLDER_DRAFTS { get {
+        if (_xlist_drafts == null)
+            _xlist_drafts = new MailboxAttribute("\\Drafts");
+        
+        return _xlist_drafts;
+    } }
+
+    private static MailboxAttribute? _xlist_sent = null;
+    public static MailboxAttribute SPECIAL_FOLDER_SENT { get {
+        if (_xlist_sent == null)
+            _xlist_sent = new MailboxAttribute("\\Sent");
+        
+        return _xlist_sent;
+    } }
+
+    private static MailboxAttribute? _xlist_spam = null;
+    public static MailboxAttribute SPECIAL_FOLDER_SPAM { get {
+        if (_xlist_spam == null)
+            _xlist_spam = new MailboxAttribute("\\Spam");
+        
+        return _xlist_spam;
+    } }
+    
+    private static MailboxAttribute? _xlist_starred = null;
+    public static MailboxAttribute SPECIAL_FOLDER_STARRED { get {
+        if (_xlist_starred == null)
+            _xlist_starred = new MailboxAttribute("\\Starred");
+        
+        return _xlist_starred;
+    } }
+    
     public MailboxAttribute(string value) {
         base (value);
     }

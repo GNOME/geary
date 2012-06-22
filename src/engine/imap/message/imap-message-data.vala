@@ -183,6 +183,31 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         
         return new MailboxAttributes(attrs);
     }
+    
+    public Geary.SpecialFolderType get_special_folder_type() {
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_INBOX))
+            return Geary.SpecialFolderType.INBOX;
+        
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL_MAIL))
+            return Geary.SpecialFolderType.ALL_MAIL;
+        
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_TRASH))
+            return Geary.SpecialFolderType.TRASH;
+        
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_DRAFTS))
+            return Geary.SpecialFolderType.DRAFTS;
+        
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_SENT))
+            return Geary.SpecialFolderType.SENT;
+        
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_SPAM))
+            return Geary.SpecialFolderType.SPAM;
+        
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_STARRED))
+            return Geary.SpecialFolderType.FLAGGED;
+        
+        return Geary.SpecialFolderType.NONE;
+    }
 }
 
 public class Geary.Imap.InternalDate : Geary.RFC822.Date, Geary.Imap.MessageData {

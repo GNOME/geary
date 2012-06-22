@@ -44,10 +44,19 @@ public class Geary.DBus.Controller {
             account.report_problem.connect(on_report_problem);
             
             // Open the Inbox folder.
-            Geary.SpecialFolderMap? special_folders = account.get_special_folder_map();
-            Geary.Folder folder = yield account.fetch_folder_async(special_folders.get_folder(
-                Geary.SpecialFolderType.INBOX).path);
+            Geary.Folder? folder = null;
+            Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null, null);
+            foreach(Geary.Folder folder_to_check in folders) {
+                if(folder_to_check.get_special_folder_type() == Geary.SpecialFolderType.INBOX) {
+                    folder = folder_to_check;
+                    break;
+                }
+            }
             
+            if (folder == null) {
+                warning("No inbox folder found");
+                return;
+            }
             yield folder.open_async(false, null);
             
             conversations = new Geary.DBus.Conversations(folder);

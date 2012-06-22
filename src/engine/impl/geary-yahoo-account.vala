@@ -31,62 +31,28 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
         return _smtp_endpoint;
     } }
     
-    private static SpecialFolderMap? special_folder_map = null;
-    private static Gee.Set<Geary.FolderPath>? ignored_paths = null;
+    private Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType> special_map = new Gee.HashMap<
+        Geary.FolderPath, Geary.SpecialFolderType>(Hashable.hash_func, Equalable.equal_func);
     
     public YahooAccount(string name, string username, AccountInformation account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
         base (name, username, account_info, user_data_dir, remote, local);
         
-        if (special_folder_map == null || ignored_paths == null)
-            initialize_personality();
-    }
-    
-    private static void initialize_personality() {
-        special_folder_map = new SpecialFolderMap();
+        FolderPath sent = new Geary.FolderRoot("Sent", Imap.Account.ASSUMED_SEPARATOR, false);
+        special_map.set(sent, Geary.SpecialFolderType.SENT);
         
-        FolderRoot inbox_folder = new FolderRoot(Imap.Account.INBOX_NAME, 
-            Imap.Account.ASSUMED_SEPARATOR, false);
-        FolderRoot sent_folder = new Geary.FolderRoot("Sent", Imap.Account.ASSUMED_SEPARATOR, false);
-        FolderRoot drafts_folder = new Geary.FolderRoot("Draft", Imap.Account.ASSUMED_SEPARATOR,
-            false);
-        FolderRoot spam_folder = new Geary.FolderRoot("Bulk Mail", Imap.Account.ASSUMED_SEPARATOR,
-            false);
-        FolderRoot trash_folder = new Geary.FolderRoot("Trash", Imap.Account.ASSUMED_SEPARATOR, false);
-        FolderRoot outbox_folder = new SmtpOutboxFolderRoot();
+        FolderPath drafts = new Geary.FolderRoot("Draft", Imap.Account.ASSUMED_SEPARATOR, false);
+        special_map.set(drafts, Geary.SpecialFolderType.DRAFTS);
         
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.INBOX, _("Inbox"),
-            inbox_folder, 0));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.DRAFTS, _("Drafts"),
-            drafts_folder, 1));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SENT, _("Sent Mail"),
-            sent_folder, 2));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.SPAM, _("Spam"),
-            spam_folder, 3));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.OUTBOX,
-            _("Outbox"), outbox_folder, 4));
-        special_folder_map.set_folder(new SpecialFolder(Geary.SpecialFolderType.TRASH, _("Trash"),
-            trash_folder, 5));
+        FolderPath bulk = new Geary.FolderRoot("Bulk Mail", Imap.Account.ASSUMED_SEPARATOR, false);
+        special_map.set(bulk, Geary.SpecialFolderType.SPAM);
         
-        ignored_paths = new Gee.HashSet<Geary.FolderPath>(Hashable.hash_func, Equalable.equal_func);
-        ignored_paths.add(inbox_folder);
-        ignored_paths.add(drafts_folder);
-        ignored_paths.add(sent_folder);
-        ignored_paths.add(spam_folder);
-        ignored_paths.add(outbox_folder);
-        ignored_paths.add(trash_folder);
+        FolderPath trash = new Geary.FolderRoot("Trash", Imap.Account.ASSUMED_SEPARATOR, false);
+        special_map.set(trash, Geary.SpecialFolderType.TRASH);
     }
     
-    public override string get_user_folders_label() {
-        return _("Folders");
-    }
-    
-    public override Geary.SpecialFolderMap? get_special_folder_map() {
-        return special_folder_map;
-    }
-    
-    public override Gee.Set<Geary.FolderPath>? get_ignored_paths() {
-        return ignored_paths;
+    protected override Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
+        return special_map.has_key(path) ? special_map.get(path) : Geary.SpecialFolderType.NONE;
     }
     
     public override bool delete_is_archive() {

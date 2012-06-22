@@ -43,11 +43,26 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         email_flags_changed(flag_map);
     }
     
+    internal virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
+        Geary.SpecialFolderType new_type) {
+        special_folder_type_changed(old_type, new_type);
+    }
+    
     public abstract Geary.FolderPath get_path();
     
     public abstract Geary.Trillian has_children();
     
-    public abstract Geary.SpecialFolderType? get_special_folder_type();
+    public abstract Geary.SpecialFolderType get_special_folder_type();
+    
+    /**
+     * Default is to display the basename of the Folder's path.
+     */
+    public virtual string get_display_name() {
+        Geary.SpecialFolderType special_folder_type = get_special_folder_type();
+        
+        return (special_folder_type == Geary.SpecialFolderType.NONE)
+            ? get_path().basename : special_folder_type.get_display_name();
+    }
     
     public abstract Geary.Folder.OpenState get_open_state();
     

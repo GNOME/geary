@@ -5,6 +5,7 @@
  */
 
 public enum Geary.SpecialFolderType {
+    NONE,
     INBOX,
     DRAFTS,
     SENT,
@@ -12,53 +13,38 @@ public enum Geary.SpecialFolderType {
     ALL_MAIL,
     SPAM,
     TRASH,
-    OUTBOX
-}
-
-public class Geary.SpecialFolder : Object {
-    public SpecialFolderType folder_type { get; private set; }
-    public string name { get; private set; }
-    public Geary.FolderPath path { get; private set; }
-    public int ordering { get; private set; }
+    OUTBOX;
     
-    public SpecialFolder(SpecialFolderType folder_type, string name, FolderPath path, int ordering) {
-        this.folder_type = folder_type;
-        this.name = name;
-        this.path = path;
-        this.ordering = ordering;
-    }
-}
-
-public class Geary.SpecialFolderMap : Object {
-    private Gee.HashMap<SpecialFolderType, SpecialFolder> map = new Gee.HashMap<SpecialFolderType,
-        SpecialFolder>();
-    
-    public SpecialFolderMap() {
-    }
-    
-    public void set_folder(SpecialFolder special_folder) {
-        map.set(special_folder.folder_type, special_folder);
-    }
-    
-    public SpecialFolder? get_folder(SpecialFolderType folder_type) {
-        return map.get(folder_type);
-    }
-    
-    public SpecialFolder? get_folder_by_path(FolderPath path) {
-        foreach (SpecialFolder folder in map.values) {
-            if (folder.path == path) {
-                return folder;
-            }
+    public unowned string get_display_name() {
+        switch (this) {
+            case INBOX:
+                return _("Inbox");
+            
+            case DRAFTS:
+                return _("Drafts");
+            
+            case SENT:
+                return _("Sent Mail");
+            
+            case FLAGGED:
+                return _("Starred");
+            
+            case ALL_MAIL:
+                return _("All Mail");
+            
+            case SPAM:
+                return _("Spam");
+            
+            case TRASH:
+                return _("Trash");
+            
+            case OUTBOX:
+                return _("Outbox");
+            
+            case NONE:
+            default:
+                return _("None");
         }
-        return null;
-    }
-    
-    public Gee.Set<SpecialFolderType> get_supported_types() {
-        return map.keys.read_only_view;
-    }
-    
-    public Gee.Collection<SpecialFolder> get_all() {
-        return map.values.read_only_view;
     }
 }
 
