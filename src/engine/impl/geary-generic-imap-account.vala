@@ -118,6 +118,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         return yield remote.folder_exists_async(path, cancellable);
     }
     
+    // TODO: This needs to be made into a single transaction
     public override async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
         

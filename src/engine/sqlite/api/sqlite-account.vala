@@ -44,6 +44,9 @@ private class Geary.Sqlite.Account : Object {
             db.post_upgrade.connect(on_post_upgrade);
             
             db.upgrade();
+            
+            // Need to clear duplicate folders (due to ticket #nnnn)
+            clear_duplicate_folders();
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             
@@ -103,10 +106,31 @@ private class Geary.Sqlite.Account : Object {
         Transaction transaction = yield db.begin_transaction_async("Account.clone_folder_async",
             cancellable);
         
-        int64 parent_id = yield fetch_parent_id_async(transaction, imap_folder.get_path(), cancellable);
+        int64 folder_id = Row.INVALID_ID;
+        int64 parent_id = Row.INVALID_ID;
+        for (int index = 0; index < imap_folder.get_path().get_path_length(); index++) {
+            Geary.FolderPath? current_path = imap_folder.get_path().get_folder_at(index);
+            assert(current_path != null);
+            
+            int64 current_id = Row.INVALID_ID;
+            try {
+                current_id = yield fetch_id_async(transaction, current_path, cancellable);
+            } catch (Error err) {
+                if (!(err is EngineError.NOT_FOUND))
+                    throw err;
+            }
+            
+            if (current_id == Row.INVALID_ID) {
+                folder_id = yield folder_table.create_async(transaction, new FolderRow(folder_table,
+                    current_path.basename, parent_id), cancellable);
+            } else {
+                folder_id = current_id;
+            }
+            
+            parent_id = folder_id;
+        }
         
-        int64 folder_id = yield folder_table.create_async(transaction, new FolderRow(folder_table,
-            imap_folder.get_path().basename, parent_id), cancellable);
+        assert(folder_id != Row.INVALID_ID);
         
         yield folder_properties_table.create_async(transaction,
             new ImapFolderPropertiesRow.from_imap_properties(folder_properties_table, folder_id,
@@ -268,8 +292,48 @@ private class Geary.Sqlite.Account : Object {
         // TODO Add per-version data massaging.
     }
 
-    private void on_post_upgrade(int version){
+    private void on_post_upgrade(int version) {
         // TODO Add per-version data massaging.
+    }
+    
+    private void clear_duplicate_folders() throws SQLHeavy.Error {
+        int count = 0;
+        
+        // Find all folders with duplicate names
+        SQLHeavy.Query dupe_name_query = db.db.prepare(
+            "SELECT id, name FROM FolderTable WHERE name IN "
+            + "(SELECT name FROM FolderTable GROUP BY name HAVING (COUNT(name) > 1))");
+        SQLHeavy.QueryResult result = dupe_name_query.execute();
+        while (!result.finished) {
+            int64 id = result.fetch_int64(0);
+            
+            // see if any folders have this folder as a parent OR if there are messages associated
+            // with this folder
+            SQLHeavy.Query child_query = db.db.prepare(
+                "SELECT id FROM FolderTable WHERE parent_id=?");
+            child_query.bind_int64(0, id);
+            SQLHeavy.QueryResult child_result = child_query.execute();
+            
+            SQLHeavy.Query message_query = db.db.prepare(
+                "SELECT id FROM MessageLocationTable WHERE folder_id=?");
+            message_query.bind_int64(0, id);
+            SQLHeavy.QueryResult message_result = message_query.execute();
+            
+            if (child_result.finished && message_result.finished) {
+                // no children, delete it
+                SQLHeavy.Query child_delete = db.db.prepare(
+                    "DELETE FROM FolderTable WHERE id=?");
+                child_delete.bind_int64(0, id);
+                
+                child_delete.execute();
+                count++;
+            }
+            
+            result.next();
+        }
+        
+        if (count > 0)
+            debug("Deleted %d duplicate folders", count);
     }
 }
 
