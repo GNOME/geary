@@ -456,6 +456,7 @@ public class MessageViewer : WebKit.WebView {
         bind_event(this, ".email_container .menu", "click", (Callback) on_menu_clicked, this);
         bind_event(this, ".email_container .starred", "click", (Callback) on_unstar_clicked, this);
         bind_event(this, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
+        bind_event(this, ".header .field .value", "click", (Callback) on_value_clicked, this);
         bind_event(this, ".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(this, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(this, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
@@ -590,7 +591,24 @@ public class MessageViewer : WebKit.WebView {
         active_email = get_email_from_element(element);
         on_flag_message();
     }
-    
+
+    private static void on_value_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        MessageViewer message_viewer) {
+        if (!message_viewer.is_hidden_email(element))
+            event.stop_propagation();  // Don't allow toggle
+    }
+
+    private bool is_hidden_email(WebKit.DOM.Element element) {
+        try {
+            WebKit.DOM.HTMLElement email = closest_ancestor(element, ".email");
+            WebKit.DOM.DOMTokenList class_list = email.get_class_list();
+            return class_list.contains("hide");
+        } catch (Error error) {
+            warning("Error getting hidden status: %s", error.message);
+            return false;
+        }
+    }
+
     private static void on_body_toggle_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         message_viewer.on_body_toggle_clicked_self(element);
@@ -1072,12 +1090,14 @@ public class MessageViewer : WebKit.WebView {
         string value = "";
         Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
         foreach (Geary.RFC822.MailboxAddress a in list) {
+            value += "<a href='mailto:%s'>".printf(a.address);
             if (a.name != null) {
                 value += "<span class='address_name'>%s</span> ".printf(a.name);
                 value += "<span class='address_value'>%s</span>".printf(a.address);
             } else {
                 value += "<span class='address_name'>%s</span>".printf(a.address);
             }
+            value += "</a>";
 
             if (++i < list.size)
                 value += ", ";

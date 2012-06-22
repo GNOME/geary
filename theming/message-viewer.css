@@ -194,6 +194,9 @@ img[src^="data:"] {
     .email:last-of-type .header .field .hidden_only {
         display: none;
     }
+    .email.hide:not(:last-of-type) .header .field a {
+        pointer-events: none;
+    }
 
 }
 
@@ -290,6 +293,15 @@ img[src^="data:"] {
 .header .field .value {
     color: black;
     margin-left: 5.25em;
+    max-height: 5em;
+    overflow-y: auto;
+}
+.show .header .field .value {
+    cursor: auto;
+}
+.header .field .value a {
+    color: black;
+    text-decoration: none;
 }
 .header .field.important .address_name {
     font-weight: bold;
