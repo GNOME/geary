@@ -49,8 +49,8 @@ public class NotificationBubble : GLib.Object {
            "message-new-email");
         notification.show();
     }
-    
-    public void notify_one_message(Geary.Email email) throws GLib.Error {
+
+    public async void notify_one_message_async(Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
         
         // possible to receive email with no originator
@@ -73,8 +73,22 @@ public class NotificationBubble : GLib.Object {
         }
         
         prepare_notification(message, "message-new-email");
-        notification.show();
-   }
+        
+        File file = File.new_for_uri(Gravatar.get_image_uri(primary, Gravatar.Default.MYSTERY_MAN));
+        try {
+            InputStream stream = yield file.read_async(GLib.Priority.DEFAULT, cancellable);
+            notification.set_image_from_pixbuf(
+                yield Gdk.Pixbuf.new_from_stream_async(stream, cancellable));
+        } catch (GLib.Error avatar_error) {
+            debug("Failed to get avatar for notification: %s", avatar_error.message);
+        }
+        
+        try {
+            notification.show();
+        } catch (GLib.Error error) {
+            warning("Failed to show notification: %s", error.message);
+        }
+    }
     
     private void prepare_notification(string message, string sound) throws GLib.Error {
         notification.set("body", message);

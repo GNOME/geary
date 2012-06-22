@@ -512,7 +512,7 @@ public class GearyController {
             
             NotificationBubble notification = new NotificationBubble();
             if (unread == 1 && last_unread != null)
-                notification.notify_one_message(last_unread);
+                yield notification.notify_one_message_async(last_unread, cancellable_inbox);
             else if (unread > 0)
                 notification.notify_new_mail(unread);
         } catch (Error err) {
