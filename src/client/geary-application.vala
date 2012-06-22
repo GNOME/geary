@@ -392,7 +392,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public File get_user_data_directory() {
-        return File.new_for_path(Environment.get_user_data_dir()).get_child(Environment.get_prgname());
+        return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
+    }
+    
+    public File get_user_config_directory() {
+        return File.new_for_path(Environment.get_user_config_dir()).get_child("geary");
     }
     
     /**

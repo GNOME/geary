@@ -14,7 +14,9 @@ public class MessageViewer : WebKit.WebView {
         | Geary.Email.Field.DATE
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
-
+    
+    public const string USER_CSS = "user-message.css";
+    
     private const int ATTACHMENT_PREVIEW_SIZE = 50;
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
@@ -63,6 +65,7 @@ public class MessageViewer : WebKit.WebView {
     private string? hover_url = null;
     private Gtk.Menu? context_menu = null;
     private Gtk.Menu? message_menu = null;
+    private FileMonitor? user_style_monitor = null;
     
     public MessageViewer() {
         valign = Gtk.Align.START;
@@ -104,6 +107,8 @@ public class MessageViewer : WebKit.WebView {
             debug("Unable to load message-viewer document from files: %s", error.message);
         }
 
+        load_user_style();
+
         // Grab the HTML container.
         WebKit.DOM.Element? _container = get_dom_document().get_element_by_id("message_container");
         assert(_container != null);
@@ -124,6 +129,55 @@ public class MessageViewer : WebKit.WebView {
         if (!request.get_uri().has_prefix("http://www.gravatar.com/avatar/")
          && !request.get_uri().has_prefix("data:")) {
             request.set_uri("about:blank");
+        }
+    }
+
+    private void load_user_style() {
+        try {
+            WebKit.DOM.Document document = get_dom_document();
+            WebKit.DOM.Element style_element = document.create_element(STYLE_NAME);
+            style_element.set_attribute("id", "user_style");
+            WebKit.DOM.HTMLHeadElement head_element = document.get_head();
+            head_element.append_child(style_element);
+            
+            File user_style = GearyApplication.instance.get_user_config_directory().get_child(USER_CSS);
+            user_style_monitor = user_style.monitor_file(FileMonitorFlags.NONE, null);
+            user_style_monitor.changed.connect(on_user_style_changed);
+            
+            // And call it once to load the initial user style
+            on_user_style_changed(user_style, null, FileMonitorEvent.CREATED);
+        } catch (Error error) {
+            debug("Error setting up user style: %s", error.message);
+        }
+    }
+
+    private void on_user_style_changed(File user_style, File? other_file, FileMonitorEvent event_type) {
+        // Changing a file produces 1 created signal, 3 changes done hints, and 0 changed
+        if (event_type != FileMonitorEvent.CHANGED && event_type != FileMonitorEvent.CREATED
+            && event_type != FileMonitorEvent.DELETED) {
+            return;
+        }
+        
+        debug("Loading new message viewer style from %s...", user_style.get_path());
+        
+        WebKit.DOM.Document document = get_dom_document();
+        WebKit.DOM.Element style_element = document.get_element_by_id("user_style");
+        ulong n = style_element.child_nodes.length;
+        try {
+            for (int i = 0; i < n; i++)
+                style_element.remove_child(style_element.first_child);
+        } catch (Error error) {
+            debug("Error removing old user style: %s", error.message);
+        }
+        
+        try {
+            DataInputStream data_input_stream = new DataInputStream(user_style.read());
+            size_t length;
+            string user_css = data_input_stream.read_upto("\0", 1, out length);
+            WebKit.DOM.Text text_node = document.create_text_node(user_css);
+            style_element.append_child(text_node);
+        } catch (Error error) {
+            // Expected if file was deleted.
         }
     }
 
