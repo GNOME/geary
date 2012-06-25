@@ -7,11 +7,18 @@
 public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Personality {
     private AccountInformation account_information;
     
+    public virtual signal void email_sent(Geary.RFC822.Message rfc822) {
+    }
+    
     public EngineAccount(string name, string username, AccountInformation account_information,
         File user_data_dir) {
         base (name);
         
         this.account_information = account_information;
+    }
+    
+    protected virtual void notify_email_sent(Geary.RFC822.Message rfc822) {
+        email_sent(rfc822);
     }
     
     public virtual AccountInformation get_account_information() {
@@ -23,4 +30,3 @@ public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Persona
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
 }
-

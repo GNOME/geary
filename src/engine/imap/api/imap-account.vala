@@ -10,6 +10,8 @@ private class Geary.Imap.Account : Object {
     public const string INBOX_NAME = "INBOX";
     public const string ASSUMED_SEPARATOR = "/";
     
+    public signal void email_sent(Geary.RFC822.Message rfc822);
+    
     private class StatusOperation : Geary.NonblockingBatchOperation {
         public ClientSessionManager session_mgr;
         public MailboxInformation mbox;
@@ -190,6 +192,7 @@ private class Geary.Imap.Account : Object {
         yield smtp.login_async(cred, cancellable);
         try {
             yield smtp.send_email_async(rfc822, cancellable);
+            email_sent(rfc822);
         } finally {
             // always logout
             try {

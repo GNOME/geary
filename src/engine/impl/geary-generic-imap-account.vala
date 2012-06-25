@@ -26,6 +26,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         this.local = local;
         
         this.remote.login_failed.connect(on_login_failed);
+        this.remote.email_sent.connect(on_email_sent);
         
         if (inbox_path == null) {
             inbox_path = new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
@@ -298,6 +299,10 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
         Cancellable? cancellable = null) throws Error {
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(composed);
         yield outbox.create_email_async(rfc822, cancellable);
+    }
+
+    private void on_email_sent(Geary.RFC822.Message rfc822) {
+        notify_email_sent(rfc822);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

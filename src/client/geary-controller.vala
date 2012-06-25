@@ -299,6 +299,7 @@ public class GearyController {
             }
             
             account.folders_added_removed.connect(on_folders_added_removed);
+            account.email_sent.connect(on_sent);
             
             // Personality-specific setup.
             if (account.delete_is_archive()) {
@@ -1188,6 +1189,10 @@ public class GearyController {
     private void on_send(ComposerWindow cw) {
         account.send_email_async.begin(cw.get_composed_email(get_from()));
         cw.destroy();
+    }
+
+    private void on_sent(Geary.RFC822.Message rfc822) {
+        NotificationBubble.play_sound("message-sent-email");
     }
     
     public void set_busy(bool is_busy) {
