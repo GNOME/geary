@@ -92,6 +92,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private string? reply_body = null;
+    private Gee.Set<File> attachment_files = new Gee.HashSet<File>(File.hash, (EqualFunc) File.equal);
     
     private EmailEntry to_entry;
     private EmailEntry cc_entry;
@@ -103,6 +104,8 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Label message_overlay_label;
     private Gtk.Menu? context_menu = null;
     private WebKit.DOM.Element? prev_selected_link = null;
+    private Gtk.Box attachments_box;
+    private Gtk.Button add_attachment_button;
     
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
@@ -130,6 +133,9 @@ public class ComposerWindow : Gtk.Window {
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
         send_button = builder.get_object("Send") as Gtk.Button;
         send_button.clicked.connect(on_send);
+        add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
+        add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
+        attachments_box = builder.get_object("attachments_box") as Gtk.Box;
         
         to_entry = new EmailEntry();
         (builder.get_object("to") as Gtk.EventBox).add(to_entry);
@@ -339,6 +345,8 @@ public class ComposerWindow : Gtk.Window {
         if (!Geary.String.is_empty(subject))
             email.subject = new Geary.RFC822.Subject(subject);
         
+        email.attachment_files.add_all(attachment_files);
+        
         email.body_html = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_html()));
         email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_text()));
 
@@ -378,6 +386,57 @@ public class ComposerWindow : Gtk.Window {
     private void on_send() {
         linkify_document(editor.get_dom_document());
         send(this);
+    }
+    
+    private void on_add_attachment_button_clicked() {
+        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
+            _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
+            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
+        
+        if (dialog.run() == Gtk.ResponseType.ACCEPT)
+            add_attachment(dialog.get_filename());
+        
+        dialog.destroy();
+    }
+    
+    public void add_attachment(string filename) {
+        File attachment_file = File.new_for_path(filename);
+        if (!attachment_files.add(attachment_file))
+            return;
+        
+        Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+        attachments_box.pack_start(box);
+        
+        Gtk.Label label = new Gtk.Label(attachment_file.get_basename());
+        box.pack_start(label);
+        label.halign = Gtk.Align.START;
+        label.xpad = 4;
+        
+        Gtk.Button remove_button = new Gtk.Button.from_stock(Gtk.Stock.REMOVE);
+        box.pack_start(remove_button, false, false);
+        remove_button.clicked.connect(() => remove_attachment(attachment_file, box));
+        
+        refresh_add_attachment_button_label();
+        attachments_box.show_all();
+    }
+    
+    private void remove_attachment(File file, Gtk.Box box) {
+        if (!attachment_files.remove(file))
+            return;
+        
+        foreach (weak Gtk.Widget child in attachments_box.get_children()) {
+            if (child == box) {
+                attachments_box.remove(box);
+                refresh_add_attachment_button_label();
+                break;
+            }
+        }
+    }
+    
+    private void refresh_add_attachment_button_label() {
+        add_attachment_button.label = attachment_files.size > 0 ? _("_Attach another file") :
+            _("_Attach a file");
     }
     
     private void on_subject_changed() {

@@ -1077,16 +1077,16 @@ public class GearyController {
     }
     
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
-        ComposerWindow w = new ComposerWindow(prefill);
-        w.set_position(Gtk.WindowPosition.CENTER);
-        w.send.connect(on_send);
+        ComposerWindow window = new ComposerWindow(prefill);
+        window.set_position(Gtk.WindowPosition.CENTER);
+        window.send.connect(on_send);
         
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.
-        composer_windows.add(w);
-        w.destroy.connect(on_composer_window_destroy);
+        composer_windows.add(window);
+        window.destroy.connect(on_composer_window_destroy);
         
-        w.show_all();
+        window.show_all();
     }
     
     private void on_composer_window_destroy(Gtk.Widget sender) {
@@ -1186,9 +1186,9 @@ public class GearyController {
         return new Geary.RFC822.MailboxAddresses.single(get_sender());
     }
         
-    private void on_send(ComposerWindow cw) {
-        account.send_email_async.begin(cw.get_composed_email(get_from()));
-        cw.destroy();
+    private void on_send(ComposerWindow composer_window) {
+        account.send_email_async.begin(composer_window.get_composed_email(get_from()));
+        composer_window.destroy();
     }
 
     private void on_sent(Geary.RFC822.Message rfc822) {

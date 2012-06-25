@@ -121,17 +121,30 @@ public class Geary.RFC822.Message : Object {
             body_html.set_content_object(content);
         }
         
-        // Setup body depending on what MIME components were filled out.
-        if (body_text != null && body_html != null) {
-            GMime.Multipart multipart = new GMime.Multipart.with_subtype("alternative");
-            multipart.add(body_text);
-            multipart.add(body_html);
-            message.set_mime_part(multipart);
-        } else if (body_text != null) {
-            message.set_mime_part(body_text);
-        } else if (body_html != null) {
-            message.set_mime_part(body_html);
+        // Build the message's mime part.
+        Gee.List<GMime.Object> main_parts = new Gee.LinkedList<GMime.Object>();
+        
+        Gee.List<GMime.Object> body_parts = new Gee.LinkedList<GMime.Object>();
+        if (body_text != null)
+            body_parts.add(body_text);
+        if (body_html != null)
+            body_parts.add(body_html);
+        GMime.Object? body_part = coalesce_parts(body_parts, "alternative");
+        if (body_part != null)
+            main_parts.add(body_part);
+        
+        Gee.List<GMime.Object> attachment_parts = new Gee.LinkedList<GMime.Object>();
+        foreach (File attachment_file in email.attachment_files) {
+            GMime.Object? attachment_part = get_attachment_part(attachment_file);
+            if (attachment_part != null)
+                attachment_parts.add(attachment_part);
         }
+        GMime.Object? attachment_part = coalesce_parts(attachment_parts, "mixed");
+        if (attachment_part != null)
+            main_parts.add(attachment_part);
+            
+        GMime.Object? main_part = coalesce_parts(main_parts, "mixed");
+        message.set_mime_part(main_part);
     }
     
     // Makes a copy of the given message without the BCC fields. This is used for sending the email
@@ -176,9 +189,56 @@ public class Geary.RFC822.Message : Object {
             mailer = email.mailer;
             message.set_header("X-Mailer", email.mailer);
         }
-
+        
         // Setup body depending on what MIME components were filled out.
         message.set_mime_part(email.message.get_mime_part());
+    }
+    
+    private GMime.Object? coalesce_parts(Gee.List<GMime.Object> parts, string subtype) {
+        if (parts.size == 0) {
+            return null;
+        } else if (parts.size == 1) {
+            return parts.first();
+        } else {
+            GMime.Multipart multipart = new GMime.Multipart.with_subtype(subtype);
+            foreach (GMime.Object part in parts)
+                multipart.add(part);
+            return multipart;
+        }
+    }
+    
+    private GMime.Part? get_attachment_part(File file) {
+        if (!file.query_exists())
+            return null;
+            
+        FileInfo file_info;
+        try {
+            file_info = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, FileQueryInfoFlags.NONE);
+        } catch (Error err) {
+            debug("Error querying info from file: %s", err.message);
+            return null;
+        }
+        
+        GMime.Part part = new GMime.Part();
+        part.set_disposition("attachment");
+        part.set_filename(file.get_basename());
+        part.set_content_type(new GMime.ContentType.from_string(file_info.get_content_type()));
+        
+        // TODO: Remove this once GMime is patched. GMime.StreamGIO currently unrefs its file upon
+        // destruction, but does not ref it upon construction. If GMime is patched to do both, we
+        // can remove this line. If GMime is patched to do neither, we will need to keep our own
+        // reference to the file (probably within this RFC822Message instance).
+        // See: https://bugzilla.gnome.org/show_bug.cgi?id=678574
+        file.ref();
+        
+        // This encoding is the initial encoding of the stream.
+        part.set_content_object(new GMime.DataWrapper.with_stream(new GMime.StreamGIO(file),
+            GMime.ContentEncoding.BINARY));
+        
+        // This encoding is the "Content-Transfer-Encoding", which GMime automatically converts to.
+        part.set_content_encoding(GMime.ContentEncoding.BASE64);
+        
+        return part;
     }
     
     public Geary.Email get_email(int position, Geary.EmailIdentifier id) throws Error {
@@ -362,11 +422,11 @@ public class Geary.RFC822.Message : Object {
 
     internal Gee.List<GMime.Part> get_attachments() throws RFC822Error {
         Gee.List<GMime.Part> attachments = new Gee.ArrayList<GMime.Part>();
-        find_attachments( ref attachments, message.get_mime_part() );
+        find_attachments(attachments, message.get_mime_part() );
         return attachments;
     }
 
-    private void find_attachments(ref Gee.List<GMime.Part> attachments, GMime.Object root)
+    private void find_attachments(Gee.List<GMime.Part> attachments, GMime.Object root)
         throws RFC822Error {
 
         // If this is a multipart container, dive into each of its children.
@@ -374,7 +434,7 @@ public class Geary.RFC822.Message : Object {
             GMime.Multipart multipart = root as GMime.Multipart;
             int count = multipart.get_count();
             for (int i = 0; i < count; ++i) {
-                find_attachments(ref attachments, multipart.get_part(i));
+                find_attachments(attachments, multipart.get_part(i));
             }
             return;
         }
