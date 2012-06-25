@@ -335,6 +335,7 @@ img[src^="data:"] {
 .quote_container > .shower,
 .quote_container > .hider {
     color: #777;
+    font-family: sans-serif;
     font-size: 75%;
     cursor: pointer;
     display: none;
