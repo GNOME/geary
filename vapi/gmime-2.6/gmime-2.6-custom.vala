@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-[CCode (cname="InternetAddress", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS", type_check_function="IS_INTERNET_ADDRESS")]
+[CCode (cname="InternetAddress", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_TYPE", type_check_function="IS_INTERNET_ADDRESS")]
 public class InternetAddress : GLib.Object {
     [CCode (cname="internet_address_get_name")]
     public unowned string? get_name();
@@ -14,7 +14,7 @@ public class InternetAddress : GLib.Object {
     public virtual string to_string(bool encoded);
 }
 
-[CCode (cname="InternetAddressGroup", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_GROUP", type_check_function="INTERNET_ADDRESS_IS_GROUP")]
+[CCode (cname="InternetAddressGroup", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_TYPE_GROUP", type_check_function="INTERNET_ADDRESS_IS_GROUP")]
 public class InternetAddressGroup : InternetAddress {
     [CCode (cname="internet_address_group_new")]
     public InternetAddressGroup(string name);
@@ -26,7 +26,7 @@ public class InternetAddressGroup : InternetAddress {
     public int add_member(InternetAddress member);
 }
 
-[CCode (cname="InternetAddressMailbox", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_MAILBOX", type_check_function="INTERNET_ADDRESS_IS_MAILBOX")]
+[CCode (cname="InternetAddressMailbox", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_TYPE_MAILBOX", type_check_function="INTERNET_ADDRESS_IS_MAILBOX")]
 public class InternetAddressMailbox : InternetAddress {
     [CCode (cname="internet_address_mailbox_new")]
     public InternetAddressMailbox(string? name, string addr);
@@ -36,7 +36,7 @@ public class InternetAddressMailbox : InternetAddress {
     public void set_addr(string addr);
 }
 
-[CCode (cname="InternetAddressList", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_LIST", type_check_function="IS_INTERNET_ADDRESS_LIST")]
+[CCode (cname="InternetAddressList", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_LIST_TYPE", type_check_function="IS_INTERNET_ADDRESS_LIST")]
 public class InternetAddressList : GLib.Object {
     [CCode (cname="internet_address_list_new")]
     public InternetAddressList();

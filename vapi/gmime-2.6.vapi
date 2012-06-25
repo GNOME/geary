@@ -1382,7 +1382,7 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_yencode_step")]
 	public static size_t yencode_step (uint inbuf, size_t inlen, uint outbuf, int state, uint32 pcrc, uint32 crc);
 }
-[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddress", type_check_function = "IS_INTERNET_ADDRESS", type_id = "INTERNET_ADDRESS")]
+[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddress", type_check_function = "IS_INTERNET_ADDRESS", type_id = "INTERNET_ADDRESS_TYPE")]
 public class InternetAddress : GLib.Object {
 	[CCode (cname = "internet_address_get_name")]
 	public unowned string? get_name ();
@@ -1391,7 +1391,7 @@ public class InternetAddress : GLib.Object {
 	[CCode (cname = "internet_address_to_string")]
 	public virtual string to_string (bool encoded);
 }
-[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddressGroup", type_check_function = "INTERNET_ADDRESS_IS_GROUP", type_id = "INTERNET_ADDRESS_GROUP")]
+[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddressGroup", type_check_function = "INTERNET_ADDRESS_IS_GROUP", type_id = "INTERNET_ADDRESS_TYPE_GROUP")]
 public class InternetAddressGroup : InternetAddress {
 	[CCode (cname = "internet_address_group_new")]
 	public InternetAddressGroup (string name);
@@ -1402,7 +1402,7 @@ public class InternetAddressGroup : InternetAddress {
 	[CCode (cname = "internet_address_group_set_members")]
 	public void set_members (InternetAddressList members);
 }
-[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddressMailbox", type_check_function = "INTERNET_ADDRESS_IS_MAILBOX", type_id = "INTERNET_ADDRESS_MAILBOX")]
+[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddressMailbox", type_check_function = "INTERNET_ADDRESS_IS_MAILBOX", type_id = "INTERNET_ADDRESS_TYPE_MAILBOX")]
 public class InternetAddressMailbox : InternetAddress {
 	[CCode (cname = "internet_address_mailbox_new")]
 	public InternetAddressMailbox (string? name, string addr);
@@ -1411,7 +1411,7 @@ public class InternetAddressMailbox : InternetAddress {
 	[CCode (cname = "internet_address_mailbox_set_addr")]
 	public void set_addr (string addr);
 }
-[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddressList", type_check_function = "IS_INTERNET_ADDRESS_LIST", type_id = "INTERNET_ADDRESS_LIST")]
+[CCode (cheader_filename = "gmime/gmime.h", cname = "InternetAddressList", type_check_function = "IS_INTERNET_ADDRESS_LIST", type_id = "INTERNET_ADDRESS_LIST_TYPE")]
 public class InternetAddressList : GLib.Object {
 	[CCode (cname = "internet_address_list_new")]
 	public InternetAddressList ();

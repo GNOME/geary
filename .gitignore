@@ -9,4 +9,4 @@ build/
 /geary-console
 *.xz
 *.swp
-
+vapi/gmime-2.6/gmime-2.6.gi

@@ -119,7 +119,7 @@ public class MessageListStore : Gtk.TreeStore {
             return;
         }
         
-        remove(iter);
+        remove(ref iter);
     }
     
     public bool has_conversation(Geary.Conversation conversation) {
