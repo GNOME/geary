@@ -107,9 +107,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         context.add_group(Gtk.get_option_group(false));
         try {
             context.parse(ref args);
-        } catch (GLib.Error error) {
+        } catch (OptionError error) {
             // i18n: Command line arguments are invalid
-            GLib.error (_("Failed to parse command line: %s"), error.message);
+            stdout.printf (_("Failed to parse command line options: %s\n"), error.message);
+            stdout.printf("\n%s", context.get_help(true, Gtk.get_option_group(false)));
+            return 1;
         }
 
         if (version) {
@@ -147,8 +149,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
         Configuration.init(is_installed(), GSETTINGS_DIR);
         
-        int result = base.startup();
-        result = parse_arguments(args);
+        base.startup();
+        int result = parse_arguments(args);
         return result;
     }
     
