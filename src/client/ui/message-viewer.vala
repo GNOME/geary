@@ -881,7 +881,7 @@ public class MessageViewer : WebKit.WebView {
                 // Copy the stuff before the quote, then the wrapped quote.
                 WebKit.DOM.Element quote_container = create_quote_container();
                 Util.DOM.select(quote_container, ".quote").set_inner_html(
-                    text.substring(quote_start, quote_end - quote_start));
+                    decorate_quotes(text.substring(quote_start, quote_end - quote_start)));
                 container.append_child(quote_container);
                 if (quote_start > offset) {
                     message += text.substring(offset, quote_start - offset);
@@ -909,6 +909,39 @@ public class MessageViewer : WebKit.WebView {
             message = "<div>%s</div>".printf(message_chunks[0]);
         }
         return "<pre>" + set_up_quotes(message + signature) + "</pre>";
+    }
+
+    private string decorate_quotes(string text) throws Error {
+        int level = 0;
+        string outtext = "";
+        Regex quote_leader = new Regex("^(&gt;)*( |$)");  // Some &gt; followed by space or EOL
+
+        foreach (string line in text.split("\n")) {
+            MatchInfo match_info;
+            if (quote_leader.match_all(line, 0, out match_info)) {
+                int start, end, new_level;
+                match_info.fetch_pos(0, out start, out end);
+                new_level = end / 4;  // Cast to int removes 0.25 from space at end, if present
+                while (new_level > level) {
+                    outtext += "<blockquote>";
+                    level += 1;
+                }
+                while (new_level < level) {
+                    outtext += "</blockquote>";
+                    level -= 1;
+                }
+                outtext += line.substring(end);
+            } else {
+                debug("This line didn't match the quote regex: %s", line);
+                outtext += line;
+            }
+        }
+        // Close any remaining blockquotes.
+        while (level > 0) {
+            outtext += "</blockquote>";
+            level -= 1;
+        }
+        return outtext;
     }
 
     private string insert_html_markup(string text, Geary.Email email) {
