@@ -9,6 +9,13 @@
  * other data.
  */
 public class PasswordDialog {
+    // We can't keep these in the glade file, because Gnome doesn't want markup in translatable
+    // strings, and Glade doesn't support the "larger" size attribute. See this bug report for
+    // details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
+    private const string PRIMARY_TEXT_MARKUP = "<span weight=\"bold\" size=\"larger\">%s</span>";
+    private const string PRIMARY_TEXT_FIRST_TRY = _("Please enter your email password");
+    private const string PRIMARY_TEXT_REPEATED_TRY = _("Unable to login to email server");
+    
     private Gtk.Dialog dialog;
     private Gtk.Entry password_entry;
     private Gtk.CheckButton remember_password_checkbutton;
@@ -22,24 +29,28 @@ public class PasswordDialog {
         Gtk.Builder builder = GearyApplication.instance.create_builder("password-dialog.glade");
         
         // Load dialog
-        dialog = (Gtk.Dialog)builder.get_object("PasswordDialog");
+        dialog = (Gtk.Dialog) builder.get_object("PasswordDialog");
         dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG);
         dialog.set_default_response(Gtk.ResponseType.OK);
         
         // Load editable widgets
-        password_entry = (Gtk.Entry)builder.get_object("password_entry");
-        remember_password_checkbutton = (Gtk.CheckButton)builder.get_object("remember_password_checkbutton");
+        password_entry = (Gtk.Entry) builder.get_object("password_entry");
+        remember_password_checkbutton = (Gtk.CheckButton) builder.get_object("remember_password_checkbutton");
         
         // Load non-editable widgets
-        Gtk.Label email_label = (Gtk.Label)builder.get_object("email_label");
-        Gtk.Label real_name_label = (Gtk.Label)builder.get_object("real_name_label");
-        Gtk.Label service_label = (Gtk.Label)builder.get_object("service_label");
-        Gtk.Label imap_server_label = (Gtk.Label)builder.get_object("imap_server_label");
-        Gtk.Label imap_port_label = (Gtk.Label)builder.get_object("imap_port_label");
-        Gtk.Label imap_encryption_label = (Gtk.Label)builder.get_object("imap_encryption_label");
-        Gtk.Label smtp_server_label = (Gtk.Label)builder.get_object("smtp_server_label");
-        Gtk.Label smtp_port_label = (Gtk.Label)builder.get_object("smtp_port_label");
-        Gtk.Label smtp_encryption_label = (Gtk.Label)builder.get_object("smtp_encryption_label");
+        Gtk.Label email_label = (Gtk.Label) builder.get_object("email_label");
+        Gtk.Label real_name_label = (Gtk.Label) builder.get_object("real_name_label");
+        Gtk.Label service_label = (Gtk.Label) builder.get_object("service_label");
+        Gtk.Label imap_server_label = (Gtk.Label) builder.get_object("imap_server_label");
+        Gtk.Label imap_port_label = (Gtk.Label) builder.get_object("imap_port_label");
+        Gtk.Label imap_encryption_label = (Gtk.Label) builder.get_object("imap_encryption_label");
+        Gtk.Label smtp_server_label = (Gtk.Label) builder.get_object("smtp_server_label");
+        Gtk.Label smtp_port_label = (Gtk.Label) builder.get_object("smtp_port_label");
+        Gtk.Label smtp_encryption_label = (Gtk.Label) builder.get_object("smtp_encryption_label");
+        
+        // Load translated text for labels with markup unsupported by glade.
+        Gtk.Label primary_text_label = (Gtk.Label) builder.get_object("primary_text_label");
+        primary_text_label.set_markup(get_primary_text_markup(first_try));
 
         // Find server configuration information
         Geary.Endpoint imap_endpoint;
@@ -71,14 +82,6 @@ public class PasswordDialog {
         smtp_port_label.set_text(smtp_server_port.to_string());
         smtp_encryption_label.set_text(smtp_server_ssl ? "on" : "off");
 
-        // Set primary text
-        Gtk.Label primary_text_label = (Gtk.Label)builder.get_object("primary_text_label");
-        const string primary_markup_format = """<span weight="bold" size="larger">%s</span>""";
-        string primary_markup_text = first_try ? _("Please enter your email password") :
-            _("Unable to login to email server");
-        primary_text_label.set_markup(primary_markup_format.printf(primary_markup_text));
-        primary_text_label.use_markup = true;
-
         // Add action buttons
         Gtk.Button cancel_button = new Gtk.Button.from_stock(Gtk.Stock.CANCEL);
         ok_button = new Gtk.Button.from_stock(Gtk.Stock.OK);
@@ -92,9 +95,12 @@ public class PasswordDialog {
         password_entry.changed.connect(refresh_ok_button_sensitivity);
     }
     
+    private string get_primary_text_markup(bool first_try) {
+        return PRIMARY_TEXT_MARKUP.printf(first_try ? PRIMARY_TEXT_FIRST_TRY : PRIMARY_TEXT_REPEATED_TRY);
+    }
+    
     private void refresh_ok_button_sensitivity() {
         ok_button.sensitive = !Geary.String.is_null_or_whitespace(password_entry.get_text());
-        
     }
     
     public bool run() {

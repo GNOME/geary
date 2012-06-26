@@ -11,13 +11,12 @@ extern const string _GSETTINGS_DIR;
 extern const string _SOURCE_ROOT_DIR;
 
 public class GearyApplication : YorbaApplication {
-    // TODO: replace static strings with const strings when gettext is integrated properly
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
-    public static string DESCRIPTION = _("Email Client");
-    public const string COPYRIGHT = "Copyright 2011-2012 Yorba Foundation";
+    public const string DESCRIPTION = _("Email Client");
+    public const string COPYRIGHT = _("Copyright 2011-2012 Yorba Foundation");
     public const string WEBSITE = "http://www.yorba.org";
-    public static string WEBSITE_LABEL = _("Visit the Yorba web site");
+    public const string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
     
     public const string VERSION = _VERSION;

@@ -57,8 +57,7 @@ public class GearyController {
 
     private const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
-    // TODO: Translate
-    private const string DEFAULT_DELETE_MESSAGE_LABEL = "_Delete";
+    private const string DEFAULT_DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DEFAULT_DELETE_MESSAGE_TOOLTIP = null;
     private const string DEFAULT_DELETE_MESSAGE_ICON_NAME = "user-trash-full";
     

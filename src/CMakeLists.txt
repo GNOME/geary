@@ -6,7 +6,7 @@ common/common-arrays.vala
 common/common-async.vala
 common/common-date.vala
 common/common-files.vala
-common/common-intl.vala
+common/common-international.vala
 common/common-yorba-application.vala
 )
 
@@ -273,6 +273,8 @@ set(CFLAGS
     -D_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
+    -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
+    -DLANGUAGE_SUPPORT_DIRECTORY=\"${LANGUAGE_SUPPORT_DIRECTORY}\"
     -g
 )
 

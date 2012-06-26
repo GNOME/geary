@@ -14,6 +14,8 @@
  * http://redmine.yorba.org/issues/4266
  */
 
+extern const string GETTEXT_PACKAGE;
+
 public abstract class YorbaApplication {
     
     public bool registered { get; private set; }
@@ -119,6 +121,7 @@ public abstract class YorbaApplication {
             error("run() called twice.");
         
         this.args = args;
+        International.init(GETTEXT_PACKAGE, args[0]);
         
         running = true;
         exitcode = startup();

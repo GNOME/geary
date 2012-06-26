@@ -6,7 +6,7 @@
 
 // Window for sending messages.
 public class ComposerWindow : Gtk.Window {
-    private static string DEFAULT_TITLE = _("New Message");
+    private const string DEFAULT_TITLE = _("New Message");
     
     private const string ACTION_UNDO = "undo";
     private const string ACTION_REDO = "redo";

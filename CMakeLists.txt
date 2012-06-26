@@ -17,6 +17,7 @@ set(GETTEXT_PACKAGE "geary")
 set(RELEASE_NAME "Lightweight email client for GNOME.")
 set(VERSION "0.1.0+trunk")
 set(VERSION_INFO "Release")
+set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 
 # Packaging filenamesnames.
 set(ARCHIVE_BASE_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
