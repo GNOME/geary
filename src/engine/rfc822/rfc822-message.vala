@@ -224,16 +224,10 @@ public class Geary.RFC822.Message : Object {
         part.set_filename(file.get_basename());
         part.set_content_type(new GMime.ContentType.from_string(file_info.get_content_type()));
         
-        // TODO: Remove this once GMime is patched. GMime.StreamGIO currently unrefs its file upon
-        // destruction, but does not ref it upon construction. If GMime is patched to do both, we
-        // can remove this line. If GMime is patched to do neither, we will need to keep our own
-        // reference to the file (probably within this RFC822Message instance).
-        // See: https://bugzilla.gnome.org/show_bug.cgi?id=678574
-        file.ref();
-        
         // This encoding is the initial encoding of the stream.
-        part.set_content_object(new GMime.DataWrapper.with_stream(new GMime.StreamGIO(file),
-            GMime.ContentEncoding.BINARY));
+        GMime.StreamGIO stream = new GMime.StreamGIO(file);
+        stream.set_owner(false);
+        part.set_content_object(new GMime.DataWrapper.with_stream(stream, GMime.ContentEncoding.BINARY));
         
         // This encoding is the "Content-Transfer-Encoding", which GMime automatically converts to.
         part.set_content_encoding(GMime.ContentEncoding.BASE64);
