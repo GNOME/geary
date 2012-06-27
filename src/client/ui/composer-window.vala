@@ -31,6 +31,8 @@ public class ComposerWindow : Gtk.Window {
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_LINK = "insertlink";
     
+    private const string URI_LIST_MIME_TYPE = "text/uri-list";
+    private const string FILE_URI_PREFIX = "file://";
     private const string REPLY_ID = "reply";
     private const string HTML_BODY = """
         <html><head><title></title>
@@ -106,6 +108,10 @@ public class ComposerWindow : Gtk.Window {
     private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
     private Gtk.Button add_attachment_button;
+    private Gtk.Alignment hidden_on_attachment_drag_over;
+    private Gtk.Alignment visible_on_attachment_drag_over;
+    private Gtk.Widget hidden_on_attachment_drag_over_child;
+    private Gtk.Widget visible_on_attachment_drag_over_child;
     
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
@@ -119,6 +125,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.ActionGroup actions;
     private string? hover_url = null;
     private bool action_flag = false;
+    private bool is_attachment_overlay_visible = false;
     
     private WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
@@ -127,6 +134,8 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.UIManager ui;
     
     public ComposerWindow(Geary.ComposedEmail? prefill = null) {
+        setup_drag_destination(this);
+        
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
         Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
         
@@ -136,6 +145,11 @@ public class ComposerWindow : Gtk.Window {
         add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
         add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
         attachments_box = builder.get_object("attachments_box") as Gtk.Box;
+        hidden_on_attachment_drag_over = (Gtk.Alignment) builder.get_object("hidden_on_attachment_drag_over");
+        hidden_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("hidden_on_attachment_drag_over_child");
+        visible_on_attachment_drag_over = (Gtk.Alignment) builder.get_object("visible_on_attachment_drag_over");
+        visible_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("visible_on_attachment_drag_over_child");
+        visible_on_attachment_drag_over.remove(visible_on_attachment_drag_over_child);
         
         to_entry = new EmailEntry();
         (builder.get_object("to") as Gtk.EventBox).add(to_entry);
@@ -144,7 +158,7 @@ public class ComposerWindow : Gtk.Window {
         bcc_entry = new EmailEntry();
         (builder.get_object("bcc") as Gtk.EventBox).add(bcc_entry);
         subject_entry = builder.get_object("subject") as Gtk.Entry;
-        Gtk.Alignment msg_area = builder.get_object("message area") as Gtk.Alignment;
+        Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
         
         Gtk.ScrolledWindow scroll = new Gtk.ScrolledWindow(null, null);
@@ -152,7 +166,7 @@ public class ComposerWindow : Gtk.Window {
         
         Gtk.Overlay message_overlay = new Gtk.Overlay();
         message_overlay.add(scroll);
-        msg_area.add(message_overlay);
+        message_area.add(message_overlay);
         
         message_overlay_label = new Gtk.Label(null);
         message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
@@ -318,6 +332,88 @@ public class ComposerWindow : Gtk.Window {
         update_actions();
     }
     
+    private void setup_drag_destination(Gtk.Widget destination) {
+        const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
+        Gtk.drag_dest_set(destination, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
+            target_entries, Gdk.DragAction.COPY);
+        destination.drag_data_received.connect(on_drag_data_received);
+        destination.drag_drop.connect(on_drag_drop);
+        destination.drag_motion.connect(on_drag_motion);
+        destination.drag_leave.connect(on_drag_leave);
+    }
+    
+    private void show_attachment_overlay(bool visible) {
+        if (is_attachment_overlay_visible == visible)
+            return;
+            
+        is_attachment_overlay_visible = visible;
+        
+        // If we just make the widget invisible, it can still intercept drop signals. So we
+        // completely remove it instead.
+        if (visible) {
+            int height = hidden_on_attachment_drag_over.get_allocated_height();
+            hidden_on_attachment_drag_over.remove(hidden_on_attachment_drag_over_child);
+            visible_on_attachment_drag_over.add(visible_on_attachment_drag_over_child);
+            visible_on_attachment_drag_over.set_size_request(-1, height);
+        } else {
+            hidden_on_attachment_drag_over.add(hidden_on_attachment_drag_over_child);
+            visible_on_attachment_drag_over.remove(visible_on_attachment_drag_over_child);
+            visible_on_attachment_drag_over.set_size_request(-1, -1);
+        }
+   }
+    
+    private bool on_drag_motion() {
+        show_attachment_overlay(true);
+        return false;
+    }
+    
+    private void on_drag_leave() {
+        show_attachment_overlay(false);
+    }
+    
+    private void on_drag_data_received(Gtk.Widget sender, Gdk.DragContext context, int x, int y,
+        Gtk.SelectionData selection_data, uint info, uint time_) {
+        
+        bool dnd_success = false;
+        if (selection_data.get_length() >= 0) {
+            dnd_success = true;
+            
+            string uri_list = (string) selection_data.get_data();
+            string[] uris = uri_list.strip().split("\n");
+            foreach (string uri in uris) {
+                if (!uri.has_prefix(FILE_URI_PREFIX))
+                    continue;
+                
+                uri = uri.substring(FILE_URI_PREFIX.length);
+                if (Geary.String.is_null_or_whitespace(uri))
+                    continue;
+                
+                add_attachment(uri.strip());
+            }
+        }
+        
+        Gtk.drag_finish(context, dnd_success, false, time_);
+    }
+    
+    private bool on_drag_drop(Gtk.Widget sender, Gdk.DragContext context, int x, int y, uint time_) {
+        if (context.list_targets() == null)
+            return false;
+        
+        uint length = context.list_targets().length();
+        Gdk.Atom? target_type = null;
+        for (uint i = 0; i < length; i++) {
+            Gdk.Atom target = context.list_targets().nth_data(i);
+            if (target.name() == URI_LIST_MIME_TYPE)
+                target_type = target;
+        }
+        
+        if (target_type == null)
+            return false;
+        
+        Gtk.drag_get_data(sender, context, target_type, time_);
+        return true;
+    }
+    
     public Geary.ComposedEmail get_composed_email(
         Geary.RFC822.MailboxAddresses? default_from = null, DateTime? date_override = null) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
@@ -402,6 +498,16 @@ public class ComposerWindow : Gtk.Window {
     
     public void add_attachment(string filename) {
         File attachment_file = File.new_for_path(filename);
+        if (!attachment_file.query_exists()) {
+            debug("File '%s' does not exist", filename);
+            return;
+        }
+        
+        if (attachment_file.query_file_type(FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
+            debug("File '%s' is a directory", filename);
+            return;
+        }
+        
         if (!attachment_files.add(attachment_file))
             return;
         

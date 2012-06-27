@@ -149,34 +149,220 @@
     <property name="orientation">vertical</property>
     <property name="spacing">6</property>
     <child>
-      <object class="GtkBox" id="box2">
+      <object class="GtkAlignment" id="hidden_on_attachment_drag_over">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">6</property>
-        <property name="margin_right">6</property>
-        <property name="margin_top">6</property>
-        <property name="margin_bottom">6</property>
         <child>
-          <object class="GtkButton" id="Send">
-            <property name="label" translatable="yes">_Send</property>
-            <property name="use_action_appearance">False</property>
+          <object class="GtkBox" id="hidden_on_attachment_drag_over_child">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_action_appearance">False</property>
-            <property name="use_underline">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkBox" id="box2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">6</property>
+                <property name="margin_right">6</property>
+                <property name="margin_top">6</property>
+                <property name="margin_bottom">6</property>
+                <child>
+                  <object class="GtkButton" id="Send">
+                    <property name="label" translatable="yes">_Send</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkGrid" id="recipients">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">6</property>
+                <property name="margin_right">6</property>
+                <property name="row_spacing">6</property>
+                <property name="column_spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="to label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">To:</property>
+                    <property name="justify">right</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="cc label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes">Cc:</property>
+                    <property name="justify">right</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="to">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="cc">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">1</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="subject">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="invisible_char">•</property>
+                    <property name="invisible_char_set">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">3</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="subject label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes">Subject:</property>
+                    <property name="justify">right</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">3</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="bcc label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes">Bcc:</property>
+                    <property name="justify">right</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">2</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="bcc">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">2</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="attachments_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">6</property>
+                <property name="margin_right">6</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkButton" id="add_attachment_button">
+                    <property name="label" translatable="yes">_Attach a file</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">start</property>
+                    <property name="valign">center</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
       <packing>
@@ -186,170 +372,52 @@
       </packing>
     </child>
     <child>
-      <object class="GtkGrid" id="recipients">
+      <object class="GtkAlignment" id="visible_on_attachment_drag_over">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">6</property>
-        <property name="margin_right">6</property>
-        <property name="row_spacing">6</property>
-        <property name="column_spacing">6</property>
         <child>
-          <object class="GtkLabel" id="to label">
+          <object class="GtkBox" id="visible_on_attachment_drag_over_child">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xalign">1</property>
-            <property name="xpad">6</property>
-            <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">To:</property>
-            <property name="justify">right</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="cc label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="xalign">1</property>
-            <property name="xpad">6</property>
-            <property name="label" translatable="yes">Cc:</property>
-            <property name="justify">right</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEventBox" id="to">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">0</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEventBox" id="cc">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="subject">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <property name="invisible_char">•</property>
-            <property name="invisible_char_set">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">3</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="subject label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="xalign">1</property>
-            <property name="xpad">6</property>
-            <property name="label" translatable="yes">Subject:</property>
-            <property name="justify">right</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">3</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="bcc label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="xalign">1</property>
-            <property name="xpad">6</property>
-            <property name="label" translatable="yes">Bcc:</property>
-            <property name="justify">right</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEventBox" id="bcc">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">2</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkBox" id="attachments_box">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_left">6</property>
-        <property name="margin_right">6</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">6</property>
-        <child>
-          <object class="GtkButton" id="add_attachment_button">
-            <property name="label" translatable="yes">_Attach a file</property>
-            <property name="use_action_appearance">False</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">start</property>
             <property name="valign">center</property>
-            <property name="use_action_appearance">False</property>
-            <property name="use_underline">True</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="label" translatable="yes">Drop files here</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="label" translatable="yes">To add them as attachments</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
         </child>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">2</property>
+        <property name="fill">False</property>
+        <property name="position">1</property>
       </packing>
     </child>
     <child>
@@ -553,7 +621,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">3</property>
+        <property name="position">2</property>
       </packing>
     </child>
     <child>
@@ -567,7 +635,7 @@
       <packing>
         <property name="expand">True</property>
         <property name="fill">True</property>
-        <property name="position">4</property>
+        <property name="position">3</property>
       </packing>
     </child>
   </object>
