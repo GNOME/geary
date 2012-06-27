@@ -43,6 +43,9 @@ public class NotificationBubble : GLib.Object {
     }
 
     public void notify_new_mail(int count) throws GLib.Error {
+        if (!GearyApplication.instance.config.show_notifications)
+            return;
+
         notification.set_category("email.arrived");
         
         prepare_notification(ngettext("%d new message", "%d new messages", count).printf(count),
@@ -52,6 +55,9 @@ public class NotificationBubble : GLib.Object {
 
     public async void notify_one_message_async(Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
+
+        if (!GearyApplication.instance.config.show_notifications)
+            return;
         
         // possible to receive email with no originator
         Geary.RFC822.MailboxAddress? primary = email.get_primary_originator();
@@ -101,6 +107,8 @@ public class NotificationBubble : GLib.Object {
     }
     
     public static void play_sound(string sound) {
+        if (!GearyApplication.instance.config.play_sounds)
+            return;
         init_sound();
         sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
     }

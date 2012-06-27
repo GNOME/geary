@@ -66,6 +66,22 @@ public class Configuration {
             spell_check_changed();
         }
     }
+
+    private const string PLAY_SOUNDS_NAME = "play-sounds";
+    public bool play_sounds {
+        get { return settings.get_boolean(PLAY_SOUNDS_NAME); }
+        set {
+            settings.set_boolean(PLAY_SOUNDS_NAME, value);
+        }
+    }
+
+    private const string SHOW_NOTIFICATIONS_NAME = "show-notifications";
+    public bool show_notifications {
+        get { return settings.get_boolean(SHOW_NOTIFICATIONS_NAME); }
+        set {
+            settings.set_boolean(SHOW_NOTIFICATIONS_NAME, value);
+        }
+    }
     
     private const string CLOCK_FORMAT_NAME = "clock-format";
     private const string TIME_FORMAT_NAME = "time-format";

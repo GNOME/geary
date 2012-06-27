@@ -49,6 +49,17 @@
         <summary>enable inline spell checking</summary>
         <description>True to spell check while typing.</description>
     </key>
+    <key name="play-sounds" type="b">
+        <default>true</default>
+        <summary>enable notification sounds</summary>
+        <description>True to play sounds for notifications and sending.</description>
+    </key>
+    <key name="show-notifications" type="b">
+        <default>true</default>
+        <summary>show notifications for new mail</summary>
+        <description>True to show notification bubbles.</description>
+    </key>
+
     
 </schema>
 
