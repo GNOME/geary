@@ -465,6 +465,9 @@ public class Geary.RFC822.Message : Object {
             if (charset == null)
                 charset = DEFAULT_ENCODING;
             stream_filter.add(new GMime.FilterCharset(charset, "UTF8"));
+            string? format = part.get_content_type_parameter("format");
+            if (format == "flowed")
+                stream_filter.add(new GMime.FilterFlowed());
         }
 
         wrapper.write_to_stream(stream_filter);

@@ -291,24 +291,24 @@ namespace GMime {
 	}
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public class Filter : GLib.Object {
-		public weak string backbuf;
+		public char* backbuf;
 		public size_t backlen;
 		public size_t backsize;
-		public weak string outbuf;
+		[CCode (array_length_cname = "outsize", array_length_type = "size_t")]
+		public char[] outbuf;
 		public size_t outpre;
-		public weak string outptr;
-		public weak string outreal;
-		public size_t outsize;
+		public char* outptr;
+		public char* outreal;
 		[CCode (has_construct_function = false)]
 		protected Filter ();
 		[CCode (cname = "g_mime_filter_backup")]
-		public void backup (string data, size_t length);
+		public void backup ([CCode (array_length_pos = 1.1, array_length_type = "size_t")] char[] data);
 		[CCode (cname = "g_mime_filter_complete")]
-		public virtual void complete (string inbuf, size_t inlen, size_t prespace, out unowned string outbuf, size_t outlen, size_t outprespace);
+		public virtual void complete ([CCode (array_length_pos = 1.1, array_length_type = "size_t")] char[] inbuf, size_t prespace, [CCode (array_length_pos = 3.1, array_length_type = "size_t")] out unowned char[] outbuf, out size_t outprespace);
 		[CCode (cname = "g_mime_filter_copy")]
-		public virtual unowned GMime.Filter copy ();
+		public virtual GMime.Filter copy ();
 		[CCode (cname = "g_mime_filter_filter")]
-		public virtual void filter (string inbuf, size_t inlen, size_t prespace, out unowned string outbuf, size_t outlen, size_t outprespace);
+		public virtual void filter ([CCode (array_length_pos = 1.1, array_length_type = "size_t")] char[] inbuf, size_t prespace, [CCode (array_length_pos = 3.1, array_length_type = "size_t")] out unowned char[] outbuf, out size_t outprespace);
 		[CCode (cname = "g_mime_filter_reset")]
 		public virtual void reset ();
 		[CCode (cname = "g_mime_filter_set_size")]
