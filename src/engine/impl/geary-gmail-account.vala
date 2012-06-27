@@ -34,9 +34,46 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         return _smtp_endpoint;
     } }
     
+    private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? path_type_map = null;
+    
     public GmailAccount(string name, string username, AccountInformation account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
         base (name, username, account_info, user_data_dir, remote, local);
+        
+        if (path_type_map == null) {
+            path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(
+                Hashable.hash_func, Equalable.equal_func);
+            
+            Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER,
+                Imap.Account.ASSUMED_SEPARATOR, Imap.Folder.CASE_SENSITIVE);
+            Geary.FolderPath googlemail_root = new Geary.FolderRoot(GOOGLEMAIL_FOLDER,
+                Imap.Account.ASSUMED_SEPARATOR, Imap.Folder.CASE_SENSITIVE);
+            
+            path_type_map.set(gmail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);
+            path_type_map.set(googlemail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);
+            
+            path_type_map.set(gmail_root.get_child("Sent Mail"), SpecialFolderType.SENT);
+            path_type_map.set(googlemail_root.get_child("Sent Mail"), SpecialFolderType.SENT);
+            
+            path_type_map.set(gmail_root.get_child("Starred"), SpecialFolderType.FLAGGED);
+            path_type_map.set(googlemail_root.get_child("Starred"), SpecialFolderType.FLAGGED);
+            
+            path_type_map.set(gmail_root.get_child("All Mail"), SpecialFolderType.ALL_MAIL);
+            path_type_map.set(googlemail_root.get_child("All Mail"), SpecialFolderType.ALL_MAIL);
+            
+            path_type_map.set(gmail_root.get_child("Spam"), SpecialFolderType.SPAM);
+            path_type_map.set(googlemail_root.get_child("Spam"), SpecialFolderType.SPAM);
+            
+            path_type_map.set(gmail_root.get_child("Trash"), SpecialFolderType.TRASH);
+            path_type_map.set(googlemail_root.get_child("Trash"), SpecialFolderType.TRASH);
+        }
+    }
+    
+    protected override Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
+        // although Gmail supports XLIST, this will be called on startup if the XLIST properties
+        // for the folders hasn't been retrieved yet.  Once they've been retrieved and stored in
+        // the local database, this won't be called again
+        return path_type_map.has_key(path) ? path_type_map.get(path) : SpecialFolderType.NONE;
     }
     
     public override bool delete_is_archive() {
