@@ -572,6 +572,9 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            if (!yield owner.wait_for_remote_to_open(cancellable))
+                throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", owner.to_string());
+            
             // fetch from remote folder
             Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
                 unfulfilled_fields, cancellable);
@@ -677,9 +680,6 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield owner.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", owner.to_string());
-        
         NonblockingBatch batch = new NonblockingBatch();
         
         // schedule operations to remote for each set of email with unfulfilled fields and merge
