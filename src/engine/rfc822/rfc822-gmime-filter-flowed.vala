@@ -27,7 +27,7 @@ class GMime.FilterFlowed : GMime.Filter {
             if(first_line) {
                 builder.append(line);
             } else if (quote_level == cur_quote_level && was_flowed) {
-                builder.append(line[quote_level:line.length-1]);
+                builder.append(line[quote_level:line.length]);
             } else {
                 builder.append("\r\n");
                 builder.append(line);
