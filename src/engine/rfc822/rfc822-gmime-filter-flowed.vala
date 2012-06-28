@@ -13,12 +13,13 @@ class GMime.FilterFlowed : GMime.Filter {
     }
     
     public override void filter(char[] inbuf, size_t prespace, out unowned char[] outbuf, out size_t outprespace) {
-        StringBuilder builder = new StringBuilder();
-        string text = (string) inbuf;
-        string[] lines = text.split("\r\n");
+        StringBuilder inbuf_string = new StringBuilder();
+        inbuf_string.append_len((string)inbuf, inbuf.length);
+        string[] lines = inbuf_string.str.split("\r\n");
         int cur_quote_level = 0;
         bool was_flowed = false;
         bool first_line = true;
+        StringBuilder builder = new StringBuilder();
         foreach(string line in lines) {
             int quote_level = 0;
             while(line[quote_level] == '>')
@@ -36,8 +37,15 @@ class GMime.FilterFlowed : GMime.Filter {
             first_line = false;
         }
         
-        set_size(builder.str.length, false);
-        Memory.copy(this.outbuf, builder.str.data, builder.str.length);
+        // use length + 1 for terminating \0 if inbuf was null-terminated
+        if (inbuf[inbuf.length - 1] == 0) {
+            set_size(builder.len + 1, false);
+            Memory.copy(this.outbuf, builder.str.data, builder.len + 1);
+        } else {
+            set_size(builder.len, false);
+            Memory.copy(this.outbuf, builder.str.data, builder.len);
+        }
+
         
         outbuf = this.outbuf;
         outprespace = this.outpre;
