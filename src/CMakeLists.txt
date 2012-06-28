@@ -38,7 +38,7 @@ engine/api/geary-folder-supports-move.vala
 engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
 engine/api/geary-service-provider.vala
-engine/api/geary-special-folder.vala
+engine/api/geary-special-folder-type.vala
 
 engine/common/common-message-data.vala
 
