@@ -66,6 +66,7 @@ public class MessageViewer : WebKit.WebView {
     private Gtk.Menu? context_menu = null;
     private Gtk.Menu? message_menu = null;
     private FileMonitor? user_style_monitor = null;
+    private weak Geary.Folder? current_folder = null;
     
     public MessageViewer() {
         valign = Gtk.Align.START;
@@ -245,7 +246,7 @@ public class MessageViewer : WebKit.WebView {
     }
 
     // Removes all displayed e-mails from the view.
-    public void clear() {
+    public void clear(Geary.Folder? new_folder) {
         // Remove all messages from DOM.
         debug("Clearing message viewer");
         try {
@@ -258,6 +259,8 @@ public class MessageViewer : WebKit.WebView {
         }
         email_to_element.clear();
         messages.clear();
+        
+        current_folder = new_folder;
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
@@ -275,7 +278,7 @@ public class MessageViewer : WebKit.WebView {
     
     public void show_multiple_selected(uint selected_count) {
         // Remove any messages and hide the message container, then show the counter.
-        clear();
+        clear(current_folder);
         try {
             hide_element_by_id(MESSAGE_CONTAINER_ID);
             show_element_by_id(SELECTION_COUNTER_ID);
@@ -770,18 +773,20 @@ public class MessageViewer : WebKit.WebView {
 
         // Separator.
         menu.append(new Gtk.SeparatorMenuItem());
-
+        
         // Mark as read/unread.
-        if (active_email.is_unread().to_boolean(false)) {
-            Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
-            mark_read_item.activate.connect(on_mark_read_message);
-            menu.append(mark_read_item);
-        } else {
-            Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
-            mark_unread_item.activate.connect(on_mark_unread_message);
-            menu.append(mark_unread_item);
+        if (current_folder is Geary.FolderSupportsMark) {
+            if (active_email.is_unread().to_boolean(false)) {
+                Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
+                mark_read_item.activate.connect(on_mark_read_message);
+                menu.append(mark_read_item);
+            } else {
+                Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
+                mark_unread_item.activate.connect(on_mark_unread_message);
+                menu.append(mark_unread_item);
+            }
         }
-
+        
         // Print a message.
         Gtk.MenuItem print_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.PRINT, null);
         print_item.activate.connect(on_print_message);

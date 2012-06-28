@@ -14,7 +14,8 @@ private class Geary.SmtpOutboxFolderRoot : Geary.FolderRoot {
 
 // Special type of folder that runs an asynchronous send queue.  Messages are
 // saved to the database, then queued up for sending.
-private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
+private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupportsRemove,
+    Geary.FolderSupportsCreate {
     private static FolderRoot? path = null;
     
     private Geary.Sqlite.SmtpOutboxTable local_folder;
@@ -34,7 +35,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
     
     private string message_subject(RFC822.Message message) {
         return (message.subject != null && !String.is_empty(message.subject.to_string()))
-            ? message.subject.to_string() : "(no subject)";
+            ? message.subject.to_string() : _("(no subject)");
     }
     
     // TODO: Use Cancellable to shut down outbox processor when closing account
@@ -149,7 +150,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
         return yield local_folder.get_email_count_async(transaction, cancellable);
     }
     
-    public override async bool create_email_async(Geary.RFC822.Message rfc822,
+    public virtual async Geary.FolderSupportsCreate.Result create_email_async(Geary.RFC822.Message rfc822,
         Cancellable? cancellable = null) throws Error {
         Sqlite.Transaction transaction = yield db.begin_transaction_async("Outbox.create_email_async",
             cancellable);
@@ -168,7 +169,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
         // immediately add to outbox queue for delivery
         outbox_queue.send(row);
         
-        return true;
+        return FolderSupportsCreate.Result.CREATED;
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
@@ -253,13 +254,13 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
         return outbox_email_for_row(row, position);
     }
     
-    public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
+    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
         Cancellable? cancellable = null) throws Error {
         foreach (Geary.EmailIdentifier id in email_ids)
             remove_single_email_async(id, cancellable);
     }
     
-    public override async void remove_single_email_async(Geary.EmailIdentifier _id,
+    public virtual async void remove_single_email_async(Geary.EmailIdentifier _id,
         Cancellable? cancellable = null) throws Error {
         OutboxEmailIdentifier? id = _id as OutboxEmailIdentifier;
         assert(id != null);
@@ -277,12 +278,6 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
         notify_email_count_changed(count, CountChangeReason.REMOVED);
     }
     
-    public override async void mark_email_async(
-        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
-        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
-        // Not implemented.
-    }
-    
     // Utility for getting an email object back from an outbox row.
     private Geary.Email outbox_email_for_row(Geary.Sqlite.SmtpOutboxRow row, int position) throws Error {
         RFC822.Message message = new RFC822.Message.from_string(row.message);
@@ -292,16 +287,6 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder {
         email.set_flags(new Geary.EmailFlags());
         
         return email;
-    }
-    
-    public override async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
-        // Not implemented.
-    }
-
-    public override async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
-        // Not implemented.
     }
 }
 

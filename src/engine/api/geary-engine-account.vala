@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.EngineAccount : Geary.AbstractAccount, Geary.Personality {
+public abstract class Geary.EngineAccount : Geary.AbstractAccount {
     private AccountInformation account_information;
     
     public virtual signal void email_sent(Geary.RFC822.Message rfc822) {

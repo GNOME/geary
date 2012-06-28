@@ -263,24 +263,6 @@ public interface Geary.Folder : Object {
     public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
     
     /**
-     * If the Folder object detects that the supplied Email does not have sufficient fields for
-     * writing it, it should throw an EngineError.INCOMPLETE_MESSAGE.  Use
-     * get_required_fields_for_writing() to determine which fields must be present to create the
-     * email.
-     *
-     * If the Folder supports duplicate detection, it may merge in additional fields from this Email
-     * and associate the revised Email with this Folder.  See LocalFolder for specific calls that
-     * deal with this.  Callers from outside the Engine don't need to worry about this; it's taken
-     * care of under the covers.
-     *
-     * Returns true if the email was created in the folder, false if it was merged.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async bool create_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable = null)
-        throws Error;
-    
-    /**
      * Returns a list of messages that fulfill the required_fields flags starting at the low
      * position and moving up to (low + count).  If count is -1, the returned list starts at low
      * and proceeds to all available emails.  If low is -1, the *last* (most recent) 'count' emails
@@ -441,47 +423,6 @@ public interface Geary.Folder : Object {
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
     
-    /**
-     * Removes the specified emails from the folder.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * Removes one email from the folder.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async void remove_single_email_async(Geary.EmailIdentifier email_id,
-        Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * Adds or removes a flag from a list of messages.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
-        Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Copies messages into another folder.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Moves messages to another folder.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;
-
     /**
      * check_span_specifiers() verifies that the span specifiers match the requirements set by
      * list_email_async() and lazy_list_email_async().  If not, this method throws

@@ -59,8 +59,12 @@ public class Geary.DBus.Email : Object {
     }
     
     public async void remove() throws IOError {
+        Geary.FolderSupportsRemove? supports_remove = folder as Geary.FolderSupportsRemove;
+        if (supports_remove == null)
+            return;
+        
         try {
-            yield folder.remove_single_email_async(email.id);
+            yield supports_remove.remove_single_email_async(email.id);
         } catch (Error e) {
             if (e is IOError)
                 throw (IOError) e;

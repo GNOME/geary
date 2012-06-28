@@ -31,32 +31,33 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
         return _smtp_endpoint;
     } }
     
-    private Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType> special_map = new Gee.HashMap<
-        Geary.FolderPath, Geary.SpecialFolderType>(Hashable.hash_func, Equalable.equal_func);
+    private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? special_map = null;
     
     public YahooAccount(string name, string username, AccountInformation account_info,
         File user_data_dir, Imap.Account remote, Sqlite.Account local) {
         base (name, username, account_info, user_data_dir, remote, local);
         
-        FolderPath sent = new Geary.FolderRoot("Sent", Imap.Account.ASSUMED_SEPARATOR, false);
-        special_map.set(sent, Geary.SpecialFolderType.SENT);
-        
-        FolderPath drafts = new Geary.FolderRoot("Draft", Imap.Account.ASSUMED_SEPARATOR, false);
-        special_map.set(drafts, Geary.SpecialFolderType.DRAFTS);
-        
-        FolderPath bulk = new Geary.FolderRoot("Bulk Mail", Imap.Account.ASSUMED_SEPARATOR, false);
-        special_map.set(bulk, Geary.SpecialFolderType.SPAM);
-        
-        FolderPath trash = new Geary.FolderRoot("Trash", Imap.Account.ASSUMED_SEPARATOR, false);
-        special_map.set(trash, Geary.SpecialFolderType.TRASH);
+        if (special_map == null) {
+            special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(
+                Hashable.hash_func, Equalable.equal_func);
+            
+            special_map.set(new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR, false),
+                Geary.SpecialFolderType.INBOX);
+            special_map.set(new Geary.FolderRoot("Sent", Imap.Account.ASSUMED_SEPARATOR, false),
+                Geary.SpecialFolderType.SENT);
+            special_map.set(new Geary.FolderRoot("Draft", Imap.Account.ASSUMED_SEPARATOR, false),
+                Geary.SpecialFolderType.DRAFTS);
+            special_map.set(new Geary.FolderRoot("Bulk Mail", Imap.Account.ASSUMED_SEPARATOR, false),
+                Geary.SpecialFolderType.SPAM);
+            special_map.set(new Geary.FolderRoot("Trash", Imap.Account.ASSUMED_SEPARATOR, false),
+                Geary.SpecialFolderType.TRASH);
+        }
     }
     
-    protected override Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
-        return special_map.has_key(path) ? special_map.get(path) : Geary.SpecialFolderType.NONE;
-    }
-    
-    public override bool delete_is_archive() {
-        return false;
+    protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+        Sqlite.Account local_account, Sqlite.Folder local_folder) {
+        return new YahooFolder(this, remote_account, local_account, local_folder,
+            special_map.has_key(path) ? special_map.get(path) : Geary.SpecialFolderType.NONE);
     }
 }
 

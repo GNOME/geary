@@ -91,33 +91,20 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             throw remote_err;
     }
     
-    // Subclasses should implement this for hardcoded paths that correspond to special folders ...
-    // if the server supports XLIST, this doesn't have to be implemented.
+    // Subclasses should implement this to return their flavor of a GenericImapFolder with the
+    // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
+    // set using either the properties from the local folder or its path.
     //
-    // This won't be called for INBOX or the Outbox.
-    protected virtual Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
-        return Geary.SpecialFolderType.NONE;
-    }
-    
-    private Geary.SpecialFolderType internal_get_special_folder_type_for_path(Geary.FolderPath path) {
-        if (path.equals(inbox_path))
-            return Geary.SpecialFolderType.INBOX;
-        
-        if (path.equals(outbox_path))
-            return Geary.SpecialFolderType.OUTBOX;
-        
-        return get_special_folder_type_for_path(path);
-    }
+    // This won't be called to build the Outbox, but for all others (including Inbox) it will.
+    protected abstract GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+        Sqlite.Account local_account, Sqlite.Folder local_folder);
     
     private GenericImapFolder build_folder(Sqlite.Folder local_folder) {
         GenericImapFolder? folder = existing_folders.get(local_folder.get_path());
         if (folder != null)
             return folder;
         
-        folder = new GenericImapFolder(this, remote, local, local_folder);
-        if (folder.get_special_folder_type() == Geary.SpecialFolderType.NONE)
-            folder.set_special_folder_type(internal_get_special_folder_type_for_path(local_folder.get_path()));
-        
+        folder = new_folder(local_folder.get_path(), remote, local, local_folder);
         existing_folders.set(folder.get_path(), folder);
         
         return folder;
@@ -229,8 +216,8 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             
             // also use this iteration to set the local folder's special type
             GenericImapFolder? local_folder = existing_folders.get(remote_folder.get_path());
-            if (local_folder != null && local_folder.get_special_folder_type() == Geary.SpecialFolderType.NONE)
-                local_folder.set_special_folder_type(internal_get_special_folder_type_for_path(local_folder.get_path()));
+            if (local_folder != null)
+                local_folder.set_special_folder_type(remote_folder.get_properties().attrs.get_special_folder_type());
         }
         
         // If path in remote but not local, need to add it

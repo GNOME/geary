@@ -69,15 +69,15 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     }
 }
 
-private class Geary.RemoveEmail : Geary.SendReplayOperation {
+private class Geary.ExpungeEmail : Geary.SendReplayOperation {
     private GenericImapFolder engine;
     private Gee.List<Geary.EmailIdentifier> to_remove;
     private Cancellable? cancellable;
     private int original_count = 0;
     
-    public RemoveEmail(GenericImapFolder engine, Gee.List<Geary.EmailIdentifier> to_remove,
+    public ExpungeEmail(GenericImapFolder engine, Gee.List<Geary.EmailIdentifier> to_remove,
         Cancellable? cancellable = null) {
-        base("RemoveEmail");
+        base("ExpungeEmail");
         
         this.engine = engine;
         

@@ -28,10 +28,15 @@ engine/api/geary-endpoint.vala
 engine/api/geary-engine-account.vala
 engine/api/geary-engine-error.vala
 engine/api/geary-engine.vala
-engine/api/geary-folder-path.vala
 engine/api/geary-folder.vala
+engine/api/geary-folder-path.vala
+engine/api/geary-folder-supports-archive.vala
+engine/api/geary-folder-supports-copy.vala
+engine/api/geary-folder-supports-create.vala
+engine/api/geary-folder-supports-mark.vala
+engine/api/geary-folder-supports-move.vala
+engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
-engine/api/geary-personality.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder.vala
 
@@ -90,12 +95,15 @@ engine/impl/geary-generic-capabilities.vala
 engine/impl/geary-generic-imap-account.vala
 engine/impl/geary-generic-imap-folder.vala
 engine/impl/geary-gmail-account.vala
-engine/impl/geary-yahoo-account.vala
+engine/impl/geary-gmail-folder.vala
 engine/impl/geary-other-account.vala
+engine/impl/geary-other-folder.vala
 engine/impl/geary-receive-replay-operations.vala
 engine/impl/geary-replay-operation.vala
 engine/impl/geary-replay-queue.vala
 engine/impl/geary-send-replay-operations.vala
+engine/impl/geary-yahoo-account.vala
+engine/impl/geary-yahoo-folder.vala
 engine/impl/outbox/smtp-outbox-folder.vala
 engine/impl/outbox/smtp-outbox-email-identifier.vala
 engine/impl/outbox/smtp-outbox-email-properties.vala

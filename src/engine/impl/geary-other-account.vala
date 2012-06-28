@@ -10,12 +10,10 @@ private class Geary.OtherAccount : Geary.GenericImapAccount {
         base (name, username, account_info, user_data_dir, remote, local);
     }
     
-    protected override Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
-        return Geary.SpecialFolderType.NONE;
-    }
-    
-    public override bool delete_is_archive() {
-        return false;
+    protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+        Sqlite.Account local_account, Sqlite.Folder local_folder) {
+        return new OtherFolder(this, remote_account, local_account, local_folder,
+            (path.basename == Imap.Account.INBOX_NAME) ? SpecialFolderType.INBOX : SpecialFolderType.NONE);
     }
 }
 

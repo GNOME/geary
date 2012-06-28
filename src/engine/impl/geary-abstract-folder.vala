@@ -72,9 +72,6 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
     
-    public abstract async bool create_email_async(Geary.RFC822.Message rfc822,
-        Cancellable? cancellable = null) throws Error;
-    
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error;
@@ -155,27 +152,6 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error;
     
-    public abstract async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
-        Cancellable? cancellable = null) throws Error;
-    
-    public virtual async void remove_single_email_async(Geary.EmailIdentifier email_id,
-        Cancellable? cancellable = null) throws Error {
-        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
-        list.add(email_id);
-        
-        yield remove_email_async(list, cancellable);
-    }
-    
-    public abstract async void mark_email_async(
-        Gee.List<Geary.EmailIdentifier> to_mark, Geary.EmailFlags? flags_to_add,
-        Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error;
-
-    public abstract async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;
-
-    public abstract async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;
-
     public virtual string to_string() {
         return get_path().to_string();
     }

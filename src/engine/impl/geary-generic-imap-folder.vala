@@ -4,7 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.GenericImapFolder : Geary.AbstractFolder {
+private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSupportsCopy,
+    Geary.FolderSupportsMark, Geary.FolderSupportsMove {
     internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
     
     private const Geary.Email.Field NORMALIZATION_FIELDS = Geary.Email.Field.PROPERTIES
@@ -26,12 +27,12 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
     public GenericImapFolder(GenericImapAccount account, Imap.Account remote, Sqlite.Account local,
-        Sqlite.Folder local_folder) {
+        Sqlite.Folder local_folder, SpecialFolderType special_folder_type) {
         this.account = account;
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
-        this.special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
+        this.special_folder_type = special_folder_type;
         
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
@@ -98,11 +99,6 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         
         // opened flag set but neither open; indicates opening state
         return Geary.Folder.OpenState.OPENING;
-    }
-    
-    public override async bool create_email_async(Geary.RFC822.Message rfc822, Cancellable?
-        cancellable) throws Error {
-        throw new EngineError.READONLY("Engine currently read-only");
     }
     
     private async bool normalize_folders(Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
@@ -869,11 +865,13 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         return op.email;
     }
     
-    public override async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
+    // Helper function for child classes dealing with the delete/archive question.  This method will
+    // mark the message as deleted and expunge it.
+    protected async void expunge_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
-        check_open("remove_email_async");
+        check_open("expunge_email_async");
         
-        replay_queue.schedule(new RemoveEmail(this, email_ids, cancellable));
+        replay_queue.schedule(new ExpungeEmail(this, email_ids, cancellable));
     }
     
     private void check_open(string method) throws EngineError {
@@ -1003,7 +1001,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             throw error;
     }
     
-    public override async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
+    public virtual async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error {
         check_open("mark_email_async");
@@ -1014,7 +1012,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
             cancellable));
     }
 
-    public override async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
+    public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("copy_email_async");
         if (!yield wait_for_remote_to_open(cancellable))
@@ -1023,7 +1021,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder {
         replay_queue.schedule(new CopyEmail(this, to_copy, destination));
     }
 
-    public override async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
+    public virtual async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("move_email_async");
         if (!yield wait_for_remote_to_open(cancellable))

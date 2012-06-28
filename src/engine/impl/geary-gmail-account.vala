@@ -44,6 +44,9 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
             path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(
                 Hashable.hash_func, Equalable.equal_func);
             
+            path_type_map.set(new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
+                Imap.Folder.CASE_SENSITIVE), SpecialFolderType.INBOX);
+            
             Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER,
                 Imap.Account.ASSUMED_SEPARATOR, Imap.Folder.CASE_SENSITIVE);
             Geary.FolderPath googlemail_root = new Geary.FolderRoot(GOOGLEMAIL_FOLDER,
@@ -69,15 +72,15 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         }
     }
     
-    protected override Geary.SpecialFolderType get_special_folder_type_for_path(Geary.FolderPath path) {
+    protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+        Sqlite.Account local_account, Sqlite.Folder local_folder) {
         // although Gmail supports XLIST, this will be called on startup if the XLIST properties
         // for the folders hasn't been retrieved yet.  Once they've been retrieved and stored in
         // the local database, this won't be called again
-        return path_type_map.has_key(path) ? path_type_map.get(path) : SpecialFolderType.NONE;
-    }
-    
-    public override bool delete_is_archive() {
-        return true;
+        SpecialFolderType special_folder_type = path_type_map.has_key(path) ? path_type_map.get(path)
+            : SpecialFolderType.NONE;
+        
+        return new GmailFolder(this, remote_account, local_account, local_folder, special_folder_type);
     }
 }
 
