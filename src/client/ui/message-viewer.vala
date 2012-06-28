@@ -1231,7 +1231,12 @@ public class MessageViewer : WebKit.WebView {
         WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
         WebKit.WebPolicyDecision policy_decision) {
         policy_decision.ignore();
-        link_selected(request.uri);
+        
+        // Other policy-decisions may be requested for various reasons. The existence of an iframe,
+        // for example, causes a policy-decision request with an "OTHER" reason. We don't want to
+        // open a webpage in the browser just because an email contains an iframe.
+        if (navigation_action.reason == WebKit.WebNavigationReason.LINK_CLICKED)
+            link_selected(request.uri);
         return true;
     }
     
