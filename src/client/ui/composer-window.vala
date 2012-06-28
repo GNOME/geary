@@ -303,6 +303,12 @@ public class ComposerWindow : Gtk.Window {
         
         add(box);
         validate_send_button();
+
+        if(prefill != null) {
+            foreach(File attachment_file in prefill.attachment_files) {
+                add_attachment(attachment_file);
+            }
+        }
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
@@ -384,11 +390,7 @@ public class ComposerWindow : Gtk.Window {
                 if (!uri.has_prefix(FILE_URI_PREFIX))
                     continue;
                 
-                uri = uri.substring(FILE_URI_PREFIX.length);
-                if (Geary.String.is_null_or_whitespace(uri))
-                    continue;
-                
-                add_attachment(uri.strip());
+                add_attachment(File.new_for_uri(uri.strip()));
             }
         }
         
@@ -491,20 +493,19 @@ public class ComposerWindow : Gtk.Window {
             Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
         
         if (dialog.run() == Gtk.ResponseType.ACCEPT)
-            add_attachment(dialog.get_filename());
+            add_attachment(dialog.get_file());
         
         dialog.destroy();
     }
     
-    public void add_attachment(string filename) {
-        File attachment_file = File.new_for_path(filename);
+    public void add_attachment(File attachment_file) {
         if (!attachment_file.query_exists()) {
-            debug("File '%s' does not exist", filename);
+            debug("File '%s' does not exist", attachment_file.get_path());
             return;
         }
         
         if (attachment_file.query_file_type(FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
-            debug("File '%s' is a directory", filename);
+            debug("File '%s' is a directory", attachment_file.get_path());
             return;
         }
         

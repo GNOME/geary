@@ -90,12 +90,12 @@ public class Geary.ComposedEmail : Object {
         RFC822.MailboxAddresses? bcc = null;
         RFC822.Subject? subject = null;
 
+        Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > "mailto:".length) {
             // Parse the mailto link.
             string[] parts = mailto.substring("mailto:".length).split("?", 2);
             string email = Uri.unescape_string(parts[0]);
             string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
-            Gee.HashMap<string, string> headers = new Gee.HashMap<string, string>();
             foreach (string param in params) {
                 string[] param_parts = param.split("=", 2);
                 if (param_parts.length == 2) {
@@ -105,33 +105,48 @@ public class Geary.ComposedEmail : Object {
             }
 
             // Assemble the headers.
-            if (headers.has_key("from")) {
-                from = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("from"));
+            if (headers.contains("from")) {
+                from = new RFC822.MailboxAddresses.from_rfc822_string(
+                    Geary.Collection.get_first(headers.get("from")));
             }
 
-            if (email.length > 0 && headers.has_key("to")) {
-                to = new RFC822.MailboxAddresses.from_rfc822_string("%s,%s".printf(email, headers.get("to")));
+            if (email.length > 0 && headers.contains("to")) {
+                to = new RFC822.MailboxAddresses.from_rfc822_string("%s,%s".printf(email,
+                    Geary.Collection.get_first(headers.get("to"))));
             } else if (email.length > 0) {
                 to = new RFC822.MailboxAddresses.from_rfc822_string(email);
-            } else if (headers.has_key("to")) {
-                to = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("to"));
+            } else if (headers.contains("to")) {
+                to = new RFC822.MailboxAddresses.from_rfc822_string(
+                    Geary.Collection.get_first(headers.get("to")));
             }
 
-            if (headers.has_key("cc")) {
-                cc = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("cc"));
+            if (headers.contains("cc")) {
+                cc = new RFC822.MailboxAddresses.from_rfc822_string(
+                    Geary.Collection.get_first(headers.get("cc")));
             }
 
-            if (headers.has_key("bcc")) {
-                bcc = new RFC822.MailboxAddresses.from_rfc822_string(headers.get("bcc"));
+            if (headers.contains("bcc")) {
+                bcc = new RFC822.MailboxAddresses.from_rfc822_string(
+                    Geary.Collection.get_first(headers.get("bcc")));
             }
 
-            if (headers.has_key("subject")) {
-                subject = new RFC822.Subject(headers.get("subject"));
+            if (headers.contains("subject")) {
+                subject = new RFC822.Subject(Geary.Collection.get_first(headers.get("subject")));
             }
         }
 
         // And construct!
-        this(date, from, to, cc, bcc, subject);
+        this(date, from, to, cc, bcc, subject); 
+        
+        // Add attachments directly to public member ... need to call base constructor before doing
+        // so
+        foreach (string attachment in headers.get("attach")) {
+            attachment_files.add(File.new_for_uri(attachment));
+        }
+        
+        foreach (string attachment in headers.get("attachment")) {
+            attachment_files.add(File.new_for_uri(attachment));
+        }
     }
 
     private void set_reply_references(Geary.Email source) {

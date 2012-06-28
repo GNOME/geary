@@ -13,4 +13,8 @@ public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
     return list;
 }
 
+public G? get_first<G>(Gee.Collection<G> c) {
+    return c.iterator().get();
+}
+
 }
