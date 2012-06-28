@@ -31,8 +31,13 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
     
     string quoted = "";
     
-    if (email.date != null)
-        quoted += _("On %s, ").printf(email.date.value.format(_("%a, %b %-e, %Y at %-l:%M %p")));
+    if (email.date != null) {
+        /// The datetime that a message being replied to was received.
+        string DATE_LABEL = _("On %s, ");
+        /// Format for the datetime that a message being replied to was received.
+        string DATE_FORMAT = _("%a, %b %-e, %Y at %-l:%M %p");
+        quoted += DATE_LABEL.printf(email.date.value.format(DATE_FORMAT));
+    }
     
     if (email.from != null)
         quoted += _("%s wrote:").printf(email_addresses_for_reply(email.from, html_format));

@@ -27,20 +27,20 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
     string fmt;
     if (equals(datetime, now)) {
         if (clock_format == ClockFormat.TWELVE_HOURS) {
-            // 8:31 am
+            /// Datetime format for 12-hour time, i.e. 8:31 am.
             fmt = _("%l:%M %P");
         } else if (clock_format == ClockFormat.TWENTY_FOUR_HOURS) {
-            // 16:35
+            /// Datetime format for 24-hour time, i.e. 16:35.
             fmt = _("%H:%M");
         } else {
-            // locale default, 8:31 am or 16:35
-            fmt = C_("DefaultClockFormat", "%l:%M %P");
+            /// Datetime format for the locale default, i.e. 8:31 am or 16:35.
+            fmt = C_("Default clock format", "%l:%M %P");
         }
     } else if (datetime.get_year() == now.get_year()) {
-        // Nov 8
+        /// Date format for dates within the current year, i.e. Nov 8.
         fmt = _("%b %-e");
     } else {
-        // 02/04/10
+        /// Date format for dates within a different year, i.e. 02/04/10.
         fmt = "%x";
     }
     
@@ -49,14 +49,14 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
 
 public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) {
     if (clock_format == ClockFormat.TWELVE_HOURS) {
-        // November 8, 2010 8:42 am
+        /// Vebose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am.
         return datetime.format(_("%B %-e, %Y %-l:%M %P"));
     } else if (clock_format == ClockFormat.TWENTY_FOUR_HOURS) {
-        // November 8, 2010 16:35
+        /// Vebose datetime format for 24-hour time, i.e. November 8, 2010 16:35.
         return datetime.format(_("%B %-e, %Y %-H:%M"));
     } else {
-        // locale default full month, day and time
-        return datetime.format(C_("DefaultFullDate", "%B %-e, %Y %-l:%M %P"));
+        /// Vebose datetime format for the locale default (full month, day and time).
+        return datetime.format(C_("Default full date", "%B %-e, %Y %-l:%M %P"));
     }
 }
 

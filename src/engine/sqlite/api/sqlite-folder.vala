@@ -669,6 +669,7 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             string? filename = attachment.get_filename();
             string mime_type = attachment.get_content_type().to_string();
             if (filename == null || filename.length == 0) {
+                /// Placeholder filename for attachments with no filename.
                 filename = _("none");
             }
 

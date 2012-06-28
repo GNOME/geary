@@ -229,7 +229,7 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="ypad">12</property>
-                    <property name="label" translatable="yes">IMAP  settings</property>
+                    <property name="label" translatable="yes">IMAP settings</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
@@ -296,7 +296,7 @@
                     <property name="can_focus">True</property>
                     <property name="invisible_char">•</property>
                     <property name="width_chars">5</property>
-                    <property name="text" translatable="yes">993</property>
+                    <property name="text">993</property>
                     <property name="invisible_char_set">True</property>
                   </object>
                   <packing>

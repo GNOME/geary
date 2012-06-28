@@ -82,10 +82,11 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyDeleteMessage">
-        <property name="use_action_appearance">True</property>
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Delete the selected conversation</property>
+        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Delete</property>
         <property name="use_underline">True</property>
       </object>
@@ -101,12 +102,10 @@
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Toggles menu for applying labels to emails.">Move the selected conversation</property>
         <property name="use_action_appearance">False</property>
-        <property name="use_underline">False</property>
         <property name="icon_name">folder</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
       </packing>
     </child>
     <child>
@@ -116,12 +115,10 @@
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Toggles menu for applying labels to emails.">Label the selected conversation</property>
         <property name="use_action_appearance">False</property>
-        <property name="use_underline">False</property>
         <property name="icon_name">multiple-tags</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
       </packing>
     </child>
     <child>
@@ -143,12 +140,10 @@
         <property name="tooltip_text" translatable="yes" comments="Toggles menu for marking a message as read/unread or starred/unstarred">Mark email</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Mark</property>
-        <property name="use_underline">False</property>
         <property name="icon_name">menu-down</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
       </packing>
     </child>
     <child>
@@ -172,7 +167,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">menu</property>
+        <property name="label" translatable="yes">Menu</property>
         <property name="use_underline">True</property>
         <property name="icon_name">application-menu</property>
       </object>
