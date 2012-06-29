@@ -1145,8 +1145,8 @@ public class MessageViewer : WebKit.WebView {
     }
     
     private string linkify_and_escape_plain_text(string input) throws Error {
-        // Convert < and > into non-printable characters.
-        string output = input.replace("<", " \01 ").replace(">", " \02 ");
+        // Convert < and > into non-printable characters, and change & to &amp;.
+        string output = input.replace("<", " \01 ").replace(">", " \02 ").replace("&", "&amp;");
         
         // Converts text links into HTML hyperlinks.
         Regex r = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
