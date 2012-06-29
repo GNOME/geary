@@ -926,15 +926,15 @@ public class GearyController {
         }
     }
 
-    private void on_message_viewer_mark_message(Geary.EmailFlags? flags_to_add,
+    private void on_message_viewer_mark_message(Geary.Email message, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove) {
         Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
         if (supports_mark == null)
             return;
         
         set_busy(true);
-        supports_mark.mark_single_email_async.begin(get_email_from_message_viewer().id,
-            flags_to_add, flags_to_remove, cancellable_message, on_mark_complete);
+        supports_mark.mark_single_email_async.begin(message.id, flags_to_add, flags_to_remove,
+            cancellable_message, on_mark_complete);
     }
     
     private void on_mark_as_read() {
@@ -1122,24 +1122,28 @@ public class GearyController {
         create_compose_window();
     }
     
-    private Geary.Email get_email_from_message_viewer() {
-        return main_window.message_viewer.active_email == null ?
-            main_window.message_viewer.messages.last() : main_window.message_viewer.active_email;
-    }
-    
     private void on_reply_to_message() {
-        create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
-            get_from(), get_email_from_message_viewer()));
+        Geary.Email? message = main_window.message_viewer.get_last_message();
+        if (message != null) {
+            create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
+                get_from(), message));
+        }
     }
     
     private void on_reply_all_message() {
-        create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
-            get_from(), get_email_from_message_viewer()));
+        Geary.Email? message = main_window.message_viewer.get_last_message();
+        if (message != null) {
+            create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
+                get_from(), message));
+        }
     }
     
     private void on_forward_message() {
-        create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
-            get_from(), get_email_from_message_viewer()));
+        Geary.Email? message = main_window.message_viewer.get_last_message();
+        if (message != null) {
+            create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
+                get_from(), message));
+        }
     }
     
     // This method is used for both removing and archive a message; currently Geary only supports

@@ -259,7 +259,7 @@ public class Geary.Email : Object {
         return message;
     }
 
-    public Geary.Attachment? get_attachment(int64 attachment_id) throws EngineError, RFC822Error {
+    public Geary.Attachment? get_attachment(int64 attachment_id) throws EngineError {
         if (!fields.fulfills(Field.HEADER | Field.BODY))
             throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
 

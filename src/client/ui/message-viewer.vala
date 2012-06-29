@@ -31,16 +31,16 @@ public class MessageViewer : WebKit.WebView {
     public signal void link_hover(string? link);
 
     // Fired when the user clicks "reply" in the message menu.
-    public signal void reply_to_message();
+    public signal void reply_to_message(Geary.Email message);
 
     // Fired when the user clicks "reply all" in the message menu.
-    public signal void reply_all_message();
+    public signal void reply_all_message(Geary.Email message);
 
     // Fired when the user clicks "forward" in the message menu.
-    public signal void forward_message();
+    public signal void forward_message(Geary.Email message);
 
     // Fired when the user marks a message.
-    public signal void mark_message(Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
+    public signal void mark_message(Geary.Email message, Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
     // Fired when the user opens an attachment.
     public signal void open_attachment(Geary.Attachment attachment);
@@ -51,8 +51,6 @@ public class MessageViewer : WebKit.WebView {
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
-    public Geary.Email? active_email = null;
-    public Geary.Attachment? active_attachment = null;
     
     // HTML element that contains message DIVs.
     private WebKit.DOM.HTMLDivElement container;
@@ -67,6 +65,7 @@ public class MessageViewer : WebKit.WebView {
     private string? hover_url = null;
     private Gtk.Menu? context_menu = null;
     private Gtk.Menu? message_menu = null;
+    private Gtk.Menu? attachment_menu = null;
     private FileMonitor? user_style_monitor = null;
     private weak Geary.Folder? current_folder = null;
     
@@ -246,7 +245,11 @@ public class MessageViewer : WebKit.WebView {
         throws Error {
         img.set_attribute("src", "data:%s;base64,%s".printf(mime_type, Base64.encode(content)));
     }
-
+    
+    public Geary.Email? get_last_message() {
+        return messages.is_empty ? null : messages.last();
+    }
+    
     // Removes all displayed e-mails from the view.
     public void clear(Geary.Folder? new_folder) {
         // Remove all messages from DOM.
@@ -482,7 +485,7 @@ public class MessageViewer : WebKit.WebView {
 
     private Geary.Email? get_email_from_element(WebKit.DOM.Element element) {
         // First get the email container.
-        WebKit.DOM.Element email_element;
+        WebKit.DOM.Element? email_element = null;
         try {
             if (element.webkit_matches_selector(".email")) {
                 email_element = element;
@@ -493,7 +496,10 @@ public class MessageViewer : WebKit.WebView {
             debug("Failed to find div.email from element: %s", error.message);
             return null;
         }
-
+        
+        if (email_element == null)
+            return null;
+        
         // Next find the ID in the email-to-element map.
         Geary.EmailIdentifier? email_id = null;
         foreach (var entry in email_to_element.entries) {
@@ -502,14 +508,29 @@ public class MessageViewer : WebKit.WebView {
                 break;
             }
         }
+        
+        if (email_id == null)
+            return null;
 
         // Now lookup the email in our messages set.
         foreach (Geary.Email message in messages) {
-            if (message.id == email_id) {
+            if (message.id == email_id)
                 return message;
-            }
         }
+        
         return null;
+    }
+    
+    private Geary.Attachment? get_attachment_from_element(WebKit.DOM.Element element) {
+        Geary.Email? email = get_email_from_element(element);
+        if (email == null)
+            return null;
+         
+        try {
+            return email.get_attachment(int64.parse(element.get_attribute("data-attachment-id")));
+        } catch (Geary.EngineError err) {
+            return null;
+        }
     }
 
     public void update_flags(Geary.Email email) {
@@ -540,10 +561,54 @@ public class MessageViewer : WebKit.WebView {
         }
     }
 
-    private static void on_context_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
+    private static void on_context_menu(WebKit.DOM.Element clicked_element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
-        message_viewer.active_email = message_viewer.get_email_from_element(element);
-        message_viewer.create_context_menu();
+        Geary.Email email = message_viewer.get_email_from_element(clicked_element);
+        if (email != null)
+            message_viewer.show_context_menu(email);
+    }
+    
+    private void show_context_menu(Geary.Email email) {
+        context_menu = build_context_menu(email);
+        context_menu.show_all();
+        context_menu.popup(null, null, null, 0, 0);
+    }
+    
+    private Gtk.Menu build_context_menu(Geary.Email email) {
+        Gtk.Menu menu = new Gtk.Menu();
+        
+        if (can_copy_clipboard()) {
+            // Add a menu item for copying the current selection.
+            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("_Copy"));
+            item.activate.connect(on_copy_text);
+            menu.append(item);
+        }
+        
+        if (hover_url != null) {
+            // Add a menu item for copying the link.
+            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
+            item.activate.connect(on_copy_link);
+            menu.append(item);
+            
+            if (Geary.RFC822.MailboxAddress.is_valid_address(hover_url)) {
+                // Add a menu item for copying the address.
+                item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
+                item.activate.connect(on_copy_email_address);
+                context_menu.append(item);
+            }
+        }
+        
+        // View original message source
+        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
+        view_source_item.activate.connect(() => on_view_source(email));
+        menu.append(view_source_item);
+
+        // Select all.
+        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
+        select_all_item.activate.connect(on_select_all);
+        menu.append(select_all_item);
+        
+        return menu;
     }
 
     private static void on_hide_quote_clicked(WebKit.DOM.Element element) {
@@ -567,34 +632,25 @@ public class MessageViewer : WebKit.WebView {
     private static void on_menu_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         event.stop_propagation();
-        message_viewer.on_menu_clicked_self(element);
-    }
-
-    private void on_menu_clicked_self(WebKit.DOM.Element element) {
-        active_email = get_email_from_element(element);
-        show_message_menu(element);
+        Geary.Email email = message_viewer.get_email_from_element(element);
+        if (email != null)
+            message_viewer.show_message_menu(email);
     }
 
     private static void on_unstar_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         event.stop_propagation();
-        message_viewer.on_unstar_clicked_self(element);
-    }
-
-    private void on_unstar_clicked_self(WebKit.DOM.Element element){
-        active_email = get_email_from_element(element);
-        on_unflag_message();
+        Geary.Email? email = message_viewer.get_email_from_element(element);
+        if (email != null)
+            message_viewer.unflag_message(email);
     }
 
     private static void on_star_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
         event.stop_propagation();
-        message_viewer.on_star_clicked_self(element);
-    }
-
-    private void on_star_clicked_self(WebKit.DOM.Element element){
-        active_email = get_email_from_element(element);
-        on_flag_message();
+        Geary.Email? email = message_viewer.get_email_from_element(element);
+        if (email != null)
+            message_viewer.flag_message(email);
     }
 
     private static void on_value_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
@@ -605,8 +661,11 @@ public class MessageViewer : WebKit.WebView {
 
     private bool is_hidden_email(WebKit.DOM.Element element) {
         try {
-            WebKit.DOM.HTMLElement email = closest_ancestor(element, ".email");
-            WebKit.DOM.DOMTokenList class_list = email.get_class_list();
+            WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+            if (email_element == null)
+                return false;
+            
+            WebKit.DOM.DOMTokenList class_list = email_element.get_class_list();
             return class_list.contains("hide");
         } catch (Error error) {
             warning("Error getting hidden status: %s", error.message);
@@ -621,8 +680,11 @@ public class MessageViewer : WebKit.WebView {
 
     private void on_body_toggle_clicked_self(WebKit.DOM.Element element) {
         try {
-            WebKit.DOM.HTMLElement email = closest_ancestor(element, ".email");
-            WebKit.DOM.DOMTokenList class_list = email.get_class_list();
+            WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+            if (email_element == null)
+                return;
+            
+            WebKit.DOM.DOMTokenList class_list = email_element.get_class_list();
             if (class_list.contains("hide")) {
                 class_list.add("show");
                 class_list.remove("hide");
@@ -641,136 +703,134 @@ public class MessageViewer : WebKit.WebView {
     }
 
     private void on_attachment_clicked_self(WebKit.DOM.Element element) {
+        int64 attachment_id = int64.parse(element.get_attribute("data-attachment-id"));
+        Geary.Email? email = get_email_from_element(element);
+        if (email == null)
+            return;
+        
+        Geary.Attachment? attachment = null;
         try {
-            int64 attachment_id = int64.parse(element.get_attribute("data-attachment-id"));
-            open_attachment(get_email_from_element(element).get_attachment(attachment_id));
+            attachment = email.get_attachment(attachment_id);
         } catch (Error error) {
             warning("Error opening attachment: %s", error.message);
         }
+        
+        if (attachment != null)
+            open_attachment(attachment);
     }
 
     private static void on_attachment_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
         MessageViewer message_viewer) {
-        try {
-            event.stop_propagation();
-            message_viewer.active_email = message_viewer.get_email_from_element(element);
-            message_viewer.active_attachment = message_viewer.active_email.get_attachment(
-                int64.parse(element.get_attribute("data-attachment-id")));
-            message_viewer.show_message_menu(element);
-        } catch (Error error) {
-            warning("Error opening attachment menu: %s", error.message);
-        }
+        event.stop_propagation();
+        Geary.Email? email = message_viewer.get_email_from_element(element);
+        Geary.Attachment? attachment = message_viewer.get_attachment_from_element(element);
+        if (email != null && attachment != null)
+            message_viewer.show_attachment_menu(email, attachment);
     }
-
+    
     private void on_message_menu_selection_done() {
-        active_email = null;
-        active_attachment = null;
         message_menu = null;
     }
+    
+    private void on_attachment_menu_selection_done() {
+        attachment_menu = null;
+    }
 
-    private void on_save_attachment() {
+    private void save_attachment(Geary.Attachment attachment) {
         Gee.List<Geary.Attachment> attachments = new Gee.ArrayList<Geary.Attachment>();
-        attachments.add(active_attachment != null ? active_attachment : active_email.attachments[0]);
+        attachments.add(attachment);
         save_attachments(attachments);
     }
-
-    private void on_save_all_attachments() {
-        save_attachments(active_email.attachments);
-    }
-
-    private void on_reply_to_message() {
-        reply_to_message();
-    }
-
-    private void on_reply_all_message() {
-        reply_all_message();
-    }
-
-    private void on_forward_message() {
-        forward_message();
-    }
-
-    private void on_mark_read_message() {
+    
+    private void on_mark_read_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
-        mark_message(null, flags);
+        mark_message(message, null, flags);
     }
 
-    private void on_mark_unread_message() {
+    private void on_mark_unread_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
-        mark_message(flags, null);
+        mark_message(message, flags, null);
     }
 
-    public void on_print_message() {
+    private void on_print_message(Geary.Email message) {
         try {
-            email_to_element.get(active_email.id).get_class_list().add("print");
+            email_to_element.get(message.id).get_class_list().add("print");
             get_main_frame().print();
-            email_to_element.get(active_email.id).get_class_list().remove("print");
+            email_to_element.get(message.id).get_class_list().remove("print");
         } catch (GLib.Error error) {
             debug("Hiding elements for printing failed: %s", error.message);
         }
     }
-
-    private void on_flag_message() {
+    
+    private void flag_message(Geary.Email email) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_message(flags, null);
+        mark_message(email, flags, null);
     }
 
-    private void on_unflag_message() {
+    private void unflag_message(Geary.Email email) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_message(null, flags);
+        mark_message(email, null, flags);
     }
 
-    private void show_message_menu(WebKit.DOM.Element element) {
-        message_menu = build_message_menu(element);
+    private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
+        attachment_menu = build_attachment_menu(email, attachment);
+        attachment_menu.show_all();
+        attachment_menu.popup(null, null, null, 0, 0);
+    }
+    
+    private Gtk.Menu build_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
+        Gtk.Menu menu = new Gtk.Menu();
+        menu.selection_done.connect(on_attachment_menu_selection_done);
+        
+        Gtk.MenuItem save_attachment_item = new Gtk.MenuItem.with_mnemonic(_("_Save As..."));
+        save_attachment_item.activate.connect(() => save_attachment(attachment));
+        menu.append(save_attachment_item);
+        
+        if (email.attachments.size > 1) {
+            Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
+            save_all_item.activate.connect(() => save_attachments(email.attachments));
+            menu.append(save_all_item);
+        }
+        
+        return menu;
+    }
+    
+    private void show_message_menu(Geary.Email email) {
+        message_menu = build_message_menu(email);
         message_menu.show_all();
         message_menu.popup(null, null, null, 0, 0);
     }
-
-    private Gtk.Menu build_message_menu(WebKit.DOM.Element clicked_element) {
+    
+    private Gtk.Menu build_message_menu(Geary.Email email) {
         Gtk.Menu menu = new Gtk.Menu();
         menu.selection_done.connect(on_message_menu_selection_done);
-
-        if (active_email.attachments.size > 0) {
-            // Save all attachments
-            if (active_email.attachments.size > 1) {
-                Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
-                save_all_item.activate.connect(on_save_all_attachments);
-                menu.append(save_all_item);
-            } else if (active_attachment == null) {
-                Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save A_ttachment..."));
-                save_all_item.activate.connect(on_save_attachment);
-                menu.append(save_all_item);
-            }
-
-            // Save attachment as...
-            if (active_attachment != null) {
-                Gtk.MenuItem save_attachment_item = new Gtk.MenuItem.with_mnemonic(_("_Save As..."));
-                save_attachment_item.activate.connect(on_save_attachment);
-                menu.prepend(save_attachment_item);
-                return menu;
-            }
-
-            // Separator.
+        
+        if (email.attachments.size > 0) {
+            string mnemonic = ngettext("Save A_ttachment...", "Save All A_ttachments...",
+                email.attachments.size);
+            Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(mnemonic);
+            save_all_item.activate.connect(() => save_attachments(email.attachments));
+            menu.append(save_all_item);
             menu.append(new Gtk.SeparatorMenuItem());
         }
-
+        
         // Reply to a message.
         Gtk.MenuItem reply_item = new Gtk.MenuItem.with_mnemonic(_("_Reply"));
-        reply_item.activate.connect(on_reply_to_message);
+        reply_item.activate.connect(() => reply_to_message(email));
         menu.append(reply_item);
 
         // Reply to all on a message.
         Gtk.MenuItem reply_all_item = new Gtk.MenuItem.with_mnemonic(_("Reply to _All"));
-        reply_all_item.activate.connect(on_reply_all_message);
+        reply_all_item.activate.connect(() => reply_all_message(email));
         menu.append(reply_all_item);
 
         // Forward a message.
         Gtk.MenuItem forward_item = new Gtk.MenuItem.with_mnemonic(_("_Forward"));
-        forward_item.activate.connect(on_forward_message);
+        forward_item.activate.connect(() => forward_message(email));
         menu.append(forward_item);
 
         // Separator.
@@ -778,20 +838,20 @@ public class MessageViewer : WebKit.WebView {
         
         // Mark as read/unread.
         if (current_folder is Geary.FolderSupportsMark) {
-            if (active_email.is_unread().to_boolean(false)) {
+            if (email.is_unread().to_boolean(false)) {
                 Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
-                mark_read_item.activate.connect(on_mark_read_message);
+                mark_read_item.activate.connect(() => on_mark_read_message(email));
                 menu.append(mark_read_item);
             } else {
                 Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
-                mark_unread_item.activate.connect(on_mark_unread_message);
+                mark_unread_item.activate.connect(() => on_mark_unread_message(email));
                 menu.append(mark_unread_item);
             }
         }
         
         // Print a message.
         Gtk.MenuItem print_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.PRINT, null);
-        print_item.activate.connect(on_print_message);
+        print_item.activate.connect(() => on_print_message(email));
         menu.append(print_item);
 
         // Separator.
@@ -799,7 +859,7 @@ public class MessageViewer : WebKit.WebView {
 
         // View original message source.
         Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("_View Source"));
-        view_source_item.activate.connect(on_view_source);
+        view_source_item.activate.connect(() => on_view_source(email));
         menu.append(view_source_item);
 
         return menu;
@@ -1270,45 +1330,33 @@ public class MessageViewer : WebKit.WebView {
     
     private void on_copy_link() {
         // Put the current link in clipboard.
-        Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        c.set_text(hover_url, -1);
-        c.store();
+        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        clipboard.set_text(hover_url, -1);
+        clipboard.store();
     }
 
     private void on_copy_email_address() {
         // Put the current email address in clipboard.
-        Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
         if (hover_url.has_prefix(MAILTO_SCHEME))
-            c.set_text(hover_url.substring(MAILTO_SCHEME.length, -1), -1);
+            clipboard.set_text(hover_url.substring(MAILTO_SCHEME.length, -1), -1);
         else
-            c.set_text(hover_url, -1);
-        c.store();
+            clipboard.set_text(hover_url, -1);
+        clipboard.store();
     }
     
     private void on_select_all() {
         select_all();
     }
     
-    public void on_view_source() {
-        if (active_email != null) {
-            Gee.ArrayList<Geary.Email> active_list = new Gee.ArrayList<Geary.Email>();
-            active_list.add(active_email);
-            show_message_source(active_list);
-        } else {
-            show_message_source(messages);
-        }
-    }
-    
-    private void show_message_source(Gee.Collection<Geary.Email> messages) {
-        StringBuilder source = new StringBuilder();
-        foreach(Geary.Email email in messages)
-            source.append_printf("%s%s\n\n", email.header.buffer.to_string(), email.body.buffer.to_string());
+    private void on_view_source(Geary.Email message) {
+        string source = message.header.buffer.to_string() + message.body.buffer.to_string();
         
         try {
             string temporary_filename;
             int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
                                                       out temporary_filename);
-            FileUtils.set_contents(temporary_filename, source.str);
+            FileUtils.set_contents(temporary_filename, source);
             FileUtils.close(temporary_handle);
             string temporary_uri = Filename.to_uri(temporary_filename, null);
             Gtk.show_uri(get_screen(), temporary_uri, Gdk.CURRENT_TIME);
@@ -1320,44 +1368,6 @@ public class MessageViewer : WebKit.WebView {
             dialog.run();
             dialog.destroy();
         }
-    }
-    
-    private void create_context_menu() {
-        context_menu = new Gtk.Menu();
-        
-        if (can_copy_clipboard()) {
-            // Add a menu item for copying the current selection.
-            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("_Copy"));
-            item.activate.connect(on_copy_text);
-            context_menu.append(item);
-        }
-        
-        if (hover_url != null) {
-           // Add a menu item for copying the link.
-            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
-            item.activate.connect(on_copy_link);
-            context_menu.append(item);
-
-            if (Geary.RFC822.MailboxAddress.is_valid_address(hover_url)) {
-                // Add a menu item for copying the address.
-                item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
-                item.activate.connect(on_copy_email_address);
-                context_menu.append(item);
-            }
-         }
-        
-        // View original message source
-        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
-        view_source_item.activate.connect(on_view_source);
-        context_menu.append(view_source_item);
-
-        // Select all.
-        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
-        select_all_item.activate.connect(on_select_all);
-        context_menu.append(select_all_item);
-        
-        context_menu.show_all();
-        context_menu.popup(null, null, null, 0, 0);
     }
     
     public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
