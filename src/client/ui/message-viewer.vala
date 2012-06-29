@@ -466,7 +466,18 @@ public class MessageViewer : WebKit.WebView {
         bind_event(this, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(this, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
     }
-    
+
+    public void ensure_show_last_email() {
+        WebKit.DOM.HTMLElement last_email = (WebKit.DOM.HTMLElement) container.get_last_child().previous_sibling;
+        WebKit.DOM.DOMTokenList class_list = last_email.get_class_list();
+        try {
+            class_list.add("show");
+            class_list.remove("hide");
+        } catch (Error error) {
+            // Expected, if already of class show
+        }
+    }
+
     private WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
         try {
             WebKit.DOM.Element? parent = element.get_parent_element();
