@@ -91,6 +91,13 @@ public class Geary.RFC822.MailboxAddress {
      * Returns true if the email syntax is valid.
      */
     public bool is_valid() {
+        return is_valid_address(address);
+    }
+
+    /**
+     * Returns true if the email syntax is valid.
+     */
+    public static bool is_valid_address(string address) {
         try {
             // http://www.regular-expressions.info/email.html
             // matches john@dep.aol.museum not john@aol...com

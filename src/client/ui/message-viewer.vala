@@ -21,7 +21,9 @@ public class MessageViewer : WebKit.WebView {
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string STYLE_NAME = "STYLE";
-
+    
+    private const string MAILTO_SCHEME = "mailto:";
+    
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
     
@@ -1272,6 +1274,16 @@ public class MessageViewer : WebKit.WebView {
         c.set_text(hover_url, -1);
         c.store();
     }
+
+    private void on_copy_email_address() {
+        // Put the current email address in clipboard.
+        Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        if (hover_url.has_prefix(MAILTO_SCHEME))
+            c.set_text(hover_url.substring(MAILTO_SCHEME.length, -1), -1);
+        else
+            c.set_text(hover_url, -1);
+        c.store();
+    }
     
     private void on_select_all() {
         select_all();
@@ -1321,11 +1333,18 @@ public class MessageViewer : WebKit.WebView {
         }
         
         if (hover_url != null) {
-            // Add a menu item for copying the link.
+           // Add a menu item for copying the link.
             Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
             item.activate.connect(on_copy_link);
             context_menu.append(item);
-        }
+
+            if (Geary.RFC822.MailboxAddress.is_valid_address(hover_url)) {
+                // Add a menu item for copying the address.
+                item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
+                item.activate.connect(on_copy_email_address);
+                context_menu.append(item);
+            }
+         }
         
         // View original message source
         Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
