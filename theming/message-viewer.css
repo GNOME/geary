@@ -150,6 +150,8 @@ img[src^="data:"] {
     margin: 15px;
     margin-top: 0;
     padding-top: 15px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 @media screen {
