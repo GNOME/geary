@@ -562,7 +562,7 @@ public class GearyController {
         }
         if (is_viewed_conversation(conversation))
             do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.NONE), cancellable_message,
-                false, on_show_message_completed);
+                on_show_message_completed);
     }
     
     public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
@@ -629,7 +629,6 @@ public class GearyController {
     private void on_conversations_selected(Geary.Conversation[] conversations) {
         cancel_message();
 
-        bool already_selected = is_viewed_conversation(conversations[0]);
         selected_conversations = conversations;
         
         // Disable message buttons until conversation loads.
@@ -637,7 +636,7 @@ public class GearyController {
         
         if (conversations.length == 1 && current_folder != null) {
             do_show_message.begin(conversations[0].get_email(Geary.Conversation.Ordering.DATE_ASCENDING),
-                cancellable_message, !already_selected, on_show_message_completed);
+                cancellable_message, on_show_message_completed);
         } else if (current_folder != null) {
             main_window.message_viewer.show_multiple_selected(conversations.length);
             if (conversations.length > 1) {
@@ -649,7 +648,7 @@ public class GearyController {
     }
     
     private async void do_show_message(Gee.Collection<Geary.Email> messages, Cancellable? 
-        cancellable = null, bool clear_view = true) throws Error {
+        cancellable = null) throws Error {
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         set_busy(true);
         
@@ -670,17 +669,12 @@ public class GearyController {
                 ids.add(full_email.id);
         }
         
-        if (clear_view) {
-            // Clear message viewer and add messages.
-            main_window.message_viewer.clear(current_folder);
-        } else {
-            // Make sure current last email will be shown if we add one after it.
-            main_window.message_viewer.ensure_show_last_email();
-        }
+        // Clear message viewer and add messages.
+        main_window.message_viewer.clear(current_folder);
         foreach (Geary.Email email in messages_to_add)
-            main_window.message_viewer.add_message(email);  // Will only add new messages.
-        if (clear_view)
-            main_window.message_viewer.scroll_reset();
+            main_window.message_viewer.add_message(email);
+        
+        main_window.message_viewer.scroll_reset();
         
         // Mark as read.
         Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
