@@ -172,6 +172,9 @@ img[src^="data:"] {
     .email:not(:last-of-type) .header_container {
         cursor: pointer;
     }
+    .email:not(.hide) .header .field .value {
+        cursor: auto;
+    }
     .email.hide:not(:last-of-type) .header {
         padding: 5px 0;
         text-align: right;
@@ -297,9 +300,6 @@ img[src^="data:"] {
     margin-left: 5.25em;
     max-height: 5em;
     overflow-y: auto;
-}
-.show .header .field .value {
-    cursor: auto;
 }
 .header .field .value a {
     color: black;
