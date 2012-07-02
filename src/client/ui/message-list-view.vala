@@ -12,9 +12,12 @@ public class MessageListView : Gtk.TreeView {
     // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
+    private Gee.Set<Geary.Conversation> selected = new Gee.HashSet<Geary.Conversation>();
     
-    public signal void conversations_selected(Geary.Conversation[] conversations);
+    public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
+    
     public signal void load_more();
+    
     public signal void mark_conversation(Geary.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
@@ -122,25 +125,35 @@ public class MessageListView : Gtk.TreeView {
     private Gtk.TreePath? get_selected_path() {
         return get_all_selected_paths().nth_data(0);
     }
-
+    
+    // Gtk.TreeSelection can fire its "changed" signal even when nothing's changed, so look for that
+    // and prevent to avoid subscribers from doing the same things multiple times
     private void on_selection_changed() {
-        // Get the selected paths. If no paths are selected then notify of that immediately.
+        debug("on_selection_changed");
+        
         List<Gtk.TreePath> paths = get_all_selected_paths();
-        Geary.Conversation[] conversations = new Geary.Conversation[0];
         if (paths.length() == 0) {
-            conversations_selected(conversations);
+            // only notify if this is different than what was previously reported
+            if (selected.size != 0) {
+                selected.clear();
+                conversations_selected(selected.read_only_view);
+            }
+            
             return;
         }
-
-        // Conversations are selected, so lets collect all of their conversations and signal.
+        
+        // Conversations are selected, so collect them and signal if different
+        Gee.HashSet<Geary.Conversation> new_selected = new Gee.HashSet<Geary.Conversation>();
         foreach (Gtk.TreePath path in paths) {
             Geary.Conversation? conversation = get_store().get_conversation_at(path);
-            if (conversation != null) {
-                conversations += conversation;
-            }
+            if (conversation != null)
+                new_selected.add(conversation);
         }
-        if (conversations.length != 0) {
-            conversations_selected(conversations);
+        
+        // only notify if different than what was previously reported
+        if (!Geary.Collection.are_sets_equal<Geary.Conversation>(selected, new_selected)) {
+            selected = new_selected;
+            conversations_selected(selected.read_only_view);
         }
     }
     

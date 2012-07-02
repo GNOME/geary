@@ -76,7 +76,7 @@ public class GearyController {
     private Geary.ConversationMonitor? current_conversations = null;
     private bool loading_local_only = true;
     private int busy_count = 0;
-    private Geary.Conversation[] selected_conversations = new Geary.Conversation[0];
+    private Gee.Set<Geary.Conversation> selected_conversations = new Gee.HashSet<Geary.Conversation>();
     private Geary.Conversation? last_deleted_conversation = null;
     private bool scan_in_progress = false;
     private int conversations_added_counter = 0;
@@ -311,8 +311,8 @@ public class GearyController {
     }
     
     private bool is_viewed_conversation(Geary.Conversation? conversation) {
-        return conversation != null && selected_conversations.length > 0 &&
-            selected_conversations[0] == conversation;
+        return conversation != null && selected_conversations.size > 0 &&
+            Geary.Collection.get_first<Geary.Conversation>(selected_conversations) == conversation;
     }
     
     // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
@@ -626,20 +626,23 @@ public class GearyController {
         set_busy(false);
     }
     
-    private void on_conversations_selected(Geary.Conversation[] conversations) {
+    private void on_conversations_selected(Gee.Set<Geary.Conversation> selected) {
+        debug("on_conversations_selected: %d", selected.size);
+        
         cancel_message();
 
-        selected_conversations = conversations;
+        selected_conversations = selected;
         
         // Disable message buttons until conversation loads.
         enable_message_buttons(false);
         
-        if (conversations.length == 1 && current_folder != null) {
-            do_show_message.begin(conversations[0].get_email(Geary.Conversation.Ordering.DATE_ASCENDING),
+        if (selected.size == 1 && current_folder != null) {
+            Geary.Conversation conversation = Geary.Collection.get_first(selected);
+            do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING),
                 cancellable_message, on_show_message_completed);
         } else if (current_folder != null) {
-            main_window.message_viewer.show_multiple_selected(conversations.length);
-            if (conversations.length > 1) {
+            main_window.message_viewer.show_multiple_selected(selected.size);
+            if (selected.size > 1) {
                 enable_multiple_message_buttons();
             } else {
                 enable_message_buttons(false);
@@ -975,7 +978,7 @@ public class GearyController {
 
     private void on_copy_conversation(Geary.Folder destination) {
         // Nothing to do if nothing selected.
-        if (selected_conversations == null || selected_conversations.length == 0)
+        if (selected_conversations == null || selected_conversations.size == 0)
             return;
         
         Gee.List<Geary.EmailIdentifier> ids = get_selected_ids();
@@ -997,7 +1000,7 @@ public class GearyController {
 
     private void on_move_conversation(Geary.Folder destination) {
         // Nothing to do if nothing selected.
-        if (selected_conversations == null || selected_conversations.length == 0)
+        if (selected_conversations == null || selected_conversations.size == 0)
             return;
         
         Gee.List<Geary.EmailIdentifier> ids = get_selected_ids();
@@ -1155,7 +1158,8 @@ public class GearyController {
         
         // There should always be at least one conversation selected here, otherwise the archive
         // button is disabled, but better safe than segfaulted.
-        last_deleted_conversation = selected_conversations.length > 0 ? selected_conversations[0] : null;
+        last_deleted_conversation = selected_conversations.size > 0
+            ? Geary.Collection.get_first<Geary.Conversation>(selected_conversations) : null;
 
         // If the user clicked the toolbar button, we want to move focus back to the message list.
         main_window.message_list_view.grab_focus();

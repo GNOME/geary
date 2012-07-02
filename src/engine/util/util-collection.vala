@@ -14,7 +14,21 @@ public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
 }
 
 public G? get_first<G>(Gee.Collection<G> c) {
-    return c.iterator().get();
+    Gee.Iterator<G> iter = c.iterator();
+    
+    return iter.next() ? iter.get() : null;
+}
+
+public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
+    if (a.size != b.size)
+        return false;
+    
+    foreach (G element in a) {
+        if (!b.contains(element))
+            return false;
+    }
+    
+    return true;
 }
 
 }
