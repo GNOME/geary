@@ -209,17 +209,17 @@ public class GearyController {
         add_accelerator("N", ACTION_NEW_MESSAGE);
 
         Gtk.ActionEntry reply_to_message = { ACTION_REPLY_TO_MESSAGE, null, TRANSLATABLE, "<Ctrl>R",
-            null, on_reply_to_message };
+            null, on_reply_to_message_action };
         entries += reply_to_message;
         add_accelerator("R", ACTION_REPLY_TO_MESSAGE);
         
         Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, null, TRANSLATABLE,
-            "<Ctrl><Shift>R", null, on_reply_all_message };
+            "<Ctrl><Shift>R", null, on_reply_all_message_action };
         entries += reply_all_message;
         add_accelerator("<Shift>R", ACTION_REPLY_ALL_MESSAGE);
         
         Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE, "<Ctrl>L", null,
-            on_forward_message };
+            on_forward_message_action };
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
@@ -1125,28 +1125,37 @@ public class GearyController {
         create_compose_window();
     }
     
-    private void on_reply_to_message() {
-        Geary.Email? message = main_window.message_viewer.get_last_message();
-        if (message != null) {
-            create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
-                get_from(), message));
-        }
+    private void on_reply_to_message(Geary.Email message) {
+        create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
+            get_from(), message));
     }
     
-    private void on_reply_all_message() {
+    private void on_reply_to_message_action() {
         Geary.Email? message = main_window.message_viewer.get_last_message();
-        if (message != null) {
-            create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
-                get_from(), message));
-        }
+        if (message != null)
+            on_reply_to_message(message);
     }
     
-    private void on_forward_message() {
+    private void on_reply_all_message(Geary.Email message) {
+        create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
+            get_from(), message));
+    }
+    
+    private void on_reply_all_message_action() {
         Geary.Email? message = main_window.message_viewer.get_last_message();
-        if (message != null) {
-            create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
-                get_from(), message));
-        }
+        if (message != null)
+            on_reply_all_message(message);
+    }
+    
+    private void on_forward_message(Geary.Email message) {
+        create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
+            get_from(), message));
+    }
+    
+    private void on_forward_message_action() {
+        Geary.Email? message = main_window.message_viewer.get_last_message();
+        if (message != null)
+            on_forward_message(message);
     }
     
     // This method is used for both removing and archive a message; currently Geary only supports
