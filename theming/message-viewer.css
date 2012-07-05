@@ -160,46 +160,44 @@ img[src^="data:"] {
         background-color: #ccc !important;
     }
 
-    .email.hide:not(:last-of-type) {
+    .email.hide {
         background-color: #e8e8e8
     }
-    .email.hide:not(:last-of-type) .body,
-    .email.hide:not(:last-of-type) > .attachment_container,
-    .email:not(.hide) .header_container .preview,
-    .email:last-of-type .header_container .preview {
-        display: none;
+    .email.hide .body,
+    .email.hide > .attachment_container,
+    .email:not(.hide) .header_container .preview {
+       display: none;
     }
-    .email:not(:last-of-type) .header_container {
+    .email .header_container {
         cursor: pointer;
     }
     .email:not(.hide) .header .field .value {
         cursor: auto;
     }
-    .email.hide:not(:last-of-type) .header {
+    .email.hide .header {
         padding: 5px 0;
         text-align: right;
     }
-    .email.hide:not(:last-of-type) .header .field {
+    .email.hide .header .field {
         display: inline;
         margin-right: 2px;
         text-align: left;
     }
-    .email.hide:not(:last-of-type) .header .field:not(:first-child) {
+    .email.hide .header .field:not(:first-child) {
         display: inline-block;
     }
-    .email.hide:not(:last-of-type) .header .field:not(.important),
-    .email.hide:not(:last-of-type) .header .field .title {
+    .email.hide .header .field:not(.important),
+    .email.hide .header .field .title {
         display: none;
     }
-    .email.hide:not(:last-of-type) .header .field .value {
+    .email.hide .header .field .value {
         margin-left: 0;
     }
-    .email.hide:not(:last-of-type) .header .field .not_hidden_only,
-    .email:not(.hide) .header .field .hidden_only,
-    .email:last-of-type .header .field .hidden_only {
+    .email.hide .header .field .not_hidden_only,
+    .email:not(.hide) .header .field .hidden_only {
         display: none;
     }
-    .email.hide:not(:last-of-type) .header .field a {
+    .email.hide .header .field a {
         pointer-events: none;
     }
 

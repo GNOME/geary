@@ -677,6 +677,7 @@ public class GearyController {
         foreach (Geary.Email email in messages_to_add)
             main_window.message_viewer.add_message(email);
         
+        main_window.message_viewer.unhide_last_email();
         main_window.message_viewer.scroll_reset();
         
         // Mark as read.

@@ -469,6 +469,18 @@ public class MessageViewer : WebKit.WebView {
         bind_event(this, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(this, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
     }
+        
+    public void unhide_last_email() {
+        WebKit.DOM.HTMLElement last_email = (WebKit.DOM.HTMLElement) container.get_last_child().previous_sibling;
+        if (last_email != null) {
+            WebKit.DOM.DOMTokenList class_list = last_email.get_class_list();
+            try {
+                class_list.remove("hide");
+            } catch (Error error) {
+                // Expected, if not hidden
+            }
+        }
+    }
     
     private WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
         try {
@@ -685,13 +697,10 @@ public class MessageViewer : WebKit.WebView {
                 return;
             
             WebKit.DOM.DOMTokenList class_list = email_element.get_class_list();
-            if (class_list.contains("hide")) {
-                class_list.add("show");
+            if (class_list.contains("hide"))
                 class_list.remove("hide");
-            } else {
-                class_list.remove("show");
+            else
                 class_list.add("hide");
-            }
         } catch (Error error) {
             warning("Error toggling message: %s", error.message);
         }
