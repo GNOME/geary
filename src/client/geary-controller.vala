@@ -562,7 +562,7 @@ public class GearyController {
         }
         if (is_viewed_conversation(conversation))
             do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.NONE), cancellable_message,
-                on_show_message_completed);
+                false, on_show_message_completed);
     }
     
     public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
@@ -639,7 +639,7 @@ public class GearyController {
         if (selected.size == 1 && current_folder != null) {
             Geary.Conversation conversation = Geary.Collection.get_first(selected);
             do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING),
-                cancellable_message, on_show_message_completed);
+                cancellable_message, true, on_show_message_completed);
         } else if (current_folder != null) {
             main_window.message_viewer.show_multiple_selected(selected.size);
             if (selected.size > 1) {
@@ -651,11 +651,17 @@ public class GearyController {
     }
     
     private async void do_show_message(Gee.Collection<Geary.Email> messages, Cancellable? 
-        cancellable = null) throws Error {
+        cancellable = null, bool clear_view = true) throws Error {
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         set_busy(true);
         
         Gee.HashSet<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
+        
+        // Clear view before we yield, to make sure it happens
+        if (clear_view) {
+            main_window.message_viewer.clear(current_folder);
+            main_window.message_viewer.scroll_reset();
+        }
         
         // Fetch full messages.
         foreach (Geary.Email email in messages) {
@@ -672,13 +678,11 @@ public class GearyController {
                 ids.add(full_email.id);
         }
         
-        // Clear message viewer and add messages.
-        main_window.message_viewer.clear(current_folder);
+        // Add messages.  message_viewer.add_message only adds new messages
         foreach (Geary.Email email in messages_to_add)
             main_window.message_viewer.add_message(email);
         
         main_window.message_viewer.unhide_last_email();
-        main_window.message_viewer.scroll_reset();
         
         // Mark as read.
         Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
