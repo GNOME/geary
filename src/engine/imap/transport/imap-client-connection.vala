@@ -416,9 +416,15 @@ public class Geary.Imap.ClientConnection {
         
         Error? ser_err = null;
         try {
-            // TODO: Make serialize non-blocking; this would also remove the need for a send_mutex
-            // (although reentrancy should still be checked for)
-            yield cmd.serialize(ser);
+            // watch for disconnect while waiting for mutex
+            if (ser != null) {
+                // TODO: Make serialize non-blocking; this would also remove the need for a send_mutex
+                // (although reentrancy should still be checked for)
+                yield cmd.serialize(ser);
+            } else {
+                ser_err = new ImapError.NOT_CONNECTED("Send not allowed: connection in %s state",
+                    fsm.get_state_string(fsm.get_state()));
+            }
         } catch (Error err) {
             debug("[%s] Error serializing command: %s", to_string(), err.message);
             ser_err = err;
@@ -640,6 +646,14 @@ public class Geary.Imap.ClientConnection {
     
     private uint on_idle_send(uint state, uint event, void *user) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] Closing IDLE", to_string());
+        
+        // TODO: Because there is not DISCONNECTING state, need to watch for the Serializer
+        // disappearing during a disconnect while in a "normal" state
+        if (ser == null) {
+            debug("[%s] Unable to close IDLE: no serializer", to_string());
+            
+            return do_no_proceed(state, user);
+        }
         
         try {
             ser.push_string("done");
