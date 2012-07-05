@@ -28,6 +28,7 @@ public interface Geary.FolderSupportsMark : Geary.Folder {
         Cancellable? cancellable = null) throws Error {
         Gee.ArrayList<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>(
             Equalable.equal_func);
+        list.add(to_mark);
         
         yield mark_email_async(list, flags_to_add, flags_to_remove, cancellable);
     }
