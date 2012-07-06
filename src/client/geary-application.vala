@@ -88,7 +88,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_transactions = false;
     static bool version = false;
     const OptionEntry[] options = {
-        { "debug", 0, 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
+        { "debug", 'd', 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
         { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Output conversations log"), null },
         { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
         { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Output replay queue log"), null },
