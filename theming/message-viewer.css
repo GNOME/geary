@@ -379,8 +379,14 @@ img[src^="data:"] {
 #attachment_template {
     display: none;
 }
+
 blockquote {
-    margin: 10px;
-    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border: 0;
     border-left: 3px #aaa solid;
 }
