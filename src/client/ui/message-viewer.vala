@@ -1258,8 +1258,10 @@ public class MessageViewer : WebKit.WebView {
             foreach (Geary.Attachment attachment in attachments) {
                 // Generate the attachment table.
                 WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
+                string filename = Geary.String.is_null_or_whitespace(attachment.filename) ?
+                    _("none") : attachment.filename;
                 Util.DOM.select(attachment_table, ".info .filename")
-                    .set_inner_text(attachment.filename);
+                    .set_inner_text(filename);
                 Util.DOM.select(attachment_table, ".info .filesize")
                     .set_inner_text(Files.get_filesize_as_string(attachment.filesize));
                 attachment_table.set_attribute("data-attachment-id", "%lld".printf(attachment.id));

@@ -8,11 +8,11 @@ public class Geary.Sqlite.MessageAttachmentRow : Geary.Sqlite.Row {
     public int64 id { get; private set; }
     public int64 message_id { get; private set; }
     public int64 filesize { get; private set; }
-    public string filename { get; private set; }
+    public string? filename { get; private set; }
     public string mime_type { get; private set; }
 
     public MessageAttachmentRow(MessageAttachmentTable table, int64 id, int64 message_id,
-        string filename, string mime_type, int64 filesize) {
+        string? filename, string mime_type, int64 filesize) {
         base (table);
 
         this.id = id;

@@ -668,10 +668,6 @@ private class Geary.Sqlite.Folder : Object, Geary.ReferenceSemantics {
             // Get the info about the attachment.
             string? filename = attachment.get_filename();
             string mime_type = attachment.get_content_type().to_string();
-            if (filename == null || filename.length == 0) {
-                /// Placeholder filename for attachments with no filename.
-                filename = _("none");
-            }
 
             // Convert the attachment content into a usable ByteArray.
             GMime.DataWrapper attachment_data = attachment.get_content_object();
