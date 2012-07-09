@@ -990,7 +990,7 @@ public class MessageViewer : WebKit.WebView {
     private string decorate_quotes(string text) throws Error {
         int level = 0;
         string outtext = "";
-        Regex quote_leader = new Regex("^(&gt;)*( |$)");  // Some &gt; followed by space or EOL
+        Regex quote_leader = new Regex("^(&gt;)* ?");  // Some &gt; followed by optional space
 
         foreach (string line in text.split("\n")) {
             MatchInfo match_info;
