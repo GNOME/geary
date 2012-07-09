@@ -140,7 +140,7 @@ img[src^="data:"] {
     height: 48px;
     float: right;
 }
-.email.hide:not(:last-of-type) .header_container .avatar {
+.email.hide .header_container .avatar {
     width: 24px;
     height: 24px;
 }
