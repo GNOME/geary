@@ -111,7 +111,6 @@ public class MainWindow : Gtk.Window {
         message_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
         message_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_list_scrolled.add(message_list_view);
-        message_list_scrolled.resize_mode = Gtk.ResizeMode.IMMEDIATE;
         
         // message viewer
         Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
