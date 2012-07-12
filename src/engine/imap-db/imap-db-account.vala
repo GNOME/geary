@@ -100,20 +100,20 @@ private class Geary.ImapDB.Account : Object {
         Geary.FolderPath path = imap_folder.get_path();
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            // get the parent of this folder, creating parents if necessary
-            int64 parent_id;
-            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable))
-                return Db.TransactionOutcome.ROLLBACK;
+            // get the parent of this folder, creating parents if necessary ... ok if this fails,
+            // that just means the folder has no parents
+            int64 parent_id = Db.INVALID_ROWID;
+            do_fetch_parent_id(cx, path, true, out parent_id, cancellable);
             
             // create the folder object
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO FolderTable (name, parent_id, last_seen_total, uid_validity, uid_next, attributes) "
-                + "VALUES (?, ?, ?, ?, ?)");
+                + "VALUES (?, ?, ?, ?, ?, ?)");
             stmt.bind_string(0, path.basename);
             stmt.bind_rowid(1, parent_id);
             stmt.bind_int(2, properties.messages);
-            stmt.bind_int64(3, properties.uid_validity.value);
-            stmt.bind_int64(4, properties.uid_next.value);
+            stmt.bind_int64(3, (properties.uid_validity != null) ?  properties.uid_validity.value : 0);
+            stmt.bind_int64(4, (properties.uid_next != null) ? properties.uid_next.value : 0);
             stmt.bind_string(5, properties.attrs.serialize());
             
             stmt.exec(cancellable);

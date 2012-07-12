@@ -276,7 +276,10 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
                     engine_added.add(build_folder((ImapDB.Folder) yield local.fetch_folder_async(
                         remote_folder.get_path(), cancellable)));
                 } catch (Error convert_err) {
-                    error("Unable to fetch local folder: %s", convert_err.message);
+                    // This isn't fatal, but irksome ... in the future, when local folders are
+                    // removed, it's possible for one to disappear between cloning it and fetching
+                    // it
+                    debug("Unable to fetch local folder after cloning: %s", convert_err.message);
                 }
             }
         }

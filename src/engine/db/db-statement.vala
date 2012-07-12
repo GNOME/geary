@@ -201,11 +201,11 @@ public class Geary.Db.Statement : Geary.Db.Context {
     /**
      * index is zero-based.
      *
-     * This is merely a front for bind_int64().  It's provided to offer more verbosity in the
-     * caller's code.
+     * This will bind the value to the column as an int64 unless it's INVALID_ROWID, in which case
+     * the column is bound as NULL.
      */
     public Statement bind_rowid(int index, int64 rowid) throws DatabaseError {
-        return bind_int64(index, rowid);
+        return (rowid != Db.INVALID_ROWID) ? bind_int64(index, rowid) : bind_null(index);
     }
     
     /**
