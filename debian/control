@@ -13,7 +13,7 @@ Build-Depends: debhelper (>= 7),
  libgmime-2.6-dev (>= 2.6.0),
  valac-0.18 (>= 0.17.2),
  cmake (>= 2.8.0),
- libsqlite3-dev (>= 3.7.4)
+ libsqlite3-dev (>= 3.7.4),
  libgnome-keyring-dev (>= 3.2.0)
 Standards-Version: 3.8.3
 Homepage: http://www.yorba.org
