@@ -18,8 +18,8 @@ public class MainWindow : Gtk.Window {
     private int window_width;
     private int window_height;
     private bool window_maximized;
-    private Gtk.HPaned folder_paned = new Gtk.HPaned();
-    private Gtk.HPaned messages_paned = new Gtk.HPaned();
+    private Gtk.Paned folder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
+    private Gtk.Paned messages_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     private Gtk.Spinner spinner = new Gtk.Spinner();
     private bool is_shown = false;
     

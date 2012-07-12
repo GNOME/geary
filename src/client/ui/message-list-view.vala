@@ -81,7 +81,7 @@ public class MessageListView : Gtk.TreeView {
     
     private void on_show() {
         // Wait until we're visible to set this signal up.
-        this.get_vadjustment().value_changed.connect(on_value_changed);
+        ((Gtk.Scrollable) this).get_vadjustment().value_changed.connect(on_value_changed);
     }
     
     private void on_value_changed() {
@@ -90,7 +90,7 @@ public class MessageListView : Gtk.TreeView {
         
         // Check if we're at the very bottom of the list. If we are, it's time to
         // issue a load_more signal.
-        Gtk.Adjustment adjustment = this.get_vadjustment();
+        Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
         double upper = adjustment.get_upper();
         if (adjustment.get_value() >= upper - adjustment.page_size - LOAD_MORE_HEIGHT &&
             upper > last_upper) {
