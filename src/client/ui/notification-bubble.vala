@@ -12,7 +12,10 @@ public class NotificationBubble : GLib.Object {
     private static Canberra.Context? sound_context = null;
     
     private Notify.Notification notification;
+    private Geary.Email? email = null;
     private unowned List<string> caps;
+
+    public signal void invoked(Geary.Email? email);
     
     public NotificationBubble() {
         if (!Notify.is_initted()) {
@@ -29,7 +32,7 @@ public class NotificationBubble : GLib.Object {
             "icon-name", "geary",
             "summary", GLib.Environment.get_application_name());
         notification.set_hint_string("desktop-entry", "geary");
-        if (caps.find("actions") != null)
+        if (caps.find_custom("actions", GLib.strcmp) != null)
             notification.add_action("default", _("Open"), on_default_action);
     }
     
@@ -39,13 +42,17 @@ public class NotificationBubble : GLib.Object {
     }
     
     private void on_default_action(Notify.Notification notification, string action) {
+        invoked(email);
         GearyApplication.instance.activate(new string[0]);
     }
 
     public void notify_new_mail(int count) throws GLib.Error {
+        // don't pass email if invoked
+        email = null;
+        
         if (!GearyApplication.instance.config.show_notifications)
             return;
-
+        
         notification.set_category("email.arrived");
         
         prepare_notification(ngettext("%d new message", "%d new messages", count).printf(count),
@@ -55,7 +62,10 @@ public class NotificationBubble : GLib.Object {
 
     public async void notify_one_message_async(Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
-
+        
+        // used if notification is invoked
+        this.email = email;
+        
         if (!GearyApplication.instance.config.show_notifications)
             return;
         

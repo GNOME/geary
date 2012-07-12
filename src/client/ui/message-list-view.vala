@@ -163,7 +163,14 @@ public class MessageListView : Gtk.TreeView {
             set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
         }
     }
-    
+
+    public void select_conversation(Geary.Conversation conversation) {
+        Gtk.TreeIter iter;
+        if(get_store().find_conversation(conversation, out iter)) {
+            set_cursor(get_store().get_path(iter), null, false);
+        }
+    }
+
     private void on_row_deleted(Gtk.TreePath path) {
         if (GearyApplication.instance.config.autoselect) {
             // Move to next conversation.

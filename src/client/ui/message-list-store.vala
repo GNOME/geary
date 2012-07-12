@@ -201,7 +201,7 @@ public class MessageListStore : Gtk.TreeStore {
         return low;
     }
     
-    private bool find_conversation(Geary.Conversation conversation, out Gtk.TreeIter iter) {
+    public bool find_conversation(Geary.Conversation conversation, out Gtk.TreeIter iter) {
         iter = Gtk.TreeIter();
         int count = get_count();
         for (int ctr = 0; ctr < count; ctr++) {

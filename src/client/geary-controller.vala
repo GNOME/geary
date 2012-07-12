@@ -520,12 +520,25 @@ public class GearyController {
             debug("do_notify_new_email: %d messages listed, %d unread", list.size, unread);
             
             NotificationBubble notification = new NotificationBubble();
+            notification.invoked.connect(on_notification_bubble_invoked);
             if (unread == 1 && last_unread != null)
                 yield notification.notify_one_message_async(last_unread, cancellable_inbox);
             else if (unread > 0)
                 notification.notify_new_mail(unread);
         } catch (Error err) {
             debug("Unable to notify of new email: %s", err.message);
+        }
+    }
+
+    private void on_notification_bubble_invoked(Geary.Email? email) {
+        if(inbox_folder != null) {
+            main_window.folder_list.select_path(inbox_folder.get_path());
+            if(email != null) {
+                Geary.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
+                if(conversation != null) {
+                    main_window.message_list_view.select_conversation(conversation);
+                }
+            }
         }
     }
     
