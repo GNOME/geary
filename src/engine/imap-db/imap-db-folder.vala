@@ -622,7 +622,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             return -1;
         
         // the COUNT represents the 1-based number of rows from the first ordering to this one
-        if (flags.include_marked_for_remove())
+        if (!flags.include_marked_for_remove())
             return results.int_at(0);
         
         int adjusted = results.int_at(0) - get_marked_removed_count_lte(id);
