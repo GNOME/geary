@@ -663,7 +663,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         
         // look for duplicate in IMAP message properties
         Db.Statement stmt = cx.prepare(
-            "SELECT message_id FROM MessageTable WHERE internaldate=? AND rfc822_size=?");
+            "SELECT id FROM MessageTable WHERE internaldate=? AND rfc822_size=?");
         stmt.bind_string(0, internaldate);
         stmt.bind_int64(1, rfc822_size);
         
