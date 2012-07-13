@@ -45,11 +45,11 @@ engine/api/geary-special-folder-type.vala
 
 engine/common/common-message-data.vala
 
-engine/db/database-error.vala
 engine/db/db.vala
 engine/db/db-connection.vala
 engine/db/db-context.vala
 engine/db/db-database.vala
+engine/db/db-database-error.vala
 engine/db/db-result.vala
 engine/db/db-statement.vala
 engine/db/db-synchronous-mode.vala

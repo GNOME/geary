@@ -40,6 +40,7 @@ public class Geary.Db.Database : Geary.Db.Context {
     private Connection? master_connection = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
+    private Gee.LinkedList<Connection>? cx_pool = null;
     private unowned PrepareConnection? prepare_cb = null;
     
     public Database(File db_file) {
@@ -76,9 +77,13 @@ public class Geary.Db.Database : Geary.Db.Context {
         }
         
         if (threadsafe()) {
-            assert(thread_pool == null);
-            thread_pool = new ThreadPool<TransactionAsyncJob>.with_owned_data(on_async_job,
-                DEFAULT_MAX_CONCURRENCY, true);
+            if (thread_pool == null) {
+                thread_pool = new ThreadPool<TransactionAsyncJob>.with_owned_data(on_async_job,
+                    DEFAULT_MAX_CONCURRENCY, true);
+            }
+            
+            if (cx_pool == null)
+                cx_pool = new Gee.LinkedList<Connection>();
         } else {
             warning("SQLite not thread-safe: asynchronous queries will not be available");
         }
@@ -100,6 +105,9 @@ public class Geary.Db.Database : Geary.Db.Context {
         
         // drop the master connection, which holds a ref back to this object
         master_connection = null;
+        
+        // As per the contract above, can't simply drop the thread and connection pools; that would
+        // be bad.
         
         is_open = false;
     }
@@ -220,22 +228,36 @@ public class Geary.Db.Database : Geary.Db.Context {
     
     // This method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
-        // create connection for this thread
-        // TODO: Use connection pool -- *never* use master connection
+        // go to connection pool before creating a connection -- *never* use master connection for
+        // threaded operations
         Connection? cx = null;
-        try {
-            cx = open_connection();
-        } catch (Error err) {
-            debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
-                db_file.get_path(), err.message);
+        lock (cx_pool) {
+            cx = cx_pool.poll();
+        }
+        
+        Error? open_err = null;
+        if (cx == null) {
+            try {
+                cx = open_connection();
+            } catch (Error err) {
+                open_err = err;
+                debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
+                    db_file.get_path(), err.message);
+            }
         }
         
         if (cx != null)
             job.execute(cx);
+        else
+            job.failed(open_err);
         
         lock (outstanding_async_jobs) {
             assert(outstanding_async_jobs > 0);
             --outstanding_async_jobs;
+        }
+        
+        lock (cx_pool) {
+            cx_pool.offer(cx);
         }
     }
     

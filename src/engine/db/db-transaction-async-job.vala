@@ -42,6 +42,18 @@ private class Geary.Db.TransactionAsyncJob : Object {
             caught_err = err;
         }
         
+        schedule_completion();
+    }
+    
+    // Called in background thread context
+    internal void failed(Error err) {
+        // store as a caught thread to report to original caller
+        caught_err = err;
+        
+        schedule_completion();
+    }
+    
+    private void schedule_completion() {
         // notify foreground thread of completion
         // because Idle doesn't hold a ref, manually keep this object alive
         ref();
