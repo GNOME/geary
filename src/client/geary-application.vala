@@ -86,15 +86,17 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_conversations = false;
     static bool log_periodic = false;
     static bool log_sql = false;
+    static bool log_folder_normalization = false;
     static bool version = false;
     const OptionEntry[] options = {
         { "debug", 'd', 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
-        { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Output conversations log"), null },
-        { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Output network log"), null },
-        { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Output replay queue log"), null },
-        { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
-        { "log-periodic", 0, 0, OptionArg.NONE, ref log_periodic, N_("Output periodic activity"), null },
-        { "log-sql", 0, 0, OptionArg.NONE, ref log_sql, N_("Output database queries (generates lots of messages)"), null },
+        { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Log conversation monitoring"), null },
+        { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Log network activity"), null },
+        { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Log IMAP replay queue"), null },
+        { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Log netowkr serialization"), null },
+        { "log-periodic", 0, 0, OptionArg.NONE, ref log_periodic, N_("Log periodic activity"), null },
+        { "log-sql", 0, 0, OptionArg.NONE, ref log_sql, N_("Log database queries (generates lots of messages)"), null },
+        { "log-folder-normalization", 0, 0, OptionArg.NONE, ref log_folder_normalization, N_("Log folder normalization"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
         { null }
     };
@@ -137,6 +139,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         if (log_sql)
             Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
+        
+        if (log_folder_normalization)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
         
         if (log_debug)
             Geary.Logging.log_to(stdout);

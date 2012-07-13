@@ -192,6 +192,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         
         int remote_length = (old_remote != null) ? old_remote.size : 0;
         
+        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "normalizing %s, %d remote messages, %d local messages",
+            to_string(), remote_length, local_length);
+        
         int remote_ctr = 0;
         int local_ctr = 0;
         Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
@@ -217,6 +220,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
                 if ((local_email_flags == null) || !local_email_flags.equals(remote_email_flags)) {
                     batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
                     flags_changed.set(remote_email.id, remote_email.email_flags);
+                    
+                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
+                        to_string(), remote_email.id.to_string());
                 }
                 
                 remote_ctr++;
@@ -226,6 +232,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
                 batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
                 appended_ids.add(remote_email.id);
                 
+                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending inside remote ID %s",
+                    to_string(), remote_email.id.to_string());
+                
                 remote_ctr++;
             } else {
                 assert(remote_uid.value > local_uid.value);
@@ -233,6 +242,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
                 // local's email on the server has been removed, remove locally
                 batch.add(new RemoveLocalEmailOperation(local_folder, local_email.id));
                 removed_ids.add(local_email.id);
+                
+                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing inside local ID %s",
+                    to_string(), local_email.id.to_string());
                 
                 local_ctr++;
             }
@@ -246,6 +258,9 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             batch.add(new CreateLocalEmailOperation(local_folder, old_remote[remote_ctr],
                 NORMALIZATION_FIELDS));
             appended_ids.add(old_remote[remote_ctr].id);
+            
+            Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending outside remote %s",
+                to_string(), old_remote[remote_ctr].id.to_string());
         }
         
         // remove anything left over ... use local count rather than remote as we're still in a stage
@@ -253,10 +268,19 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         for (; local_ctr < local_length; local_ctr++) {
             batch.add(new RemoveLocalEmailOperation(local_folder, old_local[local_ctr].id));
             removed_ids.add(old_local[local_ctr].id);
+            
+            Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing outside remote %s",
+                to_string(), old_local[local_ctr].id.to_string());
         }
         
         // execute them all at once
+        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION,
+            "Executing %d batch normalization operations on %s...", batch.size, to_string());
+        
         yield batch.execute_all_async(cancellable);
+        
+        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION,
+            "Finished %d batch normalization operations on %s", batch.size, to_string());
         
         if (batch.get_first_exception_message() != null) {
             debug("Error while preparing opened folder %s: %s", to_string(),

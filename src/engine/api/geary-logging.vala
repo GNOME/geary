@@ -14,7 +14,8 @@ public enum Flag {
     REPLAY,
     CONVERSATIONS,
     PERIODIC,
-    SQL;
+    SQL,
+    FOLDER_NORMALIZATION;
     
     public inline bool is_all_set(Flag flags) {
         return (flags & this) == flags;
