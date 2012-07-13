@@ -7,6 +7,12 @@
 public class Geary.RFC822.Message : Object {
     private const string DEFAULT_ENCODING = "UTF8";
     
+    private const string HEADER_IN_REPLY_TO = "In-Reply-To";
+    private const string HEADER_REFERENCES = "References";
+    private const string HEADER_MAILER = "X-Mailer";
+    
+    // Internal note: If a field is added here, it *must* be set in Message.from_parts(),
+    // Message.without_bcc(), and stock_from_gmime().
     public RFC822.MailboxAddress? sender { get; private set; default = null; }
     public RFC822.MailboxAddresses? from { get; private set; default = null; }
     public RFC822.MailboxAddresses? to { get; private set; default = null; }
@@ -78,12 +84,12 @@ public class Geary.RFC822.Message : Object {
 
         if (email.in_reply_to != null) {
             in_reply_to = email.in_reply_to;
-            message.set_header("In-Reply-To", email.in_reply_to.value);
+            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to.value);
         }
         
         if (email.references != null) {
             references = email.references;
-            message.set_header("References", email.references.to_rfc822_string());
+            message.set_header(HEADER_REFERENCES, email.references.to_rfc822_string());
         }
         
         if (email.subject != null) {
@@ -94,7 +100,7 @@ public class Geary.RFC822.Message : Object {
         // User-Agent
         if (!Geary.String.is_empty(email.mailer)) {
             mailer = email.mailer;
-            message.set_header("X-Mailer", email.mailer);
+            message.set_header(HEADER_MAILER, email.mailer);
         }
 
         // Body: text format (optional)
@@ -150,12 +156,14 @@ public class Geary.RFC822.Message : Object {
     // Makes a copy of the given message without the BCC fields. This is used for sending the email
     // without sending the BCC headers to all recipients.
     public Message.without_bcc(Message email) {
-        // Required headers.
         message = new GMime.Message(true);
+        
+        // Required headers.
         sender = email.sender;
         message.set_sender(email.message.get_sender());
+        
         message.set_date_as_string(email.message.get_date_as_string());
-
+        
         // Optional headers.
         if (email.to != null) {
             to = email.to;
@@ -171,12 +179,12 @@ public class Geary.RFC822.Message : Object {
 
         if (email.in_reply_to != null) {
             in_reply_to = email.in_reply_to;
-            message.set_header("In-Reply-To", email.in_reply_to.value);
+            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to.value);
         }
 
         if (email.references != null) {
             references = email.references;
-            message.set_header("References", email.references.to_rfc822_string());
+            message.set_header(HEADER_REFERENCES, email.references.to_rfc822_string());
         }
 
         if (email.subject != null) {
@@ -187,7 +195,7 @@ public class Geary.RFC822.Message : Object {
         // User-Agent
         if (!Geary.String.is_empty(email.mailer)) {
             mailer = email.mailer;
-            message.set_header("X-Mailer", email.mailer);
+            message.set_header(HEADER_MAILER, email.mailer);
         }
         
         // Setup body depending on what MIME components were filled out.
@@ -274,12 +282,9 @@ public class Geary.RFC822.Message : Object {
     
     private void stock_from_gmime() {
         from = new RFC822.MailboxAddresses.from_rfc822_string(message.get_sender());
-        if (from.size == 0) {
-            from = null;
-        } else {
-            // sender is defined as first From address, from better or worse
-            sender = from[0];
-        }
+        
+        // sender is defined as first From address, from better or worse
+        sender = (from.size != 0) ? from[0] : null;
         
         Gee.List<RFC822.MailboxAddress>? converted = convert_gmime_address_list(
             message.get_recipients(GMime.RecipientType.TO));
@@ -294,8 +299,17 @@ public class Geary.RFC822.Message : Object {
         if (converted != null && converted.size > 0)
             bcc = new RFC822.MailboxAddresses(converted);
         
+        if (!String.is_empty(message.get_header(HEADER_IN_REPLY_TO)))
+            in_reply_to = new RFC822.MessageID(message.get_header(HEADER_IN_REPLY_TO));
+        
+        if (!String.is_empty(message.get_header(HEADER_REFERENCES)))
+            references = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_REFERENCES));
+        
         if (!String.is_empty(message.get_subject()))
             subject = new RFC822.Subject.decode(message.get_subject());
+        
+        if (!String.is_empty(message.get_header(HEADER_MAILER)))
+            mailer = message.get_header(HEADER_MAILER);
     }
     
     private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist) {

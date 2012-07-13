@@ -152,6 +152,8 @@ public class Geary.ComposedEmail : Object {
     private void set_reply_references(Geary.Email source) {
         in_reply_to = source.message_id;
         reply_to_email = source;
+        
+        // generate list for References
         Gee.ArrayList<RFC822.MessageID> list = new Gee.ArrayList<RFC822.MessageID>();
         
         // 1. Start with the source's References list
@@ -167,10 +169,7 @@ public class Geary.ComposedEmail : Object {
         if (source.message_id != null)
             list.add(source.message_id);
         
-        if (list.size > 0)
-            references = new RFC822.MessageIDList.from_list(list);
-        else
-            references = null;
+        references = (list.size > 0) ? new RFC822.MessageIDList.from_list(list) : null;
     }
     
     private Geary.RFC822.Subject create_subject_for_reply(Geary.Email email) {
