@@ -15,7 +15,6 @@ engine/api/geary-account.vala
 engine/api/geary-account-information.vala
 engine/api/geary-account-settings.vala
 engine/api/geary-attachment.vala
-engine/api/geary-batch-operations.vala
 engine/api/geary-composed-email.vala
 engine/api/geary-conversation.vala
 engine/api/geary-conversation-monitor.vala
@@ -112,6 +111,7 @@ engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
 engine/impl/geary-abstract-account.vala
 engine/impl/geary-abstract-folder.vala
+engine/impl/geary-batch-operations.vala
 engine/impl/geary-email-flag-watcher.vala
 engine/impl/geary-email-prefetcher.vala
 engine/impl/geary-generic-capabilities.vala
