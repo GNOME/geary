@@ -388,7 +388,6 @@ public class GearyController {
         
         current_conversations = new Geary.ConversationMonitor(current_folder, false,
             MessageListStore.REQUIRED_FIELDS);
-        yield current_conversations.start_monitoring_async(cancellable_folder);
         
         current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);
@@ -398,6 +397,8 @@ public class GearyController {
         current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
         current_conversations.conversation_removed.connect(on_conversation_removed);
         current_conversations.email_flags_changed.connect(on_email_flags_changed);
+        
+        yield current_conversations.start_monitoring_async(cancellable_folder);
         
         // Do a quick-list of the messages in the local store), followed by a complete list if needed
         loading_local_only = true;

@@ -49,8 +49,7 @@ private class Geary.MarkEmail : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
             flags_to_add, flags_to_remove, cancellable);
@@ -101,8 +100,7 @@ private class Geary.ExpungeEmail : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
@@ -206,7 +204,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         int local_count;
         if (!local_only) {
             // normalize the position (ordering) of what's available locally with the situation on
-            // the server ... this involves prefetching the PROPERTIES of the missing emails from
+            // the server ... this involves fetching the PROPERTIES of the missing emails from
             // the server and caching them locally
             yield engine.normalize_email_positions_async(low, count, out local_count, cancellable);
         } else {
@@ -218,7 +216,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
         // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
         // if the folder is in the process of opening
         int local_low = 0;
-        if (!local_only && yield engine.wait_for_remote_to_open(cancellable)) {
+        if (!local_only && yield engine.wait_for_remote_ready(cancellable)) {
             engine.normalize_span_specifiers(ref low, ref count, engine.remote_count);
             
             // because the local store caches messages starting from the newest (at the end of the list)
@@ -295,8 +293,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         // go through the positions from (low) to (low + count) and see if they're not already
         // present in local_list; whatever isn't present needs to be fetched in full
@@ -359,8 +356,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     
     private async void remote_list_positional(int[] needed_by_position) throws Error {
         // possible to call remote multiple times, wait for it to open once and go
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            return;
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         // pull in reverse order because callers to this method tend to order messages from oldest
         // to newest, but for user satisfaction, should be fetched from newest to oldest
@@ -402,8 +398,7 @@ private class Geary.ListEmail : Geary.SendReplayOperation {
     private async void remote_list_partials(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.Email.Field remaining_fields) throws Error {
         // possible to call remote multiple times, wait for it to open once and go
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            return;
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         Imap.MessageSet msg_set = new Imap.MessageSet.email_id_collection(ids);
         
@@ -580,8 +575,7 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            if (!yield owner.wait_for_remote_to_open(cancellable))
-                throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", owner.to_string());
+            yield owner.throw_if_remote_not_ready(cancellable);
             
             // fetch from remote folder
             Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
@@ -688,8 +682,7 @@ private class Geary.ListEmailBySparseID : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield owner.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", owner.to_string());
+        yield owner.throw_if_remote_not_ready(cancellable);
         
         NonblockingBatch batch = new NonblockingBatch();
         
@@ -796,8 +789,7 @@ private class Geary.FetchEmail : Geary.SendReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         // fetch only the remaining fields from the remote folder (if only pulling partial information,
         // will merge at end of this method)
@@ -858,8 +850,7 @@ private class Geary.CopyEmail : Geary.SendReplayOperation {
     }
 
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         yield engine.remote_folder.copy_email_async(new Imap.MessageSet.email_id_collection(to_copy),
             destination, cancellable);
@@ -906,8 +897,7 @@ private class Geary.MoveEmail : Geary.SendReplayOperation {
     }
 
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (!yield engine.wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", engine.to_string());
+        yield engine.throw_if_remote_not_ready(cancellable);
         
         yield engine.remote_folder.move_email_async(new Imap.MessageSet.email_id_collection(to_move),
             destination, cancellable);

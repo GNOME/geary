@@ -419,7 +419,7 @@ public class Geary.ConversationMonitor : Object {
     }
     
     /**
-     * See Geary.Folder.lazy_list_email_async() for details of how these parameters operate.  Instead
+     * See Geary.Folder.lazy_list_email() for details of how these parameters operate.  Instead
      * of returning emails, this method will load the Conversations object with them sorted into
      * Conversation objects.
      */

@@ -358,7 +358,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // doesn't open, this folder remains open but only able to work with the local cache.
         //
         // Note that any use of remote_folder in this class should first call
-        // wait_for_remote_to_open(), which uses a NonblockingSemaphore to indicate that the remote
+        // wait_for_remote_ready(), which uses a NonblockingSemaphore to indicate that the remote
         // is open (or has failed to open).  This allows for early calls to list and fetch emails
         // can work out of the local cache until the remote is ready.
         open_remote_async.begin(readonly, cancellable);
@@ -444,14 +444,18 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     }
     
     // Returns true if the remote folder is ready, false otherwise
-    internal async bool wait_for_remote_to_open(Cancellable? cancellable = null) throws Error {
+    internal async bool wait_for_remote_ready(Cancellable? cancellable) throws Error {
         if (remote_folder != null)
             return true;
         
-        debug("waiting for remote to open, replay queue blocked...");
         yield remote_semaphore.wait_async(cancellable);
         
         return (remote_folder != null);
+    }
+    
+    internal async void throw_if_remote_not_ready(Cancellable? cancellable) throws Error {
+        if (!yield wait_for_remote_ready(cancellable))
+            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -550,7 +554,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         try {
             // If remote doesn't fully open, then don't fire signal, as we'll be unable to
             // normalize the folder
-            if (!yield wait_for_remote_to_open()) {
+            if (!yield wait_for_remote_ready(null)) {
                 debug("do_replay_appended_messages: remote never opened for %s", to_string());
                 
                 return;
@@ -709,7 +713,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // if connected or connecting, use stashed remote count (which is always kept current once
         // remote folder is opened)
         if (opened) {
-            if (yield wait_for_remote_to_open(cancellable))
+            if (yield wait_for_remote_ready(cancellable))
                 return remote_count;
         }
         
@@ -809,8 +813,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // reliable way to determine certain counts and positions without it
         //
         // TODO: Need to deal with this in a sane manner when offline
-        if (!yield wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("Must be synchronized with server for listing by ID");
+        throw_if_remote_not_ready(cancellable);
         assert(remote_count >= 0);
         
         // Schedule list operation and wait for completion.
@@ -966,18 +969,18 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     // In order to maintain positions for all messages without storing all of them locally,
     // the database stores entries for the lowest requested email to the highest (newest), which
     // means there can be no gaps between the last in the database and the last on the server.
-    // This method takes care of that.
+    // This method takes care of that if that range needs to expand.
     //
     // Note that this method doesn't return a remote_count because that's maintained by the
     // EngineFolder as a member variable.
     internal async void normalize_email_positions_async(int low, int count, out int local_count,
         Cancellable? cancellable) throws Error {
-        if (!yield wait_for_remote_to_open(cancellable)) {
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
-        }
+        throw_if_remote_not_ready(cancellable);
         
         int mutex_token = yield normalize_email_positions_mutex.claim_async(cancellable);
         
+        Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
+            Hashable.hash_func, Equalable.equal_func);
         Error? error = null;
         try {
             local_count = yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
@@ -999,8 +1002,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             
             int prefetch_count = local_low - high;
             
-            debug("prefetching %d (%d) for %s (local_low=%d)", high, prefetch_count, to_string(),
-                local_low);
+            debug("expanding normalized range to %d (%d needed) for %s (local_low=%d) from remote",
+                high, prefetch_count, to_string(), local_low);
             
             // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
             // as fields for duplicate detection
@@ -1023,22 +1026,21 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
             batch.throw_first_exception();
             
             // Collect which EmailIdentifiers were created and report them
-            Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
-                Hashable.hash_func, Equalable.equal_func);
             foreach (int id in batch.get_ids()) {
                 CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
                 if (op != null && op.created)
                     created_ids.add(op.email.id);
             }
-            
-            if (created_ids.size > 0)
-                notify_email_locally_appended(created_ids);
         } catch (Error e) {
             local_count = 0; // prevent compiler warning
             error = e;
         }
         
         normalize_email_positions_mutex.release(ref mutex_token);
+        
+        // report created outside of mutex, to avoid reentrancy issues
+        if (created_ids.size > 0)
+            notify_email_locally_appended(created_ids);
         
         if (error != null)
             throw error;
@@ -1048,8 +1050,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error {
         check_open("mark_email_async");
-        if (!yield wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
+        throw_if_remote_not_ready(cancellable);
 
         replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
             cancellable));
@@ -1058,8 +1059,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("copy_email_async");
-        if (!yield wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
+        throw_if_remote_not_ready(cancellable);
 
         replay_queue.schedule(new CopyEmail(this, to_copy, destination));
     }
@@ -1067,8 +1067,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     public virtual async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("move_email_async");
-        if (!yield wait_for_remote_to_open(cancellable))
-            throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
+        throw_if_remote_not_ready(cancellable);
 
         replay_queue.schedule(new MoveEmail(this, to_move, destination));
     }

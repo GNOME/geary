@@ -77,8 +77,9 @@ public interface Geary.Folder : Object {
      * indicating the number of messages in the folder (in the case of OpenState.BOTH or
      * OpenState.REMOTE, it refers to the authoritative number).
      *
-     * In general, OpenState.REMOTE won't fire as that indicates an underlying error in the local
-     * store, which is problematic for synchronization.
+     * OpenState.REMOTE will only fire if there's no local store, indicating that it's not a
+     * synchronized folder but rather one entirely backed by a network server.  Geary currently
+     * has no such folder implemented like this.
      *
      * This signal will never fire with Geary.OpenState.CLOSED as a parameter.
      */
@@ -218,9 +219,10 @@ public interface Geary.Folder : Object {
      * However, even if the method returns before the Folder's OpenState is BOTH, this Folder is
      * ready for operation if this method returns without error.  The messages the folder returns
      * may not reflect the full state of the Folder, however, and returned emails may subsequently
-     * have their state changed (such as their EmailLocation).  Making a call that requires
+     * have their state changed (such as their position).  Making a call that requires
      * accessing the remote store before OpenState.BOTH has been signalled will result in that
-     * call blocking until the remote is open or an error state has occurred.
+     * call blocking until the remote is open or an error state has occurred.  See list_email_async()
+     * for special notes on its operation.
      *
      * If there's an error while opening, "open-failed" will be fired.  (See that signal for more
      * information on how many times it may fire, and when.)  To prevent the Folder from going into
@@ -268,7 +270,8 @@ public interface Geary.Folder : Object {
      * and proceeds to all available emails.  If low is -1, the *last* (most recent) 'count' emails
      * are returned.  If both low and count are -1, it's no different than calling with low as
      * 1 and count -1, that is, all emails are returned.  (See normalize_span_specifiers() for
-     * a utility function that handles all aspects of these requirements.)
+     * a utility function that handles all aspects of these requirements.)  low is one-based, unless
+     * -1 is specified, as explained above.
      *
      * The returned list is not guaranteed to be in any particular order.  The position index
      * (starting from low) *is* ordered, however, from oldest to newest (in terms of receipt by the 
@@ -280,25 +283,21 @@ public interface Geary.Folder : Object {
      * reported.  No error is thrown.  This allows callers to blindly request the first or last n
      * emails in a folder without determining the count first.
      *
-     * Note that this only returns the emails with the required fields that are available to the
-     * Folder's backing medium.  The local store may have fewer or incomplete messages, meaning that
-     * this will return an incomplete list.  It is up to the caller to determine what's missing
-     * and take the appropriate steps.
-     *
-     * In the case of a Folder returned by Engine, it will use what's available in the local store
-     * and fetch from the network only what it needs, so that the caller gets a full list.
-     * Note that this means the call may require a round-trip to the server.
-     *
      * If the caller would prefer the Folder return emails it has immediately available rather than
-     * make an expensive I/O call to "properly" fetch the emails, it should pass ListFlags.FAST.
+     * make an expensive I/O call to "properly" fetch the emails, it should pass ListFlags.LOCAL_ONLY.
      * However, this also means avoiding a full synchronization, so it's possible the fetched
-     * emails do not correspond to what's actually available on the server.
-     * The best use of this method is to quickly retrieve a block of email for display or processing
-     * purposes, immediately followed by a non-fast list operation and then merging the two results.
+     * emails do not correspond to what's actually available on the server.  The best use of this
+     * method is to quickly retrieve a block of email for display or processing purposes,
+     * immediately followed by a non-fast list operation and then merging the two results.
+     *
+     * Note that LOCAL_ONLY only returns the emails with the required fields that are available in
+     * the Folder's local store.  It may have fewer or incomplete messages, meaning that this will
+     * return an incomplete list.
+     *
+     * Similarly, if the caller wants the Folder to always go out to the network to retrieve the
+     * information (even if it is already present in the local store), use ListFlags.FORCE_UPDATE.
      *
      * The Folder must be opened prior to attempting this operation.
-     *
-     * low is one-based, unless -1 is specified, as explained above.
      */
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
