@@ -5,8 +5,6 @@
  */
 
 private class Geary.ImapDB.Account : Object {
-    private const int BUSY_TIMEOUT_MSEC = 1000;
-    
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         
@@ -47,8 +45,8 @@ private class Geary.ImapDB.Account : Object {
         db.post_upgrade.connect(on_post_upgrade);
         
         try {
-            db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE,
-                on_prepare_database_connection, cancellable);
+            db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE, null,
+                cancellable);
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             
@@ -79,13 +77,6 @@ private class Geary.ImapDB.Account : Object {
         }
         
         outbox = null;
-    }
-    
-    private void on_prepare_database_connection(Db.Connection cx) throws Error {
-        cx.set_busy_timeout_msec(BUSY_TIMEOUT_MSEC);
-        cx.set_foreign_keys(true);
-        cx.set_recursive_triggers(true);
-        cx.set_synchronous(Db.SynchronousMode.OFF);
     }
     
     public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
