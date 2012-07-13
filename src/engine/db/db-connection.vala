@@ -25,6 +25,9 @@ public class Geary.Db.Connection : Geary.Db.Context {
     private const string PRAGMA_SECURE_DELETE = "secure_delete";
     private const string PRAGMA_SYNCHRONOUS = "synchronous";
     
+    // this is used for logging purposes only; connection numbers mean nothing to SQLite
+    private static int next_cx_number = 0;
+    
     /**
      * See http://www.sqlite.org/c3ref/last_insert_rowid.html
      */
@@ -50,10 +53,15 @@ public class Geary.Db.Connection : Geary.Db.Context {
     
     internal Sqlite.Database db;
     
+    private int cx_number;
     private int busy_timeout_msec = DEFAULT_BUSY_TIMEOUT_MSEC;
     
     internal Connection(Database database, int sqlite_flags, Cancellable? cancellable) throws Error {
         this.database = database;
+        
+        lock (next_cx_number) {
+            cx_number = next_cx_number++;
+        }
         
         check_cancelled("Connection.ctor", cancellable);
         
@@ -76,6 +84,9 @@ public class Geary.Db.Connection : Geary.Db.Context {
         check_cancelled("Connection.exec", cancellable);
         
         throw_on_error("Connection.exec", db.exec(sql), sql);
+        
+        // Don't use Context.log(), which is designed for logging Results and Statements
+        Logging.debug(Logging.Flag.SQL, "exec:\n\t%s", sql);
     }
     
     /**
@@ -329,6 +340,10 @@ public class Geary.Db.Connection : Geary.Db.Context {
     
     public override Connection? get_connection() {
         return this;
+    }
+    
+    public string to_string() {
+        return "[%d] %s".printf(cx_number, database.db_file.get_basename());
     }
 }
 

@@ -34,8 +34,10 @@ public class Geary.Db.Result : Geary.Db.Context {
     public bool next(Cancellable? cancellable = null) throws Error {
         check_cancelled("Result.step", cancellable);
         
-        if (!finished)
+        if (!finished) {
             finished = (throw_on_error("Result.step", statement.stmt.step())) != Sqlite.ROW;
+            log(finished ? "NO ROW" : "ROW");
+        }
         
         return !finished;
     }
@@ -46,7 +48,10 @@ public class Geary.Db.Result : Geary.Db.Context {
     public double double_at(int column) throws DatabaseError {
         verify_at(column);
         
-        return statement.stmt.column_double(column);
+        double d = statement.stmt.column_double(column);
+        log("double_at(%d) -> %lf", column, d);
+        
+        return d;
     }
     
     /**
@@ -55,7 +60,10 @@ public class Geary.Db.Result : Geary.Db.Context {
     public int int_at(int column) throws DatabaseError {
         verify_at(column);
         
-        return statement.stmt.column_int(column);
+        int i = statement.stmt.column_int(column);
+        log("int_at(%d) -> %d", column, i);
+        
+        return i;
     }
     
     /**
@@ -78,7 +86,10 @@ public class Geary.Db.Result : Geary.Db.Context {
     public int64 int64_at(int column) throws DatabaseError {
         verify_at(column);
         
-        return statement.stmt.column_int64(column);
+        int64 i64 = statement.stmt.column_int64(column);
+        log("int64_at(%d) -> %s", column, i64.to_string());
+        
+        return i64;
     }
     
     /**
@@ -106,7 +117,10 @@ public class Geary.Db.Result : Geary.Db.Context {
     public string string_at(int column) throws DatabaseError {
         verify_at(column);
         
-        return statement.stmt.column_text(column);
+        string s = statement.stmt.column_text(column);
+        log("string_at(%d) -> %s", column, s);
+        
+        return s;
     }
     
     private void verify_at(int column) throws DatabaseError {

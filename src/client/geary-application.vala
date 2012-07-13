@@ -85,7 +85,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     static bool log_replay_queue = false;
     static bool log_conversations = false;
     static bool log_periodic = false;
-    static bool log_transactions = false;
+    static bool log_sql = false;
     static bool version = false;
     const OptionEntry[] options = {
         { "debug", 'd', 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
@@ -94,7 +94,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Output replay queue log"), null },
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Output serializer log"), null },
         { "log-periodic", 0, 0, OptionArg.NONE, ref log_periodic, N_("Output periodic activity"), null },
-        { "log-transactions", 0, 0, OptionArg.NONE, ref log_transactions, N_("Output database transactions"), null },
+        { "log-sql", 0, 0, OptionArg.NONE, ref log_sql, N_("Output database queries (generates lots of messages)"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
         { null }
     };
@@ -135,8 +135,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (log_periodic)
             Geary.Logging.enable_flags(Geary.Logging.Flag.PERIODIC);
         
-        if (log_transactions)
-            Geary.Logging.enable_flags(Geary.Logging.Flag.TRANSACTIONS);
+        if (log_sql)
+            Geary.Logging.enable_flags(Geary.Logging.Flag.SQL);
         
         if (log_debug)
             Geary.Logging.log_to(stdout);

@@ -32,5 +32,25 @@ public abstract class Geary.Db.Context : Object {
     protected inline int throw_on_error(string? method, int result, string? raw = null) throws DatabaseError {
         return Db.throw_on_error(this, method, result, raw);
     }
+    
+    [PrintFormat]
+    protected void log(string fmt, ...) {
+        if (!Logging.are_all_flags_set(Logging.Flag.SQL))
+            return;
+        
+        Connection? cx = get_connection();
+        Statement? stmt = get_statement();
+        
+        if (stmt != null) {
+            Logging.debug(Logging.Flag.SQL, "%s %s\n\t<%s>".printf(
+                (cx != null) ? cx.to_string() : "[no cx]",
+                fmt.vprintf(va_list()),
+                (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql"));
+        } else {
+            Logging.debug(Logging.Flag.SQL, "%s %s".printf(
+                (cx != null) ? cx.to_string() : "[no cx]",
+                fmt.vprintf(va_list())));
+        }
+    }
 }
 
