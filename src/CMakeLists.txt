@@ -11,6 +11,9 @@ common/common-yorba-application.vala
 )
 
 set(ENGINE_SRC
+engine/abstract/geary-abstract-account.vala
+engine/abstract/geary-abstract-folder.vala
+
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
 engine/api/geary-account-settings.vala
@@ -109,24 +112,22 @@ engine/imap-db/outbox/smtp-outbox-email-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
-engine/impl/geary-abstract-account.vala
-engine/impl/geary-abstract-folder.vala
-engine/impl/geary-batch-operations.vala
-engine/impl/geary-email-flag-watcher.vala
-engine/impl/geary-email-prefetcher.vala
-engine/impl/geary-generic-capabilities.vala
-engine/impl/geary-generic-imap-account.vala
-engine/impl/geary-generic-imap-folder.vala
-engine/impl/geary-gmail-account.vala
-engine/impl/geary-gmail-folder.vala
-engine/impl/geary-other-account.vala
-engine/impl/geary-other-folder.vala
-engine/impl/geary-receive-replay-operations.vala
-engine/impl/geary-replay-operation.vala
-engine/impl/geary-replay-queue.vala
-engine/impl/geary-send-replay-operations.vala
-engine/impl/geary-yahoo-account.vala
-engine/impl/geary-yahoo-folder.vala
+engine/imap-impl/geary-batch-operations.vala
+engine/imap-impl/geary-email-flag-watcher.vala
+engine/imap-impl/geary-email-prefetcher.vala
+engine/imap-impl/geary-generic-capabilities.vala
+engine/imap-impl/geary-generic-imap-account.vala
+engine/imap-impl/geary-generic-imap-folder.vala
+engine/imap-impl/geary-receive-replay-operations.vala
+engine/imap-impl/geary-replay-operation.vala
+engine/imap-impl/geary-replay-queue.vala
+engine/imap-impl/geary-send-replay-operations.vala
+engine/imap-impl/gmail/geary-gmail-account.vala
+engine/imap-impl/gmail/geary-gmail-folder.vala
+engine/imap-impl/other/geary-other-account.vala
+engine/imap-impl/other/geary-other-folder.vala
+engine/imap-impl/yahoo/geary-yahoo-account.vala
+engine/imap-impl/yahoo/geary-yahoo-folder.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
