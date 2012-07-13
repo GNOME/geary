@@ -222,10 +222,6 @@ set(MAILER_SRC
 mailer/main.vala
 )
 
-set(DBTEST_SRC
-db-test/main.vala
-)
-
 set(DBUSSERVICE_SRC
 dbusservice/controller.vala
 dbusservice/database.vala
@@ -396,31 +392,6 @@ add_custom_command(
     POST_BUILD
     COMMAND 
         ${CMAKE_COMMAND} -E copy geary-mailer ${CMAKE_BINARY_DIR}/
-)
-
-# db-test app
-#################################################
-vala_precompile(DBTEST_VALA_C
-    ${DBTEST_SRC}
-PACKAGES
-    ${ENGINE_PACKAGES}
-    geary-static
-OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
-    --vapidir=${CMAKE_BINARY_DIR}/src
-    --thread
-    --enable-checking
-    --fatal-warnings
-)
-
-add_executable(geary-db-test ${DBTEST_VALA_C})
-target_link_libraries(geary-db-test ${DEPS_LIBRARIES} gthread-2.0 geary-static)
-add_custom_command(
-    TARGET
-        geary-db-test
-    POST_BUILD
-    COMMAND 
-        ${CMAKE_COMMAND} -E copy geary-db-test ${CMAKE_BINARY_DIR}/
 )
 
 # DBus Service
