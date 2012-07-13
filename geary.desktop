@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Icon=geary
 Name=Geary
 GenericName=Email Client
@@ -8,6 +7,6 @@ TryExec=geary
 Exec=geary %U
 Type=Application
 Terminal=false
-Categories=GNOME;GTK;Network;Office;Email
-MimeType=x-scheme-handler/mailto
+Categories=GNOME;GTK;Network;Office;Email;
+MimeType=x-scheme-handler/mailto;
 
