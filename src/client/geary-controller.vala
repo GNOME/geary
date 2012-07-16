@@ -641,8 +641,6 @@ public class GearyController {
     }
     
     private void on_conversations_selected(Gee.Set<Geary.Conversation> selected) {
-        debug("on_conversations_selected: %d", selected.size);
-        
         cancel_message();
 
         selected_conversations = selected;

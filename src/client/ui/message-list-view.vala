@@ -129,8 +129,6 @@ public class MessageListView : Gtk.TreeView {
     // Gtk.TreeSelection can fire its "changed" signal even when nothing's changed, so look for that
     // and prevent to avoid subscribers from doing the same things multiple times
     private void on_selection_changed() {
-        debug("on_selection_changed");
-        
         List<Gtk.TreePath> paths = get_all_selected_paths();
         if (paths.length() == 0) {
             // only notify if this is different than what was previously reported

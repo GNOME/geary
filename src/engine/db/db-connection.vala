@@ -312,7 +312,12 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public TransactionOutcome exec_transaction(TransactionType type, TransactionMethod cb,
         Cancellable? cancellable = null) throws Error {
         // initiate the transaction
-        exec(type.sql(), cancellable);
+        try {
+            exec(type.sql(), cancellable);
+        } catch (Error err) {
+            debug("Connection.exec_transaction: unable to %s: %s", type.sql(), err.message);
+            throw err;
+        }
         
         TransactionOutcome outcome = TransactionOutcome.ROLLBACK;
         Error? caught_err = null;

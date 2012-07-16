@@ -358,7 +358,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // doesn't open, this folder remains open but only able to work with the local cache.
         //
         // Note that any use of remote_folder in this class should first call
-        // wait_for_remote_ready(), which uses a NonblockingSemaphore to indicate that the remote
+        // wait_for_remote_ready_async(), which uses a NonblockingSemaphore to indicate that the remote
         // is open (or has failed to open).  This allows for early calls to list and fetch emails
         // can work out of the local cache until the remote is ready.
         open_remote_async.begin(readonly, cancellable);
@@ -444,7 +444,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     }
     
     // Returns true if the remote folder is ready, false otherwise
-    internal async bool wait_for_remote_ready(Cancellable? cancellable) throws Error {
+    internal async bool wait_for_remote_ready_async(Cancellable? cancellable) throws Error {
         if (remote_folder != null)
             return true;
         
@@ -453,8 +453,8 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         return (remote_folder != null);
     }
     
-    internal async void throw_if_remote_not_ready(Cancellable? cancellable) throws Error {
-        if (!yield wait_for_remote_ready(cancellable))
+    internal async void throw_if_remote_not_ready_async(Cancellable? cancellable) throws Error {
+        if (!yield wait_for_remote_ready_async(cancellable))
             throw new EngineError.SERVER_UNAVAILABLE("No connection to %s", remote.to_string());
     }
     
@@ -554,7 +554,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         try {
             // If remote doesn't fully open, then don't fire signal, as we'll be unable to
             // normalize the folder
-            if (!yield wait_for_remote_ready(null)) {
+            if (!yield wait_for_remote_ready_async(null)) {
                 debug("do_replay_appended_messages: remote never opened for %s", to_string());
                 
                 return;
@@ -713,7 +713,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // if connected or connecting, use stashed remote count (which is always kept current once
         // remote folder is opened)
         if (opened) {
-            if (yield wait_for_remote_ready(cancellable))
+            if (yield wait_for_remote_ready_async(cancellable))
                 return remote_count;
         }
         
@@ -813,7 +813,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         // reliable way to determine certain counts and positions without it
         //
         // TODO: Need to deal with this in a sane manner when offline
-        throw_if_remote_not_ready(cancellable);
+        yield throw_if_remote_not_ready_async(cancellable);
         assert(remote_count >= 0);
         
         // Schedule list operation and wait for completion.
@@ -975,7 +975,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     // EngineFolder as a member variable.
     internal async void normalize_email_positions_async(int low, int count, out int local_count,
         Cancellable? cancellable) throws Error {
-        throw_if_remote_not_ready(cancellable);
+        yield throw_if_remote_not_ready_async(cancellable);
         
         int mutex_token = yield normalize_email_positions_mutex.claim_async(cancellable);
         
@@ -1050,7 +1050,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error {
         check_open("mark_email_async");
-        throw_if_remote_not_ready(cancellable);
+        yield throw_if_remote_not_ready_async(cancellable);
 
         replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
             cancellable));
@@ -1059,7 +1059,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("copy_email_async");
-        throw_if_remote_not_ready(cancellable);
+        yield throw_if_remote_not_ready_async(cancellable);
 
         replay_queue.schedule(new CopyEmail(this, to_copy, destination));
     }
@@ -1067,7 +1067,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     public virtual async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("move_email_async");
-        throw_if_remote_not_ready(cancellable);
+        yield throw_if_remote_not_ready_async(cancellable);
 
         replay_queue.schedule(new MoveEmail(this, to_move, destination));
     }

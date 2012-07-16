@@ -253,7 +253,6 @@ public class MessageViewer : WebKit.WebView {
     // Removes all displayed e-mails from the view.
     public void clear(Geary.Folder? new_folder) {
         // Remove all messages from DOM.
-        debug("Clearing message viewer");
         try {
             foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
                 if (element.get_parent_element() != null)
