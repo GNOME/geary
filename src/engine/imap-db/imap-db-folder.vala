@@ -961,8 +961,10 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         if (!do_fetch_email_fields(cx, row.id, out available_fields, cancellable))
             throw new EngineError.NOT_FOUND("No message with ID %lld found in database", row.id);
         
-        // This calculates the fields in the row that are not in the database already
+        // This calculates the fields in the row that are not in the database already and then adds
+        // any available mutable fields provided by the caller
         Geary.Email.Field new_fields = (row.fields ^ available_fields) & row.fields;
+        new_fields |= (row.fields & Geary.Email.MUTABLE_FIELDS);
         if (new_fields == Geary.Email.Field.NONE) {
             // nothing to add
             return;
@@ -1092,8 +1094,8 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         // Build the combined email from the merge, which will be used to save the attachments
         Geary.Email combined_email = row.to_email(email.position, email.id);
         
-        // Merge in any fields in the submitted email that aren't already in the database
-        if ((db_fields & email.fields) != email.fields) {
+        // Merge in any fields in the submitted email that aren't already in the database or are mutable
+        if (((db_fields & email.fields) != email.fields) || email.fields.is_any_set(Geary.Email.MUTABLE_FIELDS)) {
             do_merge_message_row(cx, row, cancellable);
             
             // Update attachments if not already in the database

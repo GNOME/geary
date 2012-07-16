@@ -9,6 +9,12 @@ public class Geary.Email : Object {
     // when returned.
     public const int MAX_PREVIEW_BYTES = 128;
     
+    /**
+     * Currently only one field is mutable: FLAGS.  All others never change once stored in the
+     * database.
+     */
+    public const Field MUTABLE_FIELDS = Geary.Email.Field.FLAGS;
+    
     // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
     public enum Field {
         NONE =              0,
