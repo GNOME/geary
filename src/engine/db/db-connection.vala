@@ -18,6 +18,12 @@
 public class Geary.Db.Connection : Geary.Db.Context {
     public const int DEFAULT_BUSY_TIMEOUT_MSEC = 0;
     
+    /**
+     * This value gives a generous amount of time for SQLite to finish a big write operation and
+     * relinquish the lock to other waiting transactions.
+     */
+    public const int RECOMMENDED_BUSY_TIMEOUT_MSEC = 30 * 1000;
+    
     private const string PRAGMA_FOREIGN_KEYS = "foreign_keys";
     private const string PRAGMA_RECURSIVE_TRIGGERS = "recursive_triggers";
     private const string PRAGMA_USER_VERSION = "user_version";

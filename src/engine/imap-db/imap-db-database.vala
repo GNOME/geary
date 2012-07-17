@@ -6,7 +6,7 @@
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const string DB_FILENAME = "geary.db";
-    private const int BUSY_TIMEOUT_MSEC = 1000;
+    private const int BUSY_TIMEOUT_MSEC = Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC;
     
     public Database(File db_dir, File schema_dir) {
         base (db_dir.get_child(DB_FILENAME), schema_dir);
