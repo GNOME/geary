@@ -809,6 +809,14 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         check_flags(method, flags);
         check_id(method, initial_id);
         
+        if (count == 0) {
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
+        
         // listing by ID requires the remote to be open and fully synchronized, as there's no
         // reliable way to determine certain counts and positions without it
         //
@@ -859,6 +867,14 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
         check_open(method);
         check_flags(method, flags);
         check_ids(method, ids);
+        
+        if (ids.size == 0) {
+            // signal finished
+            if (cb != null)
+                cb(null, null);
+            
+            return;
+        }
         
         // Unlike list_email_by_id, don't need to wait for remote to open because not dealing with
         // a range of emails, but specific ones by ID
