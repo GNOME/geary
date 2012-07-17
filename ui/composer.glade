@@ -211,6 +211,7 @@
                     <property name="xpad">6</property>
                     <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">To:</property>
                     <property name="justify">right</property>
+                    <property name="mnemonic_widget">to</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -227,6 +228,7 @@
                     <property name="xpad">6</property>
                     <property name="label" translatable="yes">Cc:</property>
                     <property name="justify">right</property>
+                    <property name="mnemonic_widget">cc</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -284,6 +286,7 @@
                     <property name="xpad">6</property>
                     <property name="label" translatable="yes">Subject:</property>
                     <property name="justify">right</property>
+                    <property name="mnemonic_widget">subject</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -300,6 +303,7 @@
                     <property name="xpad">6</property>
                     <property name="label" translatable="yes">Bcc:</property>
                     <property name="justify">right</property>
+                    <property name="mnemonic_widget">bcc</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -435,7 +439,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Bold</property>
             <property name="related_action">bold</property>
-            <property name="label" translatable="no">toolbutton2</property>
+            <property name="label" translatable="yes">Bold</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -450,7 +454,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Italic</property>
             <property name="related_action">italic</property>
-            <property name="label" translatable="no">toolbutton2</property>
+            <property name="label" translatable="yes">Italic</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -465,7 +469,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Underline</property>
             <property name="related_action">underline</property>
-            <property name="label" translatable="no">toolbutton1</property>
+            <property name="label" translatable="yes">Underline</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -480,7 +484,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Strikethrough</property>
             <property name="related_action">strikethrough</property>
-            <property name="label" translatable="no">toolbutton1</property>
+            <property name="label" translatable="yes">Strikethrough</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -507,7 +511,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Indent</property>
             <property name="related_action">indent</property>
-            <property name="label" translatable="no">toolbutton6</property>
+            <property name="label" translatable="yes">Indent</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -522,7 +526,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Un-indent</property>
             <property name="related_action">outdent</property>
-            <property name="label" translatable="no">toolbutton6</property>
+            <property name="label" translatable="yes">Un-indent</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -549,7 +553,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Fonts</property>
             <property name="related_action">font</property>
-            <property name="label" translatable="no">toolbutton4</property>
+            <property name="label" translatable="yes">Fonts</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -564,7 +568,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Font size</property>
             <property name="related_action">fontsize</property>
-            <property name="label" translatable="no">toolbutton1</property>
+            <property name="label" translatable="yes">Font size</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -579,7 +583,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Color</property>
             <property name="related_action">color</property>
-            <property name="label" translatable="no">toolbutton4</property>
+            <property name="label" translatable="yes">Color</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -594,7 +598,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Link</property>
             <property name="related_action">insertlink</property>
-            <property name="label" translatable="no">toolbutton4</property>
+            <property name="label" translatable="yes">Link</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -609,7 +613,7 @@
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Remove formatting</property>
             <property name="related_action">removeformat</property>
-            <property name="label" translatable="no">toolbutton6</property>
+            <property name="label" translatable="yes">Remove formatting</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
