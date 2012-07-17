@@ -299,9 +299,17 @@ set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
+set(VALAC_OPTIONS
+    --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    --thread
+    --enable-checking
+    --debug
+    --fatal-warnings
+)
+
 # Engine (static library used for building)
 #################################################
-vala_precompile(ENGINE_VALA_C
+vala_precompile(ENGINE_VALA_C geary-static
     ${ENGINE_SRC}
     ${COMMON_SRC}
 PACKAGES
@@ -310,11 +318,7 @@ PACKAGES
 GENERATE_VAPI
     geary-static
 OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
-    --thread
-    --enable-checking
-    --debug
-    --fatal-warnings
+    ${VALAC_OPTIONS}
 )
 
 add_library(geary-static STATIC ${ENGINE_VALA_C})
@@ -322,19 +326,16 @@ target_link_libraries(geary-static ${DEPS_LIBRARIES} gthread-2.0)
 
 # Geary client app
 #################################################
-vala_precompile(GEARY_VALA_C
+vala_precompile(GEARY_VALA_C geary
     ${CLIENT_SRC}
 PACKAGES
     ${CLIENT_PACKAGES}
     ${ENGINE_PACKAGES}
-    geary-static
+CUSTOM_VAPIS
+    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    ${VALAC_OPTIONS}
     --vapidir=${CMAKE_BINARY_DIR}/src
-    --thread
-    --enable-checking
-    --debug
-    --fatal-warnings
 )
 
 add_executable(geary ${GEARY_VALA_C})
@@ -354,19 +355,16 @@ add_schemas(geary ${GSETTINGS_DIR})
 
 # Console app
 #################################################
-vala_precompile(CONSOLE_VALA_C
+vala_precompile(CONSOLE_VALA_C geary-console
     ${CONSOLE_SRC}
 PACKAGES
     ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
-    geary-static
+CUSTOM_VAPIS
+    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    ${VALAC_OPTIONS}
     --vapidir=${CMAKE_BINARY_DIR}/src
-    --thread
-    --enable-checking
-    --debug
-    --fatal-warnings
 )
 
 add_executable(geary-console ${CONSOLE_VALA_C})
@@ -381,18 +379,15 @@ add_custom_command(
 
 # Mailer app
 #################################################
-vala_precompile(MAILER_VALA_C
+vala_precompile(MAILER_VALA_C geary-mailer
     ${MAILER_SRC}
 PACKAGES
     ${ENGINE_PACKAGES}
-    geary-static
+CUSTOM_VAPIS
+    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    ${VALAC_OPTIONS}
     --vapidir=${CMAKE_BINARY_DIR}/src
-    --thread
-    --enable-checking
-    --debug
-    --fatal-warnings
 )
 
 add_executable(geary-mailer ${MAILER_VALA_C})
@@ -407,19 +402,16 @@ add_custom_command(
 
 # DBus Service
 #################################################
-vala_precompile(DBUS_VALA_C
+vala_precompile(DBUS_VALA_C gearyd
     ${DBUSSERVICE_SRC}
 PACKAGES
     ${DBUSSERVICE_PACKAGES}
     ${ENGINE_PACKAGES}
-    geary-static
+CUSTOM_VAPIS
+    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    ${VALAC_OPTIONS}
     --vapidir=${CMAKE_BINARY_DIR}/src
-    --thread
-    --enable-checking
-    --debug
-    --fatal-warnings
 )
 
 add_executable(gearyd ${DBUS_VALA_C})

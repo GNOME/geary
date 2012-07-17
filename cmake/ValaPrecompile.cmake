@@ -41,8 +41,12 @@ find_package(Vala REQUIRED)
 # of c files outputted by the vala compiler. This list can than be used in
 # conjuction with functions like "add_executable" or others to create the
 # neccessary compile rules with CMake.
+#
+# The second parameter provided is a unique name for the source bundle, which
+# is used to create a .stamp file that marks the last time the bundle was
+# compiled to C.
 # 
-# The initial variable is followed by a list of .vala files to be compiled.
+# The initial variables are followed by a list of .vala files to be compiled.
 # Please take care to add every vala file belonging to the currently compiled
 # project or library as Vala will otherwise not be able to resolve all
 # dependencies.
@@ -77,7 +81,7 @@ find_package(Vala REQUIRED)
 # The following call is a simple example to the vala_precompile macro showing
 # an example to every of the optional sections:
 #
-#   vala_precompile(VALA_C
+#   vala_precompile(VALA_C mysourcebundle
 #       source1.vala
 #       source2.vala
 #       source3.vala
@@ -101,39 +105,47 @@ find_package(Vala REQUIRED)
 # file names after the call.
 ##
 
-macro(vala_precompile output)
+macro(vala_precompile output source_bundle_name)
     parse_arguments(ARGS "PACKAGES;OPTIONS;DIRECTORY;GENERATE_HEADER;GENERATE_VAPI;CUSTOM_VAPIS" "" ${ARGN})
+    
     if(ARGS_DIRECTORY)
         set(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_DIRECTORY})
     else(ARGS_DIRECTORY)
         set(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     endif(ARGS_DIRECTORY)
+    
     include_directories(${DIRECTORY})
+    
     set(vala_pkg_opts "")
     foreach(pkg ${ARGS_PACKAGES})
         list(APPEND vala_pkg_opts "--pkg=${pkg}")
     endforeach(pkg ${ARGS_PACKAGES})
+    
     set(in_files "")
     set(out_files "")
     set(${output} "")
     foreach(src ${ARGS_DEFAULT_ARGS})
         string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/ "" src ${src})
         string(REGEX MATCH "^/" IS_MATCHED ${src})
+        
         if(${IS_MATCHED} MATCHES "/")
-            list(APPEND in_files "${src}")
+            set(in_file ${src})
         else()
-            list(APPEND in_files "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
+            set(in_file "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
         endif()
+        
         string(REPLACE ".vala" ".c" src ${src})
         string(REPLACE ".gs" ".c" src ${src})
+        
         if(${IS_MATCHED} MATCHES "/")
             get_filename_component(VALA_FILE_NAME ${src} NAME)
             set(out_file "${CMAKE_CURRENT_BINARY_DIR}/${VALA_FILE_NAME}")
-            list(APPEND out_files "${CMAKE_CURRENT_BINARY_DIR}/${VALA_FILE_NAME}")
         else()
             set(out_file "${DIRECTORY}/${src}")
-            list(APPEND out_files "${DIRECTORY}/${src}")
         endif()
+        
+        list(APPEND in_files ${in_file})
+        list(APPEND out_files ${out_file})
         list(APPEND ${output} ${out_file})
     endforeach(src ${ARGS_DEFAULT_ARGS})
 
@@ -142,19 +154,21 @@ macro(vala_precompile output)
         foreach(vapi ${ARGS_CUSTOM_VAPIS})
             if(${vapi} MATCHES ${CMAKE_SOURCE_DIR} OR ${vapi} MATCHES ${CMAKE_BINARY_DIR})
                 list(APPEND custom_vapi_arguments ${vapi})
-            else (${vapi} MATCHES ${CMAKE_SOURCE_DIR} OR ${vapi} MATCHES ${CMAKE_BINARY_DIR})
+            else(${vapi} MATCHES ${CMAKE_SOURCE_DIR} OR ${vapi} MATCHES ${CMAKE_BINARY_DIR})
                 list(APPEND custom_vapi_arguments ${CMAKE_CURRENT_SOURCE_DIR}/${vapi})
             endif(${vapi} MATCHES ${CMAKE_SOURCE_DIR} OR ${vapi} MATCHES ${CMAKE_BINARY_DIR})
         endforeach(vapi ${ARGS_CUSTOM_VAPIS})
     endif(ARGS_CUSTOM_VAPIS)
 
+    set(STAMP_FILE ".${source_bundle_name}.stamp")
+    
     set(vapi_arguments "")
     if(ARGS_GENERATE_VAPI)
         list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_VAPI}.vapi")
         set(vapi_arguments "--internal-vapi=${ARGS_GENERATE_VAPI}.vapi")
-
+        
         # Header and internal header is needed to generate internal vapi
-        if (NOT ARGS_GENERATE_HEADER)
+        if(NOT ARGS_GENERATE_HEADER)
             set(ARGS_GENERATE_HEADER ${ARGS_GENERATE_VAPI})
         endif(NOT ARGS_GENERATE_HEADER)
     endif(ARGS_GENERATE_VAPI)
@@ -167,9 +181,9 @@ macro(vala_precompile output)
         list(APPEND header_arguments "--internal-header=${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
     endif(ARGS_GENERATE_HEADER)
 
-    add_custom_command(OUTPUT ${out_files} 
-    COMMAND 
-        ${VALA_EXECUTABLE} 
+    add_custom_command(OUTPUT ${STAMP_FILE}
+    COMMAND
+        ${VALA_EXECUTABLE}
     ARGS 
         "-C" 
         ${header_arguments} 
@@ -180,8 +194,15 @@ macro(vala_precompile output)
         ${ARGS_OPTIONS} 
         ${in_files} 
         ${custom_vapi_arguments}
+    COMMAND
+        touch
+    ARGS
+        ${STAMP_FILE}
     DEPENDS 
-        ${in_files} 
+        ${in_files}
         ${ARGS_CUSTOM_VAPIS}
     )
+    
+    add_custom_command(OUTPUT ${out_files} DEPENDS ${STAMP_FILE})
 endmacro(vala_precompile)
+
