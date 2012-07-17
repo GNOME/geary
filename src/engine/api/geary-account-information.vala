@@ -96,10 +96,10 @@ public class Geary.AccountInformation : Object {
     public Endpoint get_imap_endpoint() throws EngineError {
         switch (service_provider) {
             case ServiceProvider.GMAIL:
-                return GmailAccount.IMAP_ENDPOINT;
+                return ImapEngine.GmailAccount.IMAP_ENDPOINT;
             
             case ServiceProvider.YAHOO:
-                return YahooAccount.IMAP_ENDPOINT;
+                return ImapEngine.YahooAccount.IMAP_ENDPOINT;
             
             case ServiceProvider.OTHER:
                 Endpoint.Flags imap_flags = default_imap_server_ssl ? Endpoint.Flags.SSL :
@@ -118,10 +118,10 @@ public class Geary.AccountInformation : Object {
     public Endpoint get_smtp_endpoint() throws EngineError {
         switch (service_provider) {
             case ServiceProvider.GMAIL:
-                return GmailAccount.SMTP_ENDPOINT;
+                return ImapEngine.GmailAccount.SMTP_ENDPOINT;
             
             case ServiceProvider.YAHOO:
-                return YahooAccount.SMTP_ENDPOINT;
+                return ImapEngine.YahooAccount.SMTP_ENDPOINT;
             
             case ServiceProvider.OTHER:
                 Endpoint.Flags smtp_flags = default_smtp_server_ssl ? Endpoint.Flags.SSL :
@@ -145,16 +145,16 @@ public class Geary.AccountInformation : Object {
 
         switch (service_provider) {
             case ServiceProvider.GMAIL:
-                return new GmailAccount("Gmail account %s".printf(credentials.to_string()), settings,
-                    remote_account, local_account);
+                return new ImapEngine.GmailAccount("Gmail account %s".printf(credentials.to_string()),
+                    settings, remote_account, local_account);
             
             case ServiceProvider.YAHOO:
-                return new YahooAccount("Yahoo account %s".printf(credentials.to_string()), settings,
-                    remote_account, local_account);
+                return new ImapEngine.YahooAccount("Yahoo account %s".printf(credentials.to_string()),
+                    settings, remote_account, local_account);
             
             case ServiceProvider.OTHER:
-                return new OtherAccount("Other account %s".printf(credentials.to_string()), settings,
-                    remote_account, local_account);
+                return new ImapEngine.OtherAccount("Other account %s".printf(credentials.to_string()),
+                    settings, remote_account, local_account);
                 
             default:
                 throw new EngineError.NOT_FOUND("Service provider of type %s not known",

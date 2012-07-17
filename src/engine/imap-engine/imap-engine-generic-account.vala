@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
+private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
     private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
     
@@ -13,12 +13,12 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
     private bool open = false;
     private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
         FolderPath, Imap.FolderProperties>(Hashable.hash_func, Equalable.equal_func);
-    private Gee.HashMap<FolderPath, GenericImapFolder> existing_folders = new Gee.HashMap<
-        FolderPath, GenericImapFolder>(Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashMap<FolderPath, GenericFolder> existing_folders = new Gee.HashMap<
+        FolderPath, GenericFolder>(Hashable.hash_func, Equalable.equal_func);
     private Gee.HashSet<FolderPath> local_only = new Gee.HashSet<FolderPath>(
         Hashable.hash_func, Equalable.equal_func);
     
-    public GenericImapAccount(string name, Geary.AccountSettings settings, Imap.Account remote,
+    public GenericAccount(string name, Geary.AccountSettings settings, Imap.Account remote,
         ImapDB.Account local) {
         base (name, settings);
         
@@ -100,16 +100,16 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             throw remote_err;
     }
     
-    // Subclasses should implement this to return their flavor of a GenericImapFolder with the
+    // Subclasses should implement this to return their flavor of a GenericFolder with the
     // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
     // set using either the properties from the local folder or its path.
     //
     // This won't be called to build the Outbox, but for all others (including Inbox) it will.
-    protected abstract GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected abstract GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder);
     
-    private GenericImapFolder build_folder(ImapDB.Folder local_folder) {
-        GenericImapFolder? folder = existing_folders.get(local_folder.get_path());
+    private GenericFolder build_folder(ImapDB.Folder local_folder) {
+        GenericFolder? folder = existing_folders.get(local_folder.get_path());
         if (folder != null)
             return folder;
         
@@ -188,7 +188,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             yield local.clone_folder_async(remote_folder, cancellable);
         }
         
-        // Fetch the local account's version of the folder for the GenericImapFolder
+        // Fetch the local account's version of the folder for the GenericFolder
         return build_folder((ImapDB.Folder) yield local.fetch_folder_async(path, cancellable));
     }
     
@@ -229,7 +229,7 @@ private abstract class Geary.GenericImapAccount : Geary.EngineAccount {
             properties_map.set(remote_folder.get_path(), remote_folder.get_properties());
             
             // also use this iteration to set the local folder's special type
-            GenericImapFolder? local_folder = existing_folders.get(remote_folder.get_path());
+            GenericFolder? local_folder = existing_folders.get(remote_folder.get_path());
             if (local_folder != null)
                 local_folder.set_special_folder_type(remote_folder.get_properties().attrs.get_special_folder_type());
         }

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.YahooAccount : Geary.GenericImapAccount {
+private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
     private static Geary.Endpoint? _imap_endpoint = null;
     public static Geary.Endpoint IMAP_ENDPOINT { get {
         if (_imap_endpoint == null) {
@@ -54,7 +54,7 @@ private class Geary.YahooAccount : Geary.GenericImapAccount {
         }
     }
     
-    protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         return new YahooFolder(this, remote_account, local_account, local_folder,
             special_map.has_key(path) ? special_map.get(path) : Geary.SpecialFolderType.NONE);

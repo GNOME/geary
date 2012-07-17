@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSupportsCopy,
+private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.FolderSupportsCopy,
     Geary.FolderSupportsMark, Geary.FolderSupportsMove {
     internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
     
@@ -15,7 +15,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
     
-    private weak GenericImapAccount account;
+    private weak GenericAccount account;
     private Imap.Account remote;
     private ImapDB.Account local;
     private EmailFlagWatcher email_flag_watcher;
@@ -26,7 +26,7 @@ private class Geary.GenericImapFolder : Geary.AbstractFolder, Geary.FolderSuppor
     private ReplayQueue? replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     
-    public GenericImapFolder(GenericImapAccount account, Imap.Account remote, ImapDB.Account local,
+    public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         this.account = account;
         this.remote = remote;

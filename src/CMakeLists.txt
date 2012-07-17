@@ -112,22 +112,32 @@ engine/imap-db/outbox/smtp-outbox-email-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
-engine/imap-impl/geary-batch-operations.vala
-engine/imap-impl/geary-email-flag-watcher.vala
-engine/imap-impl/geary-email-prefetcher.vala
-engine/imap-impl/geary-generic-capabilities.vala
-engine/imap-impl/geary-generic-imap-account.vala
-engine/imap-impl/geary-generic-imap-folder.vala
-engine/imap-impl/geary-receive-replay-operations.vala
-engine/imap-impl/geary-replay-operation.vala
-engine/imap-impl/geary-replay-queue.vala
-engine/imap-impl/geary-send-replay-operations.vala
-engine/imap-impl/gmail/geary-gmail-account.vala
-engine/imap-impl/gmail/geary-gmail-folder.vala
-engine/imap-impl/other/geary-other-account.vala
-engine/imap-impl/other/geary-other-folder.vala
-engine/imap-impl/yahoo/geary-yahoo-account.vala
-engine/imap-impl/yahoo/geary-yahoo-folder.vala
+engine/imap-engine/imap-engine-batch-operations.vala
+engine/imap-engine/imap-engine-email-flag-watcher.vala
+engine/imap-engine/imap-engine-email-prefetcher.vala
+engine/imap-engine/imap-engine-generic-account.vala
+engine/imap-engine/imap-engine-generic-folder.vala
+engine/imap-engine/imap-engine-receive-replay-operation.vala
+engine/imap-engine/imap-engine-replay-operation.vala
+engine/imap-engine/imap-engine-replay-queue.vala
+engine/imap-engine/imap-engine-send-replay-operation.vala
+engine/imap-engine/gmail/imap-engine-gmail-account.vala
+engine/imap-engine/gmail/imap-engine-gmail-folder.vala
+engine/imap-engine/other/imap-engine-other-account.vala
+engine/imap-engine/other/imap-engine-other-folder.vala
+engine/imap-engine/replay-ops/imap-engine-copy-email.vala
+engine/imap-engine/replay-ops/imap-engine-expunge-email.vala
+engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
+engine/imap-engine/replay-ops/imap-engine-list-email.vala
+engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
+engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
+engine/imap-engine/replay-ops/imap-engine-mark-email.vala
+engine/imap-engine/replay-ops/imap-engine-move-email.vala
+engine/imap-engine/replay-ops/imap-engine-replay-append.vala
+engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
+engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
+engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
+engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
@@ -165,6 +175,7 @@ engine/state/state-mapping.vala
 
 engine/util/util-collection.vala
 engine/util/util-converter.vala
+engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
 engine/util/util-inet.vala
 engine/util/util-interfaces.vala

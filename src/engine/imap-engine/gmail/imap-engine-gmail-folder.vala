@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.YahooFolder : GenericImapFolder, Geary.FolderSupportsRemove {
-    public YahooFolder(YahooAccount account, Imap.Account remote, ImapDB.Account local,
+private class Geary.ImapEngine.GmailFolder : GenericFolder, FolderSupportsArchive {
+    public GmailFolder(GmailAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         base (account, remote, local, local_folder, special_folder_type);
     }
     
-    public async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
+    public async void archive_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
         yield expunge_email_async(email_ids, cancellable);
     }

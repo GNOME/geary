@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.ReplayQueue {
+private class Geary.ImapEngine.ReplayQueue {
     private class ReplayClose : ReplayOperation {
         public ReplayClose() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe

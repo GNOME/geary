@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.GmailAccount : Geary.GenericImapAccount {
+private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
     private const string GMAIL_FOLDER = "[Gmail]";
     private const string GOOGLEMAIL_FOLDER = "[Google Mail]";
     
@@ -72,7 +72,7 @@ private class Geary.GmailAccount : Geary.GenericImapAccount {
         }
     }
     
-    protected override GenericImapFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         // although Gmail supports XLIST, this will be called on startup if the XLIST properties
         // for the folders hasn't been retrieved yet.  Once they've been retrieved and stored in
