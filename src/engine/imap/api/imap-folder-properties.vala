@@ -5,7 +5,8 @@
  */
 
 public class Geary.Imap.FolderProperties {
-    public int messages { get; private set; }
+    // messages can be updated a variety of ways, so it's available as a public set
+    public int messages { get; set; }
     public int recent { get; private set; }
     public int unseen { get; private set; }
     public UIDValidity? uid_validity { get; private set; }

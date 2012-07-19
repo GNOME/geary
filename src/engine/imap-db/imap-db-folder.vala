@@ -162,6 +162,26 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         return count;
     }
     
+    // Updates both the FolderProperties and the value in the local store.  Must be called while
+    // open.
+    public async void update_remote_message_count(int count, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "UPDATE FolderTable SET last_seen_total=? WHERE id=?");
+            stmt.bind_int(0, Numeric.int_floor(count, 0));
+            stmt.bind_rowid(1, folder_id);
+            
+            stmt.exec(cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
+        if (properties != null)
+            properties.messages = count;
+    }
+    
     public async int get_id_position_async(Geary.EmailIdentifier id, ListFlags flags,
         Cancellable? cancellable) throws Error {
         check_open();
@@ -522,6 +542,8 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
     // Mark messages as removed (but not expunged) from the folder.  Marked messages are skipped
     // on most operations unless ListFlags.INCLUDE_MARKED_REMOVED is true.  Use remove_marked_email_async()
     // to formally remove the messages from the folder.
+    //
+    // TODO: Need to verify each EmailIdentifier before adding to marked_removed collection.
     public async void mark_removed_async(Gee.Collection<Geary.EmailIdentifier> ids, bool mark_removed, 
         Cancellable? cancellable) throws Error {
         check_open();

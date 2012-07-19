@@ -28,8 +28,16 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
                 initial_id.to_string(), engine.to_string());
         }
         
+        int remote_count;
+        int last_seen_remote_count;
+        int usable_remote_count = engine.get_remote_counts(out remote_count, out last_seen_remote_count);
+        
+        // use local count if both remote counts unavailable
+        if (usable_remote_count < 0)
+            usable_remote_count = local_count;
+        
         // normalize the initial position to the remote folder's addressing
-        initial_position = engine.local_position_to_remote_position(initial_position, local_count);
+        initial_position = engine.local_position_to_remote_position(initial_position, local_count, usable_remote_count);
         if (initial_position <= 0) {
             throw new EngineError.NOT_FOUND("Cannot map email ID %s in %s to remote folder",
                 initial_id.to_string(), engine.to_string());
@@ -44,7 +52,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
             high = excluding_id ? initial_position - 1 : initial_position;
         } else if (count > 0) {
             low = excluding_id ? initial_position + 1 : initial_position;
-            high = (count != int.MAX) ? (initial_position + count - 1) : engine.remote_count;
+            high = (count != int.MAX) ? (initial_position + count - 1) : usable_remote_count;
         } else {
             // count == 0
             low = initial_position;
@@ -71,7 +79,13 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
         this.low = low;
         this.count = actual_count;
         
-        return yield base.replay_local_async();
+        // Always return completed if the base class says so
+        if ((yield base.replay_local_async()) == ReplayOperation.Status.COMPLETED)
+            return ReplayOperation.Status.COMPLETED;
+        
+        // Only return CONTINUE if connected to the remote (otherwise possibility of mixing stale
+        // and fresh email data in single call)
+        return (remote_count >= 0) ? ReplayOperation.Status.CONTINUE : ReplayOperation.Status.COMPLETED;
     }
     
     public override string describe_state() {

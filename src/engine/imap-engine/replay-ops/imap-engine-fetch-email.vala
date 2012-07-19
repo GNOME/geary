@@ -44,8 +44,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         if (email != null && email.fields.fulfills(required_fields))
             return ReplayOperation.Status.COMPLETED;
         
-        // If local only and not found fully in local store, throw NOT_FOUND; there is no fallback
-        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
+        int remote_count;
+        int last_seen_remote_count;
+        engine.get_remote_counts(out remote_count, out last_seen_remote_count);
+        
+        // If local only (or not connected) and not found fully in local store, throw NOT_FOUND;
+        // there is no fallback
+        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY) || remote_count < 0) {
             throw new EngineError.NOT_FOUND("Email %s with fields %Xh not found in %s", id.to_string(),
                 required_fields, to_string());
         }

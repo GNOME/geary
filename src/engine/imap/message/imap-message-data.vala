@@ -65,6 +65,11 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
 }
 
 public class Geary.Imap.UIDValidity : Geary.Common.Int64MessageData, Geary.Imap.MessageData {
+    // Using statics because int32.MAX is static, not const (??)
+    public static int64 MIN = 1;
+    public static int64 MAX = int32.MAX;
+    public static int64 INVALID = -1;
+    
     public UIDValidity(int64 value) {
         base (value);
     }

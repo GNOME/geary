@@ -317,6 +317,10 @@ public class Geary.ConversationMonitor : Object {
         email_flags_changed(conversation, email);
     }
     
+    public int get_conversation_count() {
+        return conversations.size;
+    }
+    
     public Gee.Collection<Conversation> get_conversations() {
         return conversations.read_only_view;
     }

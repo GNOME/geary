@@ -13,7 +13,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
-    internal int remote_count { get; private set; default = -1; }
     
     private weak GenericAccount account;
     private Imap.Account remote;
@@ -25,6 +24,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private NonblockingSemaphore remote_semaphore;
     private ReplayQueue? replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
+    private int remote_count = -1;
     
     public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
@@ -99,6 +99,18 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // opened flag set but neither open; indicates opening state
         return Geary.Folder.OpenState.OPENING;
+    }
+    
+    // Returns the synchronized remote count (-1 if not opened) and the last seen remote count (stored
+    // locally, -1 if not available)
+    //
+    // Return value is the remote_count, unless the remote is unopened, in which case it's the
+    // last_seen_remote_count (which may be -1).
+    internal int get_remote_counts(out int remote_count, out int last_seen_remote_count) {
+        remote_count = this.remote_count;
+        last_seen_remote_count = (local_folder.get_properties() != null) ? local_folder.get_properties().messages : -1;
+        
+        return (remote_count >= 0) ? remote_count : last_seen_remote_count;
     }
     
     private async bool normalize_folders(Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
@@ -594,9 +606,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 to_string(), err.message);
         }
         
-        // save new remote count
+        // save new remote count internally and in local store
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
+        try {
+            yield local_folder.update_remote_message_count(remote_count, null);
+        } catch (Error update_err) {
+            debug("Unable to save appended remote count for %s: %s", to_string(), update_err.message);
+        }
         
         if (appended.size > 0)
             notify_email_appended(appended);
@@ -670,10 +687,16 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("Error fetching new local count for %s: %s", to_string(), new_count_err.message);
         }
         
-        // save new remote count and notify of change
+        // save new remote count internally and in local store
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
+        try {
+            yield local_folder.update_remote_message_count(remote_count, null);
+        } catch (Error update_err) {
+            debug("Unable to save removed remote count for %s: %s", to_string(), update_err.message);
+        }
         
+        // notify of change
         if (!marked && owned_id != null)
             notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(owned_id));
         
@@ -817,13 +840,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return;
         }
         
-        // listing by ID requires the remote to be open and fully synchronized, as there's no
-        // reliable way to determine certain counts and positions without it
-        //
-        // TODO: Need to deal with this in a sane manner when offline
-        yield throw_if_remote_not_ready_async(cancellable);
-        assert(remote_count >= 0);
-        
         // Schedule list operation and wait for completion.
         ListEmailByID op = new ListEmailByID(this, initial_id, count, required_fields, flags, accumulator,
             cb, cancellable);
@@ -876,8 +892,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return;
         }
         
-        // Unlike list_email_by_id, don't need to wait for remote to open because not dealing with
-        // a range of emails, but specific ones by ID
+        // Schedule list operation and wait for completion.
         ListEmailBySparseID op = new ListEmailBySparseID(this, ids, required_fields, flags, accumulator,
             cb, cancellable);
         replay_queue.schedule(op);
@@ -947,39 +962,44 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             check_id(method, id);
     }
     
-    // Converts a remote position to a local position, assuming that the remote has been completely
-    // opened.  local_count must be supplied because that's not held by EngineFolder (unlike
-    // remote_count).  remote_pos is 1-based.
+    // Converts a remote position to a local position.  remote_pos is 1-based.
     //
-    // Returns a negative value if not available in local folder or remote is not open yet.
-    internal int remote_position_to_local_position(int remote_pos, int local_count) {
+    // Returns negative value if remote_count is smaller than local_count or remote_pos is out of
+    // range.
+    internal static int remote_position_to_local_position(int remote_pos, int local_count, int remote_count) {
         assert(remote_pos >= 1);
+        assert(local_count >= 0);
+        assert(remote_count >= 0);
         
-        if (remote_count < 0) {
-            debug("[%s] remote_position_to_local_position called before remote opened", to_string());
-        } else if (remote_count < local_count) {
-            debug("[%s] remote_position_to_local_position: remote_count=%d < local_count=%d",
-                to_string(), remote_count, local_count);
+        if (remote_count < local_count) {
+            debug("remote_position_to_local_position: remote_count=%d < local_count=%d",
+                remote_count, local_count);
+        } else if (remote_pos > remote_count) {
+            debug("remote_position_to_local_position: remote_pos=%d > remote_count=%d",
+                remote_pos, remote_count);
         }
         
-        return (remote_count >= 0) ? remote_pos - (remote_count - local_count) : -1;
+        return (remote_pos <= remote_count) ? remote_pos - (remote_count - local_count) : -1;
     }
     
-    // Converts a local position to a remote position, assuming that the remote has been completely
-    // opened.  See remote_position_to_local_position for more caveats.
+    // Converts a local position to a remote position.  local_pos is 1-based.
     //
-    // Returns a negative value if remote is not open.
-    internal int local_position_to_remote_position(int local_pos, int local_count) {
+    // Returns negative value if remote_count is smaller than local_count or if local_pos is out
+    // of range.
+    internal static int local_position_to_remote_position(int local_pos, int local_count, int remote_count) {
         assert(local_pos >= 1);
+        assert(local_count >= 0);
+        assert(remote_count >= 0);
         
-        if (remote_count < 0) {
-            debug("[%s] local_position_to_remote_position called before remote opened", to_string());
-        } else if (remote_count < local_count) {
-            debug("[%s] local_position_to_remote_position: remote_count=%d < local_count=%d",
-                to_string(), remote_count, local_count);
+        if (remote_count < local_count) {
+            debug("local_position_to_remote_position: remote_count=%d < local_count=%d",
+                remote_count, local_count);
+        } else if (local_pos > local_count) {
+            debug("local_position_to_remote_position: local_pos=%d > local_count=%d",
+                local_pos, local_count);
         }
         
-        return (remote_count >= 0) ? remote_count - (local_count - local_pos) : -1;
+        return (local_pos <= local_count) ? remote_count - (local_count - local_pos) : -1;
     }
     
     // In order to maintain positions for all messages without storing all of them locally,
@@ -1066,8 +1086,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) throws Error {
         check_open("mark_email_async");
-        yield throw_if_remote_not_ready_async(cancellable);
-
+        
         replay_queue.schedule(new MarkEmail(this, to_mark, flags_to_add, flags_to_remove,
             cancellable));
     }
@@ -1075,19 +1094,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("copy_email_async");
-        yield throw_if_remote_not_ready_async(cancellable);
-
+        
         replay_queue.schedule(new CopyEmail(this, to_copy, destination));
     }
 
     public virtual async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("move_email_async");
-        yield throw_if_remote_not_ready_async(cancellable);
-
+        
         replay_queue.schedule(new MoveEmail(this, to_move, destination));
     }
-
+    
     private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> changed) {
         notify_email_flags_changed(changed);
     }

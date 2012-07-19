@@ -21,11 +21,21 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
+        if (to_remove.size <= 0)
+            return ReplayOperation.Status.COMPLETED;
+        
+        int remote_count;
+        int last_seen_remote_count;
+        original_count = engine.get_remote_counts(out remote_count, out last_seen_remote_count);
+        
+        // because this value is only used for reporting count changes, offer best-possible service
+        if (original_count < 0)
+            original_count = to_remove.size;
+        
         yield engine.local_folder.mark_removed_async(to_remove, true, cancellable);
         
         engine.notify_email_removed(to_remove);
         
-        original_count = engine.remote_count;
         engine.notify_email_count_changed(original_count - to_remove.size,
             Geary.Folder.CountChangeReason.REMOVED);
         

@@ -284,11 +284,20 @@ public interface Geary.Folder : Object {
      * emails in a folder without determining the count first.
      *
      * If the caller would prefer the Folder return emails it has immediately available rather than
-     * make an expensive I/O call to "properly" fetch the emails, it should pass ListFlags.LOCAL_ONLY.
+     * make an expensive network call to "properly" fetch the emails, it should pass ListFlags.LOCAL_ONLY.
      * However, this also means avoiding a full synchronization, so it's possible the fetched
      * emails do not correspond to what's actually available on the server.  The best use of this
      * method is to quickly retrieve a block of email for display or processing purposes,
      * immediately followed by a non-fast list operation and then merging the two results.
+     *
+     * Likewise, if this is called while Folder is in an OPENING or LOCAL state (that is, the remote
+     * server is not yet available), only local mail will be returned.  This is to avoid two poor
+     * situations: (a) waiting to connect to the server to ensure that positional addressing is
+     * correctly calculated (and potentially missing the opportunity to return available local data)
+     * and (b) fetching locally, waiting, then fetching remotely, which means the returned emails
+     * could potentially mix stale and fresh data.  A ListFlag may be offered in the future to allow
+     * the caller to force the engine to wait for a server connection before continuing.  See
+     * get_open_state() and "opened" for more information.
      *
      * Note that LOCAL_ONLY only returns the emails with the required fields that are available in
      * the Folder's local store.  It may have fewer or incomplete messages, meaning that this will
@@ -416,6 +425,11 @@ public interface Geary.Folder : Object {
      * Because fetch_email_async() is a form of listing (listing exactly one email), it takes
      * ListFlags as a parameter.  See list_email_async() for more information.  Note that one
      * flag (ListFlags.EXCLUDING_ID) makes no sense in this context.
+     *
+     * This method also works like the list variants in that it will not wait for the server to
+     * connect if called in the OPENING state.  A ListFlag option may be offered in the future to
+     * force waiting for the server to connect.  Unlike the list variants, if in the OPENING state
+     * and the message is not found locally, EngineError.NOT_FOUND is thrown.
      *
      * The Folder must be opened prior to attempting this operation.
      */

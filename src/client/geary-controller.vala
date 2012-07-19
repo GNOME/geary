@@ -371,6 +371,9 @@ public class GearyController {
             yield current_folder.close_async();
         }
         
+        if (current_folder != null)
+            current_folder.opened.disconnect(on_current_folder_opened);
+        
         if (folder != null)
             debug("switching to %s", folder.to_string());
         
@@ -385,6 +388,8 @@ public class GearyController {
         }
         
         update_ui();
+        
+        current_folder.opened.connect(on_current_folder_opened);
         
         current_conversations = new Geary.ConversationMonitor(current_folder, false,
             MessageListStore.REQUIRED_FIELDS);
@@ -403,6 +408,18 @@ public class GearyController {
         // Do a quick-list of the messages in the local store), followed by a complete list if needed
         loading_local_only = true;
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
+    }
+    
+    public void on_current_folder_opened(Geary.Folder.OpenState state, int count) {
+        // when BOTH (or only REMOTE) is opened and no conversations are available, seed the
+        // ConversationMonitor, as its possible to call Folder.list's variants while opening and
+        // only receive the local mail
+        if ((state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
+            && (current_conversations.get_conversation_count() == 0)) {
+            debug("Reseed of ConversationMonitor from opened folder %s", current_folder.to_string());
+            current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
+                cancellable_folder);
+        }
     }
     
     public void on_scan_started() {

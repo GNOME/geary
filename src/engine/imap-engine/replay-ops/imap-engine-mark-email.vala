@@ -26,7 +26,13 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
+        if (to_mark.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
         // Save original flags, then set new ones.
+        // TODO: Make this atomic (otherwise there stands a chance backout_local_async() will
+        // reapply the wrong flags): should get the original flags and the new flags in the same
+        // operation as the marking procedure, so original flags and reported flags are correct
         original_flags = yield engine.local_folder.get_email_flags_async(to_mark, cancellable);
         yield engine.local_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove,
             cancellable);

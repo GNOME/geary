@@ -94,7 +94,11 @@ private class Geary.ImapDB.Account : Object {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,
             // that just means the folder has no parents
             int64 parent_id = Db.INVALID_ROWID;
-            do_fetch_parent_id(cx, path, true, out parent_id, cancellable);
+            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable)) {
+                debug("Unable to find parent ID to %s clone folder", path.to_string());
+                
+                return Db.TransactionOutcome.ROLLBACK;
+            }
             
             // create the folder object
             Db.Statement stmt = cx.prepare(
@@ -103,8 +107,10 @@ private class Geary.ImapDB.Account : Object {
             stmt.bind_string(0, path.basename);
             stmt.bind_rowid(1, parent_id);
             stmt.bind_int(2, properties.messages);
-            stmt.bind_int64(3, (properties.uid_validity != null) ?  properties.uid_validity.value : 0);
-            stmt.bind_int64(4, (properties.uid_next != null) ? properties.uid_next.value : 0);
+            stmt.bind_int64(3, (properties.uid_validity != null) ? properties.uid_validity.value
+                : Imap.UIDValidity.INVALID);
+            stmt.bind_int64(4, (properties.uid_next != null) ? properties.uid_next.value
+                : Imap.UID.INVALID);
             stmt.bind_string(5, properties.attrs.serialize());
             
             stmt.exec(cancellable);
@@ -126,15 +132,20 @@ private class Geary.ImapDB.Account : Object {
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 parent_id;
-            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable))
+            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable)) {
+                debug("Unable to find parent ID of %s to update properties", path.to_string());
+                
                 return Db.TransactionOutcome.ROLLBACK;
+            }
             
             Db.Statement stmt = cx.prepare(
                 "UPDATE FolderTable SET last_seen_total=?, uid_validity=?, uid_next=?, attributes=? "
                 + "WHERE parent_id=? AND name=?");
             stmt.bind_int(0, properties.messages);
-            stmt.bind_int64(1, properties.uid_validity.value);
-            stmt.bind_int64(2, properties.uid_next.value);
+            stmt.bind_int64(1, (properties.uid_validity != null) ? properties.uid_validity.value
+                : Imap.UIDValidity.INVALID);
+            stmt.bind_int64(2, (properties.uid_next != null) ? properties.uid_next.value
+                : Imap.UID.INVALID);
             stmt.bind_string(3, properties.attrs.serialize());
             stmt.bind_rowid(4, parent_id);
             stmt.bind_string(4, path.basename);
@@ -163,10 +174,14 @@ private class Geary.ImapDB.Account : Object {
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             int64 parent_id = Db.INVALID_ROWID;
             if (parent != null) {
-                if (!do_fetch_folder_id(cx, parent, false, out parent_id, cancellable))
+                if (!do_fetch_folder_id(cx, parent, false, out parent_id, cancellable)) {
+                    debug("Unable to find folder ID for %s to list folders", parent.to_string());
+                    
                     return Db.TransactionOutcome.ROLLBACK;
+                }
                 
-                assert(parent_id != Db.INVALID_ROWID);
+                if (parent_id == Db.INVALID_ROWID)
+                    throw new EngineError.NOT_FOUND("Folder %s not found", parent.to_string());
             }
             
             Db.Statement stmt;
@@ -230,8 +245,9 @@ private class Geary.ImapDB.Account : Object {
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             try {
                 int64 folder_id;
-                if (do_fetch_folder_id(cx, path, false, out folder_id, cancellable))
-                    exists = (folder_id != Db.INVALID_ROWID);
+                do_fetch_folder_id(cx, path, false, out folder_id, cancellable);
+                
+                exists = (folder_id != Db.INVALID_ROWID);
             } catch (EngineError err) {
                 // treat NOT_FOUND as non-exceptional situation
                 if (!(err is EngineError.NOT_FOUND))
@@ -256,10 +272,14 @@ private class Geary.ImapDB.Account : Object {
         int64 folder_id = Db.INVALID_ROWID;
         Imap.FolderProperties? properties = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable))
+            if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable)) {
+                debug("Unable to find folder ID for %s to fetch", path.to_string());
+                
                 return Db.TransactionOutcome.DONE;
+            }
             
-            assert(folder_id != Db.INVALID_ROWID);
+            if (folder_id == Db.INVALID_ROWID)
+                return Db.TransactionOutcome.DONE;
             
             Db.Statement stmt = cx.prepare(
                 "SELECT last_seen_total, uid_validity, uid_next, attributes FROM FolderTable WHERE id=?");
@@ -373,6 +393,9 @@ private class Geary.ImapDB.Account : Object {
     // Transaction helper methods
     // 
     
+    // If the FolderPath has no parent, returns true and folder_id will be set to Db.INVALID_ROWID.
+    // If cannot create path or there is a logical problem traversing it, returns false with folder_id
+    // set to Db.INVALID_ROWID.
     private bool do_fetch_folder_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 folder_id,
         Cancellable? cancellable) throws Error {
         check_open();
@@ -404,6 +427,9 @@ private class Geary.ImapDB.Account : Object {
             if (!result.finished) {
                 id = result.rowid_at(0);
             } else if (!create) {
+                debug("Unable to return folder ID for %s: not creating paths in table",
+                    path.to_string());
+                
                 return false;
             } else {
                 // not found, create it
@@ -430,15 +456,16 @@ private class Geary.ImapDB.Account : Object {
         // parent_id is now the folder being searched for
         folder_id = parent_id;
         
-        return (folder_id != Db.INVALID_ROWID);
+        return true;
     }
     
+    // See do_fetch_folder_id() for return semantics.
     private bool do_fetch_parent_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 parent_id,
         Cancellable? cancellable = null) throws Error {
         if (path.is_root()) {
             parent_id = Db.INVALID_ROWID;
             
-            return false;
+            return true;
         }
         
         return do_fetch_folder_id(cx, path.get_parent(), create, out parent_id, cancellable);

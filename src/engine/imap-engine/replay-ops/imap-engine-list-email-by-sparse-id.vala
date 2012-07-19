@@ -143,7 +143,11 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
                 cb(fulfilled, null);
         }
         
-        if (local_only || unfulfilled.size == 0) {
+        int remote_count;
+        int last_seen_remote_count;
+        owner.get_remote_counts(out remote_count, out last_seen_remote_count);
+        
+        if (local_only || unfulfilled.size == 0 || remote_count < 0) {
             if (cb != null)
                 cb(null, null);
             

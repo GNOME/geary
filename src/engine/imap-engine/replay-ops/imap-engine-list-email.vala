@@ -82,38 +82,32 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        int local_count;
-        if (!local_only) {
-            // normalize the position (ordering) of what's available locally with the situation on
-            // the server ... this involves fetching the PROPERTIES of the missing emails from
-            // the server and caching them locally
-            yield engine.normalize_email_positions_async(low, count, out local_count, cancellable);
-        } else {
-            // local_only means just that
-            local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
-                cancellable);
+        int local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+            cancellable);
+        
+        int remote_count;
+        int last_seen_remote_count;
+        int usable_remote_count = engine.get_remote_counts(out remote_count, out last_seen_remote_count);
+        
+        if (usable_remote_count <= 0) {
+            if (cb != null)
+                cb(null, null);
+            
+            Logging.debug(Logging.Flag.REPLAY,
+                "ListEmail.replay_local_async %s: No usable remote count, completed", engine.to_string());
+            
+            return ReplayOperation.Status.COMPLETED;
         }
         
-        // normalize the arguments so they reflect cardinal positions ... remote_count can be -1
-        // if the folder is in the process of opening
-        int local_low = 0;
-        if (!local_only && yield engine.wait_for_remote_ready_async(cancellable)) {
-            engine.normalize_span_specifiers(ref low, ref count, engine.remote_count);
-            
-            // because the local store caches messages starting from the newest (at the end of the list)
-            // to the earliest fetched by the user, need to adjust the low value to match its offset
-            // and range
-            if (low > 0)
-                local_low = engine.remote_position_to_local_position(low, local_count);
-        } else {
-            engine.normalize_span_specifiers(ref low, ref count, local_count);
-            if (low > 0)
-                local_low = low.clamp(1, local_count);
-        }
+        engine.normalize_span_specifiers(ref low, ref count, usable_remote_count);
+        
+        int local_low = engine.remote_position_to_local_position(low, local_count, usable_remote_count).clamp(1, local_count);
         
         Logging.debug(Logging.Flag.REPLAY,
-            "ListEmail.replay_local %s: low=%d count=%d local_count=%d remote_count=%d local_low=%d",
-            engine.to_string(), low, count, local_count, engine.remote_count, local_low);
+            "ListEmail.replay_local_async %s: low=%d count=%d local_low=%d local_count=%d remote_count=%d "
+            + "last_seen_remote_count=%d usable_remote_count=%d local_only=%s remote_only=%s",
+            engine.to_string(), low, count, local_low, local_count, remote_count, last_seen_remote_count,
+            usable_remote_count, local_only.to_string(), remote_only.to_string());
         
         if (!remote_only && local_low > 0) {
             try {
@@ -129,8 +123,8 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         local_list_size = (local_list != null) ? local_list.size : 0;
         
         // fixup local email positions to match server's positions
-        if (local_list_size > 0 && engine.remote_count > 0 && local_count < engine.remote_count) {
-            int adjustment = engine.remote_count - local_count;
+        if (local_list_size > 0 && usable_remote_count > 0 && local_count < usable_remote_count) {
+            int adjustment = usable_remote_count - local_count;
             foreach (Geary.Email email in local_list)
                 email.update_position(email.position + adjustment);
         }
@@ -150,6 +144,10 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
             }
         }
         
+        Logging.debug(Logging.Flag.REPLAY,
+            "ListEmail.replay_local_async %s: local_list_size=%d fulfilled=%d", to_string(),
+            local_list_size, fulfilled.size);
+        
         // report fulfilled
         if (fulfilled.size > 0) {
             if (accumulator != null)
@@ -159,8 +157,15 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
                 cb(fulfilled, null);
         }
         
-        // if local list matches total asked for, or if only returning local versions, exit
-        if (fulfilled.size == count || local_only) {
+        // if local list matches total asked for, if only returning local versions, or if not
+        // connected to the remote, operation is completed
+        //
+        // NOTE: Do NOT want to wait for remote to open in replay_remote_async() if work was done
+        // here using last_seen_remote_count, as there's a high possibility that positional
+        // addressing will be out of sync will return bogus email to caller; in other words, it
+        // means returning a combination of dirty local email and validated remote email, which is
+        // bad news
+        if (fulfilled.size == count || local_only || remote_count < 0) {
             if (!local_only)
                 assert(unfulfilled.size == 0);
             
@@ -175,6 +180,11 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         yield engine.throw_if_remote_not_ready_async(cancellable);
+        
+        // normalize the email positions in the local store, so the positions being requested
+        // from the server are available in the database
+        int local_count;
+        yield engine.normalize_email_positions_async(low, count, out local_count, cancellable);
         
         // go through the positions from (low) to (low + count) and see if they're not already
         // present in local_list; whatever isn't present needs to be fetched in full
