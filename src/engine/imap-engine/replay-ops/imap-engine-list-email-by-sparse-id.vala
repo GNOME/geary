@@ -165,8 +165,11 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
         // schedule operations to remote for each set of email with unfulfilled fields and merge
         // in results, pulling out the entire email
         foreach (Geary.Email.Field unfulfilled_fields in unfulfilled.get_keys()) {
-            Imap.MessageSet msg_set = new Imap.MessageSet.email_id_collection(
-                unfulfilled.get(unfulfilled_fields));
+            Gee.Collection<EmailIdentifier> email_ids = unfulfilled.get(unfulfilled_fields);
+            if (email_ids.size == 0)
+                continue;
+            
+            Imap.MessageSet msg_set = new Imap.MessageSet.email_id_collection(email_ids);
             RemoteBatchOperation remote_op = new RemoteBatchOperation(owner, msg_set, unfulfilled_fields,
                 required_fields);
             batch.add(remote_op);

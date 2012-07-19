@@ -219,8 +219,11 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         // fetch the partial emails that do not fulfill all required fields, getting only those
         // fields that are missing for each email
         if (unfulfilled.size > 0) {
-            foreach (Geary.Email.Field remaining_fields in unfulfilled.get_keys())
-                batch.add(new RemoteListPartial(this, remaining_fields, unfulfilled.get(remaining_fields)));
+            foreach (Geary.Email.Field remaining_fields in unfulfilled.get_keys()) {
+                Gee.Collection<EmailIdentifier> email_ids = unfulfilled.get(remaining_fields);
+                if (email_ids.size > 0)
+                    batch.add(new RemoteListPartial(this, remaining_fields, email_ids));
+            }
         }
         
         Logging.debug(Logging.Flag.REPLAY, "ListEmail.replay_remote %s: Scheduling %d FETCH operations",
@@ -291,10 +294,8 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         // possible to call remote multiple times, wait for it to open once and go
         yield engine.throw_if_remote_not_ready_async(cancellable);
         
-        Imap.MessageSet msg_set = new Imap.MessageSet.email_id_collection(ids);
-        
-        Gee.List<Geary.Email>? remote_list = yield engine.remote_folder.list_email_async(msg_set,
-            remaining_fields, cancellable);
+        Gee.List<Geary.Email>? remote_list = yield engine.remote_folder.list_email_async(
+            new Imap.MessageSet.email_id_collection(ids), remaining_fields, cancellable);
         if (remote_list == null || remote_list.size == 0)
             return;
         

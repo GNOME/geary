@@ -22,6 +22,9 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
     }
 
     public override async ReplayOperation.Status replay_local_async() throws Error {
+        if (to_copy.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
         // The local DB will be updated when the remote folder is opened and we see a new message
         // existing there.
         return ReplayOperation.Status.CONTINUE;
