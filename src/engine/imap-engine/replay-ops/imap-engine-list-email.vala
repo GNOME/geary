@@ -166,9 +166,6 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         // means returning a combination of dirty local email and validated remote email, which is
         // bad news
         if (fulfilled.size == count || local_only || remote_count < 0) {
-            if (!local_only)
-                assert(unfulfilled.size == 0);
-            
             if (cb != null)
                 cb(null, null);
             
