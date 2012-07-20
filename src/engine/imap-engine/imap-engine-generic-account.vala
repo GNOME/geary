@@ -229,8 +229,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
             properties_map.set(remote_folder.get_path(), remote_folder.get_properties());
             
             // also use this iteration to set the local folder's special type
+            // (but only promote, not demote, since getting the special folder type via its
+            // properties relies on the optional XLIST extension)
             GenericFolder? local_folder = existing_folders.get(remote_folder.get_path());
-            if (local_folder != null)
+            if (local_folder != null && local_folder.get_special_folder_type() == SpecialFolderType.NONE)
                 local_folder.set_special_folder_type(remote_folder.get_properties().attrs.get_special_folder_type());
         }
         
