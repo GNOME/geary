@@ -101,18 +101,24 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         
         engine.normalize_span_specifiers(ref low, ref count, usable_remote_count);
         
-        int local_low = engine.remote_position_to_local_position(low, local_count, usable_remote_count).clamp(1, local_count);
+        // calculate local availability
+        int local_low = engine.remote_position_to_local_position(low, local_count, usable_remote_count);
+        int local_available_low = local_low.clamp(1, local_count);
+        int local_available_count = (local_low > 0) ? (count - local_low) + 1 : (count + local_low) - 1;
         
         Logging.debug(Logging.Flag.REPLAY,
-            "ListEmail.replay_local_async %s: low=%d count=%d local_low=%d local_count=%d remote_count=%d "
+            "ListEmail.replay_local_async %s: low=%d count=%d local_low=%d local_count=%d "
+            + "local_available_low=%d local_available_count=%d remote_count=%d "
             + "last_seen_remote_count=%d usable_remote_count=%d local_only=%s remote_only=%s",
-            engine.to_string(), low, count, local_low, local_count, remote_count, last_seen_remote_count,
+            engine.to_string(), low, count, local_low, local_count, local_available_low,
+            local_available_count, remote_count, last_seen_remote_count,
             usable_remote_count, local_only.to_string(), remote_only.to_string());
         
-        if (!remote_only && local_low > 0) {
+        if (!remote_only && local_available_count > 0) {
             try {
-                local_list = yield engine.local_folder.list_email_async(local_low, count, required_fields,
-                    ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
+                local_list = yield engine.local_folder.list_email_async(local_available_low,
+                    local_available_count, required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK,
+                    cancellable);
             } catch (Error local_err) {
                 if (cb != null && !(local_err is IOError.CANCELLED))
                     cb (null, local_err);
