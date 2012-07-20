@@ -307,46 +307,64 @@ set(VALAC_OPTIONS
     --fatal-warnings
 )
 
-# Engine (static library used for building)
+# Engine (conceptually a library, but not built as a separate library)
 #################################################
-vala_precompile(ENGINE_VALA_C geary-static
+vala_precompile(ENGINE_VALA_C geary-engine-prebuild
     ${ENGINE_SRC}
     ${COMMON_SRC}
 PACKAGES
     ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
-GENERATE_VAPI
-    geary-static
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_library(geary-static STATIC ${ENGINE_VALA_C})
-target_link_libraries(geary-static ${DEPS_LIBRARIES} gthread-2.0)
+include(ParseArguments)
+macro(add_geary_executable executable_name engine_prebuild_name)
+    parse_arguments(ARGS "EXTRA_PACKAGES" "" ${ARGN})
+    set(executable_prebuild_name ${executable_name}-prebuild)
+    
+    vala_precompile(VALA_C ${executable_prebuild_name}
+        ${ARGS_DEFAULT_ARGS}
+    EXTERNAL_SOURCES
+        ${ENGINE_SRC}
+        ${COMMON_SRC}
+    PACKAGES
+        ${ENGINE_PACKAGES}
+        ${ARGS_EXTRA_PACKAGES}
+    OPTIONS
+        ${VALAC_OPTIONS}
+    )
+    
+    add_executable(${executable_name} ${VALA_C})
+    add_dependencies(${executable_name} ${executable_prebuild_name})
+    add_dependencies(${executable_prebuild_name} ${engine_prebuild_name})
+    target_link_libraries(${executable_name} ${DEPS_LIBRARIES} gthread-2.0)
+    
+    # Copy executable after it is built.
+    add_custom_command(
+        TARGET
+            ${executable_name}
+        POST_BUILD
+        COMMAND 
+            ${CMAKE_COMMAND} -E copy ${executable_name} ${CMAKE_BINARY_DIR}/
+    )
+    
+    # Make clean: Remove copied executable.
+    set_property(
+        DIRECTORY ..
+        APPEND
+        PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+            ${executable_name}
+    )
+endmacro(add_geary_executable)
 
 # Geary client app
 #################################################
-vala_precompile(GEARY_VALA_C geary
+add_geary_executable(geary geary-engine-prebuild
     ${CLIENT_SRC}
-PACKAGES
+EXTRA_PACKAGES
     ${CLIENT_PACKAGES}
-    ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-OPTIONS
-    ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
-)
-
-add_executable(geary ${GEARY_VALA_C})
-target_link_libraries(geary ${DEPS_LIBRARIES} gthread-2.0 geary-static)
-install(TARGETS geary RUNTIME DESTINATION bin)
-add_custom_command(
-    TARGET
-        geary
-    POST_BUILD
-    COMMAND 
-        ${CMAKE_COMMAND} -E copy geary ${CMAKE_BINARY_DIR}/
 )
 
 # GSettings
@@ -355,84 +373,23 @@ add_schemas(geary ${GSETTINGS_DIR})
 
 # Console app
 #################################################
-vala_precompile(CONSOLE_VALA_C geary-console
+add_geary_executable(geary-console geary-engine-prebuild
     ${CONSOLE_SRC}
-PACKAGES
+EXTRA_PACKAGES
     ${CONSOLE_PACKAGES}
-    ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-OPTIONS
-    ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
-)
-
-add_executable(geary-console ${CONSOLE_VALA_C})
-target_link_libraries(geary-console ${DEPS_LIBRARIES} gthread-2.0 geary-static)
-add_custom_command(
-    TARGET
-        geary-console
-    POST_BUILD
-    COMMAND 
-        ${CMAKE_COMMAND} -E copy geary-console ${CMAKE_BINARY_DIR}/
 )
 
 # Mailer app
 #################################################
-vala_precompile(MAILER_VALA_C geary-mailer
+add_geary_executable(geary-mailer geary-engine-prebuild
     ${MAILER_SRC}
-PACKAGES
-    ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-OPTIONS
-    ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
-)
-
-add_executable(geary-mailer ${MAILER_VALA_C})
-target_link_libraries(geary-mailer ${DEPS_LIBRARIES} gthread-2.0 geary-static)
-add_custom_command(
-    TARGET
-        geary-mailer
-    POST_BUILD
-    COMMAND 
-        ${CMAKE_COMMAND} -E copy geary-mailer ${CMAKE_BINARY_DIR}/
 )
 
 # DBus Service
 #################################################
-vala_precompile(DBUS_VALA_C gearyd
+add_geary_executable(gearyd geary-engine-prebuild
     ${DBUSSERVICE_SRC}
-PACKAGES
+EXTRA_PACKAGES
     ${DBUSSERVICE_PACKAGES}
-    ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-OPTIONS
-    ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
-)
-
-add_executable(gearyd ${DBUS_VALA_C})
-target_link_libraries(gearyd ${DEPS_LIBRARIES} gthread-2.0 geary-static)
-add_custom_command(
-    TARGET
-        gearyd
-    POST_BUILD
-    COMMAND 
-        ${CMAKE_COMMAND} -E copy gearyd ${CMAKE_BINARY_DIR}/
-)
-
-## Make clean: remove copied files
-##################################################
-set_property(
-    DIRECTORY ..
-    APPEND
-    PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-        geary
-        geary-console
-        geary-mailer
-        gearyd
 )
 
