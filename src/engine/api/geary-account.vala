@@ -69,6 +69,11 @@ public interface Geary.Account : Object {
         Cancellable? cancellable = null) throws Error;
     
     /**
+     * Gets a perpetually update-to-date collection of autocompletion contacts.
+     */
+    public abstract Geary.ContactStore get_contact_store();
+
+    /**
      * Returns true if the folder exists.
      *
      * This method never throws EngineError.NOT_FOUND.

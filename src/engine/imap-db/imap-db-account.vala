@@ -18,14 +18,21 @@ private class Geary.ImapDB.Account : Object {
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
     
+    // TODO: This should be updated when Geary no longer assumes username is email.
+    public string account_owner_email {
+        get { return settings.credentials.user; }
+    }
+    
     private string name;
     private AccountSettings settings;
     private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>(Hashable.hash_func, Equalable.equal_func);
+    public ContactStore contact_store { get; private set; }
     
     public Account(Geary.AccountSettings settings) {
         this.settings = settings;
+        contact_store = new ContactStore();
         
         name = "IMAP database account for %s".printf(settings.credentials.user);
     }
@@ -40,9 +47,7 @@ private class Geary.ImapDB.Account : Object {
         if (db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
-        db = new ImapDB.Database(user_data_dir, schema_dir);
-        db.pre_upgrade.connect(on_pre_upgrade);
-        db.post_upgrade.connect(on_post_upgrade);
+        db = new ImapDB.Database(user_data_dir, schema_dir, account_owner_email);
         
         try {
             db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE, null,
@@ -55,6 +60,8 @@ private class Geary.ImapDB.Account : Object {
             
             throw err;
         }
+        
+        initialize_contacts(cancellable);
         
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
         outbox = new SmtpOutboxFolder(db, settings);
@@ -159,6 +166,39 @@ private class Geary.ImapDB.Account : Object {
         ImapDB.Folder? db_folder = get_local_folder(path);
         if (db_folder != null)
             db_folder.set_properties(properties);
+    }
+    
+    private void initialize_contacts(Cancellable? cancellable = null) throws Error {
+        check_open();
+        
+        Gee.Collection<Contact> contacts = new Gee.LinkedList<Contact>();
+        Db.TransactionOutcome outcome = db.exec_transaction(Db.TransactionType.RO,
+            (context) => {
+            Db.Statement statement = context.prepare(
+                "SELECT email, real_name, highest_importance, normalized_email " +
+                "FROM ContactTable WHERE highest_importance >= ?");
+            statement.bind_int(0, ContactImportance.VISIBILITY_THRESHOLD);
+            
+            Db.Result result = statement.exec(cancellable);
+            while (!result.finished) {
+                try {
+                    Contact contact = new Contact(result.string_at(0), result.string_at(1),
+                        result.int_at(2), result.string_at(3));
+                    contacts.add(contact);
+                } catch (Geary.DatabaseError err) {
+                    // We don't want to abandon loading all contacts just because there was a
+                    // problem with one.
+                    debug("Problem loading contact: %s", err.message);
+                }
+                
+                result.next();
+            }
+                
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        if (outcome == Db.TransactionOutcome.DONE)
+            contact_store.update_contacts(contacts);
     }
     
     public async Gee.Collection<Geary.ImapDB.Folder> list_folders_async(Geary.FolderPath? parent,
@@ -321,7 +361,8 @@ private class Geary.ImapDB.Account : Object {
         }
         
         // create folder
-         folder = new Geary.ImapDB.Folder(db, path, folder_id, properties);
+        folder = new Geary.ImapDB.Folder(db, path, contact_store, account_owner_email, folder_id,
+            properties);
         
         // build a reference to it
         FolderReference folder_ref = new FolderReference(folder, path);
@@ -340,14 +381,6 @@ private class Geary.ImapDB.Account : Object {
         folder_refs.unset(folder_ref.path);
     }
 
-    private void on_pre_upgrade(int version){
-        // TODO Add per-version data massaging.
-    }
-
-    private void on_post_upgrade(int version) {
-        // TODO Add per-version data massaging.
-    }
-    
     private void clear_duplicate_folders() {
         int count = 0;
         

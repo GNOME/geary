@@ -19,6 +19,9 @@ engine/api/geary-account-information.vala
 engine/api/geary-account-settings.vala
 engine/api/geary-attachment.vala
 engine/api/geary-composed-email.vala
+engine/api/geary-contact.vala
+engine/api/geary-contact-importance.vala
+engine/api/geary-contact-store.vala
 engine/api/geary-conversation.vala
 engine/api/geary-conversation-monitor.vala
 engine/api/geary-credentials.vala
@@ -104,8 +107,10 @@ engine/imap/transport/imap-serializable.vala
 engine/imap/transport/imap-serializer.vala
 
 engine/imap-db/imap-db-account.vala
+engine/imap-db/imap-db-contact.vala
 engine/imap-db/imap-db-database.vala
 engine/imap-db/imap-db-folder.vala
+engine/imap-db/imap-db-message-addresses.vala
 engine/imap-db/imap-db-message-row.vala
 engine/imap-db/outbox/smtp-outbox-email-identifier.vala
 engine/imap-db/outbox/smtp-outbox-email-properties.vala
@@ -202,6 +207,7 @@ client/notification/notification-bubble.vala
 client/notification/null-indicator.vala
 
 client/ui/composer-window.vala
+client/ui/contact-entry-completion.vala
 client/ui/geary-login.vala
 client/ui/email-entry.vala
 client/ui/icon-factory.vala

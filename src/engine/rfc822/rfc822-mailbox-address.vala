@@ -93,7 +93,7 @@ public class Geary.RFC822.MailboxAddress {
     public bool is_valid() {
         return is_valid_address(address);
     }
-
+    
     /**
      * Returns true if the email syntax is valid.
      */

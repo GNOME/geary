@@ -132,8 +132,14 @@ public class ComposerWindow : Gtk.Window {
     // garbage-collected.
     private WebViewEditFixer edit_fixer;
     private Gtk.UIManager ui;
+    private ContactEntryCompletion[] contact_entry_completions;
     
-    public ComposerWindow(Geary.ComposedEmail? prefill = null) {
+    public ComposerWindow(Geary.ContactStore? contact_store, Geary.ComposedEmail? prefill = null) {
+        contact_entry_completions = {
+            new ContactEntryCompletion(contact_store),
+            new ContactEntryCompletion(contact_store),
+            new ContactEntryCompletion(contact_store)
+        };
         setup_drag_destination(this);
         
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
@@ -151,11 +157,16 @@ public class ComposerWindow : Gtk.Window {
         visible_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("visible_on_attachment_drag_over_child");
         visible_on_attachment_drag_over.remove(visible_on_attachment_drag_over_child);
         
+        // TODO: It would be nicer to set the completions inside the EmailEntry constructor. But in
+        // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
         to_entry = new EmailEntry();
+        to_entry.completion = contact_entry_completions[0];
         (builder.get_object("to") as Gtk.EventBox).add(to_entry);
         cc_entry = new EmailEntry();
+        cc_entry.completion = contact_entry_completions[1];
         (builder.get_object("cc") as Gtk.EventBox).add(cc_entry);
         bcc_entry = new EmailEntry();
+        bcc_entry.completion = contact_entry_completions[2];
         (builder.get_object("bcc") as Gtk.EventBox).add(bcc_entry);
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;

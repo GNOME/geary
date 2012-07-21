@@ -147,6 +147,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
         return engine_list;
     }
     
+    public override Geary.ContactStore get_contact_store() {
+        return local.contact_store;
+    }
+    
     public override async bool folder_exists_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
         check_open();

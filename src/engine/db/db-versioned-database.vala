@@ -7,24 +7,16 @@
 public class Geary.Db.VersionedDatabase : Geary.Db.Database {
     public File schema_dir { get; private set; }
     
-    public virtual signal void pre_upgrade(int version) {
-    }
-    
-    public virtual signal void post_upgrade(int version) {
-    }
-    
     public VersionedDatabase(File db_file, File schema_dir) {
         base (db_file);
         
         this.schema_dir = schema_dir;
     }
     
-    protected virtual void notify_pre_upgrade(int version) {
-        pre_upgrade(version);
+    protected virtual void pre_upgrade(int version) {
     }
-    
-    protected virtual void notify_post_upgrade(int version) {
-        post_upgrade(version);
+
+    protected virtual void post_upgrade(int version) {
     }
     
     // TODO: Initialize database from version-001.sql and upgrade with version-nnn.sql
@@ -48,7 +40,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
             if (!upgrade_script.query_exists(cancellable))
                 break;
             
-            notify_pre_upgrade(db_version);
+            pre_upgrade(db_version);
             
             check_cancelled("VersionedDatabase.open", cancellable);
             
@@ -66,7 +58,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
                 throw err;
             }
             
-            notify_post_upgrade(db_version);
+            post_upgrade(db_version);
         }
     }
 }

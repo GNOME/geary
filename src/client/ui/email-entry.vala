@@ -14,7 +14,6 @@ public class EmailEntry : Gtk.Entry {
 
     public EmailEntry() {
         changed.connect(on_changed);
-        // TODO: Contact completion with libfolks
     }
 
     private void on_changed() {

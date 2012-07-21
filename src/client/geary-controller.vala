@@ -1055,7 +1055,8 @@ public class GearyController {
     }
     
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
-        ComposerWindow window = new ComposerWindow(prefill);
+        Geary.ContactStore? contact_store = account == null ? null : account.get_contact_store();
+        ComposerWindow window = new ComposerWindow(contact_store, prefill);
         window.set_position(Gtk.WindowPosition.CENTER);
         window.send.connect(on_send);
         

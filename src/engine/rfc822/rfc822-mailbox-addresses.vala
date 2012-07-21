@@ -47,6 +47,20 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
         return addrs.read_only_view;
     }
     
+    public bool contains_normalized(string address) {
+        if (addrs.size < 1)
+            return false;
+        
+        string normalized_address = address.normalize().casefold();
+        
+        foreach (MailboxAddress mailbox_address in addrs) {
+            if (mailbox_address.address.normalize().casefold() == normalized_address)
+                return true;
+        }
+        
+        return false;
+    }
+    
     public bool contains(string address) {
         if (addrs.size < 1)
             return false;
