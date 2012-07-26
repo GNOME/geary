@@ -97,6 +97,9 @@ fi
 # Remove existing Makefile so it's not left around if configure fails
 rm -f Makefile
 
+# Remove the build folder to force Cmake to update its cache.
+rm -fr build
+
 if ! mkdir -p build
 then
     printf "Unable to create build directory.\n"
