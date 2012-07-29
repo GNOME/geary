@@ -444,8 +444,8 @@ private class Geary.ImapDB.Account : Object {
             // watch for path loops, real bad if it happens ... could be more thorough here, but at
             // least one level of checking is better than none
             if (id == parent_id) {
-                warning("Loop found in database: parent of %lld is %lld in FolderTable",
-                    parent_id, id);
+                warning("Loop found in database: parent of %s is %s in FolderTable",
+                    parent_id.to_string(), id.to_string());
                 
                 return false;
             }

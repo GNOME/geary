@@ -152,8 +152,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         if (local_properties.uid_validity.value != remote_properties.uid_validity.value) {
             // TODO: Don't deal with UID validity changes yet
-            error("UID validity changed: %lld -> %lld", local_properties.uid_validity.value,
-                remote_properties.uid_validity.value);
+            error("UID validity changed: %s -> %s", local_properties.uid_validity.value.to_string(),
+                remote_properties.uid_validity.value.to_string());
         }
         
         // from here on the only write operations being performed on the folder are creating or updating

@@ -820,7 +820,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         
         Db.Result results = stmt.exec(cancellable);
         if (results.finished)
-            throw new EngineError.NOT_FOUND("No message ID %lld found in database", message_id);
+            throw new EngineError.NOT_FOUND("No message ID %s found in database", message_id.to_string());
         
         return new MessageRow.from_result(required_fields, results);
     }
@@ -981,7 +981,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         throws Error {
         Geary.Email.Field available_fields;
         if (!do_fetch_email_fields(cx, row.id, out available_fields, cancellable))
-            throw new EngineError.NOT_FOUND("No message with ID %lld found in database", row.id);
+            throw new EngineError.NOT_FOUND("No message with ID %s found in database", row.id.to_string());
         
         // This calculates the fields in the row that are not in the database already and then adds
         // any available mutable fields provided by the caller

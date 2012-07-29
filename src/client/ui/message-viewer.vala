@@ -1263,7 +1263,7 @@ public class MessageViewer : WebKit.WebView {
                     .set_inner_text(filename);
                 Util.DOM.select(attachment_table, ".info .filesize")
                     .set_inner_text(Files.get_filesize_as_string(attachment.filesize));
-                attachment_table.set_attribute("data-attachment-id", "%lld".printf(attachment.id));
+                attachment_table.set_attribute("data-attachment-id", "%s".printf(attachment.id.to_string()));
 
                 // Set the image preview and insert it into the container.
                 WebKit.DOM.HTMLImageElement img =
@@ -1365,7 +1365,7 @@ public class MessageViewer : WebKit.WebView {
         try {
             string temporary_filename;
             int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
-                                                      out temporary_filename);
+                out temporary_filename);
             FileUtils.set_contents(temporary_filename, source);
             FileUtils.close(temporary_handle);
             string temporary_uri = Filename.to_uri(temporary_filename, null);
@@ -1373,7 +1373,7 @@ public class MessageViewer : WebKit.WebView {
         } catch (Error error) {
             var dialog = new Gtk.MessageDialog(null, 0,
                 Gtk.MessageType.ERROR, Gtk.ButtonsType.OK,
-                _("Failed to open default text editor."));
+                "%s", _("Failed to open default text editor."));
             dialog.format_secondary_text(error.message);
             dialog.run();
             dialog.destroy();

@@ -27,8 +27,8 @@ public class Geary.Attachment {
         string? filename) {
         // "none" should not be translated, or the user will be unable to retrieve their
         // attachments with no filenames after changing their language.
-        return "%s/attachments/%lld/%lld/%s".printf(data_dir.get_path(), message_id, attachment_id,
-            filename ?? "none");
+        return "%s/attachments/%s/%s/%s".printf(data_dir.get_path(), message_id.to_string(),
+            attachment_id.to_string(), filename ?? "none");
     }
 }
 

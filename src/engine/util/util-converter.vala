@@ -43,8 +43,8 @@ public class Geary.MidstreamConverter : Object, Converter {
                 double pct = (converted_bytes_read > converted_bytes_written)
                     ? (double) converted_bytes_written / (double) converted_bytes_read
                     : (double) converted_bytes_read / (double) converted_bytes_written;
-                debug("%s read/written: %lld/%lld (%ld%%)", name, converted_bytes_read, converted_bytes_written,
-                    (long) (pct * 100.0));
+                debug("%s read/written: %s/%s (%ld%%)", name, converted_bytes_read.to_string(),
+                    converted_bytes_written.to_string(), (long) (pct * 100.0));
             }
             
             return result;

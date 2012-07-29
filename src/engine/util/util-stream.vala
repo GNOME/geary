@@ -14,8 +14,10 @@ public async void write_all_async(OutputStream outs, uint8[] data, ssize_t offse
     if (length == 0)
         return;
     
-    if (offset >= length)
-        throw new IOError.INVALID_ARGUMENT("Offset %d outside of buffer length %d", offset, length);
+    if (offset >= length) {
+        throw new IOError.INVALID_ARGUMENT("Offset %s outside of buffer length %d", offset.to_string(),
+            length);
+    }
     
     do {
         offset += yield outs.write_async(data[offset:length], priority, cancellable);

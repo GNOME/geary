@@ -20,7 +20,7 @@ public class Geary.Imap.MessageSet {
     public MessageSet.uid(UID uid) {
         assert(uid.value > 0);
         
-        value = "%lld".printf(uid.value);
+        value = uid.value.to_string();
         is_uid = true;
     }
     
@@ -41,7 +41,7 @@ public class Geary.Imap.MessageSet {
         assert(low.value > 0);
         assert(high.value > 0);
         
-        value = "%lld:%lld".printf(low.value, high.value);
+        value = "%s:%s".printf(low.value.to_string(), high.value.to_string());
         is_uid = true;
     }
     
@@ -78,14 +78,14 @@ public class Geary.Imap.MessageSet {
             high = (low + count).clamp(1, uint32.MAX);
         }
         
-        value = "%lld:%lld".printf(low, high);
+        value = "%s:%s".printf(low.to_string(), high.to_string());
         is_uid = true;
     }
     
     public MessageSet.uid_range_to_highest(UID low) {
         assert(low.value > 0);
         
-        value = "%lld:*".printf(low.value);
+        value = "%s:*".printf(low.value.to_string());
         is_uid = true;
     }
     
@@ -167,7 +167,7 @@ public class Geary.Imap.MessageSet {
             // loop because foreach/Iterator would still require a special case to skip it)
             if (start_of_span < 0) {
                 // start of first span
-                builder.append_printf("%lld", msg_num);
+                builder.append(msg_num.to_string());
                 
                 start_of_span = msg_num;
                 span_count = 1;
@@ -178,12 +178,15 @@ public class Geary.Imap.MessageSet {
                 assert(span_count >= 1);
                 
                 // span ends, another begins
-                if (span_count == 1)
-                    builder.append_printf(",%lld", msg_num);
-                else if (span_count == 2)
-                    builder.append_printf(",%lld,%lld", start_of_span + 1, msg_num);
-                else
-                    builder.append_printf(":%lld,%lld", start_of_span + span_count - 1, msg_num);
+                if (span_count == 1) {
+                    builder.append_printf(",%s", msg_num.to_string());
+                } else if (span_count == 2) {
+                    builder.append_printf(",%s,%s", (start_of_span + 1).to_string(),
+                        msg_num.to_string());
+                } else {
+                    builder.append_printf(":%s,%s", (start_of_span + span_count - 1).to_string(),
+                        msg_num.to_string());
+                }
                 
                 start_of_span = msg_num;
                 span_count = 1;
@@ -199,9 +202,9 @@ public class Geary.Imap.MessageSet {
         
         // look for open-ended span
         if (span_count == 2)
-            builder.append_printf(",%lld", last_msg_num);
+            builder.append_printf(",%s", last_msg_num.to_string());
         else
-            builder.append_printf(":%lld", last_msg_num);
+            builder.append_printf(":%s", last_msg_num.to_string());
         
         return builder.str;
     }

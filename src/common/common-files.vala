@@ -29,7 +29,7 @@ public string get_filesize_as_string(int64 filesize) {
     }
 
     if (scale == 1) {
-        return "%lld %s".printf(filesize, units);
+        return "%s %s".printf(filesize.to_string(), units);
     } else {
         return "%.2f %s".printf((float) filesize / (float) scale, units);
     }
