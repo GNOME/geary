@@ -1168,7 +1168,8 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             ByteArray byte_array = new ByteArray();
             GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
             stream.set_owner(false);
-            attachment_data.write_to_stream(stream);
+            if (attachment_data != null)
+                attachment_data.write_to_stream(stream); // data is null if it's 0 bytes
             uint filesize = byte_array.len;
             
             // Insert it into the database.
@@ -1193,7 +1194,9 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 
                 // Save the data to disk and flush it.
                 size_t written;
-                saved_stream.write_all(byte_array.data[0:filesize], out written, cancellable);
+                if (filesize != 0)
+                    saved_stream.write_all(byte_array.data[0:filesize], out written, cancellable);
+                
                 saved_stream.flush(cancellable);
             } catch (Error error) {
                 // An error occurred while saving the attachment, so lets remove the attachment from
