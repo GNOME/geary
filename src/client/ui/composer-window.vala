@@ -509,6 +509,16 @@ public class ComposerWindow : Gtk.Window {
             return;
         }
         
+        try {
+            FileInputStream? stream = attachment_file.read();
+            if (stream != null)
+                stream.close();
+        } catch(Error e) {
+            debug("File '%s' could not be opened for reading. Error: %s", attachment_file.get_path(),
+                e.message);
+            return;
+        }
+        
         if (!attachment_files.add(attachment_file))
             return;
         
