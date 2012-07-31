@@ -44,19 +44,34 @@ public abstract class Geary.Conversation : Object {
     }
 
     /**
+     * Returns true if any message in the conversation is not unread.
+     */
+    public bool has_any_read_message() {
+        return is_missing_flag(Geary.EmailFlags.UNREAD);
+    }
+
+    /**
      * Returns true if *any* message in the conversation is flagged.
      */
     public bool is_flagged() {
         return has_flag(Geary.EmailFlags.FLAGGED);
     }
     
-    private bool has_flag(Geary.EmailFlag flag) {
+    private bool check_flag(Geary.EmailFlag flag, bool contains) {
         foreach (Geary.Email email in get_email(Ordering.NONE)) {
-            if (email.email_flags != null && email.email_flags.contains(flag))
+            if (email.email_flags != null && email.email_flags.contains(flag) == contains)
                 return true;
         }
         
         return false;
+    }
+
+    private bool has_flag(Geary.EmailFlag flag) {
+        return check_flag(flag, true);
+    }
+
+    private bool is_missing_flag(Geary.EmailFlag flag) {
+        return check_flag(flag, false);
     }
 }
 

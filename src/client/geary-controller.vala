@@ -922,11 +922,11 @@ public class GearyController {
         bool starred_selected = false;
         bool unstarred_selected = false;
         foreach (Geary.Conversation conversation in selected_conversations) {
-            if (conversation.is_unread()) {
+            if (conversation.is_unread())
                 unread_selected = true;
-            } else {
+            if (conversation.has_any_read_message())
                 read_selected = true;
-            }
+
             if (conversation.is_flagged()) {
                 starred_selected = true;
             } else {
