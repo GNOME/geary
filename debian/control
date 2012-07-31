@@ -29,7 +29,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  libcanberra0 (>= 0.28),
  libwebkitgtk-3.0-0 (>= 1.4.3),
  libxml2 (>= 2.6.32),
- libsqlite3 (>= 3.7.4)
+ libsqlite3-0 (>= 3.7.4)
 Description: Email client
  Geary is an email client built for the GNOME desktop environment.  It
  allows you to read and write email with a simple, modern interface.
