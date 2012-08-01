@@ -24,7 +24,7 @@ public abstract class Geary.Conversation : Object {
     /**
      * Returns all the email in the conversation sorted according to the specifier.
      */
-    public abstract Gee.List<Geary.Email> get_email(Ordering ordering);
+    public abstract Gee.List<Geary.Email> get_emails(Ordering ordering);
     
     /**
      * Returns the email associated with the EmailIdentifier, if present in this conversation.
@@ -57,8 +57,16 @@ public abstract class Geary.Conversation : Object {
         return has_flag(Geary.EmailFlags.FLAGGED);
     }
     
+    /**
+     * Returns the email to use for a preview in a conversation.
+     */
+    public Geary.Email? get_latest_email() {
+        Gee.List<Geary.Email> pool = get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
+        return pool.size == 0 ? null : pool.last();
+    }
+    
     private bool check_flag(Geary.EmailFlag flag, bool contains) {
-        foreach (Geary.Email email in get_email(Ordering.NONE)) {
+        foreach (Geary.Email email in get_emails(Ordering.NONE)) {
             if (email.email_flags != null && email.email_flags.contains(flag) == contains)
                 return true;
         }

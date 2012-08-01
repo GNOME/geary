@@ -55,7 +55,7 @@ public class GearyController {
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
 
-    private const int FETCH_EMAIL_CHUNK_COUNT = 50;
+    public const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DELETE_MESSAGE_TOOLTIP = null;
@@ -66,7 +66,6 @@ public class GearyController {
     private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-insert";
     
     public MainWindow main_window { get; private set; }
-    public bool enable_load_more { get; set; default = true; }
     
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_inbox = new Cancellable();
@@ -78,8 +77,6 @@ public class GearyController {
     private int busy_count = 0;
     private Gee.Set<Geary.Conversation> selected_conversations = new Gee.HashSet<Geary.Conversation>();
     private Geary.Conversation? last_deleted_conversation = null;
-    private bool scan_in_progress = false;
-    private int conversations_added_counter = 0;
     private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
     private File? last_save_directory = null;
 
@@ -91,7 +88,6 @@ public class GearyController {
         GearyApplication.instance.ui_manager.insert_action_group(
             GearyApplication.instance.actions, 0);
         GearyApplication.instance.load_ui_file("accelerators.ui");
-        GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
         
         // Listen for attempts to close the application.
         GearyApplication.instance.exiting.connect(on_application_exiting);
@@ -260,7 +256,7 @@ public class GearyController {
             account.folders_added_removed.disconnect(on_folders_added_removed);
             
             main_window.title = GearyApplication.NAME;
-            
+            main_window.message_list_store.account_owner_email = null;
             main_window.folder_list.remove_all_branches();
             
             if (inbox_folder != null) {
@@ -300,6 +296,8 @@ public class GearyController {
             
             if (account.settings.service_provider == Geary.ServiceProvider.YAHOO)
                 main_window.title = GearyApplication.NAME + "!";
+            // TODO: Change this when Geary no longer assumes username is email addresss.
+            main_window.message_list_store.account_owner_email = account.settings.credentials.user;
             
             main_window.folder_list.set_user_folders_root_name(_("Labels"));
             load_folders.begin(cancellable_folder);
@@ -348,8 +346,6 @@ public class GearyController {
     private void on_folder_selected(Geary.Folder? folder) {
         if (folder == null) {
             debug("no folder selected");
-            main_window.message_list_store.clear();
-            
             return;
         }
         
@@ -360,7 +356,6 @@ public class GearyController {
     
     private async void do_select_folder(Geary.Folder folder) throws Error {
         cancel_folder();
-        main_window.message_list_store.clear();
         
         // stop monitoring for conversations and close the folder (but only if not the inbox_folder,
         // which we leave open for notifications)
@@ -378,7 +373,7 @@ public class GearyController {
             debug("switching to %s", folder.to_string());
         
         current_folder = folder;
-        main_window.message_list_store.set_current_folder(current_folder);
+        main_window.message_list_store.set_current_folder(current_folder, cancellable_folder);
         
         // The current folder may be null if the user rapidly switches between folders. If they have
         // done that then this folder selection is invalid anyways, so just return.
@@ -397,11 +392,12 @@ public class GearyController {
         current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.scan_completed.connect(on_scan_completed);
-        current_conversations.conversations_added.connect(on_conversations_added);
         current_conversations.conversation_appended.connect(on_conversation_appended);
         current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
-        current_conversations.conversation_removed.connect(on_conversation_removed);
         current_conversations.email_flags_changed.connect(on_email_flags_changed);
+        
+        main_window.message_list_store.set_conversation_monitor(current_conversations);
+        main_window.message_list_view.set_conversation_monitor(current_conversations);
         
         yield current_conversations.start_monitoring_async(cancellable_folder);
         
@@ -410,7 +406,7 @@ public class GearyController {
         current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
     }
     
-    public void on_current_folder_opened(Geary.Folder.OpenState state, int count) {
+    private void on_current_folder_opened(Geary.Folder.OpenState state, int count) {
         // when BOTH (or only REMOTE) is opened and no conversations are available, seed the
         // ConversationMonitor, as its possible to call Folder.list's variants while opening and
         // only receive the local mail
@@ -422,95 +418,19 @@ public class GearyController {
         }
     }
     
-    public void on_scan_started() {
-        main_window.message_list_view.enable_load_more = false;
+    private void on_scan_started() {
         set_busy(true);
-        
-        scan_in_progress = true;
     }
     
-    public void on_scan_error(Error err) {
+    private void on_scan_error(Error err) {
         set_busy(false);
-        
-        scan_in_progress = false;
     }
     
-    public void on_scan_completed() {
+    private void on_scan_completed() {
         set_busy(false);
-        
-        scan_in_progress = false;
-        
-        do_fetch_previews();
-        
-        main_window.message_list_view.enable_load_more = true;
-        
-        // Select first conversation.
-        if (GearyApplication.instance.config.autoselect)
-            main_window.message_list_view.select_first_conversation();
-        
-        do_second_pass_if_needed();
     }
     
-    private void do_fetch_previews() {
-        if (current_folder == null || !GearyApplication.instance.config.display_preview)
-            return;
-        
-        Geary.Folder.ListFlags flags = (loading_local_only) ? Geary.Folder.ListFlags.LOCAL_ONLY
-            : Geary.Folder.ListFlags.NONE;
-        
-        // sort the conversations so the previews are fetched from the newest to the oldest, matching
-        // the user experience
-        Gee.TreeSet<Geary.Conversation> sorted_conversations = new Gee.TreeSet<Geary.Conversation>(
-            (CompareFunc) compare_conversation_descending);
-        sorted_conversations.add_all(current_conversations.get_conversations());
-        
-        Gee.HashSet<Geary.EmailIdentifier> need_previews = new Gee.HashSet<Geary.EmailIdentifier>(
-            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
-        foreach (Geary.Conversation conversation in sorted_conversations) {
-            Geary.Email? need_preview = MessageListStore.email_for_preview(conversation);
-            Geary.Email? current_preview = main_window.message_list_store.get_preview_for_conversation(conversation);
-            
-            // if all preview fields present and it's the same email, don't need to refresh
-            if (need_preview != null && current_preview != null && need_preview.id.equals(current_preview.id) &&
-                current_preview.fields.is_all_set(MessageListStore.WITH_PREVIEW_FIELDS)) {
-                continue;
-            }
-            
-            if (need_preview != null)
-                need_previews.add(need_preview.id);
-        }
-        
-        if (need_previews.size > 0) {
-            current_folder.list_email_by_sparse_id_async.begin(need_previews,
-                MessageListStore.WITH_PREVIEW_FIELDS, flags, cancellable_folder,
-                on_fetch_previews_completed);
-        }
-    }
-    
-    private void on_fetch_previews_completed(Object? source, AsyncResult result) {
-        if (current_folder == null || current_conversations == null)
-            return;
-        
-        try {
-            Gee.List<Geary.Email>? emails = current_folder.list_email_by_sparse_id_async.end(result);
-            if (emails != null) {
-                foreach (Geary.Email email in emails) {
-                    Geary.Conversation? conversation = current_conversations.get_conversation_for_email(
-                        email.id);
-                    if (conversation != null)
-                        main_window.message_list_store.set_preview_for_conversation(conversation, email);
-                    else
-                        debug("Couldn't find conversation for %s", email.id.to_string());
-                }
-            }
-        } catch (Error err) {
-            // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
-            if (!(err is Geary.EngineError.NOT_FOUND))
-                debug("Unable to fetch preview: %s", err.message);
-        }
-    }
-    
-    public void on_inbox_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
+    private void on_inbox_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
         debug("on_inbox_new_email: %d locally appended", email_ids.size);
         do_notify_new_email.begin(email_ids);
     }
@@ -560,59 +480,22 @@ public class GearyController {
         }
     }
     
-    public void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
-        Gtk.Adjustment adjustment = (main_window.message_list_view.get_parent() as Gtk.ScrolledWindow)
-            .get_vadjustment();
-        int stage = ++conversations_added_counter;
-        double scroll = adjustment.get_value();
-        debug("Adding %d conversations (%d).", conversations.size, stage);
-        foreach (Geary.Conversation c in conversations) {
-            if (!main_window.message_list_store.has_conversation(c))
-                main_window.message_list_store.append_conversation(c);
-        }
-        debug("Added %d conversations (%d).", conversations.size, stage);
-
-        // If we are at the top of the message list we want to stay at the top. We need to spin the
-        // event loop until they make it from the store to the view. We also don't want to have two
-        // of these going, so if another conversation gets appended, we just return.
-        if (scroll == 0) {
-            while (Gtk.events_pending()) {
-                if (Gtk.main_iteration() || conversations_added_counter != stage) {
-                    return;
-                }
-            }
-            adjustment.set_value(0);
-        }
-    }
-
-    public void on_conversation_appended(Geary.Conversation conversation,
+    private void on_conversation_appended(Geary.Conversation conversation,
         Gee.Collection<Geary.Email> email) {
-        // If we're viewing this conversation, fetch the messages and add them to the view.
-        if (main_window.message_list_store.has_conversation(conversation)) {
-            main_window.message_list_store.update_conversation(conversation);
-        }
-        if (is_viewed_conversation(conversation))
-            do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.NONE), cancellable_message,
+        if (is_viewed_conversation(conversation)) {
+            do_show_message.begin(conversation.get_emails(Geary.Conversation.Ordering.NONE), cancellable_message,
                 false, on_show_message_completed);
+        }
     }
     
-    public void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
+    private void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
         if (is_viewed_conversation(conversation))
             main_window.message_viewer.remove_message(email);
     }
     
-    public void on_conversation_removed(Geary.Conversation conversation) {
-        main_window.message_list_store.remove_conversation(conversation);
-        if (!GearyApplication.instance.config.autoselect) {
-            main_window.message_list_view.unselect_all();
-        }
-    }
-    
     private void on_load_more() {
         debug("on_load_more");
-        main_window.message_list_view.enable_load_more = false;
-        
-        Geary.EmailIdentifier? low_id = main_window.message_list_store.get_email_id_lowest();
+        Geary.EmailIdentifier? low_id = main_window.message_list_store.get_lowest_email_id();
         if (low_id == null)
             return;
         
@@ -633,18 +516,7 @@ public class GearyController {
     }
     
     private void on_email_flags_changed(Geary.Conversation conversation, Geary.Email email) {
-        main_window.message_list_store.update_conversation(conversation, true);
         main_window.message_viewer.update_flags(email);
-    }
-    
-    private void do_second_pass_if_needed() {
-        if (loading_local_only) {
-            loading_local_only = false;
-            
-            debug("Loading all emails now");
-            current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
-                cancellable_folder);
-        }
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
@@ -667,7 +539,7 @@ public class GearyController {
         
         if (selected.size == 1 && current_folder != null) {
             Geary.Conversation conversation = Geary.Collection.get_first(selected);
-            do_show_message.begin(conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING),
+            do_show_message.begin(conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING),
                 cancellable_message, true, on_show_message_completed);
         } else if (current_folder != null) {
             main_window.message_viewer.show_multiple_selected(selected.size);
@@ -681,10 +553,7 @@ public class GearyController {
     
     private async void do_show_message(Gee.Collection<Geary.Email> messages, Cancellable? 
         cancellable = null, bool clear_view = true) throws Error {
-        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         set_busy(true);
-        
-        Gee.HashSet<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
         
         // Clear view before we yield, to make sure it happens
         if (clear_view) {
@@ -694,6 +563,8 @@ public class GearyController {
         }
         
         // Fetch full messages.
+        Gee.List<Geary.EmailIdentifier> unread_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
         foreach (Geary.Email email in messages) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
                 MessageViewer.REQUIRED_FIELDS | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
@@ -705,7 +576,7 @@ public class GearyController {
             messages_to_add.add(full_email);
             
             if (full_email.email_flags.is_unread())
-                ids.add(full_email.id);
+                unread_ids.add(full_email.id);
         }
         
         // Add messages.  message_viewer.add_message only adds new messages
@@ -715,12 +586,17 @@ public class GearyController {
         main_window.message_viewer.unhide_last_email();
         
         // Mark as read.
+        yield mark_as_read_async(unread_ids, cancellable);
+    }
+    
+    private async void mark_as_read_async(Gee.List<Geary.EmailIdentifier> unread_ids,
+        Cancellable? cancellable = null) throws Error {
         Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
-        if (supports_mark != null && ids.size > 0) {
+        if (supports_mark != null && unread_ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
             
-            yield supports_mark.mark_email_async(ids, null, flags, cancellable);
+            yield supports_mark.mark_email_async(unread_ids, null, flags, cancellable);
         }
     }
     
@@ -838,7 +714,7 @@ public class GearyController {
         return sender.cancel_exit();
     }
     
-    public void on_quit() {
+    private void on_quit() {
         GearyApplication.instance.exit();
     }
 
@@ -869,7 +745,7 @@ public class GearyController {
         }
     }
 
-    public void on_about() {
+    private void on_about() {
         Gtk.show_about_dialog(main_window,
             "program-name", GearyApplication.NAME,
             "comments", GearyApplication.DESCRIPTION,
@@ -882,7 +758,7 @@ public class GearyController {
         );
     }
     
-    public void on_preferences() {
+    private void on_preferences() {
         PreferencesDialog dialog = new PreferencesDialog(GearyApplication.instance.config);
         dialog.run();
     }
@@ -891,7 +767,7 @@ public class GearyController {
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.Conversation conversation in selected_conversations) {
             if (only_get_preview_message) {
-                Geary.Email? preview_message = MessageListStore.email_for_preview(conversation);
+                Geary.Email? preview_message = conversation.get_latest_email();
                 if (preview_message != null) {
                     ids.add(preview_message.id);
                 }
@@ -949,7 +825,7 @@ public class GearyController {
         
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         if (only_mark_preview) {
-            Geary.Email? email = MessageListStore.email_for_preview(conversation);
+            Geary.Email? email = conversation.get_latest_email();
             if (email != null) {
                 ids.add(email.id);
             }
@@ -1212,7 +1088,7 @@ public class GearyController {
         // Collect all the emails into one pool and then delete.
         Gee.Set<Geary.Email> all_emails = new Gee.TreeSet<Geary.Email>();
         foreach (Geary.Conversation conversation in selected_conversations)
-            all_emails.add_all(conversation.get_email(Geary.Conversation.Ordering.NONE));
+            all_emails.add_all(conversation.get_emails(Geary.Conversation.Ordering.NONE));
         
         delete_messages.begin(all_emails, cancellable_folder, on_delete_messages_completed);
     }
@@ -1297,13 +1173,7 @@ public class GearyController {
         main_window.set_busy(busy_count > 0);
     }
 
-    private void on_display_preview_changed() {
-        do_fetch_previews();
-        main_window.message_list_view.style_set(null);
-        main_window.message_list_view.refresh();
-    }
-    
-    public void on_link_selected(string link) {
+    private void on_link_selected(string link) {
         const string MAILTO = "mailto:";
         if (link.down().has_prefix(MAILTO)) {
             compose_mailto(link);

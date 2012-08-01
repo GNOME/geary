@@ -48,7 +48,7 @@ public class Geary.ConversationMonitor : Object {
             return emails.size;
         }
         
-        public override Gee.List<Geary.Email> get_email(Conversation.Ordering ordering) {
+        public override Gee.List<Geary.Email> get_emails(Conversation.Ordering ordering) {
             switch (ordering) {
                 case Conversation.Ordering.DATE_ASCENDING:
                     return Collection.to_array_list<Email>(date_ascending);
@@ -305,8 +305,8 @@ public class Geary.ConversationMonitor : Object {
     }
     
     protected virtual void notify_conversation_appended(Conversation conversation,
-        Gee.Collection<Geary.Email> email) {
-        conversation_appended(conversation, email);
+        Gee.Collection<Geary.Email> emails) {
+        conversation_appended(conversation, emails);
     }
     
     protected virtual void notify_conversation_trimmed(Conversation conversation, Geary.Email email) {

@@ -46,5 +46,9 @@ public enum Geary.SpecialFolderType {
                 return _("None");
         }
     }
+    
+    public bool is_outgoing() {
+        return this == SENT || this == OUTBOX;
+    }
 }
 

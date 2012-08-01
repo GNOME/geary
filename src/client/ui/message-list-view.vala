@@ -7,22 +7,29 @@
 public class MessageListView : Gtk.TreeView {
     const int LOAD_MORE_HEIGHT = 100;
     
-    public bool enable_load_more { get; set; default = true; }
+    private bool enable_load_more = true;
     
     // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
+    private bool reset_adjustment = false;
     private Gee.Set<Geary.Conversation> selected = new Gee.HashSet<Geary.Conversation>();
     
     public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
     
-    public signal void load_more();
+    public virtual signal void load_more() {
+        enable_load_more = false;
+    }
     
     public signal void mark_conversation(Geary.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
-    public MessageListView(MessageListStore store) {
-        set_model(store);
+    private MessageListStore message_list_store;
+    private Geary.ConversationMonitor? conversation_monitor;
+    
+    public MessageListView(MessageListStore message_list_store) {
+        this.message_list_store = message_list_store;
+        set_model(message_list_store);
         
         set_show_expanders(false);
         set_headers_visible(false);
@@ -37,12 +44,76 @@ public class MessageListView : Gtk.TreeView {
         style_set.connect(on_style_changed);
         show.connect(on_show);
         
-        store.row_deleted.connect(on_row_deleted);
+        get_model().row_deleted.connect(on_row_deleted);
+        message_list_store.conversations_added_began.connect(on_conversations_added_began);
+        message_list_store.conversations_added_finished.connect(on_conversations_added_finished);
         button_press_event.connect(on_button_press);
 
         // Set up drag and drop.
         Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
+        
+        GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
+    }
+    
+    public void set_conversation_monitor(Geary.ConversationMonitor? new_conversation_monitor) {
+        if (conversation_monitor != null) {
+            conversation_monitor.scan_started.disconnect(on_scan_started);
+            conversation_monitor.scan_completed.disconnect(on_scan_completed);
+            conversation_monitor.conversation_removed.disconnect(on_conversation_removed);
+        }
+        
+        conversation_monitor = new_conversation_monitor;
+        
+        if (conversation_monitor != null) {
+            conversation_monitor.scan_started.connect(on_scan_started);
+            conversation_monitor.scan_completed.connect(on_scan_completed);
+            conversation_monitor.conversation_removed.connect(on_conversation_removed);
+        }
+    }
+    
+    private void on_scan_started() {
+        enable_load_more = false;
+    }
+    
+    private void on_scan_completed() {
+        enable_load_more = true;
+        
+        // Select first conversation.
+        if (GearyApplication.instance.config.autoselect)
+            select_first_conversation();
+    }
+    
+    private void on_conversation_removed(Geary.Conversation conversation) {
+        if (!GearyApplication.instance.config.autoselect)
+            unselect_all();
+    }
+    
+    private void on_conversations_added_began() {
+        Gtk.Adjustment? adjustment = get_adjustment();
+        // If we were at the top, we want to stay there after conversations are added.
+        reset_adjustment = adjustment != null && adjustment.get_value() == 0;
+    }
+    
+    private void on_conversations_added_finished() {
+        if (!reset_adjustment)
+            return;
+        
+        Gtk.Adjustment? adjustment = get_adjustment();
+        if (adjustment == null)
+            return;
+        
+        adjustment.set_value(0);
+    }
+    
+    private Gtk.Adjustment? get_adjustment() {
+        Gtk.ScrolledWindow? parent = get_parent() as Gtk.ScrolledWindow;
+        if (parent == null) {
+            debug("Parent was not scrolled window");
+            return null;
+        }
+        
+        return parent.get_vadjustment();
     }
 
     private bool on_button_press(Gdk.EventButton event) {
@@ -61,7 +132,7 @@ public class MessageListView : Gtk.TreeView {
             (event.state & Gdk.ModifierType.CONTROL_MASK) == 0 &&
             event.type == Gdk.EventType.BUTTON_PRESS && cell_x < 25 && cell_y < 25) {
             
-            Geary.Conversation conversation = get_store().get_conversation_at(path);
+            Geary.Conversation conversation = message_list_store.get_conversation_at_path(path);
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.FLAGGED);
             if (conversation.is_flagged()) {
@@ -113,10 +184,6 @@ public class MessageListView : Gtk.TreeView {
         return view_column;
     }
     
-    public MessageListStore get_store() {
-        return (MessageListStore) get_model();
-    }
-    
     private List<Gtk.TreePath> get_all_selected_paths() {
         Gtk.TreeModel model;
         return get_selection().get_selected_rows(out model);
@@ -143,7 +210,7 @@ public class MessageListView : Gtk.TreeView {
         // Conversations are selected, so collect them and signal if different
         Gee.HashSet<Geary.Conversation> new_selected = new Gee.HashSet<Geary.Conversation>();
         foreach (Gtk.TreePath path in paths) {
-            Geary.Conversation? conversation = get_store().get_conversation_at(path);
+            Geary.Conversation? conversation = message_list_store.get_conversation_at_path(path);
             if (conversation != null)
                 new_selected.add(conversation);
         }
@@ -163,10 +230,9 @@ public class MessageListView : Gtk.TreeView {
     }
 
     public void select_conversation(Geary.Conversation conversation) {
-        Gtk.TreeIter iter;
-        if(get_store().find_conversation(conversation, out iter)) {
-            set_cursor(get_store().get_path(iter), null, false);
-        }
+        Gtk.TreePath path = message_list_store.get_path_for_conversation(conversation);
+        if (path != null)
+            set_cursor(path, null, false);
     }
 
     private void on_row_deleted(Gtk.TreePath path) {
@@ -182,7 +248,8 @@ public class MessageListView : Gtk.TreeView {
         }
     }
 
-    public void refresh() {
+    private void on_display_preview_changed() {
+        style_set(null);
         model.foreach(refresh_path);
     }
     

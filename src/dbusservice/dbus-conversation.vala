@@ -18,7 +18,7 @@ public class Geary.DBus.Conversation : Object {
     }
     
     public async ObjectPath[] get_emails() throws IOError {
-        Gee.List<Geary.Email> pool = conversation.get_email(Geary.Conversation.Ordering.DATE_ASCENDING);
+        Gee.List<Geary.Email> pool = conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
         if (pool.size == 0)
             return new ObjectPath[0];
         

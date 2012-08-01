@@ -18,63 +18,100 @@ public class FormattedMessageData : Object {
     private static int cell_height = -1;
     private static int preview_height = -1;
     
-    public Geary.Email email { get; private set; default = null; }
-    public bool is_unread { get; set; default = false; }
-    public bool is_flagged { get; set; default = false; }
-    public string date { get; private set; default = ""; } 
-    public string from { get; private set; default = ""; }
-    public string subject { get; private set; default = ""; }
+    public bool is_unread { get; set; }
+    public bool is_flagged { get; set; }
+    public string date { get; private set; } 
+    public string from { get; private set; }
+    public string subject { get; private set; }
     public string? body { get; private set; default = null; } // optional
-    public int num_emails { get; private set; default = 1; }
-    
-    private FormattedMessageData(bool is_unread, bool is_flagged, string date, string from,
-        string subject, string preview, int num_emails) {
-        this.is_unread = is_unread;
-        this.is_flagged = is_flagged;
-        this.date = date;
-        this.from = from;
-        this.subject = subject;
-        this.body = preview;
-        this.num_emails = num_emails;
-    }
+    public int num_emails { get; private set; }
+    public Geary.Email? preview { get; private set; default = null; }
     
     // Creates a formatted message data from an e-mail.
-    public FormattedMessageData.from_email(Geary.Email email, int num_emails, bool unread,
-        bool flagged, Geary.Folder folder) {
-        assert(email.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
+    public FormattedMessageData(Geary.Conversation conversation, Geary.Email preview,
+        Geary.Folder folder, string account_owner_email) {
+        assert(preview.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
         
-        string who = "";
-        if ((folder.get_special_folder_type() == Geary.SpecialFolderType.SENT ||
-            folder.get_special_folder_type() == Geary.SpecialFolderType.OUTBOX) &&
-            email.to != null && email.to.size > 0) {
-            who = email.to[0].get_short_address();
-        } else if (email.from != null && email.from.size > 0) {
-            who = email.from[0].get_short_address();
-        }
-        
-        string clean_subject;
-        try {
-            Regex subject_regex = new Regex("^(?i:Re:\\s*)+");
-            clean_subject = subject_regex.replace(email.get_subject_as_string(), -1, 0, "");
-        } catch (RegexError e) {
-            debug("Failed to clean up subject line: %s", e.message);
-            clean_subject = email.get_subject_as_string();
-        }
-        
-        string date = (email.date != null)
-            ? Date.pretty_print(email.date.value, GearyApplication.instance.config.clock_format)
+        // Load preview-related data.
+        this.date = (preview.date != null)
+            ? Date.pretty_print(preview.date.value, GearyApplication.instance.config.clock_format)
             : "";
+        this.subject = get_clean_subject_as_string(preview);
+        this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
+        this.preview = preview;
         
-        this(unread, flagged, date, who, clean_subject,
-            Geary.String.reduce_whitespace(email.get_preview_as_string()), num_emails);
-        
-        this.email = email;
+        // Load conversation-related data.
+        this.is_unread = conversation.is_unread();
+        this.is_flagged = conversation.is_flagged();
+        this.from = get_authors(conversation, folder, account_owner_email);
+        this.num_emails = conversation.get_count();
     }
     
     // Creates an example message (used interally for styling calculations.)
     public FormattedMessageData.create_example() {
-        this(false, false, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE, STYLE_EXAMPLE + "\n" +
-            STYLE_EXAMPLE, 1);
+        this.is_unread = false;
+        this.is_flagged = false;
+        this.date = STYLE_EXAMPLE;
+        this.from = STYLE_EXAMPLE;
+        this.subject = STYLE_EXAMPLE;
+        this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
+        this.num_emails = 1;
+    }
+    
+    private string get_authors(Geary.Conversation conversation, Geary.Folder? folder, string account_owner_email) {
+        bool use_to = folder != null && folder.get_special_folder_type().is_outgoing();
+        string normalized_account_owner_email = account_owner_email.normalize().casefold();
+        Gee.Set<string> emails = new Gee.HashSet<string>();
+        string[] authors = new string[0];
+        
+        foreach (Geary.Email message in conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING)) {
+            Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
+            if (addresses == null || addresses.size < 1)
+                continue;
+            
+            string normalized_address = addresses[0].address.normalize().casefold();
+            if (!emails.add(normalized_address))
+                continue;
+            
+            if (normalized_address == normalized_account_owner_email)
+                authors += _("Me");
+            else
+                authors += addresses[0].get_short_address();
+        }
+        
+        // If there is only one author, use their full name.
+        if (authors.length == 1)
+            return authors[0];
+            
+        StringBuilder authors_builder = new StringBuilder();
+        foreach (string author in authors) {
+            string[] tokens = author.strip().split(" ", 2);
+            if (tokens.length < 1)
+                continue;
+            
+            // TODO: Should we use a more sophisticated algorithm than "first word" to get the
+            // first name?
+            string first_name = tokens[0].strip();
+            if (Geary.String.is_null_or_whitespace(first_name))
+                continue;
+            
+            if (authors_builder.len > 0)
+                authors_builder.append(", ");
+            authors_builder.append(first_name);
+        }
+        
+        return authors_builder.str;
+    }
+    
+    public string get_clean_subject_as_string(Geary.Email email) {
+        string subject_string = email.get_subject_as_string();
+        try {
+            Regex subject_regex = new Regex("^(?i:Re:\\s*)+");
+            return subject_regex.replace(subject_string, -1, 0, "");
+        } catch (RegexError e) {
+            debug("Failed to clean up subject line: %s", e.message);
+            return subject_string;
+        }
     }
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
