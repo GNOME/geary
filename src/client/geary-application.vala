@@ -28,6 +28,7 @@ public class GearyApplication : YorbaApplication {
         "Jim Nelson <jim@yorba.org>",
         "Eric Gregory <eric@yorba.org>",
         "Nate Lillich <nate@yorba.org>",
+        "Matthew Pirocchi <matthew@yorba.org>",
         null
     };
     
