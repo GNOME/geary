@@ -19,7 +19,7 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     
     public override async void serialize(Serializer ser) throws Error {
         ser.push_ascii('[');
-        serialize_list(ser);
+        yield serialize_list(ser);
         ser.push_ascii(']');
     }
 }
