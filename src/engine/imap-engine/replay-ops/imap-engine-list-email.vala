@@ -99,10 +99,10 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
             return ReplayOperation.Status.COMPLETED;
         }
         
-        engine.normalize_span_specifiers(ref low, ref count, usable_remote_count);
+        Folder.normalize_span_specifiers(ref low, ref count, usable_remote_count);
         
         // calculate local availability
-        int local_low = engine.remote_position_to_local_position(low, local_count, usable_remote_count);
+        int local_low = GenericFolder.remote_position_to_local_position(low, local_count, usable_remote_count);
         int local_available_low = local_low.clamp(1, local_count);
         int local_available_count = (local_low > 0) ? (count - local_low) + 1 : (count + local_low) - 1;
         

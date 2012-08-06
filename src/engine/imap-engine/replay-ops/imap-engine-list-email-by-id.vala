@@ -37,7 +37,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
             usable_remote_count = local_count;
         
         // normalize the initial position to the remote folder's addressing
-        initial_position = engine.local_position_to_remote_position(initial_position, local_count, usable_remote_count);
+        initial_position = GenericFolder.local_position_to_remote_position(initial_position, local_count, usable_remote_count);
         if (initial_position <= 0) {
             throw new EngineError.NOT_FOUND("Cannot map email ID %s in %s to remote folder",
                 initial_id.to_string(), engine.to_string());

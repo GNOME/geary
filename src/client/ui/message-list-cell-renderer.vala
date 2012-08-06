@@ -135,8 +135,8 @@ public class FormattedMessageData : Object {
         }
 
         if (recalc_dims) {
-            this.preview_height = preview_height;
-            this.cell_height = y + preview_height;
+            FormattedMessageData.preview_height = preview_height;
+            FormattedMessageData.cell_height = y + preview_height;
         } else {
             // Flagged indicator.
             if (is_flagged) {
