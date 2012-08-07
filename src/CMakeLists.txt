@@ -261,7 +261,7 @@ pkg_check_modules(DEPS REQUIRED
     libcanberra>=0.28
     sqlite3>=3.7.4
     gmime-2.6>=2.6.0
-    gnome-keyring-1>=2.32.0
+    gnome-keyring-1>=3.2.2
     webkitgtk-3.0>=1.4.3
 )
 
