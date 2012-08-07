@@ -94,7 +94,7 @@ public class NotificationBubble : GLib.Object {
         try {
             InputStream stream = yield file.read_async(GLib.Priority.DEFAULT, cancellable);
             notification.set_image_from_pixbuf(
-                yield Gdk.Pixbuf.new_from_stream_async(stream, cancellable));
+                yield new Gdk.Pixbuf.from_stream_async(stream, cancellable));
         } catch (GLib.Error avatar_error) {
             debug("Failed to get avatar for notification: %s", avatar_error.message);
         }
