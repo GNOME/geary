@@ -208,6 +208,7 @@ client/ui/message-list-cell-renderer.vala
 client/ui/message-list-store.vala
 client/ui/message-list-view.vala
 client/ui/message-viewer.vala
+client/ui/message-web-view.vala
 client/ui/password-dialog.vala
 client/ui/preferences-dialog.vala
 client/ui/webview-edit-fixer.vala

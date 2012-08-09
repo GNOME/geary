@@ -42,12 +42,6 @@ pre {
     font-family: sans-serif;
     white-space: pre-wrap;
 }
-img {
-    display: none;
-}
-img[src^="data:"] {
-    display: inline;
-}
 
 .button {
     border: 1px transparent solid;

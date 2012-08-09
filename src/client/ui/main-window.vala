@@ -13,7 +13,6 @@ public class MainWindow : Gtk.Window {
     public MainToolbar main_toolbar { get; private set; }
     public MessageListView message_list_view  { get; private set; }
     public MessageViewer message_viewer { get; private set; default = new MessageViewer(); }
-    private Gtk.Label message_overlay_label;
     
     private int window_width;
     private int window_height;
@@ -112,12 +111,6 @@ public class MainWindow : Gtk.Window {
         message_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         message_list_scrolled.add(message_list_view);
         
-        // message viewer
-        Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
-        message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        message_viewer_scrolled.add(message_viewer);
-        message_viewer.link_hover.connect(on_link_hover);
-        
         // Three-pane display.
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         Gtk.Statusbar status_bar = new Gtk.Statusbar();
@@ -128,16 +121,7 @@ public class MainWindow : Gtk.Window {
         
          // Message list left of message viewer.
         messages_paned.pack1(message_list_scrolled, false, false);
-        
-        Gtk.Overlay message_overlay = new Gtk.Overlay();
-        message_overlay.add(message_viewer_scrolled);
-        messages_paned.pack2(message_overlay, true, true);
-        
-        message_overlay_label = new Gtk.Label(null);
-        message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
-        message_overlay_label.halign = Gtk.Align.START;
-        message_overlay_label.valign = Gtk.Align.END;
-        message_overlay.add_overlay(message_overlay_label);
+        messages_paned.pack2(message_viewer.content_area, true, true);
         
         // Folder list to the left of everything.
         folder_paned.pack1(status_bar_box, false, false);
@@ -146,10 +130,6 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
-    }
-    
-    private void on_link_hover(string? link) {
-        message_overlay_label.label = link;
     }
 }
 

@@ -690,6 +690,7 @@ public class GearyController {
         if (clear_view) {
             main_window.message_viewer.clear(current_folder);
             main_window.message_viewer.scroll_reset();
+            main_window.message_viewer.external_images_info_bar.hide();
         }
         
         // Fetch full messages.
@@ -1252,15 +1253,15 @@ public class GearyController {
     }
     
     private void on_zoom_in() {
-        main_window.message_viewer.zoom_in();
+        main_window.message_viewer.web_view.zoom_in();
     }
 
     private void on_zoom_out() {
-        main_window.message_viewer.zoom_out();
+        main_window.message_viewer.web_view.zoom_out();
     }
 
     private void on_zoom_normal() {
-        main_window.message_viewer.zoom_level = 1.0f;
+        main_window.message_viewer.web_view.zoom_level = 1.0f;
     }
     
     private Geary.RFC822.MailboxAddress get_sender() {
