@@ -32,6 +32,7 @@ public class Geary.AccountInformation : Object {
     public string default_smtp_server_host  { get; set; }
     public uint16 default_smtp_server_port  { get; set; }
     public bool default_smtp_server_ssl  { get; set; }
+    public bool default_smtp_server_starttls { get; set; }
 
     public Geary.Credentials credentials { get; private set; }
     public bool remember_password { get; set; default = true; }
@@ -102,9 +103,9 @@ public class Geary.AccountInformation : Object {
                 return ImapEngine.YahooAccount.IMAP_ENDPOINT;
             
             case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = default_imap_server_ssl ? Endpoint.Flags.SSL :
-                    Endpoint.Flags.NONE;
-                imap_flags |= Endpoint.Flags.GRACEFUL_DISCONNECT;
+                Endpoint.Flags imap_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
+                if (default_imap_server_ssl)
+                    imap_flags |= Endpoint.Flags.SSL;
                 
                 return new Endpoint(default_imap_server_host, default_imap_server_port,
                     imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
@@ -124,9 +125,11 @@ public class Geary.AccountInformation : Object {
                 return ImapEngine.YahooAccount.SMTP_ENDPOINT;
             
             case ServiceProvider.OTHER:
-                Endpoint.Flags smtp_flags = default_smtp_server_ssl ? Endpoint.Flags.SSL :
-                    Endpoint.Flags.NONE;
-                smtp_flags |= Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+                Endpoint.Flags smtp_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
+                if (default_smtp_server_ssl)
+                    smtp_flags |= Endpoint.Flags.SSL;
+                if (default_smtp_server_starttls)
+                    smtp_flags |= Endpoint.Flags.STARTTLS;
                 
                 return new Endpoint(default_smtp_server_host, default_smtp_server_port,
                     smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);

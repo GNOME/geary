@@ -20,7 +20,7 @@ public class LoginDialog {
     private Gtk.Entry entry_smtp_host;
     private Gtk.Entry entry_smtp_port;
     private Gtk.CheckButton check_smtp_ssl;
-    
+    private Gtk.CheckButton check_smtp_starttls;
     private Gtk.Button ok_button;
     
     private bool edited_imap_port = false;
@@ -34,7 +34,7 @@ public class LoginDialog {
             initial_account_information.service_provider, initial_account_information.default_imap_server_host,
             initial_account_information.default_imap_server_port, initial_account_information.default_imap_server_ssl,
             initial_account_information.default_smtp_server_host, initial_account_information.default_smtp_server_port,
-            initial_account_information.default_smtp_server_ssl);
+            initial_account_information.default_smtp_server_ssl, initial_account_information.default_smtp_server_starttls);
     }
     
     public LoginDialog(string? initial_real_name = null, string? initial_username = null,
@@ -43,7 +43,7 @@ public class LoginDialog {
         uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_imap_ssl = true, string? initial_default_smtp_host = null,
         uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
-        bool initial_default_smtp_ssl = true) {
+        bool initial_default_smtp_ssl = true, bool initial_default_smtp_starttls = false) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
         
         dialog = builder.get_object("LoginDialog") as Gtk.Dialog;
@@ -63,6 +63,7 @@ public class LoginDialog {
         entry_smtp_host = builder.get_object("smtp host") as Gtk.Entry;
         entry_smtp_port = builder.get_object("smtp port") as Gtk.Entry;
         check_smtp_ssl = builder.get_object("smtp ssl") as Gtk.CheckButton;
+        check_smtp_starttls = builder.get_object("smtp starttls") as Gtk.CheckButton;
         
         combo_service.changed.connect(on_service_changed);
         
@@ -86,6 +87,12 @@ public class LoginDialog {
         entry_smtp_host.set_text(initial_default_smtp_host ?? "");
         entry_smtp_port.set_text(initial_default_smtp_port.to_string());
         check_smtp_ssl.active = initial_default_smtp_ssl;
+        check_smtp_starttls.active = initial_default_smtp_starttls;
+        
+        if (check_smtp_ssl.active) {
+            check_smtp_starttls.active = false;
+            check_smtp_starttls.sensitive = false;
+        }
         
         if (Geary.String.is_empty(entry_real_name.text))
             entry_real_name.grab_focus();
@@ -139,6 +146,7 @@ public class LoginDialog {
         account_information.default_smtp_server_host = entry_smtp_host.text.strip();
         account_information.default_smtp_server_port = (uint16) int.parse(entry_smtp_port.text.strip());
         account_information.default_smtp_server_ssl = check_smtp_ssl.active;
+        account_information.default_smtp_server_starttls = check_smtp_starttls.active;
         
         on_changed();
         
@@ -184,9 +192,14 @@ public class LoginDialog {
         if (edited_smtp_port)
             return;
         
-        entry_smtp_port.text = (check_smtp_ssl.active ? Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL :
-            Geary.Smtp.ClientConnection.DEFAULT_PORT).to_string();
+        uint default_smtp_port = check_smtp_ssl.active ? Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL :
+            Geary.Smtp.ClientConnection.DEFAULT_PORT;
+        entry_smtp_port.text = default_smtp_port.to_string();
         edited_smtp_port = false;
+        
+        check_smtp_starttls.sensitive = !check_smtp_ssl.active;
+        if (check_smtp_ssl.active)
+            check_smtp_starttls.active = false;
     }
     
     private Geary.ServiceProvider get_service_provider() {
