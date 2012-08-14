@@ -12,10 +12,12 @@ public class Geary.AccountInformation : Object {
     private const string IMAP_HOST = "imap_host";
     private const string IMAP_PORT = "imap_port";
     private const string IMAP_SSL = "imap_ssl";
+    private const string IMAP_STARTTLS = "imap_starttls";
     private const string IMAP_PIPELINE = "imap_pipeline";
     private const string SMTP_HOST = "smtp_host";
     private const string SMTP_PORT = "smtp_port";
     private const string SMTP_SSL = "smtp_ssl";
+    private const string SMTP_STARTTLS = "smtp_starttls";
     
     public const string SETTINGS_FILENAME = "geary.ini";
     
@@ -29,6 +31,7 @@ public class Geary.AccountInformation : Object {
     public string default_imap_server_host { get; set; }
     public uint16 default_imap_server_port  { get; set; }
     public bool default_imap_server_ssl  { get; set; }
+    public bool default_imap_server_starttls  { get; set; }
     public string default_smtp_server_host  { get; set; }
     public uint16 default_smtp_server_port  { get; set; }
     public bool default_smtp_server_ssl  { get; set; }
@@ -65,11 +68,13 @@ public class Geary.AccountInformation : Object {
                 default_imap_server_port = get_uint16_value(key_file, GROUP, IMAP_PORT,
                     Imap.ClientConnection.DEFAULT_PORT_SSL);
                 default_imap_server_ssl = get_bool_value(key_file, GROUP, IMAP_SSL, true);
+                default_imap_server_starttls = get_bool_value(key_file, GROUP, IMAP_STARTTLS, false);
                 
                 default_smtp_server_host = get_string_value(key_file, GROUP, SMTP_HOST);
                 default_smtp_server_port = get_uint16_value(key_file, GROUP, SMTP_PORT,
                     Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
                 default_smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
+                default_smtp_server_starttls = get_bool_value(key_file, GROUP, SMTP_STARTTLS, false);
             }
         }
     }
@@ -118,6 +123,8 @@ public class Geary.AccountInformation : Object {
                 Endpoint.Flags imap_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
                 if (default_imap_server_ssl)
                     imap_flags |= Endpoint.Flags.SSL;
+                if (default_imap_server_starttls)
+                    imap_flags |= Endpoint.Flags.STARTTLS;
                 
                 return new Endpoint(default_imap_server_host, default_imap_server_port,
                     imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
@@ -239,10 +246,12 @@ public class Geary.AccountInformation : Object {
             key_file.set_value(GROUP, IMAP_HOST, default_imap_server_host);
             key_file.set_integer(GROUP, IMAP_PORT, default_imap_server_port);
             key_file.set_boolean(GROUP, IMAP_SSL, default_imap_server_ssl);
+            key_file.set_boolean(GROUP, IMAP_STARTTLS, default_imap_server_starttls);
             
             key_file.set_value(GROUP, SMTP_HOST, default_smtp_server_host);
             key_file.set_integer(GROUP, SMTP_PORT, default_smtp_server_port);
             key_file.set_boolean(GROUP, SMTP_SSL, default_smtp_server_ssl);
+            key_file.set_boolean(GROUP, SMTP_STARTTLS, default_smtp_server_starttls);
         }
         
         string data = key_file.to_data();

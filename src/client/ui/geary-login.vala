@@ -16,7 +16,9 @@ public class LoginDialog {
     private Gtk.Alignment other_info;
     private Gtk.Entry entry_imap_host;
     private Gtk.Entry entry_imap_port;
-    private Gtk.CheckButton check_imap_ssl;
+    private Gtk.RadioButton radio_imap_none;
+    private Gtk.RadioButton radio_imap_ssl;
+    private Gtk.RadioButton radio_imap_starttls;
     private Gtk.Entry entry_smtp_host;
     private Gtk.Entry entry_smtp_port;
     private Gtk.RadioButton radio_smtp_none;
@@ -34,15 +36,17 @@ public class LoginDialog {
             initial_account_information.credentials.pass, initial_account_information.remember_password, 
             initial_account_information.service_provider, initial_account_information.default_imap_server_host,
             initial_account_information.default_imap_server_port, initial_account_information.default_imap_server_ssl,
-            initial_account_information.default_smtp_server_host, initial_account_information.default_smtp_server_port,
-            initial_account_information.default_smtp_server_ssl, initial_account_information.default_smtp_server_starttls);
+            initial_account_information.default_imap_server_starttls, initial_account_information.default_smtp_server_host,
+            initial_account_information.default_smtp_server_port, initial_account_information.default_smtp_server_ssl,
+            initial_account_information.default_smtp_server_starttls);
     }
     
     public LoginDialog(string? initial_real_name = null, string? initial_username = null,
         string? initial_password = null, bool initial_remember_password = true,
         int initial_service_provider = -1, string? initial_default_imap_host = null,
         uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
-        bool initial_default_imap_ssl = true, string? initial_default_smtp_host = null,
+        bool initial_default_imap_ssl = true, bool initial_default_imap_starttls = false,
+        string? initial_default_smtp_host = null,
         uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_smtp_ssl = true, bool initial_default_smtp_starttls = false) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
@@ -58,9 +62,13 @@ public class LoginDialog {
         check_remember_password = builder.get_object("remember_password") as Gtk.CheckButton;
         
         other_info = builder.get_object("other_info") as Gtk.Alignment;
+        
         entry_imap_host = builder.get_object("imap host") as Gtk.Entry;
         entry_imap_port = builder.get_object("imap port") as Gtk.Entry;
-        check_imap_ssl = builder.get_object("imap ssl") as Gtk.CheckButton;
+        radio_imap_none = builder.get_object("imap none") as Gtk.RadioButton;
+        radio_imap_ssl = builder.get_object("imap ssl") as Gtk.RadioButton;
+        radio_imap_starttls = builder.get_object("imap starttls") as Gtk.RadioButton;
+        
         entry_smtp_host = builder.get_object("smtp host") as Gtk.Entry;
         entry_smtp_port = builder.get_object("smtp port") as Gtk.Entry;
         radio_smtp_none = builder.get_object("smtp none") as Gtk.RadioButton;
@@ -83,9 +91,13 @@ public class LoginDialog {
         entry_username.set_text(initial_username ?? "");
         entry_password.set_text(initial_password ?? "");
         check_remember_password.active = initial_remember_password;
+        
         entry_imap_host.set_text(initial_default_imap_host ?? "");
         entry_imap_port.set_text(initial_default_imap_port.to_string());
-        check_imap_ssl.active = initial_default_imap_ssl;
+        radio_imap_none.active = true;
+        radio_imap_ssl.active = initial_default_imap_ssl;
+        radio_imap_starttls.active = initial_default_imap_starttls;
+        
         entry_smtp_host.set_text(initial_default_smtp_host ?? "");
         entry_smtp_port.set_text(initial_default_smtp_port.to_string());
         radio_smtp_none.active = true;
@@ -107,7 +119,9 @@ public class LoginDialog {
         entry_smtp_host.changed.connect(on_changed);
         entry_smtp_port.changed.connect(on_changed);
         
-        check_imap_ssl.toggled.connect(on_check_imap_ssl_toggled);
+        radio_imap_none.toggled.connect(on_radio_imap_toggled);
+        radio_imap_ssl.toggled.connect(on_radio_imap_toggled);
+        radio_imap_starttls.toggled.connect(on_radio_imap_toggled);
         
         radio_smtp_none.toggled.connect(on_radio_smtp_toggled);
         radio_smtp_ssl.toggled.connect(on_radio_smtp_toggled);
@@ -143,7 +157,8 @@ public class LoginDialog {
         account_information.service_provider = get_service_provider();
         account_information.default_imap_server_host = entry_imap_host.text.strip();
         account_information.default_imap_server_port = (uint16) int.parse(entry_imap_port.text.strip());
-        account_information.default_imap_server_ssl = check_imap_ssl.active;
+        account_information.default_imap_server_ssl = radio_imap_ssl.active;
+        account_information.default_imap_server_starttls = radio_imap_starttls.active;
         account_information.default_smtp_server_host = entry_smtp_host.text.strip();
         account_information.default_smtp_server_port = (uint16) int.parse(entry_smtp_port.text.strip());
         account_information.default_smtp_server_ssl = radio_smtp_ssl.active;
@@ -180,13 +195,21 @@ public class LoginDialog {
         }
     }
     
-    private void on_check_imap_ssl_toggled() {
+    private void on_radio_imap_toggled() {
         if (edited_imap_port)
             return;
         
-        entry_imap_port.text = (check_imap_ssl.active ? Geary.Imap.ClientConnection.DEFAULT_PORT_SSL :
-            Geary.Imap.ClientConnection.DEFAULT_PORT).to_string();
+        entry_imap_port.text = get_default_imap_port().to_string();
         edited_imap_port = false;
+    }
+    
+    private uint16 get_default_imap_port() {
+        if (radio_imap_ssl.active)
+            return Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
+        if (radio_imap_starttls.active)
+            return Geary.Imap.ClientConnection.DEFAULT_PORT;
+        
+        return Geary.Imap.ClientConnection.DEFAULT_PORT;
     }
     
     private void on_radio_smtp_toggled() {
