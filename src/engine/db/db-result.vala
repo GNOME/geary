@@ -32,10 +32,10 @@ public class Geary.Db.Result : Geary.Db.Context {
      * Returns true if results are waiting, false if finished, or throws a DatabaseError.
      */
     public bool next(Cancellable? cancellable = null) throws Error {
-        check_cancelled("Result.step", cancellable);
+        check_cancelled("Result.next", cancellable);
         
         if (!finished) {
-            finished = (throw_on_error("Result.step", statement.stmt.step())) != Sqlite.ROW;
+            finished = (throw_on_error("Result.next", statement.stmt.step())) != Sqlite.ROW;
             log(finished ? "NO ROW" : "ROW");
         }
         

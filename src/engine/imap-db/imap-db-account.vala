@@ -382,7 +382,6 @@ private class Geary.ImapDB.Account : Object {
             }
         } catch (Error err) {
             debug("Error attempting to clear duplicate folders from account: %s", err.message);
-            breakpoint();
         }
         
         if (count > 0)

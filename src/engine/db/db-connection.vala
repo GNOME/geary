@@ -325,19 +325,21 @@ public class Geary.Db.Connection : Geary.Db.Context {
             throw err;
         }
         
+        // If transaction throws an Error, must rollback, always
         TransactionOutcome outcome = TransactionOutcome.ROLLBACK;
         Error? caught_err = null;
         try {
             // perform the transaction
             outcome = cb(this, cancellable);
         } catch (Error err) {
-            debug("Connection.exec_transaction: transaction threw error %s", err.message);
+            debug("Connection.exec_transaction: transaction threw error: %s", err.message);
             caught_err = err;
         }
         
-        // commit/rollback
+        // commit/rollback ... don't use Cancellable for TransactionOutcome because it's SQL *must*
+        // execute in order to unlock the database
         try {
-            exec(outcome.sql(), cancellable);
+            exec(outcome.sql());
         } catch (Error err) {
             debug("Connection.exec_transaction: Unable to %s transaction: %s", outcome.to_string(),
                 err.message);
