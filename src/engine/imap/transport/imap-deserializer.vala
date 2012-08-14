@@ -94,8 +94,10 @@ public class Geary.Imap.Deserializer {
     
     public Deserializer(InputStream ins) {
         cins = new ConverterInputStream(ins, midstream);
+        cins.set_close_base_stream(false);
         dins = new DataInputStream(cins);
         dins.set_newline_type(DataStreamNewlineType.CR_LF);
+        dins.set_close_base_stream(false);
         
         context = root;
         

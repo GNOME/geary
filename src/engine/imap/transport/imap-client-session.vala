@@ -181,7 +181,8 @@ public class Geary.Imap.ClientSession {
         Hashable.hash_func, Equalable.equal_func);
     private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>(
         Hashable.hash_func, Equalable.equal_func);
-    private Capabilities capabilities = new Capabilities();
+    private Capabilities capabilities = new Capabilities(0);
+    private int next_capabilities_revision = 1;
     private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
@@ -542,6 +543,10 @@ public class Geary.Imap.ClientSession {
     // login
     //
     
+    /**
+     * Performs the LOGIN command using the supplied credentials.  See initiate_session_async() for
+     * a more full-featured version of login_async().
+     */
     public async void login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
         LoginParams params = new LoginParams(credentials.user, credentials.pass, cancellable,
@@ -553,6 +558,64 @@ public class Geary.Imap.ClientSession {
         
         if (params.err != null)
             throw params.err;
+    }
+    
+    /**
+     * Prepares the connection and performs a login using the supplied credentials.  Preparing the
+     * connnection includes attempting compression and using STARTTLS if necessary.
+     */
+    public async void initiate_session_async(Geary.Credentials credentials, Cancellable? cancellable = null)
+        throws Error {
+        // If no capabilities available, get them now
+        if (get_capabilities().is_empty())
+            yield send_command_async(new CapabilityCommand());
+        
+        Imap.Capabilities caps = get_capabilities();
+        
+        // Attempt TLS if specified or if available and not an SSL connection
+        debug("[%s] use_starttls=%s is_ssl=%s starttls=%s", to_string(), imap_endpoint.use_starttls.to_string(),
+            imap_endpoint.is_ssl.to_string(), caps.has_capability(Capabilities.STARTTLS).to_string());
+        if (imap_endpoint.use_starttls
+            || (!imap_endpoint.is_ssl && caps.has_capability(Capabilities.STARTTLS))) {
+            debug("[%s] Attempting STARTTLS...", to_string());
+            CommandResponse resp = yield send_command_async(new StarttlsCommand());
+            if (resp.status_response.status == Status.OK) {
+                yield cx.starttls_async(cancellable);
+                debug("[%s] STARTTLS completed", to_string());
+            } else {
+                debug("[%s} STARTTLS refused: %s", to_string(), resp.status_response.to_string());
+                
+                // throw an exception and fail rather than send credentials under suspect
+                // conditions
+                throw new ImapError.NOT_SUPPORTED("STARTTLS refused by %s: %s", to_string(),
+                    resp.status_response.to_string());
+            }
+        }
+        
+        // Login after STARTTLS
+        yield login_async(credentials, cancellable);
+        
+        // if new capabilities not offered after login, get them now
+        if (caps.revision == get_capabilities().revision)
+            yield send_command_async(new CapabilityCommand());
+        
+        // either way, new capabilities should be available
+        caps = get_capabilities();
+        
+        // Attempt compression (usually only available after authentication)
+        if (caps.has_setting(Capabilities.COMPRESS, Capabilities.DEFLATE_SETTING)) {
+            CommandResponse resp = yield send_command_async(
+                new CompressCommand(CompressCommand.ALGORITHM_DEFLATE));
+            if (resp.status_response.status == Status.OK) {
+                install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW));
+                install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW));
+                debug("[%s] Compression started", to_string());
+            } else {
+                debug("[%s] Unable to start compression: %s", to_string(), resp.to_string());
+            }
+        } else {
+            debug("[%s] No compression available", to_string());
+        }
     }
     
     private uint on_login(uint state, uint event, void *user, Object? object) {
@@ -1303,7 +1366,10 @@ public class Geary.Imap.ClientSession {
         if (current_cmd_response.status_response.status == Status.OK
             && CapabilityResults.is_capability_response(current_cmd_response)) {
             try {
-                capabilities = CapabilityResults.decode(current_cmd_response).capabilities;
+                int old_revision = next_capabilities_revision;
+                capabilities =
+                    CapabilityResults.decode(current_cmd_response, ref next_capabilities_revision).capabilities;
+                assert(old_revision != next_capabilities_revision);
                 debug("[%s] CAPABILITY: %s", to_string(), capabilities.to_string());
                 
                 capabilities_changed(capabilities);

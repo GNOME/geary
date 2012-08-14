@@ -77,21 +77,33 @@ public class Geary.AccountInformation : Object {
     public async bool validate_async(Cancellable? cancellable = null) throws EngineError {
         AccountSettings settings = new AccountSettings(this);
         
-        Geary.Imap.ClientSessionManager client_session_manager = new Geary.Imap.ClientSessionManager(
-            settings, 0);
-        Geary.Imap.ClientSession? client_session = null;
+        Geary.Imap.ClientSession client_session = new Imap.ClientSession(settings.imap_endpoint, true);
         try {
-            client_session = yield client_session_manager.get_authorized_session_async(cancellable);
+            yield client_session.connect_async(cancellable);
+            yield client_session.initiate_session_async(settings.credentials, cancellable);
         } catch (Error err) {
             debug("Error validating account info: %s", err.message);
+            
+            try {
+                yield client_session.disconnect_async(cancellable);
+            } catch (Error disconnect_err) {
+                // ignored
+            }
+            
+            return false;
         }
         
-        if (client_session != null) {
-            string current_mailbox;
-            return client_session.get_context(out current_mailbox) == Geary.Imap.ClientSession.Context.AUTHORIZED;
+        // Connected and initiated, still need to be sure connection authorized
+        string current_mailbox;
+        bool valid = (client_session.get_context(out current_mailbox) == Imap.ClientSession.Context.AUTHORIZED);
+        
+        try {
+            yield client_session.disconnect_async(cancellable);
+        } catch (Error err) {
+            // ignored
         }
         
-        return false;
+        return valid;
     }
 
     public Endpoint get_imap_endpoint() throws EngineError {

@@ -28,9 +28,12 @@ public class Geary.Imap.Serializer {
     
     public Serializer(OutputStream outs) {
         this.outs = outs;
+        
         couts = new ConverterOutputStream(outs, midstream);
+        couts.set_close_base_stream(false);
         mouts = new MemoryOutputStream(null, realloc, free);
         douts = new DataOutputStream(mouts);
+        douts.set_close_base_stream(false);
     }
     
     public bool install_converter(Converter converter) {

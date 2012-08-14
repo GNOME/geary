@@ -12,6 +12,24 @@ public class Geary.Imap.CapabilityCommand : Command {
     }
 }
 
+public class Geary.Imap.CompressCommand : Command {
+    public const string NAME = "compress";
+    
+    public const string ALGORITHM_DEFLATE = "deflate";
+    
+    public CompressCommand(string algorithm) {
+        base (NAME, { algorithm });
+    }
+}
+
+public class Geary.Imap.StarttlsCommand : Command {
+    public const string NAME = "starttls";
+    
+    public StarttlsCommand() {
+        base (NAME);
+    }
+}
+
 public class Geary.Imap.NoopCommand : Command {
     public const string NAME = "noop";
     

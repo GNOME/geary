@@ -81,6 +81,7 @@ public class Geary.Imap.ClientConnection {
     private int cx_id;
     private Geary.State.Machine fsm;
     private SocketConnection? cx = null;
+    private IOStream? ios = null;
     private Serializer? ser = null;
     private Deserializer? des = null;
     private Geary.NonblockingMutex send_mutex = new Geary.NonblockingMutex();
@@ -236,6 +237,32 @@ public class Geary.Imap.ClientConnection {
         return idle_when_quiet;
     }
     
+    public SocketAddress? get_remote_address() {
+        if (cx == null)
+            return null;
+        
+        try {
+            return cx.get_remote_address();
+        } catch (Error err) {
+            debug("Unable to retrieve remote address: %s", err.message);
+        }
+        
+        return null;
+    }
+    
+    public SocketAddress? get_local_address() {
+        if (cx == null)
+            return null;
+        
+        try {
+            return cx.get_local_address();
+        } catch (Error err) {
+            debug("Unable to retrieve remote address: %s", err.message);
+        }
+        
+        return null;
+    }
+    
     /**
      * Returns true if the connection is in an IDLE state.  The or_idling parameter means to return
      * true if the connection is working toward an IDLE state (but additional responses are being
@@ -273,22 +300,13 @@ public class Geary.Imap.ClientConnection {
         }
         
         cx = yield endpoint.connect_async(cancellable);
-        
-        // not buffering the Serializer because it buffers using a MemoryOutputStream and not
-        // buffering the Deserializer because it uses a DataInputStream, which is buffered
-        ser = new Serializer(cx.output_stream);
-        des = new Deserializer(cx.input_stream);
-        
-        des.parameters_ready.connect(on_parameters_ready);
-        des.receive_failure.connect(on_receive_failure);
-        des.deserialize_failure.connect(on_deserialize_failure);
-        des.eos.connect(on_eos);
+        ios = cx;
         
         fsm.issue(Event.CONNECTED);
         
         connected();
         
-        yield des.start_async();
+        yield open_channels_async(cancellable);
     }
     
     public async void disconnect_async(Cancellable? cancellable = null) throws Error {
@@ -298,6 +316,7 @@ public class Geary.Imap.ClientConnection {
         // To guard against reentrancy
         SocketConnection close_cx = cx;
         cx = null;
+        ios = null;
         
         // unschedule before yielding to stop the Deserializer
         unschedule_flush_timeout();
@@ -305,18 +324,10 @@ public class Geary.Imap.ClientConnection {
         // cancel all outstanding commmand timeouts
         cmd_timer.cancel_all();
         
-        // disconnect from Deserializer before yielding to stop it
-        des.parameters_ready.disconnect(on_parameters_ready);
-        des.receive_failure.disconnect(on_receive_failure);
-        des.deserialize_failure.disconnect(on_deserialize_failure);
-        des.eos.disconnect(on_eos);
+        // close the Serializer and Deserializer
+        yield close_channels_async(cancellable);
         
-        yield des.stop_async();
-        
-        // TODO: May need to commit Serializer before disconnecting
-        ser = null;
-        des = null;
-        
+        // close the actual streams and the connection itself
         Error? close_err = null;
         try {
             debug("[%s] Disconnecting...", to_string());
@@ -333,6 +344,68 @@ public class Geary.Imap.ClientConnection {
             
             disconnected();
         }
+    }
+    
+    private async void open_channels_async(Cancellable? cancellable) throws Error {
+        assert(ios != null);
+        assert(ser == null);
+        assert(des == null);
+        
+        // not buffering the Serializer because it buffers using a MemoryOutputStream and not
+        // buffering the Deserializer because it uses a DataInputStream, which is buffered
+        ser = new Serializer(ios.output_stream);
+        des = new Deserializer(ios.input_stream);
+        
+        des.parameters_ready.connect(on_parameters_ready);
+        des.receive_failure.connect(on_receive_failure);
+        des.deserialize_failure.connect(on_deserialize_failure);
+        des.eos.connect(on_eos);
+        
+        yield des.start_async();
+    }
+    
+    // Closes the Serializer and Deserializer, but does NOT close the underlying streams
+    private async void close_channels_async(Cancellable? cancellable) throws Error {
+        // disconnect from Deserializer before yielding to stop it
+        if (des != null) {
+            des.parameters_ready.disconnect(on_parameters_ready);
+            des.receive_failure.disconnect(on_receive_failure);
+            des.deserialize_failure.disconnect(on_deserialize_failure);
+            des.eos.disconnect(on_eos);
+            
+            yield des.stop_async();
+        }
+        
+        // TODO: May need to commit Serializer before disconnecting
+        ser = null;
+        des = null;
+    }
+    
+    public async void starttls_async(Cancellable? cancellable = null) throws Error {
+        if (cx == null)
+            throw new ImapError.NOT_SUPPORTED("[%s] Unable to enable TLS: no connection", to_string());
+        
+        // (mostly) silent fail in this case
+        if (cx is TlsClientConnection) {
+            debug("[%s] Already TLS connection", to_string());
+            
+            return;
+        }
+        
+        // Close the Serializer/Deserializer, as need to use the TLS streams
+        yield close_channels_async(cancellable);
+        
+        // wrap connection with TLS connection
+        TlsClientConnection tls_cx = TlsClientConnection.new(cx, cx.get_remote_address());
+        tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
+        
+        ios = tls_cx;
+        
+        // do the handshake
+        yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
+        
+        // re-open Serializer/Deserializer with the new streams
+        yield open_channels_async(cancellable);
     }
     
     private void on_parameters_ready(RootParameters root) {

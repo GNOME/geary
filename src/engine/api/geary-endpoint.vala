@@ -26,6 +26,14 @@ public class Geary.Endpoint : Object {
     public Flags flags { get; private set; }
     public uint timeout_sec { get; private set; }
     
+    public bool is_ssl { get {
+        return flags.is_all_set(Flags.SSL);
+    } }
+    
+    public bool use_starttls { get {
+        return flags.is_all_set(Flags.STARTTLS);
+    } }
+    
     private SocketClient? socket_client = null;
     
     public Endpoint(string host_specifier, uint16 default_port, Flags flags, uint timeout_sec) {

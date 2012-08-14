@@ -60,9 +60,7 @@ public class Geary.Smtp.ClientConnection {
         // Use STARTTLS if it has been explicitly enabled or if the server supports it and we are
         // not using SSL encryption.
         Response response;
-        if (endpoint.flags.is_all_set(Endpoint.Flags.STARTTLS) ||
-            (!endpoint.flags.is_all_set(Endpoint.Flags.SSL) &&
-                capabilities.has_capability(Capabilities.STARTTLS))) {
+        if (endpoint.use_starttls || (!endpoint.is_ssl && capabilities.has_capability(Capabilities.STARTTLS))) {
             response = yield transaction_async(new Request(Command.STARTTLS));
             if (!response.code.is_starttls_ready()) {
                 throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());

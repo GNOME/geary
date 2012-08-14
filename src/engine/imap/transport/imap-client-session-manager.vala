@@ -226,26 +226,7 @@ public class Geary.Imap.ClientSessionManager {
         
         try {
             yield new_session.connect_async(cancellable);
-            yield new_session.login_async(settings.credentials, cancellable);
-            
-            // If no capabilities were returned at login, ask for them now
-            if (new_session.get_capabilities().is_empty())
-                yield new_session.send_command_async(new CapabilityCommand());
-            
-            // Attempt compression
-            if (new_session.get_capabilities().has_setting("compress", "deflate")) {
-                CommandResponse resp = yield new_session.send_command_async(
-                    new Command("COMPRESS", { "DEFLATE" }));
-                if (resp.status_response.status == Status.OK) {
-                    assert(new_session.install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW)));
-                    assert(new_session.install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW)));
-                    debug("[%s] Compression started", new_session.to_string());
-                } else {
-                    debug("[%s] Unable to start compression: %s", new_session.to_string(), resp.to_string());
-                }
-            } else {
-                debug("[%s] No compression available", new_session.to_string());
-            }
+            yield new_session.initiate_session_async(settings.credentials, cancellable);
         } catch (Error err) {
             debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
@@ -269,7 +250,7 @@ public class Geary.Imap.ClientSessionManager {
         return new_session;
     }
     
-    public async ClientSession get_authorized_session_async(Cancellable? cancellable) throws Error {
+    private async ClientSession get_authorized_session_async(Cancellable? cancellable) throws Error {
         int token = yield sessions_mutex.claim_async(cancellable);
         
         ClientSession? found_session = null;

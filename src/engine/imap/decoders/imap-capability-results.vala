@@ -22,7 +22,8 @@ public class Geary.Imap.CapabilityResults : Geary.Imap.CommandResults {
         return (cmd != null && cmd.equals_ci(CapabilityCommand.NAME));
     }
     
-    public static CapabilityResults decode(CommandResponse response) throws ImapError {
+    public static CapabilityResults decode(CommandResponse response, ref int next_revision)
+        throws ImapError {
         assert(response.is_sealed());
         
         if (!is_capability_response(response))
@@ -31,7 +32,7 @@ public class Geary.Imap.CapabilityResults : Geary.Imap.CommandResults {
         ServerData data = response.server_data[0];
         
         // parse the remaining parameters in the response as capabilities
-        Capabilities capabilities = new Capabilities();
+        Capabilities capabilities = new Capabilities(next_revision++);
         for (int ctr = 2; ctr < data.get_count(); ctr++) {
             StringParameter? param = data.get_if_string(ctr);
             if (param != null)
