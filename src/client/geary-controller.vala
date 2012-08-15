@@ -754,7 +754,9 @@ public class GearyController {
             "license", GearyApplication.LICENSE,
             "version", GearyApplication.VERSION,
             "website", GearyApplication.WEBSITE,
-            "website-label", GearyApplication.WEBSITE_LABEL
+            "website-label", GearyApplication.WEBSITE_LABEL,
+            "title", _("About %s").printf(GearyApplication.NAME),
+            "translator-credits", _("translator-credits")
         );
     }
     
