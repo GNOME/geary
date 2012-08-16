@@ -196,6 +196,11 @@ client/geary-config.vala
 client/geary-controller.vala
 client/main.vala
 
+client/notification/libindicate.vala
+client/notification/new-messages-indicator.vala
+client/notification/notification-bubble.vala
+client/notification/null-indicator.vala
+
 client/ui/composer-window.vala
 client/ui/geary-login.vala
 client/ui/email-entry.vala
@@ -212,7 +217,6 @@ client/ui/message-web-view.vala
 client/ui/password-dialog.vala
 client/ui/preferences-dialog.vala
 client/ui/webview-edit-fixer.vala
-client/ui/notification-bubble.vala
 
 client/ui/sidebar/sidebar-branch.vala
 client/ui/sidebar/sidebar-common.vala
@@ -249,6 +253,20 @@ include(ValaVersion)
 ensure_vala_version("0.17.4" MINIMUM)
 include(ValaPrecompile)
 
+option(ENABLE_LIBINDICATE "Enable libindicate messaging menu support." OFF)
+if (ENABLE_LIBINDICATE STREQUAL "ON")
+    message(STATUS "Building with messaging menu support.")
+    set(EXTRA_CLIENT_PKG_CONFIG
+        indicate-0.7>=0.6.1
+    )
+    set(EXTRA_CLIENT_PACKAGES
+        Dbusmenu-0.4 Indicate-0.7
+    )
+    set(EXTRA_VALA_OPTIONS
+        -D HAVE_LIBINDICATE
+    )
+endif ()
+
 # Packages
 find_package(PkgConfig)
 pkg_check_modules(DEPS REQUIRED
@@ -264,6 +282,7 @@ pkg_check_modules(DEPS REQUIRED
     gmime-2.6>=2.6.0
     gnome-keyring-1>=3.2.2
     webkitgtk-3.0>=1.8.0
+    ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
 set(ENGINE_PACKAGES
@@ -271,7 +290,7 @@ set(ENGINE_PACKAGES
 )
 
 set(CLIENT_PACKAGES
-    gtk+-3.0 gnome-keyring-1 webkitgtk-3.0 libnotify libcanberra
+    gtk+-3.0 gnome-keyring-1 webkitgtk-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -306,6 +325,7 @@ set(VALAC_OPTIONS
     --enable-checking
     --debug
     --fatal-warnings
+    ${EXTRA_VALA_OPTIONS}
 )
 
 # Engine (conceptually a library, but not built as a separate library)

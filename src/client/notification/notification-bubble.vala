@@ -45,7 +45,7 @@ public class NotificationBubble : GLib.Object {
         invoked(email);
         GearyApplication.instance.activate(new string[0]);
     }
-
+    
     public void notify_new_mail(int count) throws GLib.Error {
         // don't pass email if invoked
         email = null;
@@ -113,7 +113,6 @@ public class NotificationBubble : GLib.Object {
             notification.set_hint_string("sound-name", sound);
         else
             play_sound(sound);
-        
     }
     
     public static void play_sound(string sound) {

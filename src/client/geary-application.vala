@@ -162,7 +162,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public override void activate(string[] args) {
         // If Geary is already running, show the main window and return.
         if (controller != null && controller.main_window != null) {
-            controller.main_window.present();
+            controller.main_window.present_with_time((uint32) TimeVal().tv_sec);
             handle_args(args);
             return;
         }

@@ -67,6 +67,7 @@ public class GearyController {
     
     public MainWindow main_window { get; private set; }
     
+    private Geary.EngineAccount? account = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_inbox = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
@@ -79,8 +80,7 @@ public class GearyController {
     private Geary.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
     private File? last_save_directory = null;
-
-    private Geary.EngineAccount? account { get; private set; }
+    private NewMessagesIndicator new_messages_indicator;
     
     public GearyController() {
         // Setup actions.
@@ -91,6 +91,12 @@ public class GearyController {
         
         // Listen for attempts to close the application.
         GearyApplication.instance.exiting.connect(on_application_exiting);
+        
+        // New messages indicator (Ubuntuism)
+        new_messages_indicator = NewMessagesIndicator.create();
+        new_messages_indicator.application_activated.connect(on_indicator_activated_application);
+        new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
+        new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
         
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
@@ -267,6 +273,7 @@ public class GearyController {
                 }
                 
                 inbox_folder.email_locally_appended.disconnect(on_inbox_new_email);
+                inbox_folder.email_flags_changed.disconnect(on_inbox_email_flags_changed);
             }
             
             try {
@@ -435,7 +442,14 @@ public class GearyController {
         do_notify_new_email.begin(email_ids);
     }
     
-    public async void do_notify_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
+    private void on_inbox_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> ids) {
+        foreach(Geary.EmailIdentifier id in ids.keys) {
+            if (!ids[id].is_unread())
+                new_messages_indicator.not_new_message(id);
+        }
+    }
+    
+    private async void do_notify_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
         try {
             Gee.List<Geary.Email>? list = yield inbox_folder.list_email_by_sparse_id_async(email_ids,
                 NotificationBubble.REQUIRED_FIELDS | Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.NONE,
@@ -446,38 +460,57 @@ public class GearyController {
                 return;
             }
             
-            int unread = 0;
             Geary.Email? last_unread = null;
             foreach (Geary.Email email in list) {
                 if (email.email_flags.is_unread()) {
-                    unread++;
                     last_unread = email;
+                    // notify via new messages indicator (i.e. libindicate, libmessagingmenu when available)
+                    new_messages_indicator.new_message(email.id);
                 }
             }
             
-            debug("do_notify_new_email: %d messages listed, %d unread", list.size, unread);
+            debug("do_notify_new_email: %d messages listed, %d unread", list.size, new_messages_indicator.count);
             
+            // notify via notification bubble (i.e. libnotify)
             NotificationBubble notification = new NotificationBubble();
             notification.invoked.connect(on_notification_bubble_invoked);
-            if (unread == 1 && last_unread != null)
+            if (new_messages_indicator.count == 1 && last_unread != null)
                 yield notification.notify_one_message_async(last_unread, cancellable_inbox);
-            else if (unread > 0)
-                notification.notify_new_mail(unread);
+            else if (new_messages_indicator.count > 0)
+                notification.notify_new_mail(new_messages_indicator.count);
         } catch (Error err) {
             debug("Unable to notify of new email: %s", err.message);
         }
     }
 
     private void on_notification_bubble_invoked(Geary.Email? email) {
-        if(inbox_folder != null) {
+        if (email == null || inbox_folder == null)
+            return;
+        
+        main_window.folder_list.select_path(inbox_folder.get_path());
+        Geary.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
+        if (conversation != null)
+            main_window.message_list_view.select_conversation(conversation);
+    }
+    
+    private void on_indicator_activated_application(uint32 timestamp) {
+        main_window.present_with_time(timestamp);
+    }
+    
+    private void on_indicator_activated_composer(uint32 timestamp) {
+        main_window.present_with_time(timestamp);
+        on_new_message();
+    }
+    
+    private void on_indicator_activated_inbox(uint32 timestamp) {
+        main_window.present_with_time(timestamp);
+        
+        // reset new messages
+        new_messages_indicator.clear_new_messages();
+        
+        // attempt to select Inbox
+        if (inbox_folder != null)
             main_window.folder_list.select_path(inbox_folder.get_path());
-            if(email != null) {
-                Geary.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
-                if(conversation != null) {
-                    main_window.message_list_view.select_conversation(conversation);
-                }
-            }
-        }
     }
     
     private void on_conversation_appended(Geary.Conversation conversation,
@@ -631,10 +664,14 @@ public class GearyController {
                 if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX && inbox_folder == null) {
                     inbox_folder = folder;
                     inbox_folder.email_locally_appended.connect(on_inbox_new_email);
+                    inbox_folder.email_flags_changed.connect(on_inbox_email_flags_changed);
                     
                     // select the inbox and get the show started
                     main_window.folder_list.select_path(folder.get_path());
                     inbox_folder.open_async.begin(false, cancellable_inbox);
+                    
+                    // reset new messages indicator
+                    new_messages_indicator.clear_new_messages();
                 }
                 
                 folder.special_folder_type_changed.connect(on_special_folder_type_changed);
