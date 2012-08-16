@@ -250,7 +250,7 @@ macro(vala_precompile output prebuild_target)
         add_custom_command(OUTPUT ${full_vapi_name} COMMAND ":")
         add_custom_command(OUTPUT ${full_vapi_stamp_name}
         COMMAND
-            valac
+            ${VALA_EXECUTABLE}
         ARGS
             --fast-vapi=${full_vapi_name}
             ${SOURCE_NAMES}
@@ -274,7 +274,7 @@ macro(vala_precompile output prebuild_target)
             -p
             ${vapi_path_name}
         COMMAND
-            valac
+            ${VALA_EXECUTABLE}
         ARGS
             --fast-vapi=${vapi_name}
             ${source_name}
@@ -299,7 +299,7 @@ macro(vala_precompile output prebuild_target)
             -p
             ${dep_path_name}
         COMMAND
-            valac
+            ${VALA_EXECUTABLE}
         ARGS
             "-C"
             "-b" ${CMAKE_CURRENT_SOURCE_DIR}
