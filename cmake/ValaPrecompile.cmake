@@ -42,27 +42,18 @@ find_package(Vala REQUIRED)
 # conjuction with functions like "add_executable" or others to create the
 # neccessary compile rules with CMake.
 #
-# The second parameter provided is a name for the "prebuild" target for the
-# bundle. This target, when built, will generate C source file from the vala
-# source code. The binary executable target should be depend on the prebuild
-# target (using add_dependencies). See the example below for details.
+# The second parameter provided is a unique name for the source bundle, which
+# is used to create a .stamp file that marks the last time the bundle was
+# compiled to C.
 # 
 # The initial variables are followed by a list of .vala files to be compiled.
 # Please take care to add every vala file belonging to the currently compiled
 # project or library as Vala will otherwise not be able to resolve all
-# dependencies. The paths to these .vala files should be relative to
-# CMAKE_CURRENT_SOURCE_DIR.
+# dependencies.
 # 
 # The following sections may be specified afterwards to provide certain options
 # to the vala compiler:
 # 
-# EXTERNAL_SOURCES
-#   Source files for which there is already a prebuild_target. This is needed
-#   because the main source files need to know the names of the .vapi, .vapi.stamp,
-#   and .c files. We have already created rules to build those files, we just need
-#   their names. The paths to these .vala files should be relative to
-#   CMAKE_CURRENT_SOURCE_DIR.
-#
 # PACKAGES
 #   A list of vala packages/libraries to be used during the compile cycle. The
 #   package names are exactly the same, as they would be passed to the valac
@@ -72,138 +63,50 @@ find_package(Vala REQUIRED)
 #   A list of optional options to be passed to the valac executable. This can be
 #   used to pass "--thread" for example to enable multi-threading support.
 #
-# DIRECTORY
-#   The directory to which build files should be written. If not specified,
-#   defaults to CMAKE_CURRENT_BINARY_DIRECTORY. If specified, should be relative to
-#   CMAKE_CURRENT_SOURCE_DIRECTORY.
+# CUSTOM_VAPIS
+#   A list of custom vapi files to be included for compilation. This can be
+#   useful to include freshly created vala libraries without having to install
+#   them in the system.
 #
 # GENERATE_VAPI
 #   Pass all the needed flags to the compiler to create an internal vapi for
 #   the compiled library. The provided name will be used for this and a
 #   <provided_name>.vapi file will be created.
+# 
+# GENERATE_HEADER
+#   Let the compiler generate a header file for the compiled code. There will
+#   be a header file as well as an internal header file being generated called
+#   <provided_name>.h and <provided_name>_internal.h
 #
-# There are two ways to build multi-package applications using vala_precompile: with
-# and without a static library. Below are two examples. The first does not use a
-# static library. The second does.
+# The following call is a simple example to the vala_precompile macro showing
+# an example to every of the optional sections:
 #
-# Example 1 (no static library):
-#   vala_precompile(VALA_LIB_C mylib-prebuild
-#       mylib/source1.vala
-#       mylib/source2.vala
-#       mylib/source3.vala
-#   PACKAGES
-#       gio-1.0
-#       posix
-#   OPTIONS
-#       --thread
-#   DIRECTORY
-#       build
-#   )
-#   # No need to call add_library.
-#   
-#   vala_precompile(VALA_C myproject-prebuild
+#   vala_precompile(VALA_C mysourcebundle
 #       source1.vala
 #       source2.vala
 #       source3.vala
-#   EXTERNAL_SOURCES
-#       mylib/source1.vala
-#       mylib/source2.vala
-#       mylib/source3.vala
 #   PACKAGES
 #       gtk+-2.0
 #       gio-1.0
 #       posix
+#   DIRECTORY
+#       gen
 #   OPTIONS
 #       --thread
-#   DIRECTORY
-#       build
-#   )
-#   # vala_precompile generates the .c files, but those still need to be compiled
-#   # into an executable
-#   add_executable(myproject ${VALA_C})
-#   # Require that the .c files are generated before cmake attempts to compile them.
-#   add_dependencies(myproject myproject-prebuild)
-#   # Require that the library's .c files are generated before the main program's .c files.
-#   add_dependencies(myproject-prebuild mylib-prebuild)
-#
-#
-# Example 2 (using static library):
-#   vala_precompile(VALA_LIB_C mylib-prebuild
-#       mylib/source1.vala
-#       mylib/source2.vala
-#       mylib/source3.vala
-#   PACKAGES
-#       gio-1.0
-#       posix
-#   OPTIONS
-#       --thread
-#   DIRECTORY
-#       build
+#   CUSTOM_VAPIS
+#       some_vapi.vapi
 #   GENERATE_VAPI
-#       mylib-static-library
+#       myvapi
+#   GENERATE_HEADER
+#       myheader
 #   )
-#   add_library(mylib-static-library STATIC ${VALA_LIB_C})
-#   add_dependencies(mylib-static-library mylib-prebuild)
-#   target_link_libraries(mylib-static-library ${DEPS_LIBRARIES} gthread-2.0)
 #
-#   vala_precompile(VALA_C myproject-prebuild
-#       source1.vala
-#       source2.vala
-#       source3.vala
-#   # Note: No EXTERNAL_SOURCES section, because we use the static library instead.
-#   PACKAGES
-#       gtk+-2.0
-#       gio-1.0
-#       posix
-#   OPTIONS
-#       --thread
-#       --vapidir=${CMAKE_BINARY_DIR} # Wherever mylib-static-library.vapi was generated
-#   DIRECTORY
-#       build
-#   )
-#   # vala_precompile generates the .c files, but those still need to be compiled
-#   # into an executable.
-#   add_executable(myproject ${VALA_C})
-#   # Require that the static library is built before the .c files are generated.
-#   add_dependencies(myproject-prebuild engine-static-library)
-#   # Require that the .c files are generated before cmake attempts to compile them.
-#   add_dependencies(myproject myproject-prebuild)
-#   target_link_libraries(myproject ${DEPS_LIBRARIES} gthread-2.0 mylib-static-library)
+# Most important is the variable VALA_C which will contain all the generated c
+# file names after the call.
+##
 
-
-# Private helper macro. Takes the name of a vala source file relative to CMAKE_CURRENT_SOURCE_DIR,
-# and computes the absolute names of the relevant .vala/.gs, .vapi, .vala.stamp, .dep, and .c files.
-macro(add_extensions original_source_name source_name vapi_name vapi_stamp_name dep_name c_name build_dir)
-    string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/ "" replaced_source_name ${original_source_name})
-    get_filename_component(original_extension ${original_source_name} EXT)
-    get_filename_component(temp_path ${replaced_source_name}.vala PATH)
-    get_filename_component(temp_name_we ${replaced_source_name}.vala NAME_WE)
-    set(replaced_basename "${temp_path}/${temp_name_we}")
-    
-    string(REGEX MATCH "^/" ABSOLUTE_PATH_MATCH ${temp_path})
-    if(${ABSOLUTE_PATH_MATCH} MATCHES "/")
-        set(absolute_source_basename ${replaced_basename})
-        set(absolute_generated_basename "${DIRECTORY}${replaced_basename}")
-    else()
-        set(absolute_source_basename "${CMAKE_CURRENT_SOURCE_DIR}/${replaced_basename}")
-        set(absolute_generated_basename "${DIRECTORY}/${replaced_basename}")
-    endif()
-    
-    set(${source_name} "${absolute_source_basename}${original_extension}")
-    set(${vapi_name} "${absolute_generated_basename}.vapi")
-    set(${vapi_stamp_name} "${absolute_generated_basename}.vapi.stamp")
-    set(${dep_name} "${absolute_generated_basename}.dep")
-    set(${c_name} "${absolute_generated_basename}.c")
-
-    if(${ABSOLUTE_PATH_MATCH} MATCHES "/")
-        get_filename_component(${build_dir} ${${c_name}} PATH)
-    else()
-        set(${build_dir} ${DIRECTORY})
-    endif()
-endmacro(add_extensions)
-
-macro(vala_precompile output prebuild_target)
-    parse_arguments(ARGS "EXTERNAL_SOURCES;PACKAGES;OPTIONS;DIRECTORY;GENERATE_VAPI" "" ${ARGN})
+macro(vala_precompile output source_bundle_name)
+    parse_arguments(ARGS "PACKAGES;OPTIONS;DIRECTORY;GENERATE_HEADER;GENERATE_VAPI;CUSTOM_VAPIS" "" ${ARGN})
     
     if(ARGS_DIRECTORY)
         set(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${ARGS_DIRECTORY})
@@ -218,104 +121,93 @@ macro(vala_precompile output prebuild_target)
         list(APPEND vala_pkg_opts "--pkg=${pkg}")
     endforeach(pkg ${ARGS_PACKAGES})
     
-    set(SOURCE_NAMES "")
-    set(VAPI_NAMES "")
-    set(VAPI_STAMP_NAMES "")
-    set(DEP_NAMES "")
-    set(C_NAMES "")
-    foreach(original_source_name ${ARGS_DEFAULT_ARGS})
-        add_extensions(${original_source_name} source_name vapi_name vapi_stamp_name dep_name c_name build_dir)
+
+    set(in_files "")
+    set(out_files "")
+    set(${output} "")
+    foreach(src ${ARGS_DEFAULT_ARGS})
+        string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/ "" src ${src})
+        string(REGEX MATCH "^/" IS_MATCHED ${src})
         
-        list(APPEND SOURCE_NAMES ${source_name})
-        list(APPEND VAPI_NAMES ${vapi_name})
-        list(APPEND VAPI_STAMP_NAMES ${vapi_stamp_name})
-        list(APPEND DEP_NAMES ${dep_name})
-        list(APPEND C_NAMES ${c_name})
-    endforeach(original_source_name ${ARGS_DEFAULT_ARGS})
+        if(${IS_MATCHED} MATCHES "/")
+            set(in_file ${src})
+        else()
+            set(in_file "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
+        endif()
+        
+        string(REPLACE ".vala" ".c" src ${src})
+        string(REPLACE ".gs" ".c" src ${src})
+        
+        if(${IS_MATCHED} MATCHES "/")
+            get_filename_component(VALA_FILE_NAME ${src} NAME)
+            set(out_file "${CMAKE_CURRENT_BINARY_DIR}/${VALA_FILE_NAME}")
+        else()
+            set(out_file "${DIRECTORY}/${src}")
+        endif()
+        
+        list(APPEND in_files ${in_file})
+        list(APPEND out_files ${out_file})
+        list(APPEND ${output} ${out_file})
+    endforeach(src ${ARGS_DEFAULT_ARGS})
+
+    set(custom_vapi_arguments "")
+    if(ARGS_CUSTOM_VAPIS)
+        foreach(vapi ${ARGS_CUSTOM_VAPIS})
+            SET(_srcdir_regexp "${CMAKE_SOURCE_DIR}")
+            SET(_bindir_regexp "${CMAKE_BINARY_DIR}")
+            STRING(REGEX REPLACE "\\+" "\\\\+" _srcdir_regexp "${_srcdir_regexp}")
+            STRING(REGEX REPLACE "\\+" "\\\\+" _bindir_regexp "${_bindir_regexp}")
+            if(${vapi} MATCHES ${_srcdir_regexp} OR ${vapi} MATCHES ${_bindir_regexp})
+                list(APPEND custom_vapi_arguments ${vapi})
+            else(${vapi} MATCHES ${_srcdir_regexp} OR ${vapi} MATCHES ${_bindir_regexp})
+                list(APPEND custom_vapi_arguments ${CMAKE_CURRENT_SOURCE_DIR}/${vapi})
+            endif(${vapi} MATCHES ${_srcdir_regexp} OR ${vapi} MATCHES ${_bindir_regexp})
+        endforeach(vapi ${ARGS_CUSTOM_VAPIS})
+    endif(ARGS_CUSTOM_VAPIS)
+
+    set(STAMP_FILE ".${source_bundle_name}.stamp")
     
-    set(${output} ${C_NAMES})
-    
-    foreach(original_source_name ${ARGS_EXTERNAL_SOURCES})
-        add_extensions(${original_source_name} source_name vapi_name vapi_stamp_name dep_name c_name build_dir)
-        list(APPEND VAPI_NAMES ${vapi_name})
-        list(APPEND VAPI_STAMP_NAMES ${vapi_stamp_name})
-        list(APPEND ${output} ${c_name})
-    endforeach(original_source_name ${ARGS_EXTERNAL_SOURCES})
-    
-    set(full_vapi_name "")
-    set(full_vapi_stamp_name "")
+    set(vapi_arguments "")
     if(ARGS_GENERATE_VAPI)
-        set(full_vapi_name ${ARGS_GENERATE_VAPI}.vapi)
-        set(full_vapi_stamp_name ${full_vapi_name}.stamp)
-        add_custom_command(OUTPUT ${full_vapi_name} COMMAND ":")
-        add_custom_command(OUTPUT ${full_vapi_stamp_name}
-        COMMAND
-            ${VALA_EXECUTABLE}
-        ARGS
-            --fast-vapi=${full_vapi_name}
-            ${SOURCE_NAMES}
-            && touch ${full_vapi_stamp_name}
-        DEPENDS
-            ${SOURCE_NAMES}
-        )
+        list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_VAPI}.vapi")
+        set(vapi_arguments "--internal-vapi=${ARGS_GENERATE_VAPI}.vapi")
+        
+        # Header and internal header is needed to generate internal vapi
+        if(NOT ARGS_GENERATE_HEADER)
+            set(ARGS_GENERATE_HEADER ${ARGS_GENERATE_VAPI})
+        endif(NOT ARGS_GENERATE_HEADER)
     endif(ARGS_GENERATE_VAPI)
+
+    set(header_arguments "")
+    if(ARGS_GENERATE_HEADER)
+        list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_HEADER}.h")
+        list(APPEND out_files "${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
+        list(APPEND header_arguments "--header=${DIRECTORY}/${ARGS_GENERATE_HEADER}.h")
+        list(APPEND header_arguments "--internal-header=${DIRECTORY}/${ARGS_GENERATE_HEADER}_internal.h")
+    endif(ARGS_GENERATE_HEADER)
+
+    add_custom_command(OUTPUT ${STAMP_FILE}
+    COMMAND
+        ${VALA_EXECUTABLE}
+    ARGS 
+        "-C" 
+        ${header_arguments} 
+        ${vapi_arguments}
+        "-b" ${CMAKE_CURRENT_SOURCE_DIR} 
+        "-d" ${DIRECTORY} 
+        ${vala_pkg_opts} 
+        ${ARGS_OPTIONS} 
+        ${in_files} 
+        ${custom_vapi_arguments}
+    COMMAND
+        touch
+    ARGS
+        ${STAMP_FILE}
+    DEPENDS 
+        ${in_files}
+        ${ARGS_CUSTOM_VAPIS}
+    )
     
-    foreach(original_source_name ${ARGS_DEFAULT_ARGS})
-        add_extensions(${original_source_name} source_name vapi_name vapi_stamp_name dep_name c_name build_dir)
-        
-        add_custom_command(OUTPUT ${vapi_name} COMMAND ":")
-        add_custom_command(OUTPUT ${c_name} COMMAND ":")
-        
-        get_filename_component(vapi_path_name ${vapi_name} PATH)
-        add_custom_command(OUTPUT ${vapi_stamp_name}
-        COMMAND
-            mkdir
-        ARGS
-            -p
-            ${vapi_path_name}
-        COMMAND
-            ${VALA_EXECUTABLE}
-        ARGS
-            --fast-vapi=${vapi_name}
-            ${source_name}
-            && touch ${vapi_stamp_name}
-        DEPENDS
-            ${source_name}
-        )
-        
-        set(temp_vapi_names ${VAPI_NAMES})
-        list(REMOVE_ITEM temp_vapi_names ${vapi_name})
-        
-        set(use_fast_vapi_flags "")
-        foreach(temp_vapi_name ${temp_vapi_names})
-            list(APPEND use_fast_vapi_flags "--use-fast-vapi=${temp_vapi_name}")
-        endforeach(temp_vapi_name ${temp_vapi_names})
-        
-        get_filename_component(dep_path_name ${dep_name} PATH)
-        add_custom_command(OUTPUT ${dep_name}
-        COMMAND
-            mkdir
-        ARGS
-            -p
-            ${dep_path_name}
-        COMMAND
-            ${VALA_EXECUTABLE}
-        ARGS
-            "-C"
-            "-b" ${CMAKE_CURRENT_SOURCE_DIR}
-            "-d" ${build_dir} 
-            ${vala_pkg_opts}
-            ${ARGS_OPTIONS}
-            --deps=${dep_name}
-            ${use_fast_vapi_flags}
-            ${source_name}
-        DEPENDS
-            ${source_name}
-            ${VAPI_NAMES}
-            ${full_vapi_name}
-        )
-    endforeach(original_source_name ${ARGS_DEFAULT_ARGS})
-    
-    add_custom_target(${prebuild_target} DEPENDS ${VAPI_STAMP_NAMES} ${full_vapi_stamp_name} ${DEP_NAMES})
+    add_custom_command(OUTPUT ${out_files} DEPENDS ${STAMP_FILE})
 endmacro(vala_precompile)
 
