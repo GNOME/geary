@@ -7,7 +7,9 @@
 // Do-nothing NewMessagesIndicator, used on non-Ubuntu compiles.
 
 public class NullIndicator : NewMessagesIndicator {
-    public NullIndicator() {
+    public NullIndicator(NewMessagesMonitor monitor) {
+        base (monitor);
+        
         debug("No messaging menu support in this build");
     }
 }

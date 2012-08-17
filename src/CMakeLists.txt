@@ -203,8 +203,10 @@ client/main.vala
 
 client/notification/libindicate.vala
 client/notification/new-messages-indicator.vala
+client/notification/new-messages-monitor.vala
 client/notification/notification-bubble.vala
 client/notification/null-indicator.vala
+client/notification/unity-launcher.vala
 
 client/ui/composer-window.vala
 client/ui/contact-entry-completion.vala
@@ -263,13 +265,33 @@ option(ENABLE_LIBINDICATE "Enable libindicate messaging menu support." OFF)
 if (ENABLE_LIBINDICATE STREQUAL "ON")
     message(STATUS "Building with messaging menu support.")
     set(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
         indicate-0.7>=0.6.1
     )
     set(EXTRA_CLIENT_PACKAGES
+        ${EXTRA_CLIENT_PACKAGES}
         Dbusmenu-0.4 Indicate-0.7
     )
     set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
         -D HAVE_LIBINDICATE
+    )
+endif ()
+
+option(ENABLE_LIBUNITY "Enable Unity launcher support." OFF)
+if (ENABLE_LIBUNITY STREQUAL "ON")
+    message(STATUS "Building with Unity launcher support.")
+    set(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        unity>=5.12.0
+    )
+    set(EXTRA_CLIENT_PACKAGES
+        ${EXTRA_CLIENT_PACKAGES}
+        unity
+    )
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        -D HAVE_LIBUNITY
     )
 endif ()
 

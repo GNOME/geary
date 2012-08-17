@@ -423,7 +423,19 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public File get_exec_dir() {
         return exec_dir;
     }
-
+    
+    public File? get_desktop_file() {
+        File desktop_file = get_resource_directory().get_child("geary.desktop");
+        if (desktop_file.query_exists())
+            return desktop_file;
+        
+        desktop_file = File.new_for_path("/usr/share/applications/geary.desktop");
+        if (!desktop_file.query_exists())
+            return desktop_file;
+        
+        return null;
+    }
+    
     public bool is_installed() {
         return exec_dir.has_prefix(File.new_for_path(INSTALL_PREFIX));
     }

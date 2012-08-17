@@ -11,13 +11,18 @@ public class NotificationBubble : GLib.Object {
     
     private static Canberra.Context? sound_context = null;
     
+    private NewMessagesMonitor monitor;
     private Notify.Notification notification;
     private Geary.Email? email = null;
     private unowned List<string> caps;
 
     public signal void invoked(Geary.Email? email);
     
-    public NotificationBubble() {
+    public NotificationBubble(NewMessagesMonitor monitor) {
+        this.monitor = monitor;
+        
+        monitor.add_required_fields(REQUIRED_FIELDS);
+        
         if (!Notify.is_initted()) {
             if (!Notify.init(GearyApplication.PRGNAME))
                 critical("Failed to initialize libnotify.");
@@ -34,6 +39,12 @@ public class NotificationBubble : GLib.Object {
         notification.set_hint_string("desktop-entry", "geary");
         if (caps.find_custom("actions", GLib.strcmp) != null)
             notification.add_action("default", _("Open"), on_default_action);
+        
+        monitor.notify["count"].connect(on_new_messages_changed);
+    }
+    
+    ~NotificationBubble() {
+        monitor.notify["count"].disconnect(on_new_messages_changed);
     }
     
     private static void init_sound() {
@@ -41,12 +52,23 @@ public class NotificationBubble : GLib.Object {
             Canberra.Context.create(out sound_context);
     }
     
+    private void on_new_messages_changed() {
+        try {
+            if (monitor.count == 1 && monitor.last_new_message != null)
+                notify_one_message_async.begin(monitor.last_new_message, null);
+            else if (monitor.count > 0)
+                notify_new_mail(monitor.count);
+        } catch (Error err) {
+            debug("Unable to notify of new mail: %s", err.message);
+        }
+    }
+    
     private void on_default_action(Notify.Notification notification, string action) {
         invoked(email);
         GearyApplication.instance.activate(new string[0]);
     }
     
-    public void notify_new_mail(int count) throws GLib.Error {
+    private void notify_new_mail(int count) throws GLib.Error {
         // don't pass email if invoked
         email = null;
         
@@ -59,8 +81,8 @@ public class NotificationBubble : GLib.Object {
            "message-new-email");
         notification.show();
     }
-
-    public async void notify_one_message_async(Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
+    
+    private async void notify_one_message_async(Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
         
         // used if notification is invoked
@@ -118,6 +140,7 @@ public class NotificationBubble : GLib.Object {
     public static void play_sound(string sound) {
         if (!GearyApplication.instance.config.play_sounds)
             return;
+        
         init_sound();
         sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
     }

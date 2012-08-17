@@ -10,16 +10,21 @@ public class Libindicate : NewMessagesIndicator {
     private Indicate.Indicator compose;
     private Indicate.Indicator inbox;
     
-    public Libindicate() {
+    public Libindicate(NewMessagesMonitor monitor) {
+        base (monitor);
+        
         debug("Using libindicate for messaging menu support");
         
         indicator = Indicate.Server.ref_default();
         indicator.set_type("message.email");
         
         // Find the desktop file this app instance is using (running from build dir vs. install dir)
-        File desktop_file = GearyApplication.instance.get_resource_directory().get_child("geary.desktop");
-        if (!desktop_file.query_exists())
-            desktop_file = File.new_for_path("/usr/share/applications/geary.desktop");
+        File? desktop_file = GearyApplication.instance.get_desktop_file();
+        if (desktop_file == null) {
+            debug("Unable to setup libindicate support: no desktop file found");
+            
+            return;
+        }
         
         indicator.set_desktop_file(desktop_file.get_path());
         indicator.server_display.connect(on_display_server);
@@ -35,15 +40,19 @@ public class Libindicate : NewMessagesIndicator {
         inbox.set_property_variant("name", _("New Messages"));
         inbox.user_display.connect(on_activate_inbox);
         
-        notify["count"].connect(on_new_messages_changed);
+        monitor.notify["count"].connect(on_new_messages_changed);
         
         indicator.show();
     }
     
+    ~Libindicate() {
+        monitor.notify["count"].disconnect(on_new_messages_changed);
+    }
+    
     private void on_new_messages_changed() {
-        if (count > 0) {
+        if (monitor.count > 0) {
             // count is in fact a string property
-            inbox.set_property_variant("count", count.to_string());
+            inbox.set_property_variant("count", monitor.count.to_string());
             inbox.set_property_bool("draw-attention", true);
             
             inbox.show();
@@ -62,6 +71,10 @@ public class Libindicate : NewMessagesIndicator {
     
     private void on_activate_inbox(uint timestamp) {
         inbox_activated(timestamp);
+    }
+#else
+    public Libindicate(NewMessagesMonitor monitor) {
+        base (monitor);
     }
 #endif
 }

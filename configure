@@ -31,7 +31,10 @@ configure_help() {
     
     printf "\t--enable-libindicate\n"
     printf "\t\t\t\tEnable libindicate messaging menu support.\n"
-
+    
+    printf "\t--enable-libunity\n"
+    printf "\t\t\t\tEnable libunity launcher support.\n"
+    
     printf "\n"
 }
 
@@ -78,6 +81,11 @@ do
         --enable-libindicate)
                             CMDLINE="${CMDLINE} -DENABLE_LIBINDICATE=ON"
                             ;;
+        
+        --enable-libunity)
+                            CMDLINE="${CMDLINE} -DENABLE_LIBUNITY=ON"
+                            ;;
+        
         
         *)                  abort $option
                             ;;
