@@ -40,11 +40,11 @@ public class NotificationBubble : GLib.Object {
         if (caps.find_custom("actions", GLib.strcmp) != null)
             notification.add_action("default", _("Open"), on_default_action);
         
-        monitor.notify["count"].connect(on_new_messages_changed);
+        monitor.new_messages_arrived.connect(on_new_messages_arrived);
     }
     
     ~NotificationBubble() {
-        monitor.notify["count"].disconnect(on_new_messages_changed);
+        monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
     }
     
     private static void init_sound() {
@@ -52,7 +52,7 @@ public class NotificationBubble : GLib.Object {
             Canberra.Context.create(out sound_context);
     }
     
-    private void on_new_messages_changed() {
+    private void on_new_messages_arrived() {
         try {
             if (monitor.count == 1 && monitor.last_new_message != null)
                 notify_one_message_async.begin(monitor.last_new_message, null);
@@ -76,6 +76,7 @@ public class NotificationBubble : GLib.Object {
             return;
         
         notification.set_category("email.arrived");
+        notification.set("summary", null);
         
         prepare_notification(ngettext("%d new message", "%d new messages", count).printf(count),
            "message-new-email");

@@ -22,6 +22,10 @@ public class NewMessagesMonitor : Object {
     private Gee.HashSet<Geary.EmailIdentifier> new_ids = new Gee.HashSet<Geary.EmailIdentifier>(
         Geary.Hashable.hash_func, Geary.Equalable.equal_func);
     
+    public signal void new_messages_arrived();
+    
+    public signal void new_messages_retired();
+    
     public NewMessagesMonitor(Geary.Folder folder, Cancellable? cancellable) {
         this.folder = folder;
         this.cancellable = cancellable;
@@ -90,7 +94,7 @@ public class NewMessagesMonitor : Object {
             new_ids.add(email.id);
         }
         
-        update_count();
+        update_count(true);
     }
     
     private void retire_new_messages(Gee.Collection<Geary.EmailIdentifier> email_ids) {
@@ -101,22 +105,28 @@ public class NewMessagesMonitor : Object {
             new_ids.remove(email_id);
         }
         
-        update_count();
+        update_count(false);
     }
     
     public void clear_new_messages() {
         new_ids.clear();
         last_new_message = null;
         
-        update_count();
+        update_count(false);
     }
     
-    private void update_count() {
+    private void update_count(bool arrived) {
         // Documentation for "notify" signal seems to suggest that it's possible for the signal to
         // fire even if the value of the property doesn't change.  Since this signal can trigger
         // big events, want to avoid firing it unless necessary
-        if (count != new_ids.size)
-            count = new_ids.size;
+        if (count == new_ids.size)
+            return;
+        
+        count = new_ids.size;
+        if (arrived)
+            new_messages_arrived();
+        else
+            new_messages_retired();
     }
 }
 
