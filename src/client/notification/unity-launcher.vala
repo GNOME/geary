@@ -10,16 +10,8 @@ public class UnityLauncher : Object {
     private Unity.LauncherEntry? entry = null;
     
     public UnityLauncher(NewMessagesMonitor monitor) {
-        File? desktop_file = GearyApplication.instance.get_desktop_file();
-        if (desktop_file == null) {
-            debug("Unable to setup Unity Launcher support: desktop file not found");
-            
-            return;
-        }
-        
         this.monitor = monitor;
         
-        //entry = Unity.LauncherEntry.get_for_desktop_file(desktop_file.get_path());
         entry = Unity.LauncherEntry.get_for_desktop_id("geary.desktop");
         set_count(0);
         
