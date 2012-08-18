@@ -29,12 +29,6 @@ configure_help() {
     printf "\t--disable-icon-update\n"
     printf "\t\t\t\tDisable icon cache update.\n"
     
-    printf "\t--enable-libindicate\n"
-    printf "\t\t\t\tEnable libindicate messaging menu support.\n"
-    
-    printf "\t--enable-libunity\n"
-    printf "\t\t\t\tEnable libunity launcher support.\n"
-    
     printf "\n"
 }
 
@@ -77,15 +71,6 @@ do
         --disable-desktop-update)
                             CMDLINE="${CMDLINE} -DDESKTOP_UPDATE=OFF"
                             ;;
-        
-        --enable-libindicate)
-                            CMDLINE="${CMDLINE} -DENABLE_LIBINDICATE=ON"
-                            ;;
-        
-        --enable-libunity)
-                            CMDLINE="${CMDLINE} -DENABLE_LIBUNITY=ON"
-                            ;;
-        
         
         *)                  abort $option
                             ;;

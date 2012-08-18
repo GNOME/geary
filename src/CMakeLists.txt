@@ -261,43 +261,53 @@ include(ValaVersion)
 ensure_vala_version("0.17.4" MINIMUM)
 include(ValaPrecompile)
 
-option(ENABLE_LIBINDICATE "Enable libindicate messaging menu support." OFF)
-if (ENABLE_LIBINDICATE STREQUAL "ON")
-    message(STATUS "Building with messaging menu support.")
+# Packages
+find_package(PkgConfig)
+
+pkg_check_modules(LIBINDICATE QUIET indicate-0.7>=0.6.1)
+if (LIBINDICATE_FOUND)
+    message(STATUS "Unity messaging menu support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
-        indicate-0.7>=0.6.1
+        indicate-0.7
     )
+    
     set(EXTRA_CLIENT_PACKAGES
         ${EXTRA_CLIENT_PACKAGES}
-        Dbusmenu-0.4 Indicate-0.7
+        Dbusmenu-0.4
+        Indicate-0.7
     )
+    
     set(EXTRA_VALA_OPTIONS
         ${EXTRA_VALA_OPTIONS}
         -D HAVE_LIBINDICATE
     )
+else ()
+    message(STATUS "Unity messaging menu support: OFF")
 endif ()
 
-option(ENABLE_LIBUNITY "Enable Unity launcher support." OFF)
-if (ENABLE_LIBUNITY STREQUAL "ON")
-    message(STATUS "Building with Unity launcher support.")
+pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
+if (LIBUNITY_FOUND)
+    message(STATUS "Unity launcher support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
-        unity>=5.12.0
+        unity
     )
+    
     set(EXTRA_CLIENT_PACKAGES
         ${EXTRA_CLIENT_PACKAGES}
         unity
     )
+    
     set(EXTRA_VALA_OPTIONS
         ${EXTRA_VALA_OPTIONS}
         -D HAVE_LIBUNITY
     )
+else ()
+    message(STATUS "Unity launcher support: OFF")
 endif ()
 
-# Packages
-find_package(PkgConfig)
-pkg_check_modules(DEPS REQUIRED
+pkg_check_modules(DEPS REQUIRED QUIET
     gthread-2.0
     glib-2.0>=2.30.0
     gio-2.0>=2.28.0
