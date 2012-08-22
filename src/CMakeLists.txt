@@ -408,6 +408,12 @@ add_custom_command(
         ${CMAKE_COMMAND} -E copy geary ${CMAKE_BINARY_DIR}/
 )
 
+# GSettings
+# This needs to be here and not in client/CMakeLists.txt in order for Geary to run in the build
+# directory
+include(GSettings)
+add_schemas(geary ${GSETTINGS_DIR})
+
 add_subdirectory(client)
 
 # Console app

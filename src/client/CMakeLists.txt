@@ -8,10 +8,6 @@ install(
         share/applications
 )
 
-# GSettings
-include(GSettings)
-add_schemas(geary ${GSETTINGS_DIR})
-
 # Optional: run update-desktop-database at install time.
 # (This has to happen after the geary.desktop file is installed.)
 if (DESKTOP_UPDATE)
