@@ -339,7 +339,7 @@ set(DBUSSERVICE_PACKAGES
     gee-1.0 glib-2.0
 )
 
-set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/src/client)
+set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/src/client/misc)
 
 set(CFLAGS 
     ${DEPS_CFLAGS}
@@ -411,6 +411,8 @@ add_custom_command(
 # GSettings
 include(GSettings)
 add_schemas(geary ${GSETTINGS_DIR})
+
+add_subdirectory(client)
 
 # Console app
 #################################################

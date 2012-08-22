@@ -44,16 +44,6 @@ add_subdirectory(ui)
 add_subdirectory(help)
 
 #
-# Install geary.desktop
-#
-install(
-    FILES
-        geary.desktop
-    DESTINATION
-        share/applications
-)
-
-#
 # Uninstall target
 #
 configure_file(
@@ -69,24 +59,6 @@ add_custom_target(
     COMMAND 
         ${glib_schema_compiler} ${GSETTINGS_DIR}
 )
-
-# Optional: run update-desktop-database at install time.
-if (DESKTOP_UPDATE)
-    install(
-        CODE
-            "execute_process (COMMAND update-desktop-database)"
-        CODE
-            "message (STATUS \"Updating desktop database\")"
-    )
-    
-    add_custom_target(
-        uninstall-desktop-update
-        DEPENDS
-            uninstall
-        COMMAND
-            update-desktop-database
-    )
-endif ()
 
 # Dist
 # This generates the dist tarballs
