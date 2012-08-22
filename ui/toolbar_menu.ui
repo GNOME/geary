@@ -1,5 +1,22 @@
 <ui>
+    <!--
+    If ToolbarMenu is changed, be sure to update ToolbarMenuProxy as well. See comments below.
+    -->
     <popup name="ToolbarMenu">
+        <menuitem name="Preferences" action="GearyPreferences" />
+        <separator />
+        <menuitem name="Help" action="GearyHelp" />
+        <menuitem name="About" action="GearyAbout" />
+        <separator />
+        <menuitem name="Quit" action="GearyQuit" />
+    </popup>
+    
+    <!--
+    This should be identical to ToolbarMenu, except for the name. We can't add ToolbarMenu to
+    multiple parents, and we don't want to create a second UIManager to load a copy. So instead,
+    we keep a duplicate of ToolbarMenu in this .ui file to be used by the proxy.
+    -->
+    <popup name="ToolbarMenuProxy">
         <menuitem name="Preferences" action="GearyPreferences" />
         <separator />
         <menuitem name="Help" action="GearyHelp" />

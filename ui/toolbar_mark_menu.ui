@@ -1,5 +1,21 @@
 <ui>
+    <!--
+    If ToolbarMarkMenu is changed, be sure to update ToolbarMarkMenuProxy as well. See comments
+    below.
+    -->
     <popup name="ToolbarMarkMenu">
+        <menuitem name="MarkAsRead" action="GearyMarkAsRead" />
+        <menuitem name="MarkAsUnread" action="GearyMarkAsUnread" />
+        <menuitem name="MarkAsStarred" action="GearyMarkAsStarred" />
+        <menuitem name="MarkAsUnStarred" action="GearyMarkAsUnStarred" />
+    </popup>
+    
+    <!--
+    This should be identical to ToolbarMarkMenu, except for the name. We can't add ToolbarMarkMenu
+    to multiple parents, and we don't want to create a second UIManager to load a copy. So instead,
+    we keep a duplicate of ToolbarMenu in this .ui file to be used by the proxy.
+    -->
+    <popup name="ToolbarMarkMenuProxy">
         <menuitem name="MarkAsRead" action="GearyMarkAsRead" />
         <menuitem name="MarkAsUnread" action="GearyMarkAsUnread" />
         <menuitem name="MarkAsStarred" action="GearyMarkAsStarred" />

@@ -24,13 +24,30 @@ public void menu_popup_relative(Gtk.Menu menu, out int x, out int y, out bool pu
     push_in = false;
 }
 
-public void make_menu_dropdown_button(Gtk.ToggleToolButton toolbutton, string label) {
-    Gtk.ToggleButton button = toolbutton.get_child() as Gtk.ToggleButton;
-    button.remove(button.get_child());
+// This method must be called AFTER the button is added to the toolbar.
+public void make_menu_dropdown_button(Gtk.ToggleToolButton toggle_tool_button, string label) {
+    Gtk.ToggleButton? toggle_button = toggle_tool_button.get_child() as Gtk.ToggleButton;
+    if (toggle_button == null) {
+        debug("Problem making dropdown button: ToggleToolButton's child is not a ToggleButton");
+        return;
+    }
+    
+    Gtk.Widget? child = toggle_button.get_child();
+    if (child != null)
+        toggle_button.remove(child);
+    
     Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+    toggle_button.add(box);
     box.set_homogeneous(false);
-    button.add(box);
     box.pack_start(new Gtk.Label(label));
     box.pack_start(new Gtk.Image.from_icon_name("menu-down", Gtk.IconSize.SMALL_TOOLBAR));
 }
 
+public void add_proxy_menu(Gtk.ToolItem tool_item, string label, Gtk.Menu proxy_menu) {
+    Gtk.MenuItem proxy_menu_item = new Gtk.MenuItem.with_label(label);
+    proxy_menu_item.submenu = proxy_menu;
+    tool_item.create_menu_proxy.connect((sender) => {
+        sender.set_proxy_menu_item("proxy", proxy_menu_item);
+        return true;
+    });
+}
