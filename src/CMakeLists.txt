@@ -408,10 +408,6 @@ add_custom_command(
         ${CMAKE_COMMAND} -E copy geary ${CMAKE_BINARY_DIR}/
 )
 
-# GSettings
-include(GSettings)
-add_schemas(geary ${GSETTINGS_DIR})
-
 add_subdirectory(client)
 
 # Console app
