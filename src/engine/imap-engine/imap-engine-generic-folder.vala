@@ -306,10 +306,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.ArrayList<Geary.EmailIdentifier> locally_appended = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (int id in batch.get_ids()) {
             CreateLocalEmailOperation? create_op = batch.get_operation(id) as CreateLocalEmailOperation;
-            if (create_op != null) {
-                if (create_op.created)
-                    locally_appended.add(create_op.email.id);
-            }
+            if (create_op != null && create_op.created)
+                locally_appended.add(create_op.email.id);
         }
         
         // notify emails that have been removed (see note above about why not all Creates are
