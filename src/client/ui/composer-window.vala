@@ -607,13 +607,66 @@ public class ComposerWindow : Gtk.Window {
         c.store();
     }
     
+    private WebKit.DOM.Node? get_left_text(WebKit.DOM.Node node, long offset) {
+        WebKit.DOM.Document document = editor.get_dom_document();
+        string node_value = node.node_value;
+
+        // Offset is in unicode characters, but index is in bytes. We need to get the corresponding
+        // byte index for the given offset.
+        int char_count = node_value.char_count();
+        int index = offset > char_count ? node_value.length : node_value.index_of_nth_char(offset);
+
+        return offset > 0 ? document.create_text_node(node_value[0:index]) : null;
+    }
+    
     private void on_clipboard_text_received(Gtk.Clipboard clipboard, string? text) {
         if (text == null)
             return;
         
         // Insert plain text from clipboard.
-        editor.get_dom_document().exec_command("inserthtml", false, 
-            Geary.HTML.newlines_to_br(Geary.HTML.escape_markup(text)));
+        WebKit.DOM.Document document = editor.get_dom_document();
+        document.exec_command("inserttext", false, text);
+    
+        // The inserttext command will not scroll if needed, but we can't use the clipboard
+        // for plain text. WebKit allows us to scroll a node into view, but not an arbitrary
+        // position within a text node. So we add a placeholder node at the cursor position,
+        // scroll to that, then remove the placeholder node.
+        try {
+            WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
+            WebKit.DOM.Node selection_base_node = selection.get_base_node();
+            long selection_base_offset = selection.get_base_offset();
+            
+            WebKit.DOM.NodeList selection_child_nodes = selection_base_node.get_child_nodes();
+            WebKit.DOM.Node ref_child = selection_child_nodes.item(selection_base_offset);
+        
+            WebKit.DOM.Element placeholder = document.create_element("SPAN");
+            WebKit.DOM.Text placeholder_text = document.create_text_node("placeholder");
+            placeholder.append_child(placeholder_text);
+            
+            if (selection_base_node.node_name == "#text") {
+                WebKit.DOM.Node? left = get_left_text(selection_base_node, selection_base_offset);
+                
+                WebKit.DOM.Node parent = selection_base_node.parent_node;
+                if (left != null)
+                    parent.insert_before(left, selection_base_node);
+                parent.insert_before(placeholder, selection_base_node);
+                parent.remove_child(selection_base_node);
+                
+                placeholder.scroll_into_view_if_needed(false);
+                parent.insert_before(selection_base_node, placeholder);
+                if (left != null)
+                    parent.remove_child(left);
+                parent.remove_child(placeholder);
+                selection.set_base_and_extent(selection_base_node, selection_base_offset, selection_base_node, selection_base_offset);
+            } else {
+                selection_base_node.insert_before(placeholder, ref_child);
+                placeholder.scroll_into_view_if_needed(false);
+                selection_base_node.remove_child(placeholder);
+            }
+            
+        } catch (Error err) {
+            debug("Error scrolling pasted text into view: %s", err.message);
+        }
     }
     
     private void on_paste() {
