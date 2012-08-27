@@ -7,7 +7,8 @@
 public class Geary.Smtp.Capabilities : Geary.GenericCapabilities {
     public static const string STARTTLS = "starttls";
 
-    public Capabilities(){
+    public Capabilities() {
+        base ("=");
     }
 }
 

@@ -10,8 +10,8 @@ extern string glib_substring(string str, long start_pos, long end_pos);
 
 namespace Geary.String {
 
-public inline bool is_null_or_whitespace(string? str) {
-    return (str == null || str.strip()[0] == 0);
+public bool is_empty_or_whitespace(string? str) {
+    return (str == null || str[0] == 0 || str.strip()[0] == 0);
 }
 
 public inline bool is_empty(string? str) {
@@ -50,8 +50,23 @@ public uint stri_hash(void *str) {
     return str_hash(((string *) str)->down());
 }
 
+public uint nullable_stri_hash(void *str) {
+    return (str != null) ? stri_hash(str) : 0;
+}
+
 public bool stri_equal(void *a, void *b) {
     return str_equal(((string *) a)->down(), ((string *) b)->down());
+}
+
+public bool nullable_stri_equal(void *a, void *b) {
+    if (a == null)
+        return (b == null);
+    
+    // a != null, so always false
+    if (b == null)
+        return false;
+    
+    return stri_equal(a, b);
 }
 
 /**

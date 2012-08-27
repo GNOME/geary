@@ -92,7 +92,7 @@ public class FormattedMessageData : Object {
             // TODO: Should we use a more sophisticated algorithm than "first word" to get the
             // first name?
             string first_name = tokens[0].strip();
-            if (Geary.String.is_null_or_whitespace(first_name))
+            if (Geary.String.is_empty_or_whitespace(first_name))
                 continue;
             
             if (authors_builder.len > 0)

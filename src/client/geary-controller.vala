@@ -67,7 +67,7 @@ public class GearyController {
     
     public MainWindow main_window { get; private set; }
     
-    private Geary.EngineAccount? account = null;
+    private Geary.Account? account = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_inbox = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
@@ -246,7 +246,7 @@ public class GearyController {
         return entries;
     }
     
-    public async void connect_account_async(Geary.EngineAccount? new_account, Cancellable? cancellable) {
+    public async void connect_account_async(Geary.Account? new_account, Cancellable? cancellable) {
         if (account == new_account)
             return;
         
@@ -297,8 +297,7 @@ public class GearyController {
             
             if (account.settings.service_provider == Geary.ServiceProvider.YAHOO)
                 main_window.title = GearyApplication.NAME + "!";
-            // TODO: Change this when Geary no longer assumes username is email addresss.
-            main_window.message_list_store.account_owner_email = account.settings.credentials.user;
+            main_window.message_list_store.account_owner_email = account.settings.email.address;
             
             main_window.folder_list.set_user_folders_root_name(_("Labels"));
             load_folders.begin(cancellable_folder);
@@ -538,7 +537,7 @@ public class GearyController {
         
         // Clear view before we yield, to make sure it happens
         if (clear_view) {
-            main_window.message_viewer.clear(current_folder);
+            main_window.message_viewer.clear(current_folder, account.settings);
             main_window.message_viewer.scroll_reset();
             main_window.message_viewer.external_images_info_bar.hide();
         }
@@ -1139,17 +1138,9 @@ public class GearyController {
     }
     
     private Geary.RFC822.MailboxAddress get_sender() {
-        string username;
-        try {
-            // TODO: Multiple accounts.
-            username = Geary.Engine.get_usernames().get(0);
-        } catch (Error e) {
-            error("Unable to get username. Error: %s", e.message);
-        }
-        
-        return new Geary.RFC822.MailboxAddress(account.settings.real_name, username);
+        return account.settings.email;
     }
-        
+    
     private Geary.RFC822.MailboxAddresses get_from() {
         return new Geary.RFC822.MailboxAddresses.single(get_sender());
     }

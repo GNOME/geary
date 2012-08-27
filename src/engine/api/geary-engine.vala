@@ -9,7 +9,11 @@ public class Geary.Engine {
     public static File? resource_dir { get; private set; default = null; }
     
     private static bool inited = false;
-
+    
+    /**
+     * Geary.Engine.init() should be the first call any application makes prior to calling into
+     * the Geary engine.
+     */
     public static void init(File _user_data_dir, File _resource_dir) {
         if (inited)
             return;
@@ -23,9 +27,18 @@ public class Geary.Engine {
         inited = true;
     }
     
-    // Returns a list of usernames associated with Geary.
-    public static Gee.List<string> get_usernames() throws Error {
-        Gee.ArrayList<string> list = new Gee.ArrayList<string>();
+    /**
+     * Returns a list of AccountInformation objects representing accounts setup for use by the Geary
+     * engine.
+     */
+    public static Gee.List<AccountInformation> get_accounts() throws Error {
+        Gee.ArrayList<AccountInformation> list = new Gee.ArrayList<AccountInformation>();
+        
+        if (!inited) {
+            debug("Geary.Engine.get_accounts(): not initialized");
+            
+            return list;
+        }
         
         FileEnumerator enumerator = user_data_dir.enumerate_children("standard::*", 
             FileQueryInfoFlags.NONE);
@@ -33,9 +46,22 @@ public class Geary.Engine {
         FileInfo? info = null;
         while ((info = enumerator.next_file()) != null) {
             if (info.get_file_type() == FileType.DIRECTORY)
-                list.add(info.get_name());
+                list.add(new AccountInformation(user_data_dir.get_child(info.get_name())));
         }
         
         return list;
     }
+    
+    /**
+     * Returns a Geary.AccountInformation for the specified email address.  If the account
+     * has not been set up previously, an object is returned, although it's merely backed by memory
+     * and filled with defaults.  Otherwise, the account information for that address is loaded.
+     *
+     * "email" in this case means the Internet mailbox for the account, i.e. username@domain.com.
+     * Use the "address" field of RFC822.MailboxAddress for this parameter.
+     */
+    public static Geary.AccountInformation get_account_for_email(string email) throws Error {
+        return new Geary.AccountInformation(user_data_dir.get_child(email));
+    }
 }
+

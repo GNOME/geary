@@ -13,7 +13,7 @@ public class Geary.DBus.Controller {
     public DBusConnection connection { get; private set; }
     
     private string[] args;
-    private Geary.EngineAccount account;
+    private Geary.Account account;
     private Geary.DBus.Conversations conversations;
     
     public static void init(string[] args) {
@@ -32,9 +32,12 @@ public class Geary.DBus.Controller {
             connection = yield Bus.get(GLib.BusType.SESSION);
             
             // Open the account.
-            Geary.Credentials credentials = new Geary.Credentials(args[1], args[2]);
-            Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
-            account_information.load_info_from_file();
+            // TODO: Don't assume username is email, allow separate imap/smtp credentials.
+            Geary.AccountInformation account_information = Geary.Engine.get_account_for_email(args[1]);
+            account_information.imap_credentials = new Geary.Credentials(args[1], args[2]);
+            account_information.smtp_credentials = new Geary.Credentials(args[1], args[2]);
+            
+            // convert AccountInformation into an Account
             try {
                 account = account_information.get_account();
             } catch (EngineError err) {
@@ -80,7 +83,7 @@ public class Geary.DBus.Controller {
         return File.new_for_path(Environment.get_current_dir());
     }
     
-    private void on_report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
+    private void on_report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
         Error? err) {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
     }

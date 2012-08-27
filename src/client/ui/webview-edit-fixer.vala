@@ -304,7 +304,7 @@ public class WebViewEditFixer {
             child = node.child_nodes.item(i);
             if (child.node_name == BR_NAME)
                 continue;
-            if (child.node_name == TEXT_NAME && Geary.String.is_null_or_whitespace(child.node_value))
+            if (child.node_name == TEXT_NAME && Geary.String.is_empty_or_whitespace(child.node_value))
                 continue;
             if (child.node_name == DIV_NAME && !is_substantial(child))
                 continue;

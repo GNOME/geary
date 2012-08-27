@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
+private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
     
@@ -52,8 +52,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
         
-        yield local.open_async(Engine.user_data_dir.get_child(settings.credentials.user),
-            Engine.resource_dir.get_child("sql"), cancellable);
+        yield local.open_async(settings.settings_dir, Engine.resource_dir.get_child("sql"), cancellable);
+        
+        // outbox is now available
+        local.outbox.report_problem.connect(notify_report_problem);
         
         // need to back out local.open_async() if remote fails
         try {
@@ -77,6 +79,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
     public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (!open)
             return;
+        
+        local.outbox.report_problem.disconnect(notify_report_problem);
         
         // attempt to close both regardless of errors
         Error? local_err = null;
@@ -316,7 +320,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.EngineAccount {
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {
-        notify_report_problem(Geary.Account.Problem.LOGIN_FAILED, credentials, null);
+        notify_report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, settings, null);
     }
 }
 

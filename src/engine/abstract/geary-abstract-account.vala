@@ -5,15 +5,13 @@
  */
 
 public abstract class Geary.AbstractAccount : Object, Geary.Account {
+    public Geary.AccountSettings settings { get; protected set; }
+    
     private string name;
     
-    public AbstractAccount(string name) {
+    public AbstractAccount(string name, AccountSettings settings) {
         this.name = name;
-    }
-    
-    public virtual void notify_report_problem(Geary.Account.Problem problem,
-        Geary.Credentials? credentials, Error? err) {
-        report_problem(problem, credentials, err);
+        this.settings = settings;
     }
     
     protected virtual void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
@@ -27,6 +25,15 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     
     protected virtual void notify_closed() {
         closed();
+    }
+    
+    protected virtual void notify_email_sent(RFC822.Message message) {
+        email_sent(message);
+    }
+    
+    protected virtual void notify_report_problem(Geary.Account.Problem problem,
+        Geary.AccountSettings? settings, Error? err) {
+        report_problem(problem, settings, err);
     }
     
     public abstract async void open_async(Cancellable? cancellable = null) throws Error;
@@ -43,6 +50,9 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
+    
+    public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
+        throws Error;
     
     public virtual string to_string() {
         return name;

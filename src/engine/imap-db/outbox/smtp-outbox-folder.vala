@@ -32,6 +32,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         }
     }
     
+    public signal void report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
+        Error? err);
+        
     private static FolderRoot? path = null;
     
     private ImapDB.Database db;
@@ -118,6 +121,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                 yield send_email_async(message, null);
             } catch (Error send_err) {
                 debug("Outbox postman send error, retrying: %s", send_err.message);
+                
+                if (send_err is SmtpError.AUTHENTICATION_FAILED)
+                    report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, settings, send_err);
                 
                 try {
                     outbox_queue.send(row);
@@ -477,7 +483,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     
     private async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
-        yield smtp.login_async(settings.credentials, cancellable);
+        yield smtp.login_async(settings.smtp_credentials, cancellable);
         try {
             yield smtp.send_email_async(rfc822, cancellable);
         } finally {

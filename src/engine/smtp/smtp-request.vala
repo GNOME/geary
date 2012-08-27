@@ -35,6 +35,26 @@ public class Geary.Smtp.Request {
     }
 }
 
+public class Geary.Smtp.HeloRequest : Geary.Smtp.Request {
+    public HeloRequest(string domain) {
+        base (Command.HELO, { domain });
+    }
+    
+    public HeloRequest.for_endpoint(Geary.Endpoint endpoint) {
+        this (endpoint.host_specifier);
+    }
+}
+
+public class Geary.Smtp.EhloRequest : Geary.Smtp.Request {
+    public EhloRequest(string domain) {
+        base (Command.EHLO, { domain });
+    }
+    
+    public EhloRequest.for_endpoint(Geary.Endpoint endpoint) {
+        this (endpoint.host_specifier);
+    }
+}
+
 public class Geary.Smtp.MailRequest : Geary.Smtp.Request {
     public MailRequest(Geary.RFC822.MailboxAddress from) {
         base (Command.MAIL, { "from:%s".printf(from.get_simple_address()) });

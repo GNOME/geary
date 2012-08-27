@@ -80,6 +80,7 @@ public class MessageViewer : Object {
     private Gtk.Menu? attachment_menu = null;
     private FileMonitor? user_style_monitor = null;
     private weak Geary.Folder? current_folder = null;
+    private Geary.AccountSettings? current_settings = null;
     private bool load_external_images = false;
     
     public MessageViewer() {
@@ -235,7 +236,7 @@ public class MessageViewer : Object {
                     continue;
                 
                 string src = element.get_attribute("src");
-                if (Geary.String.is_null_or_whitespace(src) || is_always_loaded(src))
+                if (Geary.String.is_empty_or_whitespace(src) || is_always_loaded(src))
                     continue;
                 
                 // Refresh the image source. Requests are denied when load_external_images
@@ -364,7 +365,7 @@ public class MessageViewer : Object {
     }
     
     // Removes all displayed e-mails from the view.
-    public void clear(Geary.Folder? new_folder) {
+    public void clear(Geary.Folder? new_folder, Geary.AccountSettings? settings) {
         // Remove all messages from DOM.
         try {
             foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
@@ -378,6 +379,7 @@ public class MessageViewer : Object {
         messages.clear();
         
         current_folder = new_folder;
+        current_settings = settings;
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
@@ -395,7 +397,7 @@ public class MessageViewer : Object {
     
     public void show_multiple_selected(uint selected_count) {
         // Remove any messages and hide the message container, then show the counter.
-        clear(current_folder);
+        clear(current_folder, current_settings);
         try {
             hide_element_by_id(MESSAGE_CONTAINER_ID);
             show_element_by_id(SELECTION_COUNTER_ID);
@@ -478,21 +480,13 @@ public class MessageViewer : Object {
         
         email_to_element.set(email.id, div_message);
         
-        string username;
-        try {
-            // TODO: Multiple accounts.
-            username = Geary.Engine.get_usernames().get(0);
-        } catch (Error e) {
-            error("Unable to get username. Error: %s", e.message);
-        }
-        
         insert_header_address(ref header, _("From:"), email.from != null ? email.from : email.sender,
             true);
         
         // Only include to string if it's not just this account.
         // TODO: multiple accounts.
-        if (email.to != null) {
-            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == username))
+        if (email.to != null && current_settings != null) {
+            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == current_settings.email.address))
                  insert_header_address(ref header, _("To:"), email.to);
         }
 
@@ -1372,7 +1366,7 @@ public class MessageViewer : Object {
             foreach (Geary.Attachment attachment in attachments) {
                 // Generate the attachment table.
                 WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
-                string filename = Geary.String.is_null_or_whitespace(attachment.filename) ?
+                string filename = Geary.String.is_empty_or_whitespace(attachment.filename) ?
                     _("none") : attachment.filename;
                 Util.DOM.select(attachment_table, ".info .filename")
                     .set_inner_text(filename);

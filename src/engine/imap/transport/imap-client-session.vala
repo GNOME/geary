@@ -547,7 +547,7 @@ public class Geary.Imap.ClientSession {
      * Performs the LOGIN command using the supplied credentials.  See initiate_session_async() for
      * a more full-featured version of login_async().
      */
-    public async void login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
+    public async CommandResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
         LoginParams params = new LoginParams(credentials.user, credentials.pass, cancellable,
             login_async.callback);
@@ -558,6 +558,11 @@ public class Geary.Imap.ClientSession {
         
         if (params.err != null)
             throw params.err;
+        
+        // No Error means a response had better be available
+        assert(params.cmd_response != null);
+        
+        return params.cmd_response;
     }
     
     /**
@@ -572,28 +577,48 @@ public class Geary.Imap.ClientSession {
         
         Imap.Capabilities caps = get_capabilities();
         
-        // Attempt TLS if specified or if available and not an SSL connection
         debug("[%s] use_starttls=%s is_ssl=%s starttls=%s", to_string(), imap_endpoint.use_starttls.to_string(),
             imap_endpoint.is_ssl.to_string(), caps.has_capability(Capabilities.STARTTLS).to_string());
-        if (imap_endpoint.use_starttls
-            || (!imap_endpoint.is_ssl && caps.has_capability(Capabilities.STARTTLS))) {
-            debug("[%s] Attempting STARTTLS...", to_string());
-            CommandResponse resp = yield send_command_async(new StarttlsCommand());
-            if (resp.status_response.status == Status.OK) {
-                yield cx.starttls_async(cancellable);
-                debug("[%s] STARTTLS completed", to_string());
-            } else {
-                debug("[%s} STARTTLS refused: %s", to_string(), resp.status_response.to_string());
+        switch (imap_endpoint.attempt_starttls(caps.has_capability(Capabilities.STARTTLS))) {
+            case Endpoint.AttemptStarttls.YES:
+                debug("[%s] Attempting STARTTLS...", to_string());
+                CommandResponse resp;
+                try {
+                    resp = yield send_command_async(new StarttlsCommand());
+                } catch (Error err) {
+                    debug("Error attempting STARTTLS command on %s: %s", to_string(), err.message);
+                    
+                    throw err;
+                }
                 
-                // throw an exception and fail rather than send credentials under suspect
-                // conditions
-                throw new ImapError.NOT_SUPPORTED("STARTTLS refused by %s: %s", to_string(),
-                    resp.status_response.to_string());
-            }
+                if (resp.status_response.status == Status.OK) {
+                    yield cx.starttls_async(cancellable);
+                    debug("[%s] STARTTLS completed", to_string());
+                } else {
+                    debug("[%s} STARTTLS refused: %s", to_string(), resp.status_response.to_string());
+                    
+                    // throw an exception and fail rather than send credentials under suspect
+                    // conditions
+                    throw new ImapError.NOT_SUPPORTED("STARTTLS refused by %s: %s", to_string(),
+                        resp.status_response.to_string());
+                }
+            break;
+            
+            case Endpoint.AttemptStarttls.NO:
+                debug("[%s] No STARTTLS attempted", to_string());
+            break;
+            
+            case Endpoint.AttemptStarttls.HALT:
+            default:
+                throw new ImapError.NOT_SUPPORTED("STARTTLS unavailable for %s", to_string());
         }
         
         // Login after STARTTLS
-        yield login_async(credentials, cancellable);
+        CommandResponse login_resp = yield login_async(credentials, cancellable);
+        if (login_resp.status_response.status != Status.OK) {
+            throw new ImapError.UNAUTHENTICATED("Unable to login to %s with supplied credentials",
+                to_string());
+        }
         
         // if new capabilities not offered after login, get them now
         if (caps.revision == get_capabilities().revision)

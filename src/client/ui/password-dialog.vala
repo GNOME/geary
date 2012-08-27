@@ -17,15 +17,23 @@ public class PasswordDialog {
     private const string PRIMARY_TEXT_REPEATED_TRY = _("Unable to login to email server");
     
     private Gtk.Dialog dialog;
-    private Gtk.Entry password_entry;
-    private Gtk.CheckButton remember_password_checkbutton;
+    private Gtk.Entry entry_imap_password;
+    private Gtk.CheckButton check_imap_remember_password;
+    private Gtk.Entry entry_smtp_password;
+    private Gtk.CheckButton check_smtp_remember_password;
     private Gtk.Button ok_button;
+    private Gtk.Grid grid_imap;
+    private Gtk.Grid grid_smtp;
+    private PasswordTypeFlag password_flags;
     
-    public string password { get; private set; default = ""; }
+    public string imap_password { get; private set; default = ""; }
+    public string smtp_password { get; private set; default = ""; }
+    public bool imap_remember_password { get; private set; }
+    public bool smtp_remember_password { get; private set; }
     
-    public bool remember_password { get; private set; }
-    
-    public PasswordDialog(Geary.AccountInformation account_information, bool first_try) {
+    public PasswordDialog(Geary.AccountInformation account_information, bool first_try,
+        PasswordTypeFlag password_flags) {
+        this.password_flags = password_flags;
         Gtk.Builder builder = GearyApplication.instance.create_builder("password-dialog.glade");
         
         // Load dialog
@@ -34,19 +42,26 @@ public class PasswordDialog {
         dialog.set_default_response(Gtk.ResponseType.OK);
         
         // Load editable widgets
-        password_entry = (Gtk.Entry) builder.get_object("password_entry");
-        remember_password_checkbutton = (Gtk.CheckButton) builder.get_object("remember_password_checkbutton");
+        entry_imap_password = (Gtk.Entry) builder.get_object("entry: imap password");
+        check_imap_remember_password = (Gtk.CheckButton) builder.get_object("check: imap remember_password");
+        entry_smtp_password = (Gtk.Entry) builder.get_object("entry: smtp password");
+        check_smtp_remember_password = (Gtk.CheckButton) builder.get_object("check: smtp remember_password");
         
         // Load non-editable widgets
-        Gtk.Label email_label = (Gtk.Label) builder.get_object("email_label");
-        Gtk.Label real_name_label = (Gtk.Label) builder.get_object("real_name_label");
-        Gtk.Label service_label = (Gtk.Label) builder.get_object("service_label");
-        Gtk.Label imap_server_label = (Gtk.Label) builder.get_object("imap_server_label");
-        Gtk.Label imap_port_label = (Gtk.Label) builder.get_object("imap_port_label");
-        Gtk.Label imap_encryption_label = (Gtk.Label) builder.get_object("imap_encryption_label");
-        Gtk.Label smtp_server_label = (Gtk.Label) builder.get_object("smtp_server_label");
-        Gtk.Label smtp_port_label = (Gtk.Label) builder.get_object("smtp_port_label");
-        Gtk.Label smtp_encryption_label = (Gtk.Label) builder.get_object("smtp_encryption_label");
+        Gtk.Label label_real_name = (Gtk.Label) builder.get_object("label: real_name");
+        Gtk.Label label_service = (Gtk.Label) builder.get_object("label: service");
+        
+        grid_imap = (Gtk.Grid) builder.get_object("grid: imap");
+        Gtk.Label label_imap_username = (Gtk.Label) builder.get_object("label: imap username");
+        Gtk.Label label_imap_server = (Gtk.Label) builder.get_object("label: imap server");
+        Gtk.Label label_imap_port = (Gtk.Label) builder.get_object("label: imap port");
+        Gtk.Label label_imap_encryption = (Gtk.Label) builder.get_object("label: imap encryption");
+        
+        grid_smtp = (Gtk.Grid) builder.get_object("grid: smtp");
+        Gtk.Label label_smtp_username = (Gtk.Label) builder.get_object("label: smtp username");
+        Gtk.Label label_smtp_server = (Gtk.Label) builder.get_object("label: smtp server");
+        Gtk.Label label_smtp_port = (Gtk.Label) builder.get_object("label: smtp port");
+        Gtk.Label label_smtp_encryption = (Gtk.Label) builder.get_object("label: smtp encryption");
         
         // Load translated text for labels with markup unsupported by glade.
         Gtk.Label primary_text_label = (Gtk.Label) builder.get_object("primary_text_label");
@@ -70,17 +85,23 @@ public class PasswordDialog {
         bool smtp_server_ssl= (smtp_endpoint.flags & Geary.Endpoint.Flags.SSL) != 0;
 
         // Load initial values
-        email_label.set_text(account_information.credentials.user ?? "");
-        password_entry.set_text(account_information.credentials.pass ?? "");
-        remember_password_checkbutton.active = account_information.remember_password;
-        real_name_label.set_text(account_information.real_name ?? "");
-        service_label.set_text(account_information.service_provider.display_name() ?? "");
-        imap_server_label.set_text(imap_server_host);
-        imap_port_label.set_text(imap_server_port.to_string());
-        imap_encryption_label.set_text(imap_server_ssl ? "on" : "off");
-        smtp_server_label.set_text(smtp_server_host);
-        smtp_port_label.set_text(smtp_server_port.to_string());
-        smtp_encryption_label.set_text(smtp_server_ssl ? "on" : "off");
+        // TODO: Use email, imap/smtp credentials, imap/smtp remember.
+        label_real_name.set_text(account_information.real_name ?? "");
+        label_service.set_text(account_information.service_provider.display_name() ?? "");
+        
+        label_imap_username.set_text(account_information.imap_credentials.user ?? "");
+        entry_imap_password.set_text(account_information.imap_credentials.pass ?? "");
+        check_imap_remember_password.active = account_information.imap_remember_password;
+        label_imap_server.set_text(imap_server_host);
+        label_imap_port.set_text(imap_server_port.to_string());
+        label_imap_encryption.set_text(imap_server_ssl ? "on" : "off");
+        
+        label_smtp_username.set_text(account_information.smtp_credentials.user ?? "");
+        entry_smtp_password.set_text(account_information.smtp_credentials.pass ?? "");
+        check_smtp_remember_password.active = account_information.smtp_remember_password;
+        label_smtp_server.set_text(smtp_server_host);
+        label_smtp_port.set_text(smtp_server_port.to_string());
+        label_smtp_encryption.set_text(smtp_server_ssl ? "on" : "off");
 
         // Add action buttons
         Gtk.Button cancel_button = new Gtk.Button.from_stock(Gtk.Stock.CANCEL);
@@ -92,7 +113,8 @@ public class PasswordDialog {
         
         // Setup listeners
         refresh_ok_button_sensitivity();
-        password_entry.changed.connect(refresh_ok_button_sensitivity);
+        entry_imap_password.changed.connect(refresh_ok_button_sensitivity);
+        entry_smtp_password.changed.connect(refresh_ok_button_sensitivity);
     }
     
     private string get_primary_text_markup(bool first_try) {
@@ -100,24 +122,31 @@ public class PasswordDialog {
     }
     
     private void refresh_ok_button_sensitivity() {
-        ok_button.sensitive = !Geary.String.is_null_or_whitespace(password_entry.get_text());
+        ok_button.sensitive = !Geary.String.is_empty_or_whitespace(entry_imap_password.get_text()) ||
+            !Geary.String.is_empty_or_whitespace(entry_smtp_password.get_text());
     }
     
     public bool run() {
         dialog.show();
         dialog.get_action_area().show_all();
         
-        Gtk.ResponseType response = (Gtk.ResponseType)dialog.run();
-        if (response != Gtk.ResponseType.OK) {
-            dialog.destroy();
-            return false;
+        if (!password_flags.has_imap())
+            grid_imap.hide();
+        
+        if (!password_flags.has_smtp())
+            grid_smtp.hide();
+        
+        Gtk.ResponseType response = (Gtk.ResponseType) dialog.run();
+        if (response == Gtk.ResponseType.OK) {
+            imap_password = entry_imap_password.get_text();
+            imap_remember_password = check_imap_remember_password.active;
+            smtp_password = entry_smtp_password.get_text();
+            smtp_remember_password = check_smtp_remember_password.active;
         }
         
-        password = password_entry.get_text();
-        remember_password = remember_password_checkbutton.active;
-        
         dialog.destroy();
-        return true;
+        
+        return (response == Gtk.ResponseType.OK);
     }
 }
 

@@ -56,30 +56,39 @@ public class Geary.Smtp.ClientConnection {
     public async Response authenticate_async(Authenticator authenticator, Cancellable? cancellable = null)
         throws Error {
         check_connected();
-
-        // Use STARTTLS if it has been explicitly enabled or if the server supports it and we are
-        // not using SSL encryption.
-        Response response;
-        if (endpoint.use_starttls || (!endpoint.is_ssl && capabilities.has_capability(Capabilities.STARTTLS))) {
-            response = yield transaction_async(new Request(Command.STARTTLS));
-            if (!response.code.is_starttls_ready()) {
-                throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
-            }
-
-            // TLS started, lets wrap the connection and shake hands.
-            TlsClientConnection tls_cx = TlsClientConnection.new(cx, socket_cx.get_remote_address());
-            cx = tls_cx;
-            tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
-            set_data_streams(tls_cx);
-            yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
-
-            // Now that we are on an encrypted line we need to say hello again in order to get the
-            // updated capabilities.
-            yield say_hello_async(cancellable);
+        
+        switch (endpoint.attempt_starttls(capabilities.has_capability(Capabilities.STARTTLS))) {
+            case Endpoint.AttemptStarttls.YES:
+                Response response = yield transaction_async(new Request(Command.STARTTLS));
+                if (!response.code.is_starttls_ready()) {
+                    throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
+                }
+                
+                // TLS started, lets wrap the connection and shake hands.
+                TlsClientConnection tls_cx = TlsClientConnection.new(cx, socket_cx.get_remote_address());
+                cx = tls_cx;
+                tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
+                set_data_streams(tls_cx);
+                yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
+                
+                // Now that we are on an encrypted line we need to say hello again in order to get the
+                // updated capabilities.
+                yield say_hello_async(cancellable);
+            break;
+            
+            case Endpoint.AttemptStarttls.NO:
+                // do nothing
+            break;
+            
+            case Endpoint.AttemptStarttls.HALT:
+            default:
+                throw new SmtpError.NOT_SUPPORTED("STARTTLS not available for %s", endpoint.to_string());
         }
-
-        response = yield transaction_async(authenticator.initiate(), cancellable);
-
+        
+        Response response = yield transaction_async(authenticator.initiate(), cancellable);
+        
+        debug("Initiating SMTP %s authentication", authenticator.to_string());
+        
         // Possible for initiate() Request to:
         // (a) immediately generate success (due to valid authentication being passed in Request);
         // (b) immediately fails;
@@ -92,14 +101,17 @@ public class Geary.Smtp.ClientConnection {
             uint8[]? data = authenticator.challenge(step++, response);
             if (data == null || data.length == 0)
                 data = DataFormat.CANCEL_AUTHENTICATION.data;
-
+            
+            Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Response: %s <%ldb>", to_string(),
+                data.length);
+            
             yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
             douts.put_string(DataFormat.LINE_TERMINATOR);
             yield douts.flush_async(Priority.DEFAULT, cancellable);
-
+            
             response = yield recv_response_async(cancellable);
         }
-
+        
         return response;
     }
 
@@ -120,6 +132,8 @@ public class Geary.Smtp.ClientConnection {
         if (!response.code.is_start_data())
             return response;
         
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%ldb>", data.length);
+        
         yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
         douts.put_string(DataFormat.DATA_TERMINATOR);
         yield douts.flush_async(Priority.DEFAULT, cancellable);
@@ -129,6 +143,8 @@ public class Geary.Smtp.ClientConnection {
     
     public async void send_request_async(Request request, Cancellable? cancellable = null) throws Error {
         check_connected();
+        
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Request: %s", to_string(), request.to_string());
         
         douts.put_string(request.serialize());
         douts.put_string(DataFormat.LINE_TERMINATOR);
@@ -150,12 +166,15 @@ public class Geary.Smtp.ClientConnection {
         // lines should never be empty; if it is, then somebody didn't throw an exception
         assert(lines.size > 0);
         
-        return new Response(lines);
+        Response response = new Response(lines);
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Response: %s", to_string(), response.to_string());
+        
+        return response;
     }
 
     public async Response say_hello_async(Cancellable? cancellable = null) throws Error {
         // try EHLO first, then fall back on HELO
-        Response response = yield transaction_async(new Request(Command.EHLO), cancellable);
+        Response response = yield transaction_async(new EhloRequest.for_endpoint(endpoint), cancellable);
         if (response.code.is_success_completed()) {
             // save list of caps returned in EHLO command, skipping first line because it's the 
             // EHLO response
@@ -165,10 +184,14 @@ public class Geary.Smtp.ClientConnection {
                     capabilities.add_capability(response.lines[ctr].explanation);
             }
         } else {
-            response = yield transaction_async(new Request(Command.HELO), cancellable);
-            if (!response.code.is_success_completed())
-                throw new SmtpError.SERVER_ERROR("Refused service: %s", response.to_string());
+            string first_response = response.to_string().strip();
+            response = yield transaction_async(new HeloRequest.for_endpoint(endpoint), cancellable);
+            if (!response.code.is_success_completed()) {
+                throw new SmtpError.SERVER_ERROR("Refused service: \"%s\" and \"%s\"", first_response,
+                    response.to_string().strip());
+            }
         }
+        
         return response;
     }
 
@@ -180,7 +203,7 @@ public class Geary.Smtp.ClientConnection {
     public async Response transaction_async(Request request, Cancellable? cancellable = null)
         throws Error {
         yield send_request_async(request, cancellable);
-
+        
         return yield recv_response_async(cancellable);
     }
     

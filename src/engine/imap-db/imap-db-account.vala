@@ -18,11 +18,6 @@ private class Geary.ImapDB.Account : Object {
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
     
-    // TODO: This should be updated when Geary no longer assumes username is email.
-    public string account_owner_email {
-        get { return settings.credentials.user; }
-    }
-    
     private string name;
     private AccountSettings settings;
     private ImapDB.Database? db = null;
@@ -34,7 +29,7 @@ private class Geary.ImapDB.Account : Object {
         this.settings = settings;
         contact_store = new ContactStore();
         
-        name = "IMAP database account for %s".printf(settings.credentials.user);
+        name = "IMAP database account for %s".printf(settings.imap_credentials.user);
     }
     
     private void check_open() throws Error {
@@ -47,7 +42,7 @@ private class Geary.ImapDB.Account : Object {
         if (db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
-        db = new ImapDB.Database(user_data_dir, schema_dir, account_owner_email);
+        db = new ImapDB.Database(user_data_dir, schema_dir, settings.email.address);
         
         try {
             db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE, null,
@@ -361,7 +356,7 @@ private class Geary.ImapDB.Account : Object {
         }
         
         // create folder
-        folder = new Geary.ImapDB.Folder(db, path, contact_store, account_owner_email, folder_id,
+        folder = new Geary.ImapDB.Folder(db, path, contact_store, settings.email.address, folder_id,
             properties);
         
         // build a reference to it

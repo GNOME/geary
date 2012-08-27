@@ -4,6 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+/**
+ * An Endpoint represents the location of an Internet TCP connection as represented by a host,
+ * a port, and flags and other parameters that specify the nature of the connection itself.
+ */
+
 public class Geary.Endpoint : Object {
     [Flags]
     public enum Flags {
@@ -19,6 +24,12 @@ public class Geary.Endpoint : Object {
         public inline bool is_any_set(Flags flags) {
             return (this & flags) != 0;
         }
+    }
+    
+    public enum AttemptStarttls {
+        YES,
+        NO,
+        HALT
     }
     
     public string host_specifier { get; private set; }
@@ -69,7 +80,27 @@ public class Geary.Endpoint : Object {
 
         return cx;
     }
-
+    
+    /**
+     * Returns true if a STARTTLS command should be attempted on the connection:
+     * (a) STARTTLS is reported available (a parameter specified by the caller to this method),
+     * (b) not using SSL (so TLS is not required), and (c) STARTTLS is specified as a flag on
+     * the Endpoint.
+     *
+     * If AttemptStarttls.HALT is returned, the caller should not proceed to pass any
+     * authentication information down the connection; this situation indicates the connection is
+     * insecure and the Endpoint is configured otherwise.
+     */
+    public AttemptStarttls attempt_starttls(bool starttls_available) {
+        if (is_ssl || !use_starttls)
+            return AttemptStarttls.NO;
+        
+        if (!starttls_available)
+            return AttemptStarttls.HALT;
+        
+        return AttemptStarttls.YES;
+    }
+    
     public string to_string() {
         return "%s/default:%u".printf(host_specifier, default_port);
     }

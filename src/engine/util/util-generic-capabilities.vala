@@ -5,22 +5,37 @@
  */
 
 public class Geary.GenericCapabilities : Object {
-    private Gee.ArrayList<string> list = new Gee.ArrayList<string>(String.stri_equal);
-    private Gee.HashMap<string, string?> map = new Gee.HashMap<string, string?>(
-        String.stri_hash, String.stri_equal);
+    public string separator { get; private set; }
+    
+    private Gee.HashMultiMap<string, string?> map = new Gee.HashMultiMap<string, string?>(
+        String.stri_hash, String.stri_equal, String.nullable_stri_hash, String.nullable_stri_equal);
     
     /**
      * Creates an empty set of capabilities.
      */
-    public GenericCapabilities(){
+    public GenericCapabilities(string separator) {
+        assert(!String.is_empty(separator));
+        
+        this.separator = separator;
     }
     
     public bool is_empty() {
-        return map.is_empty;
+        return (map.size == 0);
+    }
+    
+    public bool parse_and_add_capability(string text) {
+        string[] tokens = text.split(separator, 2);
+        if (tokens.length == 1)
+            add_capability(tokens[0]);
+        else if (tokens.length == 2)
+            add_capability(tokens[0], tokens[1]);
+        else
+            return false;
+        
+        return true;
     }
     
     public void add_capability(string name, string? setting = null) {
-        list.add(name);
         map.set(name, String.is_empty(setting) ? null : setting);
     }
     
@@ -28,7 +43,7 @@ public class Geary.GenericCapabilities : Object {
      * Returns true only if the capability was named as available by the server.
      */
     public bool has_capability(string name) {
-        return map.has_key(name);
+        return map.contains(name);
     }
     
     /**
@@ -36,40 +51,57 @@ public class Geary.GenericCapabilities : Object {
      * by the server.
      */
     public bool has_setting(string name, string? setting) {
-        if (!map.has_key(name)) {
+        if (!map.contains(name))
             return false;
-        } else if (String.is_empty(setting)) {
+        
+        if (String.is_empty(setting))
             return true;
-        } else {
-            string? stored_setting = map.get(name);
-            return !String.is_empty(stored_setting) && String.stri_equal(stored_setting, setting);
-        }
+        
+        return map.get(name).contains(setting);
     }
     
     /**
-     * Returns null if either the capability is available but has no associated setting, or if the
+     * Returns null if either the capability is available but has no associated settings, or if the
      * capability is not available.  Thus, use has_capability() to determine if available, then
      * this method to get its value (if one is expected).  Often has_setting() is a better choice.
      */
-    public string? get_setting(string name) {
-        return map.get(name);
+    public Gee.Collection<string>? get_settings(string name) {
+        Gee.Collection<string> settings = map.get(name);
+        
+        return (settings.size > 0) ? settings : null;
     }
     
-    public Gee.List<string> get_all_names() {
-        return list.read_only_view;
+    public Gee.Set<string>? get_all_names() {
+        Gee.Set<string> names = map.get_keys();
+        
+        return (names.size > 0) ? names : null;
+    }
+    
+    private void append(StringBuilder builder, string text) {
+        if (!String.is_empty(builder.str))
+            builder.append_c(' ');
+        
+        builder.append(text);
     }
     
     public virtual string to_string() {
+        Gee.Set<string>? names = get_all_names();
+        if (names == null || names.size == 0)
+            return "";
+        
         StringBuilder builder = new StringBuilder();
-        foreach (string name in list) {
-            if (!String.is_empty(builder.str))
-                builder.append_c(' ');
-            
-            string? setting = map.get(name);
-            if (String.is_empty(setting))
-                builder.append(name);
-            else
-                builder.append_printf("%s=%s", name, setting);
+        foreach (string name in names) {
+            Gee.Collection<string>? settings = get_settings(name);
+            if (settings == null || settings.size == 0) {
+                append(builder, name);
+            } else {
+                foreach (string setting in settings) {
+                    if (String.is_empty(setting))
+                        append(builder, name);
+                    else
+                        append(builder, "%s%s%s".printf(name, separator, setting));
+                }
+            }
         }
         
         return builder.str;

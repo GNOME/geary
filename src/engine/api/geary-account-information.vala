@@ -8,7 +8,10 @@ public class Geary.AccountInformation : Object {
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
-    private const string REMEMBER_PASSWORD_KEY = "remember_password";
+    private const string IMAP_USERNAME_KEY = "imap_username";
+    private const string IMAP_REMEMBER_PASSWORD_KEY = "imap_remember_password";
+    private const string SMTP_USERNAME_KEY = "smtp_username";
+    private const string SMTP_REMEMBER_PASSWORD_KEY = "smtp_remember_password";
     private const string IMAP_HOST = "imap_host";
     private const string IMAP_PORT = "imap_port";
     private const string IMAP_SSL = "imap_ssl";
@@ -21,9 +24,11 @@ public class Geary.AccountInformation : Object {
     
     public const string SETTINGS_FILENAME = "geary.ini";
     
-    internal File? settings_dir;
-    internal File? file = null;
+    internal File settings_dir;
+    internal File file;
+    
     public string real_name { get; set; }
+    public string email { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
     public bool imap_server_pipeline { get; set; default = true; }
 
@@ -37,17 +42,16 @@ public class Geary.AccountInformation : Object {
     public bool default_smtp_server_ssl  { get; set; }
     public bool default_smtp_server_starttls { get; set; }
 
-    public Geary.Credentials credentials { get; private set; }
-    public bool remember_password { get; set; default = true; }
+    public Geary.Credentials imap_credentials { get; set; default = new Geary.Credentials(null, null); }
+    public bool imap_remember_password { get; set; default = true; }
+    public Geary.Credentials smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
+    public bool smtp_remember_password { get; set; default = true; }
     
-    public AccountInformation(Geary.Credentials credentials) {
-        this.credentials = credentials;
-        
-        this.settings_dir = Geary.Engine.user_data_dir.get_child(credentials.user);
+    internal AccountInformation(File directory) {
+        this.email = directory.get_basename();
+        this.settings_dir = directory;
         this.file = settings_dir.get_child(SETTINGS_FILENAME);
-    }
-    
-    public void load_info_from_file() {
+        
         KeyFile key_file = new KeyFile();
         try {
             key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
@@ -57,9 +61,12 @@ public class Geary.AccountInformation : Object {
             // It's no big deal if we couldn't load the key file -- just means we give you the defaults.
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
-            remember_password = get_bool_value(key_file, GROUP, REMEMBER_PASSWORD_KEY, true);
+            imap_credentials.user = get_string_value(key_file, GROUP, IMAP_USERNAME_KEY, email);
+            imap_remember_password = get_bool_value(key_file, GROUP, IMAP_REMEMBER_PASSWORD_KEY, true);
+            smtp_credentials.user = get_string_value(key_file, GROUP, SMTP_USERNAME_KEY, email);
+            smtp_remember_password = get_bool_value(key_file, GROUP, SMTP_REMEMBER_PASSWORD_KEY, true);
             service_provider = Geary.ServiceProvider.from_string(get_string_value(key_file, GROUP,
-                SERVICE_PROVIDER_KEY));
+                SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
             
             imap_server_pipeline = get_bool_value(key_file, GROUP, IMAP_PIPELINE, true);
 
@@ -82,33 +89,55 @@ public class Geary.AccountInformation : Object {
     public async bool validate_async(Cancellable? cancellable = null) throws EngineError {
         AccountSettings settings = new AccountSettings(this);
         
-        Geary.Imap.ClientSession client_session = new Imap.ClientSession(settings.imap_endpoint, true);
+        // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
+        bool imap_valid = false;
+        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(settings.imap_endpoint, true);
         try {
-            yield client_session.connect_async(cancellable);
-            yield client_session.initiate_session_async(settings.credentials, cancellable);
+            yield imap_session.connect_async(cancellable);
+            yield imap_session.initiate_session_async(settings.imap_credentials, cancellable);
+            
+            // Connected and initiated, still need to be sure connection authorized
+            string current_mailbox;
+            if (imap_session.get_context(out current_mailbox) == Imap.ClientSession.Context.AUTHORIZED)
+                imap_valid = true;
         } catch (Error err) {
-            debug("Error validating account info: %s", err.message);
+            debug("Error validating IMAP account info: %s", err.message);
             
-            try {
-                yield client_session.disconnect_async(cancellable);
-            } catch (Error disconnect_err) {
-                // ignored
-            }
-            
-            return false;
+            // fall through so session can be disconnected
         }
         
-        // Connected and initiated, still need to be sure connection authorized
-        string current_mailbox;
-        bool valid = (client_session.get_context(out current_mailbox) == Imap.ClientSession.Context.AUTHORIZED);
-        
         try {
-            yield client_session.disconnect_async(cancellable);
+            yield imap_session.disconnect_async(cancellable);
         } catch (Error err) {
             // ignored
+        } finally {
+            imap_session = null;
         }
         
-        return valid;
+        if (!imap_valid)
+            return false;
+        
+        // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
+        bool smtp_valid = false;
+        Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(settings.smtp_endpoint);
+        try {
+            yield smtp_session.login_async(settings.smtp_credentials, cancellable);
+            smtp_valid = true;
+        } catch (Error err) {
+            debug("Error validating SMTP account info: %s", err.message);
+            
+            // fall through so session can be disconnected
+        }
+        
+        try {
+            yield smtp_session.logout_async(cancellable);
+        } catch (Error err) {
+            // ignored
+        } finally {
+            smtp_session = null;
+        }
+        
+        return smtp_valid;
     }
 
     public Endpoint get_imap_endpoint() throws EngineError {
@@ -159,23 +188,23 @@ public class Geary.AccountInformation : Object {
         }
     }
 
-    public Geary.EngineAccount get_account() throws EngineError {
+    public Geary.Account get_account() throws EngineError {
         AccountSettings settings = new AccountSettings(this);
         
         ImapDB.Account local_account = new ImapDB.Account(settings);
         Imap.Account remote_account = new Imap.Account(settings);
-
+        
         switch (service_provider) {
             case ServiceProvider.GMAIL:
-                return new ImapEngine.GmailAccount("Gmail account %s".printf(credentials.to_string()),
+                return new ImapEngine.GmailAccount("Gmail account %s".printf(email),
                     settings, remote_account, local_account);
             
             case ServiceProvider.YAHOO:
-                return new ImapEngine.YahooAccount("Yahoo account %s".printf(credentials.to_string()),
+                return new ImapEngine.YahooAccount("Yahoo account %s".printf(email),
                     settings, remote_account, local_account);
             
             case ServiceProvider.OTHER:
-                return new ImapEngine.OtherAccount("Other account %s".printf(credentials.to_string()),
+                return new ImapEngine.OtherAccount("Other account %s".printf(email),
                     settings, remote_account, local_account);
                 
             default:
@@ -184,34 +213,34 @@ public class Geary.AccountInformation : Object {
         }
     }
     
-    private string get_string_value(KeyFile key_file, string group, string key, string _default = "") {
-        string v = _default;
+    private string get_string_value(KeyFile key_file, string group, string key, string def = "") {
         try {
-            v = key_file.get_value(group, key);
+            return key_file.get_value(group, key);
         } catch(KeyFileError err) {
             // Ignore.
         }
-        return v;
+        
+        return def;
     }
     
-    private bool get_bool_value(KeyFile key_file, string group, string key, bool _default = false) {
-        bool v = _default;
+    private bool get_bool_value(KeyFile key_file, string group, string key, bool def = false) {
         try {
-            v = key_file.get_boolean(group, key);
+            return key_file.get_boolean(group, key);
         } catch(KeyFileError err) {
             // Ignore.
         }
-        return v;
+        
+        return def;
     }
     
-    private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 _default = 0) {
-        uint16 v = _default;
+    private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 def = 0) {
         try {
-            v = (uint16) key_file.get_integer(group, key);
+            return (uint16) key_file.get_integer(group, key);
         } catch(KeyFileError err) {
             // Ignore.
         }
-        return v;
+        
+        return def;
     }
     
     public async void store_async(Cancellable? cancellable = null) {
@@ -221,7 +250,7 @@ public class Geary.AccountInformation : Object {
             try {
                 settings_dir.make_directory_with_parents();
             } catch (Error err) {
-                error("Error creating settings directory for user '%s': %s", credentials.user,
+                error("Error creating settings directory for email '%s': %s", email,
                     err.message);
             }
         }
@@ -238,7 +267,10 @@ public class Geary.AccountInformation : Object {
         
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
-        key_file.set_boolean(GROUP, REMEMBER_PASSWORD_KEY, remember_password);
+        key_file.set_value(GROUP, IMAP_USERNAME_KEY, imap_credentials.user);
+        key_file.set_boolean(GROUP, IMAP_REMEMBER_PASSWORD_KEY, imap_remember_password);
+        key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
+        key_file.set_boolean(GROUP, SMTP_REMEMBER_PASSWORD_KEY, smtp_remember_password);
         
         key_file.set_boolean(GROUP, IMAP_PIPELINE, imap_server_pipeline);
 

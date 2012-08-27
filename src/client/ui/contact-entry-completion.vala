@@ -97,7 +97,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         Gee.List<string> addresses = get_addresses(sender, out current_address_index, null,
             out current_address_remainder);
         addresses[current_address_index] = full_address;
-        if (!Geary.String.is_null_or_whitespace(current_address_remainder))
+        if (!Geary.String.is_empty_or_whitespace(current_address_remainder))
             addresses.insert(current_address_index + 1, current_address_remainder);
         string delimiter = ", ";
         entry.text = concat_strings(addresses, delimiter);

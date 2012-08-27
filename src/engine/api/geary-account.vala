@@ -6,17 +6,22 @@
 
 public interface Geary.Account : Object {
     public enum Problem {
-        LOGIN_FAILED,
+        RECV_EMAIL_LOGIN_FAILED,
+        SEND_EMAIL_LOGIN_FAILED,
         HOST_UNREACHABLE,
         NETWORK_UNAVAILABLE,
         DATABASE_FAILURE
     }
     
+    public abstract Geary.AccountSettings settings { get; protected set; }
+    
     public signal void opened();
     
     public signal void closed();
     
-    public signal void report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
+    public signal void email_sent(Geary.RFC822.Message rfc822);
+    
+    public signal void report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
         Error? err);
     
     public signal void folders_added_removed(Gee.Collection<Geary.Folder>? added,
@@ -35,8 +40,13 @@ public interface Geary.Account : Object {
     /**
      * Signal notification method for subclasses to use.
      */
+    protected abstract void notify_email_sent(Geary.RFC822.Message rfc822);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
     protected abstract void notify_report_problem(Geary.Account.Problem problem,
-        Geary.Credentials? credentials, Error? err);
+        Geary.AccountSettings? settings, Error? err);
     
     /**
      * Signal notification method for subclasses to use.
@@ -93,6 +103,15 @@ public interface Geary.Account : Object {
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
     
+    /**
+     * Submits a ComposedEmail for delivery.  Messages may be scheduled for later delivery or immediately
+     * sent.  Subscribe to the "email-sent" signal to be notified of delivery.  Note that that signal
+     * does not return the ComposedEmail object but an RFC822-formatted object.  Allowing for the
+     * subscriber to attach some kind of token for later comparison is being considered.
+     */
+    public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
+        throws Error;
+
     /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */

@@ -26,5 +26,9 @@ public interface Geary.Smtp.Authenticator : Object {
      * server.  Generally this leaves the connection in a bad state and should be closed.
      */
     public abstract uint8[]? challenge(int step, Response response) throws SmtpError;
+    
+    public virtual string to_string() {
+        return get_name();
+    }
 }
 

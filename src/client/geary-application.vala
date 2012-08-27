@@ -70,7 +70,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     private static GearyApplication _instance = null;
     
     private GearyController? controller = null;
-    private Geary.EngineAccount? account = null;
+    private Geary.Account? account = null;
     
     private File exec_dir;
     
@@ -177,7 +177,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return;
     }
     
-    private void set_account(Geary.EngineAccount? account) {
+    private void set_account(Geary.Account? account) {
         if (this.account == account)
             return;
             
@@ -193,19 +193,22 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     private void initialize_account() {
-        string? username = get_username();
-        if (username == null)
-            create_account(username);
+        Geary.AccountInformation? account_information = get_account();
+        if (account_information == null)
+            create_account(null);
         else
-            open_account(username);
+            open_account(account_information.email, null, null, PasswordTypeFlag.IMAP | PasswordTypeFlag.SMTP, null);
     }
     
-    private void create_account(string? username) {
+    private void create_account(string? email) {
         Geary.AccountInformation? old_account_information = null;
-        if (username != null) {
-            Geary.Credentials credentials = new Geary.Credentials(username, null);
-            old_account_information = new Geary.AccountInformation(credentials);
-            old_account_information.load_info_from_file();
+        if (email != null) {
+            try {
+                old_account_information = Geary.Engine.get_account_for_email(email);
+            } catch (Error err) {
+                debug("Unable to open account information for %s, creating instead: %s", email,
+                    err.message);
+            }
         }
         
         Geary.AccountInformation account_information =
@@ -262,23 +265,31 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return new_account_information;
     }
     
-    private void open_account(string username, string? old_password = null, Cancellable? cancellable = null) {
-        Geary.Credentials credentials = new Geary.Credentials(username, null);
-        Geary.AccountInformation account_information = new Geary.AccountInformation(credentials);
-        account_information.load_info_from_file();
+    private void open_account(string email, string? old_imap_password, string? old_smtp_password,
+        PasswordTypeFlag password_flags, Cancellable? cancellable) {
+        Geary.AccountInformation account_information;
+        try {
+            account_information = Geary.Engine.get_account_for_email(email);
+        } catch (Error err) {
+            error("Unable to open account information for label %s: %s", email, err.message);
+        }
         
-        bool remember_password = account_information.remember_password;
-        string? password = get_password(account_information.credentials.user, old_password, ref remember_password);
-        // If there was no saved password and the user refused to enter a password.
-        if (password == null) {
+        bool imap_remember_password = account_information.imap_remember_password;
+        bool smtp_remember_password = account_information.smtp_remember_password;
+        string? imap_password, smtp_password;
+        get_passwords(account_information, password_flags, ref imap_remember_password,
+            ref smtp_remember_password, out imap_password, out smtp_password);
+        if (imap_password == null || smtp_password == null) {
             set_account(null);
             return;
         }
         
-        account_information.remember_password = remember_password;
+        account_information.imap_remember_password = imap_remember_password;
+        account_information.smtp_remember_password = smtp_remember_password;
         account_information.store_async.begin(cancellable);
         
-        account_information.credentials.pass = password;
+        account_information.imap_credentials.pass = imap_password;
+        account_information.smtp_credentials.pass = smtp_password;
         
         try {
             set_account(account_information.get_account());
@@ -290,29 +301,34 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
-    private string? get_username() {
+    private Geary.AccountInformation? get_account() {
         try {
-            Gee.List<string> usernames = Geary.Engine.get_usernames();
-            if (usernames.size > 0) {
-                string username = usernames.get(0);
-                return Geary.String.is_empty(username) ? null : username;
-            }
+            Gee.List<Geary.AccountInformation> accounts = Geary.Engine.get_accounts();
+            if (accounts.size > 0)
+                return accounts[0];
         } catch (Error e) {
-            debug("Unable to fetch accounts. Error: %s", e.message);
+            debug("Unable to fetch account labels: %s", e.message);
         }
         
         return null;
     }
     
-    private string? get_password(string username, string? old_password, ref bool remember_password) {
-        string? password = null;
-        if (old_password == null && remember_password)
-            password = keyring_get_password(username);
+    private void get_passwords(Geary.AccountInformation old_account_information,
+        PasswordTypeFlag password_flags, ref bool imap_remember_password,
+        ref bool smtp_remember_password, out string? imap_password, out string? smtp_password) {
+        imap_password = null;
+        if (!old_account_information.imap_credentials.is_complete() && imap_remember_password)
+            imap_password = keyring_get_password(old_account_information.imap_credentials.user, PasswordType.IMAP);
         
-        if (Geary.String.is_null_or_whitespace(password))
-            password = request_password(username, old_password, out remember_password);
+        smtp_password = null;
+        if (!old_account_information.smtp_credentials.is_complete() && smtp_remember_password)
+            smtp_password = keyring_get_password(old_account_information.smtp_credentials.user, PasswordType.SMTP);
         
-        return password;
+        if (Geary.String.is_empty_or_whitespace(imap_password) ||
+            Geary.String.is_empty_or_whitespace(smtp_password)) {
+            request_passwords(old_account_information, password_flags, out imap_password,
+                out smtp_password, out imap_remember_password, out smtp_remember_password);
+        }
     }
     
     private string get_default_real_name() {
@@ -320,30 +336,53 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return real_name == "Unknown" ? "" : real_name;
     }
     
-    private string? request_password(string username, string? old_password, out bool remember_password) {
-        Geary.Credentials credentials = new Geary.Credentials(username, old_password);
+    private void request_passwords(Geary.AccountInformation old_account_information,
+        PasswordTypeFlag password_flags, out string? imap_password, out string? smtp_password,
+        out bool imap_remember_password, out bool smtp_remember_password) {
+        Geary.AccountInformation temp_account_information;
+        try {
+            temp_account_information = Geary.Engine.get_account_for_email(old_account_information.email);
+        } catch (Error err) {
+            error("Unable to open account information for %s: %s", old_account_information.email,
+                err.message);
+        }
         
-        Geary.AccountInformation old_account_information = new Geary.AccountInformation(credentials);
-        old_account_information.load_info_from_file();
+        temp_account_information.imap_credentials = old_account_information.imap_credentials.copy();
+        temp_account_information.smtp_credentials = old_account_information.smtp_credentials.copy();
         
-        PasswordDialog password_dialog = new PasswordDialog(old_account_information, old_password == null);
+        bool first_try = !temp_account_information.imap_credentials.is_complete() ||
+            !temp_account_information.smtp_credentials.is_complete();
+        PasswordDialog password_dialog = new PasswordDialog(temp_account_information, first_try,
+            password_flags);
         if (!password_dialog.run()) {
             exit(1);
-            remember_password = false;
-            return null;
+            imap_password = null;
+            smtp_password = null;
+            imap_remember_password = false;
+            smtp_remember_password = false;
+            return;
         }
             
         // password_dialog.password should never be null at this point. It will only be null when
         // password_dialog.run() returns false, in which case we have already exited/returned.
-        string? password = password_dialog.password;
-        remember_password = password_dialog.remember_password;
+        imap_password = password_dialog.imap_password;
+        smtp_password = password_dialog.smtp_password;
+        imap_remember_password = password_dialog.imap_remember_password;
+        smtp_remember_password = password_dialog.smtp_remember_password;
         
-        if (remember_password)
-            keyring_save_password(new Geary.Credentials(username, password));
-        else
-            keyring_delete_password(username);
+        if (imap_remember_password) {
+            keyring_save_password(new Geary.Credentials(temp_account_information.imap_credentials.user,
+                imap_password), PasswordType.IMAP);
+        } else {
+            keyring_delete_password(temp_account_information.imap_credentials.user, PasswordType.IMAP);
+        }
         
-        return password;
+        if (smtp_remember_password) {
+            keyring_save_password(new Geary.Credentials(temp_account_information.smtp_credentials.user,
+                smtp_password), PasswordType.SMTP);
+        } else {
+            keyring_delete_password(temp_account_information.smtp_credentials.user, PasswordType.SMTP);
+        }
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
@@ -359,15 +398,26 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             return null;
         }
         
-        if (login_dialog.account_information.remember_password)
-            keyring_save_password(login_dialog.account_information.credentials);
-        else
-            keyring_delete_password(login_dialog.account_information.credentials.user);
-          
+        if (login_dialog.account_information.imap_remember_password) {
+            keyring_save_password(login_dialog.account_information.imap_credentials,
+                PasswordType.IMAP);
+        } else {
+            keyring_delete_password(login_dialog.account_information.imap_credentials.user,
+                PasswordType.IMAP);
+        }
+        
+        if (login_dialog.account_information.smtp_remember_password) {
+            keyring_save_password(login_dialog.account_information.smtp_credentials,
+                PasswordType.SMTP);
+        } else {
+            keyring_delete_password(login_dialog.account_information.smtp_credentials.user,
+                PasswordType.SMTP);
+        }
+        
         return login_dialog.account_information;  
     }
     
-    private void on_report_problem(Geary.Account.Problem problem, Geary.Credentials? credentials,
+    private void on_report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
         Error? err) {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
         switch (problem) {
@@ -377,11 +427,18 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
                 // TODO
             break;
             
-            case Geary.Account.Problem.LOGIN_FAILED:
-                debug("Login failed.");
-                Geary.Credentials old_credentials = account.settings.credentials;
+            // TODO: Different password dialog prompt for SMTP or IMAP login.
+            case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
                 account.report_problem.disconnect(on_report_problem);
-                open_account(old_credentials.user, old_credentials.pass);
+                open_account(account.settings.email.address, account.settings.imap_credentials.pass,
+                    account.settings.smtp_credentials.pass, PasswordTypeFlag.IMAP, null);
+            break;
+            
+            // TODO: Different password dialog prompt for SMTP or IMAP login.
+            case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
+                account.report_problem.disconnect(on_report_problem);
+                open_account(account.settings.email.address, account.settings.imap_credentials.pass,
+                    account.settings.smtp_credentials.pass, PasswordTypeFlag.SMTP, null);
             break;
             
             default:
