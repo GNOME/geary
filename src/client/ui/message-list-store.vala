@@ -287,17 +287,19 @@ public class MessageListStore : Gtk.ListStore {
             remove(iter);
     }
     
-    private void add_conversation(Geary.Conversation conversation) {
+    private bool add_conversation(Geary.Conversation conversation) {
         Geary.Email? last_email = conversation.get_latest_email();
         if (last_email == null)
-            return;
+            return false;
         
         if (has_conversation(conversation))
-            return;
+            return false;
         
         Gtk.TreeIter iter;
         append(out iter);
         set_row(iter, conversation, last_email);
+        
+        return true;
     }
     
     private void on_scan_completed(Geary.ConversationMonitor sender) {
@@ -316,10 +318,13 @@ public class MessageListStore : Gtk.ListStore {
         conversations_added_began();
         
         debug("Adding %d conversations.", conversations.size);
-        foreach (Geary.Conversation conversation in conversations)
-            add_conversation(conversation);
+        int added = 0;
+        foreach (Geary.Conversation conversation in conversations) {
+            if (add_conversation(conversation))
+                added++;
+        }
         int stage = ++conversations_added_counter;
-        debug("Added %d conversations. (%d)", conversations.size, stage);
+        debug("Added %d/%d conversations. (stage=%d)", added, conversations.size, stage);
         
         while (Gtk.events_pending()) {
             if (Gtk.main_iteration() || conversations_added_counter != stage)
