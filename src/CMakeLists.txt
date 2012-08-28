@@ -338,7 +338,7 @@ set(DBUSSERVICE_PACKAGES
     gee-1.0 glib-2.0
 )
 
-set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/src/client/misc)
+set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/desktop)
 
 set(CFLAGS 
     ${DEPS_CFLAGS}
@@ -408,12 +408,10 @@ add_custom_command(
 )
 
 # GSettings
-# This needs to be here and not in client/CMakeLists.txt in order for Geary to run in the build
+# This needs to be here and not in desktop/CMakeLists.txt in order for Geary to run in the build
 # directory
 include(GSettings)
 add_schemas(geary ${GSETTINGS_DIR})
-
-add_subdirectory(client)
 
 # Console app
 #################################################

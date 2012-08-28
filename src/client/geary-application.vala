@@ -484,7 +484,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public File? get_desktop_file() {
         File desktop_file = is_installed()
             ? File.new_for_path(INSTALL_PREFIX).get_child("share/applications/geary.desktop")
-            : File.new_for_path(SOURCE_ROOT_DIR).get_child("src/client/misc/geary.desktop");
+            : File.new_for_path(SOURCE_ROOT_DIR).get_child("desktop/geary.desktop");
         
         return desktop_file.query_exists() ? desktop_file : null;
     }

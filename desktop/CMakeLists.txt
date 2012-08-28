@@ -3,7 +3,7 @@
 #
 install(
     FILES
-        misc/geary.desktop
+        geary.desktop
     DESTINATION
         share/applications
 )

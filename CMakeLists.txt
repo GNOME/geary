@@ -42,6 +42,7 @@ add_subdirectory(sql)
 add_subdirectory(theming)
 add_subdirectory(ui)
 add_subdirectory(help)
+add_subdirectory(desktop)
 
 #
 # Uninstall target
