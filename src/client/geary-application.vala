@@ -482,15 +482,11 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public File? get_desktop_file() {
-        File desktop_file = get_resource_directory().get_child("geary.desktop");
-        if (desktop_file.query_exists())
-            return desktop_file;
+        File desktop_file = is_installed()
+            ? File.new_for_path(INSTALL_PREFIX).get_child("share/applications/geary.desktop")
+            : File.new_for_path(SOURCE_ROOT_DIR).get_child("src/client/misc/geary.desktop");
         
-        desktop_file = File.new_for_path("/usr/share/applications/geary.desktop");
-        if (!desktop_file.query_exists())
-            return desktop_file;
-        
-        return null;
+        return desktop_file.query_exists() ? desktop_file : null;
     }
     
     public bool is_installed() {
