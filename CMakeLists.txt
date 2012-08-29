@@ -35,6 +35,13 @@ if (DESKTOP_UPDATE)
     message(STATUS "Desktop database will be updated")
 endif ()
 
+# intl
+include(Gettext)
+if (XGETTEXT_FOUND)
+    message(STATUS "xgettext found")
+else ()
+    message(STATUS "xgettext not found")
+endif ()
 
 add_subdirectory(src)
 add_subdirectory(icons)

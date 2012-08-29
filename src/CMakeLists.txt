@@ -414,6 +414,14 @@ add_custom_command(
 include(GSettings)
 add_schemas(geary ${GSETTINGS_DIR})
 
+IF (XGETTEXT_FOUND)
+    GETTEXT_CREATE_POT(${GETTEXT_PACKAGE}.pot OPTION ${XGETTEXT_OPTIONS} SRC ${CLIENT_SRC} ${ENGINE_SRC} ${COMMON_SRC})
+    GETTEXT_CREATE_TRANSLATIONS(${GETTEXT_PACKAGE}.pot ALL ${TRANSLATED}
+	COMMENT "Creating translations.")
+ELSE ()
+    message(STATUS "xgettext not found")
+ENDIF()
+
 # Console app
 #################################################
 vala_precompile(CONSOLE_VALA_C geary-console

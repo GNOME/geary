@@ -32,9 +32,10 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
     string quoted = "";
     
     if (email.date != null) {
-        /// The datetime that a message being replied to was received.
+        /// The datetime that a message being replied to was received
         string DATE_LABEL = _("On %s, ");
-        /// Format for the datetime that a message being replied to was received.
+        /// Format for the datetime that a message being replied to was received
+        /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
         string DATE_FORMAT = _("%a, %b %-e, %Y at %-l:%M %p");
         quoted += DATE_LABEL.printf(email.date.value.format(DATE_FORMAT));
     }

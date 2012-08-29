@@ -728,6 +728,7 @@ public class GearyController {
             "website", GearyApplication.WEBSITE,
             "website-label", GearyApplication.WEBSITE_LABEL,
             "title", _("About %s").printf(GearyApplication.NAME),
+            /// Translator credit for the About dialog
             "translator-credits", _("translator-credits")
         );
     }
