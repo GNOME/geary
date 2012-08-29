@@ -74,7 +74,6 @@ public class GearyController {
     private Geary.Folder? current_folder = null;
     private Geary.Folder? inbox_folder = null;
     private Geary.ConversationMonitor? current_conversations = null;
-    private bool loading_local_only = true;
     private int busy_count = 0;
     private Gee.Set<Geary.Conversation> selected_conversations = new Gee.HashSet<Geary.Conversation>();
     private Geary.Conversation? last_deleted_conversation = null;
@@ -366,9 +365,6 @@ public class GearyController {
             yield current_folder.close_async();
         }
         
-        if (current_folder != null)
-            current_folder.opened.disconnect(on_current_folder_opened);
-        
         if (folder != null)
             debug("switching to %s", folder.to_string());
         
@@ -384,8 +380,6 @@ public class GearyController {
         
         update_ui();
         
-        current_folder.opened.connect(on_current_folder_opened);
-        
         current_conversations = new Geary.ConversationMonitor(current_folder, false,
             MessageListStore.REQUIRED_FIELDS);
         
@@ -399,23 +393,7 @@ public class GearyController {
         main_window.message_list_store.set_conversation_monitor(current_conversations);
         main_window.message_list_view.set_conversation_monitor(current_conversations);
         
-        yield current_conversations.start_monitoring_async(cancellable_folder);
-        
-        // Do a quick-list of the messages in the local store), followed by a complete list if needed
-        loading_local_only = true;
-        current_conversations.lazy_load(-1, -1, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable_folder);
-    }
-    
-    private void on_current_folder_opened(Geary.Folder.OpenState state, int count) {
-        // when BOTH (or only REMOTE) is opened and no conversations are available, seed the
-        // ConversationMonitor, as its possible to call Folder.list's variants while opening and
-        // only receive the local mail
-        if ((state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
-            && (current_conversations.get_conversation_count() == 0)) {
-            debug("Reseed of ConversationMonitor from opened folder %s", current_folder.to_string());
-            current_conversations.lazy_load(-1, FETCH_EMAIL_CHUNK_COUNT, Geary.Folder.ListFlags.NONE,
-                cancellable_folder);
-        }
+        yield current_conversations.start_monitoring_async(FETCH_EMAIL_CHUNK_COUNT, cancellable_folder);
     }
     
     private void on_scan_started() {

@@ -151,6 +151,7 @@ public class Geary.ConversationMonitor : Object {
     private Cancellable? cancellable_monitor = null;
     private bool retry_connection = false;
     private uint retry_id = 0;
+    private int min_window_count = 0;
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
@@ -329,19 +330,24 @@ public class Geary.ConversationMonitor : Object {
         return geary_id_map.get(email_id);
     }
     
-    public async bool start_monitoring_async(Cancellable? cancellable = null) throws Error {
+    public async bool start_monitoring_async(int min_window_count, Cancellable? cancellable = null)
+        throws Error {
         if (monitoring)
             return false;
         
         // set before yield to guard against reentrancy
         monitoring = true;
         
+        this.min_window_count = min_window_count;
         cancellable_monitor = cancellable;
+        
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
         folder.email_flags_changed.connect(on_folder_email_flags_changed);
+        folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
         
+        bool reseed_now = true;
         if (folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
             try {
                 yield folder.open_async(readonly, cancellable);
@@ -350,9 +356,20 @@ public class Geary.ConversationMonitor : Object {
                 
                 throw err;
             }
+            
+            reseed_now = false;
         }
         
         notify_monitoring_started();
+        
+        // pull in all the local email immediamente
+        debug("ConversationMonitor seeding with local email for %s", folder.to_string());
+        yield load_async(-1, -1, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+        
+        // if already opened, go ahead and do a full load now from remote and local; otherwise,
+        // the reseed has to wait until the folder's remote is opened (handled in on_folder_opened)
+        if (reseed_now)
+            reseed("already opened");
         
         return true;
     }
@@ -381,6 +398,7 @@ public class Geary.ConversationMonitor : Object {
         folder.email_appended.disconnect(on_folder_email_appended);
         folder.email_removed.disconnect(on_folder_email_removed);
         folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+        folder.opened.disconnect(on_folder_opened);
         folder.closed.disconnect(on_folder_closed);
         
         Error? close_err = null;
@@ -626,6 +644,35 @@ public class Geary.ConversationMonitor : Object {
         }
     }
     
+    private Geary.EmailIdentifier? get_earliest_id() {
+        Geary.EmailIdentifier? earliest_id = null;
+        foreach (Geary.EmailIdentifier email_id in geary_id_map.keys) {
+            if ((earliest_id == null) || (earliest_id.compare(email_id) > 0))
+                earliest_id = email_id;
+        }
+        
+        return earliest_id;
+    }
+    
+    private void reseed(string why) {
+        Geary.EmailIdentifier? earliest_id = get_earliest_id();
+        if (earliest_id != null) {
+            debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
+                earliest_id.to_string(), folder.to_string());
+            lazy_load_by_id(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+        } else {
+            debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
+                min_window_count, folder.to_string());
+            lazy_load(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+        }
+    }
+    
+    private void on_folder_opened(Geary.Folder.OpenState state, int count) {
+        // once remote is open, reseed with messages from the earliest ID to the latest
+        if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
+            reseed(state.to_string());
+    }
+    
     private void on_folder_closed(Folder.CloseReason reason) {
         debug("Folder %s close reason %s", folder.to_string(), reason.to_string());
         
@@ -669,7 +716,7 @@ public class Geary.ConversationMonitor : Object {
         // and not a hard error
         debug("Restarting conversation monitoring of folder %s...", folder.to_string());
         try {
-            if (!yield start_monitoring_async(cancellable_monitor))
+            if (!yield start_monitoring_async(min_window_count, cancellable_monitor))
                 debug("Unable to restart monitoring of %s: already monitoring", folder.to_string());
             else
                 debug("Reestablished connection to %s, continuing to monitor conversations",

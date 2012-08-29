@@ -35,7 +35,7 @@ public class Geary.DBus.Conversations : Object {
     
     private async void start_monitoring_async() {
         try {
-            yield conversations.start_monitoring_async();
+            yield conversations.start_monitoring_async(0);
         } catch (Error err) {
             debug("Unable to start monitoring %s for conversations: %s", folder.to_string(),
                 err.message);
