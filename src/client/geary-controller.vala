@@ -908,51 +908,87 @@ public class GearyController {
     private void on_open_attachment(Geary.Attachment attachment) {
         open_uri("file://" + attachment.filepath);
     }
-
+    
+    private bool do_overwrite_confirmation(File to_overwrite) {
+        string primary = _("A file named \"%s\" already exists.  Do you want to replace it?").printf(
+            to_overwrite.get_basename());
+        string secondary = _("The file already exists in \"%s\".  Replacing it will overwrite its contents.").printf(
+            to_overwrite.get_parent().get_basename());
+        Gtk.MessageDialog overwrite_dialog = new Gtk.MessageDialog(main_window,
+            Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.MessageType.WARNING,
+            Gtk.ButtonsType.NONE, "");
+        overwrite_dialog.set_markup("<span weight=\"bold\" size=\"larger\">%s</span>\n\n%s".printf(
+            primary, secondary));
+        overwrite_dialog.add_button(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL);
+        overwrite_dialog.add_button(_("_Replace"), Gtk.ResponseType.OK);
+        
+        bool overwrite = (overwrite_dialog.run() == Gtk.ResponseType.OK);
+        
+        overwrite_dialog.destroy();
+        
+        return overwrite;
+    }
+    
+    private Gtk.FileChooserConfirmation on_confirm_overwrite(Gtk.FileChooser chooser) {
+        // this is only called when choosing one file
+        return do_overwrite_confirmation(chooser.get_file()) ? Gtk.FileChooserConfirmation.ACCEPT_FILENAME
+            : Gtk.FileChooserConfirmation.SELECT_AGAIN;
+    }
+    
     private void on_save_attachments(Gee.List<Geary.Attachment> attachments) {
-        Gtk.FileChooserAction action = attachments.size == 1
+        if (attachments.size == 0)
+            return;
+        
+        Gtk.FileChooserAction action = (attachments.size == 1)
             ? Gtk.FileChooserAction.SAVE
             : Gtk.FileChooserAction.SELECT_FOLDER;
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
             Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.SAVE, Gtk.ResponseType.ACCEPT, null);
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
-        dialog.set_current_name(attachments[0].filename);
-        if (dialog.run() != Gtk.ResponseType.ACCEPT) {
-            dialog.destroy();
-            return;
-        }
-
-        // Get the selected location.
-        string filename = dialog.get_filename();
-        debug("Saving attachment to: %s", filename);
-
-        // Save the attachments.
-        // TODO Handle attachments with the same name being saved into the same directory.
-        File destination = File.new_for_path(filename);
-        last_save_directory = destination.get_parent();
         if (attachments.size == 1) {
-            File source = File.new_for_path(attachments[0].filepath);
-            source.copy_async.begin(destination, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
-                null, on_save_completed);
-        } else {
-            foreach (Geary.Attachment attachment in attachments) {
-                File dest_name = destination.get_child(attachment.filename);
-                File source = File.new_for_path(attachment.filepath);
-                debug("Saving %s to %s", source.get_path(), dest_name.get_path());
-                source.copy_async.begin(dest_name, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
-                    null, on_save_completed);
-            }
+            dialog.set_current_name(attachments[0].filename);
+            dialog.set_do_overwrite_confirmation(true);
+            // use custom overwrite confirmation so it looks consistent whether one or many
+            // attachments are being saved
+            dialog.confirm_overwrite.connect(on_confirm_overwrite);
         }
-
+        dialog.set_create_folders(true);
+        
+        bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
+        File destination = File.new_for_path(dialog.get_filename());
+        
         dialog.destroy();
+        
+        if (!accepted)
+            return;
+        
+        // Proceeding, save this as last destination directory
+        last_save_directory = (attachments.size == 1) ? destination.get_parent() : destination;
+        
+        debug("Saving attachments to %s", destination.get_path());
+        
+        // Save each one, checking for overwrite only if multiple attachments are being written
+        foreach (Geary.Attachment attachment in attachments) {
+            File source_file = File.new_for_path(attachment.filepath);
+            File dest_file = (attachments.size == 1) ? destination : destination.get_child(attachment.filename);
+            
+            if (attachments.size > 1 && dest_file.query_exists() && !do_overwrite_confirmation(dest_file))
+                return;
+            
+            debug("Copying %s to %s...", source_file.get_path(), dest_file.get_path());
+            
+            source_file.copy_async.begin(dest_file, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
+                null, on_save_completed);
+        }
     }
-
+    
     private void on_save_completed(Object? source, AsyncResult result) {
         try {
             ((File) source).copy_async.end(result);
         } catch (Error error) {
-            warning("Failed to copy attachment to destination: %s", error.message);
+            warning("Failed to copy attachment %s to destination: %s", ((File) source).get_path(),
+                error.message);
         }
     }
 
