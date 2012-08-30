@@ -13,11 +13,17 @@ extern const string _SOURCE_ROOT_DIR;
 public class GearyApplication : YorbaApplication {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
-    public const string DESCRIPTION = _("Email Client");
+    public const string DESCRIPTION = DESKTOP_GENERIC_NAME;
     public const string COPYRIGHT = _("Copyright 2011-2012 Yorba Foundation");
     public const string WEBSITE = "http://www.yorba.org";
     public const string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
+    
+    // These strings must match corresponding strings in desktop/geary.desktop *exactly* and be
+    // internationalizable
+    public const string DESKTOP_NAME = _("Geary");
+    public const string DESKTOP_GENERIC_NAME = _("Email Client");
+    public const string DESKTOP_COMMENT = _("Send and receive email");
     
     public const string VERSION = _VERSION;
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;

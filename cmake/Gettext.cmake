@@ -48,20 +48,21 @@
 
 FIND_PROGRAM(GETTEXT_MSGMERGE_EXECUTABLE msgmerge)
 FIND_PROGRAM(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
+FIND_PROGRAM(GETTEXT_MSGCAT_EXECUTABLE msgcat)
 FIND_PROGRAM(XGETTEXT_EXECUTABLE xgettext)
 
 SET(XGETTEXT_OPTIONS_DEFAULT
     --language=C --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2 -s
     --escape --add-comments="/" --package-name=${PROJECT_NAME} --package-version=${VERSION})
 
-IF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
+IF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE AND GETTEXT_MSGCAT_EXECUTABLE)
     SET(GETTEXT_FOUND TRUE)
 ELSE (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE)
     SET(GETTEXT_FOUND FALSE)
     IF (GetText_REQUIRED)
 	MESSAGE(FATAL_ERROR "GetText not found")
     ENDIF (GetText_REQUIRED)
-ENDIF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
+ENDIF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE AND GETTEXT_MSGCAT_EXECUTABLE)
 
 IF(XGETTEXT_EXECUTABLE)
     SET(XGETTEXT_FOUND TRUE)
@@ -79,22 +80,31 @@ IF(XGETTEXT_FOUND)
 	SET(_xgettext_options_list)
 	SET(_src_list)
 	SET(_src_list_abs)
+	SET(_glade_list)
+	SET(_glade_list_abs)
 	SET(_stage "SRC")
 	FOREACH(_pot_option ${_pot_options} ${ARGN})
-	    IF(_pot_option STREQUAL "OPTION")
-		SET(_stage "OPTION")
-	    ELSEIF(_pot_option STREQUAL "SRC")
-		SET(_stage "SRC")
-	    ELSE(_pot_option STREQUAL "OPTION")
-		IF(_stage STREQUAL "OPTION")
-		    SET(_xgettext_options_list ${_xgettext_options_list} ${_pot_option})
-		ELSE(_stage STREQUAL "OPTION")
-		    FILE(RELATIVE_PATH _relFile ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${_pot_option})
-		    GET_FILENAME_COMPONENT(_absFile ${_pot_option} ABSOLUTE)
-		    SET(_src_list ${_src_list} ${_relFile})
-		    SET(_src_list_abs ${_src_list_abs} ${_absFile})
-		ENDIF(_stage STREQUAL "OPTION")
-	    ENDIF(_pot_option STREQUAL "OPTION")
+		IF(_pot_option STREQUAL "OPTION")
+			SET(_stage "OPTION")
+		ELSEIF(_pot_option STREQUAL "SRC")
+			SET(_stage "SRC")
+		ELSEIF(_pot_option STREQUAL "GLADE")
+			SET(_stage "GLADE")
+		ELSE(_pot_option STREQUAL "OPTION")
+			IF(_stage STREQUAL "OPTION")
+				SET(_xgettext_options_list ${_xgettext_options_list} ${_pot_option})
+			ELSEIF(_stage STREQUAL "GLADE")
+				FILE(RELATIVE_PATH _relFile ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/${_pot_option})
+				GET_FILENAME_COMPONENT(_absFile ${_pot_option} ABSOLUTE)
+				SET(_glade_list ${_glade_list} ${_relFile})
+				SET(_glade_list_abs ${_glade_list_abs} ${_absFile})
+			ELSEIF(_stage STREQUAL "SRC")
+				FILE(RELATIVE_PATH _relFile ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${_pot_option})
+				GET_FILENAME_COMPONENT(_absFile ${_pot_option} ABSOLUTE)
+				SET(_src_list ${_src_list} ${_relFile})
+				SET(_src_list_abs ${_src_list_abs} ${_absFile})
+			ENDIF(_stage STREQUAL "OPTION")
+		ENDIF(_pot_option STREQUAL "OPTION")
 	ENDFOREACH(_pot_option ${_pot_options} ${ARGN})
 
 	IF (_xgettext_options_list)
@@ -106,12 +116,14 @@ IF(XGETTEXT_FOUND)
 	#MESSAGE("${XGETTEXT_EXECUTABLE} ${_xgettext_options_list} -o ${_potFile} ${_src_list}")
 	ADD_CUSTOM_COMMAND(OUTPUT pot_file
 	    COMMAND ${XGETTEXT_EXECUTABLE} ${_xgettext_options} -o ${_potFile} ${_src_list}
-	    DEPENDS ${_src_list_abs}
+	    DEPENDS ${_src_list_abs} ${GLADE_FILES}
 	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	    )
 
 	ADD_CUSTOM_TARGET(pot_file
-	    COMMAND ${XGETTEXT_EXECUTABLE} ${_xgettext_options_list} -o ${_potFile} ${_src_list}
+	    COMMAND ${XGETTEXT_EXECUTABLE} ${_xgettext_options_list} -o _source.pot ${_src_list}
+	    COMMAND ${XGETTEXT_EXECUTABLE} --language=Glade --omit-header -o _glade.pot ${_glade_list}
+	    COMMAND ${GETTEXT_MSGCAT_EXECUTABLE} -o ${_potFile} --use-first _source.pot _glade.pot
 	    DEPENDS ${_src_list_abs}
 	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	    COMMENT "Extract translatable messages to ${_potFile}"
