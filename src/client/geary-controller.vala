@@ -1178,8 +1178,7 @@ public class GearyController {
     }
 
     private void on_link_selected(string link) {
-        const string MAILTO = "mailto:";
-        if (link.down().has_prefix(MAILTO)) {
+        if (link.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
             compose_mailto(link);
         } else {
             open_uri(link);

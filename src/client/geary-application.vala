@@ -121,7 +121,20 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             stdout.printf("\n%s", context.get_help(true, Gtk.get_option_group(false)));
             return 1;
         }
-
+        
+        // other than the OptionEntry command-line arguments, the only acceptable arguments are
+        // mailto:'s
+        for (int ctr = 1; ctr < args.length; ctr++) {
+            string arg = args[ctr];
+            
+            if (!arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                stdout.printf(_("Unrecognized command line option \"%s\"\n").printf(arg));
+                stdout.printf("\n%s", context.get_help(true, Gtk.get_option_group(false)));
+                
+                return 1;
+            }
+        }
+        
         if (version) {
             stdout.printf("%s %s\n\n%s\n\n%s\n\t%s\n",
                 PRGNAME, VERSION, COPYRIGHT,
@@ -553,7 +566,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
 
     private void handle_args(string[] args) {
         foreach(string arg in args) {
-            if (arg.has_prefix("mailto:")) {
+            if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
                 controller.compose_mailto(arg);
             }
         }

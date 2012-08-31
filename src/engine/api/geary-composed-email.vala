@@ -5,6 +5,8 @@
  */
 
 public class Geary.ComposedEmail : Object {
+    public const string MAILTO_SCHEME = "mailto:";
+    
     public const Geary.Email.Field REQUIRED_REPLY_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
@@ -91,9 +93,9 @@ public class Geary.ComposedEmail : Object {
         RFC822.Subject? subject = null;
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
-        if (mailto.length > "mailto:".length) {
+        if (mailto.length > MAILTO_SCHEME.length) {
             // Parse the mailto link.
-            string[] parts = mailto.substring("mailto:".length).split("?", 2);
+            string[] parts = mailto.substring(MAILTO_SCHEME.length).split("?", 2);
             string email = Uri.unescape_string(parts[0]);
             string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
             foreach (string param in params) {

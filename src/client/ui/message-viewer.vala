@@ -27,8 +27,6 @@ public class MessageViewer : Object {
         "data:"
     };
     
-    private const string MAILTO_SCHEME = "mailto:";
-    
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
     
@@ -1442,8 +1440,8 @@ public class MessageViewer : Object {
     private void on_copy_email_address() {
         // Put the current email address in clipboard.
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        if (hover_url.has_prefix(MAILTO_SCHEME))
-            clipboard.set_text(hover_url.substring(MAILTO_SCHEME.length, -1), -1);
+        if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
+            clipboard.set_text(hover_url.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1), -1);
         else
             clipboard.set_text(hover_url, -1);
         clipboard.store();
