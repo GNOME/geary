@@ -498,26 +498,39 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_add_attachment_button_clicked() {
-        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
-            _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
-            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-            Gtk.Stock.OPEN, Gtk.ResponseType.ACCEPT);
-        
-        if (dialog.run() == Gtk.ResponseType.ACCEPT)
-            add_attachment(dialog.get_file());
-        
-        dialog.destroy();
+        bool finished = false;
+        do {
+            Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
+                _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
+                Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+                _("_Attach"), Gtk.ResponseType.ACCEPT);
+            
+            if (dialog.run() == Gtk.ResponseType.ACCEPT)
+                finished = add_attachment(dialog.get_file());
+            else
+                finished = true;
+            
+            dialog.destroy();
+        } while (!finished);
     }
     
-    public void add_attachment(File attachment_file) {
+    private void attachment_failed(string msg) {
+        ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.get_main_window(),
+            _("Cannot add attachment"), msg);
+        dialog.run();
+    }
+    
+    private bool add_attachment(File attachment_file) {
         if (!attachment_file.query_exists()) {
-            debug("File '%s' does not exist", attachment_file.get_path());
-            return;
+            attachment_failed(_("\"%s\" does not exist").printf(attachment_file.get_path()));
+            
+            return false;
         }
         
         if (attachment_file.query_file_type(FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
-            debug("File '%s' is a directory", attachment_file.get_path());
-            return;
+            attachment_failed(_("\"%s\" is a folder").printf(attachment_file.get_path()));
+            
+            return false;
         }
         
         try {
@@ -527,11 +540,17 @@ public class ComposerWindow : Gtk.Window {
         } catch(Error e) {
             debug("File '%s' could not be opened for reading. Error: %s", attachment_file.get_path(),
                 e.message);
-            return;
+            
+            attachment_failed(_("\"%s\" could not be opened for reading").printf(attachment_file.get_path()));
+            
+            return false;
         }
         
-        if (!attachment_files.add(attachment_file))
-            return;
+        if (!attachment_files.add(attachment_file)) {
+            attachment_failed(_("\"%s\" already attached for delivery").printf(attachment_file.get_path()));
+            
+            return false;
+        }
         
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
         attachments_box.pack_start(box);
@@ -547,6 +566,8 @@ public class ComposerWindow : Gtk.Window {
         
         refresh_add_attachment_button_label();
         attachments_box.show_all();
+        
+        return true;
     }
     
     private void remove_attachment(File file, Gtk.Box box) {

@@ -230,6 +230,7 @@ client/ui/sidebar/sidebar-common.vala
 client/ui/sidebar/sidebar-entry.vala
 client/ui/sidebar/sidebar-tree.vala
 
+client/util/util-dialog.vala
 client/util/util-email.vala
 client/util/util-gravatar.vala
 client/util/util-keyring.vala

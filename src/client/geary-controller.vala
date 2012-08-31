@@ -915,19 +915,10 @@ public class GearyController {
             to_overwrite.get_basename());
         string secondary = _("The file already exists in \"%s\".  Replacing it will overwrite its contents.").printf(
             to_overwrite.get_parent().get_basename());
-        Gtk.MessageDialog overwrite_dialog = new Gtk.MessageDialog(main_window,
-            Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.MessageType.WARNING,
-            Gtk.ButtonsType.NONE, "");
-        overwrite_dialog.set_markup("<span weight=\"bold\" size=\"larger\">%s</span>\n\n%s".printf(
-            primary, secondary));
-        overwrite_dialog.add_button(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL);
-        overwrite_dialog.add_button(_("_Replace"), Gtk.ResponseType.OK);
         
-        bool overwrite = (overwrite_dialog.run() == Gtk.ResponseType.OK);
+        ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"));
         
-        overwrite_dialog.destroy();
-        
-        return overwrite;
+        return (dialog.run() == Gtk.ResponseType.OK);
     }
     
     private Gtk.FileChooserConfirmation on_confirm_overwrite(Gtk.FileChooser chooser) {
