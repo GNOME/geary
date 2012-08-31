@@ -107,11 +107,12 @@ public class FormattedMessageData : Object {
         string subject_string = email.get_subject_as_string();
         try {
             Regex subject_regex = new Regex("^(?i:Re:\\s*)+");
-            return subject_regex.replace(subject_string, -1, 0, "");
+            subject_string = subject_regex.replace(subject_string, -1, 0, "");
         } catch (RegexError e) {
-            debug("Failed to clean up subject line: %s", e.message);
-            return subject_string;
+            debug("Failed to clean up subject line \"%s\": %s", subject_string, e.message);
         }
+        
+        return !Geary.String.is_empty_or_whitespace(subject_string) ? subject_string : _("(no subject)");
     }
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
