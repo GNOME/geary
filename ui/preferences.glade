@@ -177,7 +177,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="play_sounds">
-                <property name="label" translatable="yes">Play notification sounds</property>
+                <property name="label" translatable="yes">_Play notification sounds</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -200,7 +200,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="show_notifications">
-                <property name="label" translatable="yes">Show notifications for new mail</property>
+                <property name="label" translatable="yes">Show _notifications for new mail</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
