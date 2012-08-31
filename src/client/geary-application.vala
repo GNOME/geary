@@ -405,35 +405,44 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
-    private Geary.AccountInformation? request_account_information(
-        Geary.AccountInformation? old_account_information = null) {
-        LoginDialog login_dialog = old_account_information == null ?
-            new LoginDialog(get_default_real_name()) :
-            new LoginDialog.from_account_information(old_account_information);
-        
-        if (!login_dialog.show()) {
-            debug("User refused to enter account information. Exiting...");
-            exit(1);
-            return null;
+    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info) {
+        Geary.AccountInformation? new_info = old_info;
+        for (;;) {
+            LoginDialog login_dialog = (new_info == null) ? new LoginDialog(get_default_real_name())
+                : new LoginDialog.from_account_information(new_info);
+            
+            if (!login_dialog.show()) {
+                debug("User refused to enter account information. Exiting...");
+                exit(1);
+                return null;
+            }
+            
+            new_info = login_dialog.account_information;
+            
+            if ((!new_info.default_imap_server_ssl && !new_info.default_imap_server_starttls)
+                || (!new_info.default_smtp_server_ssl && !new_info.default_smtp_server_starttls)) {
+                ConfirmationDialog security_dialog = new ConfirmationDialog(controller.main_window,
+                    _("Your settings are insecure"),
+                    _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),
+                    _("Co_ntinue"));
+                if (security_dialog.run() != Gtk.ResponseType.OK)
+                    continue;
+            }
+            
+            break;
         }
         
-        if (login_dialog.account_information.imap_remember_password) {
-            keyring_save_password(login_dialog.account_information.imap_credentials,
-                PasswordType.IMAP);
-        } else {
-            keyring_delete_password(login_dialog.account_information.imap_credentials.user,
-                PasswordType.IMAP);
-        }
+        if (new_info.imap_remember_password)
+            keyring_save_password(new_info.imap_credentials, PasswordType.IMAP);
+        else
+            keyring_delete_password(new_info.imap_credentials.user, PasswordType.IMAP);
         
-        if (login_dialog.account_information.smtp_remember_password) {
-            keyring_save_password(login_dialog.account_information.smtp_credentials,
-                PasswordType.SMTP);
-        } else {
-            keyring_delete_password(login_dialog.account_information.smtp_credentials.user,
-                PasswordType.SMTP);
-        }
+        if (new_info.smtp_remember_password)
+            keyring_save_password(new_info.smtp_credentials, PasswordType.SMTP);
+        else
+            keyring_delete_password(new_info.smtp_credentials.user, PasswordType.SMTP);
         
-        return login_dialog.account_information;  
+        return new_info;
     }
     
     private void on_report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
