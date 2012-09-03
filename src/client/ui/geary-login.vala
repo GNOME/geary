@@ -6,6 +6,13 @@
 
 // Displays a dialog for collecting the user's login data.
 public class LoginDialog {
+    // these are tied to the values in the Glade file
+    private enum Encryption {
+        NONE = 0,
+        SSL = 1,
+        STARTTLS = 2
+    }
+    
     private Gtk.Dialog dialog;
     private Gtk.Entry entry_email;
     private Gtk.Label label_password;
@@ -22,9 +29,7 @@ public class LoginDialog {
     private Gtk.Entry entry_imap_username;
     private Gtk.Entry entry_imap_password;
     private Gtk.CheckButton check_imap_remember_password;
-    private Gtk.RadioButton radio_imap_none;
-    private Gtk.RadioButton radio_imap_ssl;
-    private Gtk.RadioButton radio_imap_starttls;
+    private Gtk.ComboBox combo_imap_encryption;
     
     // SMTP info widgets
     private Gtk.Entry entry_smtp_host;
@@ -32,9 +37,7 @@ public class LoginDialog {
     private Gtk.Entry entry_smtp_username;
     private Gtk.Entry entry_smtp_password;
     private Gtk.CheckButton check_smtp_remember_password;
-    private Gtk.RadioButton radio_smtp_none;
-    private Gtk.RadioButton radio_smtp_ssl;
-    private Gtk.RadioButton radio_smtp_starttls;
+    private Gtk.ComboBox combo_smtp_encryption;
     
     private Gtk.Button ok_button;
     
@@ -104,9 +107,7 @@ public class LoginDialog {
         entry_imap_username = builder.get_object("entry: imap username") as Gtk.Entry;
         entry_imap_password = builder.get_object("entry: imap password") as Gtk.Entry;
         check_imap_remember_password = builder.get_object("check: imap remember_password") as Gtk.CheckButton;
-        radio_imap_none = builder.get_object("radio: imap none") as Gtk.RadioButton;
-        radio_imap_ssl = builder.get_object("radio: imap ssl") as Gtk.RadioButton;
-        radio_imap_starttls = builder.get_object("radio: imap starttls") as Gtk.RadioButton;
+        combo_imap_encryption = builder.get_object("combo: imap encryption") as Gtk.ComboBox;
         
         // SMTP info widgets.
         entry_smtp_host = builder.get_object("entry: smtp host") as Gtk.Entry;
@@ -114,9 +115,7 @@ public class LoginDialog {
         entry_smtp_username = builder.get_object("entry: smtp username") as Gtk.Entry;
         entry_smtp_password = builder.get_object("entry: smtp password") as Gtk.Entry;
         check_smtp_remember_password = builder.get_object("check: smtp remember_password") as Gtk.CheckButton;
-        radio_smtp_none = builder.get_object("radio: smtp none") as Gtk.RadioButton;
-        radio_smtp_ssl = builder.get_object("radio: smtp ssl") as Gtk.RadioButton;
-        radio_smtp_starttls = builder.get_object("radio: smtp starttls") as Gtk.RadioButton;
+        combo_smtp_encryption = builder.get_object("combo: smtp encryption") as Gtk.ComboBox;
         
         combo_service.changed.connect(on_service_changed);
         
@@ -143,9 +142,12 @@ public class LoginDialog {
         entry_imap_username.set_text(initial_imap_username ?? "");
         entry_imap_password.set_text(initial_imap_password ?? "");
         check_imap_remember_password.active = initial_imap_remember_password;
-        radio_imap_none.active = true;
-        radio_imap_ssl.active = initial_default_imap_ssl;
-        radio_imap_starttls.active = initial_default_imap_starttls;
+        if (initial_default_imap_ssl)
+            combo_imap_encryption.active = Encryption.SSL;
+        else if (initial_default_imap_starttls)
+            combo_imap_encryption.active = Encryption.STARTTLS;
+        else
+            combo_imap_encryption.active = Encryption.NONE;
         
         // Set defaults for SMTP info
         entry_smtp_host.set_text(initial_default_smtp_host ?? "");
@@ -153,9 +155,12 @@ public class LoginDialog {
         entry_smtp_username.set_text(initial_smtp_username ?? "");
         entry_smtp_password.set_text(initial_smtp_password ?? "");
         check_smtp_remember_password.active = initial_smtp_remember_password;
-        radio_smtp_none.active = true;
-        radio_smtp_ssl.active = initial_default_smtp_ssl;
-        radio_smtp_starttls.active = initial_default_smtp_starttls;
+        if (initial_default_smtp_ssl)
+            combo_smtp_encryption.active = Encryption.SSL;
+        else if (initial_default_smtp_starttls)
+            combo_smtp_encryption.active = Encryption.STARTTLS;
+        else
+            combo_smtp_encryption.active = Encryption.NONE;
         
         if (Geary.String.is_empty(entry_real_name.text))
             entry_real_name.grab_focus();
@@ -180,13 +185,8 @@ public class LoginDialog {
         entry_password.changed.connect(on_password_changed);
         check_remember_password.toggled.connect(on_remember_password_toggled);
         
-        radio_imap_none.toggled.connect(on_radio_imap_toggled);
-        radio_imap_ssl.toggled.connect(on_radio_imap_toggled);
-        radio_imap_starttls.toggled.connect(on_radio_imap_toggled);
-        
-        radio_smtp_none.toggled.connect(on_radio_smtp_toggled);
-        radio_smtp_ssl.toggled.connect(on_radio_smtp_toggled);
-        radio_smtp_starttls.toggled.connect(on_radio_smtp_toggled);
+        combo_imap_encryption.changed.connect(on_imap_encryption_changed);
+        combo_smtp_encryption.changed.connect(on_smtp_encryption_changed);
         
         entry_imap_port.insert_text.connect(on_port_insert_text);
         entry_smtp_port.insert_text.connect(on_port_insert_text);
@@ -240,12 +240,12 @@ public class LoginDialog {
         account_information.service_provider = get_service_provider();
         account_information.default_imap_server_host = entry_imap_host.text.strip();
         account_information.default_imap_server_port = (uint16) int.parse(entry_imap_port.text.strip());
-        account_information.default_imap_server_ssl = radio_imap_ssl.active;
-        account_information.default_imap_server_starttls = radio_imap_starttls.active;
+        account_information.default_imap_server_ssl = (combo_imap_encryption.active == Encryption.SSL);
+        account_information.default_imap_server_starttls = (combo_imap_encryption.active == Encryption.STARTTLS);
         account_information.default_smtp_server_host = entry_smtp_host.text.strip();
         account_information.default_smtp_server_port = (uint16) int.parse(entry_smtp_port.text.strip());
-        account_information.default_smtp_server_ssl = radio_smtp_ssl.active;
-        account_information.default_smtp_server_starttls = radio_smtp_starttls.active;
+        account_information.default_smtp_server_ssl = (combo_smtp_encryption.active == Encryption.SSL);
+        account_information.default_smtp_server_starttls = (combo_smtp_encryption.active == Encryption.STARTTLS);
         
         on_changed();
         
@@ -302,7 +302,7 @@ public class LoginDialog {
         }
     }
     
-    private void on_radio_imap_toggled() {
+    private void on_imap_encryption_changed() {
         if (edited_imap_port)
             return;
         
@@ -311,15 +311,18 @@ public class LoginDialog {
     }
     
     private uint16 get_default_imap_port() {
-        if (radio_imap_ssl.active)
-            return Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
-        if (radio_imap_starttls.active)
-            return Geary.Imap.ClientConnection.DEFAULT_PORT;
-        
-        return Geary.Imap.ClientConnection.DEFAULT_PORT;
+        switch (combo_imap_encryption.active) {
+            case Encryption.SSL:
+                return Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
+            
+            case Encryption.NONE:
+            case Encryption.STARTTLS:
+            default:
+                return Geary.Imap.ClientConnection.DEFAULT_PORT;
+        }
     }
     
-    private void on_radio_smtp_toggled() {
+    private void on_smtp_encryption_changed() {
         if (edited_smtp_port)
             return;
         
@@ -328,12 +331,17 @@ public class LoginDialog {
     }
     
     private uint16 get_default_smtp_port() {
-        if (radio_smtp_ssl.active)
-            return Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
-        if (radio_smtp_starttls.active)
-            return Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
-        
-        return Geary.Smtp.ClientConnection.DEFAULT_PORT;
+        switch (combo_smtp_encryption.active) {
+            case Encryption.SSL:
+                return Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
+            
+            case Encryption.STARTTLS:
+                return Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
+            
+            case Encryption.NONE:
+            default:
+                return Geary.Smtp.ClientConnection.DEFAULT_PORT;
+        }
     }
     
     private Geary.ServiceProvider get_service_provider() {
