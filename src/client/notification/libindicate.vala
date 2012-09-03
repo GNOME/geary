@@ -6,17 +6,12 @@
 
 public class Libindicate : NewMessagesIndicator {
 #if HAVE_LIBINDICATE
-    private Indicate.Server indicator;
-    private Indicate.Indicator compose;
-    private Indicate.Indicator inbox;
+    private Indicate.Server? indicator = null;
+    private Indicate.Indicator? compose = null;
+    private Indicate.Indicator? inbox = null;
     
     public Libindicate(NewMessagesMonitor monitor) {
         base (monitor);
-        
-        debug("Using libindicate for messaging menu support");
-        
-        indicator = Indicate.Server.ref_default();
-        indicator.set_type("message.email");
         
         // Find the desktop file this app instance is using (running from build dir vs. install dir)
         File? desktop_file = GearyApplication.instance.get_desktop_file();
@@ -26,6 +21,10 @@ public class Libindicate : NewMessagesIndicator {
             return;
         }
         
+        debug("Using libindicate for messaging menu support w/ .desktop file %s", desktop_file.get_path());
+        
+        indicator = Indicate.Server.ref_default();
+        indicator.set_type("message.email");
         indicator.set_desktop_file(desktop_file.get_path());
         indicator.server_display.connect(on_display_server);
         

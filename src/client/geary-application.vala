@@ -21,8 +21,8 @@ public class GearyApplication : YorbaApplication {
     
     // These strings must match corresponding strings in desktop/geary.desktop *exactly* and be
     // internationalizable
-    public const string DESKTOP_NAME = _("Geary");
-    public const string DESKTOP_GENERIC_NAME = _("Email Client");
+    public const string DESKTOP_NAME = _("Geary Mail");
+    public const string DESKTOP_GENERIC_NAME = _("Mail Client");
     public const string DESKTOP_COMMENT = _("Send and receive email");
     
     public const string VERSION = _VERSION;
@@ -511,7 +511,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public File? get_desktop_file() {
         File desktop_file = is_installed()
-            ? File.new_for_path(INSTALL_PREFIX).get_child("share/applications/geary.desktop")
+            ? File.new_for_path("/usr/share/applications/geary.desktop")
             : File.new_for_path(SOURCE_ROOT_DIR).get_child("desktop/geary.desktop");
         
         return desktop_file.query_exists() ? desktop_file : null;

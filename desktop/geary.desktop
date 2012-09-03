@@ -1,13 +1,13 @@
-# See src/client/geary-application.vala for corresponding strings in the application
 [Desktop Entry]
-Icon=geary
-Name=Geary
-GenericName=Email Client
+Encoding=UTF-8
+Name=Geary Mail
+GenericName=Mail Client
 Comment=Send and receive email
+Icon=geary
 TryExec=geary
 Exec=geary %U
 Type=Application
 Terminal=false
 Categories=GNOME;GTK;Network;Office;Email;
 MimeType=x-scheme-handler/mailto;
-
+StartupNotify=true

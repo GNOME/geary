@@ -262,9 +262,6 @@ ensure_vala_version("0.17.4" MINIMUM)
 include(ValaPrecompile)
 
 # Packages
-find_package(PkgConfig)
-
-pkg_check_modules(LIBINDICATE QUIET indicate-0.7>=0.6.1)
 if (LIBINDICATE_FOUND)
     message(STATUS "Unity messaging menu support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG
@@ -286,7 +283,6 @@ else ()
     message(STATUS "Unity messaging menu support: OFF")
 endif ()
 
-pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
 if (LIBUNITY_FOUND)
     message(STATUS "Unity launcher support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG

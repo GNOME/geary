@@ -1,12 +1,10 @@
 #
 # Install geary.desktop
 #
-install(
-    FILES
-        geary.desktop
-    DESTINATION
-        share/applications
-)
+install(FILES geary.desktop DESTINATION /usr/share/applications)
+if (LIBINDICATE_FOUND)
+    install(FILES geary DESTINATION /usr/share/indicators/messages/applications)
+endif ()
 
 # Optional: run update-desktop-database at install time.
 # (This has to happen after the geary.desktop file is installed.)

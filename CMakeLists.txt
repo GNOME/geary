@@ -37,6 +37,10 @@ if (DESKTOP_UPDATE)
     message(STATUS "Desktop database will be updated")
 endif ()
 
+find_package(PkgConfig)
+pkg_check_modules(LIBINDICATE QUIET indicate-0.7>=0.6.1)
+pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
+
 # intl
 include(Gettext)
 if (XGETTEXT_FOUND)
