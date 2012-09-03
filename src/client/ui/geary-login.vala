@@ -28,7 +28,6 @@ public class LoginDialog {
     private Gtk.Entry entry_imap_port;
     private Gtk.Entry entry_imap_username;
     private Gtk.Entry entry_imap_password;
-    private Gtk.CheckButton check_imap_remember_password;
     private Gtk.ComboBox combo_imap_encryption;
     
     // SMTP info widgets
@@ -36,7 +35,6 @@ public class LoginDialog {
     private Gtk.Entry entry_smtp_port;
     private Gtk.Entry entry_smtp_username;
     private Gtk.Entry entry_smtp_password;
-    private Gtk.CheckButton check_smtp_remember_password;
     private Gtk.ComboBox combo_smtp_encryption;
     
     private Gtk.Button ok_button;
@@ -53,10 +51,9 @@ public class LoginDialog {
             initial_account_information.email,
             initial_account_information.imap_credentials.user,
             initial_account_information.imap_credentials.pass,
-            initial_account_information.imap_remember_password, 
+            initial_account_information.imap_remember_password && initial_account_information.smtp_remember_password,
             initial_account_information.smtp_credentials.user,
             initial_account_information.smtp_credentials.pass,
-            initial_account_information.smtp_remember_password, 
             initial_account_information.service_provider,
             initial_account_information.default_imap_server_host,
             initial_account_information.default_imap_server_port,
@@ -73,10 +70,9 @@ public class LoginDialog {
         string? initial_email = null,
         string? initial_imap_username = null,
         string? initial_imap_password = null,
-        bool initial_imap_remember_password = true,
+        bool initial_remember_password = true,
         string? initial_smtp_username = null,
         string? initial_smtp_password = null,
-        bool initial_smtp_remember_password = true,
         int initial_service_provider = -1,
         string? initial_default_imap_host = null,
         uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
@@ -106,7 +102,6 @@ public class LoginDialog {
         entry_imap_port = builder.get_object("entry: imap port") as Gtk.Entry;
         entry_imap_username = builder.get_object("entry: imap username") as Gtk.Entry;
         entry_imap_password = builder.get_object("entry: imap password") as Gtk.Entry;
-        check_imap_remember_password = builder.get_object("check: imap remember_password") as Gtk.CheckButton;
         combo_imap_encryption = builder.get_object("combo: imap encryption") as Gtk.ComboBox;
         
         // SMTP info widgets.
@@ -114,7 +109,6 @@ public class LoginDialog {
         entry_smtp_port = builder.get_object("entry: smtp port") as Gtk.Entry;
         entry_smtp_username = builder.get_object("entry: smtp username") as Gtk.Entry;
         entry_smtp_password = builder.get_object("entry: smtp password") as Gtk.Entry;
-        check_smtp_remember_password = builder.get_object("check: smtp remember_password") as Gtk.CheckButton;
         combo_smtp_encryption = builder.get_object("combo: smtp encryption") as Gtk.ComboBox;
         
         combo_service.changed.connect(on_service_changed);
@@ -134,14 +128,13 @@ public class LoginDialog {
         bool use_imap_password = initial_imap_password == initial_smtp_password &&
             initial_imap_password != null;
         entry_password.set_text(use_imap_password ? initial_imap_password : "");
-        check_remember_password.active = initial_imap_remember_password && initial_smtp_remember_password;
+        check_remember_password.active = initial_remember_password;
         
         // Set defaults for IMAP info
         entry_imap_host.set_text(initial_default_imap_host ?? "");
         entry_imap_port.set_text(initial_default_imap_port.to_string());
         entry_imap_username.set_text(initial_imap_username ?? "");
         entry_imap_password.set_text(initial_imap_password ?? "");
-        check_imap_remember_password.active = initial_imap_remember_password;
         if (initial_default_imap_ssl)
             combo_imap_encryption.active = Encryption.SSL;
         else if (initial_default_imap_starttls)
@@ -154,7 +147,6 @@ public class LoginDialog {
         entry_smtp_port.set_text(initial_default_smtp_port.to_string());
         entry_smtp_username.set_text(initial_smtp_username ?? "");
         entry_smtp_password.set_text(initial_smtp_password ?? "");
-        check_smtp_remember_password.active = initial_smtp_remember_password;
         if (initial_default_smtp_ssl)
             combo_smtp_encryption.active = Encryption.SSL;
         else if (initial_default_smtp_starttls)
@@ -183,7 +175,6 @@ public class LoginDialog {
         
         entry_email.changed.connect(on_email_changed);
         entry_password.changed.connect(on_password_changed);
-        check_remember_password.toggled.connect(on_remember_password_toggled);
         
         combo_imap_encryption.changed.connect(on_imap_encryption_changed);
         combo_smtp_encryption.changed.connect(on_smtp_encryption_changed);
@@ -214,14 +205,12 @@ public class LoginDialog {
         string email = entry_email.text.strip();
         string imap_username = use_extra_info ? entry_imap_username.text.strip() : email;
         string imap_password = (use_extra_info ? entry_imap_password : entry_password).text.strip();
-        bool imap_remember_password = use_extra_info ? check_imap_remember_password.active :
-            check_remember_password.active;
+        bool imap_remember_password = check_remember_password.active;
         Geary.Credentials imap_credentials = new Geary.Credentials(imap_username, imap_password);
         
         string smtp_username = use_extra_info ? entry_smtp_username.text.strip() : email;
         string smtp_password = (use_extra_info ? entry_smtp_password : entry_password).text.strip();
-        bool smtp_remember_password = use_extra_info ? check_smtp_remember_password.active :
-            check_remember_password.active;
+        bool smtp_remember_password = check_remember_password.active;
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username, smtp_password);
         
         try {
@@ -265,22 +254,16 @@ public class LoginDialog {
         entry_smtp_password.text = entry_password.text;
     }
     
-    // TODO: Only reset if not manually set by user.
-    private void on_remember_password_toggled() {
-        check_imap_remember_password.active = check_remember_password.active;
-        check_smtp_remember_password.active = check_remember_password.active;
-    }
-    
     private void on_service_changed() {
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             label_password.hide();
             entry_password.hide();
-            check_remember_password.hide();
+            check_remember_password.label = _("Re_member passwords");
             other_info.show();
         } else {
             label_password.show();
             entry_password.show();
-            check_remember_password.show();
+            check_remember_password.label = _("Re_member password");
             other_info.hide();
             dialog.resize(1, 1);
         }

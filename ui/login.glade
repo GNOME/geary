@@ -13,17 +13,44 @@
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkLabel" id="welcome">
+          <object class="GtkBox" id="box1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xpad">12</property>
-            <property name="ypad">12</property>
-            <property name="label" translatable="yes">Welcome to Geary.</property>
-            <property name="wrap">True</property>
+            <child>
+              <object class="GtkImage" id="application-icon">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="pixel_size">64</property>
+                <property name="icon_name">geary</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">8</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="welcome">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;span size="large"&gt;&lt;b&gt;Welcome to Geary.&lt;/b&gt;&lt;/span&gt;
+Enter your account information to get started.</property>
+                <property name="use_markup">True</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="fill">True</property>
+            <property name="padding">12</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -44,7 +71,7 @@
             <property name="fill">False</property>
             <property name="padding">6</property>
             <property name="pack_type">end</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -64,6 +91,7 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="placeholder_text">email@example.com</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -83,6 +111,7 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="placeholder_text">Password</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -178,6 +207,7 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="placeholder_text">First Last</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -398,7 +428,9 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Username:</property>
+                    <property name="label" translatable="yes">User_name:</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic_widget">entry: smtp username</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -413,7 +445,9 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Password:</property>
+                    <property name="label" translatable="yes">Pass_word:</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic_widget">entry: smtp password</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -427,6 +461,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">•</property>
+                    <property name="placeholder_text">SMTP username</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -441,28 +476,11 @@
                     <property name="can_focus">True</property>
                     <property name="visibility">False</property>
                     <property name="invisible_char">•</property>
+                    <property name="placeholder_text">SMTP password</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">11</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="check: smtp remember_password">
-                    <property name="label" translatable="yes">Remember password</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="xalign">0</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">12</property>
                     <property name="width">3</property>
                     <property name="height">1</property>
                   </packing>
@@ -473,7 +491,9 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Username:</property>
+                    <property name="label" translatable="yes">_Username:</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic_widget">entry: imap username</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -488,7 +508,9 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Password:</property>
+                    <property name="label" translatable="yes">_Password:</property>
+                    <property name="use_underline">True</property>
+                    <property name="mnemonic_widget">entry: imap password</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -502,6 +524,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">•</property>
+                    <property name="placeholder_text">IMAP username</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -516,28 +539,11 @@
                     <property name="can_focus">True</property>
                     <property name="visibility">False</property>
                     <property name="invisible_char">•</property>
+                    <property name="placeholder_text">IMAP password</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">3</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="check: imap remember_password">
-                    <property name="label" translatable="yes">Remember password</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="xalign">0</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">4</property>
                     <property name="width">3</property>
                     <property name="height">1</property>
                   </packing>
@@ -588,9 +594,9 @@
                     <property name="entry_text_column">0</property>
                     <property name="id_column">1</property>
                     <items>
-                      <item translatable="yes">No encryption</item>
-                      <item translatable="yes">SSL/TLS encryption</item>
-                      <item translatable="yes">STARTTLS authentication</item>
+                      <item translatable="yes">None</item>
+                      <item translatable="yes">SSL/TLS</item>
+                      <item translatable="yes">STARTTLS</item>
                     </items>
                   </object>
                   <packing>
@@ -608,9 +614,9 @@
                     <property name="entry_text_column">0</property>
                     <property name="id_column">1</property>
                     <items>
-                      <item translatable="yes">No encryption</item>
-                      <item translatable="yes">SSL/TLS encryption</item>
-                      <item translatable="yes">STARTTLS encryption</item>
+                      <item translatable="yes">None</item>
+                      <item translatable="yes">SSL/TLS</item>
+                      <item translatable="yes">STARTTLS</item>
                     </items>
                   </object>
                   <packing>
@@ -619,12 +625,6 @@
                     <property name="width">3</property>
                     <property name="height">1</property>
                   </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>
