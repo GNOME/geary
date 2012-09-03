@@ -18,6 +18,9 @@ public class IconFactory {
         private set { _instance = value; }
     }
     
+    public const int APPLICATION_ICON_SIZE = 128;
+    public Gdk.Pixbuf application_icon { get; private set; }
+    
     public const int UNREAD_ICON_SIZE = 16;
     public Gdk.Pixbuf unread { get; private set; }
 
@@ -25,13 +28,34 @@ public class IconFactory {
     public Gdk.Pixbuf starred { get; private set; }
     public Gdk.Pixbuf unstarred { get; private set; }
 
-    public const int GEARY_ICON_SIZE = 95;
-    public Gdk.Pixbuf geary { get; private set; }
-    
     public ThemedIcon label_icon { get; private set; default = new ThemedIcon("one-tag"); }
     public ThemedIcon label_folder_icon { get; private set; default = new ThemedIcon("multiple-tags"); }
     
     private Gtk.IconTheme icon_theme { get; private set; }
+    
+    // Creates the icon factory.
+    private IconFactory() {
+        icon_theme = Gtk.IconTheme.get_default();
+        
+        append_icons_search_path(null);
+        append_icons_search_path("128x128");
+        append_icons_search_path("48x48");
+        
+        // Load icons here.
+        application_icon = load("geary", APPLICATION_ICON_SIZE);
+        unread = load("mail-unread", UNREAD_ICON_SIZE);
+        starred = load("starred", STAR_ICON_SIZE);
+        unstarred = load("non-starred-grey", STAR_ICON_SIZE);
+    }
+    
+    private void append_icons_search_path(string? name) {
+        File basedir = GearyApplication.instance.get_resource_directory().get_child("icons");
+        
+        if (Geary.String.is_empty(name))
+            icon_theme.append_search_path(basedir.get_path());
+        else
+            icon_theme.append_search_path(basedir.get_child(name).get_path());
+    }
     
     private Gdk.Pixbuf? load(string icon_name, int size, Gtk.IconLookupFlags flags = 0) {
         // First try the requested image.
@@ -51,24 +75,11 @@ public class IconFactory {
         // If that fails... well they're out of luck.
         return null;
     }
-
+    
     public Gtk.IconInfo? lookup_icon(string icon_name, int size, Gtk.IconLookupFlags flags = 0) {
         Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
         return icon_info != null ? icon_info.copy() :
             icon_theme.lookup_icon("image-missing", size, flags);
-    }
-
-    // Creates the icon factory.
-    private IconFactory() {
-        icon_theme= Gtk.IconTheme.get_default();
-        icon_theme.append_search_path(GearyApplication.instance.get_resource_directory().
-            get_child("icons").get_path());
-        
-        // Load icons here.
-        unread = load("mail-unread", UNREAD_ICON_SIZE);
-        starred = load("starred", STAR_ICON_SIZE);
-        unstarred = load("non-starred-grey", STAR_ICON_SIZE);
-        geary = load("geary", GEARY_ICON_SIZE);
     }
 }
 

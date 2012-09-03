@@ -4,7 +4,6 @@ set(ICON_FILES
     application-menu.svg
     archive.svg
     archive-insert.svg
-    geary.png
     mail-inbox.png
     mail-sent.png
     menu-down.svg
@@ -16,8 +15,8 @@ set(ICON_FILES
 )
 
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
-install(FILES geary.png DESTINATION share/icons/hicolor/scalable/apps)
-
+install(FILES "48x48/geary.svg" DESTINATION share/icons/hicolor/48x48/apps)
+install(FILES "128x128/geary.svg" DESTINATION share/icons/hicolor/128x128/apps)
 
 # Optional: update icon cache at install time.
 if (ICON_UPDATE)
