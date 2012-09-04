@@ -25,7 +25,7 @@ public void menu_popup_relative(Gtk.Menu menu, out int x, out int y, out bool pu
 }
 
 // This method must be called AFTER the button is added to the toolbar.
-public void make_menu_dropdown_button(Gtk.ToggleToolButton toggle_tool_button, string label) {
+public void make_menu_dropdown_button(Gtk.ToggleToolButton toggle_tool_button, string? icon_name, string? label) {
     Gtk.ToggleButton? toggle_button = toggle_tool_button.get_child() as Gtk.ToggleButton;
     if (toggle_button == null) {
         debug("Problem making dropdown button: ToggleToolButton's child is not a ToggleButton");
@@ -37,10 +37,17 @@ public void make_menu_dropdown_button(Gtk.ToggleToolButton toggle_tool_button, s
         toggle_button.remove(child);
     
     Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-    toggle_button.add(box);
     box.set_homogeneous(false);
-    box.pack_start(new Gtk.Label(label));
-    box.pack_start(new Gtk.Image.from_icon_name("menu-down", Gtk.IconSize.SMALL_TOOLBAR));
+    
+    if (icon_name != null)
+        box.pack_start(new Gtk.Image.from_icon_name(icon_name, Gtk.IconSize.SMALL_TOOLBAR));
+    
+    if (label != null)
+        box.pack_start(new Gtk.Label(label));
+    
+    box.pack_end(new Gtk.Image.from_icon_name("menu-down", Gtk.IconSize.SMALL_TOOLBAR));
+    
+    toggle_button.add(box);
 }
 
 public void add_proxy_menu(Gtk.ToolItem tool_item, string label, Gtk.Menu proxy_menu) {

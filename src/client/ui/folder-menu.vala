@@ -12,7 +12,7 @@ public class FolderMenu {
 
     public signal void folder_selected(Geary.Folder folder);
 
-    public FolderMenu(Gtk.ToggleToolButton button, string label) {
+    public FolderMenu(Gtk.ToggleToolButton button, string? icon_name, string? label) {
         this.button = button;
         
         // TODO Add fancy filter option.
@@ -27,7 +27,8 @@ public class FolderMenu {
         proxy_menu = new Gtk.Menu();
         add_proxy_menu(button, label, proxy_menu);
         
-        make_menu_dropdown_button(button, label);
+        // only use label for proxy, not the toolbar
+        make_menu_dropdown_button(button, icon_name, null);
     }
 
     public void add_folder(Geary.Folder folder) {

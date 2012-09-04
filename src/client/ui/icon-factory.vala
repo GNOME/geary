@@ -28,8 +28,8 @@ public class IconFactory {
     public Gdk.Pixbuf starred { get; private set; }
     public Gdk.Pixbuf unstarred { get; private set; }
 
-    public ThemedIcon label_icon { get; private set; default = new ThemedIcon("one-tag"); }
-    public ThemedIcon label_folder_icon { get; private set; default = new ThemedIcon("multiple-tags"); }
+    public ThemedIcon label_icon { get; private set; default = new ThemedIcon("tag"); }
+    public ThemedIcon label_folder_icon { get; private set; default = new ThemedIcon("tag"); }
     
     private Gtk.IconTheme icon_theme { get; private set; }
     
@@ -40,6 +40,8 @@ public class IconFactory {
         append_icons_search_path(null);
         append_icons_search_path("128x128");
         append_icons_search_path("48x48");
+        append_icons_search_path("24x24");
+        append_icons_search_path("16x16");
         
         // Load icons here.
         application_icon = load("geary", APPLICATION_ICON_SIZE);
@@ -58,18 +60,24 @@ public class IconFactory {
     }
     
     private Gdk.Pixbuf? load(string icon_name, int size, Gtk.IconLookupFlags flags = 0) {
-        // First try the requested image.
-        try {
-            return icon_theme.load_icon(icon_name, size, flags);
-        } catch (Error e) {
-            warning("Couldn't load icon. Error: " + e.message);
+        // Try looking up IconInfo (to report path in case of error) then load image
+        Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
+        if (icon_info != null) {
+            try {
+                return icon_info.load_icon();
+            } catch (Error err) {
+                warning("Couldn't load icon %s at %s, falling back to image-missing: %s", icon_name,
+                    icon_info.get_filename(), err.message);
+            }
+        } else {
+            debug("Unable to lookup icon %s, falling back to image-missing...", icon_name);
         }
-
+        
         // If that fails, try the missing image icon instead.
         try {
             return icon_theme.load_icon("image-missing", size, flags);
-        } catch (Error e) {
-            warning("Couldn't load image-missing icon. Error: " + e.message);
+        } catch (Error err) {
+            warning("Couldn't load image-missing icon: %s", err.message);
         }
 
         // If that fails... well they're out of luck.

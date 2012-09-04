@@ -7,14 +7,28 @@ set(ICON_FILES
     mail-inbox.png
     mail-sent.png
     menu-down.svg
-    multiple-tags.png
     non-starred-grey.png
-    one-tag.png
     remove-formatting.png
     starred.png
 )
 
+set(ICON_FILES_16
+    16x16/tag.svg
+    16x16/tag-new.svg
+)
+
+set(ICON_FILES_24
+    24x24/mail-move.svg
+    24x24/tag.svg
+    24x24/tag-new.svg
+)
+
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
+
+install(FILES ${ICON_FILES_16} DESTINATION ${ICONS_DEST}/16x16)
+install(FILES ${ICON_FILES_24} DESTINATION ${ICONS_DEST}/24x24)
+
+# Application icon goes in theme directory
 install(FILES "48x48/geary.svg" DESTINATION share/icons/hicolor/48x48/apps)
 install(FILES "128x128/geary.svg" DESTINATION share/icons/hicolor/128x128/apps)
 
