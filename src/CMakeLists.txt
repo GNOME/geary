@@ -4,8 +4,6 @@
 set(COMMON_SRC
 common/common-arrays.vala
 common/common-async.vala
-common/common-date.vala
-common/common-files.vala
 common/common-international.vala
 common/common-yorba-application.vala
 )
@@ -230,8 +228,10 @@ client/ui/sidebar/sidebar-common.vala
 client/ui/sidebar/sidebar-entry.vala
 client/ui/sidebar/sidebar-tree.vala
 
+client/util/util-date.vala
 client/util/util-dialog.vala
 client/util/util-email.vala
+client/util/util-files.vala
 client/util/util-gravatar.vala
 client/util/util-keyring.vala
 client/util/util-menu.vala
