@@ -64,6 +64,8 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         
     internal Folder(ImapDB.Database db, Geary.FolderPath path, ContactStore contact_store,
         string account_owner_email, int64 folder_id, Geary.Imap.FolderProperties? properties) {
+        assert(folder_id != Db.INVALID_ROWID);
+        
         this.db = db;
         this.path = path;
         this.contact_store = contact_store;

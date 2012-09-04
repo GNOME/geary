@@ -970,11 +970,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         assert(remote_count >= 0);
         
         if (remote_count < local_count) {
-            debug("remote_position_to_local_position: remote_count=%d < local_count=%d",
-                remote_count, local_count);
-        } else if (remote_pos > remote_count) {
-            debug("remote_position_to_local_position: remote_pos=%d > remote_count=%d",
-                remote_pos, remote_count);
+            debug("remote_position_to_local_position: remote_count=%d < local_count=%d (remote_pos=%d)",
+                remote_count, local_count, remote_pos);
+        }
+        
+        if (remote_pos > remote_count) {
+            debug("remote_position_to_local_position: remote_pos=%d > remote_count=%d (local_count=%d)",
+                remote_pos, remote_count, local_count);
         }
         
         return (remote_pos <= remote_count) ? remote_pos - (remote_count - local_count) : -1;

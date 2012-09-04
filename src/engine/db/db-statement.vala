@@ -202,7 +202,8 @@ public class Geary.Db.Statement : Geary.Db.Context {
      * index is zero-based.
      *
      * This will bind the value to the column as an int64 unless it's INVALID_ROWID, in which case
-     * the column is bound as NULL.
+     * the column is bound as NULL.  WARNING: This does *not* work in WHERE clauses. For WHERE, you
+     * must use "field IS NULL".
      */
     public Statement bind_rowid(int index, int64 rowid) throws DatabaseError {
         return (rowid != Db.INVALID_ROWID) ? bind_int64(index, rowid) : bind_null(index);
@@ -210,6 +211,8 @@ public class Geary.Db.Statement : Geary.Db.Context {
     
     /**
      * index is zero-based.
+     *
+     * WARNING: This does *not* work in WHERE clauses. For WHERE, you must use "field IS NULL".
      */
     public Statement bind_null(int index) throws DatabaseError {
         throw_on_error("Statement.bind_null", stmt.bind_null(index + 1));

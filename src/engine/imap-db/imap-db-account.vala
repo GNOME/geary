@@ -140,17 +140,31 @@ private class Geary.ImapDB.Account : Object {
                 return Db.TransactionOutcome.ROLLBACK;
             }
             
-            Db.Statement stmt = cx.prepare(
-                "UPDATE FolderTable SET last_seen_total=?, uid_validity=?, uid_next=?, attributes=? "
-                + "WHERE parent_id=? AND name=?");
-            stmt.bind_int(0, properties.messages);
-            stmt.bind_int64(1, (properties.uid_validity != null) ? properties.uid_validity.value
-                : Imap.UIDValidity.INVALID);
-            stmt.bind_int64(2, (properties.uid_next != null) ? properties.uid_next.value
-                : Imap.UID.INVALID);
-            stmt.bind_string(3, properties.attrs.serialize());
-            stmt.bind_rowid(4, parent_id);
-            stmt.bind_string(4, path.basename);
+            Db.Statement stmt;
+            if (parent_id != Db.INVALID_ROWID) {
+                stmt = cx.prepare(
+                    "UPDATE FolderTable SET last_seen_total=?, uid_validity=?, uid_next=?, attributes=? "
+                    + "WHERE parent_id=? AND name=?");
+                stmt.bind_int(0, properties.messages);
+                stmt.bind_int64(1, (properties.uid_validity != null) ? properties.uid_validity.value
+                    : Imap.UIDValidity.INVALID);
+                stmt.bind_int64(2, (properties.uid_next != null) ? properties.uid_next.value
+                    : Imap.UID.INVALID);
+                stmt.bind_string(3, properties.attrs.serialize());
+                stmt.bind_rowid(4, parent_id);
+                stmt.bind_string(5, path.basename);
+            } else {
+                stmt = cx.prepare(
+                    "UPDATE FolderTable SET last_seen_total=?, uid_validity=?, uid_next=?, attributes=? "
+                    + "WHERE parent_id IS NULL AND name=?");
+                stmt.bind_int(0, properties.messages);
+                stmt.bind_int64(1, (properties.uid_validity != null) ? properties.uid_validity.value
+                    : Imap.UIDValidity.INVALID);
+                stmt.bind_int64(2, (properties.uid_next != null) ? properties.uid_next.value
+                    : Imap.UID.INVALID);
+                stmt.bind_string(3, properties.attrs.serialize());
+                stmt.bind_string(4, path.basename);
+            }
             
             stmt.exec();
             
@@ -375,7 +389,7 @@ private class Geary.ImapDB.Account : Object {
         // drop from folder references table, all cleaned up
         folder_refs.unset(folder_ref.path);
     }
-
+    
     private void clear_duplicate_folders() {
         int count = 0;
         
