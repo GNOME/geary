@@ -31,11 +31,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="welcome">
+              <object class="GtkLabel" id="label-welcome">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;span size="large"&gt;&lt;b&gt;Welcome to Geary.&lt;/b&gt;&lt;/span&gt;
-Enter your account information to get started.</property>
                 <property name="use_markup">True</property>
                 <property name="wrap">True</property>
               </object>

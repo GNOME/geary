@@ -88,6 +88,10 @@ public class LoginDialog {
         dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG);
         dialog.set_default_response(Gtk.ResponseType.OK);
         
+        Gtk.Label label_welcome = (Gtk.Label) builder.get_object("label-welcome");
+        label_welcome.set_markup("<span size=\"large\"><b>%s</b></span>\n%s".printf(
+            _("Welcome to Geary."), _("Enter your account information to get started.")));
+        
         entry_real_name = builder.get_object("entry: real_name") as Gtk.Entry;
         combo_service =  builder.get_object("combo: service") as Gtk.ComboBoxText;
         entry_email = builder.get_object("entry: email") as Gtk.Entry;
