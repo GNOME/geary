@@ -8,7 +8,8 @@ extern const string LANGUAGE_SUPPORT_DIRECTORY;
 public const string TRANSLATABLE = "translatable";
 
 namespace International {
-const string SYSTEM_LOCALE = "";
+
+public const string SYSTEM_LOCALE = "";
 
 void init(string package_name, string program_path, string locale = SYSTEM_LOCALE) {
     Intl.setlocale(LocaleCategory.ALL, locale);
@@ -19,11 +20,11 @@ void init(string package_name, string program_path, string locale = SYSTEM_LOCAL
 
 private string get_langpack_dir_path(string program_path) {
     File local_langpack_dir =
-        File.new_for_path(Environment.find_program_in_path(program_path)).get_parent().get_child(
-        "locale-langpack");
-
+        File.new_for_path(Environment.find_program_in_path(program_path)).get_parent().get_child("locale");
+    
     return (local_langpack_dir.query_exists(null)) ? local_langpack_dir.get_path() :
         LANGUAGE_SUPPORT_DIRECTORY;
 }
+
 }
 

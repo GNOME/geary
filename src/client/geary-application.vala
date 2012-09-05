@@ -171,11 +171,24 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public override int startup() {
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
+        
         Configuration.init(is_installed(), GSETTINGS_DIR);
+        Date.init();
         
         base.startup();
-        int result = parse_arguments(args);
-        return result;
+        
+        return parse_arguments(args);
+    }
+    
+    public override bool exiting(bool panicked) {
+        if (controller.main_window != null)
+            controller.main_window.destroy();
+        
+        controller.disconnect_account_async.begin(null);
+        
+        Date.terminate();
+        
+        return true;
     }
     
     public override void activate(string[] args) {
@@ -472,15 +485,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             default:
                 assert_not_reached();
         }
-    }
-    
-    public override bool exiting(bool panicked) {
-        if (controller.main_window != null)
-            controller.main_window.destroy();
-        
-        controller.disconnect_account_async.begin(null);
-        
-        return true;
     }
     
     public File get_user_data_directory() {
