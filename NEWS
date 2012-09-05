@@ -1,3 +1,18 @@
+Geary 0.1.90 - 05 September 2012
+--------------------------------
+
+  * Support for sending and receiving attachments
+  * New mail notification for GNOME Shell and Unity
+  * Outbox for scheduled delivery of messages
+  * Better visual presentation of conversations
+  * Full SSL and STARTTLS support
+  * Fine-grained control of account information for connecting to Dovecot
+    and generic IMAP servers
+  * Address autocompletion when composing a message
+  * Database optimizations
+  * Strings marked for translation and .pot file now available
+  * Numerous bug and stability fixes
+
 Geary 0.1.0 - 04 May 2012
 -------------------------
 
