@@ -105,6 +105,12 @@ public class Configuration {
         }
     }
     
+    private const string ASK_OPEN_ATTACHMENT = "ask-open-attachment";
+    public bool ask_open_attachment {
+        get { return settings.get_boolean(ASK_OPEN_ATTACHMENT); }
+        set { settings.set_boolean(ASK_OPEN_ATTACHMENT, value); }
+    }
+    
     // Creates a configuration object.
     public Configuration() {
         // Start GSettings.

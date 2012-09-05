@@ -59,8 +59,11 @@
         <summary>show notifications for new mail</summary>
         <description>True to show notification bubbles.</description>
     </key>
-
-    
+    <key name="ask-open-attachment" type="b">
+        <default>true</default>
+        <summary>ask when opening an attachment</summary>
+        <description>True to ask when opening an attachment.</description>
+    </key>
 </schema>
 
 </schemalist>
