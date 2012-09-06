@@ -99,10 +99,15 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         { "debug", 'd', 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
         { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Log conversation monitoring"), null },
         { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Log network activity"), null },
+        /// The IMAP replay queue is how changes on the server are replicated on the client.
+        /// It could also be called the IMAP events queue.
         { "log-replay-queue", 0, 0, OptionArg.NONE, ref log_replay_queue, N_("Log IMAP replay queue"), null },
+        /// Serialization is how commands and responses are converted into a stream of bytes for
+        /// network transmission
         { "log-serializer", 0, 0, OptionArg.NONE, ref log_serializer, N_("Log network serialization"), null },
         { "log-periodic", 0, 0, OptionArg.NONE, ref log_periodic, N_("Log periodic activity"), null },
         { "log-sql", 0, 0, OptionArg.NONE, ref log_sql, N_("Log database queries (generates lots of messages)"), null },
+        /// "Normalization" can also be called "synchronization"
         { "log-folder-normalization", 0, 0, OptionArg.NONE, ref log_folder_normalization, N_("Log folder normalization"), null },
         { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
         { null }
