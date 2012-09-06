@@ -12,11 +12,15 @@ public class Geary.Imap.ClientSession {
     // physical connection is lost
     public const uint RECOMMENDED_KEEPALIVE_SEC = 5 * 60;
     
+    // A more aggressive keepalive will detect when a connection has died, thereby giving the client
+    // a chance to reestablish a connection without long lags.
+    public const uint AGGRESSIVE_KEEPALIVE_SEC = 30;
+    
     // NOOP is only sent after this amount of time has passed since the last received
     // message on the connection dependant on connection state (selected/examined vs. authorized)
-    public const uint DEFAULT_SELECTED_KEEPALIVE_SEC = 60;
+    public const uint DEFAULT_SELECTED_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
-    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
+    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
     
     public enum Context {
         UNCONNECTED,
