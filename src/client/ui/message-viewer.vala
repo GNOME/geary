@@ -1463,12 +1463,9 @@ public class MessageViewer : Object {
             string temporary_uri = Filename.to_uri(temporary_filename, null);
             Gtk.show_uri(web_view.get_screen(), temporary_uri, Gdk.CURRENT_TIME);
         } catch (Error error) {
-            var dialog = new Gtk.MessageDialog(null, 0,
-                Gtk.MessageType.ERROR, Gtk.ButtonsType.OK,
-                "%s", _("Failed to open default text editor."));
-            dialog.format_secondary_text(error.message);
+            ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.get_main_window(),
+                _("Failed to open default text editor."), error.message);
             dialog.run();
-            dialog.destroy();
         }
     }
 }

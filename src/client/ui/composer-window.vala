@@ -473,16 +473,9 @@ public class ComposerWindow : Gtk.Window {
     public bool should_close() {
         // TODO: Check if the message was (automatically) saved
         if (editor.can_undo()) {
-            var dialog = new Gtk.MessageDialog(this, 0,
-                Gtk.MessageType.WARNING, Gtk.ButtonsType.NONE,
-                _("Do you want to discard the unsaved message?"));
-            dialog.add_buttons(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                Gtk.Stock.DISCARD, Gtk.ResponseType.OK);
-            dialog.set_default_response(Gtk.ResponseType.CANCEL);
-            int response = dialog.run();
-            dialog.destroy();
-            
-            if (response != Gtk.ResponseType.OK)
+            ConfirmationDialog dialog = new ConfirmationDialog(this,
+                _("Do you want to discard the unsaved message?"), null, Gtk.Stock.DISCARD);
+            if (dialog.run() != Gtk.ResponseType.OK)
                 return false;
         }
         return true;
