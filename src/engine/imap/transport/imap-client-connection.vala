@@ -555,6 +555,12 @@ public class Geary.Imap.ClientConnection {
         try {
             token = yield send_mutex.claim_async();
             
+            // Dovecot will hang the connection (not send any replies) if IDLE is sent in the
+            // same buffer as normal commands, so flush the buffer first, enqueue IDLE, and
+            // flush that behind the first
+            if (ser != null)
+                yield ser.flush_async();
+                
             // as connection is "quiet" (haven't seen new command in n msec), go into IDLE state
             // if (a) allowed by owner and (b) allowed by state machine
             if (ser != null && idle_when_quiet && issue_conditional_event(Event.SEND_IDLE)) {
@@ -707,8 +713,7 @@ public class Geary.Imap.ClientConnection {
     private uint on_idling_continuation(uint state, uint event, void *user, Object? object) {
         ContinuationResponse continuation = (ContinuationResponse) object;
         
-        Logging.debug(Logging.Flag.NETWORK, "[%s] Entering IDLE: %s", to_string(),
-            continuation.to_string());
+        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), continuation.to_string());
         
         // only signal entering IDLE state if that's the case
         if (state != State.IDLE)
@@ -729,6 +734,7 @@ public class Geary.Imap.ClientConnection {
         }
         
         try {
+            Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), "done");
             ser.push_string("done");
             ser.push_eol();
         } catch (Error err) {
