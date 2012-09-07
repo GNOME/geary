@@ -84,6 +84,11 @@ public class Geary.AccountInformation : Object {
                 default_smtp_server_starttls = get_bool_value(key_file, GROUP, SMTP_STARTTLS, false);
             }
         }
+        
+        // currently IMAP pipelining is *always* turned off with generic servers; see
+        // http://redmine.yorba.org/issues/5224
+        if (service_provider == Geary.ServiceProvider.OTHER)
+            imap_server_pipeline = false;
     }
     
     public async bool validate_async(Cancellable? cancellable = null) throws EngineError {

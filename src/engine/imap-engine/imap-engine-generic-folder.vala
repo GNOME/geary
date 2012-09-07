@@ -168,7 +168,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // if no earliest UID, that means no messages in local store, so nothing to update
         if (earliest_uid == null || !earliest_uid.is_valid()) {
-            debug("No earliest UID in %s, nothing to normalize", to_string());
+            debug("No earliest UID in local %s, nothing to normalize", to_string());
             
             return true;
         }
