@@ -69,16 +69,41 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
     
     quoted += _("---------- Forwarded message ----------");
     quoted += "\n\n";
-    quoted += _("From: %s\n").printf(email_addresses_for_reply(email.from, html_format));
-    quoted += _("Subject %s\n").printf(email.subject != null ? email.subject.to_string() : "");
+    string from_line = email_addresses_for_reply(email.from, html_format);
+    if (!String.is_empty_or_whitespace(from_line))
+        quoted += _("From: %s\n").printf(from_line);
+    // TODO: Doing it this way because string change happened after string freeze and "Subject" is
+    // available but not "Subject: %s"
+    quoted += _("Subject:") + "%s\n".printf(email.subject != null ? email.subject.to_string() : "");
     quoted += _("Date: %s\n").printf(email.date != null ? email.date.to_string() : "");
-    quoted += _("To: %s\n").printf(email_addresses_for_reply(email.to, html_format));
+    string to_line = email_addresses_for_reply(email.to, html_format);
+    if (!String.is_empty_or_whitespace(to_line))
+        quoted += _("To: %s\n").printf(to_line);
+    
+    // only add extra blank line if body exists and first line of *plain text* body is not a blank
+    // line (this test won't work with HTML, but formatting applies to it too)
+    if (email.body != null) {
+        try {
+            Memory.StringBuffer stringb = new Memory.StringBuffer(text_from_message(email, false));
+            DataInputStream dins = new DataInputStream(stringb.get_input_stream());
+            dins.set_newline_type(DataStreamNewlineType.ANY);
+            
+            string line = dins.read_line();
+            if (!String.is_empty_or_whitespace(line))
+                quoted += "\n";
+        } catch (Error err) {
+            debug("Error attempting to inspect first line of body buffer: %s", err.message);
+            
+            // add blank line; better to have too many than not enough
+            quoted += "\n";
+        }
+    }
     
     if (html_format)
         quoted = quoted.replace("\n", "<br />");
     
     if (email.body != null)
-        quoted += "\n" + quote_body(email, false, html_format);
+        quoted += quote_body(email, false, html_format);
     
     return quoted;
 }
