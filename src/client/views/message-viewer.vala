@@ -712,7 +712,7 @@ public class MessageViewer : Object {
                 // Add a menu item for copying the address.
                 item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
                 item.activate.connect(on_copy_email_address);
-                context_menu.append(item);
+                menu.append(item);
             }
         }
         
