@@ -80,7 +80,22 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         SpecialFolderType special_folder_type = path_type_map.has_key(path) ? path_type_map.get(path)
             : SpecialFolderType.NONE;
         
-        return new GmailFolder(this, remote_account, local_account, local_folder, special_folder_type);
+        switch (special_folder_type) {
+            case SpecialFolderType.ALL_MAIL:
+                return new GenericAllMailFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
+            case SpecialFolderType.SENT:
+                return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
+            case SpecialFolderType.TRASH:
+                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
+            default:
+                return new GmailFolder(this, remote_account, local_account, local_folder, special_folder_type);
+        }
     }
 }
 

@@ -118,7 +118,10 @@ engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
 engine/imap-engine/imap-engine-generic-account.vala
+engine/imap-engine/imap-engine-generic-all-mail-folder.vala
 engine/imap-engine/imap-engine-generic-folder.vala
+engine/imap-engine/imap-engine-generic-sent-mail-folder.vala
+engine/imap-engine/imap-engine-generic-trash-folder.vala
 engine/imap-engine/imap-engine-receive-replay-operation.vala
 engine/imap-engine/imap-engine-replay-operation.vala
 engine/imap-engine/imap-engine-replay-queue.vala
