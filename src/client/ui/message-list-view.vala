@@ -234,23 +234,12 @@ public class MessageListView : Gtk.TreeView {
         if (path != null)
             set_cursor(path, null, false);
     }
-
+    
     private void on_row_deleted(Gtk.TreePath path) {
         // if one or more rows are deleted in the model, reset the last upper limit so scrolling to
         // the bottom will always activate a reload (this is particularly important if the model
         // is cleared)
         last_upper = -1.0;
-        
-        if (GearyApplication.instance.config.autoselect) {
-            // Move to next conversation.
-            set_cursor(path, null, false);
-            
-            // If the current path is no longer valid, try the previous message.
-            if (get_selected_path() == null) {
-                path.prev();
-                set_cursor(path, null, false);
-            }
-        }
     }
 
     private void on_display_preview_changed() {
