@@ -9,23 +9,23 @@ public class MainWindow : Gtk.Window {
     private const int FOLDER_LIST_WIDTH = 100;
     
     public FolderList folder_list { get; private set; default = new FolderList(); }
-    public MessageListStore message_list_store { get; private set; default = new MessageListStore(); }
+    public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
-    public MessageListView message_list_view  { get; private set; }
-    public MessageViewer message_viewer { get; private set; default = new MessageViewer(); }
+    public ConversationListView conversation_list_view  { get; private set; }
+    public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     
     private int window_width;
     private int window_height;
     private bool window_maximized;
     private Gtk.Paned folder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
-    private Gtk.Paned messages_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
+    private Gtk.Paned conversations_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     private Gtk.Spinner spinner = new Gtk.Spinner();
     private bool is_shown = false;
     
     public MainWindow() {
         title = GearyApplication.NAME;
         
-        message_list_view = new MessageListView(message_list_store);
+        conversation_list_view = new ConversationListView(conversation_list_store);
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
@@ -45,7 +45,7 @@ public class MainWindow : Gtk.Window {
             maximize();
         
         folder_paned.set_position(GearyApplication.instance.config.folder_list_pane_position);
-        messages_paned.set_position(GearyApplication.instance.config.messages_pane_position);
+        conversations_paned.set_position(GearyApplication.instance.config.messages_pane_position);
         
         base.show_all();
         is_shown = true;
@@ -60,7 +60,7 @@ public class MainWindow : Gtk.Window {
             
             // Save pane positions.
             GearyApplication.instance.config.folder_list_pane_position = folder_paned.get_position();
-            GearyApplication.instance.config.messages_pane_position = messages_paned.get_position();
+            GearyApplication.instance.config.messages_pane_position = conversations_paned.get_position();
         }
         
         base.destroy();
@@ -106,10 +106,10 @@ public class MainWindow : Gtk.Window {
         folder_list_scrolled.add(folder_list);
         
         // message list
-        Gtk.ScrolledWindow message_list_scrolled = new Gtk.ScrolledWindow(null, null);
-        message_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
-        message_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        message_list_scrolled.add(message_list_view);
+        Gtk.ScrolledWindow conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
+        conversation_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
+        conversation_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        conversation_list_scrolled.add(conversation_list_view);
         
         // Three-pane display.
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
@@ -120,12 +120,12 @@ public class MainWindow : Gtk.Window {
         get_style_context().add_class("sidebar-pane-separator");
         
          // Message list left of message viewer.
-        messages_paned.pack1(message_list_scrolled, false, false);
-        messages_paned.pack2(message_viewer.content_area, true, true);
+        conversations_paned.pack1(conversation_list_scrolled, false, false);
+        conversations_paned.pack2(conversation_viewer.content_area, true, true);
         
         // Folder list to the left of everything.
         folder_paned.pack1(status_bar_box, false, false);
-        folder_paned.pack2(messages_paned, true, false);
+        folder_paned.pack2(conversations_paned, true, false);
         
         main_layout.pack_end(folder_paned, true, true, 0);
         

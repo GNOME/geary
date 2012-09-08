@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
  
-public class MessageListStore : Gtk.ListStore {
+public class ConversationListStore : Gtk.ListStore {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS;
     
@@ -12,21 +12,21 @@ public class MessageListStore : Gtk.ListStore {
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PREVIEW;
     
     public enum Column {
-        MESSAGE_DATA,
-        MESSAGE_OBJECT;
+        CONVERSATION_DATA,
+        CONVERSATION_OBJECT;
         
         public static Type[] get_types() {
             return {
-                typeof (FormattedMessageData), // MESSAGE_DATA
-                typeof (Geary.Conversation)    // MESSAGE_OBJECT
+                typeof (FormattedConversationData), // CONVERSATION_DATA
+                typeof (Geary.Conversation)         // CONVERSATION_OBJECT
             };
         }
         
         public string to_string() {
             switch (this) {
-                case MESSAGE_DATA:
+                case CONVERSATION_DATA:
                     return "data";
-                case MESSAGE_OBJECT:
+                case CONVERSATION_OBJECT:
                     return "envelope";
                 
                 default:
@@ -47,7 +47,7 @@ public class MessageListStore : Gtk.ListStore {
     
     public signal void conversations_added_finished();
     
-    public MessageListStore() {
+    public ConversationListStore() {
         set_column_types(Column.get_types());
         set_default_sort_func(sort_by_date);
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
@@ -139,7 +139,7 @@ public class MessageListStore : Gtk.ListStore {
         Gee.List<Geary.Email>? emails = null;
         try {
             emails = yield current_folder.list_email_by_sparse_id_async(emails_needing_previews,
-                MessageListStore.WITH_PREVIEW_FIELDS, flags, cancellable_folder);
+                ConversationListStore.WITH_PREVIEW_FIELDS, flags, cancellable_folder);
         } catch (Error err) {
             // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
             if (!(err is Geary.EngineError.NOT_FOUND))
@@ -174,7 +174,7 @@ public class MessageListStore : Gtk.ListStore {
             // if all preview fields present and it's the same email, don't need to refresh
             if (need_preview == null || (current_preview != null &&
                 need_preview.id.equals(current_preview.id) &&
-                current_preview.fields.is_all_set(MessageListStore.WITH_PREVIEW_FIELDS))) {
+                current_preview.fields.is_all_set(ConversationListStore.WITH_PREVIEW_FIELDS))) {
                 continue;
             }
             
@@ -191,7 +191,7 @@ public class MessageListStore : Gtk.ListStore {
             return null;
         }
         
-        FormattedMessageData? message_data = get_message_data_at_iter(iter);
+        FormattedConversationData? message_data = get_message_data_at_iter(iter);
         return message_data == null ? null : message_data.preview;
     }
     
@@ -204,11 +204,11 @@ public class MessageListStore : Gtk.ListStore {
     }
     
     private void set_row(Gtk.TreeIter iter, Geary.Conversation conversation, Geary.Email preview) {
-        FormattedMessageData message_data = new FormattedMessageData(conversation, preview,
-            current_folder, account_owner_email);
+        FormattedConversationData conversation_data = new FormattedConversationData(conversation,
+            preview, current_folder, account_owner_email);
         set(iter,
-            Column.MESSAGE_DATA, message_data,
-            Column.MESSAGE_OBJECT, conversation);
+            Column.CONVERSATION_DATA, conversation_data,
+            Column.CONVERSATION_OBJECT, conversation);
     }
     
     private void refresh_conversation(Geary.Conversation conversation) {
@@ -225,7 +225,7 @@ public class MessageListStore : Gtk.ListStore {
             return;
         }
         
-        FormattedMessageData? existing_message_data = get_message_data_at_iter(iter);
+        FormattedConversationData? existing_message_data = get_message_data_at_iter(iter);
         
         if (existing_message_data == null || !existing_message_data.preview.id.equals(last_email.id))
             set_row(iter, conversation, last_email);
@@ -239,7 +239,7 @@ public class MessageListStore : Gtk.ListStore {
             return;
         }
         
-        FormattedMessageData? existing_message_data = get_message_data_at_iter(iter);
+        FormattedConversationData? existing_message_data = get_message_data_at_iter(iter);
         if (existing_message_data == null)
             return;
         
@@ -269,14 +269,14 @@ public class MessageListStore : Gtk.ListStore {
     
     private Geary.Conversation? get_conversation_at_iter(Gtk.TreeIter iter) {
         Geary.Conversation? conversation;
-        get(iter, Column.MESSAGE_OBJECT, out conversation);
+        get(iter, Column.CONVERSATION_OBJECT, out conversation);
         
         return conversation;
     }
     
-    private FormattedMessageData? get_message_data_at_iter(Gtk.TreeIter iter) {
-        FormattedMessageData? message_data;
-        get(iter, Column.MESSAGE_DATA, out message_data);
+    private FormattedConversationData? get_message_data_at_iter(Gtk.TreeIter iter) {
+        FormattedConversationData? message_data;
+        get(iter, Column.CONVERSATION_DATA, out message_data);
         
         return message_data;
     }
@@ -358,8 +358,8 @@ public class MessageListStore : Gtk.ListStore {
     private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
         Geary.Conversation a, b;
         
-        get(aiter, Column.MESSAGE_OBJECT, out a);
-        get(biter, Column.MESSAGE_OBJECT, out b);
+        get(aiter, Column.CONVERSATION_OBJECT, out a);
+        get(biter, Column.CONVERSATION_OBJECT, out b);
         
         return compare_conversation_ascending(a, b);
     }

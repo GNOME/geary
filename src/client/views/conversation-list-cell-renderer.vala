@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class MessageListCellRenderer : Gtk.CellRenderer {
-    private static FormattedMessageData? example_data = null;
+public class ConversationListCellRenderer : Gtk.CellRenderer {
+    private static FormattedConversationData? example_data = null;
     
     // Mail message data.
-    public FormattedMessageData data { get; set; }
+    public FormattedConversationData data { get; set; }
     
-    public MessageListCellRenderer() {
+    public ConversationListCellRenderer() {
     }
     
     public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
@@ -33,7 +33,7 @@ public class MessageListCellRenderer : Gtk.CellRenderer {
     // Note: this must be called by the parent TreeView.
     public static void style_changed(Gtk.Widget widget) {
         if (example_data == null) {
-            example_data = new FormattedMessageData.create_example();
+            example_data = new FormattedConversationData.create_example();
         }
         
         example_data.calculate_sizes(widget);

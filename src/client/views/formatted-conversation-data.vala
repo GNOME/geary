@@ -5,7 +5,7 @@
  */
 
 // Stores formatted data for a message.
-public class FormattedMessageData : Object {
+public class FormattedConversationData : Object {
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
     private const int LINE_SPACING = 4;
     private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
@@ -28,9 +28,9 @@ public class FormattedMessageData : Object {
     public Geary.Email? preview { get; private set; default = null; }
     
     // Creates a formatted message data from an e-mail.
-    public FormattedMessageData(Geary.Conversation conversation, Geary.Email preview,
+    public FormattedConversationData(Geary.Conversation conversation, Geary.Email preview,
         Geary.Folder folder, string account_owner_email) {
-        assert(preview.fields.fulfills(MessageListStore.REQUIRED_FIELDS));
+        assert(preview.fields.fulfills(ConversationListStore.REQUIRED_FIELDS));
         
         // Load preview-related data.
         this.date = (preview.date != null)
@@ -48,7 +48,7 @@ public class FormattedMessageData : Object {
     }
     
     // Creates an example message (used interally for styling calculations.)
-    public FormattedMessageData.create_example() {
+    public FormattedConversationData.create_example() {
         this.is_unread = false;
         this.is_flagged = false;
         this.date = STYLE_EXAMPLE;
@@ -173,8 +173,8 @@ public class FormattedMessageData : Object {
         }
 
         if (recalc_dims) {
-            FormattedMessageData.preview_height = preview_height;
-            FormattedMessageData.cell_height = y + preview_height;
+            FormattedConversationData.preview_height = preview_height;
+            FormattedConversationData.cell_height = y + preview_height;
         } else {
             // Flagged indicator.
             if (is_flagged) {

@@ -100,23 +100,23 @@ public class GearyController {
         enable_message_buttons(false);
 
         // Connect to various UI signals.
-        main_window.message_list_view.conversations_selected.connect(on_conversations_selected);
-        main_window.message_list_view.load_more.connect(on_load_more);
-        main_window.message_list_view.mark_conversation.connect(on_mark_conversation);
+        main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
+        main_window.conversation_list_view.load_more.connect(on_load_more);
+        main_window.conversation_list_view.mark_conversation.connect(on_mark_conversation);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.folder_list.copy_conversation.connect(on_copy_conversation);
         main_window.folder_list.move_conversation.connect(on_move_conversation);
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
-        main_window.message_viewer.link_selected.connect(on_link_selected);
-        main_window.message_viewer.reply_to_message.connect(on_reply_to_message);
-        main_window.message_viewer.reply_all_message.connect(on_reply_all_message);
-        main_window.message_viewer.forward_message.connect(on_forward_message);
-        main_window.message_viewer.mark_message.connect(on_message_viewer_mark_message);
-        main_window.message_viewer.open_attachment.connect(on_open_attachment);
-        main_window.message_viewer.save_attachments.connect(on_save_attachments);
+        main_window.conversation_viewer.link_selected.connect(on_link_selected);
+        main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
+        main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
+        main_window.conversation_viewer.forward_message.connect(on_forward_message);
+        main_window.conversation_viewer.mark_message.connect(on_conversation_viewer_mark_message);
+        main_window.conversation_viewer.open_attachment.connect(on_open_attachment);
+        main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
 
-        main_window.message_list_view.grab_focus();
+        main_window.conversation_list_view.grab_focus();
         
         set_busy(false);
         
@@ -258,7 +258,7 @@ public class GearyController {
             account.folders_added_removed.disconnect(on_folders_added_removed);
             
             main_window.title = GearyApplication.NAME;
-            main_window.message_list_store.account_owner_email = null;
+            main_window.conversation_list_store.account_owner_email = null;
             main_window.folder_list.remove_all_branches();
             
             if (inbox_folder != null) {
@@ -296,7 +296,7 @@ public class GearyController {
             
             if (account.settings.service_provider == Geary.ServiceProvider.YAHOO)
                 main_window.title = GearyApplication.NAME + "!";
-            main_window.message_list_store.account_owner_email = account.settings.email.address;
+            main_window.conversation_list_store.account_owner_email = account.settings.email.address;
             
             main_window.folder_list.set_user_folders_root_name(_("Labels"));
             load_folders.begin(cancellable_folder);
@@ -369,7 +369,7 @@ public class GearyController {
             debug("switching to %s", folder.to_string());
         
         current_folder = folder;
-        main_window.message_list_store.set_current_folder(current_folder, cancellable_folder);
+        main_window.conversation_list_store.set_current_folder(current_folder, cancellable_folder);
         
         // The current folder may be null if the user rapidly switches between folders. If they have
         // done that then this folder selection is invalid anyways, so just return.
@@ -381,7 +381,7 @@ public class GearyController {
         update_ui();
         
         current_conversations = new Geary.ConversationMonitor(current_folder, false,
-            MessageListStore.REQUIRED_FIELDS);
+            ConversationListStore.REQUIRED_FIELDS);
         
         current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);
@@ -390,8 +390,8 @@ public class GearyController {
         current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
         current_conversations.email_flags_changed.connect(on_email_flags_changed);
         
-        main_window.message_list_store.set_conversation_monitor(current_conversations);
-        main_window.message_list_view.set_conversation_monitor(current_conversations);
+        main_window.conversation_list_store.set_conversation_monitor(current_conversations);
+        main_window.conversation_list_view.set_conversation_monitor(current_conversations);
         
         yield current_conversations.start_monitoring_async(FETCH_EMAIL_CHUNK_COUNT, cancellable_folder);
     }
@@ -415,7 +415,7 @@ public class GearyController {
         main_window.folder_list.select_path(inbox_folder.get_path());
         Geary.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
         if (conversation != null)
-            main_window.message_list_view.select_conversation(conversation);
+            main_window.conversation_list_view.select_conversation(conversation);
     }
     
     private void on_indicator_activated_application(uint32 timestamp) {
@@ -448,12 +448,12 @@ public class GearyController {
     
     private void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
         if (is_viewed_conversation(conversation))
-            main_window.message_viewer.remove_message(email);
+            main_window.conversation_viewer.remove_message(email);
     }
     
     private void on_load_more() {
         debug("on_load_more");
-        Geary.EmailIdentifier? low_id = main_window.message_list_store.get_lowest_email_id();
+        Geary.EmailIdentifier? low_id = main_window.conversation_list_store.get_lowest_email_id();
         if (low_id == null)
             return;
         
@@ -474,7 +474,7 @@ public class GearyController {
     }
     
     private void on_email_flags_changed(Geary.Conversation conversation, Geary.Email email) {
-        main_window.message_viewer.update_flags(email);
+        main_window.conversation_viewer.update_flags(email);
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
@@ -500,7 +500,7 @@ public class GearyController {
             do_show_message.begin(conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING),
                 cancellable_message, true, on_show_message_completed);
         } else if (current_folder != null) {
-            main_window.message_viewer.show_multiple_selected(selected.size);
+            main_window.conversation_viewer.show_multiple_selected(selected.size);
             if (selected.size > 1) {
                 enable_multiple_message_buttons();
             } else {
@@ -515,9 +515,9 @@ public class GearyController {
         
         // Clear view before we yield, to make sure it happens
         if (clear_view) {
-            main_window.message_viewer.clear(current_folder, account.settings);
-            main_window.message_viewer.scroll_reset();
-            main_window.message_viewer.external_images_info_bar.hide();
+            main_window.conversation_viewer.clear(current_folder, account.settings);
+            main_window.conversation_viewer.scroll_reset();
+            main_window.conversation_viewer.external_images_info_bar.hide();
         }
         
         // Fetch full messages.
@@ -525,7 +525,7 @@ public class GearyController {
         Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
         foreach (Geary.Email email in messages) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
-                MessageViewer.REQUIRED_FIELDS | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
+                ConversationViewer.REQUIRED_FIELDS | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
                 Geary.Folder.ListFlags.NONE, cancellable);
             
             if (cancellable.is_cancelled())
@@ -537,11 +537,11 @@ public class GearyController {
                 unread_ids.add(full_email.id);
         }
         
-        // Add messages.  message_viewer.add_message only adds new messages
+        // Add messages.  conversation_viewer.add_message only adds new messages
         foreach (Geary.Email email in messages_to_add)
-            main_window.message_viewer.add_message(email);
+            main_window.conversation_viewer.add_message(email);
         
-        main_window.message_viewer.unhide_last_email();
+        main_window.conversation_viewer.unhide_last_email();
         
         // Mark as read.
         yield mark_as_read_async(unread_ids, cancellable);
@@ -815,7 +815,7 @@ public class GearyController {
         }
     }
 
-    private void on_message_viewer_mark_message(Geary.Email message, Geary.EmailFlags? flags_to_add,
+    private void on_conversation_viewer_mark_message(Geary.Email message, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove) {
         Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
         if (supports_mark == null)
@@ -1057,7 +1057,7 @@ public class GearyController {
     }
     
     private void on_reply_to_message_action() {
-        Geary.Email? message = main_window.message_viewer.get_last_message();
+        Geary.Email? message = main_window.conversation_viewer.get_last_message();
         if (message != null)
             on_reply_to_message(message);
     }
@@ -1068,7 +1068,7 @@ public class GearyController {
     }
     
     private void on_reply_all_message_action() {
-        Geary.Email? message = main_window.message_viewer.get_last_message();
+        Geary.Email? message = main_window.conversation_viewer.get_last_message();
         if (message != null)
             on_reply_all_message(message);
     }
@@ -1079,7 +1079,7 @@ public class GearyController {
     }
     
     private void on_forward_message_action() {
-        Geary.Email? message = main_window.message_viewer.get_last_message();
+        Geary.Email? message = main_window.conversation_viewer.get_last_message();
         if (message != null)
             on_forward_message(message);
     }
@@ -1097,7 +1097,7 @@ public class GearyController {
             ? Geary.Collection.get_first<Geary.Conversation>(selected_conversations) : null;
 
         // If the user clicked the toolbar button, we want to move focus back to the message list.
-        main_window.message_list_view.grab_focus();
+        main_window.conversation_list_view.grab_focus();
         set_busy(true);
 
         // Collect all the emails into one pool and then delete.
@@ -1144,15 +1144,15 @@ public class GearyController {
     }
     
     private void on_zoom_in() {
-        main_window.message_viewer.web_view.zoom_in();
+        main_window.conversation_viewer.web_view.zoom_in();
     }
 
     private void on_zoom_out() {
-        main_window.message_viewer.web_view.zoom_out();
+        main_window.conversation_viewer.web_view.zoom_out();
     }
 
     private void on_zoom_normal() {
-        main_window.message_viewer.web_view.zoom_level = 1.0f;
+        main_window.conversation_viewer.web_view.zoom_level = 1.0f;
     }
     
     private Geary.RFC822.MailboxAddress get_sender() {

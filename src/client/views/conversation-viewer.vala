@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class MessageViewer : Object {
+public class ConversationViewer : Object {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
@@ -81,7 +81,7 @@ public class MessageViewer : Object {
     private Geary.AccountSettings? current_settings = null;
     private bool load_external_images = false;
     
-    public MessageViewer() {
+    public ConversationViewer() {
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         
         external_images_info_bar = new Gtk.InfoBar.with_buttons(
@@ -98,7 +98,7 @@ public class MessageViewer : Object {
         }
         box.pack_start(external_images_info_bar, false, false);
     
-        web_view = new MessageWebView();
+        web_view = new ConversationWebView();
         
         web_view.valign = Gtk.Align.START;
         web_view.vexpand = true;
@@ -121,12 +121,12 @@ public class MessageViewer : Object {
         string html_text = GearyApplication.instance.read_theme_file("message-viewer.html") ?? "";
         web_view.load_string(html_text, "text/html", "UTF8", "");
         
-        Gtk.ScrolledWindow message_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
-        message_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        message_viewer_scrolled.add(web_view);
+        Gtk.ScrolledWindow conversation_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
+        conversation_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        conversation_viewer_scrolled.add(web_view);
         
         Gtk.Overlay message_overlay = new Gtk.Overlay();
-        message_overlay.add(message_viewer_scrolled);
+        message_overlay.add(conversation_viewer_scrolled);
         
         message_overlay_label = new Gtk.Label(null);
         message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
@@ -680,10 +680,10 @@ public class MessageViewer : Object {
     }
 
     private static void on_context_menu(WebKit.DOM.Element clicked_element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
-        Geary.Email email = message_viewer.get_email_from_element(clicked_element);
+        ConversationViewer conversation_viewer) {
+        Geary.Email email = conversation_viewer.get_email_from_element(clicked_element);
         if (email != null)
-            message_viewer.show_context_menu(email);
+            conversation_viewer.show_context_menu(email);
     }
     
     private void show_context_menu(Geary.Email email) {
@@ -748,32 +748,32 @@ public class MessageViewer : Object {
     }
 
     private static void on_menu_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
+        ConversationViewer conversation_viewer) {
         event.stop_propagation();
-        Geary.Email email = message_viewer.get_email_from_element(element);
+        Geary.Email email = conversation_viewer.get_email_from_element(element);
         if (email != null)
-            message_viewer.show_message_menu(email);
+            conversation_viewer.show_message_menu(email);
     }
 
     private static void on_unstar_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
+        ConversationViewer conversation_viewer) {
         event.stop_propagation();
-        Geary.Email? email = message_viewer.get_email_from_element(element);
+        Geary.Email? email = conversation_viewer.get_email_from_element(element);
         if (email != null)
-            message_viewer.unflag_message(email);
+            conversation_viewer.unflag_message(email);
     }
 
     private static void on_star_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
+        ConversationViewer conversation_viewer) {
         event.stop_propagation();
-        Geary.Email? email = message_viewer.get_email_from_element(element);
+        Geary.Email? email = conversation_viewer.get_email_from_element(element);
         if (email != null)
-            message_viewer.flag_message(email);
+            conversation_viewer.flag_message(email);
     }
 
     private static void on_value_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
-        if (!message_viewer.is_hidden_email(element))
+        ConversationViewer conversation_viewer) {
+        if (!conversation_viewer.is_hidden_email(element))
             event.stop_propagation();  // Don't allow toggle
     }
 
@@ -792,8 +792,8 @@ public class MessageViewer : Object {
     }
 
     private static void on_body_toggle_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
-        message_viewer.on_body_toggle_clicked_self(element);
+        ConversationViewer conversation_viewer) {
+        conversation_viewer.on_body_toggle_clicked_self(element);
     }
 
     private void on_body_toggle_clicked_self(WebKit.DOM.Element element) {
@@ -813,8 +813,8 @@ public class MessageViewer : Object {
     }
 
     private static void on_attachment_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
-        message_viewer.on_attachment_clicked_self(element);
+        ConversationViewer conversation_viewer) {
+        conversation_viewer.on_attachment_clicked_self(element);
     }
 
     private void on_attachment_clicked_self(WebKit.DOM.Element element) {
@@ -835,12 +835,12 @@ public class MessageViewer : Object {
     }
 
     private static void on_attachment_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        MessageViewer message_viewer) {
+        ConversationViewer conversation_viewer) {
         event.stop_propagation();
-        Geary.Email? email = message_viewer.get_email_from_element(element);
-        Geary.Attachment? attachment = message_viewer.get_attachment_from_element(element);
+        Geary.Email? email = conversation_viewer.get_email_from_element(element);
+        Geary.Attachment? attachment = conversation_viewer.get_attachment_from_element(element);
         if (email != null && attachment != null)
-            message_viewer.show_attachment_menu(email, attachment);
+            conversation_viewer.show_attachment_menu(email, attachment);
     }
     
     private void on_message_menu_selection_done() {

@@ -209,7 +209,7 @@ client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
 
 client/models/folder-list.vala
-client/models/message-list-store.vala
+client/models/conversation-list-store.vala
 
 client/notification/libindicate.vala
 client/notification/new-messages-indicator.vala
@@ -236,11 +236,11 @@ client/util/util-keyring.vala
 client/util/util-menu.vala
 client/util/util-webkit.vala
 
-client/views/formatted-message-data.vala
-client/views/message-list-cell-renderer.vala
-client/views/message-list-view.vala
-client/views/message-viewer.vala
-client/views/message-web-view.vala
+client/views/formatted-conversation-data.vala
+client/views/conversation-list-cell-renderer.vala
+client/views/conversation-list-view.vala
+client/views/conversation-viewer.vala
+client/views/conversation-web-view.vala
 )
 
 set(CONSOLE_SRC

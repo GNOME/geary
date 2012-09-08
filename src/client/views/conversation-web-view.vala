@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class MessageWebView : WebKit.WebView {
+public class ConversationWebView : WebKit.WebView {
     private int width = 0;
     private int height = 0;
     

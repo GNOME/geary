@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class MessageListView : Gtk.TreeView {
+public class ConversationListView : Gtk.TreeView {
     const int LOAD_MORE_HEIGHT = 100;
     
     private bool enable_load_more = true;
@@ -14,6 +14,8 @@ public class MessageListView : Gtk.TreeView {
     private double last_upper = -1.0;
     private bool reset_adjustment = false;
     private Gee.Set<Geary.Conversation> selected = new Gee.HashSet<Geary.Conversation>();
+    private ConversationListStore conversation_list_store;
+    private Geary.ConversationMonitor? conversation_monitor;
     
     public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
     
@@ -24,19 +26,17 @@ public class MessageListView : Gtk.TreeView {
     public signal void mark_conversation(Geary.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
-    private MessageListStore message_list_store;
-    private Geary.ConversationMonitor? conversation_monitor;
-    
-    public MessageListView(MessageListStore message_list_store) {
-        this.message_list_store = message_list_store;
-        set_model(message_list_store);
+    public ConversationListView(ConversationListStore conversation_list_store) {
+        this.conversation_list_store = conversation_list_store;
+        set_model(conversation_list_store);
         
         set_show_expanders(false);
         set_headers_visible(false);
         enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
         
-        append_column(create_column(MessageListStore.Column.MESSAGE_DATA, new MessageListCellRenderer(),
-            MessageListStore.Column.MESSAGE_DATA.to_string(), 0));
+        append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
+            new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
+            0));
         
         Gtk.TreeSelection selection = get_selection();
         selection.changed.connect(on_selection_changed);
@@ -45,8 +45,8 @@ public class MessageListView : Gtk.TreeView {
         show.connect(on_show);
         
         get_model().row_deleted.connect(on_row_deleted);
-        message_list_store.conversations_added_began.connect(on_conversations_added_began);
-        message_list_store.conversations_added_finished.connect(on_conversations_added_finished);
+        conversation_list_store.conversations_added_began.connect(on_conversations_added_began);
+        conversation_list_store.conversations_added_finished.connect(on_conversations_added_finished);
         button_press_event.connect(on_button_press);
 
         // Set up drag and drop.
@@ -132,7 +132,7 @@ public class MessageListView : Gtk.TreeView {
             (event.state & Gdk.ModifierType.CONTROL_MASK) == 0 &&
             event.type == Gdk.EventType.BUTTON_PRESS && cell_x < 25 && cell_y < 25) {
             
-            Geary.Conversation conversation = message_list_store.get_conversation_at_path(path);
+            Geary.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.FLAGGED);
             if (conversation.is_flagged()) {
@@ -147,7 +147,7 @@ public class MessageListView : Gtk.TreeView {
 
     private void on_style_changed() {
         // Recalculate dimensions of child cells.
-        MessageListCellRenderer.style_changed(this);
+        ConversationListCellRenderer.style_changed(this);
     }
     
     private void on_show() {
@@ -170,7 +170,7 @@ public class MessageListView : Gtk.TreeView {
         }
     }
     
-    private static Gtk.TreeViewColumn create_column(MessageListStore.Column column,
+    private static Gtk.TreeViewColumn create_column(ConversationListStore.Column column,
         Gtk.CellRenderer renderer, string attr, int width = 0) {
         Gtk.TreeViewColumn view_column = new Gtk.TreeViewColumn.with_attributes(column.to_string(),
             renderer, attr, column);
@@ -210,7 +210,7 @@ public class MessageListView : Gtk.TreeView {
         // Conversations are selected, so collect them and signal if different
         Gee.HashSet<Geary.Conversation> new_selected = new Gee.HashSet<Geary.Conversation>();
         foreach (Gtk.TreePath path in paths) {
-            Geary.Conversation? conversation = message_list_store.get_conversation_at_path(path);
+            Geary.Conversation? conversation = conversation_list_store.get_conversation_at_path(path);
             if (conversation != null)
                 new_selected.add(conversation);
         }
@@ -230,7 +230,7 @@ public class MessageListView : Gtk.TreeView {
     }
 
     public void select_conversation(Geary.Conversation conversation) {
-        Gtk.TreePath path = message_list_store.get_path_for_conversation(conversation);
+        Gtk.TreePath path = conversation_list_store.get_path_for_conversation(conversation);
         if (path != null)
             set_cursor(path, null, false);
     }
