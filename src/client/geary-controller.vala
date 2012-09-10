@@ -74,6 +74,7 @@ public class GearyController {
     private Geary.Folder? current_folder = null;
     private Geary.Folder? inbox_folder = null;
     private Geary.ConversationMonitor? current_conversations = null;
+    private Geary.ConversationMonitor? inbox_conversations = null;
     private int busy_count = 0;
     private Gee.Set<Geary.Conversation> selected_conversations = new Gee.HashSet<Geary.Conversation>();
     private Geary.Conversation? last_deleted_conversation = null;
@@ -261,12 +262,25 @@ public class GearyController {
             main_window.conversation_list_store.account_owner_email = null;
             main_window.folder_list.remove_all_branches();
             
+            if (inbox_conversations != null) {
+                try {
+                    yield inbox_conversations.stop_monitoring_async(true, cancellable);
+                } catch (Error close_conversations_err) {
+                    debug("Unable to stop monitoring inbox: %s", close_conversations_err.message);
+                }
+                
+                inbox_conversations = null;
+                inbox_folder = null;
+            }
+            
             if (inbox_folder != null) {
                 try {
                     yield inbox_folder.close_async(cancellable);
                 } catch (Error close_inbox_err) {
                     debug("Unable to close monitored inbox: %s", close_inbox_err.message);
                 }
+                
+                inbox_folder = null;
             }
             
             try {
@@ -356,6 +370,9 @@ public class GearyController {
     private async void do_select_folder(Geary.Folder folder) throws Error {
         cancel_folder();
         
+        Cancellable? conversation_cancellable = (current_folder != inbox_folder)
+            ? cancellable_folder : cancellable_inbox;
+        
         // stop monitoring for conversations and close the folder (but only if not the inbox_folder,
         // which we leave open for notifications)
         if (current_conversations != null) {
@@ -369,7 +386,7 @@ public class GearyController {
             debug("switching to %s", folder.to_string());
         
         current_folder = folder;
-        main_window.conversation_list_store.set_current_folder(current_folder, cancellable_folder);
+        main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
         
         // The current folder may be null if the user rapidly switches between folders. If they have
         // done that then this folder selection is invalid anyways, so just return.
@@ -380,8 +397,17 @@ public class GearyController {
         
         update_ui();
         
-        current_conversations = new Geary.ConversationMonitor(current_folder, false,
-            ConversationListStore.REQUIRED_FIELDS);
+        if (current_folder != inbox_folder) {
+            current_conversations = new Geary.ConversationMonitor(current_folder, false,
+                ConversationListStore.REQUIRED_FIELDS);
+        } else {
+            if (inbox_conversations == null) {
+                inbox_conversations = new Geary.ConversationMonitor(inbox_folder, false,
+                    ConversationListStore.REQUIRED_FIELDS);
+            }
+            
+            current_conversations = inbox_conversations;
+        }
         
         current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);
@@ -393,7 +419,8 @@ public class GearyController {
         main_window.conversation_list_store.set_conversation_monitor(current_conversations);
         main_window.conversation_list_view.set_conversation_monitor(current_conversations);
         
-        yield current_conversations.start_monitoring_async(FETCH_EMAIL_CHUNK_COUNT, cancellable_folder);
+        if (!current_conversations.is_monitoring)
+            yield current_conversations.start_monitoring_async(FETCH_EMAIL_CHUNK_COUNT, conversation_cancellable);
     }
     
     private void on_scan_started() {

@@ -73,6 +73,9 @@ public class ConversationListStore : Gtk.ListStore {
         conversation_monitor = new_conversation_monitor;
         
         if (conversation_monitor != null) {
+            // add all existing conversations
+            on_conversations_added(conversation_monitor.get_conversations());
+            
             conversation_monitor.scan_completed.connect(on_scan_completed);
             conversation_monitor.conversations_added.connect(on_conversations_added);
             conversation_monitor.conversation_removed.connect(on_conversation_removed);

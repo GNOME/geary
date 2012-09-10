@@ -141,7 +141,7 @@ public class Geary.ConversationMonitor : Object {
     
     public Geary.Folder folder { get; private set; }
     public bool reestablish_connections { get; set; default = true; }
-    public bool monitoring { get; private set; default = false; }
+    public bool is_monitoring { get; private set; default = false; }
     
     private Geary.Email.Field required_fields;
     private bool readonly;
@@ -269,7 +269,7 @@ public class Geary.ConversationMonitor : Object {
     }
     
     ~Conversations() {
-        if (monitoring)
+        if (is_monitoring)
             debug("Warning: Conversations object destroyed without stopping monitoring");
         
         // Manually detach all the weak refs in the Conversation objects
@@ -332,11 +332,11 @@ public class Geary.ConversationMonitor : Object {
     
     public async bool start_monitoring_async(int min_window_count, Cancellable? cancellable = null)
         throws Error {
-        if (monitoring)
+        if (is_monitoring)
             return false;
         
         // set before yield to guard against reentrancy
-        monitoring = true;
+        is_monitoring = true;
         
         this.min_window_count = min_window_count;
         cancellable_monitor = cancellable;
@@ -352,7 +352,7 @@ public class Geary.ConversationMonitor : Object {
             try {
                 yield folder.open_async(readonly, cancellable);
             } catch (Error err) {
-                monitoring = false;
+                is_monitoring = false;
                 
                 throw err;
             }
@@ -389,11 +389,11 @@ public class Geary.ConversationMonitor : Object {
         // always unschedule, as Timeout will hold a reference to this object
         unschedule_retry();
         
-        if (!monitoring)
+        if (!is_monitoring)
             return;
         
         // set now to prevent reentrancy during yield or signal
-        monitoring = false;
+        is_monitoring = false;
         
         folder.email_appended.disconnect(on_folder_email_appended);
         folder.email_removed.disconnect(on_folder_email_removed);
