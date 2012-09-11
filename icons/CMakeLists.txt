@@ -15,6 +15,7 @@ set(ICON_FILES
 set(ICON_FILES_16
     16x16/tag.svg
     16x16/tag-new.svg
+    16x16/tags.svg
 )
 
 set(ICON_FILES_24
