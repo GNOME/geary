@@ -762,11 +762,9 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_select_color() {
-        Gtk.ColorSelectionDialog dialog = new Gtk.ColorSelectionDialog("Select Color");
+        Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog("Select Color", this);
         if (dialog.run() == Gtk.ResponseType.OK) {
-            string color = ((Gtk.ColorSelection) dialog.get_color_selection()).
-                current_rgba.to_string();
-            
+            string color = dialog.get_rgba().to_string();
             editor.get_dom_document().exec_command("forecolor", false, color);
         }
         

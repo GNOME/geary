@@ -315,7 +315,7 @@ pkg_check_modules(DEPS REQUIRED QUIET
     gthread-2.0
     glib-2.0>=2.30.0
     gio-2.0>=2.28.0
-    gtk+-3.0>=3.2.0
+    gtk+-3.0>=3.4.0
     gee-1.0>=0.6.0
     unique-3.0>=3.0.0
     libnotify>=0.7.5
