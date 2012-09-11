@@ -2,8 +2,6 @@ set(ICONS_DEST share/geary/icons)
 
 set(ICON_FILES
     application-menu.svg
-    archive.svg
-    archive-insert.svg
     mail-inbox.png
     mail-sent.png
     menu-down.svg
@@ -13,7 +11,7 @@ set(ICON_FILES
 )
 
 set(ICON_FILES_16
-    16x16/mail-archive
+    16x16/mail-archive.svg
     16x16/tag.svg
     16x16/tag-new.svg
     16x16/tags.svg
