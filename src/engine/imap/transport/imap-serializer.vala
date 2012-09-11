@@ -52,11 +52,8 @@ public class Geary.Imap.Serializer {
             break;
             
             case DataFormat.Quoting.REQUIRED:
-                string quoted;
-                DataFormat.Quoting requirement = DataFormat.convert_to_quoted(str, out quoted);
-                assert(requirement == DataFormat.Quoting.REQUIRED);
-                
-                douts.put_string(quoted);
+                bool required = push_quoted_string(str);
+                assert(required);
             break;
             
             case DataFormat.Quoting.UNALLOWED:
@@ -64,6 +61,19 @@ public class Geary.Imap.Serializer {
                 // TODO: Not handled currently
                 assert_not_reached();
         }
+    }
+    
+    /**
+     * Pushes the string to the IMAP server with quoting applied whether required or not.  Returns
+     * true if quoting was required.
+     */
+    public bool push_quoted_string(string str) throws Error {
+        string quoted;
+        DataFormat.Quoting requirement = DataFormat.convert_to_quoted(str, out quoted);
+        
+        douts.put_string(quoted);
+        
+        return (requirement == DataFormat.Quoting.REQUIRED);
     }
     
     /**

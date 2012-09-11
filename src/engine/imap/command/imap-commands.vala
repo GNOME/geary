@@ -169,3 +169,25 @@ public class Geary.Imap.CopyCommand : Command {
     }
 }
 
+public class Geary.Imap.IdCommand : Command {
+    public const string NAME = "id";
+    
+    public IdCommand(Gee.HashMap<string, string> fields) {
+        base (NAME);
+        
+        ListParameter list = new ListParameter(this);
+        foreach (string key in fields.keys) {
+            list.add(new QuotedStringParameter(key));
+            list.add(new QuotedStringParameter(fields.get(key)));
+        }
+        
+        add(list);
+    }
+    
+    public IdCommand.nil() {
+        base (NAME);
+        
+        add(NilParameter.instance);
+    }
+}
+

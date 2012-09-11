@@ -4,12 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
+// Defined by CMake build script.
+extern const string _VERSION;
+
 errordomain CommandException {
     USAGE,
     STATE
 }
 
 class ImapConsole : Gtk.Window {
+    public const string VERSION = _VERSION;
+    
     private static const int KEEPALIVE_SEC = 60 * 10;
     
     private Gtk.TextView console = new Gtk.TextView();
@@ -81,6 +86,7 @@ class ImapConsole : Gtk.Window {
         "disconnect",
         "login",
         "logout",
+        "id",
         "bye",
         "list",
         "xlist",
@@ -147,6 +153,10 @@ class ImapConsole : Gtk.Window {
                     case "bye":
                     case "kthxbye":
                         logout(cmd, args);
+                    break;
+                    
+                    case "id":
+                        id(cmd, args);
                     break;
                     
                     case "list":
@@ -350,6 +360,27 @@ class ImapConsole : Gtk.Window {
         try {
             cx.send_async.end(result);
             status("Logged out");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
+    private void id(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 0, null);
+        
+        status("Retrieving ID...");
+        
+        Gee.HashMap<string, string> fields = new Gee.HashMap<string, string>();
+        fields.set("name", "geary-console");
+        fields.set("version", VERSION);
+        
+        cx.send_async.begin(new Geary.Imap.IdCommand(fields), null, on_id);
+    }
+    
+    private void on_id(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Retrieved ID");
         } catch (Error err) {
             exception(err);
         }
