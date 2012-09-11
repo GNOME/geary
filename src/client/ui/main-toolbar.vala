@@ -26,11 +26,13 @@ public class MainToolbar : Gtk.Box {
         // Setup the folder menus (move/copy).
         Gtk.ToggleToolButton copy_menu_button = set_toolbutton_action(builder,
             GearyController.ACTION_COPY_MENU) as Gtk.ToggleToolButton;
-        copy_folder_menu = new FolderMenu(copy_menu_button, "tag-new", _("Label as"));
+        copy_folder_menu = new FolderMenu(copy_menu_button,
+            IconFactory.instance.get_custom_icon("tag-new", IconFactory.ICON_TOOLBAR), _("Label as"));
 
         Gtk.ToggleToolButton move_menu_button = set_toolbutton_action(builder,
             GearyController.ACTION_MOVE_MENU) as Gtk.ToggleToolButton;
-        move_folder_menu = new FolderMenu(move_menu_button, "mail-move", _("Move to"));
+        move_folder_menu = new FolderMenu(move_menu_button,
+            IconFactory.instance.get_custom_icon("mail-move", IconFactory.ICON_TOOLBAR), _("Move to"));
 
         // Assemble mark menu button.
         GearyApplication.instance.load_ui_file("toolbar_mark_menu.ui");

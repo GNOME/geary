@@ -6,6 +6,9 @@
 
 // Singleton class to hold icons.
 public class IconFactory {
+    public const Gtk.IconSize ICON_TOOLBAR = Gtk.IconSize.LARGE_TOOLBAR;
+    public const Gtk.IconSize ICON_SIDEBAR = Gtk.IconSize.MENU;
+    
     private static IconFactory? _instance = null;
     public static IconFactory instance {
         get {
@@ -23,19 +26,19 @@ public class IconFactory {
     
     public const int UNREAD_ICON_SIZE = 16;
     public Gdk.Pixbuf unread { get; private set; }
-
+    
     public const int STAR_ICON_SIZE = 16;
     public Gdk.Pixbuf starred { get; private set; }
     public Gdk.Pixbuf unstarred { get; private set; }
-
-    public ThemedIcon label_icon { get; private set; default = new ThemedIcon("tag"); }
-    public ThemedIcon label_folder_icon { get; private set; default = new ThemedIcon("tag"); }
     
     private Gtk.IconTheme icon_theme { get; private set; }
+    
+    private File icons_dir;
     
     // Creates the icon factory.
     private IconFactory() {
         icon_theme = Gtk.IconTheme.get_default();
+        icons_dir = GearyApplication.instance.get_resource_directory().get_child("icons");
         
         append_icons_search_path(null);
         append_icons_search_path("128x128");
@@ -50,13 +53,27 @@ public class IconFactory {
         unstarred = load("non-starred-grey", STAR_ICON_SIZE);
     }
     
-    private void append_icons_search_path(string? name) {
-        File basedir = GearyApplication.instance.get_resource_directory().get_child("icons");
+    public Icon get_custom_icon(string name, Gtk.IconSize size) {
+        int pixels;
+        switch (size) {
+            case ICON_SIDEBAR:
+                pixels = 16;
+            break;
+            
+            case ICON_TOOLBAR:
+            default:
+                pixels = 24;
+            break;
+        }
         
+        return new FileIcon(icons_dir.get_child("%dx%d".printf(pixels, pixels)).get_child("%s.svg".printf(name)));
+    }
+    
+    private void append_icons_search_path(string? name) {
         if (Geary.String.is_empty(name))
-            icon_theme.append_search_path(basedir.get_path());
+            icon_theme.append_search_path(icons_dir.get_path());
         else
-            icon_theme.append_search_path(basedir.get_child(name).get_path());
+            icon_theme.append_search_path(icons_dir.get_child(name).get_path());
     }
     
     private Gdk.Pixbuf? load(string icon_name, int size, Gtk.IconLookupFlags flags = 0) {

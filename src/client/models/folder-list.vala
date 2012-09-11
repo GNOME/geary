@@ -37,7 +37,7 @@ public class FolderList : Sidebar.Tree {
         public Icon? get_sidebar_icon() {
             switch (folder.get_special_folder_type()) {
                 case Geary.SpecialFolderType.NONE:
-                    return IconFactory.instance.label_icon;
+                    return IconFactory.instance.get_custom_icon("tag", IconFactory.ICON_SIDEBAR);
                 
                 case Geary.SpecialFolderType.INBOX:
                     return new ThemedIcon("mail-inbox");
@@ -132,7 +132,8 @@ public class FolderList : Sidebar.Tree {
     }
     
     private void reset_user_folder_group() {
-        user_folder_group = new Sidebar.Grouping("", IconFactory.instance.label_folder_icon);
+        user_folder_group = new Sidebar.Grouping("",
+            IconFactory.instance.get_custom_icon("tags", IconFactory.ICON_SIDEBAR));
         user_folder_branch = new Sidebar.Branch(user_folder_group,
             Sidebar.Branch.Options.STARTUP_OPEN_GROUPING, user_folder_comparator);
     }
