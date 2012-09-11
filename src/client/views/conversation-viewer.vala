@@ -716,11 +716,6 @@ public class ConversationViewer : Object {
             }
         }
         
-        // View original message source
-        Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("View _Source"));
-        view_source_item.activate.connect(() => on_view_source(email));
-        menu.append(view_source_item);
-
         // Select all.
         Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
         select_all_item.activate.connect(on_select_all);
