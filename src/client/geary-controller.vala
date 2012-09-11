@@ -63,7 +63,7 @@ public class GearyController {
     
     private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
     private const string ARCHIVE_MESSAGE_TOOLTIP = _("Archive the selected conversation");
-    private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-insert";
+    private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive";
     
     public MainWindow main_window { get; private set; }
     

@@ -13,12 +13,14 @@ set(ICON_FILES
 )
 
 set(ICON_FILES_16
+    16x16/mail-archive
     16x16/tag.svg
     16x16/tag-new.svg
     16x16/tags.svg
 )
 
 set(ICON_FILES_24
+    24x24/mail-archive.svg
     24x24/mail-move.svg
     24x24/tag.svg
     24x24/tag-new.svg

@@ -52,7 +52,7 @@ public class FolderList : Sidebar.Tree {
                     return new ThemedIcon("starred");
                 
                 case Geary.SpecialFolderType.ALL_MAIL:
-                    return new ThemedIcon("archive");
+                    return IconFactory.instance.get_custom_icon("mail-archive", IconFactory.ICON_SIDEBAR);
                 
                 case Geary.SpecialFolderType.SPAM:
                     return new ThemedIcon("mail-mark-junk");
