@@ -47,9 +47,9 @@ public class Geary.Imap.FetchResults : Geary.Imap.CommandResults {
             
             if (FetchBodyDataType.is_fetch_body(data_item_param)) {
                 // FETCH body data items are merely a literal of all requested fields formatted
-                // in RFC822 header format ... watch for empty return values
+                // in RFC822 header format ... watch for empty return values and NIL
                 if (has_value)
-                    results.body_data.add(list.get_as_literal(ctr + 1).get_buffer());
+                    results.body_data.add(list.get_as_empty_literal(ctr + 1).get_buffer());
                 else
                     results.body_data.add(Memory.EmptyBuffer.instance);
             } else {

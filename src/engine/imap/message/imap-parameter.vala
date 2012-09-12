@@ -392,7 +392,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return (LiteralParameter?) get_if(index, typeof(LiteralParameter));
     }
     
-    public LiteralParameter get_as_empty_parameter(int index) throws ImapError {
+    public LiteralParameter get_as_empty_literal(int index) throws ImapError {
         LiteralParameter? param = get_as_nullable_literal(index);
         
         return param ?? new LiteralParameter(Geary.Memory.EmptyBuffer.instance);
