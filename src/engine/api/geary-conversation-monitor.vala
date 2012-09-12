@@ -215,6 +215,9 @@ public class Geary.ConversationMonitor : Object {
     
     /**
      * "conversations-removed" is fired when all the email in a Conversation has been removed.
+     * It's possible this will be called without a signal alerting that it's emails have been
+     * removed, i.e. a "conversation-removed" signal may fire with no accompanying
+     * "conversation-trimmed".
      *
      * Note that this can only occur when monitoring is enabled.  There is (currently) no
      * user call to manually remove email from Conversations.
@@ -238,7 +241,9 @@ public class Geary.ConversationMonitor : Object {
     /**
      * "conversation-trimmed" is fired when an Email has been removed from the Folder, and therefore
      * from the specified Conversation.  If the trimmed Email is the last usable Email in the
-     * Conversation, this signal will be followed by "conversation-removed".
+     * Conversation, this signal will be followed by "conversation-removed".  However, it's
+     * possible for "conversation-removed" to fire without "conversation-trimmed" preceding it,
+     * in the case of all emails being removed from a Conversation at once.
      *
      * There is (currently) no user-specified call to manually remove Email from Conversations.
      * This is only called when monitoring is enabled.
@@ -580,43 +585,6 @@ public class Geary.ConversationMonitor : Object {
         }
     }
     
-    private void remove_email(Geary.EmailIdentifier removed_id) {
-        // Remove EmailIdentifier from map
-        ImplConversation conversation;
-        if (!geary_id_map.unset(removed_id, out conversation)) {
-            debug("Removed email %s not found on conversations model", removed_id.to_string());
-            
-            return;
-        }
-        
-        Geary.Email? found = conversation.get_email_by_id(removed_id);
-        if (found == null) {
-            debug("WARNING: Unable to locate email ID %s in conversation %s", removed_id.to_string(),
-                conversation.to_string());
-            
-            return;
-        }
-        
-        conversation.remove(found);
-        
-        bool removed = false;
-        if (conversation.get_count() == 0) {
-            // remove the Conversation from the master list
-            removed = conversations.remove((ImplConversation) conversation);
-            if (removed) {
-                debug("Removing Email ID %s evaporates conversation %s", removed_id.to_string(),
-                    conversation.to_string());
-            } else {
-                debug("WARNING: Conversation %s already removed from master list (Email ID %s)",
-                    conversation.to_string(), removed_id.to_string());
-            }
-        }
-        
-        notify_conversation_trimmed(conversation, found);
-        if (removed)
-            notify_conversation_removed(conversation);
-    }
-    
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
         debug("%d message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
             folder.to_string());
@@ -625,8 +593,54 @@ public class Geary.ConversationMonitor : Object {
     }
     
     private void on_folder_email_removed(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
-        foreach (Geary.EmailIdentifier id in removed_ids)
-            remove_email(id);
+        debug("%d messages(s) removed to %s, trimming/removing conversations...", removed_ids.size,
+            folder.to_string());
+        
+        Gee.HashSet<Conversation> removed = new Gee.HashSet<Conversation>();
+        Gee.HashMultiMap<Conversation, Email> trimmed = new Gee.HashMultiMap<Conversation, Email>();
+        foreach (Geary.EmailIdentifier removed_id in removed_ids) {
+            ImplConversation conversation;
+            if (!geary_id_map.unset(removed_id, out conversation)) {
+                debug("Removed email %s not found on conversations model", removed_id.to_string());
+                
+                continue;
+            }
+            
+            Geary.Email? found = conversation.get_email_by_id(removed_id);
+            if (found == null) {
+                debug("WARNING: Unable to locate email ID %s in conversation %s", removed_id.to_string(),
+                    conversation.to_string());
+                
+                continue;
+            }
+            
+            conversation.remove(found);
+            trimmed.set(conversation, found);
+            
+            if (conversation.get_count() == 0) {
+                bool is_removed = conversations.remove((ImplConversation) conversation);
+                if (is_removed) {
+                    debug("Removing Email ID %s evaporates conversation %s", removed_id.to_string(),
+                        conversation.to_string());
+                    removed.add(conversation);
+                } else {
+                    debug("WARNING: Conversation %s already removed from master list (Email ID %s)",
+                        conversation.to_string(), removed_id.to_string());
+                }
+            }
+        }
+        
+        // for Conversations that have been removed, don't notify they're trimmed
+        foreach (Conversation conversation in removed)
+            trimmed.remove_all(conversation);
+        
+        foreach (Conversation conversation in trimmed.get_keys()) {
+            foreach (Email email in trimmed.get(conversation))
+                notify_conversation_trimmed(conversation, email);
+        }
+        
+        foreach (Conversation conversation in removed)
+            notify_conversation_removed(conversation);
     }
     
     private void on_folder_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {

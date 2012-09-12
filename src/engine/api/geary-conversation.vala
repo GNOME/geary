@@ -58,10 +58,60 @@ public abstract class Geary.Conversation : Object {
     }
     
     /**
-     * Returns the email to use for a preview in a conversation.
+     * Returns true if this Conversation's earliest (first sent) email is earlier than
+     * the supplied Conversation's earliest email.  An empty Conversation is defined as being
+     * earlier than a non-empty conversation.  Comparing two empty Conversations or two Conversations
+     * with the same earliest date is undefined.
+     */
+    public bool is_earlier(Geary.Conversation other) {
+        Email? this_earliest = get_earliest_email();
+        Email? other_earliest = other.get_earliest_email();
+        
+        if (this_earliest == null)
+            return true;
+        
+        // this_earliest != null
+        if (other_earliest == null)
+            return false;
+        
+        return this_earliest.date.value.compare(other_earliest.date.value) < 0;
+    }
+    
+    /**
+     * Returns true if this Conversation's latest (most recently sent) email is more recent than
+     * the supplied Conversation's latest email.  An empty Conversation is defined as being
+     * earlier than a non-empty conversation.  Comparing two empty Conversations or two
+     * Conversations with the same latest date is undefined.
+     */
+    public bool is_later(Geary.Conversation other) {
+        Email? this_latest = get_latest_email();
+        Email? other_latest = other.get_latest_email();
+        
+        if (this_latest == null)
+            return (other_latest != null);
+        
+        // this_latest != null
+        if (other_latest == null)
+            return true;
+        
+        return this_latest.date.value.compare(other_latest.date.value) > 0;
+    }
+    
+    /**
+     * Returns the earliest (first sent) email in the Conversation.
+     */
+    public Geary.Email? get_earliest_email() {
+        Gee.List<Geary.Email> pool = get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
+        
+        return pool.size == 0 ? null : pool.first();
+    }
+    
+    /**
+     * Returns the latest (most recently sent) email in the Conversation.
      */
     public Geary.Email? get_latest_email() {
         Gee.List<Geary.Email> pool = get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
+        
         return pool.size == 0 ? null : pool.last();
     }
     
