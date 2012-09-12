@@ -7,8 +7,10 @@
 public abstract class Geary.Imap.Parameter : Object, Serializable {
     public abstract async void serialize(Serializer ser) throws Error;
     
-    // to_string() returns a representation of the Parameter suitable for logging and debugging,
-    // but should not be relied upon for wire or persistent representation.
+    /**
+     * to_string() returns a representation of the Parameter suitable for logging and debugging,
+     * but should not be relied upon for wire or persistent representation.
+     */
     public abstract string to_string();
 }
 
@@ -132,6 +134,16 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
         return buffer;
     }
     
+    /**
+     * Returns the LiteralParameter as though it had been a StringParameter on the wire.  Note
+     * that this does not deal with quoting issues or NIL (which should never be literalized to
+     * begin with).  It merely converts the literal data to a UTF-8 string and returns it as a
+     * StringParameter.
+     */
+    public StringParameter to_string_parameter() {
+        return new StringParameter(buffer.to_valid_utf8());
+    }
+    
     public override string to_string() {
         return "{literal/%lub}".printf(get_size());
     }
@@ -144,6 +156,12 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
 }
 
 public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
+    /**
+     * The maximum length a literal parameter may be to be auto-converted to a StringParameter
+     * in the StringParameter getters.
+     */
+    public const int MAX_STRING_LITERAL_LENGTH = 4096;
+    
     private weak ListParameter? parent;
     private Gee.List<Parameter> list = new Gee.ArrayList<Parameter>();
     
@@ -167,12 +185,19 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return list.size;
     }
     
+    /**
+     * Returns the Parameter at the index in the list, null if index is out of range.
+     */
     public new Parameter? get(int index) {
-        return (index < list.size) ? list.get(index) : null;
+        return ((index >= 0) && (index < list.size)) ? list.get(index) : null;
     }
     
+    /**
+     * Returns the Parameter at the index.  Throws an ImapError.TYPE_ERROR if the index is out of
+     * range.
+     */
     public Parameter get_required(int index) throws ImapError {
-        if (index >= list.size)
+        if ((index < 0) || (index >= list.size))
             throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
         
         Parameter? param = list.get(index);
@@ -182,6 +207,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return param;
     }
     
+    /**
+     * Returns Paramater at index if in range and of Type type, otherwise throws an
+     * ImapError.TYPE_ERROR.  type must be of type Parameter.
+     */
     public Parameter get_as(int index, Type type) throws ImapError {
         assert(type.is_a(typeof(Parameter)));
         
@@ -194,6 +223,9 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return param;
     }
     
+    /**
+     * Like get_as(), but returns null if the Parameter at index is a NilParameter.
+     */
     public Parameter? get_as_nullable(int index, Type type) throws ImapError {
         assert(type.is_a(typeof(Parameter)));
         
@@ -209,6 +241,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return param;
     }
     
+    /**
+     * Like get(), but returns null if Parameter at index is not of the specified type.  type must
+     * be of type Parameter.
+     */
     public Parameter? get_if(int index, Type type) {
         assert(type.is_a(typeof(Parameter)));
         
@@ -219,22 +255,111 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return param;
     }
     
-    public StringParameter get_as_string(int index) throws ImapError {
+    /**
+     * Returns a StringParameter only if the Parameter at index is a StringParameter (quoted or
+     * atom string).
+     */
+    public StringParameter get_only_as_string(int index) throws ImapError {
         return (StringParameter) get_as(index, typeof(StringParameter));
     }
     
-    public StringParameter? get_as_nullable_string(int index) throws ImapError {
+    /**
+     * Returns a StringParameter only if the Parameter at index is a StringParameter (quoted or
+     * atom string).
+     */
+    public StringParameter? get_only_as_nullable_string(int index) throws ImapError {
         return (StringParameter?) get_as_nullable(index, typeof(StringParameter));
     }
     
-    public StringParameter get_as_empty_string(int index) throws ImapError {
-        StringParameter? param = get_as_nullable_string(index);
+    /**
+     * Returns a StringParameter only if the Parameter at index is a StringParameter (quoted or
+     * atom string).  Returns an empty StringParameter if index is for a NilParameter;
+     */
+    public StringParameter get_only_as_empty_string(int index) throws ImapError {
+        StringParameter? param = get_only_as_nullable_string(index);
         
         return param ?? new StringParameter("");
     }
     
-    public StringParameter? get_if_string(int index) {
+    /**
+     * Returns a StringParameter only if the Parameter at index is a StringParameter (quoted or
+     * atom string).
+     */
+    public StringParameter? get_only_if_string(int index) {
         return (StringParameter?) get_if(index, typeof(StringParameter));
+    }
+    
+    /**
+     * Returns the StringParameter at the index only if the Parameter is a StringParameter or a
+     * LiteralParameter with a length less than or equal to MAX_STRING_LITERAL_LENGTH.  Throws an
+     * ImapError.TYPE_ERROR if a literal longer than that value.
+     */
+    public StringParameter get_as_string(int index) throws ImapError {
+        Parameter param = get_required(index);
+        
+        StringParameter? stringp = param as StringParameter;
+        if (stringp != null)
+            return stringp;
+        
+        LiteralParameter? literalp = param as LiteralParameter;
+        if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
+            return literalp.to_string_parameter();
+        
+        throw new ImapError.TYPE_ERROR("Parameter %d not of type string or literal (is %s)", index,
+            param.get_type().name());
+    }
+    
+    /**
+     * Much like get_nullable() for StringParameters, but will convert a LiteralParameter to a
+     * StringParameter if its length is less than or equal to MAX_STRING_LITERAL_LENGTH.  Throws
+     * an ImapError.TYPE_ERROR if literal is longer than that value.
+     */
+    public StringParameter? get_as_nullable_string(int index) throws ImapError {
+        Parameter? param = get_as_nullable(index, typeof(Parameter));
+        if (param == null)
+            return null;
+        
+        StringParameter? stringp = param as StringParameter;
+        if (stringp != null)
+            return stringp;
+        
+        LiteralParameter? literalp = param as LiteralParameter;
+        if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
+            return literalp.to_string_parameter();
+        
+        throw new ImapError.TYPE_ERROR("Parameter %d not of type string or literal (is %s)", index,
+            param.get_type().name());
+    }
+    
+    /**
+     * Much like get_as_nullable_string() but returns an empty StringParameter (rather than null)
+     * if the parameter at index is a NilParameter.
+     */
+    public StringParameter get_as_empty_string(int index) throws ImapError {
+        StringParameter? stringp = get_as_nullable_string(index);
+        
+        return stringp ?? new StringParameter("");
+    }
+    
+    /**
+     * Returns the StringParameter at the index only if the Parameter is a StringParameter or a
+     * LiteralParameter with a length less than or equal to MAX_STRING_LITERAL_LENGTH.  Returns null
+     * if either is not true.
+     */
+    public StringParameter? get_if_string(int index) {
+        Parameter? param = get(index);
+        if (param == null)
+            return null;
+        
+        StringParameter? stringp = param as StringParameter;
+        if (stringp != null)
+            return stringp;
+        
+        LiteralParameter? literalp = param as LiteralParameter;
+        if (literalp != null && literalp.get_size() <= MAX_STRING_LITERAL_LENGTH)
+            return literalp.to_string_parameter();
+        
+        return null;
     }
     
     public ListParameter get_as_list(int index) throws ImapError {

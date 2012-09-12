@@ -23,9 +23,11 @@ public abstract class Geary.Imap.FetchDataDecoder {
         this.data_item = data_item;
     }
     
-    // The default implementation determines the type of the parameter and calls the appropriate
-    // virtual function; most implementations of a FetchResponseDecoder shouldn't need to override
-    // this method.
+    /*
+     * The default implementation determines the type of the parameter and calls the appropriate
+     * virtual function; most implementations of a FetchResponseDecoder shouldn't need to override
+     * this method.
+     */
     public virtual MessageData decode(Parameter param) throws ImapError {
         StringParameter? stringp = param as StringParameter;
         if (stringp != null)
@@ -36,8 +38,21 @@ public abstract class Geary.Imap.FetchDataDecoder {
             return decode_list(listp);
         
         LiteralParameter? literalp = param as LiteralParameter;
-        if (literalp != null)
+        if (literalp != null) {
+            // because this method is called without the help of get_as_string() (which converts
+            // reasonably-length literals into StringParameters), do so here manually
+            try {
+                if (literalp.get_size() <= ListParameter.MAX_STRING_LITERAL_LENGTH)
+                    return decode_string(literalp.to_string_parameter());
+            } catch (ImapError imap_err) {
+                // if decode_string() throws a TYPE_ERROR, retry as a LiteralParameter, otherwise
+                // relay the exception to the caller
+                if (!(imap_err is ImapError.TYPE_ERROR))
+                    throw imap_err;
+            }
+            
             return decode_literal(literalp);
+        }
         
         NilParameter? nilp = param as NilParameter;
         if (nilp != null)

@@ -103,12 +103,12 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                 MailboxAttributes attributes = new MailboxAttributes(attrlist);
                 if (Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
                     info = new MailboxInformation(Geary.Imap.Account.INBOX_NAME, delim.nullable_value,
-                        attributes);                    
+                        attributes);
                 } else {
                     info = new MailboxInformation(mailbox.value, delim.nullable_value,
                         attributes);
                 }
-
+                
                 map.set(mailbox.value, info);
                 list.add(info);
             } catch (ImapError ierr) {
