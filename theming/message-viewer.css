@@ -126,17 +126,17 @@ pre {
 .avatar {
     display: none;
     image-rendering: optimizeQuality;
-    margin-left: 2px;
 }
 .avatar[src^=file], .avatar[src^=http] {
     display: inline;
     width: 48px;
     height: 48px;
-    float: right;
+    float: left;
 }
 .email.hide .header_container .avatar {
     width: 24px;
     height: 24px;
+    margin-right: 4px;
 }
 
 .email .body {
