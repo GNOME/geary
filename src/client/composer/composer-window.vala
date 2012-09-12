@@ -100,6 +100,7 @@ public class ComposerWindow : Gtk.Window {
     private EmailEntry cc_entry;
     private EmailEntry bcc_entry;
     private Gtk.Entry subject_entry;
+    private Gtk.Button cancel_button;
     private Gtk.Button send_button;
     private Gtk.ToggleToolButton font_button;
     private Gtk.ToggleToolButton font_size_button;
@@ -146,6 +147,8 @@ public class ComposerWindow : Gtk.Window {
         Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
         
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
+        cancel_button = builder.get_object("Cancel") as Gtk.Button;
+        cancel_button.clicked.connect(on_cancel);
         send_button = builder.get_object("Send") as Gtk.Button;
         send_button.clicked.connect(on_send);
         add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
@@ -483,6 +486,11 @@ public class ComposerWindow : Gtk.Window {
     
     public override bool delete_event(Gdk.EventAny event) {
         return !should_close();
+    }
+    
+    private void on_cancel() {
+        if (should_close())
+            destroy();
     }
     
     private void on_send() {
