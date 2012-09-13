@@ -2,7 +2,7 @@ Source: geary
 Section: gnome
 Priority: optional
 Maintainer: Jim Nelson <jim@yorba.org>
-Build-Depends: debhelper (>= 7), 
+Build-Depends: debhelper (>= 8), 
  libgee-dev (>= 0.6.0),
  libglib2.0-dev (>= 2.30.0),
  libgtk-3-dev (>= 3.2.0),
@@ -41,3 +41,18 @@ Description: Email client
  .
  Visit http://www.yorba.org to read about the current state of 
  Geary's development.
+
+Package: geary-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: geary (= ${binary:Version}), ${misc:Depends}
+Enhances: geary
+Description: Email client (debugging symbols)
+ Geary is an email client built for the GNOME desktop environment.  It
+ allows you to read and send email with a simple, modern interface.
+ .
+ Visit http://www.yorba.org to read about the current state of 
+ Geary's development.
+ .
+ This package contains debugging symbols for geary.
