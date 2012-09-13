@@ -11,8 +11,11 @@ private abstract class Geary.ImapEngine.ReplayOperation {
      *
      * LOCAL_AND_REMOTE: replay_local_async() is called.  If that method returns COMPLETED,
      *   no further calls are made.  If it returns CONTINUE, replay_remote_async() is called.
+     *   query_local_writebehind_operation() may be called before replay_remote_async().
      * LOCAL_ONLY: replay_local_async() only.  replay_remote_async() will never be called.
+     *   query_local_writebehind_operation() will never be called.
      * REMOTE_ONLY: replay_remote_async() only.  replay_local_async() will never be called.
+     *   query_local_writebehind_operation() may be called before replay_remote_async().
      *
      * See the various replay methods for how backout_local_async() may be called depending on
      * this field and those methods' return values.
@@ -27,6 +30,12 @@ private abstract class Geary.ImapEngine.ReplayOperation {
         COMPLETED,
         FAILED,
         CONTINUE
+    }
+    
+    public enum WritebehindOperation {
+        CREATE,
+        REMOVE,
+        UPDATE_FLAGS
     }
     
     private static int next_opnum = 0;
@@ -47,7 +56,7 @@ private abstract class Geary.ImapEngine.ReplayOperation {
     }
     
     /**
-     * See Scope for conditions for this method to be called.
+     * See Scope for conditions where this method will be called.
      *
      * Returns:
      *   COMPLETED: the operation has completed and no further calls should be made.
@@ -59,7 +68,30 @@ private abstract class Geary.ImapEngine.ReplayOperation {
     public abstract async Status replay_local_async() throws Error;
     
     /**
-     * See Scope for conditions for this method to be called.
+     * See Scope for conditions where this method will be called.
+     *
+     * This method is called only when the ReplayOperation is blocked waiting to execute a remote
+     * command and an exterior operation is going to occur that may alter the state on the local
+     * database (i.e. altering state behind the execution of this operation's replay_local_async()).
+     * This primarily happens during folder normalization (initial synchronization with the server
+     * when a folder is opened) where ReplayOperations are allowed to execute locally and enqueue
+     * for remote operation in preparation for the folder to open.  (There may be other
+     * circumstances in the future where this method may be called.)
+     *
+     * The method should examine the supplied operation and return true if it's okay to proceed
+     * (and modifying its own operation to reflect the change that will occur before it's allowed to
+     * proceed, or merely not performing any operation in replay_remote_async()) or false if the
+     * supplied operation should *not* execute so that this ReplayOperation's command may execute
+     * shortly.
+     *
+     * flags will only be non-null when op is UPDATE_FLAGS.  In that case, if this method returns
+     * true, it may also modify the EmailFlags.  Those flags will be written to the local store.
+     */
+    public abstract bool query_local_writebehind_operation(WritebehindOperation op, EmailIdentifier id,
+        Imap.EmailFlags? flags);
+    
+    /**
+     * See Scope for conditions where this method will be called.
      *
      * Returns:
      *   COMPLETED: the operation has completed and no further calls should be made.
@@ -70,8 +102,8 @@ private abstract class Geary.ImapEngine.ReplayOperation {
     public abstract async Status replay_remote_async() throws Error;
     
     /**
-     * See Scope, replay_local_async(), and replay_remote_async() for conditions for this to
-     * be called.
+     * See Scope, replay_local_async(), and replay_remote_async() for conditions for this where this
+     * will be called.
      */
     public abstract async void backout_local_async() throws Error;
     

@@ -13,6 +13,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     private Email.Field remaining_fields;
     private Folder.ListFlags flags;
     private Cancellable? cancellable;
+    private bool writebehind_removed = false;
     
     public FetchEmail(GenericFolder engine, EmailIdentifier id, Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
@@ -66,8 +67,30 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         return ReplayOperation.Status.CONTINUE;
     }
     
+    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
+        EmailIdentifier id, Imap.EmailFlags? flags) {
+        if (!this.id.equals(id))
+            return true;
+        
+        switch (op) {
+            case ReplayOperation.WritebehindOperation.REMOVE:
+                writebehind_removed = true;
+                
+                return true;
+            
+            case ReplayOperation.WritebehindOperation.CREATE:
+            default:
+                // still need to do the full fetch for CREATE, since it's unknown (currently) what
+                // fields are available locally; otherwise, ignored
+                return true;
+        }
+    }
+    
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield engine.throw_if_remote_not_ready_async(cancellable);
+        if (writebehind_removed) {
+            throw new EngineError.NOT_FOUND("Unable to fetch %s in %s (removed with writebehind)",
+                id.to_string(), engine.to_string());
+        }
         
         // fetch only the remaining fields from the remote folder (if only pulling partial information,
         // will merge at end of this method)

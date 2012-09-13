@@ -148,6 +148,7 @@ engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-mailbox.vala
 engine/nonblocking/nonblocking-mutex.vala
+engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 
 engine/rfc822/rfc822-error.vala

@@ -46,6 +46,9 @@ public abstract class Geary.NonblockingAbstractSemaphore {
     private bool passed = false;
     private Gee.List<Pending> pending_queue = new Gee.LinkedList<Pending>();
     
+    public virtual signal void at_reset() {
+    }
+    
     protected NonblockingAbstractSemaphore(bool broadcast, bool autoreset, Cancellable? cancellable = null) {
         this.broadcast = broadcast;
         this.autoreset = autoreset;
@@ -67,6 +70,10 @@ public abstract class Geary.NonblockingAbstractSemaphore {
             cancellable.cancelled.disconnect(on_cancelled);
     }
     
+    protected virtual void notify_at_reset() {
+        at_reset();
+    }
+    
     private void trigger(bool all) {
         if (pending_queue.size == 0)
             return;
@@ -84,7 +91,7 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         }
     }
     
-    public void notify() throws Error {
+    public virtual void notify() throws Error {
         check_cancelled();
         
         passed = true;
@@ -106,7 +113,7 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         }
     }
     
-    public async void wait_async(Cancellable? cancellable = null) throws Error {
+    public virtual async void wait_async(Cancellable? cancellable = null) throws Error {
         for (;;) {
             check_user_cancelled(cancellable);
             check_cancelled();
@@ -130,8 +137,10 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         }
     }
     
-    public void reset() {
+    public virtual void reset() {
         passed = false;
+        
+        notify_at_reset();
     }
     
     public bool is_cancelled() {

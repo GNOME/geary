@@ -6,7 +6,8 @@
 
 private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_move;
+    private Gee.List<Geary.EmailIdentifier> to_move = new Gee.ArrayList<Geary.EmailIdentifier>(
+        Equalable.equal_func);
     private Geary.FolderPath destination;
     private Cancellable? cancellable;
     private int original_count = 0;
@@ -17,7 +18,7 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
 
         this.engine = engine;
 
-        this.to_move = to_move;
+        this.to_move.add_all(to_move);
         this.destination = destination;
         this.cancellable = cancellable;
     }
@@ -43,12 +44,33 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
 
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield engine.throw_if_remote_not_ready_async(cancellable);
+    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
+        EmailIdentifier id, Imap.EmailFlags? flags) {
+        if (!to_move.contains(id))
+            return true;
         
-        yield engine.remote_folder.move_email_async(new Imap.MessageSet.email_id_collection(to_move),
-            destination, cancellable);
-
+        switch (op) {
+            case ReplayOperation.WritebehindOperation.CREATE:
+                // don't allow for it to be created, it's already been marked for removal
+                return false;
+            
+            case ReplayOperation.WritebehindOperation.REMOVE:
+            case ReplayOperation.WritebehindOperation.UPDATE_FLAGS:
+                // don't bother, already removed
+                return false;
+            
+            default:
+                // ignored
+                return true;
+        }
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
+        if (to_move.size > 0) {
+            yield engine.remote_folder.move_email_async(new Imap.MessageSet.email_id_collection(to_move),
+                destination, cancellable);
+        }
+        
         return ReplayOperation.Status.COMPLETED;
     }
 

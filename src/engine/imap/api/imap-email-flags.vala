@@ -9,29 +9,36 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
     
     public EmailFlags(MessageFlags flags) {
         message_flags = flags;
-
+        
         if (!flags.contains(MessageFlag.SEEN))
             add(UNREAD);
+        
         if (flags.contains(MessageFlag.FLAGGED))
             add(FLAGGED);
     }
-
-    public override void add(EmailFlag flag) {
-        if (flag.equals(UNREAD))
-            message_flags.remove(MessageFlag.SEEN);
-        if (flag.equals(FLAGGED))
-            message_flags.add(MessageFlag.FLAGGED);
-
-        base.add(flag);
+    
+    protected override void notify_added(Gee.Collection<EmailFlag> added) {
+        foreach (EmailFlag flag in added) {
+            if (flag.equals(UNREAD))
+                message_flags.remove(MessageFlag.SEEN);
+            
+            if (flag.equals(FLAGGED))
+                message_flags.add(MessageFlag.FLAGGED);
+        }
+        
+        base.notify_added(added);
     }
-
-    public override bool remove(EmailFlag flag) {
-        if (flag.equals(UNREAD))
-            message_flags.add(MessageFlag.SEEN);
-        if (flag.equals(FLAGGED))
-            message_flags.remove(MessageFlag.FLAGGED);
-
-        return base.remove(flag);
+    
+    protected override void notify_removed(Gee.Collection<EmailFlag> removed) {
+        foreach (EmailFlag flag in removed) {
+            if (flag.equals(UNREAD))
+                message_flags.add(MessageFlag.SEEN);
+            
+            if (flag.equals(FLAGGED))
+                message_flags.remove(MessageFlag.FLAGGED);
+        }
+        
+        base.notify_removed(removed);
     }
 }
 

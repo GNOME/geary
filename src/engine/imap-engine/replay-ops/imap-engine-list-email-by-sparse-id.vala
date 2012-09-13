@@ -47,8 +47,6 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            yield owner.throw_if_remote_not_ready_async(cancellable);
-            
             // fetch from remote folder
             Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
                 unfulfilled_fields, cancellable);
@@ -157,9 +155,37 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield owner.throw_if_remote_not_ready_async(cancellable);
+    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
+        EmailIdentifier id, Imap.EmailFlags? flags) {
+        // don't need to check if id is present here, all paths deal with this correctly
         
+        switch (op) {
+            case ReplayOperation.WritebehindOperation.REMOVE:
+                // remove email already picked up from local store ... for email reported via the
+                // callback, too late
+                if (accumulator != null) {
+                    Gee.HashSet<Geary.Email> wb_removed = new Gee.HashSet<Geary.Email>();
+                    foreach (Geary.Email email in accumulator) {
+                        if (email.id.equals(id))
+                            wb_removed.add(email);
+                    }
+                    
+                    accumulator.remove_all(wb_removed);
+                }
+                
+                // remove from unfulfilled list, as there's nothing to fetch from the server
+                foreach (Geary.Email.Field field in unfulfilled.get_keys())
+                    unfulfilled.remove(field, id);
+                
+                return true;
+            
+            default:
+                // ignored
+                return true;
+        }
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         NonblockingBatch batch = new NonblockingBatch();
         
         // schedule operations to remote for each set of email with unfulfilled fields and merge

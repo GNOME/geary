@@ -55,7 +55,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
     private Gee.List<Geary.Email>? local_list = null;
     private int local_list_size = 0;
     private Gee.HashMultiMap<Geary.Email.Field, Geary.EmailIdentifier> unfulfilled = new Gee.HashMultiMap<
-        Geary.Email.Field, Geary.EmailIdentifier>();
+        Geary.Email.Field, Geary.EmailIdentifier>(null, null, Hashable.hash_func, Equalable.equal_func);
     
     public ListEmail(GenericFolder engine, int low, int count, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable) {
@@ -181,9 +181,38 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield engine.throw_if_remote_not_ready_async(cancellable);
+    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
+        EmailIdentifier id, Imap.EmailFlags? flags) {
+        // don't need to check if id is present here, all paths deal with this possibility
+        // correctly
         
+        switch (op) {
+            case ReplayOperation.WritebehindOperation.REMOVE:
+                // remove email already picked up from local store ... for email reported via the
+                // callback, too late
+                if (accumulator != null) {
+                    Gee.HashSet<Geary.Email> wb_removed = new Gee.HashSet<Geary.Email>();
+                    foreach (Geary.Email email in accumulator) {
+                        if (email.id.equals(id))
+                            wb_removed.add(email);
+                    }
+                    
+                    accumulator.remove_all(wb_removed);
+                }
+                
+                // remove from unfulfilled list, as there's nothing to fetch from the server
+                foreach (Geary.Email.Field field in unfulfilled.get_keys())
+                    unfulfilled.remove(field, id);
+                
+                return true;
+            
+            default:
+                // ignored
+                return true;
+        }
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         // normalize the email positions in the local store, so the positions being requested
         // from the server are available in the database
         int local_count;
@@ -252,9 +281,6 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
     }
     
     private async void remote_list_positional(int[] needed_by_position) throws Error {
-        // possible to call remote multiple times, wait for it to open once and go
-        yield engine.throw_if_remote_not_ready_async(cancellable);
-        
         // pull in reverse order because callers to this method tend to order messages from oldest
         // to newest, but for user satisfaction, should be fetched from newest to oldest
         int remaining = needed_by_position.length;
@@ -294,9 +320,6 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
     
     private async void remote_list_partials(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.Email.Field remaining_fields) throws Error {
-        // possible to call remote multiple times, wait for it to open once and go
-        yield engine.throw_if_remote_not_ready_async(cancellable);
-        
         Gee.List<Geary.Email>? remote_list = yield engine.remote_folder.list_email_async(
             new Imap.MessageSet.email_id_collection(ids), remaining_fields, cancellable);
         if (remote_list == null || remote_list.size == 0)

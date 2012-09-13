@@ -6,7 +6,8 @@
 
 private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_mark;
+    private Gee.List<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>(
+        Equalable.equal_func);
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
@@ -19,7 +20,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         
         this.engine = engine;
         
-        this.to_mark = to_mark;
+        this.to_mark.add_all(to_mark);
         this.flags_to_add = flags_to_add;
         this.flags_to_remove = flags_to_remove;
         this.cancellable = cancellable;
@@ -44,8 +45,40 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
+    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
+        EmailIdentifier id, Imap.EmailFlags? flags) {
+        if (!to_mark.contains(id))
+            return true;
+        
+        switch (op) {
+            case ReplayOperation.WritebehindOperation.REMOVE:
+                // don't bother updating on server
+                to_mark.remove(id);
+                
+                return true;
+            
+            case ReplayOperation.WritebehindOperation.UPDATE_FLAGS:
+                // user's mark operation takes precedence over server's, update supplied flags
+                // and continue
+                if (flags_to_add != null && flags != null)
+                    flags.add_all(flags_to_add);
+                
+                if (flags_to_remove != null && flags != null)
+                    flags.remove_all(flags_to_remove);
+                
+                return true;
+            
+            case ReplayOperation.WritebehindOperation.CREATE:
+            default:
+                // not interested in other operations
+                return true;
+        }
+    }
+    
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield engine.throw_if_remote_not_ready_async(cancellable);
+        // potentially empty due to writebehind operation
+        if (to_mark.size == 0)
+            return ReplayOperation.Status.COMPLETED;
         
         yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
             flags_to_add, flags_to_remove, cancellable);

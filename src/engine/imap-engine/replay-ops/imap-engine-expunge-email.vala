@@ -6,7 +6,8 @@
 
 private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_remove;
+    private Gee.List<Geary.EmailIdentifier> to_remove = new Gee.ArrayList<EmailIdentifier>(
+        Equalable.equal_func);
     private Cancellable? cancellable;
     private int original_count = 0;
     
@@ -16,7 +17,7 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
         
         this.engine = engine;
         
-        this.to_remove = to_remove;
+        this.to_remove.add_all(to_remove);
         this.cancellable = cancellable;
     }
     
@@ -42,9 +43,28 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield engine.throw_if_remote_not_ready_async(cancellable);
+    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
+        EmailIdentifier id, Imap.EmailFlags? flags) {
+        if (!to_remove.contains(id))
+            return true;
         
+        switch (op) {
+            case ReplayOperation.WritebehindOperation.CREATE:
+                // don't allow for the message to be created, it will be removed on the server by
+                // this operation
+                return false;
+            
+            case ReplayOperation.WritebehindOperation.REMOVE:
+                // removed locally, to be removed remotely, don't bother writing locally
+                return false;
+            
+            default:
+                // ignored
+                return true;
+        }
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
         // that the signal has already been fired.

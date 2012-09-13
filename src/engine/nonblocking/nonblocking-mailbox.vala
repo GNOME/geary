@@ -19,6 +19,13 @@ public class Geary.NonblockingMailbox<G> : Object {
         spinlock.notify();
     }
     
+    /**
+     * Returns true if the message was revoked.
+     */
+    public bool revoke(G msg) throws Error {
+        return queue.remove(msg);
+    }
+    
     public async G recv_async(Cancellable? cancellable = null) throws Error {
         for (;;) {
             if (queue.size > 0)
@@ -26,6 +33,17 @@ public class Geary.NonblockingMailbox<G> : Object {
             
             yield spinlock.wait_async(cancellable);
         }
+    }
+    
+    /**
+     * Since the queue could potentially alter when the main loop runs, it's important to only
+     * examine the queue when not allowing other operations to process.
+     *
+     * This returns a read-only list in queue-order.  Altering will not affect the queue.  Use
+     * revoke() to remove enqueued operations.
+     */
+    public Gee.List<G> get_all() {
+        return queue.read_only_view;
     }
 }
 
