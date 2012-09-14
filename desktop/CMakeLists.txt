@@ -18,11 +18,11 @@ if (DESKTOP_UPDATE)
     
     add_custom_target(
         uninstall-desktop-update
-        DEPENDS
-            uninstall
         COMMAND
             update-desktop-database
     )
+    
+    add_dependencies(uninstall uninstall-desktop-update)
 else ()
     install(
         CODE "message (STATUS \"Not updating desktop database\")"

@@ -45,10 +45,10 @@ if (ICON_UPDATE)
     
     add_custom_target(
         uninstall-icon-cache
-        DEPENDS
-            uninstall
         COMMAND
             gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor
     )
+    
+    add_dependencies(uninstall uninstall-icon-cache)
 endif ()
 

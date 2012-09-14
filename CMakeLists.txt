@@ -49,14 +49,6 @@ else ()
     message(STATUS "xgettext not found")
 endif ()
 
-add_subdirectory(src)
-add_subdirectory(icons)
-add_subdirectory(sql)
-add_subdirectory(theming)
-add_subdirectory(ui)
-add_subdirectory(help)
-add_subdirectory(desktop)
-
 #
 # Uninstall target
 #
@@ -67,12 +59,20 @@ configure_file(
 )
 
 add_custom_target(
-    uninstall
+    uninstall-base
     COMMAND 
         ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
     COMMAND 
         ${glib_schema_compiler} ${GSETTINGS_DIR}
 )
+
+add_custom_target(
+    uninstall
+)
+
+# We add this dependency using add_dependencies (which makes it run first) rather than
+# a depends clause in add_custom_target (which would make it run last).
+add_dependencies(uninstall uninstall-base)
 
 # Dist
 # This generates the dist tarballs
@@ -109,4 +109,12 @@ add_custom_target(
 
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${ARCHIVE_BASE_NAME}"
 )
+
+add_subdirectory(desktop)
+add_subdirectory(help)
+add_subdirectory(icons)
+add_subdirectory(sql)
+add_subdirectory(src)
+add_subdirectory(theming)
+add_subdirectory(ui)
 
