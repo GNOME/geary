@@ -146,6 +146,10 @@ public class ComposerWindow : Gtk.Window {
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
         Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
         
+        // Add the content-view style class for the elementary GTK theme.
+        Gtk.Box button_area = (Gtk.Box) builder.get_object("button_area");
+        button_area.get_style_context().add_class("content-view");
+        
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
         cancel_button = builder.get_object("Cancel") as Gtk.Button;
         cancel_button.clicked.connect(on_cancel);
