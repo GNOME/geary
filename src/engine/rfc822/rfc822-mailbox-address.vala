@@ -111,6 +111,13 @@ public class Geary.RFC822.MailboxAddress {
         }
     }
     
+    /**
+     * Returns a normalized casefolded string of the address, suitable for comparison and hashing.
+     */
+    public string as_key() {
+        return address.normalize().casefold();
+    }
+    
     public string to_rfc822_string() {
         return String.is_empty(name)
             ? address

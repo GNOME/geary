@@ -6,6 +6,8 @@
 
 // Stores formatted data for a message.
 public class FormattedConversationData : Object {
+    private const string ME = _("Me");
+    
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
     private const int LINE_SPACING = 4;
     private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
@@ -15,22 +17,79 @@ public class FormattedConversationData : Object {
     private const int FONT_SIZE_FROM = 11;
     private const int FONT_SIZE_PREVIEW = 8;
     
+    private class ParticipantDisplay : Geary.Equalable {
+        public string key;
+        public Geary.RFC822.MailboxAddress address;
+        public bool is_unread;
+        
+        public ParticipantDisplay(Geary.RFC822.MailboxAddress address, bool is_unread) {
+            key = address.as_key();
+            this.address = address;
+            this.is_unread = is_unread;
+        }
+        
+        public string get_full_markup(string normalized_account_key) {
+            return get_as_markup((key == normalized_account_key) ? ME : address.get_short_address());
+        }
+        
+        public string get_short_markup(string normalized_account_key) {
+            if (key == normalized_account_key)
+                return get_as_markup(ME);
+            
+            // Using simplified algorithm: first name as delimited by a space
+            string[] tokens = address.get_short_address().strip().split(" ", 2);
+            if (tokens.length < 1)
+                return get_full_markup(normalized_account_key);
+            
+            string first_name = tokens[0].strip();
+            if (Geary.String.is_empty_or_whitespace(first_name))
+                return get_full_markup(normalized_account_key);
+            
+            return get_as_markup(first_name);
+        }
+        
+        private string get_as_markup(string participant) {
+            string open_tag = is_unread ? "<b>" : "";
+            string close_tag = is_unread ? "</b>" : "";
+            
+            return "%s%s%s".printf(open_tag, participant, close_tag);
+        }
+        
+        public bool equals(Geary.Equalable o) {
+            ParticipantDisplay? other = o as ParticipantDisplay;
+            if (other == null)
+                return false;
+            
+            if (this == other)
+                return true;
+            
+            return key == other.key;
+        }
+    }
+    
     private static int cell_height = -1;
     private static int preview_height = -1;
     
     public bool is_unread { get; set; }
     public bool is_flagged { get; set; }
-    public string date { get; private set; } 
-    public string from { get; private set; }
+    public string date { get; private set; }
     public string subject { get; private set; }
     public string? body { get; private set; default = null; } // optional
     public int num_emails { get; private set; }
     public Geary.Email? preview { get; private set; default = null; }
     
+    private Geary.Conversation? conversation = null;
+    private string? account_owner_email = null;
+    private bool use_to = true;
+    
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.Conversation conversation, Geary.Email preview,
         Geary.Folder folder, string account_owner_email) {
         assert(preview.fields.fulfills(ConversationListStore.REQUIRED_FIELDS));
+        
+        this.conversation = conversation;
+        this.account_owner_email = account_owner_email;
+        use_to = (folder != null) && folder.get_special_folder_type().is_outgoing();
         
         // Load preview-related data.
         this.date = (preview.date != null)
@@ -43,7 +102,6 @@ public class FormattedConversationData : Object {
         // Load conversation-related data.
         this.is_unread = conversation.is_unread();
         this.is_flagged = conversation.is_flagged();
-        this.from = get_authors(conversation, folder, account_owner_email);
         this.num_emails = conversation.get_count();
     }
     
@@ -52,55 +110,56 @@ public class FormattedConversationData : Object {
         this.is_unread = false;
         this.is_flagged = false;
         this.date = STYLE_EXAMPLE;
-        this.from = STYLE_EXAMPLE;
         this.subject = STYLE_EXAMPLE;
         this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
         this.num_emails = 1;
     }
     
-    private string get_authors(Geary.Conversation conversation, Geary.Folder? folder, string account_owner_email) {
-        bool use_to = folder != null && folder.get_special_folder_type().is_outgoing();
-        string normalized_account_owner_email = account_owner_email.normalize().casefold();
-        Gee.Set<string> emails = new Gee.HashSet<string>();
-        string[] authors = new string[0];
+    private string get_participants_markup() {
+        if (conversation == null || account_owner_email == null)
+            return "";
         
+        string normalized_account_owner_email = account_owner_email.normalize().casefold();
+        
+        // Build chronological list of AuthorDisplay records, setting to unread if any message by
+        // that author is unread
+        Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>(Geary.Equalable.equal_func);
         foreach (Geary.Email message in conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING)) {
+            // only display if something to display
             Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
             if (addresses == null || addresses.size < 1)
                 continue;
             
-            string normalized_address = addresses[0].address.normalize().casefold();
-            if (!emails.add(normalized_address))
-                continue;
+            ParticipantDisplay participant_display = new ParticipantDisplay(addresses[0],
+                message.email_flags.is_unread());
             
-            if (normalized_address == normalized_account_owner_email)
-                authors += _("Me");
-            else
-                authors += addresses[0].get_short_address();
+            // if not present, add in chronological order
+            int existing_index = list.index_of(participant_display);
+            if (existing_index < 0) {
+                list.add(participant_display);
+                
+                continue;
+            }
+            
+            // if present and this message is unread but the prior were read, this author is now
+            // unread
+            if (message.email_flags.is_unread() && !list[existing_index].is_unread)
+                list[existing_index].is_unread = true;
         }
         
-        // If there is only one author, use their full name.
-        if (authors.length == 1)
-            return authors[0];
+        // if only one participant, use full name
+        if (list.size == 1)
+            return list[0].get_full_markup(normalized_account_owner_email);
+        
+        StringBuilder builder = new StringBuilder();
+        foreach (ParticipantDisplay participant in list) {
+            if (builder.len > 0)
+                builder.append(", ");
             
-        StringBuilder authors_builder = new StringBuilder();
-        foreach (string author in authors) {
-            string[] tokens = author.strip().split(" ", 2);
-            if (tokens.length < 1)
-                continue;
-            
-            // TODO: Should we use a more sophisticated algorithm than "first word" to get the
-            // first name?
-            string first_name = tokens[0].strip();
-            if (Geary.String.is_empty_or_whitespace(first_name))
-                continue;
-            
-            if (authors_builder.len > 0)
-                authors_builder.append(", ");
-            authors_builder.append(first_name);
+            builder.append(participant.get_short_markup(normalized_account_owner_email));
         }
         
-        return authors_builder.str;
+        return builder.str;
     }
     
     public string get_clean_subject_as_string(Geary.Email email) {
@@ -220,13 +279,13 @@ public class FormattedConversationData : Object {
     
     private Pango.Rectangle render_from(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, Pango.Rectangle ink_rect) {
-
+        string from_markup = (conversation != null) ? get_participants_markup() : STYLE_EXAMPLE;
+        
         Pango.FontDescription font_from = new Pango.FontDescription();
         font_from.set_size(FONT_SIZE_FROM * Pango.SCALE);
-        font_from.set_weight(Pango.Weight.BOLD);
         Pango.Layout layout_from = widget.create_pango_layout(null);
         layout_from.set_font_description(font_from);
-        layout_from.set_text(from, -1);
+        layout_from.set_markup(from_markup, -1);
         layout_from.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
             layout_from.set_width((cell_area.width - ink_rect.width - ink_rect.x - LINE_SPACING -
