@@ -138,6 +138,9 @@ public abstract class Geary.NonblockingAbstractSemaphore {
     }
     
     public virtual void reset() {
+        if (!passed)
+            return;
+        
         passed = false;
         
         notify_at_reset();

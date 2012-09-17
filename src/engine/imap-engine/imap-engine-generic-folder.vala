@@ -474,8 +474,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("Unable to fire semaphore notifying remote folder ready/not ready: %s",
                 notify_err.message);
             
-            remote_folder = null;
-            remote_count = -1;
+            // do this now rather than wait for close_internal_async() to execute to ensure that
+            // any replay operations already queued don't attempt to run
+            try {
+                clear_remote_folder();
+            } catch (Error err) {
+                debug("Unable to clear and signal remote folder due to failed open: %s", err.message);
+                
+                // fall through
+            }
             
             notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, notify_err);
             
@@ -506,11 +513,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // Notify all callers waiting for the remote folder that it's not coming available
         Imap.Folder? closing_remote_folder = remote_folder;
-        remote_folder = null;
-        remote_count = -1;
-        
         try {
-            remote_semaphore.notify();
+            clear_remote_folder();
         } catch (Error err) {
             debug("close_internal_async: Unable to fire remote semaphore: %s", err.message);
         }
@@ -561,6 +565,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         notify_closed(CloseReason.FOLDER_CLOSED);
         
         debug("Folder %s closed", to_string());
+    }
+    
+    private void clear_remote_folder() throws Error {
+        remote_folder = null;
+        remote_count = -1;
+        
+        remote_semaphore.reset();
+        remote_semaphore.notify_result(false, null);
     }
     
     private void on_remote_messages_appended(int total) {
