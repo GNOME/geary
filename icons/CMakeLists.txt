@@ -6,11 +6,11 @@ set(ICON_FILES
     mail-sent.png
     menu-down.svg
     non-starred-grey.png
-    remove-formatting.png
     starred.png
 )
 
 set(ICON_FILES_16
+    16x16/format-text-none.svg
     16x16/mail-archive.svg
     16x16/tag.svg
     16x16/tag-new.svg
@@ -18,6 +18,7 @@ set(ICON_FILES_16
 )
 
 set(ICON_FILES_24
+    24x24/format-text-none.svg
     24x24/edit-flag.svg
     24x24/mail-archive.svg
     24x24/mail-move.svg
