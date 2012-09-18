@@ -198,6 +198,7 @@ engine/util/util-trillian.vala
 
 set(CLIENT_SRC
 client/geary-application.vala
+client/geary-args.vala
 client/geary-config.vala
 client/geary-controller.vala
 client/main.vala
