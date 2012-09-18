@@ -111,6 +111,7 @@
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Toggles menu for applying labels to emails.">Label the selected conversation</property>
         <property name="use_action_appearance">False</property>
+        <property name="label" translatable="yes">Label as</property>
         <property name="icon_name">tag-new</property>
       </object>
       <packing>
@@ -124,6 +125,7 @@
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Toggles menu for applying labels to emails.">Move the selected conversation</property>
         <property name="use_action_appearance">False</property>
+        <property name="label" translatable="yes">Move to</property>
         <property name="icon_name">mail-move</property>
       </object>
       <packing>
