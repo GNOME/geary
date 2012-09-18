@@ -128,6 +128,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return;
     }
     
+    // NOTE: This assert()'s if the Gtk.Action is not present in the default action group
+    public Gtk.Action get_action(string name) {
+        Gtk.Action? action = actions.get_action(name);
+        assert(action != null);
+        
+        return action;
+    }
+    
     private void set_account(Geary.Account? account) {
         if (this.account == account)
             return;

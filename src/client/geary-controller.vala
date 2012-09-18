@@ -92,6 +92,9 @@ public class GearyController {
             GearyApplication.instance.actions, 0);
         GearyApplication.instance.load_ui_file("accelerators.ui");
         
+        // some actions need a little extra help
+        prepare_actions();
+        
         // Listen for attempts to close the application.
         GearyApplication.instance.exiting.connect(on_application_exiting);
         
@@ -244,6 +247,14 @@ public class GearyController {
         add_accelerator("0", ACTION_ZOOM_NORMAL);
 
         return entries;
+    }
+    
+    private void prepare_actions() {
+        GearyApplication.instance.get_action(ACTION_NEW_MESSAGE).is_important = true;
+        GearyApplication.instance.get_action(ACTION_REPLY_TO_MESSAGE).is_important = true;
+        GearyApplication.instance.get_action(ACTION_REPLY_ALL_MESSAGE).is_important = true;
+        GearyApplication.instance.get_action(ACTION_FORWARD_MESSAGE).is_important = true;
+        GearyApplication.instance.get_action(ACTION_DELETE_MESSAGE).is_important = true;
     }
     
     public async void connect_account_async(Geary.Account? new_account, Cancellable? cancellable) {
