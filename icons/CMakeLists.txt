@@ -19,7 +19,7 @@ set(ICON_FILES_16
 
 set(ICON_FILES_24
     24x24/format-text-none.svg
-    24x24/edit-flag.svg
+    24x24/edit-mark.svg
     24x24/mail-archive.svg
     24x24/mail-move.svg
     24x24/tag.svg

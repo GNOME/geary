@@ -42,7 +42,7 @@ public class MainToolbar : Gtk.Box {
             GearyController.ACTION_MARK_AS_MENU) as Gtk.ToggleToolButton;
         attach_menu(mark_menu, mark_menu_button);
         make_menu_dropdown_button(mark_menu_button,
-            IconFactory.instance.get_custom_icon("edit-flag", IconFactory.ICON_TOOLBAR), null);
+            IconFactory.instance.get_custom_icon("edit-mark", IconFactory.ICON_TOOLBAR), null);
         Gtk.Menu mark_proxy_menu = (Gtk.Menu) GearyApplication.instance.ui_manager
             .get_widget("/ui/ToolbarMarkMenuProxy");
         add_proxy_menu(mark_menu_button, _("Mark"), mark_proxy_menu);
