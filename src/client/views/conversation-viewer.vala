@@ -100,8 +100,6 @@ public class ConversationViewer : Object {
     
         web_view = new ConversationWebView();
         
-        web_view.valign = Gtk.Align.START;
-        web_view.vexpand = true;
         web_view.set_border_width(0);
         
         web_view.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
