@@ -4,7 +4,6 @@ set(ICON_FILES
     application-menu.svg
     mail-inbox.png
     mail-sent.png
-    menu-down.svg
     non-starred-grey.png
     starred.png
 )

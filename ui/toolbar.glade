@@ -18,6 +18,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -45,6 +46,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -61,6 +63,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -77,6 +80,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -98,10 +102,11 @@
         <property name="tooltip_text" translatable="yes" comments="Toggles menu for marking a message as read/unread or starred/unstarred">Mark email</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Mark</property>
-        <property name="icon_name">menu-down</property>
+        <property name="icon_name">edit-mark</property>
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -116,6 +121,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -130,6 +136,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -153,6 +160,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
@@ -181,6 +189,7 @@
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
   </object>
