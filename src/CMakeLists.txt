@@ -237,8 +237,8 @@ client/util/util-date.vala
 client/util/util-email.vala
 client/util/util-files.vala
 client/util/util-gravatar.vala
+client/util/util-gtk.vala
 client/util/util-keyring.vala
-client/util/util-menu.vala
 client/util/util-webkit.vala
 
 client/views/formatted-conversation-data.vala

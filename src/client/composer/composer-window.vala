@@ -724,7 +724,7 @@ public class ComposerWindow : Gtk.Window {
             return;
         
         font_menu.show_all();
-        font_menu.popup(null, null, menu_popup_relative, 0, 0);
+        font_menu.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
     }
     
     private void on_deactivate_font_menu() {
@@ -736,7 +736,7 @@ public class ComposerWindow : Gtk.Window {
             return;
         
         font_size_menu.show_all();
-        font_size_menu.popup(null, null, menu_popup_relative, 0, 0);
+        font_size_menu.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
     }
     
     private void on_deactivate_font_size_menu() {

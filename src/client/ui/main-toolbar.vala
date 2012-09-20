@@ -9,7 +9,10 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Toolbar toolbar;
     public FolderMenu copy_folder_menu { get; private set; }
     public FolderMenu move_folder_menu { get; private set; }
-
+    
+    private GtkUtil.ToggleToolbarDropdown mark_menu_dropdown;
+    private GtkUtil.ToggleToolbarDropdown app_menu_dropdown;
+    
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
 
@@ -24,58 +27,52 @@ public class MainToolbar : Gtk.Box {
         set_toolbutton_action(builder, GearyController.ACTION_DELETE_MESSAGE);
 
         // Setup the folder menus (move/copy).
-        Gtk.ToggleToolButton copy_menu_button = set_toolbutton_action(builder,
+        
+        Gtk.ToggleToolButton copy_toggle_button = set_toolbutton_action(builder,
             GearyController.ACTION_COPY_MENU) as Gtk.ToggleToolButton;
-        copy_folder_menu = new FolderMenu(copy_menu_button,
-            IconFactory.instance.get_custom_icon("tag-new", IconFactory.ICON_TOOLBAR), _("Label as"));
-
-        Gtk.ToggleToolButton move_menu_button = set_toolbutton_action(builder,
+        copy_folder_menu = new FolderMenu(
+            IconFactory.instance.get_custom_icon("tag-new", IconFactory.ICON_TOOLBAR),
+            Gtk.IconSize.LARGE_TOOLBAR, null, null);
+        copy_folder_menu.attach(copy_toggle_button);
+        
+        Gtk.ToggleToolButton move_toggle_button = set_toolbutton_action(builder,
             GearyController.ACTION_MOVE_MENU) as Gtk.ToggleToolButton;
-        move_folder_menu = new FolderMenu(move_menu_button,
-            IconFactory.instance.get_custom_icon("mail-move", IconFactory.ICON_TOOLBAR), _("Move to"));
-
+        move_folder_menu = new FolderMenu(
+            IconFactory.instance.get_custom_icon("mail-move", IconFactory.ICON_TOOLBAR),
+            Gtk.IconSize.LARGE_TOOLBAR, null, null);
+        move_folder_menu.attach(move_toggle_button);
+        
         // Assemble mark menu button.
         GearyApplication.instance.load_ui_file("toolbar_mark_menu.ui");
         Gtk.Menu mark_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu")
             as Gtk.Menu;
-        Gtk.ToggleToolButton mark_menu_button = set_toolbutton_action(builder,
-            GearyController.ACTION_MARK_AS_MENU) as Gtk.ToggleToolButton;
-        attach_menu(mark_menu, mark_menu_button);
-        make_menu_dropdown_button(mark_menu_button,
-            IconFactory.instance.get_custom_icon("edit-mark", IconFactory.ICON_TOOLBAR), null);
         Gtk.Menu mark_proxy_menu = (Gtk.Menu) GearyApplication.instance.ui_manager
             .get_widget("/ui/ToolbarMarkMenuProxy");
-        add_proxy_menu(mark_menu_button, _("Mark"), mark_proxy_menu);
-
+        Gtk.ToggleToolButton mark_menu_button = set_toolbutton_action(builder,
+            GearyController.ACTION_MARK_AS_MENU) as Gtk.ToggleToolButton;
+        mark_menu_dropdown = new GtkUtil.ToggleToolbarDropdown(
+            IconFactory.instance.get_custom_icon("edit-mark", IconFactory.ICON_TOOLBAR),
+            Gtk.IconSize.LARGE_TOOLBAR, mark_menu, mark_proxy_menu);
+        mark_menu_dropdown.attach(mark_menu_button);
+        
         // Setup the application menu.
         GearyApplication.instance.load_ui_file("toolbar_menu.ui");
-        Gtk.Menu menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu") as Gtk.Menu;
-        Gtk.ToggleToolButton application_menu_button = (Gtk.ToggleToolButton) builder.get_object("menu_button");
-        attach_menu(menu, application_menu_button);
-        Gtk.Menu application_proxy_menu = (Gtk.Menu) GearyApplication.instance.ui_manager
-            .get_widget("/ui/ToolbarMenuProxy");
-        add_proxy_menu(application_menu_button, application_menu_button.label, application_proxy_menu);
-
+        Gtk.Menu application_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu")
+            as Gtk.Menu;
+        Gtk.Menu application_proxy_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenuProxy")
+            as Gtk.Menu;
+        Gtk.ToggleToolButton app_menu_button = (Gtk.ToggleToolButton) builder.get_object("menu_button");
+        app_menu_dropdown = new GtkUtil.ToggleToolbarDropdown(
+            IconFactory.instance.get_theme_icon("application-menu"), Gtk.IconSize.LARGE_TOOLBAR,
+            application_menu, application_proxy_menu);
+        app_menu_dropdown.show_arrow = false;
+        app_menu_dropdown.attach(app_menu_button);
+        
         toolbar.get_style_context().add_class("primary-toolbar");
         
         add(toolbar);
     }
     
-    private void attach_menu(Gtk.Menu menu, Gtk.ToggleToolButton button) {
-        menu.attach_to_widget(button, null);
-        menu.deactivate.connect(() => {
-            button.active = false;
-        });
-        button.clicked.connect(() => {
-            // Prevent loops.
-            if (!button.active) {
-                return;
-            }
-
-            menu.popup(null, null, menu_popup_relative, 0, 0);
-        });
-    }
-
     private Gtk.ToolButton set_toolbutton_action(Gtk.Builder builder, string action) {
         Gtk.ToolButton button = builder.get_object(action) as Gtk.ToolButton;
         button.set_related_action(GearyApplication.instance.actions.get_action(action));

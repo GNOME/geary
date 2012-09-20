@@ -194,13 +194,11 @@ public class GearyController {
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
 
-        Gtk.ActionEntry copy_menu = { ACTION_COPY_MENU, null, TRANSLATABLE, "L", null,
-            on_show_copy_menu };
+        Gtk.ActionEntry copy_menu = { ACTION_COPY_MENU, null, TRANSLATABLE, "L", null, null };
         copy_menu.label = _("_Label");
         entries += copy_menu;
 
-        Gtk.ActionEntry move_menu = { ACTION_MOVE_MENU, null, TRANSLATABLE, "M", null,
-            on_show_move_menu };
+        Gtk.ActionEntry move_menu = { ACTION_MOVE_MENU, null, TRANSLATABLE, "M", null, null };
         move_menu.label = _("_Move");
         entries += move_menu;
 
@@ -891,15 +889,7 @@ public class GearyController {
     private void on_mark_complete() {
         set_busy(false);
     }
-
-    private void on_show_copy_menu() {
-        main_window.main_toolbar.copy_folder_menu.show();
-    }
-
-    private void on_show_move_menu() {
-        main_window.main_toolbar.move_folder_menu.show();
-    }
-
+    
     private void on_copy_conversation(Geary.Folder destination) {
         // Nothing to do if nothing selected.
         if (selected_conversations == null || selected_conversations.size == 0)
@@ -1227,7 +1217,7 @@ public class GearyController {
     }
 
     // Disables all single-message buttons and enables all multi-message buttons.
-    public void enable_multiple_message_buttons(){
+    public void enable_multiple_message_buttons() {
         // Single message only buttons.
         GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = false;
         GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = false;

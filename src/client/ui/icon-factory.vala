@@ -53,18 +53,23 @@ public class IconFactory {
         unstarred = load("non-starred-grey", STAR_ICON_SIZE);
     }
     
-    public Icon get_custom_icon(string name, Gtk.IconSize size) {
-        int pixels;
-        switch (size) {
+    private int icon_size_to_pixels(Gtk.IconSize icon_size) {
+        switch (icon_size) {
             case ICON_SIDEBAR:
-                pixels = 16;
-            break;
+                return 16;
             
             case ICON_TOOLBAR:
             default:
-                pixels = 24;
-            break;
+                return 24;
         }
+    }
+    
+    public Icon get_theme_icon(string name) {
+        return new ThemedIcon(name);
+    }
+    
+    public Icon get_custom_icon(string name, Gtk.IconSize size) {
+        int pixels = icon_size_to_pixels(size);
         
         return new FileIcon(icons_dir.get_child("%dx%d".printf(pixels, pixels)).get_child("%s.svg".printf(name)));
     }

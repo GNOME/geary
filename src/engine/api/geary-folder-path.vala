@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.FolderPath : Object, Hashable, Equalable {
+public class Geary.FolderPath : Object, Hashable, Equalable, Comparable {
     public string basename { get; private set; }
     
     private Gee.List<Geary.FolderPath>? path = null;
@@ -114,6 +114,39 @@ public class Geary.FolderPath : Object, Hashable, Equalable {
     
     private uint get_basename_hash(bool cs) {
         return cs ? str_hash(basename) : str_hash(basename.down());
+    }
+    
+    /**
+     * Comparisons for Geary.FolderPath is defined as (a) empty paths are less-than non-empty paths
+     * and (b) each element is compared to the corresponding path element of the other FolderPath
+     * following collation rules for casefolded (case-insensitive) compared, and (c) shorter paths
+     * are less-than longer paths, assuming the path elements are equal up to the shorter path's
+     * length.
+     */
+    public int compare(Comparable o) {
+        FolderPath? other = o as FolderPath;
+        if (other == null)
+            return -1;
+        
+        if (this == other)
+            return 0;
+        
+        // walk elements using as_list() as that includes the basename (whereas path does not),
+        // avoids the null problem, and makes comparisons straightforward
+        Gee.List<string> this_list = as_list();
+        Gee.List<string> other_list = other.as_list();
+        
+        // if paths exist, do comparison of each parent in order
+        int min = int.min(this_list.size, other_list.size);
+        for (int ctr = 0; ctr < min; ctr++) {
+            int result = this_list[ctr].casefold().collate(other_list[ctr].casefold());
+            if (result != 0)
+                return result;
+        }
+        
+        // paths up to the min element count are equal, shortest path is less-than, otherwise
+        // equal paths
+        return this_list.size - other_list.size;
     }
     
     public uint to_hash() {
