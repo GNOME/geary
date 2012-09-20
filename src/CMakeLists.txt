@@ -217,6 +217,7 @@ client/models/folder-list.vala
 client/models/conversation-list-store.vala
 
 client/notification/libindicate.vala
+client/notification/libmessagingmenu.vala
 client/notification/new-messages-indicator.vala
 client/notification/new-messages-monitor.vala
 client/notification/notification-bubble.vala
@@ -273,7 +274,7 @@ include(ValaPrecompile)
 
 # Packages
 if (LIBINDICATE_FOUND)
-    message(STATUS "Unity messaging menu support: ON")
+    message(STATUS "Unity indicate support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
         indicate-0.7
@@ -288,6 +289,26 @@ if (LIBINDICATE_FOUND)
     set(EXTRA_VALA_OPTIONS
         ${EXTRA_VALA_OPTIONS}
         -D HAVE_LIBINDICATE
+    )
+else ()
+    message(STATUS "Unity indicate support: OFF")
+endif ()
+
+if (LIBMESSAGINGMENU_FOUND)
+    message(STATUS "Unity messaging menu support: ON")
+    set(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        messaging-menu
+    )
+    
+    set(EXTRA_CLIENT_PACKAGES
+        ${EXTRA_CLIENT_PACKAGES}
+        MessagingMenu-1.0
+    )
+    
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        -D HAVE_LIBMESSAGINGMENU
     )
 else ()
     message(STATUS "Unity messaging menu support: OFF")

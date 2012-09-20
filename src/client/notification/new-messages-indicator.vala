@@ -21,11 +21,32 @@ public abstract class NewMessagesIndicator : Object {
     }
     
     public static NewMessagesIndicator create(NewMessagesMonitor monitor) {
-#if HAVE_LIBINDICATE
-        return new Libindicate(monitor);
-#else
-        return new NullIndicator(monitor);
+        NewMessagesIndicator? indicator = null;
+        
+        // these are ordered in order of preference, as it's possible for libindicate and
+        // libmessagingmenu to coexist (although only libmessagingmenu will work)
+        
+#if HAVE_LIBMESSAGINGMENU
+        if (indicator == null)
+            indicator = new Libmessagingmenu(monitor);
 #endif
+        
+#if HAVE_LIBINDICATE
+        if (indicator == null)
+            indicator = new Libindicate(monitor);
+#endif
+        
+        if (indicator == null)
+            indicator = new NullIndicator(monitor);
+        
+        assert(indicator != null);
+        
+        return indicator;
+    }
+    
+    // Returns time as a uint32 (suitable for signals if event doesn't supply it)
+    protected uint32 now() {
+        return (uint32) TimeVal().tv_sec;
     }
 }
 

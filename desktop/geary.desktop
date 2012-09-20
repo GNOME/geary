@@ -11,3 +11,10 @@ Terminal=false
 Categories=GNOME;GTK;Network;Office;Email;
 MimeType=x-scheme-handler/mailto;
 StartupNotify=true
+Actions=Compose
+
+[Desktop Action Compose]
+Name=Compose Message
+Exec=geary mailto:
+OnlyShowIn=Messaging Menu;Unity
+
