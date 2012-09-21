@@ -1227,10 +1227,25 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             
             File saved_file = File.new_for_path(Attachment.get_path(db.db_file.get_parent(), message_id,
                 attachment_id, filename));
+            
             debug("Saving attachment to %s", saved_file.get_path());
+            
             try {
+                // create directory, but don't throw exception if already exists
+                try {
+                    saved_file.get_parent().make_directory_with_parents(cancellable);
+                } catch (IOError ioe) {
+                    // fall through if already exists
+                    if (!(ioe is IOError.EXISTS))
+                        throw ioe;
+                }
+                
+                // REPLACE_DESTINATION doesn't seem to work as advertised all the time ... just
+                // play it safe here
+                if (saved_file.query_exists(cancellable))
+                    saved_file.delete(cancellable);
+                
                 // Create the file where the attachment will be saved and get the output stream.
-                saved_file.get_parent().make_directory_with_parents();
                 FileOutputStream saved_stream = saved_file.create(FileCreateFlags.REPLACE_DESTINATION,
                     cancellable);
                 
