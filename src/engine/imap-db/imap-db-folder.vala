@@ -318,14 +318,14 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 stmt = cx.prepare(
                     "SELECT message_id, ordering FROM MessageLocationTable WHERE folder_id=? "
                     + "AND ordering >= ? AND ordering <= ? ORDER BY ordering ASC");
-                stmt.bind_int64(0, folder_id);
+                stmt.bind_rowid(0, folder_id);
                 stmt.bind_int64(1, low);
                 stmt.bind_int64(2, high);
             } else if (high == -1) {
                 stmt = cx.prepare(
                     "SELECT message_id, ordering FROM MessageLocationTable WHERE folder_id=? "
                     + "AND ordering >= ? ORDER BY ordering ASC");
-                stmt.bind_int64(0, folder_id);
+                stmt.bind_rowid(0, folder_id);
                 stmt.bind_int64(1, low);
             } else {
                 assert(low == -1);
@@ -333,7 +333,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 stmt = cx.prepare(
                     "SELECT message_id, ordering FROM MessageLocationTable WHERE folder_id=? "
                     + "AND ordering <= ? ORDER BY ordering ASC");
-                stmt.bind_int64(0, folder_id);
+                stmt.bind_rowid(0, folder_id);
                 stmt.bind_int64(1, high);
             }
             
@@ -620,7 +620,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         throws Error {
         Db.Statement stmt = cx.prepare(
             "SELECT COUNT(*) FROM MessageLocationTable WHERE folder_id=?");
-        stmt.bind_int64(0, folder_id);
+        stmt.bind_rowid(0, folder_id);
         
         Db.Result results = stmt.exec(cancellable);
         if (results.finished)
@@ -721,7 +721,13 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                     internaldate, rfc822_size, to_string());
             }
             
-            associated = true;
+            Db.Statement search_stmt = cx.prepare(
+                "SELECT id FROM MessageLocationTable WHERE message_id=? AND folder_id=?");
+            stmt.bind_rowid(0, message_id);
+            stmt.bind_rowid(1, folder_id);
+            
+            Db.Result search_results = search_stmt.exec(cancellable);
+            associated = !search_results.finished;
             
             return message_id;
         }

@@ -160,6 +160,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // any flags that may have changed
         Geary.Imap.UID? earliest_uid = yield local_folder.get_earliest_uid_async(cancellable);
         
+        // verify still open
+        check_open("normalize_folders (local earliest UID)");
+        
         // if no earliest UID, that means no messages in local store, so nothing to update
         if (earliest_uid == null || !earliest_uid.is_valid()) {
             debug("No earliest UID in local %s, nothing to normalize", to_string());
@@ -172,6 +175,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
         Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
             earliest_id, int.MAX, NORMALIZATION_FIELDS, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
+        
+        // verify still open
+        check_open("normalize_folders (list local)");
         
         // be sure they're sorted from earliest to latest
         if (old_local != null)
@@ -191,6 +197,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.List<Geary.Email>? old_remote = yield remote_folder.list_email_async(
             new Imap.MessageSet.uid_range_to_highest(earliest_uid), NORMALIZATION_FIELDS,
             cancellable);
+        
+        // verify still open after I/O
+        check_open("normalize_folders (list remote)");
         
         // sort earliest to latest
         if (old_remote != null)
@@ -337,6 +346,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             "Executing %d batch normalization operations on %s...", batch.size, to_string());
         
         yield batch.execute_all_async(cancellable);
+        
+        // check still open a third time
+        check_open("normalize_folders (batch execute)");
         
         Logging.debug(Logging.Flag.FOLDER_NORMALIZATION,
             "Finished %d batch normalization operations on %s", batch.size, to_string());
