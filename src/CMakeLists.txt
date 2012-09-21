@@ -380,8 +380,14 @@ set(CFLAGS
     -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
     -DLANGUAGE_SUPPORT_DIRECTORY=\"${LANGUAGE_SUPPORT_DIRECTORY}\"
     -g
-    -O2
 )
+
+if (NOT DEBUG)
+    set(CFLAGS
+        ${CFLAGS}
+        -O2
+    )    
+endif ()
 
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})

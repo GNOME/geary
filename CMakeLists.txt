@@ -26,8 +26,13 @@ set(ARCHIVE_DEBUILD_FULL_NAME ${CMAKE_PROJECT_NAME}_${VERSION}.orig.tar.xz)
 
 set(GLADE_FILES ui/composer.glade ui/login.glade ui/message.glade ui/password-dialog.glade ui/toolbar.glade)
 
+option(DEBUG "Build for debugging." OFF)
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
 option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
+
+if (DEBUG)
+    message(STATUS "Debug build")
+endif ()
 
 if (ICON_UPDATE)
     message(STATUS "Icon cache will be updated")

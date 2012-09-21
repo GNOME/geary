@@ -20,6 +20,9 @@ configure_help() {
     printf "\t--prefix=PREFIX\t\tPrepend PREFIX to program installation paths.\n"
     printf "\t\t\t\t[%s]\n" $DEFAULT_PREFIX
     
+    printf "\t--debug\n"
+    printf "\t\t\t\tBuild for debugging.\n"
+    
     printf "\t--disable-schemas-compile\n"
     printf "\t\t\t\tDisable compiling the GSettings schema.\n"
     
@@ -57,6 +60,10 @@ do
                             fi
                             
                             CMDLINE="${CMDLINE} -DCMAKE_INSTALL_PREFIX=${value}"
+                            ;;
+        
+        --debug)
+                            CMDLINE="${CMDLINE} -DDEBUG=ON"
                             ;;
         
         --disable-schemas-compile)
