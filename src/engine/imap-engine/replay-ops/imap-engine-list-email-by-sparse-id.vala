@@ -18,6 +18,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
         }
         
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            // TODO: Need a sparse ID fetch in ImapDB.Folder to scoop all these up at once
             try {
                 return yield owner.local_folder.fetch_email_async(id, required_fields,
                     ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
@@ -53,13 +54,12 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
             if (list == null || list.size == 0)
                 return null;
             
-            // create all locally and merge results if required
+            yield owner.local_folder.create_or_merge_email_async(list, cancellable);
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];
                 
-                yield owner.local_folder.create_or_merge_email_async(email, cancellable);
-                
                 // if remote email doesn't fulfills all required fields, fetch full and return that
+                // TODO: Need a sparse ID fetch in ImapDB.Folder to do this all at once
                 if (!email.fields.fulfills(required_fields)) {
                     email = yield owner.local_folder.fetch_email_async(email.id, required_fields,
                         ImapDB.Folder.ListFlags.NONE, cancellable);
@@ -99,6 +99,12 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
         
         local_only = flags.is_all_set(Folder.ListFlags.LOCAL_ONLY);
         force_update = flags.is_all_set(Folder.ListFlags.FORCE_UPDATE);
+        
+        // always fetch required fields unless a modified list, in which case only fetch the fields
+        // requested by user ... this ensures the local store is seeded with certain fields required
+        // for it to operate properly
+        if (!force_update && !local_only)
+            this.required_fields |= ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {

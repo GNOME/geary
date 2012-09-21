@@ -14,7 +14,7 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
     }
     
     public override uint to_hash() {
-        return Geary.Hashable.int64_hash(uid.value);
+        return uid.to_hash();
     }
     
     public override bool equals(Equalable o) {
@@ -25,7 +25,7 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
         if (this == other)
             return true;
         
-        return ordering == other.ordering;
+        return uid.equals(other.uid);
     }
     
     public override string to_string() {

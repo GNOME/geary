@@ -157,7 +157,7 @@ public class Geary.NonblockingBatch : Object {
         
         locked = true;
         
-        // if empty, quietly exit
+        // if empty, quietly exit (leaving the object locked; NonblockingBatch is a one-shot deal)
         if (contexts.size == 0)
             return;
         

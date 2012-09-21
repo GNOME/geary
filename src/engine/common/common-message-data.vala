@@ -56,6 +56,8 @@ public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData,
 public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Hashable, Equalable {
     public int value { get; private set; }
     
+    private uint hash = uint.MAX;
+    
     public IntMessageData(int value) {
         this.value = value;
     }
@@ -72,7 +74,7 @@ public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Ha
     }
     
     public virtual uint to_hash() {
-        return int_hash(value);
+        return (hash != uint.MAX) ? hash : (hash = int_hash(value));
     }
     
     public override string to_string() {
@@ -82,6 +84,8 @@ public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Ha
 
 public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData, Hashable, Equalable {
     public long value { get; private set; }
+    
+    private uint hash = uint.MAX;
     
     public LongMessageData(long value) {
         this.value = value;
@@ -99,7 +103,7 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData, H
     }
     
     public virtual uint to_hash() {
-        return int64_hash((int64) value);
+        return (hash != uint.MAX) ? hash : (hash = int64_hash((int64) value));
     }
     
     public override string to_string() {
@@ -109,6 +113,8 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData, H
 
 public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData, Hashable, Equalable {
     public int64 value { get; private set; }
+    
+    private uint hash = uint.MAX;
     
     public Int64MessageData(int64 value) {
         this.value = value;
@@ -126,7 +132,7 @@ public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData, 
     }
     
     public virtual uint to_hash() {
-        return int64_hash(value);
+        return (hash != uint.MAX) ? hash : (hash = int64_hash(value));
     }
     
     public override string to_string() {

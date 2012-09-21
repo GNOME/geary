@@ -156,12 +156,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 remote_properties.uid_validity.value.to_string());
         }
         
-        // from here on the only write operations being performed on the folder are creating or updating
-        // existing emails or removing them, both operations being performed using EmailIdentifiers
-        // rather than positional addressing ... this means the order of operation is not important
-        // and can be batched up rather than performed serially
-        NonblockingBatch batch = new NonblockingBatch();
-        
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
         // any flags that may have changed
         Geary.Imap.UID? earliest_uid = yield local_folder.get_earliest_uid_async(cancellable);
@@ -209,6 +203,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         int remote_ctr = 0;
         int local_ctr = 0;
+        Gee.ArrayList<Geary.Email> to_create_or_merge = new Gee.ArrayList<Geary.Email>();
         Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
@@ -233,7 +228,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     // check before writebehind
                     if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
                         remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
-                        batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
+                        to_create_or_merge.add(remote_email);
                         flags_changed.set(remote_email.id, remote_email.email_flags);
                         
                         Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
@@ -251,7 +246,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 // check for writebehind before doing
                 if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
                     remote_email.id, null)) {
-                    batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
+                    to_create_or_merge.add(remote_email);
                     appended_ids.add(remote_email.id);
                     
                     Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending inside remote ID %s",
@@ -269,7 +264,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 // check writebehind first
                 if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.REMOVE,
                     local_email.id, null)) {
-                    batch.add(new RemoveLocalEmailOperation(local_folder, local_email.id));
                     removed_ids.add(local_email.id);
                     
                     Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing inside local ID %s",
@@ -293,7 +287,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // again, have to check for writebehind
             if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
                 remote_email.id, null)) {
-                batch.add(new CreateLocalEmailOperation(local_folder, remote_email, NORMALIZATION_FIELDS));
+                to_create_or_merge.add(remote_email);
                 appended_ids.add(remote_email.id);
                 
                 Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending outside remote %s",
@@ -312,7 +306,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // again, check for writebehind
             if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.REMOVE,
                 local_email.id, null)) {
-                batch.add(new RemoveLocalEmailOperation(local_folder, local_email.id));
                 removed_ids.add(local_email.id);
                 
                 Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing outside remote %s",
@@ -322,6 +315,22 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     to_string(), local_email.id.to_string());
             }
         }
+        
+        // from here on the only write operations being performed on the folder are creating or updating
+        // existing emails or removing them, both operations being performed using EmailIdentifiers
+        // rather than positional addressing ... this means the order of operation is not important
+        // and can be batched up rather than performed serially
+        NonblockingBatch batch = new NonblockingBatch();
+        
+        CreateLocalEmailOperation? create_op = null;
+        if (to_create_or_merge.size > 0) {
+            create_op = new CreateLocalEmailOperation(local_folder, to_create_or_merge,
+                NORMALIZATION_FIELDS);
+            batch.add(create_op);
+        }
+        
+        if (removed_ids.size > 0)
+            batch.add(new RemoveLocalEmailOperation(local_folder, removed_ids));
         
         // execute them all at once
         Logging.debug(Logging.Flag.FOLDER_NORMALIZATION,
@@ -342,10 +351,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // look for local additions (email not known to the local store) to signal
         Gee.ArrayList<Geary.EmailIdentifier> locally_appended = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (int id in batch.get_ids()) {
-            CreateLocalEmailOperation? create_op = batch.get_operation(id) as CreateLocalEmailOperation;
-            if (create_op != null && create_op.created)
-                locally_appended.add(create_op.email.id);
+        if (create_op != null) {
+            foreach (Geary.Email email in create_op.created.keys) {
+                // true means created, not merged
+                if (create_op.created.get(email))
+                    locally_appended.add(email.id);
+            }
         }
         
         // notify emails that have been removed (see note above about why not all Creates are
@@ -614,14 +625,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 debug("do_replay_appended_messages: %d new messages from %s in %s", list.size,
                     msg_set.to_string(), to_string());
                 
-                // add new messages to local store
-                foreach (Geary.Email email in list) {
-                    debug("do_replay_appended_messages: appending email ID %s to %s", email.id.to_string(),
-                        to_string());
-                    
-                    // need to report both if it was created (not known before) and appended (which
-                    // could mean created or simply a known email associated with this folder)
-                    if (yield local_folder.create_or_merge_email_async(email, null)) {
+                // need to report both if it was created (not known before) and appended (which
+                // could mean created or simply a known email associated with this folder)
+                Gee.Map<Geary.Email, bool> created_or_merged =
+                    yield local_folder.create_or_merge_email_async(list, null);
+                foreach (Geary.Email email in created_or_merged.keys) {
+                    // true means created
+                    if (created_or_merged.get(email)) {
                         created.add(email.id);
                     } else {
                         debug("do_replay_appended_messages: appended email ID %s already known in account, now associated with %s...",
@@ -1087,21 +1097,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     count, low, to_string());
             }
             
-            NonblockingBatch batch = new NonblockingBatch();
-            
-            foreach (Geary.Email email in list) {
-                batch.add(new CreateLocalEmailOperation(local_folder, email,
-                    ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION));
-            }
-            
-            yield batch.execute_all_async(cancellable);
-            batch.throw_first_exception();
+            Gee.Map<Geary.Email, bool> created_or_merged = yield local_folder.create_or_merge_email_async(
+                list, cancellable);
             
             // Collect which EmailIdentifiers were created and report them
-            foreach (int id in batch.get_ids()) {
-                CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
-                if (op != null && op.created)
-                    created_ids.add(op.email.id);
+            foreach (Geary.Email email in created_or_merged.keys) {
+                // true means created
+                if (created_or_merged.get(email))
+                    created_ids.add(email.id);
             }
         } catch (Error e) {
             local_count = 0; // prevent compiler warning

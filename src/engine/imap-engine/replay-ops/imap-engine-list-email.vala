@@ -311,7 +311,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
             if (accumulator != null && remote_list != null && remote_list.size > 0)
                 accumulator.add_all(remote_list);
             
-            if (cb != null)
+            if (cb != null && remote_list.size > 0)
                 cb(remote_list, null);
             
             remaining -= list.length;
@@ -330,42 +330,44 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         if (accumulator != null && remote_list != null && remote_list.size > 0)
             accumulator.add_all(remote_list);
         
-        if (cb != null)
+        if (cb != null && remote_list.size > 0)
             cb(remote_list, null);
     }
     
     private async Gee.List<Geary.Email> merge_emails(Gee.List<Geary.Email> list,
         Cancellable? cancellable) throws Error {
+        CreateLocalEmailOperation create_op = new CreateLocalEmailOperation(engine.local_folder,
+            list, required_fields);
+        
         NonblockingBatch batch = new NonblockingBatch();
-        foreach (Geary.Email email in list)
-            batch.add(new CreateLocalEmailOperation(engine.local_folder, email, required_fields));
+        batch.add(create_op);
         
         yield batch.execute_all_async(cancellable);
         
         batch.throw_first_exception();
         
+        assert(create_op.created != null);
+        assert(create_op.merged != null);
+        
         // report locally added (non-duplicate, not unknown) emails & collect emails post-merge
-        Gee.List<Geary.Email> merged_email = new Gee.ArrayList<Geary.Email>();
         Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
             Hashable.hash_func, Equalable.equal_func);
-        foreach (int id in batch.get_ids()) {
-            CreateLocalEmailOperation? op = batch.get_operation(id) as CreateLocalEmailOperation;
-            if (op != null) {
-                if (op.created)
-                    created_ids.add(op.email.id);
-                
-                assert(op.merged != null);
-                merged_email.add(op.merged);
-            }
+        foreach (Geary.Email email in create_op.created.keys) {
+            // true means created
+            if (create_op.created.get(email))
+                created_ids.add(email.id);
         }
         
         if (created_ids.size > 0)
             engine.notify_email_locally_appended(created_ids);
         
-        if (cb != null)
-            cb(merged_email, null);
+        Gee.ArrayList<Geary.Email> merged_list = new Gee.ArrayList<Geary.Email>();
+        merged_list.add_all(create_op.merged.values);
         
-        return merged_email;
+        if (cb != null && merged_list.size > 0)
+            cb(merged_list, null);
+        
+        return merged_list;
     }
     
     public override string describe_state() {

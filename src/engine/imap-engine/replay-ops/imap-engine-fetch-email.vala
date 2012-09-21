@@ -22,9 +22,15 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         this.engine = engine;
         this.id = id;
         this.required_fields = required_fields;
-        remaining_fields = required_fields;
         this.flags = flags;
         this.cancellable = cancellable;
+        
+        // always fetch the required fields unless a modified list, in which case want to do exactly
+        // what's required, no more and no less
+        if (!flags.is_all_set(Folder.ListFlags.LOCAL_ONLY) && !flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
+            this.required_fields |= ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
+        
+        remaining_fields = required_fields;
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
@@ -103,7 +109,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         // save to local store
         email = list[0];
         assert(email != null);
-        if (yield engine.local_folder.create_or_merge_email_async(email, cancellable))
+        
+        Gee.Map<Geary.Email, bool> created_or_merged =
+            yield engine.local_folder.create_or_merge_email_async(new Geary.Singleton<Geary.Email>(email),
+                cancellable);
+        
+        // true means created
+        if (created_or_merged.get(email))
             engine.notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now

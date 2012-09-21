@@ -42,6 +42,7 @@ public class ConversationListStore : Gtk.ListStore {
     private Cancellable? cancellable_folder = null;
     private bool loading_local_only = true;
     private int conversations_added_counter = 0;
+    private Geary.NonblockingMutex refresh_mutex = new Geary.NonblockingMutex();
     
     public signal void conversations_added_began();
     
@@ -130,6 +131,30 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private async void refresh_previews_async(Geary.ConversationMonitor conversation_monitor) {
+        // Use a mutex because it's possible for the conversation monitor to fire multiple
+        // "scan-started" signals as messages come in fast and furious, but only want to process
+        // previews one at a time, otherwise it's possible to issue multiple requests for the
+        // same set
+        int token;
+        try {
+            token = yield refresh_mutex.claim_async();
+        } catch (Error err) {
+            debug("Unable to claim refresh mutex: %s", err.message);
+            
+            return;
+        }
+        
+        yield do_refresh_previews_async(conversation_monitor);
+        
+        try {
+            refresh_mutex.release(ref token);
+        } catch (Error err) {
+            debug("Unable to release refresh mutex: %s", err.message);
+        }
+    }
+    
+    // should only be called by refresh_previews_async()
+    private async void do_refresh_previews_async(Geary.ConversationMonitor conversation_monitor) {
         if (current_folder == null || !GearyApplication.instance.config.display_preview)
             return;
         
@@ -141,17 +166,20 @@ public class ConversationListStore : Gtk.ListStore {
             : Geary.Folder.ListFlags.NONE;
         Gee.List<Geary.Email>? emails = null;
         try {
+            debug("Loading %d previews for %s...", emails_needing_previews.size, current_folder.to_string());
             emails = yield current_folder.list_email_by_sparse_id_async(emails_needing_previews,
                 ConversationListStore.WITH_PREVIEW_FIELDS, flags, cancellable_folder);
+            debug("Loaded %d previews for %s...", emails_needing_previews.size, current_folder.to_string());
         } catch (Error err) {
             // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
             if (!(err is Geary.EngineError.NOT_FOUND))
                 debug("Unable to fetch preview: %s", err.message);
         }
         
-        if (current_folder == null || emails == null)
+        if (current_folder == null || emails == null || emails.size == 0)
             return;
         
+        debug("Displaying %d previews for %s...", emails.size, current_folder.to_string());
         foreach (Geary.Email email in emails) {
             Geary.Conversation? conversation = conversation_monitor.get_conversation_for_email(email.id);
             if (conversation != null)
@@ -159,6 +187,7 @@ public class ConversationListStore : Gtk.ListStore {
             else
                 debug("Couldn't find conversation for %s", email.id.to_string());
         }
+        debug("Displayed %d previews for %s", emails.size, current_folder.to_string());
     }
     
     private Gee.Collection<Geary.EmailIdentifier> get_emails_needing_previews() {
@@ -172,12 +201,15 @@ public class ConversationListStore : Gtk.ListStore {
             Geary.Hashable.hash_func, Geary.Equalable.equal_func);
         foreach (Geary.Conversation conversation in sorted_conversations) {
             Geary.Email? need_preview = conversation.get_latest_email();
+            if (need_preview == null)
+                continue;
+            
             Geary.Email? current_preview = get_preview_for_conversation(conversation);
             
             // if all preview fields present and it's the same email, don't need to refresh
-            if (need_preview == null || (current_preview != null &&
-                need_preview.id.equals(current_preview.id) &&
-                current_preview.fields.is_all_set(ConversationListStore.WITH_PREVIEW_FIELDS))) {
+            if (current_preview != null
+                && need_preview.id.equals(current_preview.id)
+                && current_preview.fields.is_all_set(ConversationListStore.WITH_PREVIEW_FIELDS)) {
                 continue;
             }
             
@@ -318,6 +350,11 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
+        // this handler is used to initialize the display, so it's possible for an empty list to
+        // be passed in (the ConversationMonitor signal should never do this)
+        if (conversations.size == 0)
+            return;
+        
         conversations_added_began();
         
         debug("Adding %d conversations.", conversations.size);

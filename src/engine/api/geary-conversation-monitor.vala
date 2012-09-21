@@ -76,8 +76,8 @@ public class Geary.ConversationMonitor : Object {
             return emails.keys;
         }
         
-        public bool tracks_message_id(RFC822.MessageID message_id) {
-            return message_ids.contains(message_id);
+        public Gee.Collection<RFC822.MessageID> get_all_message_ids() {
+            return message_ids.read_only_view;
         }
         
         public void add(Email email) {
@@ -148,6 +148,8 @@ public class Geary.ConversationMonitor : Object {
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
     private Gee.HashMap<Geary.EmailIdentifier, ImplConversation> geary_id_map = new Gee.HashMap<
         Geary.EmailIdentifier, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashMap<Geary.RFC822.MessageID, ImplConversation> message_id_map = new Gee.HashMap<
+        Geary.RFC822.MessageID, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
     private Cancellable? cancellable_monitor = null;
     private bool retry_connection = false;
     private uint retry_id = 0;
@@ -370,6 +372,7 @@ public class Geary.ConversationMonitor : Object {
         // pull in all the local email immediamente
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
         yield load_async(-1, -1, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+        debug("ConversationMonitor seeded for %s", folder.to_string());
         
         // if already opened, go ahead and do a full load now from remote and local; otherwise,
         // the reseed has to wait until the folder's remote is opened (handled in on_folder_opened)
@@ -492,12 +495,11 @@ public class Geary.ConversationMonitor : Object {
         notify_scan_started();
         
         try {
-            Gee.ArrayList<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
-            foreach (Geary.EmailIdentifier id in ids)
-                list.add(yield folder.fetch_email_async(id, required_fields, flags, cancellable));
-            
+            Gee.List<Geary.Email>? list = yield folder.list_email_by_sparse_id_async(ids,
+                required_fields, flags, cancellable);
             on_email_listed(list, null);
-            on_email_listed(null, null);
+            if (list != null)
+                on_email_listed(null, null);
         } catch (Error err) {
             on_email_listed(null, err);
         }
@@ -531,6 +533,9 @@ public class Geary.ConversationMonitor : Object {
             // of messages with no Message-ID being loaded twice (most often encountered when
             // the first pass is loading messages directly from the database and the second pass
             // are messages loaded from both)
+            //
+            // TODO: Combine fields from this email with existing email so the monitor is holding
+            // the freshest stuff ... this may require more signals
             if (geary_id_map.has_key(email.id))
                 continue;
             
@@ -541,15 +546,8 @@ public class Geary.ConversationMonitor : Object {
             // see if any of these ancestor IDs maps to an existing conversation
             ImplConversation? conversation = null;
             if (ancestors != null) {
-                foreach (ImplConversation known in conversations) {
-                    foreach (RFC822.MessageID ancestor in ancestors) {
-                        if (known.tracks_message_id(ancestor)) {
-                            conversation = known;
-                            
-                            break;
-                        }
-                    }
-                    
+                foreach (RFC822.MessageID ancestor in ancestors) {
+                    conversation = message_id_map.get(ancestor);
                     if (conversation != null)
                         break;
                 }
@@ -572,6 +570,10 @@ public class Geary.ConversationMonitor : Object {
             
             // map email identifier to email (for later removal)
             geary_id_map.set(email.id, conversation);
+            
+            // map ancestors to this conversation
+            foreach (RFC822.MessageID ancestor in ancestors)
+                message_id_map.set(ancestor, conversation);
         }
         
         // Save and signal the new conversations
@@ -583,6 +585,9 @@ public class Geary.ConversationMonitor : Object {
             if (!new_conversations.contains(conversation))
                 notify_conversation_appended(conversation, appended_conversations.get(conversation));
         }
+        
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email completed: %d emails",
+            folder.to_string(), emails.size);
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
@@ -604,6 +609,12 @@ public class Geary.ConversationMonitor : Object {
                 debug("Removed email %s not found on conversations model", removed_id.to_string());
                 
                 continue;
+            }
+            
+            // Warn if not found, but not crucial enough to stop removal
+            foreach (RFC822.MessageID tracked_id in conversation.get_all_message_ids()) {
+                if (!message_id_map.unset(tracked_id))
+                    debug("Warning: Message-ID %s not associated with conversation", tracked_id.to_string());
             }
             
             Geary.Email? found = conversation.get_email_by_id(removed_id);

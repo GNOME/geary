@@ -202,30 +202,42 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         return position;
     }
     
-    // Returns true if created, false if merged.
-    public async bool create_or_merge_email_async(Geary.Email email, Cancellable? cancellable = null)
-        throws Error {
+    // Returns a Map with the created or merged email as the key and the result of the operation
+    // (true if created, false if merged) as the value
+    public async Gee.Map<Geary.Email, bool> create_or_merge_email_async(Gee.Collection<Geary.Email> emails,
+        Cancellable? cancellable = null) throws Error {
         check_open();
         
-        bool created = false;
-        Gee.Collection<Contact>? updated_contacts = null;
+        Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
+        Gee.Collection<Contact> updated_contacts = new Gee.ArrayList<Contact>();
         Db.TransactionOutcome outcome = yield db.exec_transaction_async(Db.TransactionType.RW,
             (cx) => {
-            created = do_create_or_merge_email(cx, email, out updated_contacts, cancellable);
+            foreach (Geary.Email email in emails) {
+                Gee.Collection<Contact>? contacts_this_email = null;
+                bool created = do_create_or_merge_email(cx, email, out contacts_this_email, cancellable);
+                
+                if (contacts_this_email != null)
+                    updated_contacts.add_all(contacts_this_email);
+                
+                results.set(email, created);
+            }
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
         
-        if (outcome == Db.TransactionOutcome.COMMIT && updated_contacts != null)
+        if (outcome == Db.TransactionOutcome.COMMIT && updated_contacts.size > 0)
             contact_store.update_contacts(updated_contacts);
         
-        return created;
+        return results;
     }
     
     public async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
         check_open();
         
+        // TODO: A more efficient way to do this would be to pull in all the columns at once in
+        // a single SELECT operation ... this might be less efficient than current practice if
+        // a lot of messages are marked for removal, but that's an edge case
         Gee.List<Geary.Email>? list = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
             Geary.Folder.normalize_span_specifiers(ref low, ref count,
@@ -680,7 +692,8 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         
         // if fields not present, then no duplicate can reliably be found
         if (!email.fields.is_all_set(REQUIRED_FOR_DUPLICATE_DETECTION)) {
-            debug("Unable to detect duplicates for %s", email.id.to_string());
+            debug("Unable to detect duplicates for %s (%s available)", email.id.to_string(),
+                email.fields.to_list_string());
             return Db.INVALID_ROWID;
         }
         
