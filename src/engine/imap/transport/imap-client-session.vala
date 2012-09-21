@@ -451,6 +451,7 @@ public class Geary.Imap.ClientSession {
         cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
+        cx.received_bytes.connect(on_received_bytes);
         cx.received_bad_response.connect(on_received_bad_response);
         cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
@@ -478,6 +479,7 @@ public class Geary.Imap.ClientSession {
         cx.send_failure.disconnect(on_network_send_error);
         cx.received_status_response.disconnect(on_received_status_response);
         cx.received_server_data.disconnect(on_received_server_data);
+        cx.received_bytes.disconnect(on_received_bytes);
         cx.received_bad_response.disconnect(on_received_bad_response);
         cx.recv_closed.disconnect(on_received_closed);
         cx.receive_failure.disconnect(on_network_receive_failure);
@@ -1385,6 +1387,9 @@ public class Geary.Imap.ClientSession {
         current_cmd_response.seal(status_response);
         assert(current_cmd_response.is_sealed());
         
+        // reschedule keepalive
+        schedule_keepalive();
+        
         Tag tag = current_cmd_response.status_response.tag;
         
         // store the result for the caller to index
@@ -1421,6 +1426,9 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_received_server_data(ServerData server_data) {
+        // reschedule keepalive
+        schedule_keepalive();
+        
         // The first response from the server is an untagged status response, which is considered
         // ServerData in our model.  This captures that and treats it as such.
         if (awaiting_connect_response) {
@@ -1442,6 +1450,11 @@ public class Geary.Imap.ClientSession {
         }
         
         current_cmd_response.add_server_data(server_data);
+    }
+    
+    private void on_received_bytes(size_t bytes) {
+        // reschedule keepalive
+        schedule_keepalive();
     }
     
     private void on_received_bad_response(RootParameters root, ImapError err) {

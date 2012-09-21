@@ -90,6 +90,19 @@ public class Geary.Imap.Deserializer {
     
     public signal void receive_failure(Error err);
     
+    /**
+     * "data-received" is fired as data blocks are received during download.  The bytes themselves
+     * may be partial and unusable out of context, so they're not provided, but their size is, to allow
+     * monitoring of speed and such.
+     *
+     * Note that this is fired for both line data (i.e. responses, status, etc.) and literal data
+     * (block transfers).
+     *
+     * In general, this signal is provided to inform subscribers that activity is happening
+     * on the receive channel, especially during long downloads.
+     */
+    public signal void bytes_received(size_t bytes);
+    
     public signal void deserialize_failure();
     
     public Deserializer(InputStream ins) {
@@ -223,13 +236,15 @@ public class Geary.Imap.Deserializer {
     
     private void on_read_line(Object? source, AsyncResult result) {
         try {
-            size_t length;
-            string? line = dins.read_line_async.end(result, out length);
+            size_t bytes_read;
+            string? line = dins.read_line_async.end(result, out bytes_read);
             if (line == null) {
                 push_eos();
                 
                 return;
             }
+            
+            bytes_received(bytes_read);
             
             push_line(line);
         } catch (Error err) {
@@ -251,6 +266,8 @@ public class Geary.Imap.Deserializer {
                 
                 return;
             }
+            
+            bytes_received(bytes_read);
             
             // adjust the current buffer's size to the amount that was actually read in
             block_buffer.adjust(current_buffer, bytes_read);

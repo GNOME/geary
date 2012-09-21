@@ -91,7 +91,8 @@ public class Geary.Imap.ClientConnection {
     private bool idle_when_quiet = false;
     private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>(Hashable.hash_func,
         Equalable.equal_func);
-    private TimerPool<Tag> cmd_timer = new TimerPool<Tag>(Hashable.hash_func, Equalable.equal_func);
+    private uint timeout_id = 0;
+    private uint timeout_cmd_count = 0;
     
     public virtual signal void connected() {
         Logging.debug(Logging.Flag.NETWORK, "[%s] connected to %s", to_string(),
@@ -121,6 +122,10 @@ public class Geary.Imap.ClientConnection {
     
     public virtual signal void received_continuation_response(ContinuationResponse continuation_response) {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), continuation_response.to_string());
+    }
+    
+    public virtual signal void received_bytes(size_t bytes) {
+        // this generates a *lot* of debug logging if one was placed here, so it's not
     }
     
     public virtual signal void received_bad_response(RootParameters root, ImapError err) {
@@ -200,8 +205,6 @@ public class Geary.Imap.ClientConnection {
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
         fsm.set_logging(false);
-        
-        cmd_timer.timed_out.connect(on_cmd_timed_out);
     }
     
     /**
@@ -322,7 +325,7 @@ public class Geary.Imap.ClientConnection {
         unschedule_flush_timeout();
         
         // cancel all outstanding commmand timeouts
-        cmd_timer.cancel_all();
+        cancel_timeout();
         
         // close the Serializer and Deserializer
         yield close_channels_async(cancellable);
@@ -357,6 +360,7 @@ public class Geary.Imap.ClientConnection {
         des = new Deserializer(ios.input_stream);
         
         des.parameters_ready.connect(on_parameters_ready);
+        des.bytes_received.connect(on_bytes_received);
         des.receive_failure.connect(on_receive_failure);
         des.deserialize_failure.connect(on_deserialize_failure);
         des.eos.connect(on_eos);
@@ -369,6 +373,7 @@ public class Geary.Imap.ClientConnection {
         // disconnect from Deserializer before yielding to stop it
         if (des != null) {
             des.parameters_ready.disconnect(on_parameters_ready);
+            des.bytes_received.disconnect(on_bytes_received);
             des.receive_failure.disconnect(on_receive_failure);
             des.deserialize_failure.disconnect(on_deserialize_failure);
             des.eos.disconnect(on_eos);
@@ -434,6 +439,15 @@ public class Geary.Imap.ClientConnection {
         }
     }
     
+    private void on_bytes_received(size_t bytes) {
+        // as long as receiving someone on the connection, keep the outstanding command timeouts
+        // alive ... this primarily prevents against the case where a command that generates a long
+        // download doesn't timeout the commands behind it
+        increase_timeout();
+        
+        received_bytes(bytes);
+    }
+    
     private void on_receive_failure(Error err) {
         receive_failure(err);
     }
@@ -444,22 +458,6 @@ public class Geary.Imap.ClientConnection {
     
     private void on_eos() {
         recv_closed();
-    }
-    
-    private void on_cmd_timed_out(Tag tag) {
-        debug("[%s] on_cmd_timed_out: %s", to_string(), tag.to_string());
-        
-        // one timeout is enough; recv error is reported and it's up to caller to nuke connection
-        cmd_timer.timed_out.disconnect(on_cmd_timed_out);
-        
-        // turn off graceful disconnect ... if the connection is hung, don't want to be stalled
-        // trying to flush the pipe
-        TcpConnection? tcp_cx = cx as TcpConnection;
-        if (tcp_cx != null)
-            tcp_cx.set_graceful_disconnect(false);
-        
-        receive_failure(new ImapError.TIMED_OUT("No response to command %s after %u seconds",
-            tag.to_string(), command_timeout_sec));
     }
     
     // TODO: Guard against reentrancy
@@ -484,8 +482,7 @@ public class Geary.Imap.ClientConnection {
         
         // set the timeout on this command; note that a zero-second timeout means no timeout,
         // and that there's no timeout on serialization
-        bool started = cmd_timer.start(cmd.tag, command_timeout_sec);
-        assert(started);
+        cmd_started_timeout();
         
         Error? ser_err = null;
         try {
@@ -601,6 +598,56 @@ public class Geary.Imap.ClientConnection {
             throw new ImapError.NOT_CONNECTED("Not connected to %s", to_string());
     }
     
+    private void cmd_started_timeout() {
+        timeout_cmd_count++;
+        
+        if (timeout_id == 0)
+            timeout_id = Timeout.add_seconds(command_timeout_sec, on_cmd_timeout);
+    }
+    
+    private void cmd_completed_timeout() {
+        if (timeout_cmd_count > 0)
+            timeout_cmd_count--;
+        
+        if (timeout_cmd_count == 0 && timeout_id != 0) {
+            Source.remove(timeout_id);
+            timeout_id = 0;
+        }
+    }
+    
+    private void increase_timeout() {
+        if (timeout_id != 0) {
+            Source.remove(timeout_id);
+            timeout_id = Timeout.add_seconds(command_timeout_sec, on_cmd_timeout);
+        }
+    }
+    
+    private void cancel_timeout() {
+        if (timeout_id != 0)
+            Source.remove(timeout_id);
+        
+        timeout_id = 0;
+        timeout_cmd_count = 0;
+    }
+    
+    private bool on_cmd_timeout() {
+        debug("[%s] on_cmd_timeout", to_string());
+        
+        // turn off graceful disconnect ... if the connection is hung, don't want to be stalled
+        // trying to flush the pipe
+        TcpConnection? tcp_cx = cx as TcpConnection;
+        if (tcp_cx != null)
+            tcp_cx.set_graceful_disconnect(false);
+        
+        timeout_id = 0;
+        timeout_cmd_count = 0;
+        
+        receive_failure(new ImapError.TIMED_OUT("No response to command(s) after %u seconds",
+            command_timeout_sec));
+        
+        return false;
+    }
+    
     public string to_string() {
         if (cx != null) {
             try {
@@ -634,8 +681,7 @@ public class Geary.Imap.ClientConnection {
         StatusResponse status_response = (StatusResponse) object;
         
         // stop the countdown timer on the associated command
-        bool cancelled = cmd_timer.cancel(status_response.tag);
-        assert(cancelled);
+        cmd_completed_timeout();
         
         received_status_response(status_response);
     }
