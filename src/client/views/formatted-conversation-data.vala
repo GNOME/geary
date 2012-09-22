@@ -49,10 +49,8 @@ public class FormattedConversationData : Object {
         }
         
         private string get_as_markup(string participant) {
-            string open_tag = is_unread ? "<b>" : "";
-            string close_tag = is_unread ? "</b>" : "";
-            
-            return "%s%s%s".printf(open_tag, participant, close_tag);
+            return "%s%s%s".printf(
+                is_unread ? "<b>" : "", Geary.HTML.escape_markup(participant), is_unread ? "</b>" : "");
         }
         
         public bool equals(Geary.Equalable o) {
