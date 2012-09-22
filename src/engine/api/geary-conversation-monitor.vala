@@ -76,13 +76,11 @@ public class Geary.ConversationMonitor : Object {
             return emails.keys;
         }
         
-        public Gee.Collection<RFC822.MessageID> get_all_message_ids() {
-            return message_ids.read_only_view;
-        }
-        
         public void add(Email email) {
             // since Email is mutable (and Conversations itself mutates them, and callers might as
             // well), don't replace known email with new
+            //
+            // TODO: Combine new email with old email
             if (emails.has_key(email.id))
                 return;
             
@@ -97,16 +95,28 @@ public class Geary.ConversationMonitor : Object {
                 message_ids.add_all(ancestors);
         }
         
-        public void remove(Email email) {
+        // Returns the removed Message-IDs
+        public Gee.Set<RFC822.MessageID>? remove(Email email) {
             emails.unset(email.id);
             date_ascending.remove(email);
             date_descending.remove(email);
             id_ascending.remove(email);
             id_descending.remove(email);
             
+            Gee.Set<RFC822.MessageID> removed_message_ids = new Gee.HashSet<RFC822.MessageID>(
+                Hashable.hash_func, Equalable.equal_func);
+            
             Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-            if (ancestors != null)
-                message_ids.remove_all(ancestors);
+            if (ancestors != null) {
+                foreach (RFC822.MessageID ancestor_id in ancestors) {
+                    // if remove() changes set (i.e. it was present) but no longer present, that
+                    // means the ancestor_id was the last one and is formally removed
+                    if (message_ids.remove(ancestor_id) && !message_ids.contains(ancestor_id))
+                        removed_message_ids.add(ancestor_id);
+                }
+            }
+            
+            return (removed_message_ids.size > 0) ? removed_message_ids : null;
         }
         
         private static int compare_date_ascending(Email a, Email b) {
@@ -572,8 +582,10 @@ public class Geary.ConversationMonitor : Object {
             geary_id_map.set(email.id, conversation);
             
             // map ancestors to this conversation
-            foreach (RFC822.MessageID ancestor in ancestors)
-                message_id_map.set(ancestor, conversation);
+            if (ancestors != null) {
+                foreach (RFC822.MessageID ancestor in ancestors)
+                    message_id_map.set(ancestor, conversation);
+            }
         }
         
         // Save and signal the new conversations
@@ -611,12 +623,6 @@ public class Geary.ConversationMonitor : Object {
                 continue;
             }
             
-            // Warn if not found, but not crucial enough to stop removal
-            foreach (RFC822.MessageID tracked_id in conversation.get_all_message_ids()) {
-                if (!message_id_map.unset(tracked_id))
-                    debug("Warning: Message-ID %s not associated with conversation", tracked_id.to_string());
-            }
-            
             Geary.Email? found = conversation.get_email_by_id(removed_id);
             if (found == null) {
                 debug("WARNING: Unable to locate email ID %s in conversation %s", removed_id.to_string(),
@@ -625,7 +631,17 @@ public class Geary.ConversationMonitor : Object {
                 continue;
             }
             
-            conversation.remove(found);
+            Gee.Set<RFC822.MessageID>? removed_message_ids = conversation.remove(found);
+            if (removed_message_ids != null) {
+                foreach (RFC822.MessageID removed_message_id in removed_message_ids) {
+                    // Warn if not found, but not hairy enough to skip continuing
+                    if (!message_id_map.unset(removed_message_id)) {
+                        debug("WARNING: Message-ID %s not associated with conversation",
+                            removed_message_id.to_string());
+                    }
+                }
+            }
+            
             trimmed.set(conversation, found);
             
             if (conversation.get_count() == 0) {

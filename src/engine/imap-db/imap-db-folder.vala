@@ -723,8 +723,8 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             
             Db.Statement search_stmt = cx.prepare(
                 "SELECT id FROM MessageLocationTable WHERE message_id=? AND folder_id=?");
-            stmt.bind_rowid(0, message_id);
-            stmt.bind_rowid(1, folder_id);
+            search_stmt.bind_rowid(0, message_id);
+            search_stmt.bind_rowid(1, folder_id);
             
             Db.Result search_results = search_stmt.exec(cancellable);
             associated = !search_results.finished;
