@@ -23,10 +23,8 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
     
     public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
         Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
-        if (data == null)
-            return;
-        
-        data.render(ctx, widget, background_area, cell_area, flags);
+        if (data != null)
+            data.render(ctx, widget, background_area, cell_area, flags);
     }
     
     // Recalculates size when the style changed.

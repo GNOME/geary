@@ -9,13 +9,15 @@ public class FormattedConversationData : Object {
     private const string ME = _("Me");
     
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
-    private const int LINE_SPACING = 4;
+    private const int LINE_SPACING = 6;
     private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
+    private const double DIM_TEXT_AMOUNT = 0.25;
     
-    private const int FONT_SIZE_DATE = 11;
+    private const int FONT_SIZE_DATE = 10;
     private const int FONT_SIZE_SUBJECT = 9;
     private const int FONT_SIZE_FROM = 11;
     private const int FONT_SIZE_PREVIEW = 8;
+    private const int FONT_SIZE_MESSAGE_COUNT = 8;
     
     private class ParticipantDisplay : Geary.Equalable {
         public string key;
@@ -113,7 +115,59 @@ public class FormattedConversationData : Object {
         this.num_emails = 1;
     }
     
-    private string get_participants_markup() {
+    private uint16 gdk_to_pango(double gdk) {
+        return (uint16) (gdk.clamp(0.0, 1.0) * 65535.0);
+    }
+    
+    private uint8 gdk_to_rgb(double gdk) {
+        return (uint8) (gdk.clamp(0.0, 1.0) * 255.0);
+    }
+    
+    private Gdk.RGBA dim_rgba(Gdk.RGBA rgba, double amount) {
+        amount = amount.clamp(0.0, 1.0);
+        
+        // can't use ternary in struct initializer due to this bug:
+        // https://bugzilla.gnome.org/show_bug.cgi?id=684742
+        double dim_red = (rgba.red >= 0.5) ? -amount : amount;
+        double dim_green = (rgba.green >= 0.5) ? -amount : amount;
+        double dim_blue = (rgba.blue >= 0.5) ? -amount : amount;
+        
+        return Gdk.RGBA() {
+            red = (rgba.red + dim_red).clamp(0.0, 1.0),
+            green = (rgba.green + dim_green).clamp(0.0, 1.0),
+            blue = (rgba.blue + dim_blue).clamp(0.0, 1.0),
+            alpha = rgba.alpha
+        };
+    }
+    
+    private string rgba_to_markup(Gdk.RGBA rgba) {
+        return "#%02x%02x%02x".printf(
+            gdk_to_rgb(rgba.red), gdk_to_rgb(rgba.green), gdk_to_rgb(rgba.blue));
+    }
+    
+    private Gdk.RGBA get_foreground_rgba(Gtk.Widget widget, bool selected) {
+        return widget.get_style_context().get_color(selected ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
+    }
+    
+    private Pango.Attribute get_pango_foreground_attr(Gtk.StyleContext style_cx, string name, Gdk.RGBA def) {
+        Gdk.RGBA color;
+        bool found = style_cx.lookup_color(name, out color);
+        if (!found)
+            color = def;
+        
+        return Pango.attr_foreground_new(gdk_to_pango(color.red), gdk_to_pango(color.blue), gdk_to_pango(color.green));
+    }
+    
+    private Pango.Attribute get_attr_fg_color(Gtk.Widget widget, bool selected) {
+        if (selected) {
+            Gdk.RGBA def = { 0.33, 0.33, 0.33, 0.1 };
+            return get_pango_foreground_attr(widget.get_style_context(), "selected_fg_color", def);
+        } else {
+            return Pango.attr_foreground_new(0x57, 0x57, 0x57);
+        }
+    }
+    
+    private string get_participants_markup(Gtk.Widget widget, bool selected) {
         if (conversation == null || account_owner_email == null)
             return "";
         
@@ -145,17 +199,22 @@ public class FormattedConversationData : Object {
                 list[existing_index].is_unread = true;
         }
         
-        // if only one participant, use full name
-        if (list.size == 1)
-            return list[0].get_full_markup(normalized_account_owner_email);
-        
-        StringBuilder builder = new StringBuilder();
-        foreach (ParticipantDisplay participant in list) {
-            if (builder.len > 0)
-                builder.append(", ");
-            
-            builder.append(participant.get_short_markup(normalized_account_owner_email));
+        StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
+            rgba_to_markup(get_foreground_rgba(widget, selected))));
+        if (list.size == 1) {
+            // if only one participant, use full name
+            builder.append(list[0].get_full_markup(normalized_account_owner_email));
+        } else {
+            bool first = true;
+            foreach (ParticipantDisplay participant in list) {
+                if (!first)
+                    builder.append(", ");
+                
+                builder.append(participant.get_short_markup(normalized_account_owner_email));
+                first = false;
+            }
         }
+        builder.append("</span>");
         
         return builder.str;
     }
@@ -200,10 +259,10 @@ public class FormattedConversationData : Object {
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
         
         // Date field.
-        Pango.Rectangle ink_rect = render_date(widget, cell_area, ctx, y);
+        Pango.Rectangle ink_rect = render_date(widget, cell_area, ctx, y, selected);
 
         // From field.
-        ink_rect = render_from(widget, cell_area, ctx, y, ink_rect);
+        ink_rect = render_from(widget, cell_area, ctx, y, selected, ink_rect);
         y += ink_rect.height + ink_rect.y + LINE_SPACING;
 
         // If we are displaying a preview then the message counter goes on the same line as the
@@ -211,21 +270,21 @@ public class FormattedConversationData : Object {
         int preview_height = 0;
         if (GearyApplication.instance.config.display_preview) {
             // Subject field.
-            render_subject(widget, cell_area, ctx, y);
+            render_subject(widget, cell_area, ctx, y, selected);
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
             
             // Number of e-mails field.
-            int counter_width = render_counter(widget, cell_area, ctx, y);
+            int counter_width = render_counter(widget, cell_area, ctx, y, selected);
             
             // Body preview.
             ink_rect = render_preview(widget, cell_area, ctx, y, selected, counter_width);
             preview_height = ink_rect.height + ink_rect.y + LINE_SPACING;
         } else {
             // Number of e-mails field.
-            int counter_width = render_counter(widget, cell_area, ctx, y);
+            int counter_width = render_counter(widget, cell_area, ctx, y, selected);
 
             // Subject field.
-            render_subject(widget, cell_area, ctx, y, counter_width);
+            render_subject(widget, cell_area, ctx, y, selected, counter_width);
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
         }
 
@@ -234,15 +293,9 @@ public class FormattedConversationData : Object {
             FormattedConversationData.cell_height = y + preview_height;
         } else {
             // Flagged indicator.
-            if (is_flagged) {
-                Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.starred, cell_area.x + LINE_SPACING,
-                    cell_area.y + LINE_SPACING);
-                ctx.paint();
-            } else {
-                Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unstarred, cell_area.x + LINE_SPACING,
-                    cell_area.y + LINE_SPACING);
-                ctx.paint();
-            }
+            Gdk.Pixbuf icon = is_flagged ? IconFactory.instance.starred : IconFactory.instance.unstarred;
+            Gdk.cairo_set_source_pixbuf(ctx, icon, cell_area.x + LINE_SPACING, cell_area.y + LINE_SPACING);
+            ctx.paint();
             
             // Unread indicator.
             if (is_unread) {
@@ -254,18 +307,18 @@ public class FormattedConversationData : Object {
     }
     
     private Pango.Rectangle render_date(Gtk.Widget widget, Gdk.Rectangle? cell_area,
-        Cairo.Context? ctx, int y) {
-
+        Cairo.Context? ctx, int y, bool selected) {
+        string date_markup = "<span foreground='%s'>%s</span>".printf(
+            rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
+            date);
+        
         Pango.Rectangle? ink_rect;
         Pango.Rectangle? logical_rect;
         Pango.FontDescription font_date = new Pango.FontDescription();
         font_date.set_size(FONT_SIZE_DATE * Pango.SCALE);
-        Pango.AttrList list_date = new Pango.AttrList();
-        list_date.insert(Pango.attr_foreground_new(10000, 10000, 55000)); // muted blue
         Pango.Layout layout_date = widget.create_pango_layout(null);
         layout_date.set_font_description(font_date);
-        layout_date.set_attributes(list_date);
-        layout_date.set_text(date, -1);
+        layout_date.set_markup(date_markup, -1);
         layout_date.set_alignment(Pango.Alignment.RIGHT);
         layout_date.get_pixel_extents(out ink_rect, out logical_rect);
         if (ctx != null && cell_area != null) {
@@ -276,8 +329,8 @@ public class FormattedConversationData : Object {
     }
     
     private Pango.Rectangle render_from(Gtk.Widget widget, Gdk.Rectangle? cell_area,
-        Cairo.Context? ctx, int y, Pango.Rectangle ink_rect) {
-        string from_markup = (conversation != null) ? get_participants_markup() : STYLE_EXAMPLE;
+        Cairo.Context? ctx, int y, bool selected, Pango.Rectangle ink_rect) {
+        string from_markup = (conversation != null) ? get_participants_markup(widget, selected) : STYLE_EXAMPLE;
         
         Pango.FontDescription font_from = new Pango.FontDescription();
         font_from.set_size(FONT_SIZE_FROM * Pango.SCALE);
@@ -295,38 +348,42 @@ public class FormattedConversationData : Object {
         return ink_rect;
     }
     
-    private int render_counter(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx, int y) {
-        int num_email_width = 0;
-        if (num_emails > 1) {
-            Pango.Rectangle? ink_rect;
-            Pango.Rectangle? logical_rect;
-            string mails = 
-                "<span background='#999999' foreground='white' size='x-small' weight='bold'> %d </span>"
-                .printf(num_emails);
-                
-            Pango.Layout layout_num = widget.create_pango_layout(null);
-            layout_num.set_markup(mails, -1);
-            layout_num.set_alignment(Pango.Alignment.RIGHT);
-            layout_num.get_pixel_extents(out ink_rect, out logical_rect);
-            if (ctx != null && cell_area != null) {
-                ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - 
-                    LINE_SPACING, y);
-                Pango.cairo_show_layout(ctx, layout_num);
-            }
-            
-            num_email_width = ink_rect.width + (LINE_SPACING * 3);
+    private int render_counter(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx, int y,
+        bool selected) {
+        if (num_emails <= 1)
+            return 0;
+        
+        string mails = 
+            "<span background='#575757' foreground='white' font='%d' weight='bold'> %d </span>"
+            .printf(FONT_SIZE_MESSAGE_COUNT, num_emails);
+        
+        Pango.Layout layout_num = widget.create_pango_layout(null);
+        layout_num.set_markup(mails, -1);
+        layout_num.set_alignment(Pango.Alignment.RIGHT);
+
+        Pango.Rectangle? ink_rect;
+        Pango.Rectangle? logical_rect;
+        layout_num.get_pixel_extents(out ink_rect, out logical_rect);
+        if (ctx != null && cell_area != null) {
+            ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - 
+                LINE_SPACING, y);
+            Pango.cairo_show_layout(ctx, layout_num);
         }
-        return num_email_width;
+        
+        return ink_rect.width + (LINE_SPACING * 3);
     }
     
     private void render_subject(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx,
-        int y, int counter_width = 0) {
+        int y, bool selected, int counter_width = 0) {
 
         Pango.FontDescription font_subject = new Pango.FontDescription();
         font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
         if (is_unread)
             font_subject.set_weight(Pango.Weight.BOLD);
+        Pango.AttrList subject_list = new Pango.AttrList();
+        subject_list.insert(get_attr_fg_color(widget, selected));
         Pango.Layout layout_subject = widget.create_pango_layout(null);
+        layout_subject.set_attributes(subject_list);
         layout_subject.set_font_description(font_subject);
         layout_subject.set_text(subject, -1);
         if (cell_area != null)
@@ -340,19 +397,17 @@ public class FormattedConversationData : Object {
     
     private Pango.Rectangle render_preview(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, bool selected, int counter_width = 0) {
-
+        string preview_markup = "<span foreground='%s'>%s</span>".printf(
+            rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
+            Geary.String.is_empty(body) ? "" : Geary.HTML.escape_markup(body));
+        
         Pango.FontDescription font_preview = new Pango.FontDescription();
         font_preview.set_size(FONT_SIZE_PREVIEW * Pango.SCALE);
-        Pango.AttrList list_preview = new Pango.AttrList();
-
-        uint16 shade = selected ? 0x3000 : 0x7000;
-        list_preview.insert(Pango.attr_foreground_new(shade, shade, shade));
         
         Pango.Layout layout_preview = widget.create_pango_layout(null);
         layout_preview.set_font_description(font_preview);
-        layout_preview.set_attributes(list_preview);
         
-        layout_preview.set_text(body != null ? body : "\n\n", -1);
+        layout_preview.set_markup(preview_markup, -1);
         layout_preview.set_wrap(Pango.WrapMode.WORD);
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
