@@ -17,8 +17,15 @@ public class MainWindow : Gtk.Window {
     private int window_width;
     private int window_height;
     private bool window_maximized;
+
+#if HAVE_LIBGRANITE
+    private Granite.Widgets.SidebarPaned folder_paned = new Granite.Widgets.SidebarPaned();
+    private Granite.Widgets.SidebarPaned conversations_paned = new Granite.Widgets.SidebarPaned();
+#else
     private Gtk.Paned folder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     private Gtk.Paned conversations_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
+#endif
+
     private Gtk.Spinner spinner = new Gtk.Spinner();
     private bool is_shown = false;
     
@@ -44,8 +51,8 @@ public class MainWindow : Gtk.Window {
         if (GearyApplication.instance.config.window_maximize)
             maximize();
         
-        folder_paned.set_position(GearyApplication.instance.config.folder_list_pane_position);
-        conversations_paned.set_position(GearyApplication.instance.config.messages_pane_position);
+        folder_paned.position = GearyApplication.instance.config.folder_list_pane_position;
+        conversations_paned.position = GearyApplication.instance.config.messages_pane_position;
         
         base.show_all();
         is_shown = true;
@@ -59,8 +66,8 @@ public class MainWindow : Gtk.Window {
             GearyApplication.instance.config.window_maximize = window_maximized;
             
             // Save pane positions.
-            GearyApplication.instance.config.folder_list_pane_position = folder_paned.get_position();
-            GearyApplication.instance.config.messages_pane_position = conversations_paned.get_position();
+            GearyApplication.instance.config.folder_list_pane_position = folder_paned.position;
+            GearyApplication.instance.config.messages_pane_position = conversations_paned.position;
         }
         
         base.destroy();
@@ -117,7 +124,10 @@ public class MainWindow : Gtk.Window {
         status_bar.add(spinner);
         status_bar_box.pack_start(folder_list_scrolled);
         status_bar_box.pack_start(status_bar, false, false, 0);
-        get_style_context().add_class("sidebar-pane-separator");
+        
+#if !HAVE_LIBGRANITE
+        folder_paned.get_style_context().add_class("sidebar-pane-separator");
+#endif
         
          // Message list left of message viewer.
         conversations_paned.pack1(conversation_list_scrolled, false, false);

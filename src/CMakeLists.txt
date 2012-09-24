@@ -333,6 +333,26 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
+if (LIBGRANITE_FOUND)
+    message(STATUS "Granite support: ON")
+    set(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        granite
+    )
+    
+    set(EXTRA_CLIENT_PACKAGES
+        ${EXTRA_CLIENT_PACKAGES}
+        granite
+    )
+    
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        -D HAVE_LIBGRANITE
+    )
+else ()
+    message(STATUS "Granite support: OFF")
+endif ()
+
 set(TARGET_GLIB 2.32)
 
 pkg_check_modules(DEPS REQUIRED QUIET
