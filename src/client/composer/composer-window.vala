@@ -569,7 +569,6 @@ public class ComposerWindow : Gtk.Window {
         box.pack_start(remove_button, false, false);
         remove_button.clicked.connect(() => remove_attachment(attachment_file, box));
         
-        refresh_add_attachment_button_label();
         attachments_box.show_all();
         
         return true;
@@ -582,15 +581,9 @@ public class ComposerWindow : Gtk.Window {
         foreach (weak Gtk.Widget child in attachments_box.get_children()) {
             if (child == box) {
                 attachments_box.remove(box);
-                refresh_add_attachment_button_label();
                 break;
             }
         }
-    }
-    
-    private void refresh_add_attachment_button_label() {
-        add_attachment_button.label = attachment_files.size > 0 ? _("_Attach another file") :
-            _("_Attach a file");
     }
     
     private void on_subject_changed() {
