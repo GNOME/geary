@@ -354,7 +354,7 @@ public class FormattedConversationData : Object {
             return 0;
         
         string mails = 
-            "<span background='#575757' foreground='white' font='%d' weight='bold'> %d </span>"
+            "<span background='#888888' foreground='white' font='%d' weight='bold'> %d </span>"
             .printf(FONT_SIZE_MESSAGE_COUNT, num_emails);
         
         Pango.Layout layout_num = widget.create_pango_layout(null);
