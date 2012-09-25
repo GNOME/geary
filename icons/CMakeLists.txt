@@ -3,6 +3,7 @@ set(ICONS_DEST share/geary/icons)
 set(ICON_FILES
     application-menu.svg
     mail-inbox.png
+    mail-outbox.png
     mail-sent.png
     non-starred-grey.png
     starred.png
