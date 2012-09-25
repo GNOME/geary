@@ -3,7 +3,7 @@ set(ICONS_DEST share/geary/icons)
 set(ICON_FILES
     application-menu.svg
     mail-inbox.png
-    mail-outbox.png
+    mail-outbox.svg
     mail-sent.png
     non-starred-grey.png
     starred.png
@@ -32,7 +32,10 @@ install(FILES ${ICON_FILES_16} DESTINATION ${ICONS_DEST}/16x16)
 install(FILES ${ICON_FILES_24} DESTINATION ${ICONS_DEST}/24x24)
 
 # Application icon goes in theme directory
+install(FILES "16x16/geary.svg" DESTINATION share/icons/hicolor/16x16/apps)
+install(FILES "32x32/geary.svg" DESTINATION share/icons/hicolor/32x32/apps)
 install(FILES "48x48/geary.svg" DESTINATION share/icons/hicolor/48x48/apps)
+install(FILES "64x64/geary.svg" DESTINATION share/icons/hicolor/64x64/apps)
 install(FILES "128x128/geary.svg" DESTINATION share/icons/hicolor/128x128/apps)
 
 # Optional: update icon cache at install time.
