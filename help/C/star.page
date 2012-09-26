@@ -5,18 +5,24 @@
     <info>
         <link type="guide" xref="index#overview"/>
         
-        <link type="next" xref="archive"/>
+        <link type="next" xref="write"/>
     </info>
-	<title>Star messages and mark as read</title>
+	<title>Star a message or mark it as read/unread</title>
 	<section>
 	<title>Star messages</title>
-	<p>You can star messages by selecting it and clicking on the star icon in the conversation list. Messages may also be starred within the message view area by clicking the star at the top right of the message.</p>
-	<p>Starred messages will appear in your Starred folder located in the folder list.</p>
-	<p>Learn about the <link xref="shortcuts">keyboard shortcuts</link> to star messages.</p>
+	<p>You can star messages to indicate that they're important to you.
+	To mark a conversation with a star, click its star icon in the conversation list. You can star an individual message by clicking the star at the upper right of the message itself.</p>
+	<p>Starred messages appear in the Starred folder in the folder list.</p>
 	</section>
 	<section>
 	<title>Mark messages as read or unread</title>
-	<p>Messages are marked as read when they are selected from the conversation list. To mark a message as unread, select Mark as Unread from the dropdown menu inside the message viewer. If you would like to mark a message as read, you may select Mark as Read option from the dropdown menu.</p>
+	<p>Geary marks messages as read automatically as you read them.
+	To mark one or more conversations as unread, select the conversations(s), then select
+	<gui>Mark as Unread</gui> from the <gui>Mark</gui> menu on the toolbar.  To mark an
+	individual message as unread, select <gui>Mark as Unread</gui> from the message menu
+	at the upper right of the message.</p>
+	
+	<p>To mark an individual message as read, you may select <gui>Mark as Read</gui> from the dropdown menu .</p>
 	
 	</section>
 </page>

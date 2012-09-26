@@ -1,0 +1,59 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="preferences">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="star" />
+    </info>
+   <title>Preferences</title>
+	<p>To set preferences in Geary, click the gear menu at the upper right
+	of the toolbar and choose <gui>Preferences</gui>.</p>
+	
+    <section>
+	<title>Reading</title>
+	<terms>
+	<item>
+	<title><gui>Automatically select next message</gui></title>
+	<p>When this option is enabled, Geary automatically selects the latest message in a folder
+	when you enter the folder. In addition, after archiving a message, Geary automatically selects
+	an adjacent message.</p>
+	</item>
+	<item>
+	<title><gui>Display message preview</gui></title>
+	<p>Enables message previews in the conversation list. Previews show
+	the first few lines of each message. </p>
+	</item>
+	</terms>
+	</section>
+	
+	<section>
+	<title>Composer</title>
+	<terms>
+	<item>
+	<title><gui>Enable spell checking</gui></title>
+	<p>When set, Geary automatically spell checks a message as you write it, underlying
+	each misspelled word in red.</p>
+	</item>
+	</terms>
+	</section>
+	
+	<section>
+	<title>Notifications</title>
+	<terms>
+	<item>
+	<title><gui>Play notification sounds</gui></title>
+	<p>When set, Geary plays a sound whenever a new message arrives.</p>
+	</item>
+	<item>
+	<title><gui>Show notifications for new mail</gui></title>
+	<p>When set, Geary displays a <em>notification</em> each time a new message arrives.  Notifications
+	are displayed in a system-dependent manner.  On GNOME Shell, notifications appear at the
+	bottom of the display.  In Ubuntu Unity, notifications appear at the upper right
+	of the display.</p>
+	</item>
+	</terms>
+	</section>
+	
+</page>

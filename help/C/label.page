@@ -1,0 +1,35 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="label">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="preferences"/>
+    </info>
+	<title>Label or move a conversation</title>
+	<section>
+	<title>Label a conversation</title>
+	<p>Geary lets you apply one or more <em>labels</em> to each conversation.  Geary labels
+	correspond to labels in Gmail, or ordinary folders in other mail services.</p>
+	<p>To label one or more conversations, first select the conversation(s), then
+	do either of the following:</p>
+	<list>
+	<item><p>Click the <gui>Label</gui> button on the toolbar and select a label from the resulting
+	drop-down menu.</p></item>
+	<item><p>Hold down the <key>Ctrl</key> key and drag the conversation(s) from the
+	conversation list to the label in the sidebar.</p></item>
+	</list>
+	</section>
+	<section>
+	<title>Move a conversation to a folder or label</title>
+	<p>To move one or more conversations to a folder or label, first select the
+	conversation(s), then do either of the following:</p>
+	<list>
+	<item><p>Click the <gui>Move</gui> button on the toolbar and select a folder or label from the resulting
+	drop-down menu.</p></item>
+	<item><p>Drag the conversation(s) from the
+	conversation list to the folder or label in the sidebar.</p></item>
+	</list>
+	</section>
+</page>

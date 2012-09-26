@@ -9,18 +9,18 @@
     </info>
     
     <title>Limitations</title>
-    <p>Geary is still in early development. Geary supports IMAP and can be used with Gmail. Geary is missing attachment support, searching and numerous other features.</p>
+    <p>Geary is still in early development. Geary supports IMAP and has been tested with Gmail, Yahoo and the free Dovecot mail server. Geary may not yet work well with other IMAP servers.  Additionally, Geary is still missing searching, multiple accounts and numerous other features.</p>
     
-     <p>Geary may be used with Yahoo! Mail, however it is highly unstable and not recommended for primary email accounts on Yahoo! Mail.</p> 
-    
-    
-       
     <p>To learn more about the features we're working on and the future of Geary, please visit Geary's <link href="http://redmine.yorba.org/projects/geary/wiki">Redmine page</link>.</p>
     
   
     <section>
     <title>Multiple email accounts</title>
-    <p>Geary does not support multiple email accounts. If you would like to change the email account used with Geary, you'll need to delete your Geary database. From a Nautilus window, locate your Geary database in .local/share/geary. Delete the folder named after your email account. Upon relaunching Geary, you will be prompted to enter your new email credentials. </p>
+    <p>Geary does not yet support multiple email accounts. If you would like to change the email account used with Geary, you'll need to delete your Geary database.  Run this command from a terminal window:</p>
+    <screen>
+    $ rm -rf ~/.local/share/geary
+    </screen>
+    <p>Upon relaunching Geary, you will be prompted to enter your new email credentials. </p>
     </section>
   
 </page>

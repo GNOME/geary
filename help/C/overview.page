@@ -1,0 +1,56 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="overview">
+
+    <info>
+        <link type="guide" xref="index#introduction"/>
+    </info>
+	<title>Overview</title>
+
+<p>Geary is a lightweight email reader for the <link href="http://gnome.org">GNOME</link> desktop.
+It works with mail servers that
+support the IMAP protocol, including popular services such as Gmail and Yahoo Mail.</p>
+
+	<p>Geary groups mail messages into <em>conversations</em>.  A conversation contains all
+	messages in a single thread of discussion.</p>
+
+    <p>The main Geary window is divided into several areas:</p>
+    
+    <section>
+    <title>Folder list</title>
+    <p>The <em>folder list</em> at the left displays all <em>folders</em> and
+    <em>labels</em> in your mail account.  Geary uses the term <em>label</em> for any folder
+    that you have created to help organize your messages.  (The Gmail web interface
+    also uses this term; most other mail services do not.)</p>
+    </section>
+    
+    <section>
+    <title>Conversation list</title>
+    <p>The <em>conversation list</em> displays a list of conversations in the
+    selected folder.  Newer conversations appear at the top.</p>
+    <p>Each sender's name appears bold if there are unread messages from that sender.
+    If a conversation has more than one message, Geary displays a count of messages
+    in the conversation.</p>
+    <p>Geary does not automatically download all messages in all of your mail folders. When you first visit your Inbox or any other folder, Geary downloads the 50 most recent messages in that folder. To see more messages, simply scroll down the conversation list and Geary will fetch more messages automatically.</p> 
+	
+    <p>Some commands in Geary can
+    act on a group of conversations.  To select multiple conversations, hold down the
+    <key>Ctrl</key> key and click each conversation in turn in the conversation list.
+    Alternatively, click the first
+    conversation in a range, then hold down <key>Shift</key> and click the last conversation.</p>
+    </section>
+    
+    <section>
+    <title>Message area</title>
+    <p>The <em>message area</em> displays all messages in the selected conversation,
+    with the oldest message at the top.</p>
+    <p>At the upper right of each message, Geary displays a dropdown arrow that
+    lets you open the <em>message menu</em> with commands that operate on the message.</p>
+   	<p>When you view a conversation, Geary collapses messages that you've already read. Click collapsed messages to expand them. Click an expanded message's header to collapse it.</p>
+    <p>Any attachments in a message appear at the bottom of the message.  You can click
+    an attachment to open it.</p>
+
+    </section>
+	
+</page>
+

@@ -5,13 +5,17 @@
     <info>
         <link type="guide" xref="index#overview"/>
         
-        <link type="next" xref="conversation"/>
+        <link type="next" xref="shortcuts"/>
     </info>
-	<title>Archive messages</title>
+	<title>Delete or archive a message</title>
 
-	<p>To archive a message, select the message from the conversation list and press the archive button located in the toolbar. To select multiple messages to archive, hold down the <key>Shift</key> key and click on the messages to be archived from the conversation list.</p>
-	<p>Archived messages will appear in the All Mail folder located in the folder list.</p>
+	<p>When you use Geary with a Gmail account, Geary lets you <em>archive</em> messages.
+	The <gui>Archive</gui> toolbar button archives the selected conversation(s).
+	Archived messages appear in the <gui>All Mail</gui> folder.</p>
 
-	
+    <p>With other mail servers, you can delete but not archive messages.  To delete
+    one or more conversations, select them and press the <gui>Delete</gui>
+    button on the toolbar.</p>
+    
 </page>
 

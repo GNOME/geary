@@ -5,17 +5,17 @@
     <info>
         <link type="guide" xref="index#overview"/>
         
-        <link type="next" xref="spell" />
+        <link type="next" xref="label" />
     </info>
   
    <title>Keyboard shortcuts</title>   
-   <p>Geary has a growing list of keyboard shortcuts. </p>
+   <p>Geary has keyboard shortcuts for most common operations. </p>
      <table frame="all" rules="rows">
   	<tr>
-  		<td><p>Compose a new email</p></td> 			<td><p><keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key></p></td>
+  		<td><p>Compose a new message</p></td> 			<td><p><keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key></p></td>
   	</tr>
  	<tr>
-  		<td><p>Reply to email</p></td> 
+  		<td><p>Reply to sender</p></td> 
   		<td><p><keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key></p></td>
   	</tr>
   	<tr>

@@ -2,9 +2,12 @@
       type="guide"
       id="index">
 
-<title><media type="image" src="figures/Mail.png"></media>  
+<title><media type="image" src="figures/geary.svg"></media>  
 Geary</title>
-<p>A lightweight email reader for the GNOME desktop.</p>
+
+    <section id="introduction" style="2column">
+        <title>Introduction</title>
+    </section>
 
     <section id="overview" style="2column">
         <title>Using Geary</title>
