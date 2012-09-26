@@ -35,11 +35,11 @@ public class Geary.Smtp.ResponseCode {
     public ResponseCode(string str) throws SmtpError {
         // these two checks are sufficient to make sure the Status is valid, but not the Condition
         if (str.length != STRLEN)
-            throw new SmtpError.PARSE_ERROR("Reply code %s too long", str);
+            throw new SmtpError.PARSE_ERROR("Reply code too long: %s", str);
         
         int as_int = int.parse(str);
         if (as_int < MIN || as_int > MAX)
-            throw new SmtpError.PARSE_ERROR("Reply code %s out of range", str);
+            throw new SmtpError.PARSE_ERROR("Reply code out of range: %s", str);
         
         this.str = str;
     }

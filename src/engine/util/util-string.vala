@@ -79,12 +79,22 @@ public inline int digit_to_int(char ch) {
 public string uint8_to_hex(uint8[] buffer) {
     StringBuilder builder = new StringBuilder();
     
+    bool first = true;
     foreach (uint8 byte in buffer) {
-        if (builder.len > 0)
+        if (!first)
             builder.append_c(' ');
         
-        builder.append("%X (%c)".printf(byte, (char) byte));
+        builder.append_printf("%X", byte);
+        first = false;
     }
+    
+    return builder.str;
+}
+
+public string uint8_to_string(uint8[] buffer) {
+    StringBuilder builder = new StringBuilder();
+    foreach (uint8 byte in buffer)
+        builder.append_printf("%c", (char) byte);
     
     return builder.str;
 }

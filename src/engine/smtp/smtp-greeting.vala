@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Smtp.Greeting {
+public class Geary.Smtp.Greeting : Response {
     public enum ServerFlavor {
         SMTP,
         ESMTP,
@@ -40,88 +40,38 @@ public class Geary.Smtp.Greeting {
         }
     }
     
-    public ResponseCode code { get; private set; }
-    public string? domain { get; private set; }
-    public ServerFlavor flavor { get; private set; }
-    public string? message { get; private set; }
+    public string? domain { get; private set; default = null; }
+    public ServerFlavor flavor { get; private set; default = ServerFlavor.UNSPECIFIED; }
+    public string? message { get; private set; default = null; }
     
-    public Greeting(ResponseCode code, string? domain, ServerFlavor flavor, string? message) {
-        this.code = code;
-        this.domain = domain;
-        this.flavor = flavor;
-        this.message = message;
-    }
-    
-    /**
-     * Converts the first serialized line from a server into something usable.  The CRLF should
-     * *not* be included in the input.
-     */
-    public static Greeting deserialize(string line) throws SmtpError {
-        // ResponseCode is mandatory
-        if (line.length < ResponseCode.STRLEN)
-            throw new SmtpError.PARSE_ERROR("Greeting too short: %s", line);
+    public Greeting(Gee.List<ResponseLine> lines) {
+        base (lines);
         
-        // tokenize by spaces; must be at least one
-        string[] tokens = line.split(" ");
-        int length = tokens.length;
-        if (length < 1)
-            throw new SmtpError.PARSE_ERROR("Invalid greeting: %s", line);
-        
-        // assemble the parameters
-        ResponseCode code = new ResponseCode(tokens[0]);
-        
-        int index = 1;
-        string? domain = null;
-        ServerFlavor flavor = ServerFlavor.UNSPECIFIED;
-        string? message = null;
-        
-        if (index < length)
-            domain = tokens[index++];
-        
-        if (index < length) {
-            string f = tokens[index++];
-            flavor = ServerFlavor.deserialize(f);
-            if (flavor == ServerFlavor.UNSPECIFIED) {
-                // actually part of the message, not a flavor
-                message = f;
+        // tokenize first line explanation for domain, server flavor, and greeting message
+        if (!String.is_empty(first_line.explanation)) {
+            string[] tokens = first_line.explanation.substring(ResponseCode.STRLEN + 1, -1).split(" ");
+            int length = tokens.length;
+            int index = 0;
+            
+            if (index < length)
+                domain = tokens[index++];
+            
+            if (index < length) {
+                string f = tokens[index++];
+                flavor = ServerFlavor.deserialize(f);
+                if (flavor == ServerFlavor.UNSPECIFIED) {
+                    // actually part of the message, not a flavor
+                    message = f;
+                }
+            }
+            
+            while (index < length) {
+                if (String.is_empty(message))
+                    message = tokens[index++];
+                else
+                    message += " " + tokens[index++];
             }
         }
-        
-        while (index < length) {
-            if (String.is_empty(message))
-                message = tokens[index++];
-            else
-                message += " " + tokens[index++];
-        }
-        
-        return new Greeting(code, domain, flavor, message);
-    }
-    
-    public string serialize() {
-        StringBuilder builder = new StringBuilder();
-        
-        builder.append(code.serialize());
-        
-        if (!String.is_empty(domain)) {
-            builder.append_c(' ');
-            builder.append(domain);
-        }
-        
-        if (flavor != ServerFlavor.UNSPECIFIED) {
-            builder.append_c(' ');
-            builder.append(flavor.serialize());
-        }
-        
-        if (!String.is_empty(message)) {
-            builder.append_c(' ');
-            builder.append(message);
-        }
-        
-        return builder.str;
-    }
-    
-    public string to_string() {
-        return serialize();
     }
 }
 

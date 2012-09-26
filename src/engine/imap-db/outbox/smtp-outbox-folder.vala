@@ -128,7 +128,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                 try {
                     outbox_queue.send(row);
                 } catch (Error send_err) {
-                    debug("Outbox postman: Unable to re-send row to outbox, dropping on floor: %s", send_err.message);
+                    debug("Outbox postman: Unable to re-enqueue message, dropping on floor: %s", send_err.message);
                 }
                 
                 continue;
@@ -484,16 +484,23 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     private async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
         yield smtp.login_async(settings.smtp_credentials, cancellable);
+        
+        Error? send_err = null;
         try {
             yield smtp.send_email_async(rfc822, cancellable);
-        } finally {
-            // always logout
-            try {
-                yield smtp.logout_async(cancellable);
-            } catch (Error err) {
-                message("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
-            }
+        } catch (Error err) {
+            send_err = err;
         }
+        
+        // always logout
+        try {
+            yield smtp.logout_async(cancellable);
+        } catch (Error err) {
+            debug("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
+        }
+        
+        if (send_err != null)
+            throw send_err;
     }
     
     //

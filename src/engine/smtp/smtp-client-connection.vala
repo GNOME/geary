@@ -37,7 +37,7 @@ public class Geary.Smtp.ClientConnection {
         set_data_streams(cx);
         
         // read and deserialize the greeting
-        return Greeting.deserialize(yield read_line_async(cancellable));
+        return new Greeting(yield recv_response_lines_async(cancellable));
     }
     
     public async bool disconnect_async(Cancellable? cancellable = null) throws Error {
@@ -87,7 +87,7 @@ public class Geary.Smtp.ClientConnection {
         
         Response response = yield transaction_async(authenticator.initiate(), cancellable);
         
-        debug("Initiating SMTP %s authentication", authenticator.to_string());
+        debug("Initiated SMTP %s authentication", authenticator.to_string());
         
         // Possible for initiate() Request to:
         // (a) immediately generate success (due to valid authentication being passed in Request);
@@ -102,8 +102,8 @@ public class Geary.Smtp.ClientConnection {
             if (data == null || data.length == 0)
                 data = DataFormat.CANCEL_AUTHENTICATION.data;
             
-            Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Response: %s <%ldb>", to_string(),
-                data.length);
+            Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Challenge: %s <%ldb>", to_string(),
+                Geary.String.uint8_to_string(data), data.length);
             
             yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
             douts.put_string(DataFormat.LINE_TERMINATOR);
@@ -132,7 +132,7 @@ public class Geary.Smtp.ClientConnection {
         if (!response.code.is_start_data())
             return response;
         
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%ldb>", data.length);
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%ldb>", to_string(), data.length);
         
         yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
         douts.put_string(DataFormat.DATA_TERMINATOR);
@@ -151,7 +151,7 @@ public class Geary.Smtp.ClientConnection {
         yield douts.flush_async(Priority.DEFAULT, cancellable);
     }
     
-    public async Response recv_response_async(Cancellable? cancellable = null) throws Error {
+    private async Gee.List<ResponseLine> recv_response_lines_async(Cancellable? cancellable) throws Error {
         check_connected();
         
         Gee.List<ResponseLine> lines = new Gee.ArrayList<ResponseLine>();
@@ -166,7 +166,12 @@ public class Geary.Smtp.ClientConnection {
         // lines should never be empty; if it is, then somebody didn't throw an exception
         assert(lines.size > 0);
         
-        Response response = new Response(lines);
+        return lines;
+    }
+    
+    public async Response recv_response_async(Cancellable? cancellable = null) throws Error {
+        Response response = new Response(yield recv_response_lines_async(cancellable));
+        
         Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Response: %s", to_string(), response.to_string());
         
         return response;
