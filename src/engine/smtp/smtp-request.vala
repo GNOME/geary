@@ -40,8 +40,8 @@ public class Geary.Smtp.HeloRequest : Geary.Smtp.Request {
         base (Command.HELO, { domain });
     }
     
-    public HeloRequest.for_endpoint(Geary.Endpoint endpoint) {
-        this (endpoint.host_specifier);
+    public HeloRequest.for_local_address(InetAddress local_addr) {
+        this (local_addr.to_string());
     }
 }
 
@@ -50,8 +50,8 @@ public class Geary.Smtp.EhloRequest : Geary.Smtp.Request {
         base (Command.EHLO, { domain });
     }
     
-    public EhloRequest.for_endpoint(Geary.Endpoint endpoint) {
-        this (endpoint.host_specifier);
+    public EhloRequest.for_local_address(InetAddress local_addr) {
+        this (local_addr.to_string());
     }
 }
 

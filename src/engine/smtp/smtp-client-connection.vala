@@ -87,7 +87,8 @@ public class Geary.Smtp.ClientConnection {
         
         Response response = yield transaction_async(authenticator.initiate(), cancellable);
         
-        debug("Initiated SMTP %s authentication", authenticator.to_string());
+        Logging.debug(Logging.Flag.NETWORK, "[%s] Initiated SMTP %s authentication", to_string(),
+            authenticator.to_string());
         
         // Possible for initiate() Request to:
         // (a) immediately generate success (due to valid authentication being passed in Request);
@@ -178,8 +179,21 @@ public class Geary.Smtp.ClientConnection {
     }
 
     public async Response say_hello_async(Cancellable? cancellable = null) throws Error {
+        check_connected();
+        
+        // get local address as FQDN to greet server ... note that this merely returns the DHCP address
+        // for machines behind a NAT
+        InetAddress local_addr = ((InetSocketAddress) socket_cx.get_local_address()).get_address();
+        
+        // only attempt to produce a FQDN if not a local address and use the local address if
+        // unavailable
+        string? fqdn = null;
+        if (!local_addr.is_link_local && !local_addr.is_loopback && !local_addr.is_site_local)
+            fqdn = yield Resolver.get_default().lookup_by_address_async(local_addr, cancellable);
+        
         // try EHLO first, then fall back on HELO
-        Response response = yield transaction_async(new EhloRequest.for_endpoint(endpoint), cancellable);
+        EhloRequest ehlo = !String.is_empty(fqdn) ? new EhloRequest(fqdn) : new EhloRequest.for_local_address(local_addr);
+        Response response = yield transaction_async(ehlo, cancellable);
         if (response.code.is_success_completed()) {
             // save list of caps returned in EHLO command, skipping first line because it's the 
             // EHLO response
@@ -190,7 +204,8 @@ public class Geary.Smtp.ClientConnection {
             }
         } else {
             string first_response = response.to_string().strip();
-            response = yield transaction_async(new HeloRequest.for_endpoint(endpoint), cancellable);
+            HeloRequest helo = !String.is_empty(fqdn) ? new HeloRequest(fqdn) : new HeloRequest.for_local_address(local_addr);
+            response = yield transaction_async(helo, cancellable);
             if (!response.code.is_success_completed()) {
                 throw new SmtpError.SERVER_ERROR("Refused service: \"%s\" and \"%s\"", first_response,
                     response.to_string().strip());
