@@ -339,6 +339,10 @@ public class Sidebar.Tree : Gtk.TreeView {
         expand_to_path(path);
     }
     
+    public bool has_branch(Sidebar.Branch branch) {
+        return branches.has_key(branch);
+    }
+    
     public void graft(Sidebar.Branch branch, int position) requires (position >= 0) {
         assert(!branches.has_key(branch));
         

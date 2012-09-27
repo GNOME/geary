@@ -16,6 +16,7 @@ public class Geary.Imap.ClientSessionManager {
     private uint unselected_keepalive_sec = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC;
     private uint selected_keepalive_sec = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC;
     private uint selected_with_idle_keepalive_sec = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC;
+    private bool authentication_failed = false;
     
     public signal void login_failed();
     
@@ -38,7 +39,7 @@ public class Geary.Imap.ClientSessionManager {
             return;
         }
         
-        while (sessions.size < min_pool_size) {
+        while (sessions.size < min_pool_size && !authentication_failed) {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {
@@ -218,6 +219,9 @@ public class Geary.Imap.ClientSessionManager {
     
     // This should only be called when sessions_mutex is locked.
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
+        if (authentication_failed)
+            throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
+        
         ClientSession new_session = new ClientSession(settings.imap_endpoint, settings.imap_server_pipeline);
         
         // add session to pool before launching all the connect activity so error cases can properly
@@ -226,13 +230,31 @@ public class Geary.Imap.ClientSessionManager {
         
         try {
             yield new_session.connect_async(cancellable);
-            yield new_session.initiate_session_async(settings.imap_credentials, cancellable);
         } catch (Error err) {
             debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
-            // possible session was already removed in error handling inside a signal call;
-            // don't assert on the removal
-            remove_session(new_session);
+            bool removed = remove_session(new_session);
+            assert(removed);
+            
+            throw err;
+        }
+        
+        try {
+            yield new_session.initiate_session_async(settings.imap_credentials, cancellable);
+        } catch (Error err) {
+            debug("[%s] Initiate session failure: %s", new_session.to_string(), err.message);
+            
+            // need to disconnect before throwing error ... don't honor Cancellable here, it's
+            // important to disconnect the client before dropping the ref
+            try {
+                yield new_session.disconnect_async();
+            } catch (Error disconnect_err) {
+                debug("[%s] Error disconnecting due to session initiation failure, ignored: %s",
+                    new_session.to_string(), disconnect_err.message);
+            }
+            
+            bool removed = remove_session(new_session);
+            assert(removed);
             
             throw err;
         }
@@ -268,7 +290,7 @@ public class Geary.Imap.ClientSessionManager {
             if (found_session == null)
                 found_session = yield create_new_authorized_session(cancellable);
         } catch (Error e2) {
-            debug("Error creating session %s", e2.message);
+            debug("Error creating session: %s", e2.message);
             c = e2;
         } finally {
             try {
@@ -315,7 +337,9 @@ public class Geary.Imap.ClientSessionManager {
         adjust_session_pool.begin();
     }
     
-    private void on_login_failed() {
+    private void on_login_failed(ClientSession session) {
+        authentication_failed = true;
+        
         login_failed();
     }
     

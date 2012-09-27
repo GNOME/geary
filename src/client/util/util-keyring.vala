@@ -54,6 +54,18 @@ public static bool keyring_save_password(Geary.Credentials credentials, Password
     return (result == GnomeKeyring.Result.OK);
 }
 
+public bool keyring_clear_password(string username, PasswordType password_type) {
+    string key = keyring_get_key(password_type, username);
+    
+    GnomeKeyring.Result result = GnomeKeyring.store_password_sync(GnomeKeyring.NETWORK_PASSWORD,
+        null, key, "", "user", key);
+    
+    if (result != GnomeKeyring.Result.OK)
+        debug("Unable to clear password in GNOME keyring: %s", result.to_string());
+    
+    return (result == GnomeKeyring.Result.OK);
+}
+
 public static void keyring_delete_password(string username, PasswordType password_type) {
     // delete new-style and old-style locations
     GnomeKeyring.delete_password_sync(GnomeKeyring.NETWORK_PASSWORD, "user",

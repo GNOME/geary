@@ -104,13 +104,12 @@ public class FolderList : Sidebar.Tree {
         entry_selected.connect(on_entry_selected);
 
         reset_user_folder_group();
-        graft(user_folder_branch, int.MAX);
 
         // Set self as a drag destination.
         Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
             TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
     }
-
+    
     private static int user_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
         int result = a.get_sidebar_name().collate(b.get_sidebar_name());
         
@@ -140,7 +139,10 @@ public class FolderList : Sidebar.Tree {
     
     public void add_folder(Geary.Folder folder) {
         bool added = false;
-
+        
+        if (!has_branch(user_folder_branch))
+            graft(user_folder_branch, int.MAX);
+        
         Geary.SpecialFolderType special_folder_type = folder.get_special_folder_type();
         if (special_folder_type != Geary.SpecialFolderType.NONE) {
             SpecialFolderBranch branch = new SpecialFolderBranch(folder);

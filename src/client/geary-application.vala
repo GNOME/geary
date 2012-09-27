@@ -329,18 +329,22 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         imap_remember_password = password_dialog.imap_remember_password;
         smtp_remember_password = password_dialog.smtp_remember_password;
         
-        if (imap_remember_password) {
-            keyring_save_password(new Geary.Credentials(temp_account_information.imap_credentials.user,
-                imap_password), PasswordType.IMAP);
-        } else {
-            keyring_delete_password(temp_account_information.imap_credentials.user, PasswordType.IMAP);
+        if (password_flags.has_imap()) {
+            if (imap_remember_password) {
+                keyring_save_password(new Geary.Credentials(temp_account_information.imap_credentials.user,
+                    imap_password), PasswordType.IMAP);
+            } else {
+                keyring_delete_password(temp_account_information.imap_credentials.user, PasswordType.IMAP);
+            }
         }
         
-        if (smtp_remember_password) {
-            keyring_save_password(new Geary.Credentials(temp_account_information.smtp_credentials.user,
-                smtp_password), PasswordType.SMTP);
-        } else {
-            keyring_delete_password(temp_account_information.smtp_credentials.user, PasswordType.SMTP);
+        if (password_flags.has_smtp()) {
+            if (smtp_remember_password) {
+                keyring_save_password(new Geary.Credentials(temp_account_information.smtp_credentials.user,
+                    smtp_password), PasswordType.SMTP);
+            } else {
+                keyring_delete_password(temp_account_information.smtp_credentials.user, PasswordType.SMTP);
+            }
         }
     }
     
@@ -398,6 +402,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             // TODO: Different password dialog prompt for SMTP or IMAP login.
             case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
                 account.report_problem.disconnect(on_report_problem);
+                keyring_clear_password(account.settings.imap_credentials.user, PasswordType.IMAP);
                 open_account(account.settings.email.address, account.settings.imap_credentials.pass,
                     account.settings.smtp_credentials.pass, PasswordTypeFlag.IMAP, null);
             break;
@@ -405,6 +410,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             // TODO: Different password dialog prompt for SMTP or IMAP login.
             case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
                 account.report_problem.disconnect(on_report_problem);
+                keyring_clear_password(account.settings.smtp_credentials.user, PasswordType.SMTP);
                 open_account(account.settings.email.address, account.settings.imap_credentials.pass,
                     account.settings.smtp_credentials.pass, PasswordTypeFlag.SMTP, null);
             break;
