@@ -41,7 +41,7 @@ public class Geary.Smtp.HeloRequest : Geary.Smtp.Request {
     }
     
     public HeloRequest.for_local_address(InetAddress local_addr) {
-        this (local_addr.to_string());
+        this ("[%s]".printf(local_addr.to_string()));
     }
 }
 
@@ -51,7 +51,7 @@ public class Geary.Smtp.EhloRequest : Geary.Smtp.Request {
     }
     
     public EhloRequest.for_local_address(InetAddress local_addr) {
-        this (local_addr.to_string());
+        this ("[%s]".printf(local_addr.to_string()));
     }
 }
 
