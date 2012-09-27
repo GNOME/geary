@@ -53,6 +53,11 @@ public class IconFactory {
         unstarred = load("non-starred-grey", STAR_ICON_SIZE);
     }
     
+    public void init() {
+        // perform any additional initialization here; at this time, everything is done in the
+        // constructor
+    }
+    
     private int icon_size_to_pixels(Gtk.IconSize icon_size) {
         switch (icon_size) {
             case ICON_SIDEBAR:

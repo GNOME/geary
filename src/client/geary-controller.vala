@@ -86,6 +86,10 @@ public class GearyController {
     private NotificationBubble? notification_bubble = null;
     
     public GearyController() {
+        // This initializes the IconFactory, important to do before the actions are created (as they
+        // refer to some of Geary's custom icons)
+        IconFactory.instance.init();
+        
         // Setup actions.
         GearyApplication.instance.actions.add_actions(create_actions(), this);
         GearyApplication.instance.ui_manager.insert_action_group(
@@ -223,8 +227,11 @@ public class GearyController {
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, "user-trash-full", TRANSLATABLE,
-            "A", null, on_delete_message };
+        // although this action changes according to Geary.Folder capabilities, set to Archive
+        // until they're known so the "translatable" string doesn't first appear
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
+            ARCHIVE_MESSAGE_LABEL, "A", null, on_delete_message };
+        delete_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP;
         entries += delete_message;
         add_accelerator("Delete", ACTION_DELETE_MESSAGE);
         add_accelerator("BackSpace", ACTION_DELETE_MESSAGE);
