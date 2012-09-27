@@ -28,6 +28,11 @@ body {
     padding: 0 !important;
     font-size: 10pt !important;
 }
+
+a {
+    color: #08c;
+}
+
 td, th {
     vertical-align: top;
 }
@@ -45,43 +50,42 @@ pre {
 
 .button {
     border: 1px transparent solid;
-    border-radius: 4px;
+    border-radius: 2.5px;
     cursor: pointer;
     padding: 4px;
     margin-top: 7px;
     -webkit-user-select: none;
     -webkit-user-drag: none;
-    text-align: center;
+    text-align: center;()
 }
 .button * {
     -webkit-user-select: none;
     -webkit-user-drag: none;
 }
 .button:hover {
-    border-color: #ccc;
-    background-color: #ddd;
-    box-shadow: inset 2px 2px 7px #f8f8f8;
+    border-color: rgba(0,0,0,0.18);
+    box-shadow: inset 0px 0px 1px rgba(255,255,255,0.8);
 }
 .button:active {
-    border-color: #aaa;
-    background-color: #ddd;
+    border-color: rgba(0,0,0,0.20);
+    background-color: rgba(0,0,0,0.05);;
     padding: 5px 3px 3px 5px;
-    box-shadow: inset 2px 2px 7px #ccc;
+    box-shadow: inset 0px 0px 1px rgba(0,0,0,0.05);
 }
 
 .email {
-    border: 1px #999 solid;
+    border: 1px rgba(0,0,0,0.4) solid;
     background-color: white;
     color: black;
     font-size: small;
-    border-radius: 4px;
-    box-shadow: 0 3px 5px #aaa;
+    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
     display: inline-block;
     word-wrap: break-word;
     width: 100%;
     box-sizing:border-box;
-    margin-top: 15px;
+    margin-top: 16px;
 }
+
 .email .starred {
     display: none;
 }
@@ -105,6 +109,11 @@ pre {
 .email_container .header_container {
     padding: 15px;
 }
+
+.email_container .header_container a:hover * {
+    color: #08c;
+}
+
 .email_container .header_container .button_bar {
     float: right;
     margin-top: -6px;
@@ -127,23 +136,27 @@ pre {
     display: none;
     image-rendering: optimizeQuality;
 }
+
 .avatar[src^=file], .avatar[src^=http] {
     display: inline;
     width: 48px;
     height: 48px;
     float: left;
+    border-radius: 5px;
 }
+
 .email.hide .header_container .avatar {
-    width: 24px;
-    height: 24px;
-    margin-right: 4px;
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
+    border-radius: 2.5px;
 }
 
 .email .body {
     border-top: 1px solid #999;
-    margin: 15px;
+    margin: 16px;
     margin-top: 0;
-    padding-top: 15px;
+    padding-top: 16px;
     overflow-x: auto;
     overflow-y: hidden;
 }
@@ -155,12 +168,13 @@ pre {
     }
 
     .email.hide {
-        background-color: #e8e8e8
+        background-color: #f5f5f5;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
     .email.hide .body,
     .email.hide > .attachment_container,
     .email:not(.hide) .header_container .preview {
-       display: none;
+        display: none;
     }
     .email .header_container {
         cursor: pointer;
@@ -169,7 +183,7 @@ pre {
         cursor: auto;
     }
     .email.hide .header {
-        padding: 5px 0;
+        padding: 0;
         text-align: right;
     }
     .email.hide .header .field {
@@ -205,17 +219,14 @@ pre {
     margin-top: 7px;
 }
 .email > .attachment_container {
-    background-color: #ddd;
-    border-radius: 4px;
+    background-color: white;
     padding-bottom: 10px;
 }
 .email > .attachment_container > .top_border {
-    border-bottom: 1px solid #999;
-    border-radius: 0 0 4px 4px;
+    border-bottom: 1px solid #aaa;
     height: 10px;
     background-color: white;
-    margin-bottom: 5px;
-    box-shadow: 0 3px 5px #c0c0c0;
+    margin: 0 16px 5px;
 }
 .email > .attachment_container > .attachment {
     margin: 10px 10px 0 10px;
@@ -224,18 +235,23 @@ pre {
     font-size: 10pt;
     cursor: pointer;
     border: 1px solid transparent;
-    border-radius: 5px;
+    border-radius: 4px;
     display: inline;
 }
+
 .email > .attachment_container > .attachment:hover,
 .email > .attachment_container > .attachment:active {
-    border-color: #999;
-    background-color: #e8e8e8;
+    border-color: rgba(0,0,0,0.18);
+    box-shadow: inset 0px 0px 1px rgba(255,255,255,0.8);
 }
+
 .email > .attachment_container > .attachment:active {
     padding: 3px 1px 1px 3px;
-    box-shadow: inset 3px 3px 5px #ccc, inset -1px -1px 3px #ccc;
+    border-color: rgba(0,0,0,0.20);
+    background-color: rgba(0,0,0,0.05);;
+    box-shadow: inset 0px 0px 2px rgba(0,0,0,0.05);
 }
+
 .email > .attachment_container > .attachment .preview {
     width: 52px;
     height: 52px;
@@ -315,17 +331,19 @@ pre {
     color: #777;
     display: inline;
 }
-.signature a {
-    color: #66f;
+.signature a,
+.quote_container a {
+    color: #5fb2e7;
 }
 
 .quote_container {
     margin: 5px 0;
-    padding: 5px;
-    background-color: #f4f4f4;
+    padding: 12px;
+    color: #303030;
+    background-color: #e8e8e8;
     border-radius: 4px;
-    box-shadow: inset 0 2px 8px 1px #ccc;
 }
+
 .quote_container > .shower,
 .quote_container > .hider {
     color: #777;
@@ -375,10 +393,7 @@ pre {
 }
 
 blockquote {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 5px 10px 5px 10px;
     padding-left: 5px;
     padding-right: 5px;
     border: 0;
