@@ -55,7 +55,7 @@ public class ComposerWindow : Gtk.Window {
             border-left: 3px #aaa solid;
         }
         </style>
-        </head><body id="reply" contenteditable="true"></body></html>""";
+        </head><body id="reply"></body></html>""";
     
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
@@ -198,6 +198,8 @@ public class ComposerWindow : Gtk.Window {
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
         
+        Gtk.Toolbar compose_toolbar = (Gtk.Toolbar) builder.get_object("compose_toolbar");
+        
         actions.get_action(ACTION_UNDO).activate.connect(on_action);
         actions.get_action(ACTION_REDO).activate.connect(on_action);
         
@@ -255,6 +257,8 @@ public class ComposerWindow : Gtk.Window {
         
         editor = new WebKit.WebView();
         edit_fixer = new WebViewEditFixer(editor);
+
+        editor.editable = true;
         editor.load_finished.connect(on_load_finished);
         editor.hovering_over_link.connect(on_hovering_over_link);
         editor.button_press_event.connect(on_button_press_event);
@@ -321,6 +325,16 @@ public class ComposerWindow : Gtk.Window {
         
         add(box);
         validate_send_button();
+
+        // Place the message area before the compose toolbar in the focus chain, so that
+        // the user can tab directly from the Subject: field to the message area.
+        List<Gtk.Widget> chain = new List<Gtk.Widget>();
+        chain.append(hidden_on_attachment_drag_over);
+        chain.append(message_area);
+        chain.append(compose_toolbar);
+        chain.append(attachments_box);
+        chain.append(button_area);
+        box.set_focus_chain(chain);
 
         if(prefill != null) {
             foreach(File attachment_file in prefill.attachment_files) {
