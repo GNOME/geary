@@ -8,11 +8,20 @@ public class Libmessagingmenu : NewMessagesIndicator {
 #if HAVE_LIBMESSAGINGMENU
     private const string NEW_MESSAGES_ID = "new-messages-id";
     
-    private MessagingMenu.App app = new MessagingMenu.App("geary.desktop");
+    private MessagingMenu.App? app = null;
     
     public Libmessagingmenu(NewMessagesMonitor monitor) {
         base (monitor);
         
+        File? desktop_file = GearyApplication.instance.get_desktop_file();
+        if (desktop_file == null
+            || !desktop_file.get_parent().equal(GearyApplication.instance.system_desktop_file_directory)) {
+            debug("Only an installed version of Geary with its .desktop file installed can use Messaging Menu");
+            
+            return;
+        }
+        
+        app = new MessagingMenu.App("geary.desktop");
         app.register();
         app.activate_source.connect(on_activate_source);
         
@@ -22,7 +31,8 @@ public class Libmessagingmenu : NewMessagesIndicator {
     }
     
     ~Libmessagingmenu() {
-        monitor.notify["count"].disconnect(on_new_messages_changed);
+        if (app != null)
+            monitor.notify["count"].disconnect(on_new_messages_changed);
     }
     
     private void on_activate_source(string source_id) {
