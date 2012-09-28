@@ -104,6 +104,7 @@ public class GearyController {
         
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
+        main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
         
         enable_message_buttons(false);
 
@@ -111,6 +112,7 @@ public class GearyController {
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.load_more.connect(on_load_more);
         main_window.conversation_list_view.mark_conversation.connect(on_mark_conversation);
+        main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.folder_list.copy_conversation.connect(on_copy_conversation);
         main_window.folder_list.move_conversation.connect(on_move_conversation);
@@ -423,6 +425,9 @@ public class GearyController {
             }
             
             current_conversations = inbox_conversations;
+            
+            // Inbox selected, clear new messages if visible
+            clear_new_messages("do_select_folder (inbox)", null);
         }
         
         current_conversations.scan_started.connect(on_scan_started);
@@ -473,7 +478,7 @@ public class GearyController {
     private void on_indicator_activated_inbox(uint32 timestamp) {
         main_window.present_with_time(timestamp);
         
-        // reset new messages
+        // user activated notification, reset new messages no matter other conditions
         new_messages_monitor.clear_new_messages();
         
         // attempt to select Inbox
@@ -636,7 +641,8 @@ public class GearyController {
                     main_window.folder_list.select_path(folder.get_path());
                     inbox_folder.open_async.begin(false, cancellable_inbox);
                     
-                    new_messages_monitor = new NewMessagesMonitor(inbox_folder, cancellable_inbox);
+                    new_messages_monitor = new NewMessagesMonitor(inbox_folder, should_notify_new_messages,
+                        cancellable_inbox);
                     
                     // Unity launcher count (Ubuntuism)
                     unity_launcher = new UnityLauncher(new_messages_monitor);
@@ -776,6 +782,12 @@ public class GearyController {
         );
     }
     
+    // this signal does not necessarily indicate that the application previously didn't have
+    // focus and now it does
+    private void on_has_toplevel_focus() {
+        clear_new_messages("on_has_toplevel_focus", null);
+    }
+    
     private void on_preferences() {
         PreferencesDialog dialog = new PreferencesDialog(GearyApplication.instance.config);
         dialog.run();
@@ -834,7 +846,40 @@ public class GearyController {
         actions.get_action(ACTION_MARK_AS_STARRED).set_visible(unstarred_selected);
         actions.get_action(ACTION_MARK_AS_UNSTARRED).set_visible(starred_selected);
     }
-
+    
+    private void on_visible_conversations_changed(Gee.Set<Geary.Conversation> visible) {
+        clear_new_messages("on_visible_conversations_changed", visible);
+    }
+    
+    private bool should_notify_new_messages() {
+        // Inbox must be selected to squelch notifications;
+        // if conversation list is at top of display, don't display
+        // and don't display if main window has top-level focus
+        return current_folder == null
+            || current_folder.get_special_folder_type() != Geary.SpecialFolderType.INBOX
+            || main_window.conversation_list_view.vadjustment.value != 0.0
+            || !main_window.has_toplevel_focus;
+    }
+    
+    // Clears messages if conditions are true: anything in should_notify_new_messages() is
+    // true and the supplied visible messages are visible in the conversation list view
+    private void clear_new_messages(string caller, Gee.Set<Geary.Conversation>? supplied) {
+        if (should_notify_new_messages())
+            return;
+        
+        Gee.Set<Geary.Conversation> visible =
+            supplied ?? main_window.conversation_list_view.get_visible_conversations();
+        
+        foreach (Geary.Conversation conversation in visible) {
+            if (new_messages_monitor.are_any_new_messages(conversation.get_email_ids())) {
+                debug("Clearing new messages: %s", caller);
+                new_messages_monitor.clear_new_messages();
+                
+                break;
+            }
+        }
+    }
+    
     private void on_mark_conversation(Geary.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview = false) {
         Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;

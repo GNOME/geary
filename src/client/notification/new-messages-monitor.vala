@@ -12,12 +12,14 @@
 // flags to the object with add_required_fields().
 
 public class NewMessagesMonitor : Object {
+    public delegate bool ShouldNotifyNewMessages();
+    
     public Geary.Folder folder { get; private set; }
     public int count { get; private set; default = 0; }
     public Geary.Email? last_new_message { get; private set; default = null; }
-    
     public Geary.Email.Field required_fields { get; private set; default = Geary.Email.Field.FLAGS; }
     
+    private unowned ShouldNotifyNewMessages? should_notify_new_messages;
     private Cancellable? cancellable;
     private Gee.HashSet<Geary.EmailIdentifier> new_ids = new Gee.HashSet<Geary.EmailIdentifier>(
         Geary.Hashable.hash_func, Geary.Equalable.equal_func);
@@ -26,8 +28,10 @@ public class NewMessagesMonitor : Object {
     
     public signal void new_messages_retired();
     
-    public NewMessagesMonitor(Geary.Folder folder, Cancellable? cancellable) {
+    public NewMessagesMonitor(Geary.Folder folder, ShouldNotifyNewMessages? should_notify_new_messages,
+        Cancellable? cancellable) {
         this.folder = folder;
+        this.should_notify_new_messages = should_notify_new_messages;
         this.cancellable = cancellable;
         
         folder.email_locally_appended.connect(on_email_locally_appended);
@@ -45,6 +49,15 @@ public class NewMessagesMonitor : Object {
         required_fields |= fields;
     }
     
+    public bool are_any_new_messages(Gee.Collection<Geary.EmailIdentifier> ids) {
+        foreach (Geary.EmailIdentifier id in ids) {
+            if (new_ids.contains(id))
+                return true;
+        }
+        
+        return false;
+    }
+    
     private void on_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> email_ids) {
         do_process_new_email.begin(email_ids);
     }
@@ -58,6 +71,9 @@ public class NewMessagesMonitor : Object {
     }
     
     private async void do_process_new_email(Gee.Collection<Geary.EmailIdentifier> email_ids) {
+        if (should_notify_new_messages != null && !should_notify_new_messages())
+            return;
+        
         try {
             Gee.List<Geary.Email>? list = yield folder.list_email_by_sparse_id_async(email_ids,
                 required_fields, Geary.Folder.ListFlags.NONE, cancellable);

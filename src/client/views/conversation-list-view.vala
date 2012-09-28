@@ -16,6 +16,8 @@ public class ConversationListView : Gtk.TreeView {
     private Gee.Set<Geary.Conversation> selected = new Gee.HashSet<Geary.Conversation>();
     private ConversationListStore conversation_list_store;
     private Geary.ConversationMonitor? conversation_monitor;
+    private Gee.Set<Geary.Conversation>? current_visible_conversations = null;
+    private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     
     public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
     
@@ -25,6 +27,8 @@ public class ConversationListView : Gtk.TreeView {
     
     public signal void mark_conversation(Geary.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
+    
+    public signal void visible_conversations_changed(Gee.Set<Geary.Conversation> visible);
     
     public ConversationListView(ConversationListStore conversation_list_store) {
         this.conversation_list_store = conversation_list_store;
@@ -44,7 +48,12 @@ public class ConversationListView : Gtk.TreeView {
         style_set.connect(on_style_changed);
         show.connect(on_show);
         
+        get_model().row_inserted.connect(on_rows_changed);
+        get_model().rows_reordered.connect(on_rows_changed);
+        get_model().row_changed.connect(on_rows_changed);
+        get_model().row_deleted.connect(on_rows_changed);
         get_model().row_deleted.connect(on_row_deleted);
+        
         conversation_list_store.conversations_added_began.connect(on_conversations_added_began);
         conversation_list_store.conversations_added_finished.connect(on_conversations_added_finished);
         button_press_event.connect(on_button_press);
@@ -148,6 +157,8 @@ public class ConversationListView : Gtk.TreeView {
     private void on_style_changed() {
         // Recalculate dimensions of child cells.
         ConversationListCellRenderer.style_changed(this);
+        
+        schedule_visible_conversations_changed();
     }
     
     private void on_show() {
@@ -168,6 +179,8 @@ public class ConversationListView : Gtk.TreeView {
             load_more();
             last_upper = upper;
         }
+        
+        schedule_visible_conversations_changed();
     }
     
     private static Gtk.TreeViewColumn create_column(ConversationListStore.Column column,
@@ -222,6 +235,44 @@ public class ConversationListView : Gtk.TreeView {
         }
     }
     
+    public Gee.Set<Geary.Conversation> get_visible_conversations() {
+        Gee.HashSet<Geary.Conversation> visible_conversations = new Gee.HashSet<Geary.Conversation>();
+        
+        Gtk.TreePath start_path;
+        Gtk.TreePath end_path;
+        if (!get_visible_range(out start_path, out end_path))
+            return visible_conversations;
+        
+        while (start_path.compare(end_path) <= 0) {
+            Geary.Conversation? conversation = conversation_list_store.get_conversation_at_path(start_path);
+            if (conversation != null)
+                visible_conversations.add(conversation);
+            
+            start_path.next();
+        }
+        
+        return visible_conversations;
+    }
+    
+    // Always returns false, so it can be used as a one-time SourceFunc
+    private bool update_visible_conversations() {
+        Gee.Set<Geary.Conversation> visible_conversations = get_visible_conversations();
+        if (current_visible_conversations != null
+            && Geary.Collection.are_sets_equal<Geary.Conversation>(current_visible_conversations, visible_conversations)) {
+            return false;
+        }
+        
+        current_visible_conversations = visible_conversations;
+        
+        visible_conversations_changed(current_visible_conversations.read_only_view);
+        
+        return false;
+    }
+    
+    private void schedule_visible_conversations_changed() {
+        scheduled_update_visible_conversations = Geary.Scheduler.on_idle(update_visible_conversations);
+    }
+    
     // Selects the first conversation, if nothing has been selected yet.
     public void select_first_conversation() {
         if (get_selected_path() == null) {
@@ -241,10 +292,16 @@ public class ConversationListView : Gtk.TreeView {
         // is cleared)
         last_upper = -1.0;
     }
-
+    
+    private void on_rows_changed() {
+        schedule_visible_conversations_changed();
+    }
+    
     private void on_display_preview_changed() {
         style_set(null);
         model.foreach(refresh_path);
+        
+        schedule_visible_conversations_changed();
     }
     
     private bool refresh_path(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
