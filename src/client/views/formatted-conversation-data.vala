@@ -228,7 +228,9 @@ public class FormattedConversationData : Object {
             debug("Failed to clean up subject line \"%s\": %s", subject_string, e.message);
         }
         
-        return !Geary.String.is_empty_or_whitespace(subject_string) ? subject_string : _("(no subject)");
+        subject_string = Geary.String.reduce_whitespace(subject_string);
+        
+        return !Geary.String.is_empty(subject_string) ? subject_string : _("(no subject)");
     }
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
