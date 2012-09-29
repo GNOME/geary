@@ -37,7 +37,10 @@ public class Geary.Smtp.ClientConnection {
         set_data_streams(cx);
         
         // read and deserialize the greeting
-        return new Greeting(yield recv_response_lines_async(cancellable));
+        Greeting greeting = new Greeting(yield recv_response_lines_async(cancellable));
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Greeting: %s", to_string(), greeting.to_string());
+        
+        return greeting;
     }
     
     public async bool disconnect_async(Cancellable? cancellable = null) throws Error {
@@ -188,8 +191,14 @@ public class Geary.Smtp.ClientConnection {
         // only attempt to produce a FQDN if not a local address and use the local address if
         // unavailable
         string? fqdn = null;
-        if (!local_addr.is_link_local && !local_addr.is_loopback && !local_addr.is_site_local)
-            fqdn = yield Resolver.get_default().lookup_by_address_async(local_addr, cancellable);
+        if (!local_addr.is_link_local && !local_addr.is_loopback && !local_addr.is_site_local) {
+            try {
+                fqdn = yield Resolver.get_default().lookup_by_address_async(local_addr, cancellable);
+            } catch (Error err) {
+                debug("[%s] Unable to lookup local address for %s: %s", to_string(),
+                    local_addr.to_string(), err.message);
+            }
+        }
         
         // try EHLO first, then fall back on HELO
         EhloRequest ehlo = !String.is_empty(fqdn) ? new EhloRequest(fqdn) : new EhloRequest.for_local_address(local_addr);

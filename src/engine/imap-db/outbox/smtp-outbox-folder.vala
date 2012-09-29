@@ -483,13 +483,20 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     
     private async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
-        yield smtp.login_async(settings.smtp_credentials, cancellable);
+        Error? smtp_err = null;
         
-        Error? send_err = null;
         try {
-            yield smtp.send_email_async(rfc822, cancellable);
-        } catch (Error err) {
-            send_err = err;
+            yield smtp.login_async(settings.smtp_credentials, cancellable);
+        } catch (Error login_err) {
+            smtp_err = login_err;
+        }
+        
+        if (smtp_err != null) {
+            try {
+                yield smtp.send_email_async(rfc822, cancellable);
+            } catch (Error send_err) {
+                smtp_err = send_err;
+            }
         }
         
         // always logout
@@ -499,8 +506,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             debug("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
         }
         
-        if (send_err != null)
-            throw send_err;
+        if (smtp_err != null)
+            throw smtp_err;
     }
     
     //
