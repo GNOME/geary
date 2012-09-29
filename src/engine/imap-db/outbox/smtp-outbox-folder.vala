@@ -488,13 +488,15 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         try {
             yield smtp.login_async(settings.smtp_credentials, cancellable);
         } catch (Error login_err) {
+            debug("SMTP login error: %s", login_err.message);
             smtp_err = login_err;
         }
         
-        if (smtp_err != null) {
+        if (smtp_err == null) {
             try {
                 yield smtp.send_email_async(rfc822, cancellable);
             } catch (Error send_err) {
+                debug("SMTP send mail error: %s", send_err.message);
                 smtp_err = send_err;
             }
         }
