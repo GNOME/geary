@@ -8,7 +8,7 @@
 #   <melipse@gmail.com>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.2.0\n"
+"Project-Id-Version: geary-0.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-09-05 12:06-0700\n"
 "PO-Revision-Date: 2012-09-11 18:01+0000\n"
