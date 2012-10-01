@@ -151,7 +151,7 @@ IF(XGETTEXT_FOUND)
 		SET(_lang ${_currentLang})
 		GET_FILENAME_COMPONENT(_absFile ${_currentLang}.po ABSOLUTE)
 		GET_FILENAME_COMPONENT(_abs_PATH ${_absFile} PATH)
-		SET(_gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${_lang}.gmo)
+		SET(_gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${_lang}.mo)
 
 		#MESSAGE("_absFile=${_absFile} _abs_PATH=${_abs_PATH} _lang=${_lang} curr_bin=${CMAKE_CURRENT_BINARY_DIR}")
 		ADD_CUSTOM_COMMAND(

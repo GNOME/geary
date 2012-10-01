@@ -3,23 +3,23 @@
 # Copyright 2012 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
 # Jim Nelson <jim@yorba.org>
-# 
+#
 # Translators:
 # Heimen Stoffels <vistausss@gmail.com>, 2012.
 #   <hyperhoax@riseup.net>, 2012.
 #   <peter@peternijssen.nl>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: Geary\n"
-"Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
+"Project-Id-Version: geary-0.2.0\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-09-05 12:06-0700\n"
 "PO-Revision-Date: 2012-10-01 17:29+0000\n"
 "Last-Translator: Heimen Stoffels <vistausss@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: nl_NL\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../../src/client/ui/composer-window.vala:550
@@ -43,44 +43,38 @@ msgid "\"%s\" is a folder"
 msgstr "\"%s\" is een map"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:39
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %b %-e, %Y at %-l:%M %p"
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%b %-e"
@@ -93,15 +87,13 @@ msgstr[0] "%d nieuw bericht"
 msgstr[1] "%d nieuwe berichten"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -118,8 +110,7 @@ msgid "%u conversations selected."
 msgstr "%u berichten geselecteerd."
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -158,13 +149,23 @@ msgstr "Weet u zeker dat u \"%s\" wil openen?"
 
 #: ../../src/client/geary-controller.vala:913
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from"
-" trusted sources."
-msgstr "Bijlagen kunnen schade aan uw systeem aanbrengen wanneer deze worden geopend. Open enkel bestanden van vertrouwde bronnen."
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"Bijlagen kunnen schade aan uw systeem aanbrengen wanneer deze worden "
+"geopend. Open enkel bestanden van vertrouwde bronnen."
 
 #: ../../src/client/ui/message-viewer.vala:496
 msgid "Bcc:"
 msgstr "Bcc:"
+
+#: ../../ui/composer.glade:440 ../../ui/composer.glade:442
+msgid "Bold"
+msgstr "Dikgedrukt"
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "K_leur"
 
 #: ../../src/client/ui/composer-window.vala:519
 msgid "Cannot add attachment"
@@ -182,8 +183,17 @@ msgstr "Kies een bestand"
 msgid "Co_ntinue"
 msgstr "Ga verder"
 
+#: ../../ui/composer.glade:584 ../../ui/composer.glade:586
+msgid "Color"
+msgstr "Kleur"
+
 #: ../../src/client/notification/libindicate.vala:33
 msgid "Compose Message"
+msgstr "Stel bericht op"
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:13
+msgid "Compose message"
 msgstr "Stel bericht op"
 
 #: ../../src/client/ui/message-viewer.vala:713
@@ -193,6 +203,10 @@ msgstr "Kopieer emailadres"
 #: ../../src/client/ui/message-viewer.vala:707
 msgid "Copy _Link"
 msgstr "Kopieer link"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
+msgstr "Kopieer _link"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2012 Yorba Foundation"
@@ -206,6 +220,14 @@ msgstr "Datum:"
 #, c-format
 msgid "Date: %s\n"
 msgstr "Datum: %s\n"
+
+#: ../../ui/toolbar.glade:89
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: ../../ui/toolbar.glade:88
+msgid "Delete the selected conversation"
+msgstr "Verwijderde geselecteerde bericht"
 
 #: ../../src/client/geary-application.vala:107
 msgid "Display program version"
@@ -223,6 +245,18 @@ msgstr "Niet o_pnieuw vragen"
 msgid "Drafts"
 msgstr "Concepten"
 
+#: ../../ui/composer.glade:394
+msgid "Drop files here"
+msgstr "Plaats bestanden hier"
+
+#: ../../ui/login.glade:556
+msgid "Encr_yption:"
+msgstr "Encr_yptie:"
+
+#: ../../ui/login.glade:575
+msgid "Encrypt_ion:"
+msgstr "Encrypt_ie:"
+
 #: ../../src/client/ui/geary-login.vala:93
 msgid "Enter your account information to get started."
 msgstr "Vul uw account-informatie in om te beginnen."
@@ -239,6 +273,27 @@ msgstr "Kon de volgende command line optie niet parsen: %s\n"
 #: ../../src/client/ui/composer-window.vala:285
 msgid "Fixed width"
 msgstr "Vaste breedte"
+
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "Lettertype"
+
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:569
+#: ../../ui/composer.glade:571
+msgid "Font size"
+msgstr "Lettergrootteq"
+
+#: ../../ui/composer.glade:554 ../../ui/composer.glade:556
+msgid "Fonts"
+msgstr "Lettertypes"
+
+#: ../../ui/toolbar.glade:63
+msgid "Forward"
+msgstr "Doorsturen"
+
+#: ../../ui/toolbar.glade:61
+msgid "Forward email"
+msgstr "Stuur e-mail door"
 
 #: ../../src/client/ui/message-viewer.vala:481
 msgid "From:"
@@ -262,9 +317,25 @@ msgstr "Geary Mail"
 msgid "Gmail"
 msgstr "Gmail"
 
+#: ../../ui/password-dialog.glade:151
+msgid "IMAP Credentials"
+msgstr "IMAP gegevens"
+
+#: ../../ui/login.glade:262 ../../ui/password-dialog.glade:374
+msgid "IMAP settings"
+msgstr "IMAP instellingen"
+
 #: ../../src/engine/api/geary-special-folder-type.vala:21
 msgid "Inbox"
 msgstr "Postvak IN"
+
+#: ../../ui/composer.glade:512 ../../ui/composer.glade:514
+msgid "Indent"
+msgstr "Inspringen"
+
+#: ../../ui/composer.glade:455 ../../ui/composer.glade:457
+msgid "Italic"
+msgstr "Schuingedrukt"
 
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
@@ -275,6 +346,11 @@ msgstr "KB"
 msgid "Label as"
 msgstr "Label als"
 
+#. Toggles menu for applying labels to emails.
+#: ../../ui/toolbar.glade:117
+msgid "Label the selected conversation"
+msgstr "Label geselecteerde bericht"
+
 #: ../../src/client/geary-controller.vala:301
 msgid "Labels"
 msgstr "Labels"
@@ -282,6 +358,14 @@ msgstr "Labels"
 #: ../../src/client/ui/composer-window.vala:299
 msgid "Large"
 msgstr "Groot"
+
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr "Lin_k"
+
+#: ../../ui/composer.glade:599 ../../ui/composer.glade:601
+msgid "Link"
+msgstr "Link"
 
 #: ../../src/client/geary-application.vala:102
 msgid "Log IMAP replay queue"
@@ -332,6 +416,11 @@ msgstr "Markeer als _gelezen"
 msgid "Mark as _unread"
 msgstr "Markeer als _ongelezen"
 
+#. Toggles menu for marking a message as read/unread or starred/unstarred
+#: ../../ui/toolbar.glade:143
+msgid "Mark email"
+msgstr "Markeer e-mail"
+
 #: ../../src/client/ui/message-list-cell-renderer.vala:77
 msgid "Me"
 msgstr "Ik"
@@ -340,9 +429,22 @@ msgstr "Ik"
 msgid "Medium"
 msgstr "Middel"
 
+#: ../../ui/toolbar.glade:175
+msgid "Menu"
+msgstr "Menu"
+
+#. Toggles menu for applying labels to emails.
+#: ../../ui/toolbar.glade:102
+msgid "Move the selected conversation"
+msgstr "Verplaats geselecteerde bericht"
+
 #: ../../src/client/ui/main-toolbar.vala:33
 msgid "Move to"
 msgstr "Verplaats naar"
+
+#: ../../ui/login.glade:187
+msgid "N_ame:"
+msgstr "Naam:"
 
 #: ../../src/client/ui/composer-window.vala:9
 msgid "New Message"
@@ -382,6 +484,22 @@ msgstr "Postvak uit"
 msgid "Output debugging information"
 msgstr "Geef debug informatie weer"
 
+#: ../../ui/login.glade:312
+msgid "P_ort:"
+msgstr "P_oort:"
+
+#: ../../ui/login.glade:446
+msgid "Pass_word:"
+msgstr "Wacht_woord:"
+
+#: ../../ui/password-dialog.glade:217
+msgid "Password:"
+msgstr "Wachtwoord:"
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr "Plak _met opmaak"
+
 #: ../../src/client/ui/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "Vul je wachtwoord in"
@@ -389,6 +507,14 @@ msgstr "Vul je wachtwoord in"
 #: ../../src/client/geary-application.vala:141
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Verstuur opmerkingen, suggesties en bugs naar:"
+
+#: ../../ui/login.glade:393
+msgid "Por_t:"
+msgstr "Poor_t:"
+
+#: ../../ui/password-dialog.glade:407 ../../ui/password-dialog.glade:510
+msgid "Port:"
+msgstr "Poort:"
 
 #: ../../src/client/ui/geary-login.vala:270
 msgid "Re_member password"
@@ -398,9 +524,50 @@ msgstr "Onthoudt wachtwoord"
 msgid "Re_member passwords"
 msgstr "Onthoudt wachtwoorden"
 
+#: ../../ui/password-dialog.glade:314
+msgid "Real name:"
+msgstr "Echten naam:"
+
+#: ../../ui/password-dialog.glade:256
+msgid "Remember password"
+msgstr "Onthoud wachtwoord:"
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:614
+#: ../../ui/composer.glade:616
+msgid "Remove formatting"
+msgstr "Verwijder opmaak"
+
+#: ../../ui/toolbar.glade:47
+msgid "Reply All"
+msgstr "Beantwoord allen"
+
+#: ../../ui/toolbar.glade:31
+msgid "Reply To"
+msgstr "Beantwoord naar"
+
 #: ../../src/client/ui/message-viewer.vala:942
 msgid "Reply to _All"
 msgstr "Beantwoord _iedereen"
+
+#: ../../ui/toolbar.glade:45
+msgid "Reply to all"
+msgstr "Beantwoord allen"
+
+#: ../../ui/toolbar.glade:29
+msgid "Reply to sender"
+msgstr "Beantwoord verstuurd"
+
+#: ../../ui/password-dialog.glade:184
+msgid "SMTP Credentials"
+msgstr "SMTP gegevens"
+
+#: ../../ui/login.glade:411 ../../ui/password-dialog.glade:477
+msgid "SMTP settings"
+msgstr "SMTP instellingen"
+
+#: ../../ui/password-dialog.glade:422 ../../ui/password-dialog.glade:525
+msgid "SSL/TLS encryption:"
+msgstr "SSL/TLS encryptie:"
 
 #: ../../src/client/ui/composer-window.vala:278
 msgid "Sans Serif"
@@ -416,6 +583,10 @@ msgstr[1] "Sla alle bijlagen op"
 msgid "Save All A_ttachments..."
 msgstr "Sla alle bijlagen op"
 
+#: ../../ui/login.glade:280
+msgid "Se_rver:"
+msgstr "Se_rver:"
+
 #: ../../src/client/ui/message-viewer.vala:725
 msgid "Select _All"
 msgstr "Selecteer alle"
@@ -428,9 +599,21 @@ msgstr "Verstuur en ontvang e-mail"
 msgid "Sent Mail"
 msgstr "Verstuur e-mail"
 
+#: ../../ui/login.glade:376
+msgid "Ser_ver:"
+msgstr "Ser_ver:"
+
 #: ../../src/client/ui/composer-window.vala:281
 msgid "Serif"
 msgstr "Serif"
+
+#: ../../ui/password-dialog.glade:392 ../../ui/password-dialog.glade:495
+msgid "Server:"
+msgstr "Server:"
+
+#: ../../ui/password-dialog.glade:299
+msgid "Service:"
+msgstr "Service:"
 
 #: ../../src/client/ui/composer-window.vala:293
 msgid "Small"
@@ -443,6 +626,10 @@ msgstr "Spam"
 #: ../../src/engine/api/geary-special-folder-type.vala:30
 msgid "Starred"
 msgstr "Met ster"
+
+#: ../../ui/composer.glade:485 ../../ui/composer.glade:487
+msgid "Strikethrough"
+msgstr "Doorgestreept"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:73
 #, c-format
@@ -461,13 +648,16 @@ msgstr "TB"
 #: ../../src/client/geary-controller.vala:928
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its "
-"contents."
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Het bestand \"%s\" bestaat reeds. Vervanging overschrijft het bestand"
 
 #: ../../src/client/ui/message-viewer.vala:95
 msgid "This message contains images. Do you want to show them?"
 msgstr "Dit bericht bevat afbeeldingen. Wil je deze weergeven?"
+
+#: ../../ui/composer.glade:410
+msgid "To add them as attachments"
+msgstr "Om ze toe te voegen als bijlagen"
 
 #: ../../src/client/ui/message-viewer.vala:488
 msgid "To:"
@@ -486,14 +676,30 @@ msgstr "Prullenbak"
 msgid "U_nstar"
 msgstr "Ster verwijderen"
 
+#: ../../ui/composer.glade:527 ../../ui/composer.glade:529
+msgid "Un-indent"
+msgstr "Inspringen ongedaan maken"
+
 #: ../../src/client/ui/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "Kan niet inloggen op e-mail server"
+
+#: ../../ui/composer.glade:470 ../../ui/composer.glade:472
+msgid "Underline"
+msgstr "Onderstreept"
 
 #: ../../src/client/geary-application.vala:131
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Onbekende command line optie: \"%s\"\n"
+
+#: ../../ui/login.glade:429
+msgid "User_name:"
+msgstr "Gebruikers_naam:"
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:202
+msgid "Username:"
+msgstr "Gebruikersnaam:"
 
 #: ../../src/client/ui/message-viewer.vala:720
 msgid "View _Source"
@@ -517,7 +723,10 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "Je IMAP en/of SMTP instellingen zijn niet op SSL of TLS ingesteld. Dit betekent dat iemand binnen hetzelfde netwerk je gebruikersnaam en wachtwoord zou kunnen lezen. Weet je zeker dat je verder wil gaan?"
+msgstr ""
+"Je IMAP en/of SMTP instellingen zijn niet op SSL of TLS ingesteld. Dit "
+"betekent dat iemand binnen hetzelfde netwerk je gebruikersnaam en wachtwoord "
+"zou kunnen lezen. Weet je zeker dat je verder wil gaan?"
 
 #: ../../src/client/geary-application.vala:438
 msgid "Your settings are insecure"
@@ -547,6 +756,10 @@ msgstr "_Voeg nog een bestand toe"
 msgid "_Cancel"
 msgstr "_Annuleren"
 
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr "_Midden"
+
 #: ../../src/client/ui/message-viewer.vala:700
 msgid "_Copy"
 msgstr "_Kopieren"
@@ -554,6 +767,14 @@ msgstr "_Kopieren"
 #: ../../src/client/geary-controller.vala:60
 msgid "_Delete"
 msgstr "_Verwijderen"
+
+#: ../../ui/password-dialog.glade:588
+msgid "_Details"
+msgstr "_Details"
+
+#: ../../ui/login.glade:126
+msgid "_Email address:"
+msgstr "_E-mail adres:"
 
 #: ../../src/client/ui/message-viewer.vala:947
 msgid "_Forward"
@@ -563,9 +784,17 @@ msgstr "_Doorsturen"
 msgid "_Help"
 msgstr "_Help"
 
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr "_Uitlijnen"
+
 #: ../../src/client/geary-controller.vala:195
 msgid "_Label"
 msgstr "_Label"
+
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr "_Links"
 
 #: ../../src/client/ui/message-viewer.vala:957
 msgid "_Mark as Read"
@@ -587,6 +816,11 @@ msgstr "Verplaats"
 msgid "_New Message"
 msgstr "_Nieuw Bericht"
 
+#: ../../ui/login.glade:142 ../../ui/login.glade:509
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr "_Wachtwoord"
+
 #: ../../src/client/geary-controller.vala:153
 msgid "_Preferences"
 msgstr "_Instellingen"
@@ -594,6 +828,10 @@ msgstr "_Instellingen"
 #: ../../src/client/geary-controller.vala:165
 msgid "_Quit"
 msgstr "_Afsluiten"
+
+#: ../../ui/password-dialog.glade:129
+msgid "_Remember password"
+msgstr "_Onthoud wachtwoord"
 
 #: ../../src/client/geary-controller.vala:931
 msgid "_Replace"
@@ -603,9 +841,21 @@ msgstr "_Vervangen"
 msgid "_Reply"
 msgstr "_Beantwoorden"
 
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr "_Rechts"
+
 #: ../../src/client/ui/message-viewer.vala:904
 msgid "_Save As..."
 msgstr "_Opslaan als..."
+
+#: ../../ui/composer.glade:171
+msgid "_Send"
+msgstr "_Verstuur"
+
+#: ../../ui/login.glade:171
+msgid "_Service:"
+msgstr "_Service"
 
 #: ../../src/client/ui/message-viewer.vala:88
 msgid "_Show Images"
@@ -614,6 +864,10 @@ msgstr "_Geef afbeeldingen weer"
 #: ../../src/client/geary-controller.vala:185
 msgid "_Star"
 msgstr "_Ster"
+
+#: ../../ui/login.glade:492
+msgid "_Username:"
+msgstr "_Gebruikersnaam"
 
 #: ../../src/client/ui/message-viewer.vala:976
 msgid "_View Source"
@@ -633,262 +887,3 @@ msgstr "geen"
 #: ../../src/client/geary-controller.vala:732
 msgid "translator-credits"
 msgstr "Vertalingscredits"
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr "_Links"
-
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr "_Rechts"
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr "_Midden"
-
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr "_Uitlijnen"
-
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr "Lin_k"
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "K_leur"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "Lettertype"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:614
-#: ../../ui/composer.glade:616
-msgid "Remove formatting"
-msgstr "Verwijder opmaak"
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr "Plak _met opmaak"
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr "Kopieer _link"
-
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:569
-#: ../../ui/composer.glade:571
-msgid "Font size"
-msgstr "Lettergrootteq"
-
-#: ../../ui/composer.glade:171
-msgid "_Send"
-msgstr "_Verstuur"
-
-#: ../../ui/composer.glade:394
-msgid "Drop files here"
-msgstr "Plaats bestanden hier"
-
-#: ../../ui/composer.glade:410
-msgid "To add them as attachments"
-msgstr "Om ze toe te voegen als bijlagen"
-
-#: ../../ui/composer.glade:440 ../../ui/composer.glade:442
-msgid "Bold"
-msgstr "Dikgedrukt"
-
-#: ../../ui/composer.glade:455 ../../ui/composer.glade:457
-msgid "Italic"
-msgstr "Schuingedrukt"
-
-#: ../../ui/composer.glade:470 ../../ui/composer.glade:472
-msgid "Underline"
-msgstr "Onderstreept"
-
-#: ../../ui/composer.glade:485 ../../ui/composer.glade:487
-msgid "Strikethrough"
-msgstr "Doorgestreept"
-
-#: ../../ui/composer.glade:512 ../../ui/composer.glade:514
-msgid "Indent"
-msgstr "Inspringen"
-
-#: ../../ui/composer.glade:527 ../../ui/composer.glade:529
-msgid "Un-indent"
-msgstr "Inspringen ongedaan maken"
-
-#: ../../ui/composer.glade:554 ../../ui/composer.glade:556
-msgid "Fonts"
-msgstr "Lettertypes"
-
-#: ../../ui/composer.glade:584 ../../ui/composer.glade:586
-msgid "Color"
-msgstr "Kleur"
-
-#: ../../ui/composer.glade:599 ../../ui/composer.glade:601
-msgid "Link"
-msgstr "Link"
-
-#: ../../ui/login.glade:126
-msgid "_Email address:"
-msgstr "_E-mail adres:"
-
-#: ../../ui/login.glade:142 ../../ui/login.glade:509
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr "_Wachtwoord"
-
-#: ../../ui/login.glade:171
-msgid "_Service:"
-msgstr "_Service"
-
-#: ../../ui/login.glade:187
-msgid "N_ame:"
-msgstr "Naam:"
-
-#: ../../ui/login.glade:262 ../../ui/password-dialog.glade:374
-msgid "IMAP settings"
-msgstr "IMAP instellingen"
-
-#: ../../ui/login.glade:280
-msgid "Se_rver:"
-msgstr "Se_rver:"
-
-#: ../../ui/login.glade:312
-msgid "P_ort:"
-msgstr "P_oort:"
-
-#: ../../ui/login.glade:376
-msgid "Ser_ver:"
-msgstr "Ser_ver:"
-
-#: ../../ui/login.glade:393
-msgid "Por_t:"
-msgstr "Poor_t:"
-
-#: ../../ui/login.glade:411 ../../ui/password-dialog.glade:477
-msgid "SMTP settings"
-msgstr "SMTP instellingen"
-
-#: ../../ui/login.glade:429
-msgid "User_name:"
-msgstr "Gebruikers_naam:"
-
-#: ../../ui/login.glade:446
-msgid "Pass_word:"
-msgstr "Wacht_woord:"
-
-#: ../../ui/login.glade:492
-msgid "_Username:"
-msgstr "_Gebruikersnaam"
-
-#: ../../ui/login.glade:556
-msgid "Encr_yption:"
-msgstr "Encr_yptie:"
-
-#: ../../ui/login.glade:575
-msgid "Encrypt_ion:"
-msgstr "Encrypt_ie:"
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:202
-msgid "Username:"
-msgstr "Gebruikersnaam:"
-
-#: ../../ui/password-dialog.glade:129
-msgid "_Remember password"
-msgstr "_Onthoud wachtwoord"
-
-#: ../../ui/password-dialog.glade:151
-msgid "IMAP Credentials"
-msgstr "IMAP gegevens"
-
-#: ../../ui/password-dialog.glade:184
-msgid "SMTP Credentials"
-msgstr "SMTP gegevens"
-
-#: ../../ui/password-dialog.glade:217
-msgid "Password:"
-msgstr "Wachtwoord:"
-
-#: ../../ui/password-dialog.glade:256
-msgid "Remember password"
-msgstr "Onthoud wachtwoord:"
-
-#: ../../ui/password-dialog.glade:299
-msgid "Service:"
-msgstr "Service:"
-
-#: ../../ui/password-dialog.glade:314
-msgid "Real name:"
-msgstr "Echten naam:"
-
-#: ../../ui/password-dialog.glade:392 ../../ui/password-dialog.glade:495
-msgid "Server:"
-msgstr "Server:"
-
-#: ../../ui/password-dialog.glade:407 ../../ui/password-dialog.glade:510
-msgid "Port:"
-msgstr "Poort:"
-
-#: ../../ui/password-dialog.glade:422 ../../ui/password-dialog.glade:525
-msgid "SSL/TLS encryption:"
-msgstr "SSL/TLS encryptie:"
-
-#: ../../ui/password-dialog.glade:588
-msgid "_Details"
-msgstr "_Details"
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:13
-msgid "Compose message"
-msgstr "Stel bericht op"
-
-#: ../../ui/toolbar.glade:29
-msgid "Reply to sender"
-msgstr "Beantwoord verstuurd"
-
-#: ../../ui/toolbar.glade:31
-msgid "Reply To"
-msgstr "Beantwoord naar"
-
-#: ../../ui/toolbar.glade:45
-msgid "Reply to all"
-msgstr "Beantwoord allen"
-
-#: ../../ui/toolbar.glade:47
-msgid "Reply All"
-msgstr "Beantwoord allen"
-
-#: ../../ui/toolbar.glade:61
-msgid "Forward email"
-msgstr "Stuur e-mail door"
-
-#: ../../ui/toolbar.glade:63
-msgid "Forward"
-msgstr "Doorsturen"
-
-#: ../../ui/toolbar.glade:88
-msgid "Delete the selected conversation"
-msgstr "Verwijderde geselecteerde bericht"
-
-#: ../../ui/toolbar.glade:89
-msgid "Delete"
-msgstr "Verwijderen"
-
-#. Toggles menu for applying labels to emails.
-#: ../../ui/toolbar.glade:102
-msgid "Move the selected conversation"
-msgstr "Verplaats geselecteerde bericht"
-
-#. Toggles menu for applying labels to emails.
-#: ../../ui/toolbar.glade:117
-msgid "Label the selected conversation"
-msgstr "Label geselecteerde bericht"
-
-#. Toggles menu for marking a message as read/unread or starred/unstarred
-#: ../../ui/toolbar.glade:143
-msgid "Mark email"
-msgstr "Markeer e-mail"
-
-#: ../../ui/toolbar.glade:175
-msgid "Menu"
-msgstr "Menu"
