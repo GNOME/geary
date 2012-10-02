@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-10-02 12:38-0700\n"
+"POT-Creation-Date: 2012-10-02 15:16-0700\n"
 "PO-Revision-Date: 2012-09-07 21:30+0000\n"
 "Last-Translator: anthonmanix <anthon.manix@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,7 +180,7 @@ msgstr "Kp:"
 msgid "Choose a file"
 msgstr "Izberite datoteko"
 
-#: ../../src/client/geary-application.vala:373
+#: ../../src/client/geary-application.vala:374
 msgid "Co_ntinue"
 msgstr "_Nadaljuj"
 
@@ -188,6 +188,7 @@ msgstr "_Nadaljuj"
 msgid "Color"
 msgstr "Barva"
 
+#: ../../src/client/geary-application.vala:27
 #: ../../src/client/notification/libindicate.vala:33
 msgid "Compose Message"
 msgstr "Sestavi sporočilo"
@@ -742,7 +743,7 @@ msgstr "Dobrodošli v Geary."
 msgid "Yahoo! Mail"
 msgstr "Yahoo! Mail"
 
-#: ../../src/client/geary-application.vala:372
+#: ../../src/client/geary-application.vala:373
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -752,7 +753,7 @@ msgstr ""
 "lahko druga oseba na omrežju prebere vaše uporabniško ime in geslo.  Ali ste "
 "prepričani, da želite to storiti?"
 
-#: ../../src/client/geary-application.vala:371
+#: ../../src/client/geary-application.vala:372
 msgid "Your settings are insecure"
 msgstr "Vaše nastavitve niso varne"
 
