@@ -1,7 +1,7 @@
 
 set(TRANSLATED
-    ca_ES
     ca
+    ca_ES
     de
     el_GR
     en_CA
@@ -13,6 +13,7 @@ set(TRANSLATED
     fr
     he
     id
+    it
     km_KH
     nb
     nl_NL
