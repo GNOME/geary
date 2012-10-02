@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-05 12:06-0700\n"
+"POT-Creation-Date: 2012-10-02 12:38-0700\n"
 "PO-Revision-Date: 2012-09-09 05:44+0000\n"
 "Last-Translator: Dianjin Wang <1132321739qq@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,22 +20,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: ../../src/client/ui/composer-window.vala:550
+#: ../../src/client/composer/composer-window.vala:569
 #, c-format
 msgid "\"%s\" already attached for delivery"
 msgstr "“%s”已作为发送附件了"
 
-#: ../../src/client/ui/composer-window.vala:544
+#: ../../src/client/composer/composer-window.vala:563
 #, c-format
 msgid "\"%s\" could not be opened for reading"
 msgstr "“%s”无法打开阅读"
 
-#: ../../src/client/ui/composer-window.vala:525
+#: ../../src/client/composer/composer-window.vala:544
 #, c-format
 msgid "\"%s\" does not exist"
 msgstr "“%s”不存在"
 
-#: ../../src/client/ui/composer-window.vala:531
+#: ../../src/client/composer/composer-window.vala:550
 #, c-format
 msgid "\"%s\" is a folder"
 msgstr "“%s”是一个文件夹"
@@ -101,7 +101,7 @@ msgstr "%p %l:%M"
 msgid "%s wrote:"
 msgstr "%s 写道："
 
-#: ../../src/client/ui/message-viewer.vala:409
+#: ../../src/client/views/conversation-viewer.vala:407
 #, c-format
 msgid "%u conversations selected."
 msgstr "已选中 %u 个对话。"
@@ -113,7 +113,7 @@ msgstr "已选中 %u 个对话。"
 msgid "%x"
 msgstr "%x"
 
-#: ../../src/client/ui/message-list-cell-renderer.vala:115
+#: ../../src/client/views/formatted-conversation-data.vala:233
 msgid "(no subject)"
 msgstr "(无主题)"
 
@@ -121,12 +121,12 @@ msgstr "(无主题)"
 msgid "---------- Forwarded message ----------"
 msgstr "---------- 已转发消息 ----------"
 
-#: ../../src/client/geary-controller.vala:926
+#: ../../src/client/geary-controller.vala:1007
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "名称为“%s”的文件已经存在。您要替换它吗？"
 
-#: ../../src/client/geary-controller.vala:730
+#: ../../src/client/geary-controller.vala:779
 #, c-format
 msgid "About %s"
 msgstr "关于 %s"
@@ -139,22 +139,22 @@ msgstr "全部邮件"
 msgid "Archive the selected conversation"
 msgstr "将选中的对话存档"
 
-#: ../../src/client/geary-controller.vala:912
+#: ../../src/client/geary-controller.vala:993
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "确定要打开“%s”?"
 
-#: ../../src/client/geary-controller.vala:913
+#: ../../src/client/geary-controller.vala:994
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr "如果打开，附件可能会对您的系统造成破坏。仅打开可信任来源的文件。"
 
-#: ../../src/client/ui/message-viewer.vala:496
+#: ../../src/client/views/conversation-viewer.vala:494
 msgid "Bcc:"
 msgstr "密送："
 
-#: ../../ui/composer.glade:440 ../../ui/composer.glade:442
+#: ../../ui/composer.glade:368 ../../ui/composer.glade:370
 msgid "Bold"
 msgstr "粗体"
 
@@ -162,23 +162,23 @@ msgstr "粗体"
 msgid "C_olor"
 msgstr "颜色(_O)"
 
-#: ../../src/client/ui/composer-window.vala:519
+#: ../../src/client/composer/composer-window.vala:538
 msgid "Cannot add attachment"
 msgstr "无法添加附件"
 
-#: ../../src/client/ui/message-viewer.vala:492
+#: ../../src/client/views/conversation-viewer.vala:490
 msgid "Cc:"
 msgstr "抄送："
 
-#: ../../src/client/ui/composer-window.vala:504
+#: ../../src/client/composer/composer-window.vala:523
 msgid "Choose a file"
 msgstr "选择文件"
 
-#: ../../src/client/geary-application.vala:440
+#: ../../src/client/geary-application.vala:373
 msgid "Co_ntinue"
 msgstr "继续(_N)"
 
-#: ../../ui/composer.glade:584 ../../ui/composer.glade:586
+#: ../../ui/composer.glade:512 ../../ui/composer.glade:514
 msgid "Color"
 msgstr "颜色"
 
@@ -187,15 +187,20 @@ msgid "Compose Message"
 msgstr "撰写邮件"
 
 #. Button for creating a new email message
-#: ../../ui/toolbar.glade:13
+#: ../../ui/toolbar.glade:12
 msgid "Compose message"
 msgstr "撰写邮件"
 
-#: ../../src/client/ui/message-viewer.vala:713
+#: ../../ui/preferences.glade:123
+#, fuzzy
+msgid "Composer"
+msgstr "撰写邮件"
+
+#: ../../src/client/views/conversation-viewer.vala:711
 msgid "Copy _Email Address"
 msgstr "复制邮件地址(_E)"
 
-#: ../../src/client/ui/message-viewer.vala:707
+#: ../../src/client/views/conversation-viewer.vala:705
 msgid "Copy _Link"
 msgstr "复制链接(_L)"
 
@@ -207,32 +212,32 @@ msgstr "复制链接(_L)"
 msgid "Copyright 2011-2012 Yorba Foundation"
 msgstr "版权所有 2011-2012 Yorba 基金会"
 
-#: ../../src/client/ui/message-viewer.vala:503
+#: ../../src/client/views/conversation-viewer.vala:501
 msgid "Date:"
 msgstr "日期："
 
-#: ../../src/engine/rfc822/rfc822-utils.vala:74
+#: ../../src/engine/rfc822/rfc822-utils.vala:78
 #, c-format
 msgid "Date: %s\n"
 msgstr "日期：%s\n"
 
-#: ../../ui/toolbar.glade:89
+#: ../../ui/toolbar.glade:159
 msgid "Delete"
 msgstr "删除"
 
-#: ../../ui/toolbar.glade:88
+#: ../../ui/toolbar.glade:157
 msgid "Delete the selected conversation"
 msgstr "删除选中的对话"
 
-#: ../../src/client/geary-application.vala:107
+#: ../../src/client/geary-args.vala:23
 msgid "Display program version"
 msgstr "显示程序版本"
 
-#: ../../src/client/ui/composer-window.vala:478
+#: ../../src/client/composer/composer-window.vala:498
 msgid "Do you want to discard the unsaved message?"
 msgstr "您要舍弃未保存的该邮件吗？"
 
-#: ../../src/client/geary-controller.vala:914
+#: ../../src/client/geary-controller.vala:995
 msgid "Don't _ask me again"
 msgstr "不再询问(_A)"
 
@@ -240,32 +245,36 @@ msgstr "不再询问(_A)"
 msgid "Drafts"
 msgstr "草稿"
 
-#: ../../ui/composer.glade:394
+#: ../../ui/composer.glade:324
 msgid "Drop files here"
 msgstr "将文件托到此处"
 
-#: ../../ui/login.glade:556
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr ""
+
+#: ../../ui/login.glade:557
 msgid "Encr_yption:"
 msgstr "加密(_Y)："
 
-#: ../../ui/login.glade:575
+#: ../../ui/login.glade:576
 msgid "Encrypt_ion:"
 msgstr "加密(_I)："
 
-#: ../../src/client/ui/geary-login.vala:93
+#: ../../src/client/dialogs/login-dialog.vala:93
 msgid "Enter your account information to get started."
 msgstr "首先输入您的帐号信息。"
 
-#: ../../src/client/ui/message-viewer.vala:1468
+#: ../../src/client/views/conversation-viewer.vala:1460
 msgid "Failed to open default text editor."
 msgstr "无法打开默认的文本编辑器。"
 
-#: ../../src/client/geary-application.vala:120
+#: ../../src/client/geary-args.vala:50
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "无法解析命令行参数：%s\n"
 
-#: ../../src/client/ui/composer-window.vala:285
+#: ../../src/client/composer/composer-window.vala:296
 msgid "Fixed width"
 msgstr "等宽"
 
@@ -273,28 +282,28 @@ msgstr "等宽"
 msgid "Font"
 msgstr "字体"
 
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:569
-#: ../../ui/composer.glade:571
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:497
+#: ../../ui/composer.glade:499
 msgid "Font size"
 msgstr "字体大小"
 
-#: ../../ui/composer.glade:554 ../../ui/composer.glade:556
+#: ../../ui/composer.glade:482 ../../ui/composer.glade:484
 msgid "Fonts"
 msgstr "字体"
 
-#: ../../ui/toolbar.glade:63
+#: ../../ui/toolbar.glade:77
 msgid "Forward"
 msgstr "转发"
 
-#: ../../ui/toolbar.glade:61
+#: ../../ui/toolbar.glade:74
 msgid "Forward email"
 msgstr "转发邮件"
 
-#: ../../src/client/ui/message-viewer.vala:481
+#: ../../src/client/views/conversation-viewer.vala:479
 msgid "From:"
 msgstr "发件人："
 
-#: ../../src/engine/rfc822/rfc822-utils.vala:72
+#: ../../src/engine/rfc822/rfc822-utils.vala:74
 #, c-format
 msgid "From: %s\n"
 msgstr "发件人：%s\n"
@@ -316,7 +325,7 @@ msgstr "Gmail"
 msgid "IMAP Credentials"
 msgstr "IMAP 证书"
 
-#: ../../ui/login.glade:262 ../../ui/password-dialog.glade:374
+#: ../../ui/login.glade:263 ../../ui/password-dialog.glade:374
 msgid "IMAP settings"
 msgstr "IMAP 设置"
 
@@ -324,11 +333,11 @@ msgstr "IMAP 设置"
 msgid "Inbox"
 msgstr "收件箱"
 
-#: ../../ui/composer.glade:512 ../../ui/composer.glade:514
+#: ../../ui/composer.glade:440 ../../ui/composer.glade:442
 msgid "Indent"
 msgstr "缩进"
 
-#: ../../ui/composer.glade:455 ../../ui/composer.glade:457
+#: ../../ui/composer.glade:383 ../../ui/composer.glade:385
 msgid "Italic"
 msgstr "斜体"
 
@@ -337,7 +346,7 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: ../../src/client/ui/main-toolbar.vala:29
+#: ../../ui/toolbar.glade:119
 msgid "Label as"
 msgstr "标记为"
 
@@ -346,11 +355,11 @@ msgstr "标记为"
 msgid "Label the selected conversation"
 msgstr "标记选中的对话"
 
-#: ../../src/client/geary-controller.vala:301
+#: ../../src/client/geary-controller.vala:333
 msgid "Labels"
 msgstr "标签"
 
-#: ../../src/client/ui/composer-window.vala:299
+#: ../../src/client/composer/composer-window.vala:310
 msgid "Large"
 msgstr "大"
 
@@ -358,35 +367,40 @@ msgstr "大"
 msgid "Lin_k"
 msgstr "链接(_K)"
 
-#: ../../ui/composer.glade:599 ../../ui/composer.glade:601
+#: ../../ui/composer.glade:527 ../../ui/composer.glade:529
 msgid "Link"
 msgstr "链接"
 
-#: ../../src/client/geary-application.vala:102
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
+#. / It could also be called the IMAP events queue.
+#: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
 msgstr "记录 IMAP 重播队列"
 
-#: ../../src/client/geary-application.vala:100
+#: ../../src/client/geary-args.vala:11
 msgid "Log conversation monitoring"
 msgstr "记录对话监控"
 
-#: ../../src/client/geary-application.vala:105
+#: ../../src/client/geary-args.vala:20
 msgid "Log database queries (generates lots of messages)"
 msgstr "记录数据库查询(产生大量信息)"
 
-#: ../../src/client/geary-application.vala:106
+#. / "Normalization" can also be called "synchronization"
+#: ../../src/client/geary-args.vala:22
 msgid "Log folder normalization"
 msgstr "记录文件夹标准"
 
-#: ../../src/client/geary-application.vala:101
+#: ../../src/client/geary-args.vala:12
 msgid "Log network activity"
 msgstr "记录网络活动"
 
-#: ../../src/client/geary-application.vala:103
+#. / Serialization is how commands and responses are converted into a stream of bytes for
+#. / network transmission
+#: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
 msgstr "记录网络序列"
 
-#: ../../src/client/geary-application.vala:104
+#: ../../src/client/geary-args.vala:19
 msgid "Log periodic activity"
 msgstr "记录周期性活动"
 
@@ -399,63 +413,68 @@ msgstr "MB"
 msgid "Mail Client"
 msgstr "邮件客户端"
 
-#: ../../src/client/ui/main-toolbar.vala:42
+#: ../../ui/toolbar.glade:104
 msgid "Mark"
 msgstr "标记"
 
-#: ../../src/client/geary-controller.vala:175
+#: ../../src/client/geary-controller.vala:185
 msgid "Mark as _read"
 msgstr "标记为已读(_R)"
 
-#: ../../src/client/geary-controller.vala:180
+#: ../../src/client/geary-controller.vala:190
 msgid "Mark as _unread"
 msgstr "标记为未读(_U)"
 
 #. Toggles menu for marking a message as read/unread or starred/unstarred
-#: ../../ui/toolbar.glade:143
+#: ../../ui/toolbar.glade:102
 msgid "Mark email"
 msgstr "标记邮件"
 
-#: ../../src/client/ui/message-list-cell-renderer.vala:77
+#: ../../src/client/views/formatted-conversation-data.vala:9
 msgid "Me"
 msgstr "我"
 
-#: ../../src/client/ui/composer-window.vala:296
+#: ../../src/client/composer/composer-window.vala:307
 msgid "Medium"
 msgstr "中等"
 
-#: ../../ui/toolbar.glade:175
+#: ../../ui/toolbar.glade:186
 msgid "Menu"
 msgstr "菜单"
 
 #. Toggles menu for applying labels to emails.
-#: ../../ui/toolbar.glade:102
+#: ../../ui/toolbar.glade:132
 msgid "Move the selected conversation"
 msgstr "移动选中的对话"
 
-#: ../../src/client/ui/main-toolbar.vala:33
+#: ../../ui/toolbar.glade:134
 msgid "Move to"
 msgstr "移至"
 
-#: ../../ui/login.glade:187
+#: ../../ui/login.glade:188
 msgid "N_ame:"
 msgstr "名称(_A)："
 
-#: ../../src/client/ui/composer-window.vala:9
+#: ../../src/client/composer/composer-window.vala:9
 msgid "New Message"
 msgstr "新邮件"
 
 #: ../../src/client/notification/libindicate.vala:39
+#: ../../src/client/notification/libmessagingmenu.vala:54
 msgid "New Messages"
 msgstr "新邮件"
 
-#: ../../src/client/ui/message-viewer.vala:407
+#: ../../src/client/views/conversation-viewer.vala:405
 msgid "No conversations selected."
 msgstr "未选中对话。"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:46
 msgid "None"
 msgstr "无"
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
+msgstr ""
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:36
@@ -475,15 +494,15 @@ msgstr "其他"
 msgid "Outbox"
 msgstr "已发邮件"
 
-#: ../../src/client/geary-application.vala:99
+#: ../../src/client/geary-args.vala:10
 msgid "Output debugging information"
 msgstr "输出调试信息"
 
-#: ../../ui/login.glade:312
+#: ../../ui/login.glade:313
 msgid "P_ort:"
 msgstr "端口(_O)："
 
-#: ../../ui/login.glade:446
+#: ../../ui/login.glade:447
 msgid "Pass_word:"
 msgstr "密码(_W)："
 
@@ -495,15 +514,15 @@ msgstr "密码："
 msgid "Paste _with formatting"
 msgstr "使用原格式粘贴"
 
-#: ../../src/client/ui/password-dialog.vala:16
+#: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "请输入您的邮件密码"
 
-#: ../../src/client/geary-application.vala:141
+#: ../../src/client/geary-args.vala:43
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "请将评论、建议和问题反馈到："
 
-#: ../../ui/login.glade:393
+#: ../../ui/login.glade:394
 msgid "Por_t:"
 msgstr "端口(_T)："
 
@@ -511,13 +530,17 @@ msgstr "端口(_T)："
 msgid "Port:"
 msgstr "端口："
 
-#: ../../src/client/ui/geary-login.vala:270
+#: ../../src/client/dialogs/login-dialog.vala:270
 msgid "Re_member password"
 msgstr "记住密码(_M)"
 
-#: ../../src/client/ui/geary-login.vala:265
+#: ../../src/client/dialogs/login-dialog.vala:265
 msgid "Re_member passwords"
 msgstr "记住密码(_M)"
+
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr ""
 
 #: ../../ui/password-dialog.glade:314
 msgid "Real name:"
@@ -527,28 +550,28 @@ msgstr "真实姓名："
 msgid "Remember password"
 msgstr "记住密码"
 
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:614
-#: ../../ui/composer.glade:616
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:542
+#: ../../ui/composer.glade:544
 msgid "Remove formatting"
 msgstr "删除格式"
 
-#: ../../ui/toolbar.glade:47
+#: ../../ui/toolbar.glade:60
 msgid "Reply All"
 msgstr "回复全部"
 
-#: ../../ui/toolbar.glade:31
+#: ../../ui/toolbar.glade:43
 msgid "Reply To"
 msgstr "回复给"
 
-#: ../../src/client/ui/message-viewer.vala:942
+#: ../../src/client/views/conversation-viewer.vala:935
 msgid "Reply to _All"
 msgstr "回复全部(_A)"
 
-#: ../../ui/toolbar.glade:45
+#: ../../ui/toolbar.glade:57
 msgid "Reply to all"
 msgstr "回复全部"
 
-#: ../../ui/toolbar.glade:29
+#: ../../ui/toolbar.glade:40
 msgid "Reply to sender"
 msgstr "回复发件人"
 
@@ -556,7 +579,7 @@ msgstr "回复发件人"
 msgid "SMTP Credentials"
 msgstr "SMTP 证书"
 
-#: ../../ui/login.glade:411 ../../ui/password-dialog.glade:477
+#: ../../ui/login.glade:412 ../../ui/password-dialog.glade:477
 msgid "SMTP settings"
 msgstr "SMTP 设置"
 
@@ -564,24 +587,24 @@ msgstr "SMTP 设置"
 msgid "SSL/TLS encryption:"
 msgstr "SSL/TLS 加密："
 
-#: ../../src/client/ui/composer-window.vala:278
+#: ../../src/client/composer/composer-window.vala:289
 msgid "Sans Serif"
 msgstr "Sans Serif"
 
-#: ../../src/client/ui/message-viewer.vala:928
+#: ../../src/client/views/conversation-viewer.vala:921
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "保存附件(_T)..."
 
-#: ../../src/client/ui/message-viewer.vala:909
+#: ../../src/client/views/conversation-viewer.vala:902
 msgid "Save All A_ttachments..."
 msgstr "保存全部附件(_T)..."
 
-#: ../../ui/login.glade:280
+#: ../../ui/login.glade:281
 msgid "Se_rver:"
 msgstr "服务器(_R)："
 
-#: ../../src/client/ui/message-viewer.vala:725
+#: ../../src/client/views/conversation-viewer.vala:718
 msgid "Select _All"
 msgstr "全选(_A)"
 
@@ -593,11 +616,11 @@ msgstr "发送并接收邮件"
 msgid "Sent Mail"
 msgstr "已发邮件"
 
-#: ../../ui/login.glade:376
+#: ../../ui/login.glade:377
 msgid "Ser_ver:"
 msgstr "服务器(_V)："
 
-#: ../../src/client/ui/composer-window.vala:281
+#: ../../src/client/composer/composer-window.vala:292
 msgid "Serif"
 msgstr "Serif"
 
@@ -609,7 +632,11 @@ msgstr "服务器："
 msgid "Service:"
 msgstr "服务："
 
-#: ../../src/client/ui/composer-window.vala:293
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
+msgstr ""
+
+#: ../../src/client/composer/composer-window.vala:304
 msgid "Small"
 msgstr "小"
 
@@ -621,16 +648,12 @@ msgstr "垃圾邮件"
 msgid "Starred"
 msgstr "已加星标"
 
-#: ../../ui/composer.glade:485 ../../ui/composer.glade:487
+#: ../../ui/composer.glade:413 ../../ui/composer.glade:415
 msgid "Strikethrough"
 msgstr "删除线"
 
-#: ../../src/engine/rfc822/rfc822-utils.vala:73
-#, c-format
-msgid "Subject %s\n"
-msgstr "主题 %s\n"
-
-#: ../../src/client/ui/message-viewer.vala:500
+#: ../../src/client/views/conversation-viewer.vala:498
+#: ../../src/engine/rfc822/rfc822-utils.vala:77
 msgid "Subject:"
 msgstr "主题："
 
@@ -639,25 +662,25 @@ msgctxt "Abbreviation for terabyte"
 msgid "TB"
 msgstr "TB"
 
-#: ../../src/client/geary-controller.vala:928
+#: ../../src/client/geary-controller.vala:1009
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "“%s”中已有该文件。替换它将覆盖其内容。"
 
-#: ../../src/client/ui/message-viewer.vala:95
+#: ../../src/client/views/conversation-viewer.vala:95
 msgid "This message contains images. Do you want to show them?"
 msgstr "该邮件包含图像。要显示它们吗？"
 
-#: ../../ui/composer.glade:410
+#: ../../ui/composer.glade:340
 msgid "To add them as attachments"
 msgstr "将它们添加为附件"
 
-#: ../../src/client/ui/message-viewer.vala:488
+#: ../../src/client/views/conversation-viewer.vala:486
 msgid "To:"
 msgstr "收件人："
 
-#: ../../src/engine/rfc822/rfc822-utils.vala:75
+#: ../../src/engine/rfc822/rfc822-utils.vala:81
 #, c-format
 msgid "To: %s\n"
 msgstr "收件人：%s\n"
@@ -666,28 +689,28 @@ msgstr "收件人：%s\n"
 msgid "Trash"
 msgstr "回收站"
 
-#: ../../src/client/geary-controller.vala:190
+#: ../../src/client/geary-controller.vala:200
 msgid "U_nstar"
 msgstr "取消星标(_N)"
 
-#: ../../ui/composer.glade:527 ../../ui/composer.glade:529
+#: ../../ui/composer.glade:455 ../../ui/composer.glade:457
 msgid "Un-indent"
 msgstr "取消缩进"
 
-#: ../../src/client/ui/password-dialog.vala:17
+#: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "无法登陆到邮件服务器"
 
-#: ../../ui/composer.glade:470 ../../ui/composer.glade:472
+#: ../../ui/composer.glade:398 ../../ui/composer.glade:400
 msgid "Underline"
 msgstr "下划线"
 
-#: ../../src/client/geary-application.vala:131
+#: ../../src/client/geary-args.vala:61
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "无法识别的命令行选项“%s”\n"
 
-#: ../../ui/login.glade:429
+#: ../../ui/login.glade:430
 msgid "User_name:"
 msgstr "用户名(_N)："
 
@@ -695,15 +718,11 @@ msgstr "用户名(_N)："
 msgid "Username:"
 msgstr "用户名："
 
-#: ../../src/client/ui/message-viewer.vala:720
-msgid "View _Source"
-msgstr "查看来源(_S)"
-
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
 msgstr "访问 Yorba 网站"
 
-#: ../../src/client/ui/geary-login.vala:93
+#: ../../src/client/dialogs/login-dialog.vala:93
 #, c-format
 msgid "Welcome to Geary."
 msgstr "欢迎使用 Geary。"
@@ -712,7 +731,7 @@ msgstr "欢迎使用 Geary。"
 msgid "Yahoo! Mail"
 msgstr "Yahoo! 邮箱"
 
-#: ../../src/client/geary-application.vala:439
+#: ../../src/client/geary-application.vala:372
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -721,11 +740,11 @@ msgstr ""
 "您的 IMAP 和/或 SMTP 设置没有指定 SSL 或 TLS。这意味着您的用户名和密码可以被"
 "同一网络中的其他人看到。您确定要这样做吗？"
 
-#: ../../src/client/geary-application.vala:438
+#: ../../src/client/geary-application.vala:371
 msgid "Your settings are insecure"
 msgstr "您的设置不安全"
 
-#: ../../src/client/geary-controller.vala:161
+#: ../../src/client/geary-controller.vala:171
 msgid "_About"
 msgstr "关于(_A)"
 
@@ -733,19 +752,19 @@ msgstr "关于(_A)"
 msgid "_Archive"
 msgstr "存档(_A)"
 
-#: ../../src/client/ui/composer-window.vala:506
+#: ../../src/client/composer/composer-window.vala:525
 msgid "_Attach"
 msgstr "附件(_A)"
 
-#: ../../src/client/ui/composer-window.vala:588
+#: ../../ui/composer.glade:618
 msgid "_Attach a file"
 msgstr "添加附件(_A)"
 
-#: ../../src/client/ui/composer-window.vala:587
-msgid "_Attach another file"
-msgstr "添加其他附件(_A)"
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr ""
 
-#: ../../src/client/ui/message-viewer.vala:88
+#: ../../src/client/views/conversation-viewer.vala:88
 msgid "_Cancel"
 msgstr "取消(_C)"
 
@@ -753,7 +772,7 @@ msgstr "取消(_C)"
 msgid "_Center"
 msgstr "居中(_C)"
 
-#: ../../src/client/ui/message-viewer.vala:700
+#: ../../src/client/views/conversation-viewer.vala:698
 msgid "_Copy"
 msgstr "复制(_C)"
 
@@ -765,15 +784,19 @@ msgstr "删除(_D)"
 msgid "_Details"
 msgstr "详细信息(_D)"
 
-#: ../../ui/login.glade:126
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr ""
+
+#: ../../ui/login.glade:127
 msgid "_Email address:"
 msgstr "邮件地址(_E)："
 
-#: ../../src/client/ui/message-viewer.vala:947
+#: ../../src/client/views/conversation-viewer.vala:940
 msgid "_Forward"
 msgstr "转发(_F)"
 
-#: ../../src/client/geary-controller.vala:157
+#: ../../src/client/geary-controller.vala:167
 msgid "_Help"
 msgstr "帮助(_H)"
 
@@ -781,7 +804,7 @@ msgstr "帮助(_H)"
 msgid "_Justify"
 msgstr "两端对齐(_J)"
 
-#: ../../src/client/geary-controller.vala:195
+#: ../../src/client/geary-controller.vala:204
 msgid "_Label"
 msgstr "标签(_L)"
 
@@ -789,36 +812,40 @@ msgstr "标签(_L)"
 msgid "_Left"
 msgstr "左对齐(_L)"
 
-#: ../../src/client/ui/message-viewer.vala:957
+#: ../../src/client/views/conversation-viewer.vala:950
 msgid "_Mark as Read"
 msgstr "标记为已读(_M)"
 
-#: ../../src/client/ui/message-viewer.vala:961
+#: ../../src/client/views/conversation-viewer.vala:954
 msgid "_Mark as Unread"
 msgstr "标记为未读(_M)"
 
-#: ../../src/client/geary-controller.vala:170
+#: ../../src/client/geary-controller.vala:180
 msgid "_Mark as..."
 msgstr "标记为(_M)..."
 
-#: ../../src/client/geary-controller.vala:200
+#: ../../src/client/geary-controller.vala:208
 msgid "_Move"
 msgstr "移动(_M)"
 
-#: ../../src/client/geary-controller.vala:205
+#: ../../src/client/geary-controller.vala:213
 msgid "_New Message"
 msgstr "新邮件(_N)"
 
-#: ../../ui/login.glade:142 ../../ui/login.glade:509
+#: ../../ui/login.glade:143 ../../ui/login.glade:510
 #: ../../ui/password-dialog.glade:84
 msgid "_Password:"
 msgstr "密码(_P)："
 
-#: ../../src/client/geary-controller.vala:153
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr ""
+
+#: ../../src/client/geary-controller.vala:163
 msgid "_Preferences"
 msgstr "首选项(_P)"
 
-#: ../../src/client/geary-controller.vala:165
+#: ../../src/client/geary-controller.vala:175
 msgid "_Quit"
 msgstr "退出(_Q)"
 
@@ -826,11 +853,11 @@ msgstr "退出(_Q)"
 msgid "_Remember password"
 msgstr "记住密码(_R)"
 
-#: ../../src/client/geary-controller.vala:931
+#: ../../src/client/geary-controller.vala:1012
 msgid "_Replace"
 msgstr "替换(_R)"
 
-#: ../../src/client/ui/message-viewer.vala:937
+#: ../../src/client/views/conversation-viewer.vala:930
 msgid "_Reply"
 msgstr "回复(_R)"
 
@@ -838,31 +865,31 @@ msgstr "回复(_R)"
 msgid "_Right"
 msgstr "右对齐(_R)"
 
-#: ../../src/client/ui/message-viewer.vala:904
+#: ../../src/client/views/conversation-viewer.vala:897
 msgid "_Save As..."
 msgstr "另存为(_S)..."
 
-#: ../../ui/composer.glade:171
+#: ../../ui/composer.glade:655
 msgid "_Send"
 msgstr "发送(_S)"
 
-#: ../../ui/login.glade:171
+#: ../../ui/login.glade:172
 msgid "_Service:"
 msgstr "服务(_S)："
 
-#: ../../src/client/ui/message-viewer.vala:88
+#: ../../src/client/views/conversation-viewer.vala:88
 msgid "_Show Images"
 msgstr "显示图像(_S)"
 
-#: ../../src/client/geary-controller.vala:185
+#: ../../src/client/geary-controller.vala:195
 msgid "_Star"
 msgstr "加注星标(_S)"
 
-#: ../../ui/login.glade:492
+#: ../../ui/login.glade:493
 msgid "_Username:"
 msgstr "用户名(_U)："
 
-#: ../../src/client/ui/message-viewer.vala:976
+#: ../../src/client/views/conversation-viewer.vala:969
 msgid "_View Source"
 msgstr "查看来源(_V)"
 
@@ -871,12 +898,22 @@ msgid "bytes"
 msgstr "字节"
 
 #. / Placeholder filename for attachments with no filename.
-#: ../../src/client/ui/message-viewer.vala:1368
-#: ../../src/engine/imap-db/imap-db-folder.vala:1192
+#: ../../src/client/views/conversation-viewer.vala:1361
+#: ../../src/engine/imap-db/imap-db-folder.vala:1211
 msgid "none"
 msgstr "无"
 
-#. / Translator credit for the About dialog
-#: ../../src/client/geary-controller.vala:732
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../../src/client/geary-controller.vala:782
 msgid "translator-credits"
 msgstr "tuhaihe <1132321739qq@gmail.com>, 2012"
+
+#~ msgid "Subject %s\n"
+#~ msgstr "主题 %s\n"
+
+#~ msgid "View _Source"
+#~ msgstr "查看来源(_S)"
+
+#~ msgid "_Attach another file"
+#~ msgstr "添加其他附件(_A)"
