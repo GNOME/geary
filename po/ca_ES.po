@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-10-02 12:38-0700\n"
+"POT-Creation-Date: 2012-10-02 15:16-0700\n"
 "PO-Revision-Date: 2012-09-08 23:29+0000\n"
 "Last-Translator: Alfredo Hernández <aldomann.designs@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,7 +177,7 @@ msgstr "CC:"
 msgid "Choose a file"
 msgstr "Escolliu un fitxer"
 
-#: ../../src/client/geary-application.vala:373
+#: ../../src/client/geary-application.vala:374
 msgid "Co_ntinue"
 msgstr "Co_ntinua"
 
@@ -185,6 +185,7 @@ msgstr "Co_ntinua"
 msgid "Color"
 msgstr "Color"
 
+#: ../../src/client/geary-application.vala:27
 #: ../../src/client/notification/libindicate.vala:33
 msgid "Compose Message"
 msgstr "Redacta un missatge"
@@ -736,7 +737,7 @@ msgstr "Benvingut al Geary."
 msgid "Yahoo! Mail"
 msgstr "Yahoo! Mail"
 
-#: ../../src/client/geary-application.vala:372
+#: ../../src/client/geary-application.vala:373
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -746,7 +747,7 @@ msgstr ""
 "vostre nom d'usuari i contrasenya podrien ser llegits per una altra persona "
 "de la xarxa. Esteu segur que voleu fer això?"
 
-#: ../../src/client/geary-application.vala:371
+#: ../../src/client/geary-application.vala:372
 msgid "Your settings are insecure"
 msgstr "La vostra configuració no és segura"
 

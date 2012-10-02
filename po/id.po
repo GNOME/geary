@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-10-02 12:38-0700\n"
+"POT-Creation-Date: 2012-10-02 15:16-0700\n"
 "PO-Revision-Date: 2012-09-18 09:29+0000\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,7 +177,7 @@ msgstr "Cc:"
 msgid "Choose a file"
 msgstr "Pilih berkas"
 
-#: ../../src/client/geary-application.vala:373
+#: ../../src/client/geary-application.vala:374
 msgid "Co_ntinue"
 msgstr "La_njutkan"
 
@@ -185,6 +185,7 @@ msgstr "La_njutkan"
 msgid "Color"
 msgstr "Warna"
 
+#: ../../src/client/geary-application.vala:27
 #: ../../src/client/notification/libindicate.vala:33
 msgid "Compose Message"
 msgstr "Tulis Surat"
@@ -734,7 +735,7 @@ msgstr "Selamat datang ke Geary."
 msgid "Yahoo! Mail"
 msgstr "Yahoo! Mail"
 
-#: ../../src/client/geary-application.vala:372
+#: ../../src/client/geary-application.vala:373
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -744,7 +745,7 @@ msgstr ""
 "username dan password kamu bisa dibaca orang lain di jaringan ini. Yakin "
 "kamu nggak apa-apa? "
 
-#: ../../src/client/geary-application.vala:371
+#: ../../src/client/geary-application.vala:372
 msgid "Your settings are insecure"
 msgstr "Pengaturan kamu rawan"
 
