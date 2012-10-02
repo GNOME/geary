@@ -1,3 +1,17 @@
+geary (0.2.0-1~precise1) precise; urgency=low
+
+  * Fixed Dovecot-related IMAP issues
+  * Fixed Exim-related SMTP issues
+  * Improved icons
+  * Toolbar improvements
+  * Composer window redesign and bug fixes
+  * Conversation List redesign
+  * Messaging Menu integration
+  * Numerous bug and stability fixes
+
+ -- Jim Nelson <jim@yorba.org>  Mon, 01 Oct 2012 14:56:27 -0700
+
+
 geary (0.1.90-1~precise1) precise; urgency=low
 
   * Support for sending and receiving attachments

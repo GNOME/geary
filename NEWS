@@ -1,3 +1,15 @@
+Geary 0.2.0 - 1 October 2012
+----------------------------
+
+  * Fixed Dovecot-related IMAP issues
+  * Fixed Exim-related SMTP issues
+  * Improved icons
+  * Toolbar improvements
+  * Composer window redesign and bug fixes
+  * Conversation List redesign
+  * Messaging Menu integration
+  * Numerous bug and stability fixes
+
 Geary 0.1.90 - 05 September 2012
 --------------------------------
 
