@@ -1039,6 +1039,7 @@ public class GearyController {
             dialog.confirm_overwrite.connect(on_confirm_overwrite);
         }
         dialog.set_create_folders(true);
+        dialog.set_local_only(false);
         
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
         File destination = File.new_for_path(dialog.get_filename());
