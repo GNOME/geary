@@ -523,6 +523,7 @@ public class ComposerWindow : Gtk.Window {
                 _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
                 Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                 _("_Attach"), Gtk.ResponseType.ACCEPT);
+            dialog.set_local_only(false);
             
             if (dialog.run() == Gtk.ResponseType.ACCEPT)
                 finished = add_attachment(dialog.get_file());
