@@ -355,7 +355,7 @@ endif ()
 
 set(TARGET_GLIB 2.32)
 
-pkg_check_modules(DEPS REQUIRED QUIET
+pkg_check_modules(DEPS REQUIRED
     gthread-2.0
     glib-2.0>=${TARGET_GLIB}.0
     gio-2.0>=2.28.0
