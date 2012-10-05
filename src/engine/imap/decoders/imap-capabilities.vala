@@ -9,6 +9,9 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     public const string COMPRESS = "COMPRESS";
     public const string DEFLATE_SETTING = "DEFLATE";
     
+    public const string NAME_SEPARATOR = " ";
+    public const string? VALUE_SEPARATOR = null;
+    
     public int revision { get; private set; }
     
     /**
@@ -17,7 +20,7 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
      * example).
      */
     public Capabilities(int revision) {
-        base ("=");
+        base (NAME_SEPARATOR, VALUE_SEPARATOR);
         
         this.revision = revision;
     }
