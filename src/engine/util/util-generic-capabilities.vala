@@ -5,7 +5,8 @@
  */
 
 public class Geary.GenericCapabilities : Object {
-    public string separator { get; private set; }
+    public string name_separator { get; private set; }
+    public string? value_separator { get; private set; }
     
     private Gee.HashMultiMap<string, string?> map = new Gee.HashMultiMap<string, string?>(
         String.stri_hash, String.stri_equal, String.nullable_stri_hash, String.nullable_stri_equal);
@@ -13,10 +14,11 @@ public class Geary.GenericCapabilities : Object {
     /**
      * Creates an empty set of capabilities.
      */
-    public GenericCapabilities(string separator) {
-        assert(!String.is_empty(separator));
+    public GenericCapabilities(string name_separator, string? value_separator) {
+        assert(!String.is_empty(name_separator));
         
-        this.separator = separator;
+        this.name_separator = name_separator;
+        this.value_separator = !String.is_empty(value_separator) ? value_separator : null;
     }
     
     public bool is_empty() {
@@ -24,13 +26,30 @@ public class Geary.GenericCapabilities : Object {
     }
     
     public bool parse_and_add_capability(string text) {
-        string[] tokens = text.split(separator, 2);
-        if (tokens.length == 1)
-            add_capability(tokens[0]);
-        else if (tokens.length == 2)
-            add_capability(tokens[0], tokens[1]);
-        else
-            return false;
+        string[] name_values = text.split(name_separator, 2);
+        switch (name_values.length) {
+            case 1:
+                add_capability(name_values[0]);
+            break;
+            
+            case 2:
+                if (value_separator == null) {
+                    add_capability(name_values[0], name_values[1]);
+                } else {
+                    // break up second token for multiple values
+                    string[] values = name_values[1].split(value_separator);
+                    if (values.length <= 1) {
+                        add_capability(name_values[0], name_values[1]);
+                    } else {
+                        foreach (string value in values)
+                            add_capability(name_values[0], value);
+                    }
+                }
+            break;
+            
+            default:
+                return false;
+        }
         
         return true;
     }
@@ -79,7 +98,7 @@ public class Geary.GenericCapabilities : Object {
     
     private void append(StringBuilder builder, string text) {
         if (!String.is_empty(builder.str))
-            builder.append_c(' ');
+            builder.append(String.is_empty(value_separator) ? " " : value_separator);
         
         builder.append(text);
     }
@@ -99,7 +118,7 @@ public class Geary.GenericCapabilities : Object {
                     if (String.is_empty(setting))
                         append(builder, name);
                     else
-                        append(builder, "%s%s%s".printf(name, separator, setting));
+                        append(builder, "\"%s%s%s\"".printf(name, name_separator, setting));
                 }
             }
         }

@@ -11,12 +11,13 @@ public class Geary.Smtp.ClientConnection {
     
     public const uint DEFAULT_TIMEOUT_SEC = 60;
     
+    public Geary.Smtp.Capabilities? capabilities { get; private set; default = null; }
+    
     private Geary.Endpoint endpoint;
     private IOStream? cx = null;
     private SocketConnection? socket_cx = null;
     private DataInputStream? dins = null;
     private DataOutputStream douts = null;
-    private Geary.Smtp.Capabilities? capabilities = null;
     
     public ClientConnection(Geary.Endpoint endpoint) {
         this.endpoint = endpoint;
@@ -207,10 +208,7 @@ public class Geary.Smtp.ClientConnection {
             // save list of caps returned in EHLO command, skipping first line because it's the 
             // EHLO response
             capabilities = new Geary.Smtp.Capabilities();
-            for (int ctr = 1; ctr < response.lines.size; ctr++) {
-                if (!String.is_empty(response.lines[ctr].explanation))
-                    capabilities.add_capability(response.lines[ctr].explanation);
-            }
+            capabilities.add_ehlo_response(response);
         } else {
             string first_response = response.to_string().strip();
             HeloRequest helo = !String.is_empty(fqdn) ? new HeloRequest(fqdn) : new HeloRequest.for_local_address(local_addr);

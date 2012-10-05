@@ -45,11 +45,22 @@ public class Geary.Smtp.ClientSession {
 
         notify_connected(greeting);
 
-        // authenticate if credentials supplied (in almost every case they should be)
-        // TODO: Select an authentication method based on AUTH capabilities line, falling back on
-        // LOGIN or PLAIN if none match or are present
+        // authenticate if credentials supplied (they should be if ESMTP is supported)
         if (creds != null) {
-            Authenticator authenticator = new LoginAuthenticator(creds);
+            // detect which authentication is available, using PLAIN if none found as a hail mary
+            Authenticator? authenticator = null;
+            if (cx.capabilities != null) {
+                if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_PLAIN))
+                    authenticator = new PlainAuthenticator(creds);
+                else if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_LOGIN))
+                    authenticator = new LoginAuthenticator(creds);
+            }
+            
+            if (authenticator == null)
+                authenticator = new PlainAuthenticator(creds);
+            
+            debug("[%s] Using %s authenticator", to_string(), authenticator.to_string());
+            
             Response response = yield cx.authenticate_async(authenticator, cancellable);
             if (!response.code.is_success_completed())
                 throw new SmtpError.AUTHENTICATION_FAILED("Unable to authenticate with %s", to_string());
