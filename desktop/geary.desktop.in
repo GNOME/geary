@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Geary Mail
-GenericName=Mail Client
-Comment=Send and receive email
+_Name=Geary Mail
+_GenericName=Mail Client
+_Comment=Send and receive email
 Icon=geary
 TryExec=geary
 Exec=geary %U
@@ -13,7 +13,7 @@ StartupNotify=true
 Actions=Compose;
 
 [Desktop Action Compose]
-Name=Compose Message
+_Name=Compose Message
 Exec=geary mailto:
 OnlyShowIn=X-Messaging Menu;Unity;
 

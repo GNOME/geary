@@ -1,7 +1,12 @@
 #
-# Install geary.desktop
+# Build and install geary.desktop
 #
-install(FILES geary.desktop DESTINATION /usr/share/applications)
+
+include (FindIntltool)
+if (INTLTOOL_MERGE_FOUND)
+    INTLTOOL_MERGE_DESKTOP (geary po)
+endif (INTLTOOL_MERGE_FOUND)
+
 if (LIBINDICATE_FOUND)
     install(FILES geary DESTINATION /usr/share/indicators/messages/applications)
 endif ()
