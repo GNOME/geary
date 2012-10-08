@@ -18,12 +18,9 @@ void init(string package_name, string program_path, string locale = SYSTEM_LOCAL
     Intl.textdomain(package_name);
 }
 
+// TODO: Geary should be able to use langpacks from the build directory
 private string get_langpack_dir_path(string program_path) {
-    File local_langpack_dir =
-        File.new_for_path(Environment.find_program_in_path(program_path)).get_parent().get_child("locale");
-    
-    return (local_langpack_dir.query_exists(null)) ? local_langpack_dir.get_path() :
-        LANGUAGE_SUPPORT_DIRECTORY;
+    return LANGUAGE_SUPPORT_DIRECTORY;
 }
 
 }
