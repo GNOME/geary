@@ -1,3 +1,16 @@
+geary (0.2.1-1~precise3) precise; urgency=low
+
+  * Save attachments FileChooserDialog now displays network mounts
+  * Adds support for SMTP PLAIN authentication
+  * Installs Italian translation (overlooked in 0.2.0)
+  * Adds three new translations: Czech, Telugu, and Turkish
+  * Preferences dialog and .desktop file now translated
+  * Icon and desktop file cache updated after uninstall
+  * Various translation fixes, including translations not being displayed
+
+ -- Jim Nelson <jim@yorba.org>  Mon, 08 Oct 2012 18:09:18 -0700
+
+
 geary (0.2.0-1~precise1) precise; urgency=low
 
   * Fixed Dovecot-related IMAP issues

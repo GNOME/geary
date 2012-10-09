@@ -1,3 +1,14 @@
+Geary 0.2.1 - 8 October 2012
+----------------------------
+
+  * Save attachments FileChooserDialog now displays network mounts
+  * Adds support for SMTP PLAIN authentication
+  * Installs Italian translation (overlooked in 0.2.0)
+  * Adds three new translations: Czech, Telugu, and Turkish
+  * Preferences dialog and .desktop file now translated
+  * Icon and desktop file cache updated after uninstall
+  * Various translation fixes, including translations not being displayed
+
 Geary 0.2.0 - 1 October 2012
 ----------------------------
 
