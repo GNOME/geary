@@ -1,4 +1,4 @@
-geary (0.2.1-1~precise3) precise; urgency=low
+geary (0.2.1-1~precise5) precise; urgency=low
 
   * Save attachments FileChooserDialog now displays network mounts
   * Adds support for SMTP PLAIN authentication
