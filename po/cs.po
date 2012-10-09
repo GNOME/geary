@@ -5,42 +5,40 @@
 # Jim Nelson <jim@yorba.org>
 # 
 # Translators:
-#   <alperen@elhan.org>, 2012.
-#   <ferhattnctn66@gmail.com>, 2012.
-# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012.
+#   <petr.simacek@gmail.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2012-10-02 15:16-0700\n"
-"PO-Revision-Date: 2012-10-04 14:54+0000\n"
-"Last-Translator: Ferhat Tunctan <ferhattnctn66@gmail.com>\n"
+"PO-Revision-Date: 2012-10-03 07:15+0000\n"
+"Last-Translator: petr.simacek <petr.simacek@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: tr_TR\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: cs\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: ../../src/client/composer/composer-window.vala:569
 #, c-format
 msgid "\"%s\" already attached for delivery"
-msgstr "\"%s\" gönderim için zaten eklendi"
+msgstr "\"%s\" už přiložena pro doručení"
 
 #: ../../src/client/composer/composer-window.vala:563
 #, c-format
 msgid "\"%s\" could not be opened for reading"
-msgstr "\"%s\" okuma için açılamadı"
+msgstr "\"%s\" nemohlo být otevřeno pro čtení"
 
 #: ../../src/client/composer/composer-window.vala:544
 #, c-format
 msgid "\"%s\" does not exist"
-msgstr "\"%s\" bulunmamaktadır."
+msgstr "\"%s\" neexistuje"
 
 #: ../../src/client/composer/composer-window.vala:550
 #, c-format
 msgid "\"%s\" is a folder"
-msgstr "\"%s\" bir klasör"
+msgstr "\"%s\" je složka"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -89,7 +87,9 @@ msgstr "%b %-e"
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
-msgstr[0] "%d yeni mesaj"
+msgstr[0] " %d nová zpráva"
+msgstr[1] " %d nové zprávy"
+msgstr[2] " %d nových zpráv"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -109,12 +109,12 @@ msgstr "%l:%M %P"
 #: ../../src/engine/rfc822/rfc822-utils.vala:44
 #, c-format
 msgid "%s wrote:"
-msgstr "%s yazdı:"
+msgstr "%s napsal:"
 
 #: ../../src/client/views/conversation-viewer.vala:407
 #, c-format
 msgid "%u conversations selected."
-msgstr "%u konuşmalar seçildi."
+msgstr "%u vybraných konverzací."
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -126,128 +126,128 @@ msgstr "%x"
 
 #: ../../src/client/views/formatted-conversation-data.vala:233
 msgid "(no subject)"
-msgstr "(konu yok)"
+msgstr "(bez předmětu)"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:70
 msgid "---------- Forwarded message ----------"
-msgstr "---------- Yönlendirilen ileti ----------"
+msgstr "---------- Přeposlaná zpráva ----------"
 
 #: ../../src/client/geary-controller.vala:1007
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
-msgstr "\"%s\" isimli bir dosya zaten var  Bunu varolanla değiştirmek istiyor musunuz?"
+msgstr "Soubor pojmenovaný \"%s\" už existuje. Chcete ho nahradit?"
 
 #: ../../src/client/geary-controller.vala:779
 #, c-format
 msgid "About %s"
-msgstr "%s hakında"
+msgstr "O %s"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:33
 msgid "All Mail"
-msgstr "Tüm Postalar"
+msgstr "Všechny emaily"
 
 #: ../../src/client/geary-controller.vala:65
 msgid "Archive the selected conversation"
-msgstr "Seçilen konuşmayı arşivle"
+msgstr "Archivovat vybranou konverzaci"
 
 #: ../../src/client/geary-controller.vala:993
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
-msgstr " \"%s\" i açmak istediğinizden emin misiniz?"
+msgstr "Opravdu chcete otevřít \"%s\"?"
 
 #: ../../src/client/geary-controller.vala:994
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from"
 " trusted sources."
-msgstr "Eklerin açılması sisteminizin zarar görmesine neden olabilir.  Yalnızca güvendiğiniz kaynaklardan gelen dosyaları açın."
+msgstr "Příloha by po otevření mohla poškodit váš počítač. Otevírejte pouze soubory z důvěryhodných zdrojů. "
 
 #: ../../src/client/views/conversation-viewer.vala:494
 msgid "Bcc:"
-msgstr "Bcc:"
+msgstr "Skrytá kopie:"
 
 #: ../../src/client/composer/composer-window.vala:538
 msgid "Cannot add attachment"
-msgstr "Eklenti eklenemiyor"
+msgstr "Nelze připojit přílohu"
 
 #: ../../src/client/views/conversation-viewer.vala:490
 msgid "Cc:"
-msgstr "Cc:"
+msgstr "Kopie:"
 
 #: ../../src/client/composer/composer-window.vala:523
 msgid "Choose a file"
-msgstr "Bir dosya seçin"
+msgstr "Vybrat soubor"
 
 #: ../../src/client/geary-application.vala:374
 msgid "Co_ntinue"
-msgstr "Devam_et"
+msgstr "Po_kračovat"
 
 #: ../../src/client/geary-application.vala:27
 #: ../../src/client/notification/libindicate.vala:33
 msgid "Compose Message"
-msgstr "İleti oluştur"
+msgstr "Napsat zprávu"
 
 #: ../../src/client/views/conversation-viewer.vala:711
 msgid "Copy _Email Address"
-msgstr "Kopyala _Eposta Adresi"
+msgstr "Kopírovat _emailovou adresu"
 
 #: ../../src/client/views/conversation-viewer.vala:705
 msgid "Copy _Link"
-msgstr "Kopyala _Bağlantı"
+msgstr "Kopírovat _odkaz"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2012 Yorba Foundation"
-msgstr "Telif Hakkı 2011-2012 Yorba Kuruluşu"
+msgstr "Copyright 2011-2012 Yorba Foundation"
 
 #: ../../src/client/views/conversation-viewer.vala:501
 msgid "Date:"
-msgstr "Tarih:"
+msgstr "Datum:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:78
 #, c-format
 msgid "Date: %s\n"
-msgstr "Tarih: %s\n"
+msgstr "Datum: %s\n"
 
 #: ../../src/client/geary-args.vala:23
 msgid "Display program version"
-msgstr "Uygulama sürümünü göster"
+msgstr "Zobrazit verzi programu"
 
 #: ../../src/client/composer/composer-window.vala:498
 msgid "Do you want to discard the unsaved message?"
-msgstr "Kaydedilmemiş iletiyi iptal etmek istiyor musunuz?"
+msgstr "Chcete se zbavit neuložené zprávy?"
 
 #: ../../src/client/geary-controller.vala:995
 msgid "Don't _ask me again"
-msgstr "Tekrar_sorma"
+msgstr "Neptat_se znovu"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:24
 msgid "Drafts"
-msgstr "Taslaklar"
+msgstr "Koncepty"
 
 #: ../../src/client/dialogs/login-dialog.vala:93
 msgid "Enter your account information to get started."
-msgstr "Başlamak için hesap bilginizi giriniz."
+msgstr "Vyplňte vaše informace o účtu."
 
 #: ../../src/client/views/conversation-viewer.vala:1460
 msgid "Failed to open default text editor."
-msgstr "Varsayılan metin düzenleyici açılamadı."
+msgstr "Nepodařilo se otevřít defaultní textový editor."
 
 #: ../../src/client/geary-args.vala:50
 #, c-format
 msgid "Failed to parse command line options: %s\n"
-msgstr "Komut satırı seçenekleri ayrıştırılamadı: %s\n"
+msgstr "Nepodařilo se zpracovat možnosti příkazového řádku: %s\n"
 
 #: ../../src/client/composer/composer-window.vala:296
 msgid "Fixed width"
-msgstr "Sabit genişlik"
+msgstr "Pevná šířka"
 
 #: ../../src/client/views/conversation-viewer.vala:479
 msgid "From:"
-msgstr "Gönderen:"
+msgstr "Od:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:74
 #, c-format
 msgid "From: %s\n"
-msgstr "Gönderen: %s\n"
+msgstr "Od: %s\n"
 
 #: ../../src/client/util/util-files.vala:22
 msgctxt "Abbreviation for gigabyte"
@@ -256,7 +256,7 @@ msgstr "GB"
 
 #: ../../src/client/geary-application.vala:24
 msgid "Geary Mail"
-msgstr "Geary Posta"
+msgstr "Geary Mail"
 
 #: ../../src/engine/api/geary-service-provider.vala:35
 msgid "Gmail"
@@ -264,7 +264,7 @@ msgstr "Gmail"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:21
 msgid "Inbox"
-msgstr "Gelen Kutusu"
+msgstr "Doručená pošta"
 
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
@@ -273,46 +273,46 @@ msgstr "KB"
 
 #: ../../src/client/geary-controller.vala:333
 msgid "Labels"
-msgstr "Etiketler"
+msgstr "Štítek"
 
 #: ../../src/client/composer/composer-window.vala:310
 msgid "Large"
-msgstr "Büyük"
+msgstr "Velký"
 
 #. / The IMAP replay queue is how changes on the server are replicated on the
 #. client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
-msgstr "IMAP tekrar sırasını kayda al"
+msgstr "Log IMAP přehrání fronty"
 
 #: ../../src/client/geary-args.vala:11
 msgid "Log conversation monitoring"
-msgstr "Sohbet gözetimini kayda al"
+msgstr "Log konverzace sledování"
 
 #: ../../src/client/geary-args.vala:20
 msgid "Log database queries (generates lots of messages)"
-msgstr "Veritabanı sorgularını kayda al (bir çok ileti oluşturur)"
+msgstr "Log databázových dotazů (generuje velké množství zpráv)"
 
 #. / "Normalization" can also be called "synchronization"
 #: ../../src/client/geary-args.vala:22
 msgid "Log folder normalization"
-msgstr "Klasör düzgelemeyi kayda al"
+msgstr "Log normalizace složky"
 
 #: ../../src/client/geary-args.vala:12
 msgid "Log network activity"
-msgstr "Ağ etkinliğini kayda al"
+msgstr "Log aktivity sítě"
 
 #. / Serialization is how commands and responses are converted into a stream
 #. of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
-msgstr "Ağ serileştirmeyi kayda al"
+msgstr "Log síťové serializace"
 
 #: ../../src/client/geary-args.vala:19
 msgid "Log periodic activity"
-msgstr "Dönemsel etkinliği kayda al"
+msgstr "Log opakující se aktivity"
 
 #: ../../src/client/util/util-files.vala:25
 msgctxt "Abbreviation for megabyte"
@@ -321,82 +321,82 @@ msgstr "MB"
 
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
-msgstr "Posta İstemcisi"
+msgstr "Emailový klient"
 
 #: ../../src/client/geary-controller.vala:185
 msgid "Mark as _read"
-msgstr "Okundu _olarak işaretle"
+msgstr "Označit jako _přečtený"
 
 #: ../../src/client/geary-controller.vala:190
 msgid "Mark as _unread"
-msgstr "Okunmadı _olarak işaretle"
+msgstr "Označit jako _nepřečtený"
 
 #: ../../src/client/views/formatted-conversation-data.vala:9
 msgid "Me"
-msgstr "Ben"
+msgstr "Mě"
 
 #: ../../src/client/composer/composer-window.vala:307
 msgid "Medium"
-msgstr "Orta"
+msgstr "Střední"
 
 #: ../../src/client/composer/composer-window.vala:9
 msgid "New Message"
-msgstr "Yeni İleti"
+msgstr "Nová zpráva"
 
 #: ../../src/client/notification/libindicate.vala:39
 #: ../../src/client/notification/libmessagingmenu.vala:54
 msgid "New Messages"
-msgstr "Yeni İletiler"
+msgstr "Nové zprávy"
 
 #: ../../src/client/views/conversation-viewer.vala:405
 msgid "No conversations selected."
-msgstr "Hiçbir görüşme seçilmedi."
+msgstr "Nebyla vybrána žádná konverzace."
 
 #: ../../src/engine/api/geary-special-folder-type.vala:46
 msgid "None"
-msgstr "Hiç"
+msgstr "Žádný"
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:36
 #, c-format
 msgid "On %s, "
-msgstr "%s, 'de"
+msgstr "Na %s, "
 
 #: ../../src/client/notification/notification-bubble.vala:41
 msgid "Open"
-msgstr "Aç"
+msgstr "Otevřít"
 
 #: ../../src/engine/api/geary-service-provider.vala:41
 msgid "Other"
-msgstr "Diğer"
+msgstr "Ostatní"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:42
 msgid "Outbox"
-msgstr "Giden Kutusu"
+msgstr "Odesílané"
 
 #: ../../src/client/geary-args.vala:10
 msgid "Output debugging information"
-msgstr "Çıktı hata ayıklama bilgisi"
+msgstr "Výstupní ladící informace"
 
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
-msgstr "Lütfen eposta şifrenizi girin"
+msgstr "Vložte, prosím, heslo vašeho emailu"
 
 #: ../../src/client/geary-args.vala:43
 msgid "Please report comments, suggestions and bugs to:"
-msgstr "Lütfen yorumlarınızı,  önerilerinizi ve hataları bildirin:"
+msgstr "Prosím oznamte připomínky, návrhy a chyby na:"
 
 #: ../../src/client/dialogs/login-dialog.vala:270
 msgid "Re_member password"
-msgstr "Şifreyi ha_tırla"
+msgstr "Pa_matovat heslo"
 
 #: ../../src/client/dialogs/login-dialog.vala:265
 msgid "Re_member passwords"
-msgstr "Şifreleri ha_tırla"
+msgstr "Pa_matovat hesla"
 
 #: ../../src/client/views/conversation-viewer.vala:935
 msgid "Reply to _All"
-msgstr "Tümüne _Yanıt Ver"
+msgstr "Odpovědět _Všeml"
 
 #: ../../src/client/composer/composer-window.vala:289
 msgid "Sans Serif"
@@ -405,23 +405,25 @@ msgstr "Sans Serif"
 #: ../../src/client/views/conversation-viewer.vala:921
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
-msgstr[0] "E_klentiyi kaydet..."
+msgstr[0] "Uložit P_řílohu"
+msgstr[1] "Uložit P_řílohy"
+msgstr[2] "Uložit P_řílohy"
 
 #: ../../src/client/views/conversation-viewer.vala:902
 msgid "Save All A_ttachments..."
-msgstr "Tüm E_klentileri Kaydet..."
+msgstr "Uložit všechny P_řílohy..."
 
 #: ../../src/client/views/conversation-viewer.vala:718
 msgid "Select _All"
-msgstr "Hepsini _Seç"
+msgstr "Vybrat _Vše"
 
 #: ../../src/client/geary-application.vala:26
 msgid "Send and receive email"
-msgstr "Eposta gönder ve al"
+msgstr "Odesílání a přijímání e-mailů"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:27
 msgid "Sent Mail"
-msgstr "Gönderilmiş Postalar"
+msgstr "Odeslané e-maily"
 
 #: ../../src/client/composer/composer-window.vala:292
 msgid "Serif"
@@ -429,20 +431,20 @@ msgstr "Serif"
 
 #: ../../src/client/composer/composer-window.vala:304
 msgid "Small"
-msgstr "Küçük"
+msgstr "Malý"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:36
 msgid "Spam"
-msgstr "Gereksiz"
+msgstr "Spam"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:30
 msgid "Starred"
-msgstr "Yıldız İşaretli"
+msgstr "Oblíbená"
 
 #: ../../src/client/views/conversation-viewer.vala:498
 #: ../../src/engine/rfc822/rfc822-utils.vala:77
 msgid "Subject:"
-msgstr "Konu:"
+msgstr "Předmět:"
 
 #: ../../src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
@@ -454,46 +456,46 @@ msgstr "TB"
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its "
 "contents."
-msgstr "Dosya \"%s\"'in içinde zaten var.  Bunu varolanla değiştirmek, içeriğini üzerine yazacak."
+msgstr "Soubor už existuje v \"%s\".  Nahrazením přepíšete jeho obsah."
 
 #: ../../src/client/views/conversation-viewer.vala:95
 msgid "This message contains images. Do you want to show them?"
-msgstr "Bu ileti resimler içeriyor. Bunları göstermek istiyor musunuz?"
+msgstr "Tato zpráva obsahuje obrázky. Chcete je zobrazit?"
 
 #: ../../src/client/views/conversation-viewer.vala:486
 msgid "To:"
-msgstr "Kime:"
+msgstr "Komu:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:81
 #, c-format
 msgid "To: %s\n"
-msgstr "Kime: %s\n"
+msgstr "Komu: %s\n"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:39
 msgid "Trash"
-msgstr "Çöp"
+msgstr "Koš"
 
 #: ../../src/client/geary-controller.vala:200
 msgid "U_nstar"
-msgstr "Y_ıldızı Kaldır"
+msgstr "O_debrat hvězdičku"
 
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
-msgstr "Eposta sunucusuna giriş yapılamıyor"
+msgstr "Nelze se přihlásit na e-mailový server"
 
 #: ../../src/client/geary-args.vala:61
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
-msgstr "Tanınmayan komut satırı seçeneği \"%s\"\n"
+msgstr "Nerozpoznaná volba příkazového řádku \"%s\"\n"
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
-msgstr "Yorba web sitesini ziyaret edin"
+msgstr "Navštívit webovou stránku Yorba"
 
 #: ../../src/client/dialogs/login-dialog.vala:93
 #, c-format
 msgid "Welcome to Geary."
-msgstr "Geary'e Hoşgeldiniz."
+msgstr "Vítejte v Geary."
 
 #: ../../src/engine/api/geary-service-provider.vala:38
 msgid "Yahoo! Mail"
@@ -504,99 +506,99 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "IMAP ve/veya SMTP ayarlarınız SSL veya TLS belirtmiyor.  Bunun anlamı kullanıcı adınız ve şifreniz ağdaki başka biri tarafından okunabilir demektir. Bunu yapmak istediğinizden emin misiniz?"
+msgstr "Vaše IMAP a/nebo SMTP nastavení není v režimu SSL nebo TLS. To znamená, že vaše uživatelské jméno a heslo může číst jiná osoba na síti. Opravdu to chcete udělat?"
 
 #: ../../src/client/geary-application.vala:372
 msgid "Your settings are insecure"
-msgstr "Ayarlarınız emniyetsiz"
+msgstr "Vaše nastavení není zabezpečené"
 
 #: ../../src/client/geary-controller.vala:171
 msgid "_About"
-msgstr "_Hakkında"
+msgstr "_O"
 
 #: ../../src/client/geary-controller.vala:64
 msgid "_Archive"
-msgstr "_Arşiv"
+msgstr "_Archiv"
 
 #: ../../src/client/composer/composer-window.vala:525
 msgid "_Attach"
-msgstr "_Ekle"
+msgstr "_Příloha"
 
 #: ../../src/client/views/conversation-viewer.vala:88
 msgid "_Cancel"
-msgstr "_İptal et"
+msgstr "_Zrušit"
 
 #: ../../src/client/views/conversation-viewer.vala:698
 msgid "_Copy"
-msgstr "_Kopyala"
+msgstr "_Kopírovat"
 
 #: ../../src/client/geary-controller.vala:60
 msgid "_Delete"
-msgstr "_Sil"
+msgstr "_Vymazat"
 
 #: ../../src/client/views/conversation-viewer.vala:940
 msgid "_Forward"
-msgstr "_İlet"
+msgstr "_Přeposlat"
 
 #: ../../src/client/geary-controller.vala:167
 msgid "_Help"
-msgstr "_Yardım"
+msgstr "_Pomoc"
 
 #: ../../src/client/geary-controller.vala:204
 msgid "_Label"
-msgstr "_Etiketle"
+msgstr "_Štítek"
 
 #: ../../src/client/views/conversation-viewer.vala:950
 msgid "_Mark as Read"
-msgstr "_Okunmuş olarak işaretle"
+msgstr "_Označit jako přečtené"
 
 #: ../../src/client/views/conversation-viewer.vala:954
 msgid "_Mark as Unread"
-msgstr "_Okunmamış olarak işaretle"
+msgstr "_Označit jako nepřečtené"
 
 #: ../../src/client/geary-controller.vala:180
 msgid "_Mark as..."
-msgstr "_... olarak işaretle"
+msgstr "_Označit jako..."
 
 #: ../../src/client/geary-controller.vala:208
 msgid "_Move"
-msgstr "_Taşı"
+msgstr "_Přesunout"
 
 #: ../../src/client/geary-controller.vala:213
 msgid "_New Message"
-msgstr "_Yeni İleti"
+msgstr "_Nová zpráva"
 
 #: ../../src/client/geary-controller.vala:163
 msgid "_Preferences"
-msgstr "_Tercihler"
+msgstr "_Předvolby"
 
 #: ../../src/client/geary-controller.vala:175
 msgid "_Quit"
-msgstr "_Çık"
+msgstr "_Ukončit"
 
 #: ../../src/client/geary-controller.vala:1012
 msgid "_Replace"
-msgstr "_Değiştir"
+msgstr "_Nahradit"
 
 #: ../../src/client/views/conversation-viewer.vala:930
 msgid "_Reply"
-msgstr "_Yanıtla"
+msgstr "_Odpovědět"
 
 #: ../../src/client/views/conversation-viewer.vala:897
 msgid "_Save As..."
-msgstr "_... Olarak Kaydet"
+msgstr "_Uložit jako..."
 
 #: ../../src/client/views/conversation-viewer.vala:88
 msgid "_Show Images"
-msgstr "_Resimleri Göster"
+msgstr "_Zobrazit obrázky"
 
 #: ../../src/client/geary-controller.vala:195
 msgid "_Star"
-msgstr "_Yıldızla"
+msgstr "_Hvězdička"
 
 #: ../../src/client/views/conversation-viewer.vala:969
 msgid "_View Source"
-msgstr "_Kaynağı Görüntüle"
+msgstr "_Zobrazit zdroj"
 
 #: ../../src/client/util/util-files.vala:16
 msgid "bytes"
@@ -606,137 +608,137 @@ msgstr "bytes"
 #: ../../src/client/views/conversation-viewer.vala:1361
 #: ../../src/engine/imap-db/imap-db-folder.vala:1211
 msgid "none"
-msgstr "hiçbiri"
+msgstr "žádný"
 
 #. / Translators: add your name and email address to receive credit in the
 #. About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
 #: ../../src/client/geary-controller.vala:782
 msgid "translator-credits"
-msgstr "Çeviriyi Hazırlayanlar: \nFerhat TUNÇTAN <ferhattnctn19@yahoo.com.tr>\nYunus Burak TUNÇTAN <buraktunctan@hotmail.com>"
+msgstr "Překladatelé"
 
 #: ../../ui/composer.glade:37
 msgid "_Left"
-msgstr "_Sol"
+msgstr "_Vlevo"
 
 #: ../../ui/composer.glade:43
 msgid "_Right"
-msgstr "_Sağ"
+msgstr "_Vpravo"
 
 #: ../../ui/composer.glade:49
 msgid "_Center"
-msgstr "_Merkez"
+msgstr "_Vycentrovat"
 
 #: ../../ui/composer.glade:55
 msgid "_Justify"
-msgstr "_Doğrula"
+msgstr "_Vyrovnat"
 
 #: ../../ui/composer.glade:61
 msgid "Lin_k"
-msgstr "Bağ_lantı"
+msgstr "Odka_z"
 
 #: ../../ui/composer.glade:68
 msgid "C_olor"
-msgstr "R_enk"
+msgstr "B_arva"
 
 #: ../../ui/composer.glade:75
 msgid "Font"
-msgstr "Yazı Tipi"
+msgstr "Font"
 
 #: ../../ui/composer.glade:99 ../../ui/composer.glade:542
 #: ../../ui/composer.glade:544
 msgid "Remove formatting"
-msgstr "Biçimlendirmeyi kaldır"
+msgstr "Odstranit formátování"
 
 #: ../../ui/composer.glade:106
 msgid "Paste _with formatting"
-msgstr "Biçimlendirme_yle yapıştır"
+msgstr "Vložit _s formátováním"
 
 #: ../../ui/composer.glade:112
 msgid "Copy _link"
-msgstr "Bağlantıyı _kopyala"
+msgstr "Kopírovat _odkaz"
 
 #: ../../ui/composer.glade:141 ../../ui/composer.glade:497
 #: ../../ui/composer.glade:499
 msgid "Font size"
-msgstr "Yazı Tipi büyüklüğü"
+msgstr "Velikost fontu"
 
 #: ../../ui/composer.glade:324
 msgid "Drop files here"
-msgstr "Dosyaları buraya bırak"
+msgstr "Upustit soubory zde"
 
 #: ../../ui/composer.glade:340
 msgid "To add them as attachments"
-msgstr "Onları ek olarak eklemek için"
+msgstr "Chcete-li je přidat jako přílohy"
 
 #: ../../ui/composer.glade:368 ../../ui/composer.glade:370
 msgid "Bold"
-msgstr "Kalın"
+msgstr "Tučné"
 
 #: ../../ui/composer.glade:383 ../../ui/composer.glade:385
 msgid "Italic"
-msgstr "Eğik"
+msgstr "Kurzíva"
 
 #: ../../ui/composer.glade:398 ../../ui/composer.glade:400
 msgid "Underline"
-msgstr "Altı çizili"
+msgstr "Podtržené"
 
 #: ../../ui/composer.glade:413 ../../ui/composer.glade:415
 msgid "Strikethrough"
-msgstr "Ortası çizili"
+msgstr "Přeškrtnuté"
 
 #: ../../ui/composer.glade:440 ../../ui/composer.glade:442
 msgid "Indent"
-msgstr "Paragrafbaşı"
+msgstr "Odsazení"
 
 #: ../../ui/composer.glade:455 ../../ui/composer.glade:457
 msgid "Un-indent"
-msgstr "Girintisiz"
+msgstr "Bez odsazení"
 
 #: ../../ui/composer.glade:482 ../../ui/composer.glade:484
 msgid "Fonts"
-msgstr "Yazı Tipleri"
+msgstr "Fonty"
 
 #: ../../ui/composer.glade:512 ../../ui/composer.glade:514
 msgid "Color"
-msgstr "Renk"
+msgstr "Barva"
 
 #: ../../ui/composer.glade:527 ../../ui/composer.glade:529
 msgid "Link"
-msgstr "Bağlantı"
+msgstr "Odkaz"
 
 #: ../../ui/composer.glade:618
 msgid "_Attach a file"
-msgstr "_Bir dosya ekle"
+msgstr "_Přiložit soubor"
 
 #: ../../ui/composer.glade:655
 msgid "_Send"
-msgstr "_Gönder"
+msgstr "_Odeslat"
 
 #: ../../ui/login.glade:127
 msgid "_Email address:"
-msgstr "_Eposta adresi:"
+msgstr "_Emailová adresa:"
 
 #: ../../ui/login.glade:143 ../../ui/login.glade:510
 #: ../../ui/password-dialog.glade:84
 msgid "_Password:"
-msgstr "_Şifre:"
+msgstr "_Heslo:"
 
 #: ../../ui/login.glade:172
 msgid "_Service:"
-msgstr "_Hizmet:"
+msgstr "_Služba:"
 
 #: ../../ui/login.glade:188
 msgid "N_ame:"
-msgstr "İ_sim:"
+msgstr "J_méno:"
 
 #: ../../ui/login.glade:263 ../../ui/password-dialog.glade:374
 msgid "IMAP settings"
-msgstr "IMAP ayarları"
+msgstr "Nastavení IMAP"
 
 #: ../../ui/login.glade:281
 msgid "Se_rver:"
-msgstr "Su_nucu:"
+msgstr "Se_rver:"
 
 #: ../../ui/login.glade:313
 msgid "P_ort:"
@@ -744,7 +746,7 @@ msgstr "P_ort:"
 
 #: ../../ui/login.glade:377
 msgid "Ser_ver:"
-msgstr "Sun_ucu:"
+msgstr "Ser_ver:"
 
 #: ../../ui/login.glade:394
 msgid "Por_t:"
@@ -752,63 +754,63 @@ msgstr "Por_t:"
 
 #: ../../ui/login.glade:412 ../../ui/password-dialog.glade:477
 msgid "SMTP settings"
-msgstr "SMTP ayarları"
+msgstr "Nastavení SMTP"
 
 #: ../../ui/login.glade:430
 msgid "User_name:"
-msgstr "Kullanıcı_adı:"
+msgstr "Uživatelské_jméno:"
 
 #: ../../ui/login.glade:447
 msgid "Pass_word:"
-msgstr "Şif_re:"
+msgstr "Hes_lo:"
 
 #: ../../ui/login.glade:493
 msgid "_Username:"
-msgstr "_Kullanıcı adı:"
+msgstr "_Uživatelské jméno:"
 
 #: ../../ui/login.glade:557
 msgid "Encr_yption:"
-msgstr "Şif_releme:"
+msgstr "Šifr_ování:"
 
 #: ../../ui/login.glade:576
 msgid "Encrypt_ion:"
-msgstr "Şifre_leme:"
+msgstr "Šifrová_ní:"
 
 #: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:202
 msgid "Username:"
-msgstr "Kullanıcı adı:"
+msgstr "Uživatelské jméno:"
 
 #: ../../ui/password-dialog.glade:129
 msgid "_Remember password"
-msgstr "_Şifreyi hatırla"
+msgstr "_Zapamatovat heslo"
 
 #: ../../ui/password-dialog.glade:151
 msgid "IMAP Credentials"
-msgstr "IMAP Referansı"
+msgstr "IMAP přihlašovací údaje"
 
 #: ../../ui/password-dialog.glade:184
 msgid "SMTP Credentials"
-msgstr "SMTP Referansı"
+msgstr "SMTP přihlašovací údaje"
 
 #: ../../ui/password-dialog.glade:217
 msgid "Password:"
-msgstr "Şifre:"
+msgstr "Heslo:"
 
 #: ../../ui/password-dialog.glade:256
 msgid "Remember password"
-msgstr "Şifreyi hatırla"
+msgstr "Zapamatovat heslo"
 
 #: ../../ui/password-dialog.glade:299
 msgid "Service:"
-msgstr "Hizmet:"
+msgstr "Služba:"
 
 #: ../../ui/password-dialog.glade:314
 msgid "Real name:"
-msgstr "Gerçek isim:"
+msgstr "Skutečné jméno:"
 
 #: ../../ui/password-dialog.glade:392 ../../ui/password-dialog.glade:495
 msgid "Server:"
-msgstr "Sunucu:"
+msgstr "Server:"
 
 #: ../../ui/password-dialog.glade:407 ../../ui/password-dialog.glade:510
 msgid "Port:"
@@ -816,108 +818,108 @@ msgstr "Port:"
 
 #: ../../ui/password-dialog.glade:422 ../../ui/password-dialog.glade:525
 msgid "SSL/TLS encryption:"
-msgstr "SSL/TLS şifrelemesi:"
+msgstr "SSL/TLS šifrování:"
 
 #: ../../ui/password-dialog.glade:588
 msgid "_Details"
-msgstr "_Ayrıntılar"
+msgstr "_Detaily"
 
 #: ../../ui/preferences.glade:57
 msgid "Reading"
-msgstr "Okuyor"
+msgstr "Čtení"
 
 #: ../../ui/preferences.glade:71
 msgid "_Automatically select next message"
-msgstr "_Sıradaki iletiyi otomoatik olarak seç"
+msgstr "_Automaticky vybrat další zprávy"
 
 #: ../../ui/preferences.glade:94
 msgid "_Display message preview"
-msgstr "_İleti önizlemesini göster"
+msgstr "_Zobrazit náhled zprávy"
 
 #: ../../ui/preferences.glade:123
 msgid "Composer"
-msgstr "Yazar"
+msgstr "Editor"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
-msgstr "Yazım _denetimi etkinleştir"
+msgstr "Zapnout _kontrolu pravopisu"
 
 #: ../../ui/preferences.glade:166
 msgid "Notifications"
-msgstr "Bildirimler"
+msgstr "Upozornění"
 
 #: ../../ui/preferences.glade:180
 msgid "_Play notification sounds"
-msgstr "_Bildirim seslerini oynat"
+msgstr "_Přehrát zvuková upozornění"
 
 #: ../../ui/preferences.glade:203
 msgid "Show _notifications for new mail"
-msgstr "Yeni posta için _bildirimleri göster"
+msgstr "Zobrazit _upozornění na nový email"
 
 #. Button for creating a new email message
 #: ../../ui/toolbar.glade:12
 msgid "Compose message"
-msgstr "İleti oluştur"
+msgstr "Napsat zprávu"
 
 #: ../../ui/toolbar.glade:40
 msgid "Reply to sender"
-msgstr "Gönderene yanıt ver"
+msgstr "Odpovědět odesílateli"
 
 #: ../../ui/toolbar.glade:43
 msgid "Reply To"
-msgstr "Yanıt ver"
+msgstr "Odpovědět"
 
 #: ../../ui/toolbar.glade:57
 msgid "Reply to all"
-msgstr "Hepsine yanıt ver"
+msgstr "Odpovědět všem"
 
 #: ../../ui/toolbar.glade:60
 msgid "Reply All"
-msgstr "Hepsini Yanıtla"
+msgstr "Odpovědět všem"
 
 #: ../../ui/toolbar.glade:74
 msgid "Forward email"
-msgstr "Epostayı yönlendir"
+msgstr "Přeposlat email"
 
 #: ../../ui/toolbar.glade:77
 msgid "Forward"
-msgstr "Yönlendir"
+msgstr "Přeposlat"
 
 #. Toggles menu for marking a message as read/unread or starred/unstarred
 #: ../../ui/toolbar.glade:102
 msgid "Mark email"
-msgstr "Epostayı işaretle"
+msgstr "Označit email"
 
 #: ../../ui/toolbar.glade:104
 msgid "Mark"
-msgstr "İşaretle"
+msgstr "Označit"
 
 #. Toggles menu for applying labels to emails.
 #: ../../ui/toolbar.glade:117
 msgid "Label the selected conversation"
-msgstr "Seçili konuşmayı etiketle"
+msgstr "Přidat štítek vybrané konverzaci"
 
 #: ../../ui/toolbar.glade:119
 msgid "Label as"
-msgstr "Olarak etiketle"
+msgstr "Štítek jako"
 
 #. Toggles menu for applying labels to emails.
 #: ../../ui/toolbar.glade:132
 msgid "Move the selected conversation"
-msgstr "Seçili konuşmayı taşı"
+msgstr "Přesunout vybranou konverzaci"
 
 #: ../../ui/toolbar.glade:134
 msgid "Move to"
-msgstr "Taşı"
+msgstr "Přesunout do"
 
 #: ../../ui/toolbar.glade:157
 msgid "Delete the selected conversation"
-msgstr "Seçili konuşmayı sil"
+msgstr "Vymazat vybranou konverzaci"
 
 #: ../../ui/toolbar.glade:159
 msgid "Delete"
-msgstr "Sil"
+msgstr "Vymazat"
 
 #: ../../ui/toolbar.glade:186
 msgid "Menu"
-msgstr "Menü"
+msgstr "Menu"

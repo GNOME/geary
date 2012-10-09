@@ -2,6 +2,7 @@
 set(TRANSLATED
     ca
     ca_ES
+    cs
     de
     el_GR
     en_CA
@@ -24,6 +25,8 @@ set(TRANSLATED
     sl
     sr
     sv
+    te
+    tr
     tr_TR
     uk
     vi

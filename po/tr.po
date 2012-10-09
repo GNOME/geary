@@ -13,13 +13,13 @@ msgstr ""
 "Project-Id-Version: Geary\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2012-10-02 15:16-0700\n"
-"PO-Revision-Date: 2012-10-04 14:54+0000\n"
+"PO-Revision-Date: 2012-10-04 21:16+0000\n"
 "Last-Translator: Ferhat Tunctan <ferhattnctn66@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: tr_TR\n"
+"Language: tr\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ../../src/client/composer/composer-window.vala:569
@@ -824,15 +824,15 @@ msgstr "_Ayrıntılar"
 
 #: ../../ui/preferences.glade:57
 msgid "Reading"
-msgstr "Okuyor"
+msgstr "Okunuyor"
 
 #: ../../ui/preferences.glade:71
 msgid "_Automatically select next message"
-msgstr "_Sıradaki iletiyi otomoatik olarak seç"
+msgstr "_Otomatik olarak bir sonraki mesajı seç"
 
 #: ../../ui/preferences.glade:94
 msgid "_Display message preview"
-msgstr "_İleti önizlemesini göster"
+msgstr "İleti önizlemesini _göster"
 
 #: ../../ui/preferences.glade:123
 msgid "Composer"
@@ -840,7 +840,7 @@ msgstr "Yazar"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
-msgstr "Yazım _denetimi etkinleştir"
+msgstr "_İmla denetimini etkinleştir"
 
 #: ../../ui/preferences.glade:166
 msgid "Notifications"
@@ -848,11 +848,11 @@ msgstr "Bildirimler"
 
 #: ../../ui/preferences.glade:180
 msgid "_Play notification sounds"
-msgstr "_Bildirim seslerini oynat"
+msgstr "Bildirim seslerini _oynat"
 
 #: ../../ui/preferences.glade:203
 msgid "Show _notifications for new mail"
-msgstr "Yeni posta için _bildirimleri göster"
+msgstr "Yeni e-postalar için _bildirimleri göster"
 
 #. Button for creating a new email message
 #: ../../ui/toolbar.glade:12
