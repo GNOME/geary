@@ -12,9 +12,14 @@ all:
 	@$(MAKE) -C $(BUILD_DIR)
 	@cp $(BUILD_BINARIES) .
 
-.PHONY: install uninstall
-install uninstall:
+.PHONY: install
+install:
 	@$(MAKE) -C $(BUILD_DIR) $@
+
+.PHONY: uninstall
+uninstall:
+	@$(MAKE) -C $(BUILD_DIR) $@
+	@$(MAKE) -C $(BUILD_DIR) post-uninstall
 
 .PHONY: pot_file
 pot_file:

@@ -82,6 +82,12 @@ add_custom_target(
 # a depends clause in add_custom_target (which would make it run last).
 add_dependencies(uninstall uninstall-base)
 
+# This gets fired in the root-level Makefile to ensure an post-uninstall cleanup happens after
+# everything has has been removed
+add_custom_target(
+    post-uninstall
+)
+
 # Dist
 # This generates the dist tarballs
 add_custom_target(
