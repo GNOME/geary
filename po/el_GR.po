@@ -3,21 +3,21 @@
 # Copyright 2012 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
 # Jim Nelson <jim@yorba.org>
-#
+# 
 # Translators:
 #   <ioza1964@yahoo.gr>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.2\n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: Geary\n"
+"Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2012-10-02 15:16-0700\n"
-"PO-Revision-Date: 2012-09-24 20:25+0000\n"
+"PO-Revision-Date: 2012-10-02 22:21+0000\n"
 "Last-Translator: ioza1964 <ioza1964@yahoo.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: el_GR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: el_GR\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../../src/client/composer/composer-window.vala:569
@@ -41,38 +41,44 @@ msgid "\"%s\" is a folder"
 msgstr "\"%s\" είναι ένας φάκελος"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/engine/rfc822/rfc822-utils.vala:39
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %b %-e, %Y at %-l:%M %p"
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%b %-e"
@@ -85,13 +91,15 @@ msgstr[0] "%d νέο μήνυμα"
 msgstr[1] "%d νέα μηνύματα"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -108,7 +116,8 @@ msgid "%u conversations selected."
 msgstr "%u συνομιλίες επιλέχθηκαν."
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
+#. format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -147,23 +156,13 @@ msgstr "Είστε βέβαιοι ότι θέλετε να ανοίξετε το
 
 #: ../../src/client/geary-controller.vala:994
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from "
-"trusted sources."
-msgstr ""
-"Τα συνημμένα μπορεί να προκαλέσουν βλάβη στο σύστημά σας, αν ανοιχθούν. "
-"Ανοίξτε αρχεία που προέρχονται μόνο από αξιόπιστες πηγές."
+"Attachments may cause damage to your system if opened.  Only open files from"
+" trusted sources."
+msgstr "Τα συνημμένα μπορεί να προκαλέσουν βλάβη στο σύστημά σας, αν ανοιχθούν. Ανοίξτε αρχεία που προέρχονται μόνο από αξιόπιστες πηγές."
 
 #: ../../src/client/views/conversation-viewer.vala:494
 msgid "Bcc:"
 msgstr "Ιδιαιτ.κοιν:"
-
-#: ../../ui/composer.glade:368 ../../ui/composer.glade:370
-msgid "Bold"
-msgstr "Έντονη γραφή"
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "Χρώμ_α"
 
 #: ../../src/client/composer/composer-window.vala:538
 msgid "Cannot add attachment"
@@ -181,23 +180,9 @@ msgstr "Επιλέξτε ένα αρχείο"
 msgid "Co_ntinue"
 msgstr "Συ_νεχίστε"
 
-#: ../../ui/composer.glade:512 ../../ui/composer.glade:514
-msgid "Color"
-msgstr "Χρώμα"
-
 #: ../../src/client/geary-application.vala:27
 #: ../../src/client/notification/libindicate.vala:33
 msgid "Compose Message"
-msgstr "Σύνθεση μηνύματος"
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:12
-msgid "Compose message"
-msgstr "Συνθέστε μήνυμα"
-
-#: ../../ui/preferences.glade:123
-#, fuzzy
-msgid "Composer"
 msgstr "Σύνθεση μηνύματος"
 
 #: ../../src/client/views/conversation-viewer.vala:711
@@ -207,10 +192,6 @@ msgstr "Αντιγραφή _διεύθυνσης ηλεκτρονικού ταχ
 #: ../../src/client/views/conversation-viewer.vala:705
 msgid "Copy _Link"
 msgstr "Αντιγραφή _σύνδεσης"
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr "Αντιγραφή σ_υνδέσμου"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2012 Yorba Foundation"
@@ -224,14 +205,6 @@ msgstr "Ημερομηνία:"
 #, c-format
 msgid "Date: %s\n"
 msgstr "Ημερομηνία:%s\n"
-
-#: ../../ui/toolbar.glade:159
-msgid "Delete"
-msgstr "Διαγραφή"
-
-#: ../../ui/toolbar.glade:157
-msgid "Delete the selected conversation"
-msgstr "Διαγραφή της επιλεγμένης συνομιλίας"
 
 #: ../../src/client/geary-args.vala:23
 msgid "Display program version"
@@ -249,22 +222,6 @@ msgstr "Μην με _ρωτάτε πάλι"
 msgid "Drafts"
 msgstr "Πρόχειρα"
 
-#: ../../ui/composer.glade:324
-msgid "Drop files here"
-msgstr "Αφήστε τα αρχεία εδώ"
-
-#: ../../ui/preferences.glade:137
-msgid "Enable _spell checking"
-msgstr ""
-
-#: ../../ui/login.glade:557
-msgid "Encr_yption:"
-msgstr "Κρυπ_τογράφηση:"
-
-#: ../../ui/login.glade:576
-msgid "Encrypt_ion:"
-msgstr "Κρυπτογράφ_ηση:"
-
 #: ../../src/client/dialogs/login-dialog.vala:93
 msgid "Enter your account information to get started."
 msgstr "Εισάγετε τα στοιχεία του λογαριασμού σας για να ξεκινήσετε."
@@ -281,27 +238,6 @@ msgstr "Απέτυχε να αναλύσει τις επιλογές της γρ
 #: ../../src/client/composer/composer-window.vala:296
 msgid "Fixed width"
 msgstr "Σταθερό πλάτος"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "Γραμματοσειρά"
-
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:497
-#: ../../ui/composer.glade:499
-msgid "Font size"
-msgstr "Μέγεθος γραμματοσειράς"
-
-#: ../../ui/composer.glade:482 ../../ui/composer.glade:484
-msgid "Fonts"
-msgstr "Γραμματοσειρές"
-
-#: ../../ui/toolbar.glade:77
-msgid "Forward"
-msgstr "Προώθηση"
-
-#: ../../ui/toolbar.glade:74
-msgid "Forward email"
-msgstr "Προώθηση ηλεκτρονικού ταχυδρομείου"
 
 #: ../../src/client/views/conversation-viewer.vala:479
 msgid "From:"
@@ -325,39 +261,14 @@ msgstr "Geary ταχυδρομείο"
 msgid "Gmail"
 msgstr "Gmail"
 
-#: ../../ui/password-dialog.glade:151
-msgid "IMAP Credentials"
-msgstr "Διαπιστευτήρια IMAP"
-
-#: ../../ui/login.glade:263 ../../ui/password-dialog.glade:374
-msgid "IMAP settings"
-msgstr "Ρυθμίσεις IMAP"
-
 #: ../../src/engine/api/geary-special-folder-type.vala:21
 msgid "Inbox"
 msgstr "Εισερχόμενα"
-
-#: ../../ui/composer.glade:440 ../../ui/composer.glade:442
-msgid "Indent"
-msgstr "Εσοχή"
-
-#: ../../ui/composer.glade:383 ../../ui/composer.glade:385
-msgid "Italic"
-msgstr "Πλάγια"
 
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
-
-#: ../../ui/toolbar.glade:119
-msgid "Label as"
-msgstr "Σημειώστε ως"
-
-#. Toggles menu for applying labels to emails.
-#: ../../ui/toolbar.glade:117
-msgid "Label the selected conversation"
-msgstr "Ονομασία της επιλεγμένης συνομιλίας"
 
 #: ../../src/client/geary-controller.vala:333
 msgid "Labels"
@@ -367,15 +278,8 @@ msgstr "Ετικέτες"
 msgid "Large"
 msgstr "Μεγάλο"
 
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr "Σύνδ_εση"
-
-#: ../../ui/composer.glade:527 ../../ui/composer.glade:529
-msgid "Link"
-msgstr "Σύνδεσμος"
-
-#. / The IMAP replay queue is how changes on the server are replicated on the client.
+#. / The IMAP replay queue is how changes on the server are replicated on the
+#. client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
@@ -398,7 +302,8 @@ msgstr "Καταγραφή ομαλοποίησης φάκελου"
 msgid "Log network activity"
 msgstr "Καταγραφή δραστηριότητας του δικτύου"
 
-#. / Serialization is how commands and responses are converted into a stream of bytes for
+#. / Serialization is how commands and responses are converted into a stream
+#. of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
@@ -417,10 +322,6 @@ msgstr "MB"
 msgid "Mail Client"
 msgstr "Πελάτης ταχυδρομείου"
 
-#: ../../ui/toolbar.glade:104
-msgid "Mark"
-msgstr "Σήμανση"
-
 #: ../../src/client/geary-controller.vala:185
 msgid "Mark as _read"
 msgstr "Σήμανση ως ανα_γνωσμένα"
@@ -429,11 +330,6 @@ msgstr "Σήμανση ως ανα_γνωσμένα"
 msgid "Mark as _unread"
 msgstr "Σήμανση ως _μη αναγνωσμένου"
 
-#. Toggles menu for marking a message as read/unread or starred/unstarred
-#: ../../ui/toolbar.glade:102
-msgid "Mark email"
-msgstr "Σήμανση ηλεκτρονικού ταχυδρομείου"
-
 #: ../../src/client/views/formatted-conversation-data.vala:9
 msgid "Me"
 msgstr "Εγώ"
@@ -441,23 +337,6 @@ msgstr "Εγώ"
 #: ../../src/client/composer/composer-window.vala:307
 msgid "Medium"
 msgstr "Μεσαίο"
-
-#: ../../ui/toolbar.glade:186
-msgid "Menu"
-msgstr "Κατάλογος"
-
-#. Toggles menu for applying labels to emails.
-#: ../../ui/toolbar.glade:132
-msgid "Move the selected conversation"
-msgstr "Μεταφορά της επιλεγμένης συνομιλίας"
-
-#: ../../ui/toolbar.glade:134
-msgid "Move to"
-msgstr "Μετακίνηση στην"
-
-#: ../../ui/login.glade:188
-msgid "N_ame:"
-msgstr "Όν_ομα:"
 
 #: ../../src/client/composer/composer-window.vala:9
 msgid "New Message"
@@ -475,10 +354,6 @@ msgstr "Δεν επιλέχθηκαν συνομιλίες."
 #: ../../src/engine/api/geary-special-folder-type.vala:46
 msgid "None"
 msgstr "Kανένας"
-
-#: ../../ui/preferences.glade:166
-msgid "Notifications"
-msgstr ""
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:36
@@ -502,22 +377,6 @@ msgstr "Εξερχόμενα"
 msgid "Output debugging information"
 msgstr "Έξοδος πληροφορίας αποσφαλμάτωσης"
 
-#: ../../ui/login.glade:313
-msgid "P_ort:"
-msgstr "Πόρτ_α:"
-
-#: ../../ui/login.glade:447
-msgid "Pass_word:"
-msgstr "Κ_ωδικός:"
-
-#: ../../ui/password-dialog.glade:217
-msgid "Password:"
-msgstr "Κωδικός:"
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr "Επικόλληση με μορφο_ποίηση"
-
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "Παρακαλώ εισάγετε τον κωδικό πρόσβασης ηλεκτρονικού ταχυδρομείου σας"
@@ -525,14 +384,6 @@ msgstr "Παρακαλώ εισάγετε τον κωδικό πρόσβασης
 #: ../../src/client/geary-args.vala:43
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Παρακαλούμε αναφέρετε σχόλια, προτάσεις και σφάλματα σε:"
-
-#: ../../ui/login.glade:394
-msgid "Por_t:"
-msgstr "Πόρτ_α:"
-
-#: ../../ui/password-dialog.glade:407 ../../ui/password-dialog.glade:510
-msgid "Port:"
-msgstr "Πόρτα:"
 
 #: ../../src/client/dialogs/login-dialog.vala:270
 msgid "Re_member password"
@@ -542,54 +393,9 @@ msgstr "Α_πομνημόνευση κωδικού πρόσβασης"
 msgid "Re_member passwords"
 msgstr " Α_πομνημόνευση κωδικών πρόσβασης"
 
-#: ../../ui/preferences.glade:57
-msgid "Reading"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:314
-msgid "Real name:"
-msgstr "Πραγματικό όνομα:"
-
-#: ../../ui/password-dialog.glade:256
-msgid "Remember password"
-msgstr "_Απομνημόνευση κωδικού πρόσβασης"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:542
-#: ../../ui/composer.glade:544
-msgid "Remove formatting"
-msgstr "Κατάργηση μορφοποίησης"
-
-#: ../../ui/toolbar.glade:60
-msgid "Reply All"
-msgstr "Απάντηση σε όλους"
-
-#: ../../ui/toolbar.glade:43
-msgid "Reply To"
-msgstr "Απάντηση στον"
-
 #: ../../src/client/views/conversation-viewer.vala:935
 msgid "Reply to _All"
 msgstr "Απάντηση σε ό_λους"
-
-#: ../../ui/toolbar.glade:57
-msgid "Reply to all"
-msgstr "Απάντηση σε όλους"
-
-#: ../../ui/toolbar.glade:40
-msgid "Reply to sender"
-msgstr "Απάντηση στον αποστολέα"
-
-#: ../../ui/password-dialog.glade:184
-msgid "SMTP Credentials"
-msgstr "Διαπιστευτήρια SMTP"
-
-#: ../../ui/login.glade:412 ../../ui/password-dialog.glade:477
-msgid "SMTP settings"
-msgstr "Ρυθμίσεις SMTP"
-
-#: ../../ui/password-dialog.glade:422 ../../ui/password-dialog.glade:525
-msgid "SSL/TLS encryption:"
-msgstr "Κρυπτογράφηση SSL/TLS:"
 
 #: ../../src/client/composer/composer-window.vala:289
 msgid "Sans Serif"
@@ -605,10 +411,6 @@ msgstr[1] "Αποθή_κευση όλων των συνημμένων..."
 msgid "Save All A_ttachments..."
 msgstr "Αποθή_κευση όλων των συνημμένων..."
 
-#: ../../ui/login.glade:281
-msgid "Se_rver:"
-msgstr "Δ_ιακομιστής:"
-
 #: ../../src/client/views/conversation-viewer.vala:718
 msgid "Select _All"
 msgstr "Ε_πιλογή όλων"
@@ -621,25 +423,9 @@ msgstr "Αποστολή και λήψη ηλεκτρονικού ταχυδρο
 msgid "Sent Mail"
 msgstr "Απεσταλμένα"
 
-#: ../../ui/login.glade:377
-msgid "Ser_ver:"
-msgstr "Δ_ιακομιστής:"
-
 #: ../../src/client/composer/composer-window.vala:292
 msgid "Serif"
 msgstr "Serif"
-
-#: ../../ui/password-dialog.glade:392 ../../ui/password-dialog.glade:495
-msgid "Server:"
-msgstr "Διακομιστής:"
-
-#: ../../ui/password-dialog.glade:299
-msgid "Service:"
-msgstr "Υπηρεσία:"
-
-#: ../../ui/preferences.glade:203
-msgid "Show _notifications for new mail"
-msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:304
 msgid "Small"
@@ -652,10 +438,6 @@ msgstr "Ανεπιθύμητα"
 #: ../../src/engine/api/geary-special-folder-type.vala:30
 msgid "Starred"
 msgstr "Διακεκριμένα"
-
-#: ../../ui/composer.glade:413 ../../ui/composer.glade:415
-msgid "Strikethrough"
-msgstr "Διαγράμμιση"
 
 #: ../../src/client/views/conversation-viewer.vala:498
 #: ../../src/engine/rfc822/rfc822-utils.vala:77
@@ -670,18 +452,13 @@ msgstr "TB"
 #: ../../src/client/geary-controller.vala:1009
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its contents."
-msgstr ""
-"Το αρχείο υπάρχει ήδη στο \"%s\". Η αντικατάστασή του θα αντικαταστήσει το "
-"περιεχόμενό του."
+"The file already exists in \"%s\".  Replacing it will overwrite its "
+"contents."
+msgstr "Το αρχείο υπάρχει ήδη στο \"%s\". Η αντικατάστασή του θα αντικαταστήσει το περιεχόμενό του."
 
 #: ../../src/client/views/conversation-viewer.vala:95
 msgid "This message contains images. Do you want to show them?"
 msgstr "Αυτό το μήνυμα περιέχει εικόνες. Θέλετε να τις δείξουμε;"
-
-#: ../../ui/composer.glade:340
-msgid "To add them as attachments"
-msgstr "Για να τα προσθέσετε ως συνημμένα"
 
 #: ../../src/client/views/conversation-viewer.vala:486
 msgid "To:"
@@ -700,30 +477,14 @@ msgstr "Άχρηστα"
 msgid "U_nstar"
 msgstr "Κα_τάργηση αστεριού"
 
-#: ../../ui/composer.glade:455 ../../ui/composer.glade:457
-msgid "Un-indent"
-msgstr "Χωρίς-εσοχή"
-
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "Δεν είναι δυνατή η σύνδεση στο διακομιστή ηλεκτρονικού ταχυδρομείου"
-
-#: ../../ui/composer.glade:398 ../../ui/composer.glade:400
-msgid "Underline"
-msgstr "Υπογραμμίζω"
 
 #: ../../src/client/geary-args.vala:61
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Άγνωστος επιλογή γραμμής εντολών επιλογή \"%s\"\n"
-
-#: ../../ui/login.glade:430
-msgid "User_name:"
-msgstr "Όνομα_χρήστη:"
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:202
-msgid "Username:"
-msgstr "Όνομα χρήστη:"
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
@@ -743,11 +504,7 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr ""
-"Οι ρυθμίσεις σας του IMAP και/η του SMTP δεν διευκρινίζουν SSL ή TLS. Αυτό "
-"σημαίνει ότι το όνομα χρήστη και ο κωδικός πρόσβασής σας θα μπορούσε να "
-"διαβαστεί από άλλο άτομο στο δίκτυο. Είστε βέβαιοι ότι θέλετε να το κάνετε "
-"αυτό;"
+msgstr "Οι ρυθμίσεις σας του IMAP και/η του SMTP δεν διευκρινίζουν SSL ή TLS. Αυτό σημαίνει ότι το όνομα χρήστη και ο κωδικός πρόσβασής σας θα μπορούσε να διαβαστεί από άλλο άτομο στο δίκτυο. Είστε βέβαιοι ότι θέλετε να το κάνετε αυτό;"
 
 #: ../../src/client/geary-application.vala:372
 msgid "Your settings are insecure"
@@ -765,21 +522,9 @@ msgstr "_Αρχείο"
 msgid "_Attach"
 msgstr "_Επισυνάψτε"
 
-#: ../../ui/composer.glade:618
-msgid "_Attach a file"
-msgstr "_Επισύναψη αρχείου"
-
-#: ../../ui/preferences.glade:71
-msgid "_Automatically select next message"
-msgstr ""
-
 #: ../../src/client/views/conversation-viewer.vala:88
 msgid "_Cancel"
 msgstr "_Ακύρωση"
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr "_Κέντρο"
 
 #: ../../src/client/views/conversation-viewer.vala:698
 msgid "_Copy"
@@ -789,18 +534,6 @@ msgstr "_Αντιγραφή"
 msgid "_Delete"
 msgstr "_Διαγραφή"
 
-#: ../../ui/password-dialog.glade:588
-msgid "_Details"
-msgstr "_Λεπτομέρειες"
-
-#: ../../ui/preferences.glade:94
-msgid "_Display message preview"
-msgstr ""
-
-#: ../../ui/login.glade:127
-msgid "_Email address:"
-msgstr "Διεύ_θυνση ηλεκτρονικού ταχυδρομείου:"
-
 #: ../../src/client/views/conversation-viewer.vala:940
 msgid "_Forward"
 msgstr "_Μπροστά"
@@ -809,17 +542,9 @@ msgstr "_Μπροστά"
 msgid "_Help"
 msgstr "_Βοήθεια"
 
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr "_Πλήρης στοίχιση"
-
 #: ../../src/client/geary-controller.vala:204
 msgid "_Label"
 msgstr "_Ετικέτα"
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr "_Αριστερά"
 
 #: ../../src/client/views/conversation-viewer.vala:950
 msgid "_Mark as Read"
@@ -841,15 +566,6 @@ msgstr "_Μετακίνηση"
 msgid "_New Message"
 msgstr "_Νέο μύνημα"
 
-#: ../../ui/login.glade:143 ../../ui/login.glade:510
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr "Κ_ωδικός:"
-
-#: ../../ui/preferences.glade:180
-msgid "_Play notification sounds"
-msgstr ""
-
 #: ../../src/client/geary-controller.vala:163
 msgid "_Preferences"
 msgstr "_Προτιμήσεις"
@@ -857,10 +573,6 @@ msgstr "_Προτιμήσεις"
 #: ../../src/client/geary-controller.vala:175
 msgid "_Quit"
 msgstr "_Έξοδος"
-
-#: ../../ui/password-dialog.glade:129
-msgid "_Remember password"
-msgstr "_Απομνημόνευση κωδικού πρόσβασης"
 
 #: ../../src/client/geary-controller.vala:1012
 msgid "_Replace"
@@ -870,21 +582,9 @@ msgstr "_Αντικατάσταση"
 msgid "_Reply"
 msgstr "_Απάντηση"
 
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr "_Δεξιά"
-
 #: ../../src/client/views/conversation-viewer.vala:897
 msgid "_Save As..."
 msgstr "_Αποθήκευση ως..."
-
-#: ../../ui/composer.glade:655
-msgid "_Send"
-msgstr "Α_ποστολή"
-
-#: ../../ui/login.glade:172
-msgid "_Service:"
-msgstr "Υπ_ηρεσία:"
 
 #: ../../src/client/views/conversation-viewer.vala:88
 msgid "_Show Images"
@@ -893,10 +593,6 @@ msgstr "_Δείξτε εικόνες"
 #: ../../src/client/geary-controller.vala:195
 msgid "_Star"
 msgstr "_Αστέρι"
-
-#: ../../ui/login.glade:493
-msgid "_Username:"
-msgstr "Ό_νομα χρήστη:"
 
 #: ../../src/client/views/conversation-viewer.vala:969
 msgid "_View Source"
@@ -912,17 +608,316 @@ msgstr "bytes"
 msgid "none"
 msgstr "Κανένα"
 
-#. / Translators: add your name and email address to receive credit in the About dialog
+#. / Translators: add your name and email address to receive credit in the
+#. About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
 #: ../../src/client/geary-controller.vala:782
 msgid "translator-credits"
 msgstr "πιστώσεις-μεταφραστή"
 
-#~ msgid "Subject %s\n"
-#~ msgstr "Θέμα %s\n"
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr "_Αριστερά"
 
-#~ msgid "View _Source"
-#~ msgstr "Εμ_φάνιση κώδικα"
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr "_Δεξιά"
 
-#~ msgid "_Attach another file"
-#~ msgstr "_Επισύναψη ενός ακόμη αρχείου"
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr "_Κέντρο"
+
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr "_Πλήρης στοίχιση"
+
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr "Σύνδ_εση"
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "Χρώμ_α"
+
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "Γραμματοσειρά"
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:542
+#: ../../ui/composer.glade:544
+msgid "Remove formatting"
+msgstr "Κατάργηση μορφοποίησης"
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr "Επικόλληση με μορφο_ποίηση"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
+msgstr "Αντιγραφή σ_υνδέσμου"
+
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:497
+#: ../../ui/composer.glade:499
+msgid "Font size"
+msgstr "Μέγεθος γραμματοσειράς"
+
+#: ../../ui/composer.glade:324
+msgid "Drop files here"
+msgstr "Αφήστε τα αρχεία εδώ"
+
+#: ../../ui/composer.glade:340
+msgid "To add them as attachments"
+msgstr "Για να τα προσθέσετε ως συνημμένα"
+
+#: ../../ui/composer.glade:368 ../../ui/composer.glade:370
+msgid "Bold"
+msgstr "Έντονη γραφή"
+
+#: ../../ui/composer.glade:383 ../../ui/composer.glade:385
+msgid "Italic"
+msgstr "Πλάγια"
+
+#: ../../ui/composer.glade:398 ../../ui/composer.glade:400
+msgid "Underline"
+msgstr "Υπογραμμίζω"
+
+#: ../../ui/composer.glade:413 ../../ui/composer.glade:415
+msgid "Strikethrough"
+msgstr "Διαγράμμιση"
+
+#: ../../ui/composer.glade:440 ../../ui/composer.glade:442
+msgid "Indent"
+msgstr "Εσοχή"
+
+#: ../../ui/composer.glade:455 ../../ui/composer.glade:457
+msgid "Un-indent"
+msgstr "Χωρίς-εσοχή"
+
+#: ../../ui/composer.glade:482 ../../ui/composer.glade:484
+msgid "Fonts"
+msgstr "Γραμματοσειρές"
+
+#: ../../ui/composer.glade:512 ../../ui/composer.glade:514
+msgid "Color"
+msgstr "Χρώμα"
+
+#: ../../ui/composer.glade:527 ../../ui/composer.glade:529
+msgid "Link"
+msgstr "Σύνδεσμος"
+
+#: ../../ui/composer.glade:618
+msgid "_Attach a file"
+msgstr "_Επισύναψη αρχείου"
+
+#: ../../ui/composer.glade:655
+msgid "_Send"
+msgstr "Α_ποστολή"
+
+#: ../../ui/login.glade:127
+msgid "_Email address:"
+msgstr "Διεύ_θυνση ηλεκτρονικού ταχυδρομείου:"
+
+#: ../../ui/login.glade:143 ../../ui/login.glade:510
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr "Κ_ωδικός:"
+
+#: ../../ui/login.glade:172
+msgid "_Service:"
+msgstr "Υπ_ηρεσία:"
+
+#: ../../ui/login.glade:188
+msgid "N_ame:"
+msgstr "Όν_ομα:"
+
+#: ../../ui/login.glade:263 ../../ui/password-dialog.glade:374
+msgid "IMAP settings"
+msgstr "Ρυθμίσεις IMAP"
+
+#: ../../ui/login.glade:281
+msgid "Se_rver:"
+msgstr "Δ_ιακομιστής:"
+
+#: ../../ui/login.glade:313
+msgid "P_ort:"
+msgstr "Πόρτ_α:"
+
+#: ../../ui/login.glade:377
+msgid "Ser_ver:"
+msgstr "Δ_ιακομιστής:"
+
+#: ../../ui/login.glade:394
+msgid "Por_t:"
+msgstr "Πόρτ_α:"
+
+#: ../../ui/login.glade:412 ../../ui/password-dialog.glade:477
+msgid "SMTP settings"
+msgstr "Ρυθμίσεις SMTP"
+
+#: ../../ui/login.glade:430
+msgid "User_name:"
+msgstr "Όνομα_χρήστη:"
+
+#: ../../ui/login.glade:447
+msgid "Pass_word:"
+msgstr "Κ_ωδικός:"
+
+#: ../../ui/login.glade:493
+msgid "_Username:"
+msgstr "Ό_νομα χρήστη:"
+
+#: ../../ui/login.glade:557
+msgid "Encr_yption:"
+msgstr "Κρυπ_τογράφηση:"
+
+#: ../../ui/login.glade:576
+msgid "Encrypt_ion:"
+msgstr "Κρυπτογράφ_ηση:"
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:202
+msgid "Username:"
+msgstr "Όνομα χρήστη:"
+
+#: ../../ui/password-dialog.glade:129
+msgid "_Remember password"
+msgstr "_Απομνημόνευση κωδικού πρόσβασης"
+
+#: ../../ui/password-dialog.glade:151
+msgid "IMAP Credentials"
+msgstr "Διαπιστευτήρια IMAP"
+
+#: ../../ui/password-dialog.glade:184
+msgid "SMTP Credentials"
+msgstr "Διαπιστευτήρια SMTP"
+
+#: ../../ui/password-dialog.glade:217
+msgid "Password:"
+msgstr "Κωδικός:"
+
+#: ../../ui/password-dialog.glade:256
+msgid "Remember password"
+msgstr "_Απομνημόνευση κωδικού πρόσβασης"
+
+#: ../../ui/password-dialog.glade:299
+msgid "Service:"
+msgstr "Υπηρεσία:"
+
+#: ../../ui/password-dialog.glade:314
+msgid "Real name:"
+msgstr "Πραγματικό όνομα:"
+
+#: ../../ui/password-dialog.glade:392 ../../ui/password-dialog.glade:495
+msgid "Server:"
+msgstr "Διακομιστής:"
+
+#: ../../ui/password-dialog.glade:407 ../../ui/password-dialog.glade:510
+msgid "Port:"
+msgstr "Πόρτα:"
+
+#: ../../ui/password-dialog.glade:422 ../../ui/password-dialog.glade:525
+msgid "SSL/TLS encryption:"
+msgstr "Κρυπτογράφηση SSL/TLS:"
+
+#: ../../ui/password-dialog.glade:588
+msgid "_Details"
+msgstr "_Λεπτομέρειες"
+
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr ""
+
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr ""
+
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr ""
+
+#: ../../ui/preferences.glade:123
+msgid "Composer"
+msgstr ""
+
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr ""
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
+msgstr ""
+
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr ""
+
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
+msgstr ""
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:12
+msgid "Compose message"
+msgstr "Συνθέστε μήνυμα"
+
+#: ../../ui/toolbar.glade:40
+msgid "Reply to sender"
+msgstr "Απάντηση στον αποστολέα"
+
+#: ../../ui/toolbar.glade:43
+msgid "Reply To"
+msgstr "Απάντηση στον"
+
+#: ../../ui/toolbar.glade:57
+msgid "Reply to all"
+msgstr "Απάντηση σε όλους"
+
+#: ../../ui/toolbar.glade:60
+msgid "Reply All"
+msgstr "Απάντηση σε όλους"
+
+#: ../../ui/toolbar.glade:74
+msgid "Forward email"
+msgstr "Προώθηση ηλεκτρονικού ταχυδρομείου"
+
+#: ../../ui/toolbar.glade:77
+msgid "Forward"
+msgstr "Προώθηση"
+
+#. Toggles menu for marking a message as read/unread or starred/unstarred
+#: ../../ui/toolbar.glade:102
+msgid "Mark email"
+msgstr "Σήμανση ηλεκτρονικού ταχυδρομείου"
+
+#: ../../ui/toolbar.glade:104
+msgid "Mark"
+msgstr "Σήμανση"
+
+#. Toggles menu for applying labels to emails.
+#: ../../ui/toolbar.glade:117
+msgid "Label the selected conversation"
+msgstr "Ονομασία της επιλεγμένης συνομιλίας"
+
+#: ../../ui/toolbar.glade:119
+msgid "Label as"
+msgstr "Σημειώστε ως"
+
+#. Toggles menu for applying labels to emails.
+#: ../../ui/toolbar.glade:132
+msgid "Move the selected conversation"
+msgstr "Μεταφορά της επιλεγμένης συνομιλίας"
+
+#: ../../ui/toolbar.glade:134
+msgid "Move to"
+msgstr "Μετακίνηση στην"
+
+#: ../../ui/toolbar.glade:157
+msgid "Delete the selected conversation"
+msgstr "Διαγραφή της επιλεγμένης συνομιλίας"
+
+#: ../../ui/toolbar.glade:159
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: ../../ui/toolbar.glade:186
+msgid "Menu"
+msgstr "Κατάλογος"
