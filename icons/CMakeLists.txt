@@ -44,15 +44,17 @@ if (ICON_UPDATE)
         CODE
             "execute_process (COMMAND gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor)"
         CODE
-            "message (STATUS \"Updating icon cache\")"
+            "message (STATUS \"Updated icon cache in ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor\")"
     )
     
     add_custom_target(
         uninstall-icon-cache
         COMMAND
             gtk-update-icon-cache -t -f ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor
+        COMMENT
+            "Updated icon cache after uninstall in ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor"
     )
     
-    add_dependencies(uninstall uninstall-icon-cache)
+    add_dependencies(post-uninstall uninstall-icon-cache)
 endif ()
 

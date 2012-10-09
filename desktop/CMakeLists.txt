@@ -27,7 +27,7 @@ if (DESKTOP_UPDATE)
             update-desktop-database
     )
     
-    add_dependencies(uninstall uninstall-desktop-update)
+    add_dependencies(post-uninstall uninstall-desktop-update)
 else ()
     install(
         CODE "message (STATUS \"Not updating desktop database\")"
