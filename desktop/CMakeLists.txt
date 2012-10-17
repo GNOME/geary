@@ -5,6 +5,8 @@
 include (FindIntltool)
 if (INTLTOOL_MERGE_FOUND)
     INTLTOOL_MERGE_DESKTOP (geary po)
+else (INTLTOOL_MERGE_FOUND)
+    message (FATAL_ERROR "intltool must be installed to generate .desktop file")
 endif (INTLTOOL_MERGE_FOUND)
 
 if (LIBINDICATE_FOUND)
