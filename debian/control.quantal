@@ -16,7 +16,8 @@ Build-Depends: debhelper (>= 8),
  libsqlite3-dev (>= 3.7.4),
  libgnome-keyring-dev (>= 3.2.2),
  libmessaging-menu-dev (>= 12.10.2),
- libunity-dev (>= 5.12.0)
+ libunity-dev (>= 5.12.0),
+ intltool
 Standards-Version: 3.8.3
 Homepage: http://www.yorba.org
 

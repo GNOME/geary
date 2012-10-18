@@ -1,3 +1,9 @@
+Geary 0.2.2 - 18 October 2012
+-----------------------------
+
+  * Fix PLAIN authentication (failed w/ Yahoo! and other SMTP servers)
+  * Build will fail if intltool not installed (necessary for .desktop)
+
 Geary 0.2.1 - 8 October 2012
 ----------------------------
 

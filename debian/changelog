@@ -1,3 +1,11 @@
+geary (0.2.2+1~precise1) precise; urgency=low
+
+  * Fix PLAIN authentication (failed w/ Yahoo! and other SMTP servers)
+  * Build will fail if intltool not installed (necessary for .desktop)
+
+ -- Jim Nelson <jim@yorba.org>  Thu, 18 Oct 2012 15:38:44 -0700
+
+
 geary (0.2.1-1~precise5) precise; urgency=low
 
   * Save attachments FileChooserDialog now displays network mounts
