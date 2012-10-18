@@ -8,7 +8,7 @@
 # Jiri Grönroos <jiri.gronroos@iki.fi>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.2.1\n"
+"Project-Id-Version: geary-0.2.2\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2012-10-02 15:16-0700\n"
 "PO-Revision-Date: 2012-10-04 12:17+0000\n"
