@@ -243,6 +243,7 @@ public class Geary.Imap.ClientSession {
     public ClientSession(Endpoint imap_endpoint, bool imap_server_pipeline) {
         this.imap_endpoint = imap_endpoint;
         this.imap_server_pipeline = imap_server_pipeline;
+        allow_idle = imap_server_pipeline;
         
         not_connected_err = new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
         
@@ -722,6 +723,9 @@ public class Geary.Imap.ClientSession {
      *
      * This will *not* break a connection out of IDLE mode; a command must be sent as well to force
      * the connection back to de-idled state.
+     *
+     * Note that this overrides other heuristics ClientSession uses about allowing idle, so use
+     * with caution.
      */
     public void allow_idle_when_selected(bool allow_idle) {
         this.allow_idle = allow_idle;
