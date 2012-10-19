@@ -10,12 +10,14 @@ extern string glib_substring(string str, long start_pos, long end_pos);
 
 namespace Geary.String {
 
+public const char EOS = '\0';
+
 public bool is_empty_or_whitespace(string? str) {
-    return (str == null || str[0] == 0 || str.strip()[0] == 0);
+    return (str == null || str[0] == EOS || str.strip()[0] == EOS);
 }
 
 public inline bool is_empty(string? str) {
-    return (str == null || str[0] == 0);
+    return (str == null || str[0] == EOS);
 }
 
 public int ascii_cmp(string a, string b) {
@@ -30,7 +32,7 @@ public int ascii_cmpi(string a, string b) {
         if (diff != 0)
             return diff;
         
-        if (*aptr == '\0')
+        if (*aptr == EOS)
             return 0;
         
         aptr++;

@@ -27,17 +27,32 @@ public class Geary.Smtp.ResponseLine {
         if (line.length < ResponseCode.STRLEN)
             throw new SmtpError.PARSE_ERROR("Line too short: %s", line);
         
-        // Only one of two separators allowed
+        // Only one of two separators allowed, as well as no separator (which means no explanation
+        // and not continued)
+        string? explanation;
         bool continued;
-        if (line[ResponseCode.STRLEN] == NOT_CONTINUED_CHAR)
-            continued = false;
-        else if (line[ResponseCode.STRLEN] == CONTINUED_CHAR)
-            continued = true;
-        else
-            throw new SmtpError.PARSE_ERROR("Invalid separator: %s", line);
+        switch (line[ResponseCode.STRLEN]) {
+            case NOT_CONTINUED_CHAR:
+                explanation = line.substring(ResponseCode.STRLEN + 1, -1);
+                continued = false;
+            break;
+            
+            case String.EOS:
+                explanation = null;
+                continued = false;
+            break;
+            
+            case CONTINUED_CHAR:
+                explanation = explanation = line.substring(ResponseCode.STRLEN + 1, -1);
+                continued = true;
+            break;
+            
+            default:
+                throw new SmtpError.PARSE_ERROR("Invalid response line separator: %s", line);
+        }
         
         return new ResponseLine(new ResponseCode(line.substring(0, ResponseCode.STRLEN)),
-            line.substring(ResponseCode.STRLEN + 1, -1), continued);
+            explanation, continued);
     }
     
     /**
