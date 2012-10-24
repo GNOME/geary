@@ -61,34 +61,6 @@ public class Geary.Smtp.ClientConnection {
         throws Error {
         check_connected();
         
-        switch (endpoint.attempt_starttls(capabilities.has_capability(Capabilities.STARTTLS))) {
-            case Endpoint.AttemptStarttls.YES:
-                Response response = yield transaction_async(new Request(Command.STARTTLS));
-                if (!response.code.is_starttls_ready()) {
-                    throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
-                }
-                
-                // TLS started, lets wrap the connection and shake hands.
-                TlsClientConnection tls_cx = TlsClientConnection.new(cx, socket_cx.get_remote_address());
-                cx = tls_cx;
-                tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
-                set_data_streams(tls_cx);
-                yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
-                
-                // Now that we are on an encrypted line we need to say hello again in order to get the
-                // updated capabilities.
-                yield say_hello_async(cancellable);
-            break;
-            
-            case Endpoint.AttemptStarttls.NO:
-                // do nothing
-            break;
-            
-            case Endpoint.AttemptStarttls.HALT:
-            default:
-                throw new SmtpError.NOT_SUPPORTED("STARTTLS not available for %s", endpoint.to_string());
-        }
-        
         Response response = yield transaction_async(authenticator.initiate(), cancellable);
         
         Logging.debug(Logging.Flag.NETWORK, "[%s] Initiated SMTP %s authentication", to_string(),
@@ -181,10 +153,13 @@ public class Geary.Smtp.ClientConnection {
         
         return response;
     }
-
-    public async Response say_hello_async(Cancellable? cancellable = null) throws Error {
-        check_connected();
-        
+    
+    /**
+     * Sends the appropriate HELO/EHLO command and returns the response of the one that worked.
+     * Also saves the server's capabilities in the capabilties property (overwriting any that may
+     * already be present).
+     */
+    public async Response say_hello_async(Cancellable? cancellable) throws Error {
         // get local address as FQDN to greet server ... note that this merely returns the DHCP address
         // for machines behind a NAT
         InetAddress local_addr = ((InetSocketAddress) socket_cx.get_local_address()).get_address();
@@ -205,8 +180,7 @@ public class Geary.Smtp.ClientConnection {
         EhloRequest ehlo = !String.is_empty(fqdn) ? new EhloRequest(fqdn) : new EhloRequest.for_local_address(local_addr);
         Response response = yield transaction_async(ehlo, cancellable);
         if (response.code.is_success_completed()) {
-            // save list of caps returned in EHLO command, skipping first line because it's the 
-            // EHLO response
+            // save list of caps returned in EHLO command
             capabilities = new Geary.Smtp.Capabilities();
             capabilities.add_ehlo_response(response);
         } else {
@@ -217,6 +191,54 @@ public class Geary.Smtp.ClientConnection {
                 throw new SmtpError.SERVER_ERROR("Refused service: \"%s\" and \"%s\"", first_response,
                     response.to_string().strip());
             }
+        }
+        
+        return response;
+    }
+    
+    /**
+     * Sends the appropriate hello command to the server (EHLO / HELO) and establishes whatever
+     * additional connection features are available (STARTTLS, compression).  For general-purpose
+     * use, this is the preferred method for establishing a session with a server, as it will do
+     * whatever is necessary to ensure quality-of-service and security.
+     *
+     * Note that this does *not* connect to the server; connect_async() should be used before
+     * calling this method.
+     *
+     * Returns the Response of the final hello command (there may be more than one).
+     */
+    public async Response establish_connection_async(Cancellable? cancellable = null) throws Error {
+        check_connected();
+        
+        // issue first HELO/EHLO, which will generate a set of capabiltiies
+        Smtp.Response response = yield say_hello_async(cancellable);
+        
+        // STARTTLS, if required
+        switch (endpoint.attempt_starttls(capabilities.has_capability(Capabilities.STARTTLS))) {
+            case Endpoint.AttemptStarttls.YES:
+                Response starttls_response = yield transaction_async(new Request(Command.STARTTLS));
+                if (!starttls_response.code.is_starttls_ready())
+                    throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
+                
+                // TLS started, lets wrap the connection and shake hands.
+                TlsClientConnection tls_cx = TlsClientConnection.new(cx, socket_cx.get_remote_address());
+                cx = tls_cx;
+                tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
+                set_data_streams(tls_cx);
+                yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
+                
+                // Now that we are on an encrypted line we need to say hello again in order to get the
+                // updated capabilities.
+                response = yield say_hello_async(cancellable);
+            break;
+            
+            case Endpoint.AttemptStarttls.NO:
+                // do nothing
+            break;
+            
+            case Endpoint.AttemptStarttls.HALT:
+            default:
+                throw new SmtpError.NOT_SUPPORTED("STARTTLS not available for %s", endpoint.to_string());
         }
         
         return response;

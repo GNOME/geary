@@ -36,15 +36,15 @@ public class Geary.Smtp.ClientSession {
     public async Greeting? login_async(Credentials? creds, Cancellable? cancellable = null) throws Error {
         if (cx.is_connected())
             throw new SmtpError.ALREADY_CONNECTED("Connection to %s already exists", to_string());
-
+        
         // Greet the SMTP server.
         Greeting? greeting = yield cx.connect_async(cancellable);
         if (greeting == null)
             throw new SmtpError.ALREADY_CONNECTED("Connection to %s already exists", to_string());
-        yield cx.say_hello_async(cancellable);
-
+        yield cx.establish_connection_async(cancellable);
+        
         notify_connected(greeting);
-
+        
         // authenticate if credentials supplied (they should be if ESMTP is supported)
         if (creds != null) {
             // detect which authentication is available, using PLAIN if none found as a hail mary
@@ -70,7 +70,7 @@ public class Geary.Smtp.ClientSession {
         
         return greeting;
     }
-
+    
     public async Response? logout_async(Cancellable? cancellable = null) throws Error {
         Response? response = null;
         try {
