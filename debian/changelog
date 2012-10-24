@@ -1,4 +1,4 @@
-geary (0.2.2+1~precise1) precise; urgency=low
+geary (0.2.2-1~precise1) precise; urgency=low
 
   * Fix PLAIN authentication (failed w/ Yahoo! and other SMTP servers)
   * Build will fail if intltool not installed (necessary for .desktop)
