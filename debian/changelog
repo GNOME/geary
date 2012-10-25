@@ -1,3 +1,10 @@
+geary (0.2.2-2~precise1) precise; urgency=low
+
+  * Updated for daily build PPA.
+
+ -- Jim Nelson <jim@yorba.org>  Thu, 25 Oct 2012 07:41:21 -0700
+
+
 geary (0.2.2-1~precise1) precise; urgency=low
 
   * Fix PLAIN authentication (failed w/ Yahoo! and other SMTP servers)
