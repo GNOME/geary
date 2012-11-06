@@ -216,6 +216,9 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         if (contains(MailboxAttribute.SPECIAL_FOLDER_STARRED))
             return Geary.SpecialFolderType.FLAGGED;
         
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
+            return Geary.SpecialFolderType.IMPORTANT;
+        
         return Geary.SpecialFolderType.NONE;
     }
 }

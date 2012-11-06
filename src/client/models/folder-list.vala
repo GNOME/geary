@@ -51,6 +51,9 @@ public class FolderList : Sidebar.Tree {
                 case Geary.SpecialFolderType.FLAGGED:
                     return new ThemedIcon("starred");
                 
+                case Geary.SpecialFolderType.IMPORTANT:
+                    return new ThemedIcon("task-due");
+                
                 case Geary.SpecialFolderType.ALL_MAIL:
                     return IconFactory.instance.get_custom_icon("mail-archive", IconFactory.ICON_SIDEBAR);
                 

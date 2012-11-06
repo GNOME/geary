@@ -234,6 +234,14 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
         return _xlist_starred;
     } }
     
+    private static MailboxAttribute? _xlist_important = null;
+    public static MailboxAttribute SPECIAL_FOLDER_IMPORTANT { get {
+        if (_xlist_important == null)
+            _xlist_important = new MailboxAttribute("\\Important");
+        
+        return _xlist_important;
+    } }
+    
     public MailboxAttribute(string value) {
         base (value);
     }

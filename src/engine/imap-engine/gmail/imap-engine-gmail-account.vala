@@ -61,6 +61,9 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             path_type_map.set(gmail_root.get_child("Starred"), SpecialFolderType.FLAGGED);
             path_type_map.set(googlemail_root.get_child("Starred"), SpecialFolderType.FLAGGED);
             
+            path_type_map.set(gmail_root.get_child("Important"), SpecialFolderType.IMPORTANT);
+            path_type_map.set(googlemail_root.get_child("Important"), SpecialFolderType.IMPORTANT);
+            
             path_type_map.set(gmail_root.get_child("All Mail"), SpecialFolderType.ALL_MAIL);
             path_type_map.set(googlemail_root.get_child("All Mail"), SpecialFolderType.ALL_MAIL);
             

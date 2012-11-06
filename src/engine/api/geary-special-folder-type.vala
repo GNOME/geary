@@ -10,6 +10,7 @@ public enum Geary.SpecialFolderType {
     DRAFTS,
     SENT,
     FLAGGED,
+    IMPORTANT,
     ALL_MAIL,
     SPAM,
     TRASH,
@@ -28,6 +29,9 @@ public enum Geary.SpecialFolderType {
             
             case FLAGGED:
                 return _("Starred");
+            
+            case IMPORTANT:
+                return _("Important");
             
             case ALL_MAIL:
                 return _("All Mail");
