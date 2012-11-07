@@ -6,6 +6,8 @@
 
 // Wrapper class for GSettings.
 public class Configuration {
+    // TODO: These signals can be removed; anyone needing to know when a configuration value has changed
+    // can use the notify["property-name"] syntax
     public signal void display_preview_changed();
     public signal void spell_check_changed();
     
@@ -22,38 +24,38 @@ public class Configuration {
     private const string WINDOW_HEIGHT_NAME = "window-height";
     public int window_height {
         get { return settings.get_int(WINDOW_HEIGHT_NAME); }
-        set { settings.set_int(WINDOW_HEIGHT_NAME, value); }
+        set { set_int(WINDOW_HEIGHT_NAME, value); }
     }
     
     private const string WINDOW_MAXIMIZE_NAME = "window-maximize";
     public bool window_maximize {
         get { return settings.get_boolean(WINDOW_MAXIMIZE_NAME); }
-        set { settings.set_boolean(WINDOW_MAXIMIZE_NAME, value); }
+        set { set_boolean(WINDOW_MAXIMIZE_NAME, value); }
     }
     
     private const string FOLDER_LIST_PANE_POSITION_NAME = "folder-list-pane-position";
     public int folder_list_pane_position {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_NAME); }
-        set { settings.set_int(FOLDER_LIST_PANE_POSITION_NAME, value); }
+        set { set_int(FOLDER_LIST_PANE_POSITION_NAME, value); }
     }
     
     private const string MESSAGES_PANE_POSITION_NAME = "messages-pane-position";
     public int messages_pane_position {
         get { return settings.get_int(MESSAGES_PANE_POSITION_NAME); }
-        set { settings.set_int(MESSAGES_PANE_POSITION_NAME, value); }
+        set { set_int(MESSAGES_PANE_POSITION_NAME, value); }
     }
     
     private const string AUTOSELECT_NAME = "autoselect";
     public bool autoselect {
         get { return settings.get_boolean(AUTOSELECT_NAME); }
-        set { settings.set_boolean(AUTOSELECT_NAME, value); }
+        set { set_boolean(AUTOSELECT_NAME, value); }
     }
     
     private const string DISPLAY_PREVIEW_NAME = "display-preview";
     public bool display_preview {
         get { return settings.get_boolean(DISPLAY_PREVIEW_NAME); }
         set {
-            settings.set_boolean(DISPLAY_PREVIEW_NAME, value);
+            set_boolean(DISPLAY_PREVIEW_NAME, value);
             display_preview_changed(); 
         }
     }
@@ -62,7 +64,7 @@ public class Configuration {
     public bool spell_check {
         get { return settings.get_boolean(SPELL_CHECK_NAME); }
         set {
-            settings.set_boolean(SPELL_CHECK_NAME, value);
+            set_boolean(SPELL_CHECK_NAME, value);
             spell_check_changed();
         }
     }
@@ -71,7 +73,7 @@ public class Configuration {
     public bool play_sounds {
         get { return settings.get_boolean(PLAY_SOUNDS_NAME); }
         set {
-            settings.set_boolean(PLAY_SOUNDS_NAME, value);
+            set_boolean(PLAY_SOUNDS_NAME, value);
         }
     }
 
@@ -79,7 +81,7 @@ public class Configuration {
     public bool show_notifications {
         get { return settings.get_boolean(SHOW_NOTIFICATIONS_NAME); }
         set {
-            settings.set_boolean(SHOW_NOTIFICATIONS_NAME, value);
+            set_boolean(SHOW_NOTIFICATIONS_NAME, value);
         }
     }
     
@@ -108,7 +110,7 @@ public class Configuration {
     private const string ASK_OPEN_ATTACHMENT = "ask-open-attachment";
     public bool ask_open_attachment {
         get { return settings.get_boolean(ASK_OPEN_ATTACHMENT); }
-        set { settings.set_boolean(ASK_OPEN_ATTACHMENT, value); }
+        set { set_boolean(ASK_OPEN_ATTACHMENT, value); }
     }
     
     // Creates a configuration object.
@@ -133,6 +135,20 @@ public class Configuration {
             // is to be found.
             GLib.Environment.set_variable("GSETTINGS_SCHEMA_DIR", schema_dir, true);
         }
+    }
+    
+    private void set_boolean(string name, bool value) {
+        if (!settings.set_boolean(name, value))
+            complain(name, value.to_string());
+    }
+    
+    private void set_int(string name, int value) {
+        if (!settings.set_int(name, value))
+            complain(name, value.to_string());
+    }
+    
+    private void complain(string name, string value) {
+        message("Unable to set configuration value %s = %s", name, value);
     }
 }
 
