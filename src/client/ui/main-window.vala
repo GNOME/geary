@@ -14,9 +14,9 @@ public class MainWindow : Gtk.Window {
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     
-    private int window_width;
-    private int window_height;
-    private bool window_maximized;
+    public int window_width { get; set; }
+    public int window_height { get; set; }
+    public bool window_maximized { get; set; }
 
 #if HAVE_LIBGRANITE
     private Granite.Widgets.SidebarPaned folder_paned = new Granite.Widgets.SidebarPaned();
@@ -27,12 +27,22 @@ public class MainWindow : Gtk.Window {
 #endif
 
     private Gtk.Spinner spinner = new Gtk.Spinner();
-    private bool is_shown = false;
     
     public MainWindow() {
         title = GearyApplication.NAME;
         
         conversation_list_view = new ConversationListView(conversation_list_store);
+        
+        // This code both loads AND saves the pane positions with live
+        // updating. This is more resilient against crashes because
+        // the value in dconf changes *immediately*, and stays saved
+        // in the event of a crash.
+        Configuration config = GearyApplication.instance.config;
+        config.bind(Configuration.FOLDER_LIST_PANE_POSITION_NAME, folder_paned, "position");
+        config.bind(Configuration.MESSAGES_PANE_POSITION_NAME, conversations_paned, "position");
+        config.bind(Configuration.WINDOW_WIDTH_NAME, this, "window-width");
+        config.bind(Configuration.WINDOW_HEIGHT_NAME, this, "window-height");
+        config.bind(Configuration.WINDOW_MAXIMIZE_NAME, this, "window-maximized");
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
@@ -51,26 +61,7 @@ public class MainWindow : Gtk.Window {
         if (GearyApplication.instance.config.window_maximize)
             maximize();
         
-        folder_paned.position = GearyApplication.instance.config.folder_list_pane_position;
-        conversations_paned.position = GearyApplication.instance.config.messages_pane_position;
-        
         base.show_all();
-        is_shown = true;
-    }
-    
-    public override void destroy() {
-        if (is_shown) {
-            // Save window dimensions.
-            GearyApplication.instance.config.window_width = window_width;
-            GearyApplication.instance.config.window_height = window_height;
-            GearyApplication.instance.config.window_maximize = window_maximized;
-            
-            // Save pane positions.
-            GearyApplication.instance.config.folder_list_pane_position = folder_paned.position;
-            GearyApplication.instance.config.messages_pane_position = conversations_paned.position;
-        }
-        
-        base.destroy();
     }
     
     private bool on_delete_event() {
@@ -82,8 +73,14 @@ public class MainWindow : Gtk.Window {
     public override bool configure_event(Gdk.EventConfigure event) {
         // Get window dimensions.
         window_maximized = (get_window().get_state() == Gdk.WindowState.MAXIMIZED);
-        if (!window_maximized)
-            get_size(out window_width, out window_height);
+        if (!window_maximized) {
+            int width, height;
+            get_size(out width, out height);
+            
+            // can't use properties as out variables
+            window_width = width;
+            window_height = height;
+        }
         
         return base.configure_event(event);
     }

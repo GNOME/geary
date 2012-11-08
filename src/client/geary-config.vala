@@ -15,34 +15,29 @@ public class Configuration {
     private Settings gnome_interface;
     private Settings? indicator_datetime;
     
-    private const string WINDOW_WIDTH_NAME = "window-width";
+    public const string WINDOW_WIDTH_NAME = "window-width";
     public int window_width {
         get { return settings.get_int(WINDOW_WIDTH_NAME); }
-        set { settings.set_int(WINDOW_WIDTH_NAME, value); }
     }
     
-    private const string WINDOW_HEIGHT_NAME = "window-height";
+    public const string WINDOW_HEIGHT_NAME = "window-height";
     public int window_height {
         get { return settings.get_int(WINDOW_HEIGHT_NAME); }
-        set { set_int(WINDOW_HEIGHT_NAME, value); }
     }
     
-    private const string WINDOW_MAXIMIZE_NAME = "window-maximize";
+    public const string WINDOW_MAXIMIZE_NAME = "window-maximize";
     public bool window_maximize {
         get { return settings.get_boolean(WINDOW_MAXIMIZE_NAME); }
-        set { set_boolean(WINDOW_MAXIMIZE_NAME, value); }
     }
     
-    private const string FOLDER_LIST_PANE_POSITION_NAME = "folder-list-pane-position";
+    public const string FOLDER_LIST_PANE_POSITION_NAME = "folder-list-pane-position";
     public int folder_list_pane_position {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_NAME); }
-        set { set_int(FOLDER_LIST_PANE_POSITION_NAME, value); }
     }
     
-    private const string MESSAGES_PANE_POSITION_NAME = "messages-pane-position";
+    public const string MESSAGES_PANE_POSITION_NAME = "messages-pane-position";
     public int messages_pane_position {
         get { return settings.get_int(MESSAGES_PANE_POSITION_NAME); }
-        set { set_int(MESSAGES_PANE_POSITION_NAME, value); }
     }
     
     private const string AUTOSELECT_NAME = "autoselect";
@@ -137,18 +132,14 @@ public class Configuration {
         }
     }
     
+    public void bind (string key, Object object, string property,
+        SettingsBindFlags flags = SettingsBindFlags.DEFAULT) {
+        settings.bind(key, object, property, flags);
+    }
+    
     private void set_boolean(string name, bool value) {
         if (!settings.set_boolean(name, value))
-            complain(name, value.to_string());
-    }
-    
-    private void set_int(string name, int value) {
-        if (!settings.set_int(name, value))
-            complain(name, value.to_string());
-    }
-    
-    private void complain(string name, string value) {
-        message("Unable to set configuration value %s = %s", name, value);
+            message("Unable to set configuration value %s = %s", name, value.to_string());
     }
 }
 
