@@ -673,9 +673,14 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_login_failed(uint state, uint event, void *user) {
-        login_failed();
+        // don't fire signals inside state transition handlers
+        fsm.do_post_transition(on_signal_login_failed);
         
         return State.NOAUTH;
+    }
+    
+    private void on_signal_login_failed() {
+        login_failed();
     }
     
     //
@@ -813,7 +818,7 @@ public class Geary.Imap.ClientSession {
     }
     
     public bool supports_idle() {
-        return get_capabilities().has_capability("idle");
+        return get_capabilities().has_capability(Capabilities.IDLE);
     }
     
     //
@@ -1128,7 +1133,9 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_disconnected(uint state, uint event) {
-        drop_connection();
+        // don't do inside signal handler -- although today drop_connection() doesn't fire signals or call
+        // callbacks, it could in the future
+        fsm.do_post_transition(on_drop_connection);
         
         // although we could go to the DISCONNECTED state, that implies the object can be reused ...
         // while possible, that requires all state (not just the FSM) be reset at this point, and
@@ -1136,6 +1143,10 @@ public class Geary.Imap.ClientSession {
         // instantiate a new one
         
         return State.BROKEN;
+    }
+    
+    private void on_drop_connection() {
+        drop_connection();
     }
     
     //
