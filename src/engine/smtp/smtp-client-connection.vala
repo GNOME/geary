@@ -220,12 +220,10 @@ public class Geary.Smtp.ClientConnection {
                 if (!starttls_response.code.is_starttls_ready())
                     throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
                 
-                // TLS started, lets wrap the connection and shake hands.
-                TlsClientConnection tls_cx = TlsClientConnection.new(cx, socket_cx.get_remote_address());
+                TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx,
+                    socket_cx.get_remote_address(), cancellable);
                 cx = tls_cx;
-                tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
                 set_data_streams(tls_cx);
-                yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
                 
                 // Now that we are on an encrypted line we need to say hello again in order to get the
                 // updated capabilities.
@@ -243,7 +241,7 @@ public class Geary.Smtp.ClientConnection {
         
         return response;
     }
-
+    
     public async Response quit_async(Cancellable? cancellable = null) throws Error {
         capabilities = null;
         return yield transaction_async(new Request(Command.QUIT), cancellable);

@@ -401,13 +401,10 @@ public class Geary.Imap.ClientConnection {
         yield close_channels_async(cancellable);
         
         // wrap connection with TLS connection
-        TlsClientConnection tls_cx = TlsClientConnection.new(cx, cx.get_remote_address());
-        tls_cx.set_validation_flags(TlsCertificateFlags.UNKNOWN_CA);
+        TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx,
+            cx.get_remote_address(), cancellable);
         
         ios = tls_cx;
-        
-        // do the handshake
-        yield tls_cx.handshake_async(Priority.DEFAULT, cancellable);
         
         // re-open Serializer/Deserializer with the new streams
         yield open_channels_async(cancellable);
