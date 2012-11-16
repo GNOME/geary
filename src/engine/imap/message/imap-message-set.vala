@@ -28,12 +28,28 @@ public class Geary.Imap.MessageSet {
         MessageSet.uid(((Geary.Imap.EmailIdentifier) email_id).uid);
     }
     
-    public MessageSet.range(int low_msg_num, int count) {
+    public MessageSet.range_by_count(int low_msg_num, int count) {
         assert(low_msg_num > 0);
         assert(count > 0);
         
         value = (count > 1)
             ? "%d:%d".printf(low_msg_num, low_msg_num + count - 1)
+            : "%d".printf(low_msg_num);
+    }
+    
+    public MessageSet.range_by_first_last(int low_msg_num, int high_msg_num) {
+        assert(low_msg_num > 0);
+        assert(high_msg_num > 0);
+        
+        // correct range problems (i.e. last before first)
+        if (low_msg_num > high_msg_num) {
+            int swap = low_msg_num;
+            low_msg_num = high_msg_num;
+            high_msg_num = swap;
+        }
+        
+        value = (low_msg_num != high_msg_num)
+            ? "%d:%d".printf(low_msg_num, high_msg_num)
             : "%d".printf(low_msg_num);
     }
     

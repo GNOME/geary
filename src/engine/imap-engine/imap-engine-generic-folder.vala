@@ -630,7 +630,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
-            Imap.MessageSet msg_set = new Imap.MessageSet.range_to_highest(remote_count + 1);
+            Imap.MessageSet msg_set = new Imap.MessageSet.range_by_first_last(remote_count + 1,
+                new_remote_count);
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
                 msg_set, ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
             if (list != null && list.size > 0) {
@@ -1102,7 +1103,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
             // as fields for duplicate detection
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
-                new Imap.MessageSet.range(high, prefetch_count),
+                new Imap.MessageSet.range_by_count(high, prefetch_count),
                 ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, cancellable);
             if (list == null || list.size != prefetch_count) {
                 throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",
