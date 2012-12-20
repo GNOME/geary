@@ -79,8 +79,7 @@ public class Geary.Smtp.ClientConnection {
             if (data == null || data.length == 0)
                 data = DataFormat.CANCEL_AUTHENTICATION.data;
             
-            Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Challenge: %s <%ldb>", to_string(),
-                Geary.String.uint8_to_string(data), data.length);
+            Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Challenge recvd", to_string());
             
             yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
             douts.put_string(DataFormat.LINE_TERMINATOR);
