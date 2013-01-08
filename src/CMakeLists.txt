@@ -376,7 +376,7 @@ set(ENGINE_PACKAGES
 )
 
 set(CLIENT_PACKAGES
-    gtk+-3.0 gnome-keyring-1 webkitgtk-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 gnome-keyring-1 WebKit-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -414,6 +414,7 @@ add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/vapi
+    --metadatadir=${CMAKE_SOURCE_DIR}/metadata
     --target-glib=${TARGET_GLIB}
     --thread
     --enable-checking

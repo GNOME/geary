@@ -106,9 +106,9 @@ public class ConversationViewer : Object {
         web_view.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.resource_request_starting.connect(on_resource_request_starting);
+        web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         
         WebKit.WebSettings settings = new WebKit.WebSettings();
-        settings.enable_default_context_menu = false;
         settings.enable_scripts = false;
         settings.enable_java_applet = false;
         settings.enable_plugins = false;
