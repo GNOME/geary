@@ -119,7 +119,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     
     private string? get_full_address(Gtk.TreeIter iter) {
         Geary.Contact? contact = get_contact(iter);
-        return contact == null ? null : contact.get_rfc822_address().get_full_address();
+        return contact == null ? null : contact.get_rfc822_address().to_rfc822_string();
     }
     
     private bool completion_match_func(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
