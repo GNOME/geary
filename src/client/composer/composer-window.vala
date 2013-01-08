@@ -511,9 +511,22 @@ public class ComposerWindow : Gtk.Window {
             destroy();
     }
     
+    private bool should_send() {
+        if (Geary.String.is_empty(subject.strip()) ||
+            ((Geary.String.is_empty(get_text()) && attachment_files.size == 0))) {
+            ConfirmationDialog dialog = new ConfirmationDialog(this,
+                _("Send message with an empty subject and/or body?"), null, Gtk.Stock.OK);
+            if (dialog.run() != Gtk.ResponseType.OK)
+                return false;
+        }
+        return true;
+    }
+    
     private void on_send() {
-        linkify_document(editor.get_dom_document());
-        send(this);
+        if (should_send()) {
+            linkify_document(editor.get_dom_document());
+            send(this);
+        }
     }
     
     private void on_add_attachment_button_clicked() {
