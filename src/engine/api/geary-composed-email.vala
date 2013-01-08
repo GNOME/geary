@@ -55,6 +55,8 @@ public class Geary.ComposedEmail : Object {
             Geary.RFC822.Utils.quote_email_for_reply(source, false)));
         body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
             Geary.RFC822.Utils.quote_email_for_reply(source, true)));
+        
+        add_attachments_from_source(source);
     }
     
     public ComposedEmail.as_reply_all(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -71,6 +73,8 @@ public class Geary.ComposedEmail : Object {
             Geary.RFC822.Utils.quote_email_for_reply(source, false)));
         body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
             Geary.RFC822.Utils.quote_email_for_reply(source, true)));
+        
+        add_attachments_from_source(source);
     }
     
     public ComposedEmail.as_forward(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -82,8 +86,18 @@ public class Geary.ComposedEmail : Object {
             Geary.RFC822.Utils.quote_email_for_forward(source, false)));
         body_html = new RFC822.Text(new Geary.Memory.StringBuffer("\n\n" +
             Geary.RFC822.Utils.quote_email_for_forward(source, true)));
+        
+        add_attachments_from_source(source);
     }
-
+    
+    private void add_attachments_from_source(Geary.Email source) {
+        foreach (Geary.Attachment attachment in source.attachments) {
+            File? attachment_file = File.new_for_path(attachment.filepath);
+            if (attachment_file != null)
+                attachment_files.add(attachment_file);
+        }
+    }
+    
     public ComposedEmail.from_mailto(string mailto, RFC822.MailboxAddresses default_from) {
         DateTime date = new DateTime.now_local();
         RFC822.MailboxAddresses from = default_from; 
