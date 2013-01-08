@@ -530,18 +530,25 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_add_attachment_button_clicked() {
-        bool finished = false;
+        bool finished = true;
         do {
             Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
                 _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
                 Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                 _("_Attach"), Gtk.ResponseType.ACCEPT);
             dialog.set_local_only(false);
+            dialog.set_select_multiple(true);
             
-            if (dialog.run() == Gtk.ResponseType.ACCEPT)
-                finished = add_attachment(dialog.get_file());
-            else
+            if (dialog.run() == Gtk.ResponseType.ACCEPT) {
+                foreach (File file in dialog.get_files()) {
+                    if (!add_attachment(file)) {
+                        finished = false;
+                        break;
+                    }
+                }
+            } else {
                 finished = true;
+            }
             
             dialog.destroy();
         } while (!finished);
