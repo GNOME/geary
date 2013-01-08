@@ -38,8 +38,18 @@ public class FormattedConversationData : Object {
             if (key == normalized_account_key)
                 return get_as_markup(ME);
             
-            // Using simplified algorithm: first name as delimited by a space
-            string[] tokens = address.get_short_address().strip().split(" ", 2);
+            string short_address = address.get_short_address().strip();
+            
+            if (", " in short_address) {
+                // assume address is in Last, First format
+                string[] tokens = short_address.split(", ", 2);
+                short_address = tokens[1].strip();
+                if (Geary.String.is_empty(short_address))
+                    return get_full_markup(normalized_account_key);
+            }
+            
+            // use first name as delimited by a space
+            string[] tokens = short_address.split(" ", 2);
             if (tokens.length < 1)
                 return get_full_markup(normalized_account_key);
             
