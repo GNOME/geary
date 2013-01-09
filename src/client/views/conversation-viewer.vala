@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class ConversationViewer : Object {
+public class ConversationViewer : Gtk.Box {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
@@ -15,17 +15,9 @@ public class ConversationViewer : Object {
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
     
-    public const string USER_CSS = "user-message.css";
-    
     private const int ATTACHMENT_PREVIEW_SIZE = 50;
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
-    private const string STYLE_NAME = "STYLE";
-    
-    private const string[] always_loaded_prefixes = {
-        "http://www.gravatar.com/avatar/",
-        "data:"
-    };
     
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
@@ -52,17 +44,11 @@ public class ConversationViewer : Object {
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
     
-    // The content area contains all of the message-viewer's widgets.
-    public Gtk.Widget content_area { get; private set; }
-    
     // The HTML viewer to view the emails.
-    public WebKit.WebView web_view { get; private set; }
+    public ConversationWebView web_view { get; private set; }
     
     // The Info Bar to be shown when an external image is blocked.
     public Gtk.InfoBar external_images_info_bar { get; private set; }
-    
-    // HTML element that contains message DIVs.
-    private WebKit.DOM.HTMLDivElement container;
     
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
@@ -76,13 +62,11 @@ public class ConversationViewer : Object {
     private Gtk.Menu? context_menu = null;
     private Gtk.Menu? message_menu = null;
     private Gtk.Menu? attachment_menu = null;
-    private FileMonitor? user_style_monitor = null;
     private weak Geary.Folder? current_folder = null;
     private Geary.AccountSettings? current_settings = null;
-    private bool load_external_images = false;
     
     public ConversationViewer() {
-        Gtk.Box box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
         external_images_info_bar = new Gtk.InfoBar.with_buttons(
             _("_Show Images"), Gtk.ResponseType.OK, _("_Cancel"), Gtk.ResponseType.CANCEL);
@@ -96,28 +80,15 @@ public class ConversationViewer : Object {
             external_images_info_bar_content_area.add(label);
             label.show_all();
         }
-        box.pack_start(external_images_info_bar, false, false);
-    
+        pack_start(external_images_info_bar, false, false);
+        
         web_view = new ConversationWebView();
         
-        web_view.set_border_width(0);
-        
-        web_view.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
-        web_view.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         web_view.hovering_over_link.connect(on_hovering_over_link);
-        web_view.resource_request_starting.connect(on_resource_request_starting);
         web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         
-        WebKit.WebSettings settings = new WebKit.WebSettings();
-        settings.enable_scripts = false;
-        settings.enable_java_applet = false;
-        settings.enable_plugins = false;
-        web_view.settings = settings;
-        
-        // Load the HTML into WebKit.
-        web_view.load_finished.connect(on_load_finished);
-        string html_text = GearyApplication.instance.read_theme_file("message-viewer.html") ?? "";
-        web_view.load_string(html_text, "text/html", "UTF8", "");
+        web_view.image_load_requested.connect(on_image_load_requested);
+        web_view.link_selected.connect((link) => { link_selected(link); });
         
         Gtk.ScrolledWindow conversation_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -132,228 +103,16 @@ public class ConversationViewer : Object {
         message_overlay_label.valign = Gtk.Align.END;
         message_overlay.add_overlay(message_overlay_label);
         
-        box.pack_start(message_overlay);
-        content_area = box;
+        pack_start(message_overlay);
+    }
+    
+    private void on_image_load_requested() {
+        external_images_info_bar.show();
     }
     
     private void on_external_images_info_bar_response(Gtk.InfoBar sender, int response_id) {
-        set_load_external_images(response_id == Gtk.ResponseType.OK);
+        web_view.set_load_external_images(response_id == Gtk.ResponseType.OK);
         sender.hide();
-    }
-    
-    private void on_load_finished(WebKit.WebFrame frame) {
-        // Load the style.
-        try {
-            WebKit.DOM.Document document = web_view.get_dom_document();
-            WebKit.DOM.Element style_element = document.create_element(STYLE_NAME);
-
-            string css_text = GearyApplication.instance.read_theme_file("message-viewer.css") ?? "";
-            WebKit.DOM.Text text_node = document.create_text_node(css_text);
-            style_element.append_child(text_node);
-
-            WebKit.DOM.HTMLHeadElement head_element = document.get_head();
-            head_element.append_child(style_element);
-        } catch (Error error) {
-            debug("Unable to load message-viewer document from files: %s", error.message);
-        }
-
-        load_user_style();
-
-        // Grab the HTML container.
-        WebKit.DOM.Element? _container = web_view.get_dom_document().get_element_by_id("message_container");
-        assert(_container != null);
-        container = _container as WebKit.DOM.HTMLDivElement;
-        assert(container != null);
-
-        // Load the icons.
-        set_icon_src("#email_template .menu .icon", "go-down");
-        set_icon_src("#email_template .starred .icon", "starred");
-        set_icon_src("#email_template .unstarred .icon", "non-starred-grey");
-        set_icon_src("#email_template .attachment.icon", "mail-attachment");
-    }
-    
-    private void on_resource_request_starting(WebKit.WebFrame web_frame,
-        WebKit.WebResource web_resource, WebKit.NetworkRequest request,
-        WebKit.NetworkResponse? response) {
-        
-        string? uri = request.get_uri();
-        bool uri_is_image = is_image(uri);
-        if (uri_is_image && !load_external_images)
-            external_images_info_bar.show();
-        if (!is_always_loaded(uri) && !(uri_is_image && load_external_images))
-            request.set_uri("about:blank");
-    }
-    
-    private bool is_always_loaded(string? uri) {
-        if (uri == null)
-            return false;
-        
-        foreach (string prefix in always_loaded_prefixes) {
-            if (uri.has_prefix(prefix))
-                return true;
-        }
-        
-        return false;
-    }
-    
-    private bool is_image(string? uri) {
-        if (uri == null)
-            return false;
-        
-        try {
-            Regex regex = new Regex("(?:jpe?g|gif|png)$", RegexCompileFlags.CASELESS);
-            return regex.match(uri);
-        } catch (RegexError err) {
-            debug("Error creating image-matching regex: %s", err.message);
-            return false;
-        }
-    }
-    
-    private void set_load_external_images(bool load_external_images) {
-        this.load_external_images = load_external_images;
-        
-        // Refreshing the images would do nothing in this case--the resource has already been
-        // loaded, so no additional resource request will be sent.
-        if (load_external_images == false)
-            return;
-        
-        // We can't simply set load_external_images to true before refreshing, then set it back to
-        // false afterwards. If one of the images' sources is redirected, an additional resource
-        // request will come after we reset load_external_images to false.
-        try {
-            WebKit.DOM.Document document = web_view.get_dom_document();
-            WebKit.DOM.NodeList nodes = document.query_selector_all("img");
-            for (ulong i = 0; i < nodes.length; i++) {
-                WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
-                if (element == null)
-                    continue;
-                
-                if (!element.has_attribute("src"))
-                    continue;
-                
-                string src = element.get_attribute("src");
-                if (Geary.String.is_empty_or_whitespace(src) || is_always_loaded(src))
-                    continue;
-                
-                // Refresh the image source. Requests are denied when load_external_images
-                // is false, so we need to force webkit to send the request again.
-                element.set_attribute("src", src);
-            }
-        } catch (Error err) {
-            debug("Error refreshing images: %s", err.message);
-        }
-    }
-
-    private void load_user_style() {
-        try {
-            WebKit.DOM.Document document = web_view.get_dom_document();
-            WebKit.DOM.Element style_element = document.create_element(STYLE_NAME);
-            style_element.set_attribute("id", "user_style");
-            WebKit.DOM.HTMLHeadElement head_element = document.get_head();
-            head_element.append_child(style_element);
-            
-            File user_style = GearyApplication.instance.get_user_config_directory().get_child(USER_CSS);
-            user_style_monitor = user_style.monitor_file(FileMonitorFlags.NONE, null);
-            user_style_monitor.changed.connect(on_user_style_changed);
-            
-            // And call it once to load the initial user style
-            on_user_style_changed(user_style, null, FileMonitorEvent.CREATED);
-        } catch (Error error) {
-            debug("Error setting up user style: %s", error.message);
-        }
-    }
-
-    private void on_user_style_changed(File user_style, File? other_file, FileMonitorEvent event_type) {
-        // Changing a file produces 1 created signal, 3 changes done hints, and 0 changed
-        if (event_type != FileMonitorEvent.CHANGED && event_type != FileMonitorEvent.CREATED
-            && event_type != FileMonitorEvent.DELETED) {
-            return;
-        }
-        
-        debug("Loading new message viewer style from %s...", user_style.get_path());
-        
-        WebKit.DOM.Document document = web_view.get_dom_document();
-        WebKit.DOM.Element style_element = document.get_element_by_id("user_style");
-        ulong n = style_element.child_nodes.length;
-        try {
-            for (int i = 0; i < n; i++)
-                style_element.remove_child(style_element.first_child);
-        } catch (Error error) {
-            debug("Error removing old user style: %s", error.message);
-        }
-        
-        try {
-            DataInputStream data_input_stream = new DataInputStream(user_style.read());
-            size_t length;
-            string user_css = data_input_stream.read_upto("\0", 1, out length);
-            WebKit.DOM.Text text_node = document.create_text_node(user_css);
-            style_element.append_child(text_node);
-        } catch (Error error) {
-            // Expected if file was deleted.
-        }
-    }
-
-    private void set_icon_src(string selector, string icon_name) {
-        try {
-            // Load the icon.
-            string icon_filename = IconFactory.instance.lookup_icon(icon_name, 16).get_filename();
-            uint8[] icon_content;
-            FileUtils.get_data(icon_filename, out icon_content);
-
-            // Fetch its mime type.
-            bool uncertain_content_type;
-            string icon_mimetype = ContentType.get_mime_type(ContentType.guess(icon_filename,
-                icon_content, out uncertain_content_type));
-
-            // Then set the source to a data url.
-            WebKit.DOM.HTMLImageElement img = Util.DOM.select(web_view.get_dom_document(), selector)
-                as WebKit.DOM.HTMLImageElement;
-            set_data_url(img, icon_mimetype, icon_content);
-        } catch (Error error) {
-            warning("Failed to load icon '%s': %s", icon_name, error.message);
-        }
-    }
-
-    private void set_image_src(WebKit.DOM.HTMLImageElement img, string mime_type, string filename,
-        int maxwidth, int maxheight = -1) {
-        if( maxheight == -1 ){
-            maxheight = maxwidth;
-        }
-
-        try {
-            // If the file is an image, use it. Otherwise get the icon for this mime_type.
-            uint8[] content;
-            string content_type = ContentType.from_mime_type(mime_type);
-            string icon_mime_type = mime_type;
-            if (mime_type.has_prefix("image/")) {
-                // Get a thumbnail for the image.
-                // TODO Generate and save the thumbnail when extracting the attachments rather than
-                // when showing them in the viewer.
-                img.get_class_list().add("thumbnail");
-                Gdk.Pixbuf image = new Gdk.Pixbuf.from_file_at_scale(filename, maxwidth, maxheight,
-                    true);
-                image.save_to_buffer(out content, "png");
-                icon_mime_type = "image/png";
-            } else {
-                // Load the icon for this mime type.
-                ThemedIcon icon = ContentType.get_icon(content_type) as ThemedIcon;
-                string icon_filename = IconFactory.instance.lookup_icon(icon.names[0], maxwidth)
-                    .get_filename();
-                FileUtils.get_data(icon_filename, out content);
-                icon_mime_type = ContentType.get_mime_type(ContentType.guess(icon_filename, content,
-                    null));
-            }
-
-            // Then set the source to a data url.
-            set_data_url(img, icon_mime_type, content);
-        } catch (Error error) {
-            warning("Failed to load image '%s': %s", filename, error.message);
-        }
-    }
-
-    private void set_data_url(WebKit.DOM.HTMLImageElement img, string mime_type, uint8[] content)
-        throws Error {
-        img.set_attribute("src", "data:%s;base64,%s".printf(mime_type, Base64.encode(content)));
     }
     
     public Geary.Email? get_last_message() {
@@ -383,20 +142,12 @@ public class ConversationViewer : Object {
         return "message_%s".printf(id.to_string());
     }
     
-    private void hide_element_by_id(string element_id) throws Error {
-        web_view.get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:none");
-    }
-
-    private void show_element_by_id(string element_id) throws Error {
-        web_view.get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:block");
-    }
-    
     public void show_multiple_selected(uint selected_count) {
         // Remove any messages and hide the message container, then show the counter.
         clear(current_folder, current_settings);
         try {
-            hide_element_by_id(MESSAGE_CONTAINER_ID);
-            show_element_by_id(SELECTION_COUNTER_ID);
+            web_view.hide_element_by_id(MESSAGE_CONTAINER_ID);
+            web_view.show_element_by_id(SELECTION_COUNTER_ID);
             
             // Update the counter's count.
             WebKit.DOM.HTMLElement counter =
@@ -412,12 +163,12 @@ public class ConversationViewer : Object {
     }
     
     public void add_message(Geary.Email email) {
-        set_load_external_images(false);
+        web_view.set_load_external_images(false);
         
         // Make sure the message container is showing and the multi-message counter hidden.
         try {
-            show_element_by_id(MESSAGE_CONTAINER_ID);
-            hide_element_by_id(SELECTION_COUNTER_ID);
+            web_view.show_element_by_id(MESSAGE_CONTAINER_ID);
+            web_view.hide_element_by_id(SELECTION_COUNTER_ID);
         } catch (Error e) {
             debug("Error showing/hiding containers: %s", e.message);
         }
@@ -428,7 +179,7 @@ public class ConversationViewer : Object {
         string message_id = get_div_id(email.id);
         string header = "";
         
-        WebKit.DOM.Node insert_before = container.get_last_child();
+        WebKit.DOM.Node insert_before = web_view.container.get_last_child();
         
         messages.add(email);
         Geary.Email? higher = messages.higher(email);
@@ -463,7 +214,7 @@ public class ConversationViewer : Object {
             // </div>
             div_message = Util.DOM.clone_select(web_view.get_dom_document(), "#email_template");
             div_message.set_attribute("id", message_id);
-            container.insert_before(div_message, insert_before);
+            web_view.container.insert_before(div_message, insert_before);
             div_email_container = Util.DOM.select(div_message, "div.email_container");
             if (email.is_unread() == Geary.Trillian.FALSE) {
                 div_message.get_class_list().add("hide");
@@ -573,9 +324,9 @@ public class ConversationViewer : Object {
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
     }
-        
+    
     public void unhide_last_email() {
-        WebKit.DOM.HTMLElement last_email = (WebKit.DOM.HTMLElement) container.get_last_child().previous_sibling;
+        WebKit.DOM.HTMLElement last_email = (WebKit.DOM.HTMLElement) web_view.container.get_last_child().previous_sibling;
         if (last_email != null) {
             WebKit.DOM.DOMTokenList class_list = last_email.get_class_list();
             try {
@@ -586,19 +337,6 @@ public class ConversationViewer : Object {
         }
     }
     
-    private WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
-        try {
-            WebKit.DOM.Element? parent = element.get_parent_element();
-            while (parent != null && !parent.webkit_matches_selector(selector)) {
-                parent = parent.get_parent_element();
-            }
-            return parent as WebKit.DOM.HTMLElement;
-        } catch (Error error) {
-            warning("Failed to find ancestor: %s", error.message);
-            return null;
-        }
-    }
-
     private Geary.Email? get_email_from_element(WebKit.DOM.Element element) {
         // First get the email container.
         WebKit.DOM.Element? email_element = null;
@@ -974,8 +712,7 @@ public class ConversationViewer : Object {
     }
 
     private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
-        WebKit.DOM.HTMLDivElement quote_container = web_view.get_dom_document().create_element("div")
-            as WebKit.DOM.HTMLDivElement;
+        WebKit.DOM.HTMLDivElement quote_container = web_view.create_div();
         quote_container.set_attribute("class", "quote_container");
         quote_container.set_inner_html("%s%s%s".printf("<div class=\"shower\">[show]</div>",
             "<div class=\"hider\">[hide]</div>", "<div class=\"quote\"></div>"));
@@ -995,8 +732,7 @@ public class ConversationViewer : Object {
     private string set_up_quotes(string text) {
         try {
             // Extract any quote containers from the signature block and make them controllable.
-            WebKit.DOM.HTMLElement container = web_view.get_dom_document().create_element("div")
-                as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement container = web_view.create_div();
             container.set_inner_html(text);
             WebKit.DOM.NodeList quote_list = container.query_selector_all(".signature .quote_container");
             for (int i = 0; i < quote_list.length; ++i) {
@@ -1030,8 +766,7 @@ public class ConversationViewer : Object {
         // Wrap all quotes in hide/show controllers.
         string message = "";
         try {
-            WebKit.DOM.HTMLElement container = web_view.get_dom_document().create_element("div")
-                as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement container = web_view.create_div();
             int offset = 0;
             while (offset < text.length) {
                 // Find the beginning of a quote block.
@@ -1085,45 +820,11 @@ public class ConversationViewer : Object {
         }
         return "<pre>" + set_up_quotes(message + signature) + "</pre>";
     }
-
-    private string decorate_quotes(string text) throws Error {
-        int level = 0;
-        string outtext = "";
-        Regex quote_leader = new Regex("^(&gt;)* ?");  // Some &gt; followed by optional space
-
-        foreach (string line in text.split("\n")) {
-            MatchInfo match_info;
-            if (quote_leader.match_all(line, 0, out match_info)) {
-                int start, end, new_level;
-                match_info.fetch_pos(0, out start, out end);
-                new_level = end / 4;  // Cast to int removes 0.25 from space at end, if present
-                while (new_level > level) {
-                    outtext += "<blockquote>";
-                    level += 1;
-                }
-                while (new_level < level) {
-                    outtext += "</blockquote>";
-                    level -= 1;
-                }
-                outtext += line.substring(end);
-            } else {
-                debug("This line didn't match the quote regex: %s", line);
-                outtext += line;
-            }
-        }
-        // Close any remaining blockquotes.
-        while (level > 0) {
-            outtext += "</blockquote>";
-            level -= 1;
-        }
-        return outtext;
-    }
-
+    
     private string insert_html_markup(string text, Geary.Email email) {
         try {
             // Create a workspace for manipulating the HTML.
-            WebKit.DOM.Document document = web_view.get_dom_document();
-            WebKit.DOM.HTMLElement container = document.create_element("div") as WebKit.DOM.HTMLElement;
+            WebKit.DOM.HTMLElement container = web_view.create_div();
             container.set_inner_html(text);
             
             // Some HTML messages like to wrap themselves in full, proper html, head, and body tags.
@@ -1178,7 +879,7 @@ public class ConversationViewer : Object {
                     out uncertain_content_type));
 
                 // Then set the source to a data url.
-                set_data_url(img, mimetype, image_data);
+                web_view.set_data_url(img, mimetype, image_data);
             }
 
             // Now return the whole message.
@@ -1216,8 +917,7 @@ public class ConversationViewer : Object {
             return;
         }
         WebKit.DOM.Element elem = div_list.item(i) as WebKit.DOM.Element;
-        WebKit.DOM.HTMLElement signature_container = web_view.get_dom_document().create_element("div")
-            as WebKit.DOM.HTMLElement;
+        WebKit.DOM.HTMLElement signature_container = web_view.create_div();
         signature_container.set_attribute("class", "signature");
         do {
             // Get its sibling _before_ we move it into the signature div.
@@ -1230,16 +930,6 @@ public class ConversationViewer : Object {
         container.append_child(signature_container);
     }
     
-    private bool node_is_child_of(WebKit.DOM.Node node, string ancestor_tag) {
-        WebKit.DOM.Element? ancestor = node.get_parent_element();
-        for (; ancestor != null; ancestor = ancestor.get_parent_element()) {
-            if (ancestor.get_tag_name() == ancestor_tag) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void remove_message(Geary.Email email) {
         if (!messages.contains(email))
             return;
@@ -1269,10 +959,8 @@ public class ConversationViewer : Object {
         if (Geary.String.is_empty(_value))
             return;
         
-        string title = Geary.HTML.escape_markup(_title);
-        string value = Geary.HTML.escape_markup(_value);
-        
-        header_text += create_header_row(title, value, important);
+        header_text += create_header_row(Geary.HTML.escape_markup(_title),
+            Geary.HTML.escape_markup(_value), important);
     }
 
     private void insert_header_date(ref string header_text, string _title, DateTime _value,
@@ -1314,17 +1002,6 @@ public class ConversationViewer : Object {
         header_text += create_header_row(Geary.HTML.escape_markup(title), value, important);
     }
     
-    private string linkify_and_escape_plain_text(string input) throws Error {
-        // Convert < and > into non-printable characters, and change & to &amp;.
-        string output = input.replace("<", " \01 ").replace(">", " \02 ").replace("&", "&amp;");
-        
-        // Converts text links into HTML hyperlinks.
-        Regex r = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
-        
-        output = r.replace_eval(output, -1, 0, 0, is_valid_url);
-        return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
-    }
-
     private void insert_attachments(WebKit.DOM.HTMLElement email_container,
         Gee.List<Geary.Attachment> attachments) {
 
@@ -1368,7 +1045,7 @@ public class ConversationViewer : Object {
                 // Set the image preview and insert it into the container.
                 WebKit.DOM.HTMLImageElement img =
                     Util.DOM.select(attachment_table, ".preview img") as WebKit.DOM.HTMLImageElement;
-                set_image_src(img, attachment.mime_type, attachment.filepath, ATTACHMENT_PREVIEW_SIZE);
+                web_view.set_image_src(img, attachment.mime_type, attachment.filepath, ATTACHMENT_PREVIEW_SIZE);
                 attachment_container.append_child(attachment_table);
             }
 
@@ -1378,38 +1055,9 @@ public class ConversationViewer : Object {
             debug("Failed to insert attachments: %s", error.message);
         }
     }
-
-    // Validates a URL.
-    // Ensures the URL begins with a valid protocol specifier.  (If not, we don't
-    // want to linkify it.)
-    private bool is_valid_url(MatchInfo match_info, StringBuilder result) {
-        try {
-            string? url = match_info.fetch(0);
-            Regex r = new Regex(PROTOCOL_REGEX, RegexCompileFlags.CASELESS);
-            
-            result.append(r.match(url) ? "<a href=\"%s\">%s</a>".printf(url, url) : url);
-        } catch (Error e) {
-            debug("URL parsing error: %s\n", e.message);
-        }
-        return false; // False to continue processing.
-    }
     
-    // Scrolls back up to the top.
     public void scroll_reset() {
-        web_view.get_dom_document().get_default_view().scroll(0, 0);
-    }
-    
-    private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
-        WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
-        WebKit.WebPolicyDecision policy_decision) {
-        policy_decision.ignore();
-        
-        // Other policy-decisions may be requested for various reasons. The existence of an iframe,
-        // for example, causes a policy-decision request with an "OTHER" reason. We don't want to
-        // open a webpage in the browser just because an email contains an iframe.
-        if (navigation_action.reason == WebKit.WebNavigationReason.LINK_CLICKED)
-            link_selected(request.uri);
-        return true;
+        web_view.scroll_reset();
     }
     
     private void on_hovering_over_link(string? title, string? url) {

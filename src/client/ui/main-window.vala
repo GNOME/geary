@@ -128,7 +128,7 @@ public class MainWindow : Gtk.Window {
         
          // Message list left of message viewer.
         conversations_paned.pack1(conversation_list_scrolled, false, false);
-        conversations_paned.pack2(conversation_viewer.content_area, true, true);
+        conversations_paned.pack2(conversation_viewer, true, true);
         
         // Folder list to the left of everything.
         folder_paned.pack1(status_bar_box, false, false);

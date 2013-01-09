@@ -142,3 +142,99 @@ private void linkify_recurse(WebKit.DOM.Document document, WebKit.DOM.Node node,
     }
 }
 
+// Validates a URL.  Intended to be used as a RegexEvalCallback.
+// Ensures the URL begins with a valid protocol specifier.  (If not, we don't
+// want to linkify it.)
+public bool is_valid_url(MatchInfo match_info, StringBuilder result) {
+    try {
+        string? url = match_info.fetch(0);
+        Regex r = new Regex(PROTOCOL_REGEX, RegexCompileFlags.CASELESS);
+        
+        result.append(r.match(url) ? "<a href=\"%s\">%s</a>".printf(url, url) : url);
+    } catch (Error e) {
+        debug("URL parsing error: %s\n", e.message);
+    }
+    return false; // False to continue processing.
+}
+
+// Converts plain text emails to something safe and usable in HTML.
+public string linkify_and_escape_plain_text(string input) throws Error {
+    // Convert < and > into non-printable characters, and change & to &amp;.
+    string output = input.replace("<", " \01 ").replace(">", " \02 ").replace("&", "&amp;");
+    
+    // Converts text links into HTML hyperlinks.
+    Regex r = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
+    
+    output = r.replace_eval(output, -1, 0, 0, is_valid_url);
+    return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
+}
+
+public bool node_is_child_of(WebKit.DOM.Node node, string ancestor_tag) {
+    WebKit.DOM.Element? ancestor = node.get_parent_element();
+    for (; ancestor != null; ancestor = ancestor.get_parent_element()) {
+        if (ancestor.get_tag_name() == ancestor_tag) {
+            return true;
+        }
+    }
+    return false;
+}
+
+public WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
+    try {
+        WebKit.DOM.Element? parent = element.get_parent_element();
+        while (parent != null && !parent.webkit_matches_selector(selector)) {
+            parent = parent.get_parent_element();
+        }
+        return parent as WebKit.DOM.HTMLElement;
+    } catch (Error error) {
+        warning("Failed to find ancestor: %s", error.message);
+        return null;
+    }
+}
+
+public bool is_image(string? uri) {
+    if (uri == null)
+        return false;
+    
+    try {
+        Regex regex = new Regex("(?:jpe?g|gif|png)$", RegexCompileFlags.CASELESS);
+        return regex.match(uri);
+    } catch (RegexError err) {
+        debug("Error creating image-matching regex: %s", err.message);
+        return false;
+    }
+}
+
+public string decorate_quotes(string text) throws Error {
+    int level = 0;
+    string outtext = "";
+    Regex quote_leader = new Regex("^(&gt;)* ?");  // Some &gt; followed by optional space
+    
+    foreach (string line in text.split("\n")) {
+        MatchInfo match_info;
+        if (quote_leader.match_all(line, 0, out match_info)) {
+            int start, end, new_level;
+            match_info.fetch_pos(0, out start, out end);
+            new_level = end / 4;  // Cast to int removes 0.25 from space at end, if present
+            while (new_level > level) {
+                outtext += "<blockquote>";
+                level += 1;
+            }
+            while (new_level < level) {
+                outtext += "</blockquote>";
+                level -= 1;
+            }
+            outtext += line.substring(end);
+        } else {
+            debug("This line didn't match the quote regex: %s", line);
+            outtext += line;
+        }
+    }
+    // Close any remaining blockquotes.
+    while (level > 0) {
+        outtext += "</blockquote>";
+        level -= 1;
+    }
+    return outtext;
+}
+
