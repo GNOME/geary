@@ -615,7 +615,7 @@
         <property name="layout_style">start</property>
         <child>
           <object class="GtkButton" id="add_attachment_button">
-            <property name="label" translatable="yes">_Attach a file</property>
+            <property name="label" translatable="yes">_Attach File</property>
             <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
