@@ -264,7 +264,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
                 if (preview_email == null)
                     preview_email = accumulate_email(preview_res, msgs, pos_map);
                 
-                preview_email.set_message_preview(new RFC822.PreviewText(
+                preview_email.set_message_preview(new RFC822.PreviewText.with_header(
                     preview_res.get_body_data()[0], preview_header_results[i].get_body_data()[0]));
                 i++;
             }

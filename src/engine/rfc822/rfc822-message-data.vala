@@ -232,50 +232,78 @@ public class Geary.RFC822.Full : Geary.Common.BlockMessageData, Geary.RFC822.Mes
 
 // Used for decoding preview text.
 public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
-    public PreviewText(Geary.Memory.AbstractBuffer _buffer, Geary.Memory.AbstractBuffer? 
-        preview_header = null) {
+    public PreviewText(Geary.Memory.AbstractBuffer _buffer) {
+        base (_buffer);
+    }
+    
+    public PreviewText.with_header(Geary.Memory.AbstractBuffer buffer, Geary.Memory.AbstractBuffer
+        preview_header) {
+        string? charset = null;
+        string? encoding = null;
+        bool is_html = false;
         
-        Geary.Memory.AbstractBuffer buffer = _buffer;
-        
-        if (preview_header != null) {
-            string? charset = null;
-            string? encoding = null;
-            bool is_html = false;
+        // Parse the header.
+        GMime.Stream header_stream = new GMime.StreamMem.with_buffer(
+            preview_header.get_array());
+        GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
+        GMime.Part? part = parser.construct_part() as GMime.Part;
+        if (part != null) {
+            is_html = (part.get_content_type().to_string() == "text/html");
             
-            // Parse the header.
-            GMime.Stream header_stream = new GMime.StreamMem.with_buffer(
-                preview_header.get_array());
-            GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
-            GMime.Part? part = parser.construct_part() as GMime.Part;
-            if (part != null) {
-                is_html = (part.get_content_type().to_string() == "text/html");
-                
-                charset = part.get_content_type_parameter("charset");
-                encoding = part.get_header("Content-Transfer-Encoding");
-            }
-            
-            GMime.StreamMem input_stream = new GMime.StreamMem.with_buffer(buffer.get_array());
-            
-            ByteArray output = new ByteArray();
-            GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
-            output_stream.set_owner(false);
-            
-            // Convert the encoding and character set.
-            GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
-            if (encoding != null)
-                filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
-            
-            if (charset != null)
-                filter.add(new GMime.FilterCharset(charset, "UTF8"));
-            
-            input_stream.write_to_stream(filter);
-            uint8[] data = output.data;
-            data += (uint8) '\0';
-            buffer = new Geary.Memory.StringBuffer(is_html ? Geary.HTML.remove_html_tags(
-                (string) data) : (string) data);
+            charset = part.get_content_type_parameter("charset");
+            encoding = part.get_header("Content-Transfer-Encoding");
         }
         
-        base (buffer);
+        GMime.StreamMem input_stream = new GMime.StreamMem.with_buffer(buffer.get_array());
+        
+        ByteArray output = new ByteArray();
+        GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
+        output_stream.set_owner(false);
+        
+        // Convert the encoding and character set.
+        GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
+        if (encoding != null)
+            filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
+        
+        if (charset != null)
+            filter.add(new GMime.FilterCharset(charset, "UTF8"));
+        
+        input_stream.write_to_stream(filter);
+        uint8[] data = output.data;
+        data += (uint8) '\0';
+        
+        // Fix the preview up by removing HTML tags, redundant white space, common types of
+        // message armor, text-based quotes, and various MIME fields.
+        string preview_text = "";
+        string original_text = is_html ? Geary.HTML.remove_html_tags((string) data) : (string) data;
+        string[] all_lines = original_text.split("\r\n");
+        bool in_header = false; // True after a header
+        
+        foreach(string line in all_lines) {
+            if (in_header && line.has_prefix(" ") || line.has_prefix("\t")) {
+                continue; // Skip "folded" (multi-line) headers.
+            } else {
+                in_header = false;
+            }
+            
+            if (line.has_prefix("Content-")) {
+                in_header = true;
+                continue;
+            }
+            
+            if (Geary.String.is_empty_or_whitespace(line))
+                continue;
+            
+            if (line.has_prefix("--"))
+                continue;
+            
+            if (line.has_prefix(">"))
+                continue;
+            
+            preview_text += " " + line;
+        }
+        
+        base (new Geary.Memory.StringBuffer(Geary.String.reduce_whitespace(preview_text)));
     }
     
     public PreviewText.from_string(string preview) {
