@@ -192,21 +192,23 @@ public class FormattedConversationData : Object {
             if (addresses == null || addresses.size < 1)
                 continue;
             
-            ParticipantDisplay participant_display = new ParticipantDisplay(addresses[0],
-                message.email_flags.is_unread());
-            
-            // if not present, add in chronological order
-            int existing_index = list.index_of(participant_display);
-            if (existing_index < 0) {
-                list.add(participant_display);
+            foreach (Geary.RFC822.MailboxAddress address in addresses) {
+                ParticipantDisplay participant_display = new ParticipantDisplay(address,
+                    message.email_flags.is_unread());
+
+                // if not present, add in chronological order
+                int existing_index = list.index_of(participant_display);
+                if (existing_index < 0) {
+                    list.add(participant_display);
+
+                    continue;
+                }
                 
-                continue;
+                // if present and this message is unread but the prior were read,
+                // this author is now unread
+                if (message.email_flags.is_unread() && !list[existing_index].is_unread)
+                    list[existing_index].is_unread = true;
             }
-            
-            // if present and this message is unread but the prior were read, this author is now
-            // unread
-            if (message.email_flags.is_unread() && !list[existing_index].is_unread)
-                list[existing_index].is_unread = true;
         }
         
         StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
