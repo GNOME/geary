@@ -297,6 +297,8 @@ public class Geary.AccountInformation : Object {
         try {
             yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
                 cancellable, out new_etag);
+
+            Geary.Engine.instance.add_account(this, true);
         } catch (Error err) {
             debug("Error writing to account info file: %s", err.message);
         }

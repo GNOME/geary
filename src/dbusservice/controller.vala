@@ -27,13 +27,15 @@ public class Geary.DBus.Controller {
     
     public async void start() {
         try {
-            Geary.Engine.init(get_user_data_directory(), get_resource_directory());
+            yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory());
             
             connection = yield Bus.get(GLib.BusType.SESSION);
             
             // Open the account.
             // TODO: Don't assume username is email, allow separate imap/smtp credentials.
-            Geary.AccountInformation account_information = Geary.Engine.get_account_for_email(args[1]);
+            Geary.AccountInformation account_information = Geary.Engine.instance.get_accounts().get(args[1]);
+            if (account_information == null)
+                account_information = Geary.Engine.instance.create_orphan_account(args[1]);
             account_information.imap_credentials = new Geary.Credentials(args[1], args[2]);
             account_information.smtp_credentials = new Geary.Credentials(args[1], args[2]);
             

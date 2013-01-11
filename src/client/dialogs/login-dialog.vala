@@ -218,7 +218,9 @@ public class LoginDialog {
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username, smtp_password);
         
         try {
-            account_information = Geary.Engine.get_account_for_email(email);
+            account_information = Geary.Engine.instance.get_accounts().get(email);
+            if (account_information == null)
+                account_information = Geary.Engine.instance.create_orphan_account(email);
         } catch (Error err) {
             debug("Unable to open account information for %s: %s", email, err.message);
             

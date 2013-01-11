@@ -52,7 +52,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
         
-        yield local.open_async(settings.settings_dir, Engine.resource_dir.get_child("sql"), cancellable);
+        yield local.open_async(settings.settings_dir, Engine.instance.resource_dir.get_child("sql"), cancellable);
         
         // outbox is now available
         local.outbox.report_problem.connect(notify_report_problem);

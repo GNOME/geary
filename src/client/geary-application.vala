@@ -114,6 +114,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public override void activate(string[] args) {
+        do_activate_async.begin(args);
+    }
+
+    // Without owned on the args parameter, vala won't bother to keep the array
+    // around until the open_async() call completes, leading to crashes.  This
+    // way, this method gets its own long-lived copy.
+    private async void do_activate_async(owned string[] args) {
         // If Geary is already running, show the main window and return.
         if (controller != null && controller.main_window != null) {
             controller.main_window.present_with_time((uint32) TimeVal().tv_sec);
@@ -122,13 +129,16 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
 
         // Start Geary.
-        Geary.Engine.init(get_user_data_directory(), get_resource_directory());
+        try {
+            yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory());
+        } catch (Error e) {
+            error("Error opening Geary.Engine instance: %s", e.message);
+        }
+
         config = new Configuration();
         controller = new GearyController();
         initialize_account();
         handle_args(args);
-
-        return;
     }
     
     // NOTE: This assert()'s if the Gtk.Action is not present in the default action group
@@ -166,7 +176,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         Geary.AccountInformation? old_account_information = null;
         if (email != null) {
             try {
-                old_account_information = Geary.Engine.get_account_for_email(email);
+                old_account_information = Geary.Engine.instance.get_accounts().get(email);
             } catch (Error err) {
                 debug("Unable to open account information for %s, creating instead: %s", email,
                     err.message);
@@ -231,7 +241,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         PasswordTypeFlag password_flags, Cancellable? cancellable) {
         Geary.AccountInformation account_information;
         try {
-            account_information = Geary.Engine.get_account_for_email(email);
+            account_information = Geary.Engine.instance.get_accounts().get(email);
+            if (account_information == null)
+                account_information = Geary.Engine.instance.create_orphan_account(email);
         } catch (Error err) {
             error("Unable to open account information for label %s: %s", email, err.message);
         }
@@ -265,8 +277,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     private Geary.AccountInformation? get_account() {
         try {
-            Gee.List<Geary.AccountInformation> accounts = Geary.Engine.get_accounts();
-            if (accounts.size > 0)
+            Geary.AccountInformation[] accounts = Geary.Engine.instance.get_accounts().values.to_array();
+            if (accounts.length > 0)
                 return accounts[0];
         } catch (Error e) {
             debug("Unable to fetch account labels: %s", e.message);
@@ -303,7 +315,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         out bool imap_remember_password, out bool smtp_remember_password) {
         Geary.AccountInformation temp_account_information;
         try {
-            temp_account_information = Geary.Engine.get_account_for_email(old_account_information.email);
+            temp_account_information = Geary.Engine.instance.get_accounts().get(old_account_information.email);
+            if (temp_account_information == null)
+                temp_account_information = Geary.Engine.instance.create_orphan_account(old_account_information.email);
         } catch (Error err) {
             error("Unable to open account information for %s: %s", old_account_information.email,
                 err.message);
