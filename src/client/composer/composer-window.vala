@@ -261,7 +261,7 @@ public class ComposerWindow : Gtk.Window {
         editor.editable = true;
         editor.load_finished.connect(on_load_finished);
         editor.hovering_over_link.connect(on_hovering_over_link);
-        editor.context_menu.connect(on_context_menu);
+        editor.button_press_event.connect(on_button_press_event);
         editor.move_focus.connect(update_actions);
         editor.copy_clipboard.connect(update_actions);
         editor.cut_clipboard.connect(update_actions);
@@ -317,6 +317,7 @@ public class ComposerWindow : Gtk.Window {
         s.enable_scripts = false;
         s.enable_java_applet = false;
         s.enable_plugins = false;
+        s.enable_default_context_menu = false; // Deprecated, still needed for Precise
         editor.settings = s;
         
         scroll.add(editor);
@@ -935,9 +936,10 @@ public class ComposerWindow : Gtk.Window {
         return base.key_press_event(event);
     }
     
-    private bool on_context_menu(Gtk.Widget default_menu, WebKit.HitTestResult hit_test_result,
-        bool keyboard_triggered) {
-        
+    private bool on_button_press_event(Gdk.EventButton event) {
+        if (event.button != 3)
+            return true;
+
         context_menu = new Gtk.Menu();
         
         // Undo
@@ -985,11 +987,11 @@ public class ComposerWindow : Gtk.Window {
         context_menu.append(select_all_item);
         
         context_menu.show_all();
-        context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
+        context_menu.popup(null, null, null, event.button, event.time);
         
         update_actions();
         
-        return true; // Suppress default context menu.
+        return false;
     }
     
     private void update_actions() {

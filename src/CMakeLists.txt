@@ -413,8 +413,9 @@ link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/vapi
-    --metadatadir=${CMAKE_SOURCE_DIR}/metadata
+    --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+    --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
+    --girdir=${CMAKE_SOURCE_DIR}/bindings/gir
     --target-glib=${TARGET_GLIB}
     --thread
     --enable-checking

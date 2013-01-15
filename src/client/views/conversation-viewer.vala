@@ -85,7 +85,6 @@ public class ConversationViewer : Gtk.Box {
         web_view = new ConversationWebView();
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
-        web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         
         web_view.image_load_requested.connect(on_image_load_requested);
         web_view.link_selected.connect((link) => { link_selected(link); });
