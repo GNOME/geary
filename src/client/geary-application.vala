@@ -183,9 +183,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             }
         }
         
-        Geary.AccountInformation account_information =
+        Geary.AccountInformation? account_information =
             request_account_information(old_account_information);
-        do_validate_until_successful_async.begin(account_information);
+        if (account_information != null)
+            do_validate_until_successful_async.begin(account_information);
     }
     
     private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
@@ -220,7 +221,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
 
         debug("Validation failed. Prompting user for revised account information");
-        Geary.AccountInformation new_account_information =
+        Geary.AccountInformation? new_account_information =
             request_account_information(account_information);
         
         // If the user refused to enter account information. There is currently no way that we

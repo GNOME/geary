@@ -85,6 +85,13 @@ public class Geary.Engine {
    }
 
     private async void add_existing_accounts_async(Cancellable? cancellable = null) throws Error {
+        try {
+            user_data_dir.make_directory_with_parents(cancellable);
+        } catch (IOError e) {
+            if (!(e is IOError.EXISTS))
+                throw e;
+        }
+
         FileEnumerator enumerator
             = yield user_data_dir.enumerate_children_async("standard::*",
                 FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
