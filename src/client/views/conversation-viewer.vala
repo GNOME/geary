@@ -77,6 +77,7 @@ public class ConversationViewer : Gtk.Box {
             external_images_info_bar.get_content_area() as Gtk.Box;
         if (external_images_info_bar_content_area != null) {
             Gtk.Label label = new Gtk.Label(_("This message contains images. Do you want to show them?"));
+            label.set_line_wrap(true);
             external_images_info_bar_content_area.add(label);
             label.show_all();
         }
