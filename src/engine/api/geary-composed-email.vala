@@ -33,13 +33,16 @@ public class Geary.ComposedEmail : Object {
     
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
         RFC822.MailboxAddresses? to = null, RFC822.MailboxAddresses? cc = null,
-        RFC822.MailboxAddresses? bcc = null, RFC822.Subject? subject = null) {
+        RFC822.MailboxAddresses? bcc = null, RFC822.Subject? subject = null,
+        RFC822.Text? body_text = null, RFC822.Text? body_html = null) {
         this.date = date;
         this.from = from;
         this.to = to;
         this.cc = cc;
         this.bcc = bcc;
         this.subject = subject;
+        this.body_text = body_text;
+        this.body_html = body_html;
     }
     
     public ComposedEmail.as_reply(DateTime date, RFC822.MailboxAddresses from, Geary.Email source) {
@@ -105,6 +108,8 @@ public class Geary.ComposedEmail : Object {
         RFC822.MailboxAddresses? cc = null;
         RFC822.MailboxAddresses? bcc = null;
         RFC822.Subject? subject = null;
+        RFC822.Text? body_text = null;
+        RFC822.Text? body_html = null;
 
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > MAILTO_SCHEME.length) {
@@ -149,10 +154,18 @@ public class Geary.ComposedEmail : Object {
             if (headers.contains("subject")) {
                 subject = new RFC822.Subject(Geary.Collection.get_first(headers.get("subject")));
             }
+
+            if (headers.contains("body")) {
+                string body = Geary.Collection.get_first(headers.get("body"));
+
+                body_text = new RFC822.Text(new Geary.Memory.StringBuffer(body));
+                body_html = new RFC822.Text(new Geary.Memory.StringBuffer(
+                    Geary.HTML.escape_markup(body)));
+            }
         }
 
         // And construct!
-        this(date, from, to, cc, bcc, subject); 
+        this(date, from, to, cc, bcc, subject, body_text, body_html);
         
         // Add attachments directly to public member ... need to call base constructor before doing
         // so
