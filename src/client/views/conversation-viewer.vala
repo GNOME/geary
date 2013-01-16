@@ -303,7 +303,8 @@ public class ConversationViewer : Gtk.Box {
             warning("Error setting HTML for message: %s", html_error.message);
         }
 
-        // Add the attachments container if we have any attachments.
+        // Set attachment icon and add the attachments container if we have any attachments.
+        set_attachment_icon(div_message, email.attachments.size > 0);
         if (email.attachments.size > 0) {
             insert_attachments(div_message, email.attachments);
         }
@@ -386,6 +387,15 @@ public class ConversationViewer : Gtk.Box {
         }
     }
 
+    private void set_attachment_icon(WebKit.DOM.HTMLElement container, bool show) {
+        try {
+            WebKit.DOM.DOMTokenList class_list = container.get_class_list();
+            Util.DOM.toggle_class(class_list, "attachment", show);
+        } catch (Error e) {
+            warning("Failed to set attachment icon: %s", e.message);
+        }
+    }
+
     public void update_flags(Geary.Email email) {
         // Nothing to do if we aren't displaying this email.
         if (!email_to_element.has_key(email.id)) {
@@ -408,7 +418,6 @@ public class ConversationViewer : Gtk.Box {
             WebKit.DOM.DOMTokenList class_list = container.get_class_list();
             Util.DOM.toggle_class(class_list, "read", !flags.is_unread());
             Util.DOM.toggle_class(class_list, "starred", flags.is_flagged());
-            Util.DOM.toggle_class(class_list, "attachment", email.attachments.size > 0);
         } catch (Error e) {
             warning("Failed to set classes on .email: %s", e.message);
         }
