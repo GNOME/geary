@@ -938,7 +938,7 @@ public class ComposerWindow : Gtk.Window {
     
     private bool on_button_press_event(Gdk.EventButton event) {
         if (event.button != 3)
-            return true;
+            return false;
 
         context_menu = new Gtk.Menu();
         
@@ -991,7 +991,7 @@ public class ComposerWindow : Gtk.Window {
         
         update_actions();
         
-        return false;
+        return true;
     }
     
     private void update_actions() {
