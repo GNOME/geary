@@ -110,7 +110,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private void on_external_images_info_bar_response(Gtk.InfoBar sender, int response_id) {
-        web_view.set_load_external_images(response_id == Gtk.ResponseType.OK);
+        web_view.apply_load_external_images(response_id == Gtk.ResponseType.OK);
         sender.hide();
     }
     
@@ -162,7 +162,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void add_message(Geary.Email email) {
-        web_view.set_load_external_images(false);
+        web_view.apply_load_external_images(false);
         
         // Make sure the message container is showing and the multi-message counter hidden.
         try {
@@ -871,24 +871,38 @@ public class ConversationViewer : Gtk.Box {
             // Now look for the signature.
             wrap_html_signature(ref container);
 
-            // Then get all inline images and replace them with data URLs.
-            WebKit.DOM.NodeList inline_list = container.query_selector_all("img[src^=\"cid:\"]");
-            for (int i = 0; i < inline_list.length; ++i) {
+            // Then look for all <img> tags. Inline images are replaced with
+            // data URLs, while external images are added to
+            // external_images_uri (to be used later by is_image()).
+            Gee.ArrayList<string> external_images_uri = new Gee.ArrayList<string>();
+            WebKit.DOM.NodeList inline_list = container.query_selector_all("img");
+            for (ulong i = 0; i < inline_list.length; ++i) {
                 // Get the MIME content for the image.
                 WebKit.DOM.HTMLImageElement img = (WebKit.DOM.HTMLImageElement) inline_list.item(i);
-                string mime_id = img.get_attribute("src").substring(4);
-                Geary.Memory.AbstractBuffer image_content =
-                    email.get_message().get_content_by_mime_id(mime_id);
-                uint8[] image_data = image_content.get_array();
+                string? src = img.get_attribute("src");
+                if (Geary.String.is_empty(src)) {
+                    continue;
+                } else if (src.has_prefix("cid:")) {
+                    string mime_id = src.substring(4);
+                    Geary.Memory.AbstractBuffer image_content =
+                        email.get_message().get_content_by_mime_id(mime_id);
+                    uint8[] image_data = image_content.get_array();
 
-                // Get the content type.
-                bool uncertain_content_type;
-                string mimetype = ContentType.get_mime_type(ContentType.guess(null, image_data,
-                    out uncertain_content_type));
+                    // Get the content type.
+                    bool uncertain_content_type;
+                    string mimetype = ContentType.get_mime_type(ContentType.guess(null, image_data,
+                        out uncertain_content_type));
 
-                // Then set the source to a data url.
-                web_view.set_data_url(img, mimetype, image_data);
+                    // Then set the source to a data url.
+                    web_view.set_data_url(img, mimetype, image_data);
+                } else if (!src.has_prefix("data:")) {
+                    external_images_uri.add(src);
+                    if (!web_view.load_external_images)
+                        external_images_info_bar.show();
+                }
             }
+
+            web_view.set_external_images_uris(external_images_uri);
 
             // Now return the whole message.
             return set_up_quotes(container.get_inner_html());

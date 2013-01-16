@@ -192,19 +192,6 @@ public WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, stri
     }
 }
 
-public bool is_image(string? uri) {
-    if (uri == null)
-        return false;
-    
-    try {
-        Regex regex = new Regex("(?:jpe?g|gif|png)$", RegexCompileFlags.CASELESS);
-        return regex.match(uri);
-    } catch (RegexError err) {
-        debug("Error creating image-matching regex: %s", err.message);
-        return false;
-    }
-}
-
 public string decorate_quotes(string text) throws Error {
     int level = 0;
     string outtext = "";

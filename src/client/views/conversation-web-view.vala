@@ -12,16 +12,19 @@ public class ConversationWebView : WebKit.WebView {
     
     private const string USER_CSS = "user-message.css";
     private const string STYLE_NAME = "STYLE";
-    
-    public signal void image_load_requested();
-    public signal void link_selected(string link);
-    
-    private bool load_external_images = false;
-    private FileMonitor? user_style_monitor = null;
-    
+
+    public bool load_external_images { get; private set; default = false; }
+
     // HTML element that contains message DIVs.
     public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
-    
+
+    private Gee.ArrayList<string>? external_images_uri = null;
+    private FileMonitor? user_style_monitor = null;
+
+    public signal void image_load_requested();
+
+    public signal void link_selected(string link);
+
     public ConversationWebView() {
         // Set defaults.
         set_border_width(0);
@@ -79,15 +82,31 @@ public class ConversationWebView : WebKit.WebView {
     private void on_resource_request_starting(WebKit.WebFrame web_frame,
         WebKit.WebResource web_resource, WebKit.NetworkRequest request,
         WebKit.NetworkResponse? response) {
-        
+        if (response != null) {
+            // A request that was previously approved resulted in a redirect.
+            return;
+        }
+
         string? uri = request.get_uri();
-        bool uri_is_image = is_image(uri);
-        if (uri_is_image && !load_external_images)
-            image_load_requested();
-        if (!is_always_loaded(uri) && !(uri_is_image && load_external_images))
+        if (!is_always_loaded(uri) && !(is_image(uri) && load_external_images))
             request.set_uri("about:blank");
     }
-    
+
+    public void set_external_images_uris(Gee.ArrayList<string> uris) {
+        external_images_uri = uris;
+    }
+
+    public bool is_image(string? uri) {
+        if (Geary.String.is_empty_or_whitespace(uri))
+            return false;
+
+        if (uri.has_prefix("data:image/"))
+            return true;
+
+        // check if external_images_uri is null in case this is called before a page is loaded
+        return (external_images_uri != null) ? (uri in external_images_uri) : false;
+    }
+
     private bool is_always_loaded(string? uri) {
         if (uri == null)
             return false;
@@ -100,7 +119,7 @@ public class ConversationWebView : WebKit.WebView {
         return false;
     }
     
-    public void set_load_external_images(bool load_external_images) {
+    public void apply_load_external_images(bool load_external_images) {
         this.load_external_images = load_external_images;
         
         // Refreshing the images would do nothing in this case--the resource has already been
