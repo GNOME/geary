@@ -24,6 +24,18 @@ public interface Geary.Account : Object {
     public signal void report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
         Error? err);
     
+    /**
+     * Fired when folders become available or unavailable in the account.
+     * Folders become available when the account is first opened or when
+     * they're created later; they become unavailable when the account is
+     * closed or they're deleted later.
+     */
+    public signal void folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
+        Gee.Collection<Geary.Folder>? unavailable);
+
+    /**
+     * Fired when folders are created or deleted.
+     */
     public signal void folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
     
@@ -48,6 +60,12 @@ public interface Geary.Account : Object {
     protected abstract void notify_report_problem(Geary.Account.Problem problem,
         Geary.AccountSettings? settings, Error? err);
     
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    public abstract void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
+        Gee.Collection<Geary.Folder>? unavailable);
+
     /**
      * Signal notification method for subclasses to use.
      */

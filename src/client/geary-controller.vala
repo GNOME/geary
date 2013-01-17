@@ -6,34 +6,6 @@
 
 // Primary controller object for Geary.
 public class GearyController {
-    private class ListFoldersOperation : Geary.NonblockingBatchOperation {
-        public Geary.Account account;
-        public Geary.FolderPath path;
-        
-        public ListFoldersOperation(Geary.Account account, Geary.FolderPath path) {
-            this.account = account;
-            this.path = path;
-        }
-        
-        public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            return yield account.list_folders_async(path, cancellable);
-        }
-    }
-    
-    private class FetchFolderOperation : Geary.NonblockingBatchOperation {
-        public Geary.Account account;
-        public Geary.FolderPath folder_path;
-        
-        public FetchFolderOperation(Geary.Account account, Geary.FolderPath folder_path) {
-            this.account = account;
-            this.folder_path = folder_path;
-        }
-        
-        public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            return yield account.fetch_folder_async(folder_path);
-        }
-    }
-    
     // Named actions.
     public const string ACTION_HELP = "GearyHelp";
     public const string ACTION_ABOUT = "GearyAbout";
@@ -274,7 +246,7 @@ public class GearyController {
             cancel_inbox();
             cancel_message();
             
-            account.folders_added_removed.disconnect(on_folders_added_removed);
+            account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
             
             main_window.title = GearyApplication.NAME;
             main_window.conversation_list_store.account_owner_email = null;
@@ -312,6 +284,8 @@ public class GearyController {
         
         // Connect the new account, if any.
         if (account != null) {
+            account.folders_available_unavailable.connect(on_folders_available_unavailable);
+
             try {
                 yield account.open_async(cancellable);
             } catch (Error open_err) {
@@ -323,7 +297,6 @@ public class GearyController {
                 GearyApplication.instance.panic();
             }
             
-            account.folders_added_removed.connect(on_folders_added_removed);
             account.email_sent.connect(on_sent);
             
             if (account.settings.service_provider == Geary.ServiceProvider.YAHOO)
@@ -331,7 +304,6 @@ public class GearyController {
             main_window.conversation_list_store.account_owner_email = account.settings.email.address;
             
             main_window.folder_list.set_user_folders_root_name(_("Labels"));
-            load_folders.begin(cancellable_folder);
         }
     }
     
@@ -358,19 +330,6 @@ public class GearyController {
             delete_message.label = DELETE_MESSAGE_LABEL;
             delete_message.tooltip = DELETE_MESSAGE_TOOLTIP;
             delete_message.icon_name = DELETE_MESSAGE_ICON_NAME;
-        }
-    }
-    
-    private async void load_folders(Cancellable? cancellable) {
-        try {
-            // pull down the root-level user folders and recursively add to sidebar
-            Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null);
-            if (folders != null)
-                on_folders_added_removed(folders, null);
-            else
-                debug("no folders");
-        } catch (Error err) {
-            message("%s", err.message);
         }
     }
     
@@ -624,11 +583,11 @@ public class GearyController {
         main_window.folder_list.add_folder(folder);
     }
     
-    private void on_folders_added_removed(Gee.Collection<Geary.Folder>? added,
-        Gee.Collection<Geary.Folder>? removed) {
+    private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
+        Gee.Collection<Geary.Folder>? unavailable) {
         
-        if (added != null && added.size > 0) {
-            foreach (Geary.Folder folder in added) {
+        if (available != null && available.size > 0) {
+            foreach (Geary.Folder folder in available) {
                 main_window.folder_list.add_folder(folder);
                 main_window.main_toolbar.copy_folder_menu.add_folder(folder);
                 main_window.main_toolbar.move_folder_menu.add_folder(folder);
@@ -660,47 +619,7 @@ public class GearyController {
                 
                 folder.special_folder_type_changed.connect(on_special_folder_type_changed);
             }
-            
-            search_folders_for_children.begin(added);
         }
-    }
-    
-    private async void search_folders_for_children(Gee.Collection<Geary.Folder> folders) {
-        set_busy(true);
-        Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
-        foreach (Geary.Folder folder in folders) {
-            // Search for children unless Folder is absolutely certain it doesn't have any
-            if (folder.has_children().is_possible())
-                batch.add(new ListFoldersOperation(account, folder.get_path()));
-        }
-        
-        debug("Listing %d folder children", batch.size);
-        try {
-            yield batch.execute_all_async();
-        } catch (Error err) {
-            debug("Unable to execute batch: %s", err.message);
-            set_busy(false);
-            
-            return;
-        }
-        debug("Completed listing folder children");
-        
-        Gee.ArrayList<Geary.Folder> accumulator = new Gee.ArrayList<Geary.Folder>();
-        foreach (int id in batch.get_ids()) {
-            ListFoldersOperation op = (ListFoldersOperation) batch.get_operation(id);
-            try {
-                Gee.Collection<Geary.Folder> children = (Gee.Collection<Geary.Folder>) 
-                    batch.get_result(id);
-                accumulator.add_all(children);
-            } catch (Error err2) {
-                debug("Unable to list children of %s: %s", op.path.to_string(), err2.message);
-            }
-        }
-        
-        if (accumulator.size > 0)
-            on_folders_added_removed(accumulator, null);
-        
-        set_busy(false);
     }
     
     private void cancel_folder() {

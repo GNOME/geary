@@ -14,6 +14,11 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
         this.settings = settings;
     }
     
+    protected virtual void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
+        Gee.Collection<Geary.Folder>? unavailable) {
+        folders_available_unavailable(available, unavailable);
+    }
+
     protected virtual void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
         folders_added_removed(added, removed);
