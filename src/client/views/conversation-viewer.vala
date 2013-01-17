@@ -86,7 +86,9 @@ public class ConversationViewer : Gtk.Box {
         web_view = new ConversationWebView();
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
-        
+        web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
+        web_view.size_allocate.connect(mark_read);
+
         web_view.image_load_requested.connect(on_image_load_requested);
         web_view.link_selected.connect((link) => { link_selected(link); });
         
@@ -550,6 +552,8 @@ public class ConversationViewer : Gtk.Box {
         } catch (Error error) {
             warning("Error toggling message: %s", error.message);
         }
+
+        mark_read();
     }
 
     private static void on_attachment_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
@@ -601,12 +605,25 @@ public class ConversationViewer : Gtk.Box {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
         mark_message(message, null, flags);
+        mark_manual_read(message.id);
     }
 
     private void on_mark_unread_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
         mark_message(message, flags, null);
+        mark_manual_read(message.id);
+    }
+
+    // Use this when an email has been marked read through manual (user) intervention
+    public void mark_manual_read(Geary.EmailIdentifier id) {
+        if (email_to_element.has_key(id)) {
+            try {
+                email_to_element.get(id).get_class_list().add("manual_read");
+            } catch (Error error) {
+                debug("Adding manual_read class failed: %s", error.message);
+            }
+        }
     }
 
     private void on_print_message(Geary.Email message) {
@@ -1130,6 +1147,36 @@ public class ConversationViewer : Gtk.Box {
             ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.get_main_window(),
                 _("Failed to open default text editor."), error.message);
             dialog.run();
+        }
+    }
+
+    public void mark_read() {
+        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        WebKit.DOM.Document document = web_view.get_dom_document();
+        long scroll_top = document.body.scroll_top;
+        long scroll_height = document.document_element.scroll_height;
+
+        foreach (Geary.Email message in messages) {
+            try {
+                if (message.email_flags.is_unread()) {
+                    WebKit.DOM.HTMLElement element = email_to_element.get(message.id);
+                    WebKit.DOM.HTMLElement body = (WebKit.DOM.HTMLElement) element.get_elements_by_class_name("body").item(0);
+                    if (!element.get_class_list().contains("manual_read") &&
+                            body.offset_top + body.offset_height > scroll_top &&
+                            body.offset_top + 28 < scroll_top + scroll_height) {  // 28 = 15 padding + 13 first line of text
+                        ids.add(message.id);
+                    }
+                }
+            } catch (Error error) {
+                debug("Problem checking email class: %s", error.message);
+            }
+        }
+
+        Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
+        if (supports_mark != null & ids.size > 0) {
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.UNREAD);
+            supports_mark.mark_email_async.begin(ids, null, flags, null);
         }
     }
 }

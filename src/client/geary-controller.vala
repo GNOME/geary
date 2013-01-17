@@ -505,7 +505,7 @@ public class GearyController {
         if (selected.size == 1 && current_folder != null) {
             Geary.Conversation conversation = Geary.Collection.get_first(selected);
             do_show_message.begin(conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING),
-                cancellable_message, true, on_show_message_completed);
+                cancellable_message, true, on_conversation_selected_completed);
         } else if (current_folder != null) {
             main_window.conversation_viewer.show_multiple_selected(selected.size);
             if (selected.size > 1) {
@@ -549,20 +549,6 @@ public class GearyController {
             main_window.conversation_viewer.add_message(email);
         
         main_window.conversation_viewer.unhide_last_email();
-        
-        // Mark as read.
-        yield mark_as_read_async(unread_ids, cancellable);
-    }
-    
-    private async void mark_as_read_async(Gee.List<Geary.EmailIdentifier> unread_ids,
-        Cancellable? cancellable = null) throws Error {
-        Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
-        if (supports_mark != null && unread_ids.size > 0) {
-            Geary.EmailFlags flags = new Geary.EmailFlags();
-            flags.add(Geary.EmailFlags.UNREAD);
-            
-            yield supports_mark.mark_email_async(unread_ids, null, flags, cancellable);
-        }
     }
     
     private void on_show_message_completed(Object? source, AsyncResult result) {
@@ -575,6 +561,11 @@ public class GearyController {
         }
         
         set_busy(false);
+    }
+    
+    private void on_conversation_selected_completed(Object? source, AsyncResult result) {
+        on_show_message_completed(source, result);
+        main_window.conversation_viewer.mark_read();
     }
     
     private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
@@ -838,12 +829,16 @@ public class GearyController {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
         mark_selected_conversations(null, flags);
+        foreach (Geary.EmailIdentifier id in get_selected_ids())
+            main_window.conversation_viewer.mark_manual_read(id);
     }
 
     private void on_mark_as_unread() {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
         mark_selected_conversations(flags, null);
+        foreach (Geary.EmailIdentifier id in get_selected_ids())
+            main_window.conversation_viewer.mark_manual_read(id);
     }
 
     private void on_mark_as_starred() {
