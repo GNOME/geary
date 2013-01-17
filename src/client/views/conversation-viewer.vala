@@ -260,7 +260,7 @@ public class ConversationViewer : Gtk.Box {
                 icon.set_attribute("src",
                     Gravatar.get_image_uri(primary, Gravatar.Default.MYSTERY_MAN, 48));
             } catch (Error error) {
-                warning("Failed to load avatar: %s", error.message);
+                debug("Failed to inject avatar URL: %s", error.message);
             }
         }
         
