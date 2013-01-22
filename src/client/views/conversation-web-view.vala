@@ -313,5 +313,9 @@ public class ConversationWebView : WebKit.WebView {
     public WebKit.DOM.HTMLDivElement create_div() throws Error {
         return get_dom_document().create_element("div") as WebKit.DOM.HTMLDivElement;
     }
+
+    public void scroll_to_element(WebKit.DOM.HTMLElement element) {
+        get_dom_document().get_default_view().scroll(element.offset_left, element.offset_top);
+    }
 }
 

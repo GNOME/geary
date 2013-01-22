@@ -339,6 +339,25 @@ public class ConversationViewer : Gtk.Box {
             }
         }
     }
+
+    public void show_first_visible_email() {
+        // Select the first email element that does not have "hide" in its
+        // class list. The constraint on the id is required because there
+        // are some elements (like #selection_counter) that have the "email"
+        // class, but that are not messages.
+        WebKit.DOM.HTMLElement first_visible_email =
+            Util.DOM.select(web_view.get_dom_document(), ".email[id^=message_]:not(.hide)");
+        if (first_visible_email != null) {
+            // Select the sibling which, if it exists, is the previous hidden
+            // message. This is a way Geary has to say "hey, this conversation
+            // is not new: there are some messages above".
+            WebKit.DOM.HTMLElement first_visible_email_sibling = 
+                (WebKit.DOM.HTMLElement) first_visible_email.previous_sibling;
+            if (first_visible_email_sibling != null) {
+                web_view.scroll_to_element(first_visible_email_sibling);
+            }
+        }
+    }
     
     private Geary.Email? get_email_from_element(WebKit.DOM.Element element) {
         // First get the email container.
