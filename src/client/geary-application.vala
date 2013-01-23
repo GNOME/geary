@@ -81,6 +81,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     private GearyController? controller = null;
     private Geary.Account? account = null;
     
+    private LoginDialog? login_dialog = null;
+    
     private File exec_dir;
     
     public GearyApplication() {
@@ -193,33 +195,19 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         Cancellable? cancellable = null) {
         Geary.AccountInformation? result = account_information;
         do {
-            result = yield validate_async(result, cancellable);
+            result = yield validate_or_retry_async(result, cancellable);
         } while (result != null);
+
+        if (login_dialog != null)
+            login_dialog.hide();
     }
-    
+
     // Returns null if we are done validating, or the revised account information if we should retry.
-    private async Geary.AccountInformation? validate_async(Geary.AccountInformation account_information,
+    private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
         Cancellable? cancellable = null) {
-        bool success = false;
-        try {
-            success = yield account_information.validate_async(cancellable);
-        } catch (Geary.EngineError err) {
-            debug("Error validating account: %s", err.message);
-            success = false;
-        }
+        if (yield validate_async(account_information, cancellable))
+            return null;
         
-        if (success) {
-            account_information.store_async.begin(cancellable);
-
-            try {
-                set_account(account_information.get_account());
-                debug("Successfully validated account information");
-                return null;
-            } catch (Geary.EngineError err) {
-                debug("Unable to retrieve email account: %s", err.message);
-            }
-        }
-
         debug("Validation failed. Prompting user for revised account information");
         Geary.AccountInformation? new_account_information =
             request_account_information(account_information);
@@ -236,6 +224,34 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         debug("User entered revised account information, retrying validation");
         return new_account_information;
+    }
+    
+    // Attempts to validate and add an account.  Returns true on success, else false.
+    public async bool validate_async(Geary.AccountInformation account_information,
+        Cancellable? cancellable = null) {
+        bool success = false;
+        try {
+            success = yield account_information.validate_async(cancellable);
+        } catch (Geary.EngineError err) {
+            debug("Error validating account: %s", err.message);
+            
+            return false;
+        }
+        
+        if (success) {
+            account_information.store_async.begin(cancellable);
+            
+            try {
+                set_account(account_information.get_account());
+                debug("Successfully validated account information");
+                
+                return true;
+            } catch (Geary.EngineError err) {
+                debug("Unable to retrieve email account: %s", err.message);
+            }
+        }
+        
+        return false;
     }
     
     private void open_account(string email, string? old_imap_password, string? old_smtp_password,
@@ -368,17 +384,25 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
     private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info) {
         Geary.AccountInformation? new_info = old_info;
+        if (login_dialog == null)
+            login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
+        
+        if (new_info == null)
+            login_dialog.set_real_name(get_default_real_name());
+        else
+            login_dialog.set_account_information(new_info);
+        
+        login_dialog.present();
         for (;;) {
-            LoginDialog login_dialog = (new_info == null) ? new LoginDialog(get_default_real_name())
-                : new LoginDialog.from_account_information(new_info);
-            
-            if (!login_dialog.show()) {
+            login_dialog.show_spinner(false);
+            if (login_dialog.run() != Gtk.ResponseType.OK) {
                 debug("User refused to enter account information. Exiting...");
                 exit(1);
                 return null;
             }
             
-            new_info = login_dialog.account_information;
+            login_dialog.show_spinner(true);
+            new_info = login_dialog.get_account_information();
             
             if ((!new_info.default_imap_server_ssl && !new_info.default_imap_server_starttls)
                 || (!new_info.default_smtp_server_ssl && !new_info.default_smtp_server_starttls)) {
@@ -392,7 +416,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             
             break;
         }
-        
+
         if (new_info.imap_remember_password)
             keyring_save_password(new_info.imap_credentials, PasswordType.IMAP);
         else
