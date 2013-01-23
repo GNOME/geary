@@ -344,8 +344,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // password_dialog.run() returns false, in which case we have already exited/returned.
         imap_password = password_dialog.imap_password;
         smtp_password = password_dialog.smtp_password;
-        imap_remember_password = password_dialog.imap_remember_password;
-        smtp_remember_password = password_dialog.smtp_remember_password;
+        imap_remember_password = smtp_remember_password = password_dialog.remember_password;
         
         if (password_flags.has_imap()) {
             if (imap_remember_password) {
