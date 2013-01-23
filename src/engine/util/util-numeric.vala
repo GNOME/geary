@@ -1,4 +1,4 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution. 
@@ -19,6 +19,10 @@ public inline int int_ceiling(int value, int ceiling) {
 }
 
 public inline int64 int64_ceiling(int64 value, int64 ceiling) {
+    return (value <= ceiling) ? value : ceiling;
+}
+
+public inline uint uint_ceiling(uint value, uint ceiling) {
     return (value <= ceiling) ? value : ceiling;
 }
 
