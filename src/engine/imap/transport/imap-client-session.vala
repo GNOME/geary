@@ -64,7 +64,7 @@ public class Geary.Imap.ClientSession {
     private class AsyncParams : Object {
         public Cancellable? cancellable;
         public unowned SourceFunc cb;
-        public CommandResponse? cmd_response = null;
+        public CompletionStatusResponse? completion_response = null;
         public Error? err = null;
         public bool do_yield = false;
         
@@ -183,11 +183,8 @@ public class Geary.Imap.ClientSession {
     private bool current_mailbox_readonly = false;
     private Gee.HashMap<Tag, CommandCallback> tag_cb = new Gee.HashMap<Tag, CommandCallback>(
         Hashable.hash_func, Equalable.equal_func);
-    private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>(
-        Hashable.hash_func, Equalable.equal_func);
     private Capabilities capabilities = new Capabilities(0);
     private int next_capabilities_revision = 1;
-    private CommandResponse current_cmd_response = new CommandResponse();
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
     private uint unselected_keepalive_secs = 0;
@@ -195,12 +192,6 @@ public class Geary.Imap.ClientSession {
     private bool allow_idle = true;
     private NonblockingMutex serialized_cmds_mutex = new NonblockingMutex();
     private int waiting_to_send = 0;
-    
-    // state used only during connect and disconnect
-    private bool awaiting_connect_response = false;
-    private ServerData? connect_response = null;
-    private AsyncParams? connect_params = null;
-    private AsyncParams? disconnect_params = null;
     
     public virtual signal void connected() {
     }
@@ -223,21 +214,6 @@ public class Geary.Imap.ClientSession {
      * ignored.
      */
     public virtual signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly) {
-    }
-    
-    public virtual signal void capabilities_changed(Capabilities new_caps) {
-    }
-    
-    public virtual signal void unsolicited_expunged(MessageNumber msg) {
-    }
-    
-    public virtual signal void unsolicited_exists(int exists) {
-    }
-    
-    public virtual signal void unsolicited_recent(int recent) {
-    }
-    
-    public virtual signal void unsolicited_flags(MailboxAttributes attrs) {
     }
     
     public ClientSession(Endpoint imap_endpoint, bool imap_server_pipeline) {
@@ -367,7 +343,7 @@ public class Geary.Imap.ClientSession {
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
-        fsm.set_logging(false);
+        fsm.set_logging(true);
     }
     
     ~ClientSession() {
@@ -451,6 +427,7 @@ public class Geary.Imap.ClientSession {
         cx.sent_command.connect(on_network_sent_command);
         cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
+        cx.received_completion_status_response.connect(on_received_completion_status_response);
         cx.received_server_data.connect(on_received_server_data);
         cx.received_bytes.connect(on_received_bytes);
         cx.received_bad_response.connect(on_received_bad_response);
@@ -479,6 +456,7 @@ public class Geary.Imap.ClientSession {
         cx.sent_command.disconnect(on_network_sent_command);
         cx.send_failure.disconnect(on_network_send_error);
         cx.received_status_response.disconnect(on_received_status_response);
+        cx.received_completion_status_response.disconnect(on_received_completion_status_response);
         cx.received_server_data.disconnect(on_received_server_data);
         cx.received_bytes.disconnect(on_received_bytes);
         cx.received_bad_response.disconnect(on_received_bad_response);
@@ -1373,10 +1351,6 @@ public class Geary.Imap.ClientSession {
     
     private void on_network_connected() {
         debug("[%s] Connected to %s", to_full_string(), imap_endpoint.to_string());
-        
-        // the first ServerData from the server is a greeting; this flag indicates to treat it
-        // differently than the other data thereafter
-        awaiting_connect_response = true;
     }
     
     private void on_network_disconnected() {
@@ -1387,9 +1361,6 @@ public class Geary.Imap.ClientSession {
 #if VERBOSE_SESSION
         debug("[%s] Sent command %s", to_full_string(), cmd.to_string());
 #endif
-        
-        // reschedule keepalive, now that traffic has been seen
-        schedule_keepalive();
     }
     
     private void on_network_send_error(Error err) {
@@ -1397,74 +1368,39 @@ public class Geary.Imap.ClientSession {
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
     
-    private void on_received_status_response(StatusResponse status_response) {
-        assert(!current_cmd_response.is_sealed());
-        current_cmd_response.seal(status_response);
-        assert(current_cmd_response.is_sealed());
-        
-        // reschedule keepalive
-        schedule_keepalive();
-        
-        Tag tag = current_cmd_response.status_response.tag;
-        
-        // store the result for the caller to index
-        assert(!tag_response.has_key(tag));
-        tag_response.set(tag, current_cmd_response);
-        
-        // Store most recently seen CAPABILITY results
-        if (current_cmd_response.status_response.status == Status.OK
-            && CapabilityResults.is_capability_response(current_cmd_response)) {
-            try {
-                int old_revision = next_capabilities_revision;
-                capabilities =
-                    CapabilityResults.decode(current_cmd_response, ref next_capabilities_revision).capabilities;
-                assert(old_revision != next_capabilities_revision);
-                debug("[%s] CAPABILITY: %s", to_string(), capabilities.to_string());
-                
-                capabilities_changed(capabilities);
-            } catch (ImapError err) {
-                debug("Warning: Unable to decode CAPABILITY results %s: %s", current_cmd_response.to_string(),
-                    err.message);
-            }
-        }
-        
-        // create new CommandResponse for the next received response
-        current_cmd_response = new CommandResponse();
-        
-        // The caller may not have had a chance to register a callback (if the receive came in in
-        // the context of their send_async(), for example), so only schedule if they're yielding
-        CommandCallback? cmd_callback = null;
-        if (tag_cb.unset(tag, out cmd_callback)) {
-            assert(cmd_callback != null);
-            Scheduler.on_idle(cmd_callback.callback);
+    private void notify_received_server_response(ServerResponse server_response) {
+        try {
+            if (!server_response_notifier.notify(server_response))
+                debug("[%s] Unable to notify of server response: %s", server_response.to_string());
+        } catch (ImapError ierr) {
+            debug("[%s] Failure notifying of server response: %s %s", server_response.to_string(),
+                ierr.message);
         }
     }
     
-    private void on_received_server_data(ServerData server_data) {
-        // reschedule keepalive
+    private void on_received_status_response(StatusResponse status_response) {
+        // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
         
-        // The first response from the server is an untagged status response, which is considered
-        // ServerData in our model.  This captures that and treats it as such.
-        if (awaiting_connect_response) {
-            awaiting_connect_response = false;
-            connect_response = server_data;
-            
-            Scheduler.on_idle(on_connect_response_received);
-            
-            return;
-        }
+        notify_received_server_response(status_response);
+    }
+    
+    private void on_received_completion_status_response(CompletionStatusResponse completion_status_response) {
+        // reschedule keepalive (traffic seen on channel)
+        schedule_keepalive();
         
-        // If no outstanding commands, treat as unsolicited so it's reported immediately
-        if (tag_cb.size == 0) {
-            UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data(server_data);
-            if (unsolicited != null && report_unsolicited_server_data(unsolicited, "UNSOLICITED"))
-                return;
-            
-            debug("Received server data for no outstanding cmd: %s", server_data.to_string());
-        }
+        // CompletionStatusResponses are always tagged; untagged are merely StatusResponses
+        Tag tag = completion_status_response.tag;
+        assert(tag.is_tagged());
         
-        current_cmd_response.add_server_data(server_data);
+        notify_received_server_response(completion_status_response);
+    }
+    
+    private void on_received_server_data(ServerData server_data) {
+        // reschedule keepalive (traffic seen on channel)
+        schedule_keepalive();
+        
+        notify_received_server_response(server_data);
     }
     
     private void on_received_bytes(size_t bytes) {

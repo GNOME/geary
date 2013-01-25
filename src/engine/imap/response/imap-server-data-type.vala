@@ -62,6 +62,7 @@ public enum Geary.Imap.ServerDataType {
                 return EXISTS;
             
             case "expunge":
+            case "expunged":
                 return EXPUNGE;
             
             case "fetch":
@@ -96,6 +97,59 @@ public enum Geary.Imap.ServerDataType {
     
     public static ServerDataType from_parameter(StringParameter param) throws ImapError {
         return decode(param.value);
+    }
+    
+    public static ServerDataType from_response(RootParameters root) throws ImapError {
+        StringParameter? firstparam = root.get_if_string(1);
+        if (firstparam != null) {
+            switch (firstparam.value.down()) {
+                case "capability":
+                    return CAPABILITY;
+                
+                case "flags":
+                    return FLAGS;
+                
+                case "list":
+                    return LIST;
+                
+                case "lsub":
+                    return LSUB;
+                
+                case "search":
+                    return SEARCH;
+                
+                case "status":
+                    return STATUS;
+                
+                default:
+                    // fall-through
+                break;
+            }
+        }
+        
+        StringParameter? secondparam = root.get_if_string(2);
+        if (secondparam != null) {
+            switch (secondparam.value.down()) {
+                case "exists":
+                    return EXISTS;
+                
+                case "expunge":
+                case "expunged":
+                    return EXPUNGE;
+                
+                case "fetch":
+                    return FETCH;
+                
+                case "recent":
+                    return RECENT;
+                
+                default:
+                    // fall-through
+                break;
+            }
+        }
+        
+        throw new ImapError.PARSE_ERROR("\"%s\" is not recognized server data", root.to_string());
     }
 }
 

@@ -466,6 +466,15 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         base.copy(root);
     }
     
+    /**
+     * Returns null if the first parameter is not a StringParameter that resembles a Tag.
+     */
+    public Tag? get_tag() {
+        StringParameter? strparam = get_if_string(0);
+        
+        return (strparam != null) ? new Tag.from_parameter(strparam) : null;
+    }
+    
     public override string to_string() {
         return stringize_list();
     }

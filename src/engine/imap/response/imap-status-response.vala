@@ -9,24 +9,13 @@ public class Geary.Imap.StatusResponse : ServerResponse {
     public ResponseCode? response_code { get; private set; }
     public string? text { get; private set; }
     
-    public StatusResponse(Tag tag, Status status, ResponseCode? response_code, string? text) {
-        base (tag);
-        
-        this.status = status;
-        this.response_code = response_code;
-        this.text = text;
-        
-        add(status.to_parameter());
-        if (response_code != null)
-            add(response_code);
-        if (text != null)
-            add(new StringParameter(text));
+    private StatusResponse() {
     }
     
     public StatusResponse.reconstitute(RootParameters root) throws ImapError {
         base.reconstitute(root);
         
-        status = Status.from_parameter((StringParameter) get_as(1, typeof(StringParameter)));
+        status = Status.from_parameter(get_as_string(1));
         response_code = get(2) as ResponseCode;
         text = (response_code != null) ? flatten_to_text(3) : flatten_to_text(2);
     }

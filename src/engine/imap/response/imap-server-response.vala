@@ -5,50 +5,29 @@
  */
 
 public abstract class Geary.Imap.ServerResponse : RootParameters {
-    public enum Type {
-        STATUS_RESPONSE,
-        SERVER_DATA,
-        CONTINUATION_RESPONSE
-    }
-    
     public Tag tag { get; private set; }
     
-    public ServerResponse(Tag tag) {
-        this.tag = tag;
-    }
-    
-    public ServerResponse.reconstitute(RootParameters root) throws ImapError {
+    protected ServerResponse.reconstitute(RootParameters root) throws ImapError {
         base.clone(root);
         
-        tag = new Tag.from_parameter((StringParameter) get_as(0, typeof(StringParameter)));
+        tag = new Tag.from_parameter(get_as_string(0));
     }
     
-    // Returns true if the RootParameters represents a StatusResponse, otherwise they should be
-    // treated as ServerData.
-    public static ServerResponse from_server(RootParameters root, out Type response_type)
-        throws ImapError {
-        Tag tag = new Tag.from_parameter(root.get_as_string(0));
-        if (tag.is_tagged()) {
-            // Attempt to decode second parameter for predefined status codes (piggyback on
-            // Status.decode's exception if this is invalid)
-            StringParameter? statusparam = root.get_if_string(1);
-            if (statusparam != null)
-                Status.decode(statusparam.value);
-            
-            // tagged and has proper status, so it's a status response
-            response_type = Type.STATUS_RESPONSE;
-            
-            return new StatusResponse.reconstitute(root);
-        } else if (tag.is_continuation()) {
-            // nothing to decode; everything after the tag is human-readable stuff
-            response_type = Type.CONTINUATION_RESPONSE;
-            
+    public static ServerResponse from_server(RootParameters root) throws ImapError {
+        if (ContinuationResponse.is_continuation_response(root))
             return new ContinuationResponse.reconstitute(root);
-        }
         
-        response_type = Type.SERVER_DATA;
+        // All CompletionStatusResponse's are StatusResponse's, so check for it first
+        if (CompletionStatusResponse.is_completion_status_response(root))
+            return new CompletionStatusResponse.reconstitute(root);
         
-        return new ServerData.reconstitute(root);
+        if (StatusResponse.is_status_response(root))
+            return new StatusResponse.reconstitute(root);
+        
+        if (ServerData.is_server_data(root))
+            return new ServerData.reconstitute(root);
+        
+        throw new ImapError.PARSE_ERROR("Unknown server response: %s", root.to_string());
     }
 }
 

@@ -80,6 +80,12 @@ public class Geary.Imap.Deserializer {
     private int ins_priority = Priority.DEFAULT;
     private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
     
+    /**
+     * Fired when a complete set of Parameters have been received.  Note that RootParameters may
+     * contain StringParameters, ListParameters, NilParameters, and so on.  One special Parameter
+     * decoded by Deserializer is ResponseCode, which is structured internally as a ListParameter
+     * subclass for convenience when decoding.
+     */
     public signal void parameters_ready(RootParameters root);
     
     /**
