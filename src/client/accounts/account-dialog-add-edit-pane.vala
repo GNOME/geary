@@ -28,6 +28,9 @@ public class AccountDialogAddEditPane : Gtk.Box {
         button_box.pack_start(ok_button, false, false, 0);
         ok_button.can_default = true;
         
+        // Since we're not yet in a window, we have to wait before setting the default action.
+        realize.connect(() => { ok_button.has_default = true; });
+        
         ok_button.clicked.connect(on_ok);
         cancel_button.clicked.connect(() => { cancel(); });
         

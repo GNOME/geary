@@ -266,6 +266,7 @@
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="placeholder_text">imap.example.com</property>
               </object>
               <packing>
@@ -297,6 +298,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="width_chars">5</property>
                 <property name="text">993</property>
                 <property name="invisible_char_set">True</property>
@@ -313,6 +315,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="invisible_char_set">True</property>
                 <property name="placeholder_text">smtp.example.com</property>
               </object>
@@ -328,6 +331,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="width_chars">5</property>
                 <property name="text">465</property>
                 <property name="invisible_char_set">True</property>
@@ -431,6 +435,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="placeholder_text">SMTP username</property>
               </object>
               <packing>
@@ -446,6 +451,7 @@
                 <property name="can_focus">True</property>
                 <property name="visibility">False</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="placeholder_text">SMTP password</property>
               </object>
               <packing>
@@ -494,6 +500,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="placeholder_text">IMAP username</property>
               </object>
               <packing>
@@ -509,6 +516,7 @@
                 <property name="can_focus">True</property>
                 <property name="visibility">False</property>
                 <property name="invisible_char">•</property>
+                <property name="activates_default">True</property>
                 <property name="placeholder_text">IMAP password</property>
               </object>
               <packing>
