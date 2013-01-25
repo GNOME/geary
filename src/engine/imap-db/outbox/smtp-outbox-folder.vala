@@ -34,7 +34,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     
     public signal void report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
         Error? err);
-        
+
+    // Min and max times between attempting to re-send after a connection failure.
+    private const uint MIN_SEND_RETRY_INTERVAL_SEC = 4;
+    private const uint MAX_SEND_RETRY_INTERVAL_SEC = 64;
+
     private static FolderRoot? path = null;
     
     private ImapDB.Database db;
@@ -63,6 +67,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     // TODO: Use Cancellable to shut down outbox processor when closing account
     private async void do_postman_async() {
         debug("Starting outbox postman");
+        uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
         
         // Fill the send queue with existing mail (if any)
         try {
@@ -130,7 +135,12 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                 } catch (Error send_err) {
                     debug("Outbox postman: Unable to re-enqueue message, dropping on floor: %s", send_err.message);
                 }
-                
+
+                // Take a brief nap before continuing to allow connection problems to resolve.
+                yield Geary.Scheduler.sleep_async(send_retry_seconds);
+                send_retry_seconds *= 2;
+                send_retry_seconds = Geary.Numeric.uint_ceiling(send_retry_seconds, MAX_SEND_RETRY_INTERVAL_SEC);
+
                 continue;
             }
             
@@ -145,6 +155,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             } catch (Error rm_err) {
                 debug("Outbox postman: Unable to remove row from database: %s", rm_err.message);
             }
+
+            // If we got this far the send was successful, so reset the send retry interval.
+            send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
         }
         
         debug("Exiting outbox postman");

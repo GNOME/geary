@@ -1,132 +1,469 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkDialog" id="LoginDialog">
-    <property name="width_request">450</property>
+  <object class="GtkBox" id="container">
+    <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="can_default">True</property>
-    <property name="border_width">5</property>
-    <property name="type_hint">dialog</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox1">
+    <property name="orientation">vertical</property>
+    <property name="spacing">2</property>
+    <child>
+      <object class="GtkBox" id="welcome_box">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
         <child>
-          <object class="GtkBox" id="box1">
+          <object class="GtkImage" id="application-icon">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <child>
-              <object class="GtkImage" id="application-icon">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="pixel_size">64</property>
-                <property name="icon_name">geary</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">8</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label-welcome">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="use_markup">True</property>
-                <property name="wrap">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
+            <property name="pixel_size">64</property>
+            <property name="icon_name">geary</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="padding">12</property>
+            <property name="padding">8</property>
             <property name="position">0</property>
           </packing>
         </child>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="action area">
+        <child>
+          <object class="GtkLabel" id="label-welcome">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
+            <property name="halign">start</property>
+            <property name="use_markup">True</property>
+            <property name="wrap">True</property>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="padding">6</property>
-            <property name="pack_type">end</property>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="padding">12</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkGrid" id="grid2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="row_spacing">2</property>
+        <property name="column_spacing">4</property>
         <child>
-          <object class="GtkGrid" id="grid2">
+          <object class="GtkEntry" id="entry: email">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">•</property>
+            <property name="activates_default">True</property>
+            <property name="width_chars">0</property>
+            <property name="invisible_char_set">True</property>
+            <property name="primary_icon_activatable">False</property>
+            <property name="secondary_icon_activatable">False</property>
+            <property name="placeholder_text">email@example.com</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">2</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="entry: password">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="visibility">False</property>
+            <property name="invisible_char">•</property>
+            <property name="activates_default">True</property>
+            <property name="invisible_char_set">True</property>
+            <property name="primary_icon_activatable">False</property>
+            <property name="secondary_icon_activatable">False</property>
+            <property name="placeholder_text">Password</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">3</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label: email">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">_Email address:</property>
+            <property name="use_underline">True</property>
+            <property name="mnemonic_widget">entry: email</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label: password">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">_Password:</property>
+            <property name="use_underline">True</property>
+            <property name="mnemonic_widget">entry: password</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText" id="combo: service">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label: service">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">_Service:</property>
+            <property name="use_underline">True</property>
+            <property name="mnemonic_widget">combo: service</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label: real_name">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xalign">0</property>
+            <property name="label" translatable="yes">N_ame:</property>
+            <property name="use_underline">True</property>
+            <property name="mnemonic_widget">entry: real_name</property>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="entry: real_name">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="invisible_char">•</property>
+            <property name="activates_default">True</property>
+            <property name="invisible_char_set">True</property>
+            <property name="primary_icon_activatable">False</property>
+            <property name="secondary_icon_activatable">False</property>
+            <property name="placeholder_text">First Last</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">1</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="check: remember_password">
+            <property name="label" translatable="yes">Re_member password</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">4</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkAlignment" id="container: other_info">
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkGrid" id="grid1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="row_spacing">2</property>
             <property name="column_spacing">4</property>
             <child>
-              <object class="GtkEntry" id="entry: email">
+              <object class="GtkLabel" id="label: imap">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
-                <property name="invisible_char">•</property>
-                <property name="activates_default">True</property>
-                <property name="width_chars">0</property>
-                <property name="invisible_char_set">True</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="placeholder_text">email@example.com</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="ypad">10</property>
+                <property name="label" translatable="yes">IMAP settings</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+                <property name="width">4</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: host">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">Se_rver:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">entry: imap host</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
                 <property name="width">1</property>
                 <property name="height">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry: password">
+              <object class="GtkEntry" id="entry: imap host">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
+                <property name="invisible_char">•</property>
+                <property name="placeholder_text">imap.example.com</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: port">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">P_ort:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">entry: imap port</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry: imap port">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="width_chars">5</property>
+                <property name="text">993</property>
+                <property name="invisible_char_set">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="top_attach">1</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry: smtp host">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="invisible_char_set">True</property>
+                <property name="placeholder_text">smtp.example.com</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">9</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry: smtp port">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="width_chars">5</property>
+                <property name="text">465</property>
+                <property name="invisible_char_set">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="top_attach">9</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: smtp host">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">Ser_ver:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">entry: smtp host</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">9</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: smtp port">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">Por_t:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">entry: smtp port</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">9</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: smtp">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">8</property>
+                <property name="xalign">0</property>
+                <property name="ypad">10</property>
+                <property name="label" translatable="yes">SMTP settings</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">8</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: smtp username">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">User_name:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">entry: smtp username</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">10</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: smtp password">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">Pass_word:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">entry: smtp password</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">11</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry: smtp username">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="placeholder_text">SMTP username</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">10</property>
+                <property name="width">3</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry: smtp password">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
                 <property name="visibility">False</property>
                 <property name="invisible_char">•</property>
-                <property name="activates_default">True</property>
-                <property name="invisible_char_set">True</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="placeholder_text">Password</property>
+                <property name="placeholder_text">SMTP password</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
-                <property name="width">1</property>
+                <property name="top_attach">11</property>
+                <property name="width">3</property>
                 <property name="height">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label: email">
+              <object class="GtkLabel" id="label: imap username">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">_Email address:</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">_Username:</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic_widget">entry: email</property>
+                <property name="mnemonic_widget">entry: imap username</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -136,13 +473,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label: password">
+              <object class="GtkLabel" id="label: imap password">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
+                <property name="xpad">12</property>
                 <property name="label" translatable="yes">_Password:</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic_widget">entry: password</property>
+                <property name="mnemonic_widget">entry: imap password</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -152,546 +490,177 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText" id="combo: service">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="hexpand">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label: service">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">_Service:</property>
-                <property name="use_underline">True</property>
-                <property name="mnemonic_widget">combo: service</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label: real_name">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">N_ame:</property>
-                <property name="use_underline">True</property>
-                <property name="mnemonic_widget">entry: real_name</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry: real_name">
+              <object class="GtkEntry" id="entry: imap username">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
                 <property name="invisible_char">•</property>
-                <property name="activates_default">True</property>
-                <property name="invisible_char_set">True</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="placeholder_text">First Last</property>
+                <property name="placeholder_text">IMAP username</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="top_attach">2</property>
+                <property name="width">3</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry: imap password">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="visibility">False</property>
+                <property name="invisible_char">•</property>
+                <property name="placeholder_text">IMAP password</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">3</property>
+                <property name="width">3</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label: imap encryption">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">2</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">Encr_yption:</property>
+                <property name="use_underline">True</property>
+                <property name="justify">center</property>
+                <property name="mnemonic_widget">combo: imap encryption</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
                 <property name="width">1</property>
                 <property name="height">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="check: remember_password">
-                <property name="label" translatable="yes">Re_member password</property>
-                <property name="use_action_appearance">False</property>
+              <object class="GtkLabel" id="label: smtp encryption">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_underline">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">2</property>
                 <property name="xalign">0</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">Encrypt_ion:</property>
+                <property name="use_underline">True</property>
+                <property name="justify">fill</property>
+                <property name="mnemonic_widget">combo: smtp encryption</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">13</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="combo: imap encryption">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="active">1</property>
+                <property name="entry_text_column">0</property>
+                <property name="id_column">1</property>
+                <items>
+                  <item translatable="yes">None</item>
+                  <item translatable="yes">SSL/TLS</item>
+                  <item translatable="yes">STARTTLS</item>
+                </items>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">4</property>
-                <property name="width">1</property>
+                <property name="top_attach">5</property>
+                <property name="width">3</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="combo: smtp encryption">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="active">1</property>
+                <property name="entry_text_column">0</property>
+                <property name="id_column">1</property>
+                <items>
+                  <item translatable="yes">None</item>
+                  <item translatable="yes">SSL/TLS</item>
+                  <item translatable="yes">STARTTLS</item>
+                </items>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">13</property>
+                <property name="width">3</property>
                 <property name="height">1</property>
               </packing>
             </child>
             <child>
               <placeholder/>
             </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkAlignment" id="container: other_info">
-            <property name="can_focus">False</property>
             <child>
-              <object class="GtkGrid" id="grid1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="row_spacing">2</property>
-                <property name="column_spacing">4</property>
-                <child>
-                  <object class="GtkLabel" id="label: imap">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="ypad">10</property>
-                    <property name="label" translatable="yes">IMAP settings</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                    <property name="width">4</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: host">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Se_rver:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: imap host</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: imap host">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hexpand">True</property>
-                    <property name="invisible_char">•</property>
-                    <property name="placeholder_text">imap.example.com</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: port">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">P_ort:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: imap port</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">1</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: imap port">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
-                    <property name="width_chars">5</property>
-                    <property name="text">993</property>
-                    <property name="invisible_char_set">True</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">3</property>
-                    <property name="top_attach">1</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: smtp host">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
-                    <property name="invisible_char_set">True</property>
-                    <property name="placeholder_text">smtp.example.com</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">9</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: smtp port">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
-                    <property name="width_chars">5</property>
-                    <property name="text">465</property>
-                    <property name="invisible_char_set">True</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">3</property>
-                    <property name="top_attach">9</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: smtp host">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Ser_ver:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: smtp host</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">9</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: smtp port">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Por_t:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: smtp port</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">9</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: smtp">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">8</property>
-                    <property name="xalign">0</property>
-                    <property name="ypad">10</property>
-                    <property name="label" translatable="yes">SMTP settings</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">8</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: smtp username">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">User_name:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: smtp username</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">10</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: smtp password">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Pass_word:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: smtp password</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">11</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: smtp username">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
-                    <property name="placeholder_text">SMTP username</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">10</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: smtp password">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="visibility">False</property>
-                    <property name="invisible_char">•</property>
-                    <property name="placeholder_text">SMTP password</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">11</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: imap username">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">_Username:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: imap username</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">2</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: imap password">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">_Password:</property>
-                    <property name="use_underline">True</property>
-                    <property name="mnemonic_widget">entry: imap password</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">3</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: imap username">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
-                    <property name="placeholder_text">IMAP username</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">2</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry: imap password">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="visibility">False</property>
-                    <property name="invisible_char">•</property>
-                    <property name="placeholder_text">IMAP password</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">3</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: imap encryption">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Encr_yption:</property>
-                    <property name="use_underline">True</property>
-                    <property name="justify">center</property>
-                    <property name="mnemonic_widget">combo: imap encryption</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">5</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label: smtp encryption">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">2</property>
-                    <property name="xalign">0</property>
-                    <property name="xpad">12</property>
-                    <property name="label" translatable="yes">Encrypt_ion:</property>
-                    <property name="use_underline">True</property>
-                    <property name="justify">fill</property>
-                    <property name="mnemonic_widget">combo: smtp encryption</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">13</property>
-                    <property name="width">1</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBoxText" id="combo: imap encryption">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="active">1</property>
-                    <property name="entry_text_column">0</property>
-                    <property name="id_column">1</property>
-                    <items>
-                      <item translatable="yes">None</item>
-                      <item translatable="yes">SSL/TLS</item>
-                      <item translatable="yes">STARTTLS</item>
-                    </items>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">5</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBoxText" id="combo: smtp encryption">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="active">1</property>
-                    <property name="entry_text_column">0</property>
-                    <property name="id_column">1</property>
-                    <items>
-                      <item translatable="yes">None</item>
-                      <item translatable="yes">SSL/TLS</item>
-                      <item translatable="yes">STARTTLS</item>
-                    </items>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">13</property>
-                    <property name="width">3</property>
-                    <property name="height">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
         </child>
       </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
+      </packing>
     </child>
   </object>
 </interface>

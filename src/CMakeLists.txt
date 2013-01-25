@@ -197,13 +197,19 @@ client/geary-config.vala
 client/geary-controller.vala
 client/main.vala
 
+client/accounts/account-dialog.vala
+client/accounts/account-dialog-account-list-pane.vala
+client/accounts/account-dialog-add-edit-pane.vala
+client/accounts/account-spinner-page.vala
+client/accounts/add-edit-page.vala
+client/accounts/login-dialog.vala
+
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/email-entry.vala
 client/composer/webview-edit-fixer.vala
 
 client/dialogs/alert-dialog.vala
-client/dialogs/login-dialog.vala
 client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
 

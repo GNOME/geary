@@ -1,4 +1,4 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution. 
@@ -129,6 +129,13 @@ private void on_scheduled_dead(ScheduledInstance inst) {
     
     bool removed = scheduled_map.remove(inst);
     assert(removed);
+}
+
+// Sleeps for the specified number of seconds.
+public async void sleep_async(uint seconds) {
+    uint id = Timeout.add_seconds(seconds, sleep_async.callback);
+    yield;
+    Source.remove(id);
 }
 
 }

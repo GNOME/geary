@@ -1,0 +1,470 @@
+/* Copyright 2011-2013 Yorba Foundation
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later).  See the COPYING file in this distribution.
+ */
+
+// Page for adding or editing an account.
+public class AddEditPage : Gtk.Box {
+    public string real_name {
+        get { return entry_real_name.text; }
+        set { entry_real_name.text = value; }
+    }
+    
+    public string email_address {
+        get { return entry_email.text; }
+        set { entry_email.text = value; }
+    }
+    
+    public string password {
+        get { return entry_password.text; }
+        set { entry_password.text = value; }
+    }
+    
+    public string imap_username {
+        get { return entry_imap_username.text; }
+        set { entry_imap_username.text = value; }
+    }
+    
+    public string imap_password {
+        get { return entry_imap_password.text; }
+        set { entry_imap_password.text = value; }
+    }
+    
+    public bool remember_password {
+        get { return check_remember_password.active; }
+        set { check_remember_password.active = value; }
+    }
+    
+    public string smtp_username {
+        get { return entry_smtp_username.text; }
+        set { entry_smtp_username.text = value; }
+    }
+    
+    public string smtp_password {
+        get { return entry_smtp_password.text; }
+        set { entry_smtp_password.text = value; }
+    }
+    
+    public string imap_host {
+        get { return entry_imap_host.text; }
+        set { entry_imap_host.text = value; }
+    }
+    
+    public uint16 imap_port {
+        get { return (uint16) int.parse(entry_imap_port.text.strip()); }
+        set { entry_imap_port.text = value.to_string(); }
+    }
+    
+    public bool imap_ssl {
+        get { return combo_imap_encryption.active == Encryption.SSL; }
+        set {
+            if (value)
+                combo_imap_encryption.active = Encryption.SSL;
+        }
+    }
+    
+    public bool imap_starttls {
+        get { return combo_imap_encryption.active == Encryption.STARTTLS; }
+        set {
+            if (value)
+                combo_imap_encryption.active = Encryption.STARTTLS;
+        }
+    }
+    
+    public string smtp_host {
+        get { return entry_smtp_host.text; }
+        set { entry_smtp_host.text = value; }
+    }
+    
+    public uint16 smtp_port {
+        get { return (uint16) int.parse(entry_smtp_port.text.strip()); }
+        set { entry_smtp_port.text = value.to_string(); }
+    }
+    
+    public bool smtp_ssl {
+        get { return combo_smtp_encryption.active == Encryption.SSL; }
+        set {
+            if (value)
+                combo_smtp_encryption.active = Encryption.SSL;
+        }
+    }
+    
+    public bool smtp_starttls {
+        get { return combo_smtp_encryption.active == Encryption.STARTTLS; }
+        set {
+            if (value)
+                combo_smtp_encryption.active = Encryption.STARTTLS;
+        }
+    }
+    
+    // these are tied to the values in the Glade file
+    private enum Encryption {
+        NONE = 0,
+        SSL = 1,
+        STARTTLS = 2
+    }
+    
+    private bool welcome_mode = true;
+    
+    private Gtk.Widget container_widget;
+    private Gtk.Box welcome_box;
+    
+    private Gtk.Entry entry_email;
+    private Gtk.Label label_password;
+    private Gtk.Entry entry_password;
+    private Gtk.Entry entry_real_name;
+    private Gtk.ComboBoxText combo_service;
+    private Gtk.CheckButton check_remember_password;
+    
+    private Gtk.Alignment other_info;
+    
+    // IMAP info widgets
+    private Gtk.Entry entry_imap_host;
+    private Gtk.Entry entry_imap_port;
+    private Gtk.Entry entry_imap_username;
+    private Gtk.Entry entry_imap_password;
+    private Gtk.ComboBox combo_imap_encryption;
+    
+    // SMTP info widgets
+    private Gtk.Entry entry_smtp_host;
+    private Gtk.Entry entry_smtp_port;
+    private Gtk.Entry entry_smtp_username;
+    private Gtk.Entry entry_smtp_password;
+    private Gtk.ComboBox combo_smtp_encryption;
+    
+    private bool edited_imap_port = false;
+    private bool edited_smtp_port = false;
+    
+    public signal void info_changed();
+    
+    public signal void size_changed();
+    
+    public AddEditPage() {
+        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
+        
+        Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
+        
+        // Primary container.
+        container_widget = (Gtk.Widget) builder.get_object("container");
+        pack_start(container_widget);
+        
+        welcome_box = (Gtk.Box) builder.get_object("welcome_box");
+        Gtk.Label label_welcome = (Gtk.Label) builder.get_object("label-welcome");
+        label_welcome.set_markup("<span size=\"large\"><b>%s</b></span>\n%s".printf(
+            _("Welcome to Geary."), _("Enter your account information to get started.")));
+        
+        entry_real_name = (Gtk.Entry) builder.get_object("entry: real_name");
+        combo_service =  (Gtk.ComboBoxText) builder.get_object("combo: service");
+        entry_email = (Gtk.Entry) builder.get_object("entry: email");
+        label_password = (Gtk.Label) builder.get_object("label: password");
+        entry_password = (Gtk.Entry) builder.get_object("entry: password");
+        check_remember_password = (Gtk.CheckButton) builder.get_object("check: remember_password");
+        
+        other_info = (Gtk.Alignment) builder.get_object("container: other_info");
+        
+        // IMAP info widgets.
+        entry_imap_host = (Gtk.Entry) builder.get_object("entry: imap host");
+        entry_imap_port = (Gtk.Entry) builder.get_object("entry: imap port");
+        entry_imap_username = (Gtk.Entry) builder.get_object("entry: imap username");
+        entry_imap_password = (Gtk.Entry) builder.get_object("entry: imap password");
+        combo_imap_encryption = (Gtk.ComboBox) builder.get_object("combo: imap encryption");
+        
+        // SMTP info widgets.
+        entry_smtp_host = (Gtk.Entry) builder.get_object("entry: smtp host");
+        entry_smtp_port = (Gtk.Entry) builder.get_object("entry: smtp port");
+        entry_smtp_username = (Gtk.Entry) builder.get_object("entry: smtp username");
+        entry_smtp_password = (Gtk.Entry) builder.get_object("entry: smtp password");
+        combo_smtp_encryption = (Gtk.ComboBox) builder.get_object("combo: smtp encryption");
+        
+        // Build list of service providers.
+        foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers())
+            combo_service.append_text(p.display_name());
+        
+        // Set defaults.
+        set_service_provider(Geary.ServiceProvider.GMAIL);
+        imap_ssl = true;
+        smtp_ssl = true;
+        
+        combo_service.changed.connect(update_ui);
+        entry_email.changed.connect(on_changed);
+        entry_password.changed.connect(on_changed);
+        entry_real_name.changed.connect(on_changed);
+        check_remember_password.toggled.connect(on_changed);
+        combo_service.changed.connect(on_changed);
+        entry_imap_host.changed.connect(on_changed);
+        entry_imap_port.changed.connect(on_changed);
+        entry_imap_username.changed.connect(on_changed);
+        entry_imap_password.changed.connect(on_changed);
+        entry_smtp_host.changed.connect(on_changed);
+        entry_smtp_port.changed.connect(on_changed);
+        entry_smtp_username.changed.connect(on_changed);
+        entry_smtp_password.changed.connect(on_changed);
+        
+        entry_email.changed.connect(on_email_changed);
+        entry_password.changed.connect(on_password_changed);
+        
+        combo_imap_encryption.changed.connect(on_imap_encryption_changed);
+        combo_smtp_encryption.changed.connect(on_smtp_encryption_changed);
+        
+        entry_imap_port.insert_text.connect(on_port_insert_text);
+        entry_smtp_port.insert_text.connect(on_port_insert_text);
+        
+        // Shows/hides settings.
+        update_ui();
+    }
+    
+    public void set_all_info(
+        string? initial_real_name = null,
+        string? initial_email = null,
+        string? initial_imap_username = null,
+        string? initial_imap_password = null,
+        bool initial_remember_password = true,
+        string? initial_smtp_username = null,
+        string? initial_smtp_password = null,
+        int initial_service_provider = -1,
+        string? initial_default_imap_host = null,
+        uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
+        bool initial_default_imap_ssl = true,
+        bool initial_default_imap_starttls = false,
+        string? initial_default_smtp_host = null,
+        uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
+        bool initial_default_smtp_ssl = true,
+        bool initial_default_smtp_starttls = false) {
+        
+        // Set defaults (other than service provider, which is set above)
+        real_name = initial_real_name ?? "";
+        email_address = initial_email ?? "";
+        bool use_imap_password = initial_imap_password == initial_smtp_password &&
+            initial_imap_password != null;
+        password = use_imap_password ? initial_imap_password : "";
+        remember_password = initial_remember_password;
+        
+        // Set defaults for IMAP info
+        imap_host = initial_default_imap_host ?? "";
+        imap_port = initial_default_imap_port;
+        imap_username = initial_imap_username ?? "";
+        imap_password = initial_imap_password ?? "";
+        imap_ssl = initial_default_imap_ssl;
+        imap_starttls = initial_default_imap_starttls;
+        
+        // Set defaults for SMTP info
+        smtp_host = initial_default_smtp_host ?? "";
+        smtp_port = initial_default_smtp_port;
+        smtp_username = initial_smtp_username ?? "";
+        smtp_password = initial_smtp_password ?? "";
+        imap_ssl = initial_default_imap_ssl;
+        imap_starttls = initial_default_imap_starttls;
+        
+        if (Geary.String.is_empty(real_name))
+            entry_real_name.grab_focus();
+        else
+            entry_email.grab_focus();
+    }
+    
+    // Puts this page into welcome mode which shows the "Welcome to Geary" message, etc.
+    // Default is true.
+    public void show_welcome(bool welcome) {
+        welcome_mode = welcome;
+        update_ui();
+    }
+    
+    // TODO: Only reset if not manually set by user.
+    private void on_email_changed() {
+        entry_imap_username.text = entry_email.text;
+        entry_smtp_username.text = entry_email.text;
+    }
+    
+    // TODO: Only reset if not manually set by user.
+    private void on_password_changed() {
+        entry_imap_password.text = entry_password.text;
+        entry_smtp_password.text = entry_password.text;
+    }
+    
+    private void on_changed() {
+        info_changed();
+    }
+    
+    private void on_port_insert_text(Gtk.Editable e, string text, int length, ref int position) {
+        // Prevent non-numerical characters and ensure port is <= uint16.MAX
+        if (!uint64.try_parse(text) || uint64.parse(((Gtk.Entry) e).text) > uint16.MAX) {
+            Signal.stop_emission_by_name(e, "insert-text");
+        } else {
+            if (e == entry_imap_port)
+                edited_imap_port = true;
+            else if (e == entry_smtp_port)
+                edited_smtp_port = true;
+        }
+    }
+    
+    private void on_imap_encryption_changed() {
+        if (edited_imap_port)
+            return;
+        
+        imap_port = get_default_imap_port();
+        edited_imap_port = false;
+    }
+    
+    private uint16 get_default_imap_port() {
+        switch (combo_imap_encryption.active) {
+            case Encryption.SSL:
+                return Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
+            
+            case Encryption.NONE:
+            case Encryption.STARTTLS:
+            default:
+                return Geary.Imap.ClientConnection.DEFAULT_PORT;
+        }
+    }
+    
+    private void on_smtp_encryption_changed() {
+        if (edited_smtp_port)
+            return;
+        
+        smtp_port = get_default_smtp_port();
+        edited_smtp_port = false;
+    }
+    
+    private uint16 get_default_smtp_port() {
+        switch (combo_smtp_encryption.active) {
+            case Encryption.SSL:
+                return Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
+            
+            case Encryption.STARTTLS:
+                return Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
+            
+            case Encryption.NONE:
+            default:
+                return Geary.Smtp.ClientConnection.DEFAULT_PORT;
+        }
+    }
+    
+    public bool is_complete() {
+        switch (get_service_provider()) {
+            case Geary.ServiceProvider.OTHER:
+                if (Geary.String.is_empty_or_whitespace(email_address) ||
+                    Geary.String.is_empty_or_whitespace(imap_host) ||
+                    Geary.String.is_empty_or_whitespace(imap_port.to_string()) ||
+                    Geary.String.is_empty_or_whitespace(imap_username) ||
+                    Geary.String.is_empty_or_whitespace(imap_password) ||
+                    Geary.String.is_empty_or_whitespace(smtp_host) ||
+                    Geary.String.is_empty_or_whitespace(smtp_port.to_string()) ||
+                    Geary.String.is_empty_or_whitespace(smtp_username) ||
+                    Geary.String.is_empty_or_whitespace(smtp_password))
+                    return false;
+            break;
+            
+            // GMAIL and YAHOO
+            default:
+                if (Geary.String.is_empty_or_whitespace(email_address) ||
+                    Geary.String.is_empty_or_whitespace(password))
+                    return false;
+            break;
+        }
+        
+        return true;
+    }
+    
+    public Geary.AccountInformation? get_account_information() {
+        Geary.AccountInformation account_information;
+        
+        Geary.Credentials imap_credentials = new Geary.Credentials(imap_username.strip(), imap_password.strip());
+        Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username.strip(), smtp_password.strip());
+        
+        try {
+            account_information = Geary.Engine.instance.get_accounts().get(email_address);
+            if (account_information == null)
+                account_information = Geary.Engine.instance.create_orphan_account(email_address);
+        } catch (Error err) {
+            debug("Unable to open account information for %s: %s", email_address, err.message);
+            
+            return null;
+        }
+        
+        account_information.real_name = real_name.strip();
+        account_information.imap_credentials = imap_credentials;
+        account_information.smtp_credentials = smtp_credentials;
+        account_information.imap_remember_password = remember_password;
+        account_information.smtp_remember_password = remember_password;
+        account_information.service_provider = get_service_provider();
+        account_information.default_imap_server_host = imap_host;
+        account_information.default_imap_server_port = imap_port;
+        account_information.default_imap_server_ssl = imap_ssl;
+        account_information.default_imap_server_starttls = imap_starttls;
+        account_information.default_smtp_server_host = smtp_host.strip();
+        account_information.default_smtp_server_port = smtp_port;
+        account_information.default_smtp_server_ssl = smtp_ssl;
+        account_information.default_smtp_server_starttls = smtp_starttls;
+        
+        on_changed();
+        
+        return account_information;
+    }
+    
+    // Updates UI based on various options.
+    private void update_ui() {
+        base.show_all();
+        welcome_box.visible = welcome_mode;
+        
+        if (get_service_provider() == Geary.ServiceProvider.OTHER) {
+            // Display all options for custom providers.
+            label_password.hide();
+            entry_password.hide();
+            other_info.show();
+            set_other_info_sensitive(true);
+        } else {
+            // For special-cased providers, only display necessary info.
+            label_password.show();
+            entry_password.show();
+            other_info.hide();
+            
+            // TODO: Will be used by upcoming edit mode to display greyed-out other info.
+            set_other_info_sensitive(welcome_mode);
+            
+            // For supported providers, fill out the rest of the form automagically.
+            imap_username = email_address;
+            smtp_username = email_address;
+            imap_password = password;
+            smtp_password = password;
+        }
+        
+        size_changed();
+    }
+    
+    public Geary.ServiceProvider get_service_provider() {
+        return (Geary.ServiceProvider) combo_service.get_active();
+    }
+    
+    public void set_service_provider(Geary.ServiceProvider provider) {
+        foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers()) {
+            if (p == provider)
+                combo_service.set_active(p);
+        }
+        
+        if (combo_service.get_active() == -1)
+            combo_service.set_active(0);
+    }
+    
+    // Greys out "other info" (server settings, etc.)
+    public void set_other_info_sensitive(bool sensitive) {
+        entry_imap_host.sensitive = sensitive;
+        entry_imap_port.sensitive = sensitive;
+        entry_imap_username.sensitive = sensitive;
+        entry_imap_password.sensitive = sensitive;
+        combo_imap_encryption.sensitive = sensitive;
+        
+        entry_smtp_host.sensitive = sensitive;
+        entry_smtp_port.sensitive = sensitive;
+        entry_smtp_username.sensitive = sensitive;
+        entry_smtp_password.sensitive = sensitive;
+        combo_smtp_encryption.sensitive = sensitive;
+    }
+    
+    // Since users of this class embed it in a Gtk.Notebook, we're forced to override this method
+    // to prevent hidden UI elements from appearing.
+    public override void show_all() {
+        // Note that update_ui() calls base.show_all(), so no need to do that here.
+        update_ui();
+    }
+}
+

@@ -18,6 +18,7 @@ public class GearyController {
     public const string ACTION_ZOOM_IN = "GearyZoomIn";
     public const string ACTION_ZOOM_OUT = "GearyZoomOut";
     public const string ACTION_ZOOM_NORMAL = "GearyZoomNormal";
+    public const string ACTION_ACCOUNTS = "GearyAccounts";
     public const string ACTION_PREFERENCES = "GearyPreferences";
     public const string ACTION_MARK_AS_MENU = "GearyMarkAsMenuButton";
     public const string ACTION_MARK_AS_READ = "GearyMarkAsRead";
@@ -129,6 +130,11 @@ public class GearyController {
 
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
+        
+        Gtk.ActionEntry accounts = { ACTION_ACCOUNTS, null, TRANSLATABLE, null,
+            null, on_accounts };
+        accounts.label = _("A_ccounts");
+        entries += accounts;
         
         Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, null,
             null, on_preferences };
@@ -549,6 +555,7 @@ public class GearyController {
             main_window.conversation_viewer.add_message(email);
         
         main_window.conversation_viewer.unhide_last_email();
+        main_window.conversation_viewer.show_first_visible_email();
     }
     
     private void on_show_message_completed(Object? source, AsyncResult result) {
@@ -697,6 +704,12 @@ public class GearyController {
     // focus and now it does
     private void on_has_toplevel_focus() {
         clear_new_messages("on_has_toplevel_focus", null);
+    }
+    
+    private void on_accounts() {
+        AccountDialog dialog = new AccountDialog();
+        dialog.run();
+        dialog.destroy();
     }
     
     private void on_preferences() {

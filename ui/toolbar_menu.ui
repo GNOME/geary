@@ -3,6 +3,7 @@
     If ToolbarMenu is changed, be sure to update ToolbarMenuProxy as well. See comments below.
     -->
     <popup name="ToolbarMenu">
+        <menuitem name="Accounts" action="GearyAccounts" />
         <menuitem name="Preferences" action="GearyPreferences" />
         <separator />
         <menuitem name="Help" action="GearyHelp" />
@@ -17,6 +18,7 @@
     we keep a duplicate of ToolbarMenu in this .ui file to be used by the proxy.
     -->
     <popup name="ToolbarMenuProxy">
+        <menuitem name="Accounts" action="GearyAccounts" />
         <menuitem name="Preferences" action="GearyPreferences" />
         <separator />
         <menuitem name="Help" action="GearyHelp" />
