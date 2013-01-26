@@ -48,12 +48,13 @@ public class Geary.Imap.ClientSession {
     }
     
     private class AsyncCommandResponse {
-        public CommandResponse? cmd_response { get; private set; }
+        public CompletionStatusResponse? completion_response { get; private set; }
         public Object? user { get; private set; }
         public Error? err { get; private set; }
         
-        public AsyncCommandResponse(CommandResponse? cmd_response, Object? user, Error? err) {
-            this.cmd_response = cmd_response;
+        public AsyncCommandResponse(CompletionStatusResponse? completion_response, Object? user,
+            Error? err) {
+            this.completion_response = completion_response;
             this.user = user;
             this.err = err;
         }
@@ -144,19 +145,10 @@ public class Geary.Imap.ClientSession {
         LOGOUT,
         DISCONNECT,
         
-        // async-response events
-        CONNECTED,
-        CONNECT_DENIED,
-        LOGIN_SUCCESS,
-        LOGIN_FAILED,
-        SENT_COMMAND,
-        SEND_COMMAND_FAILED,
-        SELECTED,
-        SELECT_FAILED,
-        CLOSED_MAILBOX,
-        CLOSE_MAILBOX_FAILED,
-        LOGOUT_SUCCESS,
-        LOGOUT_FAILED,
+        // server responses
+        RECV_STATUS,
+        RECV_COMPLETION,
+        RECV_DATA,
         DISCONNECTED,
         
         // I/O errors
@@ -174,8 +166,18 @@ public class Geary.Imap.ClientSession {
         "Geary.Imap.ClientSession", State.DISCONNECTED, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
+    /**
+     * ClientSession tracks server extensions reported via the CAPABILITY server data response.
+     * This comes automatically when logging in and can be fetched by the CAPABILITY command.
+     * ClientSession stores the last seen list as a service for users and uses it internally
+     * (specifically for IDLE support).  However, ClientSession will not automatically fetch
+     * capabilities, only watch for them as they're reported.  Thus, it's recommended that users
+     * of ClientSession issue a CapabilityCommand (if needed) before login.
+     */
+    private Capabilities capabilities { get; private set; default = new Capabilities(0); }
+    
     private Endpoint imap_endpoint;
-    private bool imap_server_pipeline;
+    private ServerDataNotifier notifier;
     private Geary.State.Machine fsm;
     private ImapError not_connected_err;
     private ClientConnection? cx = null;
@@ -183,15 +185,16 @@ public class Geary.Imap.ClientSession {
     private bool current_mailbox_readonly = false;
     private Gee.HashMap<Tag, CommandCallback> tag_cb = new Gee.HashMap<Tag, CommandCallback>(
         Hashable.hash_func, Equalable.equal_func);
-    private Capabilities capabilities = new Capabilities(0);
     private int next_capabilities_revision = 1;
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
     private bool allow_idle = true;
-    private NonblockingMutex serialized_cmds_mutex = new NonblockingMutex();
-    private int waiting_to_send = 0;
+    
+    // state used only during connect and disconnect
+    private AsyncParams? connect_params = null;
+    private AsyncParams? disconnect_params = null;
     
     public virtual signal void connected() {
     }
@@ -216,10 +219,10 @@ public class Geary.Imap.ClientSession {
     public virtual signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly) {
     }
     
-    public ClientSession(Endpoint imap_endpoint, bool imap_server_pipeline) {
+    public ClientSession(Endpoint imap_endpoint, ServerDataNotifier notifier) {
         this.imap_endpoint = imap_endpoint;
-        this.imap_server_pipeline = imap_server_pipeline;
-        allow_idle = imap_server_pipeline;
+        this.notifier = notifier;
+        allow_idle = true;
         
         not_connected_err = new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
         
@@ -239,8 +242,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.CONNECTING, Event.CLOSE_MAILBOX, on_early_command),
             new Geary.State.Mapping(State.CONNECTING, Event.LOGOUT, on_early_command),
             new Geary.State.Mapping(State.CONNECTING, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.CONNECTING, Event.CONNECTED, on_connected),
-            new Geary.State.Mapping(State.CONNECTING, Event.CONNECT_DENIED, on_connect_denied),
+            new Geary.State.Mapping(State.CONNECTING, Event.RECV_STATUS, on_connecting_response_status),
+            new Geary.State.Mapping(State.CONNECTING, Event.RECV_COMPLETION, on_dropped_response),
+            new Geary.State.Mapping(State.CONNECTING, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.CONNECTING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.CONNECTING, Event.RECV_ERROR, on_recv_error),
             
@@ -250,6 +254,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.NOAUTH, Event.CLOSE_MAILBOX, on_unauthenticated),
             new Geary.State.Mapping(State.NOAUTH, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.NOAUTH, Event.DISCONNECT, on_disconnect),
+            new Geary.State.Mapping(State.NOAUTH, Event.RECV_STATUS, on_dropped_response,
+            new Geary.State.Mapping(State.NOAUTH, Event.RECV_COMPLETION, on_command_completed,
+            new Geary.State.Mapping(State.NOAUTH, Event.RECV_DATA, Geary.State.nop,
             new Geary.State.Mapping(State.NOAUTH, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.NOAUTH, Event.RECV_ERROR, on_recv_error),
             
@@ -259,13 +266,17 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.AUTHORIZING, Event.CLOSE_MAILBOX, on_unauthenticated),
             new Geary.State.Mapping(State.AUTHORIZING, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.AUTHORIZING, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.AUTHORIZING, Event.LOGIN_SUCCESS, on_login_success),
-            new Geary.State.Mapping(State.AUTHORIZING, Event.LOGIN_FAILED, on_login_failed),
+            new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_STATUS, on_dropped_response,
+            new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_COMPLETION, on_login_completed,
+            new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_DATA, Geary.State.nop,
             new Geary.State.Mapping(State.AUTHORIZING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_ERROR, on_recv_error),
             
             new Geary.State.Mapping(State.AUTHORIZED, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.AUTHORIZED, Event.SELECT, on_select),
+            new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_STATUS, on_dropped_response,
+            new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_COMPLETION, on_recv_completion,
+            new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_DATA, Geary.State.nop,
             new Geary.State.Mapping(State.AUTHORIZED, Event.CLOSE_MAILBOX, Geary.State.nop),
             new Geary.State.Mapping(State.AUTHORIZED, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.AUTHORIZED, Event.DISCONNECT, on_disconnect),
@@ -277,6 +288,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.SELECTING, Event.SEND_CMD, on_send_command),
             new Geary.State.Mapping(State.SELECTING, Event.SELECT, Geary.State.nop),
             new Geary.State.Mapping(State.SELECTING, Event.CLOSE_MAILBOX, on_close_mailbox),
+            new Geary.State.Mapping(State.SELECTING, Event.RECV_STATUS, on_selecting_status_response),
+            new Geary.State.Mapping(State.SELECTING, Event.RECV_COMPLETION, on_selecting_completion_response),
+            new Geary.State.Mapping(State.SELECTING, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.SELECTING, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.SELECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTING, Event.SELECTED, on_selected),
@@ -285,6 +299,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.SELECTING, Event.RECV_ERROR, on_recv_error),
             
             new Geary.State.Mapping(State.SELECTED, Event.SEND_CMD, on_send_command),
+            new Geary.State.Mapping(State.SELECTED, Event.RECV_STATUS, Geary.State.nop),
+            new Geary.State.Mapping(State.SELECTED, Event.RECV_COMPLETION, Geary.State.nop),
+            new Geary.State.Mapping(State.SELECTED, Event.RECV_DATA, Geary.State.nop),
             new Geary.State.Mapping(State.SELECTED, Event.SELECT, on_select),
             new Geary.State.Mapping(State.SELECTED, Event.CLOSE_MAILBOX, on_close_mailbox),
             new Geary.State.Mapping(State.SELECTED, Event.LOGOUT, on_logout),
@@ -293,6 +310,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.SELECTED, Event.RECV_ERROR, on_recv_error),
             
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.SEND_CMD, on_send_command),
+            new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_STATUS, on_closing_status_response),
+            new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_COMPLETION, on_closing_completion_response),
+            new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CLOSE_MAILBOX, Geary.State.nop),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CLOSING_MAILBOX, Event.CLOSED_MAILBOX, on_closed_mailbox),
@@ -305,6 +325,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGIN, on_late_command),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_CMD, on_late_command),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.SELECT, on_late_command),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_dropped_response),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_COMPLETION, on_dropped_response),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGOUT, Geary.State.nop),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.DISCONNECT, on_disconnect),
@@ -316,6 +339,9 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.LOGGED_OUT, Event.CONNECT, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.LOGIN, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.SEND_CMD, on_late_command),
+            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_dropped_response),
+            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_COMPLETION, on_dropped_response),
+            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.SELECT, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.LOGOUT, on_late_command),
@@ -326,9 +352,13 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.DISCONNECTING, Event.CONNECT, on_late_command),
             new Geary.State.Mapping(State.DISCONNECTING, Event.LOGIN, on_late_command),
             new Geary.State.Mapping(State.DISCONNECTING, Event.SEND_CMD, on_late_command),
+            new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_STATUS, on_dropped_response),
+            new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_COMPLETION, on_dropped_response),
+            new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.DISCONNECTING, Event.SELECT, on_late_command),
             new Geary.State.Mapping(State.DISCONNECTING, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.DISCONNECTING, Event.LOGOUT, on_late_command),
+            new Geary.State.Mapping(State.DISCONNECTING, Event.DISCONNECT, Geary.State.nop),
             new Geary.State.Mapping(State.DISCONNECTING, Event.DISCONNECTED, on_disconnected),
             new Geary.State.Mapping(State.DISCONNECTING, Event.SEND_ERROR, Geary.State.nop),
             new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_ERROR, Geary.State.nop),
@@ -336,10 +366,14 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.BROKEN, Event.CONNECT, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.LOGIN, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.SEND_CMD, on_late_command),
+            new Geary.State.Mapping(State.BROKEN, Event.RECV_STATUS, on_dropped_response),
+            new Geary.State.Mapping(State.BROKEN, Event.RECV_COMPLETION, on_dropped_response),
+            new Geary.State.Mapping(State.BROKEN, Event.RECV_DATA, on_dropped_response),
             new Geary.State.Mapping(State.BROKEN, Event.SELECT, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.LOGOUT, on_late_command),
-            new Geary.State.Mapping(State.BROKEN, Event.DISCONNECT, Geary.State.nop)
+            new Geary.State.Mapping(State.BROKEN, Event.DISCONNECT, Geary.State.nop),
+            new Geary.State.Mapping(State.BROKEN, Event.DISCONNECTED, Geary.State.nop)
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
@@ -415,8 +449,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_connect(uint state, uint event, void *user, Object? object) {
-        assert(object != null);
-        
         assert(connect_params == null);
         connect_params = (AsyncParams) object;
         
@@ -445,6 +477,8 @@ public class Geary.Imap.ClientSession {
         return State.CONNECTING;
     }
     
+    // this is used internally to tear-down the ClientConnection object and unhook it from
+    // ClientSession
     private void drop_connection() {
         unschedule_keepalive();
         
@@ -484,43 +518,22 @@ public class Geary.Imap.ClientSession {
         } catch (Error err) {
             fsm.issue(Event.SEND_ERROR, null, null, err);
             connect_params.err = err;
-            
-            Scheduler.on_idle(connect_params.cb);
-            connect_params = null;
-            
-            return;
-        }
-    }
-    
-    private bool on_connect_response_received() {
-        assert(connect_params != null);
-        assert(connect_response != null);
-        
-        // initial greeting from server is an untagged response where the first parameter is a
-        // status code
-        try {
-            StringParameter status_param = (StringParameter) connect_response.get_as(
-                1, typeof(StringParameter));
-            if (issue_status(Status.from_parameter(status_param), Event.CONNECTED, Event.CONNECT_DENIED,
-                connect_response)) {
-                connected();
-            }
-        } catch (ImapError imap_err) {
-            connect_params.err = imap_err;
-            fsm.issue(Event.CONNECT_DENIED);
         }
         
         Scheduler.on_idle(connect_params.cb);
-        connect_params = null;
         
-        return false;
+        // drop internal reference, caller is holding on to it
+        connect_params = null;
     }
     
-    private uint on_connected(uint state, uint event, void *user) {
-        return State.NOAUTH;
-    }
-    
-    private uint on_connect_denied(uint state, uint event, void *user) {
+    private void on_connecting_response_status(uint state, uint event, void *user, Object? object) {
+        StatusResponse status_response = (StatusResponse) object;
+        
+        if (status_response.status == Status.OK)
+            return State.NOAUTH;
+        
+        debug("[%s] Connect denied: %s", to_string(), status_response.to_string());
+        
         return State.BROKEN;
     }
     
@@ -532,7 +545,7 @@ public class Geary.Imap.ClientSession {
      * Performs the LOGIN command using the supplied credentials.  See initiate_session_async() for
      * a more full-featured version of login_async().
      */
-    public async CommandResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
+    public async CompletionStatusResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
         LoginParams params = new LoginParams(credentials.user, credentials.pass ?? "", cancellable,
             login_async.callback);
@@ -545,9 +558,9 @@ public class Geary.Imap.ClientSession {
             throw params.err;
         
         // No Error means a response had better be available
-        assert(params.cmd_response != null);
+        assert(params.completion_response != null);
         
-        return params.cmd_response;
+        return params.completion_response;
     }
     
     /**
@@ -557,10 +570,10 @@ public class Geary.Imap.ClientSession {
     public async void initiate_session_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
         // If no capabilities available, get them now
-        if (get_capabilities().is_empty())
+        if (capabilities.is_empty())
             yield send_command_async(new CapabilityCommand());
         
-        Imap.Capabilities caps = get_capabilities();
+        Imap.Capabilities caps = capabilities;
         
         debug("[%s] use_starttls=%s is_ssl=%s starttls=%s", to_string(), imap_endpoint.use_starttls.to_string(),
             imap_endpoint.is_ssl.to_string(), caps.has_capability(Capabilities.STARTTLS).to_string());
@@ -594,29 +607,31 @@ public class Geary.Imap.ClientSession {
             break;
             
             case Endpoint.AttemptStarttls.HALT:
-            default:
                 throw new ImapError.NOT_SUPPORTED("STARTTLS unavailable for %s", to_string());
+            
+            default:
+                assert_not_reached();
         }
         
         // Login after STARTTLS
-        CommandResponse login_resp = yield login_async(credentials, cancellable);
-        if (login_resp.status_response.status != Status.OK) {
+        CompletionStatusResponse login_resp = yield login_async(credentials, cancellable);
+        if (login_resp.status != Status.OK) {
             throw new ImapError.UNAUTHENTICATED("Unable to login to %s with supplied credentials",
                 to_string());
         }
         
         // if new capabilities not offered after login, get them now
-        if (caps.revision == get_capabilities().revision)
+        if (caps.revision == capabilities.revision)
             yield send_command_async(new CapabilityCommand());
         
         // either way, new capabilities should be available
-        caps = get_capabilities();
+        caps = capabilities;
         
         // Attempt compression (usually only available after authentication)
         if (caps.has_setting(Capabilities.COMPRESS, Capabilities.DEFLATE_SETTING)) {
-            CommandResponse resp = yield send_command_async(
+            CompletionStatusResponse resp = yield send_command_async(
                 new CompressCommand(CompressCommand.ALGORITHM_DEFLATE));
-            if (resp.status_response.status == Status.OK) {
+            if (resp.status == Status.OK) {
                 install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW));
                 install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW));
                 debug("[%s] Compression started", to_string());
@@ -629,36 +644,31 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_login(uint state, uint event, void *user, Object? object) {
-        assert(object != null);
-        
         LoginParams params = (LoginParams) object;
         
         issue_command_async.begin(new LoginCommand(params.user, params.pass), params,
-            params.cancellable, on_login_completed);
+            params.cancellable, generic_issue_command_completion);
         
         params.do_yield = true;
         
         return State.AUTHORIZING;
     }
     
-    private void on_login_completed(Object? source, AsyncResult result) {
-        if (generic_issue_command_completed(result, Event.LOGIN_SUCCESS, Event.LOGIN_FAILED))
-            authorized();
-    }
-    
-    private uint on_login_success(uint state, uint event, void *user) {
-        return State.AUTHORIZED;
-    }
-    
-    private uint on_login_failed(uint state, uint event, void *user) {
-        // don't fire signals inside state transition handlers
-        fsm.do_post_transition(on_signal_login_failed);
+    private uint on_login_completed(uint state, uint event, void *user, Object? object) {
+        CompletionStatusResponse completion_response = (CompletionStatusResponse) object;
         
-        return State.NOAUTH;
-    }
-    
-    private void on_signal_login_failed() {
-        login_failed();
+        // Remember: only you can prevent firing signals inside state transition handlers
+        switch (completion_response.status) {
+            case Status.OK:
+                fsm.do_post_transition(() => { authorized(); });
+                
+                return State.AUTHORIZED;
+            
+            default:
+                fsm.do_post_transition(() => { login_failed(); });
+                
+                return State.NOAUTH;
+        }
     }
     
     //
@@ -783,18 +793,6 @@ public class Geary.Imap.ClientSession {
         return (cx != null) ? cx.install_recv_converter(converter) : false;
     }
     
-    /**
-     * ClientSession tracks server extensions reported via the CAPABILITY server data response.
-     * This comes automatically when logging in and can be fetched by the CAPABILITY command.
-     * ClientSession stores the last seen list as a service for users and uses it internally
-     * (specifically for IDLE support).  However, ClientSession will not automatically fetch
-     * capabilities, only watch for them as they're reported.  Thus, it's recommended that users
-     * of ClientSession issue a CapabilityCommand (if needed) before login.
-     */
-    public Capabilities get_capabilities() {
-        return capabilities;
-    }
-    
     public bool supports_idle() {
         return get_capabilities().has_capability(Capabilities.IDLE);
     }
@@ -803,7 +801,7 @@ public class Geary.Imap.ClientSession {
     // send commands
     //
     
-    public async CommandResponse send_command_async(Command cmd, Cancellable? cancellable = null) 
+    public async CompletionStatusResponse send_command_async(Command cmd, Cancellable? cancellable = null) 
         throws Error {
         // look for special commands that we wish to handle directly, as they affect the state
         // machine
@@ -812,7 +810,7 @@ public class Geary.Imap.ClientSession {
         if (cmd.has_name(LoginCommand.NAME) || cmd.has_name(LogoutCommand.NAME)
             || cmd.has_name(SelectCommand.NAME) || cmd.has_name(ExamineCommand.NAME)
             || cmd.has_name(CloseCommand.NAME)) {
-            throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands");
+            throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands for %s", cmd.name);
         }
         
         SendCommandParams params = new SendCommandParams(cmd, cancellable, send_command_async.callback);
@@ -824,32 +822,7 @@ public class Geary.Imap.ClientSession {
         if (params.err != null)
             throw params.err;
         
-        // Look for unsolicited server data and signal all that are found ... since SELECT/EXAMINE
-        // aren't allowed here, don't need to check for them (because their fields aren't considered
-        // unsolicited).  Note that this also captures NOOP's responses; although not exactly
-        // unsolicited in one sense, the NOOP command is merely the transport vehicle to allow the
-        // server to deliver unsolicited messages when no other response is available to piggyback
-        // upon.
-        //
-        // Note that EXPUNGE returns *EXPUNGED* results, not *EXPUNGE*, which is what the unsolicited
-        // version is.
-        Gee.ArrayList<ServerData>? to_remove = null;
-        foreach (ServerData data in params.cmd_response.server_data) {
-            UnsolicitedServerData? unsolicited = UnsolicitedServerData.from_server_data(data);
-            if (unsolicited != null && report_unsolicited_server_data(unsolicited, "SOLICITED")) {
-                if (to_remove == null)
-                    to_remove = new Gee.ArrayList<ServerData>();
-                
-                to_remove.add(data);
-            }
-        }
-        
-        if (to_remove != null) {
-            bool removed = params.cmd_response.remove_many_server_data(to_remove);
-            assert(removed);
-        }
-        
-        return params.cmd_response;
+        return params.completion_response;
     }
     
     private uint on_send_command(uint state, uint event, void *user, Object? object) {
@@ -924,11 +897,7 @@ public class Geary.Imap.ClientSession {
         // performs no I/O).
         cx.set_idle_when_quiet(allow_idle && supports_idle());
         
-        Command cmd;
-        if (params.is_select)
-            cmd = new SelectCommand(params.mailbox);
-        else
-            cmd = new ExamineCommand(params.mailbox);
+        Command cmd = params.is_select ? new SelectCommand(params.mailbox) : new ExamineCommand(params.mailbox);
         issue_command_async.begin(cmd, params, params.cancellable, on_select_completed);
         
         params.do_yield = true;
@@ -1057,11 +1026,12 @@ public class Geary.Imap.ClientSession {
     }
     
     private void on_logout_completed(Object? source, AsyncResult result) {
-        if (generic_issue_command_completed(result, Event.LOGOUT_SUCCESS, Event.LOGOUT_FAILED))
-            logged_out();
+        generic_issue_command_completed(result, Event.LOGOUT_SUCCESS, Event.LOGOUT_FAILED);
     }
     
     private uint on_logged_out(uint state, uint event, void *user) {
+        fsm.do_post_transition(() => { logged_out(); });
+        
         return State.LOGGED_OUT;
     }
     
@@ -1081,8 +1051,6 @@ public class Geary.Imap.ClientSession {
     }
     
     private uint on_disconnect(uint state, uint event, void *user, Object? object) {
-        assert(object != null);
-        
         assert(disconnect_params == null);
         disconnect_params = (AsyncParams) object;
         
@@ -1107,13 +1075,15 @@ public class Geary.Imap.ClientSession {
         }
         
         Scheduler.on_idle(disconnect_params.cb);
+        
+        // don't hold a reference, the caller is doing that
         disconnect_params = null;
     }
     
     private uint on_disconnected(uint state, uint event) {
         // don't do inside signal handler -- although today drop_connection() doesn't fire signals or call
         // callbacks, it could in the future
-        fsm.do_post_transition(on_drop_connection);
+        fsm.do_post_transition(() => { drop_connection(); });
         
         // although we could go to the DISCONNECTED state, that implies the object can be reused ...
         // while possible, that requires all state (not just the FSM) be reset at this point, and
@@ -1121,10 +1091,6 @@ public class Geary.Imap.ClientSession {
         // instantiate a new one
         
         return State.BROKEN;
-    }
-    
-    private void on_drop_connection() {
-        drop_connection();
     }
     
     //
@@ -1197,6 +1163,16 @@ public class Geary.Imap.ClientSession {
         return state;
     }
     
+    // This handles the situation where an unanticipated ServerResponse was received
+    private uint on_dropped_response(uint state, uint event, void *user, Object? object) {
+        ServerResponse server_response = (ServerResponse) object;
+        
+        debug("[%s] Dropped server response at %s: %s", to_string(), fsm.get_event_issued_string(state, event),
+            server_response.to_string());
+        
+        return state;
+    }
+    
     private uint on_unauthenticated(uint state, uint event, void *user, Object? object) {
         assert(object != null);
         
@@ -1218,132 +1194,58 @@ public class Geary.Imap.ClientSession {
     // command submission
     //
     
-    private bool issue_status(Status status, Event ok_event, Event error_event, Object? object) {
-        fsm.issue((status == Status.OK) ? ok_event : error_event, null, object);
-        
-        return (status == Status.OK);
-    }
-    
-    private async AsyncCommandResponse issue_command_async(Command cmd, Object? user = null,
-        Cancellable? cancellable = null) {
-        if (cx == null)
-            return new AsyncCommandResponse(null, user, not_connected_err);
-        
-        int claim_stub = NonblockingMutex.INVALID_TOKEN;
-        if (!imap_server_pipeline) {
-            try {
-                debug("[%s] Waiting to send cmd %s: %d", to_full_string(), cmd.to_string(), ++waiting_to_send);
-                claim_stub = yield serialized_cmds_mutex.claim_async(cancellable);
-                debug("[%s] Ready, now waiting to send cmd %s: %d", to_full_string(), cmd.to_string(), --waiting_to_send);
-            } catch (Error wait_err) {
-                return new AsyncCommandResponse(null, user, wait_err);
-            }
-        }
-        
-        // watch for connection dropped after waiting for pipeline mutex
+    private async AsyncCommandResponse issue_command_async(Command cmd, Object? user,
+        Cancellable? cancellable) {
         if (cx == null)
             return new AsyncCommandResponse(null, user, not_connected_err);
         
         try {
             yield cx.send_async(cmd, cancellable);
         } catch (Error send_err) {
-            try {
-                if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN)
-                    serialized_cmds_mutex.release(ref claim_stub);
-            } catch (Error abort_err) {
-                debug("Error attempting to abort from send operation: %s", abort_err.message);
-            }
-            
             return new AsyncCommandResponse(null, user, send_err);
         }
         
-        // If the command didn't complete in the context of send_async(), wait for it
-        // now
-        if (!tag_response.has_key(cmd.tag)) {
-            tag_cb.set(cmd.tag, new CommandCallback(issue_command_async.callback));
+        // send_async() should've tagged the Command, otherwise the completion_pending will fail
+        assert(cmd.tag.is_tagged());
+        
+        // If the command didn't complete (i.e. a CompletionStatusResponse didn't return from the
+        // server) in the context of send_async(), wait for it now
+        if (!seen_completion_responses.has_key(cmd.tag)) {
+            debug("[%s] Waiting for completion status response %s...", to_string(), cmd.tag.to_string());
+            completion_pending.set(cmd.tag, new CommandCallback(issue_command_async.callback));
             yield;
         }
         
-        CommandResponse? cmd_response = tag_response.get(cmd.tag);
-        if (cmd_response == null) {
-            // this only happens when disconnected while waiting for response
+        // it should be seen now
+        CompletionStatusResponse? completion_response;
+        seen_completion_response.remove(cmd.tag, out completion_response);
+        
+        // if not, it's because of disconnection while waiting
+        if (completion_response == null) {
             assert(cx == null);
             
             return new AsyncCommandResponse(null, user, not_connected_err);
         }
         
-        assert(cmd_response.is_sealed());
-        assert(cmd_response.status_response.tag.equals(cmd.tag));
-        
-        if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN) {
-            try {
-                serialized_cmds_mutex.release(ref claim_stub);
-            } catch (Error notify_err) {
-                return new AsyncCommandResponse(null, user, notify_err);
-            }
-        }
-        
-        return new AsyncCommandResponse(cmd_response, user, null);
+        return new AsyncCommandResponse(completion_response, user, null);
     }
     
-    private bool generic_issue_command_completed(AsyncResult result, Event ok_event, Event error_event) {
+    private void generic_issue_command_completion(AsyncResult result, Object? object) {
         AsyncCommandResponse async_response = issue_command_async.end(result);
         
         assert(async_response.user != null);
         AsyncParams params = (AsyncParams) async_response.user;
         
-        params.cmd_response = async_response.cmd_response;
+        params.completion_response = async_response.completion_response;
         params.err = async_response.err;
         
-        bool success;
-        if (async_response.err != null) {
+        // Issue a SEND_ERROR if an Error was detected, as that suggests none of the various server
+        // response signals were fired to issue an event of their own
+        if (async_response.err != null)
             fsm.issue(Event.SEND_ERROR, null, null, async_response.err);
-            success = false;
-        } else {
-            issue_status(async_response.cmd_response.status_response.status, ok_event, error_event,
-                params);
-            success = true;
-        }
         
         Scheduler.on_idle(params.cb);
-        
-        return success;
     }
-    
-    private bool report_unsolicited_server_data(UnsolicitedServerData unsolicited, string label) {
-        bool reported = false;
-        
-        if (unsolicited.exists >= 0) {
-            debug("[%s] %s EXISTS %d", to_string(), label, unsolicited.exists);
-            unsolicited_exists(unsolicited.exists);
-            
-            reported = true;
-        }
-        
-        if (unsolicited.recent >= 0) {
-            debug("[%s] %s RECENT %d", to_string(), label, unsolicited.recent);
-            unsolicited_recent(unsolicited.recent);
-            
-            reported = true;
-        }
-        
-        if (unsolicited.expunge != null) {
-            debug("[%s] %s EXPUNGE %s", to_string(), label, unsolicited.expunge.to_string());
-            unsolicited_expunged(unsolicited.expunge);
-            
-            reported = true;
-        }
-        
-        if (unsolicited.flags != null) {
-            debug("[%s] %s FLAGS %s", to_string(), label, unsolicited.flags.to_string());
-            unsolicited_flags(unsolicited.flags);
-            
-            reported = true;
-        }
-        
-        return reported;
-    }
-    
     
     //
     // network connection event handlers
@@ -1361,6 +1263,8 @@ public class Geary.Imap.ClientSession {
 #if VERBOSE_SESSION
         debug("[%s] Sent command %s", to_full_string(), cmd.to_string());
 #endif
+        // resechedule keepalive
+        schedule_keepalive();
     }
     
     private void on_network_send_error(Error err) {
@@ -1368,39 +1272,44 @@ public class Geary.Imap.ClientSession {
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
     
+    // Notify watchers of server responses
     private void notify_received_server_response(ServerResponse server_response) {
-        try {
-            if (!server_response_notifier.notify(server_response))
-                debug("[%s] Unable to notify of server response: %s", server_response.to_string());
-        } catch (ImapError ierr) {
-            debug("[%s] Failure notifying of server response: %s %s", server_response.to_string(),
-                ierr.message);
-        }
     }
     
     private void on_received_status_response(StatusResponse status_response) {
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
         
-        notify_received_server_response(status_response);
+        fsm.issue(Event.RECV_STATUS, null, status_response, null);
     }
     
     private void on_received_completion_status_response(CompletionStatusResponse completion_status_response) {
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
         
-        // CompletionStatusResponses are always tagged; untagged are merely StatusResponses
-        Tag tag = completion_status_response.tag;
-        assert(tag.is_tagged());
+        // issue event change before looking for waiting command issuers
+        fsm.issue(Event.RECV_COMPLETION, null, completion_status_response, null);
         
-        notify_received_server_response(completion_status_response);
+        // TODO: need to get this right ... it's possible for this signal to be fired in context of
+        // cx.send_async() or after it's completed
+        seen_completion_response.set(completion_status_response.tag, completion_status_response);
     }
     
     private void on_received_server_data(ServerData server_data) {
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
         
-        notify_received_server_response(server_data);
+        // issue event change before the notifier so the ClientSession is up-to-date in case any of
+        // the signal handlers call it for more information
+        fsm.issue(Event.RECV_DATA, null, server_data, null);
+        
+        try {
+            if (!notifier.notify(server_data))
+                debug("[%s] Unable to notify of server data: %s", server_data.to_string());
+        } catch (ImapError ierr) {
+            debug("[%s] Failure notifying of server data: %s %s", server_data.to_string(),
+                ierr.message);
+        }
     }
     
     private void on_received_bytes(size_t bytes) {
