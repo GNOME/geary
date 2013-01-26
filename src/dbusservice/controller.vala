@@ -27,7 +27,7 @@ public class Geary.DBus.Controller {
     
     public async void start() {
         try {
-            yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory());
+            yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory(), null);
             
             connection = yield Bus.get(GLib.BusType.SESSION);
             
@@ -41,8 +41,8 @@ public class Geary.DBus.Controller {
             
             // convert AccountInformation into an Account
             try {
-                account = account_information.get_account();
-            } catch (EngineError err) {
+                account = Geary.Engine.instance.get_account_instance(account_information);
+            } catch (Error err) {
                 error("Problem loading account from account information: %s", err.message);
             }
 

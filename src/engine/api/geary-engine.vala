@@ -17,9 +17,11 @@ public class Geary.Engine {
 
     public File? user_data_dir { get; private set; default = null; }
     public File? resource_dir { get; private set; default = null; }
+    public Geary.CredentialsMediator? authentication_mediator { get; private set; default = null; }
 
     private bool is_open = false;
     private Gee.HashMap<string, AccountInformation>? accounts = null;
+    private Gee.HashMap<string, Account>? account_instances = null;
 
     /**
      * Fired when the engine is opened.
@@ -66,17 +68,22 @@ public class Geary.Engine {
     }
 
     /**
-     * Initializes the engine, and makes all existing accounts available.
+     * Initializes the engine, and makes all existing accounts available.  The
+     * given authentication mediator will be used to retrieve all passwords
+     * when necessary.
      */
     public async void open_async(File user_data_dir, File resource_dir,
+                                 Geary.CredentialsMediator? authentication_mediator,
                                  Cancellable? cancellable = null) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
 
         this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
+        this.authentication_mediator = authentication_mediator;
 
         accounts = new Gee.HashMap<string, AccountInformation>();
+        account_instances = new Gee.HashMap<string, Account>();
 
         is_open = true;
         opened();
@@ -128,7 +135,9 @@ public class Geary.Engine {
 
         user_data_dir = null;
         resource_dir = null;
+        authentication_mediator = null;
         accounts = null;
+        account_instances = null;
 
         is_open = false;
         closed();
@@ -154,7 +163,107 @@ public class Geary.Engine {
 
         return new AccountInformation(user_data_dir.get_child(email));
     }
-
+    
+    /**
+     * Returns whether the account information "validates", which means here
+     * that we can connect to the endpoints and authenticate using the supplied
+     * credentials.
+     */
+    public async bool validate_account_information_async(AccountInformation account,
+        Cancellable? cancellable = null) throws Error {
+        check_opened();
+        
+        // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
+        bool imap_valid = false;
+        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);
+        try {
+            yield imap_session.connect_async(cancellable);
+            yield imap_session.initiate_session_async(account.imap_credentials, cancellable);
+            
+            // Connected and initiated, still need to be sure connection authorized
+            string current_mailbox;
+            if (imap_session.get_context(out current_mailbox) == Imap.ClientSession.Context.AUTHORIZED)
+                imap_valid = true;
+        } catch (Error err) {
+            debug("Error validating IMAP account info: %s", err.message);
+            
+            // fall through so session can be disconnected
+        }
+        
+        try {
+            yield imap_session.disconnect_async(cancellable);
+        } catch (Error err) {
+            // ignored
+        } finally {
+            imap_session = null;
+        }
+        
+        if (!imap_valid)
+            return false;
+        
+        // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
+        bool smtp_valid = false;
+        Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(account.get_smtp_endpoint());
+        try {
+            yield smtp_session.login_async(account.smtp_credentials, cancellable);
+            smtp_valid = true;
+        } catch (Error err) {
+            debug("Error validating SMTP account info: %s", err.message);
+            
+            // fall through so session can be disconnected
+        }
+        
+        try {
+            yield smtp_session.logout_async(cancellable);
+        } catch (Error err) {
+            // ignored
+        } finally {
+            smtp_session = null;
+        }
+        
+        return smtp_valid;
+    }
+    
+    /**
+     * Creates a Geary.Account from a Geary.AccountInformation (which is what
+     * other methods in this interface deal in).
+     */
+    public Geary.Account get_account_instance(AccountInformation account_information)
+        throws Error {
+        check_opened();
+        
+        if (account_instances.has_key(account_information.email))
+            return account_instances.get(account_information.email);
+        
+        AccountSettings settings = new AccountSettings(account_information);
+        ImapDB.Account local_account = new ImapDB.Account(settings);
+        Imap.Account remote_account = new Imap.Account(settings);
+        
+        Geary.Account account;
+        switch (account_information.service_provider) {
+            case ServiceProvider.GMAIL:
+                account = new ImapEngine.GmailAccount("Gmail account %s".printf(account_information.email),
+                    settings, remote_account, local_account);
+            break;
+            
+            case ServiceProvider.YAHOO:
+                account = new ImapEngine.YahooAccount("Yahoo account %s".printf(account_information.email),
+                    settings, remote_account, local_account);
+            break;
+            
+            case ServiceProvider.OTHER:
+                account = new ImapEngine.OtherAccount("Other account %s".printf(account_information.email),
+                    settings, remote_account, local_account);
+            break;
+                
+            default:
+                assert_not_reached();
+        }
+        
+        account_instances.set(account_information.email, account);
+        return account;
+    }
+    
     /**
      * Adds the account to be tracked by the engine.  Should only be called from
      * AccountInformation.store_async() and this class.
@@ -185,6 +294,8 @@ public class Geary.Engine {
 
             // TODO: delete the account from disk.
             account_removed(account);
+            
+            account_instances.unset(account.email);
         }
     }
 }

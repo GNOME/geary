@@ -23,6 +23,7 @@ engine/api/geary-contact-store.vala
 engine/api/geary-conversation.vala
 engine/api/geary-conversation-monitor.vala
 engine/api/geary-credentials.vala
+engine/api/geary-credentials-mediator.vala
 engine/api/geary-email-flag.vala
 engine/api/geary-email-flags.vala
 engine/api/geary-email-identifier.vala
@@ -195,6 +196,7 @@ client/geary-application.vala
 client/geary-args.vala
 client/geary-config.vala
 client/geary-controller.vala
+client/gnome-keyring-mediator.vala
 client/main.vala
 
 client/accounts/account-dialog.vala
@@ -239,7 +241,6 @@ client/util/util-email.vala
 client/util/util-files.vala
 client/util/util-gravatar.vala
 client/util/util-gtk.vala
-client/util/util-keyring.vala
 client/util/util-webkit.vala
 
 client/views/formatted-conversation-data.vala

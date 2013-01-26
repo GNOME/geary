@@ -534,7 +534,7 @@ public class Geary.Imap.ClientSession {
      */
     public async CommandResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
-        LoginParams params = new LoginParams(credentials.user, credentials.pass, cancellable,
+        LoginParams params = new LoginParams(credentials.user, credentials.pass ?? "", cancellable,
             login_async.callback);
         fsm.issue(Event.LOGIN, null, params);
         

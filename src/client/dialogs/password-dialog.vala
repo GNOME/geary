@@ -23,14 +23,14 @@ public class PasswordDialog {
     private Gtk.Button ok_button;
     private Gtk.Grid grid_imap;
     private Gtk.Grid grid_smtp;
-    private PasswordTypeFlag password_flags;
+    private Geary.CredentialsMediator.ServiceFlag password_flags;
     
     public string imap_password { get; private set; default = ""; }
     public string smtp_password { get; private set; default = ""; }
     public bool remember_password { get; private set; }
     
     public PasswordDialog(Geary.AccountInformation account_information, bool first_try,
-        PasswordTypeFlag password_flags) {
+        Geary.CredentialsMediator.ServiceFlag password_flags) {
         this.password_flags = password_flags;
         Gtk.Builder builder = GearyApplication.instance.create_builder("password-dialog.glade");
         
@@ -67,12 +67,8 @@ public class PasswordDialog {
         // Find server configuration information
         Geary.Endpoint imap_endpoint;
         Geary.Endpoint smtp_endpoint;
-        try {
-            imap_endpoint = account_information.get_imap_endpoint();
-            smtp_endpoint = account_information.get_smtp_endpoint();
-        } catch (Geary.EngineError err) {
-            error("Error getting endpoints: %s", err.message);
-        }
+        imap_endpoint = account_information.get_imap_endpoint();
+        smtp_endpoint = account_information.get_smtp_endpoint();
 
         string imap_server_host = imap_endpoint.host_specifier;
         uint16 imap_server_port = imap_endpoint.default_port;

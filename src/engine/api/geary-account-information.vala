@@ -91,61 +91,154 @@ public class Geary.AccountInformation : Object {
             imap_server_pipeline = false;
     }
     
-    public async bool validate_async(Cancellable? cancellable = null) throws EngineError {
-        AccountSettings settings = new AccountSettings(this);
+    /**
+     * Juggles get_passwords_async() and prompt_passwords_async() to fetch the
+     * passwords for the given services.  Return true if all passwords were in
+     * the key store or the user proceeded normally, false if the user tried to
+     * cancel.
+     */
+    public async bool fetch_passwords_async(CredentialsMediator.ServiceFlag services) throws Error {
+        CredentialsMediator.ServiceFlag unset_services =
+            yield get_passwords_async(services);
         
-        // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
-        bool imap_valid = false;
-        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(settings.imap_endpoint, true);
-        try {
-            yield imap_session.connect_async(cancellable);
-            yield imap_session.initiate_session_async(settings.imap_credentials, cancellable);
+        if (unset_services == 0)
+            return true;
+        
+        return yield prompt_passwords_async(unset_services);
+    }
+    
+    private void check_mediator_instance() throws EngineError {
+        if (Geary.Engine.instance.authentication_mediator == null)
+            throw new EngineError.OPEN_REQUIRED(
+                "Geary.Engine instance needs to be open with a valid Geary.CredentialsMediator");
+    }
+    
+    /**
+     * Use Engine's authentication mediator to retrieve the passwords for the
+     * given services.  The passwords will be stored in the appropriate
+     * credentials in this instance.  Return any services that could *not* be
+     * retrieved from the key store (in which case you may want to call
+     * prompt_passwords_async() on the return value), or 0 if all were
+     * retrieved.
+     */
+    public async CredentialsMediator.ServiceFlag get_passwords_async(
+        CredentialsMediator.ServiceFlag services) throws Error {
+        check_mediator_instance();
+        
+        CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
+        CredentialsMediator.ServiceFlag failed_services = 0;
+        
+        if (services.has_imap()) {
+            string? imap_password = yield mediator.get_password_async(
+                CredentialsMediator.Service.IMAP, imap_credentials.user);
             
-            // Connected and initiated, still need to be sure connection authorized
-            string current_mailbox;
-            if (imap_session.get_context(out current_mailbox) == Imap.ClientSession.Context.AUTHORIZED)
-                imap_valid = true;
-        } catch (Error err) {
-            debug("Error validating IMAP account info: %s", err.message);
-            
-            // fall through so session can be disconnected
+            if (imap_password != null)
+                imap_credentials.pass = imap_password;
+             else
+                failed_services |= CredentialsMediator.ServiceFlag.IMAP;
         }
         
-        try {
-            yield imap_session.disconnect_async(cancellable);
-        } catch (Error err) {
-            // ignored
-        } finally {
-            imap_session = null;
+        if (services.has_smtp()) {
+            string? smtp_password = yield mediator.get_password_async(
+                CredentialsMediator.Service.SMTP, smtp_credentials.user);
+            
+            if (smtp_password != null)
+                smtp_credentials.pass = smtp_password;
+            else
+                failed_services |= CredentialsMediator.ServiceFlag.SMTP;
         }
         
-        if (!imap_valid)
+        return failed_services;
+    }
+    
+    /**
+     * Use the Engine's authentication mediator to prompt for the passwords for
+     * the given services.  The passwords will be stored in the appropriate
+     * credentials in this instance.  After the prompt, the passwords will be
+     * updated in the key store using update_stored_passwords_async().  Return
+     * whether the user proceeded normally (false if they tried to cancel the
+     * prompt).
+     */
+    public async bool prompt_passwords_async(
+        CredentialsMediator.ServiceFlag services) throws Error {
+        check_mediator_instance();
+        
+        string? imap_password, smtp_password;
+        bool imap_remember_password, smtp_remember_password;
+        
+        if (!yield Geary.Engine.instance.authentication_mediator.prompt_passwords_async(
+            services, this, out imap_password, out smtp_password,
+            out imap_remember_password, out smtp_remember_password))
             return false;
         
-        // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
-        bool smtp_valid = false;
-        Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(settings.smtp_endpoint);
-        try {
-            yield smtp_session.login_async(settings.smtp_credentials, cancellable);
-            smtp_valid = true;
-        } catch (Error err) {
-            debug("Error validating SMTP account info: %s", err.message);
-            
-            // fall through so session can be disconnected
+        if (services.has_imap()) {
+            imap_credentials.pass = imap_password;
+            this.imap_remember_password = imap_remember_password;
         }
         
-        try {
-            yield smtp_session.logout_async(cancellable);
-        } catch (Error err) {
-            // ignored
-        } finally {
-            smtp_session = null;
+        if (services.has_smtp()) {
+            smtp_credentials.pass = smtp_password;
+            this.smtp_remember_password = smtp_remember_password;
         }
-        
-        return smtp_valid;
-    }
 
-    public Endpoint get_imap_endpoint() throws EngineError {
+        yield update_stored_passwords_async(services);
+        
+        return true;
+    }
+    
+    /**
+     * Use the Engine's authentication mediator to set or clear the passwords
+     * for the given services in the key store.
+     */
+    public async void update_stored_passwords_async(
+        CredentialsMediator.ServiceFlag services) throws Error {
+        check_mediator_instance();
+        
+        CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
+        
+        if (services.has_imap()) {
+            if (imap_remember_password) {
+                yield mediator.set_password_async(
+                    CredentialsMediator.Service.IMAP, imap_credentials);
+            } else {
+                yield mediator.clear_password_async(
+                    CredentialsMediator.Service.IMAP, imap_credentials.user);
+            }
+        }
+        
+        if (services.has_smtp()) {
+            if (smtp_remember_password) {
+                yield mediator.set_password_async(
+                    CredentialsMediator.Service.SMTP, smtp_credentials);
+            } else {
+                yield mediator.clear_password_async(
+                    CredentialsMediator.Service.SMTP, smtp_credentials.user);
+            }
+        }
+    }
+    
+    /**
+     * Use the Engine's authentication mediator to clear the passwords for the
+     * given services in the key store.
+     */
+    public async void clear_stored_passwords_async(
+        CredentialsMediator.ServiceFlag services) throws Error {
+        check_mediator_instance();
+        
+        CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
+        
+        if (services.has_imap()) {
+            yield mediator.clear_password_async(
+                CredentialsMediator.Service.IMAP, imap_credentials.user);
+        }
+        
+        if (services.has_smtp()) {
+            yield mediator.clear_password_async(
+                CredentialsMediator.Service.SMTP, smtp_credentials.user);
+        }
+    }
+    
+    public Endpoint get_imap_endpoint() {
         switch (service_provider) {
             case ServiceProvider.GMAIL:
                 return ImapEngine.GmailAccount.IMAP_ENDPOINT;
@@ -164,12 +257,11 @@ public class Geary.AccountInformation : Object {
                     imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
             
             default:
-                throw new EngineError.NOT_FOUND("Service provider of type %s not known",
-                    service_provider.to_string());
+                assert_not_reached();
         }
     }
 
-    public Endpoint get_smtp_endpoint() throws EngineError {
+    public Endpoint get_smtp_endpoint() {
         switch (service_provider) {
             case ServiceProvider.GMAIL:
                 return ImapEngine.GmailAccount.SMTP_ENDPOINT;
@@ -188,33 +280,7 @@ public class Geary.AccountInformation : Object {
                     smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
             
             default:
-                throw new EngineError.NOT_FOUND("Service provider of type %s not known",
-                    service_provider.to_string());
-        }
-    }
-
-    public Geary.Account get_account() throws EngineError {
-        AccountSettings settings = new AccountSettings(this);
-        
-        ImapDB.Account local_account = new ImapDB.Account(settings);
-        Imap.Account remote_account = new Imap.Account(settings);
-        
-        switch (service_provider) {
-            case ServiceProvider.GMAIL:
-                return new ImapEngine.GmailAccount("Gmail account %s".printf(email),
-                    settings, remote_account, local_account);
-            
-            case ServiceProvider.YAHOO:
-                return new ImapEngine.YahooAccount("Yahoo account %s".printf(email),
-                    settings, remote_account, local_account);
-            
-            case ServiceProvider.OTHER:
-                return new ImapEngine.OtherAccount("Other account %s".printf(email),
-                    settings, remote_account, local_account);
-                
-            default:
-                throw new EngineError.NOT_FOUND("Service provider of type %s not known",
-                    service_provider.to_string());
+                assert_not_reached();
         }
     }
     
