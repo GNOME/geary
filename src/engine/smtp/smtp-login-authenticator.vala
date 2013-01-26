@@ -23,7 +23,7 @@ public class Geary.Smtp.LoginAuthenticator : Geary.Smtp.AbstractAuthenticator {
                 return Base64.encode(credentials.user.data).data;
             
             case 1:
-                return Base64.encode(credentials.pass.data).data;
+                return Base64.encode((credentials.pass ?? "").data).data;
             
             default:
                 return null;

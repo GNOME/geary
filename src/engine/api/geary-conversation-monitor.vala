@@ -736,7 +736,7 @@ public class Geary.ConversationMonitor : Object {
         // reset
         retry_connection = false;
         
-        debug("Folder %s closed due to error, restablishing connection to continue monitoring conversations",
+        debug("Folder %s closed due to error, reestablishing connection to continue monitoring conversations",
             folder.to_string());
         
         // First retry is immediate; thereafter, a delay
@@ -763,7 +763,7 @@ public class Geary.ConversationMonitor : Object {
                 debug("Reestablished connection to %s, continuing to monitor conversations",
                     folder.to_string());
         } catch (Error start_err) {
-            debug("Unable to restablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
+            debug("Unable to reestablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
                 RETRY_CONNECTION_SEC, start_err.message);
             
             schedule_retry(true);
