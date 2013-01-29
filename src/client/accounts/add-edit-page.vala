@@ -6,6 +6,12 @@
 
 // Page for adding or editing an account.
 public class AddEditPage : Gtk.Box {
+    public enum PageMode {
+        WELCOME,
+        ADD,
+        EDIT
+    }
+    
     public string real_name {
         get { return entry_real_name.text; }
         set { entry_real_name.text = value; }
@@ -105,7 +111,7 @@ public class AddEditPage : Gtk.Box {
         STARTTLS = 2
     }
     
-    private bool welcome_mode = true;
+    private PageMode mode = PageMode.WELCOME;
     
     private Gtk.Widget container_widget;
     private Gtk.Box welcome_box;
@@ -181,10 +187,7 @@ public class AddEditPage : Gtk.Box {
         foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers())
             combo_service.append_text(p.display_name());
         
-        // Set defaults.
-        set_service_provider(Geary.ServiceProvider.GMAIL);
-        imap_ssl = true;
-        smtp_ssl = true;
+        reset_all();
         
         combo_service.changed.connect(update_ui);
         entry_email.changed.connect(on_changed);
@@ -214,6 +217,27 @@ public class AddEditPage : Gtk.Box {
         update_ui();
     }
     
+    // Sets the account information to display on this page.
+    public void set_account_information(Geary.AccountInformation info) {
+        set_all_info(info.real_name,
+            info.email,
+            info.imap_credentials.user,
+            info.imap_credentials.pass,
+            info.imap_remember_password && info.smtp_remember_password,
+            info.smtp_credentials.user,
+            info.smtp_credentials.pass,
+            info.service_provider,
+            info.default_imap_server_host,
+            info.default_imap_server_port,
+            info.default_imap_server_ssl,
+            info.default_imap_server_starttls,
+            info.default_smtp_server_host,
+            info.default_smtp_server_port,
+            info.default_smtp_server_ssl,
+            info.default_smtp_server_starttls);
+    }
+    
+    // Can use this instead of set_account_information(), both do the same thing.
     public void set_all_info(
         string? initial_real_name = null,
         string? initial_email = null,
@@ -222,7 +246,7 @@ public class AddEditPage : Gtk.Box {
         bool initial_remember_password = true,
         string? initial_smtp_username = null,
         string? initial_smtp_password = null,
-        int initial_service_provider = -1,
+        int initial_service_provider = Geary.ServiceProvider.GMAIL,
         string? initial_default_imap_host = null,
         uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_imap_ssl = true,
@@ -232,13 +256,12 @@ public class AddEditPage : Gtk.Box {
         bool initial_default_smtp_ssl = true,
         bool initial_default_smtp_starttls = false) {
         
-        // Set defaults (other than service provider, which is set above)
+        // Set defaults
         real_name = initial_real_name ?? "";
         email_address = initial_email ?? "";
-        bool use_imap_password = initial_imap_password == initial_smtp_password &&
-            initial_imap_password != null;
-        password = use_imap_password ? initial_imap_password : "";
+        password = initial_imap_password != null ? initial_imap_password : "";
         remember_password = initial_remember_password;
+        set_service_provider((Geary.ServiceProvider) initial_service_provider);
         
         // Set defaults for IMAP info
         imap_host = initial_default_imap_host ?? "";
@@ -253,8 +276,8 @@ public class AddEditPage : Gtk.Box {
         smtp_port = initial_default_smtp_port;
         smtp_username = initial_smtp_username ?? "";
         smtp_password = initial_smtp_password ?? "";
-        imap_ssl = initial_default_imap_ssl;
-        imap_starttls = initial_default_imap_starttls;
+        smtp_ssl = initial_default_smtp_ssl;
+        smtp_starttls = initial_default_smtp_starttls;
         
         if (Geary.String.is_empty(real_name))
             entry_real_name.grab_focus();
@@ -262,11 +285,24 @@ public class AddEditPage : Gtk.Box {
             entry_email.grab_focus();
     }
     
-    // Puts this page into welcome mode which shows the "Welcome to Geary" message, etc.
-    // Default is true.
-    public void show_welcome(bool welcome) {
-        welcome_mode = welcome;
+    // Resets all fields to their defaults.
+    public void reset_all() {
+        // Take advantage of set_all_info()'s defaults.
+        set_all_info(get_default_real_name());
+    }
+    
+    /** Puts this page into one of three different modes:
+     *  WELCOME: The first screen when Geary is started.
+     *      ADD: Add account screen is like the Welcome screen, but without the welcome message.
+     *     EDIT: This screen has only a few options that can be modified after creating an account.
+     */
+    public void set_mode(PageMode m) {
+        mode = m;
         update_ui();
+    }
+    
+    public PageMode get_mode() {
+        return mode;
     }
     
     // TODO: Only reset if not manually set by user.
@@ -367,6 +403,7 @@ public class AddEditPage : Gtk.Box {
     
     public Geary.AccountInformation? get_account_information() {
         Geary.AccountInformation account_information;
+        update_ui(); // Force password update.
         
         Geary.Credentials imap_credentials = new Geary.Credentials(imap_username.strip(), imap_password.strip());
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username.strip(), smtp_password.strip());
@@ -404,7 +441,7 @@ public class AddEditPage : Gtk.Box {
     // Updates UI based on various options.
     private void update_ui() {
         base.show_all();
-        welcome_box.visible = welcome_mode;
+        welcome_box.visible = mode == PageMode.WELCOME;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.
@@ -418,8 +455,7 @@ public class AddEditPage : Gtk.Box {
             entry_password.show();
             other_info.hide();
             
-            // TODO: Will be used by upcoming edit mode to display greyed-out other info.
-            set_other_info_sensitive(welcome_mode);
+            set_other_info_sensitive(mode == PageMode.WELCOME);
             
             // For supported providers, fill out the rest of the form automagically.
             imap_username = email_address;
@@ -427,6 +463,19 @@ public class AddEditPage : Gtk.Box {
             imap_password = password;
             smtp_password = password;
         }
+        
+        // In edit mode, certain fields are not sensitive.
+        combo_service.sensitive =
+            entry_email.sensitive =
+            entry_imap_host.sensitive =
+            entry_imap_port.sensitive =
+            entry_imap_username.sensitive =
+            combo_imap_encryption.sensitive =
+            entry_smtp_host.sensitive =
+            entry_smtp_port.sensitive =
+            entry_smtp_username.sensitive =
+            combo_smtp_encryption.sensitive =
+                mode != PageMode.EDIT;
         
         size_changed();
     }
@@ -465,6 +514,11 @@ public class AddEditPage : Gtk.Box {
     public override void show_all() {
         // Note that update_ui() calls base.show_all(), so no need to do that here.
         update_ui();
+    }
+    
+    private string get_default_real_name() {
+        string real_name = Environment.get_real_name();
+        return real_name == "Unknown" ? "" : real_name;
     }
 }
 

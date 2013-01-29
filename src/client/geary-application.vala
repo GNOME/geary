@@ -301,20 +301,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return null;
     }
     
-    private string get_default_real_name() {
-        string real_name = Environment.get_real_name();
-        return real_name == "Unknown" ? "" : real_name;
-    }
-    
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
     private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info) {
         Geary.AccountInformation? new_info = old_info;
         if (login_dialog == null)
             login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
         
-        if (new_info == null)
-            login_dialog.set_real_name(get_default_real_name());
-        else
+        if (new_info != null)
             login_dialog.set_account_information(new_info);
         
         login_dialog.present();

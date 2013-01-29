@@ -8,7 +8,7 @@
 public class AccountDialogAddEditPane : Gtk.Box {
     public AddEditPage add_edit_page { get; private set; default = new AddEditPage(); }
     private Gtk.ButtonBox button_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
-    private Gtk.Button ok_button = new Gtk.Button.from_stock(Gtk.Stock.ADD);
+    private Gtk.Button ok_button = new Gtk.Button.from_stock(Gtk.Stock.OK);
     private Gtk.Button cancel_button = new Gtk.Button.from_stock(Gtk.Stock.CANCEL);
     
     public signal void ok(Geary.AccountInformation info);
@@ -20,7 +20,6 @@ public class AccountDialogAddEditPane : Gtk.Box {
     public AccountDialogAddEditPane() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
         
-        add_edit_page.show_welcome(false);
         button_box.set_layout(Gtk.ButtonBoxStyle.END);
         button_box.expand = false;
         button_box.spacing = 6;
@@ -38,6 +37,26 @@ public class AccountDialogAddEditPane : Gtk.Box {
         
         pack_start(add_edit_page);
         pack_start(button_box);
+        
+        // Default mode is Welcome.
+        set_mode(AddEditPage.PageMode.WELCOME);
+    }
+    
+    public void set_mode(AddEditPage.PageMode mode) {
+        ok_button.label = (mode == AddEditPage.PageMode.EDIT) ? _("_Save") : _("_Add");
+        add_edit_page.set_mode(mode);
+    }
+    
+    public AddEditPage.PageMode get_mode() {
+        return add_edit_page.get_mode();
+    }
+    
+    public void set_account_information(Geary.AccountInformation info) {
+        add_edit_page.set_account_information(info);
+    }
+    
+    public void reset_all() {
+        add_edit_page.reset_all();
     }
     
     private void on_ok() {

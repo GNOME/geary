@@ -266,7 +266,6 @@ public class GearyController {
                 }
                 
                 inbox_conversations = null;
-                inbox_folder = null;
             }
             
             if (inbox_folder != null) {
@@ -709,7 +708,6 @@ public class GearyController {
     private void on_accounts() {
         AccountDialog dialog = new AccountDialog();
         dialog.run();
-        dialog.destroy();
     }
     
     private void on_preferences() {

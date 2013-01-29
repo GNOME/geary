@@ -30,7 +30,8 @@ public class AccountDialog : Gtk.Dialog {
         // Connect signals from pages.
         account_list_pane.close.connect(on_close);
         account_list_pane.add_account.connect(on_add_account);
-        add_edit_pane.ok.connect(on_add_or_edit_account);
+        account_list_pane.edit_account.connect(on_edit_account);
+        add_edit_pane.ok.connect(on_save_add_or_edit);
         add_edit_pane.cancel.connect(on_cancel_add_edit);
         add_edit_pane.size_changed.connect(() => { resize(1, 1); });
         
@@ -45,24 +46,46 @@ public class AccountDialog : Gtk.Dialog {
     }
     
     private void on_close() {
-        response(Gtk.ResponseType.CLOSE);
+        destroy();
     }
     
     private void on_add_account() {
+        add_edit_pane.reset_all();
+        add_edit_pane.set_mode(AddEditPage.PageMode.ADD);
         notebook.set_current_page(add_edit_page_number);
     }
     
-    private void on_add_or_edit_account(Geary.AccountInformation info) {
-        // TODO: Edit existing account.
+    private void on_edit_account(string email_address) {
+        // Grab the account info.  While the addresses passed into this method should *always* be
+        // available in Geary, we double-check to be defensive.
+        Gee.Map<string, Geary.AccountInformation> accounts;
+        try {
+            accounts = Geary.Engine.instance.get_accounts();
+        } catch (Error e) {
+            debug("Error getting account info: %s", e.message);
+            
+            return;
+        }
         
+        if (!accounts.has_key(email_address)) {
+            debug("Unable to get account info for: %s", email_address);
+            return;
+        }
+        
+        add_edit_pane.set_mode(AddEditPage.PageMode.EDIT);
+        add_edit_pane.set_account_information(accounts.get(email_address));
+        notebook.set_current_page(add_edit_page_number);
+    }
+    
+    private void on_save_add_or_edit(Geary.AccountInformation info) {
         // Show the busy spinner.
         notebook.set_current_page(spinner_page_number);
         
         // Validate account.
-        GearyApplication.instance.validate_async.begin(info, null, on_add_or_edit_account_completed);
+        GearyApplication.instance.validate_async.begin(info, null, on_save_add_or_edit_completed);
     }
     
-    private void on_add_or_edit_account_completed(Object? source, AsyncResult result) {
+    private void on_save_add_or_edit_completed(Object? source, AsyncResult result) {
         // If account was successfully added return to the account list. Otherwise, go back to the
         // account add page so the user can try again.
         if (GearyApplication.instance.validate_async.end(result))
