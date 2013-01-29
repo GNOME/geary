@@ -1,6 +1,8 @@
 set(UI_DEST share/geary/ui)
 
 install(FILES accelerators.ui DESTINATION ${UI_DEST})
+install(FILES account_list.glade DESTINATION ${UI_DEST})
+install(FILES account_spinner.glade DESTINATION ${UI_DEST})
 install(FILES composer.glade DESTINATION ${UI_DEST})
 install(FILES composer_accelerators.ui DESTINATION ${UI_DEST})
 install(FILES login.glade DESTINATION ${UI_DEST})
