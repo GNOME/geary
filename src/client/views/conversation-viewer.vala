@@ -314,7 +314,17 @@ public class ConversationViewer : Gtk.Box {
 
         // Add classes according to the state of the email.
         update_flags(email);
-
+        
+        // Add animation class after other classes set, to avoid initial animation.
+        Idle.add(() => {
+            try {
+                div_message.get_class_list().add("animate");
+            } catch (Error error) {
+                debug("Could not enable animation class: %s", error.message);
+            }
+            return false;
+        });
+        
         // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
         bind_event(web_view, ".email", "contextmenu", (Callback) on_context_menu, this);
         bind_event(web_view, ".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);

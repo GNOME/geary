@@ -74,11 +74,11 @@ pre {
 }
 
 .email {
-    border: 1px rgba(0,0,0,0.4) solid;
+    border: 1px rgba(0,0,0,1) solid;
     background-color: white;
     color: black;
     font-size: small;
-    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
+    box-shadow: 0 3px 11px rgba(0,0,0,1);
     display: inline-block;
     word-wrap: break-word;
     width: 100%;
@@ -97,6 +97,14 @@ pre {
 }
 .email.starred .unstarred {
     display: none;
+}
+.email.read {
+    border-color: rgba(0,0,0,0.4);
+    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
+}
+.email.animate {
+    -webkit-transition: border-color 3s ease;
+    -webkit-transition: box-shadow 3s ease;
 }
 .email_box {
     box-sizing: border-box;
