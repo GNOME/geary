@@ -265,8 +265,8 @@ public class Geary.Imap.ClientSession {
             new Geary.State.Mapping(State.CONNECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.CONNECTING, Event.CONNECTED, on_connected),
             new Geary.State.Mapping(State.CONNECTING, Event.CONNECT_DENIED, on_connect_denied),
-            new Geary.State.Mapping(State.CONNECTING, Event.SEND_ERROR, on_send_error),
-            new Geary.State.Mapping(State.CONNECTING, Event.RECV_ERROR, on_recv_error),
+            new Geary.State.Mapping(State.CONNECTING, Event.SEND_ERROR, on_connecting_send_recv_error),
+            new Geary.State.Mapping(State.CONNECTING, Event.RECV_ERROR, on_connecting_send_recv_error),
             
             new Geary.State.Mapping(State.NOAUTH, Event.LOGIN, on_login),
             new Geary.State.Mapping(State.NOAUTH, Event.SEND_CMD, on_send_command),
@@ -1152,6 +1152,19 @@ public class Geary.Imap.ClientSession {
     //
     // error handling
     //
+    
+    // use different error handler when connecting because, if connect_async() fails, there's no
+    // requirement for the user to call disconnect_async() and cleaning up... this prevents leaving the
+    //  FSM in the CONNECTING state, causing an assertion when this object is destroyed
+    private uint on_connecting_send_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
+        assert(err != null);
+        
+        debug("[%s] Connecting send error, dropping client connection: %s", to_full_string(), err.message);
+        
+        fsm.do_post_transition(() => { drop_connection(); });
+        
+        return State.BROKEN;
+    }
     
     private uint on_send_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);

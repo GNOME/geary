@@ -297,7 +297,7 @@ public class Geary.Imap.ClientConnection {
      */
     public async void connect_async(Cancellable? cancellable = null) throws Error {
         if (cx != null) {
-            debug("Already connected to %s", to_string());
+            debug("Already connected/connecting to %s", to_string());
             
             return;
         }
@@ -305,11 +305,30 @@ public class Geary.Imap.ClientConnection {
         cx = yield endpoint.connect_async(cancellable);
         ios = cx;
         
+        // issue CONNECTED event and fire signal because the moment the channels are hooked up,
+        // data can start flowing
         fsm.issue(Event.CONNECTED);
         
         connected();
         
-        yield open_channels_async(cancellable);
+        try {
+            yield open_channels_async();
+        } catch (Error err) {
+            // if this fails, need to close connection because the caller will not call
+            // disconnect_async()
+            try {
+                yield cx.close_async();
+            } catch (Error close_err) {
+                // ignored
+            }
+            
+            fsm.issue(Event.DISCONNECTED);
+            
+            cx = null;
+            ios = null;
+            
+            throw err;
+        }
     }
     
     public async void disconnect_async(Cancellable? cancellable = null) throws Error {
@@ -349,7 +368,7 @@ public class Geary.Imap.ClientConnection {
         }
     }
     
-    private async void open_channels_async(Cancellable? cancellable) throws Error {
+    private async void open_channels_async() throws Error {
         assert(ios != null);
         assert(ser == null);
         assert(des == null);
@@ -407,7 +426,7 @@ public class Geary.Imap.ClientConnection {
         ios = tls_cx;
         
         // re-open Serializer/Deserializer with the new streams
-        yield open_channels_async(cancellable);
+        yield open_channels_async();
     }
     
     private void on_parameters_ready(RootParameters root) {
