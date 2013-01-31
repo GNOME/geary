@@ -331,6 +331,8 @@ public class Geary.Imap.ClientConnection {
             cx = null;
             ios = null;
             
+            receive_failure(err);
+            
             throw err;
         }
     }

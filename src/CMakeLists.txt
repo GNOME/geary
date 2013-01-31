@@ -65,7 +65,7 @@ engine/imap/api/imap-email-identifier.vala
 engine/imap/api/imap-email-properties.vala
 engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
-engine/imap/api/imap-server-response-notifier.vala
+engine/imap/api/imap-server-data-notifier.vala
 engine/imap/command/imap-commands.vala
 engine/imap/command/imap-command.vala
 engine/imap/command/imap-fetch-command.vala
