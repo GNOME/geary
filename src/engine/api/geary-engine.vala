@@ -173,6 +173,12 @@ public class Geary.Engine {
         Cancellable? cancellable = null) throws Error {
         check_opened();
         
+        // Make sure the account nickname is not in use.
+        foreach (AccountInformation a in get_accounts().values) {
+            if (account != a && Geary.String.equals_ci(account.nickname, a.nickname))
+                return false;
+        }
+        
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
         bool imap_valid = false;
         Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);

@@ -7,6 +7,7 @@
 public class Geary.AccountInformation : Object {
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
+    private const string NICKNAME_KEY = "nickname";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
     private const string IMAP_USERNAME_KEY = "imap_username";
     private const string IMAP_REMEMBER_PASSWORD_KEY = "imap_remember_password";
@@ -23,11 +24,13 @@ public class Geary.AccountInformation : Object {
     private const string SMTP_STARTTLS = "smtp_starttls";
     
     public const string SETTINGS_FILENAME = "geary.ini";
+    public const string DEFAULT_NICKNAME = _("Default");
     
     internal File settings_dir;
     internal File file;
     
     public string real_name { get; set; }
+    public string nickname { get; set; }
     public string email { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
     public bool imap_server_pipeline { get; set; default = true; }
@@ -61,6 +64,7 @@ public class Geary.AccountInformation : Object {
             // It's no big deal if we couldn't load the key file -- just means we give you the defaults.
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
+            nickname = get_string_value(key_file, GROUP, NICKNAME_KEY, DEFAULT_NICKNAME);
             imap_credentials.user = get_string_value(key_file, GROUP, IMAP_USERNAME_KEY, email);
             imap_remember_password = get_bool_value(key_file, GROUP, IMAP_REMEMBER_PASSWORD_KEY, true);
             smtp_credentials.user = get_string_value(key_file, GROUP, SMTP_USERNAME_KEY, email);
@@ -337,6 +341,7 @@ public class Geary.AccountInformation : Object {
         KeyFile key_file = new KeyFile();
         
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
+        key_file.set_value(GROUP, NICKNAME_KEY, nickname);
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
         key_file.set_value(GROUP, IMAP_USERNAME_KEY, imap_credentials.user);
         key_file.set_boolean(GROUP, IMAP_REMEMBER_PASSWORD_KEY, imap_remember_password);

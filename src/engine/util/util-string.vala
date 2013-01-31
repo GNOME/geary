@@ -60,6 +60,10 @@ public bool stri_equal(void *a, void *b) {
     return str_equal(((string *) a)->down(), ((string *) b)->down());
 }
 
+public bool equals_ci(string a, string b) {
+    return a.down() == b.down();
+}
+
 public bool nullable_stri_equal(void *a, void *b) {
     if (a == null)
         return (b == null);
