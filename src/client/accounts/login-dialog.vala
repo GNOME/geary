@@ -40,27 +40,8 @@ public class LoginDialog : Gtk.Dialog {
         set_account_information(initial_account_information);
     }
     
-    public void set_real_name(string name) {
-        page.real_name = name;
-    }
-    
     public void set_account_information(Geary.AccountInformation info) {
-        page.set_all_info(info.real_name,
-            info.email,
-            info.imap_credentials.user,
-            info.imap_credentials.pass,
-            info.imap_remember_password && info.smtp_remember_password,
-            info.smtp_credentials.user,
-            info.smtp_credentials.pass,
-            info.service_provider,
-            info.default_imap_server_host,
-            info.default_imap_server_port,
-            info.default_imap_server_ssl,
-            info.default_imap_server_starttls,
-            info.default_smtp_server_host,
-            info.default_smtp_server_port,
-            info.default_smtp_server_ssl,
-            info.default_smtp_server_starttls);
+        page.set_account_information(info);
     }
     
     public Geary.AccountInformation get_account_information() {

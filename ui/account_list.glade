@@ -12,6 +12,11 @@
         <property name="stock_id">gtk-close</property>
       </object>
     </child>
+    <child>
+      <object class="GtkAction" id="edit_account">
+        <property name="icon_name">gtk-edit</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="container">
     <property name="visible">True</property>
@@ -61,6 +66,20 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Add an account</property>
+            <property name="label" translatable="yes">toolbutton1</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolButton" id="edit_button">
+            <property name="related_action">edit_account</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="tooltip_text" translatable="yes">Edit an account</property>
             <property name="label" translatable="yes">toolbutton1</property>
             <property name="use_underline">True</property>
           </object>
