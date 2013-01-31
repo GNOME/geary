@@ -403,7 +403,7 @@ public class AddEditPage : Gtk.Box {
     
     public Geary.AccountInformation? get_account_information() {
         Geary.AccountInformation account_information;
-        update_ui(); // Force password update.
+        fix_credentials_for_supported_provider();
         
         Geary.Credentials imap_credentials = new Geary.Credentials(imap_username.strip(), imap_password.strip());
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username.strip(), smtp_password.strip());
@@ -438,6 +438,16 @@ public class AddEditPage : Gtk.Box {
         return account_information;
     }
     
+    // Assembles credentials for supported providers.
+    private void fix_credentials_for_supported_provider() {
+        if (get_service_provider() != Geary.ServiceProvider.OTHER) {
+            imap_username = email_address;
+            smtp_username = email_address;
+            imap_password = password;
+            smtp_password = password;
+        }
+    }
+    
     // Updates UI based on various options.
     private void update_ui() {
         base.show_all();
@@ -456,12 +466,6 @@ public class AddEditPage : Gtk.Box {
             other_info.hide();
             
             set_other_info_sensitive(mode == PageMode.WELCOME);
-            
-            // For supported providers, fill out the rest of the form automagically.
-            imap_username = email_address;
-            smtp_username = email_address;
-            imap_password = password;
-            smtp_password = password;
         }
         
         // In edit mode, certain fields are not sensitive.
