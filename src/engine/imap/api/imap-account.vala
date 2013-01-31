@@ -30,17 +30,17 @@ private class Geary.Imap.Account : Object {
     }
     
     private string name;
-    private AccountSettings settings;
+    private AccountInformation account_information;
     private ClientSessionManager session_mgr;
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     
     public signal void login_failed(Geary.Credentials cred);
     
-    public Account(Geary.AccountSettings settings) {
-        name = "IMAP Account for %s".printf(settings.imap_credentials.to_string());
-        this.settings = settings;
+    public Account(Geary.AccountInformation account_information) {
+        name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
+        this.account_information = account_information;
         
-        session_mgr = new ClientSessionManager(settings);
+        session_mgr = new ClientSessionManager(account_information);
         session_mgr.login_failed.connect(on_login_failed);
     }
     
@@ -185,7 +185,7 @@ private class Geary.Imap.Account : Object {
     }
     
     private void on_login_failed() {
-        login_failed(settings.imap_credentials);
+        login_failed(account_information.imap_credentials);
     }
     
     public string to_string() {

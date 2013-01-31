@@ -32,9 +32,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         }
     }
     
-    public signal void report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
-        Error? err);
-
+    public signal void report_problem(Geary.Account.Problem problem, Error? err);
+    
     // Min and max times between attempting to re-send after a connection failure.
     private const uint MIN_SEND_RETRY_INTERVAL_SEC = 4;
     private const uint MAX_SEND_RETRY_INTERVAL_SEC = 64;
@@ -42,18 +41,20 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     private static FolderRoot? path = null;
     
     private ImapDB.Database db;
-    private AccountSettings settings;
+    private weak Account _account;
     private Geary.Smtp.ClientSession smtp;
     private bool opened = false;
     private NonblockingMailbox<OutboxRow> outbox_queue = new NonblockingMailbox<OutboxRow>();
     
+    public override Account account { get { return _account; } }
+    
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
-    public SmtpOutboxFolder(ImapDB.Database db, AccountSettings settings) {
+    public SmtpOutboxFolder(ImapDB.Database db, Account account) {
         this.db = db;
-        this.settings = settings;
+        _account = account;
         
-        smtp = new Geary.Smtp.ClientSession(settings.smtp_endpoint);
+        smtp = new Geary.Smtp.ClientSession(_account.information.get_smtp_endpoint());
         
         do_postman_async.begin();
     }
@@ -127,15 +128,26 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             } catch (Error send_err) {
                 debug("Outbox postman send error, retrying: %s", send_err.message);
                 
-                if (send_err is SmtpError.AUTHENTICATION_FAILED)
-                    report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, settings, send_err);
-                
                 try {
                     outbox_queue.send(row);
                 } catch (Error send_err) {
                     debug("Outbox postman: Unable to re-enqueue message, dropping on floor: %s", send_err.message);
                 }
-
+                
+                if (send_err is SmtpError.AUTHENTICATION_FAILED) {
+                    bool report = true;
+                    try {
+                        if (yield _account.information.fetch_passwords_async(
+                            CredentialsMediator.ServiceFlag.SMTP))
+                            report = false;
+                    } catch (Error e) {
+                        debug("Error prompting for IMAP password: %s", e.message);
+                    }
+                    
+                    if (report)
+                        report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, send_err);
+                }
+                
                 // Take a brief nap before continuing to allow connection problems to resolve.
                 yield Geary.Scheduler.sleep_async(send_retry_seconds);
                 send_retry_seconds *= 2;
@@ -499,7 +511,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         Error? smtp_err = null;
         
         try {
-            yield smtp.login_async(settings.smtp_credentials, cancellable);
+            yield smtp.login_async(_account.information.smtp_credentials, cancellable);
         } catch (Error login_err) {
             debug("SMTP login error: %s", login_err.message);
             smtp_err = login_err;

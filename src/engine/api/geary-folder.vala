@@ -71,6 +71,8 @@ public interface Geary.Folder : Object {
         }
     }
     
+    public abstract Geary.Account account { get; }
+    
     /**
      * This is fired when the Folder is successfully opened by a caller.  It will only fire once
      * until the Folder is closed, with the OpenState indicating what has been opened and the count

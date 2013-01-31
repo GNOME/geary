@@ -241,27 +241,26 @@ public class Geary.Engine {
         if (account_instances.has_key(account_information.email))
             return account_instances.get(account_information.email);
         
-        AccountSettings settings = new AccountSettings(account_information);
-        ImapDB.Account local_account = new ImapDB.Account(settings);
-        Imap.Account remote_account = new Imap.Account(settings);
+        ImapDB.Account local_account = new ImapDB.Account(account_information);
+        Imap.Account remote_account = new Imap.Account(account_information);
         
         Geary.Account account;
         switch (account_information.service_provider) {
             case ServiceProvider.GMAIL:
                 account = new ImapEngine.GmailAccount("Gmail account %s".printf(account_information.email),
-                    settings, remote_account, local_account);
+                    account_information, remote_account, local_account);
             break;
             
             case ServiceProvider.YAHOO:
                 account = new ImapEngine.YahooAccount("Yahoo account %s".printf(account_information.email),
-                    settings, remote_account, local_account);
+                    account_information, remote_account, local_account);
             break;
             
             case ServiceProvider.OTHER:
                 account = new ImapEngine.OtherAccount("Other account %s".printf(account_information.email),
-                    settings, remote_account, local_account);
+                    account_information, remote_account, local_account);
             break;
-                
+            
             default:
                 assert_not_reached();
         }

@@ -16,7 +16,7 @@ public class NotificationBubble : GLib.Object {
     private Geary.Email? email = null;
     private unowned List<string> caps;
 
-    public signal void invoked(Geary.Email? email);
+    public signal void invoked(Geary.Folder folder, Geary.Email? email);
     
     public NotificationBubble(NewMessagesMonitor monitor) {
         this.monitor = monitor;
@@ -64,7 +64,7 @@ public class NotificationBubble : GLib.Object {
     }
     
     private void on_default_action(Notify.Notification notification, string action) {
-        invoked(email);
+        invoked(monitor.folder, email);
         GearyApplication.instance.activate(new string[0]);
     }
     

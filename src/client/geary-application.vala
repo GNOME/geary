@@ -79,7 +79,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     private static GearyApplication _instance = null;
     
     private GearyController? controller = null;
-    private Geary.Account? account = null;
     
     private LoginDialog? login_dialog = null;
     
@@ -108,8 +107,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (controller.main_window != null)
             controller.main_window.destroy();
         
-        controller.disconnect_account_async.begin(null);
-        
         Date.terminate();
         
         return true;
@@ -130,17 +127,22 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             return;
         }
 
+        Geary.Engine.instance.account_available.connect(on_account_available);
+        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
+        
+        config = new Configuration();
+        controller = new GearyController();
+        
         // Start Geary.
         try {
             yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory(),
                 new GnomeKeyringMediator());
+            if (Geary.Engine.instance.get_accounts().size == 0)
+                create_account();
         } catch (Error e) {
             error("Error opening Geary.Engine instance: %s", e.message);
         }
 
-        config = new Configuration();
-        controller = new GearyController();
-        initialize_account();
         handle_args(args);
     }
     
@@ -152,44 +154,34 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return action;
     }
     
-    private void set_account(Geary.Account? account) {
-        if (this.account == account)
-            return;
-            
-        if (this.account != null)
-            this.account.report_problem.disconnect(on_report_problem);
-        
-        this.account = account;
-        
-        if (this.account != null)
-            this.account.report_problem.connect(on_report_problem);
-        
-        controller.connect_account_async.begin(this.account, null);
+    private void open_account(Geary.Account account) {
+        account.report_problem.connect(on_report_problem);
+        controller.connect_account_async.begin(account);
     }
     
-    private void initialize_account() {
-        Geary.AccountInformation? account_information = get_account();
-        if (account_information == null) {
-            create_account(null);
-        } else {
-            open_account(account_information.email,
-                Geary.CredentialsMediator.ServiceFlag.IMAP, null);
+    private void close_account(Geary.Account account) {
+        account.report_problem.disconnect(on_report_problem);
+        controller.disconnect_account_async.begin(account);
+    }
+    
+    private Geary.Account get_account_instance(Geary.AccountInformation account_information) {
+        try {
+            return Geary.Engine.instance.get_account_instance(account_information);
+        } catch (Error e) {
+            error("Error creating account instance: %s", e.message);
         }
     }
     
-    private void create_account(string? email) {
-        Geary.AccountInformation? old_account_information = null;
-        if (email != null) {
-            try {
-                old_account_information = Geary.Engine.instance.get_accounts().get(email);
-            } catch (Error err) {
-                debug("Unable to open account information for %s, creating instead: %s", email,
-                    err.message);
-            }
-        }
-        
-        Geary.AccountInformation? account_information =
-            request_account_information(old_account_information);
+    private void on_account_available(Geary.AccountInformation account_information) {
+        open_account(get_account_instance(account_information));
+    }
+    
+    private void on_account_unavailable(Geary.AccountInformation account_information) {
+        close_account(get_account_instance(account_information));
+    }
+    
+    private void create_account() {
+        Geary.AccountInformation? account_information = request_account_information(null);
         if (account_information != null)
             do_validate_until_successful_async.begin(account_information);
     }
@@ -220,10 +212,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // exit could be canceled is if there are unsaved composer windows open (which won't
         // happen before an account is created). However, best to include this check for the
         // future.
-        if (new_account_information == null) {
-            set_account(null);
+        if (new_account_information == null)
             return null;
-        }
         
         debug("User entered revised account information, retrying validation");
         return new_account_information;
@@ -243,62 +233,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         account_information.store_async.begin(cancellable);
         
-        try {
-            set_account(Geary.Engine.instance.get_account_instance(account_information));
-            debug("Successfully validated account information");
-            return true;
-        } catch (Error err) {
-            debug("Unable to retrieve email account: %s", err.message);
-            return false;
-        }
-    }
-    
-    private void open_account(string email, Geary.CredentialsMediator.ServiceFlag password_flags,
-        Cancellable? cancellable) {
-        Geary.AccountInformation account_information;
-        try {
-            account_information = Geary.Engine.instance.get_accounts().get(email);
-            if (account_information == null)
-                account_information = Geary.Engine.instance.create_orphan_account(email);
-        } catch (Error err) {
-            error("Unable to open account information for label %s: %s", email, err.message);
-        }
-        
-        account_information.fetch_passwords_async.begin(password_flags,
-            on_open_account_fetch_passwords_finished);
-    }
-    
-    private void on_open_account_fetch_passwords_finished(Object? object, AsyncResult result) {
-        Geary.AccountInformation? account_information = object as Geary.AccountInformation;
-        assert(account_information != null);
-        
-        try {
-            if (!account_information.fetch_passwords_async.end(result))
-                exit(1);
-        } catch (Error e) {
-            error("Error fetching stored passwords: %s", e.message);
-        }
-        
-        try {
-            set_account(Geary.Engine.instance.get_account_instance(account_information));
-        } catch (Error err) {
-            // Our service provider is wrong. But we can't change it, because we don't want to
-            // change the service provider for an existing account.
-            debug("Unable to retrieve email account: %s", err.message);
-            set_account(null);
-        }
-    }
-    
-    private Geary.AccountInformation? get_account() {
-        try {
-            Geary.AccountInformation[] accounts = Geary.Engine.instance.get_accounts().values.to_array();
-            if (accounts.length > 0)
-                return accounts[0];
-        } catch (Error e) {
-            debug("Unable to fetch account labels: %s", e.message);
-        }
-        
-        return null;
+        debug("Successfully validated account information");
+        return true;
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
@@ -350,16 +286,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
-    private void on_report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
-        Error? err) {
+    private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
-        
-        Geary.AccountInformation account_information;
-        try {
-            account_information = Geary.Engine.instance.get_accounts().get(settings.email.address);
-        } catch (Error e) {
-            error("Couldn't find previously-opened account %s", settings.email.address);
-        }
         
         switch (problem) {
             case Geary.Account.Problem.DATABASE_FAILURE:
@@ -368,34 +296,16 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
                 // TODO
             break;
             
-            // TODO: Different password dialog prompt for SMTP or IMAP login.
             case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-                account.report_problem.disconnect(on_report_problem);
-                do_password_failed_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP,
-                    account_information);
-            break;
-            
-            // TODO: Different password dialog prompt for SMTP or IMAP login.
             case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
-                account.report_problem.disconnect(on_report_problem);
-                do_password_failed_async.begin(Geary.CredentialsMediator.ServiceFlag.SMTP,
-                    account_information);
+                // At this point, we've prompted them for the password and
+                // they've hit cancel, so there's not much for us to do here.
+                close_account(account);
             break;
             
             default:
                 assert_not_reached();
         }
-    }
-    
-    private async void do_password_failed_async(Geary.CredentialsMediator.ServiceFlag services,
-        Geary.AccountInformation account_information) {
-        try {
-            yield account_information.clear_stored_passwords_async(services);
-        } catch (Error e) {
-            debug("Error clearing stored passwords: %s", e.message);
-        }
-        
-        open_account(account_information.email, services, null);
     }
     
     public File get_user_data_directory() {

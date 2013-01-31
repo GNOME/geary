@@ -18,9 +18,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>(
         Hashable.hash_func, Equalable.equal_func);
     
-    public GenericAccount(string name, Geary.AccountSettings settings, Imap.Account remote,
+    public GenericAccount(string name, Geary.AccountInformation information, Imap.Account remote,
         ImapDB.Account local) {
-        base (name, settings);
+        base (name, information);
         
         this.remote = remote;
         this.local = local;
@@ -71,7 +71,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
         
-        yield local.open_async(settings.settings_dir, Engine.instance.resource_dir.get_child("sql"), cancellable);
+        yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"), cancellable);
         
         // outbox is now available
         local.outbox.report_problem.connect(notify_report_problem);
@@ -170,8 +170,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return return_folders;
     }
     
-    public override async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
-        Cancellable? cancellable = null) throws Error {
+    public override Gee.Collection<Geary.Folder> list_matching_folders(
+        Geary.FolderPath? parent) throws Error {
+        check_open();
+        
         Gee.ArrayList<Geary.Folder> matches = new Gee.ArrayList<Geary.Folder>();
 
         foreach(FolderPath path in existing_folders.keys) {
@@ -184,6 +186,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return matches;
     }
 
+    public override Gee.Collection<Geary.Folder> list_folders() throws Error {
+        check_open();
+        return existing_folders.values;
+    }
+    
     private async Gee.Collection<Geary.Folder> enumerate_folders_async(Geary.FolderPath? parent,
         Cancellable? cancellable = null) throws Error {
         check_open();
@@ -384,7 +391,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {
-        notify_report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, settings, null);
+        do_login_failed_async.begin(credentials);
+    }
+    
+    private async void do_login_failed_async(Geary.Credentials? credentials) {
+        try {
+            if (yield information.fetch_passwords_async(CredentialsMediator.ServiceFlag.IMAP))
+                return;
+        } catch (Error e) {
+            debug("Error prompting for IMAP password: %s", e.message);
+        }
+        
+        notify_report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, null);
     }
 }
 

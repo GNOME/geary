@@ -36,9 +36,9 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
     
     private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? path_type_map = null;
     
-    public GmailAccount(string name, Geary.AccountSettings settings, Imap.Account remote,
-        ImapDB.Account local) {
-        base (name, settings, remote, local);
+    public GmailAccount(string name, Geary.AccountInformation account_information,
+        Imap.Account remote, ImapDB.Account local) {
+        base (name, account_information, remote, local);
         
         if (path_type_map == null) {
             path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(

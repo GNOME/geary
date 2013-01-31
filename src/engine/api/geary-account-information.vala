@@ -96,14 +96,25 @@ public class Geary.AccountInformation : Object {
     }
     
     /**
-     * Juggles get_passwords_async() and prompt_passwords_async() to fetch the
-     * passwords for the given services.  Return true if all passwords were in
-     * the key store or the user proceeded normally, false if the user tried to
-     * cancel.
+     * Fetch the passwords for the given services.  For each service, if the
+     * password is unset, use get_passwords_async() first; if the password is
+     * set or it's not in the key store, use prompt_passwords_async().  Return
+     * true if all passwords were retrieved from the key store or the user
+     * proceeded normally if/when prompted, false if the user tried to cancel
+     * the prompt.
      */
     public async bool fetch_passwords_async(CredentialsMediator.ServiceFlag services) throws Error {
-        CredentialsMediator.ServiceFlag unset_services =
-            yield get_passwords_async(services);
+        // Only call get_passwords on anything that hasn't been set
+        // (incorrectly) previously.
+        CredentialsMediator.ServiceFlag get_services = 0;
+        if (services.has_imap() && !imap_credentials.is_complete())
+            get_services |= CredentialsMediator.ServiceFlag.IMAP;
+        if (services.has_smtp() && !smtp_credentials.is_complete())
+            get_services |= CredentialsMediator.ServiceFlag.SMTP;
+        
+        CredentialsMediator.ServiceFlag unset_services = services;
+        if (get_services != 0)
+            unset_services = yield get_passwords_async(get_services);
         
         if (unset_services == 0)
             return true;
@@ -115,6 +126,17 @@ public class Geary.AccountInformation : Object {
         if (Geary.Engine.instance.authentication_mediator == null)
             throw new EngineError.OPEN_REQUIRED(
                 "Geary.Engine instance needs to be open with a valid Geary.CredentialsMediator");
+    }
+    
+    private void set_imap_password(string imap_password) {
+        // Don't just update the pass field, because we need imap_credentials
+        // itself to change so callers can bind to its changed signal.
+        imap_credentials = new Credentials(imap_credentials.user, imap_password);
+    }
+    
+    private void set_smtp_password(string smtp_password) {
+        // See above.  Same argument.
+        smtp_credentials = new Credentials(smtp_credentials.user, smtp_password);
     }
     
     /**
@@ -137,7 +159,7 @@ public class Geary.AccountInformation : Object {
                 CredentialsMediator.Service.IMAP, imap_credentials.user);
             
             if (imap_password != null)
-                imap_credentials.pass = imap_password;
+                set_imap_password(imap_password);
              else
                 failed_services |= CredentialsMediator.ServiceFlag.IMAP;
         }
@@ -147,7 +169,7 @@ public class Geary.AccountInformation : Object {
                 CredentialsMediator.Service.SMTP, smtp_credentials.user);
             
             if (smtp_password != null)
-                smtp_credentials.pass = smtp_password;
+                set_smtp_password(smtp_password);
             else
                 failed_services |= CredentialsMediator.ServiceFlag.SMTP;
         }
@@ -176,12 +198,12 @@ public class Geary.AccountInformation : Object {
             return false;
         
         if (services.has_imap()) {
-            imap_credentials.pass = imap_password;
+            set_imap_password(imap_password);
             this.imap_remember_password = imap_remember_password;
         }
         
         if (services.has_smtp()) {
-            smtp_credentials.pass = smtp_password;
+            set_smtp_password(smtp_password);
             this.smtp_remember_password = smtp_remember_password;
         }
 
@@ -218,27 +240,6 @@ public class Geary.AccountInformation : Object {
                 yield mediator.clear_password_async(
                     CredentialsMediator.Service.SMTP, smtp_credentials.user);
             }
-        }
-    }
-    
-    /**
-     * Use the Engine's authentication mediator to clear the passwords for the
-     * given services in the key store.
-     */
-    public async void clear_stored_passwords_async(
-        CredentialsMediator.ServiceFlag services) throws Error {
-        check_mediator_instance();
-        
-        CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
-        
-        if (services.has_imap()) {
-            yield mediator.clear_password_async(
-                CredentialsMediator.Service.IMAP, imap_credentials.user);
-        }
-        
-        if (services.has_smtp()) {
-            yield mediator.clear_password_async(
-                CredentialsMediator.Service.SMTP, smtp_credentials.user);
         }
     }
     

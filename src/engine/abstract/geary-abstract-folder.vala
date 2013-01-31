@@ -47,6 +47,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Geary.SpecialFolderType new_type) {
         special_folder_type_changed(old_type, new_type);
     }
+
+    public abstract Geary.Account account { get; }
     
     public abstract Geary.FolderPath get_path();
     

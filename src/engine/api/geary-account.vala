@@ -13,7 +13,7 @@ public interface Geary.Account : Object {
         DATABASE_FAILURE
     }
     
-    public abstract Geary.AccountSettings settings { get; protected set; }
+    public abstract Geary.AccountInformation information { get; protected set; }
     
     public signal void opened();
     
@@ -21,8 +21,7 @@ public interface Geary.Account : Object {
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
     
-    public signal void report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
-        Error? err);
+    public signal void report_problem(Geary.Account.Problem problem, Error? err);
     
     /**
      * Fired when folders become available or unavailable in the account.
@@ -57,8 +56,7 @@ public interface Geary.Account : Object {
     /**
      * Signal notification method for subclasses to use.
      */
-    protected abstract void notify_report_problem(Geary.Account.Problem problem,
-        Geary.AccountSettings? settings, Error? err);
+    protected abstract void notify_report_problem(Geary.Account.Problem problem, Error? err);
     
     /**
      * Signal notification method for subclasses to use.
@@ -83,18 +81,26 @@ public interface Geary.Account : Object {
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     /**
-     * Lists all the folders found under the parent path unless it's null, in which case it lists
-     * all the root folders.  If the parent path cannot be found, EngineError.NOT_FOUND is thrown.
-     * If no folders exist in the root, EngineError.NOT_FOUND may be thrown as well.  However,
-     * the caller should be prepared to deal with an empty list being returned instead.
+     * Lists all the currently-available folders found under the parent path
+     * unless it's null, in which case it lists all the root folders.  If the
+     * parent path cannot be found, EngineError.NOT_FOUND is thrown.  If no
+     * folders exist in the root, EngineError.NOT_FOUND may be thrown as well.
+     * However, the caller should be prepared to deal with an empty list being
+     * returned instead.
      *
      * The same Geary.Folder objects (instances) will be returned if the same path is submitted
      * multiple times.  This means that multiple callers may be holding references to the same
      * Folders.  This is important when thinking of opening and closing folders and signal
      * notifications.
      */
-    public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
-        Cancellable? cancellable = null) throws Error;
+    public abstract Gee.Collection<Geary.Folder> list_matching_folders(
+        Geary.FolderPath? parent) throws Error;
+    
+    /**
+     * Lists all currently-available folders.  See caveats under
+     * list_matching_folders().
+     */
+    public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
     
     /**
      * Gets a perpetually update-to-date collection of autocompletion contacts.

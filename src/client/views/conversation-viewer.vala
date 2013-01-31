@@ -63,7 +63,7 @@ public class ConversationViewer : Gtk.Box {
     private Gtk.Menu? message_menu = null;
     private Gtk.Menu? attachment_menu = null;
     private weak Geary.Folder? current_folder = null;
-    private Geary.AccountSettings? current_settings = null;
+    private Geary.AccountInformation? current_account_information = null;
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -122,7 +122,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     // Removes all displayed e-mails from the view.
-    public void clear(Geary.Folder? new_folder, Geary.AccountSettings? settings) {
+    public void clear(Geary.Folder? new_folder, Geary.AccountInformation? account_information) {
         // Remove all messages from DOM.
         try {
             foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
@@ -136,7 +136,7 @@ public class ConversationViewer : Gtk.Box {
         messages.clear();
         
         current_folder = new_folder;
-        current_settings = settings;
+        current_account_information = account_information;
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
@@ -146,7 +146,7 @@ public class ConversationViewer : Gtk.Box {
     
     public void show_multiple_selected(uint selected_count) {
         // Remove any messages and hide the message container, then show the counter.
-        clear(current_folder, current_settings);
+        clear(current_folder, current_account_information);
         try {
             web_view.hide_element_by_id(MESSAGE_CONTAINER_ID);
             web_view.show_element_by_id(SELECTION_COUNTER_ID);
@@ -234,8 +234,8 @@ public class ConversationViewer : Gtk.Box {
         
         // Only include to string if it's not just this account.
         // TODO: multiple accounts.
-        if (email.to != null && current_settings != null) {
-            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == current_settings.email.address))
+        if (email.to != null && current_account_information != null) {
+            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == current_account_information.email))
                  insert_header_address(ref header, _("To:"), email.to);
         }
 

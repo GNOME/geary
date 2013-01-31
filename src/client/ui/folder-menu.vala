@@ -18,6 +18,10 @@ public class FolderMenu : GtkUtil.ToggleToolbarDropdown {
         // TODO Merge the move/copy menus and just have a move/copy buttons at bottom of this menu.
     }
     
+    public bool has_folder(Geary.Folder folder) {
+        return folder_list.contains(folder);
+    }
+    
     public void add_folder(Geary.Folder folder) {
         folder_list.add(folder);
         folder_list.sort((CompareFunc) folder_sort);
@@ -39,6 +43,14 @@ public class FolderMenu : GtkUtil.ToggleToolbarDropdown {
             proxy_menu.remove(proxy_menu.get_children().nth_data(index));
         }
         
+        menu.show_all();
+        proxy_menu.show_all();
+    }
+    
+    public void clear() {
+        folder_list.clear();
+        menu.foreach((w) => menu.remove(w));
+        proxy_menu.foreach((w) => proxy_menu.remove(w));
         menu.show_all();
         proxy_menu.show_all();
     }
