@@ -98,7 +98,7 @@ pre {
 .email.starred .unstarred {
     display: none;
 }
-.email.read {
+.email.read, #multiple_messages .email {
     border-color: rgba(0,0,0,0.4);
     box-shadow: 0 3px 11px rgba(0,0,0,0.21);
 }
