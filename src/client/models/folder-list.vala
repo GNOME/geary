@@ -17,7 +17,7 @@ public class FolderList : Sidebar.Tree {
         
         public AccountBranch(Geary.Account account) {
             base(new Sidebar.Grouping(account.information.nickname, new ThemedIcon("emblem-mail")),
-                Sidebar.Branch.Options.NONE, special_folder_comparator);
+                Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
             
             this.account = account;
             user_folder_group = new Sidebar.Grouping("",
@@ -26,7 +26,7 @@ public class FolderList : Sidebar.Tree {
             
             account.information.notify["nickname"].connect(on_nicknamed_changed);
             
-            graft(get_root(), user_folder_group, normal_folder_comparator);
+            graft(get_root(), user_folder_group);
         }
         
         ~AccountBranch() {
