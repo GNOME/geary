@@ -30,6 +30,10 @@ public class Geary.Imap.ClientSessionManager {
         adjust_session_pool.begin();
     }
     
+    ~ClientSessionManager() {
+        account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
+    }
+    
     private void on_imap_credentials_notified() {
         authentication_failed = false;
         adjust_session_pool.begin();

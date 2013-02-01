@@ -16,7 +16,7 @@ public class FolderList : Sidebar.Tree {
         public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
         
         public AccountBranch(Geary.Account account) {
-            base(new Sidebar.Grouping(account.information.email, new ThemedIcon("emblem-mail")),
+            base(new Sidebar.Grouping(account.information.nickname, new ThemedIcon("emblem-mail")),
                 Sidebar.Branch.Options.NONE, special_folder_comparator);
             
             this.account = account;
@@ -24,7 +24,17 @@ public class FolderList : Sidebar.Tree {
                 IconFactory.instance.get_custom_icon("tags", IconFactory.ICON_SIDEBAR));
             folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
             
+            account.information.notify["nickname"].connect(on_nicknamed_changed);
+            
             graft(get_root(), user_folder_group, normal_folder_comparator);
+        }
+        
+        ~AccountBranch() {
+            account.information.notify["nickname"].disconnect(on_nicknamed_changed);
+        }
+        
+        private void on_nicknamed_changed() {
+            ((Sidebar.Grouping) get_root()).rename(account.information.nickname);
         }
         
         private static int special_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
