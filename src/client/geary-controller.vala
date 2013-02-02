@@ -1033,9 +1033,11 @@ public class GearyController {
     }
     
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
-        Geary.ContactStore? contact_store = (current_account == null ? null
-            : current_account.get_contact_store());
-        ComposerWindow window = new ComposerWindow(contact_store, prefill);
+        if (current_account == null)
+            return;
+        
+        Geary.ContactStore? contact_store = current_account.get_contact_store();
+        ComposerWindow window = new ComposerWindow(current_account, contact_store, prefill);
         window.set_position(Gtk.WindowPosition.CENTER);
         window.send.connect(on_send);
         
@@ -1169,7 +1171,7 @@ public class GearyController {
     }
         
     private void on_send(ComposerWindow composer_window) {
-        current_account.send_email_async.begin(composer_window.get_composed_email(get_from()));
+        composer_window.account.send_email_async.begin(composer_window.get_composed_email(get_from()));
         composer_window.destroy();
     }
 

@@ -60,6 +60,8 @@ public class ComposerWindow : Gtk.Window {
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
     
+    public Geary.Account account { get; private set; }
+    
     public string from { get; set; }
     
     public string to {
@@ -135,7 +137,10 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.UIManager ui;
     private ContactEntryCompletion[] contact_entry_completions;
     
-    public ComposerWindow(Geary.ContactStore? contact_store, Geary.ComposedEmail? prefill = null) {
+    public ComposerWindow(Geary.Account account, Geary.ContactStore? contact_store,
+        Geary.ComposedEmail? prefill = null) {
+        this.account = account;
+        
         contact_entry_completions = {
             new ContactEntryCompletion(contact_store),
             new ContactEntryCompletion(contact_store),
