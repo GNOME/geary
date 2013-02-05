@@ -7,7 +7,7 @@
 namespace Geary.Files {
 
 // Number of files to delete in each step.
-public const int RECURSIVE_DELETE_BATCH_SIZE = 50;
+private const int RECURSIVE_DELETE_BATCH_SIZE = 50;
 
 /**
  * Recursively deletes a folder and its children.
@@ -26,28 +26,29 @@ public async void recursive_delete_async(File folder, Cancellable? cancellable =
         }
         
         // Iterate the enumerated files in batches.
-        try {
-            while (true) {
-                List<FileInfo>? info_list = null;
-                
-                info_list = yield enumerator.next_files_async(RECURSIVE_DELETE_BATCH_SIZE,
-                    Priority.DEFAULT, cancellable);
-                
-                if (info_list == null)
-                    break; // Stop condition.
-                
-                // Recursive step.
-                foreach (FileInfo info in info_list)
-                    yield recursive_delete_async(folder.get_child(info.get_name()), cancellable);
+        if (enumerator != null) {
+            try {
+                while (true) {
+                    List<FileInfo>? info_list = yield enumerator.next_files_async(RECURSIVE_DELETE_BATCH_SIZE,
+                        Priority.DEFAULT, cancellable);
+                    if (info_list == null)
+                        break; // Stop condition.
+                    
+                    // Recursive step.
+                    foreach (FileInfo info in info_list)
+                        yield recursive_delete_async(folder.get_child(info.get_name()), cancellable);
+                }
+            } catch (Error e) {
+                debug("Error enumerating batch of files: %s", e.message);
             }
-        } catch (Error e) {
-            debug("Error enumerating batch of files: %s", e.message);
         }
     }
     
     // Children have been deleted, it's now safe to delete this file/folder.
     try {
-        yield folder.delete_async(Priority.DEFAULT, cancellable);
+        // TODO: Use File.delete_async() when GLib 2.34 is minimum requirement:
+        // http://redmine.yorba.org/issues/6323
+        folder.delete(cancellable);
     } catch (Error e) {
         debug("Error removing file: %s", e.message);
     }
