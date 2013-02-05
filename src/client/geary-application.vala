@@ -232,6 +232,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
         
         account_information.store_async.begin(cancellable);
+        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
+            Geary.CredentialsMediator.ServiceFlag.SMTP, account_information);
         
         debug("Successfully validated account information");
         return true;
