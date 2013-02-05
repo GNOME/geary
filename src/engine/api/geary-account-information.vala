@@ -375,4 +375,48 @@ public class Geary.AccountInformation : Object {
             debug("Error writing to account info file: %s", err.message);
         }
     }
+    
+    public async void clear_stored_passwords_async(
+        CredentialsMediator.ServiceFlag services) throws Error {
+        Error? return_error = null;
+        check_mediator_instance();
+        CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
+        
+        try {
+            if (services.has_imap()) {
+                yield mediator.clear_password_async(
+                    CredentialsMediator.Service.IMAP, imap_credentials.user);
+            }
+        } catch (Error e) {
+            return_error = e;
+        }
+        
+        try {
+            if (services.has_smtp()) {
+                yield mediator.clear_password_async(
+                    CredentialsMediator.Service.SMTP, smtp_credentials.user);
+            }
+        } catch (Error e) {
+            return_error = e;
+        }
+        
+        if (return_error != null)
+            throw return_error;
+    }
+    
+    /**
+     * Deletes an account from disk.  This is used by Geary.Engine and should not
+     * normally be invoked directly.
+     */
+    internal async void remove_async(Cancellable? cancellable = null) {
+        try {
+            yield clear_stored_passwords_async(CredentialsMediator.ServiceFlag.IMAP
+                | CredentialsMediator.ServiceFlag.SMTP);
+        } catch (Error e) {
+            debug("Error clearing SMTP password: %s", e.message);
+        }
+        
+        // Delete files.
+        yield Files.recursive_delete_async(settings_dir, cancellable);
+    }
 }

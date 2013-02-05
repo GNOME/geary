@@ -126,12 +126,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         properties_map.clear();
         existing_folders.clear();
         local_only.clear();
+        open = false;
         
         if (local_err != null)
             throw local_err;
         
         if (remote_err != null)
             throw remote_err;
+    }
+    
+    public override bool is_open() {
+        return open;
     }
     
     // Subclasses should implement this to return their flavor of a GenericFolder with the

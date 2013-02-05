@@ -222,12 +222,25 @@ public class FolderList : Sidebar.Tree {
         assert(account_branch != null);
         assert(has_branch(account_branch));
         
+        // If this is the current folder, unselect it.
+        Sidebar.Entry? entry = account_branch.folder_entries.get(folder.get_path());
+        if (entry != null && is_selected(entry))
+            folder_selected(null);
+        
         account_branch.remove_folder(folder);
     }
     
     public void remove_account(Geary.Account account) {
         AccountBranch? account_branch = account_branches.get(account);
         if (account_branch != null) {
+            // If a folder on this account is selected, unselect it.
+            foreach (FolderEntry entry in account_branch.folder_entries.values) {
+                if (is_selected(entry)) {
+                    folder_selected(null);
+                    break;
+                }
+            }
+            
             if (has_branch(account_branch))
                 prune(account_branch);
             account_branches.unset(account);

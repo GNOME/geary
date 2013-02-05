@@ -322,12 +322,16 @@ public class GearyController {
     }
     
     private void on_folder_selected(Geary.Folder? folder) {
+        debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
+        
+        // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
-            debug("no folder selected");
+            main_window.conversation_list_store.clear();
+            main_window.conversation_viewer.clear(null, null);
+            
             return;
         }
         
-        debug("Folder %s selected", folder.to_string());
         set_busy(true);
         do_select_folder.begin(folder, on_select_folder_completed);
     }
@@ -362,13 +366,6 @@ public class GearyController {
         foreach(Geary.Folder f in current_folder.account.list_folders()) {
             main_window.main_toolbar.copy_folder_menu.add_folder(f);
             main_window.main_toolbar.move_folder_menu.add_folder(f);
-        }
-        
-        // The current folder may be null if the user rapidly switches between folders. If they have
-        // done that then this folder selection is invalid anyways, so just return.
-        if (current_folder == null) {
-            warning("Can not open folder: %s", folder.to_string());
-            return;
         }
         
         update_ui();

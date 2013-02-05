@@ -293,13 +293,25 @@ public class Geary.Engine {
     public async void remove_account_async(AccountInformation account,
                                            Cancellable? cancellable = null) throws Error {
         check_opened();
-
+        
+        // Ensure account is closed.
+        if (account_instances.has_key(account.email) && account_instances.get(account.email).is_open()) {
+            throw new EngineError.CLOSE_REQUIRED("Account %s must be closed before removal",
+                account.email);
+        }
+        
         if (accounts.unset(account.email)) {
+            // Removal *MUST* be done in the following order:
+            // 1. Send the account-unavailable signal.
             account_unavailable(account);
-
-            // TODO: delete the account from disk.
+            
+            // 2. Delete the corresponding files.
+            yield account.remove_async(cancellable);
+            
+            // 3. Send the account-removed signal.
             account_removed(account);
             
+            // 4. Remove the account data from the engine.
             account_instances.unset(account.email);
         }
     }

@@ -308,6 +308,17 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
+    // Removes an existing account.
+    public async void remove_account_async(Geary.AccountInformation account,
+        Cancellable? cancellable = null) {
+        try {
+            yield GearyApplication.instance.get_account_instance(account).close_async(cancellable);
+            yield Geary.Engine.instance.remove_account_async(account, cancellable);
+        } catch (Error e) {
+            message("Error removing account: %s", e.message);
+        }
+    }
+    
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
     }

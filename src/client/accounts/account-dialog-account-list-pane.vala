@@ -14,10 +14,13 @@ public class AccountDialogAccountListPane : Gtk.Box {
     private Gtk.TreeView list_view;
     private Gtk.ListStore list_model = new Gtk.ListStore(2, typeof (string), typeof (string));
     private Gtk.Action edit_action;
+    private Gtk.Action delete_action;
     
     public signal void add_account();
     
     public signal void edit_account(string email_address);
+    
+    public signal void delete_account(string email_address);
     
     public signal void close();
     
@@ -28,6 +31,7 @@ public class AccountDialogAccountListPane : Gtk.Box {
         pack_end((Gtk.Box) builder.get_object("container"));
         Gtk.ActionGroup actions = (Gtk.ActionGroup) builder.get_object("account list actions");
         edit_action = actions.get_action("edit_account");
+        delete_action = actions.get_action("delete_account");
         
         // Set up list.
         list_view = (Gtk.TreeView) builder.get_object("account_list");
@@ -43,7 +47,8 @@ public class AccountDialogAccountListPane : Gtk.Box {
         actions.get_action("close").activate.connect(() => { close(); });
         actions.get_action("add_account").activate.connect(() => { add_account(); });
         edit_action.activate.connect(notify_edit_account);
-        list_view.get_selection().changed.connect(on_selection_changed);
+        delete_action.activate.connect(notify_delete_account);
+        list_view.get_selection().changed.connect(update_buttons);
         list_view.button_press_event.connect(on_button_press);
         
         // Theme hint: "join" the toolbar to the scrolled window above it.
@@ -73,6 +78,12 @@ public class AccountDialogAccountListPane : Gtk.Box {
         string? account = get_selected_account();
         if (account != null)
             edit_account(account);
+    }
+    
+    private void notify_delete_account() {
+        string? account = get_selected_account();
+        if (account != null)
+            delete_account(account);
     }
     
     private bool on_button_press(Gdk.EventButton event) {
@@ -108,8 +119,19 @@ public class AccountDialogAccountListPane : Gtk.Box {
         return account;
     }
     
-    private void on_selection_changed() {
+    private void update_buttons() {
         edit_action.sensitive = get_selected_account() != null;
+        delete_action.sensitive = edit_action.sensitive && get_num_accounts() > 1;
+    }
+    
+    private int get_num_accounts() {
+        try {
+            return Geary.Engine.instance.get_accounts().size;
+        } catch (Error e) {
+            debug("Error getting number of accounts: %s", e.message);
+        }
+        
+        return 0; // on error
     }
     
     private void on_account_added(Geary.AccountInformation account) {
@@ -119,11 +141,13 @@ public class AccountDialogAccountListPane : Gtk.Box {
         
         add_account_to_list(account.nickname, account.email);
         account.notify.connect(on_account_changed);
+        update_buttons();
     }
     
     private void on_account_removed(Geary.AccountInformation account) {
         remove_account_from_list(account.email);
         account.notify.disconnect(on_account_changed);
+        update_buttons();
     }
     
     // Adds an account to the list.

@@ -17,6 +17,11 @@
         <property name="icon_name">gtk-edit</property>
       </object>
     </child>
+    <child>
+      <object class="GtkAction" id="delete_account">
+        <property name="icon_name">list-remove-symbolic</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="container">
     <property name="visible">True</property>
@@ -80,6 +85,19 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Edit an account</property>
+            <property name="label" translatable="yes">toolbutton1</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="homogeneous">True</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolButton" id="delete_button">
+            <property name="related_action">delete_account</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">toolbutton1</property>
             <property name="use_underline">True</property>
           </object>

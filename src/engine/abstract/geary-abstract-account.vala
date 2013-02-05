@@ -44,6 +44,8 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
+    public abstract bool is_open();
+    
     public abstract Gee.Collection<Geary.Folder> list_matching_folders(
         Geary.FolderPath? parent) throws Error;
     

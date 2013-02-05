@@ -81,6 +81,11 @@ public interface Geary.Account : Object {
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     /**
+     * Returns true if this account is open, else false.
+     */
+    public abstract bool is_open();
+    
+    /**
      * Lists all the currently-available folders found under the parent path
      * unless it's null, in which case it lists all the root folders.  If the
      * parent path cannot be found, EngineError.NOT_FOUND is thrown.  If no
