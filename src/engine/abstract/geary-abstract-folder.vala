@@ -155,7 +155,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Cancellable? cancellable = null) throws Error;
     
     public virtual string to_string() {
-        return get_path().to_string();
+        return "%s:%s".printf(account.to_string(), get_path().to_string());
     }
 }
 
