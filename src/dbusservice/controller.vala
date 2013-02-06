@@ -50,7 +50,7 @@ public class Geary.DBus.Controller {
             
             // Open the Inbox folder.
             Geary.Folder? folder = null;
-            Gee.Collection<Geary.Folder> folders = yield account.list_folders_async(null, null);
+            Gee.Collection<Geary.Folder> folders = account.list_matching_folders(null);
             foreach(Geary.Folder folder_to_check in folders) {
                 if(folder_to_check.get_special_folder_type() == Geary.SpecialFolderType.INBOX) {
                     folder = folder_to_check;
@@ -85,8 +85,7 @@ public class Geary.DBus.Controller {
         return File.new_for_path(Environment.get_current_dir());
     }
     
-    private void on_report_problem(Geary.Account.Problem problem, Geary.AccountSettings settings,
-        Error? err) {
+    private void on_report_problem(Geary.Account.Problem problem, Error? err) {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
     }
     

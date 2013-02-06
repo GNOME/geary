@@ -14,7 +14,6 @@ engine/abstract/geary-abstract-folder.vala
 
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
-engine/api/geary-account-settings.vala
 engine/api/geary-attachment.vala
 engine/api/geary-composed-email.vala
 engine/api/geary-contact.vala
@@ -177,6 +176,7 @@ engine/state/state-mapping.vala
 
 engine/util/util-collection.vala
 engine/util/util-converter.vala
+engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
 engine/util/util-inet.vala
@@ -202,6 +202,7 @@ client/main.vala
 client/accounts/account-dialog.vala
 client/accounts/account-dialog-account-list-pane.vala
 client/accounts/account-dialog-add-edit-pane.vala
+client/accounts/account-dialog-remove-confirm-pane.vala
 client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala

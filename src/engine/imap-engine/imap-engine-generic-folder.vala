@@ -11,10 +11,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private const Geary.Email.Field NORMALIZATION_FIELDS =
         Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
+    private weak GenericAccount _account;
+    public override Account account { get { return _account; } }
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     
-    private weak GenericAccount account;
     private Imap.Account remote;
     private ImapDB.Account local;
     private EmailFlagWatcher email_flag_watcher;
@@ -28,7 +29,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
-        this.account = account;
+        _account = account;
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
@@ -74,7 +75,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             properties = remote_folder.get_properties();
         
         if (properties == null)
-            properties = account.get_properties_for_folder(local_folder.get_path());
+            properties = _account.get_properties_for_folder(local_folder.get_path());
         
         if (properties == null)
             properties = local_folder.get_properties();

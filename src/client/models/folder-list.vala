@@ -10,11 +10,94 @@ public class FolderList : Sidebar.Tree {
         { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
     };
 
-    private class SpecialFolderBranch : Sidebar.RootOnlyBranch {
-        public SpecialFolderBranch(Geary.Folder folder) {
-            base(new FolderEntry(folder));
+    private class AccountBranch : Sidebar.Branch {
+        public Geary.Account account { get; private set; }
+        public Sidebar.Grouping user_folder_group { get; private set; }
+        public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
+        
+        public AccountBranch(Geary.Account account) {
+            base(new Sidebar.Grouping(account.information.nickname, new ThemedIcon("emblem-mail")),
+                Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
             
-            assert(folder.get_special_folder_type() != Geary.SpecialFolderType.NONE);
+            this.account = account;
+            user_folder_group = new Sidebar.Grouping("",
+                IconFactory.instance.get_custom_icon("tags", IconFactory.ICON_SIDEBAR));
+            folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
+            
+            account.information.notify["nickname"].connect(on_nicknamed_changed);
+            
+            graft(get_root(), user_folder_group);
+        }
+        
+        ~AccountBranch() {
+            account.information.notify["nickname"].disconnect(on_nicknamed_changed);
+        }
+        
+        private void on_nicknamed_changed() {
+            ((Sidebar.Grouping) get_root()).rename(account.information.nickname);
+        }
+        
+        private static int special_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
+            // Our user folder grouping always comes dead last.
+            if (a is Sidebar.Grouping)
+                return 1;
+            if (b is Sidebar.Grouping)
+                return -1;
+            
+            assert(a is FolderEntry);
+            assert(b is FolderEntry);
+            
+            FolderEntry entry_a = (FolderEntry) a;
+            FolderEntry entry_b = (FolderEntry) b;
+            Geary.SpecialFolderType type_a = entry_a.folder.get_special_folder_type();
+            Geary.SpecialFolderType type_b = entry_b.folder.get_special_folder_type();
+            
+            assert(type_a != Geary.SpecialFolderType.NONE);
+            assert(type_b != Geary.SpecialFolderType.NONE);
+            
+            // Special folders are ordered by their enum value.
+            return (int) type_a - (int) type_b;
+        }
+            
+        private static int normal_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
+            // Non-special folders are compared based on name.
+            return a.get_sidebar_name().collate(b.get_sidebar_name());
+        }
+        
+        public Sidebar.Entry? get_entry_for_path(Geary.FolderPath folder_path) {
+            return folder_entries.get(folder_path);
+        }
+        
+        public void add_folder(Geary.Folder folder) {
+            FolderEntry folder_entry = new FolderEntry(folder);
+            Geary.SpecialFolderType special_folder_type = folder.get_special_folder_type();
+            if (special_folder_type != Geary.SpecialFolderType.NONE) {
+                graft(get_root(), folder_entry);
+            } else if (folder.get_path().get_parent() == null) {
+                // Top-level folders get put in our special user folders group.
+                graft(user_folder_group, folder_entry);
+            } else {
+                Sidebar.Entry? entry = folder_entries.get(folder.get_path().get_parent());
+                if (entry == null) {
+                    debug("Could not add folder %s of type %s to folder list", folder.to_string(),
+                        special_folder_type.to_string());
+                    return;
+                }
+                graft(entry, folder_entry);
+            }
+            
+            folder_entries.set(folder.get_path(), folder_entry);
+        }
+        
+        public void remove_folder(Geary.Folder folder) {
+            Sidebar.Entry? entry = folder_entries.get(folder.get_path());
+            if(entry == null) {
+                debug("Could not remove folder %s", folder.to_string());
+                return;
+            }
+            
+            prune(entry);
+            folder_entries.unset(folder.get_path());
         }
     }
     
@@ -95,28 +178,17 @@ public class FolderList : Sidebar.Tree {
     public signal void copy_conversation(Geary.Folder folder);
     public signal void move_conversation(Geary.Folder folder);
     
-    private Sidebar.Grouping user_folder_group;
-    private Sidebar.Branch user_folder_branch;
-    internal Gee.HashMap<Geary.FolderPath, Sidebar.Entry> entries = new Gee.HashMap<
-        Geary.FolderPath, Sidebar.Entry>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
-    internal Gee.HashMap<Geary.FolderPath, Sidebar.Branch> branches = new Gee.HashMap<
-        Geary.FolderPath, Sidebar.Branch>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+    private Gee.HashMap<Geary.Account, AccountBranch> account_branches
+        = new Gee.HashMap<Geary.Account, AccountBranch>();
+    private int total_accounts = 0;
     
     public FolderList() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
         entry_selected.connect(on_entry_selected);
 
-        reset_user_folder_group();
-
         // Set self as a drag destination.
         Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
             TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
-    }
-    
-    private static int user_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
-        int result = a.get_sidebar_name().collate(b.get_sidebar_name());
-        
-        return (result != 0) ? result : strcmp(a.get_sidebar_name(), b.get_sidebar_name());
     }
     
     private void drop_handler(Gdk.DragContext context, Sidebar.Entry? entry,
@@ -129,88 +201,62 @@ public class FolderList : Sidebar.Tree {
         }
     }
 
-    public void set_user_folders_root_name(string name) {
-        user_folder_group.rename(name);
-    }
-    
-    private void reset_user_folder_group() {
-        user_folder_group = new Sidebar.Grouping("",
-            IconFactory.instance.get_custom_icon("tags", IconFactory.ICON_SIDEBAR));
-        user_folder_branch = new Sidebar.Branch(user_folder_group,
-            Sidebar.Branch.Options.STARTUP_OPEN_GROUPING, user_folder_comparator);
+    public void set_user_folders_root_name(Geary.Account account, string name) {
+        if (account_branches.has_key(account))
+            account_branches.get(account).user_folder_group.rename(name);
     }
     
     public void add_folder(Geary.Folder folder) {
-        bool added = false;
+        if (!account_branches.has_key(folder.account))
+            account_branches.set(folder.account, new AccountBranch(folder.account));
         
-        if (!has_branch(user_folder_branch))
-            graft(user_folder_branch, int.MAX);
+        AccountBranch account_branch = account_branches.get(folder.account);
+        if (!has_branch(account_branch))
+            graft(account_branch, total_accounts++);
         
-        Geary.SpecialFolderType special_folder_type = folder.get_special_folder_type();
-        if (special_folder_type != Geary.SpecialFolderType.NONE) {
-            SpecialFolderBranch branch = new SpecialFolderBranch(folder);
-            graft(branch, (int) special_folder_type);
-            entries.set(folder.get_path(), branch.get_root());
-            branches.set(folder.get_path(), branch);
-            added = true;
-        } else if (folder.get_path().get_parent() == null) {
-            // Top-level folder.
-            FolderEntry folder_entry = new FolderEntry(folder);
-            user_folder_branch.graft(user_folder_group, folder_entry);
-            entries.set(folder.get_path(), folder_entry);
-            branches.set(folder.get_path(), user_folder_branch);
-            added = true;
-        } else {
-            FolderEntry folder_entry = new FolderEntry(folder);
-            Sidebar.Entry? entry = get_entry_for_folder_path(folder.get_path().get_parent());
-            if (entry != null) {
-                user_folder_branch.graft(entry, folder_entry);
-                entries.set(folder.get_path(), folder_entry);
-                branches.set(folder.get_path(), user_folder_branch);
-                added = true;
-            }
-        }
-        
-        if (!added) {
-            debug("Could not add folder %s of type %s to folder list", folder.to_string(),
-                special_folder_type.to_string());
-        }
+        account_branch.add_folder(folder);
     }
 
     public void remove_folder(Geary.Folder folder) {
-        Sidebar.Entry? entry = get_entry_for_folder_path(folder.get_path());
-        Sidebar.Branch? branch = get_branch_for_folder_path(folder.get_path());
-        if(entry != null && branch != null) {
-            if (branch is SpecialFolderBranch) {
-                this.prune(branch);
-            } else {
-                branch.prune(entry);
+        AccountBranch? account_branch = account_branches.get(folder.account);
+        assert(account_branch != null);
+        assert(has_branch(account_branch));
+        
+        // If this is the current folder, unselect it.
+        Sidebar.Entry? entry = account_branch.folder_entries.get(folder.get_path());
+        if (entry != null && is_selected(entry))
+            folder_selected(null);
+        
+        account_branch.remove_folder(folder);
+    }
+    
+    public void remove_account(Geary.Account account) {
+        AccountBranch? account_branch = account_branches.get(account);
+        if (account_branch != null) {
+            // If a folder on this account is selected, unselect it.
+            foreach (FolderEntry entry in account_branch.folder_entries.values) {
+                if (is_selected(entry)) {
+                    folder_selected(null);
+                    break;
+                }
             }
-        } else {
-            debug(@"Could not remove folder $(folder.get_path())");
+            
+            if (has_branch(account_branch))
+                prune(account_branch);
+            account_branches.unset(account);
         }
     }
     
-    public void remove_all_branches() {
-        prune_all();
-        entries.clear();
-        reset_user_folder_group();
-    }
-    
-    public void select_path(Geary.FolderPath path) {
-        Sidebar.Entry? entry = get_entry_for_folder_path(path);
+    public void select_folder(Geary.Folder folder) {
+        AccountBranch? account_branch = account_branches.get(folder.account);
+        if (account_branch == null)
+            return;
+        
+        Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.get_path());
         if (entry != null)
             place_cursor(entry, false);
     }
     
-    private Sidebar.Entry? get_entry_for_folder_path(Geary.FolderPath path) {
-        return entries.get(path);
-    }
-
-    private Sidebar.Branch? get_branch_for_folder_path(Geary.FolderPath path) {
-        return branches.get(path);
-    }
-
     public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
         // Run the base version first.
         bool ret = base.drag_motion(context, x, y, time);

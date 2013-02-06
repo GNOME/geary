@@ -40,14 +40,15 @@ public class GearyController {
     
     public MainWindow main_window { get; private set; }
     
-    private Geary.Account? account = null;
-    private Cancellable cancellable_folder = new Cancellable();
-    private Cancellable cancellable_inbox = new Cancellable();
-    private Cancellable cancellable_message = new Cancellable();
+    private Geary.Account? current_account = null;
+    private Gee.HashMap<Geary.Account, Geary.Folder> inboxes
+        = new Gee.HashMap<Geary.Account, Geary.Folder>();
     private Geary.Folder? current_folder = null;
-    private Geary.Folder? inbox_folder = null;
     private Geary.ConversationMonitor? current_conversations = null;
-    private Geary.ConversationMonitor? inbox_conversations = null;
+    private Cancellable cancellable_folder = new Cancellable();
+    private Cancellable cancellable_message = new Cancellable();
+    private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
+        = new Gee.HashMap<Geary.Account, Cancellable>();
     private int busy_count = 0;
     private Gee.Set<Geary.Conversation> selected_conversations = new Gee.HashSet<Geary.Conversation>();
     private Geary.Conversation? last_deleted_conversation = null;
@@ -107,7 +108,7 @@ public class GearyController {
     }
     
     ~GearyController() {
-        assert(account == null);
+        assert(current_account == null);
     }
 
     private void add_accelerator(string accelerator, string action) {
@@ -242,78 +243,58 @@ public class GearyController {
         GearyApplication.instance.get_action(ACTION_DELETE_MESSAGE).is_important = true;
     }
     
-    public async void connect_account_async(Geary.Account? new_account, Cancellable? cancellable) {
-        if (account == new_account)
-            return;
-        
-        // Disconnect the old account, if any.
-        if (account != null) {
-            cancel_folder();
-            cancel_inbox();
-            cancel_message();
-            
-            account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-            
-            main_window.title = GearyApplication.NAME;
-            main_window.conversation_list_store.account_owner_email = null;
-            main_window.folder_list.remove_all_branches();
-            
-            if (inbox_conversations != null) {
-                try {
-                    yield inbox_conversations.stop_monitoring_async(true, cancellable);
-                } catch (Error close_conversations_err) {
-                    debug("Unable to stop monitoring inbox: %s", close_conversations_err.message);
-                }
-                
-                inbox_conversations = null;
-            }
-            
-            if (inbox_folder != null) {
-                try {
-                    yield inbox_folder.close_async(cancellable);
-                } catch (Error close_inbox_err) {
-                    debug("Unable to close monitored inbox: %s", close_inbox_err.message);
-                }
-                
-                inbox_folder = null;
-            }
-            
-            try {
-                yield account.close_async(cancellable);
-            } catch (Error close_err) {
-                debug("Unable to close account %s: %s", account.to_string(), close_err.message);
-            }
-        }
-        
-        account = new_account;
-        
-        // Connect the new account, if any.
-        if (account != null) {
-            account.folders_available_unavailable.connect(on_folders_available_unavailable);
+    public async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
+        account.folders_available_unavailable.connect(on_folders_available_unavailable);
 
-            try {
-                yield account.open_async(cancellable);
-            } catch (Error open_err) {
-                // TODO: Better error reporting to user
-                debug("Unable to open account %s: %s", account.to_string(), open_err.message);
-                
-                account = null;
-                
-                GearyApplication.instance.panic();
-            }
+        try {
+            yield account.open_async(cancellable);
+        } catch (Error open_err) {
+            // TODO: Better error reporting to user
+            debug("Unable to open account %s: %s", account.to_string(), open_err.message);
             
-            account.email_sent.connect(on_sent);
-            
-            if (account.settings.service_provider == Geary.ServiceProvider.YAHOO)
-                main_window.title = GearyApplication.NAME + "!";
-            main_window.conversation_list_store.account_owner_email = account.settings.email.address;
-            
-            main_window.folder_list.set_user_folders_root_name(_("Labels"));
+            GearyApplication.instance.panic();
         }
+        
+        inbox_cancellables.set(account, new Cancellable());
+        
+        account.email_sent.connect(on_sent);
+        
+        main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
     }
     
-    public async void disconnect_account_async(Cancellable? cancellable) throws Error {
-        yield connect_account_async(null, cancellable);
+    public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {
+        cancel_inbox(account);
+        if (current_account == account) {
+            cancel_folder();
+            cancel_message();
+        }
+        
+        account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
+        
+        if (main_window.conversation_list_store.account_owner_email == account.information.email)
+            main_window.conversation_list_store.account_owner_email = null;
+        main_window.folder_list.remove_account(account);
+        
+        if (inboxes.has_key(account)) {
+            try {
+                yield inboxes.get(account).close_async(cancellable);
+            } catch (Error close_inbox_err) {
+                debug("Unable to close monitored inbox: %s", close_inbox_err.message);
+            }
+            
+            inboxes.unset(account);
+        }
+        
+        try {
+            yield account.close_async(cancellable);
+        } catch (Error close_err) {
+            debug("Unable to close account %s: %s", account.to_string(), close_err.message);
+        }
+        
+        inbox_cancellables.unset(account);
+        
+        if (inboxes.size == 0)
+            on_quit();
     }
     
     private bool is_viewed_conversation(Geary.Conversation? conversation) {
@@ -339,12 +320,16 @@ public class GearyController {
     }
     
     private void on_folder_selected(Geary.Folder? folder) {
+        debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
+        
+        // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
-            debug("no folder selected");
+            main_window.conversation_list_store.clear();
+            main_window.conversation_viewer.clear(null, null);
+            
             return;
         }
         
-        debug("Folder %s selected", folder.to_string());
         set_busy(true);
         do_select_folder.begin(folder, on_select_folder_completed);
     }
@@ -352,15 +337,17 @@ public class GearyController {
     private async void do_select_folder(Geary.Folder folder) throws Error {
         cancel_folder();
         
-        Cancellable? conversation_cancellable = (current_folder != inbox_folder)
-            ? cancellable_folder : cancellable_inbox;
+        bool current_is_inbox = inboxes.values.contains(current_folder);
         
-        // stop monitoring for conversations and close the folder (but only if not the inbox_folder,
+        Cancellable? conversation_cancellable = (current_is_inbox ?
+            inbox_cancellables.get(folder.account) : cancellable_folder);
+        
+        // stop monitoring for conversations and close the folder (but only if not an inbox,
         // which we leave open for notifications)
         if (current_conversations != null) {
-            yield current_conversations.stop_monitoring_async((current_folder != inbox_folder), null);
+            yield current_conversations.stop_monitoring_async(!current_is_inbox, null);
             current_conversations = null;
-        } else if (current_folder != null && current_folder != inbox_folder) {
+        } else if (current_folder != null && !current_is_inbox) {
             yield current_folder.close_async();
         }
         
@@ -368,28 +355,24 @@ public class GearyController {
             debug("switching to %s", folder.to_string());
         
         current_folder = folder;
-        main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
+        current_account = folder.account;
         
-        // The current folder may be null if the user rapidly switches between folders. If they have
-        // done that then this folder selection is invalid anyways, so just return.
-        if (current_folder == null) {
-            warning("Can not open folder: %s", folder.to_string());
-            return;
+        main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
+        main_window.conversation_list_store.account_owner_email = current_account.information.email;
+        
+        main_window.main_toolbar.copy_folder_menu.clear();
+        main_window.main_toolbar.move_folder_menu.clear();
+        foreach(Geary.Folder f in current_folder.account.list_folders()) {
+            main_window.main_toolbar.copy_folder_menu.add_folder(f);
+            main_window.main_toolbar.move_folder_menu.add_folder(f);
         }
         
         update_ui();
         
-        if (current_folder != inbox_folder) {
-            current_conversations = new Geary.ConversationMonitor(current_folder, false,
-                ConversationListStore.REQUIRED_FIELDS);
-        } else {
-            if (inbox_conversations == null) {
-                inbox_conversations = new Geary.ConversationMonitor(inbox_folder, false,
-                    ConversationListStore.REQUIRED_FIELDS);
-            }
-            
-            current_conversations = inbox_conversations;
-            
+        current_conversations = new Geary.ConversationMonitor(current_folder, false,
+            ConversationListStore.REQUIRED_FIELDS);
+        
+        if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
             clear_new_messages("do_select_folder (inbox)", null);
         }
@@ -420,11 +403,11 @@ public class GearyController {
         set_busy(false);
     }
     
-    private void on_notification_bubble_invoked(Geary.Email? email) {
-        if (email == null || inbox_folder == null)
+    private void on_notification_bubble_invoked(Geary.Folder folder, Geary.Email? email) {
+        if (email == null)
             return;
         
-        main_window.folder_list.select_path(inbox_folder.get_path());
+        main_window.folder_list.select_folder(folder);
         Geary.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
         if (conversation != null)
             main_window.conversation_list_view.select_conversation(conversation);
@@ -444,10 +427,6 @@ public class GearyController {
         
         // user activated notification, reset new messages no matter other conditions
         new_messages_monitor.clear_new_messages();
-        
-        // attempt to select Inbox
-        if (inbox_folder != null)
-            main_window.folder_list.select_path(inbox_folder.get_path());
     }
     
     private void on_conversation_appended(Geary.Conversation conversation,
@@ -527,7 +506,7 @@ public class GearyController {
         
         // Clear view before we yield, to make sure it happens
         if (clear_view) {
-            main_window.conversation_viewer.clear(current_folder, account.settings);
+            main_window.conversation_viewer.clear(current_folder, current_account.information);
             main_window.conversation_viewer.scroll_reset();
             main_window.conversation_viewer.external_images_info_bar.hide();
         }
@@ -586,19 +565,25 @@ public class GearyController {
         if (available != null && available.size > 0) {
             foreach (Geary.Folder folder in available) {
                 main_window.folder_list.add_folder(folder);
-                main_window.main_toolbar.copy_folder_menu.add_folder(folder);
-                main_window.main_toolbar.move_folder_menu.add_folder(folder);
+                if (folder.account == current_account) {
+                    if (!main_window.main_toolbar.copy_folder_menu.has_folder(folder))
+                        main_window.main_toolbar.copy_folder_menu.add_folder(folder);
+                    if (!main_window.main_toolbar.move_folder_menu.has_folder(folder))
+                        main_window.main_toolbar.move_folder_menu.add_folder(folder);
+                }
                 
                 // monitor the Inbox for notifications
-                if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX && inbox_folder == null) {
-                    inbox_folder = folder;
+                if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX &&
+                    !inboxes.has_key(folder.account)) {
+                    inboxes.set(folder.account, folder);
                     
                     // select the inbox and get the show started
-                    main_window.folder_list.select_path(folder.get_path());
-                    inbox_folder.open_async.begin(false, cancellable_inbox);
+                    if (inboxes.size == 1)
+                        main_window.folder_list.select_folder(folder);
+                    folder.open_async.begin(false, inbox_cancellables.get(folder.account));
                     
-                    new_messages_monitor = new NewMessagesMonitor(inbox_folder, should_notify_new_messages,
-                        cancellable_inbox);
+                    new_messages_monitor = new NewMessagesMonitor(folder, should_notify_new_messages,
+                        inbox_cancellables.get(folder.account));
                     
                     // Unity launcher count (Ubuntuism)
                     unity_launcher = new UnityLauncher(new_messages_monitor);
@@ -626,9 +611,15 @@ public class GearyController {
         
         old_cancellable.cancel();
     }
-     private void cancel_inbox() {
-        Cancellable old_cancellable = cancellable_inbox;
-        cancellable_inbox = new Cancellable();
+    
+    private void cancel_inbox(Geary.Account account) {
+        if (!inbox_cancellables.has_key(account)) {
+            debug("Unable to cancel inbox operation for %s", account.to_string());
+            return;
+        }
+        
+        Cancellable old_cancellable = inbox_cancellables.get(account);
+        inbox_cancellables.set(account, new Cancellable());
 
         old_cancellable.cancel();
     }
@@ -1037,8 +1028,11 @@ public class GearyController {
     }
     
     private void create_compose_window(Geary.ComposedEmail? prefill = null) {
-        Geary.ContactStore? contact_store = account == null ? null : account.get_contact_store();
-        ComposerWindow window = new ComposerWindow(contact_store, prefill);
+        if (current_account == null)
+            return;
+        
+        Geary.ContactStore? contact_store = current_account.get_contact_store();
+        ComposerWindow window = new ComposerWindow(current_account, contact_store, prefill);
         window.set_position(Gtk.WindowPosition.CENTER);
         window.send.connect(on_send);
         
@@ -1163,7 +1157,8 @@ public class GearyController {
     }
     
     private Geary.RFC822.MailboxAddress get_sender() {
-        return account.settings.email;
+        return new Geary.RFC822.MailboxAddress(current_account.information.real_name,
+            current_account.information.email);
     }
     
     private Geary.RFC822.MailboxAddresses get_from() {
@@ -1171,7 +1166,7 @@ public class GearyController {
     }
         
     private void on_send(ComposerWindow composer_window) {
-        account.send_email_async.begin(composer_window.get_composed_email(get_from()));
+        composer_window.account.send_email_async.begin(composer_window.get_composed_email(get_from()));
         composer_window.destroy();
     }
 

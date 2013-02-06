@@ -47,6 +47,8 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Geary.SpecialFolderType new_type) {
         special_folder_type_changed(old_type, new_type);
     }
+
+    public abstract Geary.Account account { get; }
     
     public abstract Geary.FolderPath get_path();
     
@@ -153,7 +155,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
         Cancellable? cancellable = null) throws Error;
     
     public virtual string to_string() {
-        return get_path().to_string();
+        return "%s:%s".printf(account.to_string(), get_path().to_string());
     }
 }
 

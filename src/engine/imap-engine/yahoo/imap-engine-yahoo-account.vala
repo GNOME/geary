@@ -33,9 +33,9 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
     
     private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? special_map = null;
     
-    public YahooAccount(string name, AccountSettings settings, Imap.Account remote,
-        ImapDB.Account local) {
-        base (name, settings, remote, local);
+    public YahooAccount(string name, AccountInformation account_information,
+        Imap.Account remote, ImapDB.Account local) {
+        base (name, account_information, remote, local);
         
         if (special_map == null) {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>(

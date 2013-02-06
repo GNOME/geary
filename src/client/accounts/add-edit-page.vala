@@ -17,6 +17,11 @@ public class AddEditPage : Gtk.Box {
         set { entry_real_name.text = value; }
     }
     
+    public string nickname {
+        get { return entry_nickname.text; }
+        set { entry_nickname.text = value; }
+    }
+    
     public string email_address {
         get { return entry_email.text; }
         set { entry_email.text = value; }
@@ -120,6 +125,8 @@ public class AddEditPage : Gtk.Box {
     private Gtk.Label label_password;
     private Gtk.Entry entry_password;
     private Gtk.Entry entry_real_name;
+    private Gtk.Label label_nickname;
+    private Gtk.Entry entry_nickname;
     private Gtk.ComboBoxText combo_service;
     private Gtk.CheckButton check_remember_password;
     
@@ -161,6 +168,8 @@ public class AddEditPage : Gtk.Box {
             _("Welcome to Geary."), _("Enter your account information to get started.")));
         
         entry_real_name = (Gtk.Entry) builder.get_object("entry: real_name");
+        label_nickname = (Gtk.Label) builder.get_object("label: nickname");
+        entry_nickname = (Gtk.Entry) builder.get_object("entry: nickname");
         combo_service =  (Gtk.ComboBoxText) builder.get_object("combo: service");
         entry_email = (Gtk.Entry) builder.get_object("entry: email");
         label_password = (Gtk.Label) builder.get_object("label: password");
@@ -213,6 +222,8 @@ public class AddEditPage : Gtk.Box {
         entry_imap_port.insert_text.connect(on_port_insert_text);
         entry_smtp_port.insert_text.connect(on_port_insert_text);
         
+        entry_nickname.insert_text.connect(on_nickname_insert_text);
+        
         // Shows/hides settings.
         update_ui();
     }
@@ -220,6 +231,7 @@ public class AddEditPage : Gtk.Box {
     // Sets the account information to display on this page.
     public void set_account_information(Geary.AccountInformation info) {
         set_all_info(info.real_name,
+            info.nickname,
             info.email,
             info.imap_credentials.user,
             info.imap_credentials.pass,
@@ -240,6 +252,7 @@ public class AddEditPage : Gtk.Box {
     // Can use this instead of set_account_information(), both do the same thing.
     public void set_all_info(
         string? initial_real_name = null,
+        string? initial_nickname = null,
         string? initial_email = null,
         string? initial_imap_username = null,
         string? initial_imap_password = null,
@@ -258,6 +271,7 @@ public class AddEditPage : Gtk.Box {
         
         // Set defaults
         real_name = initial_real_name ?? "";
+        nickname = initial_nickname ?? "";
         email_address = initial_email ?? "";
         password = initial_imap_password != null ? initial_imap_password : "";
         remember_password = initial_remember_password;
@@ -321,6 +335,17 @@ public class AddEditPage : Gtk.Box {
         info_changed();
     }
     
+    // Prevent non-printable characters in nickname field.
+    private void on_nickname_insert_text(Gtk.Editable e, string text, int length, ref int position) {
+        for (long i = 0; i < text.char_count(); i++) {
+            if (!text.get_char(i).isprint()) {
+                Signal.stop_emission_by_name(e, "insert-text");
+                
+                return;
+            }
+        }
+    }
+    
     private void on_port_insert_text(Gtk.Editable e, string text, int length, ref int position) {
         // Prevent non-numerical characters and ensure port is <= uint16.MAX
         if (!uint64.try_parse(text) || uint64.parse(((Gtk.Entry) e).text) > uint16.MAX) {
@@ -378,7 +403,8 @@ public class AddEditPage : Gtk.Box {
     public bool is_complete() {
         switch (get_service_provider()) {
             case Geary.ServiceProvider.OTHER:
-                if (Geary.String.is_empty_or_whitespace(email_address) ||
+                if (Geary.String.is_empty_or_whitespace(nickname) ||
+                    Geary.String.is_empty_or_whitespace(email_address) ||
                     Geary.String.is_empty_or_whitespace(imap_host) ||
                     Geary.String.is_empty_or_whitespace(imap_port.to_string()) ||
                     Geary.String.is_empty_or_whitespace(imap_username) ||
@@ -392,7 +418,8 @@ public class AddEditPage : Gtk.Box {
             
             // GMAIL and YAHOO
             default:
-                if (Geary.String.is_empty_or_whitespace(email_address) ||
+                if (Geary.String.is_empty_or_whitespace(nickname) ||
+                    Geary.String.is_empty_or_whitespace(email_address) ||
                     Geary.String.is_empty_or_whitespace(password))
                     return false;
             break;
@@ -403,7 +430,7 @@ public class AddEditPage : Gtk.Box {
     
     public Geary.AccountInformation? get_account_information() {
         Geary.AccountInformation account_information;
-        update_ui(); // Force password update.
+        fix_credentials_for_supported_provider();
         
         Geary.Credentials imap_credentials = new Geary.Credentials(imap_username.strip(), imap_password.strip());
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username.strip(), smtp_password.strip());
@@ -419,6 +446,7 @@ public class AddEditPage : Gtk.Box {
         }
         
         account_information.real_name = real_name.strip();
+        account_information.nickname = nickname.strip();
         account_information.imap_credentials = imap_credentials;
         account_information.smtp_credentials = smtp_credentials;
         account_information.imap_remember_password = remember_password;
@@ -438,10 +466,24 @@ public class AddEditPage : Gtk.Box {
         return account_information;
     }
     
+    // Assembles credentials for supported providers.
+    private void fix_credentials_for_supported_provider() {
+        if (get_service_provider() != Geary.ServiceProvider.OTHER) {
+            imap_username = email_address;
+            smtp_username = email_address;
+            imap_password = password;
+            smtp_password = password;
+        }
+    }
+    
     // Updates UI based on various options.
     private void update_ui() {
         base.show_all();
         welcome_box.visible = mode == PageMode.WELCOME;
+        entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
+        
+        if (mode == PageMode.WELCOME)
+            nickname = Geary.AccountInformation.DEFAULT_NICKNAME;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.
@@ -456,12 +498,6 @@ public class AddEditPage : Gtk.Box {
             other_info.hide();
             
             set_other_info_sensitive(mode == PageMode.WELCOME);
-            
-            // For supported providers, fill out the rest of the form automagically.
-            imap_username = email_address;
-            smtp_username = email_address;
-            imap_password = password;
-            smtp_password = password;
         }
         
         // In edit mode, certain fields are not sensitive.

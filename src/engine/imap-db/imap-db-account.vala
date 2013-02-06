@@ -19,17 +19,17 @@ private class Geary.ImapDB.Account : Object {
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
     
     private string name;
-    private AccountSettings settings;
+    private AccountInformation account_information;
     private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>(Hashable.hash_func, Equalable.equal_func);
     public ContactStore contact_store { get; private set; }
     
-    public Account(Geary.AccountSettings settings) {
-        this.settings = settings;
+    public Account(Geary.AccountInformation account_information) {
+        this.account_information = account_information;
         contact_store = new ContactStore();
         
-        name = "IMAP database account for %s".printf(settings.imap_credentials.user);
+        name = "IMAP database account for %s".printf(account_information.imap_credentials.user);
     }
     
     private void check_open() throws Error {
@@ -42,7 +42,7 @@ private class Geary.ImapDB.Account : Object {
         if (db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
-        db = new ImapDB.Database(user_data_dir, schema_dir, settings.email.address);
+        db = new ImapDB.Database(user_data_dir, schema_dir, account_information.email);
         
         try {
             db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE, null,
@@ -56,10 +56,21 @@ private class Geary.ImapDB.Account : Object {
             throw err;
         }
         
+        Geary.Account account;
+        try {
+            account = Geary.Engine.instance.get_account_instance(account_information);
+        } catch (Error e) {
+            // If they're opening an account, the engine should already be
+            // open, and there should be no reason for this to fail.  Thus, if
+            // we get here, it's a programmer error.
+            
+            error("Error finding account from its information: %s", e.message);
+        }
+        
         initialize_contacts(cancellable);
         
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
-        outbox = new SmtpOutboxFolder(db, settings);
+        outbox = new SmtpOutboxFolder(db, account);
         
         // Need to clear duplicate folders due to old bug that caused multiple folders to be
         // created in the database ... benign due to other logic, but want to prevent this from
@@ -370,7 +381,7 @@ private class Geary.ImapDB.Account : Object {
         }
         
         // create folder
-        folder = new Geary.ImapDB.Folder(db, path, contact_store, settings.email.address, folder_id,
+        folder = new Geary.ImapDB.Folder(db, path, contact_store, account_information.email, folder_id,
             properties);
         
         // build a reference to it

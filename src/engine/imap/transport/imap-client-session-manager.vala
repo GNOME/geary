@@ -7,7 +7,7 @@
 public class Geary.Imap.ClientSessionManager {
     public const int DEFAULT_MIN_POOL_SIZE = 2;
     
-    private AccountSettings settings;
+    private AccountInformation account_information;
     private int min_pool_size;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
@@ -20,10 +20,22 @@ public class Geary.Imap.ClientSessionManager {
     
     public signal void login_failed();
     
-    public ClientSessionManager(AccountSettings settings, int min_pool_size = DEFAULT_MIN_POOL_SIZE) {
-        this.settings = settings;
+    public ClientSessionManager(AccountInformation account_information,
+        int min_pool_size = DEFAULT_MIN_POOL_SIZE) {
+        this.account_information = account_information;
         this.min_pool_size = min_pool_size;
         
+        account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
+        
+        adjust_session_pool.begin();
+    }
+    
+    ~ClientSessionManager() {
+        account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
+    }
+    
+    private void on_imap_credentials_notified() {
+        authentication_failed = false;
         adjust_session_pool.begin();
     }
     
@@ -43,7 +55,8 @@ public class Geary.Imap.ClientSessionManager {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {
-                debug("Unable to create authorized session to %s: %s", settings.imap_endpoint.to_string(), err.message);
+                debug("Unable to create authorized session to %s: %s",
+                    account_information.get_imap_endpoint().to_string(), err.message);
                 
                 break;
             }
@@ -222,7 +235,8 @@ public class Geary.Imap.ClientSessionManager {
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
         
-        ClientSession new_session = new ClientSession(settings.imap_endpoint, settings.imap_server_pipeline);
+        ClientSession new_session = new ClientSession(account_information.get_imap_endpoint(),
+            account_information.imap_server_pipeline);
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
@@ -240,7 +254,7 @@ public class Geary.Imap.ClientSessionManager {
         }
         
         try {
-            yield new_session.initiate_session_async(settings.imap_credentials, cancellable);
+            yield new_session.initiate_session_async(account_information.imap_credentials, cancellable);
         } catch (Error err) {
             debug("[%s] Initiate session failure: %s", new_session.to_string(), err.message);
             
@@ -365,7 +379,7 @@ public class Geary.Imap.ClientSessionManager {
      * Use only for debugging and logging.
      */
     public string to_string() {
-        return settings.imap_endpoint.to_string();
+        return account_information.get_imap_endpoint().to_string();
     }
 }
 

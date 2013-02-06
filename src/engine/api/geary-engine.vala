@@ -173,6 +173,12 @@ public class Geary.Engine {
         Cancellable? cancellable = null) throws Error {
         check_opened();
         
+        // Make sure the account nickname is not in use.
+        foreach (AccountInformation a in get_accounts().values) {
+            if (account != a && Geary.String.equals_ci(account.nickname, a.nickname))
+                return false;
+        }
+        
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
         bool imap_valid = false;
         Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);
@@ -235,27 +241,26 @@ public class Geary.Engine {
         if (account_instances.has_key(account_information.email))
             return account_instances.get(account_information.email);
         
-        AccountSettings settings = new AccountSettings(account_information);
-        ImapDB.Account local_account = new ImapDB.Account(settings);
-        Imap.Account remote_account = new Imap.Account(settings);
+        ImapDB.Account local_account = new ImapDB.Account(account_information);
+        Imap.Account remote_account = new Imap.Account(account_information);
         
         Geary.Account account;
         switch (account_information.service_provider) {
             case ServiceProvider.GMAIL:
                 account = new ImapEngine.GmailAccount("Gmail account %s".printf(account_information.email),
-                    settings, remote_account, local_account);
+                    account_information, remote_account, local_account);
             break;
             
             case ServiceProvider.YAHOO:
                 account = new ImapEngine.YahooAccount("Yahoo account %s".printf(account_information.email),
-                    settings, remote_account, local_account);
+                    account_information, remote_account, local_account);
             break;
             
             case ServiceProvider.OTHER:
                 account = new ImapEngine.OtherAccount("Other account %s".printf(account_information.email),
-                    settings, remote_account, local_account);
+                    account_information, remote_account, local_account);
             break;
-                
+            
             default:
                 assert_not_reached();
         }
@@ -288,13 +293,25 @@ public class Geary.Engine {
     public async void remove_account_async(AccountInformation account,
                                            Cancellable? cancellable = null) throws Error {
         check_opened();
-
+        
+        // Ensure account is closed.
+        if (account_instances.has_key(account.email) && account_instances.get(account.email).is_open()) {
+            throw new EngineError.CLOSE_REQUIRED("Account %s must be closed before removal",
+                account.email);
+        }
+        
         if (accounts.unset(account.email)) {
+            // Removal *MUST* be done in the following order:
+            // 1. Send the account-unavailable signal.
             account_unavailable(account);
-
-            // TODO: delete the account from disk.
+            
+            // 2. Delete the corresponding files.
+            yield account.remove_async(cancellable);
+            
+            // 3. Send the account-removed signal.
             account_removed(account);
             
+            // 4. Remove the account data from the engine.
             account_instances.unset(account.email);
         }
     }

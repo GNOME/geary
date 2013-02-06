@@ -5,13 +5,13 @@
  */
 
 public abstract class Geary.AbstractAccount : Object, Geary.Account {
-    public Geary.AccountSettings settings { get; protected set; }
+    public Geary.AccountInformation information { get; protected set; }
     
     private string name;
     
-    public AbstractAccount(string name, AccountSettings settings) {
+    public AbstractAccount(string name, AccountInformation information) {
         this.name = name;
-        this.settings = settings;
+        this.information = information;
     }
     
     protected virtual void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
@@ -36,17 +36,20 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
         email_sent(message);
     }
     
-    protected virtual void notify_report_problem(Geary.Account.Problem problem,
-        Geary.AccountSettings? settings, Error? err) {
-        report_problem(problem, settings, err);
+    protected virtual void notify_report_problem(Geary.Account.Problem problem, Error? err) {
+        report_problem(problem, err);
     }
     
     public abstract async void open_async(Cancellable? cancellable = null) throws Error;
     
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
-    public abstract async Gee.Collection<Geary.Folder> list_folders_async(Geary.FolderPath? parent,
-        Cancellable? cancellable = null) throws Error;
+    public abstract bool is_open();
+    
+    public abstract Gee.Collection<Geary.Folder> list_matching_folders(
+        Geary.FolderPath? parent) throws Error;
+    
+    public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
     
     public abstract Geary.ContactStore get_contact_store();
     
