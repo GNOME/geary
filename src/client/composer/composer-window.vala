@@ -566,14 +566,24 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private bool add_attachment(File attachment_file) {
-        if (!attachment_file.query_exists()) {
-            attachment_failed(_("\"%s\" does not exist").printf(attachment_file.get_path()));
+        FileInfo attachment_file_info;
+        try {
+            attachment_file_info = attachment_file.query_info("standard::size,standard::type",
+                FileQueryInfoFlags.NONE);
+        } catch(Error e) {
+            attachment_failed(_("\"%s\" could not be found.").printf(attachment_file.get_path()));
             
             return false;
         }
         
-        if (attachment_file.query_file_type(FileQueryInfoFlags.NONE) == FileType.DIRECTORY) {
-            attachment_failed(_("\"%s\" is a folder").printf(attachment_file.get_path()));
+        if (attachment_file_info.get_file_type() == FileType.DIRECTORY) {
+            attachment_failed(_("\"%s\" is a folder.").printf(attachment_file.get_path()));
+            
+            return false;
+        }
+
+        if (attachment_file_info.get_size() == 0){
+            attachment_failed(_("\"%s\" is an empty file.").printf(attachment_file.get_path()));
             
             return false;
         }
@@ -586,13 +596,13 @@ public class ComposerWindow : Gtk.Window {
             debug("File '%s' could not be opened for reading. Error: %s", attachment_file.get_path(),
                 e.message);
             
-            attachment_failed(_("\"%s\" could not be opened for reading").printf(attachment_file.get_path()));
+            attachment_failed(_("\"%s\" could not be opened for reading.").printf(attachment_file.get_path()));
             
             return false;
         }
         
         if (!attachment_files.add(attachment_file)) {
-            attachment_failed(_("\"%s\" already attached for delivery").printf(attachment_file.get_path()));
+            attachment_failed(_("\"%s\" already attached for delivery.").printf(attachment_file.get_path()));
             
             return false;
         }
