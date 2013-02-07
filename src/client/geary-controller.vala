@@ -512,7 +512,6 @@ public class GearyController {
         }
         
         // Fetch full messages.
-        Gee.List<Geary.EmailIdentifier> unread_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
         foreach (Geary.Email email in messages) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
@@ -523,9 +522,6 @@ public class GearyController {
                 throw new IOError.CANCELLED("do_select_message cancelled");
             
             messages_to_add.add(full_email);
-            
-            if (full_email.email_flags.is_unread())
-                unread_ids.add(full_email.id);
         }
         
         // Add messages.  conversation_viewer.add_message only adds new messages
