@@ -437,29 +437,36 @@ public class Geary.Imap.ClientConnection {
     
     private void on_parameters_ready(RootParameters root) {
         try {
-            ServerResponse.Type response_type;
             ServerResponse response = ServerResponse.from_server(root, out response_type);
-            
-            switch (response_type) {
-                case ServerResponse.Type.STATUS_RESPONSE:
-                case ServerResponse.Type.COMPLETION_STATUS_RESPONSE:
-                    fsm.issue(Event.RECVD_STATUS_RESPONSE, null, response);
-                break;
-                
-                case ServerResponse.Type.SERVER_DATA:
-                    fsm.issue(Event.RECVD_SERVER_DATA, null, response);
-                break;
-                
-                case ServerResponse.Type.CONTINUATION_RESPONSE:
-                    fsm.issue(Event.RECVD_CONTINUATION_RESPONSE, null, response);
-                break;
-                
-                default:
-                    assert_not_reached();
-            }
         } catch (ImapError err) {
             received_bad_response(root, err);
+            
+            return;
         }
+            
+        StatusResponse? status_response = response as StatusResponse;
+        if (status_response != null) {
+            fsm.issue(Event.RECVD_STATUS_RESPONSE, null, status_response);
+            
+            return;
+        }
+        
+        ServerData? server_data = response as ServerData;
+        if (server_data != null) {
+            fsm.issue(Event.RECVD_SERVER_DATA, null, server_data);
+            
+            return;
+        }
+        
+        ContinuationResponse? continuation_response = response as ContinuationResponse;
+        if (continuation_response != null) {
+            fsm.issue(Event.RECVD_CONTINUATION_RESPONSE, null, continuation_response);
+            
+            return;
+        }
+        
+        error("[%s] Unknown ServerResponse of type %s received: %s:", to_string(), response.type().name(),
+            response.to_string());
     }
     
     private void on_bytes_received(size_t bytes) {

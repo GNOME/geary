@@ -64,7 +64,6 @@ engine/imap/api/imap-email-identifier.vala
 engine/imap/api/imap-email-properties.vala
 engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
-engine/imap/api/imap-server-data-notifier.vala
 engine/imap/command/imap-commands.vala
 engine/imap/command/imap-command.vala
 engine/imap/command/imap-fetch-command.vala
@@ -80,21 +79,21 @@ engine/imap/message/imap-mailbox-information.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-set.vala
 engine/imap/message/imap-parameter.vala
+engine/imap/message/imap-status-data.vala
 engine/imap/message/imap-status-data-type.vala
 engine/imap/message/imap-tag.vala
+engine/imap/response/imap-completion-status-response.vala
 engine/imap/response/imap-continuation-response.vala
 engine/imap/response/imap-response-code.vala
 engine/imap/response/imap-response-code-type.vala
 engine/imap/response/imap-server-data.vala
 engine/imap/response/imap-server-data-type.vala
 engine/imap/response/imap-server-response.vala
-engine/imap/response/imap-status-response.vala
 engine/imap/response/imap-status.vala
 engine/imap/transport/imap-client-connection.vala
 engine/imap/transport/imap-client-session-manager.vala
 engine/imap/transport/imap-client-session.vala
 engine/imap/transport/imap-deserializer.vala
-engine/imap/transport/imap-mailbox.vala
 engine/imap/transport/imap-serializable.vala
 engine/imap/transport/imap-serializer.vala
 

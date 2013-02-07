@@ -23,11 +23,16 @@ public class Geary.Imap.ServerData : ServerResponse {
         }
     }
     
-    public Capabilities get_capabilities() throws ImapError {
+    /**
+     * Since Capabilities are revisioned, pass a ref to an int that will be incremented after handed
+     * to the Capabilities constructor.  This can be used to track the revision of capabilities
+     * seen on the connection.
+     */
+    public Capabilities get_capabilities(ref int next_revision) throws ImapError {
         if (server_data_type != ServerDataType.CAPABILITY)
             throw new ImapError.PARSE_ERROR("Not CAPABILITY data: %s", to_string());
         
-        Capabilities capabilities = new Capabilities();
+        Capabilities capabilities = new Capabilities(revision++);
         for (int ctr = 2; ctr < get_count(); ctr++) {
             StringParameter? param = get_if_string(ctr);
             if (param != null)
@@ -70,6 +75,20 @@ public class Geary.Imap.ServerData : ServerResponse {
             throw new ImapError.PARSE_ERROR("Not LIST data: %s", to_string());
         
         return MailboxInformation.decode(this);
+    }
+    
+    public int get_recent() throws ImapError {
+        if (server_data_type != ServerDataType.RECENT)
+            throw new ImapError.PARSE_ERROR("Not RECENT data: %s", to_string());
+        
+        return get_as_string(1).as_int(0);
+    }
+    
+    public StatusData get_status() throws ImapError {
+        if (server_data_type != ServerDataType.STATUS)
+            throw new ImapError.PARSE_ERROR("Not STATUS data: %s", to_string());
+        
+        return StatusData.decode(this);
     }
 }
 

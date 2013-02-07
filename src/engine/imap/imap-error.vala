@@ -9,11 +9,10 @@ public errordomain Geary.ImapError {
     TYPE_ERROR,
     SERVER_ERROR,
     NOT_CONNECTED,
-    COMMAND_FAILED,
+    FAILED,
     UNAUTHENTICATED,
     NOT_SUPPORTED,
-    NOT_SELECTED,
-    INVALID_PATH,
-    TIMED_OUT
+    INVALID,
+    TIMED_OUT,
 }
 

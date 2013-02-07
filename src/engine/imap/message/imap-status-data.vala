@@ -4,27 +4,29 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
+public class Geary.Imap.StatusData : Object {
+    // NOTE: This must be negative one; other values won't work well due to how the values are
+    // decoded
+    public int UNSET = -1;
+    
     public string mailbox { get; private set; }
     /**
-     * -1 if not set.
+     * UNSET if not set.
      */
     public int messages { get; private set; }
     /**
-     * -1 if not set.
+     * UNSET if not set.
      */
     public int recent { get; private set; }
     public UID? uid_next { get; private set; }
     public UIDValidity? uid_validity { get; private set; }
     /**
-     * -1 if not set.
+     * UNSET if not set.
      */
     public int unseen { get; private set; }
     
-    public StatusResults(StatusResponse status_response, string mailbox, int messages, int recent,
-        UID? uid_next, UIDValidity? uid_validity, int unseen) {
-        base (status_response);
-        
+    public StatusData(string mailbox, int messages, int recent, UID? uid_next,
+        UIDValidity? uid_validity, int unseen) {
         this.mailbox = mailbox;
         this.messages = messages;
         this.recent = recent;
@@ -33,30 +35,19 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
         this.unseen = unseen;
     }
     
-    public static StatusResults decode(CommandResponse response) throws ImapError {
-        assert(response.is_sealed());
-        
-        // only use the first untagged response of status; zero is a problem, more than one are
-        // ignored
-        if (response.server_data.size == 0)
-            throw new ImapError.PARSE_ERROR("No STATUS response line: \"%s\"", response.to_string());
-        
-        ServerData data = response.server_data[0];
-        StringParameter cmd = data.get_as_string(1);
-        StringParameter mailbox = data.get_as_string(2);
-        ListParameter values = data.get_as_list(3);
-        
-        if (!cmd.equals_ci(StatusCommand.NAME)) {
+    public static StatusData decode(ServerData server_data) throws ImapError {
+        if (!server_data.get_as_string(1).equals_ci(StatusCommand.NAME)) {
             throw new ImapError.PARSE_ERROR("Bad STATUS command name in response \"%s\"",
                 response.to_string());
         }
         
-        int messages = -1;
-        int recent = -1;
+        int messages = UNSET;
+        int recent = UNSET;
         UID? uid_next = null;
         UIDValidity? uid_validity = null;
-        int unseen = -1;
+        int unseen = UNSET;
         
+        ListParameter values = server_data.get_as_list(3);
         for (int ctr = 0; ctr < values.get_count(); ctr += 2) {
             try {
                 StringParameter typep = values.get_as_string(ctr);
@@ -64,10 +55,12 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
                 
                 switch (StatusDataType.from_parameter(typep)) {
                     case StatusDataType.MESSAGES:
+                        // see note at UNSET
                         messages = valuep.as_int(-1, int.MAX);
                     break;
                     
                     case StatusDataType.RECENT:
+                        // see note at UNSET
                         recent = valuep.as_int(-1, int.MAX);
                     break;
                     
@@ -80,6 +73,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
                     break;
                     
                     case StatusDataType.UNSEEN:
+                        // see note at UNSET
                         unseen = valuep.as_int(-1, int.MAX);
                     break;
                     
@@ -93,7 +87,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
             }
         }
         
-        return new StatusResults(response.status_response, mailbox.value, messages, recent, uid_next,
+        return new StatusData(server_data.get_as_string(2).value, messages, recent, uid_next,
             uid_validity, unseen);
     }
 }
