@@ -38,6 +38,8 @@ public class GearyController {
     private const string ARCHIVE_MESSAGE_TOOLTIP = _("Archive the selected conversation");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive";
     
+    private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
+    
     public MainWindow main_window { get; private set; }
     
     private Geary.Account? current_account = null;
@@ -58,6 +60,9 @@ public class GearyController {
     private NewMessagesIndicator? new_messages_indicator = null;
     private UnityLauncher? unity_launcher = null;
     private NotificationBubble? notification_bubble = null;
+    private uint select_folder_timeout_id = 0;
+    private Geary.Folder? folder_to_select = null;
+    private Geary.NonblockingMutex select_folder_mutex = new Geary.NonblockingMutex();
     
     public GearyController() {
         // This initializes the IconFactory, important to do before the actions are created (as they
@@ -330,11 +335,36 @@ public class GearyController {
             return;
         }
         
-        set_busy(true);
-        do_select_folder.begin(folder, on_select_folder_completed);
+        // To prevent the user from selecting folders too quickly, we actually
+        // schedule the action to happen after a timeout instead of acting
+        // directly.  If the user selects another folder during the timeout,
+        // we nix the original timeout and start a new one.
+        if (select_folder_timeout_id != 0)
+            Source.remove(select_folder_timeout_id);
+        folder_to_select = folder;
+        select_folder_timeout_id = Timeout.add(SELECT_FOLDER_TIMEOUT_MSEC, on_select_folder_timeout);
+    }
+    
+    private bool on_select_folder_timeout() {
+        assert(folder_to_select != null);
+        
+        select_folder_timeout_id = 0;
+        
+        do_select_folder.begin(folder_to_select, on_select_folder_completed);
+        
+        folder_to_select = null;
+        return false;
     }
     
     private async void do_select_folder(Geary.Folder folder) throws Error {
+        set_busy(true);
+        
+        // This function is not reentrant.  It should be, because it can be
+        // called reentrant-ly if you select folders quickly enough.  This
+        // mutex lock is a bandaid solution to make the function safe to
+        // reenter.
+        int mutex_token = yield select_folder_mutex.claim_async();
+        
         cancel_folder();
         
         bool current_is_inbox = inboxes.values.contains(current_folder);
@@ -389,6 +419,10 @@ public class GearyController {
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(FETCH_EMAIL_CHUNK_COUNT, conversation_cancellable);
+        
+        select_folder_mutex.release(ref mutex_token);
+        
+        set_busy(false);
     }
     
     private void on_scan_started() {
@@ -474,8 +508,6 @@ public class GearyController {
         } catch (Error err) {
             debug("Unable to select folder: %s", err.message);
         }
-        
-        set_busy(false);
     }
     
     private void on_conversations_selected(Gee.Set<Geary.Conversation> selected) {
@@ -512,7 +544,6 @@ public class GearyController {
         }
         
         // Fetch full messages.
-        Gee.List<Geary.EmailIdentifier> unread_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
         foreach (Geary.Email email in messages) {
             Geary.Email full_email = yield current_folder.fetch_email_async(email.id,
@@ -523,9 +554,6 @@ public class GearyController {
                 throw new IOError.CANCELLED("do_select_message cancelled");
             
             messages_to_add.add(full_email);
-            
-            if (full_email.email_flags.is_unread())
-                unread_ids.add(full_email.id);
         }
         
         // Add messages.  conversation_viewer.add_message only adds new messages
