@@ -20,6 +20,7 @@ private const OptionEntry[] options = {
     { "log-sql", 0, 0, OptionArg.NONE, ref log_sql, N_("Log database queries (generates lots of messages)"), null },
     /// "Normalization" can also be called "synchronization"
     { "log-folder-normalization", 0, 0, OptionArg.NONE, ref log_folder_normalization, N_("Log folder normalization"), null },
+    { "inspector", 'i', 0, OptionArg.NONE, ref inspector, N_("Allow inspection of WebView"), null },
     { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
     { null }
 };
@@ -32,6 +33,7 @@ public bool log_conversations = false;
 public bool log_periodic = false;
 public bool log_sql = false;
 public bool log_folder_normalization = false;
+public bool inspector = false;
 public bool version = false;
 
 public int parse(string[] args) {

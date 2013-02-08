@@ -34,6 +34,7 @@ public class ConversationWebView : WebKit.WebView {
         config.enable_java_applet = false;
         config.enable_plugins = false;
         config.enable_default_context_menu = false; // Deprecated, still needed for Precise
+        config.enable_developer_extras = Args.inspector;
         settings = config;
         
         // Hook up signals.
@@ -41,6 +42,7 @@ public class ConversationWebView : WebKit.WebView {
         resource_request_starting.connect(on_resource_request_starting);
         navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
+        web_inspector.inspect_web_view.connect(activate_inspector);
         
         // Load the HTML into WebKit.
         // Note: load_finished signal MUST be hooked up before this call.
@@ -316,6 +318,24 @@ public class ConversationWebView : WebKit.WebView {
 
     public void scroll_to_element(WebKit.DOM.HTMLElement element) {
         get_dom_document().get_default_view().scroll(element.offset_left, element.offset_top);
+    }
+    
+    private unowned WebKit.WebView activate_inspector(WebKit.WebInspector inspector, WebKit.WebView target_view) {
+        Gtk.Window window = new Gtk.Window();
+        window.set_default_size(600, 600);
+        window.set_title(_("%s - Conversation Inspector").printf(GearyApplication.NAME));
+        Gtk.ScrolledWindow scrolled = new Gtk.ScrolledWindow(null, null);
+        WebKit.WebView inspector_view = new WebKit.WebView();
+        scrolled.add(inspector_view);
+        window.add(scrolled);
+        window.show_all();
+        window.delete_event.connect(() => {
+            inspector.close();
+            return false;
+        });
+        
+        unowned WebKit.WebView r = inspector_view;
+        return r;
     }
 }
 
