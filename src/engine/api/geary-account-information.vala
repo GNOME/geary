@@ -419,4 +419,11 @@ public class Geary.AccountInformation : Object {
         // Delete files.
         yield Files.recursive_delete_async(settings_dir, cancellable);
     }
+    
+    /**
+     * Returns a formatted string with the user's real name and email address.
+     */
+    public string pretty_string() {
+        return "%s <%s>".printf(real_name, email);
+    }
 }

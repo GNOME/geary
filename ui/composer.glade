@@ -179,7 +179,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
+                    <property name="top_attach">1</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -196,7 +196,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
+                    <property name="top_attach">2</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -209,7 +209,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
+                    <property name="top_attach">1</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -222,7 +222,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
+                    <property name="top_attach">2</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -237,7 +237,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">3</property>
+                    <property name="top_attach">4</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -254,7 +254,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
-                    <property name="top_attach">3</property>
+                    <property name="top_attach">4</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -271,7 +271,7 @@
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
-                    <property name="top_attach">2</property>
+                    <property name="top_attach">3</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -284,7 +284,62 @@
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">2</property>
+                    <property name="top_attach">3</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="from label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">6</property>
+                    <property name="label" translatable="yes" comments="Geary account mail will be sent from">From:</property>
+                    <property name="justify">right</property>
+                    <property name="mnemonic_widget">to</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="from_container">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel" id="from_single">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="from_multiple">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="entry_text_column">0</property>
+                        <property name="id_column">1</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
                     <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
@@ -366,7 +421,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Bold</property>
-            <property name="related_action">bold</property>
             <property name="label" translatable="yes">Bold</property>
             <property name="use_underline">True</property>
           </object>
@@ -381,7 +435,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Italic</property>
-            <property name="related_action">italic</property>
             <property name="label" translatable="yes">Italic</property>
             <property name="use_underline">True</property>
           </object>
@@ -396,7 +449,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Underline</property>
-            <property name="related_action">underline</property>
             <property name="label" translatable="yes">Underline</property>
             <property name="use_underline">True</property>
           </object>
@@ -411,7 +463,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Strikethrough</property>
-            <property name="related_action">strikethrough</property>
             <property name="label" translatable="yes">Strikethrough</property>
             <property name="use_underline">True</property>
           </object>
@@ -422,10 +473,8 @@
         </child>
         <child>
           <object class="GtkSeparatorToolItem" id="toolbutton5">
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="use_action_appearance">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -438,7 +487,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Indent</property>
-            <property name="related_action">indent</property>
             <property name="label" translatable="yes">Indent</property>
             <property name="use_underline">True</property>
           </object>
@@ -453,7 +501,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Un-indent</property>
-            <property name="related_action">outdent</property>
             <property name="label" translatable="yes">Un-indent</property>
             <property name="use_underline">True</property>
           </object>
@@ -464,10 +511,8 @@
         </child>
         <child>
           <object class="GtkSeparatorToolItem" id="toolbutton3">
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="use_action_appearance">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -480,7 +525,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Fonts</property>
-            <property name="related_action">font</property>
             <property name="label" translatable="yes">Fonts</property>
             <property name="use_underline">True</property>
           </object>
@@ -495,7 +539,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Font size</property>
-            <property name="related_action">fontsize</property>
             <property name="label" translatable="yes">Font size</property>
             <property name="use_underline">True</property>
           </object>
@@ -510,7 +553,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Color</property>
-            <property name="related_action">color</property>
             <property name="label" translatable="yes">Color</property>
             <property name="use_underline">True</property>
           </object>
@@ -525,7 +567,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Link</property>
-            <property name="related_action">insertlink</property>
             <property name="label" translatable="yes">Link</property>
             <property name="use_underline">True</property>
           </object>
@@ -540,7 +581,6 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes">Remove formatting</property>
-            <property name="related_action">removeformat</property>
             <property name="label" translatable="yes">Remove formatting</property>
             <property name="use_underline">True</property>
           </object>
@@ -616,13 +656,11 @@
         <child>
           <object class="GtkButton" id="add_attachment_button">
             <property name="label" translatable="yes">_Attach File</property>
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
-            <property name="use_action_appearance">False</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -634,11 +672,9 @@
         <child>
           <object class="GtkButton" id="Cancel">
             <property name="label">gtk-cancel</property>
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="use_action_appearance">False</property>
             <property name="use_stock">True</property>
           </object>
           <packing>
@@ -653,11 +689,9 @@
         <child>
           <object class="GtkButton" id="Send">
             <property name="label" translatable="yes">_Send</property>
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="use_action_appearance">False</property>
             <property name="use_underline">True</property>
           </object>
           <packing>

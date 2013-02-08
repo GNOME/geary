@@ -12,10 +12,12 @@ public class AccountDialog : Gtk.Dialog {
     private AccountDialogAddEditPane add_edit_pane = new AccountDialogAddEditPane();
     private AccountSpinnerPage spinner_pane = new AccountSpinnerPage();
     private AccountDialogRemoveConfirmPane remove_confirm_pane = new AccountDialogRemoveConfirmPane();
+    private AccountDialogRemoveFailPane remove_fail_pane = new AccountDialogRemoveFailPane();
     private int add_edit_page_number;
     private int account_list_page_number;
     private int spinner_page_number;
     private int remove_confirm_page_number;
+    private int remove_fail_page_number;
     
     public AccountDialog() {
         set_size_request(450, -1); // Sets min size.
@@ -29,6 +31,7 @@ public class AccountDialog : Gtk.Dialog {
         add_edit_page_number = notebook.append_page(add_edit_pane, null);
         spinner_page_number = notebook.append_page(spinner_pane, null);
         remove_confirm_page_number = notebook.append_page(remove_confirm_pane, null);
+        remove_fail_page_number = notebook.append_page(remove_fail_pane, null);
         
         // Connect signals from pages.
         account_list_pane.close.connect(on_close);
@@ -40,6 +43,7 @@ public class AccountDialog : Gtk.Dialog {
         add_edit_pane.size_changed.connect(() => { resize(1, 1); });
         remove_confirm_pane.ok.connect(on_delete_account_confirmed);
         remove_confirm_pane.cancel.connect(on_cancel_back_to_list);
+        remove_fail_pane.ok.connect(on_cancel_back_to_list);
         
         // Set default page.
         notebook.set_current_page(account_list_page_number);
@@ -97,9 +101,30 @@ public class AccountDialog : Gtk.Dialog {
         if (account == null)
             return;
         
-        // Send user to confirmation screen.
-        remove_confirm_pane.set_account(account);
-        notebook.set_current_page(remove_confirm_page_number);
+        // Check for open composer windows.
+        bool composer_window_found = false;
+        Gee.List<ComposerWindow>? windows = 
+            GearyApplication.instance.get_composer_windows_for_account(account);
+        
+        if (windows != null) {
+            foreach (ComposerWindow cw in windows) {
+                if (cw.account.information == account &&
+                    cw.compose_type != ComposerWindow.ComposeType.NEW_MESSAGE) {
+                    composer_window_found = true;
+                    
+                    break;
+                }
+            }
+        }
+        
+        if (composer_window_found) {
+            // Warn user that account cannot be deleted until composer is closed.
+            notebook.set_current_page(remove_fail_page_number);
+        } else {
+            // Send user to confirmation screen.
+            remove_confirm_pane.set_account(account);
+            notebook.set_current_page(remove_confirm_page_number);
+        }
     }
     
     private void on_delete_account_confirmed(Geary.AccountInformation? account) {

@@ -1055,12 +1055,14 @@ public class GearyController {
         return true;
     }
     
-    private void create_compose_window(Geary.ComposedEmail? prefill = null) {
+    private void create_compose_window(ComposerWindow.ComposeType compose_type,
+        Geary.ComposedEmail? prefill = null) {
         if (current_account == null)
             return;
         
         Geary.ContactStore? contact_store = current_account.get_contact_store();
-        ComposerWindow window = new ComposerWindow(current_account, contact_store, prefill);
+        ComposerWindow window = new ComposerWindow(current_account, compose_type, contact_store,
+            prefill);
         window.set_position(Gtk.WindowPosition.CENTER);
         window.send.connect(on_send);
         
@@ -1077,12 +1079,12 @@ public class GearyController {
     }
     
     private void on_new_message() {
-        create_compose_window();
+        create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE);
     }
     
     private void on_reply_to_message(Geary.Email message) {
-        create_compose_window(new Geary.ComposedEmail.as_reply(new DateTime.now_local(),
-            get_from(), message));
+        create_compose_window(ComposerWindow.ComposeType.REPLY, new Geary.ComposedEmail.as_reply(
+            new DateTime.now_local(), get_from(), message));
     }
     
     private void on_reply_to_message_action() {
@@ -1092,8 +1094,8 @@ public class GearyController {
     }
     
     private void on_reply_all_message(Geary.Email message) {
-        create_compose_window(new Geary.ComposedEmail.as_reply_all(new DateTime.now_local(),
-            get_from(), message));
+        create_compose_window(ComposerWindow.ComposeType.REPLY, new Geary.ComposedEmail.as_reply_all(
+            new DateTime.now_local(), get_from(), message));
     }
     
     private void on_reply_all_message_action() {
@@ -1103,8 +1105,8 @@ public class GearyController {
     }
     
     private void on_forward_message(Geary.Email message) {
-        create_compose_window(new Geary.ComposedEmail.as_forward(new DateTime.now_local(),
-            get_from(), message));
+        create_compose_window(ComposerWindow.ComposeType.FORWARD, new Geary.ComposedEmail.as_forward(
+            new DateTime.now_local(), get_from(), message));
     }
     
     private void on_forward_message_action() {
@@ -1252,7 +1254,18 @@ public class GearyController {
     }
 
     public void compose_mailto(string mailto) {
-        create_compose_window(new Geary.ComposedEmail.from_mailto(mailto, get_from()));
+        create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE, new Geary.ComposedEmail.from_mailto(mailto, get_from()));
+    }
+    
+    // Returns a list of composer windows for an account, or null if none.
+    public Gee.List<ComposerWindow>? get_composer_windows_for_account(Geary.AccountInformation account) {
+        Gee.List<ComposerWindow> ret = new Gee.LinkedList<ComposerWindow>();
+        foreach (ComposerWindow cw in composer_windows) {
+            if (cw.account.information == account)
+                ret.add(cw);
+        }
+        
+        return ret.size >= 1 ? ret : null;
     }
 }
 
