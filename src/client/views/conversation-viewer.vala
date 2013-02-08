@@ -232,13 +232,9 @@ public class ConversationViewer : Gtk.Box {
         insert_header_address(ref header, _("From:"), email.from != null ? email.from : email.sender,
             true);
         
-        // Only include to string if it's not just this account.
-        // TODO: multiple accounts.
-        if (email.to != null && current_account_information != null) {
-            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == current_account_information.email))
-                 insert_header_address(ref header, _("To:"), email.to);
-        }
-
+        if (email.to != null)
+             insert_header_address(ref header, _("To:"), email.to);
+        
         if (email.cc != null) {
             insert_header_address(ref header, _("Cc:"), email.cc);
         }
