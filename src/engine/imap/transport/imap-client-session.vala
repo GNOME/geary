@@ -150,69 +150,57 @@ public class Geary.Imap.ClientSession {
     // Connection state changes
     //
     
-    public virtual signal void connected() {
-    }
+    public signal void connected();
     
-    public virtual signal void session_denied(string? reason) {
-    }
+    public signal void session_denied(string? reason);
     
-    public virtual signal void authorized() {
-    }
+    public signal void authorized();
     
-    public virtual signal void logged_out() {
-    }
+    public signal void logged_out();
     
-    public virtual signal void login_failed() {
-    }
+    public signal void login_failed();
     
-    public virtual signal void disconnected(DisconnectReason reason) {
-    }
+    public signal void disconnected(DisconnectReason reason);
     
     //
-    // ServerData (always untagged)
+    // ServerData and StatusResponses (both always untagged)
     //
+    
+    public signal void status_response_received(StatusResponse status_response);
+    
+    public signal void coded_response_received(CodedStatusResponse coded_response);
     
     /**
      * Fired *before* the specific ServerData signals (i.e. "capability", "exists", "expunge", etc.)
      */
-    public virtual signal void server_data_received(ServerData server_data) {
-    }
+    public signal void server_data_received(ServerData server_data);
     
-    public virtual signal void capability(Capabilities capabilities) {
-    }
+    public signal void capability(Capabilities capabilities);
     
-    public virtual signal void exists(int count) {
-    }
+    public signal void exists(int count);
     
-    public virtual signal void expunge(MessageNumber msg_num) {
-    }
+    public signal void expunge(MessageNumber msg_num);
     
-    public virtual signal void fetch(FetchedData fetched_data) {
-    }
+    public signal void fetch(FetchedData fetched_data);
     
-    public virtual signal void flags(MailboxAttributes mailbox_attrs) {
-    }
+    public signal void flags(MailboxAttributes mailbox_attrs);
     
-    public virtual signal void list(MailboxInformation mailbox_info) {
-    }
+    public signal void list(MailboxInformation mailbox_info);
     
     // TODO: LSUB results
     
-    public virtual signal void recent(int count) {
-    }
+    public signal void recent(int count);
     
     // TODO: SEARCH results
     
-    public virtual signal void status(StatusData status_data) {
-    }
+    public signal void status(StatusData status_data);
     
     /**
      * If the mailbox name is null it indicates the type of state change that has occurred
      * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
      * ignored.
      */
-    public virtual signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly) {
-    }
+    public signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly);
     
     public ClientSession(Endpoint imap_endpoint) {
         this.imap_endpoint = imap_endpoint;
@@ -448,6 +436,7 @@ public class Geary.Imap.ClientSession {
         cx.sent_command.connect(on_network_sent_command);
         cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
+        cx.received_coded_status_response.connect(on_received_coded_status_response);
         cx.received_completion_status_response.connect(on_received_completion_status_response);
         cx.received_server_data.connect(on_received_server_data);
         cx.received_bytes.connect(on_received_bytes);
@@ -477,6 +466,7 @@ public class Geary.Imap.ClientSession {
         cx.sent_command.disconnect(on_network_sent_command);
         cx.send_failure.disconnect(on_network_send_error);
         cx.received_status_response.disconnect(on_received_status_response);
+        cx.received_coded_status_response.disconnect(on_received_coded_status_response);
         cx.received_completion_status_response.disconnect(on_received_completion_status_response);
         cx.received_server_data.disconnect(on_received_server_data);
         cx.received_bytes.disconnect(on_received_bytes);
@@ -1292,7 +1282,20 @@ public class Geary.Imap.ClientSession {
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
         
+        // update state machine before notifying subscribers, who may turn around and query ClientSession
         fsm.issue(Event.RECV_STATUS, null, status_response, null);
+        
+        status_response_received(status_response);
+    }
+    
+    private void on_received_coded_status_response(CodedStatusResponse coded_response) {
+        // schedule keepalive (traffic seen on channel)
+        schedule_keepalive();
+        
+        // update state machine before notifying subscribers, who may turn around and query ClientSession
+        fsm.issue(Event.RECV_STATUS, null, coded_response, null);
+        
+        coded_status_response_received(coded_response);
     }
     
     private void on_received_completion_status_response(CompletionStatusResponse completion_status_response) {

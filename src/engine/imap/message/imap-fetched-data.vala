@@ -19,7 +19,7 @@ public class Geary.Imap.FetchedData : Object {
         if (!server_data.get_as_string(2).equals_ci(FetchCommand.NAME))
             throw new ImapError.PARSE_ERROR("Not FETCH data: %s", server_data.to_string());
         
-        FetchedData fetched_data = new FetchedData(new MessageNumber(data.get_as_string(1).as_int()));
+        FetchedData fetched_data = new FetchedData(new MessageNumber(server_data.get_as_string(1).as_int()));
         
         // walk the list for each returned fetch data item, which is paired by its data item name
         // and the structured data itself

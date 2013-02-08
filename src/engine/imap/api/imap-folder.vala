@@ -7,20 +7,29 @@
 private class Geary.Imap.Folder : Object {
     public const bool CASE_SENSITIVE = true;
     
+    public bool is_open { get; private set; default = false; }
+    public FolderPath path { get; private set; }
+    public Imap.FolderProperties properties { get; private set; }
+    public MailboxInformation info { get; private set; }
+    public Trillian readonly { get; private set; }
+    
     private ClientSessionManager session_mgr;
-    private MailboxInformation info;
-    private Geary.FolderPath path;
-    private Trillian readonly;
-    private Imap.FolderProperties properties;
-    private Mailbox? mailbox = null;
+    private ClientSession? session = null;
     
-    public signal void messages_appended(int exists);
+    public signal void exists(int count);
     
-    public signal void message_at_removed(int position, int total);
+    public signal void expunge(MessageNumber num);
     
+    public signal void fetch(FetchedData fetched);
+    
+    public signal void recent(int count);
+    
+    /**
+     * Note that close_async() still needs to be called after this signal is fired.
+     */
     public signal void disconnected(Geary.Folder.CloseReason reason);
     
-    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusResults? status,
+    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusData? status,
         MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
@@ -33,83 +42,96 @@ private class Geary.Imap.Folder : Object {
             : new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
-    public Geary.FolderPath get_path() {
-        return path;
-    }
-    
-    public Geary.Imap.FolderProperties get_properties() {
-        return properties;
-    }
-    
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
-        if (mailbox != null)
+        if (is_open)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
-        mailbox = yield session_mgr.select_examine_mailbox(path.get_fullpath(info.delim), !readonly,
-            cancellable);
+        is_open = true;
+        
+        session = yield session_mgr.claim_authorized_session_async(cancellable);
+        
+        // connect to interesting signals *before* SELECTing
+        session.exists.connect(on_exists);
+        session.expunge.connect(on_expunge);
+        session.fetch.connect(on_fetch);
+        session.recent.connect(on_recent);
+        session.coded_status_response.connect(on_coded_status_response);
+        session.disconnected.connect(on_disconnected);
+        
+        CompletionStatusResponse response = yield session.select_examine_async(path.get_fullpath(info.delim),
+            !readonly, cancellable);
+        if (response.status != Status.OK)
+            throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
         
         // update with new information
         this.readonly = Trillian.from_boolean(readonly);
-        
-        // connect to signals
-        mailbox.exists_altered.connect(on_exists_altered);
-        mailbox.flags_altered.connect(on_flags_altered);
-        mailbox.expunged.connect(on_expunged);
-        mailbox.disconnected.connect(on_disconnected);
-        
-        properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, mailbox.unseen,
-            mailbox.uid_validity, mailbox.uid_next, properties.attrs);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
-        disconnect_mailbox();
-    }
-    
-    private void disconnect_mailbox() {
-        if (mailbox == null)
+        if (!is_open)
             return;
         
-        mailbox.exists_altered.disconnect(on_exists_altered);
-        mailbox.flags_altered.disconnect(on_flags_altered);
-        mailbox.expunged.disconnect(on_expunged);
-        mailbox.disconnected.disconnect(on_disconnected);
+        session.exists.disconnect(on_exists);
+        session.expunge.disconnect(on_expunge);
+        session.fetch.disconnect(on_fetch);
+        session.recent.disconnect(on_recent);
+        session.coded_status_response.disconnect(on_coded_status_response);
+        session.disconnected.disconnect(on_disconnected);
         
-        mailbox = null;
-        readonly = Trillian.UNKNOWN;
+        try {
+            yield session.close_mailbox_async(cancellable);
+            yield session_mgr.release_session_async(session, cancellable);
+        } finally {
+            session = null;
+            readonly = Trillian.UNKNOWN;
+            
+            is_open = false;
+        }
     }
     
-    private void on_exists_altered(int old_exists, int new_exists) {
-        assert(mailbox != null);
-        assert(old_exists != new_exists);
+    private void on_exists(int count) {
+        properties.messages = count;
         
-        // only use this signal to notify of additions; removals are handled with the expunged
-        // signal
-        if (new_exists > old_exists)
-            messages_appended(new_exists);
+        exists(count);
     }
     
-    private void on_flags_altered(MailboxAttributes flags) {
-        assert(mailbox != null);
-        // TODO: Notify of changes
+    private void on_expunge(MessageNumber num) {
+        expunge(num);
     }
     
-    private void on_expunged(MessageNumber expunged, int total) {
-        assert(mailbox != null);
+    private void on_fetch(FetchedData fetched) {
+        fetch(fetched);
+    }
+    
+    private void on_recent(int count) {
+        properties.recent = count;
         
-        message_at_removed(expunged.value, total);
+        recent(count);
+    }
+    
+    private void on_coded_status_response(CodedStatusResponse coded_response) {
+        switch (coded_response.response_code_type) {
+            case ResponseCodeType.UIDNEXT:
+                properties.uid_next = coded_response.get_uid_next();
+            break;
+        }
+    }
+    
+    private void on_completion_status_response(CompletionStatusResponse completion_response) {
+    /*
+            case ResponseCodeType.READONLY:
+                readonly = Trillian.TRUE;
+            break;
+            
+            case ResponseCodeType.READWRITE:
+                readonly = Trillian.FALSE;
+            break;
+            
+    */
     }
     
     private void on_disconnected(Geary.Folder.CloseReason reason) {
-        disconnect_mailbox();
-        
         disconnected(reason);
-    }
-    
-    public int get_email_count() throws Error {
-        if (mailbox == null)
-            throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
-        
-        return mailbox.exists;
     }
     
     public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,

@@ -116,6 +116,10 @@ public class Geary.Imap.ClientConnection {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), status_response.to_string());
     }
     
+    public virtual signal void received_coded_status_response(CodedStatusResponse coded_status_response) {
+        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), coded_status_response.to_string());
+    }
+    
     public virtual signal void received_completion_status_response(CompletionStatusResponse completion_status_response) {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), completion_status_response.to_string());
     }
@@ -714,9 +718,18 @@ public class Geary.Imap.ClientConnection {
             cmd_completed_timeout();
             
             received_completion_status_response(completion_status_response);
-        } else {
-            received_status_response((StatusResponse) object);
+            
+            return;
         }
+        
+        CodedStatusResponse? coded_status_response = object as CodedStatusResponse;
+        if (coded_status_response != null) {
+            received_coded_status_response(coded_status_response);
+            
+            return;
+        }
+        
+        received_status_response((StatusResponse) object);
     }
     
     private void signal_continuation(void *user, Object? object) {

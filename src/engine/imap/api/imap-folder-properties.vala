@@ -5,12 +5,11 @@
  */
 
 public class Geary.Imap.FolderProperties {
-    // messages can be updated a variety of ways, so it's available as a public set
     public int messages { get; set; }
-    public int recent { get; private set; }
-    public int unseen { get; private set; }
-    public UIDValidity? uid_validity { get; private set; }
-    public UID? uid_next { get; private set; }
+    public int recent { get; set; }
+    public int unseen { get; set; }
+    public UIDValidity? uid_validity { get; set; }
+    public UID? uid_next { get; set; }
     public MailboxAttributes attrs { get; private set; }
     public Trillian supports_children { get; private set; }
     public Trillian has_children { get; private set; }
@@ -28,7 +27,7 @@ public class Geary.Imap.FolderProperties {
         init_flags();
     }
     
-    public FolderProperties.status(StatusResults status, MailboxAttributes attrs) {
+    public FolderProperties.status(StatusData status, MailboxAttributes attrs) {
         messages = status.messages;
         recent = status.recent;
         unseen = status.unseen;

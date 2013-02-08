@@ -7,7 +7,7 @@
 public class Geary.Imap.StatusData : Object {
     // NOTE: This must be negative one; other values won't work well due to how the values are
     // decoded
-    public int UNSET = -1;
+    public const int UNSET = -1;
     
     public string mailbox { get; private set; }
     /**

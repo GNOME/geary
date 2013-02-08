@@ -6,35 +6,40 @@
 
 public class Geary.Imap.StatusResponse : ServerResponse {
     public Status status { get; private set; }
-    public ResponseCode? response_code { get; private set; }
-    public string? text { get; private set; }
     
-    private StatusResponse() {
+    public StatusResponse() {
     }
     
     public StatusResponse.reconstitute(RootParameters root) throws ImapError {
         base.reconstitute(root);
         
         status = Status.from_parameter(get_as_string(1));
-        response_code = get(2) as ResponseCode;
-        text = (response_code != null) ? flatten_to_text(3) : flatten_to_text(2);
     }
     
-    private string? flatten_to_text(int start_index) throws ImapError {
+    public string? get_text() {
+        // build text from all StringParameters ... this will skip any ResponseCode or ListParameter
+        // (or NilParameter, for that matter)
         StringBuilder builder = new StringBuilder();
-        
-        while (start_index < get_count()) {
-            StringParameter? strparam = get(start_index) as StringParameter;
+        for (int index = 2; index < get_count(); index++) {
+            StringParameter? strparam = get_if_string(index);
             if (strparam != null) {
                 builder.append(strparam.value);
-                if (start_index < (get_count() - 1))
+                if (index < (get_count() - 1))
                     builder.append_c(' ');
             }
-            
-            start_index++;
         }
         
         return !String.is_empty(builder.str) ? builder.str : null;
+    }
+    
+    public static bool is_status_response(RootParameters root) {
+        try {
+            Status.from_parameter(root.get_as_string(1));
+            
+            return true;
+        } catch (ImapError err) {
+            return false;
+        }
     }
 }
 

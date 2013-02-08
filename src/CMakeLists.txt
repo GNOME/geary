@@ -82,6 +82,7 @@ engine/imap/message/imap-parameter.vala
 engine/imap/message/imap-status-data.vala
 engine/imap/message/imap-status-data-type.vala
 engine/imap/message/imap-tag.vala
+engine/imap/response/imap-coded-status-response.vala
 engine/imap/response/imap-completion-status-response.vala
 engine/imap/response/imap-continuation-response.vala
 engine/imap/response/imap-response-code.vala
@@ -90,6 +91,7 @@ engine/imap/response/imap-server-data.vala
 engine/imap/response/imap-server-data-type.vala
 engine/imap/response/imap-server-response.vala
 engine/imap/response/imap-status.vala
+engine/imap/response/imap-status-response.vala
 engine/imap/transport/imap-client-connection.vala
 engine/imap/transport/imap-client-session-manager.vala
 engine/imap/transport/imap-client-session.vala

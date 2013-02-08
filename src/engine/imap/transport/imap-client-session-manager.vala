@@ -16,7 +16,7 @@ public class Geary.Imap.ClientSessionManager {
      * This only affects newly created sessions or sessions leaving the selected/examined state
      * and returning to an authorized state.
      */
-    public int unselected_keepalive_sec { get; set; default = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC; }
+    public uint unselected_keepalive_sec { get; set; default = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC; }
     
     /**
      * Set to zero or negative value if keepalives should be disabled when a mailbox is selected
@@ -24,7 +24,7 @@ public class Geary.Imap.ClientSessionManager {
      *
      * This only affects newly selected/examined sessions.
      */
-    public int selected_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC; }
+    public uint selected_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC; }
     
     /**
      * Set to zero or negative value if keepalives should be disabled when a mailbox is selected
@@ -32,7 +32,7 @@ public class Geary.Imap.ClientSessionManager {
      *
      * This only affects newly selected/examined sessions.
      */
-    public int selected_with_idle_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC; }
+    public uint selected_with_idle_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC; }
     
     /**
      * ClientSessionManager attempts to maintain a minimum number of open sessions with the server
@@ -62,7 +62,7 @@ public class Geary.Imap.ClientSessionManager {
     
     public async void open_async() throws Error {
         if (is_opened)
-            throw ImapError.ALREADY_OPEN("ClientSessionManager is already open");
+            throw ImapError.INVALID("ClientSessionManager is already open");
         
         is_opened = true;
         

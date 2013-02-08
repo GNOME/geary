@@ -29,5 +29,27 @@ public class Geary.Imap.CompletionStatusResponse : StatusResponse {
                     root.to_string());
         }
     }
+    
+    public static bool is_completion_status_response(RootParameters root) {
+        if (!root.get_tag().is_tagged())
+            return false;
+        
+        try {
+            switch (Status.from_parameter(root.get_as_string(1))) {
+                case Status.OK:
+                case Status.NO:
+                case Status.BAD:
+                    // fall through
+                break;
+                
+                default:
+                    return false;
+            }
+        } catch (ImapError err) {
+            return false;
+        }
+        
+        return is_status_response(root);
+    }
 }
 

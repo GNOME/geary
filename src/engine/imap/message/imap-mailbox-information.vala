@@ -56,7 +56,7 @@ public class Geary.Imap.MailboxInformation : Object {
     public static MailboxInformation decode(ServerData server_data) throws ImapError {
         StringParameter cmd = data.get_as_string(1);
         if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(ListCommand.XLIST_NAME))
-            throw ImapError.DECODE_ERROR("Not LIST or XLIST data: %s", server_data.to_string());
+            throw ImapError.PARSE_ERROR("Not LIST or XLIST data: %s", server_data.to_string());
         
         ListParameter attrs = data.get_as_list(2);
         Gee.Collection<MailboxAttribute> attrlist = new Gee.ArrayList<MailboxAttribute>();

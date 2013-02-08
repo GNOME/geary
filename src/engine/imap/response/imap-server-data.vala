@@ -32,7 +32,7 @@ public class Geary.Imap.ServerData : ServerResponse {
         if (server_data_type != ServerDataType.CAPABILITY)
             throw new ImapError.PARSE_ERROR("Not CAPABILITY data: %s", to_string());
         
-        Capabilities capabilities = new Capabilities(revision++);
+        Capabilities capabilities = new Capabilities(next_revision++);
         for (int ctr = 2; ctr < get_count(); ctr++) {
             StringParameter? param = get_if_string(ctr);
             if (param != null)

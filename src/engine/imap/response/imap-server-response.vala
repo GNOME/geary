@@ -17,9 +17,13 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
         if (ContinuationResponse.is_continuation_response(root))
             return new ContinuationResponse.reconstitute(root);
         
-        // All CompletionStatusResponse's are StatusResponse's, so check for it first
+        // All CompletionStatusResponses are StatusResponses, so check for it first
         if (CompletionStatusResponse.is_completion_status_response(root))
             return new CompletionStatusResponse.reconstitute(root);
+        
+        // All CodedStatusResponses are StatusResponses, so check for it first
+        if (CodedStatusResponse.is_coded_status_response(root))
+            return new CodedStatusResponse.reconstitute(root);
         
         if (StatusResponse.is_status_response(root))
             return new StatusResponse.reconstitute(root);
