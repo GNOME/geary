@@ -1120,7 +1120,7 @@ public class ComposerWindow : Gtk.Window {
             from_multiple.visible = true;
             from_multiple.remove_all();
             foreach (Geary.AccountInformation a in accounts.values)
-                from_multiple.append(a.email, a.pretty_string());
+                from_multiple.append(a.email, a.get_mailbox_address().get_full_address());
             
             // Set the active account to the currently selected account, or failing that, set it
             // to the first account in the list.
@@ -1128,7 +1128,7 @@ public class ComposerWindow : Gtk.Window {
                 from_multiple.set_active(0);
         } else {
             // For other types of messages, just show the from account.
-            from_single.label = account.information.pretty_string();
+            from_single.label = account.information.get_mailbox_address().get_full_address();
             from_single.visible = true;
         }
     }

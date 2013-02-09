@@ -421,9 +421,9 @@ public class Geary.AccountInformation : Object {
     }
     
     /**
-     * Returns a formatted string with the user's real name and email address.
+     * Returns a MailboxAddress object for this account.
      */
-    public string pretty_string() {
-        return "%s <%s>".printf(real_name, email);
+    public RFC822.MailboxAddress get_mailbox_address() {
+        return new RFC822.MailboxAddress(real_name, email);
     }
 }
