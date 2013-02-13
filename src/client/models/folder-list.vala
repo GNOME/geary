@@ -9,10 +9,24 @@ public class FolderList : Sidebar.Tree {
     public const Gtk.TargetEntry[] TARGET_ENTRY_LIST = {
         { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
     };
+    
+    private class SpecialGrouping : Sidebar.Grouping {
+        // Must be != 0 and unique among SpecialGroupings.  Bigger comes later
+        // in the list.  If < 0, it comes before non-SpecialGroupings.
+        public int position { get; private set; }
+        
+        public SpecialGrouping(int position, string name, Icon? open_icon,
+            Icon? closed_icon = null, string? tooltip = null) {
+            base(name, open_icon, closed_icon, tooltip);
+            
+            this.position = position;
+        }
+    }
 
     private class AccountBranch : Sidebar.Branch {
         public Geary.Account account { get; private set; }
-        public Sidebar.Grouping user_folder_group { get; private set; }
+        public SpecialGrouping uncommon_special_group { get; private set; }
+        public SpecialGrouping user_folder_group { get; private set; }
         public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
         
         public AccountBranch(Geary.Account account) {
@@ -20,12 +34,15 @@ public class FolderList : Sidebar.Tree {
                 Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
             
             this.account = account;
-            user_folder_group = new Sidebar.Grouping("",
+            uncommon_special_group = new SpecialGrouping(1, _("More"),
+                new ThemedIcon("folder-open"), new ThemedIcon("folder"));
+            user_folder_group = new SpecialGrouping(2, "",
                 IconFactory.instance.get_custom_icon("tags", IconFactory.ICON_SIDEBAR));
             folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
             
             account.information.notify["nickname"].connect(on_nicknamed_changed);
             
+            graft(get_root(), uncommon_special_group, special_folder_comparator);
             graft(get_root(), user_folder_group);
         }
         
@@ -37,12 +54,21 @@ public class FolderList : Sidebar.Tree {
             ((Sidebar.Grouping) get_root()).rename(account.information.nickname);
         }
         
+        private static int special_grouping_comparator(Sidebar.Entry a, Sidebar.Entry b) {
+            SpecialGrouping? grouping_a = a as SpecialGrouping;
+            SpecialGrouping? grouping_b = b as SpecialGrouping;
+            
+            assert(grouping_a != null || grouping_b != null);
+            
+            int position_a = (grouping_a != null ? grouping_a.position : 0);
+            int position_b = (grouping_b != null ? grouping_b.position : 0);
+            
+            return position_a - position_b;
+        }
+        
         private static int special_folder_comparator(Sidebar.Entry a, Sidebar.Entry b) {
-            // Our user folder grouping always comes dead last.
-            if (a is Sidebar.Grouping)
-                return 1;
-            if (b is Sidebar.Grouping)
-                return -1;
+            if (a is Sidebar.Grouping || b is Sidebar.Grouping)
+                return special_grouping_comparator(a, b);
             
             assert(a is FolderEntry);
             assert(b is FolderEntry);
@@ -72,7 +98,20 @@ public class FolderList : Sidebar.Tree {
             FolderEntry folder_entry = new FolderEntry(folder);
             Geary.SpecialFolderType special_folder_type = folder.get_special_folder_type();
             if (special_folder_type != Geary.SpecialFolderType.NONE) {
-                graft(get_root(), folder_entry);
+                switch (special_folder_type) {
+                    // These special folders go in the root of the account.
+                    case Geary.SpecialFolderType.INBOX:
+                    case Geary.SpecialFolderType.FLAGGED:
+                    case Geary.SpecialFolderType.IMPORTANT:
+                    case Geary.SpecialFolderType.ALL_MAIL:
+                        graft(get_root(), folder_entry);
+                    break;
+                    
+                    // Others go in the "More" grouping.
+                    default:
+                        graft(uncommon_special_group, folder_entry);
+                    break;
+                }
             } else if (folder.get_path().get_parent() == null) {
                 // Top-level folders get put in our special user folders group.
                 graft(user_folder_group, folder_entry);
