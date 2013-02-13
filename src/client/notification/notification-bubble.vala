@@ -13,10 +13,11 @@ public class NotificationBubble : GLib.Object {
     
     private NewMessagesMonitor monitor;
     private Notify.Notification notification;
+    private Geary.Folder? folder = null;
     private Geary.Email? email = null;
     private unowned List<string> caps;
 
-    public signal void invoked(Geary.Folder folder, Geary.Email? email);
+    public signal void invoked(Geary.Folder? folder, Geary.Email? email);
     
     public NotificationBubble(NewMessagesMonitor monitor) {
         this.monitor = monitor;
@@ -54,25 +55,30 @@ public class NotificationBubble : GLib.Object {
     
     private void on_new_messages_arrived() {
         try {
-            if (monitor.count == 1 && monitor.last_new_message != null)
-                notify_one_message_async.begin(monitor.last_new_message, null);
-            else if (monitor.count > 0)
-                notify_new_mail(monitor.count);
+            if (monitor.total_count == 1 && monitor.last_new_message_folder != null &&
+                monitor.last_new_message != null) {
+                notify_one_message_async.begin(monitor.last_new_message_folder,
+                    monitor.last_new_message, null);
+            } else if (monitor.total_count > 0) {
+                notify_new_mail(monitor.total_count);
+            }
         } catch (Error err) {
             debug("Unable to notify of new mail: %s", err.message);
         }
     }
     
     private void on_default_action(Notify.Notification notification, string action) {
-        invoked(monitor.folder, email);
+        invoked(folder, email);
         GearyApplication.instance.activate(new string[0]);
     }
     
     private void notify_new_mail(int count) throws GLib.Error {
         // don't pass email if invoked
+        folder = null;
         email = null;
         
-        if (!GearyApplication.instance.config.show_notifications)
+        if (!GearyApplication.instance.config.show_notifications ||
+            !monitor.should_notify_new_messages())
             return;
         
         notification.set_category("email.arrived");
@@ -83,13 +89,15 @@ public class NotificationBubble : GLib.Object {
         notification.show();
     }
     
-    private async void notify_one_message_async(Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
+    private async void notify_one_message_async(Geary.Folder folder, Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
         
         // used if notification is invoked
+        this.folder = folder;
         this.email = email;
         
-        if (!GearyApplication.instance.config.show_notifications)
+        if (!GearyApplication.instance.config.show_notifications ||
+            !monitor.should_notify_new_messages())
             return;
         
         // possible to receive email with no originator

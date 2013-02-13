@@ -12,7 +12,7 @@ public abstract class NewMessagesIndicator : Object {
     
     public signal void application_activated(uint32 timestamp);
     
-    public signal void inbox_activated(uint32 timestamp);
+    public signal void inbox_activated(Geary.Folder folder, uint32 timestamp);
     
     public signal void composer_activated(uint32 timestamp);
     
