@@ -64,7 +64,7 @@ public class FolderList : Sidebar.Tree {
             return a.get_sidebar_name().collate(b.get_sidebar_name());
         }
         
-        public Sidebar.Entry? get_entry_for_path(Geary.FolderPath folder_path) {
+        public FolderEntry? get_entry_for_path(Geary.FolderPath folder_path) {
             return folder_entries.get(folder_path);
         }
         
@@ -102,11 +102,13 @@ public class FolderList : Sidebar.Tree {
     }
     
     private class FolderEntry : Object, Sidebar.Entry, Sidebar.InternalDropTargetEntry,
-        Sidebar.SelectableEntry {
+        Sidebar.SelectableEntry, Sidebar.EmphasizableEntry {
         public Geary.Folder folder { get; private set; }
+        private bool has_unread;
         
         public FolderEntry(Geary.Folder folder) {
             this.folder = folder;
+            has_unread = false;
         }
         
         public virtual string get_sidebar_name() {
@@ -157,6 +159,18 @@ public class FolderList : Sidebar.Tree {
         public virtual string to_string() {
             return "FolderEntry: " + get_sidebar_name();
         }
+        
+        public bool is_emphasized() {
+            return has_unread;
+        }
+        
+        public void set_has_unread(bool has_unread) {
+            if (this.has_unread == has_unread)
+                return;
+            
+            this.has_unread = has_unread;
+            is_emphasized_changed(has_unread);
+        }
 
         public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
             // Copy or move?
@@ -181,6 +195,7 @@ public class FolderList : Sidebar.Tree {
     private Gee.HashMap<Geary.Account, AccountBranch> account_branches
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private int total_accounts = 0;
+    private NewMessagesMonitor? monitor = null;
     
     public FolderList() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
@@ -191,8 +206,18 @@ public class FolderList : Sidebar.Tree {
             TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
     }
     
+    ~FolderList() {
+        set_new_messages_monitor(null);
+    }
+    
     private void drop_handler(Gdk.DragContext context, Sidebar.Entry? entry,
         Gtk.SelectionData data, uint info, uint time) {
+    }
+    
+    private FolderEntry? get_folder_entry(Geary.Folder folder) {
+        AccountBranch? account_branch = account_branches.get(folder.account);
+        return (account_branch == null ? null :
+            account_branch.get_entry_for_path(folder.get_path()));
     }
     
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
@@ -201,6 +226,25 @@ public class FolderList : Sidebar.Tree {
         }
     }
 
+    private void on_new_messages_changed(Geary.Folder folder, int count) {
+        FolderEntry? entry = get_folder_entry(folder);
+        if (entry != null)
+            entry.set_has_unread(count > 0);
+    }
+    
+    public void set_new_messages_monitor(NewMessagesMonitor? monitor) {
+        if (this.monitor != null) {
+            this.monitor.new_messages_arrived.disconnect(on_new_messages_changed);
+            this.monitor.new_messages_retired.disconnect(on_new_messages_changed);
+        }
+        
+        this.monitor = monitor;
+        if (this.monitor != null) {
+            this.monitor.new_messages_arrived.connect(on_new_messages_changed);
+            this.monitor.new_messages_retired.connect(on_new_messages_changed);
+        }
+    }
+    
     public void set_user_folders_root_name(Geary.Account account, string name) {
         if (account_branches.has_key(account))
             account_branches.get(account).user_folder_group.rename(name);
@@ -248,11 +292,7 @@ public class FolderList : Sidebar.Tree {
     }
     
     public void select_folder(Geary.Folder folder) {
-        AccountBranch? account_branch = account_branches.get(folder.account);
-        if (account_branch == null)
-            return;
-        
-        Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.get_path());
+        FolderEntry? entry = get_folder_entry(folder);
         if (entry != null)
             place_cursor(entry, false);
     }

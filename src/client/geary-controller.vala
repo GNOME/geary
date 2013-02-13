@@ -106,6 +106,7 @@ public class GearyController {
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
 
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
+        main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
         
         // New messages indicator (Ubuntuism)
         new_messages_indicator = NewMessagesIndicator.create(new_messages_monitor);
