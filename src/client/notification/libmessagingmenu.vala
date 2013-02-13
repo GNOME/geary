@@ -6,8 +6,6 @@
 
 public class Libmessagingmenu : NewMessagesIndicator {
 #if HAVE_LIBMESSAGINGMENU
-    private const string NEW_MESSAGES_ID = "new-messages-id";
-    
     private MessagingMenu.App? app = null;
     
     public Libmessagingmenu(NewMessagesMonitor monitor) {
@@ -25,41 +23,66 @@ public class Libmessagingmenu : NewMessagesIndicator {
         app.register();
         app.activate_source.connect(on_activate_source);
         
-        monitor.notify["count"].connect(on_new_messages_changed);
+        monitor.folder_removed.connect(on_folder_removed);
+        monitor.new_messages_arrived.connect(on_new_messages_changed);
+        monitor.new_messages_retired.connect(on_new_messages_changed);
         
         debug("Registered messaging-menu indicator");
     }
     
     ~Libmessagingmenu() {
-        if (app != null)
-            monitor.notify["count"].disconnect(on_new_messages_changed);
+        if (app != null) {
+            monitor.folder_removed.disconnect(on_folder_removed);
+            monitor.new_messages_arrived.disconnect(on_new_messages_changed);
+            monitor.new_messages_retired.disconnect(on_new_messages_changed);
+        }
+    }
+    
+    private string get_source_id(Geary.Folder folder) {
+        return "new-messages-id-%s-%s".printf(folder.account.information.email, folder.get_path().to_string());
     }
     
     private void on_activate_source(string source_id) {
-        if (source_id == NEW_MESSAGES_ID)
-            inbox_activated(now());
+        foreach (Geary.Folder folder in monitor.get_folders()) {
+            if (source_id == get_source_id(folder)) {
+                inbox_activated(folder, now());
+                break;
+            }
+        }
     }
     
-    private void on_new_messages_changed() {
-        if (monitor.count > 0)
-            show_new_messages_count();
+    private void on_new_messages_changed(Geary.Folder folder, int count) {
+        if (count > 0)
+            show_new_messages_count(folder, count);
         else
-            remove_new_messages_count();
+            remove_new_messages_count(folder);
     }
     
-    private void show_new_messages_count() {
-        if (app.has_source(NEW_MESSAGES_ID))
-            app.set_source_count(NEW_MESSAGES_ID, monitor.count);
-        else
-            app.append_source_with_count(NEW_MESSAGES_ID, null, _("New Messages"), monitor.count);
+    private void on_folder_removed(Geary.Folder folder) {
+        remove_new_messages_count(folder);
+    }
+    
+    private void show_new_messages_count(Geary.Folder folder, int count) {
+        if (!monitor.should_notify_new_messages())
+            return;
         
-        app.draw_attention(NEW_MESSAGES_ID);
+        string source_id = get_source_id(folder);
+        
+        if (app.has_source(source_id))
+            app.set_source_count(source_id, count);
+        else
+            app.append_source_with_count(source_id, null,
+                _("%s - New Messages").printf(folder.account.information.nickname), count);
+        
+        app.draw_attention(source_id);
     }
     
-    private void remove_new_messages_count() {
-        if (app.has_source(NEW_MESSAGES_ID)) {
-            app.remove_attention(NEW_MESSAGES_ID);
-            app.remove_source(NEW_MESSAGES_ID);
+    private void remove_new_messages_count(Geary.Folder folder) {
+        string source_id = get_source_id(folder);
+        
+        if (app.has_source(source_id)) {
+            app.remove_attention(source_id);
+            app.remove_source(source_id);
         }
     }
 #else

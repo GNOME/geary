@@ -419,4 +419,11 @@ public class Geary.AccountInformation : Object {
         // Delete files.
         yield Files.recursive_delete_async(settings_dir, cancellable);
     }
+    
+    /**
+     * Returns a MailboxAddress object for this account.
+     */
+    public RFC822.MailboxAddress get_mailbox_address() {
+        return new RFC822.MailboxAddress(real_name, email);
+    }
 }

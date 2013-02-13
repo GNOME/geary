@@ -232,13 +232,9 @@ public class ConversationViewer : Gtk.Box {
         insert_header_address(ref header, _("From:"), email.from != null ? email.from : email.sender,
             true);
         
-        // Only include to string if it's not just this account.
-        // TODO: multiple accounts.
-        if (email.to != null && current_account_information != null) {
-            if (!(email.to.get_all().size == 1 && email.to.get_all().get(0).address == current_account_information.email))
-                 insert_header_address(ref header, _("To:"), email.to);
-        }
-
+        if (email.to != null)
+             insert_header_address(ref header, _("To:"), email.to);
+        
         if (email.cc != null) {
             insert_header_address(ref header, _("Cc:"), email.cc);
         }
@@ -459,16 +455,16 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         Geary.Email email = conversation_viewer.get_email_from_element(clicked_element);
         if (email != null)
-            conversation_viewer.show_context_menu(email);
+            conversation_viewer.show_context_menu(email, clicked_element);
     }
     
-    private void show_context_menu(Geary.Email email) {
-        context_menu = build_context_menu(email);
+    private void show_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
+        context_menu = build_context_menu(email, clicked_element);
         context_menu.show_all();
         context_menu.popup(null, null, null, 0, 0);
     }
     
-    private Gtk.Menu build_context_menu(Geary.Email email) {
+    private Gtk.Menu build_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
         Gtk.Menu menu = new Gtk.Menu();
         
         if (web_view.can_copy_clipboard()) {
@@ -496,6 +492,13 @@ public class ConversationViewer : Gtk.Box {
         Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
         select_all_item.activate.connect(on_select_all);
         menu.append(select_all_item);
+        
+        // Inspect.
+        if (Args.inspector) {
+            Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
+            inspect_item.activate.connect(() => {web_view.web_inspector.inspect_node(clicked_element);});
+            menu.append(inspect_item);
+        }
         
         return menu;
     }

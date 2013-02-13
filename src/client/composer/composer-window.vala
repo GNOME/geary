@@ -6,6 +6,12 @@
 
 // Window for sending messages.
 public class ComposerWindow : Gtk.Window {
+    public enum ComposeType {
+        NEW_MESSAGE,
+        REPLY,
+        FORWARD
+    }
+    
     private const string DEFAULT_TITLE = _("New Message");
     
     private const string ACTION_UNDO = "undo";
@@ -95,9 +101,14 @@ public class ComposerWindow : Gtk.Window {
         }
     }
     
+    public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
+    
     private string? reply_body = null;
     private Gee.Set<File> attachment_files = new Gee.HashSet<File>(File.hash, (EqualFunc) File.equal);
     
+    private Gtk.Label from_label;
+    private Gtk.Label from_single;
+    private Gtk.ComboBoxText from_multiple = new Gtk.ComboBoxText();
     private EmailEntry to_entry;
     private EmailEntry cc_entry;
     private EmailEntry bcc_entry;
@@ -137,9 +148,10 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.UIManager ui;
     private ContactEntryCompletion[] contact_entry_completions;
     
-    public ComposerWindow(Geary.Account account, Geary.ContactStore? contact_store,
-        Geary.ComposedEmail? prefill = null) {
+    public ComposerWindow(Geary.Account account, ComposeType compose_type,
+        Geary.ContactStore? contact_store, Geary.ComposedEmail? prefill = null) {
         this.account = account;
+        this.compose_type = compose_type;
         
         contact_entry_completions = {
             new ContactEntryCompletion(contact_store),
@@ -171,6 +183,9 @@ public class ComposerWindow : Gtk.Window {
         
         // TODO: It would be nicer to set the completions inside the EmailEntry constructor. But in
         // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
+        from_label = (Gtk.Label) builder.get_object("from label");
+        from_single = (Gtk.Label) builder.get_object("from_single");
+        from_multiple = (Gtk.ComboBoxText) builder.get_object("from_multiple");
         to_entry = new EmailEntry();
         to_entry.completion = contact_entry_completions[0];
         (builder.get_object("to") as Gtk.EventBox).add(to_entry);
@@ -183,6 +198,10 @@ public class ComposerWindow : Gtk.Window {
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
+        
+        // Listen to account signals to update from menu.
+        Geary.Engine.instance.account_available.connect(update_from_field);
+        Geary.Engine.instance.account_unavailable.connect(update_from_field);
         
         Gtk.ScrolledWindow scroll = new Gtk.ScrolledWindow(null, null);
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -259,6 +278,9 @@ public class ComposerWindow : Gtk.Window {
             if (reply_body == null && prefill.body_text != null)
                 reply_body = "<pre>" + prefill.body_text.buffer.to_string();
         }
+        
+        update_from_field();
+        from_multiple.changed.connect(on_from_changed);
         
         editor = new WebKit.WebView();
         edit_fixer = new WebViewEditFixer(editor);
@@ -494,6 +516,7 @@ public class ComposerWindow : Gtk.Window {
     public override void show_all() {
         set_default_size(680, 600);
         base.show_all();
+        update_from_field();
     }
     
     public bool should_close() {
@@ -1071,6 +1094,62 @@ public class ComposerWindow : Gtk.Window {
                 font_medium.activate();
             
             action_flag = false;
+        }
+    }
+    
+    private void update_from_field() {
+        from_single.visible = from_multiple.visible = from_label.visible = false;
+        
+        Gee.Map<string, Geary.AccountInformation> accounts;
+        try {
+            accounts = Geary.Engine.instance.get_accounts();
+        } catch (Error e) {
+            debug("Could not fetch account info: %s", e.message);
+            
+            return;
+        }
+        
+        // If there's only one account, show nothing. (From fields are hidden above.)
+        if (accounts.size <= 1)
+            return;
+        
+        from_label.visible = true;
+        
+        if (compose_type == ComposeType.NEW_MESSAGE) {
+            // For new messages, show the account combo-box.
+            from_multiple.visible = true;
+            from_multiple.remove_all();
+            foreach (Geary.AccountInformation a in accounts.values)
+                from_multiple.append(a.email, a.get_mailbox_address().get_full_address());
+            
+            // Set the active account to the currently selected account, or failing that, set it
+            // to the first account in the list.
+            if (!from_multiple.set_active_id(account.information.email))
+                from_multiple.set_active(0);
+        } else {
+            // For other types of messages, just show the from account.
+            from_single.label = account.information.get_mailbox_address().get_full_address();
+            from_single.visible = true;
+        }
+    }
+    
+    private void on_from_changed() {
+        if (compose_type != ComposeType.NEW_MESSAGE)
+            return;
+        
+        // Since we've set the combo box ID to the email addresses, we can
+        // fetch that and use it to grab the account from the engine.
+        string? id = from_multiple.get_active_id();
+        Geary.AccountInformation? new_account_info = null;
+        
+        if (id != null) {
+            try {
+                new_account_info = Geary.Engine.instance.get_accounts().get(id);
+                if (new_account_info != null)
+                    account = Geary.Engine.instance.get_account_instance(new_account_info);
+            } catch (Error e) {
+                debug("Error updating account in Composer: %s", e.message);
+            }
         }
     }
 }

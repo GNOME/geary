@@ -24,8 +24,9 @@ set(ARCHIVE_BASE_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 set(ARCHIVE_FULL_NAME ${ARCHIVE_BASE_NAME}.tar.xz)
 set(ARCHIVE_DEBUILD_FULL_NAME ${CMAKE_PROJECT_NAME}_${VERSION}.orig.tar.xz)
 
-set(GLADE_FILES ui/composer.glade ui/login.glade ui/message.glade ui/password-dialog.glade
-    ui/preferences.glade ui/toolbar.glade)
+set(GLADE_FILES ui/account_list.glade ui/account_cannot_remove.glade ui/account_spinner.glade
+    ui/composer.glade ui/login.glade ui/message.glade ui/password-dialog.glade ui/preferences.glade
+    ui/remove_confirm.glade ui/toolbar.glade)
 
 option(DEBUG "Build for debugging." OFF)
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)

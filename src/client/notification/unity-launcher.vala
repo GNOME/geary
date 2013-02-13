@@ -15,11 +15,11 @@ public class UnityLauncher : Object {
         entry = Unity.LauncherEntry.get_for_desktop_id("geary.desktop");
         set_count(0);
         
-        monitor.notify["count"].connect(on_new_messages_changed);
+        monitor.notify["total-count"].connect(on_new_messages_changed);
     }
     
     ~UnityLauncher() {
-        monitor.notify["count"].disconnect(on_new_messages_changed);
+        monitor.notify["total-count"].disconnect(on_new_messages_changed);
     }
     
     private void set_count(int count) {
@@ -29,7 +29,8 @@ public class UnityLauncher : Object {
     }
     
     private void on_new_messages_changed() {
-        set_count(monitor.count);
+        if (monitor.total_count == 0 || monitor.should_notify_new_messages())
+            set_count(monitor.total_count);
     }
 #else
     public UnityLauncher(NewMessagesMonitor monitor) {
