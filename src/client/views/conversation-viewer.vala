@@ -351,14 +351,19 @@ public class ConversationViewer : Gtk.Box {
         WebKit.DOM.Document document = web_view.get_dom_document();
         WebKit.DOM.Element first_compressed = null;
         int compress_count = 0;
+        bool prev_hidden = false, curr_hidden = false, next_hidden = false;
+        try {
+            next_hidden = document.get_element_by_id(get_div_id(messages.first().id)).get_class_list().contains("hide");
+        } catch (Error error) {
+            debug("Error checking hidden status: %s", error.message);
+        }
         
         foreach (Geary.Email message in messages) {
             try {
                 WebKit.DOM.Element message_element = document.get_element_by_id(get_div_id(message.id));
-                bool curr_hidden = message_element.get_class_list().contains("hide"),
-                    prev_hidden = (message_element.previous_element_sibling != null)
-                        && message_element.previous_element_sibling.get_class_list().contains("hide"),
-                    next_hidden = (message_element.next_element_sibling != null)
+                prev_hidden = curr_hidden;
+                curr_hidden = next_hidden;
+                next_hidden = (message_element.next_element_sibling != null)
                         && message_element.next_element_sibling.get_class_list().contains("hide");
                 if (curr_hidden && prev_hidden && next_hidden) {
                     message_element.get_class_list().add("compressed");
