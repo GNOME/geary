@@ -22,7 +22,8 @@ public class Geary.AccountInformation : Object {
     private const string SMTP_PORT = "smtp_port";
     private const string SMTP_SSL = "smtp_ssl";
     private const string SMTP_STARTTLS = "smtp_starttls";
-    
+    private const string SMTP_NOAUTH = "smtp_noauth";
+
     public const string SETTINGS_FILENAME = "geary.ini";
     public const string DEFAULT_NICKNAME = _("Default");
     
@@ -44,10 +45,11 @@ public class Geary.AccountInformation : Object {
     public uint16 default_smtp_server_port  { get; set; }
     public bool default_smtp_server_ssl  { get; set; }
     public bool default_smtp_server_starttls { get; set; }
+    public bool default_smtp_server_noauth { get; set; }
 
     public Geary.Credentials imap_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool imap_remember_password { get; set; default = true; }
-    public Geary.Credentials smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
+    public Geary.Credentials? smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool smtp_remember_password { get; set; default = true; }
     
     internal AccountInformation(File directory) {
@@ -86,6 +88,12 @@ public class Geary.AccountInformation : Object {
                     Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
                 default_smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
                 default_smtp_server_starttls = get_bool_value(key_file, GROUP, SMTP_STARTTLS, false);
+                default_smtp_server_noauth = get_bool_value(key_file, GROUP, SMTP_NOAUTH, false);
+                
+                if (default_smtp_server_noauth) {
+                    // Make sure the SMTP credentials are unset.
+                    smtp_credentials = null;
+                }
             }
         }
         
@@ -361,6 +369,7 @@ public class Geary.AccountInformation : Object {
             key_file.set_integer(GROUP, SMTP_PORT, default_smtp_server_port);
             key_file.set_boolean(GROUP, SMTP_SSL, default_smtp_server_ssl);
             key_file.set_boolean(GROUP, SMTP_STARTTLS, default_smtp_server_starttls);
+            key_file.set_boolean(GROUP, SMTP_NOAUTH, default_smtp_server_noauth);
         }
         
         string data = key_file.to_data();
