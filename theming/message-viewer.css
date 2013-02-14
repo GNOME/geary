@@ -224,6 +224,9 @@ pre {
     .email.compressed + .email {
         margin-top: -1px;
     }
+    .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed {
+        display:none;
+    }
 
 }
 

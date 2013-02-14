@@ -349,6 +349,7 @@ public class ConversationViewer : Gtk.Box {
     
     public void compress_emails() {
         WebKit.DOM.Document document = web_view.get_dom_document();
+        WebKit.DOM.Element first_compressed = null;
         int compress_count = 0;
         
         foreach (Geary.Email message in messages) {
@@ -357,25 +358,29 @@ public class ConversationViewer : Gtk.Box {
                 bool curr_hidden = message_element.get_class_list().contains("hide"),
                     prev_hidden = (message_element.previous_element_sibling != null)
                         && message_element.previous_element_sibling.get_class_list().contains("hide"),
-                    next_hidden = (message_element.previous_element_sibling != null)
+                    next_hidden = (message_element.next_element_sibling != null)
                         && message_element.next_element_sibling.get_class_list().contains("hide");
                 if (curr_hidden && prev_hidden && next_hidden) {
                     message_element.get_class_list().add("compressed");
                     compress_count += 1;
+                    if (first_compressed == null)
+                        first_compressed = message_element;
                 } else if (compress_count > 0) {
                     if (compress_count == 1) {
                         message_element.previous_element_sibling.get_class_list().remove("compressed");
                     } else {
                         WebKit.DOM.HTMLElement span =
-                            message_element.previous_element_sibling.first_element_child.first_element_child
+                            first_compressed.first_element_child.first_element_child
                             as WebKit.DOM.HTMLElement;
                         span.set_inner_html(_("%u read messages").printf(compress_count));
                         // We need to set the display to get an accurate offset_height
                         span.set_attribute("style", "display:inline-block;");
-                        span.set_attribute("style", "display:inline-block; top:-%ipx".printf(
-                            ((compress_count-2) * 9 + (int) span.offset_height) / 2 ));
+                        span.set_attribute("style", "display:inline-block; top:%ipx".printf(
+                            (int) (message_element.offset_top - first_compressed.offset_top
+                            - span.offset_height) / 2));
                     }
                     compress_count = 0;
+                    first_compressed = null;
                 }
             } catch (Error error) {
                 debug("Error compressing emails: %s", error.message);
