@@ -108,7 +108,12 @@ public class AddEditPage : Gtk.Box {
                 combo_smtp_encryption.active = Encryption.STARTTLS;
         }
     }
-    
+
+    public bool smtp_noauth {
+        get { return check_smtp_noauth.active; }
+        set { check_smtp_noauth.active = value; }
+    }
+
     // these are tied to the values in the Glade file
     private enum Encryption {
         NONE = 0,
@@ -145,7 +150,11 @@ public class AddEditPage : Gtk.Box {
     private Gtk.Entry entry_smtp_username;
     private Gtk.Entry entry_smtp_password;
     private Gtk.ComboBox combo_smtp_encryption;
-    
+    private Gtk.CheckButton check_smtp_noauth;
+
+    private string smtp_username_store;
+    private string smtp_password_store;
+
     private bool edited_imap_port = false;
     private bool edited_smtp_port = false;
     
@@ -191,7 +200,8 @@ public class AddEditPage : Gtk.Box {
         entry_smtp_username = (Gtk.Entry) builder.get_object("entry: smtp username");
         entry_smtp_password = (Gtk.Entry) builder.get_object("entry: smtp password");
         combo_smtp_encryption = (Gtk.ComboBox) builder.get_object("combo: smtp encryption");
-        
+        check_smtp_noauth = (Gtk.CheckButton) builder.get_object("check: smtp no authentication");
+
         // Build list of service providers.
         foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers())
             combo_service.append_text(p.display_name());
@@ -218,6 +228,8 @@ public class AddEditPage : Gtk.Box {
         
         combo_imap_encryption.changed.connect(on_imap_encryption_changed);
         combo_smtp_encryption.changed.connect(on_smtp_encryption_changed);
+        
+        check_smtp_noauth.toggled.connect(on_smtp_no_auth_changed);
         
         entry_imap_port.insert_text.connect(on_port_insert_text);
         entry_smtp_port.insert_text.connect(on_port_insert_text);
@@ -246,7 +258,8 @@ public class AddEditPage : Gtk.Box {
             info.default_smtp_server_host,
             info.default_smtp_server_port,
             info.default_smtp_server_ssl,
-            info.default_smtp_server_starttls);
+            info.default_smtp_server_starttls,
+            info.default_smtp_server_noauth);
     }
     
     // Can use this instead of set_account_information(), both do the same thing.
@@ -267,7 +280,8 @@ public class AddEditPage : Gtk.Box {
         string? initial_default_smtp_host = null,
         uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_smtp_ssl = true,
-        bool initial_default_smtp_starttls = false) {
+        bool initial_default_smtp_starttls = false,
+        bool initial_default_smtp_noauth = false) {
         
         // Set defaults
         real_name = initial_real_name ?? "";
@@ -292,6 +306,7 @@ public class AddEditPage : Gtk.Box {
         smtp_password = initial_smtp_password ?? "";
         smtp_ssl = initial_default_smtp_ssl;
         smtp_starttls = initial_default_smtp_starttls;
+        smtp_noauth = initial_default_smtp_noauth;
         
         if (Geary.String.is_empty(real_name))
             entry_real_name.grab_focus();
@@ -322,13 +337,17 @@ public class AddEditPage : Gtk.Box {
     // TODO: Only reset if not manually set by user.
     private void on_email_changed() {
         entry_imap_username.text = entry_email.text;
-        entry_smtp_username.text = entry_email.text;
+        
+        if (entry_smtp_username.sensitive)
+            entry_smtp_username.text = entry_email.text;
     }
     
     // TODO: Only reset if not manually set by user.
     private void on_password_changed() {
         entry_imap_password.text = entry_password.text;
-        entry_smtp_password.text = entry_password.text;
+        
+        if (entry_password.sensitive)
+            entry_smtp_password.text = entry_password.text;
     }
     
     private void on_changed() {
@@ -386,6 +405,25 @@ public class AddEditPage : Gtk.Box {
         edited_smtp_port = false;
     }
     
+    private void on_smtp_no_auth_changed() {
+        if (check_smtp_noauth.active) {
+            smtp_username_store = entry_smtp_username.text;
+            smtp_password_store = entry_smtp_password.text;
+            
+            entry_smtp_username.text = "";
+            entry_smtp_password.text = "";
+            
+            entry_smtp_username.sensitive = false;
+            entry_smtp_password.sensitive = false;
+        } else {
+            entry_smtp_username.text = smtp_username_store;
+            entry_smtp_password.text = smtp_password_store;
+            
+            entry_smtp_username.sensitive = true;
+            entry_smtp_password.sensitive = true;
+        }
+    }
+    
     private uint16 get_default_smtp_port() {
         switch (combo_smtp_encryption.active) {
             case Encryption.SSL:
@@ -411,8 +449,8 @@ public class AddEditPage : Gtk.Box {
                     Geary.String.is_empty_or_whitespace(imap_password) ||
                     Geary.String.is_empty_or_whitespace(smtp_host) ||
                     Geary.String.is_empty_or_whitespace(smtp_port.to_string()) ||
-                    Geary.String.is_empty_or_whitespace(smtp_username) ||
-                    Geary.String.is_empty_or_whitespace(smtp_password))
+                    Geary.String.is_empty_or_whitespace(smtp_username) && check_smtp_noauth.active == false ||
+                    Geary.String.is_empty_or_whitespace(smtp_password) && check_smtp_noauth.active == false)
                     return false;
             break;
             
@@ -460,6 +498,10 @@ public class AddEditPage : Gtk.Box {
         account_information.default_smtp_server_port = smtp_port;
         account_information.default_smtp_server_ssl = smtp_ssl;
         account_information.default_smtp_server_starttls = smtp_starttls;
+        account_information.default_smtp_server_noauth = smtp_noauth;
+        
+        if (smtp_noauth)
+            account_information.smtp_credentials = null;
         
         on_changed();
         

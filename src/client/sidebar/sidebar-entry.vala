@@ -48,6 +48,12 @@ public interface Sidebar.RenameableEntry : Sidebar.Entry {
     public abstract bool is_user_renameable();
 }
 
+public interface Sidebar.EmphasizableEntry : Sidebar.Entry {
+    public signal void is_emphasized_changed(bool emphasized);
+    
+    public abstract bool is_emphasized();
+}
+
 public interface Sidebar.DestroyableEntry : Sidebar.Entry {
     public abstract void destroy_source();
 }

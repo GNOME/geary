@@ -12,6 +12,7 @@ public class Geary.Smtp.ResponseCode {
     
     public const string START_DATA_CODE = "354";
     public const string STARTTLS_READY_CODE = "220";
+    public const string DENIED_CODE = "550";
     
     public enum Status {
         POSITIVE_PRELIMINARY = 1,
@@ -103,6 +104,10 @@ public class Geary.Smtp.ResponseCode {
 
     public bool is_starttls_ready() {
         return str == STARTTLS_READY_CODE;
+    }
+    
+    public bool is_denied() {
+        return str == DENIED_CODE;
     }
 
     public string serialize() {

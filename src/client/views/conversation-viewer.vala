@@ -330,6 +330,7 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
         bind_event(web_view, ".header .field .value", "click", (Callback) on_value_clicked, this);
         bind_event(web_view, ".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
+        bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
     }
@@ -345,23 +346,73 @@ public class ConversationViewer : Gtk.Box {
             }
         }
     }
-
-    public void show_first_visible_email() {
-        // Select the first email element that does not have "hide" in its
-        // class list. The constraint on the id is required because there
-        // are some elements (like #selection_counter) that have the "email"
-        // class, but that are not messages.
-        WebKit.DOM.HTMLElement first_visible_email =
-            Util.DOM.select(web_view.get_dom_document(), ".email[id^=message_]:not(.hide)");
-        if (first_visible_email != null) {
-            // Select the sibling which, if it exists, is the previous hidden
-            // message. This is a way Geary has to say "hey, this conversation
-            // is not new: there are some messages above".
-            WebKit.DOM.HTMLElement first_visible_email_sibling = 
-                (WebKit.DOM.HTMLElement) first_visible_email.previous_sibling;
-            if (first_visible_email_sibling != null) {
-                web_view.scroll_to_element(first_visible_email_sibling);
+    
+    public void compress_emails() {
+        WebKit.DOM.Document document = web_view.get_dom_document();
+        WebKit.DOM.Element first_compressed = null;
+        int compress_count = 0;
+        bool prev_hidden = false, curr_hidden = false, next_hidden = false;
+        try {
+            next_hidden = document.get_element_by_id(get_div_id(messages.first().id)).get_class_list().contains("hide");
+        } catch (Error error) {
+            debug("Error checking hidden status: %s", error.message);
+        }
+        
+        foreach (Geary.Email message in messages) {
+            try {
+                WebKit.DOM.Element message_element = document.get_element_by_id(get_div_id(message.id));
+                prev_hidden = curr_hidden;
+                curr_hidden = next_hidden;
+                next_hidden = (message_element.next_element_sibling != null)
+                        && message_element.next_element_sibling.get_class_list().contains("hide");
+                if (curr_hidden && prev_hidden && next_hidden) {
+                    message_element.get_class_list().add("compressed");
+                    compress_count += 1;
+                    if (first_compressed == null)
+                        first_compressed = message_element;
+                } else if (compress_count > 0) {
+                    if (compress_count == 1) {
+                        message_element.previous_element_sibling.get_class_list().remove("compressed");
+                    } else {
+                        WebKit.DOM.HTMLElement span =
+                            first_compressed.first_element_child.first_element_child
+                            as WebKit.DOM.HTMLElement;
+                        span.set_inner_html(_("%u read messages").printf(compress_count));
+                        // We need to set the display to get an accurate offset_height
+                        span.set_attribute("style", "display:inline-block;");
+                        span.set_attribute("style", "display:inline-block; top:%ipx".printf(
+                            (int) (message_element.offset_top - first_compressed.offset_top
+                            - span.offset_height) / 2));
+                    }
+                    compress_count = 0;
+                    first_compressed = null;
+                }
+            } catch (Error error) {
+                debug("Error compressing emails: %s", error.message);
             }
+        }
+    }
+    
+    public void decompress_emails(WebKit.DOM.Element email_element) {
+        WebKit.DOM.Element iter_element = email_element;
+        try {
+            while ((iter_element != null) && iter_element.get_class_list().contains("compressed")) {
+                iter_element.get_class_list().remove("compressed");
+                iter_element.first_element_child.first_element_child.set_attribute("style", "display:none");
+                iter_element = iter_element.previous_element_sibling;
+            }
+        } catch (Error error) {
+            debug("Error decompressing emails: %s", error.message);
+        }
+        iter_element = email_element.next_element_sibling;
+        try {
+            while ((iter_element != null) && iter_element.get_class_list().contains("compressed")) {
+                iter_element.get_class_list().remove("compressed");
+                iter_element.first_element_child.first_element_child.set_attribute("style", "display:none");
+                iter_element = iter_element.next_element_sibling;
+            }
+        } catch (Error error) {
+            debug("Error decompressing emails: %s", error.message);
         }
     }
     
@@ -577,7 +628,9 @@ public class ConversationViewer : Gtk.Box {
                 return;
             
             WebKit.DOM.DOMTokenList class_list = email_element.get_class_list();
-            if (class_list.contains("hide"))
+            if (class_list.contains("compressed"))
+                decompress_emails(email_element);
+            else if (class_list.contains("hide"))
                 class_list.remove("hide");
             else
                 class_list.add("hide");

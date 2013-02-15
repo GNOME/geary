@@ -262,6 +262,16 @@ public class Sidebar.Tree : Gtk.TreeView {
         return rows.length() != 0 ? rows.nth_data(0) : null;
     }
 
+    private string get_name_for_entry(Sidebar.Entry entry) {
+        string name = Geary.HTML.escape_markup(entry.get_sidebar_name());
+        
+        Sidebar.EmphasizableEntry? emphasizable_entry = entry as Sidebar.EmphasizableEntry;
+        if (emphasizable_entry != null && emphasizable_entry.is_emphasized())
+            name = "<b>%s</b>".printf(name);
+        
+        return name;
+    }
+    
     public override void cursor_changed() {
         Gtk.TreePath? path = get_selected_path();
         if (path == null) {
@@ -429,7 +439,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         assert(!entry_map.has_key(entry));
         entry_map.set(entry, wrapper);
         
-        store.set(assoc_iter, Columns.NAME, Geary.HTML.escape_markup(entry.get_sidebar_name()));
+        store.set(assoc_iter, Columns.NAME, get_name_for_entry(entry));
         store.set(assoc_iter, Columns.TOOLTIP, entry.get_sidebar_tooltip() != null ?
             Geary.HTML.escape_markup(entry.get_sidebar_tooltip()) : null);
         store.set(assoc_iter, Columns.WRAPPER, wrapper);
@@ -441,6 +451,10 @@ public class Sidebar.Tree : Gtk.TreeView {
         Sidebar.RenameableEntry? renameable = entry as Sidebar.RenameableEntry;
         if (renameable != null)
             renameable.sidebar_name_changed.connect(on_sidebar_name_changed);
+        
+        Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
+        if (emphasizable != null)
+            emphasizable.is_emphasized_changed.connect(on_is_emphasized_changed);
         
         Sidebar.ExpandableEntry? expandable = entry as Sidebar.ExpandableEntry;
         if (expandable != null)
@@ -458,7 +472,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         EntryWrapper new_wrapper = new EntryWrapper(store, entry, store.get_path(new_iter));
         entry_map.set(entry, new_wrapper);
         
-        store.set(new_iter, Columns.NAME, Geary.HTML.escape_markup(entry.get_sidebar_name()));
+        store.set(new_iter, Columns.NAME, get_name_for_entry(entry));
         store.set(new_iter, Columns.TOOLTIP, Geary.HTML.escape_markup(entry.get_sidebar_tooltip()));
         store.set(new_iter, Columns.WRAPPER, new_wrapper);
         load_entry_icons(new_iter);
@@ -553,6 +567,10 @@ public class Sidebar.Tree : Gtk.TreeView {
         Sidebar.RenameableEntry? renameable = entry as Sidebar.RenameableEntry;
         if (renameable != null)
             renameable.sidebar_name_changed.disconnect(on_sidebar_name_changed);
+        
+        Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
+        if (emphasizable != null)
+            emphasizable.is_emphasized_changed.disconnect(on_is_emphasized_changed);
         
         Sidebar.ExpandableEntry? expandable = entry as Sidebar.ExpandableEntry;
         if (expandable != null)
@@ -703,11 +721,19 @@ public class Sidebar.Tree : Gtk.TreeView {
         store.set(wrapper.get_iter(), Columns.CLOSED_PIXBUF, fetch_icon_pixbuf(closed));
     }
     
-    private void on_sidebar_name_changed(Sidebar.RenameableEntry entry, string name) {
+    private void rename_entry(Sidebar.Entry entry) {
         EntryWrapper? wrapper = get_wrapper(entry);
         assert(wrapper != null);
         
-        store.set(wrapper.get_iter(), Columns.NAME, Geary.HTML.escape_markup(name));
+        store.set(wrapper.get_iter(), Columns.NAME, get_name_for_entry(entry));
+    }
+    
+    private void on_sidebar_name_changed(Sidebar.RenameableEntry entry, string name) {
+        rename_entry(entry);
+    }
+    
+    private void on_is_emphasized_changed(Sidebar.EmphasizableEntry entry, bool is_emphasized) {
+        rename_entry(entry);
     }
     
     private Gdk.Pixbuf? fetch_icon_pixbuf(GLib.Icon? gicon) {

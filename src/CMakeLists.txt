@@ -218,7 +218,13 @@ client/dialogs/alert-dialog.vala
 client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
 
-client/models/folder-list.vala
+client/folder-list/folder-list-account-branch.vala
+client/folder-list/folder-list-folder-entry.vala
+client/folder-list/folder-list-tree.vala
+client/folder-list/folder-list-inboxes-branch.vala
+client/folder-list/folder-list-inbox-folder-entry.vala
+client/folder-list/folder-list-special-grouping.vala
+
 client/models/conversation-list-store.vala
 
 client/notification/libindicate.vala

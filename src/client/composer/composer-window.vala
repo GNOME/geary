@@ -39,7 +39,7 @@ public class ComposerWindow : Gtk.Window {
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
-    private const string REPLY_ID = "reply";
+    private const string BODY_ID = "message-body";
     private const string HTML_BODY = """
         <html><head><title></title>
         <style>
@@ -61,7 +61,7 @@ public class ComposerWindow : Gtk.Window {
             border-left: 3px #aaa solid;
         }
         </style>
-        </head><body id="reply"></body></html>""";
+        </head><body id="message-body"></body></html>""";
     
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
@@ -96,14 +96,14 @@ public class ComposerWindow : Gtk.Window {
     public string message {
         owned get { return get_html(); }
         set {
-            reply_body = value;
+            body_html = value;
             editor.load_string(HTML_BODY, "text/html", "UTF8", "");
         }
     }
     
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
-    private string? reply_body = null;
+    private string? body_html = null;
     private Gee.Set<File> attachment_files = new Gee.HashSet<File>(File.hash, (EqualFunc) File.equal);
     
     private Gtk.Label from_label;
@@ -274,9 +274,9 @@ public class ComposerWindow : Gtk.Window {
             if (prefill.subject != null)
                 subject = prefill.subject.value;
             if (prefill.body_html != null)
-                reply_body = prefill.body_html.buffer.to_string();
-            if (reply_body == null && prefill.body_text != null)
-                reply_body = "<pre>" + prefill.body_text.buffer.to_string();
+                body_html = prefill.body_html.buffer.to_string();
+            if (body_html == null && prefill.body_text != null)
+                body_html = "<pre>" + prefill.body_text.buffer.to_string() + "</pre>";
         }
         
         update_from_field();
@@ -297,7 +297,7 @@ public class ComposerWindow : Gtk.Window {
         editor.redo.connect(update_actions);
         editor.selection_changed.connect(update_actions);
         
-        // only do this after setting reply_body
+        // only do this after setting body_html
         editor.load_string(HTML_BODY, "text/html", "UTF8", "");
         
         editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
@@ -371,15 +371,15 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
-        WebKit.DOM.HTMLElement? reply = editor.get_dom_document().get_element_by_id(
-            REPLY_ID) as WebKit.DOM.HTMLElement;
-        assert(reply != null);
+        WebKit.DOM.HTMLElement? body = editor.get_dom_document().get_element_by_id(
+            BODY_ID) as WebKit.DOM.HTMLElement;
+        assert(body != null);
 
-        if (!Geary.String.is_empty(reply_body)) {
+        if (!Geary.String.is_empty(body_html)) {
             try {
-                reply.set_inner_html("<br /><br />" + reply_body + "<br />");
+                body.set_inner_html(body_html);
             } catch (Error e) {
-                debug("Failed to load email for reply: %s", e.message);
+                debug("Failed to load prefilled body: %s", e.message);
             }
         }
 
@@ -390,7 +390,7 @@ public class ComposerWindow : Gtk.Window {
             subject_entry.grab_focus();
         } else {
             editor.grab_focus();
-            reply.focus();
+            body.focus();
         }
 
         bind_event(editor,"a", "click", (Callback) on_link_clicked, this);

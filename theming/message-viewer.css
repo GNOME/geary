@@ -216,7 +216,30 @@ pre {
     .email.hide .header .field a {
         pointer-events: none;
     }
+    
+    .email.compressed {
+        margin-top: -1px;
+        height: 10px;
+    }
+    .email.compressed + .email {
+        margin-top: -1px;
+    }
+    .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed {
+        display:none;
+    }
 
+}
+
+.email .compressed_note {
+    text-align: center;
+    height: 0;
+}
+.email .compressed_note > span {
+    display: none;
+    padding: 0px 10px;
+    background: #f5f5f5;
+    position: relative;
+    cursor: hand;
 }
 
 .email:not(.attachment) .attachment.icon {

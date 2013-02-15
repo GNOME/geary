@@ -146,8 +146,14 @@ public class Geary.Smtp.ClientSession {
         foreach (RFC822.MailboxAddress mailbox in addrlist) {
             RcptRequest rcpt_request = new RcptRequest.plain(mailbox.address);
             Response response = yield cx.transaction_async(rcpt_request, cancellable);
-            if (!response.code.is_success_completed())
-                response.throw_error("\"%s\" failed".printf(rcpt_request.to_string()));
+
+            if (!response.code.is_success_completed()) {
+                if (response.code.is_denied()) {
+                    response.throw_error("recipient \"%s\" denied by smtp server".printf(rcpt_request.to_string()));
+                } else {
+                    response.throw_error("\"%s\" failed".printf(rcpt_request.to_string()));
+                }
+            }
         }
     }
     

@@ -106,6 +106,7 @@ public class GearyController {
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
 
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
+        main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
         
         // New messages indicator (Ubuntuism)
         new_messages_indicator = NewMessagesIndicator.create(new_messages_monitor);
@@ -576,7 +577,8 @@ public class GearyController {
             main_window.conversation_viewer.add_message(email);
         
         main_window.conversation_viewer.unhide_last_email();
-        main_window.conversation_viewer.show_first_visible_email();
+        if (clear_view)
+            main_window.conversation_viewer.compress_emails();
     }
     
     private void on_show_message_completed(Object? source, AsyncResult result) {
@@ -602,6 +604,33 @@ public class GearyController {
         main_window.folder_list.add_folder(folder);
     }
     
+    // Meant to be called inside the available block of on_folders_available_unavailable,
+    // before the folder being added has been added to the inboxes map.
+    private Geary.Folder? get_initial_selection_folder(Geary.Folder folder_being_added) {
+        int total_accounts = 0;
+        try {
+            total_accounts = Geary.Engine.instance.get_accounts().size;
+        } catch (Error e) {
+            debug("Error determining the number of accounts: %s", e.message);
+        }
+        
+        Geary.Folder? select_folder = null;
+        if (!main_window.folder_list.is_any_selected()) {
+            // We select this folder if it's the first inbox for
+            // the only account.  We select the previously seen
+            // inbox if this is the second inbox and we have more
+            // than one.  This second case is delayed because we
+            // need to have given the folder list time to see both
+            // accounts to create the special Inboxes branch.
+            if (inboxes.size == 0 && total_accounts == 1)
+                select_folder = folder_being_added;
+            else if (inboxes.size == 1 && total_accounts > 1)
+                select_folder = Geary.Collection.get_first(inboxes.values);
+        }
+        
+        return select_folder;
+    }
+    
     private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
         Gee.Collection<Geary.Folder>? unavailable) {
         
@@ -618,11 +647,17 @@ public class GearyController {
                 // monitor the Inbox for notifications
                 if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX &&
                     !inboxes.has_key(folder.account)) {
+                    Geary.Folder? select_folder = get_initial_selection_folder(folder);
+                    
                     inboxes.set(folder.account, folder);
                     
-                    // select the inbox and get the show started
-                    if (inboxes.size == 1)
-                        main_window.folder_list.select_folder(folder);
+                    if (select_folder != null) {
+                        // First we try to select the Inboxes branch inbox if
+                        // it's there, falling back to the main folder list.
+                        if (!main_window.folder_list.select_inbox(select_folder.account))
+                            main_window.folder_list.select_folder(select_folder);
+                    }
+                    
                     folder.open_async.begin(false, inbox_cancellables.get(folder.account));
                     
                     new_messages_monitor.add_folder(folder, inbox_cancellables.get(folder.account));

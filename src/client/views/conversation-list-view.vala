@@ -59,7 +59,7 @@ public class ConversationListView : Gtk.TreeView {
         button_press_event.connect(on_button_press);
 
         // Set up drag and drop.
-        Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.TARGET_ENTRY_LIST,
+        Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
         
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
