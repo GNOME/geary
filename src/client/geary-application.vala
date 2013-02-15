@@ -201,12 +201,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     // Returns null if we are done validating, or the revised account information if we should retry.
     private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
         Cancellable? cancellable = null) {
-        if (yield validate_async(account_information, cancellable))
+        Geary.Engine.ValidationResult result = yield validate_async(account_information, cancellable);
+        if (result == Geary.Engine.ValidationResult.OK)
             return null;
         
         debug("Validation failed. Prompting user for revised account information");
         Geary.AccountInformation? new_account_information =
-            request_account_information(account_information);
+            request_account_information(account_information, result);
         
         // If the user refused to enter account information. There is currently no way that we
         // could see this--we exit in request_account_information, and the only way that an
@@ -221,33 +222,39 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     // Attempts to validate and add an account.  Returns true on success, else false.
-    public async bool validate_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
+    public async Geary.Engine.ValidationResult validate_async(
+        Geary.AccountInformation account_information, Cancellable? cancellable = null) {
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
         try {
-            if (!yield Geary.Engine.instance.validate_account_information_async(
-                account_information, cancellable))
-                return false;
+            result = yield Geary.Engine.instance.validate_account_information_async(account_information,
+                cancellable);
         } catch (Error err) {
             debug("Error validating account: %s", err.message);
-            return false;
+            exit(-1); // Fatal error
+            
+            return result;
         }
         
-        account_information.store_async.begin(cancellable);
-        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-            Geary.CredentialsMediator.ServiceFlag.SMTP, account_information);
+        if (result == Geary.Engine.ValidationResult.OK) {
+            account_information.store_async.begin(cancellable);
+            do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
+                Geary.CredentialsMediator.ServiceFlag.SMTP, account_information);
+            
+            debug("Successfully validated account information");
+        }
         
-        debug("Successfully validated account information");
-        return true;
+        return result;
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
-    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info) {
+    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         Geary.AccountInformation? new_info = old_info;
         if (login_dialog == null)
             login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
         
         if (new_info != null)
-            login_dialog.set_account_information(new_info);
+            login_dialog.set_account_information(new_info, result);
         
         login_dialog.present();
         for (;;) {

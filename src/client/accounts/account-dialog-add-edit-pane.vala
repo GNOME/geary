@@ -5,7 +5,7 @@
  */
 
 // Add or edit an account.  Used with AccountDialog.
-public class AccountDialogAddEditPane : Gtk.Box {
+public class AccountDialogAddEditPane : AccountDialogPane {
     public AddEditPage add_edit_page { get; private set; default = new AddEditPage(); }
     private Gtk.ButtonBox button_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
     private Gtk.Button ok_button = new Gtk.Button.from_stock(Gtk.Stock.OK);
@@ -17,8 +17,8 @@ public class AccountDialogAddEditPane : Gtk.Box {
     
     public signal void size_changed();
     
-    public AccountDialogAddEditPane() {
-        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
+    public AccountDialogAddEditPane(Gtk.Notebook notebook) {
+        base(notebook);
         
         button_box.set_layout(Gtk.ButtonBoxStyle.END);
         button_box.expand = false;
@@ -26,6 +26,8 @@ public class AccountDialogAddEditPane : Gtk.Box {
         button_box.pack_start(cancel_button, false, false, 0);
         button_box.pack_start(ok_button, false, false, 0);
         ok_button.can_default = true;
+        
+        add_edit_page.info_changed.connect(on_info_changed);
         
         // Since we're not yet in a window, we have to wait before setting the default action.
         realize.connect(() => { ok_button.has_default = true; });
@@ -51,8 +53,13 @@ public class AccountDialogAddEditPane : Gtk.Box {
         return add_edit_page.get_mode();
     }
     
-    public void set_account_information(Geary.AccountInformation info) {
-        add_edit_page.set_account_information(info);
+    public void set_account_information(Geary.AccountInformation info,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
+        add_edit_page.set_account_information(info, result);
+    }
+    
+    public void set_validation_result(Geary.Engine.ValidationResult result) {
+        add_edit_page.set_validation_result(result);
     }
     
     public void reset_all() {
@@ -61,6 +68,16 @@ public class AccountDialogAddEditPane : Gtk.Box {
     
     private void on_ok() {
         ok(add_edit_page.get_account_information());
+    }
+    
+    public override void present() {
+        base.present();
+        add_edit_page.update_ui();
+        on_info_changed();
+    }
+    
+    private void on_info_changed() {
+        ok_button.has_default = ok_button.sensitive = add_edit_page.is_complete();
     }
 }
 

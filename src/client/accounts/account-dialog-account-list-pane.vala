@@ -5,7 +5,7 @@
  */
 
 // List of accounts.  Used with AccountDialog.
-public class AccountDialogAccountListPane : Gtk.Box {
+public class AccountDialogAccountListPane : AccountDialogPane {
     public enum Column {
         ACCOUNT_NICKNAME = 0,
         ACCOUNT_ADDRESS;
@@ -24,9 +24,8 @@ public class AccountDialogAccountListPane : Gtk.Box {
     
     public signal void close();
     
-    public AccountDialogAccountListPane() {
-        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
-        
+    public AccountDialogAccountListPane(Gtk.Notebook notebook) {
+        base(notebook);
         Gtk.Builder builder = GearyApplication.instance.create_builder("account_list.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
         Gtk.ActionGroup actions = (Gtk.ActionGroup) builder.get_object("account list actions");

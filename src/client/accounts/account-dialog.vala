@@ -8,16 +8,11 @@ public class AccountDialog : Gtk.Dialog {
     private const int MARGIN = 12;
     
     private Gtk.Notebook notebook = new Gtk.Notebook();
-    private AccountDialogAccountListPane account_list_pane = new AccountDialogAccountListPane();
-    private AccountDialogAddEditPane add_edit_pane = new AccountDialogAddEditPane();
-    private AccountSpinnerPage spinner_pane = new AccountSpinnerPage();
-    private AccountDialogRemoveConfirmPane remove_confirm_pane = new AccountDialogRemoveConfirmPane();
-    private AccountDialogRemoveFailPane remove_fail_pane = new AccountDialogRemoveFailPane();
-    private int add_edit_page_number;
-    private int account_list_page_number;
-    private int spinner_page_number;
-    private int remove_confirm_page_number;
-    private int remove_fail_page_number;
+    private AccountDialogAccountListPane account_list_pane;
+    private AccountDialogAddEditPane add_edit_pane;
+    private AccountDialogSpinnerPane spinner_pane;
+    private AccountDialogRemoveConfirmPane remove_confirm_pane;
+    private AccountDialogRemoveFailPane remove_fail_pane;
     
     public AccountDialog() {
         set_size_request(450, -1); // Sets min size.
@@ -27,11 +22,11 @@ public class AccountDialog : Gtk.Dialog {
         get_content_area().margin_right = MARGIN;
         
         // Add pages to notebook.
-        account_list_page_number = notebook.append_page(account_list_pane, null);
-        add_edit_page_number = notebook.append_page(add_edit_pane, null);
-        spinner_page_number = notebook.append_page(spinner_pane, null);
-        remove_confirm_page_number = notebook.append_page(remove_confirm_pane, null);
-        remove_fail_page_number = notebook.append_page(remove_fail_pane, null);
+        account_list_pane = new AccountDialogAccountListPane(notebook);
+        add_edit_pane = new AccountDialogAddEditPane(notebook);
+        spinner_pane = new AccountDialogSpinnerPane(notebook);
+        remove_confirm_pane = new AccountDialogRemoveConfirmPane(notebook);
+        remove_fail_pane = new AccountDialogRemoveFailPane(notebook);
         
         // Connect signals from pages.
         account_list_pane.close.connect(on_close);
@@ -46,11 +41,13 @@ public class AccountDialog : Gtk.Dialog {
         remove_fail_pane.ok.connect(on_cancel_back_to_list);
         
         // Set default page.
-        notebook.set_current_page(account_list_page_number);
+        account_list_pane.present();
         
         notebook.show_border = false;
         notebook.show_tabs = false;
         get_content_area().pack_start(notebook, true, true, 0);
+        
+        set_default_response(Gtk.ResponseType.OK);
         
         notebook.show_all(); // Required due to longstanding Gtk.Notebook bug
     }
@@ -62,7 +59,7 @@ public class AccountDialog : Gtk.Dialog {
     private void on_add_account() {
         add_edit_pane.reset_all();
         add_edit_pane.set_mode(AddEditPage.PageMode.ADD);
-        notebook.set_current_page(add_edit_page_number);
+        add_edit_pane.present();
     }
     
     // Grab the account info.  While the addresses passed into this method should *always* be
@@ -93,7 +90,7 @@ public class AccountDialog : Gtk.Dialog {
         
         add_edit_pane.set_mode(AddEditPage.PageMode.EDIT);
         add_edit_pane.set_account_information(account);
-        notebook.set_current_page(add_edit_page_number);
+        add_edit_pane.present();
     }
     
     private void on_delete_account(string email_address) {
@@ -119,11 +116,11 @@ public class AccountDialog : Gtk.Dialog {
         
         if (composer_window_found) {
             // Warn user that account cannot be deleted until composer is closed.
-            notebook.set_current_page(remove_fail_page_number);
+            remove_fail_pane.present();
         } else {
             // Send user to confirmation screen.
             remove_confirm_pane.set_account(account);
-            notebook.set_current_page(remove_confirm_page_number);
+            remove_confirm_pane.present();
         }
     }
     
@@ -132,28 +129,33 @@ public class AccountDialog : Gtk.Dialog {
         
         // Remove account, then set the page back to the account list.
         GearyApplication.instance.remove_account_async.begin(account, null, () => {
-            notebook.set_current_page(account_list_page_number); });
+            account_list_pane.present(); });
     }
     
     private void on_save_add_or_edit(Geary.AccountInformation info) {
         // Show the busy spinner.
-        notebook.set_current_page(spinner_page_number);
+        spinner_pane.present();
         
         // Validate account.
         GearyApplication.instance.validate_async.begin(info, null, on_save_add_or_edit_completed);
     }
     
     private void on_save_add_or_edit_completed(Object? source, AsyncResult result) {
+        Geary.Engine.ValidationResult validation_result =
+            GearyApplication.instance.validate_async.end(result);
+        
         // If account was successfully added return to the account list. Otherwise, go back to the
         // account add page so the user can try again.
-        if (GearyApplication.instance.validate_async.end(result))
-            notebook.set_current_page(account_list_page_number);
-        else
-            notebook.set_current_page(add_edit_page_number);
+        if (validation_result == Geary.Engine.ValidationResult.OK) {
+            account_list_pane.present();
+        } else {
+            add_edit_pane.set_validation_result(validation_result);
+            add_edit_pane.present();
+        }
     }
     
     private void on_cancel_back_to_list() {
-        notebook.set_current_page(account_list_page_number);
+        account_list_pane.present();
     }
 }
 

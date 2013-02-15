@@ -5,7 +5,7 @@
  */
 
 // Confirmation of the deletion of an account
-public class AccountDialogRemoveConfirmPane : Gtk.Box {
+public class AccountDialogRemoveConfirmPane : AccountDialogPane {
     private Geary.AccountInformation? account = null;
     private Gtk.Label account_nickname_label;
     private Gtk.Label email_address_label;
@@ -14,8 +14,8 @@ public class AccountDialogRemoveConfirmPane : Gtk.Box {
     
     public signal void cancel();
     
-    public AccountDialogRemoveConfirmPane() {
-        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 6);
+    public AccountDialogRemoveConfirmPane(Gtk.Notebook notebook) {
+        base(notebook);
         
         Gtk.Builder builder = GearyApplication.instance.create_builder("remove_confirm.glade");
         pack_end((Gtk.Box) builder.get_object("container"));

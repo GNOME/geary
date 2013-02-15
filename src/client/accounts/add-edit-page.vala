@@ -126,6 +126,8 @@ public class AddEditPage : Gtk.Box {
     private Gtk.Widget container_widget;
     private Gtk.Box welcome_box;
     
+    private Gtk.Label label_error;
+    
     private Gtk.Entry entry_email;
     private Gtk.Label label_password;
     private Gtk.Entry entry_password;
@@ -158,6 +160,8 @@ public class AddEditPage : Gtk.Box {
     private bool edited_imap_port = false;
     private bool edited_smtp_port = false;
     
+    private Geary.Engine.ValidationResult last_validation_result = Geary.Engine.ValidationResult.OK;
+    
     public signal void info_changed();
     
     public signal void size_changed();
@@ -184,6 +188,8 @@ public class AddEditPage : Gtk.Box {
         label_password = (Gtk.Label) builder.get_object("label: password");
         entry_password = (Gtk.Entry) builder.get_object("entry: password");
         check_remember_password = (Gtk.CheckButton) builder.get_object("check: remember_password");
+        
+        label_error = (Gtk.Label) builder.get_object("label: error");
         
         other_info = (Gtk.Alignment) builder.get_object("container: other_info");
         
@@ -241,7 +247,7 @@ public class AddEditPage : Gtk.Box {
     }
     
     // Sets the account information to display on this page.
-    public void set_account_information(Geary.AccountInformation info) {
+    public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
         set_all_info(info.real_name,
             info.nickname,
             info.email,
@@ -259,7 +265,8 @@ public class AddEditPage : Gtk.Box {
             info.default_smtp_server_port,
             info.default_smtp_server_ssl,
             info.default_smtp_server_starttls,
-            info.default_smtp_server_noauth);
+            info.default_smtp_server_noauth,
+            result);
     }
     
     // Can use this instead of set_account_information(), both do the same thing.
@@ -281,7 +288,8 @@ public class AddEditPage : Gtk.Box {
         uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_smtp_ssl = true,
         bool initial_default_smtp_starttls = false,
-        bool initial_default_smtp_noauth = false) {
+        bool initial_default_smtp_noauth = false,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         
         // Set defaults
         real_name = initial_real_name ?? "";
@@ -308,10 +316,16 @@ public class AddEditPage : Gtk.Box {
         smtp_starttls = initial_default_smtp_starttls;
         smtp_noauth = initial_default_smtp_noauth;
         
+        set_validation_result(result);
+        
         if (Geary.String.is_empty(real_name))
             entry_real_name.grab_focus();
         else
             entry_email.grab_focus();
+    }
+    
+    public void set_validation_result(Geary.Engine.ValidationResult result) {
+        last_validation_result = result;
     }
     
     // Resets all fields to their defaults.
@@ -519,7 +533,7 @@ public class AddEditPage : Gtk.Box {
     }
     
     // Updates UI based on various options.
-    private void update_ui() {
+    internal void update_ui() {
         base.show_all();
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
@@ -554,6 +568,42 @@ public class AddEditPage : Gtk.Box {
             entry_smtp_username.sensitive =
             combo_smtp_encryption.sensitive =
                 mode != PageMode.EDIT;
+        
+        // Update error text.
+        label_error.visible = false;
+        if (last_validation_result == Geary.Engine.ValidationResult.OK) {
+            label_error.visible = false;
+        } else {
+            label_error.visible = true;
+            
+            string error_string = _("Unable to validate:\n");
+            if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.INVALID_NICKNAME))
+                error_string += _("        &#8226; Invalid account nickname.\n");
+            
+            if (get_service_provider() == Geary.ServiceProvider.OTHER) {
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED))
+                    error_string += _("        &#8226; IMAP connection error.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CREDENTIALS_INVALID))
+                    error_string += _("        &#8226; IMAP username or password incorrect.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED))
+                    error_string += _("        &#8226; SMTP connection error.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CREDENTIALS_INVALID))
+                    error_string += _("        &#8226; SMTP username or password incorrect.\n");
+            } else {
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED) ||
+                    last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED))
+                    error_string += _("        &#8226; Connection error.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CREDENTIALS_INVALID) ||
+                    last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CREDENTIALS_INVALID))
+                    error_string += _("        &#8226; Username or password incorrect.\n");
+            }
+            
+            label_error.label = "<span color=\"red\">" + error_string + "</span>";
+        }
         
         size_changed();
     }

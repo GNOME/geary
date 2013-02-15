@@ -40,8 +40,10 @@ public class LoginDialog : Gtk.Dialog {
         set_account_information(initial_account_information);
     }
     
-    public void set_account_information(Geary.AccountInformation info) {
-        page.set_account_information(info);
+    public void set_account_information(Geary.AccountInformation info,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
+        page.set_account_information(info, result);
+        page.update_ui();
     }
     
     public Geary.AccountInformation get_account_information() {
