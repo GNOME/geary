@@ -8,7 +8,7 @@ public class MainWindow : Gtk.Window {
     private const int MESSAGE_LIST_WIDTH = 250;
     private const int FOLDER_LIST_WIDTH = 100;
     
-    public FolderList folder_list { get; private set; default = new FolderList(); }
+    public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
