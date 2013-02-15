@@ -29,7 +29,7 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
     if (email.body == null)
         return "";
     
-    string quoted = "";
+    string quoted = html_format ? "<br /><br />" : "\n\n";
     
     if (email.date != null) {
         /// The datetime that a message being replied to was received
@@ -65,7 +65,7 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
     if (email.body == null)
         return "";
     
-    string quoted = "";
+    string quoted = html_format ? "<br /><br />" : "\n\n";
     
     quoted += _("---------- Forwarded message ----------");
     quoted += "\n\n";
