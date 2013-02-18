@@ -348,6 +348,9 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void compress_emails() {
+        if (messages.size == 0)
+            return;
+        
         WebKit.DOM.Document document = web_view.get_dom_document();
         WebKit.DOM.Element first_compressed = null;
         int compress_count = 0;
