@@ -450,8 +450,8 @@ public class Geary.AccountInformation : Object {
         return new RFC822.MailboxAddress(real_name, email);
     }
     
-    public static int compare(AccountInformation a, AccountInformation b) {
-        int diff = (int) (a.ordinal > b.ordinal) - (int) (a.ordinal < b.ordinal);
+    public static int compare_ascending(AccountInformation a, AccountInformation b) {
+        int diff = a.ordinal - b.ordinal;
         if (diff != 0)
             return diff;
         

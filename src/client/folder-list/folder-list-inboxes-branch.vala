@@ -21,7 +21,7 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
         
         InboxFolderEntry entry_a = (InboxFolderEntry) a;
         InboxFolderEntry entry_b = (InboxFolderEntry) b;
-        return Geary.AccountInformation.compare(entry_a.get_account_information(),
+        return Geary.AccountInformation.compare_ascending(entry_a.get_account_information(),
             entry_b.get_account_information());
     }
     
