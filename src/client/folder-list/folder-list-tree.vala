@@ -17,7 +17,6 @@ public class FolderList.Tree : Sidebar.Tree {
     private Gee.HashMap<Geary.Account, AccountBranch> account_branches
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
-    private int total_accounts = 0;
     private NewMessagesMonitor? monitor = null;
     
     public Tree() {
@@ -78,16 +77,15 @@ public class FolderList.Tree : Sidebar.Tree {
             account_branches.set(folder.account, new AccountBranch(folder.account));
         
         AccountBranch account_branch = account_branches.get(folder.account);
-        if (!has_branch(account_branch)) {
-            // 1 + ... because the Inboxes branch comes at position 0.
-            graft(account_branch, 1 + total_accounts++);
-        }
+        if (!has_branch(account_branch))
+            graft(account_branch, folder.account.information.ordinal);
         
         if (account_branches.size > 1 && !has_branch(inboxes_branch))
-            graft(inboxes_branch, 0); // The Inboxes branch comes first.
+            graft(inboxes_branch, -1); // The Inboxes branch comes first.
         if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX)
             inboxes_branch.add_inbox(folder);
         
+        folder.account.information.notify["ordinal"].connect(on_ordinal_changed);
         account_branch.add_folder(folder);
     }
 
@@ -110,6 +108,7 @@ public class FolderList.Tree : Sidebar.Tree {
     }
     
     public void remove_account(Geary.Account account) {
+        account.information.notify["ordinal"].disconnect(on_ordinal_changed);
         AccountBranch? account_branch = account_branches.get(account);
         if (account_branch != null) {
             // If a folder on this account is selected, unselect it.
@@ -167,5 +166,23 @@ public class FolderList.Tree : Sidebar.Tree {
             Gdk.drag_status(context, Gdk.DragAction.MOVE, time);
         }
         return ret;
+    }
+    
+    private void on_ordinal_changed() {
+        if (account_branches.size <= 1)
+            return;
+        
+        // Remove branches where the ordinal doesn't match the graft position.
+        Gee.ArrayList<AccountBranch> branches_to_reorder = new Gee.ArrayList<AccountBranch>();
+        foreach (AccountBranch branch in account_branches.values) {
+            if (get_position_for_branch(branch) != branch.account.information.ordinal) {
+                prune(branch);
+                branches_to_reorder.add(branch);
+            }
+        }
+        
+        // Re-add branches with new positions.
+        foreach (AccountBranch branch in branches_to_reorder)
+            graft(branch, branch.account.information.ordinal);
     }
 }

@@ -9,6 +9,7 @@ public class Geary.AccountInformation : Object {
     private const string REAL_NAME_KEY = "real_name";
     private const string NICKNAME_KEY = "nickname";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
+    private const string ORDINAL_KEY = "ordinal";
     private const string IMAP_USERNAME_KEY = "imap_username";
     private const string IMAP_REMEMBER_PASSWORD_KEY = "imap_remember_password";
     private const string SMTP_USERNAME_KEY = "smtp_username";
@@ -27,6 +28,8 @@ public class Geary.AccountInformation : Object {
     public const string SETTINGS_FILENAME = "geary.ini";
     public const string DEFAULT_NICKNAME = _("Default");
     
+    public static int default_ordinal = 0;
+    
     internal File settings_dir;
     internal File file;
     
@@ -35,7 +38,10 @@ public class Geary.AccountInformation : Object {
     public string email { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
     public bool imap_server_pipeline { get; set; default = true; }
-
+    
+    // Order for display purposes.
+    public int ordinal { get; set; }
+    
     // These properties are only used if the service provider's account type does not override them.
     public string default_imap_server_host { get; set; }
     public uint16 default_imap_server_port  { get; set; }
@@ -73,6 +79,9 @@ public class Geary.AccountInformation : Object {
             smtp_remember_password = get_bool_value(key_file, GROUP, SMTP_REMEMBER_PASSWORD_KEY, true);
             service_provider = Geary.ServiceProvider.from_string(get_string_value(key_file, GROUP,
                 SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
+            ordinal = get_int_value(key_file, GROUP, ORDINAL_KEY, default_ordinal++);
+            if (ordinal >= default_ordinal)
+                default_ordinal = ordinal + 1;
             
             imap_server_pipeline = get_bool_value(key_file, GROUP, IMAP_PIPELINE, true);
 
@@ -317,14 +326,18 @@ public class Geary.AccountInformation : Object {
         return def;
     }
     
-    private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 def = 0) {
+    private int get_int_value(KeyFile key_file, string group, string key, int def = 0) {
         try {
-            return (uint16) key_file.get_integer(group, key);
+            return key_file.get_integer(group, key);
         } catch(KeyFileError err) {
             // Ignore.
         }
         
         return def;
+    }
+    
+    private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 def = 0) {
+        return (uint16) get_int_value(key_file, group, key);
     }
     
     public async void store_async(Cancellable? cancellable = null) {
@@ -352,6 +365,7 @@ public class Geary.AccountInformation : Object {
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
         key_file.set_value(GROUP, NICKNAME_KEY, nickname);
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
+        key_file.set_value(GROUP, ORDINAL_KEY, ordinal.to_string());
         key_file.set_value(GROUP, IMAP_USERNAME_KEY, imap_credentials.user);
         key_file.set_boolean(GROUP, IMAP_REMEMBER_PASSWORD_KEY, imap_remember_password);
         key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
@@ -434,5 +448,14 @@ public class Geary.AccountInformation : Object {
      */
     public RFC822.MailboxAddress get_mailbox_address() {
         return new RFC822.MailboxAddress(real_name, email);
+    }
+    
+    public static int compare(AccountInformation a, AccountInformation b) {
+        int diff = (int) (a.ordinal > b.ordinal) - (int) (a.ordinal < b.ordinal);
+        if (diff != 0)
+            return diff;
+        
+        // Stabilize on nickname, which should always be unique.
+        return a.nickname.collate(b.nickname);
     }
 }

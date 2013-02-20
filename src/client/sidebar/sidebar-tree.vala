@@ -37,8 +37,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     private class RootWrapper : EntryWrapper {
         public int root_position;
         
-        public RootWrapper(Gtk.TreeModel model, Sidebar.Entry entry, Gtk.TreePath path, int root_position) 
-            requires (root_position >= 0) {
+        public RootWrapper(Gtk.TreeModel model, Sidebar.Entry entry, Gtk.TreePath path, int root_position) {
             base (model, entry, path);
             
             this.root_position = root_position;
@@ -353,7 +352,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         return branches.has_key(branch);
     }
     
-    public void graft(Sidebar.Branch branch, int position) requires (position >= 0) {
+    public void graft(Sidebar.Branch branch, int position) {
         assert(!branches.has_key(branch));
         
         branches.set(branch, position);
@@ -376,6 +375,13 @@ public class Sidebar.Tree : Gtk.TreeView {
         branch.show_branch.connect(on_show_branch);
         
         branch_added(branch);
+    }
+    
+    public int get_position_for_branch(Sidebar.Branch branch) {
+        if (branches.has_key(branch))
+            return branches.get(branch);
+        
+        return int.MIN;
     }
     
     // This is used to associate a known branch with the TreeView.

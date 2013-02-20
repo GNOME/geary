@@ -6,16 +6,16 @@
 
 // A FolderEntry for inboxes in the Inboxes branch.
 public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
-    private static int total_inbox_folders = 0;
-    
-    public int position { get; private set; }
-    
     public InboxFolderEntry(Geary.Folder folder) {
         base(folder);
-        position = total_inbox_folders++;
     }
     
     public override string get_sidebar_name() {
         return folder.account.information.nickname;
     }
+    
+    public Geary.AccountInformation get_account_information() {
+        return folder.account.information;
+    }
 }
+

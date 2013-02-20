@@ -21,7 +21,8 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
         
         InboxFolderEntry entry_a = (InboxFolderEntry) a;
         InboxFolderEntry entry_b = (InboxFolderEntry) b;
-        return entry_a.position - entry_b.position;
+        return Geary.AccountInformation.compare(entry_a.get_account_information(),
+            entry_b.get_account_information());
     }
     
     public InboxFolderEntry? get_entry_for_account(Geary.Account account) {
@@ -35,6 +36,7 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
         graft(get_root(), folder_entry);
         
         folder_entries.set(inbox.account, folder_entry);
+        inbox.account.information.notify["ordinal"].connect(on_ordinal_changed);
     }
     
     public void remove_inbox(Geary.Account account) {
@@ -44,7 +46,12 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
             return;
         }
         
+        account.information.notify["ordinal"].disconnect(on_ordinal_changed);
         prune(entry);
         folder_entries.unset(account);
+    }
+    
+    private void on_ordinal_changed() {
+        reorder_all();
     }
 }
