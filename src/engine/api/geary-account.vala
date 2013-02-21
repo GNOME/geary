@@ -133,6 +133,12 @@ public interface Geary.Account : Object {
         Cancellable? cancellable = null) throws Error;
     
     /**
+     * Returns the folder representing the given special folder type.  If no such folder exists,
+     * null is returned.
+     */
+    public abstract Geary.Folder? get_special_folder(Geary.SpecialFolderType special) throws Error;
+    
+    /**
      * Submits a ComposedEmail for delivery.  Messages may be scheduled for later delivery or immediately
      * sent.  Subscribe to the "email-sent" signal to be notified of delivery.  Note that that signal
      * does not return the ComposedEmail object but an RFC822-formatted object.  Allowing for the

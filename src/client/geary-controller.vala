@@ -25,6 +25,7 @@ public class GearyController {
     public const string ACTION_MARK_AS_UNREAD = "GearyMarkAsUnread";
     public const string ACTION_MARK_AS_STARRED = "GearyMarkAsStarred";
     public const string ACTION_MARK_AS_UNSTARRED = "GearyMarkAsUnStarred";
+    public const string ACTION_MARK_AS_SPAM = "GearyMarkAsSpam";
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
 
@@ -37,6 +38,9 @@ public class GearyController {
     private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
     private const string ARCHIVE_MESSAGE_TOOLTIP = _("Archive the selected conversation");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive";
+    
+    private const string MARK_AS_SPAM_LABEL = _("Mark as s_pam");
+    private const string MARK_AS_NOT_SPAM_LABEL = _("Mark as not s_pam");
     
     private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
     
@@ -198,7 +202,13 @@ public class GearyController {
             null, on_mark_as_unstarred };
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
-
+        
+        Gtk.ActionEntry mark_spam = { ACTION_MARK_AS_SPAM, null, TRANSLATABLE, "<Ctrl>J", null,
+            on_mark_as_spam };
+        mark_spam.label = MARK_AS_SPAM_LABEL;
+        entries += mark_spam;
+        add_accelerator("exclam", ACTION_MARK_AS_SPAM); // Exclamation mark (!)
+        
         Gtk.ActionEntry copy_menu = { ACTION_COPY_MENU, null, TRANSLATABLE, "L", null, null };
         copy_menu.label = _("_Label");
         entries += copy_menu;
@@ -831,6 +841,31 @@ public class GearyController {
         actions.get_action(ACTION_MARK_AS_UNREAD).set_visible(read_selected);
         actions.get_action(ACTION_MARK_AS_STARRED).set_visible(unstarred_selected);
         actions.get_action(ACTION_MARK_AS_UNSTARRED).set_visible(starred_selected);
+        
+        Geary.Folder? spam_folder = null;
+        try {
+            spam_folder = current_account.get_special_folder(Geary.SpecialFolderType.SPAM);
+        } catch (Error e) {
+            debug("Could not locate special spam folder: %s", e.message);
+        }
+        
+        if (spam_folder != null &&
+            current_folder.get_special_folder_type() != Geary.SpecialFolderType.DRAFTS &&
+            current_folder.get_special_folder_type() != Geary.SpecialFolderType.OUTBOX) {
+            if (current_folder.get_special_folder_type() == Geary.SpecialFolderType.SPAM) {
+                // We're in the spam folder.
+                actions.get_action(ACTION_MARK_AS_SPAM).sensitive = true;
+                actions.get_action(ACTION_MARK_AS_SPAM).label = MARK_AS_NOT_SPAM_LABEL;
+            } else {
+                // We're not in the spam folder, but we are in a folder that allows mark-as-spam.
+                actions.get_action(ACTION_MARK_AS_SPAM).sensitive = true;
+                actions.get_action(ACTION_MARK_AS_SPAM).label = MARK_AS_SPAM_LABEL;
+            }
+        } else {
+            // No Spam folder, or we're in Drafts/Outbox, so gray-out the option.
+            actions.get_action(ACTION_MARK_AS_SPAM).sensitive = false;
+            actions.get_action(ACTION_MARK_AS_SPAM).label = MARK_AS_SPAM_LABEL;
+        }
     }
     
     private void on_visible_conversations_changed(Gee.Set<Geary.Conversation> visible) {
@@ -931,6 +966,28 @@ public class GearyController {
     
     private void on_mark_complete() {
         set_busy(false);
+    }
+    
+    private void on_mark_as_spam() {
+        Geary.Folder? destination_folder = null;
+        if (current_folder.get_special_folder_type() != Geary.SpecialFolderType.SPAM) {
+            // Move to spam folder.
+            try {
+                destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.SPAM);
+            } catch (Error e) {
+                debug("Error getting spam folder: %s", e.message);
+            }
+        } else {
+            // Move out of spam folder, back to inbox.
+            try {
+                destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.INBOX);
+            } catch (Error e) {
+                debug("Error getting inbox folder: %s", e.message);
+            }
+        }
+        
+        if (destination_folder != null)
+            on_move_conversation(destination_folder);
     }
     
     private void on_copy_conversation(Geary.Folder destination) {
