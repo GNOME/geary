@@ -160,7 +160,7 @@ public class Geary.ComposedEmail : Object {
 
                 body_text = new RFC822.Text(new Geary.Memory.StringBuffer(body));
                 body_html = new RFC822.Text(new Geary.Memory.StringBuffer(
-                    Geary.HTML.escape_markup(body)));
+                    Geary.HTML.preserve_whitespace(Geary.HTML.escape_markup(body))));
             }
         }
 
