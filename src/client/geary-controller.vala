@@ -156,12 +156,12 @@ public class GearyController {
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
         
-        Gtk.ActionEntry accounts = { ACTION_ACCOUNTS, null, TRANSLATABLE, null,
+        Gtk.ActionEntry accounts = { ACTION_ACCOUNTS, null, TRANSLATABLE, "<Ctrl>M",
             null, on_accounts };
         accounts.label = _("A_ccounts");
         entries += accounts;
         
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, null,
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, "<Ctrl>E",
             null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
@@ -183,22 +183,24 @@ public class GearyController {
         mark_menu.label = _("_Mark as...");
         entries += mark_menu;
 
-        Gtk.ActionEntry mark_read = { ACTION_MARK_AS_READ, "mail-mark-read", TRANSLATABLE, null, null,
-            on_mark_as_read };
+        Gtk.ActionEntry mark_read = { ACTION_MARK_AS_READ, "mail-mark-read", TRANSLATABLE, "<Ctrl>I",
+            null, on_mark_as_read };
         mark_read.label = _("Mark as _read");
         entries += mark_read;
+        add_accelerator("<Shift>I", ACTION_MARK_AS_READ);
 
-        Gtk.ActionEntry mark_unread = { ACTION_MARK_AS_UNREAD, "mail-mark-unread", TRANSLATABLE, null,
-            null, on_mark_as_unread };
+        Gtk.ActionEntry mark_unread = { ACTION_MARK_AS_UNREAD, "mail-mark-unread", TRANSLATABLE,
+            "<Ctrl>U", null, on_mark_as_unread };
         mark_unread.label = _("Mark as _unread");
         entries += mark_unread;
+        add_accelerator("<Shift>U", ACTION_MARK_AS_UNREAD);
         
-        Gtk.ActionEntry mark_starred = { ACTION_MARK_AS_STARRED, "starred", TRANSLATABLE, null, null,
+        Gtk.ActionEntry mark_starred = { ACTION_MARK_AS_STARRED, "starred", TRANSLATABLE, "S", null,
             on_mark_as_starred };
         mark_starred.label = _("_Star");
         entries += mark_starred;
 
-        Gtk.ActionEntry mark_unstarred = { ACTION_MARK_AS_UNSTARRED, "non-starred", TRANSLATABLE, null,
+        Gtk.ActionEntry mark_unstarred = { ACTION_MARK_AS_UNSTARRED, "non-starred", TRANSLATABLE, "D",
             null, on_mark_as_unstarred };
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
