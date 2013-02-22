@@ -2,6 +2,7 @@
 _Name=Geary Mail
 _GenericName=Mail Client
 _Comment=Send and receive email
+_Keywords=Email;E-mail;Mail
 Icon=geary
 TryExec=geary
 Exec=geary %U

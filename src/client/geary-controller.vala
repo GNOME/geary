@@ -225,16 +225,19 @@ public class GearyController {
 
         Gtk.ActionEntry reply_to_message = { ACTION_REPLY_TO_MESSAGE, null, TRANSLATABLE, "<Ctrl>R",
             null, on_reply_to_message_action };
+        reply_to_message.label = _("_Reply");
         entries += reply_to_message;
         add_accelerator("R", ACTION_REPLY_TO_MESSAGE);
         
         Gtk.ActionEntry reply_all_message = { ACTION_REPLY_ALL_MESSAGE, null, TRANSLATABLE,
             "<Ctrl><Shift>R", null, on_reply_all_message_action };
+        reply_all_message.label = _("Reply _all");
         entries += reply_all_message;
         add_accelerator("<Shift>R", ACTION_REPLY_ALL_MESSAGE);
         
         Gtk.ActionEntry forward_message = { ACTION_FORWARD_MESSAGE, null, TRANSLATABLE, "<Ctrl>L", null,
             on_forward_message_action };
+        forward_message.label = _("_Forward");
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         

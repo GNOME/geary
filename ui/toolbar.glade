@@ -40,7 +40,7 @@
         <property name="tooltip_text" translatable="yes">Reply to sender</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
-        <property name="label" translatable="yes">Reply To</property>
+        <property name="label" translatable="yes">Reply</property>
         <property name="use_underline">True</property>
         <property name="icon_name">mail-reply-sender</property>
       </object>
