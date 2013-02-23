@@ -32,15 +32,24 @@ public class GearyController {
     public const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
-    private const string DELETE_MESSAGE_TOOLTIP = null;
+    private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete the selected conversation");
+    private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete the selected conversations");
     private const string DELETE_MESSAGE_ICON_NAME = "user-trash-full";
     
     private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
-    private const string ARCHIVE_MESSAGE_TOOLTIP = _("Archive the selected conversation");
+    private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive the selected conversation");
+    private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive the selected conversations");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive";
     
     private const string MARK_AS_SPAM_LABEL = _("Mark as s_pam");
     private const string MARK_AS_NOT_SPAM_LABEL = _("Mark as not s_pam");
+    
+    private const string MARK_MESSAGE_MENU_TOOLTIP_SINGLE = _("Mark conversation");
+    private const string MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
+    private const string LABEL_MESSAGE_TOOLTIP_SINGLE = _("Add label to conversation");
+    private const string LABEL_MESSAGE_TOOLTIP_MULTIPLE = _("Add label to conversations");
+    private const string MOVE_MESSAGE_TOOLTIP_SINGLE = _("Move conversation");
+    private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
     
     private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
     
@@ -181,6 +190,7 @@ public class GearyController {
         Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, null, TRANSLATABLE, null, null,
             on_show_mark_menu };
         mark_menu.label = _("_Mark as...");
+        mark_menu.tooltip = MARK_MESSAGE_MENU_TOOLTIP_SINGLE;
         entries += mark_menu;
 
         Gtk.ActionEntry mark_read = { ACTION_MARK_AS_READ, "mail-mark-read", TRANSLATABLE, "<Ctrl>I",
@@ -247,7 +257,7 @@ public class GearyController {
         // until they're known so the "translatable" string doesn't first appear
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
             ARCHIVE_MESSAGE_LABEL, "A", null, on_delete_message };
-        delete_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP;
+        delete_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
         add_accelerator("Delete", ACTION_DELETE_MESSAGE);
         add_accelerator("BackSpace", ACTION_DELETE_MESSAGE);
@@ -340,16 +350,15 @@ public class GearyController {
     // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
     // by other utility methods
     private void update_ui() {
+        update_tooltips();
         Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
         if (current_folder is Geary.FolderSupportsArchive) {
             delete_message.label = ARCHIVE_MESSAGE_LABEL;
-            delete_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP;
             delete_message.icon_name = ARCHIVE_MESSAGE_ICON_NAME;
         } else {
             // even if not Geary.FolderSupportsrRemove, use delete icons and label, although they
             // may be insensitive the entire time
             delete_message.label = DELETE_MESSAGE_LABEL;
-            delete_message.tooltip = DELETE_MESSAGE_TOOLTIP;
             delete_message.icon_name = DELETE_MESSAGE_ICON_NAME;
         }
     }
@@ -1330,6 +1339,8 @@ public class GearyController {
 
     // Disables all single-message buttons and enables all multi-message buttons.
     public void enable_multiple_message_buttons() {
+        update_tooltips();
+        
         // Single message only buttons.
         GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = false;
         GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = false;
@@ -1348,6 +1359,8 @@ public class GearyController {
 
     // Enables or disables the message buttons on the toolbar.
     public void enable_message_buttons(bool sensitive) {
+        update_tooltips();
+        
         GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
@@ -1360,7 +1373,27 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
             sensitive && (current_folder is Geary.FolderSupportsMove);
     }
-
+    
+    // Updates tooltip text depending on number of conversations selected.
+    private void update_tooltips() {
+        bool single = selected_conversations.size == 1;
+        
+        GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).tooltip = single ?
+            MARK_MESSAGE_MENU_TOOLTIP_SINGLE : MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE;
+        GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).tooltip = single ?
+            LABEL_MESSAGE_TOOLTIP_SINGLE : LABEL_MESSAGE_TOOLTIP_MULTIPLE;
+        GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).tooltip = single ?
+            MOVE_MESSAGE_TOOLTIP_SINGLE : MOVE_MESSAGE_TOOLTIP_MULTIPLE;
+        
+        if (current_folder is Geary.FolderSupportsArchive) {
+            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
+                ARCHIVE_MESSAGE_TOOLTIP_SINGLE : ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE;
+        } else {
+            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
+                DELETE_MESSAGE_TOOLTIP_SINGLE : DELETE_MESSAGE_TOOLTIP_MULTIPLE;
+        }
+    }
+    
     public void compose_mailto(string mailto) {
         create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE, new Geary.ComposedEmail.from_mailto(mailto, get_from()));
     }
