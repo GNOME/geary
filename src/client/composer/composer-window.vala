@@ -522,6 +522,7 @@ public class ComposerWindow : Gtk.Window {
     public bool should_close() {
         // TODO: Check if the message was (automatically) saved
         if (editor.can_undo()) {
+            present();
             ConfirmationDialog dialog = new ConfirmationDialog(this,
                 _("Do you want to discard the unsaved message?"), null, Gtk.Stock.DISCARD);
             if (dialog.run() != Gtk.ResponseType.OK)
