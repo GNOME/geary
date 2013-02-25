@@ -25,19 +25,56 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     }
     
     protected override void post_upgrade(int version) {
-        if (version == 5) {
-            try {
-                Db.Result result = query("SELECT sender, from_field, to_field, cc, bcc FROM MessageTable");
-                while (!result.finished) {
-                    MessageAddresses message_addresses =
-                        new MessageAddresses.from_result(account_owner_email, result);
-                    foreach (Contact contact in message_addresses.contacts)
-                        do_update_contact_importance(get_master_connection(), contact);
-                    result.next();
-                }
-            } catch (Error err) {
-                debug("Error population autocompletion table during upgrade to database schema 5");
+        switch (version) {
+            case 5:
+                post_upgrade_populate_autocomplete();
+            break;
+            
+            case 6:
+                post_upgrade_encode_folder_names();
+            break;
+        }
+    }
+    
+    // Version 5.
+    private void post_upgrade_populate_autocomplete() {
+        try {
+            Db.Result result = query("SELECT sender, from_field, to_field, cc, bcc FROM MessageTable");
+            while (!result.finished) {
+                MessageAddresses message_addresses =
+                    new MessageAddresses.from_result(account_owner_email, result);
+                foreach (Contact contact in message_addresses.contacts)
+                    do_update_contact_importance(get_master_connection(), contact);
+                result.next();
             }
+        } catch (Error err) {
+            debug("Error populating autocompletion table during upgrade to database schema 5");
+        }
+    }
+    
+    // Version 6.
+    private void post_upgrade_encode_folder_names() {
+        try {
+            Db.Result select = query("SELECT id, name FROM FolderTable");
+            while (!select.finished) {
+                int64 id = select.int64_at(0);
+                string encoded_name = select.string_at(1);
+                
+                try {
+                    string canonical_name = Geary.ImapUtf7.imap_utf7_to_utf8(encoded_name);
+                    
+                    Db.Statement update = prepare("UPDATE FolderTable SET name=? WHERE id=?");
+                    update.bind_string(0, canonical_name);
+                    update.bind_int64(1, id);
+                    update.exec();
+                } catch (Error e) {
+                    debug("Error renaming folder %s to its canonical representation: %s", encoded_name, e.message);
+                }
+                
+                select.next();
+            }
+        } catch (Error e) {
+            debug("Error decoding folder names during upgrade to database schema 6: %s", e.message);
         }
     }
     

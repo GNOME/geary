@@ -604,7 +604,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
 
-        yield context.session.send_command_async(new CopyCommand(msg_set, destination.to_string()),
+        yield context.session.send_command_async(
+            new CopyCommand(msg_set, new Geary.Imap.MailboxParameter(destination.to_string())),
             cancellable);
     }
 

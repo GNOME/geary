@@ -81,6 +81,7 @@ engine/imap/message/imap-data-format.vala
 engine/imap/message/imap-fetch-data-type.vala
 engine/imap/message/imap-fetch-body-data-type.vala
 engine/imap/message/imap-flag.vala
+engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-set.vala
 engine/imap/message/imap-parameter.vala
@@ -184,6 +185,7 @@ engine/util/util-converter.vala
 engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
+engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
 engine/util/util-interfaces.vala
 engine/util/util-memory.vala

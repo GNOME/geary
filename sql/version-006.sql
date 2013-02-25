@@ -1,0 +1,7 @@
+--
+-- Dummy database upgrade to fix folder names being stored in encoded form.
+-- Before this version, all folder names are stored as they came off the wire.
+-- After this version, all folder names are stored in canonical UTF-8 form.
+-- See src/engine/imap-db/imap-db-database.vala in post_upgrade() for the code
+-- that runs the upgrade.
+--

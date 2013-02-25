@@ -87,10 +87,10 @@ public class Geary.Imap.ClientSession {
     }
     
     private class SelectParams : AsyncParams {
-        public string mailbox;
+        public Geary.Imap.MailboxParameter mailbox;
         public bool is_select;
         
-        public SelectParams(string mailbox, bool is_select, Cancellable? cancellable, SourceFunc cb) {
+        public SelectParams(Geary.Imap.MailboxParameter mailbox, bool is_select, Cancellable? cancellable, SourceFunc cb) {
             base (cancellable, cb);
             
             this.mailbox = mailbox;
@@ -908,8 +908,8 @@ public class Geary.Imap.ClientSession {
         Cancellable? cancellable) throws Error {
         string? old_mailbox = current_mailbox;
         
-        SelectParams params = new SelectParams(mailbox, is_select, cancellable,
-            select_examine_async.callback);
+        SelectParams params = new SelectParams(new Geary.Imap.MailboxParameter(mailbox),
+            is_select, cancellable, select_examine_async.callback);
         fsm.issue(Event.SELECT, null, params);
         
         if (params.do_yield)
@@ -932,7 +932,7 @@ public class Geary.Imap.ClientSession {
         
         SelectParams params = (SelectParams) object;
         
-        if (current_mailbox != null && current_mailbox == params.mailbox)
+        if (current_mailbox != null && current_mailbox == params.mailbox.decode())
             return state;
         
         // TODO: Currently don't handle situation where one mailbox is selected and another is
@@ -968,7 +968,7 @@ public class Geary.Imap.ClientSession {
         SelectParams params = (SelectParams) object;
         
         assert(current_mailbox == null);
-        current_mailbox = params.mailbox;
+        current_mailbox = params.mailbox.decode();
         current_mailbox_readonly = !params.is_select;
         
         return State.SELECTED;

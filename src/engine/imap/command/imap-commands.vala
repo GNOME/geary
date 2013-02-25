@@ -62,28 +62,28 @@ public class Geary.Imap.ListCommand : Command {
     public const string NAME = "list";
     public const string XLIST_NAME = "xlist";
     
-    public ListCommand(string mailbox, bool use_xlist) {
-        base (use_xlist ? XLIST_NAME : NAME, { "", mailbox });
+    public ListCommand(Geary.Imap.MailboxParameter mailbox, bool use_xlist) {
+        base (use_xlist ? XLIST_NAME : NAME, { "", mailbox.value });
     }
     
-    public ListCommand.wildcarded(string reference, string mailbox, bool use_xlist) {
-        base (use_xlist ? XLIST_NAME : NAME, { reference, mailbox });
+    public ListCommand.wildcarded(string reference, Geary.Imap.MailboxParameter mailbox, bool use_xlist) {
+        base (use_xlist ? XLIST_NAME : NAME, { reference, mailbox.value });
     }
 }
 
 public class Geary.Imap.ExamineCommand : Command {
     public const string NAME = "examine";
     
-    public ExamineCommand(string mailbox) {
-        base (NAME, { mailbox });
+    public ExamineCommand(Geary.Imap.MailboxParameter mailbox) {
+        base (NAME, { mailbox.value });
     }
 }
 
 public class Geary.Imap.SelectCommand : Command {
     public const string NAME = "select";
     
-    public SelectCommand(string mailbox) {
-        base (NAME, { mailbox });
+    public SelectCommand(Geary.Imap.MailboxParameter mailbox) {
+        base (NAME, { mailbox.value });
     }
 }
 
@@ -98,10 +98,10 @@ public class Geary.Imap.CloseCommand : Command {
 public class Geary.Imap.StatusCommand : Command {
     public const string NAME = "status";
     
-    public StatusCommand(string mailbox, StatusDataType[] data_items) {
+    public StatusCommand(Geary.Imap.MailboxParameter mailbox, StatusDataType[] data_items) {
         base (NAME);
         
-        add(new StringParameter(mailbox));
+        add(mailbox);
         
         assert(data_items.length > 0);
         ListParameter data_item_list = new ListParameter(this);
@@ -161,11 +161,11 @@ public class Geary.Imap.CopyCommand : Command {
     public const string NAME = "copy";
     public const string UID_NAME = "uid copy";
 
-    public CopyCommand(MessageSet message_set, string destination) {
+    public CopyCommand(MessageSet message_set, Geary.Imap.MailboxParameter destination) {
         base (message_set.is_uid ? UID_NAME : NAME);
 
         add(message_set.to_parameter());
-        add(new StringParameter(destination));
+        add(destination);
     }
 }
 

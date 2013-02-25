@@ -58,7 +58,7 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
     private Gee.List<MailboxInformation> list;
     private Gee.Map<string, MailboxInformation> map;
     
-    public ListResults(StatusResponse status_response, Gee.Map<string, MailboxInformation> map,
+    private ListResults(StatusResponse status_response, Gee.Map<string, MailboxInformation> map,
         Gee.List<MailboxInformation> list) {
         base (status_response);
         
@@ -76,7 +76,7 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                 StringParameter cmd = data.get_as_string(1);
                 ListParameter attrs = data.get_as_list(2);
                 StringParameter? delim = data.get_as_nullable_string(3);
-                StringParameter mailbox = data.get_as_string(4);
+                MailboxParameter mailbox = new MailboxParameter.from_string_parameter(data.get_as_string(4));
                 
                 if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(ListCommand.XLIST_NAME)) {
                     debug("Bad list response \"%s\": Not marked as list or xlist response",
@@ -105,11 +105,11 @@ public class Geary.Imap.ListResults : Geary.Imap.CommandResults {
                     info = new MailboxInformation(Geary.Imap.Account.INBOX_NAME,
                         (delim != null) ? delim.nullable_value : null, attributes);
                 } else {
-                    info = new MailboxInformation(mailbox.value,
+                    info = new MailboxInformation(mailbox.decode(),
                         (delim != null) ? delim.nullable_value : null, attributes);
                 }
                 
-                map.set(mailbox.value, info);
+                map.set(mailbox.decode(), info);
                 list.add(info);
             } catch (ImapError ierr) {
                 debug("Unable to decode \"%s\": %s", data.to_string(), ierr.message);

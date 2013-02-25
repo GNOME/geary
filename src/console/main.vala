@@ -390,8 +390,8 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
         status("Listing...");
-        cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(args[0], args[1], (cmd.down() == "xlist")),
-            null, on_list);
+        cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(args[0],
+            new Geary.Imap.MailboxParameter(args[1]), (cmd.down() == "xlist")), null, on_list);
     }
     
     private void on_list(Object? source, AsyncResult result) {
@@ -407,7 +407,8 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 1, "<mailbox>");
         
         status("Opening %s read-only".printf(args[0]));
-        cx.send_async.begin(new Geary.Imap.ExamineCommand(args[0]), null, on_examine);
+        cx.send_async.begin(new Geary.Imap.ExamineCommand(new Geary.Imap.MailboxParameter(args[0])),
+            null, on_examine);
     }
     
     private void on_examine(Object? source, AsyncResult result) {
@@ -485,7 +486,8 @@ class ImapConsole : Gtk.Window {
         for (int ctr = 1; ctr < args.length; ctr++)
             data_items += Geary.Imap.StatusDataType.decode(args[ctr]);
         
-        cx.send_async.begin(new Geary.Imap.StatusCommand(args[0], data_items), null, on_get_status);
+        cx.send_async.begin(new Geary.Imap.StatusCommand(new Geary.Imap.MailboxParameter(args[0]),
+            data_items), null, on_get_status);
     }
     
     private void on_get_status(Object? source, AsyncResult result) {

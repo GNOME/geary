@@ -21,7 +21,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
      */
     public int unseen { get; private set; }
     
-    public StatusResults(StatusResponse status_response, string mailbox, int messages, int recent,
+    private StatusResults(StatusResponse status_response, string mailbox, int messages, int recent,
         UID? uid_next, UIDValidity? uid_validity, int unseen) {
         base (status_response);
         
@@ -43,7 +43,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
         
         ServerData data = response.server_data[0];
         StringParameter cmd = data.get_as_string(1);
-        StringParameter mailbox = data.get_as_string(2);
+        MailboxParameter mailbox = new MailboxParameter.from_string_parameter(data.get_as_string(2));
         ListParameter values = data.get_as_list(3);
         
         if (!cmd.equals_ci(StatusCommand.NAME)) {
@@ -93,7 +93,7 @@ public class Geary.Imap.StatusResults : Geary.Imap.CommandResults {
             }
         }
         
-        return new StatusResults(response.status_response, mailbox.value, messages, recent, uid_next,
+        return new StatusResults(response.status_response, mailbox.decode(), messages, recent, uid_next,
             uid_validity, unseen);
     }
 }
