@@ -990,7 +990,7 @@ public class ComposerWindow : Gtk.Window {
         redo.related_action = actions.get_action(ACTION_REDO);
         context_menu.append(redo);
         
-        context_menu.append(new Gtk.MenuItem());
+        context_menu.append(new Gtk.SeparatorMenuItem());
         
         // Cut
         Gtk.MenuItem cut = new Gtk.ImageMenuItem();
@@ -1017,7 +1017,7 @@ public class ComposerWindow : Gtk.Window {
         paste_format.related_action = actions.get_action(ACTION_PASTE_FORMAT);
         context_menu.append(paste_format);
         
-        context_menu.append(new Gtk.MenuItem());
+        context_menu.append(new Gtk.SeparatorMenuItem());
         
         // Select all.
         Gtk.MenuItem select_all_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.SELECT_ALL, null);
