@@ -90,6 +90,10 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
                                     ok_response.response_code.get_as_list(1));
                             break;
                             
+                            case ResponseCodeType.MYRIGHTS:
+                                // not implemented
+                            break;
+                            
                             default:
                                 message("Unknown line in SELECT/EXAMINE response: \"%s\"", data.to_string());
                             break;
