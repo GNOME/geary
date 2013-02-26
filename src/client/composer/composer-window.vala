@@ -563,7 +563,7 @@ public class ComposerWindow : Gtk.Window {
     
     private bool should_send() {
         if (Geary.String.is_empty(subject.strip()) ||
-            ((Geary.String.is_empty(get_text()) && attachment_files.size == 0))) {
+            ((Geary.String.is_empty(get_html()) && attachment_files.size == 0))) {
             ConfirmationDialog dialog = new ConfirmationDialog(this,
                 _("Send message with an empty subject and/or body?"), null, Gtk.Stock.OK);
             if (dialog.run() != Gtk.ResponseType.OK)
@@ -1002,7 +1002,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private string get_text() {
-        return editor.get_dom_document().get_body().get_inner_text();
+        return html_to_flowed_text(editor.get_dom_document());
     }
     
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,

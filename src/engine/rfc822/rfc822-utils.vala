@@ -6,6 +6,10 @@
 
 namespace Geary.RFC822.Utils {
 
+// We use DEL to mark quote levels, since it's unlikely to be in email bodies, is a single byte
+// in UTF-8, and is unmolested by GMime.FilterHTML.
+public const char QUOTE_MARKER = '\x7f';
+
 public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses,
     bool html_format) {
     

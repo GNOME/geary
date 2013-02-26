@@ -111,7 +111,7 @@ public class Geary.RFC822.Message : Object {
                 GMime.ContentEncoding.DEFAULT);
             
             body_text = new GMime.Part();
-            body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8"));
+            body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8; format=flowed"));
             body_text.set_content_object(content);
         }
         
