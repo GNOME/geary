@@ -504,13 +504,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
+        if (open_count == 0 || --open_count > 0)
+            return;
+        
         yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, cancellable);
     }
     
+    // NOTE: This bypasses open_count and forces the Folder closed.
     private async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
         Cancellable? cancellable) {
-        if (open_count == 0 || --open_count > 0)
-            return;
+        // force closed
+        open_count = 0;
         
         // Notify all callers waiting for the remote folder that it's not coming available
         Imap.Folder? closing_remote_folder = remote_folder;
