@@ -36,13 +36,13 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         // If EmailIdentifier has already been built, it can be supplied rather then auto-created
         // by LocationIdentifier
         public LocationIdentifier(int64 message_id, int position, int64 ordering,
-            Geary.EmailIdentifier? email_id) {
+            Geary.FolderPath path, Geary.EmailIdentifier? email_id) {
             assert(position >= 1);
             
             this.message_id = message_id;
             this.position = position;
             this.ordering = ordering;
-            this.email_id = email_id ?? new Imap.EmailIdentifier(new Imap.UID(ordering));
+            this.email_id = email_id ?? new Imap.EmailIdentifier(new Imap.UID(ordering), path);
             
             // verify that the EmailIdentifier and ordering are pointing to the same thing
             assert(this.email_id.ordering == this.ordering);
@@ -298,7 +298,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             int position = low;
             do {
                 LocationIdentifier location = new LocationIdentifier(results.rowid_at(0), position++,
-                    results.int64_at(1), null);
+                    results.int64_at(1), path, null);
                 if (!flags.include_marked_for_remove() && is_marked_removed(location.email_id))
                     continue;
                 
@@ -383,7 +383,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             int position = -1;
             do {
                 int64 ordering = results.int64_at(1);
-                Geary.EmailIdentifier email_id = new Imap.EmailIdentifier(new Imap.UID(ordering));
+                Geary.EmailIdentifier email_id = new Imap.EmailIdentifier(new Imap.UID(ordering), path);
                 
                 // get position of first message and roll from there
                 if (position == -1) {
@@ -392,7 +392,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 }
                 
                 LocationIdentifier location = new LocationIdentifier(results.rowid_at(0), position++,
-                    ordering, email_id);
+                    ordering, path, email_id);
                 if (!flags.include_marked_for_remove() && is_marked_removed(location.email_id)) {
                     // don't count this in the positional addressing
                     position--;
@@ -427,7 +427,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 return Db.TransactionOutcome.DONE;
             
             LocationIdentifier location = new LocationIdentifier(message_id, position, id.ordering,
-                null);
+                path, null);
             if (!flags.include_marked_for_remove() && is_marked_removed(location.email_id))
                 return Db.TransactionOutcome.DONE;
             
@@ -889,17 +889,17 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
     
     // Throws EngineError.NOT_FOUND if message_id is invalid.  Note that this does not verify that
     // the message is indeed in this folder.
-    private static MessageRow do_fetch_message_row(Db.Connection cx, int64 message_id,
-        Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
+    internal static MessageRow do_fetch_message_row(Db.Connection cx, int64 message_id,
+        Geary.Email.Field requested_fields, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare(
-            "SELECT %s FROM MessageTable WHERE id=?".printf(fields_to_columns(required_fields)));
+            "SELECT %s FROM MessageTable WHERE id=?".printf(fields_to_columns(requested_fields)));
         stmt.bind_rowid(0, message_id);
         
         Db.Result results = stmt.exec(cancellable);
         if (results.finished)
             throw new EngineError.NOT_FOUND("No message ID %s found in database", message_id.to_string());
         
-        return new MessageRow.from_result(required_fields, results);
+        return new MessageRow.from_result(requested_fields, results);
     }
     
     private Geary.Email do_location_to_email(Db.Connection cx, LocationIdentifier location,

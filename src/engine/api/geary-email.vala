@@ -151,8 +151,6 @@ public class Geary.Email : Object {
     private Geary.RFC822.Message? message = null;
     
     public Email(int position, Geary.EmailIdentifier id) {
-        assert(position >= 1);
-        
         this.position = position;
         this.id = id;
     }

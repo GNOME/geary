@@ -75,6 +75,10 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
     
+    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath>? folder_blacklist, Cancellable? cancellable = null) throws Error;
+    
     public virtual string to_string() {
         return name;
     }

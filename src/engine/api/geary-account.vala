@@ -156,6 +156,18 @@ public interface Geary.Account : Object {
      */
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
+    
+    /**
+     * Search the local account for emails with a matching Message-ID header.
+     * Fetch the requested fields, optionally ignoring emails that don't have
+     * the requested fields set.  Don't include any of the blacklisted folders
+     * in the result.  Return a map of Email object to a list of FolderPaths
+     * it's in, which can be null if it's in no folders (note that emails only
+     * in blacklisted folders won't show up at all).
+     */
+    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath>? folder_blacklist, Cancellable? cancellable = null) throws Error;
 
     /**
      * Used only for debugging.  Should not be used for user-visible strings.

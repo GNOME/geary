@@ -486,6 +486,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         notify_email_sent(rfc822);
     }
     
+    public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath>? folder_blacklist, Cancellable? cancellable = null) throws Error {
+        return yield local.search_message_id_async(
+            message_id, requested_fields, partial_ok, folder_blacklist, cancellable);
+    }
+    
     private void on_login_failed(Geary.Credentials? credentials) {
         do_login_failed_async.begin(credentials);
     }

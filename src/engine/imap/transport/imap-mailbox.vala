@@ -27,6 +27,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     public UID? uid_next { get { return context.uid_next; } }
     
     private SelectedContext context;
+    private Geary.FolderPath folder_path;
     
     public signal void exists_altered(int old_exists, int new_exists);
     
@@ -40,10 +41,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     public signal void disconnected(Geary.Folder.CloseReason reason);
     
-    internal Mailbox(SelectedContext context) {
+    internal Mailbox(SelectedContext context, Geary.FolderPath folder_path) {
         base (context);
         
         this.context = context;
+        this.folder_path = folder_path;
         
         context.closed.connect(on_closed);
         context.disconnected.connect(on_disconnected);
@@ -76,7 +78,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         UID? uid = results.get_data(FetchDataType.UID) as UID;
         assert(uid != null);
         
-        Geary.Email email = new Geary.Email(results.msg_num, new Geary.Imap.EmailIdentifier(uid));
+        Geary.Email email = new Geary.Email(results.msg_num,
+            new Geary.Imap.EmailIdentifier(uid, folder_path));
         msgs.add(email);
         pos_map.set(email.position, email);
         
@@ -590,7 +593,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             if (msg_flags != null) {
                 Geary.Imap.EmailFlags email_flags = new Geary.Imap.EmailFlags(msg_flags);
                 
-                map.set(new Geary.Imap.EmailIdentifier(uid) , email_flags);
+                map.set(new Geary.Imap.EmailIdentifier(uid, folder_path) , email_flags);
             } else {
                 debug("No flags returned");
             }

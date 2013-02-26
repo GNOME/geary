@@ -6,11 +6,13 @@
 
 private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
     public Imap.UID uid { get; private set; }
+    public Geary.FolderPath folder_path { get; private set; }
     
-    public EmailIdentifier(Imap.UID uid) {
+    public EmailIdentifier(Imap.UID uid, Geary.FolderPath folder_path) {
         base (uid.value);
         
         this.uid = uid;
+        this.folder_path = folder_path;
     }
     
     public override uint to_hash() {
@@ -25,7 +27,7 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
         if (this == other)
             return true;
         
-        return uid.equals(other.uid);
+        return uid.equals(other.uid) && folder_path.equals(other.folder_path);
     }
     
     public override string to_string() {

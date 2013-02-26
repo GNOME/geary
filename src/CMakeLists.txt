@@ -108,6 +108,7 @@ engine/imap/transport/imap-serializer.vala
 engine/imap-db/imap-db-account.vala
 engine/imap-db/imap-db-contact.vala
 engine/imap-db/imap-db-database.vala
+engine/imap-db/imap-db-email-identifier.vala
 engine/imap-db/imap-db-folder.vala
 engine/imap-db/imap-db-message-addresses.vala
 engine/imap-db/imap-db-message-row.vala

@@ -408,6 +408,46 @@ private class Geary.ImapDB.Account : Object {
         folder_refs.unset(folder_ref.path);
     }
     
+    public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath>? folder_blacklist, Cancellable? cancellable = null) throws Error {
+        Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
+            = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
+        
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id=?");
+            stmt.bind_string(0, message_id.to_string());
+            Db.Result result = stmt.exec(cancellable);
+            
+            while (!result.finished) {
+                int64 id = result.int64_at(0);
+                MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                    cx, id, requested_fields, cancellable);
+                
+                // Ignore any messages that don't have the required fields.
+                if (partial_ok || row.fields.fulfills(requested_fields)) {
+                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    
+                    Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, cancellable);
+                    if (folders == null) {
+                        messages.set(email, null);
+                    } else {
+                        foreach (Geary.FolderPath path in folders) {
+                            if (folder_blacklist == null || !folder_blacklist.contains(path))
+                                messages.set(email, path);
+                        }
+                    }
+                }
+                
+                result.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return (messages.size == 0 ? null : messages);
+    }
+    
     private void clear_duplicate_folders() {
         int count = 0;
         
@@ -528,6 +568,61 @@ private class Geary.ImapDB.Account : Object {
         }
         
         return do_fetch_folder_id(cx, path.get_parent(), create, out parent_id, cancellable);
+    }
+    
+    // For a message row id, return a set of all folders it's in, or null if
+    // it's not in any folders.
+    private Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
+        Cancellable? cancellable) throws Error {
+        Db.Statement stmt = cx.prepare("SELECT folder_id FROM MessageLocationTable WHERE message_id=?");
+        stmt.bind_int64(0, message_id);
+        Db.Result result = stmt.exec(cancellable);
+        
+        if (result.finished)
+            return null;
+        
+        Gee.HashSet<Geary.FolderPath> folder_paths = new Gee.HashSet<Geary.FolderPath>();
+        while (!result.finished) {
+            int64 folder_id = result.int64_at(0);
+            Geary.FolderPath? path = do_find_folder_path(cx, folder_id, cancellable);
+            if (path != null)
+                folder_paths.add(path);
+            
+            result.next(cancellable);
+        }
+        
+        return (folder_paths.size == 0 ? null : folder_paths);
+    }
+    
+    // For a folder row id, return the folder path (constructed with default
+    // separator and case sensitivity) of that folder, or null in the event
+    // it's not found.
+    private Geary.FolderPath? do_find_folder_path(Db.Connection cx, int64 folder_id,
+        Cancellable? cancellable) throws Error {
+        Db.Statement stmt = cx.prepare("SELECT parent_id, name FROM FolderTable WHERE id=?");
+        stmt.bind_int64(0, folder_id);
+        Db.Result result = stmt.exec(cancellable);
+        
+        if (result.finished)
+            return null;
+        
+        int64 parent_id = result.int64_at(0);
+        string name = result.string_at(1);
+        
+        // Here too, one level of loop detection is better than nothing.
+        if (folder_id == parent_id) {
+            warning("Loop found in database: parent of %s is %s in FolderTable",
+                folder_id.to_string(), parent_id.to_string());
+            return null;
+        }
+        
+        if (parent_id <= 0) {
+            return new Geary.FolderRoot(name,
+                Geary.Imap.Account.ASSUMED_SEPARATOR, Geary.Imap.Folder.CASE_SENSITIVE);
+        }
+        
+        Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
+        return (parent_path == null ? null : parent_path.get_child(name));
     }
     
     private void do_update_last_seen_total(Db.Connection cx, int64 parent_id, string name, int total,

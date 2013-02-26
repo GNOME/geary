@@ -146,7 +146,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return true;
         }
         
-        Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid);
+        Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid, get_path());
         
         // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
         Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(

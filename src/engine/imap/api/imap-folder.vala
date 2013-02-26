@@ -54,7 +54,7 @@ private class Geary.Imap.Folder : Object {
         if (mailbox != null)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
-        mailbox = yield session_mgr.select_examine_mailbox(path.get_fullpath(info.delim), !readonly,
+        mailbox = yield session_mgr.select_examine_mailbox(path, info.delim, !readonly,
             cancellable);
         
         // update with new information

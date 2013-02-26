@@ -174,18 +174,21 @@ public class Geary.Imap.ClientSessionManager {
         return results;
     }
     
-    public async Mailbox select_mailbox(string path, Cancellable? cancellable = null) throws Error {
-        return yield select_examine_mailbox(path, true, cancellable);
-    }
-    
-    public async Mailbox examine_mailbox(string path, Cancellable? cancellable = null) throws Error {
-        return yield select_examine_mailbox(path, false, cancellable);
-    }
-    
-    public async Mailbox select_examine_mailbox(string path, bool is_select,
+    public async Mailbox select_mailbox(Geary.FolderPath path, string? delim,
         Cancellable? cancellable = null) throws Error {
+        return yield select_examine_mailbox(path, delim, true, cancellable);
+    }
+    
+    public async Mailbox examine_mailbox(Geary.FolderPath path, string? delim,
+        Cancellable? cancellable = null) throws Error {
+        return yield select_examine_mailbox(path, delim, false, cancellable);
+    }
+    
+    public async Mailbox select_examine_mailbox(Geary.FolderPath path, string? delim,
+        bool is_select, Cancellable? cancellable = null) throws Error {
         Gee.HashSet<SelectedContext> contexts = is_select ? selected_contexts : examined_contexts;
-        SelectedContext new_context = yield select_examine_async(path, is_select, cancellable);
+        SelectedContext new_context = yield select_examine_async(
+            path.get_fullpath(delim), is_select, cancellable);
         
         if (!contexts.contains(new_context)) {
             // Can't use the ternary operator due to this bug:
@@ -199,7 +202,7 @@ public class Geary.Imap.ClientSessionManager {
             assert(added);
         }
         
-        return new Mailbox(new_context);
+        return new Mailbox(new_context, path);
     }
     
     private void on_selected_context_freed(Geary.ReferenceSemantics semantics) {
