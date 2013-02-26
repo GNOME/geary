@@ -144,7 +144,7 @@
     </child>
     <child>
       <object class="GtkToggleAction" id="compose as html">
-        <property name="label" translatable="yes">Rich text</property>
+        <property name="label" translatable="yes">Rich Text</property>
       </object>
     </child>
   </object>
