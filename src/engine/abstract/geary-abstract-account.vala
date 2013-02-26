@@ -24,6 +24,10 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
         folders_added_removed(added, removed);
     }
     
+    protected virtual void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered) {
+        folders_contents_altered(altered);
+    }
+    
     protected virtual void notify_opened() {
         opened();
     }

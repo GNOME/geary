@@ -9,6 +9,8 @@ public class Geary.Imap.EmailProperties : Geary.EmailProperties, Equalable {
     public RFC822.Size? rfc822_size { get; private set; }
     
     public EmailProperties(InternalDate? internaldate, RFC822.Size? rfc822_size) {
+        base (internaldate.value, rfc822_size.value);
+        
         this.internaldate = internaldate;
         this.rfc822_size = rfc822_size;
     }

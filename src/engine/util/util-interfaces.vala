@@ -8,10 +8,19 @@ public interface Geary.Comparable {
     public abstract int compare(Comparable other);
     
     /**
-     * A CompareFunc for any object that implements Comparable.
+     * A CompareFunc for any object that implements Comparable
+     * (ascending order).
      */
     public static int compare_func(void *a, void *b) {
         return ((Comparable *) a)->compare((Comparable *) b);
+    }
+    
+    /**
+     * A reverse CompareFunc for any object that implements
+     * Comparable (descending order).
+     */
+    public static int reverse_compare_func(void *a, void *b) {
+        return ((Comparable *) b)->compare((Comparable *) a);
     }
     
     /**

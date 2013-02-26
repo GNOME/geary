@@ -101,10 +101,31 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         
         Folder.normalize_span_specifiers(ref low, ref count, usable_remote_count);
         
-        // calculate local availability
-        int local_low = GenericFolder.remote_position_to_local_position(low, local_count, usable_remote_count);
-        int local_available_low = local_low.clamp(1, local_count);
-        int local_available_count = (local_low > 0) ? (count - local_low) + 1 : (count + local_low) - 1;
+        //
+        // Convert the requested low/count values into values that correspond do the number of
+        // emails in the database and their lowest position value relative to the remote's list.
+        //
+        
+        // convert remote low position to the low position relative to the database's contents ...
+        // this can return zero or a negative value if the position is not present in the local store
+        int local_low = GenericFolder.remote_position_to_local_position(low, local_count,
+            usable_remote_count);
+        
+        // from local_low and the user's request count, calculate the low position in the database
+        // for what is available (again, can be zero if nothing is available in the database)
+        int local_available_low = 0;
+        if (local_low >= 1)
+            local_available_low = local_low;
+        else if ((local_low + count) >= 1)
+            local_available_low = 1;
+        
+        // finally, determine how much in the requested span is available locally, if any
+        int local_available_count;
+        if (local_low >= 1)
+            local_available_count = (local_count - local_low) + 1;
+        else
+            local_available_count = count + local_low;
+        local_available_count = local_available_count.clamp(0, count);
         
         Logging.debug(Logging.Flag.REPLAY,
             "ListEmail.replay_local_async %s: low=%d count=%d local_low=%d local_count=%d "
@@ -114,7 +135,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
             local_available_count, remote_count, last_seen_remote_count,
             usable_remote_count, local_only.to_string(), remote_only.to_string());
         
-        if (!remote_only && local_available_count > 0) {
+        if (!remote_only && local_available_count > 0 && local_available_low > 0) {
             try {
                 local_list = yield engine.local_folder.list_email_async(local_available_low,
                     local_available_count, required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK,
@@ -145,6 +166,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
                 } else {
                     // strip fulfilled fields so only remaining are fetched from server
                     Geary.Email.Field remaining = required_fields.clear(email.fields);
+                    assert(remaining != Geary.Email.Field.NONE);
                     unfulfilled.set(remaining, email.id);
                 }
             }
@@ -258,7 +280,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
             }
         }
         
-        Logging.debug(Logging.Flag.REPLAY, "ListEmail.replay_remote %s: Scheduling %d FETCH operations",
+        Logging.debug(Logging.Flag.REPLAY, "ListEmail.replay_remote %s: Scheduling %d partial list operations",
             engine.to_string(), batch.size);
         
         yield batch.execute_all_async(cancellable);

@@ -30,7 +30,8 @@ public class Geary.Email : Object {
         FLAGS =             1 << 9,
         
         ENVELOPE =          DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT,
-        ALL =               0xFFFFFFFF;
+        ALL =               DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT | HEADER | BODY
+                            | PROPERTIES | PREVIEW | FLAGS;
         
         public static Field[] all() {
             return {
@@ -381,6 +382,60 @@ public class Geary.Email : Object {
      */
     public static int compare_id_descending(void* a, void *b) {
         return compare_id_ascending(b, a);
+    }
+    
+    /**
+     * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
+     * compared by EmailIdentifier.
+     */
+    public static int compare_size_ascending(void *a, void *b) {
+        Geary.EmailProperties? aprop = (Geary.EmailProperties) ((Geary.Email *) a)->properties;
+        Geary.EmailProperties? bprop = (Geary.EmailProperties) ((Geary.Email *) b)->properties;
+        
+        if (aprop == null || bprop == null)
+            return compare_id_ascending(a, b);
+        
+        long asize = aprop.total_bytes;
+        long bsize = bprop.total_bytes;
+        
+        if (asize < bsize)
+            return -1;
+        else if (asize > bsize)
+            return 1;
+        else
+            return compare_id_ascending(a, b);
+    }
+    
+    /**
+     * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
+     * compared by EmailIdentifier.
+     */
+    public static int compare_size_descending(void *a, void *b) {
+        return compare_size_ascending(b, a);
+    }
+    
+    /**
+     * CompareFunc to sort Email by EmailProperties.date_received.  If not available, emails are
+     * compared by EmailIdentifier.
+     */
+    public static int compare_date_received_ascending(void *a, void *b) {
+        Geary.Email aemail = (Geary.Email) a;
+        Geary.Email bemail = (Geary.Email) b;
+        
+        if (aemail.properties == null || bemail.properties == null)
+            return compare_id_ascending(a, b);
+        
+        int cmp = aemail.properties.date_received.compare(bemail.properties.date_received);
+        
+        return (cmp != 0) ? cmp : compare_id_ascending(a, b);
+    }
+    
+    /**
+     * CompareFunc to sort Email by EmailProperties.date_received.  If not available, emails are
+     * compared by EmailIdentifier.
+     */
+    public static int compare_date_received_descending(void *a, void *b) {
+        return compare_date_received_ascending(b, a);
     }
 }
 

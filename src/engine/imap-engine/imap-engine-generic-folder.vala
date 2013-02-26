@@ -11,18 +11,19 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private const Geary.Email.Field NORMALIZATION_FIELDS =
         Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
-    private weak GenericAccount _account;
     public override Account account { get { return _account; } }
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
+    internal EmailPrefetcher email_prefetcher { get; private set; }
     
+    
+    private weak GenericAccount _account;
     private Imap.Account remote;
     private ImapDB.Account local;
     private EmailFlagWatcher email_flag_watcher;
-    private EmailPrefetcher email_prefetcher;
     private SpecialFolderType special_folder_type;
-    private bool opened = false;
-    private NonblockingReportingSemaphore<bool> remote_semaphore;
+    private int open_count = 0;
+    private NonblockingReportingSemaphore<bool>? remote_semaphore = null;
     private ReplayQueue? replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     private int remote_count = -1;
@@ -42,12 +43,22 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     ~EngineFolder() {
-        if (opened)
+        if (open_count > 0)
             warning("Folder %s destroyed without closing", to_string());
     }
     
     public override Geary.FolderPath get_path() {
         return local_folder.get_path();
+    }
+    
+    public override Geary.FolderProperties get_properties() {
+        // Get properties in order of authoritativeness:
+        // - From open remote folder
+        // - Fetch from local store
+        if (remote_folder != null && get_open_state() == OpenState.BOTH)
+            return remote_folder.get_properties();
+        
+        return local_folder.get_properties();
     }
     
     public override Geary.SpecialFolderType get_special_folder_type() {
@@ -64,33 +75,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         notify_special_folder_type_changed(old_type, new_type);
     }
     
-    private Imap.FolderProperties? get_folder_properties() {
-        Imap.FolderProperties? properties = null;
-        
-        // Get properties in order of authoritativeness:
-        // - Ask open remote folder
-        // - Query account object if it's seen them in its traversals
-        // - Fetch from local store
-        if (remote_folder != null)
-            properties = remote_folder.get_properties();
-        
-        if (properties == null)
-            properties = _account.get_properties_for_folder(local_folder.get_path());
-        
-        if (properties == null)
-            properties = local_folder.get_properties();
-        
-        return properties;
-    }
-    
-    public override Geary.Trillian has_children() {
-        Imap.FolderProperties? properties = get_folder_properties();
-        
-        return (properties != null) ? properties.has_children : Trillian.UNKNOWN;
-    }
-    
     public override Geary.Folder.OpenState get_open_state() {
-        if (!opened)
+        if (open_count == 0)
             return Geary.Folder.OpenState.CLOSED;
         
         if (local_folder.opened)
@@ -109,7 +95,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     // last_seen_remote_count (which may be -1).
     internal int get_remote_counts(out int remote_count, out int last_seen_remote_count) {
         remote_count = this.remote_count;
-        last_seen_remote_count = (local_folder.get_properties() != null) ? local_folder.get_properties().messages : -1;
+        last_seen_remote_count = local_folder.get_properties().select_examine_messages;
+        if (last_seen_remote_count < 0)
+            last_seen_remote_count = local_folder.get_properties().status_messages;
         
         return (remote_count >= 0) ? remote_count : last_seen_remote_count;
     }
@@ -117,21 +105,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private async bool normalize_folders(Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
         debug("normalize_folders %s", to_string());
         
-        Geary.Imap.FolderProperties? local_properties = local_folder.get_properties();
-        Geary.Imap.FolderProperties? remote_properties = remote_folder.get_properties();
-        
-        // both sets of properties must be available
-        if (local_properties == null) {
-            debug("Unable to verify UID validity for %s: missing local properties", get_path().to_string());
-            
-            return false;
-        }
-        
-        if (remote_properties == null) {
-            debug("Unable to verify UID validity for %s: missing remote properties", get_path().to_string());
-            
-            return false;
-        }
+        Geary.Imap.FolderProperties local_properties = local_folder.get_properties();
+        Geary.Imap.FolderProperties remote_properties = remote_folder.get_properties();
         
         // and both must have their next UID's (it's possible they don't if it's a non-selectable
         // folder)
@@ -403,11 +378,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         return true;
     }
     
-    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
-        if (opened)
-            throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
+    public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
+        if (open_count == 0 || remote_semaphore == null)
+            throw new EngineError.OPEN_REQUIRED("wait_for_open_async() can only be called after open_async()");
         
-        opened = true;
+        if (!yield remote_semaphore.wait_for_result_async(cancellable))
+            throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
+    }
+    
+    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+        if (open_count++ > 0)
+            return;
         
         remote_semaphore = new Geary.NonblockingReportingSemaphore<bool>(false);
         
@@ -528,12 +509,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     private async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
         Cancellable? cancellable) {
-        if (!opened)
+        if (open_count == 0 || --open_count > 0)
             return;
-        
-        // set this now to avoid multiple close_async(), particularly nested inside one of the signals
-        // fired here
-        opened = false;
         
         // Notify all callers waiting for the remote folder that it's not coming available
         Imap.Folder? closing_remote_folder = remote_folder;
@@ -667,7 +644,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
-            yield local_folder.update_remote_message_count(remote_count, null);
+            yield local_folder.update_remote_selected_message_count(remote_count, null);
         } catch (Error update_err) {
             debug("Unable to save appended remote count for %s: %s", to_string(), update_err.message);
         }
@@ -748,7 +725,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
-            yield local_folder.update_remote_message_count(remote_count, null);
+            yield local_folder.update_remote_selected_message_count(remote_count, null);
         } catch (Error update_err) {
             debug("Unable to save removed remote count for %s: %s", to_string(), update_err.message);
         }
@@ -785,19 +762,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             
             return false;
         });
-    }
-    
-    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
-        check_open("get_email_count_async");
-        
-        // if connected or connecting, use stashed remote count (which is always kept current once
-        // remote folder is opened)
-        if (opened) {
-            if (yield remote_semaphore.wait_for_result_async(cancellable))
-                return remote_count;
-        }
-        
-        return yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE, cancellable);
     }
     
     //
@@ -998,7 +962,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     private void check_open(string method) throws EngineError {
-        if (!opened)
+        if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("%s failed: folder %s is not open", method, to_string());
     }
     
@@ -1097,9 +1061,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             }
             
             int prefetch_count = local_low - high;
-            
-            debug("expanding normalized range to %d (%d needed) for %s (local_low=%d) from remote",
-                high, prefetch_count, to_string(), local_low);
             
             // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
             // as fields for duplicate detection

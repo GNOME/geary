@@ -58,12 +58,12 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
     private ContactStore contact_store;
     private string account_owner_email;
     private int64 folder_id;
-    private Geary.Imap.FolderProperties? properties;
+    private Geary.Imap.FolderProperties properties;
     private Gee.HashSet<Geary.EmailIdentifier> marked_removed = new Gee.HashSet<Geary.EmailIdentifier>(
         Hashable.hash_func, Equalable.equal_func);
-        
+    
     internal Folder(ImapDB.Database db, Geary.FolderPath path, ContactStore contact_store,
-        string account_owner_email, int64 folder_id, Geary.Imap.FolderProperties? properties) {
+        string account_owner_email, int64 folder_id, Geary.Imap.FolderProperties properties) {
         assert(folder_id != Db.INVALID_ROWID);
         
         this.db = db;
@@ -83,12 +83,11 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         return path;
     }
     
-    public Geary.Imap.FolderProperties? get_properties() {
-        // TODO: TBD: alteration/updated signals for folders
+    public Geary.Imap.FolderProperties get_properties() {
         return properties;
     }
     
-    internal void set_properties(Geary.Imap.FolderProperties? properties) {
+    internal void set_properties(Geary.Imap.FolderProperties properties) {
         this.properties = properties;
     }
     
@@ -170,8 +169,33 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
     
     // Updates both the FolderProperties and the value in the local store.  Must be called while
     // open.
-    public async void update_remote_message_count(int count, Cancellable? cancellable) throws Error {
+    public async void update_remote_status_message_count(int count, Cancellable? cancellable) throws Error {
         check_open();
+        
+        if (count < 0)
+            return;
+        
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "UPDATE FolderTable SET last_seen_status_total=? WHERE id=?");
+            stmt.bind_int(0, Numeric.int_floor(count, 0));
+            stmt.bind_rowid(1, folder_id);
+            
+            stmt.exec(cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
+        properties.set_status_message_count(count);
+    }
+    
+    // Updates both the FolderProperties and the value in the local store.  Must be called while
+    // open.
+    public async void update_remote_selected_message_count(int count, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        if (count < 0)
+            return;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             Db.Statement stmt = cx.prepare(
@@ -184,8 +208,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
         
-        if (properties != null)
-            properties.messages = count;
+        properties.set_select_examine_message_count(count);
     }
     
     public async int get_id_position_async(Geary.EmailIdentifier id, ListFlags flags,
@@ -231,9 +254,24 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         return results;
     }
     
+    // NOTE: This can be used to check local messages without opening the folder, useful since
+    // opening a Geary.Folder implies remote connection ... this skips check_open() (and, by
+    // implication, means the ImapDB.Folder can be in an odd state), so USE CAREFULLY.
+    public async Gee.List<Geary.Email>? local_list_email_async(int low, int count,
+        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
+        return yield internal_list_email_async(low, count, required_fields, flags, true, cancellable);
+    }
+    
     public async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
-        check_open();
+        return yield internal_list_email_async(low, count, required_fields, flags, false, cancellable);
+    }
+    
+    private async Gee.List<Geary.Email>? internal_list_email_async(int low, int count,
+        Geary.Email.Field required_fields, ListFlags flags, bool skip_open_check,
+        Cancellable? cancellable) throws Error {
+        if (!skip_open_check)
+            check_open();
         
         // TODO: A more efficient way to do this would be to pull in all the columns at once in
         // a single SELECT operation ... this might be less efficient than current practice if
@@ -704,8 +742,11 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             ? imap_properties.internaldate.original : null;
         long rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
         
-        if (String.is_empty(internaldate) || rfc822_size < 0)
+        if (String.is_empty(internaldate) || rfc822_size < 0) {
+            debug("Unable to detect duplicates for %s (%s available but invalid)", email.id.to_string(),
+                email.fields.to_list_string());
             return Db.INVALID_ROWID;
+        }
         
         // look for duplicate in IMAP message properties
         Db.Statement stmt = cx.prepare(

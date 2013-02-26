@@ -22,7 +22,6 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     public string name { get { return context.name; } }
     public int exists { get { return context.exists; } }
     public int recent { get { return context.recent; } }
-    public int unseen { get { return context.unseen; } }
     public bool is_readonly { get { return context.is_readonly; } }
     public UIDValidity? uid_validity { get { return context.uid_validity; } }
     public UID? uid_next { get { return context.uid_next; } }
@@ -641,7 +640,6 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
     public string name { get; protected set; }
     public int exists { get; protected set; }
     public int recent { get; protected set; }
-    public int unseen { get; protected set; }
     public bool is_readonly { get; protected set; }
     public UIDValidity? uid_validity { get; protected set; }
     public UID? uid_next { get; protected set; }
@@ -669,7 +667,6 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
         is_readonly = results.readonly;
         exists = results.exists;
         recent = results.recent;
-        unseen = results.unseen;
         uid_validity = results.uid_validity;
         uid_next = results.uid_next;
         

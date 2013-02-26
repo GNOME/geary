@@ -52,7 +52,7 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract Geary.FolderPath get_path();
     
-    public abstract Geary.Trillian has_children();
+    public abstract Geary.FolderProperties get_properties();
     
     public abstract Geary.SpecialFolderType get_special_folder_type();
     
@@ -70,9 +70,9 @@ public abstract class Geary.AbstractFolder : Object, Geary.Folder {
     
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     
-    public abstract async void close_async(Cancellable? cancellable = null) throws Error;
+    public abstract async void wait_for_open_async(Cancellable? cancellable = null) throws Error;
     
-    public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
+    public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)

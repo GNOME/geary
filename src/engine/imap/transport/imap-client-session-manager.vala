@@ -5,7 +5,7 @@
  */
 
 public class Geary.Imap.ClientSessionManager {
-    public const int DEFAULT_MIN_POOL_SIZE = 2;
+    public const int DEFAULT_MIN_POOL_SIZE = 4;
     
     private AccountInformation account_information;
     private int min_pool_size;

@@ -189,7 +189,18 @@ public interface Geary.Folder : Object {
     
     public abstract Geary.FolderPath get_path();
     
-    public abstract Geary.Trillian has_children();
+    /**
+     * Returns a FolderProperties that represents, if fully open, accurate values for this Folder,
+     * and if not, values that represent the last time the Folder was opened or examined by the
+     * Engine.
+     *
+     * The returned object is not guaranteed to be long-lived.  If the Folder's state changes, it's
+     * possible a new FolderProperties will be set in its place.  Instead of monitoring the fields
+     * of the FolderProperties for changes, use Account.folders_contents_changed() to be notified
+     * of changes and use the (potentially new) FolderProperties returned by this method at that
+     * point.
+     */
+    public abstract Geary.FolderProperties get_properties();
     
     /**
      * Returns the special folder type of the folder.
@@ -223,16 +234,17 @@ public interface Geary.Folder : Object {
      * may not reflect the full state of the Folder, however, and returned emails may subsequently
      * have their state changed (such as their position).  Making a call that requires
      * accessing the remote store before OpenState.BOTH has been signalled will result in that
-     * call blocking until the remote is open or an error state has occurred.  See list_email_async()
-     * for special notes on its operation.
+     * call blocking until the remote is open or an error state has occurred.  It's also possible for
+     * the command to return early without waiting, depending on prior information of the folder.
+     * See list_email_async() for special notes on its operation.  Also see wait_for_open_async().
      *
      * If there's an error while opening, "open-failed" will be fired.  (See that signal for more
      * information on how many times it may fire, and when.)  To prevent the Folder from going into
      * a halfway state, it will immediately schedule a close_async() to cleanup, and those
      * associated signals will be fired as well.
      *
-     * If the Folder has been opened previously, EngineError.ALREADY_OPEN is thrown.  There are no
-     * other side-effects.
+     * If the Folder has been opened previously, an internal open count is incremented and the
+     * method returns.  There are no other side-effects.
      *
      * A Folder may be reopened after it has been closed.  This allows for Folder objects to be
      * emitted by the Account object cheaply, but the client should only have a few open at a time,
@@ -241,30 +253,28 @@ public interface Geary.Folder : Object {
     public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
     
     /**
+     * Wait for the Folder to become fully open or fails to open due to error.  If not opened
+     * due to error, throws EngineError.ALREADY_CLOSED.
+     *
+     * NOTE: The current implementation requirements are only that should be work after an
+     * open_async() call has completed (i.e. an open is in progress).  Calling this method
+     * otherwise will throw an EngineError.OPEN_REQUIRED.
+     */
+    public abstract async void wait_for_open_async(Cancellable? cancellable = null) throws Error;
+    
+    /**
      * The Folder should be closed when operations on it are concluded.  Depending on the
      * implementation this might entail closing a network connection or reverting it to another
      * state, or closing file handles or database connections.
      *
+     * If the Folder is open, an internal open count is decremented.  If it remains above zero, the
+     * method returns with no other side-effects.  If it decrements to zero, the Folder is closed,
+     * tearing down network connections, closing files, and so forth.  See "closed" for signals
+     * indicating the closing states.
+     *
      * If the Folder is already closed, the method silently returns.
      */
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * Returns the number of messages in the Folder.  They can be addressed by their position,
-     * from 1 to n.
-     *
-     * Note that this only returns the number of messages available to the backing medium.  In the
-     * case of the local store, this might differ from the number on the network server.  Folders
-     * created by Engine are aggregating objects and will return the true count.  However, this
-     * might require a round-trip to the server.
-     *
-     * Also note that local folders may be sparsely populated.  get_email_count_async() returns the
-     * total number of recorded emails, but it's possible none of them have more than placeholder
-     * information.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async int get_email_count_async(Cancellable? cancellable = null) throws Error;
     
     /**
      * Returns a list of messages that fulfill the required_fields flags starting at the low

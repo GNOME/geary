@@ -20,7 +20,7 @@ private class Geary.Imap.Folder : Object {
     
     public signal void disconnected(Geary.Folder.CloseReason reason);
     
-    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusResults? status,
+    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusResults status,
         MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
@@ -28,9 +28,18 @@ private class Geary.Imap.Folder : Object {
         
         readonly = Trillian.UNKNOWN;
         
-        properties = (status != null)
-            ? new Imap.FolderProperties.status(status, info.attrs)
-            : new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
+        properties = new Imap.FolderProperties.status(status, info.attrs);
+    }
+    
+    internal Folder.unselectable(ClientSessionManager session_mgr, Geary.FolderPath path,
+        MailboxInformation info) {
+        this.session_mgr = session_mgr;
+        this.info = info;
+        this.path = path;
+        
+        readonly = Trillian.UNKNOWN;
+        
+        properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
     public Geary.FolderPath get_path() {
@@ -57,8 +66,10 @@ private class Geary.Imap.Folder : Object {
         mailbox.expunged.connect(on_expunged);
         mailbox.disconnected.connect(on_disconnected);
         
-        properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, mailbox.unseen,
+        int old_status_messages = properties.status_messages;
+        properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, properties.unseen,
             mailbox.uid_validity, mailbox.uid_next, properties.attrs);
+        properties.set_status_message_count(old_status_messages);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {

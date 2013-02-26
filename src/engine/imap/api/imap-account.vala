@@ -86,7 +86,7 @@ private class Geary.Imap.Account : Object {
             if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT))
                 batch.add(new StatusOperation(session_mgr, mbox, path));
             else
-                folders.add(new Geary.Imap.Folder(session_mgr, path, null, mbox));
+                folders.add(new Geary.Imap.Folder.unselectable(session_mgr, path, mbox));
         }
         
         yield batch.execute_all_async(cancellable);
@@ -95,7 +95,7 @@ private class Geary.Imap.Account : Object {
             StatusOperation op = (StatusOperation) batch.get_operation(id);
             try {
                 folders.add(new Geary.Imap.Folder(session_mgr, op.path,
-                    (StatusResults?) batch.get_result(id), op.mbox));
+                    (StatusResults) batch.get_result(id), op.mbox));
             } catch (Error status_err) {
                 message("Unable to fetch status for %s: %s", op.path.to_string(), status_err.message);
             }
@@ -125,15 +125,11 @@ private class Geary.Imap.Account : Object {
             if (mbox == null)
                 throw_not_found(path);
             
-            StatusResults? status = null;
-            if (!mbox.attrs.contains(MailboxAttribute.NO_SELECT)) {
-                try {
-                    status = yield session_mgr.status_async(processed.get_fullpath(),
-                        StatusDataType.all(), cancellable);
-                } catch (Error status_err) {
-                    debug("Unable to get status for %s: %s", processed.to_string(), status_err.message);
-                }
-            }
+            if (mbox.attrs.contains(MailboxAttribute.NO_SELECT))
+                return new Geary.Imap.Folder.unselectable(session_mgr, processed, mbox);
+            
+            StatusResults status = yield session_mgr.status_async(processed.get_fullpath(),
+                StatusDataType.all(), cancellable);
             
             return new Geary.Imap.Folder(session_mgr, processed, status, mbox);
         } catch (ImapError err) {

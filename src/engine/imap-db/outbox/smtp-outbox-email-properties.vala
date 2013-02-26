@@ -5,7 +5,8 @@
  */
 
 private class Geary.SmtpOutboxEmailProperties : Geary.EmailProperties {
-    public SmtpOutboxEmailProperties() {
+    public SmtpOutboxEmailProperties(DateTime date_received, long total_bytes) {
+        base(date_received, total_bytes);
     }
     
     public override string to_string() {

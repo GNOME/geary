@@ -33,6 +33,7 @@ engine/api/geary-engine-error.vala
 engine/api/geary-engine.vala
 engine/api/geary-folder.vala
 engine/api/geary-folder-path.vala
+engine/api/geary-folder-properties.vala
 engine/api/geary-folder-supports-archive.vala
 engine/api/geary-folder-supports-copy.vala
 engine/api/geary-folder-supports-create.vala
@@ -113,8 +114,11 @@ engine/imap-db/imap-db-message-row.vala
 engine/imap-db/outbox/smtp-outbox-email-identifier.vala
 engine/imap-db/outbox/smtp-outbox-email-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder.vala
+engine/imap-db/outbox/smtp-outbox-folder-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
+engine/imap-engine/imap-engine.vala
+engine/imap-engine/imap-engine-account-synchronizer.vala
 engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
@@ -152,6 +156,7 @@ engine/nonblocking/nonblocking-mutex.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 
+engine/rfc822/rfc822.vala
 engine/rfc822/rfc822-error.vala
 engine/rfc822/rfc822-gmime-filter-flowed.vala
 engine/rfc822/rfc822-mailbox-addresses.vala

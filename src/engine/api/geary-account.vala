@@ -39,6 +39,11 @@ public interface Geary.Account : Object {
         Gee.Collection<Geary.Folder>? removed);
     
     /**
+     * Fired when a Folder's contents is detected having changed.
+     */
+    public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
+    
+    /**
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_opened();
@@ -69,6 +74,11 @@ public interface Geary.Account : Object {
      */
     protected abstract void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
      *

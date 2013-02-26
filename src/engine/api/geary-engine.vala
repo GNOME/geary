@@ -22,17 +22,15 @@ public class Geary.Engine {
     private static Engine? _instance = null;
     public static Engine instance {
         get {
-            if (_instance == null)
-                _instance = new Engine();
-
-            return _instance;
+            return (_instance != null) ? _instance : (_instance = new Engine());
         }
     }
 
     public File? user_data_dir { get; private set; default = null; }
     public File? resource_dir { get; private set; default = null; }
     public Geary.CredentialsMediator? authentication_mediator { get; private set; default = null; }
-
+    
+    private bool is_initialized = false;
     private bool is_open = false;
     private Gee.HashMap<string, AccountInformation>? accounts = null;
     private Gee.HashMap<string, Account>? account_instances = null;
@@ -72,15 +70,29 @@ public class Geary.Engine {
     public signal void account_removed(AccountInformation account);
 
     private Engine() {
-        // Initialize GMime
-        GMime.init(0);
     }
-
+    
     private void check_opened() throws EngineError {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
     }
-
+    
+    // This can't be called from within the ctor, as initialization code may want to access the
+    // Engine instance to make their own calls and, in particular, subscribe to signals.
+    //
+    // TODO: It would make sense to have a terminate_library() call, but it technically should not
+    // be called until the application is exiting, not merely if the Engine is closed, as termination
+    // means shutting down resources for good
+    private void initialize_library() {
+        if (is_initialized)
+            return;
+        
+        is_initialized = true;
+        
+        RFC822.init();
+        ImapEngine.init();
+    }
+    
     /**
      * Initializes the engine, and makes all existing accounts available.  The
      * given authentication mediator will be used to retrieve all passwords
@@ -89,9 +101,13 @@ public class Geary.Engine {
     public async void open_async(File user_data_dir, File resource_dir,
                                  Geary.CredentialsMediator? authentication_mediator,
                                  Cancellable? cancellable = null) throws Error {
+        // initialize *before* opening the Engine ... all initialize code should assume the Engine
+        // is closed
+        initialize_library();
+        
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
-
+        
         this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
         this.authentication_mediator = authentication_mediator;

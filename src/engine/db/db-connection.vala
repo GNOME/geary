@@ -71,6 +71,8 @@ public class Geary.Db.Connection : Geary.Db.Context {
         
         check_cancelled("Connection.ctor", cancellable);
         
+        // TODO: open_v2() can return a database connection even when an error is returned; the
+        // database must still be closed in this case
         throw_on_error("Connection.ctor", Sqlite.Database.open_v2(database.db_file.get_path(),
             out db, sqlite_flags, null));
     }

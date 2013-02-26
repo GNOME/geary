@@ -364,17 +364,19 @@ public class Geary.ConversationMonitor : Object {
         folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
         
-        bool reseed_now = true;
-        if (folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
-            try {
-                yield folder.open_async(readonly, cancellable);
-            } catch (Error err) {
-                is_monitoring = false;
-                
-                throw err;
-            }
+        bool reseed_now = (folder.get_open_state() != Geary.Folder.OpenState.CLOSED);
+        try {
+            yield folder.open_async(readonly, cancellable);
+        } catch (Error err) {
+            is_monitoring = false;
             
-            reseed_now = false;
+            folder.email_appended.disconnect(on_folder_email_appended);
+            folder.email_removed.disconnect(on_folder_email_removed);
+            folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+            folder.opened.disconnect(on_folder_opened);
+            folder.closed.disconnect(on_folder_closed);
+            
+            throw err;
         }
         
         notify_monitoring_started();

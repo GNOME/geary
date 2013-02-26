@@ -136,8 +136,11 @@ public class Geary.ImapDB.MessageRow {
         if (fields.is_all_set(Geary.Email.Field.FLAGS))
             email.set_flags(get_generic_email_flags());
         
-        if (fields.is_all_set(Geary.Email.Field.PROPERTIES))
-            email.set_email_properties(get_imap_email_properties());
+        if (fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
+            Imap.EmailProperties? properties = get_imap_email_properties();
+            if (properties != null)
+                email.set_email_properties(properties);
+        }
         
         return email;
     }

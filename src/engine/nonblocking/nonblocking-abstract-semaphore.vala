@@ -146,6 +146,10 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         notify_at_reset();
     }
     
+    public bool is_passed() {
+        return passed;
+    }
+    
     public bool is_cancelled() {
         return (cancellable != null) ? cancellable.is_cancelled() : false;
     }
