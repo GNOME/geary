@@ -156,7 +156,11 @@ public class AddEditPage : Gtk.Box {
 
     private string smtp_username_store;
     private string smtp_password_store;
-
+    
+    // Storage options
+    private Gtk.Box storage_container;
+    private Gtk.ComboBoxText combo_storage_length;
+    
     private bool edited_imap_port = false;
     private bool edited_smtp_port = false;
     
@@ -192,6 +196,18 @@ public class AddEditPage : Gtk.Box {
         label_error = (Gtk.Label) builder.get_object("label: error");
         
         other_info = (Gtk.Alignment) builder.get_object("container: other_info");
+        
+        // Storage options.
+        storage_container = (Gtk.Box) builder.get_object("storage container");
+        combo_storage_length = (Gtk.ComboBoxText) builder.get_object("combo: storage");
+        combo_storage_length.set_row_separator_func(combo_storage_separator_delegate);
+        combo_storage_length.append("14", _("2 weeks back")); // IDs are # of days
+        combo_storage_length.append("30", _("1 month back"));
+        combo_storage_length.append("90", _("3 months back"));
+        combo_storage_length.append("180", _("6 months back"));
+        combo_storage_length.append("365", _("1 year back"));
+        combo_storage_length.append(".", "."); // Separator
+        combo_storage_length.append("-1", _("Everything"));
         
         // IMAP info widgets.
         entry_imap_host = (Gtk.Entry) builder.get_object("entry: imap host");
@@ -266,6 +282,7 @@ public class AddEditPage : Gtk.Box {
             info.default_smtp_server_ssl,
             info.default_smtp_server_starttls,
             info.default_smtp_server_noauth,
+            info.prefetch_period_days,
             result);
     }
     
@@ -289,6 +306,7 @@ public class AddEditPage : Gtk.Box {
         bool initial_default_smtp_ssl = true,
         bool initial_default_smtp_starttls = false,
         bool initial_default_smtp_noauth = false,
+        int prefetch_period_days = Geary.AccountInformation.DEFAULT_PREFETCH_PERIOD_DAYS,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         
         // Set defaults
@@ -317,6 +335,8 @@ public class AddEditPage : Gtk.Box {
         smtp_noauth = initial_default_smtp_noauth;
         
         set_validation_result(result);
+        
+        set_storage_length(prefetch_period_days);
         
         if (Geary.String.is_empty(real_name))
             entry_real_name.grab_focus();
@@ -513,6 +533,7 @@ public class AddEditPage : Gtk.Box {
         account_information.default_smtp_server_ssl = smtp_ssl;
         account_information.default_smtp_server_starttls = smtp_starttls;
         account_information.default_smtp_server_noauth = smtp_noauth;
+        account_information.prefetch_period_days = get_storage_length();
         
         if (smtp_noauth)
             account_information.smtp_credentials = null;
@@ -537,6 +558,7 @@ public class AddEditPage : Gtk.Box {
         base.show_all();
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
+        storage_container.visible = mode == PageMode.EDIT;
         
         if (mode == PageMode.WELCOME)
             nickname = Geary.AccountInformation.DEFAULT_NICKNAME;
@@ -648,6 +670,24 @@ public class AddEditPage : Gtk.Box {
     private string get_default_real_name() {
         string real_name = Environment.get_real_name();
         return real_name == "Unknown" ? "" : real_name;
+    }
+    
+    // Sets the storage length combo box.  The days parameter should correspond to one of the pre-set
+    // values; arbitrary numbers will put the combo box into an undetermined state.
+    private void set_storage_length(int days) {
+        combo_storage_length.set_active_id(days.to_string());
+    }
+    
+    // Returns number of days.
+    private int get_storage_length() {
+        return int.parse(combo_storage_length.get_active_id());
+    }
+    
+    private bool combo_storage_separator_delegate(Gtk.TreeModel model, Gtk.TreeIter iter) {
+        GLib.Value v;
+        model.get_value(iter, 0, out v);
+        
+        return v.get_string() == ".";
     }
 }
 

@@ -5,7 +5,6 @@
  */
 
 private class Geary.ImapEngine.AccountSynchronizer {
-    private const int SYNC_DEPTH_DAYS = 15;
     private const int FETCH_DATE_RECEIVED_CHUNK_COUNT = 25;
     
     public GenericAccount account { get; private set; }
@@ -165,7 +164,7 @@ private class Geary.ImapEngine.AccountSynchronizer {
             // generate the current epoch for synchronization (could cache this value, obviously, but
             // doesn't seem like this biggest win in this class)
             DateTime epoch = new DateTime.now_local();
-            epoch = epoch.add_days(0 - SYNC_DEPTH_DAYS);
+            epoch = epoch.add_days(0 - account.information.prefetch_period_days);
             
             if (!yield process_folder_async(folder, made_available.remove(folder), epoch))
                 break;

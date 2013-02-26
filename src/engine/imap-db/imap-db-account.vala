@@ -116,7 +116,7 @@ private class Geary.ImapDB.Account : Object {
             // create the folder object
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO FolderTable (name, parent_id, last_seen_total, last_seen_status_total, "
-                + "uid_validity, uid_next, attributes) VALUES (?, ?, ?, ?, ?, ?)");
+                + "uid_validity, uid_next, attributes) VALUES (?, ?, ?, ?, ?, ?, ?)");
             stmt.bind_string(0, path.basename);
             stmt.bind_rowid(1, parent_id);
             stmt.bind_int(2, Numeric.int_floor(properties.select_examine_messages, 0));
