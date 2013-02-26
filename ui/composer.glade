@@ -142,6 +142,11 @@
         <property name="icon_name">font</property>
       </object>
     </child>
+    <child>
+      <object class="GtkToggleAction" id="compose as html">
+        <property name="label" translatable="yes">Rich text</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="composer">
     <property name="visible">True</property>

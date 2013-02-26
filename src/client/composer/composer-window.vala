@@ -36,6 +36,7 @@ public class ComposerWindow : Gtk.Window {
     private const string ACTION_FONT_SIZE = "fontsize";
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_LINK = "insertlink";
+    private const string ACTION_COMPOSE_AS_HTML = "compose as html";
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -49,6 +50,9 @@ public class ComposerWindow : Gtk.Window {
             background-color: white !important;
             font-size: medium !important;
         }
+        body.plain {
+            font-family: monospace !important;
+        }
         blockquote {
             margin-top: 0px;
             margin-bottom: 0px;
@@ -59,6 +63,10 @@ public class ComposerWindow : Gtk.Window {
             background-color: white;
             border: 0;
             border-left: 3px #aaa solid;
+        }
+        pre {
+            white-space: pre-wrap;
+            margin: 0;
         }
         </style>
         </head><body id="message-body"></body></html>""";
@@ -101,6 +109,11 @@ public class ComposerWindow : Gtk.Window {
         }
     }
     
+    public bool compose_as_html {
+        get { return ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active; }
+        set { ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active = value; }
+    }
+    
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
     private string? body_html = null;
@@ -126,6 +139,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Alignment visible_on_attachment_drag_over;
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     private Gtk.Widget visible_on_attachment_drag_over_child;
+    private Gtk.Toolbar compose_toolbar;
     
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
@@ -198,6 +212,8 @@ public class ComposerWindow : Gtk.Window {
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
+        // Can only hapen after actions exits
+        compose_as_html = GearyApplication.instance.config.compose_as_html;
         
         // Listen to account signals to update from menu.
         Geary.Engine.instance.account_available.connect(update_from_field);
@@ -222,7 +238,7 @@ public class ComposerWindow : Gtk.Window {
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
         
-        Gtk.Toolbar compose_toolbar = (Gtk.Toolbar) builder.get_object("compose_toolbar");
+        compose_toolbar = (Gtk.Toolbar) builder.get_object("compose_toolbar");
         
         actions.get_action(ACTION_UNDO).activate.connect(on_action);
         actions.get_action(ACTION_REDO).activate.connect(on_action);
@@ -233,20 +249,21 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_PASTE).activate.connect(on_paste);
         actions.get_action(ACTION_PASTE_FORMAT).activate.connect(on_paste_with_formatting);
         
-        actions.get_action(ACTION_BOLD).activate.connect(on_action);
-        actions.get_action(ACTION_ITALIC).activate.connect(on_action);
-        actions.get_action(ACTION_UNDERLINE).activate.connect(on_action);
-        actions.get_action(ACTION_STRIKETHROUGH).activate.connect(on_action);
+        actions.get_action(ACTION_BOLD).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_ITALIC).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_UNDERLINE).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_STRIKETHROUGH).activate.connect(on_formatting_action);
         
         actions.get_action(ACTION_REMOVE_FORMAT).activate.connect(on_remove_format);
+        actions.get_action(ACTION_COMPOSE_AS_HTML).activate.connect(on_compose_as_html);
         
-        actions.get_action(ACTION_INDENT).activate.connect(on_action);
-        actions.get_action(ACTION_OUTDENT).activate.connect(on_action);
+        actions.get_action(ACTION_INDENT).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_OUTDENT).activate.connect(on_formatting_action);
         
-        actions.get_action(ACTION_JUSTIFY_LEFT).activate.connect(on_action);
-        actions.get_action(ACTION_JUSTIFY_RIGHT).activate.connect(on_action);
-        actions.get_action(ACTION_JUSTIFY_CENTER).activate.connect(on_action);
-        actions.get_action(ACTION_JUSTIFY_FULL).activate.connect(on_action);
+        actions.get_action(ACTION_JUSTIFY_LEFT).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_JUSTIFY_RIGHT).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_JUSTIFY_CENTER).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_JUSTIFY_FULL).activate.connect(on_formatting_action);
         
         actions.get_action(ACTION_FONT).activate.connect(on_select_font);
         actions.get_action(ACTION_FONT_SIZE).activate.connect(on_select_font_size);
@@ -392,6 +409,9 @@ public class ComposerWindow : Gtk.Window {
             editor.grab_focus();
             body.focus();
         }
+        
+        // Ensure the editor is in correct mode re HTML
+        on_compose_as_html();
 
         bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
         update_actions();
@@ -504,7 +524,8 @@ public class ComposerWindow : Gtk.Window {
         
         email.attachment_files.add_all(attachment_files);
         
-        email.body_html = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_html()));
+        if (compose_as_html)
+            email.body_html = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_html()));
         email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_text()));
 
         // User-Agent
@@ -671,6 +692,11 @@ public class ComposerWindow : Gtk.Window {
          && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
     }
     
+    private void on_formatting_action(Gtk.Action action) {
+        if (compose_as_html)
+            on_action(action);
+    }
+    
     private void on_action(Gtk.Action action) {
         if (action_flag)
             return;
@@ -786,6 +812,50 @@ public class ComposerWindow : Gtk.Window {
         editor.get_dom_document().exec_command("forecolor", false, "#000000");
     }
     
+    private void on_compose_as_html() {
+        WebKit.DOM.DOMTokenList body_classes = editor.get_dom_document().body.get_class_list();
+        if (!compose_as_html) {
+            // Do the equivalent of on_remove_format, but for entire document while maintaining
+            // selection.
+            editor.settings.enable_scripts = true;
+            editor.execute_script("""
+                selection = document.getSelection();
+                anchorNode = selection.anchorNode;
+                anchorOffset = selection.anchorOffset;
+                focusNode = selection.focusNode;
+                focusOffset = selection.focusOffset;
+                
+                selection.selectAllChildren(document);
+                
+                document.execCommand("removeformat", false, "");
+                // TODO: Use this when a reset stylesheet is available:
+                // http://redmine.yorba.org/issues/6437
+                //document.execCommand("removeparaformat", false, "");
+                document.execCommand("unlink", false, "");
+                document.execCommand("backcolor", false, "#ffffff");
+                document.execCommand("forecolor", false, "#000000");
+                
+                selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
+                """);
+            editor.settings.enable_scripts = false;
+            
+            compose_toolbar.hide();
+            try {
+                body_classes.add("plain");
+            } catch (Error error) {
+                debug("Error setting composer style: %s", error.message);
+            }
+        } else {
+            compose_toolbar.show();
+            try {
+                body_classes.remove("plain");
+            } catch (Error error) {
+                debug("Error setting composer style: %s", error.message);
+            }
+        }
+        GearyApplication.instance.config.compose_as_html = compose_as_html;
+    }
+    
     private void on_select_font() {
         if (!font_button.active)
             return;
@@ -841,17 +911,18 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_select_color() {
-        Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog("Select Color", this);
-        if (dialog.run() == Gtk.ResponseType.OK) {
-            string color = dialog.get_rgba().to_string();
-            editor.get_dom_document().exec_command("forecolor", false, color);
+        if (compose_as_html) {
+            Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"), this);
+            if (dialog.run() == Gtk.ResponseType.OK)
+                editor.get_dom_document().exec_command("forecolor", false, dialog.get_rgba().to_string());
+            
+            dialog.destroy();
         }
-        
-        dialog.destroy();
     }
     
     private void on_insert_link() {
-        link_dialog("http://");
+        if (compose_as_html)
+            link_dialog("http://");
     }
     
     private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
@@ -1014,9 +1085,11 @@ public class ComposerWindow : Gtk.Window {
         context_menu.append(paste);
         
         // Paste with formatting
-        Gtk.MenuItem paste_format = new Gtk.ImageMenuItem();
-        paste_format.related_action = actions.get_action(ACTION_PASTE_FORMAT);
-        context_menu.append(paste_format);
+        if (compose_as_html) {
+            Gtk.MenuItem paste_format = new Gtk.ImageMenuItem();
+            paste_format.related_action = actions.get_action(ACTION_PASTE_FORMAT);
+            context_menu.append(paste_format);
+        }
         
         context_menu.append(new Gtk.SeparatorMenuItem());
         
@@ -1024,6 +1097,11 @@ public class ComposerWindow : Gtk.Window {
         Gtk.MenuItem select_all_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.SELECT_ALL, null);
         select_all_item.activate.connect(on_select_all);
         context_menu.append(select_all_item);
+        
+        // HTML or plain text
+        Gtk.CheckMenuItem html_item = new Gtk.CheckMenuItem();
+        html_item.related_action = actions.get_action(ACTION_COMPOSE_AS_HTML);
+        context_menu.append(html_item);
         
         context_menu.show_all();
         context_menu.popup(null, null, null, event.button, event.time);
@@ -1043,7 +1121,7 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_COPY).sensitive = editor.can_copy_clipboard();
         actions.get_action(ACTION_COPY_LINK).sensitive = hover_url != null;
         actions.get_action(ACTION_PASTE).sensitive = editor.can_paste_clipboard();
-        actions.get_action(ACTION_PASTE_FORMAT).sensitive = editor.can_paste_clipboard();
+        actions.get_action(ACTION_PASTE_FORMAT).sensitive = editor.can_paste_clipboard() && compose_as_html;
         
         // Style toggle buttons.
         WebKit.DOM.DOMWindow window = editor.get_dom_document().get_default_view();

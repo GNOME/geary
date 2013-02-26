@@ -64,6 +64,11 @@
         <summary>ask when opening an attachment</summary>
         <description>True to ask when opening an attachment.</description>
     </key>
+    <key name="compose-as-html" type="b">
+        <default>true</default>
+        <summary>whether to compose emails in HTML</summary>
+        <description>True to compose emails in HTML; false for plain text.</description>
+    </key>
 </schema>
 
 </schemalist>

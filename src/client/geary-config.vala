@@ -108,6 +108,12 @@ public class Configuration {
         set { set_boolean(ASK_OPEN_ATTACHMENT, value); }
     }
     
+    private const string COMPOSE_AS_HTML = "compose-as-html";
+    public bool compose_as_html {
+        get { return settings.get_boolean(COMPOSE_AS_HTML); }
+        set { set_boolean(COMPOSE_AS_HTML, value); }
+    }
+    
     // Creates a configuration object.
     public Configuration() {
         // Start GSettings.
