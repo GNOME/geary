@@ -51,7 +51,7 @@ public class FolderList.Tree : Sidebar.Tree {
     private void on_new_messages_changed(Geary.Folder folder, int count) {
         FolderEntry? entry = get_folder_entry(folder);
         if (entry != null)
-            entry.set_has_unread(count > 0);
+            entry.set_has_new(count > 0);
     }
     
     public void set_new_messages_monitor(NewMessagesMonitor? monitor) {

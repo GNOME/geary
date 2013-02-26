@@ -8,19 +8,25 @@
 public class FolderList.FolderEntry : Object, Sidebar.Entry, Sidebar.InternalDropTargetEntry,
     Sidebar.SelectableEntry, Sidebar.EmphasizableEntry {
     public Geary.Folder folder { get; private set; }
-    private bool has_unread;
+    private bool has_new;
+    private int unread_count;
     
     public FolderEntry(Geary.Folder folder) {
         this.folder = folder;
-        has_unread = false;
+        has_new = false;
+        unread_count = 0;
     }
     
     public virtual string get_sidebar_name() {
-        return folder.get_display_name();
+        return (unread_count == 0 ? folder.get_display_name() :
+            /// This string gets the folder name and the unread messages count,
+            /// e.g. All Mail (5).
+            _("%s (%d)").printf(folder.get_display_name(), unread_count));
     }
     
     public string? get_sidebar_tooltip() {
-        return null;
+        return (unread_count == 0 ? null :
+            ngettext("%d unread message", "%d unread messages", unread_count).printf(unread_count));
     }
     
     public Icon? get_sidebar_icon() {
@@ -65,15 +71,24 @@ public class FolderList.FolderEntry : Object, Sidebar.Entry, Sidebar.InternalDro
     }
     
     public bool is_emphasized() {
-        return has_unread;
+        return has_new;
     }
     
-    public void set_has_unread(bool has_unread) {
-        if (this.has_unread == has_unread)
+    public void set_has_new(bool has_new) {
+        if (this.has_new == has_new)
             return;
         
-        this.has_unread = has_unread;
-        is_emphasized_changed(has_unread);
+        this.has_new = has_new;
+        is_emphasized_changed(has_new);
+    }
+    
+    public void set_unread_count(int unread_count) {
+        if (this.unread_count == unread_count)
+            return;
+        
+        this.unread_count = unread_count;
+        sidebar_name_changed(get_sidebar_name());
+        sidebar_tooltip_changed(get_sidebar_tooltip());
     }
 
     public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
