@@ -9,7 +9,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Start new conversation</property>
+        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Start new conversation (Ctrl+N, N)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">New Message</property>
@@ -37,7 +37,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Reply to last message in conversation</property>
+        <property name="tooltip_text" translatable="yes">Reply to last message in conversation (Ctrl+R, R)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Reply</property>
@@ -54,7 +54,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Reply to everyone in last message of conversation</property>
+        <property name="tooltip_text" translatable="yes">Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Reply All</property>
@@ -71,7 +71,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Send copy of last message in conversation</property>
+        <property name="tooltip_text" translatable="yes">Send copy of last message in conversation (Ctrl+L, F)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Forward</property>

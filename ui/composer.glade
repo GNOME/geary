@@ -420,7 +420,7 @@
             <property name="related_action">bold</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Bold</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle bold text">Bold (Ctrl+B)</property>
             <property name="label" translatable="yes">Bold</property>
             <property name="use_underline">True</property>
           </object>
@@ -434,7 +434,7 @@
             <property name="related_action">italic</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Italic</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle italic text">Italic (Ctrl+I)</property>
             <property name="label" translatable="yes">Italic</property>
             <property name="use_underline">True</property>
           </object>
@@ -448,7 +448,7 @@
             <property name="related_action">underline</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Underline</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle underlined text">Underline (Ctrl+U)</property>
             <property name="label" translatable="yes">Underline</property>
             <property name="use_underline">True</property>
           </object>
@@ -462,7 +462,7 @@
             <property name="related_action">strikethrough</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Strikethrough</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle strikethrough text">Strikethrough (Ctrl+K)</property>
             <property name="label" translatable="yes">Strikethrough</property>
             <property name="use_underline">True</property>
           </object>
@@ -486,7 +486,7 @@
             <property name="related_action">indent</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Indent</property>
+            <property name="tooltip_text" translatable="yes" comments="Indent text">Indent (Ctrl+])</property>
             <property name="label" translatable="yes">Indent</property>
             <property name="use_underline">True</property>
           </object>
@@ -500,7 +500,7 @@
             <property name="related_action">outdent</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Un-indent</property>
+            <property name="tooltip_text" translatable="yes" comments="Removes an indent level">Un-indent (Ctrl+[)</property>
             <property name="label" translatable="yes">Un-indent</property>
             <property name="use_underline">True</property>
           </object>
@@ -524,7 +524,7 @@
             <property name="related_action">font</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Fonts</property>
+            <property name="tooltip_text" translatable="yes" comments="Opens font drop-down menu">Fonts</property>
             <property name="label" translatable="yes">Fonts</property>
             <property name="use_underline">True</property>
           </object>
@@ -538,7 +538,7 @@
             <property name="related_action">fontsize</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Font size</property>
+            <property name="tooltip_text" translatable="yes" comments="Opens font size drop-down menu">Font size</property>
             <property name="label" translatable="yes">Font size</property>
             <property name="use_underline">True</property>
           </object>
@@ -552,7 +552,7 @@
             <property name="related_action">color</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Color</property>
+            <property name="tooltip_text" translatable="yes" comments="Opens font color dialog">Color (Ctrl+R)</property>
             <property name="label" translatable="yes">Color</property>
             <property name="use_underline">True</property>
           </object>
@@ -566,7 +566,7 @@
             <property name="related_action">insertlink</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Link</property>
+            <property name="tooltip_text" translatable="yes" comments="Add an HTML link">Link (Ctrl+L)</property>
             <property name="label" translatable="yes">Link</property>
             <property name="use_underline">True</property>
           </object>
@@ -580,7 +580,7 @@
             <property name="related_action">removeformat</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Remove formatting</property>
+            <property name="tooltip_text" translatable="yes" comments="Resets formatting to the default style">Remove formatting (Ctrl+Space)</property>
             <property name="label" translatable="yes">Remove formatting</property>
             <property name="use_underline">True</property>
           </object>

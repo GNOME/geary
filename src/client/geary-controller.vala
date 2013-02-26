@@ -32,13 +32,13 @@ public class GearyController {
     public const int FETCH_EMAIL_CHUNK_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
-    private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete the selected conversation");
-    private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete the selected conversations");
+    private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Delete, Backspace, A)");
+    private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Delete, Backspace, A)");
     private const string DELETE_MESSAGE_ICON_NAME = "user-trash-full";
     
     private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
-    private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive the selected conversation");
-    private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive the selected conversations");
+    private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (Delete, Backspace, A)");
+    private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (Delete, Backspace, A)");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive";
     
     private const string MARK_AS_SPAM_LABEL = _("Mark as s_pam");
