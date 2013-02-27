@@ -319,7 +319,7 @@ msgstr "Cc:"
 msgid "Choose a file"
 msgstr "Kies een bestand"
 
-#: ../../src/client/geary-application.vala:276
+#: ../../src/client/geary-application.vala:277
 msgid "Co_ntinue"
 msgstr "Ga verder"
 
@@ -332,7 +332,7 @@ msgstr "Kleur"
 msgid "Color (Ctrl+R)"
 msgstr ""
 
-#: ../../src/client/geary-application.vala:27
+#: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "Stel bericht op"
@@ -411,6 +411,10 @@ msgstr ""
 #, fuzzy
 msgid "Email address:"
 msgstr "_E-mail adres:"
+
+#: ../../src/client/geary-application.vala:27
+msgid "Email;E-mail;Mail"
+msgstr ""
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
@@ -1022,7 +1026,7 @@ msgstr "Welkom bij Geary."
 msgid "Yahoo! Mail"
 msgstr "Yahoo! Mail"
 
-#: ../../src/client/geary-application.vala:275
+#: ../../src/client/geary-application.vala:276
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -1032,7 +1036,7 @@ msgstr ""
 "betekent dat iemand binnen hetzelfde netwerk je gebruikersnaam en wachtwoord "
 "zou kunnen lezen. Weet je zeker dat je verder wil gaan?"
 
-#: ../../src/client/geary-application.vala:274
+#: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
 msgstr "Je hebt onbeveiligde instellingen"
 

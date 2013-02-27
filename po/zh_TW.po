@@ -313,7 +313,7 @@ msgstr "副本："
 msgid "Choose a file"
 msgstr "選擇一個檔案"
 
-#: ../../src/client/geary-application.vala:276
+#: ../../src/client/geary-application.vala:277
 msgid "Co_ntinue"
 msgstr "繼續(_N)"
 
@@ -326,7 +326,7 @@ msgstr "色彩"
 msgid "Color (Ctrl+R)"
 msgstr ""
 
-#: ../../src/client/geary-application.vala:27
+#: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "編撰訊息"
@@ -405,6 +405,10 @@ msgstr ""
 #, fuzzy
 msgid "Email address:"
 msgstr "電子郵件位址(_E)："
+
+#: ../../src/client/geary-application.vala:27
+msgid "Email;E-mail;Mail"
+msgstr ""
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
@@ -1015,7 +1019,7 @@ msgstr "歡迎使用 Geary。"
 msgid "Yahoo! Mail"
 msgstr "Yahoo! Mail"
 
-#: ../../src/client/geary-application.vala:275
+#: ../../src/client/geary-application.vala:276
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -1024,7 +1028,7 @@ msgstr ""
 "您的 IMAP 與/或 SMTP 設定中沒有指定 SSL 或 TLS。這代表您的使用者名稱與密碼可"
 "能被網路上的其他人讀取。您確定要這麼做？"
 
-#: ../../src/client/geary-application.vala:274
+#: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
 msgstr "您的設定並不安全"
 
