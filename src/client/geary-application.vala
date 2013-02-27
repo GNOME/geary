@@ -14,7 +14,7 @@ public class GearyApplication : YorbaApplication {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
     public const string DESCRIPTION = DESKTOP_GENERIC_NAME;
-    public const string COPYRIGHT = _("Copyright 2011-2012 Yorba Foundation");
+    public const string COPYRIGHT = _("Copyright 2011-2013 Yorba Foundation");
     public const string WEBSITE = "http://www.yorba.org";
     public const string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";

@@ -76,9 +76,7 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
     string from_line = email_addresses_for_reply(email.from, html_format);
     if (!String.is_empty_or_whitespace(from_line))
         quoted += _("From: %s\n").printf(from_line);
-    // TODO: Doing it this way because string change happened after string freeze and "Subject" is
-    // available but not "Subject: %s"
-    quoted += _("Subject:") + "%s\n".printf(email.subject != null ? email.subject.to_string() : "");
+    quoted += _("Subject: %s\n").printf(email.subject != null ? email.subject.to_string() : "");
     quoted += _("Date: %s\n").printf(email.date != null ? email.date.to_string() : "");
     string to_line = email_addresses_for_reply(email.to, html_format);
     if (!String.is_empty_or_whitespace(to_line))
