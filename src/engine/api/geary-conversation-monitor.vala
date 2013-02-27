@@ -383,7 +383,7 @@ public class Geary.ConversationMonitor : Object {
         
         // pull in all the local email immediamente
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
-        yield load_async(-1, -1, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+        yield load_async(-1, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
         debug("ConversationMonitor seeded for %s", folder.to_string());
         
         // if already opened, go ahead and do a full load now from remote and local; otherwise,
