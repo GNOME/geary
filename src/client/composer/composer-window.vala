@@ -50,8 +50,16 @@ public class ComposerWindow : Gtk.Window {
             background-color: white !important;
             font-size: medium !important;
         }
-        body.plain {
+        body.plain, body.plain * {
             font-family: monospace !important;
+            font-weight: normal;
+            font-style: normal;
+            font-size: 10pt;
+            color: black;
+            text-decoration: none;
+        }
+        body.plain a {
+            cursor: text;
         }
         blockquote {
             margin-top: 0px;
@@ -815,30 +823,6 @@ public class ComposerWindow : Gtk.Window {
     private void on_compose_as_html() {
         WebKit.DOM.DOMTokenList body_classes = editor.get_dom_document().body.get_class_list();
         if (!compose_as_html) {
-            // Do the equivalent of on_remove_format, but for entire document while maintaining
-            // selection.
-            editor.settings.enable_scripts = true;
-            editor.execute_script("""
-                selection = document.getSelection();
-                anchorNode = selection.anchorNode;
-                anchorOffset = selection.anchorOffset;
-                focusNode = selection.focusNode;
-                focusOffset = selection.focusOffset;
-                
-                selection.selectAllChildren(document);
-                
-                document.execCommand("removeformat", false, "");
-                // TODO: Use this when a reset stylesheet is available:
-                // http://redmine.yorba.org/issues/6437
-                //document.execCommand("removeparaformat", false, "");
-                document.execCommand("unlink", false, "");
-                document.execCommand("backcolor", false, "#ffffff");
-                document.execCommand("forecolor", false, "#000000");
-                
-                selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
-                """);
-            editor.settings.enable_scripts = false;
-            
             compose_toolbar.hide();
             try {
                 body_classes.add("plain");
@@ -1009,14 +993,17 @@ public class ComposerWindow : Gtk.Window {
         WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
         WebKit.WebPolicyDecision policy_decision) {
         policy_decision.ignore();
-        link_dialog(request.uri);
+        if (compose_as_html)
+            link_dialog(request.uri);
         return true;
     }
     
     private void on_hovering_over_link(string? title, string? url) {
-        message_overlay_label.label = url;
-        hover_url = url;
-        update_actions();
+        if (compose_as_html) {
+            message_overlay_label.label = url;
+            hover_url = url;
+            update_actions();
+        }
     }
     
     private void on_spell_check_changed() {
