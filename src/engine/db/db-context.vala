@@ -29,6 +29,10 @@ public abstract class Geary.Db.Context : Object {
         return null;
     }
     
+    internal int get_max_retry_msec() {
+        return get_connection() != null ? get_connection().get_busy_timeout_msec() : Connection.DEFAULT_BUSY_TIMEOUT_MSEC;
+    }
+    
     protected inline int throw_on_error(string? method, int result, string? raw = null) throws DatabaseError {
         return Db.throw_on_error(this, method, result, raw);
     }

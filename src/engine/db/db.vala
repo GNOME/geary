@@ -20,6 +20,9 @@ namespace Geary.Db {
 
 public const int64 INVALID_ROWID = -1;
 
+private const int MAX_RETRY_SLEEP_MSEC = 1000;
+private const int RETRY_SLEEP_INC_MSEC = 50;
+
 [Flags]
 public enum DatabaseFlags {
     NONE = 0,
@@ -51,6 +54,9 @@ public delegate void PrepareConnection(Connection cx, bool master) throws Error;
  */
 public delegate TransactionOutcome TransactionMethod(Connection cx, Cancellable? cancellable) throws Error;
 
+// Used by exec_retry_locked().
+private delegate int SqliteExecOperation();
+
 /**
  * See http://www.sqlite.org/c3ref/threadsafe.html
  */
@@ -75,6 +81,36 @@ public int sqlite_version_number() {
 private void check_cancelled(string? method, Cancellable? cancellable) throws IOError {
     if (cancellable != null && cancellable.is_cancelled())
         throw new IOError.CANCELLED("%s cancelled", !String.is_empty(method) ? method : "Operation");
+}
+
+// This method is useful for dealing with BUSY retries in a consistent manner.
+private int exec_retry_locked(Context ctx, string? method, SqliteExecOperation op, string? raw = null)
+    throws Error {
+    int count = 0;
+    int sleep_msec = RETRY_SLEEP_INC_MSEC;
+    int total_msec = 0;
+    int max_retry_msec = ctx.get_max_retry_msec();
+    for (;;) {
+        try {
+            return throw_on_error(ctx, method, op(), raw);
+        } catch (DatabaseError derr) {
+            // if not BUSY, then immediately throw
+            if (!(derr is DatabaseError.BUSY))
+                throw derr;
+            
+            // if BUSY and total time has elapsed, throw
+            if ((max_retry_msec > 0) && (total_msec >= max_retry_msec))
+                throw derr;
+        }
+        
+        // sleep and retry
+        Thread.usleep(sleep_msec * 1000);
+        
+        total_msec += sleep_msec;
+        sleep_msec = Numeric.int_ceiling(sleep_msec + RETRY_SLEEP_INC_MSEC, MAX_RETRY_SLEEP_MSEC);
+        
+        debug("%s retrying: [%d] %s", method, ++count, (raw != null) ? raw : "");
+    }
 }
 
 // Returns result if exception is not thrown

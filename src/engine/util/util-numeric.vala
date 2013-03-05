@@ -42,5 +42,9 @@ public inline bool int64_in_range_exclusive(int64 value, int64 min, int64 max) {
     return (value > min) && (value < max);
 }
 
+public inline int int_round_up(int value, int multiple_of) {
+    return ((value / multiple_of) * multiple_of) + ((value % multiple_of != 0) ? multiple_of : 0);
+}
+
 }
 

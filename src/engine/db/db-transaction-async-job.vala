@@ -38,7 +38,9 @@ private class Geary.Db.TransactionAsyncJob : Object {
             
             outcome = cx.exec_transaction(type, cb, cancellable);
         } catch (Error err) {
-            debug("AsyncJob: transaction completed with error: %s", err.message);
+            if (!(err is IOError.CANCELLED))
+                debug("AsyncJob: transaction completed with error: %s", err.message);
+            
             caught_err = err;
         }
         
@@ -67,7 +69,7 @@ private class Geary.Db.TransactionAsyncJob : Object {
         try {
             completed.notify();
         } catch (Error err) {
-            if (caught_err != null) {
+            if (caught_err != null && !(caught_err is IOError.CANCELLED)) {
                 debug("Unable to notify AsyncTransaction has completed w/ err %s: %s",
                     caught_err.message, err.message);
             } else {

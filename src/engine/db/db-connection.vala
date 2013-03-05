@@ -16,13 +16,17 @@
  */
 
 public class Geary.Db.Connection : Geary.Db.Context {
+    /**
+     * Default value is for *no* timeout, that is, the Db unit will retry all BUSY results until
+     * the database is not locked.
+     */
     public const int DEFAULT_BUSY_TIMEOUT_MSEC = 0;
     
     /**
      * This value gives a generous amount of time for SQLite to finish a big write operation and
      * relinquish the lock to other waiting transactions.
      */
-    public const int RECOMMENDED_BUSY_TIMEOUT_MSEC = 30 * 1000;
+    public const int RECOMMENDED_BUSY_TIMEOUT_MSEC = 60 * 1000;
     
     private const string PRAGMA_FOREIGN_KEYS = "foreign_keys";
     private const string PRAGMA_RECURSIVE_TRIGGERS = "recursive_triggers";
@@ -71,10 +75,19 @@ public class Geary.Db.Connection : Geary.Db.Context {
         
         check_cancelled("Connection.ctor", cancellable);
         
-        // TODO: open_v2() can return a database connection even when an error is returned; the
-        // database must still be closed in this case
-        throw_on_error("Connection.ctor", Sqlite.Database.open_v2(database.db_file.get_path(),
-            out db, sqlite_flags, null));
+        try {
+            throw_on_error("Connection.ctor", Sqlite.Database.open_v2(database.db_file.get_path(),
+                out db, sqlite_flags, null));
+        } catch (DatabaseError derr) {
+            // don't throw BUSY error for open unless no db object was returned, as it's possible for
+            // open_v2() to return an error *and* a valid Database object, see:
+            // http://www.sqlite.org/c3ref/open.html
+            if (!(derr is DatabaseError.BUSY) || (db == null))
+                throw derr;
+        }
+        
+        // clear SQLite's busy timeout; this is done manually in the library with exec_retry_locked()
+        db.busy_timeout(0);
     }
     
     /**
@@ -91,7 +104,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public void exec(string sql, Cancellable? cancellable = null) throws Error {
         check_cancelled("Connection.exec", cancellable);
         
-        throw_on_error("Connection.exec", db.exec(sql), sql);
+        exec_retry_locked(this, "Connection.exec", () => { return db.exec(sql); }, sql);
         
         // Don't use Context.log(), which is designed for logging Results and Statements
         Logging.debug(Logging.Flag.SQL, "exec:\n\t%s", sql);
@@ -138,17 +151,15 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
-     * Sets SQLite's internal busy timeout handler.  This is imperative for exec_transaction() and
-     * Db.Database.exec_transaction_async(), because those calls will throw a DatabaseError.BUSY
-     * call immediately if another transaction has acquired the reserved or exclusive locks.
-     * With this set, SQLite will attempt a retry later, guarding against BUSY under normal
-     * conditions.  See http://www.sqlite.org/c3ref/busy_timeout.html
+     * Sets busy timeout time in milliseconds.  Zero or a negative value indicates that all
+     * operations that SQLite returns BUSY will be retried until they complete with success or error.
+     * Otherwise, after said amount of time has transpired, DatabaseError.BUSY will be thrown.
+     *
+     * This is imperative for exec_transaction() and Db.Database.exec_transaction_async(), because
+     * those calls will throw a DatabaseError.BUSY call immediately if another transaction has
+     * acquired the reserved or exclusive locks.
      */
     public void set_busy_timeout_msec(int busy_timeout_msec) throws Error {
-        if (this.busy_timeout_msec == busy_timeout_msec)
-            return;
-        
-        throw_on_error("Database.set_busy_timeout", db.busy_timeout(busy_timeout_msec));
         this.busy_timeout_msec = busy_timeout_msec;
     }
     
@@ -323,7 +334,9 @@ public class Geary.Db.Connection : Geary.Db.Context {
         try {
             exec(type.sql(), cancellable);
         } catch (Error err) {
-            debug("Connection.exec_transaction: unable to %s: %s", type.sql(), err.message);
+            if (!(err is IOError.CANCELLED))
+                debug("Connection.exec_transaction: unable to %s: %s", type.sql(), err.message);
+            
             throw err;
         }
         
@@ -334,7 +347,9 @@ public class Geary.Db.Connection : Geary.Db.Context {
             // perform the transaction
             outcome = cb(this, cancellable);
         } catch (Error err) {
-            debug("Connection.exec_transaction: transaction threw error: %s", err.message);
+            if (!(err is IOError.CANCELLED))
+                debug("Connection.exec_transaction: transaction threw error: %s", err.message);
+            
             caught_err = err;
         }
         

@@ -7,6 +7,8 @@
 private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
     public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = Geary.Email.Field.PROPERTIES;
     
+    private const int LIST_EMAIL_CHUNK_COUNT = 5;
+    
     [Flags]
     public enum ListFlags {
         NONE = 0,
@@ -233,9 +235,9 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         
         Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
         Gee.Collection<Contact> updated_contacts = new Gee.ArrayList<Contact>();
-        Db.TransactionOutcome outcome = yield db.exec_transaction_async(Db.TransactionType.RW,
-            (cx) => {
-            foreach (Geary.Email email in emails) {
+        foreach (Geary.Email email in emails) {
+            Db.TransactionOutcome outcome = yield db.exec_transaction_async(Db.TransactionType.RW,
+                (cx) => {
                 Gee.Collection<Contact>? contacts_this_email = null;
                 bool created = do_create_or_merge_email(cx, email, out contacts_this_email, cancellable);
                 
@@ -243,13 +245,16 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                     updated_contacts.add_all(contacts_this_email);
                 
                 results.set(email, created);
-            }
+                
+                return Db.TransactionOutcome.COMMIT;
+            }, cancellable);
             
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        if (outcome == Db.TransactionOutcome.COMMIT && updated_contacts.size > 0)
-            contact_store.update_contacts(updated_contacts);
+            if (outcome == Db.TransactionOutcome.COMMIT && updated_contacts.size > 0)
+                contact_store.update_contacts(updated_contacts);
+            
+            // clear each iteration
+            updated_contacts.clear();
+        }
         
         return results;
     }
@@ -273,10 +278,13 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
         if (!skip_open_check)
             check_open();
         
+        // Break up this work a bit so the database is not held on one long continuous transaction
+        // First, pull in all the message locations that correspond to the list criteria
+        //
         // TODO: A more efficient way to do this would be to pull in all the columns at once in
         // a single SELECT operation ... this might be less efficient than current practice if
         // a lot of messages are marked for removal, but that's an edge case
-        Gee.List<Geary.Email>? list = null;
+        Gee.List<LocationIdentifier> ids = new Gee.ArrayList<LocationIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
             Geary.Folder.normalize_span_specifiers(ref low, ref count,
                 do_get_email_count(cx, flags, cancellable));
@@ -294,7 +302,6 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             if (results.finished)
                 return Db.TransactionOutcome.SUCCESS;
             
-            Gee.List<LocationIdentifier> ids = new Gee.ArrayList<LocationIdentifier>();
             int position = low;
             do {
                 LocationIdentifier location = new LocationIdentifier(results.rowid_at(0), position++,
@@ -305,12 +312,11 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 ids.add(location);
             } while (results.next(cancellable));
             
-            list = do_list_email(cx, ids, required_fields, flags, cancellable);
-            
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
         
-        return list;
+        // Next, pull in email from locations in chunks (rather than all in one transaction)
+        return yield list_email_in_chunks_async(ids, required_fields, flags, cancellable);
     }
     
     public async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
@@ -349,7 +355,9 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             high = (count != int.MAX) ? (low + count).clamp(1, uint32.MAX) : -1;
         }
         
-        Gee.List<Geary.Email>? list = null;
+        // Break up work so all reading isn't done in single transaction that locks up the
+        // database ... first, gather locations of all emails in database
+        Gee.List<LocationIdentifier> ids = new Gee.ArrayList<LocationIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt;
             if (high != -1 && low != -1) {
@@ -379,7 +387,6 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             if (results.finished)
                 return Db.TransactionOutcome.SUCCESS;
             
-            Gee.List<LocationIdentifier> ids = new Gee.ArrayList<LocationIdentifier>();
             int position = -1;
             do {
                 int64 ordering = results.int64_at(1);
@@ -403,12 +410,44 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
                 ids.add(location);
             } while (results.next(cancellable));
             
-            list = do_list_email(cx, ids, required_fields, flags, cancellable);
-            
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
         
-        return list;
+        // Next, read in email in chunks
+        return yield list_email_in_chunks_async(ids, required_fields, flags, cancellable);
+    }
+    
+    private async Gee.List<Geary.Email>? list_email_in_chunks_async(Gee.List<LocationIdentifier> ids,
+        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
+        int length = ids.size;
+        if (length == 0)
+            return null;
+        
+        int length_rounded_up = Numeric.int_round_up(length, LIST_EMAIL_CHUNK_COUNT);
+        
+        Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
+        for (int start = 0; start < length_rounded_up; start += LIST_EMAIL_CHUNK_COUNT) {
+            // stop is the index *after* the end of the slice
+            int stop = Numeric.int_ceiling((start + LIST_EMAIL_CHUNK_COUNT), length);
+            
+            Gee.List<LocationIdentifier>? slice = ids.slice(start, stop);
+            assert(slice != null && slice.size > 0);
+            
+            Gee.List<Geary.Email>? list = null;
+            yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+                list = do_list_email(cx, slice, required_fields, flags, cancellable);
+                
+                return Db.TransactionOutcome.SUCCESS;
+            }, cancellable);
+            
+            if (list != null)
+                results.add_all(list);
+        }
+        
+        if (results.size != length)
+            debug("list_email_in_chunks_async: Requested %d email, returned %d", length, results.size);
+        
+        return (results.size > 0) ? results : null;
     }
     
     public async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
