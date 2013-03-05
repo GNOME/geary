@@ -188,7 +188,7 @@ private class Geary.ImapDB.Folder : Object, Geary.ReferenceSemantics {
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
         
-        properties.set_status_message_count(count);
+        properties.set_status_message_count(count, false);
     }
     
     // Updates both the FolderProperties and the value in the local store.  Must be called while

@@ -340,8 +340,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 try {
                     local_folder = yield local.fetch_folder_async(remote_folder.get_path(), cancellable);
                 } catch (Error err) {
-                    debug("Unable to fetch local folder for remote %s: %s", remote_folder.get_path().to_string(),
-                        err.message);
+                    if (!(err is EngineError.NOT_FOUND)) {
+                        debug("Unable to fetch local folder for remote %s: %s", remote_folder.get_path().to_string(),
+                            err.message);
+                    }
                 }
                 
                 if (local_folder != null) {

@@ -16,7 +16,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
     
-    
     private weak GenericAccount _account;
     private Imap.Account remote;
     private ImapDB.Account local;

@@ -273,7 +273,12 @@ private class Geary.ImapDB.Account : Object {
                     new Imap.UIDValidity(result.int64_for("uid_validity")),
                     new Imap.UID(result.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")));
-                properties.set_status_message_count(result.int_for("last_seen_status_total"));
+                // due to legacy code, can't set last_seen_total to -1 to indicate that the folder
+                // hasn't been SELECT/EXAMINE'd yet, so the STATUS count should be used as the
+                // authoritative when the other is zero ... this is important when first creating a
+                // folder, as the STATUS is the count that is known first
+                properties.set_status_message_count(result.int_for("last_seen_status_total"),
+                    (properties.select_examine_messages == 0));
                 
                 id_map.set(path, result.rowid_for("id"));
                 prop_map.set(path, properties);
@@ -338,11 +343,8 @@ private class Geary.ImapDB.Account : Object {
         int64 folder_id = Db.INVALID_ROWID;
         Imap.FolderProperties? properties = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable)) {
-                debug("Unable to find folder ID for %s to fetch", path.to_string());
-                
+            if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable))
                 return Db.TransactionOutcome.DONE;
-            }
             
             if (folder_id == Db.INVALID_ROWID)
                 return Db.TransactionOutcome.DONE;
@@ -358,7 +360,12 @@ private class Geary.ImapDB.Account : Object {
                     new Imap.UIDValidity(results.int64_for("uid_validity")),
                     new Imap.UID(results.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(results.string_for("attributes")));
-                properties.set_status_message_count(results.int_for("last_seen_status_total"));
+                // due to legacy code, can't set last_seen_total to -1 to indicate that the folder
+                // hasn't been SELECT/EXAMINE'd yet, so the STATUS count should be used as the
+                // authoritative when the other is zero ... this is important when first creating a
+                // folder, as the STATUS is the count that is known first
+                properties.set_status_message_count(results.int_for("last_seen_status_total"),
+                    (properties.select_examine_messages == 0));
             }
             
             return Db.TransactionOutcome.DONE;
@@ -526,9 +533,6 @@ private class Geary.ImapDB.Account : Object {
             if (!result.finished) {
                 id = result.rowid_at(0);
             } else if (!create) {
-                debug("Unable to return folder ID for %s: not creating paths in table",
-                    path.to_string());
-                
                 return false;
             } else {
                 // not found, create it

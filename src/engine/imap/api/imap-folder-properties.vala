@@ -96,14 +96,14 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         is_openable = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_SELECT));
     }
     
-    public void set_status_message_count(int messages) {
+    public void set_status_message_count(int messages, bool force) {
         if (messages < 0)
             return;
         
         status_messages = messages;
         
-        // select/examine more authoritative than status
-        if (select_examine_messages < 0)
+        // select/examine more authoritative than status, unless the caller knows otherwise
+        if (force || (select_examine_messages < 0))
             email_total = messages;
     }
     

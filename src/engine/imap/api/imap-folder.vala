@@ -69,7 +69,7 @@ private class Geary.Imap.Folder : Object {
         int old_status_messages = properties.status_messages;
         properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, properties.unseen,
             mailbox.uid_validity, mailbox.uid_next, properties.attrs);
-        properties.set_status_message_count(old_status_messages);
+        properties.set_status_message_count(old_status_messages, false);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
