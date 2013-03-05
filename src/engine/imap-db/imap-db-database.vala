@@ -6,7 +6,6 @@
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const string DB_FILENAME = "geary.db";
-    private const int BUSY_TIMEOUT_MSEC = Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC;
     private string account_owner_email;
     
     public Database(File db_dir, File schema_dir, string account_owner_email) {
@@ -79,7 +78,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     }
     
     private void on_prepare_database_connection(Db.Connection cx) throws Error {
-        cx.set_busy_timeout_msec(BUSY_TIMEOUT_MSEC);
         cx.set_foreign_keys(true);
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.OFF);
