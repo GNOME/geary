@@ -107,7 +107,7 @@ msgstr "%H:%M"
 #. format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a, %-e. %b, %Y u %H:%M %p"
+msgstr "%a, %-e. %b, %Y u %H:%M"
 
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
