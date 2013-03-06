@@ -37,7 +37,6 @@ set(TRANSLATED
     sv
     te
     tr
-    tr_TR
     uk
     vi
     zh_CN
