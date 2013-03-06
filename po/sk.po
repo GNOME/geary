@@ -2,7 +2,7 @@
 # PO message string template file for Geary email client
 # Copyright 2012-2013 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
-# 
+#
 # Translators:
 # Dušan Kazik <prescott66@gmail.com>, 2013.
 msgid ""
@@ -13,10 +13,10 @@ msgstr ""
 "PO-Revision-Date: 2013-02-27 00:48+0000\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: sk\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
@@ -73,44 +73,38 @@ msgid "\"%s\" is an empty file."
 msgstr ""
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%H:%M, %e. %B, %Y"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%H:%M, %e. %B, %Y"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%H:%M, %e. %B, %Y"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr ""
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%e. %b"
@@ -132,15 +126,13 @@ msgstr[1] ""
 msgstr[2] ""
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -180,8 +172,7 @@ msgid "%u read messages"
 msgstr ""
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -215,6 +206,22 @@ msgstr ""
 msgid "6 months back"
 msgstr ""
 
+#: ../../ui/remove_confirm.glade:46
+msgid ""
+"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
+"account?</span> "
+msgstr ""
+
+#: ../../ui/account_cannot_remove.glade:41
+msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+msgstr ""
+
+#: ../../ui/account_cannot_remove.glade:57
+msgid ""
+"A composer window associated with this account is currently open. Send or "
+"discard the message and try again."
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
@@ -233,6 +240,10 @@ msgstr "O %s"
 msgid "Accounts"
 msgstr ""
 
+#: ../../ui/account_list.glade:73
+msgid "Add an account"
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
 msgstr ""
@@ -244,6 +255,12 @@ msgstr ""
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
 msgstr "Všetka pošta"
+
+#: ../../ui/remove_confirm.glade:61
+msgid ""
+"All email associated with this account will be removed from your computer. "
+"This will not affect email on the server."
+msgstr ""
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -264,13 +281,28 @@ msgstr "Naozaj chcete otvoriť „%s“?"
 
 #: ../../src/client/geary-controller.vala:1055
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from"
-" trusted sources."
-msgstr "Prílohy môžu po otvorení poškodiť váš systém.  Otvárajte iba súbory z dôveryhodných zdrojov."
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"Prílohy môžu po otvorení poškodiť váš systém.  Otvárajte iba súbory z "
+"dôveryhodných zdrojov."
 
 #: ../../src/client/views/conversation-viewer.vala:243
 msgid "Bcc:"
 msgstr "Skeytý kópia:"
+
+#: ../../ui/composer.glade:429
+msgid "Bold"
+msgstr "Tučné"
+
+#. Toggle bold text
+#: ../../ui/composer.glade:428
+msgid "Bold (Ctrl+B)"
+msgstr ""
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "_Farba"
 
 #: ../../src/client/composer/composer-window.vala:609
 msgid "Cannot add attachment"
@@ -288,10 +320,23 @@ msgstr "Zvoľte súbor"
 msgid "Co_ntinue"
 msgstr "Po_kračovať"
 
+#: ../../ui/composer.glade:561
+msgid "Color"
+msgstr "Farba"
+
+#. Opens font color dialog
+#: ../../ui/composer.glade:560
+msgid "Color (Ctrl+R)"
+msgstr ""
+
 #: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "Napísať správu"
+
+#: ../../ui/preferences.glade:123
+msgid "Composer"
+msgstr "Tvorca"
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
@@ -299,6 +344,10 @@ msgstr "Skopírovať _emailovú adresu"
 
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
+msgstr "Skopírovať _odkaz"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
 msgstr "Skopírovať _odkaz"
 
 #: ../../src/client/geary-application.vala:17
@@ -317,6 +366,10 @@ msgstr "Dátum: %s\n"
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
 msgstr ""
+
+#: ../../ui/toolbar.glade:155
+msgid "Delete"
+msgstr "Odstrániť"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
@@ -342,9 +395,33 @@ msgstr "Nepýtať s_a znovu"
 msgid "Drafts"
 msgstr "Koncepty"
 
+#: ../../ui/composer.glade:384
+msgid "Drop files here"
+msgstr "Sem pustite súbory"
+
+#: ../../ui/account_list.glade:87
+msgid "Edit an account"
+msgstr ""
+
+#: ../../ui/remove_confirm.glade:97
+msgid "Email address:"
+msgstr ""
+
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
 msgstr ""
+
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr "Povoliť _kontrolu pravopisu"
+
+#: ../../ui/login.glade:591
+msgid "Encr_yption:"
+msgstr "Š_ifrovanie:"
+
+#: ../../ui/login.glade:610
+msgid "Encrypt_ion:"
+msgstr "Ši_frovanie:"
 
 #: ../../src/client/accounts/add-edit-page.vala:185
 msgid "Enter your account information to get started."
@@ -366,6 +443,25 @@ msgstr "Zlyhalo analyzovanie volieb príkazového riadka: %s\n"
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
 msgstr "Pevná šírka"
+
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "Písmo"
+
+#. Opens font size drop-down menu
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
+#: ../../ui/composer.glade:547
+msgid "Font size"
+msgstr "Veľkosť písma"
+
+#. Opens font drop-down menu
+#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
+msgid "Fonts"
+msgstr "Písma"
+
+#: ../../ui/toolbar.glade:77
+msgid "Forward"
+msgstr "Preposlať"
 
 #: ../../src/client/views/conversation-viewer.vala:232
 msgid "From:"
@@ -389,6 +485,14 @@ msgstr "Geary Mail"
 msgid "Gmail"
 msgstr "Gmail"
 
+#: ../../ui/password-dialog.glade:132
+msgid "IMAP Credentials"
+msgstr "Poverenia pre IMAP"
+
+#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
+msgid "IMAP settings"
+msgstr "Nastavenia IMAP"
+
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
 msgstr ""
@@ -401,10 +505,32 @@ msgstr "Doručená pošta"
 msgid "Inboxes"
 msgstr ""
 
+#: ../../ui/composer.glade:495
+msgid "Indent"
+msgstr ""
+
+#. Indent text
+#: ../../ui/composer.glade:494
+msgid "Indent (Ctrl+])"
+msgstr ""
+
+#: ../../ui/composer.glade:443
+msgid "Italic"
+msgstr "Kurzíva"
+
+#. Toggle italic text
+#: ../../ui/composer.glade:442
+msgid "Italic (Ctrl+I)"
+msgstr ""
+
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
+
+#: ../../ui/toolbar.glade:117
+msgid "Label as"
+msgstr "Označiť menovkou ako"
 
 #: ../../src/client/geary-controller.vala:307
 msgid "Labels"
@@ -414,8 +540,20 @@ msgstr "Menovky"
 msgid "Large"
 msgstr "Veľké"
 
-#. / The IMAP replay queue is how changes on the server are replicated on the
-#. client.
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr ""
+
+#: ../../ui/composer.glade:575
+msgid "Link"
+msgstr ""
+
+#. Add an HTML link
+#: ../../ui/composer.glade:574
+msgid "Link (Ctrl+L)"
+msgstr ""
+
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
@@ -438,8 +576,7 @@ msgstr "Zaznamenať normalizáciu priečinkov"
 msgid "Log network activity"
 msgstr "Zaznamenať aktivitu siete"
 
-#. / Serialization is how commands and responses are converted into a stream
-#. of bytes for
+#. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
@@ -457,6 +594,10 @@ msgstr "MB"
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
 msgstr "Poštový klient"
+
+#: ../../ui/toolbar.glade:103
+msgid "Mark"
+msgstr "Označiť"
 
 #: ../../src/client/geary-controller.vala:198
 msgid "Mark as _read"
@@ -490,6 +631,10 @@ msgstr "Ja"
 msgid "Medium"
 msgstr "Stredné"
 
+#: ../../ui/toolbar.glade:182
+msgid "Menu"
+msgstr "Ponuka"
+
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
 msgstr ""
@@ -502,9 +647,29 @@ msgstr ""
 msgid "Move conversations"
 msgstr ""
 
+#: ../../ui/toolbar.glade:131
+msgid "Move to"
+msgstr "Presunúť do"
+
+#: ../../ui/login.glade:178
+msgid "N_ame:"
+msgstr "_Meno:"
+
+#: ../../ui/login.glade:233
+msgid "N_ickname:"
+msgstr ""
+
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
 msgstr "Nová správa"
+
+#: ../../ui/remove_confirm.glade:83
+msgid "Nickname:"
+msgstr ""
+
+#: ../../ui/login.glade:664
+msgid "No authentication re_quired"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -514,6 +679,10 @@ msgstr "Žiadne vybrané rozhovory."
 #: ../../src/engine/api/geary-special-folder-type.vala:50
 msgid "None"
 msgstr "Nič"
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
+msgstr "Oznámenia"
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:40
@@ -537,6 +706,22 @@ msgstr "Odoslané správy"
 msgid "Output debugging information"
 msgstr "Výstupné ladiace informácie"
 
+#: ../../ui/login.glade:340
+msgid "P_ort:"
+msgstr "P_ort:"
+
+#: ../../ui/login.glade:477
+msgid "Pass_word:"
+msgstr "He_slo:"
+
+#: ../../ui/password-dialog.glade:195
+msgid "Password:"
+msgstr "Heslo:"
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr "Prilepiť s _formátovaním"
+
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "Prosím, zadajte heslo k vašej pošte"
@@ -544,6 +729,18 @@ msgstr "Prosím, zadajte heslo k vašej pošte"
 #: ../../src/client/geary-args.vala:45
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Prosím, pridajte komentáre, nápady a chyby na:"
+
+#: ../../ui/account_spinner.glade:41
+msgid "Please wait while Geary validates your account."
+msgstr ""
+
+#: ../../ui/login.glade:424
+msgid "Por_t:"
+msgstr "Por_t:"
+
+#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
+msgid "Port:"
+msgstr "Port:"
 
 #: ../../src/client/accounts/add-edit-page.vala:579
 msgid "Re_member password"
@@ -553,6 +750,31 @@ msgstr "Zapa_mätať heslo"
 msgid "Re_member passwords"
 msgstr "Zapa_mätať heslá"
 
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr "Číta sa"
+
+#: ../../ui/password-dialog.glade:273
+msgid "Real name:"
+msgstr "Skutočné meno:"
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
+msgid "Remove formatting"
+msgstr "Odstrániť formátovanie"
+
+#. Resets formatting to the default style
+#: ../../ui/composer.glade:588
+msgid "Remove formatting (Ctrl+Space)"
+msgstr ""
+
+#: ../../ui/toolbar.glade:43
+msgid "Reply"
+msgstr ""
+
+#: ../../ui/toolbar.glade:60
+msgid "Reply All"
+msgstr "Odpovie všetkým"
+
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
 msgstr ""
@@ -561,9 +783,34 @@ msgstr ""
 msgid "Reply to _All"
 msgstr "Odpoved_ať všetkým"
 
+#: ../../ui/toolbar.glade:57
+msgid ""
+"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
+msgstr ""
+
+#: ../../ui/toolbar.glade:40
+msgid "Reply to last message in conversation (Ctrl+R, R)"
+msgstr ""
+
+#: ../../ui/composer.glade:147
+msgid "Rich Text"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:162
+msgid "SMTP Credentials"
+msgstr "Poverenia pre SMTP"
+
+#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
+msgid "SMTP settings"
+msgstr "Nastavenia SMTP"
+
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
 msgstr ""
+
+#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
+msgid "SSL/TLS encryption:"
+msgstr "Šifrovanie SSL/TLS:"
 
 #: ../../src/client/dialogs/password-dialog.vala:123
 msgid "STARTTLS"
@@ -584,6 +831,10 @@ msgstr[2] "Uložiť všetky p_rílohy..."
 msgid "Save All A_ttachments..."
 msgstr "Uložiť všetky p_rílohy..."
 
+#: ../../ui/login.glade:307
+msgid "Se_rver:"
+msgstr "Se_rver:"
+
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
 msgstr ""
@@ -596,6 +847,10 @@ msgstr "Vybr_ať všetko"
 msgid "Send and receive email"
 msgstr "Odoslať a prijať poštu"
 
+#: ../../ui/toolbar.glade:74
+msgid "Send copy of last message in conversation (Ctrl+L, F)"
+msgstr ""
+
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
 msgstr ""
@@ -604,9 +859,25 @@ msgstr ""
 msgid "Sent Mail"
 msgstr "Odoslaná pošta"
 
+#: ../../ui/login.glade:407
+msgid "Ser_ver:"
+msgstr "Ser_ver:"
+
 #: ../../src/client/composer/composer-window.vala:336
 msgid "Serif"
 msgstr "Serif"
+
+#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
+msgid "Server:"
+msgstr "Server:"
+
+#: ../../ui/password-dialog.glade:258
+msgid "Service:"
+msgstr "Služba:"
+
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
+msgstr "Zobraziť _upozornenia pre novú poštu"
 
 #: ../../src/client/composer/composer-window.vala:348
 msgid "Small"
@@ -619,6 +890,24 @@ msgstr "Nevyžiadaná pošta"
 #: ../../src/engine/api/geary-special-folder-type.vala:31
 msgid "Starred"
 msgstr "Označené hviezdičkou"
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:12
+msgid "Start new conversation (Ctrl+N, N)"
+msgstr ""
+
+#: ../../ui/login.glade:764
+msgid "Storage"
+msgstr ""
+
+#: ../../ui/composer.glade:471
+msgid "Strikethrough"
+msgstr "Prečiarknuté"
+
+#. Toggle strikethrough text
+#: ../../ui/composer.glade:470
+msgid "Strikethrough (Ctrl+K)"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:247
 msgid "Subject:"
@@ -637,13 +926,16 @@ msgstr "TB"
 #: ../../src/client/geary-controller.vala:1070
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its "
-"contents."
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Súbor v „%s“ už existuje.  Nahradením sa prepíše jeho obsah."
 
 #: ../../src/client/views/conversation-viewer.vala:79
 msgid "This message contains images. Do you want to show them?"
 msgstr "Táto správa obsahuje obrázky. Chcete ich zobraziť?"
+
+#: ../../ui/composer.glade:400
+msgid "To add them as attachments"
+msgstr "Na ich pridanie do prílohy"
 
 #: ../../src/client/views/conversation-viewer.vala:236
 msgid "To:"
@@ -662,6 +954,15 @@ msgstr "Odpadkový koš"
 msgid "U_nstar"
 msgstr "Odz_načiť hviezdičku"
 
+#: ../../ui/composer.glade:509
+msgid "Un-indent"
+msgstr ""
+
+#. Removes an indent level
+#: ../../ui/composer.glade:508
+msgid "Un-indent (Ctrl+[)"
+msgstr ""
+
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "Nepodarilo sa prihlásiť k poštovému serveru"
@@ -670,10 +971,27 @@ msgstr "Nepodarilo sa prihlásiť k poštovému serveru"
 msgid "Unable to validate:\n"
 msgstr ""
 
+#: ../../ui/composer.glade:457
+msgid "Underline"
+msgstr "Podčiarknuté"
+
+#. Toggle underlined text
+#: ../../ui/composer.glade:456
+msgid "Underline (Ctrl+U)"
+msgstr ""
+
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Nerozpoznaná voľba príkazového riadku \"%s\"\n"
+
+#: ../../ui/login.glade:460
+msgid "User_name:"
+msgstr "Me_no používateľa:"
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
+msgid "Username:"
+msgstr "Meno používateľa:"
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
@@ -693,7 +1011,10 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "Vaše nastavenia servera IMAP a/alebo SMTP neurčujú šifrovanie SSL alebo TLS.  To znamená, že vaše meno používateľa a heslo može byť prečítané inou osobou v sieti.  Naozaj chcete toto vykonať?"
+msgstr ""
+"Vaše nastavenia servera IMAP a/alebo SMTP neurčujú šifrovanie SSL alebo "
+"TLS.  To znamená, že vaše meno používateľa a heslo može byť prečítané inou "
+"osobou v sieti.  Naozaj chcete toto vykonať?"
 
 #: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
@@ -715,9 +1036,21 @@ msgstr "_Archivovať"
 msgid "_Attach"
 msgstr "_Priložiť"
 
+#: ../../ui/composer.glade:663
+msgid "_Attach File"
+msgstr ""
+
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr "_Automaticky vybrať ďalšiu správu"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Cancel"
 msgstr "_Zrušiť"
+
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr "Na _stred"
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
@@ -726,6 +1059,22 @@ msgstr "_Skopírovať"
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
 msgstr "_Odstrániť"
+
+#: ../../ui/password-dialog.glade:547
+msgid "_Details"
+msgstr "Po_drobnosti"
+
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr "_Zobraziť ukážku správy"
+
+#: ../../ui/login.glade:785
+msgid "_Download mail:"
+msgstr ""
+
+#: ../../ui/login.glade:117
+msgid "_Email address:"
+msgstr "_Emailová adresa:"
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -740,9 +1089,17 @@ msgstr "Po_mocník"
 msgid "_Inspect"
 msgstr ""
 
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr "_Zarovnať"
+
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
 msgstr "_Menovka"
+
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr "_Vľavo"
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -764,6 +1121,15 @@ msgstr "_Presunúť"
 msgid "_New Message"
 msgstr "_Nová správa"
 
+#: ../../ui/login.glade:133 ../../ui/login.glade:542
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr "_Heslo:"
+
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr "_Prehrať zvuky upozornení"
+
 #: ../../src/client/geary-controller.vala:175
 msgid "_Preferences"
 msgstr "N_astavenia"
@@ -771,6 +1137,14 @@ msgstr "N_astavenia"
 #: ../../src/client/geary-controller.vala:187
 msgid "_Quit"
 msgstr "_Ukončiť"
+
+#: ../../ui/password-dialog.glade:560
+msgid "_Remember passwords"
+msgstr ""
+
+#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
+msgid "_Remove"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1073
 msgid "_Replace"
@@ -781,6 +1155,10 @@ msgstr "_Nahradiť"
 msgid "_Reply"
 msgstr "_Odpovedať"
 
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr "Vp_ravo"
+
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
 msgstr ""
@@ -789,6 +1167,14 @@ msgstr ""
 msgid "_Save As..."
 msgstr "_Uložiť ako..."
 
+#: ../../ui/composer.glade:696
+msgid "_Send"
+msgstr "_Odoslať"
+
+#: ../../ui/login.glade:162
+msgid "_Service:"
+msgstr "_Služba:"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Show Images"
 msgstr "_Zobraziť obrázky"
@@ -796,6 +1182,10 @@ msgstr "_Zobraziť obrázky"
 #: ../../src/client/geary-controller.vala:210
 msgid "_Star"
 msgstr "Označiť _hviezdičkou"
+
+#: ../../ui/login.glade:525
+msgid "_Username:"
+msgstr "_Meno používateľa:"
 
 #: ../../src/client/views/conversation-viewer.vala:821
 msgid "_View Source"
@@ -811,411 +1201,13 @@ msgstr "bajtov"
 msgid "none"
 msgstr "žiadny"
 
-#. / Translators: add your name and email address to receive credit in the
-#. About dialog
-#. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../../src/client/geary-controller.vala:786
-msgid "translator-credits"
-msgstr "Dušan Kazik <prescott66@gmail.com>"
-
-#: ../../ui/account_list.glade:73
-msgid "Add an account"
-msgstr ""
-
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
 msgid "toolbutton1"
 msgstr ""
 
-#: ../../ui/account_list.glade:87
-msgid "Edit an account"
-msgstr ""
-
-#: ../../ui/account_cannot_remove.glade:41
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr ""
-
-#: ../../ui/account_cannot_remove.glade:57
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr ""
-
-#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
-msgid "_Remove"
-msgstr ""
-
-#: ../../ui/account_spinner.glade:41
-msgid "Please wait while Geary validates your account."
-msgstr ""
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr "_Vľavo"
-
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr "Vp_ravo"
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr "Na _stred"
-
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr "_Zarovnať"
-
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr ""
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "_Farba"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "Písmo"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
-msgid "Remove formatting"
-msgstr "Odstrániť formátovanie"
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr "Prilepiť s _formátovaním"
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr "Skopírovať _odkaz"
-
-#. Opens font size drop-down menu
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
-#: ../../ui/composer.glade:547
-msgid "Font size"
-msgstr "Veľkosť písma"
-
-#: ../../ui/composer.glade:147
-msgid "Rich Text"
-msgstr ""
-
-#: ../../ui/composer.glade:384
-msgid "Drop files here"
-msgstr "Sem pustite súbory"
-
-#: ../../ui/composer.glade:400
-msgid "To add them as attachments"
-msgstr "Na ich pridanie do prílohy"
-
-#. Toggle bold text
-#: ../../ui/composer.glade:428
-msgid "Bold (Ctrl+B)"
-msgstr ""
-
-#: ../../ui/composer.glade:429
-msgid "Bold"
-msgstr "Tučné"
-
-#. Toggle italic text
-#: ../../ui/composer.glade:442
-msgid "Italic (Ctrl+I)"
-msgstr ""
-
-#: ../../ui/composer.glade:443
-msgid "Italic"
-msgstr "Kurzíva"
-
-#. Toggle underlined text
-#: ../../ui/composer.glade:456
-msgid "Underline (Ctrl+U)"
-msgstr ""
-
-#: ../../ui/composer.glade:457
-msgid "Underline"
-msgstr "Podčiarknuté"
-
-#. Toggle strikethrough text
-#: ../../ui/composer.glade:470
-msgid "Strikethrough (Ctrl+K)"
-msgstr ""
-
-#: ../../ui/composer.glade:471
-msgid "Strikethrough"
-msgstr "Prečiarknuté"
-
-#. Indent text
-#: ../../ui/composer.glade:494
-msgid "Indent (Ctrl+])"
-msgstr ""
-
-#: ../../ui/composer.glade:495
-msgid "Indent"
-msgstr ""
-
-#. Removes an indent level
-#: ../../ui/composer.glade:508
-msgid "Un-indent (Ctrl+[)"
-msgstr ""
-
-#: ../../ui/composer.glade:509
-msgid "Un-indent"
-msgstr ""
-
-#. Opens font drop-down menu
-#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
-msgid "Fonts"
-msgstr "Písma"
-
-#. Opens font color dialog
-#: ../../ui/composer.glade:560
-msgid "Color (Ctrl+R)"
-msgstr ""
-
-#: ../../ui/composer.glade:561
-msgid "Color"
-msgstr "Farba"
-
-#. Add an HTML link
-#: ../../ui/composer.glade:574
-msgid "Link (Ctrl+L)"
-msgstr ""
-
-#: ../../ui/composer.glade:575
-msgid "Link"
-msgstr ""
-
-#. Resets formatting to the default style
-#: ../../ui/composer.glade:588
-msgid "Remove formatting (Ctrl+Space)"
-msgstr ""
-
-#: ../../ui/composer.glade:663
-msgid "_Attach File"
-msgstr ""
-
-#: ../../ui/composer.glade:696
-msgid "_Send"
-msgstr "_Odoslať"
-
-#: ../../ui/login.glade:117
-msgid "_Email address:"
-msgstr "_Emailová adresa:"
-
-#: ../../ui/login.glade:133 ../../ui/login.glade:542
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr "_Heslo:"
-
-#: ../../ui/login.glade:162
-msgid "_Service:"
-msgstr "_Služba:"
-
-#: ../../ui/login.glade:178
-msgid "N_ame:"
-msgstr "_Meno:"
-
-#: ../../ui/login.glade:233
-msgid "N_ickname:"
-msgstr ""
-
-#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
-msgid "IMAP settings"
-msgstr "Nastavenia IMAP"
-
-#: ../../ui/login.glade:307
-msgid "Se_rver:"
-msgstr "Se_rver:"
-
-#: ../../ui/login.glade:340
-msgid "P_ort:"
-msgstr "P_ort:"
-
-#: ../../ui/login.glade:407
-msgid "Ser_ver:"
-msgstr "Ser_ver:"
-
-#: ../../ui/login.glade:424
-msgid "Por_t:"
-msgstr "Por_t:"
-
-#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
-msgid "SMTP settings"
-msgstr "Nastavenia SMTP"
-
-#: ../../ui/login.glade:460
-msgid "User_name:"
-msgstr "Me_no používateľa:"
-
-#: ../../ui/login.glade:477
-msgid "Pass_word:"
-msgstr "He_slo:"
-
-#: ../../ui/login.glade:525
-msgid "_Username:"
-msgstr "_Meno používateľa:"
-
-#: ../../ui/login.glade:591
-msgid "Encr_yption:"
-msgstr "Š_ifrovanie:"
-
-#: ../../ui/login.glade:610
-msgid "Encrypt_ion:"
-msgstr "Ši_frovanie:"
-
-#: ../../ui/login.glade:664
-msgid "No authentication re_quired"
-msgstr ""
-
-#: ../../ui/login.glade:764
-msgid "Storage"
-msgstr ""
-
-#: ../../ui/login.glade:785
-msgid "_Download mail:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
-msgid "Username:"
-msgstr "Meno používateľa:"
-
-#: ../../ui/password-dialog.glade:132
-msgid "IMAP Credentials"
-msgstr "Poverenia pre IMAP"
-
-#: ../../ui/password-dialog.glade:162
-msgid "SMTP Credentials"
-msgstr "Poverenia pre SMTP"
-
-#: ../../ui/password-dialog.glade:195
-msgid "Password:"
-msgstr "Heslo:"
-
-#: ../../ui/password-dialog.glade:258
-msgid "Service:"
-msgstr "Služba:"
-
-#: ../../ui/password-dialog.glade:273
-msgid "Real name:"
-msgstr "Skutočné meno:"
-
-#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
-msgid "Server:"
-msgstr "Server:"
-
-#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
-msgid "Port:"
-msgstr "Port:"
-
-#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
-msgid "SSL/TLS encryption:"
-msgstr "Šifrovanie SSL/TLS:"
-
-#: ../../ui/password-dialog.glade:547
-msgid "_Details"
-msgstr "Po_drobnosti"
-
-#: ../../ui/password-dialog.glade:560
-msgid "_Remember passwords"
-msgstr ""
-
-#: ../../ui/preferences.glade:57
-msgid "Reading"
-msgstr "Číta sa"
-
-#: ../../ui/preferences.glade:71
-msgid "_Automatically select next message"
-msgstr "_Automaticky vybrať ďalšiu správu"
-
-#: ../../ui/preferences.glade:94
-msgid "_Display message preview"
-msgstr "_Zobraziť ukážku správy"
-
-#: ../../ui/preferences.glade:123
-msgid "Composer"
-msgstr "Tvorca"
-
-#: ../../ui/preferences.glade:137
-msgid "Enable _spell checking"
-msgstr "Povoliť _kontrolu pravopisu"
-
-#: ../../ui/preferences.glade:166
-msgid "Notifications"
-msgstr "Oznámenia"
-
-#: ../../ui/preferences.glade:180
-msgid "_Play notification sounds"
-msgstr "_Prehrať zvuky upozornení"
-
-#: ../../ui/preferences.glade:203
-msgid "Show _notifications for new mail"
-msgstr "Zobraziť _upozornenia pre novú poštu"
-
-#: ../../ui/remove_confirm.glade:46
-msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:61
-msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:83
-msgid "Nickname:"
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:97
-msgid "Email address:"
-msgstr ""
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:12
-msgid "Start new conversation (Ctrl+N, N)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:40
-msgid "Reply to last message in conversation (Ctrl+R, R)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:43
-msgid "Reply"
-msgstr ""
-
-#: ../../ui/toolbar.glade:57
-msgid ""
-"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:60
-msgid "Reply All"
-msgstr "Odpovie všetkým"
-
-#: ../../ui/toolbar.glade:74
-msgid "Send copy of last message in conversation (Ctrl+L, F)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:77
-msgid "Forward"
-msgstr "Preposlať"
-
-#: ../../ui/toolbar.glade:103
-msgid "Mark"
-msgstr "Označiť"
-
-#: ../../ui/toolbar.glade:117
-msgid "Label as"
-msgstr "Označiť menovkou ako"
-
-#: ../../ui/toolbar.glade:131
-msgid "Move to"
-msgstr "Presunúť do"
-
-#: ../../ui/toolbar.glade:155
-msgid "Delete"
-msgstr "Odstrániť"
-
-#: ../../ui/toolbar.glade:182
-msgid "Menu"
-msgstr "Ponuka"
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../../src/client/geary-controller.vala:786
+msgid "translator-credits"
+msgstr "Dušan Kazik <prescott66@gmail.com>"

@@ -2,7 +2,7 @@
 # PO message string template file for Geary email client
 # Copyright 2012-2013 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
-# 
+#
 # Translators:
 # Andika Triwidada <andika@gmail.com>, 2012.
 # Dani Pratomo <elementaryindo@gmail.com>, 2013.
@@ -15,10 +15,10 @@ msgstr ""
 "PO-Revision-Date: 2013-03-04 12:33+0000\n"
 "Last-Translator: elementary Indonesia <elementaryindo@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: id\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
@@ -75,44 +75,38 @@ msgid "\"%s\" is an empty file."
 msgstr "\"%s\" adalah berkas kosong."
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%-e %B %Y %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-H:%M"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %-e %b %Y pada %-H:%M"
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%-e %b"
@@ -130,15 +124,13 @@ msgid_plural "%d unread messages"
 msgstr[0] "%d pesan tak terbaca"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -178,8 +170,7 @@ msgid "%u read messages"
 msgstr "%u pesan terbaca"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -213,6 +204,26 @@ msgstr "3 bulan ke belakang"
 msgid "6 months back"
 msgstr "6 bulan ke belakang"
 
+#: ../../ui/remove_confirm.glade:46
+msgid ""
+"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
+"account?</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">Apa anda yakin menghapus akun ini?</"
+"span>"
+
+#: ../../ui/account_cannot_remove.glade:41
+msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+msgstr "<span weight=\"bold\" size=\"larger\">Tak dapat menghapus akun</span>"
+
+#: ../../ui/account_cannot_remove.glade:57
+msgid ""
+"A composer window associated with this account is currently open. Send or "
+"discard the message and try again."
+msgstr ""
+"Jendela penulis pesan dari akun ini sedang terbuka. Kirim atau buang pesan "
+"itu dan coba lagi."
+
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
@@ -231,6 +242,10 @@ msgstr "Tentang %s"
 msgid "Accounts"
 msgstr "Akun"
 
+#: ../../ui/account_list.glade:73
+msgid "Add an account"
+msgstr "Tambah akun"
+
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
 msgstr "Tambahkan label ke percakapan"
@@ -242,6 +257,14 @@ msgstr "Tambahkan label ke percakapan"
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
 msgstr "Semua Surat"
+
+#: ../../ui/remove_confirm.glade:61
+msgid ""
+"All email associated with this account will be removed from your computer. "
+"This will not affect email on the server."
+msgstr ""
+"Semua email dari akun ini akan dihapus dari komputer anda. Email di server "
+"tetap ada."
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -262,13 +285,28 @@ msgstr "Yakin ingin buka \"%s\"?"
 
 #: ../../src/client/geary-controller.vala:1055
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from"
-" trusted sources."
-msgstr "Lampiran berpotensi bahaya jika dibuka. Pastikan berkas dari sumber terpercaya."
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"Lampiran berpotensi bahaya jika dibuka. Pastikan berkas dari sumber "
+"terpercaya."
 
 #: ../../src/client/views/conversation-viewer.vala:243
 msgid "Bcc:"
 msgstr "Bcc:"
+
+#: ../../ui/composer.glade:429
+msgid "Bold"
+msgstr "Tebal"
+
+#. Toggle bold text
+#: ../../ui/composer.glade:428
+msgid "Bold (Ctrl+B)"
+msgstr "Tebal (Ctrl+B)"
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "_Warna"
 
 #: ../../src/client/composer/composer-window.vala:609
 msgid "Cannot add attachment"
@@ -286,10 +324,23 @@ msgstr "Pilih berkas"
 msgid "Co_ntinue"
 msgstr "La_njutkan"
 
+#: ../../ui/composer.glade:561
+msgid "Color"
+msgstr "Warna"
+
+#. Opens font color dialog
+#: ../../ui/composer.glade:560
+msgid "Color (Ctrl+R)"
+msgstr "Warna (Ctrl+R)"
+
 #: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "Tulis Surat"
+
+#: ../../ui/preferences.glade:123
+msgid "Composer"
+msgstr "Penyusun"
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
@@ -298,6 +349,10 @@ msgstr "Salin Alamat _Email"
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
 msgstr "Sa_lin Tautan"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
+msgstr "Sa_lin tautan"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
@@ -315,6 +370,10 @@ msgstr "Tanggal: %s\n"
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
 msgstr "Utama"
+
+#: ../../ui/toolbar.glade:155
+msgid "Delete"
+msgstr "Hapus"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
@@ -340,9 +399,33 @@ msgstr "Jangan t_anya aku lagi"
 msgid "Drafts"
 msgstr "Draf"
 
+#: ../../ui/composer.glade:384
+msgid "Drop files here"
+msgstr "Taruh berkas di sini"
+
+#: ../../ui/account_list.glade:87
+msgid "Edit an account"
+msgstr "Sunting akun"
+
+#: ../../ui/remove_confirm.glade:97
+msgid "Email address:"
+msgstr "Alamat email:"
+
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
 msgstr "Email;E-mail;Surat"
+
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr "Fung_sikan pemeriksa ejaan"
+
+#: ../../ui/login.glade:591
+msgid "Encr_yption:"
+msgstr "Enkrip_si:"
+
+#: ../../ui/login.glade:610
+msgid "Encrypt_ion:"
+msgstr "Enkrips_i:"
 
 #: ../../src/client/accounts/add-edit-page.vala:185
 msgid "Enter your account information to get started."
@@ -364,6 +447,25 @@ msgstr "Gagal mengurai opsi baris perintah: %s\n"
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
 msgstr "Lebar tetap"
+
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "Huruf"
+
+#. Opens font size drop-down menu
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
+#: ../../ui/composer.glade:547
+msgid "Font size"
+msgstr "Ukuran huruf"
+
+#. Opens font drop-down menu
+#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
+msgid "Fonts"
+msgstr "Huruf"
+
+#: ../../ui/toolbar.glade:77
+msgid "Forward"
+msgstr "Teruskan"
 
 #: ../../src/client/views/conversation-viewer.vala:232
 msgid "From:"
@@ -387,6 +489,14 @@ msgstr "Surat Geary"
 msgid "Gmail"
 msgstr "Gmail"
 
+#: ../../ui/password-dialog.glade:132
+msgid "IMAP Credentials"
+msgstr "Kredensial IMAP"
+
+#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
+msgid "IMAP settings"
+msgstr "Pengaturan IMAP"
+
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
 msgstr "Penting"
@@ -399,10 +509,32 @@ msgstr "Inboks"
 msgid "Inboxes"
 msgstr "Inboks"
 
+#: ../../ui/composer.glade:495
+msgid "Indent"
+msgstr "Inden"
+
+#. Indent text
+#: ../../ui/composer.glade:494
+msgid "Indent (Ctrl+])"
+msgstr "Menjorok (Ctrl+])"
+
+#: ../../ui/composer.glade:443
+msgid "Italic"
+msgstr "Miring"
+
+#. Toggle italic text
+#: ../../ui/composer.glade:442
+msgid "Italic (Ctrl+I)"
+msgstr "Miring (Ctrl+I)"
+
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
+
+#: ../../ui/toolbar.glade:117
+msgid "Label as"
+msgstr "Labeli"
 
 #: ../../src/client/geary-controller.vala:307
 msgid "Labels"
@@ -412,8 +544,20 @@ msgstr "Label"
 msgid "Large"
 msgstr "Besar"
 
-#. / The IMAP replay queue is how changes on the server are replicated on the
-#. client.
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr "_Tautan"
+
+#: ../../ui/composer.glade:575
+msgid "Link"
+msgstr "Tautan"
+
+#. Add an HTML link
+#: ../../ui/composer.glade:574
+msgid "Link (Ctrl+L)"
+msgstr "Tautan (Ctrl+L)"
+
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
@@ -436,8 +580,7 @@ msgstr "Catat normalisasi map"
 msgid "Log network activity"
 msgstr "Catat aktivitas jaringan"
 
-#. / Serialization is how commands and responses are converted into a stream
-#. of bytes for
+#. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
@@ -455,6 +598,10 @@ msgstr "MB"
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
 msgstr "Klien Surat"
+
+#: ../../ui/toolbar.glade:103
+msgid "Mark"
+msgstr "Tanda"
 
 #: ../../src/client/geary-controller.vala:198
 msgid "Mark as _read"
@@ -488,6 +635,10 @@ msgstr "Aku"
 msgid "Medium"
 msgstr "Sedang"
 
+#: ../../ui/toolbar.glade:182
+msgid "Menu"
+msgstr "Menu"
+
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
 msgstr "Lagi"
@@ -500,9 +651,29 @@ msgstr "Pindahkan percakapan"
 msgid "Move conversations"
 msgstr "Pindahkan percakapan"
 
+#: ../../ui/toolbar.glade:131
+msgid "Move to"
+msgstr "Pindah ke"
+
+#: ../../ui/login.glade:178
+msgid "N_ame:"
+msgstr "N_ama:"
+
+#: ../../ui/login.glade:233
+msgid "N_ickname:"
+msgstr "Nama pangg_ilan:"
+
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
 msgstr "Surat Baru"
+
+#: ../../ui/remove_confirm.glade:83
+msgid "Nickname:"
+msgstr "Nama panggilan:"
+
+#: ../../ui/login.glade:664
+msgid "No authentication re_quired"
+msgstr "Otentikasi tidak dibutuhkan _Q"
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -512,6 +683,10 @@ msgstr "Tak ada percakapan terpilih."
 #: ../../src/engine/api/geary-special-folder-type.vala:50
 msgid "None"
 msgstr "Tidak ada"
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
+msgstr "Pemberitahuan"
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:40
@@ -535,6 +710,22 @@ msgstr "Outboks"
 msgid "Output debugging information"
 msgstr "Output info debugging"
 
+#: ../../ui/login.glade:340
+msgid "P_ort:"
+msgstr "P_ort:"
+
+#: ../../ui/login.glade:477
+msgid "Pass_word:"
+msgstr "Pass_word:"
+
+#: ../../ui/password-dialog.glade:195
+msgid "Password:"
+msgstr "Password:"
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr "Tempel dengan _format"
+
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "Silakan masukkan sandi emailmu"
@@ -542,6 +733,18 @@ msgstr "Silakan masukkan sandi emailmu"
 #: ../../src/client/geary-args.vala:45
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Harap laporkan komentar, saran dan error ke:"
+
+#: ../../ui/account_spinner.glade:41
+msgid "Please wait while Geary validates your account."
+msgstr "Silakan tunggu sementara Geary mengesahkan akun anda."
+
+#: ../../ui/login.glade:424
+msgid "Por_t:"
+msgstr "Por_t:"
+
+#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
+msgid "Port:"
+msgstr "Port:"
 
 #: ../../src/client/accounts/add-edit-page.vala:579
 msgid "Re_member password"
@@ -551,6 +754,31 @@ msgstr "Si_mpan password"
 msgid "Re_member passwords"
 msgstr "Si_mpan password"
 
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr "Membaca"
+
+#: ../../ui/password-dialog.glade:273
+msgid "Real name:"
+msgstr "Nama asli:"
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
+msgid "Remove formatting"
+msgstr "Tanpa format"
+
+#. Resets formatting to the default style
+#: ../../ui/composer.glade:588
+msgid "Remove formatting (Ctrl+Space)"
+msgstr "Singkirkan format (Ctrl+Space)"
+
+#: ../../ui/toolbar.glade:43
+msgid "Reply"
+msgstr "Balas"
+
+#: ../../ui/toolbar.glade:60
+msgid "Reply All"
+msgstr "Balas Semua"
+
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
 msgstr "Balas semu_a"
@@ -559,9 +787,35 @@ msgstr "Balas semu_a"
 msgid "Reply to _All"
 msgstr "Balas ke Semu_a"
 
+#: ../../ui/toolbar.glade:57
+msgid ""
+"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
+msgstr ""
+"Balas ke semua di pesan terkahir dari percakapan (Ctrl+Shift+R, Shift+R)"
+
+#: ../../ui/toolbar.glade:40
+msgid "Reply to last message in conversation (Ctrl+R, R)"
+msgstr "Balas pesan terakhir di percakapan (Ctrl+R, R)"
+
+#: ../../ui/composer.glade:147
+msgid "Rich Text"
+msgstr "Rich Text"
+
+#: ../../ui/password-dialog.glade:162
+msgid "SMTP Credentials"
+msgstr "Kredensial SMTP"
+
+#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
+msgid "SMTP settings"
+msgstr "Pengaturan SMTP"
+
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
 msgstr "SSL"
+
+#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
+msgid "SSL/TLS encryption:"
+msgstr "Enkripsi SSL/TLS:"
 
 #: ../../src/client/dialogs/password-dialog.vala:123
 msgid "STARTTLS"
@@ -580,6 +834,10 @@ msgstr[0] "Simpan _Lampiran"
 msgid "Save All A_ttachments..."
 msgstr "Simpan Semua _Lampiran"
 
+#: ../../ui/login.glade:307
+msgid "Se_rver:"
+msgstr "Se_rver:"
+
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
 msgstr "Pilih Warna"
@@ -592,6 +850,10 @@ msgstr "Pilih Semu_a"
 msgid "Send and receive email"
 msgstr "Kirim dan terima email"
 
+#: ../../ui/toolbar.glade:74
+msgid "Send copy of last message in conversation (Ctrl+L, F)"
+msgstr "Kirim salinan dari pesan terakhir di percakapan (Ctrl+L, F)"
+
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
 msgstr "Kirim pesan dengan perihal dan/atau isi kosong?"
@@ -600,9 +862,25 @@ msgstr "Kirim pesan dengan perihal dan/atau isi kosong?"
 msgid "Sent Mail"
 msgstr "Kirim Surat"
 
+#: ../../ui/login.glade:407
+msgid "Ser_ver:"
+msgstr "Ser_ver:"
+
 #: ../../src/client/composer/composer-window.vala:336
 msgid "Serif"
 msgstr "Fonta serif:"
+
+#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
+msgid "Server:"
+msgstr "Server:"
+
+#: ../../ui/password-dialog.glade:258
+msgid "Service:"
+msgstr "Layanan:"
+
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
+msgstr "Tu_njukkan pemberitahuan bagi surel baru"
 
 #: ../../src/client/composer/composer-window.vala:348
 msgid "Small"
@@ -615,6 +893,24 @@ msgstr "Spam"
 #: ../../src/engine/api/geary-special-folder-type.vala:31
 msgid "Starred"
 msgstr "Spesial"
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:12
+msgid "Start new conversation (Ctrl+N, N)"
+msgstr "Mulai percakapan baru (Ctrl+N, N)"
+
+#: ../../ui/login.glade:764
+msgid "Storage"
+msgstr "Penyimpanan"
+
+#: ../../ui/composer.glade:471
+msgid "Strikethrough"
+msgstr "Coret"
+
+#. Toggle strikethrough text
+#: ../../ui/composer.glade:470
+msgid "Strikethrough (Ctrl+K)"
+msgstr "Coret (Ctrl+K)"
 
 #: ../../src/client/views/conversation-viewer.vala:247
 msgid "Subject:"
@@ -633,13 +929,16 @@ msgstr "TB"
 #: ../../src/client/geary-controller.vala:1070
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its "
-"contents."
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Berkas telah ada di \"%s\".  Kalau ditimpa isi sebelumnya hilang."
 
 #: ../../src/client/views/conversation-viewer.vala:79
 msgid "This message contains images. Do you want to show them?"
 msgstr "Surat ini mengandung gambar. Mau dilihat?"
+
+#: ../../ui/composer.glade:400
+msgid "To add them as attachments"
+msgstr "Tambahkan sebagai lampiran"
 
 #: ../../src/client/views/conversation-viewer.vala:236
 msgid "To:"
@@ -658,6 +957,15 @@ msgstr "Sampah"
 msgid "U_nstar"
 msgstr "_Biasa"
 
+#: ../../ui/composer.glade:509
+msgid "Un-indent"
+msgstr "Tak di-inden"
+
+#. Removes an indent level
+#: ../../ui/composer.glade:508
+msgid "Un-indent (Ctrl+[)"
+msgstr "Tidak menjorok (Ctrl+[)"
+
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "Gagal login ke server email"
@@ -666,10 +974,27 @@ msgstr "Gagal login ke server email"
 msgid "Unable to validate:\n"
 msgstr "Tak dapat mengesahkan:\n"
 
+#: ../../ui/composer.glade:457
+msgid "Underline"
+msgstr "Garis Bawah"
+
+#. Toggle underlined text
+#: ../../ui/composer.glade:456
+msgid "Underline (Ctrl+U)"
+msgstr "Garis bawah (Ctrl+U)"
+
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Baris perintah asing \"%s\"\n"
+
+#: ../../ui/login.glade:460
+msgid "User_name:"
+msgstr "User_name:"
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
+msgid "Username:"
+msgstr "Username:"
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
@@ -689,7 +1014,10 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "Pengaturan IMAP dan/atau SMTP-mu tidak merinci SSL atau TLS. Artinya username dan password kamu bisa dibaca orang lain di jaringan ini. Yakin kamu nggak apa-apa? "
+msgstr ""
+"Pengaturan IMAP dan/atau SMTP-mu tidak merinci SSL atau TLS. Artinya "
+"username dan password kamu bisa dibaca orang lain di jaringan ini. Yakin "
+"kamu nggak apa-apa? "
 
 #: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
@@ -711,9 +1039,21 @@ msgstr "_Arsipkan"
 msgid "_Attach"
 msgstr "L_ampiri"
 
+#: ../../ui/composer.glade:663
+msgid "_Attach File"
+msgstr "L_ampirkan Berkas"
+
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr "Otom_atis pilih pesan selanjutnya"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Cancel"
 msgstr "Ba_tal"
+
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr "T_engah"
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
@@ -722,6 +1062,22 @@ msgstr "Sali_n"
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
 msgstr "_Hapus"
+
+#: ../../ui/password-dialog.glade:547
+msgid "_Details"
+msgstr "_Detail"
+
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr "_Tampilkan pratinjau pesan"
+
+#: ../../ui/login.glade:785
+msgid "_Download mail:"
+msgstr "Un_duh surat:"
+
+#: ../../ui/login.glade:117
+msgid "_Email address:"
+msgstr "Alamat _email:"
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -736,9 +1092,17 @@ msgstr "_Bantuan"
 msgid "_Inspect"
 msgstr "Per_iksa"
 
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr "_Rata"
+
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
 msgstr "_Label"
+
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr "K_iri"
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -760,6 +1124,15 @@ msgstr "_Pindahkan"
 msgid "_New Message"
 msgstr "_Surat Baru"
 
+#: ../../ui/login.glade:133 ../../ui/login.glade:542
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr "_Password:"
+
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr "Bunyikan suara _pemberitahuan"
+
 #: ../../src/client/geary-controller.vala:175
 msgid "_Preferences"
 msgstr "_Pengaturan"
@@ -767,6 +1140,14 @@ msgstr "_Pengaturan"
 #: ../../src/client/geary-controller.vala:187
 msgid "_Quit"
 msgstr "_Keluar"
+
+#: ../../ui/password-dialog.glade:560
+msgid "_Remember passwords"
+msgstr "Ingat sandi _R"
+
+#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
+msgid "_Remove"
+msgstr "Singki_rkan"
 
 #: ../../src/client/geary-controller.vala:1073
 msgid "_Replace"
@@ -777,6 +1158,10 @@ msgstr "Timp_a"
 msgid "_Reply"
 msgstr "B_alas"
 
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr "K_anan"
+
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
 msgstr "_Simpan"
@@ -785,6 +1170,14 @@ msgstr "_Simpan"
 msgid "_Save As..."
 msgstr "_Simpan Sebagai..."
 
+#: ../../ui/composer.glade:696
+msgid "_Send"
+msgstr "_Kirim"
+
+#: ../../ui/login.glade:162
+msgid "_Service:"
+msgstr "La_yanan:"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Show Images"
 msgstr "Tampilkan _Gambar"
@@ -792,6 +1185,10 @@ msgstr "Tampilkan _Gambar"
 #: ../../src/client/geary-controller.vala:210
 msgid "_Star"
 msgstr "_Spesial"
+
+#: ../../ui/login.glade:525
+msgid "_Username:"
+msgstr "_Username:"
 
 #: ../../src/client/views/conversation-viewer.vala:821
 msgid "_View Source"
@@ -807,411 +1204,15 @@ msgstr "byte"
 msgid "none"
 msgstr "kosong"
 
-#. / Translators: add your name and email address to receive credit in the
-#. About dialog
-#. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../../src/client/geary-controller.vala:786
-msgid "translator-credits"
-msgstr "Andika Triwidada <andika@gmail.com>, 2012\\n\nDani Pratomo <elementaryindo@gmail.com>, 2012."
-
-#: ../../ui/account_list.glade:73
-msgid "Add an account"
-msgstr "Tambah akun"
-
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
 msgid "toolbutton1"
 msgstr "toolbutton1"
 
-#: ../../ui/account_list.glade:87
-msgid "Edit an account"
-msgstr "Sunting akun"
-
-#: ../../ui/account_cannot_remove.glade:41
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">Tak dapat menghapus akun</span>"
-
-#: ../../ui/account_cannot_remove.glade:57
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr "Jendela penulis pesan dari akun ini sedang terbuka. Kirim atau buang pesan itu dan coba lagi."
-
-#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
-msgid "_Remove"
-msgstr "Singki_rkan"
-
-#: ../../ui/account_spinner.glade:41
-msgid "Please wait while Geary validates your account."
-msgstr "Silakan tunggu sementara Geary mengesahkan akun anda."
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr "K_iri"
-
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr "K_anan"
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr "T_engah"
-
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr "_Rata"
-
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr "_Tautan"
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "_Warna"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "Huruf"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
-msgid "Remove formatting"
-msgstr "Tanpa format"
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr "Tempel dengan _format"
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr "Sa_lin tautan"
-
-#. Opens font size drop-down menu
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
-#: ../../ui/composer.glade:547
-msgid "Font size"
-msgstr "Ukuran huruf"
-
-#: ../../ui/composer.glade:147
-msgid "Rich Text"
-msgstr "Rich Text"
-
-#: ../../ui/composer.glade:384
-msgid "Drop files here"
-msgstr "Taruh berkas di sini"
-
-#: ../../ui/composer.glade:400
-msgid "To add them as attachments"
-msgstr "Tambahkan sebagai lampiran"
-
-#. Toggle bold text
-#: ../../ui/composer.glade:428
-msgid "Bold (Ctrl+B)"
-msgstr "Tebal (Ctrl+B)"
-
-#: ../../ui/composer.glade:429
-msgid "Bold"
-msgstr "Tebal"
-
-#. Toggle italic text
-#: ../../ui/composer.glade:442
-msgid "Italic (Ctrl+I)"
-msgstr "Miring (Ctrl+I)"
-
-#: ../../ui/composer.glade:443
-msgid "Italic"
-msgstr "Miring"
-
-#. Toggle underlined text
-#: ../../ui/composer.glade:456
-msgid "Underline (Ctrl+U)"
-msgstr "Garis bawah (Ctrl+U)"
-
-#: ../../ui/composer.glade:457
-msgid "Underline"
-msgstr "Garis Bawah"
-
-#. Toggle strikethrough text
-#: ../../ui/composer.glade:470
-msgid "Strikethrough (Ctrl+K)"
-msgstr "Coret (Ctrl+K)"
-
-#: ../../ui/composer.glade:471
-msgid "Strikethrough"
-msgstr "Coret"
-
-#. Indent text
-#: ../../ui/composer.glade:494
-msgid "Indent (Ctrl+])"
-msgstr "Menjorok (Ctrl+])"
-
-#: ../../ui/composer.glade:495
-msgid "Indent"
-msgstr "Inden"
-
-#. Removes an indent level
-#: ../../ui/composer.glade:508
-msgid "Un-indent (Ctrl+[)"
-msgstr "Tidak menjorok (Ctrl+[)"
-
-#: ../../ui/composer.glade:509
-msgid "Un-indent"
-msgstr "Tak di-inden"
-
-#. Opens font drop-down menu
-#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
-msgid "Fonts"
-msgstr "Huruf"
-
-#. Opens font color dialog
-#: ../../ui/composer.glade:560
-msgid "Color (Ctrl+R)"
-msgstr "Warna (Ctrl+R)"
-
-#: ../../ui/composer.glade:561
-msgid "Color"
-msgstr "Warna"
-
-#. Add an HTML link
-#: ../../ui/composer.glade:574
-msgid "Link (Ctrl+L)"
-msgstr "Tautan (Ctrl+L)"
-
-#: ../../ui/composer.glade:575
-msgid "Link"
-msgstr "Tautan"
-
-#. Resets formatting to the default style
-#: ../../ui/composer.glade:588
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "Singkirkan format (Ctrl+Space)"
-
-#: ../../ui/composer.glade:663
-msgid "_Attach File"
-msgstr "L_ampirkan Berkas"
-
-#: ../../ui/composer.glade:696
-msgid "_Send"
-msgstr "_Kirim"
-
-#: ../../ui/login.glade:117
-msgid "_Email address:"
-msgstr "Alamat _email:"
-
-#: ../../ui/login.glade:133 ../../ui/login.glade:542
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr "_Password:"
-
-#: ../../ui/login.glade:162
-msgid "_Service:"
-msgstr "La_yanan:"
-
-#: ../../ui/login.glade:178
-msgid "N_ame:"
-msgstr "N_ama:"
-
-#: ../../ui/login.glade:233
-msgid "N_ickname:"
-msgstr "Nama pangg_ilan:"
-
-#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
-msgid "IMAP settings"
-msgstr "Pengaturan IMAP"
-
-#: ../../ui/login.glade:307
-msgid "Se_rver:"
-msgstr "Se_rver:"
-
-#: ../../ui/login.glade:340
-msgid "P_ort:"
-msgstr "P_ort:"
-
-#: ../../ui/login.glade:407
-msgid "Ser_ver:"
-msgstr "Ser_ver:"
-
-#: ../../ui/login.glade:424
-msgid "Por_t:"
-msgstr "Por_t:"
-
-#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
-msgid "SMTP settings"
-msgstr "Pengaturan SMTP"
-
-#: ../../ui/login.glade:460
-msgid "User_name:"
-msgstr "User_name:"
-
-#: ../../ui/login.glade:477
-msgid "Pass_word:"
-msgstr "Pass_word:"
-
-#: ../../ui/login.glade:525
-msgid "_Username:"
-msgstr "_Username:"
-
-#: ../../ui/login.glade:591
-msgid "Encr_yption:"
-msgstr "Enkrip_si:"
-
-#: ../../ui/login.glade:610
-msgid "Encrypt_ion:"
-msgstr "Enkrips_i:"
-
-#: ../../ui/login.glade:664
-msgid "No authentication re_quired"
-msgstr "Otentikasi tidak dibutuhkan _Q"
-
-#: ../../ui/login.glade:764
-msgid "Storage"
-msgstr "Penyimpanan"
-
-#: ../../ui/login.glade:785
-msgid "_Download mail:"
-msgstr "Un_duh surat:"
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
-msgid "Username:"
-msgstr "Username:"
-
-#: ../../ui/password-dialog.glade:132
-msgid "IMAP Credentials"
-msgstr "Kredensial IMAP"
-
-#: ../../ui/password-dialog.glade:162
-msgid "SMTP Credentials"
-msgstr "Kredensial SMTP"
-
-#: ../../ui/password-dialog.glade:195
-msgid "Password:"
-msgstr "Password:"
-
-#: ../../ui/password-dialog.glade:258
-msgid "Service:"
-msgstr "Layanan:"
-
-#: ../../ui/password-dialog.glade:273
-msgid "Real name:"
-msgstr "Nama asli:"
-
-#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
-msgid "Server:"
-msgstr "Server:"
-
-#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
-msgid "Port:"
-msgstr "Port:"
-
-#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
-msgid "SSL/TLS encryption:"
-msgstr "Enkripsi SSL/TLS:"
-
-#: ../../ui/password-dialog.glade:547
-msgid "_Details"
-msgstr "_Detail"
-
-#: ../../ui/password-dialog.glade:560
-msgid "_Remember passwords"
-msgstr "Ingat sandi _R"
-
-#: ../../ui/preferences.glade:57
-msgid "Reading"
-msgstr "Membaca"
-
-#: ../../ui/preferences.glade:71
-msgid "_Automatically select next message"
-msgstr "Otom_atis pilih pesan selanjutnya"
-
-#: ../../ui/preferences.glade:94
-msgid "_Display message preview"
-msgstr "_Tampilkan pratinjau pesan"
-
-#: ../../ui/preferences.glade:123
-msgid "Composer"
-msgstr "Penyusun"
-
-#: ../../ui/preferences.glade:137
-msgid "Enable _spell checking"
-msgstr "Fung_sikan pemeriksa ejaan"
-
-#: ../../ui/preferences.glade:166
-msgid "Notifications"
-msgstr "Pemberitahuan"
-
-#: ../../ui/preferences.glade:180
-msgid "_Play notification sounds"
-msgstr "Bunyikan suara _pemberitahuan"
-
-#: ../../ui/preferences.glade:203
-msgid "Show _notifications for new mail"
-msgstr "Tu_njukkan pemberitahuan bagi surel baru"
-
-#: ../../ui/remove_confirm.glade:46
-msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">Apa anda yakin menghapus akun ini?</span>"
-
-#: ../../ui/remove_confirm.glade:61
-msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
-msgstr "Semua email dari akun ini akan dihapus dari komputer anda. Email di server tetap ada."
-
-#: ../../ui/remove_confirm.glade:83
-msgid "Nickname:"
-msgstr "Nama panggilan:"
-
-#: ../../ui/remove_confirm.glade:97
-msgid "Email address:"
-msgstr "Alamat email:"
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:12
-msgid "Start new conversation (Ctrl+N, N)"
-msgstr "Mulai percakapan baru (Ctrl+N, N)"
-
-#: ../../ui/toolbar.glade:40
-msgid "Reply to last message in conversation (Ctrl+R, R)"
-msgstr "Balas pesan terakhir di percakapan (Ctrl+R, R)"
-
-#: ../../ui/toolbar.glade:43
-msgid "Reply"
-msgstr "Balas"
-
-#: ../../ui/toolbar.glade:57
-msgid ""
-"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-msgstr "Balas ke semua di pesan terkahir dari percakapan (Ctrl+Shift+R, Shift+R)"
-
-#: ../../ui/toolbar.glade:60
-msgid "Reply All"
-msgstr "Balas Semua"
-
-#: ../../ui/toolbar.glade:74
-msgid "Send copy of last message in conversation (Ctrl+L, F)"
-msgstr "Kirim salinan dari pesan terakhir di percakapan (Ctrl+L, F)"
-
-#: ../../ui/toolbar.glade:77
-msgid "Forward"
-msgstr "Teruskan"
-
-#: ../../ui/toolbar.glade:103
-msgid "Mark"
-msgstr "Tanda"
-
-#: ../../ui/toolbar.glade:117
-msgid "Label as"
-msgstr "Labeli"
-
-#: ../../ui/toolbar.glade:131
-msgid "Move to"
-msgstr "Pindah ke"
-
-#: ../../ui/toolbar.glade:155
-msgid "Delete"
-msgstr "Hapus"
-
-#: ../../ui/toolbar.glade:182
-msgid "Menu"
-msgstr "Menu"
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../../src/client/geary-controller.vala:786
+msgid "translator-credits"
+msgstr ""
+"Andika Triwidada <andika@gmail.com>, 2012\\n\n"
+"Dani Pratomo <elementaryindo@gmail.com>, 2012."

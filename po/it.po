@@ -2,7 +2,7 @@
 # PO message string template file for Geary email client
 # Copyright 2012-2013 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
-# 
+#
 # Translators:
 #   <gianmarcobrocchi@gmail.com>, 2012.
 #  <l.tavecchio1@gmail.com>, 2013.
@@ -18,10 +18,10 @@ msgstr ""
 "PO-Revision-Date: 2013-03-02 09:27+0000\n"
 "Last-Translator: Piercarlo Bennici <piercarlo.bennici@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: it\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
@@ -46,11 +46,15 @@ msgstr "&#8226; Errore di connessione a SMTP.⏎\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:617
 msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr "&#8226; Nome utente o password Smtp errata.\n\n"
+msgstr ""
+"&#8226; Nome utente o password Smtp errata.\n"
+"\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:625
 msgid "        &#8226; Username or password incorrect.\n"
-msgstr "&#8226; Nome utente o password errati.\n\n"
+msgstr ""
+"&#8226; Nome utente o password errati.\n"
+"\n"
 
 #: ../../src/client/composer/composer-window.vala:650
 #, c-format
@@ -78,44 +82,38 @@ msgid "\"%s\" is an empty file."
 msgstr "\"%s\" é un file vuoto."
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %b %-e, %Y at %-l:%M %p"
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%b %-e"
@@ -135,15 +133,13 @@ msgstr[0] "%d messaggio non letto"
 msgstr[1] "%d messaggi non letti"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -183,8 +179,7 @@ msgid "%u read messages"
 msgstr "%u messaggi letti"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -218,6 +213,27 @@ msgstr "3 mesi fa"
 msgid "6 months back"
 msgstr "6 mesi fa"
 
+#: ../../ui/remove_confirm.glade:46
+msgid ""
+"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
+"account?</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">Sicuro di voler rimuovere questo "
+"account?</span> "
+
+#: ../../ui/account_cannot_remove.glade:41
+msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">Impossibile rimuovere account</span> "
+
+#: ../../ui/account_cannot_remove.glade:57
+msgid ""
+"A composer window associated with this account is currently open. Send or "
+"discard the message and try again."
+msgstr ""
+"Una finestra di composizione associata a questo account è attualmente "
+"aperta. Invia o rimuovi il messaggio e prova ancora."
+
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
@@ -236,6 +252,10 @@ msgstr "Informazioni su %s"
 msgid "Accounts"
 msgstr "Accounts"
 
+#: ../../ui/account_list.glade:73
+msgid "Add an account"
+msgstr "Aggiungi un account"
+
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
 msgstr "Aggiungi etichetta alla conversazione"
@@ -247,6 +267,14 @@ msgstr "Aggiungi etichetta alle conversazioni"
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
 msgstr "Tutta la posta"
+
+#: ../../ui/remove_confirm.glade:61
+msgid ""
+"All email associated with this account will be removed from your computer. "
+"This will not affect email on the server."
+msgstr ""
+"Una mail associata con questo account verrà rimossa dal computer. Questo non "
+"avrà effetti sulle email presenti sul server."
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -267,13 +295,28 @@ msgstr "Sei sicuro di voler aprire \"%s\"?"
 
 #: ../../src/client/geary-controller.vala:1055
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from"
-" trusted sources."
-msgstr "Gli allegati possono danneggiare il tuo sistema se aperti. Apri solo file provenienti da fonti fidate."
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"Gli allegati possono danneggiare il tuo sistema se aperti. Apri solo file "
+"provenienti da fonti fidate."
 
 #: ../../src/client/views/conversation-viewer.vala:243
 msgid "Bcc:"
 msgstr "Ccn:"
+
+#: ../../ui/composer.glade:429
+msgid "Bold"
+msgstr "Grassetto"
+
+#. Toggle bold text
+#: ../../ui/composer.glade:428
+msgid "Bold (Ctrl+B)"
+msgstr "Grassetto (Ctrl+B)"
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "C_olore"
 
 #: ../../src/client/composer/composer-window.vala:609
 msgid "Cannot add attachment"
@@ -291,10 +334,23 @@ msgstr "Scegli un file"
 msgid "Co_ntinue"
 msgstr "Co_ntinua"
 
+#: ../../ui/composer.glade:561
+msgid "Color"
+msgstr "Colore"
+
+#. Opens font color dialog
+#: ../../ui/composer.glade:560
+msgid "Color (Ctrl+R)"
+msgstr "Colore (Ctrl+R)"
+
 #: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "Componi Messaggio"
+
+#: ../../ui/preferences.glade:123
+msgid "Composer"
+msgstr "Componitore"
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
@@ -303,6 +359,10 @@ msgstr "Copia Indirizzo _Email"
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
 msgstr "Copia _Co_llegamento"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
+msgstr "Copia co_llegamento"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
@@ -320,6 +380,10 @@ msgstr "Data: %s\n"
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
 msgstr "Predefinito"
+
+#: ../../ui/toolbar.glade:155
+msgid "Delete"
+msgstr "Cancella"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
@@ -345,9 +409,33 @@ msgstr "_Non chiedermelo più"
 msgid "Drafts"
 msgstr "Bozze"
 
+#: ../../ui/composer.glade:384
+msgid "Drop files here"
+msgstr "Trascina file qui"
+
+#: ../../ui/account_list.glade:87
+msgid "Edit an account"
+msgstr "Modifica un account"
+
+#: ../../ui/remove_confirm.glade:97
+msgid "Email address:"
+msgstr "Indirizzo mail:"
+
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
 msgstr "Email;E-mail;Posta"
+
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr "Abilita_controllo ortografico"
+
+#: ../../ui/login.glade:591
+msgid "Encr_yption:"
+msgstr "Ci_fratura:"
+
+#: ../../ui/login.glade:610
+msgid "Encrypt_ion:"
+msgstr "Cifra_tura:"
 
 #: ../../src/client/accounts/add-edit-page.vala:185
 msgid "Enter your account information to get started."
@@ -369,6 +457,25 @@ msgstr "Opzioni di riga di comando non riconosciute: %s\n"
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
 msgstr "Larghezza fissa"
+
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "Carattere"
+
+#. Opens font size drop-down menu
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
+#: ../../ui/composer.glade:547
+msgid "Font size"
+msgstr "Dimensione carattere"
+
+#. Opens font drop-down menu
+#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
+msgid "Fonts"
+msgstr "Caratteri"
+
+#: ../../ui/toolbar.glade:77
+msgid "Forward"
+msgstr "Inoltra"
 
 #: ../../src/client/views/conversation-viewer.vala:232
 msgid "From:"
@@ -392,6 +499,14 @@ msgstr "Geary Mail"
 msgid "Gmail"
 msgstr "Gmail"
 
+#: ../../ui/password-dialog.glade:132
+msgid "IMAP Credentials"
+msgstr "Credenziali IMAP"
+
+#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
+msgid "IMAP settings"
+msgstr "Impostazioni IMAP"
+
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
 msgstr "Importante"
@@ -404,10 +519,32 @@ msgstr "Posta in arrivo"
 msgid "Inboxes"
 msgstr "Posta in arrivo"
 
+#: ../../ui/composer.glade:495
+msgid "Indent"
+msgstr "Indenta"
+
+#. Indent text
+#: ../../ui/composer.glade:494
+msgid "Indent (Ctrl+])"
+msgstr "trattino (Ctrl+])"
+
+#: ../../ui/composer.glade:443
+msgid "Italic"
+msgstr "Italico"
+
+#. Toggle italic text
+#: ../../ui/composer.glade:442
+msgid "Italic (Ctrl+I)"
+msgstr "Corsivo (Ctrl+I)"
+
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
+
+#: ../../ui/toolbar.glade:117
+msgid "Label as"
+msgstr "Etichetta come:"
 
 #: ../../src/client/geary-controller.vala:307
 msgid "Labels"
@@ -417,8 +554,20 @@ msgstr "Etichette"
 msgid "Large"
 msgstr "Grande"
 
-#. / The IMAP replay queue is how changes on the server are replicated on the
-#. client.
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr "_Collegamento"
+
+#: ../../ui/composer.glade:575
+msgid "Link"
+msgstr "Collegamento"
+
+#. Add an HTML link
+#: ../../ui/composer.glade:574
+msgid "Link (Ctrl+L)"
+msgstr "Link (Ctrl+L)"
+
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
@@ -441,8 +590,7 @@ msgstr "Log normalizzazione cartella"
 msgid "Log network activity"
 msgstr "Registra attività di rete"
 
-#. / Serialization is how commands and responses are converted into a stream
-#. of bytes for
+#. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
@@ -460,6 +608,10 @@ msgstr "MB"
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
 msgstr "Client di Posta"
+
+#: ../../ui/toolbar.glade:103
+msgid "Mark"
+msgstr "Contrassegna"
 
 #: ../../src/client/geary-controller.vala:198
 msgid "Mark as _read"
@@ -493,6 +645,10 @@ msgstr "Io"
 msgid "Medium"
 msgstr "Media"
 
+#: ../../ui/toolbar.glade:182
+msgid "Menu"
+msgstr "Menu"
+
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
 msgstr "di più"
@@ -505,9 +661,29 @@ msgstr "Sposta conversazione"
 msgid "Move conversations"
 msgstr "Sposta conversazioni"
 
+#: ../../ui/toolbar.glade:131
+msgid "Move to"
+msgstr "Sposta in"
+
+#: ../../ui/login.glade:178
+msgid "N_ame:"
+msgstr "N_ome:"
+
+#: ../../ui/login.glade:233
+msgid "N_ickname:"
+msgstr "S_oprannome"
+
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
 msgstr "Nuovo Messaggio"
+
+#: ../../ui/remove_confirm.glade:83
+msgid "Nickname:"
+msgstr "Pseudonimo:"
+
+#: ../../ui/login.glade:664
+msgid "No authentication re_quired"
+msgstr "Nessuna autenticazione necessaria"
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -517,6 +693,10 @@ msgstr "Nessuna conversazione selezionata."
 #: ../../src/engine/api/geary-special-folder-type.vala:50
 msgid "None"
 msgstr "Nulla"
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
+msgstr "Notifiche"
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:40
@@ -540,6 +720,22 @@ msgstr "Posta in Uscita"
 msgid "Output debugging information"
 msgstr "Emetti informazioni di debug"
 
+#: ../../ui/login.glade:340
+msgid "P_ort:"
+msgstr "P_orta:"
+
+#: ../../ui/login.glade:477
+msgid "Pass_word:"
+msgstr "Pass_word:"
+
+#: ../../ui/password-dialog.glade:195
+msgid "Password:"
+msgstr "Password:"
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr "Incolla con _formattazione"
+
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "Prego inserisci la tua password email"
@@ -547,6 +743,18 @@ msgstr "Prego inserisci la tua password email"
 #: ../../src/client/geary-args.vala:45
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Prego riportare commenti, suggerimenti e bug a:"
+
+#: ../../ui/account_spinner.glade:41
+msgid "Please wait while Geary validates your account."
+msgstr "Per favore attendi mentre Geary convalida il tuo account."
+
+#: ../../ui/login.glade:424
+msgid "Por_t:"
+msgstr "Por_ta:"
+
+#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
+msgid "Port:"
+msgstr "Porta:"
 
 #: ../../src/client/accounts/add-edit-page.vala:579
 msgid "Re_member password"
@@ -556,6 +764,31 @@ msgstr "R_icorda password"
 msgid "Re_member passwords"
 msgstr "R_icorda password"
 
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr "Sto leggendo"
+
+#: ../../ui/password-dialog.glade:273
+msgid "Real name:"
+msgstr "Nome reale:"
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
+msgid "Remove formatting"
+msgstr "Rimuovi formattazione"
+
+#. Resets formatting to the default style
+#: ../../ui/composer.glade:588
+msgid "Remove formatting (Ctrl+Space)"
+msgstr "Rimuovi formattazione (Ctrl+Space)"
+
+#: ../../ui/toolbar.glade:43
+msgid "Reply"
+msgstr "Rispondi"
+
+#: ../../ui/toolbar.glade:60
+msgid "Reply All"
+msgstr "Rispondi a tutti"
+
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
 msgstr "Rispondi a tutti"
@@ -564,9 +797,36 @@ msgstr "Rispondi a tutti"
 msgid "Reply to _All"
 msgstr "Rispondi a _Tutti"
 
+#: ../../ui/toolbar.glade:57
+msgid ""
+"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
+msgstr ""
+"Rispondi a tutti nell'ultimo messaggio della conversazione (Ctrl+Shift+R, "
+"Shift+R)"
+
+#: ../../ui/toolbar.glade:40
+msgid "Reply to last message in conversation (Ctrl+R, R)"
+msgstr "Rispondi all'ultimo messaggio della conversazione (Ctrl+R, R)"
+
+#: ../../ui/composer.glade:147
+msgid "Rich Text"
+msgstr "Rich Text"
+
+#: ../../ui/password-dialog.glade:162
+msgid "SMTP Credentials"
+msgstr "Credenziali SMTP"
+
+#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
+msgid "SMTP settings"
+msgstr "Impostazioni SMTP"
+
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
 msgstr "SSL"
+
+#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
+msgid "SSL/TLS encryption:"
+msgstr "Cifratura SSL/TLS"
 
 #: ../../src/client/dialogs/password-dialog.vala:123
 msgid "STARTTLS"
@@ -586,6 +846,10 @@ msgstr[1] "Salva A_llegati..."
 msgid "Save All A_ttachments..."
 msgstr "Salva Tutti gli A_llegati..."
 
+#: ../../ui/login.glade:307
+msgid "Se_rver:"
+msgstr "Se_rver:"
+
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
 msgstr "Seleziona colore"
@@ -598,6 +862,10 @@ msgstr "Seleziona _Tutto"
 msgid "Send and receive email"
 msgstr "Invia e ricevi email"
 
+#: ../../ui/toolbar.glade:74
+msgid "Send copy of last message in conversation (Ctrl+L, F)"
+msgstr "Invia copia dell'ultimo messaggio della conversazione (Ctrl+L, F)"
+
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
 msgstr "Invia il messaggio con oggetto e/o corpo vuoto?"
@@ -606,9 +874,25 @@ msgstr "Invia il messaggio con oggetto e/o corpo vuoto?"
 msgid "Sent Mail"
 msgstr "Posta inviata"
 
+#: ../../ui/login.glade:407
+msgid "Ser_ver:"
+msgstr "Ser_ver:"
+
 #: ../../src/client/composer/composer-window.vala:336
 msgid "Serif"
 msgstr "Serif"
+
+#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
+msgid "Server:"
+msgstr "Server:"
+
+#: ../../ui/password-dialog.glade:258
+msgid "Service:"
+msgstr "Servizio:"
+
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
+msgstr "Mostra notifiche per le nuove mail"
 
 #: ../../src/client/composer/composer-window.vala:348
 msgid "Small"
@@ -621,6 +905,24 @@ msgstr "Spam"
 #: ../../src/engine/api/geary-special-folder-type.vala:31
 msgid "Starred"
 msgstr "Speciale"
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:12
+msgid "Start new conversation (Ctrl+N, N)"
+msgstr "Inizia una nuova conversazione (Ctrl+N, N)"
+
+#: ../../ui/login.glade:764
+msgid "Storage"
+msgstr "Archivio"
+
+#: ../../ui/composer.glade:471
+msgid "Strikethrough"
+msgstr "Barrato"
+
+#. Toggle strikethrough text
+#: ../../ui/composer.glade:470
+msgid "Strikethrough (Ctrl+K)"
+msgstr "Barrato (Ctrl+K)"
 
 #: ../../src/client/views/conversation-viewer.vala:247
 msgid "Subject:"
@@ -639,13 +941,17 @@ msgstr "TB"
 #: ../../src/client/geary-controller.vala:1070
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its "
-"contents."
-msgstr "Il file esiste già in \"%s\".  Sostituirlo sovrascriverà il suo contenuto."
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"Il file esiste già in \"%s\".  Sostituirlo sovrascriverà il suo contenuto."
 
 #: ../../src/client/views/conversation-viewer.vala:79
 msgid "This message contains images. Do you want to show them?"
 msgstr "Questo messaggio contiene immagini. Si desidera visualizzarle?"
+
+#: ../../ui/composer.glade:400
+msgid "To add them as attachments"
+msgstr "Per aggiungerli come allegati"
 
 #: ../../src/client/views/conversation-viewer.vala:236
 msgid "To:"
@@ -664,6 +970,15 @@ msgstr "Cestino"
 msgid "U_nstar"
 msgstr "_Non speciale"
 
+#: ../../ui/composer.glade:509
+msgid "Un-indent"
+msgstr "De-indenta"
+
+#. Removes an indent level
+#: ../../ui/composer.glade:508
+msgid "Un-indent (Ctrl+[)"
+msgstr "De-indenta (Ctrl+[)"
+
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "Impossibile accedere al server email"
@@ -672,10 +987,27 @@ msgstr "Impossibile accedere al server email"
 msgid "Unable to validate:\n"
 msgstr "Impossibile convalidare:\n"
 
+#: ../../ui/composer.glade:457
+msgid "Underline"
+msgstr "Sottolinea"
+
+#. Toggle underlined text
+#: ../../ui/composer.glade:456
+msgid "Underline (Ctrl+U)"
+msgstr "Sottolineato (Ctrl+U)"
+
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Opzione a riga di comando non riconosciuto \"%s\"\n"
+
+#: ../../ui/login.glade:460
+msgid "User_name:"
+msgstr "_Nome utente:"
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
+msgid "Username:"
+msgstr "Nome utente:"
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
@@ -695,7 +1027,10 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "Nelle tue impostazioni IMAP e/o SMTP non è specificato SSL o TLS. Questo significa che il tuo username e password potrebbero essere letti da altre persone sulla rete. Si è sicuri di volere ciò?"
+msgstr ""
+"Nelle tue impostazioni IMAP e/o SMTP non è specificato SSL o TLS. Questo "
+"significa che il tuo username e password potrebbero essere letti da altre "
+"persone sulla rete. Si è sicuri di volere ciò?"
 
 #: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
@@ -717,9 +1052,21 @@ msgstr "_Archivia"
 msgid "_Attach"
 msgstr "_Allega"
 
+#: ../../ui/composer.glade:663
+msgid "_Attach File"
+msgstr "_Allega file"
+
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr "_Seleziona automaticamente il prossimo messaggio"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Cancel"
 msgstr "_Annulla"
+
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr "_Centra"
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
@@ -728,6 +1075,22 @@ msgstr "_Copia"
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
 msgstr "_Cancella"
+
+#: ../../ui/password-dialog.glade:547
+msgid "_Details"
+msgstr "_Dettagli"
+
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr "_Mostra anteprima messaggi"
+
+#: ../../ui/login.glade:785
+msgid "_Download mail:"
+msgstr "_Scarica Mail:"
+
+#: ../../ui/login.glade:117
+msgid "_Email address:"
+msgstr "Indirizzo _email:"
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -742,9 +1105,17 @@ msgstr "_Aiuto"
 msgid "_Inspect"
 msgstr "_Ispeziona"
 
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr "_Giustifica"
+
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
 msgstr "_Etichetta"
+
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr "_Sinistra"
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -766,6 +1137,15 @@ msgstr "_Muovi"
 msgid "_New Message"
 msgstr "_Nuovo Messaggio"
 
+#: ../../ui/login.glade:133 ../../ui/login.glade:542
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr "_Password:"
+
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr "Attiva avvisi sonori"
+
 #: ../../src/client/geary-controller.vala:175
 msgid "_Preferences"
 msgstr "_Preferenze"
@@ -773,6 +1153,14 @@ msgstr "_Preferenze"
 #: ../../src/client/geary-controller.vala:187
 msgid "_Quit"
 msgstr "_Chiudi"
+
+#: ../../ui/password-dialog.glade:560
+msgid "_Remember passwords"
+msgstr "_Ricorda le password"
+
+#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
+msgid "_Remove"
+msgstr "_Rimuovi"
 
 #: ../../src/client/geary-controller.vala:1073
 msgid "_Replace"
@@ -783,6 +1171,10 @@ msgstr "_Sostituisci"
 msgid "_Reply"
 msgstr "_Rispondi"
 
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr "_Destra"
+
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
 msgstr "_Salva"
@@ -791,6 +1183,14 @@ msgstr "_Salva"
 msgid "_Save As..."
 msgstr "_Salva Come..."
 
+#: ../../ui/composer.glade:696
+msgid "_Send"
+msgstr "_Invia"
+
+#: ../../ui/login.glade:162
+msgid "_Service:"
+msgstr "_Servizio:"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Show Images"
 msgstr "_Mostra Immagini"
@@ -798,6 +1198,10 @@ msgstr "_Mostra Immagini"
 #: ../../src/client/geary-controller.vala:210
 msgid "_Star"
 msgstr "_Speciale"
+
+#: ../../ui/login.glade:525
+msgid "_Username:"
+msgstr "Nome_utente:"
 
 #: ../../src/client/views/conversation-viewer.vala:821
 msgid "_View Source"
@@ -813,411 +1217,13 @@ msgstr "byte"
 msgid "none"
 msgstr "nulla"
 
-#. / Translators: add your name and email address to receive credit in the
-#. About dialog
-#. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../../src/client/geary-controller.vala:786
-msgid "translator-credits"
-msgstr "traduttori-crediti"
-
-#: ../../ui/account_list.glade:73
-msgid "Add an account"
-msgstr "Aggiungi un account"
-
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
 msgid "toolbutton1"
 msgstr "pulsante strumenti1"
 
-#: ../../ui/account_list.glade:87
-msgid "Edit an account"
-msgstr "Modifica un account"
-
-#: ../../ui/account_cannot_remove.glade:41
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">Impossibile rimuovere account</span> "
-
-#: ../../ui/account_cannot_remove.glade:57
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr "Una finestra di composizione associata a questo account è attualmente aperta. Invia o rimuovi il messaggio e prova ancora."
-
-#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
-msgid "_Remove"
-msgstr "_Rimuovi"
-
-#: ../../ui/account_spinner.glade:41
-msgid "Please wait while Geary validates your account."
-msgstr "Per favore attendi mentre Geary convalida il tuo account."
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr "_Sinistra"
-
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr "_Destra"
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr "_Centra"
-
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr "_Giustifica"
-
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr "_Collegamento"
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "C_olore"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "Carattere"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
-msgid "Remove formatting"
-msgstr "Rimuovi formattazione"
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr "Incolla con _formattazione"
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr "Copia co_llegamento"
-
-#. Opens font size drop-down menu
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
-#: ../../ui/composer.glade:547
-msgid "Font size"
-msgstr "Dimensione carattere"
-
-#: ../../ui/composer.glade:147
-msgid "Rich Text"
-msgstr "Rich Text"
-
-#: ../../ui/composer.glade:384
-msgid "Drop files here"
-msgstr "Trascina file qui"
-
-#: ../../ui/composer.glade:400
-msgid "To add them as attachments"
-msgstr "Per aggiungerli come allegati"
-
-#. Toggle bold text
-#: ../../ui/composer.glade:428
-msgid "Bold (Ctrl+B)"
-msgstr "Grassetto (Ctrl+B)"
-
-#: ../../ui/composer.glade:429
-msgid "Bold"
-msgstr "Grassetto"
-
-#. Toggle italic text
-#: ../../ui/composer.glade:442
-msgid "Italic (Ctrl+I)"
-msgstr "Corsivo (Ctrl+I)"
-
-#: ../../ui/composer.glade:443
-msgid "Italic"
-msgstr "Italico"
-
-#. Toggle underlined text
-#: ../../ui/composer.glade:456
-msgid "Underline (Ctrl+U)"
-msgstr "Sottolineato (Ctrl+U)"
-
-#: ../../ui/composer.glade:457
-msgid "Underline"
-msgstr "Sottolinea"
-
-#. Toggle strikethrough text
-#: ../../ui/composer.glade:470
-msgid "Strikethrough (Ctrl+K)"
-msgstr "Barrato (Ctrl+K)"
-
-#: ../../ui/composer.glade:471
-msgid "Strikethrough"
-msgstr "Barrato"
-
-#. Indent text
-#: ../../ui/composer.glade:494
-msgid "Indent (Ctrl+])"
-msgstr "trattino (Ctrl+])"
-
-#: ../../ui/composer.glade:495
-msgid "Indent"
-msgstr "Indenta"
-
-#. Removes an indent level
-#: ../../ui/composer.glade:508
-msgid "Un-indent (Ctrl+[)"
-msgstr "De-indenta (Ctrl+[)"
-
-#: ../../ui/composer.glade:509
-msgid "Un-indent"
-msgstr "De-indenta"
-
-#. Opens font drop-down menu
-#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
-msgid "Fonts"
-msgstr "Caratteri"
-
-#. Opens font color dialog
-#: ../../ui/composer.glade:560
-msgid "Color (Ctrl+R)"
-msgstr "Colore (Ctrl+R)"
-
-#: ../../ui/composer.glade:561
-msgid "Color"
-msgstr "Colore"
-
-#. Add an HTML link
-#: ../../ui/composer.glade:574
-msgid "Link (Ctrl+L)"
-msgstr "Link (Ctrl+L)"
-
-#: ../../ui/composer.glade:575
-msgid "Link"
-msgstr "Collegamento"
-
-#. Resets formatting to the default style
-#: ../../ui/composer.glade:588
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "Rimuovi formattazione (Ctrl+Space)"
-
-#: ../../ui/composer.glade:663
-msgid "_Attach File"
-msgstr "_Allega file"
-
-#: ../../ui/composer.glade:696
-msgid "_Send"
-msgstr "_Invia"
-
-#: ../../ui/login.glade:117
-msgid "_Email address:"
-msgstr "Indirizzo _email:"
-
-#: ../../ui/login.glade:133 ../../ui/login.glade:542
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr "_Password:"
-
-#: ../../ui/login.glade:162
-msgid "_Service:"
-msgstr "_Servizio:"
-
-#: ../../ui/login.glade:178
-msgid "N_ame:"
-msgstr "N_ome:"
-
-#: ../../ui/login.glade:233
-msgid "N_ickname:"
-msgstr "S_oprannome"
-
-#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
-msgid "IMAP settings"
-msgstr "Impostazioni IMAP"
-
-#: ../../ui/login.glade:307
-msgid "Se_rver:"
-msgstr "Se_rver:"
-
-#: ../../ui/login.glade:340
-msgid "P_ort:"
-msgstr "P_orta:"
-
-#: ../../ui/login.glade:407
-msgid "Ser_ver:"
-msgstr "Ser_ver:"
-
-#: ../../ui/login.glade:424
-msgid "Por_t:"
-msgstr "Por_ta:"
-
-#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
-msgid "SMTP settings"
-msgstr "Impostazioni SMTP"
-
-#: ../../ui/login.glade:460
-msgid "User_name:"
-msgstr "_Nome utente:"
-
-#: ../../ui/login.glade:477
-msgid "Pass_word:"
-msgstr "Pass_word:"
-
-#: ../../ui/login.glade:525
-msgid "_Username:"
-msgstr "Nome_utente:"
-
-#: ../../ui/login.glade:591
-msgid "Encr_yption:"
-msgstr "Ci_fratura:"
-
-#: ../../ui/login.glade:610
-msgid "Encrypt_ion:"
-msgstr "Cifra_tura:"
-
-#: ../../ui/login.glade:664
-msgid "No authentication re_quired"
-msgstr "Nessuna autenticazione necessaria"
-
-#: ../../ui/login.glade:764
-msgid "Storage"
-msgstr "Archivio"
-
-#: ../../ui/login.glade:785
-msgid "_Download mail:"
-msgstr "_Scarica Mail:"
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
-msgid "Username:"
-msgstr "Nome utente:"
-
-#: ../../ui/password-dialog.glade:132
-msgid "IMAP Credentials"
-msgstr "Credenziali IMAP"
-
-#: ../../ui/password-dialog.glade:162
-msgid "SMTP Credentials"
-msgstr "Credenziali SMTP"
-
-#: ../../ui/password-dialog.glade:195
-msgid "Password:"
-msgstr "Password:"
-
-#: ../../ui/password-dialog.glade:258
-msgid "Service:"
-msgstr "Servizio:"
-
-#: ../../ui/password-dialog.glade:273
-msgid "Real name:"
-msgstr "Nome reale:"
-
-#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
-msgid "Server:"
-msgstr "Server:"
-
-#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
-msgid "Port:"
-msgstr "Porta:"
-
-#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
-msgid "SSL/TLS encryption:"
-msgstr "Cifratura SSL/TLS"
-
-#: ../../ui/password-dialog.glade:547
-msgid "_Details"
-msgstr "_Dettagli"
-
-#: ../../ui/password-dialog.glade:560
-msgid "_Remember passwords"
-msgstr "_Ricorda le password"
-
-#: ../../ui/preferences.glade:57
-msgid "Reading"
-msgstr "Sto leggendo"
-
-#: ../../ui/preferences.glade:71
-msgid "_Automatically select next message"
-msgstr "_Seleziona automaticamente il prossimo messaggio"
-
-#: ../../ui/preferences.glade:94
-msgid "_Display message preview"
-msgstr "_Mostra anteprima messaggi"
-
-#: ../../ui/preferences.glade:123
-msgid "Composer"
-msgstr "Componitore"
-
-#: ../../ui/preferences.glade:137
-msgid "Enable _spell checking"
-msgstr "Abilita_controllo ortografico"
-
-#: ../../ui/preferences.glade:166
-msgid "Notifications"
-msgstr "Notifiche"
-
-#: ../../ui/preferences.glade:180
-msgid "_Play notification sounds"
-msgstr "Attiva avvisi sonori"
-
-#: ../../ui/preferences.glade:203
-msgid "Show _notifications for new mail"
-msgstr "Mostra notifiche per le nuove mail"
-
-#: ../../ui/remove_confirm.glade:46
-msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">Sicuro di voler rimuovere questo account?</span> "
-
-#: ../../ui/remove_confirm.glade:61
-msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
-msgstr "Una mail associata con questo account verrà rimossa dal computer. Questo non avrà effetti sulle email presenti sul server."
-
-#: ../../ui/remove_confirm.glade:83
-msgid "Nickname:"
-msgstr "Pseudonimo:"
-
-#: ../../ui/remove_confirm.glade:97
-msgid "Email address:"
-msgstr "Indirizzo mail:"
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:12
-msgid "Start new conversation (Ctrl+N, N)"
-msgstr "Inizia una nuova conversazione (Ctrl+N, N)"
-
-#: ../../ui/toolbar.glade:40
-msgid "Reply to last message in conversation (Ctrl+R, R)"
-msgstr "Rispondi all'ultimo messaggio della conversazione (Ctrl+R, R)"
-
-#: ../../ui/toolbar.glade:43
-msgid "Reply"
-msgstr "Rispondi"
-
-#: ../../ui/toolbar.glade:57
-msgid ""
-"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-msgstr "Rispondi a tutti nell'ultimo messaggio della conversazione (Ctrl+Shift+R, Shift+R)"
-
-#: ../../ui/toolbar.glade:60
-msgid "Reply All"
-msgstr "Rispondi a tutti"
-
-#: ../../ui/toolbar.glade:74
-msgid "Send copy of last message in conversation (Ctrl+L, F)"
-msgstr "Invia copia dell'ultimo messaggio della conversazione (Ctrl+L, F)"
-
-#: ../../ui/toolbar.glade:77
-msgid "Forward"
-msgstr "Inoltra"
-
-#: ../../ui/toolbar.glade:103
-msgid "Mark"
-msgstr "Contrassegna"
-
-#: ../../ui/toolbar.glade:117
-msgid "Label as"
-msgstr "Etichetta come:"
-
-#: ../../ui/toolbar.glade:131
-msgid "Move to"
-msgstr "Sposta in"
-
-#: ../../ui/toolbar.glade:155
-msgid "Delete"
-msgstr "Cancella"
-
-#: ../../ui/toolbar.glade:182
-msgid "Menu"
-msgstr "Menu"
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../../src/client/geary-controller.vala:786
+msgid "translator-credits"
+msgstr "traduttori-crediti"

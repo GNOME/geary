@@ -2,7 +2,7 @@
 # PO message string template file for Geary email client
 # Copyright 2012-2013 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
-# 
+#
 # Translators:
 # Minato Kanzaki <pikatenor@gmail.com>, 2013.
 msgid ""
@@ -13,10 +13,10 @@ msgstr ""
 "PO-Revision-Date: 2013-03-04 09:51+0000\n"
 "Last-Translator: pikatenor <pikatenor@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ja_JP\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
@@ -73,44 +73,38 @@ msgid "\"%s\" is an empty file."
 msgstr "\"%s\" は空ファイルです"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%Y年 %B %-e日, %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%Y年 %B %-e日, %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%Y年 %B %-e日, %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%Y %b %-e日 (%a), %l:%M %p"
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%b %-e日"
@@ -128,15 +122,13 @@ msgid_plural "%d unread messages"
 msgstr[0] "%d 件の未読メッセージ"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -176,8 +168,7 @@ msgid "%u read messages"
 msgstr "%u 件の既読メッセージ"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -211,6 +202,27 @@ msgstr "3ヶ月前"
 msgid "6 months back"
 msgstr "6ヶ月前"
 
+#: ../../ui/remove_confirm.glade:46
+msgid ""
+"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
+"account?</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">このアカウントを削除してもよろしいです"
+"か?</span> "
+
+#: ../../ui/account_cannot_remove.glade:41
+msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">アカウントを削除できません</span>"
+
+#: ../../ui/account_cannot_remove.glade:57
+msgid ""
+"A composer window associated with this account is currently open. Send or "
+"discard the message and try again."
+msgstr ""
+"アカウントと関連づけられた作成画面が既に開いています. メッセージを送信するか"
+"破棄してからもう一度試してください"
+
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
@@ -229,6 +241,10 @@ msgstr "%s について"
 msgid "Accounts"
 msgstr "アカウント"
 
+#: ../../ui/account_list.glade:73
+msgid "Add an account"
+msgstr "アカウントを追加"
+
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
 msgstr "スレッドにラベルを付ける"
@@ -240,6 +256,14 @@ msgstr "スレッドにラベルを付ける"
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
 msgstr "すべてのメール"
+
+#: ../../ui/remove_confirm.glade:61
+msgid ""
+"All email associated with this account will be removed from your computer. "
+"This will not affect email on the server."
+msgstr ""
+"このアカウントに関連づけされた全てのメールは、コンピューターから削除されます."
+"これは、サーバー上のメールには影響を与えません."
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -260,13 +284,28 @@ msgstr "\"%s\" を開きますか?"
 
 #: ../../src/client/geary-controller.vala:1055
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from"
-" trusted sources."
-msgstr "添付ファイルはシステムにダメージを与える恐れがあります. 信頼できる送信元からのみ開くようにしてください."
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"添付ファイルはシステムにダメージを与える恐れがあります. 信頼できる送信元から"
+"のみ開くようにしてください."
 
 #: ../../src/client/views/conversation-viewer.vala:243
 msgid "Bcc:"
 msgstr "Bcc:"
+
+#: ../../ui/composer.glade:429
+msgid "Bold"
+msgstr "太字"
+
+#. Toggle bold text
+#: ../../ui/composer.glade:428
+msgid "Bold (Ctrl+B)"
+msgstr "太字(Ctrl+B)"
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "色(_O)"
 
 #: ../../src/client/composer/composer-window.vala:609
 msgid "Cannot add attachment"
@@ -284,10 +323,23 @@ msgstr "ファイルを選択"
 msgid "Co_ntinue"
 msgstr "継続(_N)"
 
+#: ../../ui/composer.glade:561
+msgid "Color"
+msgstr "色"
+
+#. Opens font color dialog
+#: ../../ui/composer.glade:560
+msgid "Color (Ctrl+R)"
+msgstr "色(Ctrl+R)"
+
 #: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "メッセージを作成"
+
+#: ../../ui/preferences.glade:123
+msgid "Composer"
+msgstr "作成画面"
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
@@ -296,6 +348,10 @@ msgstr "アドレスをコピー(_E)"
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
 msgstr "リンクのアドレスをコピー(_L)"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
+msgstr "リンクをコピー(_L)"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
@@ -313,6 +369,10 @@ msgstr "日時: %s\n"
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
 msgstr "デフォルト"
+
+#: ../../ui/toolbar.glade:155
+msgid "Delete"
+msgstr "削除"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
@@ -338,9 +398,33 @@ msgstr "次回から表示しない(_A)"
 msgid "Drafts"
 msgstr "下書き"
 
+#: ../../ui/composer.glade:384
+msgid "Drop files here"
+msgstr "ここにファイルをドロップ"
+
+#: ../../ui/account_list.glade:87
+msgid "Edit an account"
+msgstr "アカウントを編集"
+
+#: ../../ui/remove_confirm.glade:97
+msgid "Email address:"
+msgstr "メールアドレス:"
+
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
 msgstr "Email;E-mail;Mail"
+
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr "スペルチェックを有効(_S)"
+
+#: ../../ui/login.glade:591
+msgid "Encr_yption:"
+msgstr "暗号化(_Y)"
+
+#: ../../ui/login.glade:610
+msgid "Encrypt_ion:"
+msgstr "暗号化(_I)"
 
 #: ../../src/client/accounts/add-edit-page.vala:185
 msgid "Enter your account information to get started."
@@ -362,6 +446,25 @@ msgstr "不明なオプション: %s\n"
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
 msgstr "固定幅"
+
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "フォント"
+
+#. Opens font size drop-down menu
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
+#: ../../ui/composer.glade:547
+msgid "Font size"
+msgstr "フォント サイズ"
+
+#. Opens font drop-down menu
+#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
+msgid "Fonts"
+msgstr "フォント"
+
+#: ../../ui/toolbar.glade:77
+msgid "Forward"
+msgstr "転送"
 
 #: ../../src/client/views/conversation-viewer.vala:232
 msgid "From:"
@@ -385,6 +488,14 @@ msgstr "Geary Mail"
 msgid "Gmail"
 msgstr "Gmail"
 
+#: ../../ui/password-dialog.glade:132
+msgid "IMAP Credentials"
+msgstr "IMAP 証明書"
+
+#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
+msgid "IMAP settings"
+msgstr "IMAP 設定"
+
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
 msgstr "重要"
@@ -397,10 +508,32 @@ msgstr "受信トレイ"
 msgid "Inboxes"
 msgstr "受信トレイ"
 
+#: ../../ui/composer.glade:495
+msgid "Indent"
+msgstr "インデント"
+
+#. Indent text
+#: ../../ui/composer.glade:494
+msgid "Indent (Ctrl+])"
+msgstr "インデント(Ctrl+])"
+
+#: ../../ui/composer.glade:443
+msgid "Italic"
+msgstr "斜体"
+
+#. Toggle italic text
+#: ../../ui/composer.glade:442
+msgid "Italic (Ctrl+I)"
+msgstr "斜体(Ctrl+I)"
+
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
+
+#: ../../ui/toolbar.glade:117
+msgid "Label as"
+msgstr "ラベル"
 
 #: ../../src/client/geary-controller.vala:307
 msgid "Labels"
@@ -410,8 +543,20 @@ msgstr "ラベル"
 msgid "Large"
 msgstr "大"
 
-#. / The IMAP replay queue is how changes on the server are replicated on the
-#. client.
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr "リンク(_K)"
+
+#: ../../ui/composer.glade:575
+msgid "Link"
+msgstr "リンク"
+
+#. Add an HTML link
+#: ../../ui/composer.glade:574
+msgid "Link (Ctrl+L)"
+msgstr "リンク(Ctrl+L)"
+
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
@@ -434,8 +579,7 @@ msgstr "フォルダーの同期を記録"
 msgid "Log network activity"
 msgstr "ネットワーク情報を記録"
 
-#. / Serialization is how commands and responses are converted into a stream
-#. of bytes for
+#. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
@@ -453,6 +597,10 @@ msgstr "MB"
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
 msgstr "メールクライアント"
+
+#: ../../ui/toolbar.glade:103
+msgid "Mark"
+msgstr "マーク"
 
 #: ../../src/client/geary-controller.vala:198
 msgid "Mark as _read"
@@ -486,6 +634,10 @@ msgstr "自分"
 msgid "Medium"
 msgstr "中"
 
+#: ../../ui/toolbar.glade:182
+msgid "Menu"
+msgstr "メニュー"
+
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
 msgstr "さらに表示"
@@ -498,9 +650,29 @@ msgstr "スレッドを移動"
 msgid "Move conversations"
 msgstr "スレッドを移動"
 
+#: ../../ui/toolbar.glade:131
+msgid "Move to"
+msgstr "移動先"
+
+#: ../../ui/login.glade:178
+msgid "N_ame:"
+msgstr "名前(_A)"
+
+#: ../../ui/login.glade:233
+msgid "N_ickname:"
+msgstr "ニックネーム(_I)"
+
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
 msgstr "新着メッセージ"
+
+#: ../../ui/remove_confirm.glade:83
+msgid "Nickname:"
+msgstr "ニックネーム:"
+
+#: ../../ui/login.glade:664
+msgid "No authentication re_quired"
+msgstr "暗号化は必要とされていません(_Q)"
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -510,6 +682,10 @@ msgstr "メッセージが選択されていません"
 #: ../../src/engine/api/geary-special-folder-type.vala:50
 msgid "None"
 msgstr "なし"
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
+msgstr "通知"
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:40
@@ -533,6 +709,22 @@ msgstr "送信トレイ"
 msgid "Output debugging information"
 msgstr "デバッグ情報を出力"
 
+#: ../../ui/login.glade:340
+msgid "P_ort:"
+msgstr "ポート(_O)"
+
+#: ../../ui/login.glade:477
+msgid "Pass_word:"
+msgstr "パスワード(_W)"
+
+#: ../../ui/password-dialog.glade:195
+msgid "Password:"
+msgstr "パスワード:"
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr "形式を指定して貼り付け(_W)"
+
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr "パスワードを入力してください"
@@ -540,6 +732,18 @@ msgstr "パスワードを入力してください"
 #: ../../src/client/geary-args.vala:45
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "コメント・提案、バグ報告はこちら:"
+
+#: ../../ui/account_spinner.glade:41
+msgid "Please wait while Geary validates your account."
+msgstr "アカウントを検証しています..."
+
+#: ../../ui/login.glade:424
+msgid "Por_t:"
+msgstr "ポート(_T):"
+
+#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
+msgid "Port:"
+msgstr "ポート:"
 
 #: ../../src/client/accounts/add-edit-page.vala:579
 msgid "Re_member password"
@@ -549,6 +753,31 @@ msgstr "パスワードを保存(_M)"
 msgid "Re_member passwords"
 msgstr "パスワードを保存(_M)"
 
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr "表示画面"
+
+#: ../../ui/password-dialog.glade:273
+msgid "Real name:"
+msgstr "本名:"
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
+msgid "Remove formatting"
+msgstr "書式をリセット"
+
+#. Resets formatting to the default style
+#: ../../ui/composer.glade:588
+msgid "Remove formatting (Ctrl+Space)"
+msgstr "書式をリセット(Ctrl+Space)"
+
+#: ../../ui/toolbar.glade:43
+msgid "Reply"
+msgstr "返信"
+
+#: ../../ui/toolbar.glade:60
+msgid "Reply All"
+msgstr "全員に返信"
+
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
 msgstr "全員に返信(_A)"
@@ -557,9 +786,34 @@ msgstr "全員に返信(_A)"
 msgid "Reply to _All"
 msgstr "全員に返信(_A)"
 
+#: ../../ui/toolbar.glade:57
+msgid ""
+"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
+msgstr "スレッドの最後のメッセージの全員に返信(Ctrl+R, R)"
+
+#: ../../ui/toolbar.glade:40
+msgid "Reply to last message in conversation (Ctrl+R, R)"
+msgstr "スレッドの最後のメッセージに返信(Ctrl+R, R)"
+
+#: ../../ui/composer.glade:147
+msgid "Rich Text"
+msgstr "リッチテキスト"
+
+#: ../../ui/password-dialog.glade:162
+msgid "SMTP Credentials"
+msgstr "SMTP 証明書"
+
+#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
+msgid "SMTP settings"
+msgstr "SMTP 設定"
+
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
 msgstr "SSL"
+
+#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
+msgid "SSL/TLS encryption:"
+msgstr "SSL/TLS 暗号化"
 
 #: ../../src/client/dialogs/password-dialog.vala:123
 msgid "STARTTLS"
@@ -578,6 +832,10 @@ msgstr[0] "添付ファイルを保存(_T)"
 msgid "Save All A_ttachments..."
 msgstr "全ての添付ファイルを保存(_T)"
 
+#: ../../ui/login.glade:307
+msgid "Se_rver:"
+msgstr "サーバー(_R):"
+
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
 msgstr "色を選択"
@@ -590,6 +848,10 @@ msgstr "すべて選択(_A)"
 msgid "Send and receive email"
 msgstr "送受信"
 
+#: ../../ui/toolbar.glade:74
+msgid "Send copy of last message in conversation (Ctrl+L, F)"
+msgstr "最後のメッセージのコピーを送信 (Ctrl+L, F)"
+
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
 msgstr "件名/本文が空白です. 送信しますか?"
@@ -598,9 +860,25 @@ msgstr "件名/本文が空白です. 送信しますか?"
 msgid "Sent Mail"
 msgstr "送信済みメール"
 
+#: ../../ui/login.glade:407
+msgid "Ser_ver:"
+msgstr "サーバー(_V):"
+
 #: ../../src/client/composer/composer-window.vala:336
 msgid "Serif"
 msgstr "明朝体"
+
+#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
+msgid "Server:"
+msgstr "サーバー:"
+
+#: ../../ui/password-dialog.glade:258
+msgid "Service:"
+msgstr "メールサービス:"
+
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
+msgstr "新着メールに通知を表示(_N)"
 
 #: ../../src/client/composer/composer-window.vala:348
 msgid "Small"
@@ -613,6 +891,24 @@ msgstr "迷惑メール"
 #: ../../src/engine/api/geary-special-folder-type.vala:31
 msgid "Starred"
 msgstr "スター"
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:12
+msgid "Start new conversation (Ctrl+N, N)"
+msgstr "新しいメッセージ (Ctrl+N, N)"
+
+#: ../../ui/login.glade:764
+msgid "Storage"
+msgstr "ストレージ"
+
+#: ../../ui/composer.glade:471
+msgid "Strikethrough"
+msgstr "取り消し線"
+
+#. Toggle strikethrough text
+#: ../../ui/composer.glade:470
+msgid "Strikethrough (Ctrl+K)"
+msgstr "取り消し線(Ctrl+K)"
 
 #: ../../src/client/views/conversation-viewer.vala:247
 msgid "Subject:"
@@ -631,13 +927,16 @@ msgstr "TB"
 #: ../../src/client/geary-controller.vala:1070
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its "
-"contents."
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "\"%s\" は既に存在します. 上書きしますか?"
 
 #: ../../src/client/views/conversation-viewer.vala:79
 msgid "This message contains images. Do you want to show them?"
 msgstr "このメッセージには画像が含まれています. 表示しますか?"
+
+#: ../../ui/composer.glade:400
+msgid "To add them as attachments"
+msgstr "添付ファイルとして追加"
 
 #: ../../src/client/views/conversation-viewer.vala:236
 msgid "To:"
@@ -656,6 +955,15 @@ msgstr "ごみ箱"
 msgid "U_nstar"
 msgstr "スターをはずす(_N)"
 
+#: ../../ui/composer.glade:509
+msgid "Un-indent"
+msgstr "インデント解除"
+
+#. Removes an indent level
+#: ../../ui/composer.glade:508
+msgid "Un-indent (Ctrl+[)"
+msgstr "インデント解除(Ctrl+[)"
+
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr "ログインに失敗しました"
@@ -664,10 +972,27 @@ msgstr "ログインに失敗しました"
 msgid "Unable to validate:\n"
 msgstr "検証できません: \n"
 
+#: ../../ui/composer.glade:457
+msgid "Underline"
+msgstr "下線"
+
+#. Toggle underlined text
+#: ../../ui/composer.glade:456
+msgid "Underline (Ctrl+U)"
+msgstr "下線(Ctrl+U)"
+
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "不明なオプション \"%s\"\n"
+
+#: ../../ui/login.glade:460
+msgid "User_name:"
+msgstr "ユーザー名(_N):"
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
+msgid "Username:"
+msgstr "ユーザー名:"
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
@@ -687,7 +1012,9 @@ msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "IMAP/SMTP の通信に SSL/TLS が指定されていません. ユーザー名やパスワードはネットワーク上の他人に読み取られる可能性があります. よろしいですか?"
+msgstr ""
+"IMAP/SMTP の通信に SSL/TLS が指定されていません. ユーザー名やパスワードはネッ"
+"トワーク上の他人に読み取られる可能性があります. よろしいですか?"
 
 #: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
@@ -709,9 +1036,21 @@ msgstr "アーカイブ(_A)"
 msgid "_Attach"
 msgstr "添付(_A)"
 
+#: ../../ui/composer.glade:663
+msgid "_Attach File"
+msgstr "ファイルを添付(_A)"
+
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr "自動的に次のメッセージを選択(_A)"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Cancel"
 msgstr "キャンセル(_C)"
+
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr "中央揃え"
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
@@ -720,6 +1059,22 @@ msgstr "コピー(_C)"
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
 msgstr "削除(_C)"
+
+#: ../../ui/password-dialog.glade:547
+msgid "_Details"
+msgstr "詳細(_D)"
+
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr "メッセージのプレビューを表示(_D)"
+
+#: ../../ui/login.glade:785
+msgid "_Download mail:"
+msgstr ""
+
+#: ../../ui/login.glade:117
+msgid "_Email address:"
+msgstr "メールアドレス(_E)"
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -734,9 +1089,17 @@ msgstr "ヘルプ(_H)"
 msgid "_Inspect"
 msgstr "検証(_I)"
 
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr "両端揃え"
+
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
 msgstr "ラベル(_L)"
+
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr "左揃え"
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -758,6 +1121,15 @@ msgstr "移動(_M)"
 msgid "_New Message"
 msgstr "新規作成(_N)"
 
+#: ../../ui/login.glade:133 ../../ui/login.glade:542
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr "パスワード(_P)"
+
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr "通知音を再生(_P)"
+
 #: ../../src/client/geary-controller.vala:175
 msgid "_Preferences"
 msgstr "設定(_P)"
@@ -765,6 +1137,14 @@ msgstr "設定(_P)"
 #: ../../src/client/geary-controller.vala:187
 msgid "_Quit"
 msgstr "終了(_Q)"
+
+#: ../../ui/password-dialog.glade:560
+msgid "_Remember passwords"
+msgstr "パスワードを保存(_R)"
+
+#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
+msgid "_Remove"
+msgstr "削除(_R)"
 
 #: ../../src/client/geary-controller.vala:1073
 msgid "_Replace"
@@ -775,6 +1155,10 @@ msgstr "置換(_R)"
 msgid "_Reply"
 msgstr "返信(_R)"
 
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr "右揃え"
+
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
 msgstr "保存(_S)"
@@ -783,6 +1167,14 @@ msgstr "保存(_S)"
 msgid "_Save As..."
 msgstr "名前を付けて保存(_S)"
 
+#: ../../ui/composer.glade:696
+msgid "_Send"
+msgstr "送信(_S)"
+
+#: ../../ui/login.glade:162
+msgid "_Service:"
+msgstr "メールサービス(_S):"
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Show Images"
 msgstr "画像を表示(_S)"
@@ -790,6 +1182,10 @@ msgstr "画像を表示(_S)"
 #: ../../src/client/geary-controller.vala:210
 msgid "_Star"
 msgstr "スター(_S)"
+
+#: ../../ui/login.glade:525
+msgid "_Username:"
+msgstr "ユーザー名(_U):"
 
 #: ../../src/client/views/conversation-viewer.vala:821
 msgid "_View Source"
@@ -805,411 +1201,13 @@ msgstr "バイト"
 msgid "none"
 msgstr "無題"
 
-#. / Translators: add your name and email address to receive credit in the
-#. About dialog
-#. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../../src/client/geary-controller.vala:786
-msgid "translator-credits"
-msgstr "Minato Kanzaki <pikadcolon@gmail.com>"
-
-#: ../../ui/account_list.glade:73
-msgid "Add an account"
-msgstr "アカウントを追加"
-
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
 msgid "toolbutton1"
 msgstr "toolbutton1"
 
-#: ../../ui/account_list.glade:87
-msgid "Edit an account"
-msgstr "アカウントを編集"
-
-#: ../../ui/account_cannot_remove.glade:41
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">アカウントを削除できません</span>"
-
-#: ../../ui/account_cannot_remove.glade:57
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr "アカウントと関連づけられた作成画面が既に開いています. メッセージを送信するか破棄してからもう一度試してください"
-
-#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
-msgid "_Remove"
-msgstr "削除(_R)"
-
-#: ../../ui/account_spinner.glade:41
-msgid "Please wait while Geary validates your account."
-msgstr "アカウントを検証しています..."
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr "左揃え"
-
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr "右揃え"
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr "中央揃え"
-
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr "両端揃え"
-
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr "リンク(_K)"
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "色(_O)"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "フォント"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
-msgid "Remove formatting"
-msgstr "書式をリセット"
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr "形式を指定して貼り付け(_W)"
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr "リンクをコピー(_L)"
-
-#. Opens font size drop-down menu
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
-#: ../../ui/composer.glade:547
-msgid "Font size"
-msgstr "フォント サイズ"
-
-#: ../../ui/composer.glade:147
-msgid "Rich Text"
-msgstr "リッチテキスト"
-
-#: ../../ui/composer.glade:384
-msgid "Drop files here"
-msgstr "ここにファイルをドロップ"
-
-#: ../../ui/composer.glade:400
-msgid "To add them as attachments"
-msgstr "添付ファイルとして追加"
-
-#. Toggle bold text
-#: ../../ui/composer.glade:428
-msgid "Bold (Ctrl+B)"
-msgstr "太字(Ctrl+B)"
-
-#: ../../ui/composer.glade:429
-msgid "Bold"
-msgstr "太字"
-
-#. Toggle italic text
-#: ../../ui/composer.glade:442
-msgid "Italic (Ctrl+I)"
-msgstr "斜体(Ctrl+I)"
-
-#: ../../ui/composer.glade:443
-msgid "Italic"
-msgstr "斜体"
-
-#. Toggle underlined text
-#: ../../ui/composer.glade:456
-msgid "Underline (Ctrl+U)"
-msgstr "下線(Ctrl+U)"
-
-#: ../../ui/composer.glade:457
-msgid "Underline"
-msgstr "下線"
-
-#. Toggle strikethrough text
-#: ../../ui/composer.glade:470
-msgid "Strikethrough (Ctrl+K)"
-msgstr "取り消し線(Ctrl+K)"
-
-#: ../../ui/composer.glade:471
-msgid "Strikethrough"
-msgstr "取り消し線"
-
-#. Indent text
-#: ../../ui/composer.glade:494
-msgid "Indent (Ctrl+])"
-msgstr "インデント(Ctrl+])"
-
-#: ../../ui/composer.glade:495
-msgid "Indent"
-msgstr "インデント"
-
-#. Removes an indent level
-#: ../../ui/composer.glade:508
-msgid "Un-indent (Ctrl+[)"
-msgstr "インデント解除(Ctrl+[)"
-
-#: ../../ui/composer.glade:509
-msgid "Un-indent"
-msgstr "インデント解除"
-
-#. Opens font drop-down menu
-#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
-msgid "Fonts"
-msgstr "フォント"
-
-#. Opens font color dialog
-#: ../../ui/composer.glade:560
-msgid "Color (Ctrl+R)"
-msgstr "色(Ctrl+R)"
-
-#: ../../ui/composer.glade:561
-msgid "Color"
-msgstr "色"
-
-#. Add an HTML link
-#: ../../ui/composer.glade:574
-msgid "Link (Ctrl+L)"
-msgstr "リンク(Ctrl+L)"
-
-#: ../../ui/composer.glade:575
-msgid "Link"
-msgstr "リンク"
-
-#. Resets formatting to the default style
-#: ../../ui/composer.glade:588
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "書式をリセット(Ctrl+Space)"
-
-#: ../../ui/composer.glade:663
-msgid "_Attach File"
-msgstr "ファイルを添付(_A)"
-
-#: ../../ui/composer.glade:696
-msgid "_Send"
-msgstr "送信(_S)"
-
-#: ../../ui/login.glade:117
-msgid "_Email address:"
-msgstr "メールアドレス(_E)"
-
-#: ../../ui/login.glade:133 ../../ui/login.glade:542
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr "パスワード(_P)"
-
-#: ../../ui/login.glade:162
-msgid "_Service:"
-msgstr "メールサービス(_S):"
-
-#: ../../ui/login.glade:178
-msgid "N_ame:"
-msgstr "名前(_A)"
-
-#: ../../ui/login.glade:233
-msgid "N_ickname:"
-msgstr "ニックネーム(_I)"
-
-#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
-msgid "IMAP settings"
-msgstr "IMAP 設定"
-
-#: ../../ui/login.glade:307
-msgid "Se_rver:"
-msgstr "サーバー(_R):"
-
-#: ../../ui/login.glade:340
-msgid "P_ort:"
-msgstr "ポート(_O)"
-
-#: ../../ui/login.glade:407
-msgid "Ser_ver:"
-msgstr "サーバー(_V):"
-
-#: ../../ui/login.glade:424
-msgid "Por_t:"
-msgstr "ポート(_T):"
-
-#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
-msgid "SMTP settings"
-msgstr "SMTP 設定"
-
-#: ../../ui/login.glade:460
-msgid "User_name:"
-msgstr "ユーザー名(_N):"
-
-#: ../../ui/login.glade:477
-msgid "Pass_word:"
-msgstr "パスワード(_W)"
-
-#: ../../ui/login.glade:525
-msgid "_Username:"
-msgstr "ユーザー名(_U):"
-
-#: ../../ui/login.glade:591
-msgid "Encr_yption:"
-msgstr "暗号化(_Y)"
-
-#: ../../ui/login.glade:610
-msgid "Encrypt_ion:"
-msgstr "暗号化(_I)"
-
-#: ../../ui/login.glade:664
-msgid "No authentication re_quired"
-msgstr "暗号化は必要とされていません(_Q)"
-
-#: ../../ui/login.glade:764
-msgid "Storage"
-msgstr "ストレージ"
-
-#: ../../ui/login.glade:785
-msgid "_Download mail:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
-msgid "Username:"
-msgstr "ユーザー名:"
-
-#: ../../ui/password-dialog.glade:132
-msgid "IMAP Credentials"
-msgstr "IMAP 証明書"
-
-#: ../../ui/password-dialog.glade:162
-msgid "SMTP Credentials"
-msgstr "SMTP 証明書"
-
-#: ../../ui/password-dialog.glade:195
-msgid "Password:"
-msgstr "パスワード:"
-
-#: ../../ui/password-dialog.glade:258
-msgid "Service:"
-msgstr "メールサービス:"
-
-#: ../../ui/password-dialog.glade:273
-msgid "Real name:"
-msgstr "本名:"
-
-#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
-msgid "Server:"
-msgstr "サーバー:"
-
-#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
-msgid "Port:"
-msgstr "ポート:"
-
-#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
-msgid "SSL/TLS encryption:"
-msgstr "SSL/TLS 暗号化"
-
-#: ../../ui/password-dialog.glade:547
-msgid "_Details"
-msgstr "詳細(_D)"
-
-#: ../../ui/password-dialog.glade:560
-msgid "_Remember passwords"
-msgstr "パスワードを保存(_R)"
-
-#: ../../ui/preferences.glade:57
-msgid "Reading"
-msgstr "表示画面"
-
-#: ../../ui/preferences.glade:71
-msgid "_Automatically select next message"
-msgstr "自動的に次のメッセージを選択(_A)"
-
-#: ../../ui/preferences.glade:94
-msgid "_Display message preview"
-msgstr "メッセージのプレビューを表示(_D)"
-
-#: ../../ui/preferences.glade:123
-msgid "Composer"
-msgstr "作成画面"
-
-#: ../../ui/preferences.glade:137
-msgid "Enable _spell checking"
-msgstr "スペルチェックを有効(_S)"
-
-#: ../../ui/preferences.glade:166
-msgid "Notifications"
-msgstr "通知"
-
-#: ../../ui/preferences.glade:180
-msgid "_Play notification sounds"
-msgstr "通知音を再生(_P)"
-
-#: ../../ui/preferences.glade:203
-msgid "Show _notifications for new mail"
-msgstr "新着メールに通知を表示(_N)"
-
-#: ../../ui/remove_confirm.glade:46
-msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
-msgstr "<span weight=\"bold\" size=\"larger\">このアカウントを削除してもよろしいですか?</span> "
-
-#: ../../ui/remove_confirm.glade:61
-msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
-msgstr "このアカウントに関連づけされた全てのメールは、コンピューターから削除されます.これは、サーバー上のメールには影響を与えません."
-
-#: ../../ui/remove_confirm.glade:83
-msgid "Nickname:"
-msgstr "ニックネーム:"
-
-#: ../../ui/remove_confirm.glade:97
-msgid "Email address:"
-msgstr "メールアドレス:"
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:12
-msgid "Start new conversation (Ctrl+N, N)"
-msgstr "新しいメッセージ (Ctrl+N, N)"
-
-#: ../../ui/toolbar.glade:40
-msgid "Reply to last message in conversation (Ctrl+R, R)"
-msgstr "スレッドの最後のメッセージに返信(Ctrl+R, R)"
-
-#: ../../ui/toolbar.glade:43
-msgid "Reply"
-msgstr "返信"
-
-#: ../../ui/toolbar.glade:57
-msgid ""
-"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-msgstr "スレッドの最後のメッセージの全員に返信(Ctrl+R, R)"
-
-#: ../../ui/toolbar.glade:60
-msgid "Reply All"
-msgstr "全員に返信"
-
-#: ../../ui/toolbar.glade:74
-msgid "Send copy of last message in conversation (Ctrl+L, F)"
-msgstr "最後のメッセージのコピーを送信 (Ctrl+L, F)"
-
-#: ../../ui/toolbar.glade:77
-msgid "Forward"
-msgstr "転送"
-
-#: ../../ui/toolbar.glade:103
-msgid "Mark"
-msgstr "マーク"
-
-#: ../../ui/toolbar.glade:117
-msgid "Label as"
-msgstr "ラベル"
-
-#: ../../ui/toolbar.glade:131
-msgid "Move to"
-msgstr "移動先"
-
-#: ../../ui/toolbar.glade:155
-msgid "Delete"
-msgstr "削除"
-
-#: ../../ui/toolbar.glade:182
-msgid "Menu"
-msgstr "メニュー"
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../../src/client/geary-controller.vala:786
+msgid "translator-credits"
+msgstr "Minato Kanzaki <pikadcolon@gmail.com>"

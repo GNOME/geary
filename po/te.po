@@ -2,7 +2,7 @@
 # PO message string template file for Geary email client
 # Copyright 2012-2013 Yorba Foundation
 # This file is distributed under the GNU LGPL, version 2.1.
-# 
+#
 # Translators:
 # ప్రవీణ్ ఇళ్ళ <mail2ipn@gmail.com>, 2012.
 msgid ""
@@ -13,10 +13,10 @@ msgstr ""
 "PO-Revision-Date: 2013-02-27 00:48+0000\n"
 "Last-Translator: yorbajim <jim@yorba.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: te\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: te\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
@@ -73,44 +73,38 @@ msgid "\"%s\" is an empty file."
 msgstr ""
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %b %-e, %Y at %-l:%M %p"
 
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
 msgstr "%b %-e"
@@ -130,15 +124,13 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
@@ -178,8 +170,7 @@ msgid "%u read messages"
 msgstr ""
 
 #. / Date format for dates within a different year, i.e. 02/04/10
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
-#. format
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
@@ -213,6 +204,22 @@ msgstr ""
 msgid "6 months back"
 msgstr ""
 
+#: ../../ui/remove_confirm.glade:46
+msgid ""
+"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
+"account?</span> "
+msgstr ""
+
+#: ../../ui/account_cannot_remove.glade:41
+msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+msgstr ""
+
+#: ../../ui/account_cannot_remove.glade:57
+msgid ""
+"A composer window associated with this account is currently open. Send or "
+"discard the message and try again."
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
@@ -231,6 +238,10 @@ msgstr "%s గురించి"
 msgid "Accounts"
 msgstr ""
 
+#: ../../ui/account_list.glade:73
+msgid "Add an account"
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
 msgstr ""
@@ -241,6 +252,12 @@ msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
+msgstr ""
+
+#: ../../ui/remove_confirm.glade:61
+msgid ""
+"All email associated with this account will be removed from your computer. "
+"This will not affect email on the server."
 msgstr ""
 
 #: ../../src/client/geary-args.vala:23
@@ -262,13 +279,26 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:1055
 msgid ""
-"Attachments may cause damage to your system if opened.  Only open files from"
-" trusted sources."
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:243
 msgid "Bcc:"
 msgstr "బిసిసి:"
+
+#: ../../ui/composer.glade:429
+msgid "Bold"
+msgstr "బొద్దు"
+
+#. Toggle bold text
+#: ../../ui/composer.glade:428
+msgid "Bold (Ctrl+B)"
+msgstr ""
+
+#: ../../ui/composer.glade:68
+msgid "C_olor"
+msgstr "రంగు (_o)"
 
 #: ../../src/client/composer/composer-window.vala:609
 msgid "Cannot add attachment"
@@ -286,10 +316,23 @@ msgstr "దస్త్రాన్ని ఎంచుకోండి"
 msgid "Co_ntinue"
 msgstr "కొనసాగండి (_u)"
 
+#: ../../ui/composer.glade:561
+msgid "Color"
+msgstr "రంగు"
+
+#. Opens font color dialog
+#: ../../ui/composer.glade:560
+msgid "Color (Ctrl+R)"
+msgstr ""
+
 #: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
 msgstr "సందేశాన్ని సృష్టించండి"
+
+#: ../../ui/preferences.glade:123
+msgid "Composer"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
@@ -298,6 +341,10 @@ msgstr ""
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
 msgstr "లంకెను నకలించు (_L)"
+
+#: ../../ui/composer.glade:112
+msgid "Copy _link"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
@@ -315,6 +362,10 @@ msgstr "తేదీ: %s\n"
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
 msgstr ""
+
+#: ../../ui/toolbar.glade:155
+msgid "Delete"
+msgstr "తొలగించు"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
@@ -340,8 +391,32 @@ msgstr "నన్ను మరలా అడగవద్దు (_a)"
 msgid "Drafts"
 msgstr "చిత్తులు"
 
+#: ../../ui/composer.glade:384
+msgid "Drop files here"
+msgstr "దస్త్రాలను ఇక్కడ పడవేయండి"
+
+#: ../../ui/account_list.glade:87
+msgid "Edit an account"
+msgstr ""
+
+#: ../../ui/remove_confirm.glade:97
+msgid "Email address:"
+msgstr ""
+
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
+msgstr ""
+
+#: ../../ui/preferences.glade:137
+msgid "Enable _spell checking"
+msgstr ""
+
+#: ../../ui/login.glade:591
+msgid "Encr_yption:"
+msgstr ""
+
+#: ../../ui/login.glade:610
+msgid "Encrypt_ion:"
 msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:185
@@ -365,6 +440,25 @@ msgstr ""
 msgid "Fixed width"
 msgstr "స్థిర వెడల్పు"
 
+#: ../../ui/composer.glade:75
+msgid "Font"
+msgstr "ఖతి"
+
+#. Opens font size drop-down menu
+#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
+#: ../../ui/composer.glade:547
+msgid "Font size"
+msgstr "ఖతి పరిమాణం"
+
+#. Opens font drop-down menu
+#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
+msgid "Fonts"
+msgstr "ఖతులు"
+
+#: ../../ui/toolbar.glade:77
+msgid "Forward"
+msgstr ""
+
 #: ../../src/client/views/conversation-viewer.vala:232
 msgid "From:"
 msgstr "పంపినవారు:"
@@ -387,6 +481,14 @@ msgstr "గేరీ వేగు"
 msgid "Gmail"
 msgstr "జీమెయిల్"
 
+#: ../../ui/password-dialog.glade:132
+msgid "IMAP Credentials"
+msgstr ""
+
+#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
+msgid "IMAP settings"
+msgstr ""
+
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
 msgstr ""
@@ -399,10 +501,32 @@ msgstr "వేగుపెట్టె"
 msgid "Inboxes"
 msgstr ""
 
+#: ../../ui/composer.glade:495
+msgid "Indent"
+msgstr ""
+
+#. Indent text
+#: ../../ui/composer.glade:494
+msgid "Indent (Ctrl+])"
+msgstr ""
+
+#: ../../ui/composer.glade:443
+msgid "Italic"
+msgstr "ఏటవాలు"
+
+#. Toggle italic text
+#: ../../ui/composer.glade:442
+msgid "Italic (Ctrl+I)"
+msgstr ""
+
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "కిబై"
+
+#: ../../ui/toolbar.glade:117
+msgid "Label as"
+msgstr "ఇలా నామాంకం"
 
 #: ../../src/client/geary-controller.vala:307
 msgid "Labels"
@@ -412,8 +536,20 @@ msgstr "నామాంకాలు"
 msgid "Large"
 msgstr "అతిపెద్ద"
 
-#. / The IMAP replay queue is how changes on the server are replicated on the
-#. client.
+#: ../../ui/composer.glade:61
+msgid "Lin_k"
+msgstr "లంకె (_k)"
+
+#: ../../ui/composer.glade:575
+msgid "Link"
+msgstr "లంకె"
+
+#. Add an HTML link
+#: ../../ui/composer.glade:574
+msgid "Link (Ctrl+L)"
+msgstr ""
+
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
 #: ../../src/client/geary-args.vala:15
 msgid "Log IMAP replay queue"
@@ -436,8 +572,7 @@ msgstr ""
 msgid "Log network activity"
 msgstr ""
 
-#. / Serialization is how commands and responses are converted into a stream
-#. of bytes for
+#. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
 #: ../../src/client/geary-args.vala:18
 msgid "Log network serialization"
@@ -455,6 +590,10 @@ msgstr "మెబై"
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
 msgstr "వేగు కక్షిదారు"
+
+#: ../../ui/toolbar.glade:103
+msgid "Mark"
+msgstr "గుర్తు"
 
 #: ../../src/client/geary-controller.vala:198
 msgid "Mark as _read"
@@ -488,6 +627,10 @@ msgstr "నన్ను"
 msgid "Medium"
 msgstr "మాధ్యమం"
 
+#: ../../ui/toolbar.glade:182
+msgid "Menu"
+msgstr ""
+
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
 msgstr ""
@@ -500,9 +643,29 @@ msgstr ""
 msgid "Move conversations"
 msgstr ""
 
+#: ../../ui/toolbar.glade:131
+msgid "Move to"
+msgstr ""
+
+#: ../../ui/login.glade:178
+msgid "N_ame:"
+msgstr ""
+
+#: ../../ui/login.glade:233
+msgid "N_ickname:"
+msgstr ""
+
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
 msgstr "కొత్త సందేశం"
+
+#: ../../ui/remove_confirm.glade:83
+msgid "Nickname:"
+msgstr ""
+
+#: ../../ui/login.glade:664
+msgid "No authentication re_quired"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -511,6 +674,10 @@ msgstr ""
 #: ../../src/client/dialogs/password-dialog.vala:125
 #: ../../src/engine/api/geary-special-folder-type.vala:50
 msgid "None"
+msgstr ""
+
+#: ../../ui/preferences.glade:166
+msgid "Notifications"
 msgstr ""
 
 #. / The datetime that a message being replied to was received
@@ -535,12 +702,40 @@ msgstr ""
 msgid "Output debugging information"
 msgstr ""
 
+#: ../../ui/login.glade:340
+msgid "P_ort:"
+msgstr ""
+
+#: ../../ui/login.glade:477
+msgid "Pass_word:"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:195
+msgid "Password:"
+msgstr ""
+
+#: ../../ui/composer.glade:106
+msgid "Paste _with formatting"
+msgstr ""
+
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
 msgstr ""
 
 #: ../../src/client/geary-args.vala:45
 msgid "Please report comments, suggestions and bugs to:"
+msgstr ""
+
+#: ../../ui/account_spinner.glade:41
+msgid "Please wait while Geary validates your account."
+msgstr ""
+
+#: ../../ui/login.glade:424
+msgid "Por_t:"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
+msgid "Port:"
 msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:579
@@ -551,6 +746,31 @@ msgstr ""
 msgid "Re_member passwords"
 msgstr ""
 
+#: ../../ui/preferences.glade:57
+msgid "Reading"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:273
+msgid "Real name:"
+msgstr ""
+
+#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
+msgid "Remove formatting"
+msgstr ""
+
+#. Resets formatting to the default style
+#: ../../ui/composer.glade:588
+msgid "Remove formatting (Ctrl+Space)"
+msgstr ""
+
+#: ../../ui/toolbar.glade:43
+msgid "Reply"
+msgstr ""
+
+#: ../../ui/toolbar.glade:60
+msgid "Reply All"
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
 msgstr ""
@@ -559,8 +779,33 @@ msgstr ""
 msgid "Reply to _All"
 msgstr ""
 
+#: ../../ui/toolbar.glade:57
+msgid ""
+"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
+msgstr ""
+
+#: ../../ui/toolbar.glade:40
+msgid "Reply to last message in conversation (Ctrl+R, R)"
+msgstr ""
+
+#: ../../ui/composer.glade:147
+msgid "Rich Text"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:162
+msgid "SMTP Credentials"
+msgstr ""
+
+#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
+msgid "SMTP settings"
+msgstr ""
+
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
+msgid "SSL/TLS encryption:"
 msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:123
@@ -581,6 +826,10 @@ msgstr[1] ""
 msgid "Save All A_ttachments..."
 msgstr ""
 
+#: ../../ui/login.glade:307
+msgid "Se_rver:"
+msgstr ""
+
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
 msgstr ""
@@ -593,6 +842,10 @@ msgstr ""
 msgid "Send and receive email"
 msgstr ""
 
+#: ../../ui/toolbar.glade:74
+msgid "Send copy of last message in conversation (Ctrl+L, F)"
+msgstr ""
+
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
 msgstr ""
@@ -601,8 +854,24 @@ msgstr ""
 msgid "Sent Mail"
 msgstr ""
 
+#: ../../ui/login.glade:407
+msgid "Ser_ver:"
+msgstr ""
+
 #: ../../src/client/composer/composer-window.vala:336
 msgid "Serif"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
+msgid "Server:"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:258
+msgid "Service:"
+msgstr ""
+
+#: ../../ui/preferences.glade:203
+msgid "Show _notifications for new mail"
 msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:348
@@ -615,6 +884,24 @@ msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:31
 msgid "Starred"
+msgstr ""
+
+#. Button for creating a new email message
+#: ../../ui/toolbar.glade:12
+msgid "Start new conversation (Ctrl+N, N)"
+msgstr ""
+
+#: ../../ui/login.glade:764
+msgid "Storage"
+msgstr ""
+
+#: ../../ui/composer.glade:471
+msgid "Strikethrough"
+msgstr "కొట్టివేత"
+
+#. Toggle strikethrough text
+#: ../../ui/composer.glade:470
+msgid "Strikethrough (Ctrl+K)"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:247
@@ -634,12 +921,15 @@ msgstr "టెబై"
 #: ../../src/client/geary-controller.vala:1070
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its "
-"contents."
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:79
 msgid "This message contains images. Do you want to show them?"
+msgstr ""
+
+#: ../../ui/composer.glade:400
+msgid "To add them as attachments"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:236
@@ -659,6 +949,15 @@ msgstr "చెత్త"
 msgid "U_nstar"
 msgstr "అనక్షత్రించు"
 
+#: ../../ui/composer.glade:509
+msgid "Un-indent"
+msgstr ""
+
+#. Removes an indent level
+#: ../../ui/composer.glade:508
+msgid "Un-indent (Ctrl+[)"
+msgstr ""
+
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
 msgstr ""
@@ -667,9 +966,26 @@ msgstr ""
 msgid "Unable to validate:\n"
 msgstr ""
 
+#: ../../ui/composer.glade:457
+msgid "Underline"
+msgstr "క్రీగీత"
+
+#. Toggle underlined text
+#: ../../ui/composer.glade:456
+msgid "Underline (Ctrl+U)"
+msgstr ""
+
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
+msgstr ""
+
+#: ../../ui/login.glade:460
+msgid "User_name:"
+msgstr ""
+
+#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
+msgid "Username:"
 msgstr ""
 
 #: ../../src/client/geary-application.vala:19
@@ -712,9 +1028,21 @@ msgstr "కవిలె (_A)"
 msgid "_Attach"
 msgstr "జోడించు (_A)"
 
+#: ../../ui/composer.glade:663
+msgid "_Attach File"
+msgstr ""
+
+#: ../../ui/preferences.glade:71
+msgid "_Automatically select next message"
+msgstr ""
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Cancel"
 msgstr "రద్దుచేయి (_C)"
+
+#: ../../ui/composer.glade:49
+msgid "_Center"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
@@ -723,6 +1051,22 @@ msgstr "నకలుచేయి (_C)"
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
 msgstr "తొలగించు (_D)"
+
+#: ../../ui/password-dialog.glade:547
+msgid "_Details"
+msgstr ""
+
+#: ../../ui/preferences.glade:94
+msgid "_Display message preview"
+msgstr ""
+
+#: ../../ui/login.glade:785
+msgid "_Download mail:"
+msgstr ""
+
+#: ../../ui/login.glade:117
+msgid "_Email address:"
+msgstr "వేగు చిరునామా (_E):"
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -737,9 +1081,17 @@ msgstr "సహాయం (_H)"
 msgid "_Inspect"
 msgstr ""
 
+#: ../../ui/composer.glade:55
+msgid "_Justify"
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
 msgstr "నామాంకం (_L)"
+
+#: ../../ui/composer.glade:37
+msgid "_Left"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -761,6 +1113,15 @@ msgstr ""
 msgid "_New Message"
 msgstr "కొత్త సందేశం (_N)"
 
+#: ../../ui/login.glade:133 ../../ui/login.glade:542
+#: ../../ui/password-dialog.glade:84
+msgid "_Password:"
+msgstr ""
+
+#: ../../ui/preferences.glade:180
+msgid "_Play notification sounds"
+msgstr ""
+
 #: ../../src/client/geary-controller.vala:175
 msgid "_Preferences"
 msgstr "ప్రాధాన్యతలు (_P)"
@@ -768,6 +1129,14 @@ msgstr "ప్రాధాన్యతలు (_P)"
 #: ../../src/client/geary-controller.vala:187
 msgid "_Quit"
 msgstr "నిష్క్రమించు (_Q)"
+
+#: ../../ui/password-dialog.glade:560
+msgid "_Remember passwords"
+msgstr ""
+
+#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
+msgid "_Remove"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1073
 msgid "_Replace"
@@ -778,6 +1147,10 @@ msgstr "ప్రతిస్థాపించు (_R)"
 msgid "_Reply"
 msgstr "ప్రతిస్పందించు (_R)"
 
+#: ../../ui/composer.glade:43
+msgid "_Right"
+msgstr ""
+
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
 msgstr ""
@@ -786,6 +1159,14 @@ msgstr ""
 msgid "_Save As..."
 msgstr "ఇలా భద్రపరుచు...(_S)"
 
+#: ../../ui/composer.glade:696
+msgid "_Send"
+msgstr "పంపు (_S)"
+
+#: ../../ui/login.glade:162
+msgid "_Service:"
+msgstr ""
+
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Show Images"
 msgstr "బొమ్మలను చూపించు (_S)"
@@ -793,6 +1174,10 @@ msgstr "బొమ్మలను చూపించు (_S)"
 #: ../../src/client/geary-controller.vala:210
 msgid "_Star"
 msgstr "నక్షత్రించు (_S)"
+
+#: ../../ui/login.glade:525
+msgid "_Username:"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:821
 msgid "_View Source"
@@ -808,411 +1193,13 @@ msgstr "బైట్లు"
 msgid "none"
 msgstr "ఏదీకాదు"
 
-#. / Translators: add your name and email address to receive credit in the
-#. About dialog
-#. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../../src/client/geary-controller.vala:786
-msgid "translator-credits"
-msgstr "Praveen Illa <mail2ipn@gmail.com>, 2012."
-
-#: ../../ui/account_list.glade:73
-msgid "Add an account"
-msgstr ""
-
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
 msgid "toolbutton1"
 msgstr ""
 
-#: ../../ui/account_list.glade:87
-msgid "Edit an account"
-msgstr ""
-
-#: ../../ui/account_cannot_remove.glade:41
-msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr ""
-
-#: ../../ui/account_cannot_remove.glade:57
-msgid ""
-"A composer window associated with this account is currently open. Send or "
-"discard the message and try again."
-msgstr ""
-
-#: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
-msgid "_Remove"
-msgstr ""
-
-#: ../../ui/account_spinner.glade:41
-msgid "Please wait while Geary validates your account."
-msgstr ""
-
-#: ../../ui/composer.glade:37
-msgid "_Left"
-msgstr ""
-
-#: ../../ui/composer.glade:43
-msgid "_Right"
-msgstr ""
-
-#: ../../ui/composer.glade:49
-msgid "_Center"
-msgstr ""
-
-#: ../../ui/composer.glade:55
-msgid "_Justify"
-msgstr ""
-
-#: ../../ui/composer.glade:61
-msgid "Lin_k"
-msgstr "లంకె (_k)"
-
-#: ../../ui/composer.glade:68
-msgid "C_olor"
-msgstr "రంగు (_o)"
-
-#: ../../ui/composer.glade:75
-msgid "Font"
-msgstr "ఖతి"
-
-#: ../../ui/composer.glade:99 ../../ui/composer.glade:589
-msgid "Remove formatting"
-msgstr ""
-
-#: ../../ui/composer.glade:106
-msgid "Paste _with formatting"
-msgstr ""
-
-#: ../../ui/composer.glade:112
-msgid "Copy _link"
-msgstr ""
-
-#. Opens font size drop-down menu
-#: ../../ui/composer.glade:141 ../../ui/composer.glade:546
-#: ../../ui/composer.glade:547
-msgid "Font size"
-msgstr "ఖతి పరిమాణం"
-
-#: ../../ui/composer.glade:147
-msgid "Rich Text"
-msgstr ""
-
-#: ../../ui/composer.glade:384
-msgid "Drop files here"
-msgstr "దస్త్రాలను ఇక్కడ పడవేయండి"
-
-#: ../../ui/composer.glade:400
-msgid "To add them as attachments"
-msgstr ""
-
-#. Toggle bold text
-#: ../../ui/composer.glade:428
-msgid "Bold (Ctrl+B)"
-msgstr ""
-
-#: ../../ui/composer.glade:429
-msgid "Bold"
-msgstr "బొద్దు"
-
-#. Toggle italic text
-#: ../../ui/composer.glade:442
-msgid "Italic (Ctrl+I)"
-msgstr ""
-
-#: ../../ui/composer.glade:443
-msgid "Italic"
-msgstr "ఏటవాలు"
-
-#. Toggle underlined text
-#: ../../ui/composer.glade:456
-msgid "Underline (Ctrl+U)"
-msgstr ""
-
-#: ../../ui/composer.glade:457
-msgid "Underline"
-msgstr "క్రీగీత"
-
-#. Toggle strikethrough text
-#: ../../ui/composer.glade:470
-msgid "Strikethrough (Ctrl+K)"
-msgstr ""
-
-#: ../../ui/composer.glade:471
-msgid "Strikethrough"
-msgstr "కొట్టివేత"
-
-#. Indent text
-#: ../../ui/composer.glade:494
-msgid "Indent (Ctrl+])"
-msgstr ""
-
-#: ../../ui/composer.glade:495
-msgid "Indent"
-msgstr ""
-
-#. Removes an indent level
-#: ../../ui/composer.glade:508
-msgid "Un-indent (Ctrl+[)"
-msgstr ""
-
-#: ../../ui/composer.glade:509
-msgid "Un-indent"
-msgstr ""
-
-#. Opens font drop-down menu
-#: ../../ui/composer.glade:532 ../../ui/composer.glade:533
-msgid "Fonts"
-msgstr "ఖతులు"
-
-#. Opens font color dialog
-#: ../../ui/composer.glade:560
-msgid "Color (Ctrl+R)"
-msgstr ""
-
-#: ../../ui/composer.glade:561
-msgid "Color"
-msgstr "రంగు"
-
-#. Add an HTML link
-#: ../../ui/composer.glade:574
-msgid "Link (Ctrl+L)"
-msgstr ""
-
-#: ../../ui/composer.glade:575
-msgid "Link"
-msgstr "లంకె"
-
-#. Resets formatting to the default style
-#: ../../ui/composer.glade:588
-msgid "Remove formatting (Ctrl+Space)"
-msgstr ""
-
-#: ../../ui/composer.glade:663
-msgid "_Attach File"
-msgstr ""
-
-#: ../../ui/composer.glade:696
-msgid "_Send"
-msgstr "పంపు (_S)"
-
-#: ../../ui/login.glade:117
-msgid "_Email address:"
-msgstr "వేగు చిరునామా (_E):"
-
-#: ../../ui/login.glade:133 ../../ui/login.glade:542
-#: ../../ui/password-dialog.glade:84
-msgid "_Password:"
-msgstr ""
-
-#: ../../ui/login.glade:162
-msgid "_Service:"
-msgstr ""
-
-#: ../../ui/login.glade:178
-msgid "N_ame:"
-msgstr ""
-
-#: ../../ui/login.glade:233
-msgid "N_ickname:"
-msgstr ""
-
-#: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
-msgid "IMAP settings"
-msgstr ""
-
-#: ../../ui/login.glade:307
-msgid "Se_rver:"
-msgstr ""
-
-#: ../../ui/login.glade:340
-msgid "P_ort:"
-msgstr ""
-
-#: ../../ui/login.glade:407
-msgid "Ser_ver:"
-msgstr ""
-
-#: ../../ui/login.glade:424
-msgid "Por_t:"
-msgstr ""
-
-#: ../../ui/login.glade:442 ../../ui/password-dialog.glade:436
-msgid "SMTP settings"
-msgstr ""
-
-#: ../../ui/login.glade:460
-msgid "User_name:"
-msgstr ""
-
-#: ../../ui/login.glade:477
-msgid "Pass_word:"
-msgstr ""
-
-#: ../../ui/login.glade:525
-msgid "_Username:"
-msgstr ""
-
-#: ../../ui/login.glade:591
-msgid "Encr_yption:"
-msgstr ""
-
-#: ../../ui/login.glade:610
-msgid "Encrypt_ion:"
-msgstr ""
-
-#: ../../ui/login.glade:664
-msgid "No authentication re_quired"
-msgstr ""
-
-#: ../../ui/login.glade:764
-msgid "Storage"
-msgstr ""
-
-#: ../../ui/login.glade:785
-msgid "_Download mail:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
-msgid "Username:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:132
-msgid "IMAP Credentials"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:162
-msgid "SMTP Credentials"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:195
-msgid "Password:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:258
-msgid "Service:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:273
-msgid "Real name:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:351 ../../ui/password-dialog.glade:454
-msgid "Server:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:366 ../../ui/password-dialog.glade:469
-msgid "Port:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
-msgid "SSL/TLS encryption:"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:547
-msgid "_Details"
-msgstr ""
-
-#: ../../ui/password-dialog.glade:560
-msgid "_Remember passwords"
-msgstr ""
-
-#: ../../ui/preferences.glade:57
-msgid "Reading"
-msgstr ""
-
-#: ../../ui/preferences.glade:71
-msgid "_Automatically select next message"
-msgstr ""
-
-#: ../../ui/preferences.glade:94
-msgid "_Display message preview"
-msgstr ""
-
-#: ../../ui/preferences.glade:123
-msgid "Composer"
-msgstr ""
-
-#: ../../ui/preferences.glade:137
-msgid "Enable _spell checking"
-msgstr ""
-
-#: ../../ui/preferences.glade:166
-msgid "Notifications"
-msgstr ""
-
-#: ../../ui/preferences.glade:180
-msgid "_Play notification sounds"
-msgstr ""
-
-#: ../../ui/preferences.glade:203
-msgid "Show _notifications for new mail"
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:46
-msgid ""
-"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
-"account?</span> "
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:61
-msgid ""
-"All email associated with this account will be removed from your computer. "
-"This will not affect email on the server."
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:83
-msgid "Nickname:"
-msgstr ""
-
-#: ../../ui/remove_confirm.glade:97
-msgid "Email address:"
-msgstr ""
-
-#. Button for creating a new email message
-#: ../../ui/toolbar.glade:12
-msgid "Start new conversation (Ctrl+N, N)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:40
-msgid "Reply to last message in conversation (Ctrl+R, R)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:43
-msgid "Reply"
-msgstr ""
-
-#: ../../ui/toolbar.glade:57
-msgid ""
-"Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:60
-msgid "Reply All"
-msgstr ""
-
-#: ../../ui/toolbar.glade:74
-msgid "Send copy of last message in conversation (Ctrl+L, F)"
-msgstr ""
-
-#: ../../ui/toolbar.glade:77
-msgid "Forward"
-msgstr ""
-
-#: ../../ui/toolbar.glade:103
-msgid "Mark"
-msgstr "గుర్తు"
-
-#: ../../ui/toolbar.glade:117
-msgid "Label as"
-msgstr "ఇలా నామాంకం"
-
-#: ../../ui/toolbar.glade:131
-msgid "Move to"
-msgstr ""
-
-#: ../../ui/toolbar.glade:155
-msgid "Delete"
-msgstr "తొలగించు"
-
-#: ../../ui/toolbar.glade:182
-msgid "Menu"
-msgstr ""
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../../src/client/geary-controller.vala:786
+msgid "translator-credits"
+msgstr "Praveen Illa <mail2ipn@gmail.com>, 2012."
