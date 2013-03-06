@@ -4,20 +4,19 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 # 
 # Translators:
-# Baptiste  <baptiste+transifex@darthenay.fr>, 2012.
-#   <r2d2.art2005@gmail.com>, 2012.
+# Gaurav Pareek <gaurav.conetfun@gmail.com>, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.3.0\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-02-27 00:48+0000\n"
-"Last-Translator: Baptiste <baptiste+transifex@darthenay.fr>\n"
+"PO-Revision-Date: 2013-02-28 09:00+0000\n"
+"Last-Translator: grvrulz <gaurav.conetfun@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: eo\n"
+"Language: hi_IN\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
@@ -61,31 +60,31 @@ msgstr ""
 #: ../../src/client/composer/composer-window.vala:644
 #, c-format
 msgid "\"%s\" could not be opened for reading."
-msgstr ""
+msgstr "\"%s\" नहीं खोली जा सकी।"
 
 #: ../../src/client/composer/composer-window.vala:625
 #, c-format
 msgid "\"%s\" is a folder."
-msgstr ""
+msgstr "\"%s\" एक फ़ोल्डर है।"
 
 #: ../../src/client/composer/composer-window.vala:631
 #, c-format
 msgid "\"%s\" is an empty file."
-msgstr ""
+msgstr "\"%s\" एक ख़ाली फ़ाइल है।"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
 #. format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%B %-e, %Y %-H:%M"
+msgstr ""
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
 #. format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr ""
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -93,49 +92,49 @@ msgstr "%B %-e, %Y %-l:%M %P"
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr ""
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
 #. format
 #: ../../src/client/util/util-date.vala:59
 msgid "%H:%M"
-msgstr "%H:%M"
+msgstr ""
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
 #. format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a, %b %-e, %Y at %-l:%M %p"
+msgstr ""
 
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
 #. format
 #: ../../src/client/util/util-date.vala:66
 msgid "%b %-e"
-msgstr "%b %-e"
+msgstr ""
 
 #: ../../src/client/notification/notification-bubble.vala:87
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
-msgstr[0] "%d nova mesaĝo"
-msgstr[1] "%d novaj mesaĝoj"
+msgstr[0] "%d नया संदेश"
+msgstr[1] "%d नए संदेश"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:29
 #, c-format
 msgid "%d unread message"
 msgid_plural "%d unread messages"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d बिना पढ़ा संदेश"
+msgstr[1] "%d बिना पढ़े संदेश"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
 #. format
 #: ../../src/client/util/util-date.vala:56
 msgid "%l:%M %P"
-msgstr "%l:%M %P"
+msgstr ""
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -143,7 +142,7 @@ msgstr "%l:%M %P"
 #: ../../src/client/util/util-date.vala:62
 msgctxt "Default clock format"
 msgid "%l:%M %P"
-msgstr "%l:%M %P"
+msgstr ""
 
 #. / This string gets the folder name and the unread messages count,
 #. / e.g. All Mail (5).
@@ -161,22 +160,22 @@ msgstr ""
 #: ../../src/client/notification/libmessagingmenu.vala:75
 #, c-format
 msgid "%s - New Messages"
-msgstr ""
+msgstr "%s - नए संदेश"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:48
 #, c-format
 msgid "%s wrote:"
-msgstr "%s skribis:"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:160
 #, c-format
 msgid "%u conversations selected."
-msgstr "%u konversacioj elektitaj."
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:383
 #, c-format
 msgid "%u read messages"
-msgstr ""
+msgstr "%u पढे हुए संदेश"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -184,40 +183,40 @@ msgstr ""
 #: ../../src/client/util/util-date.vala:71
 #, no-c-format
 msgid "%x"
-msgstr "%x"
+msgstr ""
 
 #: ../../src/client/views/formatted-conversation-data.vala:245
 msgid "(no subject)"
-msgstr "(neniu temo)"
+msgstr ""
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:74
 msgid "---------- Forwarded message ----------"
-msgstr "---------- Plusendita mesaĝo ----------"
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:205
 msgid "1 month back"
-msgstr ""
+msgstr "1 महीने पहले"
 
 #: ../../src/client/accounts/add-edit-page.vala:208
 msgid "1 year back"
-msgstr ""
+msgstr "1 साल पहले"
 
 #: ../../src/client/accounts/add-edit-page.vala:204
 msgid "2 weeks back"
-msgstr ""
+msgstr "2 महीने पहले"
 
 #: ../../src/client/accounts/add-edit-page.vala:206
 msgid "3 months back"
-msgstr ""
+msgstr "3 महीने पहले"
 
 #: ../../src/client/accounts/add-edit-page.vala:207
 msgid "6 months back"
-msgstr ""
+msgstr "6 महीने पहले"
 
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
-msgstr "Dosiero nomita \"%s\" jam ekzistas. Ĉu vi volas anstataŭigi ĝin?"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:170
 msgid "A_ccounts"
@@ -226,11 +225,11 @@ msgstr ""
 #: ../../src/client/geary-controller.vala:783
 #, c-format
 msgid "About %s"
-msgstr "Pri %s"
+msgstr ""
 
 #: ../../src/client/accounts/account-dialog.vala:19
 msgid "Accounts"
-msgstr ""
+msgstr "खाते"
 
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
@@ -242,7 +241,7 @@ msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
-msgstr "Ĉiuj mesaĝoj"
+msgstr ""
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -259,38 +258,38 @@ msgstr ""
 #: ../../src/client/geary-controller.vala:1054
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
-msgstr "Ĉu vi vere volas malfermi je \"%s\"?"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1055
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from"
 " trusted sources."
-msgstr "Kunsendaĵoj povas kaŭzi damaĝojn al via sistemo. Nur malfermu dosierojn el fidindaj fontoj."
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:243
 msgid "Bcc:"
-msgstr "Kaŝkopio:"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:609
 msgid "Cannot add attachment"
-msgstr "Ne aldoneblas kunsendaĵon"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:239
 msgid "Cc:"
-msgstr "Kopio:"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:586
 msgid "Choose a file"
-msgstr "Elektu dosieron"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:277
 msgid "Co_ntinue"
-msgstr "A_ntaŭiri"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:28
 #: ../../src/client/notification/libindicate.vala:34
 msgid "Compose Message"
-msgstr "Verki mesaĝon"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
@@ -302,16 +301,16 @@ msgstr ""
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
-msgstr ""
+msgstr "सत्त्वाधिकार 2011-2013 योरबा फ़ाउंडेशन"
 
 #: ../../src/client/views/conversation-viewer.vala:250
 msgid "Date:"
-msgstr "Dato:"
+msgstr ""
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:80
 #, c-format
 msgid "Date: %s\n"
-msgstr "Dato: %s\n"
+msgstr ""
 
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
@@ -319,99 +318,99 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
-msgstr ""
+msgstr "वार्तालाप को मिटाएं (Delete, Backspace, A)"
 
 #: ../../src/client/geary-controller.vala:36
 msgid "Delete conversations (Delete, Backspace, A)"
-msgstr ""
+msgstr "वार्तालापों को मिटाएं (Delete, Backspace, A)"
 
 #: ../../src/client/geary-args.vala:24
 msgid "Display program version"
-msgstr "Montri programversion"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:548
 msgid "Do you want to discard the unsaved message?"
-msgstr "Ĉu vi volas forigi la nekonservitan dosieron?"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1056
 msgid "Don't _ask me again"
-msgstr "Ne demandi min denove"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:25
 msgid "Drafts"
-msgstr "Malnetoj"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
-msgstr ""
+msgstr "ईमेल;ई-मेल;मेल"
 
 #: ../../src/client/accounts/add-edit-page.vala:185
 msgid "Enter your account information to get started."
-msgstr "Enigu vian kontan informon por komenciĝi."
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:210
 msgid "Everything"
-msgstr ""
+msgstr "सब कुछ"
 
 #: ../../src/client/views/conversation-viewer.vala:1236
 msgid "Failed to open default text editor."
-msgstr "Malsukcesis malfermi aprioran tekstredaktilon."
+msgstr ""
 
 #: ../../src/client/geary-args.vala:52
 #, c-format
 msgid "Failed to parse command line options: %s\n"
-msgstr "Malsukcesis analizi komandliniajn opciojn: \"%s\"\n"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
-msgstr "Fiksita larĝo"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:232
 msgid "From:"
-msgstr "El:"
+msgstr ""
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:78
 #, c-format
 msgid "From: %s\n"
-msgstr "El: %s\n"
+msgstr ""
 
 #: ../../src/client/util/util-files.vala:22
 msgctxt "Abbreviation for gigabyte"
 msgid "GB"
-msgstr "GB"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:24
 msgid "Geary Mail"
-msgstr "Geary Mail"
+msgstr ""
 
 #: ../../src/engine/api/geary-service-provider.vala:35
 msgid "Gmail"
-msgstr "Gmail"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
-msgstr ""
+msgstr "महत्वपूर्ण"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:22
 msgid "Inbox"
-msgstr "Enirkesto"
+msgstr ""
 
 #: ../../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr ""
+msgstr "इनबौक्स"
 
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
-msgstr "KB"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:307
 msgid "Labels"
-msgstr "Etikedoj"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:354
 msgid "Large"
-msgstr "Granda"
+msgstr ""
 
 #. / The IMAP replay queue is how changes on the server are replicated on the
 #. client.
@@ -451,19 +450,19 @@ msgstr ""
 #: ../../src/client/util/util-files.vala:25
 msgctxt "Abbreviation for megabyte"
 msgid "MB"
-msgstr "MB"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:25
 msgid "Mail Client"
-msgstr "Retpoŝtilo"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:198
 msgid "Mark as _read"
-msgstr "Marki kiel legita"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:204
 msgid "Mark as _unread"
-msgstr "Marki kiel nelegita"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:45
 msgid "Mark as not s_pam"
@@ -483,7 +482,7 @@ msgstr ""
 
 #: ../../src/client/views/formatted-conversation-data.vala:9
 msgid "Me"
-msgstr "Mi"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:351
 msgid "Medium"
@@ -491,42 +490,42 @@ msgstr ""
 
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
-msgstr ""
+msgstr "और अधिक "
 
 #: ../../src/client/geary-controller.vala:51
 msgid "Move conversation"
-msgstr ""
+msgstr "वार्तालप का स्थान परिवर्तन करें"
 
 #: ../../src/client/geary-controller.vala:52
 msgid "Move conversations"
-msgstr ""
+msgstr "वार्तालपों का स्थान परिवर्तन करें"
 
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
-msgstr "Nova mesaĝo"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
-msgstr "Neniu konversacio elektita."
+msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:125
 #: ../../src/engine/api/geary-special-folder-type.vala:50
 msgid "None"
-msgstr "Neniu nomo"
+msgstr ""
 
 #. / The datetime that a message being replied to was received
 #: ../../src/engine/rfc822/rfc822-utils.vala:40
 #, c-format
 msgid "On %s, "
-msgstr "La %s,"
+msgstr ""
 
 #: ../../src/client/notification/notification-bubble.vala:42
 msgid "Open"
-msgstr "Malfermi"
+msgstr ""
 
 #: ../../src/engine/api/geary-service-provider.vala:41
 msgid "Other"
-msgstr "Alia"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:46
 msgid "Outbox"
@@ -538,7 +537,7 @@ msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
-msgstr "Bonvole enigu vian retpoŝtan pasvorton"
+msgstr ""
 
 #: ../../src/client/geary-args.vala:45
 msgid "Please report comments, suggestions and bugs to:"
@@ -546,15 +545,15 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:579
 msgid "Re_member password"
-msgstr "Memori pasvorton"
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:572
 msgid "Re_member passwords"
-msgstr "Memori pasvortojn"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
-msgstr ""
+msgstr "सभी को उत्तर दें"
 
 #: ../../src/client/views/conversation-viewer.vala:787
 msgid "Reply to _All"
@@ -562,45 +561,45 @@ msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
-msgstr ""
+msgstr "SSL"
 
 #: ../../src/client/dialogs/password-dialog.vala:123
 msgid "STARTTLS"
-msgstr ""
+msgstr "STARTTLS"
 
 #: ../../src/client/composer/composer-window.vala:333
 msgid "Sans Serif"
-msgstr "Sans Serif"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:773
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
-msgstr[0] "Konservi kunsendaĵon..."
-msgstr[1] "Konservi ĉiujn kunsendaĵojn..."
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../../src/client/views/conversation-viewer.vala:754
 msgid "Save All A_ttachments..."
-msgstr "Konservi ĉiujn kunsendaĵojn..."
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
-msgstr ""
+msgstr "रंग चुनें"
 
 #: ../../src/client/views/conversation-viewer.vala:546
 msgid "Select _All"
-msgstr "Elekti ĉion"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:26
 msgid "Send and receive email"
-msgstr "Sendi kaj ricevi retpoŝton"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
-msgstr ""
+msgstr "क्या आप बिना विषय का ख़ाली संदेश भेजना चाहते हैं?"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:28
 msgid "Sent Mail"
-msgstr "Mesaĝo sendita"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:336
 msgid "Serif"
@@ -608,29 +607,29 @@ msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:348
 msgid "Small"
-msgstr "Malgranda"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:40
 msgid "Spam"
-msgstr "Trudmesaĝoj"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:31
 msgid "Starred"
-msgstr "Kun stelo"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:247
 msgid "Subject:"
-msgstr "Temo:"
+msgstr ""
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:79
 #, c-format
 msgid "Subject: %s\n"
-msgstr ""
+msgstr "विषय: %s\\n"
 
 #: ../../src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
 msgid "TB"
-msgstr "TB"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1070
 #, c-format
@@ -641,37 +640,37 @@ msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:79
 msgid "This message contains images. Do you want to show them?"
-msgstr "Ĉi tiu mesaĝo enhavas bildojn. Ĉu vi volas montri ilin?"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:236
 msgid "To:"
-msgstr "Al:"
+msgstr ""
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:83
 #, c-format
 msgid "To: %s\n"
-msgstr "Al: %s\n"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:43
 msgid "Trash"
-msgstr "Rubujo"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:215
 msgid "U_nstar"
-msgstr "Forigi stelo_n"
+msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
-msgstr "Ne konekteblas al retpoŝta servilo"
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:602
 msgid "Unable to validate:\n"
-msgstr ""
+msgstr "पुष्टि नहीं हो पाई:\\n"
 
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
-msgstr "Nekonata komandlinia opcio \"%s\"\n"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:19
 msgid "Visit the Yorba web site"
@@ -680,26 +679,26 @@ msgstr ""
 #: ../../src/client/accounts/add-edit-page.vala:185
 #, c-format
 msgid "Welcome to Geary."
-msgstr "Bonvenon en Geary."
+msgstr "गीयरी में आपका स्वागत है ।"
 
 #: ../../src/engine/api/geary-service-provider.vala:38
 msgid "Yahoo! Mail"
-msgstr "Yahoo! Mail"
+msgstr "याहू ! मेल"
 
 #: ../../src/client/geary-application.vala:276
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
-msgstr "Viaj agordoj por IMAP kaj/aŭ SMTP ne specifas je SSL nek je TLS. Tio signifas, ke viaj uzantnomo kaj pasvorto povas esti legitaj de alia persono en la reto. Ĉu vi vere volas fari tion?"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:275
 msgid "Your settings are insecure"
-msgstr "Viaj agordoj estas malsekuraj."
+msgstr "आपकी सेटिंग असुरक्षित हैं।"
 
 #: ../../src/client/geary-controller.vala:183
 msgid "_About"
-msgstr "Pri"
+msgstr ""
 
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Add"
@@ -707,11 +706,11 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:39
 msgid "_Archive"
-msgstr "Enarkivigi"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:588
 msgid "_Attach"
-msgstr "Kunsendi"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:72
 msgid "_Cancel"
@@ -719,11 +718,11 @@ msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
-msgstr "_Copii"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
-msgstr "_Forigi"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -732,7 +731,7 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:179
 msgid "_Help"
-msgstr "_Helpo"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:552
 msgid "_Inspect"
@@ -740,7 +739,7 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
-msgstr "Etikedi"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -818,7 +817,7 @@ msgstr ""
 
 #: ../../ui/account_list.glade:73
 msgid "Add an account"
-msgstr ""
+msgstr "नया खाता जोड़ें"
 
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
@@ -827,7 +826,7 @@ msgstr ""
 
 #: ../../ui/account_list.glade:87
 msgid "Edit an account"
-msgstr ""
+msgstr "खाते में परिवर्तन करें"
 
 #: ../../ui/account_cannot_remove.glade:41
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
@@ -841,11 +840,11 @@ msgstr ""
 
 #: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
 msgid "_Remove"
-msgstr ""
+msgstr "हटाएं"
 
 #: ../../ui/account_spinner.glade:41
 msgid "Please wait while Geary validates your account."
-msgstr ""
+msgstr "कृपया प्रतीक्षा करें, गीयरी आपके खाते की पुष्टि कर रहा है."
 
 #: ../../ui/composer.glade:37
 msgid "_Left"
@@ -903,7 +902,7 @@ msgstr ""
 
 #: ../../ui/composer.glade:400
 msgid "To add them as attachments"
-msgstr "Por aldoni ilin kiel kunsendaĵoj"
+msgstr ""
 
 #. Toggle bold text
 #: ../../ui/composer.glade:428
@@ -985,11 +984,11 @@ msgstr ""
 #. Resets formatting to the default style
 #: ../../ui/composer.glade:588
 msgid "Remove formatting (Ctrl+Space)"
-msgstr ""
+msgstr "प्रारूपण हटाएं (Ctrl+Space)"
 
 #: ../../ui/composer.glade:663
 msgid "_Attach File"
-msgstr ""
+msgstr "फ़ाइल संलग्न करें"
 
 #: ../../ui/composer.glade:696
 msgid "_Send"
@@ -1002,7 +1001,7 @@ msgstr ""
 #: ../../ui/login.glade:133 ../../ui/login.glade:542
 #: ../../ui/password-dialog.glade:84
 msgid "_Password:"
-msgstr "_Pasvorto:"
+msgstr ""
 
 #: ../../ui/login.glade:162
 msgid "_Service:"
@@ -1014,7 +1013,7 @@ msgstr ""
 
 #: ../../ui/login.glade:233
 msgid "N_ickname:"
-msgstr ""
+msgstr "उपनाम"
 
 #: ../../ui/login.glade:289 ../../ui/password-dialog.glade:333
 msgid "IMAP settings"
@@ -1062,15 +1061,15 @@ msgstr ""
 
 #: ../../ui/login.glade:664
 msgid "No authentication re_quired"
-msgstr ""
+msgstr "प्रमाणीकरण की आवश्यकता नहीं"
 
 #: ../../ui/login.glade:764
 msgid "Storage"
-msgstr ""
+msgstr "भंडार"
 
 #: ../../ui/login.glade:785
 msgid "_Download mail:"
-msgstr ""
+msgstr "_मेल डाउनलोड करें:"
 
 #: ../../ui/password-dialog.glade:69 ../../ui/password-dialog.glade:180
 msgid "Username:"
@@ -1086,7 +1085,7 @@ msgstr ""
 
 #: ../../ui/password-dialog.glade:195
 msgid "Password:"
-msgstr "Pasvorto:"
+msgstr ""
 
 #: ../../ui/password-dialog.glade:258
 msgid "Service:"
@@ -1114,7 +1113,7 @@ msgstr ""
 
 #: ../../ui/password-dialog.glade:560
 msgid "_Remember passwords"
-msgstr ""
+msgstr "_पासवर्ड याद रखें"
 
 #: ../../ui/preferences.glade:57
 msgid "Reading"
@@ -1152,39 +1151,39 @@ msgstr ""
 msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
 "account?</span> "
-msgstr ""
+msgstr "<span weight=\"bold\" size=\"larger\">क्या आप सुनिश्चित हैं कि आप इस खाते को हटाना चाहते हैं?</span> "
 
 #: ../../ui/remove_confirm.glade:61
 msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
-msgstr ""
+msgstr "इस खाते से संबंधित सभी ईमेल आपके कंप्यूटर से हटा दिये जाएंगे । इससे सर्वर पर कोई प्रभाव नहीं पड़ेगा।"
 
 #: ../../ui/remove_confirm.glade:83
 msgid "Nickname:"
-msgstr ""
+msgstr "उपनाम:"
 
 #: ../../ui/remove_confirm.glade:97
 msgid "Email address:"
-msgstr ""
+msgstr "ईमेल एड्रेस:"
 
 #. Button for creating a new email message
 #: ../../ui/toolbar.glade:12
 msgid "Start new conversation (Ctrl+N, N)"
-msgstr ""
+msgstr "नया वार्तालाप शुरू करें (Ctrl+N, N)"
 
 #: ../../ui/toolbar.glade:40
 msgid "Reply to last message in conversation (Ctrl+R, R)"
-msgstr ""
+msgstr "वार्तालाप के अन्तिम संदेश का उत्तर दें (Ctrl+R, R)"
 
 #: ../../ui/toolbar.glade:43
 msgid "Reply"
-msgstr ""
+msgstr "उत्तर दें"
 
 #: ../../ui/toolbar.glade:57
 msgid ""
 "Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-msgstr ""
+msgstr "वार्तालाप के अन्तिम संदेश में सभी लोगों को उत्तर दें (Ctrl+Shift+R, Shift+R)"
 
 #: ../../ui/toolbar.glade:60
 msgid "Reply All"
@@ -1192,7 +1191,7 @@ msgstr ""
 
 #: ../../ui/toolbar.glade:74
 msgid "Send copy of last message in conversation (Ctrl+L, F)"
-msgstr ""
+msgstr "वार्तालाप के अन्तिम संदेश की प्रति भेजें (Ctrl+L, F)"
 
 #: ../../ui/toolbar.glade:77
 msgid "Forward"
@@ -1200,15 +1199,15 @@ msgstr ""
 
 #: ../../ui/toolbar.glade:103
 msgid "Mark"
-msgstr "Marki"
+msgstr ""
 
 #: ../../ui/toolbar.glade:117
 msgid "Label as"
-msgstr "Etikedi kiel"
+msgstr ""
 
 #: ../../ui/toolbar.glade:131
 msgid "Move to"
-msgstr "Movi al"
+msgstr ""
 
 #: ../../ui/toolbar.glade:155
 msgid "Delete"

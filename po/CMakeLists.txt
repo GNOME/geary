@@ -1,5 +1,6 @@
 
 set(TRANSLATED
+    ar
     ca
     ca_ES
     cs
@@ -10,18 +11,27 @@ set(TRANSLATED
     eo
     es
     es_ES
+    et
     fi
     fr
+    gl
     he
+    hi_IN
+    hr
+    hu_HU
     id
     it
+    ja_JP
     km_KH
     nb
     nl_NL
     pl
     pt
     pt_BR
+    ro
     ro_RO
+    ru
+    sk
     sl
     sr
     sv
