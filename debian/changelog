@@ -1,3 +1,9 @@
+geary (0.3.0pr1~raring1) raring; urgency=low
+
+  * Pre-prelease 
+
+ -- Eric Gregory <eric@yorba.org>  Wed, 06 Mar 2013 13:16:40 -0800
+
 geary (0.2.2-2~precise2) precise; urgency=low
 
   * Updated for daily build PPA.
