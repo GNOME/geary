@@ -118,10 +118,10 @@ msgid_plural "%d new messages"
 msgstr[0] "%d 封新邮件"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:29
-#, c-format
+#, fuzzy, c-format
 msgid "%d unread message"
-msgid_plural "%d 封未读"
-msgstr[0] ""
+msgid_plural "%d unread messages"
+msgstr[0] "%d 封未读"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
