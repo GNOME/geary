@@ -10,6 +10,8 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     
     private Gtk.ListStore list_store;
     
+    private Gtk.TreeIter? last_iter = null;
+    
     private enum Column {
         CONTACT_OBJECT,
         CONTACT_MARKUP_NAME,
@@ -45,7 +47,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         pack_start(text_renderer, true);
         add_attribute(text_renderer, "markup", Column.CONTACT_MARKUP_NAME);
         
+        set_inline_selection(true);
         match_selected.connect(on_match_selected);
+        cursor_on_match.connect(on_cursor_on_match);
     }
     
     private void add_contact(Geary.Contact contact) {
@@ -109,6 +113,22 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         entry.set_position(characters_seen_so_far);
         
         return true;
+    }
+    
+    private bool on_cursor_on_match(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        last_iter = iter;
+        return true;
+    }
+    
+    public void trigger_selection() {
+        if (last_iter != null) {
+            on_match_selected(this, model, last_iter);
+            last_iter = null;
+        }
+    }
+    
+    public void reset_selection() {
+        last_iter = null;
     }
     
     private Geary.Contact? get_contact(Gtk.TreeIter iter) {
