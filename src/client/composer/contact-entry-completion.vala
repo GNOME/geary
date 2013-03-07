@@ -237,7 +237,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     private bool match_prefix_contact(string needle, Geary.Contact contact,
         out string highlighted_result = null) {
         string email_result;
-        bool email_match = match_prefix_string(needle, contact.normalized_email, out email_result);
+        bool email_match = match_prefix_string(needle, contact.email, out email_result);
         
         string real_name_result;
         bool real_name_match = match_prefix_string(needle, contact.real_name, out real_name_result);
