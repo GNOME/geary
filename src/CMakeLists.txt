@@ -161,6 +161,8 @@ engine/nonblocking/nonblocking-variants.vala
 engine/rfc822/rfc822.vala
 engine/rfc822/rfc822-error.vala
 engine/rfc822/rfc822-gmime-filter-flowed.vala
+engine/rfc822/rfc822-gmime-filter-blockquotes.vala
+engine/rfc822/rfc822-gmime-filter-plain.vala
 engine/rfc822/rfc822-mailbox-addresses.vala
 engine/rfc822/rfc822-mailbox-address.vala
 engine/rfc822/rfc822-message.vala

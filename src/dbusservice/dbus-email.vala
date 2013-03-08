@@ -44,15 +44,9 @@ public class Geary.DBus.Email : Object {
         }
         
         try {
-            body_text = full_email.get_message().get_first_mime_part_of_content_type("text/html").
-                to_string();
+            body_text = full_email.get_message().get_body(true);
         } catch (Error err) {
-            try {
-                body_text = full_email.get_message().get_first_mime_part_of_content_type("text/plain").
-                    to_string();
-            } catch (Error err2) {
-                debug("Could not get message text. %s", err2.message);
-            }
+            debug("Could not get message text. %s", err.message);
         }
         
         return body_text;

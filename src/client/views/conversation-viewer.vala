@@ -277,16 +277,10 @@ public class ConversationViewer : Gtk.Box {
 
         string body_text = "";
         try {
-            body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_string();
+            body_text = email.get_message().get_body(true);
             body_text = insert_html_markup(body_text, email);
         } catch (Error err) {
-            try {
-                body_text = linkify_and_escape_plain_text(email.get_message().
-                    get_first_mime_part_of_content_type("text/plain").to_string());
-                body_text = insert_plain_text_markup(body_text);
-            } catch (Error err2) {
-                debug("Could not get message text. %s", err2.message);
-            }
+            debug("Could not get message text. %s", err.message);
         }
 
         // Graft header and email body into the email container.
@@ -833,16 +827,6 @@ public class ConversationViewer : Gtk.Box {
         return quote_container;
     }
 
-    private string[] split_message_and_signature(string text) {
-        try {
-            Regex signature_regex = new Regex("\\R--\\s*\\R", RegexCompileFlags.MULTILINE);
-            return signature_regex.split_full(text, -1, 0, 0, 2);
-        } catch (RegexError e) {
-            debug("Regex error searching for signature: %s", e.message);
-            return new string[0];
-        }
-    }
-    
     private string set_up_quotes(string text) {
         try {
             // Extract any quote containers from the signature block and make them controllable.
@@ -866,73 +850,6 @@ public class ConversationViewer : Gtk.Box {
             debug("Error adjusting final quote block: %s", error.message);
             return text;
         }
-    }
-
-    private string insert_plain_text_markup(string text) {
-        // Plain text signature and quote:
-        // -- 
-        // Nate
-        //
-        // 2012/3/14 Nate Lillich &lt;nate@yorba.org&gt;#015
-        // &gt;
-        // &gt;
-        //
-        // Wrap all quotes in hide/show controllers.
-        string message = "";
-        try {
-            WebKit.DOM.HTMLElement container = web_view.create_div();
-            int offset = 0;
-            while (offset < text.length) {
-                // Find the beginning of a quote block.
-                int quote_start = text.index_of("&gt;") == 0 && message.length == 0 ? 0 :
-                    text.index_of("\n&gt;", offset);
-                if (quote_start == -1) {
-                    break;
-                } else if (text.get(quote_start) == '\n') {
-                    // Don't include the newline.
-                    ++quote_start;
-                }
-                
-                // Find the end of the quote block.
-                int quote_end = quote_start;
-                do {
-                    quote_end = text.index_of("\n", quote_end + 1);
-                } while (quote_end != -1 && quote_end == text.index_of("\n&gt;", quote_end));
-                if (quote_end == -1) {
-                    quote_end = text.length;
-                }
-
-                // Copy the stuff before the quote, then the wrapped quote.
-                WebKit.DOM.Element quote_container = create_quote_container();
-                Util.DOM.select(quote_container, ".quote").set_inner_html(
-                    decorate_quotes(text.substring(quote_start, quote_end - quote_start)));
-                container.append_child(quote_container);
-                if (quote_start > offset) {
-                    message += text.substring(offset, quote_start - offset);
-                }
-                message += container.get_inner_html();
-                offset = quote_end;
-                container.set_inner_html("");
-            }
-            
-            // Append everything that's left.
-            if (offset != text.length) {
-                message += text.substring(offset);
-            }
-        } catch (Error error) {
-            debug("Error wrapping plaintext quotes: %s", error.message);
-            return text;
-        }
-
-        // Find the signature marker (--) at the beginning of a line.
-        string[] message_chunks = split_message_and_signature(message);
-        string signature = "";
-        if (message_chunks.length == 2) {
-            signature = "<div class=\"signature\">%s</div>".printf(
-                message.substring(message_chunks[0].length).strip());
-            message = "<div>%s</div>".printf(message_chunks[0]);
-        }
-        return "<pre>" + set_up_quotes(message + signature) + "</pre>";
     }
     
     private string insert_html_markup(string text, Geary.Email email) {
@@ -1044,18 +961,17 @@ public class ConversationViewer : Gtk.Box {
         if (i == div_list.length) {
             return;
         }
-        WebKit.DOM.Element elem = div_list.item(i) as WebKit.DOM.Element;
+        WebKit.DOM.Node elem = div_list.item(i) as WebKit.DOM.Node;
+        WebKit.DOM.Element parent = elem.get_parent_element();
         WebKit.DOM.HTMLElement signature_container = web_view.create_div();
         signature_container.set_attribute("class", "signature");
         do {
             // Get its sibling _before_ we move it into the signature div.
-            WebKit.DOM.Element? sibling = elem.get_next_element_sibling() as WebKit.DOM.Element;
-            if (!elem.get_attribute("class").contains("quote_container")) {
-                signature_container.append_child(elem);
-            }
+            WebKit.DOM.Node? sibling = elem.get_next_sibling();
+            signature_container.append_child(elem);
             elem = sibling;
         } while (elem != null);
-        container.append_child(signature_container);
+        parent.append_child(signature_container);
     }
     
     public void remove_message(Geary.Email email) {
