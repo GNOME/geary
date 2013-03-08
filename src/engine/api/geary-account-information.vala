@@ -457,6 +457,13 @@ public class Geary.AccountInformation : BaseObject {
         return new RFC822.MailboxAddress(real_name, email);
     }
     
+    /**
+     * Returns a MailboxAddresses object with this mailbox address.
+     */
+    public RFC822.MailboxAddresses get_from() {
+        return new RFC822.MailboxAddresses.single(get_mailbox_address());
+    }
+    
     public static int compare_ascending(AccountInformation a, AccountInformation b) {
         int diff = a.ordinal - b.ordinal;
         if (diff != 0)

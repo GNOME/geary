@@ -9,6 +9,7 @@ public class ComposerWindow : Gtk.Window {
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
+        REPLY_ALL,
         FORWARD
     }
     
@@ -171,10 +172,11 @@ public class ComposerWindow : Gtk.Window {
     private ContactEntryCompletion[] contact_entry_completions;
     
     public ComposerWindow(Geary.Account account, ComposeType compose_type,
-        Geary.ContactStore? contact_store, Geary.ComposedEmail? prefill = null) {
+        Geary.Email? referred = null) {
         this.account = account;
         this.compose_type = compose_type;
         
+        Geary.ContactStore? contact_store = account.get_contact_store();
         contact_entry_completions = {
             new ContactEntryCompletion(contact_store),
             new ContactEntryCompletion(contact_store),
@@ -283,29 +285,56 @@ public class ComposerWindow : Gtk.Window {
         add_accel_group(ui.get_accel_group());
         GearyApplication.instance.load_ui_file_for_manager(ui, "composer_accelerators.ui");
         
-        if (prefill != null) {
-            if (prefill.from != null)
-                from = prefill.from.to_rfc822_string();
-            if (prefill.to != null)
-                to = prefill.to.to_rfc822_string();
-            if (prefill.cc != null)
-                cc = prefill.cc.to_rfc822_string();
-            if (prefill.bcc != null)
-                bcc = prefill.bcc.to_rfc822_string();
-            if (prefill.in_reply_to != null)
-                in_reply_to = prefill.in_reply_to.value;
-            if (prefill.references != null)
-                references = prefill.references.to_rfc822_string();
-            if (prefill.subject != null)
-                subject = prefill.subject.value;
-            if (prefill.body_html != null)
-                body_html = prefill.body_html.buffer.to_string();
-            if (body_html == null && prefill.body_text != null)
-                body_html = "<pre>" + prefill.body_text.buffer.to_string() + "</pre>";
-        }
-        
+        from = account.information.get_from().to_rfc822_string();
         update_from_field();
         from_multiple.changed.connect(on_from_changed);
+        
+        if (referred != null) {
+           switch (compose_type) {
+                case ComposeType.NEW_MESSAGE:
+                    if (referred.to != null)
+                        to = referred.to.to_rfc822_string();
+                    if (referred.cc != null)
+                        cc = referred.cc.to_rfc822_string();
+                    if (referred.bcc != null)
+                        bcc = referred.bcc.to_rfc822_string();
+                    if (referred.in_reply_to != null)
+                        in_reply_to = referred.in_reply_to.value;
+                    if (referred.references != null)
+                        references = referred.references.to_rfc822_string();
+                    if (referred.subject != null)
+                        subject = referred.subject.value;
+                    try {
+                        body_html = referred.get_message().get_body(true);
+                    } catch (Error error) {
+                        debug("Error getting messae body: %s", error.message);
+                    }
+                break;
+                
+                case ComposeType.REPLY:
+                case ComposeType.REPLY_ALL:
+                    string? sender_address = account.information.get_mailbox_address().address;
+                    to = Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
+                    if (compose_type == ComposeType.REPLY_ALL)
+                        cc = Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_address);
+                    subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
+                    in_reply_to = referred.message_id.value;
+                    references = Geary.RFC822.Utils.reply_references(referred);
+                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, true);
+                break;
+                
+                case ComposeType.FORWARD:
+                    subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
+                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, true);
+                break;
+            }
+            
+            foreach(Geary.Attachment attachment in referred.attachments) {
+                File? attachment_file = File.new_for_path(attachment.filepath);
+                if (attachment_file != null)
+                    add_attachment(attachment_file);
+            }
+        }
         
         editor = new WebKit.WebView();
         edit_fixer = new WebViewEditFixer(editor);
@@ -387,11 +416,54 @@ public class ComposerWindow : Gtk.Window {
         chain.append(attachments_box);
         chain.append(button_area);
         box.set_focus_chain(chain);
-
-        if(prefill != null) {
-            foreach(File attachment_file in prefill.attachment_files) {
-                add_attachment(attachment_file);
+    }
+    
+    public ComposerWindow.from_mailto(Geary.Account account, string mailto) {
+        this(account, ComposeType.NEW_MESSAGE);
+        
+        Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
+        if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
+            // Parse the mailto link.
+            string[] parts = mailto.substring(Geary.ComposedEmail.MAILTO_SCHEME.length).split("?", 2);
+            string email = Uri.unescape_string(parts[0]);
+            string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
+            foreach (string param in params) {
+                string[] param_parts = param.split("=", 2);
+                if (param_parts.length == 2) {
+                    headers.set(Uri.unescape_string(param_parts[0]).down(),
+                        Uri.unescape_string(param_parts[1]));
+                }
             }
+            
+            // Assemble the headers.
+            if (headers.contains("from"))
+                // Should this really be allowed?
+                from = Geary.Collection.get_first(headers.get("from"));
+            
+            if (email.length > 0 && headers.contains("to"))
+                to = "%s,%s".printf(email, Geary.Collection.get_first(headers.get("to")));
+            else if (email.length > 0)
+                to = email;
+            else if (headers.contains("to"))
+                to = Geary.Collection.get_first(headers.get("to"));
+            
+            if (headers.contains("cc"))
+                cc = Geary.Collection.get_first(headers.get("cc"));
+            
+            if (headers.contains("bcc"))
+                bcc = Geary.Collection.get_first(headers.get("bcc"));
+            
+            if (headers.contains("subject"))
+                subject = Geary.Collection.get_first(headers.get("subject"));
+            
+            if (headers.contains("body"))
+                body_html = Geary.HTML.preserve_whitespace(Geary.HTML.escape_markup(
+                    Geary.Collection.get_first(headers.get("body"))));
+            
+            foreach (string attachment in headers.get("attach"))
+                add_attachment(File.new_for_uri(attachment));
+            foreach (string attachment in headers.get("attachment"))
+                add_attachment(File.new_for_uri(attachment));
         }
     }
     
@@ -522,19 +594,19 @@ public class ComposerWindow : Gtk.Window {
             email.bcc = bcc_entry.addresses;
         
         if (!Geary.String.is_empty(in_reply_to))
-            email.in_reply_to = new Geary.RFC822.MessageID(in_reply_to);
+            email.in_reply_to = in_reply_to;
         
         if (!Geary.String.is_empty(references))
-            email.references = new Geary.RFC822.MessageIDList.from_rfc822_string(references);
+            email.references = references;
         
         if (!Geary.String.is_empty(subject))
-            email.subject = new Geary.RFC822.Subject(subject);
+            email.subject = subject;
         
         email.attachment_files.add_all(attachment_files);
         
         if (compose_as_html)
-            email.body_html = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_html()));
-        email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(get_text()));
+            email.body_html = get_html();
+        email.body_text = get_text();
 
         // User-Agent
         email.mailer = GearyApplication.PRGNAME + "/" + GearyApplication.VERSION;

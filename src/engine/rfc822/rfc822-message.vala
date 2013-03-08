@@ -83,18 +83,18 @@ public class Geary.RFC822.Message : BaseObject {
         }
 
         if (email.in_reply_to != null) {
-            in_reply_to = email.in_reply_to;
-            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to.value);
+            in_reply_to = new Geary.RFC822.MessageID(email.in_reply_to);
+            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to);
         }
         
         if (email.references != null) {
-            references = email.references;
-            message.set_header(HEADER_REFERENCES, email.references.to_rfc822_string());
+            references = new Geary.RFC822.MessageIDList.from_rfc822_string(email.references);
+            message.set_header(HEADER_REFERENCES, email.references);
         }
         
         if (email.subject != null) {
-            subject = email.subject;
-            message.set_subject(email.subject.value);
+            subject = new Geary.RFC822.Subject(email.subject);
+            message.set_subject(email.subject);
         }
 
         // User-Agent
@@ -107,7 +107,7 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.Part? body_text = null;
         if (email.body_text != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body_text.buffer.get_array()),
+                new GMime.StreamMem.with_buffer(email.body_text.data),
                 GMime.ContentEncoding.DEFAULT);
             
             body_text = new GMime.Part();
@@ -119,7 +119,7 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.Part? body_html = null;
         if (email.body_html != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body_html.buffer.get_array()),
+                new GMime.StreamMem.with_buffer(email.body_html.data),
                 GMime.ContentEncoding.DEFAULT);
             
             body_html = new GMime.Part();
