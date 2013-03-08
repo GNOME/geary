@@ -7,6 +7,12 @@
 int main(string[] args) {
     GearyApplication app = new GearyApplication();
     
-    return app.run(args);
+    int ec = app.run(args);
+    
+#if REF_TRACKING
+    Geary.BaseObject.dump_refs(stdout);
+#endif
+    
+    return ec;
 }
 

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.RFC822.Message : Object {
+public class Geary.RFC822.Message : BaseObject {
     private const string DEFAULT_ENCODING = "UTF8";
     
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";

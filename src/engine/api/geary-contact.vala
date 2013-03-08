@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Contact : Object {
+public class Geary.Contact : BaseObject {
     public string normalized_email { get; private set; }
     public string email { get; private set; }
     public string? real_name { get; private set; }

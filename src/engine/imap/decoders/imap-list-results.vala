@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.MailboxInformation {
+public class Geary.Imap.MailboxInformation : BaseObject {
     public string name { get; private set; }
     public string? delim { get; private set; }
     public MailboxAttributes attrs { get; private set; }

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.ClientSession {
+public class Geary.Imap.ClientSession : BaseObject {
     // 30 min keepalive required to maintain session
     public const uint MIN_KEEPALIVE_SEC = 30 * 60;
     
@@ -61,7 +61,7 @@ public class Geary.Imap.ClientSession {
     
     // Many of the async commands go through the FSM, and this is used to pass state around until
     // the multiple transitions are completed
-    private class AsyncParams : Object {
+    private class AsyncParams : BaseObject {
         public Cancellable? cancellable;
         public unowned SourceFunc cb;
         public CommandResponse? cmd_response = null;
@@ -1306,6 +1306,9 @@ public class Geary.Imap.ClientSession {
             
             return new AsyncCommandResponse(null, user, not_connected_err);
         }
+        
+        bool removed = tag_response.unset(cmd.tag);
+        assert(removed);
         
         assert(cmd_response.is_sealed());
         assert(cmd_response.status_response.tag.equals(cmd.tag));

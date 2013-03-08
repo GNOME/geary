@@ -23,6 +23,9 @@ configure_help() {
     printf "\t--debug\n"
     printf "\t\t\t\tBuild for debugging.\n"
     
+    printf "\t--enable-ref-tracking\n"
+    printf "\t\t\t\tEnable reference tracking which is dumped to stdout when the program exits.\n"
+    
     printf "\t--disable-schemas-compile\n"
     printf "\t\t\t\tDisable compiling the GSettings schema.\n"
     
@@ -64,6 +67,10 @@ do
         
         --debug)
                             CMDLINE="${CMDLINE} -DDEBUG=ON"
+                            ;;
+        
+        --enable-ref-tracking)
+                            CMDLINE="${CMDLINE} -DREF_TRACKING=ON"
                             ;;
         
         --disable-schemas-compile)

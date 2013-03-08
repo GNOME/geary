@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.AbstractAccount : Object, Geary.Account {
+public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public Geary.AccountInformation information { get; protected set; }
     
     private string name;

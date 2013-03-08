@@ -5,7 +5,7 @@
  */
 
 // A folder of any type in the folder list.
-public class FolderList.FolderEntry : Object, Sidebar.Entry, Sidebar.InternalDropTargetEntry,
+public class FolderList.FolderEntry : Geary.BaseObject, Sidebar.Entry, Sidebar.InternalDropTargetEntry,
     Sidebar.SelectableEntry, Sidebar.EmphasizableEntry {
     public Geary.Folder folder { get; private set; }
     private bool has_new;

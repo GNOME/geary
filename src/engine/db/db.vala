@@ -21,8 +21,8 @@ namespace Geary.Db {
 public const int64 INVALID_ROWID = -1;
 
 private const int MAX_RETRY_SLEEP_MSEC = 1000;
-private const int MIN_RETRY_SLEEP_MSEC = 200;
-private const int RETRY_SLEEP_DEC_MSEC = 200;
+private const int MIN_RETRY_SLEEP_MSEC = 50;
+private const int RETRY_SLEEP_INC_MSEC = 100;
 
 [Flags]
 public enum DatabaseFlags {
@@ -88,7 +88,7 @@ private void check_cancelled(string? method, Cancellable? cancellable) throws IO
 private int exec_retry_locked(Context ctx, string? method, SqliteExecOperation op, string? raw = null)
     throws Error {
     int count = 0;
-    int sleep_msec = MAX_RETRY_SLEEP_MSEC;
+    int sleep_msec = MIN_RETRY_SLEEP_MSEC;
     int total_msec = 0;
     int max_retry_msec = ctx.get_max_retry_msec();
     for (;;) {
@@ -108,10 +108,13 @@ private int exec_retry_locked(Context ctx, string? method, SqliteExecOperation o
         Thread.usleep(sleep_msec * 1000);
         
         total_msec += sleep_msec;
-        sleep_msec = Numeric.int_floor(sleep_msec - RETRY_SLEEP_DEC_MSEC, MIN_RETRY_SLEEP_MSEC);
+        sleep_msec = Numeric.int_ceiling(sleep_msec + RETRY_SLEEP_INC_MSEC, MAX_RETRY_SLEEP_MSEC);
         
-        debug("%s retrying: [%d] total_msec=%d %s", method, ++count, total_msec,
-            (raw != null) ? raw : "");
+        // don't log the first one, this is common enough to not warrant it
+        if (++count > 1) {
+            debug("%s retrying: [%d] total_msec=%d %s", method, count, total_msec,
+                (raw != null) ? raw : "");
+        }
     }
 }
 

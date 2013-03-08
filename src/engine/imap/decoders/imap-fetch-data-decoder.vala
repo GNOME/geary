@@ -16,7 +16,7 @@
  * as in a database.
  */
 
-public abstract class Geary.Imap.FetchDataDecoder {
+public abstract class Geary.Imap.FetchDataDecoder : BaseObject {
     public FetchDataType data_item { get; private set; }
     
     public FetchDataDecoder(FetchDataType data_item) {

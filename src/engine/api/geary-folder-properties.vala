@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.FolderProperties : Object {
+public abstract class Geary.FolderProperties : BaseObject {
     /**
      * The total count of email in the Folder.
      */

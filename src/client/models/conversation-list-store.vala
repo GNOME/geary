@@ -193,7 +193,7 @@ public class ConversationListStore : Gtk.ListStore {
     private Gee.Collection<Geary.EmailIdentifier> get_emails_needing_previews() {
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
-        Gee.TreeSet<Geary.Conversation> sorted_conversations = new Gee.TreeSet<Geary.Conversation>(
+        Gee.TreeSet<Geary.Conversation> sorted_conversations = new Geary.Collection.FixedTreeSet<Geary.Conversation>(
             (CompareFunc) compare_conversation_descending);
         sorted_conversations.add_all(conversation_monitor.get_conversations());
         

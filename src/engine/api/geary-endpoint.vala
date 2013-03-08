@@ -9,7 +9,7 @@
  * a port, and flags and other parameters that specify the nature of the connection itself.
  */
 
-public class Geary.Endpoint : Object {
+public class Geary.Endpoint : BaseObject {
     [Flags]
     public enum Flags {
         NONE = 0,

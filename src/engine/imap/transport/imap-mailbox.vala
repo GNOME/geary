@@ -637,7 +637,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
 // All this fancy stepping should not be exposed to a user of the IMAP portion of Geary, who should
 // only see Geary.Imap.Mailbox, nor should it be exposed to the user of Geary.Engine, where all this
 // should only be exposed via Geary.Folder.
-private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
+private class Geary.Imap.SelectedContext : BaseObject, Geary.ReferenceSemantics {
     public ClientSession? session { get; private set; }
     
     public string name { get; protected set; }

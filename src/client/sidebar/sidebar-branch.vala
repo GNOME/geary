@@ -68,7 +68,7 @@ public class Sidebar.Branch : Object {
             child.parent = this;
 
             if (children == null)
-                children = new Gee.TreeSet<Node>(comparator_wrapper);
+                children = new Geary.Collection.FixedTreeSet<Node>(comparator_wrapper);
             
             bool added = children.add(child);
             assert(added);
@@ -77,7 +77,7 @@ public class Sidebar.Branch : Object {
         public void remove_child(Node child) {
             assert(children != null);
             
-            Gee.SortedSet<Node> new_children = new Gee.TreeSet<Node>(comparator_wrapper);
+            Gee.SortedSet<Node> new_children = new Geary.Collection.FixedTreeSet<Node>(comparator_wrapper);
             
             // For similar reasons as in reorder_child(), can't rely on TreeSet to locate this
             // node because we need reference equality.
@@ -146,7 +146,7 @@ public class Sidebar.Branch : Object {
             // called or the set is manually iterated over and removed via the Iterator -- a
             // tree search is performed and the child will not be found.  Only easy solution is
             // to rebuild a new SortedSet and see if the child has moved.
-            Gee.SortedSet<Node> new_children = new Gee.TreeSet<Node>(comparator_wrapper);
+            Gee.SortedSet<Node> new_children = new Geary.Collection.FixedTreeSet<Node>(comparator_wrapper);
             bool added = new_children.add_all(children);
             assert(added);
             
@@ -162,7 +162,7 @@ public class Sidebar.Branch : Object {
             if (children == null)
                 return;
             
-            Gee.SortedSet<Node> reordered = new Gee.TreeSet<Node>(comparator_wrapper);
+            Gee.SortedSet<Node> reordered = new Geary.Collection.FixedTreeSet<Node>(comparator_wrapper);
             reordered.add_all(children);
             children = reordered;
             

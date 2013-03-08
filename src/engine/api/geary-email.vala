@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Email : Object {
+public class Geary.Email : BaseObject {
     // This value is not persisted, but it does represent the expected max size of the preview
     // when returned.
     public const int MAX_PREVIEW_BYTES = 128;

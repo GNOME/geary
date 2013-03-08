@@ -19,7 +19,7 @@
  * flush_async() implies commit_async(), but the reverse is not true.
  */
 
-public class Geary.Imap.Serializer {
+public class Geary.Imap.Serializer : BaseObject {
     private OutputStream outs;
     private ConverterOutputStream couts;
     private MemoryOutputStream mouts;

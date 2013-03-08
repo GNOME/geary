@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.AbstractFolder : Object, Geary.Folder {
+public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
     /*
      * notify_* methods for AbstractFolder are marked internal because the SendReplayOperations
      * need access to them to report changes as they occur.

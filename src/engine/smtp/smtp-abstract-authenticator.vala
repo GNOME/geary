@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Smtp.AbstractAuthenticator : Object, Geary.Smtp.Authenticator {
+public abstract class Geary.Smtp.AbstractAuthenticator : BaseObject, Geary.Smtp.Authenticator {
     public Credentials credentials { get; private set; }
     
     public AbstractAuthenticator(Credentials credentials) {

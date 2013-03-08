@@ -14,7 +14,7 @@ namespace Geary.Scheduler {
 
 private Gee.HashSet<ScheduledInstance>? scheduled_map = null;
 
-private class ScheduledInstance : Object, Geary.ReferenceSemantics {
+private class ScheduledInstance : BaseObject, Geary.ReferenceSemantics {
     protected int manual_ref_count { get; protected set; }
     
     private unowned SourceFunc? cb;

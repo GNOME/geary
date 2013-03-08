@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.NonblockingAbstractSemaphore {
+public abstract class Geary.NonblockingAbstractSemaphore : BaseObject {
     private class Pending {
         public unowned SourceFunc cb;
         public Cancellable? cancellable;
@@ -91,7 +91,7 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         }
     }
     
-    public virtual void notify() throws Error {
+    public virtual new void notify() throws Error {
         check_cancelled();
         
         passed = true;

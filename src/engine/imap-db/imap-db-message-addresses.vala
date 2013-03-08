@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.ImapDB.MessageAddresses : Object {
+private class Geary.ImapDB.MessageAddresses : BaseObject {
     // Read-only view.
     public Gee.Collection<Contact> contacts { get; private set; }
     

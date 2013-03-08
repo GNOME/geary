@@ -59,7 +59,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
         return db.total_changes();
     } }
     
-    public Database database { get; private set; }
+    public weak Database database { get; private set; }
     
     internal Sqlite.Database db;
     

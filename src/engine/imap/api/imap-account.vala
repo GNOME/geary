@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.Imap.Account : Object {
+private class Geary.Imap.Account : BaseObject {
     // all references to Inbox are converted to this string, purely for sanity sake when dealing
     // with Inbox's case issues
     public const string INBOX_NAME = "INBOX";
@@ -45,13 +45,11 @@ private class Geary.Imap.Account : Object {
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {
-        // Nothing to do -- ClientSessionManager deals with maintaining connections
-        // TODO: Start ClientSessionManager here, not in ctor
+        yield session_mgr.open_async(cancellable);
     }
     
     public async void close_async(Cancellable? cancellable) throws Error {
-        // Nothing to do -- ClientSessionManager deals with maintaining connections
-        // TODO: Stop ClientSessionManager here
+        yield session_mgr.close_async(cancellable);
     }
     
     public async Gee.Collection<Geary.Imap.Folder> list_folders_async(Geary.FolderPath? parent,

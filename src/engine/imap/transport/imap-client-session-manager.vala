@@ -4,8 +4,10 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.ClientSessionManager {
+public class Geary.Imap.ClientSessionManager : BaseObject {
     public const int DEFAULT_MIN_POOL_SIZE = 4;
+    
+    public bool is_open { get; private set; default = false; }
     
     private AccountInformation account_information;
     private int min_pool_size;
@@ -26,22 +28,74 @@ public class Geary.Imap.ClientSessionManager {
         this.min_pool_size = min_pool_size;
         
         account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
-        
-        adjust_session_pool.begin();
     }
     
     ~ClientSessionManager() {
         account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
     }
     
+    public async void open_async(Cancellable? cancellable) throws Error {
+        if (is_open)
+            throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
+        
+        is_open = true;
+        
+        adjust_session_pool.begin();
+    }
+    
+    public async void close_async(Cancellable? cancellable) throws Error {
+        if (!is_open)
+            return;
+        
+        is_open = false;
+        
+        int token;
+        try {
+            token = yield sessions_mutex.claim_async();
+        } catch (Error claim_err) {
+            debug("Unable to claim session table mutex for closing pool: %s", claim_err.message);
+            
+            return;
+        }
+        
+        // disconnect all existing sessions at once; don't wait for each, since as they disconnect
+        // they'll remove themselves from the sessions list and cause this foreach to explode
+        foreach (ClientSession session in sessions)
+            session.disconnect_async.begin();
+        
+        try {
+            sessions_mutex.release(ref token);
+        } catch (Error release_err) {
+            debug("Unable to release session table mutex after closing pool: %s", release_err.message);
+        }
+        
+        // TODO: This isn't the best (deterministic) way to deal with this, but it's easy and works
+        // for now
+        while (sessions.size > 0) {
+            debug("Waiting for ClientSessions to disconnect from ClientSessionManager...");
+            Timeout.add(250, close_async.callback);
+            yield;
+        }
+    }
+    
     private void on_imap_credentials_notified() {
         authentication_failed = false;
-        adjust_session_pool.begin();
+        
+        if (is_open)
+            adjust_session_pool.begin();
+    }
+    
+    private void check_open() throws Error {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("ClientSessionManager is not open");
     }
     
     // TODO: Need a more thorough and bulletproof system for maintaining a pool of ready
     // authorized sessions.
     private async void adjust_session_pool() {
+        if (!is_open)
+            return;
+        
         int token;
         try {
             token = yield sessions_mutex.claim_async();
@@ -51,7 +105,7 @@ public class Geary.Imap.ClientSessionManager {
             return;
         }
         
-        while (sessions.size < min_pool_size && !authentication_failed) {
+        while (sessions.size < min_pool_size && !authentication_failed && is_open) {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {
@@ -103,6 +157,8 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Gee.Collection<Geary.Imap.MailboxInformation> list_roots(
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
@@ -118,6 +174,8 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Gee.Collection<Geary.Imap.MailboxInformation> list(string parent,
         string delim, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         // build a proper IMAP specifier
         string specifier = parent;
         specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
@@ -136,6 +194,8 @@ public class Geary.Imap.ClientSessionManager {
     }
     
     public async bool folder_exists_async(string path, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
@@ -148,6 +208,8 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Geary.Imap.MailboxInformation? fetch_async(string path,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         ListResults results = ListResults.decode(yield session.send_command_async(
@@ -163,6 +225,8 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Geary.Imap.StatusResults status_async(string path, StatusDataType[] types,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         ClientSession session = yield get_authorized_session_async(cancellable);
         
         StatusResults results = StatusResults.decode(yield session.send_command_async(
@@ -186,6 +250,8 @@ public class Geary.Imap.ClientSessionManager {
     
     public async Mailbox select_examine_mailbox(Geary.FolderPath path, string? delim,
         bool is_select, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Gee.HashSet<SelectedContext> contexts = is_select ? selected_contexts : examined_contexts;
         SelectedContext new_context = yield select_examine_async(
             path.get_fullpath(delim), is_select, cancellable);

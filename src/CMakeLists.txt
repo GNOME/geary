@@ -15,6 +15,7 @@ engine/abstract/geary-abstract-folder.vala
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
 engine/api/geary-attachment.vala
+engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
 engine/api/geary-contact.vala
 engine/api/geary-contact-importance.vala
@@ -431,6 +432,16 @@ if (NOT DEBUG)
         ${CFLAGS}
         -O2
     )    
+endif ()
+
+if (REF_TRACKING)
+    message(STATUS "Reference tracking: ON")
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        --define=REF_TRACKING
+    )
+else ()
+    message(STATUS "Reference tracking: OFF")
 endif ()
 
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})

@@ -20,7 +20,7 @@ namespace GtkUtil {
 // above improvement), but unlike the label, that's not so straightforward due to the number of
 // ways of representing an icon in GTK.
 
-public class ToggleToolbarDropdown : Object {
+public class ToggleToolbarDropdown : Geary.BaseObject {
     public const int DEFAULT_PADDING = 2;
     
     public bool show_arrow { get; set; default = true; }

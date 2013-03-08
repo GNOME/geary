@@ -5,7 +5,7 @@
  */
 
 // Stores formatted data for a message.
-public class FormattedConversationData : Object {
+public class FormattedConversationData : Geary.BaseObject {
     private const string ME = _("Me");
     
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
@@ -19,7 +19,7 @@ public class FormattedConversationData : Object {
     private const int FONT_SIZE_PREVIEW = 8;
     private const int FONT_SIZE_MESSAGE_COUNT = 8;
     
-    private class ParticipantDisplay : Geary.Equalable {
+    private class ParticipantDisplay : Geary.BaseObject, Geary.Equalable {
         public string key;
         public Geary.RFC822.MailboxAddress address;
         public bool is_unread;

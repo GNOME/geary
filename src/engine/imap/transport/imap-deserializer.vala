@@ -18,7 +18,7 @@
  * shouldn't be relied upon.)
  */
 
-public class Geary.Imap.Deserializer {
+public class Geary.Imap.Deserializer : BaseObject {
     private const size_t MAX_BLOCK_READ_SIZE = 4096;
     
     private enum Mode {

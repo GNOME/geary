@@ -34,7 +34,7 @@
  * override this signal and move the object to a closed or broken state, or merely drop their own
  * reference to the SmartReference.
  */
-public interface Geary.ReferenceSemantics : Object {
+public interface Geary.ReferenceSemantics : BaseObject {
     protected abstract int manual_ref_count { get; protected set; }
     
     /**
@@ -69,7 +69,7 @@ public interface Geary.ReferenceSemantics : Object {
  * A SmartReference holds a reference to a ReferenceSemantics object.  See that class for more
  * information on the operation of these two classes.
  */
-public abstract class Geary.SmartReference : Object {
+public abstract class Geary.SmartReference : BaseObject {
     private ReferenceSemantics? reffed;
     
     /**

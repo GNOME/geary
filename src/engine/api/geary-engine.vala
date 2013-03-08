@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Engine {
+public class Geary.Engine : BaseObject {
     [Flags]
     public enum ValidationResult {
         OK = 0,

@@ -4,8 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.EmailFlag : Geary.Equalable, Geary.Hashable {
+public class Geary.EmailFlag : BaseObject, Geary.Equalable, Geary.Hashable {
     private string name;
+    
     public EmailFlag(string name) {
         this.name = name;
     }

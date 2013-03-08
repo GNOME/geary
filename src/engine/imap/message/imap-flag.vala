@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Imap.Flag : Equalable, Hashable {
+public abstract class Geary.Imap.Flag : BaseObject, Equalable, Hashable {
     public string value { get; private set; }
     
     public Flag(string value) {

@@ -18,7 +18,7 @@
  * in the background and asking the user to reauthenticate each time is deemed inconvenient.
  */
  
-public class Geary.Credentials {
+public class Geary.Credentials : BaseObject {
     public string? user { get; set; }
     public string? pass { get; set; }
     

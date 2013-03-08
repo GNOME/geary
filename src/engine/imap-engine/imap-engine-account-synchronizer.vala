@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.AccountSynchronizer {
+private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private const int FETCH_DATE_RECEIVED_CHUNK_COUNT = 25;
     
     public GenericAccount account { get; private set; }
@@ -273,7 +273,7 @@ private class Geary.ImapEngine.AccountSynchronizer {
                 break;
             
             // sort these by their received date so they're walked in order
-            Gee.TreeSet<Email> sorted_list = new Gee.TreeSet<Email>(Email.compare_date_received_descending);
+            Gee.TreeSet<Email> sorted_list = new Collection.FixedTreeSet<Email>(Email.compare_date_received_descending);
             sorted_list.add_all(list);
             
             // look for any that are older than epoch and bail out if found

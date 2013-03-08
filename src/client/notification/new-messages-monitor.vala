@@ -11,10 +11,10 @@
 // themselves as they're added.  In the latter case, subscribers should add required Email.Field
 // flags to the object with add_required_fields().
 
-public class NewMessagesMonitor : Object {
+public class NewMessagesMonitor : Geary.BaseObject {
     public delegate bool ShouldNotifyNewMessages();
     
-    private class MonitorInformation : Object {
+    private class MonitorInformation : Geary.BaseObject {
         public Geary.Folder folder;
         public Cancellable? cancellable = null;
         public int count = 0;

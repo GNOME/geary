@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.ComposedEmail : Object {
+public class Geary.ComposedEmail : BaseObject {
     public const string MAILTO_SCHEME = "mailto:";
     
     public const Geary.Email.Field REQUIRED_REPLY_FIELDS =

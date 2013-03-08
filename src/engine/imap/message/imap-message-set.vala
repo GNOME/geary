@@ -6,7 +6,7 @@
 
 extern void qsort(void *base, size_t num, size_t size, CompareFunc compare_func);
 
-public class Geary.Imap.MessageSet {
+public class Geary.Imap.MessageSet : BaseObject {
     public bool is_uid { get; private set; default = false; }
     
     private string value { get; private set; }

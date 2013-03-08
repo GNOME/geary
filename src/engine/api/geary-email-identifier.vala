@@ -23,7 +23,7 @@
  * passed to equals() and compare().  This may be added in the future.
  */
 
-public abstract class Geary.EmailIdentifier : Object, Geary.Equalable, Geary.Comparable, Geary.Hashable {
+public abstract class Geary.EmailIdentifier : BaseObject, Geary.Equalable, Geary.Comparable, Geary.Hashable {
     public int64 ordering { get; protected set; }
     
     protected EmailIdentifier(int64 ordering) {

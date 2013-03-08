@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.FetchBodyDataType {
+public class Geary.Imap.FetchBodyDataType : BaseObject {
     public enum SectionPart {
         NONE,
         HEADER,

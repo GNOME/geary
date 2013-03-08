@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.CommandResponse : Object {
+public class Geary.Imap.CommandResponse : BaseObject {
     public Gee.List<ServerData> server_data { get; private set; }
     public StatusResponse? status_response { get; private set; }
     

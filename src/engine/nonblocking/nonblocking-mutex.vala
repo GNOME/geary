@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.NonblockingMutex {
+public class Geary.NonblockingMutex : BaseObject {
     public const int INVALID_TOKEN = -1;
     
     private NonblockingSpinlock spinlock = new NonblockingSpinlock();

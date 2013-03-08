@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.ImapDB.Account : Object {
+private class Geary.ImapDB.Account : BaseObject {
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         

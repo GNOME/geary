@@ -1249,7 +1249,7 @@ public class GearyController {
         set_busy(true);
 
         // Collect all the emails into one pool and then delete.
-        Gee.Set<Geary.Email> all_emails = new Gee.TreeSet<Geary.Email>();
+        Gee.Set<Geary.Email> all_emails = new Geary.Collection.FixedTreeSet<Geary.Email>();
         foreach (Geary.Conversation conversation in selected_conversations)
             all_emails.add_all(conversation.get_emails(Geary.Conversation.Ordering.NONE));
         

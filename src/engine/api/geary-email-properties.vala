@@ -13,7 +13,7 @@
  * to the local store, checksums, and so forth.
  */
 
-public abstract class Geary.EmailProperties : Object {
+public abstract class Geary.EmailProperties : BaseObject {
     /**
      * date_received may be the date/time received on the server or in the local store, depending
      * on whether the information is available on the server.  For example, with IMAP, this is

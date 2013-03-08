@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Imap.CommandResults : Object {
+public abstract class Geary.Imap.CommandResults : BaseObject {
     public StatusResponse status_response { get; private set; }
     
     public CommandResults(StatusResponse status_response) {

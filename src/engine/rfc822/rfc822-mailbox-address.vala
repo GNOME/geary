@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.RFC822.MailboxAddress {
+public class Geary.RFC822.MailboxAddress : BaseObject {
     public string? name { get; private set; }
     public string? source_route { get; private set; }
     public string mailbox { get; private set; }

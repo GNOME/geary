@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Memory.AbstractBuffer : Object {
+public abstract class Geary.Memory.AbstractBuffer : BaseObject {
     public abstract size_t get_size();
     
     public abstract size_t get_allocated_size();

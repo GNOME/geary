@@ -12,7 +12,7 @@
  * Geary.Db's major classes (Database, Connection, Statement, and Result) inherit from Context.
  */
 
-public abstract class Geary.Db.Context : Object {
+public abstract class Geary.Db.Context : BaseObject {
     public virtual Database? get_database() {
         return get_connection() != null ? get_connection().database : null;
     }

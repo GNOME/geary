@@ -160,8 +160,8 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         
         debug("do_prefetch_batch %s %d", folder.to_string(), ids.size);
         
-        // Sort email by size
-        Gee.TreeSet<Geary.Email> sorted_email = new Gee.TreeSet<Geary.Email>(
+        // Sort email by date
+        Gee.TreeSet<Geary.Email> sorted_email = new Collection.FixedTreeSet<Geary.Email>(
             Email.compare_date_received_descending);
         foreach (Geary.EmailIdentifier id in local_fields.keys) {
             sorted_email.add(yield folder.fetch_email_async(id, Geary.Email.Field.PROPERTIES,

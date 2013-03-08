@@ -10,7 +10,7 @@ public delegate uint Geary.State.Transition(uint state, uint event, void *user =
 public delegate void Geary.State.PostTransition(void *user = null, Object? object = null,
     Error? err = null);
 
-public class Geary.State.Mapping {
+public class Geary.State.Mapping : BaseObject {
     public uint state;
     public uint event;
     public unowned Transition transition;

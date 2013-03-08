@@ -13,7 +13,7 @@
  * Note that only one of the fields (exists, recent, expunge, or flags) will be valid for any
  * ServerData; it's impossible that more than one will be valid.
  */
-public class Geary.Imap.UnsolicitedServerData : Object {
+public class Geary.Imap.UnsolicitedServerData : BaseObject {
     /**
      * -1 means not found in ServerData
      */

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.NonblockingMailbox<G> : Object {
+public class Geary.NonblockingMailbox<G> : BaseObject {
     public int size { get { return queue.size; } }
     public bool allow_duplicates { get; set; default = true; }
     public bool requeue_duplicate { get; set; default = false; }

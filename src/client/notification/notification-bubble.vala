@@ -5,7 +5,7 @@
  */
 
 // Displays a notification bubble
-public class NotificationBubble : GLib.Object {
+public class NotificationBubble : Geary.BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
     

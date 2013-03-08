@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public abstract class Geary.Conversation : Object {
+public abstract class Geary.Conversation : BaseObject {
     public enum Ordering {
         NONE,
         DATE_ASCENDING,

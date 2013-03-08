@@ -11,7 +11,7 @@
  *
  * Note that EmailFlagWatcher doesn't maintain a reference to the Geary.Folder it's watching.
  */
-private class Geary.ImapEngine.EmailFlagWatcher : Object {
+private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     public const int DEFAULT_FLAG_WATCH_SEC = 3 * 60;
     
     private unowned Geary.Folder folder;

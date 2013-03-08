@@ -6,7 +6,7 @@
 
 public delegate void Geary.EmailCallback(Gee.List<Geary.Email>? emails, Error? err);
 
-public interface Geary.Folder : Object {
+public interface Geary.Folder : BaseObject {
     public enum OpenState {
         CLOSED,
         OPENING,

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.FolderPath : Object, Hashable, Equalable, Comparable {
+public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
     public string basename { get; private set; }
     
     private Gee.List<Geary.FolderPath>? path = null;

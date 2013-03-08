@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Attachment {
+public class Geary.Attachment : BaseObject {
     public const Email.Field REQUIRED_FIELDS = Email.Field.HEADER | Email.Field.BODY;
     
     public string? filename { get; private set; }

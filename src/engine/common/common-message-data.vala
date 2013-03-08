@@ -10,7 +10,7 @@
  * structure, its RFC822 header, IMAP metadata, or details from a POP server.
  */
 
-public abstract class Geary.Common.MessageData {
+public abstract class Geary.Common.MessageData : BaseObject {
     /**
      * to_string() is intended for debugging and logging purposes, not user-visible text or
      * serialization.

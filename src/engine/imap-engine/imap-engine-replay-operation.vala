@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private abstract class Geary.ImapEngine.ReplayOperation {
+private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     /**
      * Scope specifies what type of operations (remote, local, or both) are needed by this operation.
      * What methods are made on the operation depends on the returned Scope:

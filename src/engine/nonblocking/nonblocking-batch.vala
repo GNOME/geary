@@ -8,7 +8,7 @@
  * A NonblockingBatchOperation is an abstract base class used by NonblockingBatch.  It represents
  * a single task of asynchronous work.  NonblockingBatch will execute it one time only.
  */
-public abstract class Geary.NonblockingBatchOperation : Object {
+public abstract class Geary.NonblockingBatchOperation : BaseObject {
     public abstract async Object? execute_async(Cancellable? cancellable) throws Error;
 }
 
@@ -45,7 +45,7 @@ public abstract class Geary.NonblockingBatchOperation : Object {
  * operations in smaller chunks (to avoid flooding the thread's MainLoop).  These may be added in
  * the future.
  */
-public class Geary.NonblockingBatch : Object {
+public class Geary.NonblockingBatch : BaseObject {
     public const int INVALID_ID = -1;
     
     private const int START_ID = 1;

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-private class Geary.Db.TransactionAsyncJob : Object {
+private class Geary.Db.TransactionAsyncJob : BaseObject {
     private TransactionType type;
     private unowned TransactionMethod cb;
     private Cancellable cancellable;

@@ -8,7 +8,7 @@
  * Singleton is a simple way of creating a one-item read-only collection.
  */
 private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
-    private class IteratorImpl<G> : Object, Gee.Iterator<G> {
+    private class IteratorImpl<G> : BaseObject, Gee.Iterator<G> {
         private G item;
         private bool done = false;
         

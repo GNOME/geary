@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public interface Geary.Account : Object {
+public interface Geary.Account : BaseObject {
     public enum Problem {
         RECV_EMAIL_LOGIN_FAILED,
         SEND_EMAIL_LOGIN_FAILED,

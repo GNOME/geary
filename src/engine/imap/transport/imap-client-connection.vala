@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.Imap.ClientConnection {
+public class Geary.Imap.ClientConnection : BaseObject {
     public const uint16 DEFAULT_PORT = 143;
     public const uint16 DEFAULT_PORT_SSL = 993;
     

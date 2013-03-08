@@ -35,7 +35,7 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
         }
     }
     
-    public MailboxAddress? get(int index) {
+    public new MailboxAddress? get(int index) {
         return addrs.get(index);
     }
     

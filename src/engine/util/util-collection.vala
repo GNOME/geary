@@ -31,4 +31,16 @@ public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
     return true;
 }
 
+// This *must* be used in place of Gee,TreeSet until the fix for this bug is widely distributed:
+// https://bugzilla.gnome.org/show_bug.cgi?id=695045
+public class FixedTreeSet<G> : Gee.TreeSet<G> {
+    public FixedTreeSet(CompareFunc? compare_func = null) {
+        base (compare_func);
+    }
+    
+    ~FixedTreeSet() {
+        clear();
+    }
+}
+
 }

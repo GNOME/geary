@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class Geary.ConversationMonitor : Object {
+public class Geary.ConversationMonitor : BaseObject {
     /**
      * These are the fields Conversations require to thread emails together.  These fields will
      * be retrieved irregardless of the Field parameter passed to the constructor.
@@ -26,13 +26,13 @@ public class Geary.ConversationMonitor : Object {
         
         // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
         // the number of times they're accessed makes it worth it
-        private Gee.SortedSet<Email> date_ascending = new Gee.TreeSet<Email>(
+        private Gee.SortedSet<Email> date_ascending = new Collection.FixedTreeSet<Email>(
             (CompareFunc) compare_date_ascending);
-        private Gee.SortedSet<Email> date_descending = new Gee.TreeSet<Email>(
+        private Gee.SortedSet<Email> date_descending = new Collection.FixedTreeSet<Email>(
             (CompareFunc) compare_date_descending);
-        private Gee.SortedSet<Email> id_ascending = new Gee.TreeSet<Email>(
+        private Gee.SortedSet<Email> id_ascending = new Collection.FixedTreeSet<Email>(
             (CompareFunc) compare_id_ascending);
-        private Gee.SortedSet<Email> id_descending = new Gee.TreeSet<Email>(
+        private Gee.SortedSet<Email> id_descending = new Collection.FixedTreeSet<Email>(
             (CompareFunc) compare_id_descending);
         
         public ImplConversation(Geary.ConversationMonitor owner) {
