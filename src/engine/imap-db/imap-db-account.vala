@@ -417,12 +417,12 @@ private class Geary.ImapDB.Account : BaseObject {
     
     public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath>? folder_blacklist, Cancellable? cancellable = null) throws Error {
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error {
         Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
             = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id=?");
+            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE ? in (message_id, in_reply_to)");
             stmt.bind_string(0, message_id.to_string());
             Db.Result result = stmt.exec(cancellable);
             
@@ -437,11 +437,18 @@ private class Geary.ImapDB.Account : BaseObject {
                     
                     Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, cancellable);
                     if (folders == null) {
-                        messages.set(email, null);
+                        if (folder_blacklist == null || !folder_blacklist.contains(null))
+                            messages.set(email, null);
                     } else {
                         foreach (Geary.FolderPath path in folders) {
-                            if (folder_blacklist == null || !folder_blacklist.contains(path))
+                            // If it's in a blacklisted folder, we don't report
+                            // it at all.
+                            if (folder_blacklist != null && folder_blacklist.contains(path)) {
+                                messages.remove_all(email);
+                                break;
+                            } else {
                                 messages.set(email, path);
+                            }
                         }
                     }
                 }
@@ -453,6 +460,33 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         return (messages.size == 0 ? null : messages);
+    }
+    
+    public async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
+        if (!(email_id is Geary.ImapDB.EmailIdentifier))
+            throw new EngineError.BAD_PARAMETERS("email_id must be a Geary.ImapDB.EmailIdentifier");
+        
+        Geary.Email? email = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            // TODO: once we have a way of deleting messages, we won't be able
+            // to assume that a row id will point to the same email outside of
+            // transactions, because SQLite will reuse row ids.
+            MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                cx, email_id.ordering, required_fields, cancellable);
+            
+            if (!row.fields.fulfills(required_fields))
+                throw new EngineError.INCOMPLETE_MESSAGE(
+                    "Message %s only fulfills %Xh fields (required: %Xh)",
+                    email_id.to_string(), row.fields, required_fields);
+            
+            email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(email_id.ordering));
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        assert(email != null);
+        return email;
     }
     
     private void clear_duplicate_folders() {

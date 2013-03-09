@@ -158,17 +158,29 @@ public interface Geary.Account : BaseObject {
         throws Error;
     
     /**
-     * Search the local account for emails with a matching Message-ID header.
-     * Fetch the requested fields, optionally ignoring emails that don't have
-     * the requested fields set.  Don't include any of the blacklisted folders
-     * in the result.  Return a map of Email object to a list of FolderPaths
-     * it's in, which can be null if it's in no folders (note that emails only
-     * in blacklisted folders won't show up at all).
+     * Search the local account for emails referencing a Message-ID value
+     * (which can appear in the Message-ID header itself, as well as the
+     * In-Reply-To header, and maybe more places).  Fetch the requested fields,
+     * optionally ignoring emails that don't have the requested fields set.
+     * Don't include emails that appear in any of the blacklisted folders in
+     * the result.  If null is included in the blacklist, omit emails appearing
+     * in no folders.  Return a map of Email object to a list of FolderPaths
+     * it's in, which can be null if it's in no folders.
      */
     public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath>? folder_blacklist, Cancellable? cancellable = null) throws Error;
-
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Return a single email fulfilling the required fields.  The email to pull
+     * is identified by an EmailIdentifier from a previous call to
+     * local_search_message_id_async().  Throw EngineError.NOT_FOUND if the
+     * email isn't found and EngineError.INCOMPLETE_MESSAGE if the fields
+     * aren't available.
+     */
+    public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+    
     /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */

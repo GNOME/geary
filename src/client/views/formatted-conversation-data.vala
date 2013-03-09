@@ -85,7 +85,7 @@ public class FormattedConversationData : Geary.BaseObject {
     public string date { get; private set; }
     public string subject { get; private set; }
     public string? body { get; private set; default = null; } // optional
-    public int num_emails { get; private set; }
+    public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
     
     private Geary.Conversation? conversation = null;

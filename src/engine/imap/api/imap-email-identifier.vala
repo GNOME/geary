@@ -15,6 +15,10 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
         this.folder_path = folder_path;
     }
     
+    public override Geary.FolderPath? get_folder_path() {
+        return folder_path;
+    }
+    
     public override uint to_hash() {
         return uid.to_hash();
     }

@@ -52,6 +52,15 @@ public interface Geary.Equalable {
     }
     
     /**
+     * EqualFunc for nullable objects that implement Equalable.
+     */
+    public static bool nullable_equal_func(void *a, void *b) {
+        if (a == null || b == null)
+            return (a == null && b == null);
+        return equal_func(a, b);
+    }
+    
+    /**
      * The EqualsFunc counterpart to Hashable.bare_int64_hash().
      */
     public static bool bare_int64_equals(void *a, void *b) {

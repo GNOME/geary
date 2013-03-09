@@ -55,7 +55,7 @@ public class Geary.DBus.Conversations : Object {
     }
     
     public void fetch_messages(int num_messages) throws IOError {
-        conversations.lazy_load(-1, num_messages, Geary.Folder.ListFlags.NONE, null);
+        conversations.load_async.begin(-1, num_messages, Geary.Folder.ListFlags.NONE, null);
     }
     
     private void on_scan_started() {

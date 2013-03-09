@@ -30,6 +30,12 @@ public abstract class Geary.EmailIdentifier : BaseObject, Geary.Equalable, Geary
         this.ordering = ordering;
     }
     
+    // Used by some EmailIdentifiers to indicate they are specific to a
+    // particular folder.
+    public virtual Geary.FolderPath? get_folder_path() {
+        return null;
+    }
+    
     public virtual uint to_hash() {
         return Geary.Hashable.int64_hash(ordering);
     }
