@@ -29,6 +29,12 @@ abstract class AlertDialog : Object {
     public Gtk.Box get_message_area() {
         return (Gtk.Box) dialog.get_message_area();
     }
+
+    public void set_focus_response(Gtk.ResponseType response) {
+        Gtk.Widget? to_focus = dialog.get_widget_for_response(Gtk.ResponseType.OK);
+        if (to_focus != null)
+            to_focus.grab_focus();
+    }
     
     // Runs dialog, destroys it, and returns selected response
     public Gtk.ResponseType run() {
@@ -78,6 +84,9 @@ class QuestionDialog : AlertDialog {
         
         // this must be done once all the packing is completed
         get_message_area().show_all();
+
+        // the check box may have grabbed keyboard focus, so we put it back to the button
+        set_focus_response(Gtk.ResponseType.OK);
         
         is_checked = checkbox_default;
     }
