@@ -312,7 +312,8 @@ public class Geary.RFC822.Message : BaseObject {
             mailer = message.get_header(HEADER_MAILER);
     }
     
-    private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist) {
+    private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist,
+        int depth = 0) {
         if (addrlist == null || addrlist.length() == 0)
             return null;
         
@@ -329,12 +330,24 @@ public class Geary.RFC822.Message : BaseObject {
                 continue;
             }
             
+            // Two problems here:
+            //
+            // First, GMime crashes when parsing a malformed group list (the case seen in the
+            // wild is -- weirdly enough -- a date appended to the end of a cc: list on a spam
+            // email.  GMime interprets it as a group list but segfaults when destroying the
+            // InterneAddresses it generated from it.  See:
+            // https://bugzilla.gnome.org/show_bug.cgi?id=695319
+            //
+            // Second, RFC 822 6.2.6: "This  standard  does  not  permit  recursive  specification
+            // of groups within groups."  So don't do it.
             InternetAddressGroup? group = addr as InternetAddressGroup;
             if (group != null) {
-                Gee.List<RFC822.MailboxAddress>? grouplist = convert_gmime_address_list(
-                    group.get_members());
-                if (grouplist != null)
-                    converted.add_all(grouplist);
+                if (depth == 0) {
+                    Gee.List<RFC822.MailboxAddress>? grouplist = convert_gmime_address_list(
+                        group.get_members(), depth + 1);
+                    if (grouplist != null)
+                        converted.add_all(grouplist);
+                }
                 
                 continue;
             }
