@@ -29,7 +29,7 @@ public class GearyController {
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
 
-    public const int FETCH_EMAIL_CHUNK_COUNT = 50;
+    public const int FETCH_EMAIL_CHUNK_COUNT = 200;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Delete, Backspace, A)");
@@ -449,6 +449,7 @@ public class GearyController {
         current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.scan_completed.connect(on_scan_completed);
+        current_conversations.seed_completed.connect(on_seed_completed);
         current_conversations.conversation_appended.connect(on_conversation_appended);
         current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
         current_conversations.email_flags_changed.connect(on_email_flags_changed);
@@ -474,6 +475,15 @@ public class GearyController {
     
     private void on_scan_completed() {
         set_busy(false);
+    }
+    
+    private void on_seed_completed() {
+        // Done scanning.  Check if we have enough messages to fill the conversation list; if not,
+        // trigger a load_more();
+        if (!main_window.conversation_list_has_scrollbar()) {
+            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
+            on_load_more();
+        }
     }
     
     private void on_notification_bubble_invoked(Geary.Folder? folder, Geary.Email? email) {

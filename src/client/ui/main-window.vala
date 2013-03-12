@@ -20,7 +20,8 @@ public class MainWindow : Gtk.Window {
 
     private Gtk.Paned folder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     private Gtk.Paned conversations_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
-
+    
+    private Gtk.ScrolledWindow conversation_list_scrolled;
     private Gtk.Spinner spinner = new Gtk.Spinner();
     
     public MainWindow() {
@@ -105,7 +106,7 @@ public class MainWindow : Gtk.Window {
         folder_list_scrolled.add(folder_list);
         
         // message list
-        Gtk.ScrolledWindow conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
+        conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
         conversation_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         conversation_list_scrolled.add(conversation_list_view);
@@ -132,6 +133,13 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
+    }
+    
+    // Returns true when there's a conversation list scrollbar visible, i.e. the list is tall
+    // enough to need one.  Otherwise returns false.
+    public bool conversation_list_has_scrollbar() {
+        Gtk.Scrollbar? scrollbar = conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar;
+        return scrollbar != null && scrollbar.get_visible();
     }
 }
 

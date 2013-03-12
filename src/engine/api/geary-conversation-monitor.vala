@@ -179,6 +179,7 @@ public class Geary.ConversationMonitor : BaseObject {
     private bool retry_connection = false;
     private uint retry_id = 0;
     private int min_window_count = 0;
+    private bool reseed_notified = false;
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
@@ -228,6 +229,14 @@ public class Geary.ConversationMonitor : BaseObject {
      */
     public virtual signal void scan_completed() {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed",
+            folder.to_string());
+    }
+    
+    /**
+     * "seed-completed" is fired when the folder has opened and email has been populated.
+     */
+    public virtual signal void seed_completed() {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::seed_completed",
             folder.to_string());
     }
     
@@ -329,6 +338,10 @@ public class Geary.ConversationMonitor : BaseObject {
         scan_completed();
     }
     
+    protected virtual void notify_seed_completed() {
+        seed_completed();
+    }
+    
     protected virtual void notify_conversations_added(Gee.Collection<Conversation> conversations) {
         conversations_added(conversations);
     }
@@ -395,6 +408,7 @@ public class Geary.ConversationMonitor : BaseObject {
         }
         
         notify_monitoring_started();
+        reseed_notified = false;
         
         // pull in all the local email immediamente
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
@@ -761,14 +775,43 @@ public class Geary.ConversationMonitor : BaseObject {
     
     private void reseed(string why) {
         Geary.EmailIdentifier? earliest_id = get_lowest_email_id();
+        
         if (earliest_id != null) {
             debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
                 earliest_id.to_string(), folder.to_string());
-            load_by_id_async.begin(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+            load_by_id_async.begin(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE,
+                cancellable_monitor, on_reseed_by_id_complete);
         } else {
             debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
                 min_window_count, folder.to_string());
-            load_async.begin(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+            load_async.begin(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor,
+                on_reseed_complete);
+        }
+    }
+    
+    private void on_reseed_complete(GLib.Object? object, GLib.AsyncResult result) {
+        try {
+            load_async.end(result);
+        } catch (Error err) {
+            debug("Reseed error: %s", err.message);
+        }
+        
+        if (!reseed_notified) {
+            reseed_notified = true;
+            notify_seed_completed();
+        }
+    }
+    
+    private void on_reseed_by_id_complete(GLib.Object? object, GLib.AsyncResult result) {
+        try {
+            load_by_id_async.end(result);
+        } catch (Error err) {
+            debug("Reseed error: %s", err.message);
+        }
+        
+        if (!reseed_notified) {
+            reseed_notified = true;
+            notify_seed_completed();
         }
     }
     
