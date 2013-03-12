@@ -177,6 +177,7 @@ public class Geary.ConversationMonitor : BaseObject {
         Geary.RFC822.MessageID, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
     private Cancellable? cancellable_monitor = null;
     private bool retry_connection = false;
+    private int64 last_retry_time = 0;
     private uint retry_id = 0;
     private int min_window_count = 0;
     private bool reseed_notified = false;
@@ -307,6 +308,8 @@ public class Geary.ConversationMonitor : BaseObject {
         this.folder = folder;
         this.readonly = readonly;
         this.required_fields = required_fields | REQUIRED_FIELDS;
+        
+        folder.account.information.notify["imap-credentials"].connect(on_imap_credentials_notified);
     }
     
     ~ConversationMonitor() {
@@ -316,6 +319,8 @@ public class Geary.ConversationMonitor : BaseObject {
         // Manually detach all the weak refs in the Conversation objects
         foreach (ImplConversation conversation in conversations)
             conversation.clear_owner();
+        
+        folder.account.information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
     }
     
     protected virtual void notify_monitoring_started() {
@@ -846,11 +851,12 @@ public class Geary.ConversationMonitor : BaseObject {
         debug("Folder %s closed due to error, reestablishing connection to continue monitoring conversations",
             folder.to_string());
         
-        // First retry is immediate; thereafter, a delay
-        do_restart_monitoring_async.begin();
+        schedule_retry();
     }
     
     private async void do_restart_monitoring_async() {
+        last_retry_time = get_monotonic_time();
+        
         try {
             debug("Restarting conversation monitoring of folder %s, stopping previous monitoring...",
                 folder.to_string());
@@ -873,19 +879,34 @@ public class Geary.ConversationMonitor : BaseObject {
             debug("Unable to reestablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
                 RETRY_CONNECTION_SEC, start_err.message);
             
-            schedule_retry(true);
+            schedule_retry();
         }
     }
     
-    // TODO: A back-off algorithm would make tons of sense here; the reschedule flag can assist
-    // in that calculation
-    private void schedule_retry(bool reschedule) {
-        if (reschedule)
-            unschedule_retry();
-        else if (retry_id != 0)
+    // If we've got a pending retry and the folder's account's password is
+    // updated, cancel the pending retry and retry now.  This prevents the user
+    // waiting while nothing happens after they type in their password.
+    private void on_imap_credentials_notified() {
+        if (retry_id == 0)
+            return;
+        unschedule_retry();
+        do_restart_monitoring_async.begin();
+    }
+    
+    private void schedule_retry() {
+        if (retry_id != 0)
             return;
         
-        Timeout.add_seconds(RETRY_CONNECTION_SEC, on_delayed_retry);
+        // Number of us in the future we can schedule a retry, so we have a
+        // minimum of RETRY_CONNECTION_SEC s between retries.
+        int64 next_retry_time = RETRY_CONNECTION_SEC * 1000000 - (get_monotonic_time() - last_retry_time);
+        
+        // If it's been enough time since last retry we can retry immediately
+        // (note we schedule on ms, translated from us).
+        if (next_retry_time <= 0)
+            do_restart_monitoring_async.begin();
+        else
+            retry_id = Timeout.add((uint) (next_retry_time / 1000), on_delayed_retry);
     }
     
     private void unschedule_retry() {
