@@ -18,13 +18,8 @@ public class MainWindow : Gtk.Window {
     public int window_height { get; set; }
     public bool window_maximized { get; set; }
 
-#if HAVE_LIBGRANITE
-    private Granite.Widgets.SidebarPaned folder_paned = new Granite.Widgets.SidebarPaned();
-    private Granite.Widgets.SidebarPaned conversations_paned = new Granite.Widgets.SidebarPaned();
-#else
     private Gtk.Paned folder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     private Gtk.Paned conversations_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
-#endif
 
     private Gtk.Spinner spinner = new Gtk.Spinner();
     
