@@ -79,7 +79,6 @@
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">email@example.com</property>
-            <property name="input_purpose">email</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -100,7 +99,6 @@
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">Password</property>
-            <property name="input_purpose">password</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -197,7 +195,6 @@
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">First Last</property>
-            <property name="input_purpose">name</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
