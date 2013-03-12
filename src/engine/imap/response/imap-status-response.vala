@@ -27,7 +27,7 @@ public class Geary.Imap.StatusResponse : ServerResponse {
         base.reconstitute(root);
         
         status = Status.from_parameter((StringParameter) get_as(1, typeof(StringParameter)));
-        response_code = get(2) as ResponseCode;
+        response_code = (ResponseCode?) get_if(2, typeof(ResponseCode));
         text = (response_code != null) ? flatten_to_text(3) : flatten_to_text(2);
     }
     
@@ -35,7 +35,7 @@ public class Geary.Imap.StatusResponse : ServerResponse {
         StringBuilder builder = new StringBuilder();
         
         while (start_index < get_count()) {
-            StringParameter? strparam = get(start_index) as StringParameter;
+            StringParameter? strparam = get_if_string(start_index);
             if (strparam != null) {
                 builder.append(strparam.value);
                 if (start_index < (get_count() - 1))
