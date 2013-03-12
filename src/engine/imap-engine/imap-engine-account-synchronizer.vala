@@ -163,8 +163,13 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             
             // generate the current epoch for synchronization (could cache this value, obviously, but
             // doesn't seem like this biggest win in this class)
-            DateTime epoch = new DateTime.now_local();
-            epoch = epoch.add_days(0 - account.information.prefetch_period_days);
+            DateTime epoch;
+            if (account.information.prefetch_period_days >= 0) {
+                epoch = new DateTime.now_local();
+                epoch = epoch.add_days(0 - account.information.prefetch_period_days);
+            } else {
+                epoch = new DateTime(new TimeZone.local(), 1, 1, 1, 0, 0, 0.0);
+            }
             
             if (!yield process_folder_async(folder, made_available.remove(folder), epoch))
                 break;
