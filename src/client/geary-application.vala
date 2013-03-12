@@ -97,6 +97,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         Configuration.init(is_installed(), GSETTINGS_DIR);
         Date.init();
+        WebKit.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
         
         int ec = base.startup();
         if (ec != 0)
