@@ -5,7 +5,7 @@
  */
 
 public abstract class Geary.NonblockingAbstractSemaphore : BaseObject {
-    private class Pending {
+    private class Pending : BaseObject {
         public unowned SourceFunc cb;
         public Cancellable? cancellable;
         public bool passed = false;

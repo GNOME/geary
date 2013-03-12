@@ -432,7 +432,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private void on_parameters_ready(RootParameters root) {
         try {
             ServerResponse.Type response_type;
-            ServerResponse response = ServerResponse.from_server(root, out response_type);
+            ServerResponse response = ServerResponse.migrate_from_server(root, out response_type);
             
             switch (response_type) {
                 case ServerResponse.Type.STATUS_RESPONSE:

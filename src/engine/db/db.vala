@@ -22,7 +22,7 @@ public const int64 INVALID_ROWID = -1;
 
 private const int MAX_RETRY_SLEEP_MSEC = 1000;
 private const int MIN_RETRY_SLEEP_MSEC = 50;
-private const int RETRY_SLEEP_INC_MSEC = 100;
+private const int RETRY_SLEEP_INC_MSEC = 50;
 
 [Flags]
 public enum DatabaseFlags {

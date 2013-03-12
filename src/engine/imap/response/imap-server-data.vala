@@ -9,8 +9,8 @@ public class Geary.Imap.ServerData : ServerResponse {
         base (tag);
     }
     
-    public ServerData.reconstitute(RootParameters root) throws ImapError {
-        base.reconstitute(root);
+    public ServerData.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
     }
 }
 

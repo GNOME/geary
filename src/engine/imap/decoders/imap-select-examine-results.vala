@@ -59,7 +59,7 @@ public class Geary.Imap.SelectExamineResults : Geary.Imap.CommandResults {
                 switch (stringp.value.down()) {
                     case "ok":
                         // ok lines are structured like StatusResponses
-                        StatusResponse ok_response = new StatusResponse.reconstitute(data);
+                        StatusResponse ok_response = new StatusResponse.migrate(data);
                         if (ok_response.response_code == null) {
                             message("Invalid SELECT/EXAMINE response \"%s\": no response code",
                                 data.to_string());

@@ -17,15 +17,14 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
         this.tag = tag;
     }
     
-    public ServerResponse.reconstitute(RootParameters root) throws ImapError {
-        base.clone(root);
+    public ServerResponse.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
         
         tag = new Tag.from_parameter((StringParameter) get_as(0, typeof(StringParameter)));
     }
     
-    // Returns true if the RootParameters represents a StatusResponse, otherwise they should be
-    // treated as ServerData.
-    public static ServerResponse from_server(RootParameters root, out Type response_type)
+    // The RootParameters are migrated and will be stripped upon exit.
+    public static ServerResponse migrate_from_server(RootParameters root, out Type response_type)
         throws ImapError {
         Tag tag = new Tag.from_parameter(root.get_as_string(0));
         if (tag.is_tagged()) {
@@ -38,17 +37,17 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
             // tagged and has proper status, so it's a status response
             response_type = Type.STATUS_RESPONSE;
             
-            return new StatusResponse.reconstitute(root);
+            return new StatusResponse.migrate(root);
         } else if (tag.is_continuation()) {
             // nothing to decode; everything after the tag is human-readable stuff
             response_type = Type.CONTINUATION_RESPONSE;
             
-            return new ContinuationResponse.reconstitute(root);
+            return new ContinuationResponse.migrate(root);
         }
         
         response_type = Type.SERVER_DATA;
         
-        return new ServerData.reconstitute(root);
+        return new ServerData.migrate(root);
     }
 }
 

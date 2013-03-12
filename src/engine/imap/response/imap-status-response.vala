@@ -23,8 +23,8 @@ public class Geary.Imap.StatusResponse : ServerResponse {
             add(new StringParameter(text));
     }
     
-    public StatusResponse.reconstitute(RootParameters root) throws ImapError {
-        base.reconstitute(root);
+    public StatusResponse.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
         
         status = Status.from_parameter((StringParameter) get_as(1, typeof(StringParameter)));
         response_code = (ResponseCode?) get_if(2, typeof(ResponseCode));

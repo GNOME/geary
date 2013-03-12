@@ -424,10 +424,22 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return old;
     }
     
-    // This replaces all existing parameters with those from the supplied list
-    public void copy(ListParameter src) {
+    /**
+     * Moves all child parameters from the supplied list into this list.  The supplied list will be
+     * "stripped" of children.
+     */
+    public void move_children(ListParameter src) {
         list.clear();
-        list.add_all(src.get_all());
+        
+        foreach (Parameter param in src.list) {
+            ListParameter? listp = param as ListParameter;
+            if (listp != null)
+                listp.parent = this;
+            
+            list.add(param);
+        }
+        
+        src.list.clear();
     }
     
     protected string stringize_list() {
@@ -468,10 +480,10 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         base (null, initial);
     }
     
-    public RootParameters.clone(RootParameters root) {
+    public RootParameters.migrate(RootParameters root) {
         base (null);
         
-        base.copy(root);
+        move_children(root);
     }
     
     public override string to_string() {

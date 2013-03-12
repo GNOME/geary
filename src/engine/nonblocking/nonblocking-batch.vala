@@ -50,10 +50,10 @@ public class Geary.NonblockingBatch : BaseObject {
     
     private const int START_ID = 1;
     
-    private class BatchContext {
+    private class BatchContext : BaseObject {
         public int id;
         public NonblockingBatchOperation op;
-        public NonblockingBatch? owner = null;
+        public weak NonblockingBatch? owner = null;
         public bool completed = false;
         public Object? returned = null;
         public Error? threw = null;
