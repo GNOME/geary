@@ -404,8 +404,8 @@ public class Geary.RFC822.Message : BaseObject {
         }
 
         GMime.Part? part = current_root as GMime.Part;
-        if (part != null && part.get_content_type().to_string() == content_type &&
-            part.get_disposition() != "attachment") {
+        if (part != null && String.nullable_stri_equal(part.get_content_type().to_string(), content_type) &&
+            !String.nullable_stri_equal(part.get_disposition(), "attachment")) {
             return part;
         }
 
@@ -481,7 +481,7 @@ public class Geary.RFC822.Message : BaseObject {
         }
 
         // Otherwise see if it has a content disposition of "attachment."
-        if (root is GMime.Part && root.get_disposition() == "attachment") {
+        if (root is GMime.Part && String.nullable_stri_equal(root.get_disposition(), "attachment")) {
             attachments.add(root as GMime.Part);
         }
     }
