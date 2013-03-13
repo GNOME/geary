@@ -97,6 +97,17 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         base (value);
     }
     
+    // Call these at init time to prevent thread issues
+    internal static void init() {
+        MessageFlag to_init = ANSWERED;
+        to_init = DELETED;
+        to_init = DRAFT;
+        to_init = FLAGGED;
+        to_init = RECENT;
+        to_init = SEEN;
+        to_init = ALLOWS_NEW;
+    }
+    
     // Converts a list of email flags to add and remove to a list of message
     // flags to add and remove.
     public static void from_email_flags(Geary.EmailFlags? email_flags_add, 
@@ -244,6 +255,25 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
     
     public MailboxAttribute(string value) {
         base (value);
+    }
+    
+    // Call these at init time to prevent thread issues
+    internal static void init() {
+        MailboxAttribute to_init = NO_INFERIORS;
+        to_init = NO_SELECT;
+        to_init = MARKED;
+        to_init = UNMARKED;
+        to_init = HAS_NO_CHILDREN;
+        to_init = HAS_CHILDREN;
+        to_init = ALLOWS_NEW;
+        to_init = SPECIAL_FOLDER_ALL_MAIL;
+        to_init = SPECIAL_FOLDER_DRAFTS;
+        to_init = SPECIAL_FOLDER_IMPORTANT;
+        to_init = SPECIAL_FOLDER_INBOX;
+        to_init = SPECIAL_FOLDER_SENT;
+        to_init = SPECIAL_FOLDER_SPAM;
+        to_init = SPECIAL_FOLDER_STARRED;
+        to_init = SPECIAL_FOLDER_TRASH;
     }
 }
 

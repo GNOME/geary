@@ -78,6 +78,7 @@ engine/imap/decoders/imap-fetch-results.vala
 engine/imap/decoders/imap-list-results.vala
 engine/imap/decoders/imap-select-examine-results.vala
 engine/imap/decoders/imap-status-results.vala
+engine/imap/imap.vala
 engine/imap/imap-error.vala
 engine/imap/message/imap-data-format.vala
 engine/imap/message/imap-fetch-data-type.vala
