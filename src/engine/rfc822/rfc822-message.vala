@@ -503,9 +503,9 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         if (to_utf8) {
             string? charset = part.get_content_type_parameter("charset");
-            if (charset == null)
+            if (String.is_empty(charset))
                 charset = DEFAULT_ENCODING;
-            stream_filter.add(new GMime.FilterCharset(charset, "UTF8"));
+            stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
         }
         string format = part.get_content_type_parameter("format") ?? "";
         bool flowed = (format.down() == "flowed");

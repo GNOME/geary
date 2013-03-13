@@ -10,6 +10,16 @@ namespace Geary.RFC822.Utils {
 // in UTF-8, and is unmolested by GMime.FilterHTML.
 public const char QUOTE_MARKER = '\x7f';
 
+public GMime.FilterCharset create_utf8_filter_charset(string from_charset) {
+    GMime.FilterCharset? filter_charset = new GMime.FilterCharset(from_charset, "UTF-8");
+    if (filter_charset == null) {
+        debug("Unknown charset %s; treating as UTF-8", from_charset);
+        filter_charset = new GMime.FilterCharset("UTF-8", "UTF-8");
+        assert(filter_charset != null);
+    }
+    return filter_charset;
+}
+
 public string create_subject_for_reply(Geary.Email email) {
     return (email.subject ?? new Geary.RFC822.Subject("")).create_reply().value;
 }

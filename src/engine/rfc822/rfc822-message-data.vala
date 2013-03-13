@@ -265,8 +265,8 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         if (encoding != null)
             filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
         
-        if (charset != null)
-            filter.add(new GMime.FilterCharset(charset, "UTF8"));
+        if (!String.is_empty(charset))
+            filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
         
         input_stream.write_to_stream(filter);
         uint8[] data = output.data;
