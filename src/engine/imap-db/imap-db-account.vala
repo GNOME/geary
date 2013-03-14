@@ -422,10 +422,11 @@ private class Geary.ImapDB.Account : BaseObject {
             = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE ? in (message_id, in_reply_to)");
-            stmt.bind_string(0, message_id.to_string());
-            Db.Result result = stmt.exec(cancellable);
+            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id = ? OR in_reply_to = ?");
+            stmt.bind_string(0, message_id.value);
+            stmt.bind_string(1, message_id.value);
             
+            Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 id = result.int64_at(0);
                 MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(

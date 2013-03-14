@@ -164,6 +164,32 @@ public class Geary.ConversationMonitor : BaseObject {
         }
     }
     
+    private class LocalSearchOperation : NonblockingBatchOperation {
+        // IN
+        public Geary.Account account;
+        public RFC822.MessageID message_id;
+        public Geary.Email.Field required_fields;
+        public Gee.Collection<Geary.FolderPath>? blacklist;
+        
+        // OUT
+        public Gee.MultiMap<Geary.Email, Geary.FolderPath?>? emails = null;
+        
+        public LocalSearchOperation(Geary.Account account, RFC822.MessageID message_id,
+            Geary.Email.Field required_fields, Gee.Collection<Geary.FolderPath?> blacklist) {
+            this.account = account;
+            this.message_id = message_id;
+            this.required_fields = required_fields;
+            this.blacklist = blacklist;
+        }
+        
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            emails = yield account.local_search_message_id_async(message_id, required_fields,
+                false, blacklist);
+            
+            return null;
+        }
+    }
+    
     public Geary.Folder folder { get; private set; }
     public bool reestablish_connections { get; set; default = true; }
     public bool is_monitoring { get; private set; default = false; }
@@ -644,7 +670,7 @@ public class Geary.ConversationMonitor : BaseObject {
         return blacklist;
     }
     
-    private async void expand_conversations(Gee.Collection<RFC822.MessageID> needed_message_ids) {
+    private async void expand_conversations(Gee.Set<RFC822.MessageID> needed_message_ids) {
         if (needed_message_ids.size == 0) {
             notify_scan_completed();
             return;
@@ -656,27 +682,36 @@ public class Geary.ConversationMonitor : BaseObject {
         
         Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_blacklist();
         
-        Gee.HashMap<Geary.EmailIdentifier, Geary.Email> needed_messages
-            = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>(
-            Hashable.hash_func, Equalable.equal_func);
+        // execute all the local search operations at once
+        NonblockingBatch batch = new NonblockingBatch();
         foreach (RFC822.MessageID message_id in needed_message_ids) {
-            try {
-                Gee.MultiMap<Geary.Email, Geary.FolderPath?>? emails =
-                    yield folder.account.local_search_message_id_async(
-                        message_id, required_fields, false, folder_blacklist);
-                if (emails == null)
-                    continue;
-                
-                foreach (Geary.Email email in emails.get_keys()) {
+            batch.add(new LocalSearchOperation(folder.account, message_id, required_fields,
+                folder_blacklist));
+        }
+        
+        try {
+            yield batch.execute_all_async();
+        } catch (Error err) {
+            debug("Unable to search local mail for conversations: %s", err.message);
+            
+            return;
+        }
+        
+        // collect their results into a single collection of addt'l emails
+        Gee.HashMap<Geary.EmailIdentifier, Geary.Email> needed_messages = new Gee.HashMap<
+            Geary.EmailIdentifier, Geary.Email>(Hashable.hash_func, Equalable.equal_func);
+        foreach (int id in batch.get_ids()) {
+            LocalSearchOperation op = (LocalSearchOperation) batch.get_operation(id);
+            if (op.emails != null) {
+                foreach (Geary.Email email in op.emails.get_keys()) {
                     if (!needed_messages.has_key(email.id))
                         needed_messages.set(email.id, email);
                 }
-            } catch (Error e) {
-                debug("Error searching for local emails to add to conversations in %s: %s",
-                    folder.to_string(), e.message);
             }
         }
         
+        // process them as through they're been loaded from the folder; this, in turn, may
+        // require more local searching of email
         yield process_email_async(needed_messages.values);
         
         Logging.debug(Logging.Flag.CONVERSATIONS,
