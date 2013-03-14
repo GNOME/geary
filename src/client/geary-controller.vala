@@ -619,8 +619,7 @@ public class GearyController {
             main_window.conversation_viewer.add_message(email);
         
         main_window.conversation_viewer.unhide_last_email();
-        if (clear_view)
-            main_window.conversation_viewer.compress_emails();
+        main_window.conversation_viewer.compress_emails();
     }
     
     private void on_show_message_completed(Object? source, AsyncResult result) {

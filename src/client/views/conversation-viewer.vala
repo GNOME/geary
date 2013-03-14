@@ -346,30 +346,33 @@ public class ConversationViewer : Gtk.Box {
             return;
         
         WebKit.DOM.Document document = web_view.get_dom_document();
-        WebKit.DOM.Element first_compressed = null;
+        WebKit.DOM.Element first_compressed = null, prev_message = null,
+            curr_message = document.get_element_by_id("message_container").get_first_element_child(),
+            next_message = curr_message.next_element_sibling;
         int compress_count = 0;
         bool prev_hidden = false, curr_hidden = false, next_hidden = false;
         try {
-            next_hidden = document.get_element_by_id(get_div_id(messages.first().id)).get_class_list().contains("hide");
+            next_hidden = curr_message.get_class_list().contains("hide");
+            // The first step of the loop is to advance the hidden statuses.
         } catch (Error error) {
             debug("Error checking hidden status: %s", error.message);
         }
         
-        foreach (Geary.Email message in messages) {
+        // Note that next_message = span#placeholder when current_message is last in conversation.
+        while (next_message != null) {
             try {
-                WebKit.DOM.Element message_element = document.get_element_by_id(get_div_id(message.id));
                 prev_hidden = curr_hidden;
                 curr_hidden = next_hidden;
-                next_hidden = (message_element.next_element_sibling != null)
-                        && message_element.next_element_sibling.get_class_list().contains("hide");
-                if (curr_hidden && prev_hidden && next_hidden) {
-                    message_element.get_class_list().add("compressed");
+                next_hidden = next_message.get_class_list().contains("hide");
+                if (curr_hidden && prev_hidden && next_hidden ||
+                    curr_message.get_class_list().contains("compressed")) {
+                    curr_message.get_class_list().add("compressed");
                     compress_count += 1;
                     if (first_compressed == null)
-                        first_compressed = message_element;
+                        first_compressed = curr_message;
                 } else if (compress_count > 0) {
                     if (compress_count == 1) {
-                        message_element.previous_element_sibling.get_class_list().remove("compressed");
+                        prev_message.get_class_list().remove("compressed");
                     } else {
                         WebKit.DOM.HTMLElement span =
                             first_compressed.first_element_child.first_element_child
@@ -378,7 +381,7 @@ public class ConversationViewer : Gtk.Box {
                         // We need to set the display to get an accurate offset_height
                         span.set_attribute("style", "display:inline-block;");
                         span.set_attribute("style", "display:inline-block; top:%ipx".printf(
-                            (int) (message_element.offset_top - first_compressed.offset_top
+                            (int) (curr_message.offset_top - first_compressed.offset_top
                             - span.offset_height) / 2));
                     }
                     compress_count = 0;
@@ -387,6 +390,9 @@ public class ConversationViewer : Gtk.Box {
             } catch (Error error) {
                 debug("Error compressing emails: %s", error.message);
             }
+            prev_message = curr_message;
+            curr_message = next_message;
+            next_message = curr_message.next_element_sibling;
         }
     }
     
