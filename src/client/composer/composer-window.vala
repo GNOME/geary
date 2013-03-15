@@ -300,6 +300,7 @@ public class ComposerWindow : Gtk.Window {
                     } catch (Error error) {
                         debug("Error getting messae body: %s", error.message);
                     }
+                    add_attachments(referred.attachments);
                 break;
                 
                 case ComposeType.REPLY:
@@ -317,13 +318,8 @@ public class ComposerWindow : Gtk.Window {
                 case ComposeType.FORWARD:
                     subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, true);
+                    add_attachments(referred.attachments);
                 break;
-            }
-            
-            foreach(Geary.Attachment attachment in referred.attachments) {
-                File? attachment_file = File.new_for_path(attachment.filepath);
-                if (attachment_file != null)
-                    add_attachment(attachment_file);
             }
         }
         
@@ -738,6 +734,14 @@ public class ComposerWindow : Gtk.Window {
         attachments_box.show_all();
         
         return true;
+    }
+    
+    private void add_attachments(Gee.List<Geary.Attachment> attachments) {
+        foreach(Geary.Attachment attachment in attachments) {
+            File? attachment_file = File.new_for_path(attachment.filepath);
+            if (attachment_file != null)
+                add_attachment(attachment_file);
+        }
     }
     
     private void remove_attachment(File file, Gtk.Box box) {
