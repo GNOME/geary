@@ -76,6 +76,7 @@ public class GearyController {
     private uint select_folder_timeout_id = 0;
     private Geary.Folder? folder_to_select = null;
     private Geary.NonblockingMutex select_folder_mutex = new Geary.NonblockingMutex();
+    private Geary.Account? account_to_select = null;
     
     public GearyController() {
         // This initializes the IconFactory, important to do before the actions are created (as they
@@ -132,6 +133,9 @@ public class GearyController {
         // libnotify
         notification_bubble = new NotificationBubble(new_messages_monitor);
         notification_bubble.invoked.connect(on_notification_bubble_invoked);
+        
+        // This is fired after the accounts are ready.
+        Geary.Engine.instance.opened.connect(on_engine_opened);
         
         main_window.conversation_list_view.grab_focus();
         
@@ -645,36 +649,36 @@ public class GearyController {
         main_window.folder_list.add_folder(folder);
     }
     
-    // Meant to be called inside the available block of on_folders_available_unavailable,
-    // before the folder being added has been added to the inboxes map.
-    private Geary.Folder? get_initial_selection_folder(Geary.Folder folder_being_added) {
-        int total_accounts = 0;
+    private void on_engine_opened() {
+        // Locate the first account so we can select its inbox when available.
         try {
-            total_accounts = Geary.Engine.instance.get_accounts().size;
+            Gee.ArrayList<Geary.AccountInformation> all_accounts =
+                new Gee.ArrayList<Geary.AccountInformation>();
+            all_accounts.add_all(Geary.Engine.instance.get_accounts().values);
+            if (all_accounts.size == 0) {
+                debug("No accounts found.");
+                return;
+            }
+            
+            all_accounts.sort((CompareFunc) Geary.AccountInformation.compare_ascending);
+            account_to_select = Geary.Engine.instance.get_account_instance(all_accounts.get(0));
         } catch (Error e) {
-            debug("Error determining the number of accounts: %s", e.message);
+            debug("Error selecting first inbox: %s", e.message);
         }
+    }
+    
+    // Meant to be called inside the available block of on_folders_available_unavailable,
+    // after we've located the first account.
+    private Geary.Folder? get_initial_selection_folder(Geary.Folder folder_being_added) {
+        if (folder_being_added.account == account_to_select &&
+            !main_window.folder_list.is_any_selected() && inboxes.has_key(account_to_select))
+            return inboxes.get(account_to_select);
         
-        Geary.Folder? select_folder = null;
-        if (!main_window.folder_list.is_any_selected()) {
-            // We select this folder if it's the first inbox for
-            // the only account.  We select the previously seen
-            // inbox if this is the second inbox and we have more
-            // than one.  This second case is delayed because we
-            // need to have given the folder list time to see both
-            // accounts to create the special Inboxes branch.
-            if (inboxes.size == 0 && total_accounts == 1)
-                select_folder = folder_being_added;
-            else if (inboxes.size == 1 && total_accounts > 1)
-                select_folder = Geary.Collection.get_first(inboxes.values);
-        }
-        
-        return select_folder;
+        return null;
     }
     
     private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
         Gee.Collection<Geary.Folder>? unavailable) {
-        
         if (available != null && available.size > 0) {
             foreach (Geary.Folder folder in available) {
                 main_window.folder_list.add_folder(folder);
@@ -688,9 +692,8 @@ public class GearyController {
                 // monitor the Inbox for notifications
                 if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX &&
                     !inboxes.has_key(folder.account)) {
-                    Geary.Folder? select_folder = get_initial_selection_folder(folder);
-                    
                     inboxes.set(folder.account, folder);
+                    Geary.Folder? select_folder = get_initial_selection_folder(folder);
                     
                     if (select_folder != null) {
                         // First we try to select the Inboxes branch inbox if

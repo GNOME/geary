@@ -36,7 +36,7 @@ public class Geary.Engine : BaseObject {
     private Gee.HashMap<string, Account>? account_instances = null;
 
     /**
-     * Fired when the engine is opened.
+     * Fired when the engine is opened and all the existing accounts are loaded.
      */
     public signal void opened();
 
@@ -117,9 +117,10 @@ public class Geary.Engine : BaseObject {
         account_instances = new Gee.HashMap<string, Account>();
 
         is_open = true;
-        opened();
 
         yield add_existing_accounts_async(cancellable);
+        
+        opened();
    }
 
     private async void add_existing_accounts_async(Cancellable? cancellable = null) throws Error {
