@@ -372,6 +372,7 @@ public class GearyController {
         
         // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
+            current_folder = null;
             main_window.conversation_list_store.clear();
             main_window.conversation_viewer.clear(null, null);
             
