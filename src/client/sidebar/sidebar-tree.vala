@@ -453,10 +453,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         
         entry.sidebar_tooltip_changed.connect(on_sidebar_tooltip_changed);
         entry.sidebar_icon_changed.connect(on_sidebar_icon_changed);
-        
-        Sidebar.RenameableEntry? renameable = entry as Sidebar.RenameableEntry;
-        if (renameable != null)
-            renameable.sidebar_name_changed.connect(on_sidebar_name_changed);
+        entry.sidebar_name_changed.connect(on_sidebar_name_changed);
         
         Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
         if (emphasizable != null)
@@ -569,10 +566,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         
         entry.sidebar_tooltip_changed.disconnect(on_sidebar_tooltip_changed);
         entry.sidebar_icon_changed.disconnect(on_sidebar_icon_changed);
-        
-        Sidebar.RenameableEntry? renameable = entry as Sidebar.RenameableEntry;
-        if (renameable != null)
-            renameable.sidebar_name_changed.disconnect(on_sidebar_name_changed);
+        entry.sidebar_name_changed.disconnect(on_sidebar_name_changed);
         
         Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
         if (emphasizable != null)
@@ -734,7 +728,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         store.set(wrapper.get_iter(), Columns.NAME, get_name_for_entry(entry));
     }
     
-    private void on_sidebar_name_changed(Sidebar.RenameableEntry entry, string name) {
+    private void on_sidebar_name_changed(Sidebar.Entry entry, string name) {
         rename_entry(entry);
     }
     
