@@ -234,6 +234,7 @@ public class AddEditPage : Gtk.Box {
         entry_email.changed.connect(on_changed);
         entry_password.changed.connect(on_changed);
         entry_real_name.changed.connect(on_changed);
+        entry_nickname.changed.connect(on_changed);
         check_remember_password.toggled.connect(on_changed);
         combo_service.changed.connect(on_changed);
         entry_imap_host.changed.connect(on_changed);
@@ -390,8 +391,10 @@ public class AddEditPage : Gtk.Box {
     
     // Prevent non-printable characters in nickname field.
     private void on_nickname_insert_text(Gtk.Editable e, string text, int length, ref int position) {
-        for (long i = 0; i < text.char_count(); i++) {
-            if (!text.get_char(i).isprint()) {
+        unichar c;
+        int index = 0;
+        while (text.get_next_char(ref index, out c)) {
+            if (!c.isprint()) {
                 Signal.stop_emission_by_name(e, "insert-text");
                 
                 return;
