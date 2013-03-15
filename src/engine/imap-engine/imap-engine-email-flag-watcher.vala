@@ -100,6 +100,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
         
         // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
         // and the latest to be gotten from the server (updating the cache in the process)
+        // TODO: break this up into smaller chunks
         Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
             Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
         if (list_remote == null || list_remote.size == 0) {

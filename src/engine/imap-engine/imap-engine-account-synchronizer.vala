@@ -201,8 +201,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             
             if (oldest_local != null && oldest_local.size > 0) {
                 if (oldest_local[0].properties.date_received.compare(epoch) < 0) {
-                    debug("Oldest local email in %s before epoch, don't sync from network", folder.to_string());
-                    
+                    // Oldest local email before epoch, don't sync from network
                     return true;
                 } else {
                     debug("Oldest local email in %s not old enough (%s), synchronizing...", folder.to_string(),
@@ -211,9 +210,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             } else if (folder.get_properties().email_total == 0) {
                 // no local messages, no remote messages -- this is as good as having everything up
                 // to the epoch
-                debug("No messages in local or remote folder %s, don't sync from network",
-                    folder.to_string());
-                
                 return true;
             } else {
                 debug("No oldest message found for %s, synchronizing...", folder.to_string());

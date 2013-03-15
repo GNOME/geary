@@ -917,6 +917,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         // Schedule list operation and wait for completion.
+        // TODO: Break up requests to avoid hogging the queue
         ListEmailBySparseID op = new ListEmailBySparseID(this, ids, required_fields, flags, accumulator,
             cb, cancellable);
         replay_queue.schedule(op);

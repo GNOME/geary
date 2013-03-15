@@ -54,6 +54,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
             if (list == null || list.size == 0)
                 return null;
             
+            // TODO: create_or_merge_email_async() should only write if something has changed
             yield owner.local_folder.create_or_merge_email_async(list, cancellable);
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];
