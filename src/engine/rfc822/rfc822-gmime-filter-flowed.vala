@@ -51,7 +51,7 @@ class GMime.FilterFlowed : GMime.Filter {
     }
     
     public override GMime.Filter copy() {
-        FilterFlowed new_filter = new FilterFlowed(quote_marker == '\x7f', delsp);
+        FilterFlowed new_filter = new FilterFlowed(quote_marker == Geary.RFC822.Utils.QUOTE_MARKER, delsp);
         
         new_filter.saw_space = saw_space;
         new_filter.saw_cr = saw_cr;
