@@ -17,7 +17,9 @@
  */
 
 public class Geary.Db.Database : Geary.Db.Context {
-    public const int DEFAULT_MAX_CONCURRENCY = 8;
+    // Dealing with BUSY signal is a bear, and so for now concurrency is turned off
+    // http://redmine.yorba.org/issues/6460
+    public const int DEFAULT_MAX_CONCURRENCY = 1;
     
     public File db_file { get; private set; }
     public DatabaseFlags flags { get; private set; }

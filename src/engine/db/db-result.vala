@@ -35,8 +35,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         check_cancelled("Result.next", cancellable);
         
         if (!finished) {
-            finished = exec_retry_locked(this, "Result.next", () => { return statement.stmt.step(); },
-                statement.sql) != Sqlite.ROW;
+            finished = throw_on_error("Result.next", statement.stmt.step(), statement.sql) != Sqlite.ROW;
             
             log(finished ? "NO ROW" : "ROW");
         }

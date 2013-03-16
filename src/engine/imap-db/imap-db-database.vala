@@ -78,6 +78,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     }
     
     private void on_prepare_database_connection(Db.Connection cx) throws Error {
+        cx.set_busy_timeout_msec(Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC);
         cx.set_foreign_keys(true);
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.OFF);

@@ -17,8 +17,7 @@
 
 public class Geary.Db.Connection : Geary.Db.Context {
     /**
-     * Default value is for *no* timeout, that is, the Db unit will retry all BUSY results until
-     * the database is not locked.
+     * Default value is for *no* timeout, that is, the Sqlite will not retry BUSY results.
      */
     public const int DEFAULT_BUSY_TIMEOUT_MSEC = 0;
     
@@ -85,9 +84,6 @@ public class Geary.Db.Connection : Geary.Db.Context {
             if (!(derr is DatabaseError.BUSY) || (db == null))
                 throw derr;
         }
-        
-        // clear SQLite's busy timeout; this is done manually in the library with exec_retry_locked()
-        db.busy_timeout(0);
     }
     
     /**
@@ -104,7 +100,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public void exec(string sql, Cancellable? cancellable = null) throws Error {
         check_cancelled("Connection.exec", cancellable);
         
-        exec_retry_locked(this, "Connection.exec", () => { return db.exec(sql); }, sql);
+        throw_on_error("Connection.exec", db.exec(sql), sql);
         
         // Don't use Context.log(), which is designed for logging Results and Statements
         Logging.debug(Logging.Flag.SQL, "exec:\n\t%s", sql);
@@ -160,6 +156,10 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * acquired the reserved or exclusive locks.
      */
     public void set_busy_timeout_msec(int busy_timeout_msec) throws Error {
+        if (this.busy_timeout_msec == busy_timeout_msec)
+            return;
+        
+        throw_on_error("Database.set_busy_timeout", db.busy_timeout(busy_timeout_msec));
         this.busy_timeout_msec = busy_timeout_msec;
     }
     

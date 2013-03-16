@@ -11,7 +11,7 @@ public enum Geary.Db.TransactionType {
     
     // coarse synonyms
     RO = DEFERRED,
-    RW = IMMEDIATE,
+    RW = DEFERRED,
     WR = EXCLUSIVE,
     WO = EXCLUSIVE;
     

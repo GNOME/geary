@@ -8,6 +8,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = Geary.Email.Field.PROPERTIES;
     
     private const int LIST_EMAIL_CHUNK_COUNT = 5;
+    private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
     
     [Flags]
     public enum ListFlags {
@@ -661,25 +662,37 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.HashMap<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
             Geary.EmailIdentifier, Geary.Email.Field>(Hashable.hash_func, Equalable.equal_func);
         
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-            Db.Statement fetch_stmt = cx.prepare(
-                "SELECT fields FROM MessageTable WHERE id=?");
+        // Break up the work
+        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.Iterator<Geary.EmailIdentifier> iter = ids.iterator();
+        while (iter.next()) {
+            list.add(iter.get());
+            if (list.size < LIST_EMAIL_FIELDS_CHUNK_COUNT && iter.has_next())
+                continue;
             
-            foreach (Geary.EmailIdentifier id in ids) {
-                int64 message_id = do_find_message(cx, id, ListFlags.NONE, cancellable);
-                if (message_id == Db.INVALID_ROWID)
-                    continue;
+            yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+                Db.Statement fetch_stmt = cx.prepare(
+                    "SELECT fields FROM MessageTable WHERE id=?");
                 
-                fetch_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
-                fetch_stmt.bind_rowid(0, message_id);
+                foreach (Geary.EmailIdentifier id in list) {
+                    int64 message_id = do_find_message(cx, id, ListFlags.NONE, cancellable);
+                    if (message_id == Db.INVALID_ROWID)
+                        continue;
+                    
+                    fetch_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
+                    fetch_stmt.bind_rowid(0, message_id);
+                    
+                    Db.Result results = fetch_stmt.exec(cancellable);
+                    if (!results.finished)
+                        map.set(id, (Geary.Email.Field) results.int_at(0));
+                }
                 
-                Db.Result results = fetch_stmt.exec(cancellable);
-                if (!results.finished)
-                    map.set(id, (Geary.Email.Field) results.int_at(0));
-            }
+                return Db.TransactionOutcome.SUCCESS;
+            }, cancellable);
             
-            return Db.TransactionOutcome.SUCCESS;
-        }, cancellable);
+            list.clear();
+        }
+        assert(list.size == 0);
         
         return (map.size > 0) ? map : null;
     }

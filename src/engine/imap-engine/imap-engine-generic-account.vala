@@ -251,9 +251,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         reschedule_folder_refresh(false);
     }
     
-    private async void enumerate_folders_async(Geary.FolderPath? parent,Cancellable? cancellable = null)
+    private async void enumerate_folders_async(Geary.FolderPath? parent, Cancellable? cancellable = null)
         throws Error {
         check_open();
+        
+        debug("enumerate_folders_async %s", (parent != null) ? parent.to_string() : "(null)");
         
         Gee.Collection<ImapDB.Folder>? local_list = null;
         try {

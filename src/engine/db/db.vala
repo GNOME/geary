@@ -22,10 +22,6 @@ namespace Geary.Db {
 
 public const int64 INVALID_ROWID = -1;
 
-private const int MAX_RETRY_SLEEP_MSEC = 1000;
-private const int MIN_RETRY_SLEEP_MSEC = 50;
-private const int RETRY_SLEEP_INC_MSEC = 50;
-
 [Flags]
 public enum DatabaseFlags {
     NONE = 0,
@@ -91,40 +87,6 @@ public bool set_shared_cache_mode(bool enabled) {
 private void check_cancelled(string? method, Cancellable? cancellable) throws IOError {
     if (cancellable != null && cancellable.is_cancelled())
         throw new IOError.CANCELLED("%s cancelled", !String.is_empty(method) ? method : "Operation");
-}
-
-// This method is useful for dealing with BUSY retries in a consistent manner.
-private int exec_retry_locked(Context ctx, string? method, SqliteExecOperation op, string? raw = null)
-    throws Error {
-    int count = 0;
-    int sleep_msec = MIN_RETRY_SLEEP_MSEC;
-    int total_msec = 0;
-    int max_retry_msec = ctx.get_max_retry_msec();
-    for (;;) {
-        try {
-            return throw_on_error(ctx, method, op(), raw);
-        } catch (DatabaseError derr) {
-            // if not BUSY, then immediately throw
-            if (!(derr is DatabaseError.BUSY))
-                throw derr;
-            
-            // if BUSY and total time has elapsed, throw
-            if ((max_retry_msec > 0) && (total_msec >= max_retry_msec))
-                throw derr;
-        }
-        
-        // sleep and retry
-        Thread.usleep(sleep_msec * 1000);
-        
-        total_msec += sleep_msec;
-        sleep_msec = Numeric.int_ceiling(sleep_msec + RETRY_SLEEP_INC_MSEC, MAX_RETRY_SLEEP_MSEC);
-        
-        // don't log the first one, this is common enough to not warrant it
-        if (++count > 1) {
-            debug("%s retrying: [%d] total_msec=%d %s", method, count, total_msec,
-                (raw != null) ? raw : "");
-        }
-    }
 }
 
 // Returns result if exception is not thrown
