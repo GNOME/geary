@@ -4,7 +4,8 @@
 * (version 2.1 or later).  See the COPYING file in this distribution.
 */
 
-// Filter to insert blockquotes and put a div around the signature marker.
+// Filter to insert blockquotes, put a div around the signature marker, and wrap the whole thing
+// in a styled div.
 class GMime.FilterBlockquotes : GMime.Filter {
     // Invariant: True iff we are either at the beginning of a line, or all characters seen so far
     // have been quote markers or part of a tag.
@@ -21,6 +22,9 @@ class GMime.FilterBlockquotes : GMime.Filter {
     // are not parsing the prefix.
     private uint current_quote_level;
     
+    // Have we inserted the initial element?
+    private bool initial_element;
+    
     public FilterBlockquotes() {
         reset();
     }
@@ -30,6 +34,7 @@ class GMime.FilterBlockquotes : GMime.Filter {
         in_tag = false;
         last_quote_level = 0;
         current_quote_level = 0;
+        initial_element = false;
     }
     
     public override GMime.Filter copy() {
@@ -39,6 +44,7 @@ class GMime.FilterBlockquotes : GMime.Filter {
         new_filter.in_tag = in_tag;
         new_filter.last_quote_level = last_quote_level;
         new_filter.current_quote_level = current_quote_level;
+        new_filter.initial_element = initial_element;
         
         return new_filter;
     }
@@ -50,6 +56,13 @@ class GMime.FilterBlockquotes : GMime.Filter {
         set_size(inbuf.length, false);
         
         uint out_index = 0;
+        if (!initial_element) {
+            // We set the style explicitly so it will be set in HTML emails.  We also give it a
+            // class so users can customize the style in the viewer.
+            insert_string("<div class=\"plaintext\" style=\"white-space: pre-wrap;\">", ref out_index);
+            initial_element = true;
+        }
+        
         for (uint i = 0; i < inbuf.length; i++) {
             char c = inbuf[i];
             
@@ -101,6 +114,7 @@ class GMime.FilterBlockquotes : GMime.Filter {
                 insert_string("</blockquote>", ref out_index);
                 last_quote_level -= 1;
             }
+            insert_string("</div>", ref out_index);
         }
         
         // Slicing the buffer is important, because the buffer is not null-terminated,

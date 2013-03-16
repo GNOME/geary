@@ -518,8 +518,7 @@ public class Geary.RFC822.Message : BaseObject {
                 stream_filter.add(new GMime.FilterPlain());
             // HTML filter does stupid stuff to \r, so get rid of them.
             stream_filter.add(new GMime.FilterCRLF(false, false));
-            stream_filter.add(new GMime.FilterHTML(GMime.FILTER_HTML_PRE |
-                GMime.FILTER_HTML_CONVERT_URLS, 0));
+            stream_filter.add(new GMime.FilterHTML(GMime.FILTER_HTML_CONVERT_URLS, 0));
             stream_filter.add(new GMime.FilterBlockquotes());
         }
 

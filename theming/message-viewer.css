@@ -43,11 +43,6 @@ hr {
     margin-top: 15px;
     margin-bottom: 15px;
 }
-pre {
-    font-family: sans-serif;
-    white-space: pre-wrap;
-    margin: 0;
-}
 
 .button {
     border: 1px transparent solid;
