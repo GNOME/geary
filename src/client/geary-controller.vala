@@ -1313,12 +1313,8 @@ public class GearyController {
         main_window.conversation_viewer.web_view.zoom_level = 1.0f;
     }
     
-    private Geary.RFC822.MailboxAddresses get_from() {
-        return current_account.information.get_from();
-    }
-        
     private void on_send(ComposerWindow composer_window) {
-        composer_window.account.send_email_async.begin(composer_window.get_composed_email(get_from()));
+        composer_window.account.send_email_async.begin(composer_window.get_composed_email());
         composer_window.destroy();
     }
 

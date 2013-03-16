@@ -24,7 +24,7 @@ async void main_async() throws Error {
         Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email);
         stdout.printf("\n\n%s\n\n", msg.to_string());
         
-        yield session.send_email_async(msg);
+        yield session.send_email_async(msg.sender, msg);
         
         stdout.printf("Sent email #%d\n", ctr);
     }

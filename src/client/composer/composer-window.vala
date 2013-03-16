@@ -423,10 +423,6 @@ public class ComposerWindow : Gtk.Window {
             }
             
             // Assemble the headers.
-            if (headers.contains("from"))
-                // Should this really be allowed?
-                from = Geary.Collection.get_first(headers.get("from"));
-            
             if (email.length > 0 && headers.contains("to"))
                 to = "%s,%s".printf(email, Geary.Collection.get_first(headers.get("to")));
             else if (email.length > 0)
@@ -562,13 +558,10 @@ public class ComposerWindow : Gtk.Window {
         return true;
     }
     
-    public Geary.ComposedEmail get_composed_email(
-        Geary.RFC822.MailboxAddresses? default_from = null, DateTime? date_override = null) {
+    public Geary.ComposedEmail get_composed_email(DateTime? date_override = null) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(),
-            Geary.String.is_empty(from)
-                ? default_from
-                : new Geary.RFC822.MailboxAddresses.from_rfc822_string(from)
+            new Geary.RFC822.MailboxAddresses.from_rfc822_string(from)
         );
         
         if (to_entry.addresses != null)
@@ -1280,6 +1273,7 @@ public class ComposerWindow : Gtk.Window {
                 new_account_info = Geary.Engine.instance.get_accounts().get(id);
                 if (new_account_info != null) {
                     account = Geary.Engine.instance.get_account_instance(new_account_info);
+                    from = new_account_info.get_from().to_rfc822_string();
                     set_entry_completions();
                 }
             } catch (Error e) {

@@ -531,7 +531,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         
         if (smtp_err == null) {
             try {
-                yield smtp.send_email_async(rfc822, cancellable);
+                yield smtp.send_email_async(_account.information.get_mailbox_address(),
+                    rfc822, cancellable);
             } catch (Error send_err) {
                 debug("SMTP send mail error: %s", send_err.message);
                 smtp_err = send_err;
