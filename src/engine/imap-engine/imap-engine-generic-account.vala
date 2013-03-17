@@ -255,8 +255,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         throws Error {
         check_open();
         
-        debug("enumerate_folders_async %s", (parent != null) ? parent.to_string() : "(null)");
-        
         Gee.Collection<ImapDB.Folder>? local_list = null;
         try {
             local_list = yield local.list_folders_async(parent, cancellable);
