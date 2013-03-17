@@ -241,22 +241,8 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         folder.email_prefetcher.halting.connect(on_email_prefetcher_completed);
         folder.closed.connect(on_email_prefetcher_completed);
         
-        // if oldest local ID is known, attempt to turn that into a position on the remote server
-        int oldest_local_pos = -1;
-        if (oldest_local_id != null) {
-            try {
-                Geary.Email email = yield folder.fetch_email_async(oldest_local_id,
-                    Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE);
-                oldest_local_pos = email.position;
-                debug("%s oldest_id=%s oldest_local=%s oldest_position=%d", folder.to_string(),
-                    oldest_local_id.to_string(), oldest_local.to_string(), oldest_local_pos);
-            } catch (Error err) {
-                debug("Error fetching oldest position on %s: %s", folder.to_string(), err.message);
-            }
-        }
-        
         try {
-            yield sync_folder_async(folder, epoch, oldest_local_pos);
+            yield sync_folder_async(folder, epoch, oldest_local, oldest_local_id);
         } catch (Error err) {
             if (err is IOError.CANCELLED)
                 return false;
@@ -279,9 +265,44 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         return true;
     }
     
-    private async void sync_folder_async(GenericFolder folder, DateTime epoch, int oldest_local_pos)
-        throws Error {
+    private async void sync_folder_async(GenericFolder folder, DateTime epoch, DateTime? oldest_local,
+        Geary.EmailIdentifier? oldest_local_id) throws Error {
         debug("Background sync'ing %s", folder.to_string());
+        
+        // only perform vector expansion if oldest isn't old enough
+        if (oldest_local == null || oldest_local.compare(epoch) > 0)
+            yield expand_folder_async(folder, epoch, oldest_local, oldest_local_id);
+        
+        // always give email prefetcher time to finish its work
+        if (folder.email_prefetcher.has_work()) {
+            // expanding an already opened folder doesn't guarantee the prefetcher will start
+            debug("Waiting for email prefetcher to complete %s...", folder.to_string());
+            try {
+                yield prefetcher_semaphore.wait_async(bg_cancellable);
+            } catch (Error err) {
+                debug("Error waiting for email prefetcher to complete %s: %s", folder.to_string(),
+                    err.message);
+            }
+        }
+        
+        debug("Done background sync'ing %s", folder.to_string());
+    }
+    
+    private async void expand_folder_async(GenericFolder folder, DateTime epoch, DateTime? oldest_local,
+        Geary.EmailIdentifier? oldest_local_id) throws Error {
+        // if oldest local ID is known, attempt to turn that into a position on the remote server
+        int oldest_local_pos = -1;
+        if (oldest_local_id != null) {
+            try {
+                Geary.Email email = yield folder.fetch_email_async(oldest_local_id,
+                    Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE);
+                oldest_local_pos = email.position;
+                debug("%s oldest_id=%s oldest_local=%s oldest_position=%d", folder.to_string(),
+                    oldest_local_id.to_string(), oldest_local.to_string(), oldest_local_pos);
+            } catch (Error err) {
+                debug("Error fetching oldest position on %s: %s", folder.to_string(), err.message);
+            }
+        }
         
         // TODO: This could be done in a single IMAP SEARCH command, as INTERNALDATE may be searched
         // upon (returning all messages that fit the criteria).  For now, simply iterating backward
@@ -323,19 +344,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             low = Numeric.int_floor(lowest - FETCH_DATE_RECEIVED_CHUNK_COUNT, 1);
             count = (lowest - low).clamp(1, FETCH_DATE_RECEIVED_CHUNK_COUNT);
         }
-        
-        if (folder.email_prefetcher.has_work()) {
-            // expanding an already opened folder doesn't guarantee the prefetcher will start
-            debug("Waiting for email prefetcher to complete %s...", folder.to_string());
-            try {
-                yield prefetcher_semaphore.wait_async(bg_cancellable);
-            } catch (Error err) {
-                debug("Error waiting for email prefetcher to complete %s: %s", folder.to_string(),
-                    err.message);
-            }
-        }
-        
-        debug("Done background sync'ing %s", folder.to_string());
     }
     
     private void on_email_prefetcher_completed() {
