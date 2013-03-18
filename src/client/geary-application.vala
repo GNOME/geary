@@ -238,9 +238,22 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
         
         if (result == Geary.Engine.ValidationResult.OK) {
-            account_information.store_async.begin(cancellable);
+            Geary.AccountInformation real_account_information = account_information;
+            if (account_information.is_copy()) {
+                // We have a temporary copy of the account.  Find the "real" acct info object and
+                // copy the new data into it.
+                try {
+                    real_account_information = Geary.Engine.instance.get_accounts().get(
+                        account_information.email);
+                    real_account_information.copy_from(account_information);
+                } catch (Error e) {
+                    error("Account information is out of sync: %s", e.message);
+                }
+            }
+            
+            real_account_information.store_async.begin(cancellable);
             do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-                Geary.CredentialsMediator.ServiceFlag.SMTP, account_information);
+                Geary.CredentialsMediator.ServiceFlag.SMTP, real_account_information);
             
             debug("Successfully validated account information");
         }

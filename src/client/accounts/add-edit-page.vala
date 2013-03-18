@@ -511,9 +511,14 @@ public class AddEditPage : Gtk.Box {
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username.strip(), smtp_password.strip());
         
         try {
-            account_information = Geary.Engine.instance.get_accounts().get(email_address);
-            if (account_information == null)
+            Geary.AccountInformation original_account = Geary.Engine.instance.get_accounts().get(email_address);
+            if (original_account == null) {
+                // New account.
                 account_information = Geary.Engine.instance.create_orphan_account(email_address);
+            } else {
+                // Existing account: create a copy so we don't mess up the original.
+                account_information = new Geary.AccountInformation.temp_copy(original_account);
+            }
         } catch (Error err) {
             debug("Unable to open account information for %s: %s", email_address, err.message);
             

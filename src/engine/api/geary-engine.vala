@@ -150,7 +150,7 @@ public class Geary.Engine : BaseObject {
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
                 // TODO: check for geary.ini
-                add_account(new AccountInformation(user_data_dir.get_child(info.get_name())));
+                add_account(new AccountInformation.from_file(user_data_dir.get_child(info.get_name())));
             }
         }
      }
@@ -193,7 +193,7 @@ public class Geary.Engine : BaseObject {
         if (accounts.has_key(email))
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", email);
 
-        return new AccountInformation(user_data_dir.get_child(email));
+        return new AccountInformation.from_file(user_data_dir.get_child(email));
     }
     
     /**

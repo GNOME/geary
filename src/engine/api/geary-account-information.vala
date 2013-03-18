@@ -32,8 +32,10 @@ public class Geary.AccountInformation : BaseObject {
     
     public static int default_ordinal = 0;
     
-    internal File settings_dir;
-    internal File file;
+    internal File? settings_dir = null;
+    internal File? file = null;
+    
+    // IMPORTANT: When adding new properties, be sure to add them to the copy method.
     
     public string real_name { get; set; }
     public string nickname { get; set; }
@@ -61,7 +63,13 @@ public class Geary.AccountInformation : BaseObject {
     public Geary.Credentials? smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool smtp_remember_password { get; set; default = true; }
     
-    internal AccountInformation(File directory) {
+    // Used to create temporary AccountInformation objects.  (Note that these cannot be saved.)
+    public AccountInformation.temp_copy(AccountInformation copy) {
+        copy_from(copy);
+    }
+    
+    // This constructor is used internally to load accounts from disk.
+    internal AccountInformation.from_file(File directory) {
         this.email = directory.get_basename();
         this.settings_dir = directory;
         this.file = settings_dir.get_child(SETTINGS_FILENAME);
@@ -116,6 +124,30 @@ public class Geary.AccountInformation : BaseObject {
         // http://redmine.yorba.org/issues/5224
         if (service_provider == Geary.ServiceProvider.OTHER)
             imap_server_pipeline = false;
+    }
+    
+    // Copies all data from the "from" object into this one.
+    public void copy_from(AccountInformation from) {
+        real_name = from.real_name;
+        nickname = from.nickname;
+        email = from.email;
+        service_provider = from.service_provider;
+        imap_server_pipeline = from.imap_server_pipeline;
+        prefetch_period_days = from.prefetch_period_days;
+        ordinal = from.ordinal;
+        default_imap_server_host = from.default_imap_server_host;
+        default_imap_server_port = from.default_imap_server_port;
+        default_imap_server_ssl = from.default_imap_server_ssl;
+        default_imap_server_starttls = from.default_imap_server_starttls;
+        default_smtp_server_host = from.default_smtp_server_host;
+        default_smtp_server_port = from.default_smtp_server_port;
+        default_smtp_server_ssl = from.default_smtp_server_ssl;
+        default_smtp_server_starttls = from.default_smtp_server_starttls;
+        default_smtp_server_noauth = from.default_smtp_server_noauth;
+        imap_credentials = from.imap_credentials;
+        imap_remember_password = from.imap_remember_password;
+        smtp_credentials = from.smtp_credentials;
+        smtp_remember_password = from.smtp_remember_password;
     }
     
     /**
@@ -347,7 +379,10 @@ public class Geary.AccountInformation : BaseObject {
     }
     
     public async void store_async(Cancellable? cancellable = null) {
-        assert(file != null);
+        if (file == null || settings_dir == null) {
+            warning("Cannot save account, no file set.\n");
+            return;
+        }
         
         if (!settings_dir.query_exists(cancellable)) {
             try {
@@ -439,6 +474,11 @@ public class Geary.AccountInformation : BaseObject {
      * normally be invoked directly.
      */
     internal async void remove_async(Cancellable? cancellable = null) {
+        if (file == null || settings_dir == null) {
+            warning("Cannot remove account; nothing to remove\n");
+            return;
+        }
+        
         try {
             yield clear_stored_passwords_async(CredentialsMediator.ServiceFlag.IMAP
                 | CredentialsMediator.ServiceFlag.SMTP);
@@ -471,5 +511,10 @@ public class Geary.AccountInformation : BaseObject {
         
         // Stabilize on nickname, which should always be unique.
         return a.nickname.collate(b.nickname);
+    }
+    
+    // Returns true if this is a copy.
+    public bool is_copy() {
+        return file == null;
     }
 }
