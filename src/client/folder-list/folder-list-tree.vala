@@ -52,6 +52,12 @@ public class FolderList.Tree : Sidebar.Tree {
         FolderEntry? entry = get_folder_entry(folder);
         if (entry != null)
             entry.set_has_new(count > 0);
+        
+        if (has_branch(inboxes_branch)) {
+            InboxFolderEntry? inbox_entry = inboxes_branch.get_entry_for_account(folder.account);
+            if (inbox_entry != null)
+                inbox_entry.set_has_new(count > 0);
+        }
     }
     
     public void set_new_messages_monitor(NewMessagesMonitor? monitor) {
