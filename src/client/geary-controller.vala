@@ -403,13 +403,13 @@ public class GearyController {
     private async void do_select_folder(Geary.Folder folder) throws Error {
         set_busy(true);
         
+        cancel_folder();
+        
         // This function is not reentrant.  It should be, because it can be
         // called reentrant-ly if you select folders quickly enough.  This
         // mutex lock is a bandaid solution to make the function safe to
         // reenter.
-        int mutex_token = yield select_folder_mutex.claim_async();
-        
-        cancel_folder();
+        int mutex_token = yield select_folder_mutex.claim_async(cancellable_folder);
         
         bool current_is_inbox = inboxes.values.contains(current_folder);
         
