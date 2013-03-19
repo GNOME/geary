@@ -12,7 +12,7 @@
 // flags to the object with add_required_fields().
 
 public class NewMessagesMonitor : Geary.BaseObject {
-    public delegate bool ShouldNotifyNewMessages();
+    public delegate bool ShouldNotifyNewMessages(Geary.Folder folder);
     
     private class MonitorInformation : Geary.BaseObject {
         public Geary.Folder folder;
@@ -59,8 +59,8 @@ public class NewMessagesMonitor : Geary.BaseObject {
         _should_notify_new_messages = should_notify_new_messages;
     }
     
-    public bool should_notify_new_messages() {
-        return (_should_notify_new_messages == null ? true : _should_notify_new_messages());
+    public bool should_notify_new_messages(Geary.Folder folder) {
+        return (_should_notify_new_messages == null ? true : _should_notify_new_messages(folder));
     }
     
     public void add_folder(Geary.Folder folder, Cancellable? cancellable = null) {

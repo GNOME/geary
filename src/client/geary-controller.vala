@@ -914,11 +914,11 @@ public class GearyController {
         clear_new_messages("on_visible_conversations_changed", null, visible);
     }
     
-    private bool should_notify_new_messages() {
+    private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
         // and don't display if main window has top-level focus
-        return !new_messages_monitor.get_folders().contains(current_folder)
+        return folder != current_folder
             || main_window.conversation_list_view.vadjustment.value != 0.0
             || !main_window.has_toplevel_focus;
     }
@@ -927,10 +927,11 @@ public class GearyController {
     // true and the supplied visible messages are visible in the conversation list view
     private void clear_new_messages(string caller, Geary.Folder? folder,
         Gee.Set<Geary.Conversation>? supplied) {
-        if (should_notify_new_messages())
+        folder = folder ?? current_folder;
+        
+        if (should_notify_new_messages(folder))
             return;
         
-        folder = folder ?? current_folder;
         Gee.Set<Geary.Conversation> visible =
             supplied ?? main_window.conversation_list_view.get_visible_conversations();
         

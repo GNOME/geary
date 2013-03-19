@@ -63,7 +63,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
     }
     
     private void show_new_messages_count(Geary.Folder folder, int count) {
-        if (!monitor.should_notify_new_messages())
+        if (!monitor.should_notify_new_messages(folder))
             return;
         
         string source_id = get_source_id(folder);

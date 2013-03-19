@@ -76,7 +76,7 @@ public class Libindicate : NewMessagesIndicator {
         Indicate.Indicator folder_indicator = folder_indicators.get(folder);
         
         if (count > 0) {
-            if (!monitor.should_notify_new_messages())
+            if (!monitor.should_notify_new_messages(folder))
                 return;
             
             // count is in fact a string property
