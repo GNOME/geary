@@ -974,9 +974,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         Geary.Email email = row.to_email(location.position, location.email_id);
         
+        return do_add_attachments(cx, email, location.message_id, cancellable);
+    }
+    
+    internal static Geary.Email do_add_attachments(Db.Connection cx, Geary.Email email,
+        int64 message_id, Cancellable? cancellable = null) throws Error {
         // Add attachments if available
         if (email.fields.fulfills(Geary.Attachment.REQUIRED_FIELDS)) {
-            Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, location.message_id,
+            Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id,
                 cancellable);
             if (attachments != null)
                 email.add_attachments(attachments);
@@ -1270,7 +1275,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
     }
     
-    private Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
+    private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare(
             "SELECT id, filename, mime_type, filesize FROM MessageAttachmentTable WHERE message_id=? "

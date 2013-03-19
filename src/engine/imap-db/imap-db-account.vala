@@ -482,6 +482,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     email_id.to_string(), row.fields, required_fields);
             
             email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(email_id.ordering));
+            Geary.ImapDB.Folder.do_add_attachments(cx, email, email_id.ordering, cancellable);
             
             return Db.TransactionOutcome.DONE;
         }, cancellable);
