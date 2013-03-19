@@ -5,14 +5,15 @@
 #
 # Translators:
 # Dovix Dovix <dovix2003@gmail.com>, 2012.
+# Ofek Lavie <ofeklavie@gmail.com>, 2013.
 # Yaron Shahrabani <sh.yaron@gmail.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.3.0\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-02-27 00:48+0000\n"
-"Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
+"PO-Revision-Date: 2013-03-12 09:40+0000\n"
+"Last-Translator: Megolas <ofeklavie@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +23,7 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:621
 msgid "        &#8226; Connection error.\n"
-msgstr ""
+msgstr "&#8226; בעיית חיבור.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:608
 msgid "        &#8226; IMAP connection error.\n"
@@ -30,7 +31,7 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:611
 msgid "        &#8226; IMAP username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226; שם משתמש או סיסמאת ה-IMAP שגויים.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:604
 msgid "        &#8226; Invalid account nickname.\n"
@@ -66,12 +67,12 @@ msgstr ""
 #: ../../src/client/composer/composer-window.vala:625
 #, c-format
 msgid "\"%s\" is a folder."
-msgstr ""
+msgstr "\"%s\" היא תיקייה."
 
 #: ../../src/client/composer/composer-window.vala:631
 #, c-format
 msgid "\"%s\" is an empty file."
-msgstr ""
+msgstr "\"%s\" הוא קובץ ריק."
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -142,7 +143,7 @@ msgstr "%l:%M %P"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:24
 #, c-format
 msgid "%s (%d)"
-msgstr ""
+msgstr "%s (%d)"
 
 #: ../../src/client/views/conversation-web-view.vala:326
 #, c-format
@@ -168,7 +169,7 @@ msgstr "נבחרו %u  תכתובות."
 #: ../../src/client/views/conversation-viewer.vala:383
 #, c-format
 msgid "%u read messages"
-msgstr ""
+msgstr "%u הודעות שנקראו"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -187,39 +188,41 @@ msgstr "---------- הודעה שהועברה ----------"
 
 #: ../../src/client/accounts/add-edit-page.vala:205
 msgid "1 month back"
-msgstr ""
+msgstr "חודש 1 אחורנית"
 
 #: ../../src/client/accounts/add-edit-page.vala:208
 msgid "1 year back"
-msgstr ""
+msgstr "שנה 1 אחורנית"
 
 #: ../../src/client/accounts/add-edit-page.vala:204
 msgid "2 weeks back"
-msgstr ""
+msgstr "שבועיים אחורנית"
 
 #: ../../src/client/accounts/add-edit-page.vala:206
 msgid "3 months back"
-msgstr ""
+msgstr "3 חודשים אחורנית"
 
 #: ../../src/client/accounts/add-edit-page.vala:207
 msgid "6 months back"
-msgstr ""
+msgstr "שישה חודשים אחורנית"
 
 #: ../../ui/remove_confirm.glade:46
 msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
 "account?</span> "
 msgstr ""
+"<span weight=\"bold\" size=\"larger\">את בטוח שאתה רוצה למחוק את המשתמש?</"
+"span>"
 
 #: ../../ui/account_cannot_remove.glade:41
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr ""
+msgstr "<span weight=\"bold\" size=\"larger\">לא מסוגל למחוק משתמש</span>"
 
 #: ../../ui/account_cannot_remove.glade:57
 msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
-msgstr ""
+msgstr "חלון כתיבה הקשור במשתמש זה פתוח כרגע. שלח או מחק את ההודעה ונסה שוב."
 
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
@@ -237,19 +240,19 @@ msgstr "על אודות %s"
 
 #: ../../src/client/accounts/account-dialog.vala:19
 msgid "Accounts"
-msgstr ""
+msgstr "משתמשים"
 
 #: ../../ui/account_list.glade:73
 msgid "Add an account"
-msgstr ""
+msgstr "הוסף משתמש"
 
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
-msgstr ""
+msgstr "הוסף תווית לשיחה"
 
 #: ../../src/client/geary-controller.vala:50
 msgid "Add label to conversations"
-msgstr ""
+msgstr "הוסף תווית לשיחות"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
@@ -260,6 +263,8 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
+"כל ההודעות הקשורות במשתמש זה יוסרו ממחשבך. התהליך לא ישפיע על ההודעות שבשרת "
+"הדוא\"ל."
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -351,7 +356,7 @@ msgstr "העתקת _קישור"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
-msgstr ""
+msgstr "כל הזכויות שמורות 2011-2013 Yorba Foundation"
 
 #: ../../src/client/views/conversation-viewer.vala:250
 msgid "Date:"
@@ -364,7 +369,7 @@ msgstr "תאריך: %s\n"
 
 #: ../../src/engine/api/geary-account-information.vala:30
 msgid "Default"
-msgstr ""
+msgstr "ברירת מחדל"
 
 #: ../../ui/toolbar.glade:155
 msgid "Delete"
@@ -372,7 +377,7 @@ msgstr "מחיקה"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
-msgstr ""
+msgstr "מחק שיחה (Delete, Backspace, ש)"
 
 #: ../../src/client/geary-controller.vala:36
 msgid "Delete conversations (Delete, Backspace, A)"
@@ -400,11 +405,11 @@ msgstr "יש לגרור קבצים לכאן"
 
 #: ../../ui/account_list.glade:87
 msgid "Edit an account"
-msgstr ""
+msgstr "עורך משתמש"
 
 #: ../../ui/remove_confirm.glade:97
 msgid "Email address:"
-msgstr ""
+msgstr "כתובת דוא\"ל:"
 
 #: ../../src/client/geary-application.vala:27
 msgid "Email;E-mail;Mail"
@@ -428,7 +433,7 @@ msgstr "נא להזין את פרטי החשבון שלך כדי להתחיל."
 
 #: ../../src/client/accounts/add-edit-page.vala:210
 msgid "Everything"
-msgstr ""
+msgstr "הכל"
 
 #: ../../src/client/views/conversation-viewer.vala:1236
 msgid "Failed to open default text editor."
@@ -494,7 +499,7 @@ msgstr "הגדרות IMAP"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:34
 msgid "Important"
-msgstr ""
+msgstr "חשוב"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:22
 msgid "Inbox"
@@ -502,7 +507,7 @@ msgstr "דואר נכנס"
 
 #: ../../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr ""
+msgstr "תיבות דואר נכנס"
 
 #: ../../ui/composer.glade:495
 msgid "Indent"
@@ -608,19 +613,19 @@ msgstr "סימון כ_לא נקרא"
 
 #: ../../src/client/geary-controller.vala:45
 msgid "Mark as not s_pam"
-msgstr ""
+msgstr "סמן כלא ספאם"
 
 #: ../../src/client/geary-controller.vala:44
 msgid "Mark as s_pam"
-msgstr ""
+msgstr "סמן כספאם"
 
 #: ../../src/client/geary-controller.vala:47
 msgid "Mark conversation"
-msgstr ""
+msgstr "סמן שיחה"
 
 #: ../../src/client/geary-controller.vala:48
 msgid "Mark conversations"
-msgstr ""
+msgstr "סמן שיחות"
 
 #: ../../src/client/views/formatted-conversation-data.vala:9
 msgid "Me"
@@ -636,15 +641,15 @@ msgstr "תפריט"
 
 #: ../../src/client/folder-list/folder-list-account-branch.vala:19
 msgid "More"
-msgstr ""
+msgstr "עוד"
 
 #: ../../src/client/geary-controller.vala:51
 msgid "Move conversation"
-msgstr ""
+msgstr "הזז שיחה"
 
 #: ../../src/client/geary-controller.vala:52
 msgid "Move conversations"
-msgstr ""
+msgstr "הזז שיחות"
 
 #: ../../ui/toolbar.glade:131
 msgid "Move to"
@@ -664,7 +669,7 @@ msgstr "הודעה חדשה"
 
 #: ../../ui/remove_confirm.glade:83
 msgid "Nickname:"
-msgstr ""
+msgstr "כינוי:"
 
 #: ../../ui/login.glade:664
 msgid "No authentication re_quired"
@@ -768,7 +773,7 @@ msgstr ""
 
 #: ../../ui/toolbar.glade:43
 msgid "Reply"
-msgstr ""
+msgstr "הגב"
 
 #: ../../ui/toolbar.glade:60
 msgid "Reply All"
@@ -776,7 +781,7 @@ msgstr "להשיב לכולם"
 
 #: ../../src/client/geary-controller.vala:246
 msgid "Reply _all"
-msgstr ""
+msgstr "השב לכולם"
 
 #: ../../src/client/views/conversation-viewer.vala:787
 msgid "Reply to _All"
@@ -805,7 +810,7 @@ msgstr "הגדרות SMTP"
 
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
-msgstr ""
+msgstr "SSL"
 
 #: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
 msgid "SSL/TLS encryption:"
@@ -835,7 +840,7 @@ msgstr "_שרת:"
 
 #: ../../src/client/composer/composer-window.vala:915
 msgid "Select Color"
-msgstr ""
+msgstr "בחר צבע"
 
 #: ../../src/client/views/conversation-viewer.vala:546
 msgid "Select _All"
@@ -851,7 +856,7 @@ msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:568
 msgid "Send message with an empty subject and/or body?"
-msgstr ""
+msgstr "האם לשלוח את ההודעה ללא כותרת ו/או תוכן?"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:28
 msgid "Sent Mail"
@@ -892,11 +897,11 @@ msgstr "מסומן בכוכב"
 #. Button for creating a new email message
 #: ../../ui/toolbar.glade:12
 msgid "Start new conversation (Ctrl+N, N)"
-msgstr ""
+msgstr "התחל שיחה חדשה: (Ctrl+מ, מ)"
 
 #: ../../ui/login.glade:764
 msgid "Storage"
-msgstr ""
+msgstr "אחסון"
 
 #: ../../ui/composer.glade:471
 msgid "Strikethrough"
@@ -914,7 +919,7 @@ msgstr "נושא:"
 #: ../../src/engine/rfc822/rfc822-utils.vala:79
 #, c-format
 msgid "Subject: %s\n"
-msgstr ""
+msgstr "נושא: %s\n"
 
 #: ../../src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
@@ -1024,7 +1029,7 @@ msgstr "על _אודות"
 
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Add"
-msgstr ""
+msgstr "הוסף"
 
 #: ../../src/client/geary-controller.vala:39
 msgid "_Archive"
@@ -1068,7 +1073,7 @@ msgstr "הצגת תצוגה מ_קדימה של ההודעה"
 
 #: ../../ui/login.glade:785
 msgid "_Download mail:"
-msgstr ""
+msgstr "הורד דוא\"ל"
 
 #: ../../ui/login.glade:117
 msgid "_Email address:"
@@ -1085,7 +1090,7 @@ msgstr "עזרה"
 
 #: ../../src/client/views/conversation-viewer.vala:552
 msgid "_Inspect"
-msgstr ""
+msgstr "בחן"
 
 #: ../../ui/composer.glade:55
 msgid "_Justify"
@@ -1138,11 +1143,11 @@ msgstr "י_ציאה"
 
 #: ../../ui/password-dialog.glade:560
 msgid "_Remember passwords"
-msgstr ""
+msgstr "זכור סיסמאות"
 
 #: ../../ui/account_cannot_remove.glade:75 ../../ui/remove_confirm.glade:171
 msgid "_Remove"
-msgstr ""
+msgstr "הסר"
 
 #: ../../src/client/geary-controller.vala:1073
 msgid "_Replace"
@@ -1159,7 +1164,7 @@ msgstr "_ימין"
 
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
-msgstr ""
+msgstr "שמור"
 
 #: ../../src/client/views/conversation-viewer.vala:749
 msgid "_Save As..."

@@ -4,14 +4,15 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
+# masami chikahiro <cmasa.z321@gmail.com>, 2013.
 # Minato Kanzaki <pikatenor@gmail.com>, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.3.0\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-03-04 09:51+0000\n"
-"Last-Translator: pikatenor <pikatenor@gmail.com>\n"
+"PO-Revision-Date: 2013-03-11 00:05+0000\n"
+"Last-Translator: masami chikahiro <cmasa.z321@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: ja_JP\n"
 "MIME-Version: 1.0\n"
@@ -144,7 +145,7 @@ msgstr "%s (%d)"
 #: ../../src/client/views/conversation-web-view.vala:326
 #, c-format
 msgid "%s - Conversation Inspector"
-msgstr ""
+msgstr "%s - スレッド検証"
 
 #: ../../src/client/notification/libindicate.vala:59
 #: ../../src/client/notification/libmessagingmenu.vala:75
@@ -420,11 +421,11 @@ msgstr "スペルチェックを有効(_S)"
 
 #: ../../ui/login.glade:591
 msgid "Encr_yption:"
-msgstr "暗号化(_Y)"
+msgstr "暗号化(_Y):"
 
 #: ../../ui/login.glade:610
 msgid "Encrypt_ion:"
-msgstr "暗号化(_I)"
+msgstr "暗号化(_I):"
 
 #: ../../src/client/accounts/add-edit-page.vala:185
 msgid "Enter your account information to get started."
@@ -441,7 +442,7 @@ msgstr "テキストエディターの起動に失敗しました"
 #: ../../src/client/geary-args.vala:52
 #, c-format
 msgid "Failed to parse command line options: %s\n"
-msgstr "不明なオプション: %s\n"
+msgstr "不明なコマンドラインオプション: %s\n"
 
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
@@ -612,11 +613,11 @@ msgstr "未読としてマーク(_U)"
 
 #: ../../src/client/geary-controller.vala:45
 msgid "Mark as not s_pam"
-msgstr "迷惑メールのマークを解除"
+msgstr "迷惑メールのマークを解除(_P)"
 
 #: ../../src/client/geary-controller.vala:44
 msgid "Mark as s_pam"
-msgstr "迷惑メールとしてマーク"
+msgstr "迷惑メールとしてマーク(_P)"
 
 #: ../../src/client/geary-controller.vala:47
 msgid "Mark conversation"
@@ -656,11 +657,11 @@ msgstr "移動先"
 
 #: ../../ui/login.glade:178
 msgid "N_ame:"
-msgstr "名前(_A)"
+msgstr "名前(_A):"
 
 #: ../../ui/login.glade:233
 msgid "N_ickname:"
-msgstr "ニックネーム(_I)"
+msgstr "ニックネーム(_I):"
 
 #: ../../src/client/composer/composer-window.vala:15
 msgid "New Message"
@@ -672,7 +673,7 @@ msgstr "ニックネーム:"
 
 #: ../../ui/login.glade:664
 msgid "No authentication re_quired"
-msgstr "暗号化は必要とされていません(_Q)"
+msgstr "認証は必要とされていません(_Q)"
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -711,11 +712,11 @@ msgstr "デバッグ情報を出力"
 
 #: ../../ui/login.glade:340
 msgid "P_ort:"
-msgstr "ポート(_O)"
+msgstr "ポート(_O):"
 
 #: ../../ui/login.glade:477
 msgid "Pass_word:"
-msgstr "パスワード(_W)"
+msgstr "パスワード(_W):"
 
 #: ../../ui/password-dialog.glade:195
 msgid "Password:"
@@ -813,7 +814,7 @@ msgstr "SSL"
 
 #: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
 msgid "SSL/TLS encryption:"
-msgstr "SSL/TLS 暗号化"
+msgstr "SSL/TLS 暗号化:"
 
 #: ../../src/client/dialogs/password-dialog.vala:123
 msgid "STARTTLS"
@@ -1022,7 +1023,7 @@ msgstr "設定がセキュアでありません"
 
 #: ../../src/client/geary-controller.vala:183
 msgid "_About"
-msgstr "このアプリケーションについて"
+msgstr "このアプリケーションについて(_A)"
 
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Add"
@@ -1050,7 +1051,7 @@ msgstr "キャンセル(_C)"
 
 #: ../../ui/composer.glade:49
 msgid "_Center"
-msgstr "中央揃え"
+msgstr "中央揃え(_C)"
 
 #: ../../src/client/views/conversation-viewer.vala:526
 msgid "_Copy"
@@ -1058,7 +1059,7 @@ msgstr "コピー(_C)"
 
 #: ../../src/client/geary-controller.vala:34
 msgid "_Delete"
-msgstr "削除(_C)"
+msgstr "削除(_D)"
 
 #: ../../ui/password-dialog.glade:547
 msgid "_Details"
@@ -1070,11 +1071,11 @@ msgstr "メッセージのプレビューを表示(_D)"
 
 #: ../../ui/login.glade:785
 msgid "_Download mail:"
-msgstr ""
+msgstr "メールをダウンロード(_D):"
 
 #: ../../ui/login.glade:117
 msgid "_Email address:"
-msgstr "メールアドレス(_E)"
+msgstr "メールアドレス(_E):"
 
 #: ../../src/client/geary-controller.vala:252
 #: ../../src/client/views/conversation-viewer.vala:792
@@ -1091,7 +1092,7 @@ msgstr "検証(_I)"
 
 #: ../../ui/composer.glade:55
 msgid "_Justify"
-msgstr "両端揃え"
+msgstr "両端揃え(_J)"
 
 #: ../../src/client/geary-controller.vala:225
 msgid "_Label"
@@ -1099,7 +1100,7 @@ msgstr "ラベル(_L)"
 
 #: ../../ui/composer.glade:37
 msgid "_Left"
-msgstr "左揃え"
+msgstr "左揃え(_L)"
 
 #: ../../src/client/views/conversation-viewer.vala:802
 msgid "_Mark as Read"
@@ -1124,7 +1125,7 @@ msgstr "新規作成(_N)"
 #: ../../ui/login.glade:133 ../../ui/login.glade:542
 #: ../../ui/password-dialog.glade:84
 msgid "_Password:"
-msgstr "パスワード(_P)"
+msgstr "パスワード(_P):"
 
 #: ../../ui/preferences.glade:180
 msgid "_Play notification sounds"
@@ -1157,7 +1158,7 @@ msgstr "返信(_R)"
 
 #: ../../ui/composer.glade:43
 msgid "_Right"
-msgstr "右揃え"
+msgstr "右揃え(_R)"
 
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Save"
@@ -1165,7 +1166,7 @@ msgstr "保存(_S)"
 
 #: ../../src/client/views/conversation-viewer.vala:749
 msgid "_Save As..."
-msgstr "名前を付けて保存(_S)"
+msgstr "名前を付けて保存(_S)..."
 
 #: ../../ui/composer.glade:696
 msgid "_Send"

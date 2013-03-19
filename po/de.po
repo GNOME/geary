@@ -451,7 +451,7 @@ msgstr "Es kann kein Standard-Editor geöffnet werden."
 #: ../../src/client/geary-args.vala:52
 #, c-format
 msgid "Failed to parse command line options: %s\n"
-msgstr "Die Kommandozeilenargumente konnten nicht interpretiert werden: %s\n"
+msgstr "Die Kommandozeilenargumente konnten nicht interpretiert werden: %s\\n"
 
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
@@ -483,7 +483,7 @@ msgstr "Von:"
 #: ../../src/engine/rfc822/rfc822-utils.vala:78
 #, c-format
 msgid "From: %s\n"
-msgstr "Von: %s\n"
+msgstr "Von: %s\\n"
 
 #: ../../src/client/util/util-files.vala:22
 msgctxt "Abbreviation for gigabyte"
@@ -958,7 +958,7 @@ msgstr "An:"
 #: ../../src/engine/rfc822/rfc822-utils.vala:83
 #, c-format
 msgid "To: %s\n"
-msgstr "An: %s\n"
+msgstr "An: %s\\n"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:43
 msgid "Trash"
@@ -997,7 +997,7 @@ msgstr "Unterstreichen (Strg+U)"
 #: ../../src/client/geary-args.vala:63
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
-msgstr "Unbekanntes Kommandozeilenargument \"%s\"\n"
+msgstr "Unbekanntes Kommandozeilenargument \"%s\"\\n"
 
 #: ../../ui/login.glade:460
 msgid "User_name:"

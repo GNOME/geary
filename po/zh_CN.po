@@ -4,16 +4,17 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
+# hepin <hepin1989@gmail.com>, 2013.
+# hepin <hepin@sosia.us>, 2013.
 # Kuang Chen <kchenphy@gmail.com>, 2012.
 # tuhaihe <1132321739qq@gmail.com>, 2012.
-# hepin <hepin@sosia.us>, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.3.0\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-02-27 00:48+0000\n"
-"Last-Translator: hepin <hepin@sosia.us>\n"
+"PO-Revision-Date: 2013-03-14 01:58+0000\n"
+"Last-Translator: hepin1989 <hepin1989@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -118,10 +119,10 @@ msgid_plural "%d new messages"
 msgstr[0] "%d 封新邮件"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:29
-#, fuzzy, c-format
+#, c-format
 msgid "%d unread message"
 msgid_plural "%d unread messages"
-msgstr[0] "%d 封未读"
+msgstr[0] "%d 封新邮件"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -146,7 +147,7 @@ msgstr ""
 #: ../../src/client/views/conversation-web-view.vala:326
 #, c-format
 msgid "%s - Conversation Inspector"
-msgstr ""
+msgstr "会话检查 %s"
 
 #: ../../src/client/notification/libindicate.vala:59
 #: ../../src/client/notification/libmessagingmenu.vala:75
@@ -1020,7 +1021,7 @@ msgstr "关于(_A)"
 
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 msgid "_Add"
-msgstr ""
+msgstr "添加(_A)"
 
 #: ../../src/client/geary-controller.vala:39
 msgid "_Archive"

@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: geary-0.3.0\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-02-28 19:04+0000\n"
+"PO-Revision-Date: 2013-03-17 12:04+0000\n"
 "Last-Translator: Piotrek Dąbrowski <admin@puredev.eu>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: pl\n"
@@ -40,44 +40,44 @@ msgstr "&#8226; Login lub hasło IMAP jest niepoprawny.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:604
 msgid "        &#8226; Invalid account nickname.\n"
-msgstr ""
+msgstr "&#8226; Błędna etykieta konta.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:614
 msgid "        &#8226; SMTP connection error.\n"
-msgstr ""
+msgstr "&#8226; Błąd połączenia z SMTP.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:617
 msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226; Podane login i hasło do SMTP są niepoprawne.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:625
 msgid "        &#8226; Username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226; Login lub hasło są niepoprawne.\n"
 
 #: ../../src/client/composer/composer-window.vala:650
 #, c-format
 msgid "\"%s\" already attached for delivery."
-msgstr ""
+msgstr "\"%s\" został już załączony do wiadomości."
 
 #: ../../src/client/composer/composer-window.vala:619
 #, c-format
 msgid "\"%s\" could not be found."
-msgstr ""
+msgstr "\"%s\" nie został znaleziony."
 
 #: ../../src/client/composer/composer-window.vala:644
 #, c-format
 msgid "\"%s\" could not be opened for reading."
-msgstr ""
+msgstr "Plik \"%s\" nie mógł być otwarty do odczytu."
 
 #: ../../src/client/composer/composer-window.vala:625
 #, c-format
 msgid "\"%s\" is a folder."
-msgstr ""
+msgstr "\"%s\" to katalog."
 
 #: ../../src/client/composer/composer-window.vala:631
 #, c-format
 msgid "\"%s\" is an empty file."
-msgstr ""
+msgstr "\"%s\" to pusty plik."
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -128,9 +128,9 @@ msgstr[2] "%d nowych wiadomości"
 #, c-format
 msgid "%d unread message"
 msgid_plural "%d unread messages"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%d nieprzeczytana wiadomość"
+msgstr[1] "%d nieprzeczytane wiadomości"
+msgstr[2] "%d nieprzeczytych wiadomości"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -150,12 +150,12 @@ msgstr "%l:%M %P"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:24
 #, c-format
 msgid "%s (%d)"
-msgstr ""
+msgstr "%s (%d)"
 
 #: ../../src/client/views/conversation-web-view.vala:326
 #, c-format
 msgid "%s - Conversation Inspector"
-msgstr ""
+msgstr "%s - Inspektor wiadomości"
 
 #: ../../src/client/notification/libindicate.vala:59
 #: ../../src/client/notification/libmessagingmenu.vala:75
@@ -195,23 +195,23 @@ msgstr "---------- Przekazywana wiadomość ----------"
 
 #: ../../src/client/accounts/add-edit-page.vala:205
 msgid "1 month back"
-msgstr "1 miesiąc temu"
+msgstr "miesiąca"
 
 #: ../../src/client/accounts/add-edit-page.vala:208
 msgid "1 year back"
-msgstr "1 rok temu"
+msgstr "roku"
 
 #: ../../src/client/accounts/add-edit-page.vala:204
 msgid "2 weeks back"
-msgstr "2 tyg. temu"
+msgstr "2 tygodni"
 
 #: ../../src/client/accounts/add-edit-page.vala:206
 msgid "3 months back"
-msgstr "3 miesiące temu"
+msgstr "3 miesięcy"
 
 #: ../../src/client/accounts/add-edit-page.vala:207
 msgid "6 months back"
-msgstr "6 miesięcy temu"
+msgstr "6 miesięcy"
 
 #: ../../ui/remove_confirm.glade:46
 msgid ""
@@ -230,6 +230,8 @@ msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
+"Ekran edycji powiązany z tym kontem jest już otwarty. Wyślij lub odrzuć "
+"wiadomość i spróbuj ponownie."
 
 #: ../../src/client/geary-controller.vala:1068
 #, c-format
@@ -275,7 +277,7 @@ msgstr ""
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
-msgstr ""
+msgstr "Zezwalaj na badanie WebView"
 
 #: ../../src/client/geary-controller.vala:40
 msgid "Archive conversation (Delete, Backspace, A)"
@@ -351,7 +353,7 @@ msgstr "Kompozytor"
 
 #: ../../src/client/views/conversation-viewer.vala:539
 msgid "Copy _Email Address"
-msgstr "Skopiuj adres _email"
+msgstr "Skopiuj adres _e-mail"
 
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
@@ -523,7 +525,7 @@ msgstr "Wcina akapit"
 #. Indent text
 #: ../../ui/composer.glade:494
 msgid "Indent (Ctrl+])"
-msgstr ""
+msgstr "Zwiększ wcięcie (Ctrl+])"
 
 #: ../../ui/composer.glade:443
 msgid "Italic"
@@ -549,7 +551,7 @@ msgstr "Etykiety"
 
 #: ../../src/client/composer/composer-window.vala:354
 msgid "Large"
-msgstr "Ogromny"
+msgstr "Ogromna"
 
 #: ../../ui/composer.glade:61
 msgid "Lin_k"
@@ -641,7 +643,7 @@ msgstr "Ja"
 
 #: ../../src/client/composer/composer-window.vala:351
 msgid "Medium"
-msgstr "Średni"
+msgstr "Średnia"
 
 #: ../../ui/toolbar.glade:182
 msgid "Menu"
@@ -677,11 +679,11 @@ msgstr "Nowa wiadomość"
 
 #: ../../ui/remove_confirm.glade:83
 msgid "Nickname:"
-msgstr "Nick:"
+msgstr "Etykieta:"
 
 #: ../../ui/login.glade:664
 msgid "No authentication re_quired"
-msgstr ""
+msgstr "Brak _uwierzytelniania"
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -807,7 +809,7 @@ msgstr "Odpowiedz do ostatniej wiadomości w rozmowie (Ctrl+R, R)"
 
 #: ../../ui/composer.glade:147
 msgid "Rich Text"
-msgstr ""
+msgstr "Tekst sformatowany"
 
 #: ../../ui/password-dialog.glade:162
 msgid "SMTP Credentials"
@@ -911,7 +913,7 @@ msgstr "Rozpocznij nową rozmowę (Ctrl+N, N)"
 
 #: ../../ui/login.glade:764
 msgid "Storage"
-msgstr ""
+msgstr "Magazyn lokalny"
 
 #: ../../ui/composer.glade:471
 msgid "Strikethrough"
@@ -974,7 +976,7 @@ msgstr "Zmniejsza wcięcie akapitu"
 #. Removes an indent level
 #: ../../ui/composer.glade:508
 msgid "Un-indent (Ctrl+[)"
-msgstr ""
+msgstr "Zmniejsz wcięcie (Ctrl+[)"
 
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
@@ -1083,7 +1085,7 @@ msgstr "_Wyświetlanie podglądu wiadomości"
 
 #: ../../ui/login.glade:785
 msgid "_Download mail:"
-msgstr "_Pobierz e-mail:"
+msgstr "_Pobierz wiadomości z ost.:"
 
 #: ../../ui/login.glade:117
 msgid "_Email address:"
@@ -1100,7 +1102,7 @@ msgstr "Pomo_c"
 
 #: ../../src/client/views/conversation-viewer.vala:552
 msgid "_Inspect"
-msgstr ""
+msgstr "Zbada_j"
 
 #: ../../ui/composer.glade:55
 msgid "_Justify"
