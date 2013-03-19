@@ -448,7 +448,7 @@ public class GearyController {
         
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
-            clear_new_messages("do_select_folder (inbox)", null, null);
+            clear_new_messages("do_select_folder (inbox)", null);
         }
         
         current_conversations.scan_started.connect(on_scan_started);
@@ -811,7 +811,7 @@ public class GearyController {
     // this signal does not necessarily indicate that the application previously didn't have
     // focus and now it does
     private void on_has_toplevel_focus() {
-        clear_new_messages("on_has_toplevel_focus", null, null);
+        clear_new_messages("on_has_toplevel_focus", null);
     }
     
     private void on_accounts() {
@@ -911,7 +911,7 @@ public class GearyController {
     }
     
     private void on_visible_conversations_changed(Gee.Set<Geary.Conversation> visible) {
-        clear_new_messages("on_visible_conversations_changed", null, visible);
+        clear_new_messages("on_visible_conversations_changed", visible);
     }
     
     private bool should_notify_new_messages(Geary.Folder folder) {
@@ -924,21 +924,19 @@ public class GearyController {
     }
     
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
-    // true and the supplied visible messages are visible in the conversation list view
-    private void clear_new_messages(string caller, Geary.Folder? folder,
-        Gee.Set<Geary.Conversation>? supplied) {
-        folder = folder ?? current_folder;
-        
-        if (folder != null && should_notify_new_messages(folder))
+    // false and the supplied visible messages are visible in the conversation list view
+    private void clear_new_messages(string caller, Gee.Set<Geary.Conversation>? supplied) {
+        if (current_folder == null || !new_messages_monitor.get_folders().contains(current_folder)
+            || should_notify_new_messages(current_folder))
             return;
         
         Gee.Set<Geary.Conversation> visible =
             supplied ?? main_window.conversation_list_view.get_visible_conversations();
         
         foreach (Geary.Conversation conversation in visible) {
-            if (new_messages_monitor.are_any_new_messages(folder, conversation.get_email_ids())) {
+            if (new_messages_monitor.are_any_new_messages(current_folder, conversation.get_email_ids())) {
                 debug("Clearing new messages: %s", caller);
-                new_messages_monitor.clear_new_messages(folder);
+                new_messages_monitor.clear_new_messages(current_folder);
                 
                 break;
             }
