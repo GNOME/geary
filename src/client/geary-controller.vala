@@ -929,7 +929,7 @@ public class GearyController {
         Gee.Set<Geary.Conversation>? supplied) {
         folder = folder ?? current_folder;
         
-        if (should_notify_new_messages(folder))
+        if (folder != null && should_notify_new_messages(folder))
             return;
         
         Gee.Set<Geary.Conversation> visible =
