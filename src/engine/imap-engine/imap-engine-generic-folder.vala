@@ -135,13 +135,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
         // any flags that may have changed
         Geary.Imap.UID? earliest_uid = yield local_folder.get_earliest_uid_async(cancellable);
+        Geary.Imap.UID? latest_uid = yield local_folder.get_latest_uid_async(cancellable);
         
         // verify still open
         check_open("normalize_folders (local earliest UID)");
         
         // if no earliest UID, that means no messages in local store, so nothing to update
-        if (earliest_uid == null || !earliest_uid.is_valid()) {
-            debug("No earliest UID in local %s, nothing to normalize", to_string());
+        if (earliest_uid == null || !earliest_uid.is_valid() || latest_uid == null || !latest_uid.is_valid()) {
+            debug("No earliest and/or latest UID in local %s, nothing to normalize", to_string());
             
             return true;
         }
@@ -361,9 +362,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             current_start_id = new Geary.Imap.EmailIdentifier(current_end_id.uid.next(),
                 current_start_id.folder_path);
             
-            // TODO: If UIDNEXT isn't available, will need to fetch the highest UID from the server
-            // and the highest ID from the local store
-            if (current_start_id.uid.compare(remote_properties.uid_next) >= 0)
+            // if gone past both local and remote extremes, time to exit
+            // TODO: If UIDNEXT isn't available on server, will need to fetch the highest UID
+            if (current_start_id.uid.compare(latest_uid) >= 0
+                && current_start_id.uid.compare(remote_properties.uid_next) >= 0)
                 break;
         }
         
