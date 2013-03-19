@@ -24,7 +24,7 @@ public class GearyApplication : YorbaApplication {
     public const string DESKTOP_NAME = _("Geary Mail");
     public const string DESKTOP_GENERIC_NAME = _("Mail Client");
     public const string DESKTOP_COMMENT = _("Send and receive email");
-    public const string DESKTOP_KEYWORDS = _("Email;E-mail;Mail");
+    public const string DESKTOP_KEYWORDS = _("Email;E-mail;Mail;");
     public const string DESKTOP_COMPOSE_NAME = _("Compose Message");
     
     public const string VERSION = _VERSION;

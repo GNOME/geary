@@ -331,7 +331,7 @@ msgid "Drafts"
 msgstr ""
 
 #: ../../src/client/geary-application.vala:27
-msgid "Email;E-mail;Mail"
+msgid "Email;E-mail;Mail;"
 msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:185

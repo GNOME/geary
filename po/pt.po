@@ -415,8 +415,8 @@ msgid "Email address:"
 msgstr "Endereço eletrónico:"
 
 #: ../../src/client/geary-application.vala:27
-msgid "Email;E-mail;Mail"
-msgstr "Endereço; Eletrónico; Correio"
+msgid "Email;E-mail;Mail;"
+msgstr "Endereço; Eletrónico; Correio;"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"

@@ -406,7 +406,7 @@ msgid "Email address:"
 msgstr "邮件地址:"
 
 #: ../../src/client/geary-application.vala:27
-msgid "Email;E-mail;Mail"
+msgid "Email;E-mail;Mail;"
 msgstr ""
 
 #: ../../ui/preferences.glade:137

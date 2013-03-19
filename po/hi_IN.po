@@ -408,8 +408,8 @@ msgid "Email address:"
 msgstr "ईमेल एड्रेस:"
 
 #: ../../src/client/geary-application.vala:27
-msgid "Email;E-mail;Mail"
-msgstr "ईमेल;ई-मेल;मेल"
+msgid "Email;E-mail;Mail;"
+msgstr "ईमेल;ई-मेल;मेल;"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
