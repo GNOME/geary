@@ -105,7 +105,7 @@ msgstr "%H:%M"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/engine/rfc822/rfc822-utils.vala:43
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a, %-e %b %Y om %-l:%M %p"
+msgstr "%a %-e %b %Y om %-k:%M"
 
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -161,7 +161,7 @@ msgstr "%s - Nieuwe berichten"
 #: ../../src/engine/rfc822/rfc822-utils.vala:48
 #, c-format
 msgid "%s wrote:"
-msgstr "%s schreef:"
+msgstr "schreef %s:"
 
 #: ../../src/client/views/conversation-viewer.vala:160
 #, c-format
@@ -698,7 +698,7 @@ msgstr "Meldingen"
 #: ../../src/engine/rfc822/rfc822-utils.vala:40
 #, c-format
 msgid "On %s, "
-msgstr "Op %s, "
+msgstr "Op %s "
 
 #: ../../src/client/notification/notification-bubble.vala:42
 msgid "Open"
