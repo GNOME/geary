@@ -11,6 +11,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     private NonblockingMailbox<GenericFolder>? bg_queue = null;
     private Gee.HashSet<GenericFolder> made_available = new Gee.HashSet<GenericFolder>();
+    private GenericFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
     private NonblockingSemaphore stopped = new NonblockingSemaphore();
     private NonblockingSemaphore prefetcher_semaphore = new NonblockingSemaphore();
@@ -79,13 +80,19 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private void send_all(Gee.Collection<Folder> folders, bool reason_available) {
         foreach (Folder folder in folders) {
             GenericFolder? generic_folder = folder as GenericFolder;
-            if (generic_folder != null)
+            
+            // only deal with ImapEngine.GenericFolders
+            if (generic_folder == null)
+                continue;
+            
+            // don't requeue the currently processing folder
+            if (generic_folder != current_folder)
                 bg_queue.send(generic_folder);
             
             // If adding because now available, make sure it's flagged as such, since there's an
             // additional check for available folders ... if not, remove from the map so it's
             // not treated as such, in case both of these come in back-to-back
-            if (reason_available)
+            if (reason_available && generic_folder != current_folder)
                 made_available.add(generic_folder);
             else
                 made_available.remove(generic_folder);
@@ -161,6 +168,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 break;
             }
             
+            // mark as current folder to prevent requeues while processing
+            current_folder = folder;
+            
             // generate the current epoch for synchronization (could cache this value, obviously, but
             // doesn't seem like this biggest win in this class)
             DateTime epoch;
@@ -171,7 +181,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 epoch = new DateTime(new TimeZone.local(), 1, 1, 1, 0, 0, 0.0);
             }
             
-            if (!yield process_folder_async(folder, made_available.remove(folder), epoch))
+            bool ok = yield process_folder_async(folder, made_available.remove(folder), epoch);
+            
+            // clear current folder in every event
+            current_folder = null;
+            
+            if (!ok)
                 break;
         }
         
@@ -241,6 +256,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         folder.email_prefetcher.halting.connect(on_email_prefetcher_completed);
         folder.closed.connect(on_email_prefetcher_completed);
         
+        // turn off the flag watcher whilst synchronizing, as that can cause addt'l load on the
+        // CPU
+        folder.email_flag_watcher.enabled = false;
+        
         try {
             yield sync_folder_async(folder, epoch, oldest_local, oldest_local_id);
         } catch (Error err) {
@@ -253,6 +272,8 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         } finally {
             folder.email_prefetcher.halting.disconnect(on_email_prefetcher_completed);
             folder.closed.disconnect(on_email_prefetcher_completed);
+            
+            folder.email_flag_watcher.enabled = true;
         }
         
         try {

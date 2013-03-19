@@ -16,11 +16,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
+    internal EmailFlagWatcher email_flag_watcher;
     
     private weak GenericAccount _account;
     private Imap.Account remote;
     private ImapDB.Account local;
-    private EmailFlagWatcher email_flag_watcher;
     private SpecialFolderType special_folder_type;
     private int open_count = 0;
     private NonblockingReportingSemaphore<bool>? remote_semaphore = null;

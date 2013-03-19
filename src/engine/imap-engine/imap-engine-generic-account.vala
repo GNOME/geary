@@ -5,7 +5,7 @@
  */
 
 private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
-    private const int REFRESH_FOLDER_LIST_SEC = 3 * 60;
+    private const int REFRESH_FOLDER_LIST_SEC = 10 * 60;
     
     private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
