@@ -10,7 +10,7 @@
 # Rodrigo Cares <rcares@gmail.com>, 2012.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.3.0\n"
+"Project-Id-Version: geary-0.3\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
 "PO-Revision-Date: 2013-02-27 00:48+0000\n"

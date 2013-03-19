@@ -1,3 +1,20 @@
+Geary 0.3.0 - 19 March 2013
+---------------------------
+
+  * Support for multiple accounts
+  * Account editor
+  * Basic full conversations
+  * Some light background downloading of messages
+  * Mark as spam/not spam
+  * "Important" folder support
+  * Multiple compressed messages are collapsed in conversation viewer
+  * Mark as read as you scroll in conversation viewer
+  * Highlight unread messages in conversation viewer
+  * New keyboard shortcuts (see help)
+  * Allow auth-less SMTP
+  * Conversation viewer WebKit inspector
+  * Many bugfixes
+
 Geary 0.2.2 - 18 October 2012
 -----------------------------
 

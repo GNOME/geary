@@ -1,3 +1,21 @@
+geary (0.3.0-1~raring1) raring; urgency=low
+
+  * Support for multiple accounts
+  * Account editor
+  * Basic full conversations
+  * Some light background downloading of messages
+  * Mark as spam/not spam
+  * "Important" folder support
+  * Multiple compressed messages are collapsed in conversation viewer
+  * Mark as read as you scroll in conversation viewer
+  * Highlight unread messages in conversation viewer
+  * New keyboard shortcuts (see help)
+  * Allow auth-less SMTP
+  * Conversation viewer WebKit inspector
+  * Many bugfixes
+
+ -- Charles Lindsay <chaz@yorba.org>  Tue, 19 Mar 2013 15:01:19 -0700
+
 geary (0.3.0pr1~raring1) raring; urgency=low
 
   * Pre-prelease 
