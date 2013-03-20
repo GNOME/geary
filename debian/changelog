@@ -1,3 +1,9 @@
+geary (0.3.0-2~raring1) raring; urgency=low
+
+  * Fix control file
+
+ -- Charles Lindsay <chaz@yorba.org>  Tue, 19 Mar 2013 18:07:37 -0700
+
 geary (0.3.0-1~raring1) raring; urgency=low
 
   * Support for multiple accounts
