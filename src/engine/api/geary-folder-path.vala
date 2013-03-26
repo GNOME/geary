@@ -88,7 +88,7 @@ public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
     public string get_fullpath(string? use_separator = null) {
         string? separator = use_separator ?? get_root().default_separator;
         
-        // no separator, no heirarchy
+        // no separator, no hierarchy
         if (separator == null)
             return basename;
         

@@ -217,7 +217,7 @@ public class ComposerWindow : Gtk.Window {
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
-        // Can only hapen after actions exits
+        // Can only happen after actions exits
         compose_as_html = GearyApplication.instance.config.compose_as_html;
         
         // Listen to account signals to update from menu.

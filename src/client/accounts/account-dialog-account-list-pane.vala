@@ -223,7 +223,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
             if (list_address != null) {
                 Geary.AccountInformation account = all_accounts.get(list_address);
                 
-                // To prevent unecessary work, only set ordinal if there's a change.
+                // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;
                     account.store_async.begin(null);

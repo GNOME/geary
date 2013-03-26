@@ -44,7 +44,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
         }
         
         // since count can also indicate "to earliest" or "to latest", normalize
-        // (count is exclusive of initial_id, hence adding/substracting one, meaning that a count
+        // (count is exclusive of initial_id, hence adding/subtracting one, meaning that a count
         // of zero or one are accepted)
         int low, high;
         if (count < 0) {

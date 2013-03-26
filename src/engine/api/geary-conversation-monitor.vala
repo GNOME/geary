@@ -7,7 +7,7 @@
 public class Geary.ConversationMonitor : BaseObject {
     /**
      * These are the fields Conversations require to thread emails together.  These fields will
-     * be retrieved irregardless of the Field parameter passed to the constructor.
+     * be retrieved regardless of the Field parameter passed to the constructor.
      */
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES | 
         Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;

@@ -447,7 +447,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 notify_folders_contents_altered(altered);
         }
         
-        // enumerate childen of each remote folder
+        // enumerate children of each remote folder
         foreach (Imap.Folder remote_folder in remote_folders) {
             if (remote_folder.get_properties().has_children.is_possible()) {
                 try {

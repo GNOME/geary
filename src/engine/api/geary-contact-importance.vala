@@ -5,7 +5,7 @@
  */
 
 /**
- * Represents the relative "importance" of an occurance of a contact in a message.
+ * Represents the relative "importance" of an occurrence of a contact in a message.
  *
  * The first word (before the underscore) indicates where the account owner appeared in the
  * message. The second word (after the underscore) indicates where the contact appeared in the
