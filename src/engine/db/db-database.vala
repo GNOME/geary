@@ -225,7 +225,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         
         thread_pool.add(job);
         
-        return yield job.wait_for_completion_async(cancellable);
+        return yield job.wait_for_completion_async();
     }
     
     // This method must be thread-safe.
