@@ -672,8 +672,12 @@ public class GearyController {
     // after we've located the first account.
     private Geary.Folder? get_initial_selection_folder(Geary.Folder folder_being_added) {
         if (folder_being_added.account == account_to_select &&
-            !main_window.folder_list.is_any_selected() && inboxes.has_key(account_to_select))
+            !main_window.folder_list.is_any_selected() && inboxes.has_key(account_to_select)) {
             return inboxes.get(account_to_select);
+        } else if (account_to_select == null) {
+            // This is the first account being added, so select the inbox.
+            return inboxes.get(folder_being_added.account);
+        }
         
         return null;
     }
