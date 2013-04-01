@@ -74,7 +74,7 @@ public class NotificationBubble : Geary.BaseObject {
     
     private void notify_new_mail(Geary.Folder folder, int count) throws GLib.Error {
         // don't pass email if invoked
-        folder = null;
+        this.folder = null;
         email = null;
         
         if (!GearyApplication.instance.config.show_notifications ||
