@@ -342,8 +342,26 @@ public class GearyController {
         
         inbox_cancellables.unset(account);
         
-        if (inboxes.size == 0)
-            on_quit();
+        // If there are no accounts available, exit.  (This can happen if the user declines to
+        // enter a password on their account.)
+        try {
+            if (get_num_open_accounts() == 0)
+                GearyApplication.instance.exit();
+        } catch (Error e) {
+            message("Error enumerating accounts: %s", e.message);
+        }
+    }
+    
+    // Returns the number of open accounts.
+    private int get_num_open_accounts() throws Error {
+        int num = 0;
+        foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
+            Geary.Account a = Geary.Engine.instance.get_account_instance(info);
+            if (a.is_open())
+                num++;
+        }
+        
+        return num;
     }
     
     private bool is_viewed_conversation(Geary.Conversation? conversation) {
