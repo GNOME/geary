@@ -77,6 +77,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
     }
     
     public void add_folder(Geary.Folder folder) {
+        Sidebar.Entry? graft_point = null;
         FolderEntry folder_entry = new FolderEntry(folder);
         Geary.SpecialFolderType special_folder_type = folder.get_special_folder_type();
         if (special_folder_type != Geary.SpecialFolderType.NONE) {
@@ -86,28 +87,42 @@ public class FolderList.AccountBranch : Sidebar.Branch {
                 case Geary.SpecialFolderType.FLAGGED:
                 case Geary.SpecialFolderType.IMPORTANT:
                 case Geary.SpecialFolderType.ALL_MAIL:
-                    graft(get_root(), folder_entry);
+                    graft_point = get_root();
                 break;
                 
                 // Others go in the "More" grouping.
                 default:
-                    graft(uncommon_special_group, folder_entry);
+                    graft_point = uncommon_special_group;
                 break;
             }
         } else if (folder.get_path().get_parent() == null) {
             // Top-level folders get put in our special user folders group.
-            graft(user_folder_group, folder_entry);
+            graft_point = user_folder_group;
         } else {
             Sidebar.Entry? entry = folder_entries.get(folder.get_path().get_parent());
-            if (entry == null) {
-                debug("Could not add folder %s of type %s to folder list", folder.to_string(),
-                    special_folder_type.to_string());
-                return;
-            }
-            graft(entry, folder_entry);
+            if (entry != null)
+                graft_point = entry;
         }
         
-        folder_entries.set(folder.get_path(), folder_entry);
+        // Due to how we enumerate folders on the server, it's unfortunately
+        // possible now to have two folders that we'd put in the same place in
+        // our tree.  In that case, we just ignore the second folder for now.
+        // See #6616.
+        if (graft_point != null) {
+            Sidebar.Entry? twin = find_first_child(graft_point, (e) => {
+                return e.get_sidebar_name() == folder_entry.get_sidebar_name();
+            });
+            if (twin != null)
+                graft_point = null;
+        }
+
+        if (graft_point != null) {
+            graft(graft_point, folder_entry);
+            folder_entries.set(folder.get_path(), folder_entry);
+        } else {
+            debug("Could not add folder %s of type %s to folder list", folder.to_string(),
+                special_folder_type.to_string());
+        }
     }
     
     public void remove_folder(Geary.Folder folder) {

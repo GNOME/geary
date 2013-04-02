@@ -102,7 +102,7 @@ public class FolderList.Tree : Sidebar.Tree {
         
         // If this is the current folder, unselect it.
         Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.get_path());
-        if (entry == null || !is_selected(entry))
+        if (has_branch(inboxes_branch) && (entry == null || !is_selected(entry)))
             entry = inboxes_branch.get_entry_for_account(folder.account);
         if (entry != null && is_selected(entry))
             folder_selected(null);
