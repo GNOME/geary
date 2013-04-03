@@ -208,7 +208,7 @@ public class Geary.Engine : BaseObject {
         
         // Make sure the account nickname is not in use.
         foreach (AccountInformation a in get_accounts().values) {
-            if (account != a && Geary.String.equals_ci(account.nickname, a.nickname))
+            if (account.email != a.email && Geary.String.equals_ci(account.nickname, a.nickname))
                 error_code |= ValidationResult.INVALID_NICKNAME;
         }
         
