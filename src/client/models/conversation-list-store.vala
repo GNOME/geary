@@ -259,6 +259,7 @@ public class ConversationListStore : Gtk.ListStore {
         Gtk.TreeIter iter;
         if (!get_iter_for_conversation(conversation, out iter)) {
             debug("Unable to find preview for conversation");
+            
             return null;
         }
         
@@ -292,6 +293,8 @@ public class ConversationListStore : Gtk.ListStore {
         
         Geary.Email? last_email = conversation.get_latest_email();
         if (last_email == null) {
+            debug("Cannot refresh conversation: last email is null");
+            
             remove(iter);
             return;
         }
@@ -305,8 +308,11 @@ public class ConversationListStore : Gtk.ListStore {
             existing_message_data.num_emails = conversation.get_count();
             
             Gtk.TreePath? path = get_path(iter);
-            if (path != null)
+            if (path != null) {
                 row_changed(path, iter);
+            } else {
+                debug("Cannot refresh conversation: no path for iterator");
+            }
         }
     }
     
@@ -368,11 +374,17 @@ public class ConversationListStore : Gtk.ListStore {
     
     private bool add_conversation(Geary.Conversation conversation) {
         Geary.Email? last_email = conversation.get_latest_email();
-        if (last_email == null)
+        if (last_email == null) {
+            debug("Cannot add conversation: last email is null");
+            
             return false;
+        }
         
-        if (has_conversation(conversation))
+        if (has_conversation(conversation)) {
+            debug("Conversation already present; not adding");
+            
             return false;
+        }
         
         Gtk.TreeIter iter;
         append(out iter);
@@ -423,8 +435,11 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private void on_conversation_appended(Geary.Conversation conversation) {
-        if (has_conversation(conversation))
+        if (has_conversation(conversation)) {
             refresh_conversation(conversation);
+        } else {
+            debug("Unable to append conversation; conversation not present in list store");
+        }
     }
     
     private void on_conversation_trimmed(Geary.Conversation conversation) {
