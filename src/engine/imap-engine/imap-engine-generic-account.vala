@@ -52,26 +52,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
     }
     
-    protected override void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable) {
-        base.notify_folders_available_unavailable(available, unavailable);
-
-        if (available != null) {
-            foreach(Folder f in available) {
-                if (f.get_properties().has_children.is_possible())
-                    enumerate_folders_async.begin(f.get_path(), null, on_enumerate_folders_async_complete);
-            }
-        }
-    }
-
-    private void on_enumerate_folders_async_complete(Object? object, AsyncResult result) {
-        try {
-            enumerate_folders_async.end(result);
-        } catch (Error e) {
-            debug("Error enumerating subfolders: %s", e.message);
-        }
-    }
-
     public override async void open_async(Cancellable? cancellable = null) throws Error {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
