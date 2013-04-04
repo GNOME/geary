@@ -1276,8 +1276,11 @@ public class GearyController {
     // one or the other in a folder
     private void on_delete_message() {
         // Prevent deletes of the same conversation from repeating.
-        if (is_viewed_conversation(last_deleted_conversation))
+        if (is_viewed_conversation(last_deleted_conversation)) {
+            debug("not archiving/deleting, viewed conversation is last deleted conversation");
+            
             return;
+        }
         
         // There should always be at least one conversation selected here, otherwise the archive
         // button is disabled, but better safe than segfaulted.
