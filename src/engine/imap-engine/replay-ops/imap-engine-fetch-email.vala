@@ -56,7 +56,8 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         if (email != null && usable_remote_count > 0) {
             int local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
                 cancellable);
-            email.update_position(email.position + (usable_remote_count - local_count));
+            if (local_count < usable_remote_count)
+                email.update_position(email.position + (usable_remote_count - local_count));
         }
         
         // If returned in full, done
