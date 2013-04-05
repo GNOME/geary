@@ -197,12 +197,11 @@ public class Geary.Engine : BaseObject {
     }
     
     /**
-     * Returns whether the account information "validates", which means here
-     * that we can connect to the endpoints and authenticate using the supplied
-     * credentials.
+     * Returns whether the account information "validates."  If validate_connection is true,
+     * we check if we can connect to the endpoints and authenticate using the supplied credentials.
      */
     public async ValidationResult validate_account_information_async(AccountInformation account,
-        Cancellable? cancellable = null) throws Error {
+        bool validate_connection = true, Cancellable? cancellable = null) throws Error {
         check_opened();
         ValidationResult error_code = ValidationResult.OK;
         
@@ -211,6 +210,10 @@ public class Geary.Engine : BaseObject {
             if (account.email != a.email && Geary.String.equals_ci(account.nickname, a.nickname))
                 error_code |= ValidationResult.INVALID_NICKNAME;
         }
+        
+        // If we don't need to validate the connection, exit out here.
+        if (!validate_connection)
+            return error_code;
         
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
         Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);

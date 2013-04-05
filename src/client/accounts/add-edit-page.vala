@@ -271,8 +271,8 @@ public class AddEditPage : Gtk.Box {
             info.imap_credentials.user,
             info.imap_credentials.pass,
             info.imap_remember_password && info.smtp_remember_password,
-            info.smtp_credentials.user,
-            info.smtp_credentials.pass,
+            info.smtp_credentials != null ? info.smtp_credentials.user : null,
+            info.smtp_credentials != null ? info.smtp_credentials.pass : null,
             info.service_provider,
             info.default_imap_server_host,
             info.default_imap_server_port,
@@ -317,6 +317,8 @@ public class AddEditPage : Gtk.Box {
         password = initial_imap_password != null ? initial_imap_password : "";
         remember_password = initial_remember_password;
         set_service_provider((Geary.ServiceProvider) initial_service_provider);
+        combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
+        combo_smtp_encryption.active = Encryption.NONE;
         
         // Set defaults for IMAP info
         imap_host = initial_default_imap_host ?? "";
@@ -578,6 +580,7 @@ public class AddEditPage : Gtk.Box {
             other_info.show();
             set_other_info_sensitive(true);
             check_remember_password.label = _("Re_member passwords"); // Plural
+            entry_smtp_password.sensitive = !smtp_noauth;
         } else {
             // For special-cased providers, only display necessary info.
             label_password.show();
@@ -598,6 +601,7 @@ public class AddEditPage : Gtk.Box {
             entry_smtp_port.sensitive =
             entry_smtp_username.sensitive =
             combo_smtp_encryption.sensitive =
+            check_smtp_noauth.sensitive =
                 mode != PageMode.EDIT;
         
         // Update error text.

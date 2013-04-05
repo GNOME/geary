@@ -85,8 +85,11 @@ public class PasswordDialog {
         label_imap_port.set_text(imap_server_port.to_string());
         label_imap_encryption.set_text(get_security_status(imap_endpoint.flags));
         
-        label_smtp_username.set_text(account_information.smtp_credentials.user ?? "");
-        entry_smtp_password.set_text(account_information.smtp_credentials.pass ?? "");
+        if (account_information.smtp_credentials != null) {
+            label_smtp_username.set_text(account_information.smtp_credentials.user ?? "");
+            entry_smtp_password.set_text(account_information.smtp_credentials.pass ?? "");
+        }
+        
         label_smtp_server.set_text(smtp_server_host);
         label_smtp_port.set_text(smtp_server_port.to_string());
         label_smtp_encryption.set_text(get_security_status(smtp_endpoint.flags));

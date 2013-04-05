@@ -164,12 +164,15 @@ public class Geary.AccountInformation : BaseObject {
         CredentialsMediator.ServiceFlag get_services = 0;
         if (services.has_imap() && !imap_credentials.is_complete())
             get_services |= CredentialsMediator.ServiceFlag.IMAP;
-        if (services.has_smtp() && !smtp_credentials.is_complete())
+        
+        if (services.has_smtp() && smtp_credentials != null && !smtp_credentials.is_complete())
             get_services |= CredentialsMediator.ServiceFlag.SMTP;
         
         CredentialsMediator.ServiceFlag unset_services = services;
         if (get_services != 0)
             unset_services = yield get_passwords_async(get_services);
+        else
+            return true;
         
         if (unset_services == 0)
             return true;
@@ -219,7 +222,7 @@ public class Geary.AccountInformation : BaseObject {
                 failed_services |= CredentialsMediator.ServiceFlag.IMAP;
         }
         
-        if (services.has_smtp()) {
+        if (services.has_smtp() && smtp_credentials != null) {
             string? smtp_password = yield mediator.get_password_async(
                 CredentialsMediator.Service.SMTP, smtp_credentials.user);
             
@@ -246,6 +249,9 @@ public class Geary.AccountInformation : BaseObject {
         
         string? imap_password, smtp_password;
         bool imap_remember_password, smtp_remember_password;
+        
+        if (smtp_credentials == null)
+            services &= ~CredentialsMediator.ServiceFlag.SMTP;
         
         if (!yield Geary.Engine.instance.authentication_mediator.prompt_passwords_async(
             services, this, out imap_password, out smtp_password,
@@ -287,7 +293,7 @@ public class Geary.AccountInformation : BaseObject {
             }
         }
         
-        if (services.has_smtp()) {
+        if (services.has_smtp() && smtp_credentials != null) {
             if (smtp_remember_password) {
                 yield mediator.set_password_async(
                     CredentialsMediator.Service.SMTP, smtp_credentials);
@@ -409,7 +415,8 @@ public class Geary.AccountInformation : BaseObject {
         key_file.set_integer(GROUP, ORDINAL_KEY, ordinal);
         key_file.set_value(GROUP, IMAP_USERNAME_KEY, imap_credentials.user);
         key_file.set_boolean(GROUP, IMAP_REMEMBER_PASSWORD_KEY, imap_remember_password);
-        key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
+        if (smtp_credentials != null)
+            key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
         key_file.set_boolean(GROUP, SMTP_REMEMBER_PASSWORD_KEY, smtp_remember_password);
         key_file.set_integer(GROUP, PREFETCH_PERIOD_DAYS_KEY, prefetch_period_days);
         
@@ -457,7 +464,7 @@ public class Geary.AccountInformation : BaseObject {
         }
         
         try {
-            if (services.has_smtp()) {
+            if (services.has_smtp() && smtp_credentials != null) {
                 yield mediator.clear_password_async(
                     CredentialsMediator.Service.SMTP, smtp_credentials.user);
             }
