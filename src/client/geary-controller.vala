@@ -28,6 +28,7 @@ public class GearyController {
     public const string ACTION_MARK_AS_SPAM = "GearyMarkAsSpam";
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
+    public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
 
     public const int FETCH_EMAIL_CHUNK_COUNT = 200;
     
@@ -85,6 +86,7 @@ public class GearyController {
         
         // Setup actions.
         GearyApplication.instance.actions.add_actions(create_actions(), this);
+        GearyApplication.instance.actions.add_toggle_actions(create_toggle_actions(), this);
         GearyApplication.instance.ui_manager.insert_action_group(
             GearyApplication.instance.actions, 0);
         GearyApplication.instance.load_ui_file("accelerators.ui");
@@ -280,7 +282,17 @@ public class GearyController {
             null, on_zoom_normal };
         entries += zoom_normal;
         add_accelerator("0", ACTION_ZOOM_NORMAL);
-
+        
+        return entries;
+    }
+    
+    private Gtk.ToggleActionEntry[] create_toggle_actions() {
+        Gtk.ToggleActionEntry[] entries = new Gtk.ToggleActionEntry[0];
+        
+        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, null, "F10",
+            null, null, false };
+        entries += gear_menu;
+        
         return entries;
     }
     
