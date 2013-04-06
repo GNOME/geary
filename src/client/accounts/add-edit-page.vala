@@ -166,6 +166,8 @@ public class AddEditPage : Gtk.Box {
     
     private Geary.Engine.ValidationResult last_validation_result = Geary.Engine.ValidationResult.OK;
     
+    private bool first_ui_update = true;
+    
     public signal void info_changed();
     
     public signal void size_changed();
@@ -259,8 +261,8 @@ public class AddEditPage : Gtk.Box {
         
         entry_nickname.insert_text.connect(on_nickname_insert_text);
         
-        // Shows/hides settings.
-        update_ui();
+        // Reset the "first update" flag when the window is mapped.
+        map.connect(() => { first_ui_update = true; });
     }
     
     // Sets the account information to display on this page.
@@ -340,11 +342,6 @@ public class AddEditPage : Gtk.Box {
         set_validation_result(result);
         
         set_storage_length(prefetch_period_days);
-        
-        if (Geary.String.is_empty(real_name))
-            entry_real_name.grab_focus();
-        else
-            entry_email.grab_focus();
     }
     
     public void set_validation_result(Geary.Engine.ValidationResult result) {
@@ -641,6 +638,27 @@ public class AddEditPage : Gtk.Box {
         }
         
         size_changed();
+        
+        // Set initial field focus.
+        // This has to be done here because the window isn't completely setup until the first time
+        // this method runs.
+        if (first_ui_update && parent.get_visible()) {
+            if (mode == PageMode.EDIT) {
+                if (get_service_provider() != Geary.ServiceProvider.OTHER)
+                    entry_password.grab_focus();
+                else
+                    entry_imap_password.grab_focus();
+            } else {
+                if (Geary.String.is_empty(real_name))
+                    entry_real_name.grab_focus();
+                else if (mode == PageMode.ADD)
+                    entry_nickname.grab_focus();
+                else
+                    entry_email.grab_focus();
+            }
+            
+            first_ui_update = false;
+        }
     }
     
     public Geary.ServiceProvider get_service_provider() {

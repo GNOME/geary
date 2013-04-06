@@ -64,5 +64,10 @@ public class LoginDialog : Gtk.Dialog {
         cancel_button.sensitive = !visible;
         on_info_changed(); // sets OK button sensitivity
     }
+    
+    public override void show() {
+        page.update_ui();
+        base.show();
+    }
 }
 

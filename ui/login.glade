@@ -188,6 +188,7 @@
           <object class="GtkEntry" id="entry: real_name">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
             <property name="hexpand">True</property>
             <property name="invisible_char">•</property>
             <property name="activates_default">True</property>
