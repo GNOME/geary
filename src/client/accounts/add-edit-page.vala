@@ -352,6 +352,9 @@ public class AddEditPage : Gtk.Box {
     public void reset_all() {
         // Take advantage of set_all_info()'s defaults.
         set_all_info(get_default_real_name());
+        
+        edited_imap_port = false;
+        edited_smtp_port = false;
     }
     
     /** Puts this page into one of three different modes:
@@ -577,7 +580,6 @@ public class AddEditPage : Gtk.Box {
             other_info.show();
             set_other_info_sensitive(true);
             check_remember_password.label = _("Re_member passwords"); // Plural
-            entry_smtp_password.sensitive = !smtp_noauth;
         } else {
             // For special-cased providers, only display necessary info.
             label_password.show();
@@ -600,6 +602,11 @@ public class AddEditPage : Gtk.Box {
             combo_smtp_encryption.sensitive =
             check_smtp_noauth.sensitive =
                 mode != PageMode.EDIT;
+        
+        if (smtp_noauth) {
+            entry_smtp_username.sensitive = false;
+            entry_smtp_password.sensitive = false;
+        }
         
         // Update error text.
         label_error.visible = false;
