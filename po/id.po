@@ -412,6 +412,7 @@ msgid "Email address:"
 msgstr "Alamat email:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Surat;"
 
@@ -1214,5 +1215,5 @@ msgstr "toolbutton1"
 #: ../../src/client/geary-controller.vala:786
 msgid "translator-credits"
 msgstr ""
-"Andika Triwidada <andika@gmail.com>, 2012\\n\n"
+"Andika Triwidada <andika@gmail.com>, 2012\n\n"
 "Dani Pratomo <elementaryindo@gmail.com>, 2012."

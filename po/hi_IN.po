@@ -408,6 +408,7 @@ msgid "Email address:"
 msgstr "ईमेल एड्रेस:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
 msgstr "ईमेल;ई-मेल;मेल;"
 

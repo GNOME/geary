@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: geary-0.3\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-02-27 07:05+0000\n"
+"PO-Revision-Date: 2013-03-21 20:41+0000\n"
 "Last-Translator: petr.simacek <petr.simacek@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: cs\n"
@@ -396,7 +396,7 @@ msgstr "Chcete smazat neuloženou zprávu?"
 
 #: ../../src/client/geary-controller.vala:1056
 msgid "Don't _ask me again"
-msgstr "Neptat_se znovu"
+msgstr "Neptat se znovu"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:25
 msgid "Drafts"
@@ -415,6 +415,7 @@ msgid "Email address:"
 msgstr "Emailová adresa:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;"
 

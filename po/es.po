@@ -4,7 +4,7 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Adolfo Jayme Barrientos <fitoschido@gmail.com>, 2012.
+# Adolfo Jayme Barrientos <fitoschido@gmail.com>, 2012-2013.
 # Alfredo Hernández <aldomann.designs@gmail.com>, 2012.
 # Cristián Gacitúa <revolution2000@gmail.com>, 2013.
 #   <pakitochus@gmail.com>, 2012.
@@ -14,8 +14,8 @@ msgstr ""
 "Project-Id-Version: geary-0.3\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-03-01 22:06+0000\n"
-"Last-Translator: Rodrigo Cares <rcares@gmail.com>\n"
+"PO-Revision-Date: 2013-03-22 08:53+0000\n"
+"Last-Translator: Adolfo Jayme <fitoschido@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,7 @@ msgstr "&#8226; Error de conexión IMAP.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:611
 msgid "        &#8226; IMAP username or password incorrect.\n"
-msgstr "&#8226; El nombre de usuario o contraseña IMAP incorrecto.\n"
+msgstr "&#8226; Nombre de usuario o contraseña IMAP incorrectos.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:604
 msgid "        &#8226; Invalid account nickname.\n"
@@ -54,46 +54,46 @@ msgstr "&#8226; El nombre de usuario o contraseña incorrecto.\n"
 #: ../../src/client/composer/composer-window.vala:650
 #, c-format
 msgid "\"%s\" already attached for delivery."
-msgstr "\"%s\" ya fué adjuntado para la entrega."
+msgstr "Ya se adjuntó «%s» para la entrega."
 
 #: ../../src/client/composer/composer-window.vala:619
 #, c-format
 msgid "\"%s\" could not be found."
-msgstr "\"%s\" no fué encontrado."
+msgstr "No se pudo encontrar «%s»."
 
 #: ../../src/client/composer/composer-window.vala:644
 #, c-format
 msgid "\"%s\" could not be opened for reading."
-msgstr "\"%s\" no pudo ser abierto para ser leido."
+msgstr "No se pudo abrir «%s» para su lectura."
 
 #: ../../src/client/composer/composer-window.vala:625
 #, c-format
 msgid "\"%s\" is a folder."
-msgstr "\"%s\" es una carpeta."
+msgstr "«%s» es una carpeta."
 
 #: ../../src/client/composer/composer-window.vala:631
 #, c-format
 msgid "\"%s\" is an empty file."
-msgstr "\"%s\" es un archivo vacío."
+msgstr "«%s» es un archivo vacío."
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:79
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%-e de %B del %Y a las %-H:%M."
+msgstr "%-e de %B de %Y a las %-H:%M."
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:76
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%-e de %B del %Y a las %-l:%M %P"
+msgstr "%-e de %B de %Y a las %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:82
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%-e de %B del %Y a las %-l:%M %P"
+msgstr "%-e de %B de %Y a las %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -124,8 +124,8 @@ msgstr[1] "%d mensajes nuevos"
 #, c-format
 msgid "%d unread message"
 msgid_plural "%d unread messages"
-msgstr[0] "%d mensaje no leido"
-msgstr[1] "%d mensajes no leidos"
+msgstr[0] "%d mensaje sin leer"
+msgstr[1] "%d mensajes sin leer"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -150,13 +150,13 @@ msgstr "%s (%d)"
 #: ../../src/client/views/conversation-web-view.vala:326
 #, c-format
 msgid "%s - Conversation Inspector"
-msgstr "%s - Inspector de Conversaciones"
+msgstr "%s – Inspector de conversaciones"
 
 #: ../../src/client/notification/libindicate.vala:59
 #: ../../src/client/notification/libmessagingmenu.vala:75
 #, c-format
 msgid "%s - New Messages"
-msgstr "%s - Mensajes Nuevos"
+msgstr "%s – Mensajes nuevos"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:48
 #, c-format
@@ -171,7 +171,7 @@ msgstr "%u conversaciones seleccionadas. "
 #: ../../src/client/views/conversation-viewer.vala:383
 #, c-format
 msgid "%u read messages"
-msgstr "%u mensajes sin leer"
+msgstr "%u mensajes leídos"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -213,8 +213,8 @@ msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
 "account?</span> "
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">¿Está seguro que quiere eliminar esta "
-"cuenta?</span> "
+"<span weight=\"bold\" size=\"larger\">¿Está seguro de que quiere eliminar "
+"esta cuenta?</span> "
 
 #: ../../ui/account_cannot_remove.glade:41
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
@@ -253,11 +253,11 @@ msgstr "Agregar una cuenta"
 
 #: ../../src/client/geary-controller.vala:49
 msgid "Add label to conversation"
-msgstr "Agregar etiqueta a la conversación"
+msgstr "Añadir etiqueta a la conversación"
 
 #: ../../src/client/geary-controller.vala:50
 msgid "Add label to conversations"
-msgstr "Agregar etiqueta a las conversaciones"
+msgstr "Añadir etiqueta a las conversaciones"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:37
 msgid "All Mail"
@@ -269,7 +269,7 @@ msgid ""
 "This will not affect email on the server."
 msgstr ""
 "Todos los correos electrónicos asociados con esta cuenta podrían ser "
-"eliminados de su computador. Esto no afectará los correos en el servidor."
+"eliminados de su equipo. Esto no afectará los correos en el servidor."
 
 #: ../../src/client/geary-args.vala:23
 msgid "Allow inspection of WebView"
@@ -277,11 +277,11 @@ msgstr "Permitir la inspección de WebView"
 
 #: ../../src/client/geary-controller.vala:40
 msgid "Archive conversation (Delete, Backspace, A)"
-msgstr "Archivar conversación (Suprimir, Backspace, A)"
+msgstr "Archivar conversación (Supr, Retroceso, A)"
 
 #: ../../src/client/geary-controller.vala:41
 msgid "Archive conversations (Delete, Backspace, A)"
-msgstr "Archivar conversaciones (Suprimir, Backspace, A)"
+msgstr "Archivar conversaciones (Supr, Retroceso, A)"
 
 #: ../../src/client/geary-controller.vala:1054
 #, c-format
@@ -353,7 +353,7 @@ msgstr "Copiar dirección de correo _electrónico"
 
 #: ../../src/client/views/conversation-viewer.vala:533
 msgid "Copy _Link"
-msgstr "Copiar en_lace"
+msgstr "Copiar el en_lace"
 
 #: ../../ui/composer.glade:112
 msgid "Copy _link"
@@ -361,7 +361,7 @@ msgstr "Copiar en_lace"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
-msgstr "Copyright 2011-2013 Yorba Foundation"
+msgstr "Copyright 2011–2013 Yorba Foundation"
 
 #: ../../src/client/views/conversation-viewer.vala:250
 msgid "Date:"
@@ -382,11 +382,11 @@ msgstr "Eliminar"
 
 #: ../../src/client/geary-controller.vala:35
 msgid "Delete conversation (Delete, Backspace, A)"
-msgstr "Eliminar conversación (Suprimir, Backspace, A)"
+msgstr "Eliminar conversación (Supr, Retroceso, A)"
 
 #: ../../src/client/geary-controller.vala:36
 msgid "Delete conversations (Delete, Backspace, A)"
-msgstr "Eliminar conversaciones (Suprimir, Backspace, A)"
+msgstr "Eliminar conversaciones (Supr, Retroceso, A)"
 
 #: ../../src/client/geary-args.vala:24
 msgid "Display program version"
@@ -417,8 +417,9 @@ msgid "Email address:"
 msgstr "Dirección de correo:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
-msgstr "Email;E-mail;Mail;"
+msgstr "Email;E-mail;Correo electrónico;"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
@@ -442,17 +443,17 @@ msgstr "Todo"
 
 #: ../../src/client/views/conversation-viewer.vala:1236
 msgid "Failed to open default text editor."
-msgstr "Ha habido un error al abrir el editor de textos predeterminado."
+msgstr "Ocurrió un error al abrir el editor de textos predeterminado."
 
 #: ../../src/client/geary-args.vala:52
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr ""
-"Ha habido un error al interpretar las opciones de la línea de órdenes: %s\n"
+"Ocurrió un error al interpretar las opciones de la línea de órdenes: %s\n"
 
 #: ../../src/client/composer/composer-window.vala:340
 msgid "Fixed width"
-msgstr "Ancho fijo"
+msgstr "Anchura fija"
 
 #: ../../ui/composer.glade:75
 msgid "Font"
@@ -513,7 +514,7 @@ msgstr "Bandeja de entrada"
 
 #: ../../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr "Bandejas de Entrada"
+msgstr "Bandejas de entrada"
 
 #: ../../ui/composer.glade:495
 msgid "Indent"
@@ -522,7 +523,7 @@ msgstr "Sangría"
 #. Indent text
 #: ../../ui/composer.glade:494
 msgid "Indent (Ctrl+])"
-msgstr "Indentar (Ctrl+])"
+msgstr "Sangría (Ctrl+])"
 
 #: ../../ui/composer.glade:443
 msgid "Italic"
@@ -619,7 +620,7 @@ msgstr "Marcar como _no leído"
 
 #: ../../src/client/geary-controller.vala:45
 msgid "Mark as not s_pam"
-msgstr "Marcar como no s_pam"
+msgstr "Desmarcar como s_pam"
 
 #: ../../src/client/geary-controller.vala:44
 msgid "Mark as s_pam"
@@ -679,7 +680,7 @@ msgstr "Apodo:"
 
 #: ../../ui/login.glade:664
 msgid "No authentication re_quired"
-msgstr "No se re_quiere autentificación"
+msgstr "No se re_quiere autenticación"
 
 #: ../../src/client/views/conversation-viewer.vala:158
 msgid "No conversations selected."
@@ -797,8 +798,8 @@ msgstr "Responder a _todos"
 msgid ""
 "Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
 msgstr ""
-"Responder a todos en el último mensaje de la conversación (Ctrl+Shift+R, "
-"Shift+R)"
+"Responder a todos en el último mensaje de la conversación (Ctrl+Mayús+R, "
+"Mayús+R)"
 
 #: ../../ui/toolbar.glade:40
 msgid "Reply to last message in conversation (Ctrl+R, R)"
@@ -856,7 +857,7 @@ msgstr "Seleccionar _todo"
 
 #: ../../src/client/geary-application.vala:26
 msgid "Send and receive email"
-msgstr "Envie y reciba correos electrónicos"
+msgstr "Envíe y reciba correos electrónicos"
 
 #: ../../ui/toolbar.glade:74
 msgid "Send copy of last message in conversation (Ctrl+L, F)"
@@ -973,7 +974,7 @@ msgstr "Quitar sangría"
 #. Removes an indent level
 #: ../../ui/composer.glade:508
 msgid "Un-indent (Ctrl+[)"
-msgstr "Quitar indentación (Ctrl+[)"
+msgstr "Quitar sangría (Ctrl+[)"
 
 #: ../../src/client/dialogs/password-dialog.vala:17
 msgid "Unable to login to email server"
@@ -1050,7 +1051,7 @@ msgstr "_Adjuntar"
 
 #: ../../ui/composer.glade:663
 msgid "_Attach File"
-msgstr "_Adjuntar Archivo"
+msgstr "_Adjuntar archivo"
 
 #: ../../ui/preferences.glade:71
 msgid "_Automatically select next message"
