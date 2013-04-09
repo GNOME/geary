@@ -28,6 +28,7 @@ public class GearyController {
     public const string ACTION_MARK_AS_SPAM = "GearyMarkAsSpam";
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
+    public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
 
     public const int FETCH_EMAIL_CHUNK_COUNT = 200;
     
@@ -85,6 +86,7 @@ public class GearyController {
         
         // Setup actions.
         GearyApplication.instance.actions.add_actions(create_actions(), this);
+        GearyApplication.instance.actions.add_toggle_actions(create_toggle_actions(), this);
         GearyApplication.instance.ui_manager.insert_action_group(
             GearyApplication.instance.actions, 0);
         GearyApplication.instance.load_ui_file("accelerators.ui");
@@ -280,7 +282,17 @@ public class GearyController {
             null, on_zoom_normal };
         entries += zoom_normal;
         add_accelerator("0", ACTION_ZOOM_NORMAL);
-
+        
+        return entries;
+    }
+    
+    private Gtk.ToggleActionEntry[] create_toggle_actions() {
+        Gtk.ToggleActionEntry[] entries = new Gtk.ToggleActionEntry[0];
+        
+        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, null, "F10",
+            null, null, false };
+        entries += gear_menu;
+        
         return entries;
     }
     
@@ -342,8 +354,26 @@ public class GearyController {
         
         inbox_cancellables.unset(account);
         
-        if (inboxes.size == 0)
-            on_quit();
+        // If there are no accounts available, exit.  (This can happen if the user declines to
+        // enter a password on their account.)
+        try {
+            if (get_num_open_accounts() == 0)
+                GearyApplication.instance.exit();
+        } catch (Error e) {
+            message("Error enumerating accounts: %s", e.message);
+        }
+    }
+    
+    // Returns the number of open accounts.
+    private int get_num_open_accounts() throws Error {
+        int num = 0;
+        foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
+            Geary.Account a = Geary.Engine.instance.get_account_instance(info);
+            if (a.is_open())
+                num++;
+        }
+        
+        return num;
     }
     
     private bool is_viewed_conversation(Geary.Conversation? conversation) {
@@ -672,8 +702,12 @@ public class GearyController {
     // after we've located the first account.
     private Geary.Folder? get_initial_selection_folder(Geary.Folder folder_being_added) {
         if (folder_being_added.account == account_to_select &&
-            !main_window.folder_list.is_any_selected() && inboxes.has_key(account_to_select))
+            !main_window.folder_list.is_any_selected() && inboxes.has_key(account_to_select)) {
             return inboxes.get(account_to_select);
+        } else if (account_to_select == null) {
+            // This is the first account being added, so select the inbox.
+            return inboxes.get(folder_being_added.account);
+        }
         
         return null;
     }
@@ -1254,8 +1288,11 @@ public class GearyController {
     // one or the other in a folder
     private void on_delete_message() {
         // Prevent deletes of the same conversation from repeating.
-        if (is_viewed_conversation(last_deleted_conversation))
+        if (is_viewed_conversation(last_deleted_conversation)) {
+            debug("not archiving/deleting, viewed conversation is last deleted conversation");
+            
             return;
+        }
         
         // There should always be at least one conversation selected here, otherwise the archive
         // button is disabled, but better safe than segfaulted.

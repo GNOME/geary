@@ -99,7 +99,9 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
             return result;
     }
     
-    string location = !String.is_empty(method) ? "(%s) ".printf(method) : "";
+    string location = !String.is_empty(method)
+        ? "(%s %s) ".printf(method, ctx.get_database().db_file.get_path())
+        : "(%s) ".printf(ctx.get_database().db_file.get_path());
     string errmsg = (ctx.get_connection() != null) ? " - %s".printf(ctx.get_connection().db.errmsg()) : "";
     string sql;
     if (ctx.get_statement() != null)

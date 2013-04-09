@@ -415,6 +415,7 @@ msgid "Email address:"
 msgstr "Adresele de email:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;"
 

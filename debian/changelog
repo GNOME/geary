@@ -1,3 +1,11 @@
+geary (0.3.1-1~raring1) raring; urgency=low
+
+  * Reduced CPU and memory footprint
+  * Account dialog bugs fixed
+  * Stability improvements
+
+ -- Eric Gregory <eric@yorba.org>  Tue, 09 Apr 2013 11:39:44 -0700
+
 geary (0.3.0-2~raring1) raring; urgency=low
 
   * Fix control file

@@ -84,9 +84,20 @@ public class AccountDialog : Gtk.Dialog {
     }
     
     private void on_edit_account(string email_address) {
+        on_edit_account_async.begin(email_address);
+    }
+    
+    private async void on_edit_account_async(string email_address) {
         Geary.AccountInformation? account = get_account_info_for_email(email_address);
         if (account == null)
             return;
+        
+        try {
+            yield account.get_passwords_async(Geary.CredentialsMediator.ServiceFlag.IMAP |
+                Geary.CredentialsMediator.ServiceFlag.SMTP);
+        } catch (Error err) {
+            debug("Unable to fetch password(s) for account: %s", err.message);
+        }
         
         add_edit_pane.set_mode(AddEditPage.PageMode.EDIT);
         add_edit_pane.set_account_information(account);
@@ -136,8 +147,20 @@ public class AccountDialog : Gtk.Dialog {
         // Show the busy spinner.
         spinner_pane.present();
         
+        // For account edits, we only need to validate the connection if the credentials have changed.
+        bool validate_connection = true;
+        if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy()) {
+            Geary.AccountInformation? real_info =
+                GearyApplication.instance.get_real_account_information(info);
+            if (real_info != null) {
+                validate_connection = !real_info.imap_credentials.equals(info.imap_credentials) ||
+                    (info.smtp_credentials != null && !real_info.smtp_credentials.equals(info.smtp_credentials));
+            }
+        }
+        
         // Validate account.
-        GearyApplication.instance.validate_async.begin(info, null, on_save_add_or_edit_completed);
+        GearyApplication.instance.validate_async.begin(info, validate_connection, null,
+            on_save_add_or_edit_completed);
     }
     
     private void on_save_add_or_edit_completed(Object? source, AsyncResult result) {

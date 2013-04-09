@@ -63,7 +63,8 @@ public class GnomeKeyringMediator : Geary.CredentialsMediator, Object {
         out string? imap_password, out string? smtp_password,
         out bool imap_remember_password, out bool smtp_remember_password) throws Error {
         bool first_try = !account_information.imap_credentials.is_complete() ||
-            !account_information.smtp_credentials.is_complete();
+            (account_information.smtp_credentials != null &&
+            !account_information.smtp_credentials.is_complete());
         
         PasswordDialog password_dialog = new PasswordDialog(account_information, first_try,
             services);

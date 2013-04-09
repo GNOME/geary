@@ -9,7 +9,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     public GenericAccount account { get; private set; }
     
-    private NonblockingMailbox<GenericFolder>? bg_queue = null;
+    private NonblockingMailbox<GenericFolder> bg_queue = new NonblockingMailbox<GenericFolder>(bg_queue_comparator);
     private Gee.HashSet<GenericFolder> made_available = new Gee.HashSet<GenericFolder>();
     private GenericFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
@@ -47,7 +47,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         if (stopped.is_passed())
             return;
         
-        bg_queue = new NonblockingMailbox<GenericFolder>(bg_queue_comparator);
         bg_queue.allow_duplicates = false;
         bg_queue.requeue_duplicate = false;
         bg_cancellable = new Cancellable();

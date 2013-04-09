@@ -42,14 +42,14 @@ public abstract class Geary.Db.Context : BaseObject {
         Statement? stmt = get_statement();
         
         if (stmt != null) {
-            Logging.debug(Logging.Flag.SQL, "%s %s\n\t<%s>".printf(
+            Logging.debug(Logging.Flag.SQL, "%s %s\n\t<%s>",
                 (cx != null) ? cx.to_string() : "[no cx]",
                 fmt.vprintf(va_list()),
-                (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql"));
+                (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql");
         } else {
-            Logging.debug(Logging.Flag.SQL, "%s %s".printf(
+            Logging.debug(Logging.Flag.SQL, "%s %s",
                 (cx != null) ? cx.to_string() : "[no cx]",
-                fmt.vprintf(va_list())));
+                fmt.vprintf(va_list()));
         }
     }
 }

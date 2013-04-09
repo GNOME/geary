@@ -61,7 +61,8 @@ public class MainToolbar : Gtk.Box {
             as Gtk.Menu;
         Gtk.Menu application_proxy_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenuProxy")
             as Gtk.Menu;
-        Gtk.ToggleToolButton app_menu_button = (Gtk.ToggleToolButton) builder.get_object("menu_button");
+        Gtk.ToggleToolButton app_menu_button = set_toolbutton_action(builder, GearyController.ACTION_GEAR_MENU)
+            as Gtk.ToggleToolButton;
         app_menu_dropdown = new GtkUtil.ToggleToolbarDropdown(
             IconFactory.instance.get_theme_icon("application-menu"), Gtk.IconSize.LARGE_TOOLBAR,
             application_menu, application_proxy_menu);

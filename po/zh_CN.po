@@ -4,6 +4,7 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
+# Dianjin Wang <1132321739qq@gmail.com>, 2013.
 # hepin <hepin1989@gmail.com>, 2013.
 # hepin <hepin@sosia.us>, 2013.
 # Kuang Chen <kchenphy@gmail.com>, 2012.
@@ -13,8 +14,8 @@ msgstr ""
 "Project-Id-Version: geary-0.3\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-02-26 16:16-0800\n"
-"PO-Revision-Date: 2013-03-14 01:58+0000\n"
-"Last-Translator: hepin1989 <hepin1989@gmail.com>\n"
+"PO-Revision-Date: 2013-03-21 16:28+0000\n"
+"Last-Translator: Dianjin Wang <1132321739qq@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -142,7 +143,7 @@ msgstr "%p %l:%M"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:24
 #, c-format
 msgid "%s (%d)"
-msgstr ""
+msgstr "%s (%d 封)"
 
 #: ../../src/client/views/conversation-web-view.vala:326
 #, c-format
@@ -406,8 +407,9 @@ msgid "Email address:"
 msgstr "邮件地址:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
-msgstr ""
+msgstr "Email;E-mail;Mail;电子邮件;邮件;"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"
@@ -804,7 +806,7 @@ msgstr "SMTP 设置"
 
 #: ../../src/client/dialogs/password-dialog.vala:121
 msgid "SSL"
-msgstr ""
+msgstr "SSL"
 
 #: ../../ui/password-dialog.glade:381 ../../ui/password-dialog.glade:484
 msgid "SSL/TLS encryption:"
@@ -1199,7 +1201,7 @@ msgstr "无"
 #: ../../ui/account_list.glade:74 ../../ui/account_list.glade:88
 #: ../../ui/account_list.glade:101
 msgid "toolbutton1"
-msgstr ""
+msgstr "工具按钮1"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>

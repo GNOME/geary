@@ -410,8 +410,9 @@ msgid "Email address:"
 msgstr "Mailadress:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
-msgstr "Mail"
+msgstr "Mail;"
 
 #: ../../ui/preferences.glade:137
 msgid "Enable _spell checking"

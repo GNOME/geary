@@ -166,6 +166,8 @@ public class AddEditPage : Gtk.Box {
     
     private Geary.Engine.ValidationResult last_validation_result = Geary.Engine.ValidationResult.OK;
     
+    private bool first_ui_update = true;
+    
     public signal void info_changed();
     
     public signal void size_changed();
@@ -259,8 +261,8 @@ public class AddEditPage : Gtk.Box {
         
         entry_nickname.insert_text.connect(on_nickname_insert_text);
         
-        // Shows/hides settings.
-        update_ui();
+        // Reset the "first update" flag when the window is mapped.
+        map.connect(() => { first_ui_update = true; });
     }
     
     // Sets the account information to display on this page.
@@ -271,8 +273,8 @@ public class AddEditPage : Gtk.Box {
             info.imap_credentials.user,
             info.imap_credentials.pass,
             info.imap_remember_password && info.smtp_remember_password,
-            info.smtp_credentials.user,
-            info.smtp_credentials.pass,
+            info.smtp_credentials != null ? info.smtp_credentials.user : null,
+            info.smtp_credentials != null ? info.smtp_credentials.pass : null,
             info.service_provider,
             info.default_imap_server_host,
             info.default_imap_server_port,
@@ -317,6 +319,8 @@ public class AddEditPage : Gtk.Box {
         password = initial_imap_password != null ? initial_imap_password : "";
         remember_password = initial_remember_password;
         set_service_provider((Geary.ServiceProvider) initial_service_provider);
+        combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
+        combo_smtp_encryption.active = Encryption.NONE;
         
         // Set defaults for IMAP info
         imap_host = initial_default_imap_host ?? "";
@@ -338,11 +342,6 @@ public class AddEditPage : Gtk.Box {
         set_validation_result(result);
         
         set_storage_length(prefetch_period_days);
-        
-        if (Geary.String.is_empty(real_name))
-            entry_real_name.grab_focus();
-        else
-            entry_email.grab_focus();
     }
     
     public void set_validation_result(Geary.Engine.ValidationResult result) {
@@ -353,6 +352,9 @@ public class AddEditPage : Gtk.Box {
     public void reset_all() {
         // Take advantage of set_all_info()'s defaults.
         set_all_info(get_default_real_name());
+        
+        edited_imap_port = false;
+        edited_smtp_port = false;
     }
     
     /** Puts this page into one of three different modes:
@@ -598,7 +600,13 @@ public class AddEditPage : Gtk.Box {
             entry_smtp_port.sensitive =
             entry_smtp_username.sensitive =
             combo_smtp_encryption.sensitive =
+            check_smtp_noauth.sensitive =
                 mode != PageMode.EDIT;
+        
+        if (smtp_noauth) {
+            entry_smtp_username.sensitive = false;
+            entry_smtp_password.sensitive = false;
+        }
         
         // Update error text.
         label_error.visible = false;
@@ -637,6 +645,27 @@ public class AddEditPage : Gtk.Box {
         }
         
         size_changed();
+        
+        // Set initial field focus.
+        // This has to be done here because the window isn't completely setup until the first time
+        // this method runs.
+        if (first_ui_update && parent.get_visible()) {
+            if (mode == PageMode.EDIT) {
+                if (get_service_provider() != Geary.ServiceProvider.OTHER)
+                    entry_password.grab_focus();
+                else
+                    entry_imap_password.grab_focus();
+            } else {
+                if (Geary.String.is_empty(real_name))
+                    entry_real_name.grab_focus();
+                else if (mode == PageMode.ADD)
+                    entry_nickname.grab_focus();
+                else
+                    entry_email.grab_focus();
+            }
+            
+            first_ui_update = false;
+        }
     }
     
     public Geary.ServiceProvider get_service_provider() {

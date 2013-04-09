@@ -204,7 +204,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     // Returns null if we are done validating, or the revised account information if we should retry.
     private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
         Cancellable? cancellable = null) {
-        Geary.Engine.ValidationResult result = yield validate_async(account_information, cancellable);
+        Geary.Engine.ValidationResult result = yield validate_async(account_information, true, cancellable);
         if (result == Geary.Engine.ValidationResult.OK)
             return null;
         
@@ -224,13 +224,15 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return new_account_information;
     }
     
-    // Attempts to validate and add an account.  Returns true on success, else false.
+    // Attempts to validate and add an account.  Returns a result code indicating
+    // success or one or more errors.
     public async Geary.Engine.ValidationResult validate_async(
-        Geary.AccountInformation account_information, Cancellable? cancellable = null) {
+        Geary.AccountInformation account_information, bool validate_connection,
+        Cancellable? cancellable = null) {
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
         try {
             result = yield Geary.Engine.instance.validate_account_information_async(account_information,
-                cancellable);
+                validate_connection, cancellable);
         } catch (Error err) {
             debug("Error validating account: %s", err.message);
             exit(-1); // Fatal error
@@ -243,13 +245,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             if (account_information.is_copy()) {
                 // We have a temporary copy of the account.  Find the "real" acct info object and
                 // copy the new data into it.
-                try {
-                    real_account_information = Geary.Engine.instance.get_accounts().get(
-                        account_information.email);
-                    real_account_information.copy_from(account_information);
-                } catch (Error e) {
-                    error("Account information is out of sync: %s", e.message);
-                }
+                real_account_information = get_real_account_information(account_information);
+                real_account_information.copy_from(account_information);
             }
             
             real_account_information.store_async.begin(cancellable);
@@ -260,6 +257,20 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
         
         return result;
+    }
+    
+    // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
+    public Geary.AccountInformation? get_real_account_information(
+        Geary.AccountInformation account_information) {
+        if (account_information.is_copy()) {
+            try {
+                 return Geary.Engine.instance.get_accounts().get(account_information.email);
+            } catch (Error e) {
+                error("Account information is out of sync: %s", e.message);
+            }
+        }
+        
+        return null;
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.

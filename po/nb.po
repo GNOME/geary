@@ -413,6 +413,7 @@ msgid "Email address:"
 msgstr "E-postadresse:"
 
 #: ../../src/client/geary-application.vala:27
+#, fuzzy
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;"
 
