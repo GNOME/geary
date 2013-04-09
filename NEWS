@@ -1,3 +1,11 @@
+Geary 0.3.1 - 9 April 2013
+---------------------------
+
+  * Reduced CPU and memory footprint
+  * Account dialog bugs fixed
+  * Stability improvements
+
+
 Geary 0.3.0 - 19 March 2013
 ---------------------------
 
