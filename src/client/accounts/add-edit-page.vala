@@ -579,14 +579,14 @@ public class AddEditPage : Gtk.Box {
             entry_password.hide();
             other_info.show();
             set_other_info_sensitive(true);
-            check_remember_password.label = _("Re_member passwords"); // Plural
+            check_remember_password.label = _("Remem_ber passwords"); // Plural
         } else {
             // For special-cased providers, only display necessary info.
             label_password.show();
             entry_password.show();
             other_info.hide();
             set_other_info_sensitive(mode == PageMode.WELCOME);
-            check_remember_password.label = _("Re_member password");
+            check_remember_password.label = _("Remem_ber password");
         }
         
         // In edit mode, certain fields are not sensitive.
