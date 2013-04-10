@@ -144,6 +144,7 @@ public class ComposerWindow : Gtk.Window {
     private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
     private Gtk.Button add_attachment_button;
+    private Gtk.Button pending_attachments_button;
     private Gtk.Alignment hidden_on_attachment_drag_over;
     private Gtk.Alignment visible_on_attachment_drag_over;
     private Gtk.Widget hidden_on_attachment_drag_over_child;
@@ -163,6 +164,7 @@ public class ComposerWindow : Gtk.Window {
     private string? hover_url = null;
     private bool action_flag = false;
     private bool is_attachment_overlay_visible = false;
+    private Gee.List<Geary.Attachment>? pending_attachments = null;
     
     private WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
@@ -191,6 +193,8 @@ public class ComposerWindow : Gtk.Window {
         send_button.clicked.connect(on_send);
         add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
         add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
+        pending_attachments_button = builder.get_object("add_pending_attachments") as Gtk.Button;
+        pending_attachments_button.clicked.connect(on_pending_attachments_button_clicked);
         attachments_box = builder.get_object("attachments_box") as Gtk.Box;
         hidden_on_attachment_drag_over = (Gtk.Alignment) builder.get_object("hidden_on_attachment_drag_over");
         hidden_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("hidden_on_attachment_drag_over_child");
@@ -313,12 +317,14 @@ public class ComposerWindow : Gtk.Window {
                     in_reply_to = referred.message_id.value;
                     references = Geary.RFC822.Utils.reply_references(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, true);
+                    pending_attachments = referred.attachments;
                 break;
                 
                 case ComposeType.FORWARD:
                     subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, true);
                     add_attachments(referred.attachments);
+                    pending_attachments = referred.attachments;
                 break;
             }
         }
@@ -393,6 +399,8 @@ public class ComposerWindow : Gtk.Window {
         
         add(box);
         validate_send_button();
+        
+        check_pending_attachments();
 
         // Place the message area before the compose toolbar in the focus chain, so that
         // the user can tab directly from the Subject: field to the message area.
@@ -664,31 +672,53 @@ public class ComposerWindow : Gtk.Window {
         } while (!finished);
     }
     
+    private void on_pending_attachments_button_clicked() {
+        add_attachments(pending_attachments, false);
+    }
+    
+    private void check_pending_attachments() {
+        if (pending_attachments != null) {
+            Gee.Set<string> filenames = new Gee.HashSet<string>();
+            foreach (File file in attachment_files)
+                filenames.add(file.get_path());
+            
+            foreach (Geary.Attachment attachment in pending_attachments) {
+                if (!filenames.contains(attachment.filepath)) {
+                    pending_attachments_button.show();
+                    return;
+                }
+            }
+        }
+        pending_attachments_button.hide();
+    }
+    
     private void attachment_failed(string msg) {
-        ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.get_main_window(),
-            _("Cannot add attachment"), msg);
+        ErrorDialog dialog = new ErrorDialog(this, _("Cannot add attachment"), msg);
         dialog.run();
     }
     
-    private bool add_attachment(File attachment_file) {
+    private bool add_attachment(File attachment_file, bool alert_errors = true) {
         FileInfo attachment_file_info;
         try {
             attachment_file_info = attachment_file.query_info("standard::size,standard::type",
                 FileQueryInfoFlags.NONE);
         } catch(Error e) {
-            attachment_failed(_("\"%s\" could not be found.").printf(attachment_file.get_path()));
+            if (alert_errors)
+                attachment_failed(_("\"%s\" could not be found.").printf(attachment_file.get_path()));
             
             return false;
         }
         
         if (attachment_file_info.get_file_type() == FileType.DIRECTORY) {
-            attachment_failed(_("\"%s\" is a folder.").printf(attachment_file.get_path()));
+            if (alert_errors)
+                attachment_failed(_("\"%s\" is a folder.").printf(attachment_file.get_path()));
             
             return false;
         }
 
         if (attachment_file_info.get_size() == 0){
-            attachment_failed(_("\"%s\" is an empty file.").printf(attachment_file.get_path()));
+            if (alert_errors)
+                attachment_failed(_("\"%s\" is an empty file.").printf(attachment_file.get_path()));
             
             return false;
         }
@@ -701,13 +731,15 @@ public class ComposerWindow : Gtk.Window {
             debug("File '%s' could not be opened for reading. Error: %s", attachment_file.get_path(),
                 e.message);
             
-            attachment_failed(_("\"%s\" could not be opened for reading.").printf(attachment_file.get_path()));
+            if (alert_errors)
+                attachment_failed(_("\"%s\" could not be opened for reading.").printf(attachment_file.get_path()));
             
             return false;
         }
         
         if (!attachment_files.add(attachment_file)) {
-            attachment_failed(_("\"%s\" already attached for delivery.").printf(attachment_file.get_path()));
+            if (alert_errors)
+                attachment_failed(_("\"%s\" already attached for delivery.").printf(attachment_file.get_path()));
             
             return false;
         }
@@ -726,14 +758,16 @@ public class ComposerWindow : Gtk.Window {
         
         attachments_box.show_all();
         
+        check_pending_attachments();
+        
         return true;
     }
     
-    private void add_attachments(Gee.List<Geary.Attachment> attachments) {
+    private void add_attachments(Gee.List<Geary.Attachment> attachments, bool alert_errors = true) {
         foreach(Geary.Attachment attachment in attachments) {
             File? attachment_file = File.new_for_path(attachment.filepath);
             if (attachment_file != null)
-                add_attachment(attachment_file);
+                add_attachment(attachment_file, alert_errors);
         }
     }
     
@@ -747,6 +781,8 @@ public class ComposerWindow : Gtk.Window {
                 break;
             }
         }
+        
+        check_pending_attachments();
     }
     
     private void on_subject_changed() {
