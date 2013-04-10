@@ -310,16 +310,17 @@ public string quote_lines(string text) {
 
 public string resolve_nesting(string text, string[] values) {
     try {
-        GLib.Regex tokenregex = new GLib.Regex("([0-9]*)(.?)");
+        GLib.Regex tokenregex = new GLib.Regex("(.?)([0-9]*)(.?)");
         return tokenregex.replace_eval(text, -1, 0, 0, (info, res) => {
-            int key = int.parse(info.fetch(1));
-            string next_char = info.fetch(2);
-            // If there is a next character, and it's not a newline, insert a newline
-            // before it.  Otherwise, that text will become part of the inserted quote.
+            int key = int.parse(info.fetch(2));
+            string prev_char = info.fetch(1), next_char = info.fetch(3);
+            // Make sure there's a newline before and after the quote.
+            if (prev_char != "" && prev_char != "\n")
+                prev_char = prev_char + "\n";
             if (next_char != "" && next_char != "\n")
                 next_char = "\n" + next_char;
             if (key >= 0 && key < values.length) {
-                res.append(quote_lines(resolve_nesting(values[key], values)) + next_char);
+                res.append(prev_char + quote_lines(resolve_nesting(values[key], values)) + next_char);
             } else {
                 debug("Regex error in denesting blockquotes: Invalid key");
                 res.append("");

@@ -84,12 +84,14 @@
     </child>
     <child>
       <object class="GtkAction" id="indent">
+        <property name="label" translatable="yes">Quote text</property>
         <property name="stock_id">gtk-indent</property>
       </object>
       <accelerator key="bracketright" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="outdent">
+        <property name="label" translatable="yes">Unquote text</property>
         <property name="stock_id">gtk-unindent</property>
       </object>
       <accelerator key="bracketleft" modifiers="GDK_CONTROL_MASK"/>
@@ -477,7 +479,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparatorToolItem" id="toolbutton5">
+          <object class="GtkSeparatorToolItem" id="toolbar separator 1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
@@ -491,8 +493,8 @@
             <property name="related_action">indent</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Indent text">Indent (Ctrl+])</property>
-            <property name="label" translatable="yes">Indent</property>
+            <property name="tooltip_text" translatable="yes" comments="Adds a quote level">Quote text (Ctrl+])</property>
+            <property name="label" translatable="yes">Quote text</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -505,8 +507,8 @@
             <property name="related_action">outdent</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Removes an indent level">Un-indent (Ctrl+[)</property>
-            <property name="label" translatable="yes">Un-indent</property>
+            <property name="tooltip_text" translatable="yes" comments="Removes a quote level">Unquote text (Ctrl+[)</property>
+            <property name="label" translatable="yes">Unquote text</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -515,7 +517,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparatorToolItem" id="toolbutton3">
+          <object class="GtkSeparatorToolItem" id="toolbar separator 2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>

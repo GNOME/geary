@@ -128,6 +128,7 @@ public class ComposerWindow : Gtk.Window {
     private string? body_html = null;
     private Gee.Set<File> attachment_files = new Gee.HashSet<File>(File.hash, (EqualFunc) File.equal);
     
+    private Gtk.Builder builder;
     private Gtk.Label from_label;
     private Gtk.Label from_single;
     private Gtk.ComboBoxText from_multiple = new Gtk.ComboBoxText();
@@ -149,7 +150,6 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Alignment visible_on_attachment_drag_over;
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     private Gtk.Widget visible_on_attachment_drag_over_child;
-    private Gtk.Toolbar compose_toolbar;
     
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
@@ -180,7 +180,7 @@ public class ComposerWindow : Gtk.Window {
         setup_drag_destination(this);
         
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
-        Gtk.Builder builder = GearyApplication.instance.create_builder("composer.glade");
+        builder = GearyApplication.instance.create_builder("composer.glade");
         
         // Add the content-view style class for the elementary GTK theme.
         Gtk.Box button_area = (Gtk.Box) builder.get_object("button_area");
@@ -243,7 +243,7 @@ public class ComposerWindow : Gtk.Window {
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
         
-        compose_toolbar = (Gtk.Toolbar) builder.get_object("compose_toolbar");
+        Gtk.Toolbar compose_toolbar = (Gtk.Toolbar) builder.get_object("compose_toolbar");
         
         actions.get_action(ACTION_UNDO).activate.connect(on_action);
         actions.get_action(ACTION_REDO).activate.connect(on_action);
@@ -262,8 +262,8 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_REMOVE_FORMAT).activate.connect(on_remove_format);
         actions.get_action(ACTION_COMPOSE_AS_HTML).activate.connect(on_compose_as_html);
         
-        actions.get_action(ACTION_INDENT).activate.connect(on_formatting_action);
-        actions.get_action(ACTION_OUTDENT).activate.connect(on_formatting_action);
+        actions.get_action(ACTION_INDENT).activate.connect(on_indent);
+        actions.get_action(ACTION_OUTDENT).activate.connect(on_action);
         
         actions.get_action(ACTION_JUSTIFY_LEFT).activate.connect(on_formatting_action);
         actions.get_action(ACTION_JUSTIFY_RIGHT).activate.connect(on_formatting_action);
@@ -471,6 +471,8 @@ public class ComposerWindow : Gtk.Window {
             }
         }
 
+        protect_blockquote_styles();
+        
         // Set focus.
         if (Geary.String.is_empty(to)) {
             to_entry.grab_focus();
@@ -919,14 +921,14 @@ public class ComposerWindow : Gtk.Window {
     private void on_compose_as_html() {
         WebKit.DOM.DOMTokenList body_classes = editor.get_dom_document().body.get_class_list();
         if (!compose_as_html) {
-            compose_toolbar.hide();
+            toggle_toolbar_buttons(false);
             try {
                 body_classes.add("plain");
             } catch (Error error) {
                 debug("Error setting composer style: %s", error.message);
             }
         } else {
-            compose_toolbar.show();
+            toggle_toolbar_buttons(true);
             try {
                 body_classes.remove("plain");
             } catch (Error error) {
@@ -934,6 +936,19 @@ public class ComposerWindow : Gtk.Window {
             }
         }
         GearyApplication.instance.config.compose_as_html = compose_as_html;
+    }
+    
+    private void toggle_toolbar_buttons(bool show) {
+        string[] buttons = {"bold button", "italic button", "underline button",
+            "strikethrough button", "toolbar separator 1", "toolbar separator 2", "font button",
+            "font size button", "color button", "link button", "remove format button"};
+        foreach (string button in buttons) {
+            Gtk.Widget widget = (Gtk.Widget) builder.get_object(button);
+            if (show)
+                widget.show();
+            else
+                widget.hide();
+        }
     }
     
     private void on_select_font() {
@@ -997,6 +1012,38 @@ public class ComposerWindow : Gtk.Window {
                 editor.get_dom_document().exec_command("forecolor", false, dialog.get_rgba().to_string());
             
             dialog.destroy();
+        }
+    }
+    
+    private void on_indent(Gtk.Action action) {
+        on_action(action);
+        
+        // Undo styling of blockquotes
+        try {
+            WebKit.DOM.NodeList node_list = editor.get_dom_document().query_selector_all(
+                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
+            for (int i = 0; i < node_list.length; ++i) {
+                WebKit.DOM.Element element = (WebKit.DOM.Element) node_list.item(i);
+                element.remove_attribute("style");
+                element.set_attribute("type", "cite");
+            }
+        } catch (Error error) {
+            warning("Error removing blockquote style: %s", error.message);
+        }
+    }
+    
+    private void protect_blockquote_styles() {
+        // We will search for an remove a particular styling when we quote text.  If that style
+        // exists in the quoted text, we alter it slightly so we don't mess with it later.
+        try {
+            WebKit.DOM.NodeList node_list = editor.get_dom_document().query_selector_all(
+                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
+            for (int i = 0; i < node_list.length; ++i) {
+                ((WebKit.DOM.Element) node_list.item(i)).set_attribute("style", 
+                    "margin: 0 0 0 40px; padding: 0px; border:none;");
+            }
+        } catch (Error error) {
+            warning("Error protecting blockquotes: %s", error.message);
         }
     }
     
