@@ -131,17 +131,30 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
     
     string quoted = "<br /><br />";
     
-    if (email.date != null) {
-        /// The datetime that a message being replied to was received
-        string DATE_LABEL = _("On %s, ");
-        /// Format for the datetime that a message being replied to was received
-        /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-        string DATE_FORMAT = _("%a, %b %-e, %Y at %-l:%M %p");
-        quoted += DATE_LABEL.printf(email.date.value.format(DATE_FORMAT));
+    /// Format for the datetime that a message being replied to was received
+    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    string DATE_FORMAT = _("%a, %b %-e, %Y at %-l:%M %p");
+
+    if (email.date != null && email.from != null) {
+        /// The quoted header for a message being replied to.
+        /// %1$s will be substituted for the date, and %2$s will be substituted for
+        /// the original sender.
+        string QUOTED_LABEL = _("On %1$s, %2$s wrote:");
+        quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT),
+                                      email_addresses_for_reply(email.from, html_format));
+
+    } else if (email.from != null) {
+        /// The quoted header for a message being replied to (in case the date is not known).
+        /// %s will be replaced by the original sender.
+        string QUOTED_LABEL = _("%s wrote:");
+        quoted += QUOTED_LABEL.printf(email_addresses_for_reply(email.from, html_format));
+
+    } else if (email.date != null) {
+        /// The quoted header for a message being replied to (in case the sender is not known).
+        /// %s will be replaced by the original date
+        string QUOTED_LABEL = _("On %s:");
+        quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT));
     }
-    
-    if (email.from != null)
-        quoted += _("%s wrote:").printf(email_addresses_for_reply(email.from, html_format));
     
     quoted += "<br />";
     
