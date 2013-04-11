@@ -632,10 +632,19 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private bool should_send() {
-        if (Geary.String.is_empty(subject.strip()) ||
-            ((Geary.String.is_empty(get_html()) && attachment_files.size == 0))) {
+        bool has_subject = !Geary.String.is_empty(subject.strip());
+        bool has_body_or_attachment = !Geary.String.is_empty(get_html()) || attachment_files.size > 0;
+        string? confirmation = null;
+        if (!has_subject && !has_body_or_attachment) {
+            confirmation = _("Send message with an empty subject and body?");
+        } else if (!has_subject) {
+            confirmation = _("Send message with an empty subject?");
+        } else if (!has_body_or_attachment) {
+            confirmation = _("Send message with an empty body?");
+        }
+        if (confirmation != null) {
             ConfirmationDialog dialog = new ConfirmationDialog(this,
-                _("Send message with an empty subject and/or body?"), null, Gtk.Stock.OK);
+                confirmation, null, Gtk.Stock.OK);
             if (dialog.run() != Gtk.ResponseType.OK)
                 return false;
         }
