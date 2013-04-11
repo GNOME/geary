@@ -140,7 +140,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // Start Geary.
         try {
             yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory(),
-                new GnomeKeyringMediator());
+                new SecretMediator());
             if (Geary.Engine.instance.get_accounts().size == 0)
                 create_account();
         } catch (Error e) {

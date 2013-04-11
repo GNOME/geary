@@ -1,10 +1,11 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution. 
  */
 
-public class GnomeKeyringMediator : Geary.CredentialsMediator, Object {
+// LibSecret password adapter.
+public class SecretMediator : Geary.CredentialsMediator, Object {
     private const string OLD_GEARY_USERNAME_PREFIX = "org.yorba.geary username:";
     
     private string get_key_name(Geary.CredentialsMediator.Service service, string user) {
@@ -21,40 +22,42 @@ public class GnomeKeyringMediator : Geary.CredentialsMediator, Object {
     }
     
     public virtual async string? get_password_async(
-        Geary.CredentialsMediator.Service service, string username) throws Error {
-        string password;
-        GnomeKeyring.Result result = GnomeKeyring.find_password_sync(GnomeKeyring.NETWORK_PASSWORD,
-            out password, "user", get_key_name(service, username));
+        Geary.CredentialsMediator.Service service, string username, Cancellable? cancellable = null)
+        throws Error {
+        string? password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
+            "user", get_key_name(service, username));
         
-        if (result != GnomeKeyring.Result.OK) {
+        if (password == null) {
             // fallback to the old keyring key string for upgrading users
-            result = GnomeKeyring.find_password_sync(GnomeKeyring.NETWORK_PASSWORD, out password,
+            password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
                 "user", OLD_GEARY_USERNAME_PREFIX + username);
         }
         
-        if (result != GnomeKeyring.Result.OK)
-            debug("Unable to fetch password in GNOME keyring: %s", result.to_string());
+        if (password == null)
+            debug("Unable to fetch password in libsecret keyring for user: %s", username);
         
-        return (result == GnomeKeyring.Result.OK) ? password : null;
+        return password;
     }
     
     public virtual async void set_password_async(
-        Geary.CredentialsMediator.Service service, Geary.Credentials credentials) throws Error {
+        Geary.CredentialsMediator.Service service, Geary.Credentials credentials,
+        Cancellable? cancellable = null) throws Error {
         string key_name = get_key_name(service, credentials.user);
         
-        GnomeKeyring.Result result = GnomeKeyring.store_password_sync(GnomeKeyring.NETWORK_PASSWORD,
-            null, key_name, credentials.pass, "user", key_name);
+        bool result = yield Secret.password_store(Secret.SCHEMA_COMPAT_NETWORK,
+            null, key_name, credentials.pass, cancellable, "user", key_name);
         
-        if (result != GnomeKeyring.Result.OK)
-            debug("Unable to store password in GNOME keyring: %s", result.to_string());
+        if (!result)
+            debug("Unable to store password in libsecret keyring: %s", result.to_string());
     }
     
     public virtual async void clear_password_async(
-        Geary.CredentialsMediator.Service service, string username) throws Error {
+        Geary.CredentialsMediator.Service service, string username, Cancellable? cancellable = null)
+        throws Error {
         // delete new-style and old-style locations
-        GnomeKeyring.delete_password_sync(GnomeKeyring.NETWORK_PASSWORD, "user",
+        yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
             get_key_name(service, username));
-        GnomeKeyring.delete_password_sync(GnomeKeyring.NETWORK_PASSWORD, "user",
+        yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
             OLD_GEARY_USERNAME_PREFIX + username);
     }
     

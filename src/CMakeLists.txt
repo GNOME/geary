@@ -213,8 +213,8 @@ client/geary-application.vala
 client/geary-args.vala
 client/geary-config.vala
 client/geary-controller.vala
-client/gnome-keyring-mediator.vala
 client/main.vala
+client/secret-mediator.vala
 
 client/accounts/account-dialog.vala
 client/accounts/account-dialog-account-list-pane.vala
@@ -353,7 +353,7 @@ pkg_check_modules(DEPS REQUIRED
     libcanberra>=0.28
     sqlite3>=3.7.4
     gmime-2.6>=2.6.0
-    gnome-keyring-1>=3.2.2
+    libsecret-1>=0.11
     webkitgtk-3.0>=1.8.0
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -363,7 +363,7 @@ set(ENGINE_PACKAGES
 )
 
 set(CLIENT_PACKAGES
-    gtk+-3.0 gnome-keyring-1 WebKit-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 libsecret-1 WebKit-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
