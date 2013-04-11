@@ -5,7 +5,7 @@
  */
 
 // NewMessagesMonitor is a central data store for new message information that the various
-// notification methods (libnotify, libindicate, libunity, etc.) can monitor to do their thing.
+// notification methods (libnotify, libunity, etc.) can monitor to do their thing.
 // Subclasses should trap the "notify::count" signal and use that to perform whatever magic
 // they need for their implementation, or trap "new-messages" to receive notifications of the emails
 // themselves as they're added.  In the latter case, subscribers should add required Email.Field

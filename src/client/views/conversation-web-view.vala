@@ -33,7 +33,6 @@ public class ConversationWebView : WebKit.WebView {
         config.enable_scripts = false;
         config.enable_java_applet = false;
         config.enable_plugins = false;
-        config.enable_default_context_menu = false; // Deprecated, still needed for Precise
         config.enable_developer_extras = Args.inspector;
         settings = config;
         

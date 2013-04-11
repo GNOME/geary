@@ -245,7 +245,6 @@ client/folder-list/folder-list-special-grouping.vala
 
 client/models/conversation-list-store.vala
 
-client/notification/libindicate.vala
 client/notification/libmessagingmenu.vala
 client/notification/new-messages-indicator.vala
 client/notification/new-messages-monitor.vala
@@ -301,27 +300,6 @@ ensure_vala_version("0.17.4" MINIMUM)
 include(ValaPrecompile)
 
 # Packages
-if (LIBINDICATE_FOUND)
-    message(STATUS "Unity indicate support: ON")
-    set(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        indicate-0.7
-    )
-    
-    set(EXTRA_CLIENT_PACKAGES
-        ${EXTRA_CLIENT_PACKAGES}
-        Dbusmenu-0.4
-        Indicate-0.7
-    )
-    
-    set(EXTRA_VALA_OPTIONS
-        ${EXTRA_VALA_OPTIONS}
-        -D HAVE_LIBINDICATE
-    )
-else ()
-    message(STATUS "Unity indicate support: OFF")
-endif ()
-
 if (LIBMESSAGINGMENU_FOUND)
     message(STATUS "Unity messaging menu support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG
@@ -434,7 +412,6 @@ add_definitions(${CFLAGS})
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
-    --girdir=${CMAKE_SOURCE_DIR}/bindings/gir
     --target-glib=${TARGET_GLIB}
     --thread
     --enable-checking
