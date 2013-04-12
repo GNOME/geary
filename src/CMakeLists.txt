@@ -1,5 +1,5 @@
 # Geary build script
-# Copyright 2011-2012 Yorba Foundation
+# Copyright 2011-2013 Yorba Foundation
 
 set(COMMON_SRC
 common/common-arrays.vala
