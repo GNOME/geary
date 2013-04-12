@@ -9,10 +9,6 @@ else (INTLTOOL_MERGE_FOUND)
     message (FATAL_ERROR "intltool must be installed to generate .desktop file")
 endif (INTLTOOL_MERGE_FOUND)
 
-if (LIBINDICATE_FOUND)
-    install(FILES geary DESTINATION /usr/share/indicators/messages/applications)
-endif ()
-
 # Optional: run update-desktop-database at install time.
 # (This has to happen after the geary.desktop file is installed.)
 if (DESKTOP_UPDATE)
