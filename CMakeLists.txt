@@ -45,7 +45,6 @@ if (DESKTOP_UPDATE)
 endif ()
 
 find_package(PkgConfig)
-pkg_check_modules(LIBINDICATE QUIET indicate-0.7>=0.6.1)
 pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
 pkg_check_modules(LIBMESSAGINGMENU QUIET messaging-menu>=12.10.2)
 
