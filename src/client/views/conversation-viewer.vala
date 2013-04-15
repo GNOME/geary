@@ -324,7 +324,7 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email_container .starred", "click", (Callback) on_unstar_clicked, this);
         bind_event(web_view, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
         bind_event(web_view, ".header .field .value", "click", (Callback) on_value_clicked, this);
-        bind_event(web_view, ".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
+        bind_event(web_view, ".email:not(:only-of-type) .header_container", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);

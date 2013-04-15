@@ -180,7 +180,7 @@ hr {
     .email:not(.hide) .header_container .preview {
         display: none;
     }
-    .email .header_container {
+    .email:not(:only-of-type) .header_container {
         cursor: pointer;
     }
     .email:not(.hide) .header .field .value {
