@@ -31,6 +31,7 @@ set(GLADE_FILES ui/account_list.glade ui/account_cannot_remove.glade ui/account_
 option(DEBUG "Build for debugging." OFF)
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
 option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
+option(DESKTOP_VALIDATE "Check generated desktop file for errors during build." ON)
 
 if (DEBUG)
     message(STATUS "Debug build")
@@ -42,6 +43,10 @@ endif ()
 
 if (DESKTOP_UPDATE)
     message(STATUS "Desktop database will be updated")
+endif ()
+
+if (DESKTOP_VALIDATE)
+    message(STATUS "Generated desktop file will be checked for errors")
 endif ()
 
 find_package(PkgConfig)

@@ -18,7 +18,8 @@ Build-Depends: debhelper (>= 8),
  libmessaging-menu-dev (>= 12.10.2),
  libunity-dev (>= 5.12.0),
  intltool,
- libgirepository1.0-dev (>= 1.32.0)
+ libgirepository1.0-dev (>= 1.32.0),
+ desktop-file-utils
 Standards-Version: 3.8.3
 Homepage: http://www.yorba.org
 

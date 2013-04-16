@@ -26,6 +26,8 @@ configure_help() {
 	                        Disable compiling the GSettings schema.
 	  --disable-desktop-update
 	                        Disable desktop database update.
+	  --disable-desktop-validate
+	                        Disable checking for errors in generated desktop file.
 	  --disable-icon-update
 	                        Disable icon cache update.
 
@@ -83,6 +85,10 @@ do
         
         --disable-desktop-update)
                             CMDLINE="${CMDLINE} -DDESKTOP_UPDATE=OFF"
+                            ;;
+
+        --disable-desktop-validate)
+                            CMDLINE="${CMDLINE} -DDESKTOP_VALIDATE=OFF"
                             ;;
         
         VALAC)              [ ! $value ] && abort $1
