@@ -57,6 +57,7 @@ hr {
 .button * {
     -webkit-user-select: none;
     -webkit-user-drag: none;
+    pointer-events: none;
 }
 .button:hover {
     border-color: rgba(0,0,0,0.18);
