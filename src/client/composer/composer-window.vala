@@ -83,6 +83,8 @@ public class ComposerWindow : Gtk.Window {
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
     
+    private static string? current_folder = null;
+    
     public Geary.Account account { get; private set; }
     
     public string from { get; set; }
@@ -664,10 +666,14 @@ public class ComposerWindow : Gtk.Window {
                 _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
                 Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                 _("_Attach"), Gtk.ResponseType.ACCEPT);
+            if (!Geary.String.is_empty(current_folder))
+                dialog.set_current_folder(current_folder);
             dialog.set_local_only(false);
             dialog.set_select_multiple(true);
             
             if (dialog.run() == Gtk.ResponseType.ACCEPT) {
+                current_folder = dialog.get_current_folder();
+                
                 foreach (File file in dialog.get_files()) {
                     if (!add_attachment(file)) {
                         finished = false;
