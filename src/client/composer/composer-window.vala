@@ -83,8 +83,6 @@ public class ComposerWindow : Gtk.Window {
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
     
-    private static string? current_folder = null;
-    
     public Geary.Account account { get; private set; }
     
     public string from { get; set; }
@@ -167,6 +165,7 @@ public class ComposerWindow : Gtk.Window {
     private bool action_flag = false;
     private bool is_attachment_overlay_visible = false;
     private Gee.List<Geary.Attachment>? pending_attachments = null;
+    private string? current_folder = null;
     
     private WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
