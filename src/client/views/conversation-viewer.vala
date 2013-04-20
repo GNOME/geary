@@ -516,7 +516,7 @@ public class ConversationViewer : Gtk.Box {
     private void show_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
         context_menu = build_context_menu(email, clicked_element);
         context_menu.show_all();
-        context_menu.popup(null, null, null, 0, 0);
+        context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private Gtk.Menu build_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
