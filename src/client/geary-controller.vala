@@ -625,7 +625,6 @@ public class GearyController {
         if (clear_view) {
             main_window.conversation_viewer.clear(current_folder, current_account.information);
             main_window.conversation_viewer.scroll_reset();
-            main_window.conversation_viewer.external_images_info_bar.hide();
         }
         
         // Fetch full messages.

@@ -166,6 +166,27 @@ hr {
     overflow-y: hidden;
 }
 
+.email .remote_images {
+    display: none;
+    margin: 0 16px;
+    border: 1px solid #999;
+    border-bottom: none;
+    padding: 1em;
+    background: #ffc;
+}
+
+.email .remote_images .close_show_images {
+    float: right;
+    margin-top: -0.67em;
+    margin-right: -0.67em;
+    border: 1px solid #ffc;
+    border-radius: 4px;
+    padding: 2px;
+}
+.email .remote_images .close_show_images:hover {
+    border: 1px solid #a8a887;
+}
+
 @media screen {
 
     body {
@@ -213,7 +234,9 @@ hr {
     .email.hide .header .field a {
         pointer-events: none;
     }
-    
+    .email:not(.hide) .remote_images.show {
+        display: block;
+    }
     .email.compressed {
         margin-top: -1px;
         height: 10px;

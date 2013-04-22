@@ -47,9 +47,6 @@ public class ConversationViewer : Gtk.Box {
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
     
-    // The Info Bar to be shown when an external image is blocked.
-    public Gtk.InfoBar external_images_info_bar { get; private set; }
-    
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
     
@@ -68,21 +65,6 @@ public class ConversationViewer : Gtk.Box {
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
-        external_images_info_bar = new Gtk.InfoBar.with_buttons(
-            _("_Show Images"), Gtk.ResponseType.OK, _("_Cancel"), Gtk.ResponseType.CANCEL);
-        external_images_info_bar.no_show_all = true;
-        external_images_info_bar.response.connect(on_external_images_info_bar_response);
-        external_images_info_bar.message_type = Gtk.MessageType.WARNING;
-        Gtk.Box? external_images_info_bar_content_area =
-            external_images_info_bar.get_content_area() as Gtk.Box;
-        if (external_images_info_bar_content_area != null) {
-            Gtk.Label label = new Gtk.Label(_("This message contains images. Do you want to show them?"));
-            label.set_line_wrap(true);
-            external_images_info_bar_content_area.add(label);
-            label.show_all();
-        }
-        pack_start(external_images_info_bar, false, false);
-        
         web_view = new ConversationWebView();
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
@@ -90,7 +72,6 @@ public class ConversationViewer : Gtk.Box {
         web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
         web_view.size_allocate.connect(mark_read);
 
-        web_view.image_load_requested.connect(on_image_load_requested);
         web_view.link_selected.connect((link) => { link_selected(link); });
         
         Gtk.ScrolledWindow conversation_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
@@ -107,15 +88,6 @@ public class ConversationViewer : Gtk.Box {
         message_overlay.add_overlay(message_overlay_label);
         
         pack_start(message_overlay);
-    }
-    
-    private void on_image_load_requested() {
-        external_images_info_bar.show();
-    }
-    
-    private void on_external_images_info_bar_response(Gtk.InfoBar sender, int response_id) {
-        web_view.apply_load_external_images(response_id == Gtk.ResponseType.OK);
-        sender.hide();
     }
     
     public Geary.Email? get_last_message() {
@@ -166,8 +138,6 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void add_message(Geary.Email email) {
-        web_view.apply_load_external_images(false);
-        
         // Make sure the message container is showing and the multi-message counter hidden.
         try {
             web_view.show_element_by_id(MESSAGE_CONTAINER_ID);
@@ -277,9 +247,10 @@ public class ConversationViewer : Gtk.Box {
         }
 
         string body_text = "";
+        bool remote_images = false;
         try {
             body_text = email.get_message().get_body(true);
-            body_text = insert_html_markup(body_text, email);
+            body_text = insert_html_markup(body_text, email, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
@@ -292,6 +263,16 @@ public class ConversationViewer : Gtk.Box {
             
             WebKit.DOM.HTMLElement span_body = Util.DOM.select(div_email_container, ".body");
             span_body.set_inner_html(body_text);
+            
+            if (remote_images) {
+                WebKit.DOM.HTMLElement remote_images_bar =
+                    Util.DOM.select(div_email_container, ".remote_images");
+                ((WebKit.DOM.Element) remote_images_bar).get_class_list().add("show");
+                remote_images_bar.set_inner_html("""%s %s
+                    <input type="button" value="%s" class="show_images" />""".printf(
+                    remote_images_bar.get_inner_html(), _("This message contains remote images."),
+                    _("Show Images")));
+            }
 
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
@@ -328,6 +309,8 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
+        bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
+        bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
     }
     
     public void unhide_last_email() {
@@ -645,6 +628,47 @@ public class ConversationViewer : Gtk.Box {
         mark_read();
     }
 
+    private static void on_show_images(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+        if (email_element != null)
+            conversation_viewer.show_images_email(email_element);
+    }
+    
+    private void show_images_email(WebKit.DOM.Element email_element) {
+        // TODO: Remember that these images have been shown.
+        try {
+            WebKit.DOM.NodeList nodes = email_element.query_selector_all("img");
+            for (ulong i = 0; i < nodes.length; i++) {
+                WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
+                if (element == null || !element.has_attribute("src"))
+                    continue;
+                
+                string src = element.get_attribute("src");
+                if (src.has_prefix("remote:"))
+                    element.set_attribute("src", src.substring(7));
+            }
+            
+            WebKit.DOM.Element? remote_images = email_element.query_selector(".remote_images");
+            if (remote_images != null)
+                remote_images.get_class_list().remove("show");
+        } catch (Error error) {
+            warning("Error showing images: %s", error.message);
+        }
+    }
+    
+    private static void on_close_show_images(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        WebKit.DOM.HTMLElement? remote_images = closest_ancestor(element, ".remote_images");
+        if (remote_images != null) {
+            try {
+                remote_images.get_class_list().remove("show");
+            } catch (Error error) {
+                warning("Error hiding \"Show images\" bar: %s", error.message);
+            }
+        }
+    }
+
     private static void on_attachment_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
         ConversationViewer conversation_viewer) {
         conversation_viewer.on_attachment_clicked_self(element);
@@ -859,7 +883,8 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private string insert_html_markup(string text, Geary.Email email) {
+    private string insert_html_markup(string text, Geary.Email email, out bool remote_images) {
+        remote_images = false;
         try {
             // Create a workspace for manipulating the HTML.
             WebKit.DOM.HTMLElement container = web_view.create_div();
@@ -902,9 +927,8 @@ public class ConversationViewer : Gtk.Box {
             wrap_html_signature(ref container);
 
             // Then look for all <img> tags. Inline images are replaced with
-            // data URLs, while external images are added to
-            // external_images_uri (to be used later by is_image()).
-            Gee.ArrayList<string> external_images_uri = new Gee.ArrayList<string>();
+            // data URLs, while external images have the prefix "remote:" added
+            // to their src, which is trapped in the conversation_web_view.
             WebKit.DOM.NodeList inline_list = container.query_selector_all("img");
             for (ulong i = 0; i < inline_list.length; ++i) {
                 // Get the MIME content for the image.
@@ -925,14 +949,11 @@ public class ConversationViewer : Gtk.Box {
 
                     // Then set the source to a data url.
                     web_view.set_data_url(img, mimetype, image_data);
-                } else if (!src.has_prefix("data:")) {
-                    external_images_uri.add(src);
-                    if (!web_view.load_external_images)
-                        external_images_info_bar.show();
+                } else if (!src.has_prefix("data:")) {  // TODO: Test whether to show images
+                    img.set_attribute("src", "remote:" + src);
+                    remote_images = true;
                 }
             }
-
-            web_view.set_external_images_uris(external_images_uri);
 
             // Now return the whole message.
             return set_up_quotes(container.get_inner_html());
