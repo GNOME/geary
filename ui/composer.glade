@@ -694,8 +694,8 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="Cancel">
-            <property name="label">gtk-cancel</property>
+          <object class="GtkButton" id="Discard">
+            <property name="label">gtk-discard</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
