@@ -141,7 +141,6 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.ToggleToolButton font_button;
     private Gtk.ToggleToolButton font_size_button;
     private Gtk.Label message_overlay_label;
-    private Gtk.Menu? context_menu = null;
     private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
     private Gtk.Button add_attachment_button;
@@ -1191,7 +1190,34 @@ public class ComposerWindow : Gtk.Window {
     
     private bool on_context_menu(Gtk.Widget default_menu, WebKit.HitTestResult hit_test_result,
         bool keyboard_triggered) {
-        context_menu = new Gtk.Menu();
+        Gtk.Menu context_menu = (Gtk.Menu) default_menu;
+        Gtk.MenuItem? ignore_spelling = null, learn_spelling = null;
+        bool suggestions = false;
+        
+        GLib.List<weak Gtk.Widget> children = context_menu.get_children();
+        foreach (weak Gtk.Widget child in children) {
+            Gtk.MenuItem item = (Gtk.MenuItem) child;
+            WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
+            if (action == WebKit.ContextMenuAction.SPELLING_GUESS) {
+                suggestions = true;
+                continue;
+            }
+            
+            if (action == WebKit.ContextMenuAction.IGNORE_SPELLING)
+                ignore_spelling = item;
+            else if (action == WebKit.ContextMenuAction.LEARN_SPELLING)
+                learn_spelling = item;
+            context_menu.remove(child);
+        }
+        
+        if (suggestions)
+            context_menu.append(new Gtk.SeparatorMenuItem());
+        if (ignore_spelling != null)
+            context_menu.append(ignore_spelling);
+        if (learn_spelling != null)
+            context_menu.append(learn_spelling);
+        if (ignore_spelling != null || learn_spelling != null)
+            context_menu.append(new Gtk.SeparatorMenuItem());
         
         // Undo
         Gtk.MenuItem undo = new Gtk.ImageMenuItem();
@@ -1245,11 +1271,10 @@ public class ComposerWindow : Gtk.Window {
         context_menu.append(html_item);
         
         context_menu.show_all();
-        context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
         
         update_actions();
         
-        return true; // Suppress default context menu.
+        return false;
     }
     
     private void update_actions() {
