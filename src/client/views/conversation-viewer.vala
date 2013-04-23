@@ -526,6 +526,13 @@ public class ConversationViewer : Gtk.Box {
             }
         }
         
+        // Select message.
+        if (!is_hidden_email(clicked_element)) {
+            Gtk.MenuItem select_message_item = new Gtk.MenuItem.with_mnemonic(_("Select _Message"));
+            select_message_item.activate.connect(() => {on_select_message(clicked_element);});
+            menu.append(select_message_item);
+        }
+        
         // Select all.
         Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
         select_all_item.activate.connect(on_select_all);
@@ -1162,6 +1169,14 @@ public class ConversationViewer : Gtk.Box {
     
     private void on_select_all() {
         web_view.select_all();
+    }
+    
+    private void on_select_message(WebKit.DOM.Element email_element) {
+        try {
+            web_view.get_dom_document().get_default_view().get_selection().select_all_children(email_element);
+        } catch (Error error) {
+            warning("Could not make selection: %s", error.message);
+        }
     }
     
     private void on_view_source(Geary.Email message) {

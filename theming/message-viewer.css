@@ -27,6 +27,8 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     font-size: 10pt !important;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 }
 
 a {
@@ -44,19 +46,24 @@ hr {
     margin-bottom: 15px;
 }
 
+.body, .header, .preview {
+    -webkit-user-select: auto;
+    -webkit-user-drag: auto;
+}
+.shower, .hider {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+}
+
 .button {
     border: 1px transparent solid;
     border-radius: 2.5px;
     cursor: pointer;
     padding: 4px;
     margin-top: 7px;
-    -webkit-user-select: none;
-    -webkit-user-drag: none;
-    text-align: center;()
+    text-align: center;
 }
 .button * {
-    -webkit-user-select: none;
-    -webkit-user-drag: none;
     pointer-events: none;
 }
 .button:hover {
