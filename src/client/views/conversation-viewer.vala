@@ -771,7 +771,7 @@ public class ConversationViewer : Gtk.Box {
     private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
         attachment_menu = build_attachment_menu(email, attachment);
         attachment_menu.show_all();
-        attachment_menu.popup(null, null, null, 0, 0);
+        attachment_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private Gtk.Menu build_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
@@ -794,7 +794,7 @@ public class ConversationViewer : Gtk.Box {
     private void show_message_menu(Geary.Email email) {
         message_menu = build_message_menu(email);
         message_menu.show_all();
-        message_menu.popup(null, null, null, 0, 0);
+        message_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private Gtk.Menu build_message_menu(Geary.Email email) {
