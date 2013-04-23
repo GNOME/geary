@@ -179,12 +179,6 @@ hr {
     float: right;
     margin-top: -0.67em;
     margin-right: -0.67em;
-    border: 1px solid #ffc;
-    border-radius: 4px;
-    padding: 2px;
-}
-.email .remote_images .close_show_images:hover {
-    border: 1px solid #a8a887;
 }
 
 @media screen {
