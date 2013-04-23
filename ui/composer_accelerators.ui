@@ -27,4 +27,6 @@
     <accelerator action="font" />
     <accelerator action="color" />
     <accelerator action="insertlink" />
+    
+    <accelerator action="close" />
 </ui>

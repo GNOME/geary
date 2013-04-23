@@ -192,5 +192,24 @@ public void add_proxy_menu(Gtk.ToolItem tool_item, string label, Gtk.Menu proxy_
     });
 }
 
+public void add_accelerator(Gtk.UIManager ui_manager, Gtk.ActionGroup action_group,
+    string accelerator, string action) {
+    // Parse the accelerator.
+    uint key = 0;
+    Gdk.ModifierType modifiers = 0;
+    Gtk.accelerator_parse(accelerator, out key, out modifiers);
+    if (key == 0) {
+        debug("Failed to parse accelerator '%s'", accelerator);
+        return;
+    }
+    
+    // Connect the accelerator to the action.
+    ui_manager.get_accel_group().connect(key, modifiers, Gtk.AccelFlags.VISIBLE,
+        (group, obj, key, modifiers) => {
+            action_group.get_action(action).activate();
+            return false;
+        });
+}
+
 }
 

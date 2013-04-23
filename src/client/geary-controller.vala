@@ -151,21 +151,8 @@ public class GearyController {
     }
 
     private void add_accelerator(string accelerator, string action) {
-        // Parse the accelerator.
-        uint key = 0;
-        Gdk.ModifierType modifiers = 0;
-        Gtk.accelerator_parse(accelerator, out key, out modifiers);
-        if (key == 0) {
-            debug("Failed to parse accelerator '%s'", accelerator);
-            return;
-        }
-
-        // Connect the accelerator to the action.
-        GearyApplication.instance.ui_manager.get_accel_group().connect(key, modifiers,
-            Gtk.AccelFlags.VISIBLE, (group, obj, key, modifiers) => {
-                GearyApplication.instance.actions.get_action(action).activate();
-                return false;
-            });
+        GtkUtil.add_accelerator(GearyApplication.instance.ui_manager, GearyApplication.instance.actions,
+            accelerator, action);
     }
 
     private Gtk.ActionEntry[] create_actions() {

@@ -38,6 +38,7 @@ public class ComposerWindow : Gtk.Window {
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_LINK = "insertlink";
     private const string ACTION_COMPOSE_AS_HTML = "compose as html";
+    private const string ACTION_CLOSE = "close";
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -275,10 +276,14 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_COLOR).activate.connect(on_select_color);
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
+        actions.get_action(ACTION_CLOSE).activate.connect(on_close);
+        
         ui = new Gtk.UIManager();
         ui.insert_action_group(actions, 0);
         add_accel_group(ui.get_accel_group());
         GearyApplication.instance.load_ui_file_for_manager(ui, "composer_accelerators.ui");
+        
+        add_extra_accelerators();
         
         from = account.information.get_from().to_rfc822_string();
         update_from_field();
@@ -489,6 +494,12 @@ public class ComposerWindow : Gtk.Window {
         update_actions();
     }
     
+    // Glade only allows one accelerator per-action. This method adds extra accelerators not defined
+    // in the Glade file.
+    private void add_extra_accelerators() {
+        GtkUtil.add_accelerator(ui, actions, "Escape", ACTION_CLOSE);
+    }
+    
     private void setup_drag_destination(Gtk.Widget destination) {
         const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
         Gtk.drag_dest_set(destination, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
@@ -628,6 +639,12 @@ public class ComposerWindow : Gtk.Window {
     private void on_discard() {
         if (should_close())
             destroy();
+    }
+    
+    private void on_close() {
+        // Accelerator <Primary>w was pressed to close the composer window. Do the same as
+        // when clicking the Discard button, at least for now.
+        on_discard();
     }
     
     private bool should_send() {
@@ -1173,13 +1190,6 @@ public class ComposerWindow : Gtk.Window {
             case "KP_Enter":
                 if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive) {
                     on_send();
-                    return true;
-                }
-            break;
-            
-            case "Escape":
-                if (should_close()) {
-                    destroy();
                     return true;
                 }
             break;
