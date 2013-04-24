@@ -645,15 +645,18 @@ public class ConversationViewer : Gtk.Box {
     private void show_images_email(WebKit.DOM.Element email_element) {
         // TODO: Remember that these images have been shown.
         try {
-            WebKit.DOM.NodeList nodes = email_element.query_selector_all("img");
+            WebKit.DOM.Element? body = email_element.query_selector(".body");
+            if (body == null)
+                return;
+            
+            WebKit.DOM.NodeList nodes = body.query_selector_all("img");
             for (ulong i = 0; i < nodes.length; i++) {
                 WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
                 if (element == null || !element.has_attribute("src"))
                     continue;
                 
                 string src = element.get_attribute("src");
-                if (src.has_prefix("remote:"))
-                    element.set_attribute("src", src.substring(7));
+                element.set_attribute("src", web_view.allow_prefix + src);
             }
             
             WebKit.DOM.Element? remote_images = email_element.query_selector(".remote_images");
@@ -957,7 +960,6 @@ public class ConversationViewer : Gtk.Box {
                     // Then set the source to a data url.
                     web_view.set_data_url(img, mimetype, image_data);
                 } else if (!src.has_prefix("data:")) {  // TODO: Test whether to show images
-                    img.set_attribute("src", "remote:" + src);
                     remote_images = true;
                 }
             }
