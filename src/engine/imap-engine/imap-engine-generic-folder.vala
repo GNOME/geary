@@ -1,28 +1,29 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.FolderSupportsCopy,
     Geary.FolderSupportsMark, Geary.FolderSupportsMove {
     internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
+    private const int NORMALIZATION_CHUNK_COUNT = 5000;
     
     private const Geary.Email.Field NORMALIZATION_FIELDS =
         Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
-    private weak GenericAccount _account;
     public override Account account { get { return _account; } }
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
+    internal EmailPrefetcher email_prefetcher { get; private set; }
+    internal EmailFlagWatcher email_flag_watcher;
     
+    private weak GenericAccount _account;
     private Imap.Account remote;
     private ImapDB.Account local;
-    private EmailFlagWatcher email_flag_watcher;
-    private EmailPrefetcher email_prefetcher;
     private SpecialFolderType special_folder_type;
-    private bool opened = false;
-    private NonblockingReportingSemaphore<bool> remote_semaphore;
+    private int open_count = 0;
+    private NonblockingReportingSemaphore<bool>? remote_semaphore = null;
     private ReplayQueue? replay_queue = null;
     private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
     private int remote_count = -1;
@@ -42,12 +43,22 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     ~EngineFolder() {
-        if (opened)
+        if (open_count > 0)
             warning("Folder %s destroyed without closing", to_string());
     }
     
     public override Geary.FolderPath get_path() {
         return local_folder.get_path();
+    }
+    
+    public override Geary.FolderProperties get_properties() {
+        // Get properties in order of authoritativeness:
+        // - From open remote folder
+        // - Fetch from local store
+        if (remote_folder != null && get_open_state() == OpenState.BOTH)
+            return remote_folder.get_properties();
+        
+        return local_folder.get_properties();
     }
     
     public override Geary.SpecialFolderType get_special_folder_type() {
@@ -64,33 +75,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         notify_special_folder_type_changed(old_type, new_type);
     }
     
-    private Imap.FolderProperties? get_folder_properties() {
-        Imap.FolderProperties? properties = null;
-        
-        // Get properties in order of authoritativeness:
-        // - Ask open remote folder
-        // - Query account object if it's seen them in its traversals
-        // - Fetch from local store
-        if (remote_folder != null)
-            properties = remote_folder.get_properties();
-        
-        if (properties == null)
-            properties = _account.get_properties_for_folder(local_folder.get_path());
-        
-        if (properties == null)
-            properties = local_folder.get_properties();
-        
-        return properties;
-    }
-    
-    public override Geary.Trillian has_children() {
-        Imap.FolderProperties? properties = get_folder_properties();
-        
-        return (properties != null) ? properties.has_children : Trillian.UNKNOWN;
-    }
-    
     public override Geary.Folder.OpenState get_open_state() {
-        if (!opened)
+        if (open_count == 0)
             return Geary.Folder.OpenState.CLOSED;
         
         if (local_folder.opened)
@@ -109,7 +95,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     // last_seen_remote_count (which may be -1).
     internal int get_remote_counts(out int remote_count, out int last_seen_remote_count) {
         remote_count = this.remote_count;
-        last_seen_remote_count = (local_folder.get_properties() != null) ? local_folder.get_properties().messages : -1;
+        last_seen_remote_count = local_folder.get_properties().select_examine_messages;
+        if (last_seen_remote_count < 0)
+            last_seen_remote_count = local_folder.get_properties().status_messages;
         
         return (remote_count >= 0) ? remote_count : last_seen_remote_count;
     }
@@ -117,21 +105,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private async bool normalize_folders(Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
         debug("normalize_folders %s", to_string());
         
-        Geary.Imap.FolderProperties? local_properties = local_folder.get_properties();
-        Geary.Imap.FolderProperties? remote_properties = remote_folder.get_properties();
-        
-        // both sets of properties must be available
-        if (local_properties == null) {
-            debug("Unable to verify UID validity for %s: missing local properties", get_path().to_string());
-            
-            return false;
-        }
-        
-        if (remote_properties == null) {
-            debug("Unable to verify UID validity for %s: missing remote properties", get_path().to_string());
-            
-            return false;
-        }
+        Geary.Imap.FolderProperties local_properties = local_folder.get_properties();
+        Geary.Imap.FolderProperties remote_properties = remote_folder.get_properties();
         
         // and both must have their next UID's (it's possible they don't if it's a non-selectable
         // folder)
@@ -160,242 +135,264 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
         // any flags that may have changed
         Geary.Imap.UID? earliest_uid = yield local_folder.get_earliest_uid_async(cancellable);
+        Geary.Imap.UID? latest_uid = yield local_folder.get_latest_uid_async(cancellable);
         
         // verify still open
         check_open("normalize_folders (local earliest UID)");
         
         // if no earliest UID, that means no messages in local store, so nothing to update
-        if (earliest_uid == null || !earliest_uid.is_valid()) {
-            debug("No earliest UID in local %s, nothing to normalize", to_string());
+        if (earliest_uid == null || !earliest_uid.is_valid() || latest_uid == null || !latest_uid.is_valid()) {
+            debug("No earliest and/or latest UID in local %s, nothing to normalize", to_string());
             
             return true;
         }
         
-        Geary.Imap.EmailIdentifier earliest_id = new Geary.Imap.EmailIdentifier(earliest_uid);
+        Gee.Collection<Geary.EmailIdentifier> all_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.Collection<Geary.EmailIdentifier> all_locally_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.Collection<Geary.EmailIdentifier> all_removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> all_flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
+            Geary.EmailFlags>(Hashable.hash_func, Equalable.equal_func);
         
-        // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
-        Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-            earliest_id, int.MAX, NORMALIZATION_FIELDS, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
-        
-        // verify still open
-        check_open("normalize_folders (list local)");
-        
-        // be sure they're sorted from earliest to latest
-        if (old_local != null)
-            old_local.sort(Geary.Email.compare_id_ascending);
-        
-        int local_length = (old_local != null) ? old_local.size : 0;
-        
-        // as before, if empty folder, nothing to update
-        if (local_length == 0) {
-            debug("Folder %s empty, nothing to update", to_string());
-            
-            return true;
-        }
-        
-        // Get the remote emails in the range to either add any not known, remove deleted messages,
-        // and update the flags of the remainder
-        Gee.List<Geary.Email>? old_remote = yield remote_folder.list_email_async(
-            new Imap.MessageSet.uid_range_to_highest(earliest_uid), NORMALIZATION_FIELDS,
-            cancellable);
-        
-        // verify still open after I/O
-        check_open("normalize_folders (list remote)");
-        
-        // sort earliest to latest
-        if (old_remote != null)
-            old_remote.sort(Geary.Email.compare_id_ascending);
-        
-        int remote_length = (old_remote != null) ? old_remote.size : 0;
-        
-        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "normalizing %s, %d remote messages, %d local messages",
-            to_string(), remote_length, local_length);
-        
-        int remote_ctr = 0;
-        int local_ctr = 0;
-        Gee.ArrayList<Geary.Email> to_create_or_merge = new Gee.ArrayList<Geary.Email>();
-        Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
-            Geary.EmailFlags>();
+        Geary.Imap.EmailIdentifier current_start_id = new Geary.Imap.EmailIdentifier(earliest_uid, local_folder.get_path());
         for (;;) {
-            if (local_ctr >= local_length || remote_ctr >= remote_length)
-                break;
+            // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
+            Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
+                current_start_id, NORMALIZATION_CHUNK_COUNT, NORMALIZATION_FIELDS,
+                ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
             
-            Geary.Email remote_email = old_remote[remote_ctr];
-            Geary.Email local_email = old_local[local_ctr];
+            // verify still open
+            check_open("normalize_folders (list local)");
             
-            Geary.Imap.UID remote_uid = ((Geary.Imap.EmailIdentifier) remote_email.id).uid;
-            Geary.Imap.UID local_uid = ((Geary.Imap.EmailIdentifier) local_email.id).uid;
+            // be sure they're sorted from earliest to latest
+            if (old_local != null)
+                old_local.sort(Geary.Email.compare_id_ascending);
             
-            if (remote_uid.value == local_uid.value) {
-                // same, update flags (if changed) and move on
-                // Because local is PARTIAL_OK, EmailFlags may not be present
-                Geary.Imap.EmailFlags? local_email_flags = (Geary.Imap.EmailFlags) local_email.email_flags;
-                Geary.Imap.EmailFlags remote_email_flags = (Geary.Imap.EmailFlags) remote_email.email_flags;
-                
-                if ((local_email_flags == null) || !local_email_flags.equals(remote_email_flags)) {
-                    // check before writebehind
-                    if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
-                        remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
-                        to_create_or_merge.add(remote_email);
-                        flags_changed.set(remote_email.id, remote_email.email_flags);
-                        
-                        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
-                            to_string(), remote_email.id.to_string());
-                    } else {
-                        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for merge of %s",
-                            to_string(), remote_email.id.to_string());
-                    }
+            int local_length = (old_local != null) ? old_local.size : 0;
+            
+            // if nothing, keep going because there could be remote messages to pull down
+            Geary.Imap.EmailIdentifier current_end_id = new Geary.Imap.EmailIdentifier(
+                new Imap.UID(current_start_id.uid.value + NORMALIZATION_CHUNK_COUNT),
+                current_start_id.get_folder_path());
+            Imap.MessageSet msg_set = new Imap.MessageSet.uid_range(current_start_id.uid, current_end_id.uid);
+            
+            // Get the remote emails in the range to either add any not known, remove deleted messages,
+            // and update the flags of the remainder
+            Gee.List<Geary.Email>? old_remote = yield remote_folder.list_email_async(msg_set,
+                NORMALIZATION_FIELDS, cancellable);
+            
+            // verify still open after I/O
+            check_open("normalize_folders (list remote)");
+            
+            // sort earliest to latest
+            if (old_remote != null)
+                old_remote.sort(Geary.Email.compare_id_ascending);
+            
+            int remote_length = (old_remote != null) ? old_remote.size : 0;
+            
+            int remote_ctr = 0;
+            int local_ctr = 0;
+            Gee.ArrayList<Geary.Email> to_create_or_merge = new Gee.ArrayList<Geary.Email>();
+            Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+            Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+            for (;;) {
+                Geary.Email? remote_email = null;
+                Geary.Imap.UID? remote_uid = null;
+                if (old_remote != null && remote_ctr < remote_length) {
+                    remote_email = old_remote[remote_ctr];
+                    remote_uid = ((Geary.Imap.EmailIdentifier) remote_email.id).uid;
                 }
                 
-                remote_ctr++;
-                local_ctr++;
-            } else if (remote_uid.value < local_uid.value) {
-                // one we'd not seen before is present, add and move to next remote
-                // check for writebehind before doing
+                Geary.Email? local_email = null;
+                Geary.Imap.UID? local_uid = null;
+                if (old_local != null && local_ctr < local_length) {
+                    local_email = old_local[local_ctr];
+                    local_uid = ((Geary.Imap.EmailIdentifier) local_email.id).uid;
+                }
+                
+                if (local_email == null && remote_email == null)
+                    break;
+                
+                if (remote_uid != null && local_uid != null && remote_uid.value == local_uid.value) {
+                    // same, update flags (if changed) and move on
+                    // Because local is PARTIAL_OK, EmailFlags may not be present
+                    Geary.Imap.EmailFlags? local_email_flags = (Geary.Imap.EmailFlags) local_email.email_flags;
+                    Geary.Imap.EmailFlags remote_email_flags = (Geary.Imap.EmailFlags) remote_email.email_flags;
+                    
+                    if ((local_email_flags == null) || !local_email_flags.equals(remote_email_flags)) {
+                        // check before writebehind
+                        if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
+                            remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
+                            to_create_or_merge.add(remote_email);
+                            all_flags_changed.set(remote_email.id, remote_email.email_flags);
+                            
+                            Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
+                                to_string(), remote_email.id.to_string());
+                        } else {
+                            Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for merge of %s",
+                                to_string(), remote_email.id.to_string());
+                        }
+                    }
+                    
+                    remote_ctr++;
+                    local_ctr++;
+                } else if (remote_uid != null && (local_uid == null || remote_uid.value < local_uid.value)) {
+                    // remote we'd not seen before is present, add and move to next remote
+                    // check for writebehind before doing
+                    if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
+                        remote_email.id, null)) {
+                        to_create_or_merge.add(remote_email);
+                        appended_ids.add(remote_email.id);
+                        
+                        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending inside remote ID %s",
+                            to_string(), remote_email.id.to_string());
+                    } else {
+                        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for inside append of %s",
+                            to_string(), remote_email.id.to_string());
+                    }
+                    
+                    remote_ctr++;
+                } else {
+                    if (remote_uid != null && local_uid != null)
+                        assert(remote_uid.value > local_uid.value);
+                    else
+                        assert(local_uid != null);
+                    
+                    // local's email on the server has been removed, remove locally
+                    // check writebehind first
+                    if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.REMOVE,
+                        local_email.id, null)) {
+                        removed_ids.add(local_email.id);
+                        
+                        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing inside local ID %s",
+                            to_string(), local_email.id.to_string());
+                    } else {
+                        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for remove of %s",
+                            to_string(), local_email.id.to_string());
+                    }
+                    
+                    local_ctr++;
+                }
+            }
+            
+            // add newly-discovered emails to local store ... only report these as appended; earlier
+            // CreateEmailOperations were updates of emails existing previously or additions of emails
+            // that were on the server earlier but not stored locally (i.e. this value represents emails
+            // added to the top of the stack)
+            for (; remote_ctr < remote_length; remote_ctr++) {
+                Geary.Email remote_email = old_remote[remote_ctr];
+                
+                // again, have to check for writebehind
                 if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
                     remote_email.id, null)) {
                     to_create_or_merge.add(remote_email);
                     appended_ids.add(remote_email.id);
                     
-                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending inside remote ID %s",
+                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending outside remote %s",
                         to_string(), remote_email.id.to_string());
                 } else {
-                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for inside append of %s",
+                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for outside append of %s",
                         to_string(), remote_email.id.to_string());
                 }
+            }
+            
+            // remove anything left over ... use local count rather than remote as we're still in a stage
+            // where only the local messages are available
+            for (; local_ctr < local_length; local_ctr++) {
+                Geary.Email local_email = old_local[local_ctr];
                 
-                remote_ctr++;
-            } else {
-                assert(remote_uid.value > local_uid.value);
-                
-                // local's email on the server has been removed, remove locally
-                // check writebehind first
+                // again, check for writebehind
                 if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.REMOVE,
                     local_email.id, null)) {
                     removed_ids.add(local_email.id);
                     
-                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing inside local ID %s",
+                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing outside remote %s",
                         to_string(), local_email.id.to_string());
                 } else {
-                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for remove of %s",
+                    Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for outside remove %s",
                         to_string(), local_email.id.to_string());
                 }
-                
-                local_ctr++;
             }
-        }
-        
-        // add newly-discovered emails to local store ... only report these as appended; earlier
-        // CreateEmailOperations were updates of emails existing previously or additions of emails
-        // that were on the server earlier but not stored locally (i.e. this value represents emails
-        // added to the top of the stack)
-        for (; remote_ctr < remote_length; remote_ctr++) {
-            Geary.Email remote_email = old_remote[remote_ctr];
             
-            // again, have to check for writebehind
-            if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
-                remote_email.id, null)) {
-                to_create_or_merge.add(remote_email);
-                appended_ids.add(remote_email.id);
-                
-                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending outside remote %s",
-                    to_string(), remote_email.id.to_string());
-            } else {
-                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for outside append of %s",
-                    to_string(), remote_email.id.to_string());
-            }
-        }
-        
-        // remove anything left over ... use local count rather than remote as we're still in a stage
-        // where only the local messages are available
-        for (; local_ctr < local_length; local_ctr++) {
-            Geary.Email local_email = old_local[local_ctr];
+            // from here on the only write operations being performed on the folder are creating or updating
+            // existing emails or removing them, both operations being performed using EmailIdentifiers
+            // rather than positional addressing ... this means the order of operation is not important
+            // and can be batched up rather than performed serially
+            NonblockingBatch batch = new NonblockingBatch();
             
-            // again, check for writebehind
-            if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.REMOVE,
-                local_email.id, null)) {
-                removed_ids.add(local_email.id);
+            CreateLocalEmailOperation? create_op = null;
+            if (to_create_or_merge.size > 0) {
+                create_op = new CreateLocalEmailOperation(local_folder, to_create_or_merge,
+                    NORMALIZATION_FIELDS);
+                batch.add(create_op);
+            }
+            
+            if (removed_ids.size > 0)
+                batch.add(new RemoveLocalEmailOperation(local_folder, removed_ids));
+            
+            // execute them all at once
+            if (batch.size > 0) {
+                yield batch.execute_all_async(cancellable);
                 
-                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: removing outside remote %s",
-                    to_string(), local_email.id.to_string());
-            } else {
-                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for outside remove %s",
-                    to_string(), local_email.id.to_string());
+                // check still open a third time
+                check_open("normalize_folders (batch execute)");
+            
+                if (batch.get_first_exception_message() != null) {
+                    debug("Error while preparing opened folder %s: %s", to_string(),
+                        batch.get_first_exception_message());
+                }
+                
+                // throw the first exception, if one occurred
+                batch.throw_first_exception();
             }
-        }
-        
-        // from here on the only write operations being performed on the folder are creating or updating
-        // existing emails or removing them, both operations being performed using EmailIdentifiers
-        // rather than positional addressing ... this means the order of operation is not important
-        // and can be batched up rather than performed serially
-        NonblockingBatch batch = new NonblockingBatch();
-        
-        CreateLocalEmailOperation? create_op = null;
-        if (to_create_or_merge.size > 0) {
-            create_op = new CreateLocalEmailOperation(local_folder, to_create_or_merge,
-                NORMALIZATION_FIELDS);
-            batch.add(create_op);
-        }
-        
-        if (removed_ids.size > 0)
-            batch.add(new RemoveLocalEmailOperation(local_folder, removed_ids));
-        
-        // execute them all at once
-        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION,
-            "Executing %d batch normalization operations on %s...", batch.size, to_string());
-        
-        yield batch.execute_all_async(cancellable);
-        
-        // check still open a third time
-        check_open("normalize_folders (batch execute)");
-        
-        Logging.debug(Logging.Flag.FOLDER_NORMALIZATION,
-            "Finished %d batch normalization operations on %s", batch.size, to_string());
-        
-        if (batch.get_first_exception_message() != null) {
-            debug("Error while preparing opened folder %s: %s", to_string(),
-                batch.get_first_exception_message());
-        }
-        
-        // throw the first exception, if one occurred
-        batch.throw_first_exception();
-        
-        // look for local additions (email not known to the local store) to signal
-        Gee.ArrayList<Geary.EmailIdentifier> locally_appended = new Gee.ArrayList<Geary.EmailIdentifier>();
-        if (create_op != null) {
-            foreach (Geary.Email email in create_op.created.keys) {
-                // true means created, not merged
-                if (create_op.created.get(email))
-                    locally_appended.add(email.id);
+            
+            // add changes to master lists
+            all_removed_ids.add_all(removed_ids);
+            all_appended_ids.add_all(appended_ids);
+            
+            // look for local additions (email not known to the local store) to signal
+            if (create_op != null) {
+                foreach (Geary.Email email in create_op.created.keys) {
+                    // true means created, not merged
+                    if (create_op.created.get(email))
+                        all_locally_appended_ids.add(email.id);
+                }
             }
+            
+            // increment the next start id after the current end, as it now points to the last id examined
+            current_start_id = new Geary.Imap.EmailIdentifier(current_end_id.uid.next(),
+                current_start_id.folder_path);
+            
+            // if gone past both local and remote extremes, time to exit
+            // TODO: If UIDNEXT isn't available on server, will need to fetch the highest UID
+            if (current_start_id.uid.compare(latest_uid) >= 0
+                && current_start_id.uid.compare(remote_properties.uid_next) >= 0)
+                break;
         }
         
         // notify emails that have been removed (see note above about why not all Creates are
         // signalled)
-        if (removed_ids.size > 0) {
-            debug("Notifying of %d removed emails since %s last seen", removed_ids.size, to_string());
-            notify_email_removed(removed_ids);
+        if (all_removed_ids.size > 0) {
+            debug("Notifying of %d removed emails since %s last seen", all_removed_ids.size, to_string());
+            notify_email_removed(all_removed_ids);
         }
         
         // notify local additions
-        if (locally_appended.size > 0) {
-            debug("Notifying of %d locally appended emails since %s last seen", locally_appended.size,
+        if (all_locally_appended_ids.size > 0) {
+            debug("Notifying of %d locally appended emails since %s last seen", all_locally_appended_ids.size,
                 to_string());
-            notify_email_locally_appended(locally_appended);
+            notify_email_locally_appended(all_locally_appended_ids);
         }
         
         // notify additions
-        if (appended_ids.size > 0) {
-            debug("Notifying of %d appended emails since %s last seen", appended_ids.size, to_string());
-            notify_email_appended(appended_ids);
+        if (all_appended_ids.size > 0) {
+            debug("Notifying of %d appended emails since %s last seen", all_appended_ids.size, to_string());
+            notify_email_appended(all_appended_ids);
         }
         
         // notify flag changes
-        if (flags_changed.size > 0) {
-            debug("Notifying of %d changed flags since %s last seen", flags_changed.size, to_string());
-            notify_email_flags_changed(flags_changed);
+        if (all_flags_changed.size > 0) {
+            debug("Notifying of %d changed flags since %s last seen", all_flags_changed.size, to_string());
+            notify_email_flags_changed(all_flags_changed);
         }
         
         debug("Completed normalize_folder %s", to_string());
@@ -403,11 +400,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         return true;
     }
     
-    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
-        if (opened)
-            throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
+    public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
+        if (open_count == 0 || remote_semaphore == null)
+            throw new EngineError.OPEN_REQUIRED("wait_for_open_async() can only be called after open_async()");
         
-        opened = true;
+        if (!yield remote_semaphore.wait_for_result_async(cancellable))
+            throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
+    }
+    
+    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+        if (open_count++ > 0)
+            return;
         
         remote_semaphore = new Geary.NonblockingReportingSemaphore<bool>(false);
         
@@ -438,7 +441,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     private async void open_remote_async(bool readonly, Cancellable? cancellable) {
         try {
-            debug("Opening remote %s", local_folder.get_path().to_string());
+            debug("Opening remote %s", to_string());
             Imap.Folder folder = (Imap.Folder) yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
             
@@ -523,17 +526,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
+        if (open_count == 0 || --open_count > 0)
+            return;
+        
         yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, cancellable);
     }
     
+    // NOTE: This bypasses open_count and forces the Folder closed.
     private async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
         Cancellable? cancellable) {
-        if (!opened)
-            return;
-        
-        // set this now to avoid multiple close_async(), particularly nested inside one of the signals
-        // fired here
-        opened = false;
+        // force closed
+        open_count = 0;
         
         // Notify all callers waiting for the remote folder that it's not coming available
         Imap.Folder? closing_remote_folder = remote_folder;
@@ -667,7 +670,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
-            yield local_folder.update_remote_message_count(remote_count, null);
+            yield local_folder.update_remote_selected_message_count(remote_count, null);
         } catch (Error update_err) {
             debug("Unable to save appended remote count for %s: %s", to_string(), update_err.message);
         }
@@ -748,7 +751,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
-            yield local_folder.update_remote_message_count(remote_count, null);
+            yield local_folder.update_remote_selected_message_count(remote_count, null);
         } catch (Error update_err) {
             debug("Unable to save removed remote count for %s: %s", to_string(), update_err.message);
         }
@@ -785,19 +788,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             
             return false;
         });
-    }
-    
-    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
-        check_open("get_email_count_async");
-        
-        // if connected or connecting, use stashed remote count (which is always kept current once
-        // remote folder is opened)
-        if (opened) {
-            if (yield remote_semaphore.wait_for_result_async(cancellable))
-                return remote_count;
-        }
-        
-        return yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE, cancellable);
     }
     
     //
@@ -950,6 +940,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         // Schedule list operation and wait for completion.
+        // TODO: Break up requests to avoid hogging the queue
         ListEmailBySparseID op = new ListEmailBySparseID(this, ids, required_fields, flags, accumulator,
             cb, cancellable);
         replay_queue.schedule(op);
@@ -998,7 +989,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     private void check_open(string method) throws EngineError {
-        if (!opened)
+        if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("%s failed: folder %s is not open", method, to_string());
     }
     
@@ -1097,9 +1088,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             }
             
             int prefetch_count = local_low - high;
-            
-            debug("expanding normalized range to %d (%d needed) for %s (local_low=%d) from remote",
-                high, prefetch_count, to_string(), local_low);
             
             // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
             // as fields for duplicate detection

@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class ContactEntryCompletion : Gtk.EntryCompletion {
@@ -9,6 +9,8 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     private const int SORT_COLUMN = 0;
     
     private Gtk.ListStore list_store;
+    
+    private Gtk.TreeIter? last_iter = null;
     
     private enum Column {
         CONTACT_OBJECT,
@@ -45,7 +47,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         pack_start(text_renderer, true);
         add_attribute(text_renderer, "markup", Column.CONTACT_MARKUP_NAME);
         
+        set_inline_selection(true);
         match_selected.connect(on_match_selected);
+        cursor_on_match.connect(on_cursor_on_match);
     }
     
     private void add_contact(Geary.Contact contact) {
@@ -109,6 +113,22 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         entry.set_position(characters_seen_so_far);
         
         return true;
+    }
+    
+    private bool on_cursor_on_match(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        last_iter = iter;
+        return true;
+    }
+    
+    public void trigger_selection() {
+        if (last_iter != null) {
+            on_match_selected(this, model, last_iter);
+            last_iter = null;
+        }
+    }
+    
+    public void reset_selection() {
+        last_iter = null;
     }
     
     private Geary.Contact? get_contact(Gtk.TreeIter iter) {
@@ -217,7 +237,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     private bool match_prefix_contact(string needle, Geary.Contact contact,
         out string highlighted_result = null) {
         string email_result;
-        bool email_match = match_prefix_string(needle, contact.normalized_email, out email_result);
+        bool email_match = match_prefix_string(needle, contact.email, out email_result);
         
         string real_name_result;
         bool real_name_match = match_prefix_string(needle, contact.real_name, out real_name_result);
@@ -232,34 +252,35 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
 
     private bool match_prefix_string(string needle, string? haystack = null,
         out string highlighted_result = null) {
+        bool matched = false;
         highlighted_result = "";
         if (haystack == null)
             return false;
         
-        string escaped_haystack = Markup.escape_text(haystack);
         // Default result if there is no match or we encounter an error.
-        highlighted_result = escaped_haystack;
+        highlighted_result = haystack;
         
         try {
-            string escaped_needle = Regex.escape_string(Markup.escape_text(needle.normalize()));
+            string escaped_needle = Regex.escape_string(needle.normalize());
             Regex regex = new Regex("\\b" + escaped_needle, RegexCompileFlags.CASELESS);
-            if (regex.match(escaped_haystack)) {
-                highlighted_result = regex.replace_eval(escaped_haystack, -1, 0, 0, eval_callback);
-                return true;
+            if (regex.match(haystack)) {
+                highlighted_result = regex.replace_eval(haystack, -1, 0, 0, eval_callback);
+                matched = true;
             }
         } catch (RegexError err) {
             debug("Error matching regex: %s", err.message);
         }
         
-        return false;
+        highlighted_result = Markup.escape_text(highlighted_result)
+            .replace("&#x91;", "<b>").replace("&#x92;", "</b>");
+        return matched;
     }
 
     private bool eval_callback(MatchInfo match_info, StringBuilder result) {
         string? match = match_info.fetch(0);
         if (match != null) {
-            // The target was escaped before the regex was run against it, so we don't have to
-            // worry about markup injections here.
-            result.append("<b>%s</b>".printf(match));
+            result.append("\xc2\x91%s\xc2\x92".printf(match));
+            // This is UTF-8 encoding of U+0091 and U+0092
         }
         
         return false;

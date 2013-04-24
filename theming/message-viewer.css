@@ -27,6 +27,8 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     font-size: 10pt !important;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 }
 
 a {
@@ -43,9 +45,14 @@ hr {
     margin-top: 15px;
     margin-bottom: 15px;
 }
-pre {
-    font-family: sans-serif;
-    white-space: pre-wrap;
+
+.body, .header, .preview {
+    -webkit-user-select: auto;
+    -webkit-user-drag: auto;
+}
+.shower, .hider {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .button {
@@ -54,13 +61,10 @@ pre {
     cursor: pointer;
     padding: 4px;
     margin-top: 7px;
-    -webkit-user-select: none;
-    -webkit-user-drag: none;
-    text-align: center;()
+    text-align: center;
 }
 .button * {
-    -webkit-user-select: none;
-    -webkit-user-drag: none;
+    pointer-events: none;
 }
 .button:hover {
     border-color: rgba(0,0,0,0.18);
@@ -169,6 +173,21 @@ pre {
     overflow-y: hidden;
 }
 
+.email .remote_images {
+    display: none;
+    margin: 0 16px;
+    border: 1px solid #999;
+    border-bottom: none;
+    padding: 1em;
+    background: #ffc;
+}
+
+.email .remote_images .close_show_images {
+    float: right;
+    margin-top: -0.67em;
+    margin-right: -0.67em;
+}
+
 @media screen {
 
     body {
@@ -184,7 +203,7 @@ pre {
     .email:not(.hide) .header_container .preview {
         display: none;
     }
-    .email .header_container {
+    .email:not(:only-of-type) .header_container {
         cursor: pointer;
     }
     .email:not(.hide) .header .field .value {
@@ -216,7 +235,9 @@ pre {
     .email.hide .header .field a {
         pointer-events: none;
     }
-    
+    .email:not(.hide) .remote_images.show {
+        display: block;
+    }
     .email.compressed {
         margin-top: -1px;
         height: 10px;

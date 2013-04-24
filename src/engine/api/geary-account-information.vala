@@ -1,14 +1,16 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.AccountInformation : Object {
+public class Geary.AccountInformation : BaseObject {
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string NICKNAME_KEY = "nickname";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
+    private const string ORDINAL_KEY = "ordinal";
+    private const string PREFETCH_PERIOD_DAYS_KEY = "prefetch_period_days";
     private const string IMAP_USERNAME_KEY = "imap_username";
     private const string IMAP_REMEMBER_PASSWORD_KEY = "imap_remember_password";
     private const string SMTP_USERNAME_KEY = "smtp_username";
@@ -26,16 +28,25 @@ public class Geary.AccountInformation : Object {
 
     public const string SETTINGS_FILENAME = "geary.ini";
     public const string DEFAULT_NICKNAME = _("Default");
+    public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
     
-    internal File settings_dir;
-    internal File file;
+    public static int default_ordinal = 0;
+    
+    internal File? settings_dir = null;
+    internal File? file = null;
+    
+    // IMPORTANT: When adding new properties, be sure to add them to the copy method.
     
     public string real_name { get; set; }
     public string nickname { get; set; }
     public string email { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
     public bool imap_server_pipeline { get; set; default = true; }
-
+    public int prefetch_period_days { get; set; }
+    
+    // Order for display purposes.
+    public int ordinal { get; set; }
+    
     // These properties are only used if the service provider's account type does not override them.
     public string default_imap_server_host { get; set; }
     public uint16 default_imap_server_port  { get; set; }
@@ -52,7 +63,13 @@ public class Geary.AccountInformation : Object {
     public Geary.Credentials? smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool smtp_remember_password { get; set; default = true; }
     
-    internal AccountInformation(File directory) {
+    // Used to create temporary AccountInformation objects.  (Note that these cannot be saved.)
+    public AccountInformation.temp_copy(AccountInformation copy) {
+        copy_from(copy);
+    }
+    
+    // This constructor is used internally to load accounts from disk.
+    internal AccountInformation.from_file(File directory) {
         this.email = directory.get_basename();
         this.settings_dir = directory;
         this.file = settings_dir.get_child(SETTINGS_FILENAME);
@@ -73,6 +90,12 @@ public class Geary.AccountInformation : Object {
             smtp_remember_password = get_bool_value(key_file, GROUP, SMTP_REMEMBER_PASSWORD_KEY, true);
             service_provider = Geary.ServiceProvider.from_string(get_string_value(key_file, GROUP,
                 SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
+            prefetch_period_days = get_int_value(key_file, GROUP, PREFETCH_PERIOD_DAYS_KEY,
+                DEFAULT_PREFETCH_PERIOD_DAYS);
+            ordinal = get_int_value(key_file, GROUP, ORDINAL_KEY, default_ordinal++);
+            
+            if (ordinal >= default_ordinal)
+                default_ordinal = ordinal + 1;
             
             imap_server_pipeline = get_bool_value(key_file, GROUP, IMAP_PIPELINE, true);
 
@@ -103,6 +126,30 @@ public class Geary.AccountInformation : Object {
             imap_server_pipeline = false;
     }
     
+    // Copies all data from the "from" object into this one.
+    public void copy_from(AccountInformation from) {
+        real_name = from.real_name;
+        nickname = from.nickname;
+        email = from.email;
+        service_provider = from.service_provider;
+        imap_server_pipeline = from.imap_server_pipeline;
+        prefetch_period_days = from.prefetch_period_days;
+        ordinal = from.ordinal;
+        default_imap_server_host = from.default_imap_server_host;
+        default_imap_server_port = from.default_imap_server_port;
+        default_imap_server_ssl = from.default_imap_server_ssl;
+        default_imap_server_starttls = from.default_imap_server_starttls;
+        default_smtp_server_host = from.default_smtp_server_host;
+        default_smtp_server_port = from.default_smtp_server_port;
+        default_smtp_server_ssl = from.default_smtp_server_ssl;
+        default_smtp_server_starttls = from.default_smtp_server_starttls;
+        default_smtp_server_noauth = from.default_smtp_server_noauth;
+        imap_credentials = from.imap_credentials;
+        imap_remember_password = from.imap_remember_password;
+        smtp_credentials = from.smtp_credentials;
+        smtp_remember_password = from.smtp_remember_password;
+    }
+    
     /**
      * Fetch the passwords for the given services.  For each service, if the
      * password is unset, use get_passwords_async() first; if the password is
@@ -117,12 +164,15 @@ public class Geary.AccountInformation : Object {
         CredentialsMediator.ServiceFlag get_services = 0;
         if (services.has_imap() && !imap_credentials.is_complete())
             get_services |= CredentialsMediator.ServiceFlag.IMAP;
-        if (services.has_smtp() && !smtp_credentials.is_complete())
+        
+        if (services.has_smtp() && smtp_credentials != null && !smtp_credentials.is_complete())
             get_services |= CredentialsMediator.ServiceFlag.SMTP;
         
         CredentialsMediator.ServiceFlag unset_services = services;
         if (get_services != 0)
             unset_services = yield get_passwords_async(get_services);
+        else
+            return true;
         
         if (unset_services == 0)
             return true;
@@ -172,7 +222,7 @@ public class Geary.AccountInformation : Object {
                 failed_services |= CredentialsMediator.ServiceFlag.IMAP;
         }
         
-        if (services.has_smtp()) {
+        if (services.has_smtp() && smtp_credentials != null) {
             string? smtp_password = yield mediator.get_password_async(
                 CredentialsMediator.Service.SMTP, smtp_credentials.user);
             
@@ -199,6 +249,9 @@ public class Geary.AccountInformation : Object {
         
         string? imap_password, smtp_password;
         bool imap_remember_password, smtp_remember_password;
+        
+        if (smtp_credentials == null)
+            services &= ~CredentialsMediator.ServiceFlag.SMTP;
         
         if (!yield Geary.Engine.instance.authentication_mediator.prompt_passwords_async(
             services, this, out imap_password, out smtp_password,
@@ -240,7 +293,7 @@ public class Geary.AccountInformation : Object {
             }
         }
         
-        if (services.has_smtp()) {
+        if (services.has_smtp() && smtp_credentials != null) {
             if (smtp_remember_password) {
                 yield mediator.set_password_async(
                     CredentialsMediator.Service.SMTP, smtp_credentials);
@@ -317,9 +370,9 @@ public class Geary.AccountInformation : Object {
         return def;
     }
     
-    private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 def = 0) {
+    private int get_int_value(KeyFile key_file, string group, string key, int def = 0) {
         try {
-            return (uint16) key_file.get_integer(group, key);
+            return key_file.get_integer(group, key);
         } catch(KeyFileError err) {
             // Ignore.
         }
@@ -327,8 +380,15 @@ public class Geary.AccountInformation : Object {
         return def;
     }
     
+    private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 def = 0) {
+        return (uint16) get_int_value(key_file, group, key);
+    }
+    
     public async void store_async(Cancellable? cancellable = null) {
-        assert(file != null);
+        if (file == null || settings_dir == null) {
+            warning("Cannot save account, no file set.\n");
+            return;
+        }
         
         if (!settings_dir.query_exists(cancellable)) {
             try {
@@ -352,10 +412,13 @@ public class Geary.AccountInformation : Object {
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
         key_file.set_value(GROUP, NICKNAME_KEY, nickname);
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
+        key_file.set_integer(GROUP, ORDINAL_KEY, ordinal);
         key_file.set_value(GROUP, IMAP_USERNAME_KEY, imap_credentials.user);
         key_file.set_boolean(GROUP, IMAP_REMEMBER_PASSWORD_KEY, imap_remember_password);
-        key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
+        if (smtp_credentials != null)
+            key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
         key_file.set_boolean(GROUP, SMTP_REMEMBER_PASSWORD_KEY, smtp_remember_password);
+        key_file.set_integer(GROUP, PREFETCH_PERIOD_DAYS_KEY, prefetch_period_days);
         
         key_file.set_boolean(GROUP, IMAP_PIPELINE, imap_server_pipeline);
 
@@ -401,7 +464,7 @@ public class Geary.AccountInformation : Object {
         }
         
         try {
-            if (services.has_smtp()) {
+            if (services.has_smtp() && smtp_credentials != null) {
                 yield mediator.clear_password_async(
                     CredentialsMediator.Service.SMTP, smtp_credentials.user);
             }
@@ -418,6 +481,11 @@ public class Geary.AccountInformation : Object {
      * normally be invoked directly.
      */
     internal async void remove_async(Cancellable? cancellable = null) {
+        if (file == null || settings_dir == null) {
+            warning("Cannot remove account; nothing to remove\n");
+            return;
+        }
+        
         try {
             yield clear_stored_passwords_async(CredentialsMediator.ServiceFlag.IMAP
                 | CredentialsMediator.ServiceFlag.SMTP);
@@ -434,5 +502,26 @@ public class Geary.AccountInformation : Object {
      */
     public RFC822.MailboxAddress get_mailbox_address() {
         return new RFC822.MailboxAddress(real_name, email);
+    }
+    
+    /**
+     * Returns a MailboxAddresses object with this mailbox address.
+     */
+    public RFC822.MailboxAddresses get_from() {
+        return new RFC822.MailboxAddresses.single(get_mailbox_address());
+    }
+    
+    public static int compare_ascending(AccountInformation a, AccountInformation b) {
+        int diff = a.ordinal - b.ordinal;
+        if (diff != 0)
+            return diff;
+        
+        // Stabilize on nickname, which should always be unique.
+        return a.nickname.collate(b.nickname);
+    }
+    
+    // Returns true if this is a copy.
+    public bool is_copy() {
+        return file == null;
     }
 }

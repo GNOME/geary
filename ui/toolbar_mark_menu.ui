@@ -8,6 +8,7 @@
         <menuitem name="MarkAsUnread" action="GearyMarkAsUnread" />
         <menuitem name="MarkAsStarred" action="GearyMarkAsStarred" />
         <menuitem name="MarkAsUnStarred" action="GearyMarkAsUnStarred" />
+        <menuitem name="MarkAsSpam" action="GearyMarkAsSpam" />
     </popup>
     
     <!--
@@ -20,6 +21,7 @@
         <menuitem name="MarkAsUnread" action="GearyMarkAsUnread" />
         <menuitem name="MarkAsStarred" action="GearyMarkAsStarred" />
         <menuitem name="MarkAsUnStarred" action="GearyMarkAsUnStarred" />
+        <menuitem name="MarkAsSpam" action="GearyMarkAsSpam" />
     </popup>
 </ui>
 

@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -18,7 +18,7 @@
  * shouldn't be relied upon.)
  */
 
-public class Geary.Imap.Deserializer {
+public class Geary.Imap.Deserializer : BaseObject {
     private const size_t MAX_BLOCK_READ_SIZE = 4096;
     
     private enum Mode {

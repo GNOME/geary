@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -19,7 +19,7 @@
  * flush_async() implies commit_async(), but the reverse is not true.
  */
 
-public class Geary.Imap.Serializer {
+public class Geary.Imap.Serializer : BaseObject {
     private OutputStream outs;
     private ConverterOutputStream couts;
     private MemoryOutputStream mouts;

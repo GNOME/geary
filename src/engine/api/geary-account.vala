@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public interface Geary.Account : Object {
+public interface Geary.Account : BaseObject {
     public enum Problem {
         RECV_EMAIL_LOGIN_FAILED,
         SEND_EMAIL_LOGIN_FAILED,
@@ -39,6 +39,11 @@ public interface Geary.Account : Object {
         Gee.Collection<Geary.Folder>? removed);
     
     /**
+     * Fired when a Folder's contents is detected having changed.
+     */
+    public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
+    
+    /**
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_opened();
@@ -69,6 +74,11 @@ public interface Geary.Account : Object {
      */
     protected abstract void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
      *
@@ -133,6 +143,12 @@ public interface Geary.Account : Object {
         Cancellable? cancellable = null) throws Error;
     
     /**
+     * Returns the folder representing the given special folder type.  If no such folder exists,
+     * null is returned.
+     */
+    public abstract Geary.Folder? get_special_folder(Geary.SpecialFolderType special) throws Error;
+    
+    /**
      * Submits a ComposedEmail for delivery.  Messages may be scheduled for later delivery or immediately
      * sent.  Subscribe to the "email-sent" signal to be notified of delivery.  Note that that signal
      * does not return the ComposedEmail object but an RFC822-formatted object.  Allowing for the
@@ -140,7 +156,31 @@ public interface Geary.Account : Object {
      */
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
-
+    
+    /**
+     * Search the local account for emails referencing a Message-ID value
+     * (which can appear in the Message-ID header itself, as well as the
+     * In-Reply-To header, and maybe more places).  Fetch the requested fields,
+     * optionally ignoring emails that don't have the requested fields set.
+     * Don't include emails that appear in any of the blacklisted folders in
+     * the result.  If null is included in the blacklist, omit emails appearing
+     * in no folders.  Return a map of Email object to a list of FolderPaths
+     * it's in, which can be null if it's in no folders.
+     */
+    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Return a single email fulfilling the required fields.  The email to pull
+     * is identified by an EmailIdentifier from a previous call to
+     * local_search_message_id_async().  Throw EngineError.NOT_FOUND if the
+     * email isn't found and EngineError.INCOMPLETE_MESSAGE if the fields
+     * aren't available.
+     */
+    public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+    
     /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */

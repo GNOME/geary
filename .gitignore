@@ -10,4 +10,4 @@ build/
 /geary-db-test
 *.xz
 *.swp
-vapi/gmime-2.6/gmime-2.6.gi
+bindings/vapi/gmime-2.6/gmime-2.6.gi

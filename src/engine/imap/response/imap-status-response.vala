@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.StatusResponse : ServerResponse {
@@ -10,8 +10,8 @@ public class Geary.Imap.StatusResponse : ServerResponse {
     public StatusResponse() {
     }
     
-    public StatusResponse.reconstitute(RootParameters root) throws ImapError {
-        base.reconstitute(root);
+    public StatusResponse.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
         
         status = Status.from_parameter(get_as_string(1));
     }

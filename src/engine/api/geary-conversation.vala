@@ -1,16 +1,14 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.Conversation : Object {
+public abstract class Geary.Conversation : BaseObject {
     public enum Ordering {
         NONE,
         DATE_ASCENDING,
         DATE_DESCENDING,
-        ID_ASCENDING,
-        ID_DESCENDING
     }
     
     protected Conversation() {
@@ -19,7 +17,7 @@ public abstract class Geary.Conversation : Object {
     /**
      * Returns the number of emails in the conversation.
      */
-    public abstract int get_count();
+    public abstract int get_count(bool folder_email_ids_only = false);
     
     /**
      * Returns all the email in the conversation sorted according to the specifier.
@@ -32,9 +30,11 @@ public abstract class Geary.Conversation : Object {
     public abstract Geary.Email? get_email_by_id(Geary.EmailIdentifier id);
     
     /**
-     * Returns all EmailIdentifiers in the conversation, unsorted.
+     * Returns all EmailIdentifiers in the conversation (or optionally only
+     * folder email ids, ignoring account email ids), unsorted.
      */
-    public abstract Gee.Collection<Geary.EmailIdentifier> get_email_ids();
+    public abstract Gee.Collection<Geary.EmailIdentifier> get_email_ids(
+        bool folder_email_ids_only = false);
     
     /**
      * Returns true if *any* message in the conversation is unread.
@@ -100,20 +100,31 @@ public abstract class Geary.Conversation : Object {
     /**
      * Returns the earliest (first sent) email in the Conversation.
      */
-    public Geary.Email? get_earliest_email() {
-        Gee.List<Geary.Email> pool = get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
-        
-        return pool.size == 0 ? null : pool.first();
-    }
+    public Geary.Email? get_earliest_email(bool folder_email_ids_only = false) {
+        return get_single_email(Geary.Conversation.Ordering.DATE_ASCENDING, folder_email_ids_only);
+   }
     
     /**
      * Returns the latest (most recently sent) email in the Conversation.
      */
-    public Geary.Email? get_latest_email() {
-        Gee.List<Geary.Email> pool = get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
-        
-        return pool.size == 0 ? null : pool.last();
+    public Geary.Email? get_latest_email(bool folder_email_ids_only = false) {
+        return get_single_email(Geary.Conversation.Ordering.DATE_DESCENDING, folder_email_ids_only);
     }
+    
+    private Geary.Email? get_single_email(Geary.Conversation.Ordering ordering,
+        bool folder_email_ids_only) {
+        foreach (Geary.Email email in get_emails(ordering)) {
+            if (!folder_email_ids_only || email.id.get_folder_path() != null)
+                return email;
+        }
+        return null;
+    }
+    
+    /**
+     * Return the EmailIdentifier with the lowest value.  Ignore Geary.ImapDB.
+     * EmailIdentifiers, because they aren't useful to order in this sense.
+     */
+    public abstract Geary.EmailIdentifier? get_lowest_email_id();
     
     private bool check_flag(Geary.EmailFlag flag, bool contains) {
         foreach (Geary.Email email in get_emails(Ordering.NONE)) {

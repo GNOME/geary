@@ -31,6 +31,26 @@
   		<td><p> <key>A</key> or <key>Delete</key> or <key>Backspace</key></p></td>
   	</tr>
   	<tr>
+  	    <td><p>Star</p></td>
+  		<td><p> <key>S</key> </p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Unstar</p></td>
+  		<td><p> <key>D</key> </p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Mark read</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</key><key>I</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Mark unread</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</key><key>U</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Toggle spam</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key> </p></td>
+  	</tr>
+  	<tr>
   		<td><p>Quit</p></td>
   		<td><p><keyseq><key>Ctrl</key><key>Q</key></keyseq></p></td>
   	</tr>
@@ -45,6 +65,14 @@
   	<tr>
   		<td><p>Reset zoom</p></td>
   		<td><p><keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key> </p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Preferences</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>E</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Accounts</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>M</key></keyseq> </p></td>
   	</tr>
      </table>
 </page>

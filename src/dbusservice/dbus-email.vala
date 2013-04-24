@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 [DBus (name = "org.yorba.Geary.Email", timeout = 120000)]
@@ -44,15 +44,9 @@ public class Geary.DBus.Email : Object {
         }
         
         try {
-            body_text = full_email.get_message().get_first_mime_part_of_content_type("text/html").
-                to_string();
+            body_text = full_email.get_message().get_body(true);
         } catch (Error err) {
-            try {
-                body_text = full_email.get_message().get_first_mime_part_of_content_type("text/plain").
-                    to_string();
-            } catch (Error err2) {
-                debug("Could not get message text. %s", err2.message);
-            }
+            debug("Could not get message text. %s", err.message);
         }
         
         return body_text;

@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class UnityLauncher : Object {
+public class UnityLauncher : Geary.BaseObject {
 #if HAVE_LIBUNITY
     private NewMessagesMonitor? monitor = null;
     private Unity.LauncherEntry? entry = null;
@@ -15,11 +15,27 @@ public class UnityLauncher : Object {
         entry = Unity.LauncherEntry.get_for_desktop_id("geary.desktop");
         set_count(0);
         
-        monitor.notify["total-count"].connect(on_new_messages_changed);
+        monitor.folder_removed.connect(on_folder_removed);
+        monitor.new_messages_arrived.connect(on_new_messages_changed);
+        monitor.new_messages_retired.connect(on_new_messages_changed);
     }
     
     ~UnityLauncher() {
-        monitor.notify["total-count"].disconnect(on_new_messages_changed);
+        monitor.folder_removed.disconnect(on_folder_removed);
+        monitor.new_messages_arrived.disconnect(on_new_messages_changed);
+        monitor.new_messages_retired.disconnect(on_new_messages_changed);
+    }
+    
+    private void update_count() {
+        // This is the dead-simple approach.  It could be optimized, but
+        // doesn't seem like it's worth too much effort.
+        int count = 0;
+        foreach (Geary.Folder folder in monitor.get_folders()) {
+            if (monitor.should_notify_new_messages(folder))
+                count += monitor.get_new_message_count(folder);
+        }
+        
+        set_count(count);
     }
     
     private void set_count(int count) {
@@ -29,8 +45,11 @@ public class UnityLauncher : Object {
     }
     
     private void on_new_messages_changed() {
-        if (monitor.total_count == 0 || monitor.should_notify_new_messages())
-            set_count(monitor.total_count);
+        update_count();
+    }
+    
+    private void on_folder_removed() {
+        update_count();
     }
 #else
     public UnityLauncher(NewMessagesMonitor monitor) {

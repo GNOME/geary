@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 [CCode (cname="InternetAddress", cheader_filename="gmime/gmime.h", type_id="INTERNET_ADDRESS_TYPE", type_check_function="IS_INTERNET_ADDRESS")]
@@ -19,7 +19,7 @@ public class InternetAddressGroup : InternetAddress {
     [CCode (cname="internet_address_group_new")]
     public InternetAddressGroup(string name);
     [CCode (cname="internet_address_group_get_members")]
-    public InternetAddressList get_members();
+    public unowned InternetAddressList get_members();
     [CCode (cname="internet_address_group_set_members")]
     public void set_members(InternetAddressList members);
     [CCode (cname="internet_address_group_add_member")]

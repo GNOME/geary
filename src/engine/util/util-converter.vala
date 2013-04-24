@@ -1,10 +1,10 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.MidstreamConverter : Object, Converter {
+public class Geary.MidstreamConverter : BaseObject, Converter {
     public uint64 total_bytes_read { get; private set; default = 0; }
     public uint64 total_bytes_written { get; private set; default = 0; }
     public uint64 converted_bytes_read { get; private set; default = 0; }

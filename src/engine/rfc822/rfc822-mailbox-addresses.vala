@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC822.MessageData {
@@ -35,7 +35,7 @@ public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC
         }
     }
     
-    public MailboxAddress? get(int index) {
+    public new MailboxAddress? get(int index) {
         return addrs.get(index);
     }
     

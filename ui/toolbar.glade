@@ -9,7 +9,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Compose message</property>
+        <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Start new conversation (Ctrl+N, N)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">New Message</property>
@@ -37,10 +37,10 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Reply to sender</property>
+        <property name="tooltip_text" translatable="yes">Reply to last message in conversation (Ctrl+R, R)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
-        <property name="label" translatable="yes">Reply To</property>
+        <property name="label" translatable="yes">Reply</property>
         <property name="use_underline">True</property>
         <property name="icon_name">mail-reply-sender</property>
       </object>
@@ -54,7 +54,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Reply to all</property>
+        <property name="tooltip_text" translatable="yes">Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Reply All</property>
@@ -71,7 +71,7 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Forward email</property>
+        <property name="tooltip_text" translatable="yes">Send copy of last message in conversation (Ctrl+L, F)</property>
         <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Forward</property>
@@ -99,7 +99,6 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes" comments="Toggles menu for marking a message as read/unread or starred/unstarred">Mark email</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Mark</property>
         <property name="icon_name">edit-mark</property>
@@ -114,7 +113,6 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes" comments="Toggles menu for applying labels to emails.">Label the selected conversation</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Label as</property>
         <property name="icon_name">tag-new</property>
@@ -129,7 +127,6 @@
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes" comments="Toggles menu for applying labels to emails.">Move the selected conversation</property>
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Move to</property>
         <property name="icon_name">mail-move</property>
@@ -154,7 +151,6 @@
       <object class="GtkToolButton" id="GearyDeleteMessage">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">Delete the selected conversation</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Delete</property>
       </object>
@@ -178,7 +174,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkToggleToolButton" id="menu_button">
+      <object class="GtkToggleToolButton" id="GearyGearMenuButton">
         <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>

@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 namespace GtkUtil {
@@ -20,7 +20,7 @@ namespace GtkUtil {
 // above improvement), but unlike the label, that's not so straightforward due to the number of
 // ways of representing an icon in GTK.
 
-public class ToggleToolbarDropdown : Object {
+public class ToggleToolbarDropdown : Geary.BaseObject {
     public const int DEFAULT_PADDING = 2;
     
     public bool show_arrow { get; set; default = true; }
@@ -190,6 +190,25 @@ public void add_proxy_menu(Gtk.ToolItem tool_item, string label, Gtk.Menu proxy_
         sender.set_proxy_menu_item("proxy", proxy_menu_item);
         return true;
     });
+}
+
+public void add_accelerator(Gtk.UIManager ui_manager, Gtk.ActionGroup action_group,
+    string accelerator, string action) {
+    // Parse the accelerator.
+    uint key = 0;
+    Gdk.ModifierType modifiers = 0;
+    Gtk.accelerator_parse(accelerator, out key, out modifiers);
+    if (key == 0) {
+        debug("Failed to parse accelerator '%s'", accelerator);
+        return;
+    }
+    
+    // Connect the accelerator to the action.
+    ui_manager.get_accel_group().connect(key, modifiers, Gtk.AccelFlags.VISIBLE,
+        (group, obj, key, modifiers) => {
+            action_group.get_action(action).activate();
+            return false;
+        });
 }
 
 }

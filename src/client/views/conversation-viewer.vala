@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class ConversationViewer : Gtk.Box {
@@ -42,13 +42,10 @@ public class ConversationViewer : Gtk.Box {
 
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Gee.TreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
+        new Geary.Collection.FixedTreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
     
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
-    
-    // The Info Bar to be shown when an external image is blocked.
-    public Gtk.InfoBar external_images_info_bar { get; private set; }
     
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
@@ -68,28 +65,13 @@ public class ConversationViewer : Gtk.Box {
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
-        external_images_info_bar = new Gtk.InfoBar.with_buttons(
-            _("_Show Images"), Gtk.ResponseType.OK, _("_Cancel"), Gtk.ResponseType.CANCEL);
-        external_images_info_bar.no_show_all = true;
-        external_images_info_bar.response.connect(on_external_images_info_bar_response);
-        external_images_info_bar.message_type = Gtk.MessageType.WARNING;
-        Gtk.Box? external_images_info_bar_content_area =
-            external_images_info_bar.get_content_area() as Gtk.Box;
-        if (external_images_info_bar_content_area != null) {
-            Gtk.Label label = new Gtk.Label(_("This message contains images. Do you want to show them?"));
-            label.set_line_wrap(true);
-            external_images_info_bar_content_area.add(label);
-            label.show_all();
-        }
-        pack_start(external_images_info_bar, false, false);
-        
         web_view = new ConversationWebView();
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
+        web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
         web_view.size_allocate.connect(mark_read);
 
-        web_view.image_load_requested.connect(on_image_load_requested);
         web_view.link_selected.connect((link) => { link_selected(link); });
         
         Gtk.ScrolledWindow conversation_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
@@ -106,15 +88,6 @@ public class ConversationViewer : Gtk.Box {
         message_overlay.add_overlay(message_overlay_label);
         
         pack_start(message_overlay);
-    }
-    
-    private void on_image_load_requested() {
-        external_images_info_bar.show();
-    }
-    
-    private void on_external_images_info_bar_response(Gtk.InfoBar sender, int response_id) {
-        web_view.apply_load_external_images(response_id == Gtk.ResponseType.OK);
-        sender.hide();
     }
     
     public Geary.Email? get_last_message() {
@@ -165,8 +138,6 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void add_message(Geary.Email email) {
-        web_view.apply_load_external_images(false);
-        
         // Make sure the message container is showing and the multi-message counter hidden.
         try {
             web_view.show_element_by_id(MESSAGE_CONTAINER_ID);
@@ -276,17 +247,12 @@ public class ConversationViewer : Gtk.Box {
         }
 
         string body_text = "";
+        bool remote_images = false;
         try {
-            body_text = email.get_message().get_first_mime_part_of_content_type("text/html").to_string();
-            body_text = insert_html_markup(body_text, email);
+            body_text = email.get_message().get_body(true);
+            body_text = insert_html_markup(body_text, email, out remote_images);
         } catch (Error err) {
-            try {
-                body_text = linkify_and_escape_plain_text(email.get_message().
-                    get_first_mime_part_of_content_type("text/plain").to_string());
-                body_text = insert_plain_text_markup(body_text);
-            } catch (Error err2) {
-                debug("Could not get message text. %s", err2.message);
-            }
+            debug("Could not get message text. %s", err.message);
         }
 
         // Graft header and email body into the email container.
@@ -297,6 +263,16 @@ public class ConversationViewer : Gtk.Box {
             
             WebKit.DOM.HTMLElement span_body = Util.DOM.select(div_email_container, ".body");
             span_body.set_inner_html(body_text);
+            
+            if (remote_images) {
+                WebKit.DOM.HTMLElement remote_images_bar =
+                    Util.DOM.select(div_email_container, ".remote_images");
+                ((WebKit.DOM.Element) remote_images_bar).get_class_list().add("show");
+                remote_images_bar.set_inner_html("""%s %s
+                    <input type="button" value="%s" class="show_images" />""".printf(
+                    remote_images_bar.get_inner_html(), _("This message contains remote images."),
+                    _("Show Images")));
+            }
 
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
@@ -329,10 +305,12 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email_container .starred", "click", (Callback) on_unstar_clicked, this);
         bind_event(web_view, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
         bind_event(web_view, ".header .field .value", "click", (Callback) on_value_clicked, this);
-        bind_event(web_view, ".email .header_container", "click", (Callback) on_body_toggle_clicked, this);
+        bind_event(web_view, ".email:not(:only-of-type) .header_container", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
+        bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
+        bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
     }
     
     public void unhide_last_email() {
@@ -348,31 +326,37 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void compress_emails() {
+        if (messages.size == 0)
+            return;
+        
         WebKit.DOM.Document document = web_view.get_dom_document();
-        WebKit.DOM.Element first_compressed = null;
+        WebKit.DOM.Element first_compressed = null, prev_message = null,
+            curr_message = document.get_element_by_id("message_container").get_first_element_child(),
+            next_message = curr_message.next_element_sibling;
         int compress_count = 0;
         bool prev_hidden = false, curr_hidden = false, next_hidden = false;
         try {
-            next_hidden = document.get_element_by_id(get_div_id(messages.first().id)).get_class_list().contains("hide");
+            next_hidden = curr_message.get_class_list().contains("hide");
+            // The first step of the loop is to advance the hidden statuses.
         } catch (Error error) {
             debug("Error checking hidden status: %s", error.message);
         }
         
-        foreach (Geary.Email message in messages) {
+        // Note that next_message = span#placeholder when current_message is last in conversation.
+        while (next_message != null) {
             try {
-                WebKit.DOM.Element message_element = document.get_element_by_id(get_div_id(message.id));
                 prev_hidden = curr_hidden;
                 curr_hidden = next_hidden;
-                next_hidden = (message_element.next_element_sibling != null)
-                        && message_element.next_element_sibling.get_class_list().contains("hide");
-                if (curr_hidden && prev_hidden && next_hidden) {
-                    message_element.get_class_list().add("compressed");
+                next_hidden = next_message.get_class_list().contains("hide");
+                if (curr_hidden && prev_hidden && next_hidden ||
+                    curr_message.get_class_list().contains("compressed")) {
+                    curr_message.get_class_list().add("compressed");
                     compress_count += 1;
                     if (first_compressed == null)
-                        first_compressed = message_element;
+                        first_compressed = curr_message;
                 } else if (compress_count > 0) {
                     if (compress_count == 1) {
-                        message_element.previous_element_sibling.get_class_list().remove("compressed");
+                        prev_message.get_class_list().remove("compressed");
                     } else {
                         WebKit.DOM.HTMLElement span =
                             first_compressed.first_element_child.first_element_child
@@ -381,7 +365,7 @@ public class ConversationViewer : Gtk.Box {
                         // We need to set the display to get an accurate offset_height
                         span.set_attribute("style", "display:inline-block;");
                         span.set_attribute("style", "display:inline-block; top:%ipx".printf(
-                            (int) (message_element.offset_top - first_compressed.offset_top
+                            (int) (curr_message.offset_top - first_compressed.offset_top
                             - span.offset_height) / 2));
                     }
                     compress_count = 0;
@@ -390,6 +374,9 @@ public class ConversationViewer : Gtk.Box {
             } catch (Error error) {
                 debug("Error compressing emails: %s", error.message);
             }
+            prev_message = curr_message;
+            curr_message = next_message;
+            next_message = curr_message.next_element_sibling;
         }
     }
     
@@ -512,7 +499,7 @@ public class ConversationViewer : Gtk.Box {
     private void show_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
         context_menu = build_context_menu(email, clicked_element);
         context_menu.show_all();
-        context_menu.popup(null, null, null, 0, 0);
+        context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private Gtk.Menu build_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
@@ -537,6 +524,13 @@ public class ConversationViewer : Gtk.Box {
                 item.activate.connect(on_copy_email_address);
                 menu.append(item);
             }
+        }
+        
+        // Select message.
+        if (!is_hidden_email(clicked_element)) {
+            Gtk.MenuItem select_message_item = new Gtk.MenuItem.with_mnemonic(_("Select _Message"));
+            select_message_item.activate.connect(() => {on_select_message(clicked_element);});
+            menu.append(select_message_item);
         }
         
         // Select all.
@@ -584,7 +578,7 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         Geary.Email? email = conversation_viewer.get_email_from_element(element);
-        if (email != null)
+        if (email != null && email.id.get_folder_path() != null)
             conversation_viewer.unflag_message(email);
     }
 
@@ -592,7 +586,7 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         Geary.Email? email = conversation_viewer.get_email_from_element(element);
-        if (email != null)
+        if (email != null && email.id.get_folder_path() != null)
             conversation_viewer.flag_message(email);
     }
 
@@ -639,6 +633,47 @@ public class ConversationViewer : Gtk.Box {
         }
 
         mark_read();
+    }
+
+    private static void on_show_images(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+        if (email_element != null)
+            conversation_viewer.show_images_email(email_element);
+    }
+    
+    private void show_images_email(WebKit.DOM.Element email_element) {
+        // TODO: Remember that these images have been shown.
+        try {
+            WebKit.DOM.NodeList nodes = email_element.query_selector_all("img");
+            for (ulong i = 0; i < nodes.length; i++) {
+                WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
+                if (element == null || !element.has_attribute("src"))
+                    continue;
+                
+                string src = element.get_attribute("src");
+                if (src.has_prefix("remote:"))
+                    element.set_attribute("src", src.substring(7));
+            }
+            
+            WebKit.DOM.Element? remote_images = email_element.query_selector(".remote_images");
+            if (remote_images != null)
+                remote_images.get_class_list().remove("show");
+        } catch (Error error) {
+            warning("Error showing images: %s", error.message);
+        }
+    }
+    
+    private static void on_close_show_images(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        WebKit.DOM.HTMLElement? remote_images = closest_ancestor(element, ".remote_images");
+        if (remote_images != null) {
+            try {
+                remote_images.get_class_list().remove("show");
+            } catch (Error error) {
+                warning("Error hiding \"Show images\" bar: %s", error.message);
+            }
+        }
     }
 
     private static void on_attachment_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
@@ -736,7 +771,7 @@ public class ConversationViewer : Gtk.Box {
     private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
         attachment_menu = build_attachment_menu(email, attachment);
         attachment_menu.show_all();
-        attachment_menu.popup(null, null, null, 0, 0);
+        attachment_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private Gtk.Menu build_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
@@ -759,7 +794,7 @@ public class ConversationViewer : Gtk.Box {
     private void show_message_menu(Geary.Email email) {
         message_menu = build_message_menu(email);
         message_menu.show_all();
-        message_menu.popup(null, null, null, 0, 0);
+        message_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private Gtk.Menu build_message_menu(Geary.Email email) {
@@ -794,7 +829,7 @@ public class ConversationViewer : Gtk.Box {
         menu.append(new Gtk.SeparatorMenuItem());
         
         // Mark as read/unread.
-        if (current_folder is Geary.FolderSupportsMark) {
+        if (email.id.get_folder_path() != null && current_folder is Geary.FolderSupportsMark) {
             if (email.is_unread().to_boolean(false)) {
                 Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
                 mark_read_item.activate.connect(() => on_mark_read_message(email));
@@ -830,16 +865,6 @@ public class ConversationViewer : Gtk.Box {
         return quote_container;
     }
 
-    private string[] split_message_and_signature(string text) {
-        try {
-            Regex signature_regex = new Regex("\\R--\\s*\\R", RegexCompileFlags.MULTILINE);
-            return signature_regex.split_full(text, -1, 0, 0, 2);
-        } catch (RegexError e) {
-            debug("Regex error searching for signature: %s", e.message);
-            return new string[0];
-        }
-    }
-    
     private string set_up_quotes(string text) {
         try {
             // Extract any quote containers from the signature block and make them controllable.
@@ -864,75 +889,9 @@ public class ConversationViewer : Gtk.Box {
             return text;
         }
     }
-
-    private string insert_plain_text_markup(string text) {
-        // Plain text signature and quote:
-        // -- 
-        // Nate
-        //
-        // 2012/3/14 Nate Lillich &lt;nate@yorba.org&gt;#015
-        // &gt;
-        // &gt;
-        //
-        // Wrap all quotes in hide/show controllers.
-        string message = "";
-        try {
-            WebKit.DOM.HTMLElement container = web_view.create_div();
-            int offset = 0;
-            while (offset < text.length) {
-                // Find the beginning of a quote block.
-                int quote_start = text.index_of("&gt;") == 0 && message.length == 0 ? 0 :
-                    text.index_of("\n&gt;", offset);
-                if (quote_start == -1) {
-                    break;
-                } else if (text.get(quote_start) == '\n') {
-                    // Don't include the newline.
-                    ++quote_start;
-                }
-                
-                // Find the end of the quote block.
-                int quote_end = quote_start;
-                do {
-                    quote_end = text.index_of("\n", quote_end + 1);
-                } while (quote_end != -1 && quote_end == text.index_of("\n&gt;", quote_end));
-                if (quote_end == -1) {
-                    quote_end = text.length;
-                }
-
-                // Copy the stuff before the quote, then the wrapped quote.
-                WebKit.DOM.Element quote_container = create_quote_container();
-                Util.DOM.select(quote_container, ".quote").set_inner_html(
-                    decorate_quotes(text.substring(quote_start, quote_end - quote_start)));
-                container.append_child(quote_container);
-                if (quote_start > offset) {
-                    message += text.substring(offset, quote_start - offset);
-                }
-                message += container.get_inner_html();
-                offset = quote_end;
-                container.set_inner_html("");
-            }
-            
-            // Append everything that's left.
-            if (offset != text.length) {
-                message += text.substring(offset);
-            }
-        } catch (Error error) {
-            debug("Error wrapping plaintext quotes: %s", error.message);
-            return text;
-        }
-
-        // Find the signature marker (--) at the beginning of a line.
-        string[] message_chunks = split_message_and_signature(message);
-        string signature = "";
-        if (message_chunks.length == 2) {
-            signature = "<div class=\"signature\">%s</div>".printf(
-                message.substring(message_chunks[0].length).strip());
-            message = "<div>%s</div>".printf(message_chunks[0]);
-        }
-        return "<pre>" + set_up_quotes(message + signature) + "</pre>";
-    }
     
-    private string insert_html_markup(string text, Geary.Email email) {
+    private string insert_html_markup(string text, Geary.Email email, out bool remote_images) {
+        remote_images = false;
         try {
             // Create a workspace for manipulating the HTML.
             WebKit.DOM.HTMLElement container = web_view.create_div();
@@ -975,9 +934,8 @@ public class ConversationViewer : Gtk.Box {
             wrap_html_signature(ref container);
 
             // Then look for all <img> tags. Inline images are replaced with
-            // data URLs, while external images are added to
-            // external_images_uri (to be used later by is_image()).
-            Gee.ArrayList<string> external_images_uri = new Gee.ArrayList<string>();
+            // data URLs, while external images have the prefix "remote:" added
+            // to their src, which is trapped in the conversation_web_view.
             WebKit.DOM.NodeList inline_list = container.query_selector_all("img");
             for (ulong i = 0; i < inline_list.length; ++i) {
                 // Get the MIME content for the image.
@@ -998,14 +956,11 @@ public class ConversationViewer : Gtk.Box {
 
                     // Then set the source to a data url.
                     web_view.set_data_url(img, mimetype, image_data);
-                } else if (!src.has_prefix("data:")) {
-                    external_images_uri.add(src);
-                    if (!web_view.load_external_images)
-                        external_images_info_bar.show();
+                } else if (!src.has_prefix("data:")) {  // TODO: Test whether to show images
+                    img.set_attribute("src", "remote:" + src);
+                    remote_images = true;
                 }
             }
-
-            web_view.set_external_images_uris(external_images_uri);
 
             // Now return the whole message.
             return set_up_quotes(container.get_inner_html());
@@ -1041,18 +996,17 @@ public class ConversationViewer : Gtk.Box {
         if (i == div_list.length) {
             return;
         }
-        WebKit.DOM.Element elem = div_list.item(i) as WebKit.DOM.Element;
+        WebKit.DOM.Node elem = div_list.item(i) as WebKit.DOM.Node;
+        WebKit.DOM.Element parent = elem.get_parent_element();
         WebKit.DOM.HTMLElement signature_container = web_view.create_div();
         signature_container.set_attribute("class", "signature");
         do {
             // Get its sibling _before_ we move it into the signature div.
-            WebKit.DOM.Element? sibling = elem.get_next_element_sibling() as WebKit.DOM.Element;
-            if (!elem.get_attribute("class").contains("quote_container")) {
-                signature_container.append_child(elem);
-            }
+            WebKit.DOM.Node? sibling = elem.get_next_sibling();
+            signature_container.append_child(elem);
             elem = sibling;
         } while (elem != null);
-        container.append_child(signature_container);
+        parent.append_child(signature_container);
     }
     
     public void remove_message(Geary.Email email) {
@@ -1217,6 +1171,14 @@ public class ConversationViewer : Gtk.Box {
         web_view.select_all();
     }
     
+    private void on_select_message(WebKit.DOM.Element email_element) {
+        try {
+            web_view.get_dom_document().get_default_view().get_selection().select_all_children(email_element);
+        } catch (Error error) {
+            warning("Could not make selection: %s", error.message);
+        }
+    }
+    
     private void on_view_source(Geary.Email message) {
         string source = message.header.buffer.to_string() + message.body.buffer.to_string();
         
@@ -1246,7 +1208,8 @@ public class ConversationViewer : Gtk.Box {
                 if (message.email_flags.is_unread()) {
                     WebKit.DOM.HTMLElement element = email_to_element.get(message.id);
                     WebKit.DOM.HTMLElement body = (WebKit.DOM.HTMLElement) element.get_elements_by_class_name("body").item(0);
-                    if (!element.get_class_list().contains("manual_read") &&
+                    if (message.id.get_folder_path() != null &&
+                            !element.get_class_list().contains("manual_read") &&
                             body.offset_top + body.offset_height > scroll_top &&
                             body.offset_top + 28 < scroll_top + scroll_height) {  // 28 = 15 padding + 13 first line of text
                         ids.add(message.id);

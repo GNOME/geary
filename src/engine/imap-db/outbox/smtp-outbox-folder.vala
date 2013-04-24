@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Special type of folder that runs an asynchronous send queue.  Messages are
@@ -43,8 +43,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     private ImapDB.Database db;
     private weak Account _account;
     private Geary.Smtp.ClientSession smtp;
-    private bool opened = false;
+    private int open_count = 0;
     private NonblockingMailbox<OutboxRow> outbox_queue = new NonblockingMailbox<OutboxRow>();
+    private SmtpOutboxFolderProperties properties = new SmtpOutboxFolderProperties(0, 0);
     
     public override Account account { get { return _account; } }
     
@@ -89,6 +90,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             }, null);
             
             if (list.size > 0) {
+                // set properties now (can't do yield in ctor)
+                properties.set_total(list.size);
+                
                 debug("Priming outbox postman with %d stored messages", list.size);
                 foreach (OutboxRow row in list)
                     outbox_queue.send(row);
@@ -128,11 +132,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             } catch (Error send_err) {
                 debug("Outbox postman send error, retrying: %s", send_err.message);
                 
-                try {
-                    outbox_queue.send(row);
-                } catch (Error send_err) {
-                    debug("Outbox postman: Unable to re-enqueue message, dropping on floor: %s", send_err.message);
-                }
+                outbox_queue.send(row);
                 
                 if (send_err is SmtpError.AUTHENTICATION_FAILED) {
                     bool report = true;
@@ -167,7 +167,15 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             } catch (Error rm_err) {
                 debug("Outbox postman: Unable to remove row from database: %s", rm_err.message);
             }
-
+            
+            // update properties
+            try {
+                properties.set_total(yield get_email_count_async(null));
+            } catch (Error err) {
+                debug("Outbox postman: Unable to fetch updated email count for properties: %s",
+                    err.message);
+            }
+            
             // If we got this far the send was successful, so reset the send retry interval.
             send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
         }
@@ -182,8 +190,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         return path;
     }
     
-    public override Geary.Trillian has_children() {
-        return Geary.Trillian.FALSE;
+    public override Geary.FolderProperties get_properties() {
+        return properties;
     }
     
     public override Geary.SpecialFolderType get_special_folder_type() {
@@ -191,36 +199,36 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     }
     
     public override Geary.Folder.OpenState get_open_state() {
-        return opened ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
+        return open_count > 0 ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }
     
     private void check_open() throws EngineError {
-        if (!opened)
+        if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
+    }
+    
+    public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
+        if (open_count == 0)
+            throw new EngineError.OPEN_REQUIRED("Outbox not open");
     }
     
     public override async void open_async(bool readonly, Cancellable? cancellable = null)
         throws Error {
-        if (opened)
-            throw new EngineError.ALREADY_OPEN("Folder %s already open", to_string());
+        if (open_count++ > 0)
+            return;
         
-        opened = true;
-        notify_opened(Geary.Folder.OpenState.LOCAL, yield get_email_count_async(cancellable));
+        notify_opened(Geary.Folder.OpenState.LOCAL, properties.email_total);
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
-        if (!opened)
+        if (open_count == 0 || --open_count > 0)
             return;
-        
-        opened = false;
         
         notify_closed(Geary.Folder.CloseReason.LOCAL_CLOSE);
         notify_closed(Geary.Folder.CloseReason.FOLDER_CLOSED);
     }
     
-    public override async int get_email_count_async(Cancellable? cancellable = null) throws Error {
-        check_open();
-        
+    private async int get_email_count_async(Cancellable? cancellable) throws Error {
         int count = 0;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             count = do_get_email_count(cx, cancellable);
@@ -267,11 +275,14 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         // should have thrown an error if this failed
         assert(row != null);
         
+        // update properties
+        properties.set_total(yield get_email_count_async(cancellable));
+        
         // immediately add to outbox queue for delivery
         outbox_queue.send(row);
         
         // notify only if opened
-        if (opened) {
+        if (open_count > 0) {
             Gee.List<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
             list.add(row.outbox_id);
             
@@ -479,7 +490,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             return false;
         
         // notify only if opened
-        if (opened) {
+        if (open_count > 0) {
             notify_email_removed(removed);
             notify_email_count_changed(final_count, CountChangeReason.REMOVED);
         }
@@ -500,7 +511,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         RFC822.Message message = new RFC822.Message.from_string(row.message);
         
         Geary.Email email = message.get_email(row.position, row.outbox_id);
-        email.set_email_properties(new SmtpOutboxEmailProperties());
+        // TODO: Determine message's total size (header + body) to store in Properties.
+        email.set_email_properties(new SmtpOutboxEmailProperties(new DateTime.now_local(), -1));
         email.set_flags(new Geary.EmailFlags());
         
         return email;
@@ -519,7 +531,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         
         if (smtp_err == null) {
             try {
-                yield smtp.send_email_async(rfc822, cancellable);
+                yield smtp.send_email_async(_account.information.get_mailbox_address(),
+                    rfc822, cancellable);
             } catch (Error send_err) {
                 debug("SMTP send mail error: %s", send_err.message);
                 smtp_err = send_err;

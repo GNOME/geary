@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.Imap.Parameter : Object, Serializable {
+public abstract class Geary.Imap.Parameter : BaseObject, Serializable {
     public abstract async void serialize(Serializer ser) throws Error;
     
     /**
@@ -187,6 +187,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     
     /**
      * Returns the Parameter at the index in the list, null if index is out of range.
+     *
+     * TODO: This call can cause memory leaks when used with the "as" operator until the following
+     * Vala bug is fixed (probably in version 0.19.1).
+     * https://bugzilla.gnome.org/show_bug.cgi?id=695671
      */
     public new Parameter? get(int index) {
         return ((index >= 0) && (index < list.size)) ? list.get(index) : null;
@@ -195,6 +199,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     /**
      * Returns the Parameter at the index.  Throws an ImapError.TYPE_ERROR if the index is out of
      * range.
+     *
+     * TODO: This call can cause memory leaks when used with the "as" operator until the following
+     * Vala bug is fixed (probably in version 0.19.1).
+     * https://bugzilla.gnome.org/show_bug.cgi?id=695671
      */
     public Parameter get_required(int index) throws ImapError {
         if ((index < 0) || (index >= list.size))
@@ -416,10 +424,22 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return old;
     }
     
-    // This replaces all existing parameters with those from the supplied list
-    public void copy(ListParameter src) {
+    /**
+     * Moves all child parameters from the supplied list into this list.  The supplied list will be
+     * "stripped" of children.
+     */
+    public void move_children(ListParameter src) {
         list.clear();
-        list.add_all(src.get_all());
+        
+        foreach (Parameter param in src.list) {
+            ListParameter? listp = param as ListParameter;
+            if (listp != null)
+                listp.parent = this;
+            
+            list.add(param);
+        }
+        
+        src.list.clear();
     }
     
     protected string stringize_list() {
@@ -460,10 +480,10 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         base (null, initial);
     }
     
-    public RootParameters.clone(RootParameters root) {
+    public RootParameters.migrate(RootParameters root) {
         base (null);
         
-        base.copy(root);
+        move_children(root);
     }
     
     /**

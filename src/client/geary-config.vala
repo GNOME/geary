@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Wrapper class for GSettings.
@@ -106,6 +106,12 @@ public class Configuration {
     public bool ask_open_attachment {
         get { return settings.get_boolean(ASK_OPEN_ATTACHMENT); }
         set { set_boolean(ASK_OPEN_ATTACHMENT, value); }
+    }
+    
+    private const string COMPOSE_AS_HTML = "compose-as-html";
+    public bool compose_as_html {
+        get { return settings.get_boolean(COMPOSE_AS_HTML); }
+        set { set_boolean(COMPOSE_AS_HTML, value); }
     }
     
     // Creates a configuration object.

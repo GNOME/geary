@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Sidebar.Tree : Gtk.TreeView {
@@ -37,8 +37,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     private class RootWrapper : EntryWrapper {
         public int root_position;
         
-        public RootWrapper(Gtk.TreeModel model, Sidebar.Entry entry, Gtk.TreePath path, int root_position) 
-            requires (root_position >= 0) {
+        public RootWrapper(Gtk.TreeModel model, Sidebar.Entry entry, Gtk.TreePath path, int root_position) {
             base (model, entry, path);
             
             this.root_position = root_position;
@@ -353,7 +352,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         return branches.has_key(branch);
     }
     
-    public void graft(Sidebar.Branch branch, int position) requires (position >= 0) {
+    public void graft(Sidebar.Branch branch, int position) {
         assert(!branches.has_key(branch));
         
         branches.set(branch, position);
@@ -376,6 +375,13 @@ public class Sidebar.Tree : Gtk.TreeView {
         branch.show_branch.connect(on_show_branch);
         
         branch_added(branch);
+    }
+    
+    public int get_position_for_branch(Sidebar.Branch branch) {
+        if (branches.has_key(branch))
+            return branches.get(branch);
+        
+        return int.MIN;
     }
     
     // This is used to associate a known branch with the TreeView.
@@ -447,10 +453,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         
         entry.sidebar_tooltip_changed.connect(on_sidebar_tooltip_changed);
         entry.sidebar_icon_changed.connect(on_sidebar_icon_changed);
-        
-        Sidebar.RenameableEntry? renameable = entry as Sidebar.RenameableEntry;
-        if (renameable != null)
-            renameable.sidebar_name_changed.connect(on_sidebar_name_changed);
+        entry.sidebar_name_changed.connect(on_sidebar_name_changed);
         
         Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
         if (emphasizable != null)
@@ -563,10 +566,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         
         entry.sidebar_tooltip_changed.disconnect(on_sidebar_tooltip_changed);
         entry.sidebar_icon_changed.disconnect(on_sidebar_icon_changed);
-        
-        Sidebar.RenameableEntry? renameable = entry as Sidebar.RenameableEntry;
-        if (renameable != null)
-            renameable.sidebar_name_changed.disconnect(on_sidebar_name_changed);
+        entry.sidebar_name_changed.disconnect(on_sidebar_name_changed);
         
         Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
         if (emphasizable != null)
@@ -728,7 +728,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         store.set(wrapper.get_iter(), Columns.NAME, get_name_for_entry(entry));
     }
     
-    private void on_sidebar_name_changed(Sidebar.RenameableEntry entry, string name) {
+    private void on_sidebar_name_changed(Sidebar.Entry entry, string name) {
         rename_entry(entry);
     }
     

@@ -1,20 +1,20 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // NewMessagesMonitor is a central data store for new message information that the various
-// notification methods (libnotify, libindicate, libunity, etc.) can monitor to do their thing.
+// notification methods (libnotify, libunity, etc.) can monitor to do their thing.
 // Subclasses should trap the "notify::count" signal and use that to perform whatever magic
 // they need for their implementation, or trap "new-messages" to receive notifications of the emails
 // themselves as they're added.  In the latter case, subscribers should add required Email.Field
 // flags to the object with add_required_fields().
 
-public class NewMessagesMonitor : Object {
-    public delegate bool ShouldNotifyNewMessages();
+public class NewMessagesMonitor : Geary.BaseObject {
+    public delegate bool ShouldNotifyNewMessages(Geary.Folder folder);
     
-    private class MonitorInformation : Object {
+    private class MonitorInformation : Geary.BaseObject {
         public Geary.Folder folder;
         public Cancellable? cancellable = null;
         public int count = 0;
@@ -59,8 +59,8 @@ public class NewMessagesMonitor : Object {
         _should_notify_new_messages = should_notify_new_messages;
     }
     
-    public bool should_notify_new_messages() {
-        return (_should_notify_new_messages == null ? true : _should_notify_new_messages());
+    public bool should_notify_new_messages(Geary.Folder folder) {
+        return (_should_notify_new_messages == null ? true : _should_notify_new_messages(folder));
     }
     
     public void add_folder(Geary.Folder folder, Cancellable? cancellable = null) {

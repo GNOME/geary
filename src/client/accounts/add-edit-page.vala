@@ -126,6 +126,8 @@ public class AddEditPage : Gtk.Box {
     private Gtk.Widget container_widget;
     private Gtk.Box welcome_box;
     
+    private Gtk.Label label_error;
+    
     private Gtk.Entry entry_email;
     private Gtk.Label label_password;
     private Gtk.Entry entry_password;
@@ -154,9 +156,17 @@ public class AddEditPage : Gtk.Box {
 
     private string smtp_username_store;
     private string smtp_password_store;
-
+    
+    // Storage options
+    private Gtk.Box storage_container;
+    private Gtk.ComboBoxText combo_storage_length;
+    
     private bool edited_imap_port = false;
     private bool edited_smtp_port = false;
+    
+    private Geary.Engine.ValidationResult last_validation_result = Geary.Engine.ValidationResult.OK;
+    
+    private bool first_ui_update = true;
     
     public signal void info_changed();
     
@@ -185,7 +195,21 @@ public class AddEditPage : Gtk.Box {
         entry_password = (Gtk.Entry) builder.get_object("entry: password");
         check_remember_password = (Gtk.CheckButton) builder.get_object("check: remember_password");
         
+        label_error = (Gtk.Label) builder.get_object("label: error");
+        
         other_info = (Gtk.Alignment) builder.get_object("container: other_info");
+        
+        // Storage options.
+        storage_container = (Gtk.Box) builder.get_object("storage container");
+        combo_storage_length = (Gtk.ComboBoxText) builder.get_object("combo: storage");
+        combo_storage_length.set_row_separator_func(combo_storage_separator_delegate);
+        combo_storage_length.append("14", _("2 weeks back")); // IDs are # of days
+        combo_storage_length.append("30", _("1 month back"));
+        combo_storage_length.append("90", _("3 months back"));
+        combo_storage_length.append("180", _("6 months back"));
+        combo_storage_length.append("365", _("1 year back"));
+        combo_storage_length.append(".", "."); // Separator
+        combo_storage_length.append("-1", _("Everything"));
         
         // IMAP info widgets.
         entry_imap_host = (Gtk.Entry) builder.get_object("entry: imap host");
@@ -212,6 +236,7 @@ public class AddEditPage : Gtk.Box {
         entry_email.changed.connect(on_changed);
         entry_password.changed.connect(on_changed);
         entry_real_name.changed.connect(on_changed);
+        entry_nickname.changed.connect(on_changed);
         check_remember_password.toggled.connect(on_changed);
         combo_service.changed.connect(on_changed);
         entry_imap_host.changed.connect(on_changed);
@@ -236,20 +261,20 @@ public class AddEditPage : Gtk.Box {
         
         entry_nickname.insert_text.connect(on_nickname_insert_text);
         
-        // Shows/hides settings.
-        update_ui();
+        // Reset the "first update" flag when the window is mapped.
+        map.connect(() => { first_ui_update = true; });
     }
     
     // Sets the account information to display on this page.
-    public void set_account_information(Geary.AccountInformation info) {
+    public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
         set_all_info(info.real_name,
             info.nickname,
             info.email,
             info.imap_credentials.user,
             info.imap_credentials.pass,
             info.imap_remember_password && info.smtp_remember_password,
-            info.smtp_credentials.user,
-            info.smtp_credentials.pass,
+            info.smtp_credentials != null ? info.smtp_credentials.user : null,
+            info.smtp_credentials != null ? info.smtp_credentials.pass : null,
             info.service_provider,
             info.default_imap_server_host,
             info.default_imap_server_port,
@@ -259,7 +284,9 @@ public class AddEditPage : Gtk.Box {
             info.default_smtp_server_port,
             info.default_smtp_server_ssl,
             info.default_smtp_server_starttls,
-            info.default_smtp_server_noauth);
+            info.default_smtp_server_noauth,
+            info.prefetch_period_days,
+            result);
     }
     
     // Can use this instead of set_account_information(), both do the same thing.
@@ -281,7 +308,9 @@ public class AddEditPage : Gtk.Box {
         uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_smtp_ssl = true,
         bool initial_default_smtp_starttls = false,
-        bool initial_default_smtp_noauth = false) {
+        bool initial_default_smtp_noauth = false,
+        int prefetch_period_days = Geary.AccountInformation.DEFAULT_PREFETCH_PERIOD_DAYS,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         
         // Set defaults
         real_name = initial_real_name ?? "";
@@ -290,6 +319,8 @@ public class AddEditPage : Gtk.Box {
         password = initial_imap_password != null ? initial_imap_password : "";
         remember_password = initial_remember_password;
         set_service_provider((Geary.ServiceProvider) initial_service_provider);
+        combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
+        combo_smtp_encryption.active = Encryption.NONE;
         
         // Set defaults for IMAP info
         imap_host = initial_default_imap_host ?? "";
@@ -308,16 +339,22 @@ public class AddEditPage : Gtk.Box {
         smtp_starttls = initial_default_smtp_starttls;
         smtp_noauth = initial_default_smtp_noauth;
         
-        if (Geary.String.is_empty(real_name))
-            entry_real_name.grab_focus();
-        else
-            entry_email.grab_focus();
+        set_validation_result(result);
+        
+        set_storage_length(prefetch_period_days);
+    }
+    
+    public void set_validation_result(Geary.Engine.ValidationResult result) {
+        last_validation_result = result;
     }
     
     // Resets all fields to their defaults.
     public void reset_all() {
         // Take advantage of set_all_info()'s defaults.
         set_all_info(get_default_real_name());
+        
+        edited_imap_port = false;
+        edited_smtp_port = false;
     }
     
     /** Puts this page into one of three different modes:
@@ -356,8 +393,10 @@ public class AddEditPage : Gtk.Box {
     
     // Prevent non-printable characters in nickname field.
     private void on_nickname_insert_text(Gtk.Editable e, string text, int length, ref int position) {
-        for (long i = 0; i < text.char_count(); i++) {
-            if (!text.get_char(i).isprint()) {
+        unichar c;
+        int index = 0;
+        while (text.get_next_char(ref index, out c)) {
+            if (!c.isprint()) {
                 Signal.stop_emission_by_name(e, "insert-text");
                 
                 return;
@@ -474,9 +513,14 @@ public class AddEditPage : Gtk.Box {
         Geary.Credentials smtp_credentials = new Geary.Credentials(smtp_username.strip(), smtp_password.strip());
         
         try {
-            account_information = Geary.Engine.instance.get_accounts().get(email_address);
-            if (account_information == null)
+            Geary.AccountInformation original_account = Geary.Engine.instance.get_accounts().get(email_address);
+            if (original_account == null) {
+                // New account.
                 account_information = Geary.Engine.instance.create_orphan_account(email_address);
+            } else {
+                // Existing account: create a copy so we don't mess up the original.
+                account_information = new Geary.AccountInformation.temp_copy(original_account);
+            }
         } catch (Error err) {
             debug("Unable to open account information for %s: %s", email_address, err.message);
             
@@ -499,6 +543,7 @@ public class AddEditPage : Gtk.Box {
         account_information.default_smtp_server_ssl = smtp_ssl;
         account_information.default_smtp_server_starttls = smtp_starttls;
         account_information.default_smtp_server_noauth = smtp_noauth;
+        account_information.prefetch_period_days = get_storage_length();
         
         if (smtp_noauth)
             account_information.smtp_credentials = null;
@@ -519,10 +564,11 @@ public class AddEditPage : Gtk.Box {
     }
     
     // Updates UI based on various options.
-    private void update_ui() {
+    internal void update_ui() {
         base.show_all();
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
+        storage_container.visible = mode == PageMode.EDIT;
         
         if (mode == PageMode.WELCOME)
             nickname = Geary.AccountInformation.DEFAULT_NICKNAME;
@@ -533,13 +579,14 @@ public class AddEditPage : Gtk.Box {
             entry_password.hide();
             other_info.show();
             set_other_info_sensitive(true);
+            check_remember_password.label = _("Remem_ber passwords"); // Plural
         } else {
             // For special-cased providers, only display necessary info.
             label_password.show();
             entry_password.show();
             other_info.hide();
-            
             set_other_info_sensitive(mode == PageMode.WELCOME);
+            check_remember_password.label = _("Remem_ber password");
         }
         
         // In edit mode, certain fields are not sensitive.
@@ -553,9 +600,72 @@ public class AddEditPage : Gtk.Box {
             entry_smtp_port.sensitive =
             entry_smtp_username.sensitive =
             combo_smtp_encryption.sensitive =
+            check_smtp_noauth.sensitive =
                 mode != PageMode.EDIT;
         
+        if (smtp_noauth) {
+            entry_smtp_username.sensitive = false;
+            entry_smtp_password.sensitive = false;
+        }
+        
+        // Update error text.
+        label_error.visible = false;
+        if (last_validation_result == Geary.Engine.ValidationResult.OK) {
+            label_error.visible = false;
+        } else {
+            label_error.visible = true;
+            
+            string error_string = _("Unable to validate:\n");
+            if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.INVALID_NICKNAME))
+                error_string += _("        &#8226; Invalid account nickname.\n");
+            
+            if (get_service_provider() == Geary.ServiceProvider.OTHER) {
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED))
+                    error_string += _("        &#8226; IMAP connection error.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CREDENTIALS_INVALID))
+                    error_string += _("        &#8226; IMAP username or password incorrect.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED))
+                    error_string += _("        &#8226; SMTP connection error.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CREDENTIALS_INVALID))
+                    error_string += _("        &#8226; SMTP username or password incorrect.\n");
+            } else {
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED) ||
+                    last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED))
+                    error_string += _("        &#8226; Connection error.\n");
+                
+                if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CREDENTIALS_INVALID) ||
+                    last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CREDENTIALS_INVALID))
+                    error_string += _("        &#8226; Username or password incorrect.\n");
+            }
+            
+            label_error.label = "<span color=\"red\">" + error_string + "</span>";
+        }
+        
         size_changed();
+        
+        // Set initial field focus.
+        // This has to be done here because the window isn't completely setup until the first time
+        // this method runs.
+        if (first_ui_update && parent.get_visible()) {
+            if (mode == PageMode.EDIT) {
+                if (get_service_provider() != Geary.ServiceProvider.OTHER)
+                    entry_password.grab_focus();
+                else
+                    entry_imap_password.grab_focus();
+            } else {
+                if (Geary.String.is_empty(real_name))
+                    entry_real_name.grab_focus();
+                else if (mode == PageMode.ADD)
+                    entry_nickname.grab_focus();
+                else
+                    entry_email.grab_focus();
+            }
+            
+            first_ui_update = false;
+        }
     }
     
     public Geary.ServiceProvider get_service_provider() {
@@ -597,6 +707,24 @@ public class AddEditPage : Gtk.Box {
     private string get_default_real_name() {
         string real_name = Environment.get_real_name();
         return real_name == "Unknown" ? "" : real_name;
+    }
+    
+    // Sets the storage length combo box.  The days parameter should correspond to one of the pre-set
+    // values; arbitrary numbers will put the combo box into an undetermined state.
+    private void set_storage_length(int days) {
+        combo_storage_length.set_active_id(days.to_string());
+    }
+    
+    // Returns number of days.
+    private int get_storage_length() {
+        return int.parse(combo_storage_length.get_active_id());
+    }
+    
+    private bool combo_storage_separator_delegate(Gtk.TreeModel model, Gtk.TreeIter iter) {
+        GLib.Value v;
+        model.get_value(iter, 0, out v);
+        
+        return v.get_string() == ".";
     }
 }
 

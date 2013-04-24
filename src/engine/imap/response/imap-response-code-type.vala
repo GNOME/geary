@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public enum Geary.Imap.ResponseCodeType {
@@ -14,7 +14,8 @@ public enum Geary.Imap.ResponseCodeType {
     TRY_CREATE,
     UIDVALIDITY,
     UIDNEXT,
-    UNSEEN;
+    UNSEEN,
+    MYRIGHTS;
     
     public string to_string() {
         switch (this) {
@@ -47,6 +48,9 @@ public enum Geary.Imap.ResponseCodeType {
             
             case UNSEEN:
                 return "unseen";
+            
+            case MYRIGHTS:
+                return "myrights";
             
             default:
                 assert_not_reached();
@@ -84,6 +88,9 @@ public enum Geary.Imap.ResponseCodeType {
             
             case "unseen":
                 return UNSEEN;
+            
+            case "myrights":
+                return MYRIGHTS;
             
             default:
                 throw new ImapError.PARSE_ERROR("Unknown response code \"%s\"", value);

@@ -7,4 +7,5 @@
     <accelerator action="GearyZoomIn" />
     <accelerator action="GearyZoomOut" />
     <accelerator action="GearyZoomNormal" />
+    <accelerator action="GearyGearMenuButton" />
 </ui>

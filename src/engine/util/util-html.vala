@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 namespace Geary.HTML {
@@ -10,8 +10,16 @@ public inline string escape_markup(string? plain) {
     return (!String.is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
 }
 
-public inline string newlines_to_br(string? text) {
-    return !String.is_empty(text) ? text.replace("\n", "<br />") : "";
+public string preserve_whitespace(string? text) {
+    if (String.is_empty(text))
+        return "";
+    
+    string output = text.replace(" ", "&nbsp;");
+    output = output.replace("\r\n", "<br />");
+    output = output.replace("\n", "<br />");
+    output = output.replace("\r", "<br />");
+
+    return output;
 }
 
 // Removes any text between < and >.  Additionally, if input terminates in the middle of a tag, 

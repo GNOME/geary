@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.Mailbox : Geary.SmartReference {
@@ -22,12 +22,12 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     public string name { get { return context.name; } }
     public int exists { get { return context.exists; } }
     public int recent { get { return context.recent; } }
-    public int unseen { get { return context.unseen; } }
     public bool is_readonly { get { return context.is_readonly; } }
     public UIDValidity? uid_validity { get { return context.uid_validity; } }
     public UID? uid_next { get { return context.uid_next; } }
     
     private SelectedContext context;
+    private Geary.FolderPath folder_path;
     
     public signal void exists_altered(int old_exists, int new_exists);
     
@@ -41,10 +41,11 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
     
     public signal void disconnected(Geary.Folder.CloseReason reason);
     
-    internal Mailbox(SelectedContext context) {
+    internal Mailbox(SelectedContext context, Geary.FolderPath folder_path) {
         base (context);
         
         this.context = context;
+        this.folder_path = folder_path;
         
         context.closed.connect(on_closed);
         context.disconnected.connect(on_disconnected);
@@ -77,7 +78,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         UID? uid = results.get_data(FetchDataType.UID) as UID;
         assert(uid != null);
         
-        Geary.Email email = new Geary.Email(results.msg_num, new Geary.Imap.EmailIdentifier(uid));
+        Geary.Email email = new Geary.Email(results.msg_num,
+            new Geary.Imap.EmailIdentifier(uid, folder_path));
         msgs.add(email);
         pos_map.set(email.position, email);
         
@@ -591,7 +593,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             if (msg_flags != null) {
                 Geary.Imap.EmailFlags email_flags = new Geary.Imap.EmailFlags(msg_flags);
                 
-                map.set(new Geary.Imap.EmailIdentifier(uid) , email_flags);
+                map.set(new Geary.Imap.EmailIdentifier(uid, folder_path) , email_flags);
             } else {
                 debug("No flags returned");
             }
@@ -604,7 +606,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
 
-        yield context.session.send_command_async(new CopyCommand(msg_set, destination.to_string()),
+        yield context.session.send_command_async(
+            new CopyCommand(msg_set, new Geary.Imap.MailboxParameter(destination.to_string())),
             cancellable);
     }
 
@@ -634,13 +637,12 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
 // All this fancy stepping should not be exposed to a user of the IMAP portion of Geary, who should
 // only see Geary.Imap.Mailbox, nor should it be exposed to the user of Geary.Engine, where all this
 // should only be exposed via Geary.Folder.
-private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
+private class Geary.Imap.SelectedContext : BaseObject, Geary.ReferenceSemantics {
     public ClientSession? session { get; private set; }
     
     public string name { get; protected set; }
     public int exists { get; protected set; }
     public int recent { get; protected set; }
-    public int unseen { get; protected set; }
     public bool is_readonly { get; protected set; }
     public UIDValidity? uid_validity { get; protected set; }
     public UID? uid_next { get; protected set; }
@@ -668,7 +670,6 @@ private class Geary.Imap.SelectedContext : Object, Geary.ReferenceSemantics {
         is_readonly = results.readonly;
         exists = results.exists;
         recent = results.recent;
-        unseen = results.unseen;
         uid_validity = results.uid_validity;
         uid_next = results.uid_next;
         

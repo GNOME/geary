@@ -9,16 +9,17 @@ Build-Depends: debhelper (>= 8),
  libunique-3.0-dev (>= 3.0.0),
  libnotify-dev (>=0.7.5),
  libcanberra-dev (>= 0.28),
- libwebkitgtk-3.0-dev (>= 1.8.0),
+ libwebkitgtk-3.0-dev (>= 1.10.0),
+ libsecret-1-dev (>= 0.11),
  libgmime-2.6-dev (>= 2.6.0),
  valac-0.18 (>= 0.17.4),
  cmake (>= 2.8.0),
  libsqlite3-dev (>= 3.7.4),
- libgnome-keyring-dev (>= 3.2.2),
- libindicate-dev (>= 0.6.1),
+ libmessaging-menu-dev (>= 12.10.2),
  libunity-dev (>= 5.12.0),
  intltool,
- libgirepository1.0-dev (>= 1.32.0)
+ libgirepository1.0-dev (>= 1.32.0),
+ desktop-file-utils
 Standards-Version: 3.8.3
 Homepage: http://www.yorba.org
 
@@ -31,11 +32,11 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  libunique-3.0-0 (>= 3.0.0),
  libnotify4 (>= 0.7.5),
  libcanberra0 (>= 0.28),
- libwebkitgtk-3.0-0 (>= 1.8.0),
+ libwebkitgtk-3.0-0 (>= 1.10.0),
  libxml2 (>= 2.6.32),
  libsqlite3-0 (>= 3.7.4),
- libgnome-keyring0 (>= 3.2.2),
- libindicate5 (>= 0.6.1),
+ libsecret-1-0 (>= 0.11),
+ libmessaging-menu0 (>= 12.10.2),
  libunity9 (>= 5.12.0)
 Description: Email client
  Geary is an email client built for the GNOME desktop environment.  It

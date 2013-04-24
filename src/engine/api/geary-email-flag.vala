@@ -1,11 +1,12 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.EmailFlag : Geary.Equalable, Geary.Hashable {
+public class Geary.EmailFlag : BaseObject, Geary.Equalable, Geary.Hashable {
     private string name;
+    
     public EmailFlag(string name) {
         this.name = name;
     }

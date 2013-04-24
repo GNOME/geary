@@ -84,12 +84,14 @@
     </child>
     <child>
       <object class="GtkAction" id="indent">
+        <property name="label" translatable="yes">Quote text</property>
         <property name="stock_id">gtk-indent</property>
       </object>
       <accelerator key="bracketright" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="outdent">
+        <property name="label" translatable="yes">Unquote text</property>
         <property name="stock_id">gtk-unindent</property>
       </object>
       <accelerator key="bracketleft" modifiers="GDK_CONTROL_MASK"/>
@@ -141,6 +143,15 @@
         <property name="label" translatable="yes">Font size</property>
         <property name="icon_name">font</property>
       </object>
+    </child>
+    <child>
+      <object class="GtkToggleAction" id="compose as html">
+        <property name="label" translatable="yes">Rich Text</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="close"/>
+      <accelerator key="w" modifiers="GDK_CONTROL_MASK"/>
     </child>
   </object>
   <object class="GtkBox" id="composer">
@@ -420,7 +431,7 @@
             <property name="related_action">bold</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Bold</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle bold text">Bold (Ctrl+B)</property>
             <property name="label" translatable="yes">Bold</property>
             <property name="use_underline">True</property>
           </object>
@@ -434,7 +445,7 @@
             <property name="related_action">italic</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Italic</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle italic text">Italic (Ctrl+I)</property>
             <property name="label" translatable="yes">Italic</property>
             <property name="use_underline">True</property>
           </object>
@@ -448,7 +459,7 @@
             <property name="related_action">underline</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Underline</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle underlined text">Underline (Ctrl+U)</property>
             <property name="label" translatable="yes">Underline</property>
             <property name="use_underline">True</property>
           </object>
@@ -462,7 +473,7 @@
             <property name="related_action">strikethrough</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Strikethrough</property>
+            <property name="tooltip_text" translatable="yes" comments="Toggle strikethrough text">Strikethrough (Ctrl+K)</property>
             <property name="label" translatable="yes">Strikethrough</property>
             <property name="use_underline">True</property>
           </object>
@@ -472,7 +483,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparatorToolItem" id="toolbutton5">
+          <object class="GtkSeparatorToolItem" id="toolbar separator 1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
@@ -486,8 +497,8 @@
             <property name="related_action">indent</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Indent</property>
-            <property name="label" translatable="yes">Indent</property>
+            <property name="tooltip_text" translatable="yes" comments="Adds a quote level">Quote text (Ctrl+])</property>
+            <property name="label" translatable="yes">Quote text</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -500,8 +511,8 @@
             <property name="related_action">outdent</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Un-indent</property>
-            <property name="label" translatable="yes">Un-indent</property>
+            <property name="tooltip_text" translatable="yes" comments="Removes a quote level">Unquote text (Ctrl+[)</property>
+            <property name="label" translatable="yes">Unquote text</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -510,7 +521,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparatorToolItem" id="toolbutton3">
+          <object class="GtkSeparatorToolItem" id="toolbar separator 2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
@@ -524,7 +535,7 @@
             <property name="related_action">font</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Fonts</property>
+            <property name="tooltip_text" translatable="yes" comments="Opens font drop-down menu">Fonts</property>
             <property name="label" translatable="yes">Fonts</property>
             <property name="use_underline">True</property>
           </object>
@@ -538,7 +549,7 @@
             <property name="related_action">fontsize</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Font size</property>
+            <property name="tooltip_text" translatable="yes" comments="Opens font size drop-down menu">Font size</property>
             <property name="label" translatable="yes">Font size</property>
             <property name="use_underline">True</property>
           </object>
@@ -552,7 +563,7 @@
             <property name="related_action">color</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Color</property>
+            <property name="tooltip_text" translatable="yes" comments="Opens font color dialog">Color (Ctrl+R)</property>
             <property name="label" translatable="yes">Color</property>
             <property name="use_underline">True</property>
           </object>
@@ -566,7 +577,7 @@
             <property name="related_action">insertlink</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Link</property>
+            <property name="tooltip_text" translatable="yes" comments="Add an HTML link">Link (Ctrl+L)</property>
             <property name="label" translatable="yes">Link</property>
             <property name="use_underline">True</property>
           </object>
@@ -580,7 +591,7 @@
             <property name="related_action">removeformat</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Remove formatting</property>
+            <property name="tooltip_text" translatable="yes" comments="Resets formatting to the default style">Remove formatting (Ctrl+Space)</property>
             <property name="label" translatable="yes">Remove formatting</property>
             <property name="use_underline">True</property>
           </object>
@@ -670,8 +681,25 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="Cancel">
-            <property name="label">gtk-cancel</property>
+          <object class="GtkButton" id="add_pending_attachments">
+            <property name="label" translatable="yes">_Include Original Attachments</property>
+            <property name="visible">False</property>
+            <property name="no_show_all">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">start</property>
+            <property name="valign">center</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="Discard">
+            <property name="label">gtk-discard</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -682,7 +710,7 @@
             <property name="fill">True</property>
             <property name="padding">3</property>
             <property name="pack_type">end</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
             <property name="secondary">True</property>
           </packing>
         </child>
@@ -699,7 +727,7 @@
             <property name="fill">True</property>
             <property name="padding">3</property>
             <property name="pack_type">end</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
             <property name="secondary">True</property>
           </packing>
         </child>

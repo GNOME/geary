@@ -22,9 +22,8 @@
     information.  Note that your email password is stored securely in the
     Gnome Keyring.
     
-    Geary will then begin downloading messages in your inbox.  Only the
-    most recent messages will be downloaded.  To continue reading email,
-    scroll down in the message list and more email will be fetched.
+    Geary will then begin downloading messages in your inbox and other
+    folders.
     
   * Contacting Yorba
     
@@ -37,5 +36,5 @@
     
     
     
-    Copyright 2012 Yorba Foundation
+    Copyright 2012-2013 Yorba Foundation
 

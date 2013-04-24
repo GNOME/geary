@@ -5,11 +5,11 @@
  */
 
 // Lets user know that account removal cannot be completed..
-public class AccountDialogRemoveFailPane : Gtk.Box {
+public class AccountDialogRemoveFailPane : AccountDialogPane {
     public signal void ok();
     
-    public AccountDialogRemoveFailPane() {
-        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 6);
+    public AccountDialogRemoveFailPane(Gtk.Notebook notebook) {
+        base(notebook);
         
         Gtk.Builder builder = GearyApplication.instance.create_builder("account_cannot_remove.glade");
         pack_end((Gtk.Box) builder.get_object("container"));

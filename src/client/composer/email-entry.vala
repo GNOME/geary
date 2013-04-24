@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Displays a dialog for collecting the user's login data.
@@ -14,9 +14,11 @@ public class EmailEntry : Gtk.Entry {
 
     public EmailEntry() {
         changed.connect(on_changed);
+        key_press_event.connect(on_key_press);
     }
 
     private void on_changed() {
+        ((ContactEntryCompletion) get_completion()).reset_selection();
         if (Geary.String.is_empty(text.strip())) {
             addresses = null;
             valid_or_empty = true;
@@ -38,6 +40,16 @@ public class EmailEntry : Gtk.Entry {
             }
         }
         valid_or_empty = true;
+    }
+    
+    private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
+        if (event.keyval == Gdk.Key.Tab) {
+            ((ContactEntryCompletion) get_completion()).trigger_selection();
+            get_toplevel().child_focus(Gtk.DirectionType.TAB_FORWARD);
+            return true;
+        }
+        
+        return false;
     }
 }
 

@@ -1,17 +1,26 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public interface Geary.Comparable {
     public abstract int compare(Comparable other);
     
     /**
-     * A CompareFunc for any object that implements Comparable.
+     * A CompareFunc for any object that implements Comparable
+     * (ascending order).
      */
     public static int compare_func(void *a, void *b) {
         return ((Comparable *) a)->compare((Comparable *) b);
+    }
+    
+    /**
+     * A reverse CompareFunc for any object that implements
+     * Comparable (descending order).
+     */
+    public static int reverse_compare_func(void *a, void *b) {
+        return ((Comparable *) b)->compare((Comparable *) a);
     }
     
     /**
@@ -40,6 +49,15 @@ public interface Geary.Equalable {
      */
     public static bool equal_func(void *a, void *b) {
         return ((Equalable *) a)->equals((Equalable *) b);
+    }
+    
+    /**
+     * EqualFunc for nullable objects that implement Equalable.
+     */
+    public static bool nullable_equal_func(void *a, void *b) {
+        if (a == null || b == null)
+            return (a == null && b == null);
+        return equal_func(a, b);
     }
     
     /**

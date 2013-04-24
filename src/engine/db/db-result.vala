@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.Db.Result : Geary.Db.Context {
@@ -35,7 +35,8 @@ public class Geary.Db.Result : Geary.Db.Context {
         check_cancelled("Result.next", cancellable);
         
         if (!finished) {
-            finished = (throw_on_error("Result.next", statement.stmt.step())) != Sqlite.ROW;
+            finished = throw_on_error("Result.next", statement.stmt.step(), statement.sql) != Sqlite.ROW;
+            
             log(finished ? "NO ROW" : "ROW");
         }
         
@@ -114,10 +115,10 @@ public class Geary.Db.Result : Geary.Db.Context {
     /**
      * column is zero-based.
      */
-    public string string_at(int column) throws DatabaseError {
+    public unowned string string_at(int column) throws DatabaseError {
         verify_at(column);
         
-        string s = statement.stmt.column_text(column);
+        unowned string s = statement.stmt.column_text(column);
         log("string_at(%d) -> %s", column, s);
         
         return s;
@@ -199,7 +200,7 @@ public class Geary.Db.Result : Geary.Db.Context {
      * name is the name of the column in the result set.  See Statement.get_column_index() for name
      * matching rules.
      */
-    public string string_for(string name) throws DatabaseError {
+    public unowned string string_for(string name) throws DatabaseError {
         return string_at(convert_for(name));
     }
     

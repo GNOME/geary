@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -12,7 +12,10 @@
  * The EmailPrefetcher does not maintain a reference to the folder.
  */
 public class Geary.ImapEngine.EmailPrefetcher : Object {
-    public const int PREFETCH_DELAY_SEC = 5;
+    public const int PREFETCH_DELAY_SEC = 1;
+    
+    private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
+    private const int PREFETCH_CHUNKS = 500;
     
     private unowned Geary.Folder folder;
     private int start_delay_sec;
@@ -21,6 +24,8 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         Hashable.hash_func, Equalable.equal_func);
     private uint schedule_id = 0;
     private Cancellable cancellable = new Cancellable();
+    
+    public signal void halting();
     
     public EmailPrefetcher(Geary.Folder folder, int start_delay_sec = PREFETCH_DELAY_SEC) {
         assert(start_delay_sec > 0);
@@ -42,12 +47,16 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         folder.email_locally_appended.disconnect(on_locally_appended);
     }
     
+    public bool has_work() {
+        return prefetch_ids.size > 0;
+    }
+    
     private void on_opened(Geary.Folder.OpenState open_state) {
         if (open_state != Geary.Folder.OpenState.BOTH)
             return;
         
         cancellable = new Cancellable();
-        schedule_prefetch_all();
+        schedule_prefetch_all_local();
     }
     
     private void on_closed(Geary.Folder.CloseReason close_reason) {
@@ -65,9 +74,9 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         schedule_prefetch(ids);
     }
     
-    private void schedule_prefetch_all() {
+    private void schedule_prefetch_all_local() {
         // Async method will schedule prefetch once ids are known
-        do_prefetch_all.begin();
+        do_prefetch_all_local.begin();
     }
     
     private void schedule_prefetch(Gee.Collection<Geary.EmailIdentifier> ids) {
@@ -76,7 +85,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         if (schedule_id != 0)
             Source.remove(schedule_id);
         
-        schedule_id = Timeout.add_seconds(start_delay_sec, on_start_prefetch, Priority.LOW);
+        schedule_id = Timeout.add_seconds(start_delay_sec, on_start_prefetch);
     }
     
     private bool on_start_prefetch() {
@@ -87,26 +96,58 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         return false;
     }
     
-    private async void do_prefetch_all() {
-        Gee.List<Geary.Email>? list = null;
-        try {
-            // by listing NONE, retrieving only the EmailIdentifier for the range (which here is all)
-            list = yield folder.list_email_async(1, -1, Geary.Email.Field.NONE,
-                Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
-        } catch (Error err) {
-            debug("Error while prefetching all emails for %s: %s", folder.to_string(), err.message);
+    private async void do_prefetch_all_local() {
+        int low = -1;
+        bool finished = false;
+        for (;;) {
+            if (finished)
+                break;
+            
+            finished = (low == 1);
+            
+            Gee.List<Geary.Email>? list = null;
+            try {
+                // by listing NONE, retrieving only the EmailIdentifier for the range
+                list = yield folder.list_email_async(low, PREFETCH_CHUNKS, Geary.Email.Field.NONE,
+                    Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            } catch (Error err) {
+                debug("Error while list local emails for %s: %s", folder.to_string(), err.message);
+            }
+            
+            if (list == null || list.size == 0)
+                break;
+            
+            low = Numeric.int_floor(low - PREFETCH_CHUNKS, 1);
+            
+            Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>(
+                Hashable.hash_func, Equalable.equal_func);
+            foreach (Geary.Email email in list)
+                ids.add(email.id);
+            
+            // avoid a bit of work by seeing if any of these are not fully prefetched
+            if (ids.size > 0) {
+                Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? fields = null;
+                try {
+                    fields = yield folder.list_local_email_fields_async(ids, cancellable);
+                } catch (Error err) {
+                    debug("Error listing local email fields for %s: %s", folder.to_string(),
+                        err.message);
+                }
+                
+                // reuse ids Collection
+                ids.clear();
+                
+                if (fields != null) {
+                    foreach (Geary.EmailIdentifier id in fields.keys) {
+                        if (!fields.get(id).fulfills(PREFETCH_FIELDS))
+                            ids.add(id);
+                    }
+                }
+            }
+            
+            if (ids.size > 0)
+                schedule_prefetch(ids);
         }
-        
-        if (list == null || list.size == 0)
-            return;
-        
-        Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>(
-            Hashable.hash_func, Equalable.equal_func);
-        foreach (Geary.Email email in list)
-            ids.add(email.id);
-        
-        if (ids.size > 0)
-            schedule_prefetch(ids);
     }
     
     private async void do_prefetch() {
@@ -119,6 +160,10 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
                 debug("Error while prefetching emails for %s: %s", folder.to_string(), err.message);
         }
         
+        // only signal "halting" if it looks like nothing more is waiting for another round
+        if (prefetch_ids.size == 0)
+            halting();
+        
         if (token != NonblockingMutex.INVALID_TOKEN) {
             try {
                 mutex.release(ref token);
@@ -129,8 +174,6 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
     }
     
     private async void do_prefetch_batch() throws Error {
-        debug("do_prefetch_batch %s %d", folder.to_string(), prefetch_ids.size);
-        
         // snarf up all requested EmailIdentifiers for this round
         Gee.HashSet<Geary.EmailIdentifier> ids = prefetch_ids;
         prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>(Hashable.hash_func, Equalable.equal_func);
@@ -141,16 +184,25 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         // Get the stored fields of all the local email
         Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? local_fields =
             yield folder.list_local_email_fields_async(ids, cancellable);
-        
         if (local_fields == null || local_fields.size == 0) {
             debug("No local fields in %s", folder.to_string());
             
             return;
         }
         
-        // Sort email by size
-        Gee.TreeSet<Geary.Email> sorted_email = new Gee.TreeSet<Geary.Email>(email_size_ascending_comparator);
+        debug("do_prefetch_batch %s %d", folder.to_string(), ids.size);
+        
+        // Sort email by date
+        int skipped = 0;
+        Gee.TreeSet<Geary.Email> sorted_email = new Collection.FixedTreeSet<Geary.Email>(
+            Email.compare_date_received_descending);
         foreach (Geary.EmailIdentifier id in local_fields.keys) {
+            if (local_fields.get(id).fulfills(PREFETCH_FIELDS)) {
+                skipped++;
+                
+                continue;
+            }
+            
             sorted_email.add(yield folder.fetch_email_async(id, Geary.Email.Field.PROPERTIES,
                 Geary.Folder.ListFlags.LOCAL_ONLY, cancellable));
         }
@@ -159,64 +211,29 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         // constituting it) and PREVIEW from HEADER and BODY if available.  When it can do that
         // won't need to prefetch ENVELOPE or PREVIEW; prefetching HEADER and BODY will be enough.
         
+        // Another big TODO: The engine needs to be able to chunk BODY requests so a large email
+        // doesn't monopolize the pipe and prevent other requests from going through
+        
         foreach (Geary.Email email in sorted_email) {
-            Geary.EmailIdentifier id = email.id;
-            Geary.Email.Field has_fields = local_fields.get(id);
-            
-            if (!yield prefetch_field_async(Geary.Email.Field.ENVELOPE, has_fields, id, "envelope"))
-                break;
-            
-            if (!yield prefetch_field_async(Geary.Email.Field.HEADER, has_fields, id, "headers"))
-                break;
-            
-            if (!yield prefetch_field_async(Geary.Email.Field.BODY, has_fields, id, "body"))
-                break;
-            
-            if (!yield prefetch_field_async(Geary.Email.Field.PREVIEW, has_fields, id, "preview"))
-                break;
-            
             if (cancellable.is_cancelled())
                 break;
+            
+            try {
+                yield folder.fetch_email_async(email.id, PREFETCH_FIELDS, Folder.ListFlags.NONE,
+                    cancellable);
+            } catch (Error err) {
+                if (!(err is IOError.CANCELLED)) {
+                    debug("Error prefetching %s for %s: %s", folder.to_string(), email.id.to_string(),
+                        err.message);
+                } else {
+                    // only exit if cancelled; fetch_email_async() can error out on lots of things,
+                    // including mail that's been deleted, and that shouldn't stop the prefetcher
+                    break;
+                }
+            }
         }
         
-        debug("finished do_prefetch_batch %s %d", folder.to_string(), ids.size);
-    }
-    
-    private async bool prefetch_field_async(Geary.Email.Field field, Geary.Email.Field has_fields,
-        Geary.EmailIdentifier id, string name) {
-        if (has_fields.fulfills(field))
-            return true;
-        
-        if (cancellable.is_cancelled())
-            return false;
-        
-        try {
-            yield folder.fetch_email_async(id, field, Geary.Folder.ListFlags.NONE, cancellable);
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED))
-                debug("Error prefetching %s for %s: %s", name, id.to_string(), err.message);
-        }
-        
-        return true;
-    }
-    
-    private static int email_size_ascending_comparator(void *a, void *b) {
-        long asize = 0;
-        Geary.Imap.EmailProperties? aprop = (Geary.Imap.EmailProperties) ((Geary.Email *) a)->properties;
-        if (aprop != null && aprop.rfc822_size != null)
-            asize = aprop.rfc822_size.value;
-        
-        long bsize = 0;
-        Geary.Imap.EmailProperties? bprop = (Geary.Imap.EmailProperties) ((Geary.Email *) b)->properties;
-        if (bprop != null && bprop.rfc822_size != null)
-            bsize = bprop.rfc822_size.value;
-        
-        if (asize < bsize)
-            return -1;
-        else if (asize > bsize)
-            return 1;
-        else
-            return 0;
+        debug("finished do_prefetch_batch %s total=%d skipped=%d", folder.to_string(), ids.size, skipped);
     }
 }
 

@@ -1,10 +1,10 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.Db.TransactionAsyncJob : Object {
+private class Geary.Db.TransactionAsyncJob : BaseObject {
     private TransactionType type;
     private unowned TransactionMethod cb;
     private Cancellable cancellable;
@@ -17,7 +17,7 @@ private class Geary.Db.TransactionAsyncJob : Object {
         this.cb = cb;
         this.cancellable = cancellable ?? new Cancellable();
         
-        completed = new NonblockingEvent(cancellable);
+        completed = new NonblockingEvent();
     }
     
     public void cancel() {
@@ -38,7 +38,9 @@ private class Geary.Db.TransactionAsyncJob : Object {
             
             outcome = cx.exec_transaction(type, cb, cancellable);
         } catch (Error err) {
-            debug("AsyncJob: transaction completed with error: %s", err.message);
+            if (!(err is IOError.CANCELLED))
+                debug("AsyncJob: transaction completed with error: %s", err.message);
+            
             caught_err = err;
         }
         
@@ -67,7 +69,7 @@ private class Geary.Db.TransactionAsyncJob : Object {
         try {
             completed.notify();
         } catch (Error err) {
-            if (caught_err != null) {
+            if (caught_err != null && !(caught_err is IOError.CANCELLED)) {
                 debug("Unable to notify AsyncTransaction has completed w/ err %s: %s",
                     caught_err.message, err.message);
             } else {
@@ -81,9 +83,12 @@ private class Geary.Db.TransactionAsyncJob : Object {
         return false;
     }
     
-    public async TransactionOutcome wait_for_completion_async(Cancellable? cancellable = null)
+    // No way to cancel this because the callback thread *must* finish before
+    // we move on here.  Any I/O the thread is doing can still be cancelled
+    // using our cancel() above.
+    public async TransactionOutcome wait_for_completion_async()
         throws Error {
-        yield completed.wait_async(cancellable);
+        yield completed.wait_async();
         if (caught_err != null)
             throw caught_err;
         

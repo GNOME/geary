@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.Smtp.AbstractAuthenticator : Object, Geary.Smtp.Authenticator {
+public abstract class Geary.Smtp.AbstractAuthenticator : BaseObject, Geary.Smtp.Authenticator {
     public Credentials credentials { get; private set; }
     
     public AbstractAuthenticator(Credentials credentials) {

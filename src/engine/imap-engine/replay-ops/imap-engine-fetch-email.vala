@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation {
@@ -47,13 +47,22 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
                 throw err;
         }
         
+        int remote_count;
+        int last_seen_remote_count;
+        int usable_remote_count = engine.get_remote_counts(out remote_count,
+            out last_seen_remote_count);
+        
+        // fixup position
+        if (email != null && usable_remote_count > 0) {
+            int local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+                cancellable);
+            if (local_count < usable_remote_count)
+                email.update_position(email.position + (usable_remote_count - local_count));
+        }
+        
         // If returned in full, done
         if (email != null && email.fields.fulfills(required_fields))
             return ReplayOperation.Status.COMPLETED;
-        
-        int remote_count;
-        int last_seen_remote_count;
-        engine.get_remote_counts(out remote_count, out last_seen_remote_count);
         
         // If local only (or not connected) and not found fully in local store, throw NOT_FOUND;
         // there is no fallback

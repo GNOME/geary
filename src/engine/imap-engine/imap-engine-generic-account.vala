@@ -1,10 +1,12 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
+    private const int REFRESH_FOLDER_LIST_SEC = 10 * 60;
+    
     private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
     
@@ -17,6 +19,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         FolderPath, GenericFolder>(Hashable.hash_func, Equalable.equal_func);
     private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>(
         Hashable.hash_func, Equalable.equal_func);
+    private uint refresh_folder_timeout_id = 0;
+    private bool in_refresh_enumerate = false;
+    private Cancellable refresh_cancellable = new Cancellable();
     
     public GenericAccount(string name, Geary.AccountInformation information, Imap.Account remote,
         ImapDB.Account local) {
@@ -47,29 +52,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
     }
     
-    protected override void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable) {
-        base.notify_folders_available_unavailable(available, unavailable);
-
-        if (available != null) {
-            foreach(Folder f in available) {
-                if (f.has_children().is_possible())
-                    enumerate_folders_async.begin(f.get_path(), null, on_enumerate_folders_async_complete);
-            }
-        }
-    }
-
-    private void on_enumerate_folders_async_complete(Object? object, AsyncResult result) {
-        try {
-            enumerate_folders_async.end(result);
-        } catch (Error e) {
-            debug("Error enumerating subfolders: %s", e.message);
-        }
-    }
-
     public override async void open_async(Cancellable? cancellable = null) throws Error {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
+        
+        // To prevent spurious connection failures, we make sure we have the
+        // IMAP password before attempting a connection.  This might have to be
+        // reworked when we allow passwordless logins.
+        if (!information.imap_credentials.is_complete())
+            yield information.fetch_passwords_async(Geary.CredentialsMediator.ServiceFlag.IMAP);
         
         yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"), cancellable);
         
@@ -96,7 +87,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         notify_opened();
 
         notify_folders_available_unavailable(local_only.values, null);
-        yield enumerate_folders_async(null, cancellable);
+        
+        // schedule an immediate sweep of the folders; once this is finished, folders will be
+        // regularly enumerated
+        reschedule_folder_refresh(true);
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -172,6 +166,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
 
         if (built_folders.size > 0)
             notify_folders_available_unavailable(built_folders, null);
+        
         return return_folders;
     }
     
@@ -193,11 +188,51 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
 
     public override Gee.Collection<Geary.Folder> list_folders() throws Error {
         check_open();
+        
         return existing_folders.values;
     }
     
-    private async Gee.Collection<Geary.Folder> enumerate_folders_async(Geary.FolderPath? parent,
-        Cancellable? cancellable = null) throws Error {
+    private void reschedule_folder_refresh(bool immediate) {
+        if (in_refresh_enumerate)
+            return;
+        
+        cancel_folder_refresh();
+        
+        refresh_folder_timeout_id = immediate
+            ? Idle.add(on_refresh_folders)
+            : Timeout.add_seconds(REFRESH_FOLDER_LIST_SEC, on_refresh_folders);
+    }
+    
+    private void cancel_folder_refresh() {
+        if (refresh_folder_timeout_id != 0) {
+            Source.remove(refresh_folder_timeout_id);
+            refresh_folder_timeout_id = 0;
+        }
+    }
+    
+    private bool on_refresh_folders() {
+        in_refresh_enumerate = true;
+        enumerate_folders_async.begin(null, refresh_cancellable, on_refresh_completed);
+        
+        refresh_folder_timeout_id = 0;
+        
+        return false;
+    }
+    
+    private void on_refresh_completed(Object? source, AsyncResult result) {
+        try {
+            enumerate_folders_async.end(result);
+        } catch (Error err) {
+            if (!(err is IOError.CANCELLED))
+                debug("Refresh of account %s folders did not complete: %s", to_string(), err.message);
+        }
+        
+        in_refresh_enumerate = false;
+        reschedule_folder_refresh(false);
+    }
+    
+    private async void enumerate_folders_async(Geary.FolderPath? parent, Cancellable? cancellable = null)
+        throws Error {
         check_open();
         
         Gee.Collection<ImapDB.Folder>? local_list = null;
@@ -219,8 +254,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             engine_list.add_all(local_only.values);
         
         background_update_folders.begin(parent, engine_list, cancellable);
-        
-        return engine_list;
     }
     
     public override Geary.ContactStore get_contact_store() {
@@ -284,7 +317,27 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
         
         // update all remote folders properties in the local store and active in the system
+        Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>(
+            Hashable.hash_func, Equalable.equal_func);
         foreach (Imap.Folder remote_folder in remote_folders) {
+            // only worry about alterations if the remote is openable
+            if (remote_folder.get_properties().is_openable.is_possible()) {
+                ImapDB.Folder? local_folder = null;
+                try {
+                    local_folder = yield local.fetch_folder_async(remote_folder.get_path(), cancellable);
+                } catch (Error err) {
+                    if (!(err is EngineError.NOT_FOUND)) {
+                        debug("Unable to fetch local folder for remote %s: %s", remote_folder.get_path().to_string(),
+                            err.message);
+                    }
+                }
+                
+                if (local_folder != null) {
+                    if (remote_folder.get_properties().have_contents_changed(local_folder.get_properties()).is_possible())
+                        altered_paths.add(remote_folder.get_path());
+                }
+            }
+            
             try {
                 yield local.update_folder_async(remote_folder, cancellable);
             } catch (Error update_error) {
@@ -379,6 +432,32 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         if (engine_added != null)
             notify_folders_added_removed(engine_added, null);
+        
+        // report all altered folders
+        if (altered_paths.size > 0) {
+            Gee.ArrayList<Geary.Folder> altered = new Gee.ArrayList<Geary.Folder>();
+            foreach (Geary.FolderPath path in altered_paths) {
+                if (existing_folders.has_key(path))
+                    altered.add(existing_folders.get(path));
+                else
+                    debug("Unable to report %s altered: no local representation", path.to_string());
+            }
+            
+            if (altered.size > 0)
+                notify_folders_contents_altered(altered);
+        }
+        
+        // enumerate children of each remote folder
+        foreach (Imap.Folder remote_folder in remote_folders) {
+            if (remote_folder.get_properties().has_children.is_possible()) {
+                try {
+                    yield enumerate_folders_async(remote_folder.get_path(), cancellable);
+                } catch (Error err) {
+                    debug("Unable to enumerate children of %s: %s", remote_folder.get_path().to_string(),
+                        err.message);
+                }
+            }
+        }
     }
     
     public override async void send_email_async(Geary.ComposedEmail composed,
@@ -393,6 +472,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
 
     private void on_email_sent(Geary.RFC822.Message rfc822) {
         notify_email_sent(rfc822);
+    }
+    
+    public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error {
+        return yield local.search_message_id_async(
+            message_id, requested_fields, partial_ok, folder_blacklist, cancellable);
+    }
+    
+    public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
+        return yield local.fetch_email_async(email_id, required_fields, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

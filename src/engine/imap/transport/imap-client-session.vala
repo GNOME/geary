@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.ClientSession {
+public class Geary.Imap.ClientSession : BaseObject {
     // 30 min keepalive required to maintain session
     public const uint MIN_KEEPALIVE_SEC = 30 * 60;
     
@@ -17,7 +17,7 @@ public class Geary.Imap.ClientSession {
     public const uint AGGRESSIVE_KEEPALIVE_SEC = 30;
     
     // NOOP is only sent after this amount of time has passed since the last received
-    // message on the connection dependant on connection state (selected/examined vs. authorized)
+    // message on the connection dependent on connection state (selected/examined vs. authorized)
     public const uint DEFAULT_SELECTED_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
     public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;

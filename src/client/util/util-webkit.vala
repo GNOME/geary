@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Regex to detect URLs.
@@ -223,5 +223,113 @@ public string decorate_quotes(string text) throws Error {
         level -= 1;
     }
     return outtext;
+}
+
+public string html_to_flowed_text(WebKit.DOM.Document doc) {
+    WebKit.DOM.NodeList blockquotes;
+    try {
+        blockquotes = doc.query_selector_all("blockquote");
+    } catch (Error error) {
+        debug("Error selecting blockquotes: %s", error.message);
+        return "";
+    }
+    
+    int nbq = (int) blockquotes.length;
+    WebKit.DOM.Text[] tokens = new WebKit.DOM.Text[nbq];
+    string[] bqtexts = new string[nbq];
+    
+    // Get text of blockquotes and pull them out of DOM.  We need to get the text while they're
+    // still in the DOM to get newlines at appropriate places.  We go through the list of blockquotes
+    // from the end so that we get the innermost ones first.
+    for (int i = nbq - 1; i >= 0; i--) {
+        WebKit.DOM.Node bq = blockquotes.item(i);
+        WebKit.DOM.Node parent = bq.get_parent_node();
+        bqtexts[i] = ((WebKit.DOM.HTMLElement) bq).get_inner_text();
+        tokens[i] = doc.create_text_node(@"$i");
+        try {
+            parent.replace_child(tokens[i], bq);
+        } catch (Error error) {
+            debug("Error manipulating DOM: %s", error.message);
+        }
+    }
+    
+    // Reassemble plain text out of parts
+    string doctext = resolve_nesting(doc.get_body().get_inner_text(), bqtexts);
+    
+    // Reassemble DOM
+    for (int i = 0; i < nbq; i++) {
+        WebKit.DOM.Node parent = tokens[i].get_parent_node();
+        try {
+            parent.replace_child(blockquotes.item(i), tokens[i]);
+        } catch (Error error) {
+            debug("Error manipulating DOM: %s", error.message);
+        }
+    }
+    
+    // Wrap, space stuff, quote
+    string[] lines = doctext.split("\n");
+    GLib.StringBuilder flowed = new GLib.StringBuilder.sized(doctext.length);
+    foreach (string line in lines) {
+        int quote_level = 0;
+        while (line[quote_level] == Geary.RFC822.Utils.QUOTE_MARKER)
+            quote_level += 1;
+        line = line[quote_level:line.length];
+        string prefix = quote_level > 0 ? string.nfill(quote_level, '>') + " " : "";
+        int max_len = 72 - prefix.length;
+        
+        do {
+            if (quote_level == 0 && (line.has_prefix(">") || line.has_prefix("From")))
+                line = " " + line;
+            
+            int cut_ind = line.length;
+            if (cut_ind > max_len) {
+                string beg = line[0:max_len];
+                cut_ind = beg.last_index_of(" ") + 1;
+                if (cut_ind == 0) {
+                    cut_ind = line.index_of(" ") + 1;
+                    if (cut_ind == 0)
+                        cut_ind = line.length;
+                    if (cut_ind > 998 - prefix.length)
+                        cut_ind = 998 - prefix.length;
+                }
+            }
+            flowed.append(prefix + line[0:cut_ind] + "\n");
+            line = line[cut_ind:line.length];
+        } while (line.length > 0);
+    }
+    
+    return flowed.str;
+}
+
+public string quote_lines(string text) {
+    string[] lines = text.split("\n");
+    for (int i=0; i<lines.length; i++)
+        lines[i] = @"$(Geary.RFC822.Utils.QUOTE_MARKER)" + lines[i];
+    return string.joinv("\n", lines);
+}
+
+public string resolve_nesting(string text, string[] values) {
+    try {
+        GLib.Regex tokenregex = new GLib.Regex("(.?)([0-9]*)(.?)");
+        return tokenregex.replace_eval(text, -1, 0, 0, (info, res) => {
+            int key = int.parse(info.fetch(2));
+            string prev_char = info.fetch(1), next_char = info.fetch(3);
+            // Make sure there's a newline before and after the quote.
+            if (prev_char != "" && prev_char != "\n")
+                prev_char = prev_char + "\n";
+            if (next_char != "" && next_char != "\n")
+                next_char = "\n" + next_char;
+            if (key >= 0 && key < values.length) {
+                res.append(prev_char + quote_lines(resolve_nesting(values[key], values)) + next_char);
+            } else {
+                debug("Regex error in denesting blockquotes: Invalid key");
+                res.append("");
+            }
+            return false;
+        });
+    } catch (Error error) {
+        debug("Regex error in denesting blockquotes: %s", error.message);
+        return "";
+    }
 }
 

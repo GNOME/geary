@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplayOperation {
@@ -54,6 +54,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
             if (list == null || list.size == 0)
                 return null;
             
+            // TODO: create_or_merge_email_async() should only write if something has changed
             yield owner.local_folder.create_or_merge_email_async(list, cancellable);
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];

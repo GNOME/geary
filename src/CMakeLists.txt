@@ -1,5 +1,5 @@
 # Geary build script
-# Copyright 2011-2012 Yorba Foundation
+# Copyright 2011-2013 Yorba Foundation
 
 set(COMMON_SRC
 common/common-arrays.vala
@@ -15,6 +15,7 @@ engine/abstract/geary-abstract-folder.vala
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
 engine/api/geary-attachment.vala
+engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
 engine/api/geary-contact.vala
 engine/api/geary-contact-importance.vala
@@ -33,6 +34,7 @@ engine/api/geary-engine-error.vala
 engine/api/geary-engine.vala
 engine/api/geary-folder.vala
 engine/api/geary-folder-path.vala
+engine/api/geary-folder-properties.vala
 engine/api/geary-folder-supports-archive.vala
 engine/api/geary-folder-supports-copy.vala
 engine/api/geary-folder-supports-create.vala
@@ -67,6 +69,7 @@ engine/imap/api/imap-folder.vala
 engine/imap/command/imap-commands.vala
 engine/imap/command/imap-command.vala
 engine/imap/command/imap-fetch-command.vala
+engine/imap/imap.vala
 engine/imap/imap-error.vala
 engine/imap/message/imap-capabilities.vala
 engine/imap/message/imap-data-format.vala
@@ -76,6 +79,7 @@ engine/imap/message/imap-fetch-data-type.vala
 engine/imap/message/imap-fetched-data.vala
 engine/imap/message/imap-flag.vala
 engine/imap/message/imap-mailbox-information.vala
+engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-set.vala
 engine/imap/message/imap-parameter.vala
@@ -102,14 +106,18 @@ engine/imap/transport/imap-serializer.vala
 engine/imap-db/imap-db-account.vala
 engine/imap-db/imap-db-contact.vala
 engine/imap-db/imap-db-database.vala
+engine/imap-db/imap-db-email-identifier.vala
 engine/imap-db/imap-db-folder.vala
 engine/imap-db/imap-db-message-addresses.vala
 engine/imap-db/imap-db-message-row.vala
 engine/imap-db/outbox/smtp-outbox-email-identifier.vala
 engine/imap-db/outbox/smtp-outbox-email-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder.vala
+engine/imap-db/outbox/smtp-outbox-folder-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
+engine/imap-engine/imap-engine.vala
+engine/imap-engine/imap-engine-account-synchronizer.vala
 engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
@@ -147,8 +155,11 @@ engine/nonblocking/nonblocking-mutex.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 
+engine/rfc822/rfc822.vala
 engine/rfc822/rfc822-error.vala
 engine/rfc822/rfc822-gmime-filter-flowed.vala
+engine/rfc822/rfc822-gmime-filter-blockquotes.vala
+engine/rfc822/rfc822-gmime-filter-plain.vala
 engine/rfc822/rfc822-mailbox-addresses.vala
 engine/rfc822/rfc822-mailbox-address.vala
 engine/rfc822/rfc822-message.vala
@@ -180,6 +191,7 @@ engine/util/util-converter.vala
 engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
+engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
 engine/util/util-interfaces.vala
 engine/util/util-memory.vala
@@ -197,14 +209,16 @@ client/geary-application.vala
 client/geary-args.vala
 client/geary-config.vala
 client/geary-controller.vala
-client/gnome-keyring-mediator.vala
 client/main.vala
+client/secret-mediator.vala
 
 client/accounts/account-dialog.vala
 client/accounts/account-dialog-account-list-pane.vala
 client/accounts/account-dialog-add-edit-pane.vala
+client/accounts/account-dialog-pane.vala
 client/accounts/account-dialog-remove-confirm-pane.vala
 client/accounts/account-dialog-remove-fail-pane.vala
+client/accounts/account-dialog-spinner-pane.vala
 client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
@@ -227,7 +241,6 @@ client/folder-list/folder-list-special-grouping.vala
 
 client/models/conversation-list-store.vala
 
-client/notification/libindicate.vala
 client/notification/libmessagingmenu.vala
 client/notification/new-messages-indicator.vala
 client/notification/new-messages-monitor.vala
@@ -283,27 +296,6 @@ ensure_vala_version("0.17.4" MINIMUM)
 include(ValaPrecompile)
 
 # Packages
-if (LIBINDICATE_FOUND)
-    message(STATUS "Unity indicate support: ON")
-    set(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        indicate-0.7
-    )
-    
-    set(EXTRA_CLIENT_PACKAGES
-        ${EXTRA_CLIENT_PACKAGES}
-        Dbusmenu-0.4
-        Indicate-0.7
-    )
-    
-    set(EXTRA_VALA_OPTIONS
-        ${EXTRA_VALA_OPTIONS}
-        -D HAVE_LIBINDICATE
-    )
-else ()
-    message(STATUS "Unity indicate support: OFF")
-endif ()
-
 if (LIBMESSAGINGMENU_FOUND)
     message(STATUS "Unity messaging menu support: ON")
     set(EXTRA_CLIENT_PKG_CONFIG
@@ -344,26 +336,6 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
-if (LIBGRANITE_FOUND)
-    message(STATUS "Granite support: ON")
-    set(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        granite
-    )
-    
-    set(EXTRA_CLIENT_PACKAGES
-        ${EXTRA_CLIENT_PACKAGES}
-        granite
-    )
-    
-    set(EXTRA_VALA_OPTIONS
-        ${EXTRA_VALA_OPTIONS}
-        -D HAVE_LIBGRANITE
-    )
-else ()
-    message(STATUS "Granite support: OFF")
-endif ()
-
 set(TARGET_GLIB 2.32)
 
 pkg_check_modules(DEPS REQUIRED
@@ -377,7 +349,7 @@ pkg_check_modules(DEPS REQUIRED
     libcanberra>=0.28
     sqlite3>=3.7.4
     gmime-2.6>=2.6.0
-    gnome-keyring-1>=3.2.2
+    libsecret-1>=0.11
     webkitgtk-3.0>=1.8.0
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -387,7 +359,7 @@ set(ENGINE_PACKAGES
 )
 
 set(CLIENT_PACKAGES
-    gtk+-3.0 gnome-keyring-1 WebKit-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 libsecret-1 WebKit-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -419,6 +391,16 @@ if (NOT DEBUG)
     )    
 endif ()
 
+if (REF_TRACKING)
+    message(STATUS "Reference tracking: ON")
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        --define=REF_TRACKING
+    )
+else ()
+    message(STATUS "Reference tracking: OFF")
+endif ()
+
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
@@ -426,7 +408,6 @@ add_definitions(${CFLAGS})
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
-    --girdir=${CMAKE_SOURCE_DIR}/bindings/gir
     --target-glib=${TARGET_GLIB}
     --thread
     --enable-checking

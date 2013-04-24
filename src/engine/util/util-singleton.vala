@@ -1,14 +1,14 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
  * Singleton is a simple way of creating a one-item read-only collection.
  */
 private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
-    private class IteratorImpl<G> : Object, Gee.Iterator<G> {
+    private class IteratorImpl<G> : BaseObject, Gee.Iterator<G> {
         private G item;
         private bool done = false;
         

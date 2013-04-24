@@ -1,13 +1,13 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// This is coded this way to allow for libindicate and libmessagingmenu to coexist in code (if not
+// This is coded this way to allow for multiple indicators to coexist in code (if not
 // compiled at same time) and minimize the exposure of differences to the rest of the application.
 
-public abstract class NewMessagesIndicator : Object {
+public abstract class NewMessagesIndicator : Geary.BaseObject {
     protected NewMessagesMonitor monitor;
     
     public signal void application_activated(uint32 timestamp);
@@ -23,17 +23,12 @@ public abstract class NewMessagesIndicator : Object {
     public static NewMessagesIndicator create(NewMessagesMonitor monitor) {
         NewMessagesIndicator? indicator = null;
         
-        // these are ordered in order of preference, as it's possible for libindicate and
-        // libmessagingmenu to coexist (although only libmessagingmenu will work)
+        // Indicators are ordered from most to least prefered.  If more than one is available,
+        // use the first.
         
 #if HAVE_LIBMESSAGINGMENU
         if (indicator == null)
             indicator = new Libmessagingmenu(monitor);
-#endif
-        
-#if HAVE_LIBINDICATE
-        if (indicator == null)
-            indicator = new Libindicate(monitor);
 #endif
         
         if (indicator == null)

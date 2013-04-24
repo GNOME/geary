@@ -1,12 +1,12 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 extern void qsort(void *base, size_t num, size_t size, CompareFunc compare_func);
 
-public class Geary.Imap.MessageSet {
+public class Geary.Imap.MessageSet : BaseObject {
     public bool is_uid { get; private set; default = false; }
     
     private string value { get; private set; }

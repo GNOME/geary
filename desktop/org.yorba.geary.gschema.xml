@@ -21,15 +21,15 @@
     </key>
     
     <key name="folder-list-pane-position" type="i">
-        <default>-1</default>
+        <default>100</default>
         <summary>position of folder list pane</summary>
-        <description>Position of the folder list Paned grabber. -1 means unset.</description>
+        <description>Position of the folder list Paned grabber.</description>
     </key>
     
     <key name="messages-pane-position" type="i">
-        <default>-1</default>
+        <default>250</default>
         <summary>position of message list pane</summary>
-        <description>Position of the message list Paned grabber. -1 means unset.</description>
+        <description>Position of the message list Paned grabber.</description>
     </key>
     
     <key name="autoselect" type="b">
@@ -63,6 +63,11 @@
         <default>true</default>
         <summary>ask when opening an attachment</summary>
         <description>True to ask when opening an attachment.</description>
+    </key>
+    <key name="compose-as-html" type="b">
+        <default>true</default>
+        <summary>whether to compose emails in HTML</summary>
+        <description>True to compose emails in HTML; false for plain text.</description>
     </key>
 </schema>
 

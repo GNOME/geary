@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.State.Machine {
+public class Geary.State.Machine : BaseObject {
     private Geary.State.MachineDescriptor descriptor;
     private uint state;
     private Mapping[,] transitions;

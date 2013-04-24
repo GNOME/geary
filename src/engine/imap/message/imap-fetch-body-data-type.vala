@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.FetchBodyDataType {
+public class Geary.Imap.FetchBodyDataType : BaseObject {
     public enum SectionPart {
         NONE,
         HEADER,

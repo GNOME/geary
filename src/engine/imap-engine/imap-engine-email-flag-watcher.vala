@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -11,8 +11,13 @@
  *
  * Note that EmailFlagWatcher doesn't maintain a reference to the Geary.Folder it's watching.
  */
-private class Geary.ImapEngine.EmailFlagWatcher : Object {
+private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     public const int DEFAULT_FLAG_WATCH_SEC = 3 * 60;
+    
+    private const int PULL_CHUNK_COUNT = 100;
+    private const int MAX_EMAIL_WATCHED = 1000;
+    
+    public bool enabled { get; set; default = true; }
     
     private unowned Geary.Folder folder;
     private int seconds;
@@ -62,7 +67,8 @@ private class Geary.ImapEngine.EmailFlagWatcher : Object {
     }
     
     private bool on_flag_watch() {
-        flag_watch_async.begin();
+        if (enabled)
+            flag_watch_async.begin();
         
         return true;
     }
@@ -83,47 +89,60 @@ private class Geary.ImapEngine.EmailFlagWatcher : Object {
     private async void do_flag_watch_async() throws Error {
         Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async begin %s", folder.to_string());
         
-        // Fetch all email flags in local folder.
-        Gee.List<Geary.Email>? list_local = yield folder.list_email_async(-1, int.MAX, 
-            Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
-        if (list_local == null || list_local.size == 0) {
-            debug("do_flag_watch_async: no local email in %s", folder.to_string());
+        int low = -1;
+        bool finished = false;
+        int total = 0;
+        for (;;) {
+            if (finished)
+                break;
             
-            return;
-        }
-        
-        // Get all email identifiers in the local folder
-        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
-        foreach (Geary.Email e in list_local)
-            local_map.set(e.id, e.email_flags);
-        
-        // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
-        // and the latest to be gotten from the server (updating the cache in the process)
-        Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
-            Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
-        if (list_remote == null || list_remote.size == 0) {
-            debug("do_flag_watch_async: no remote mail in %s", folder.to_string());
+            // Fetch a chunk of email flags in local folder.
+            Gee.List<Geary.Email>? list_local = yield folder.list_email_async(low, PULL_CHUNK_COUNT,
+                Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            if (list_local == null || list_local.size == 0)
+                break;
             
-            return;
-        }
-        
-        // Build map of emails that have changed.
-        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
-            new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
-            Geary.Equalable.equal_func);
-        foreach (Geary.Email e in list_remote) {
-            if (!local_map.has_key(e.id))
+            total += list_local.size;
+            
+            // if this request's low was 1 or processed the top 2000, then this is the last iteration
+            finished = (low == 1 || total >= MAX_EMAIL_WATCHED);
+            
+            // Get all email identifiers in the local folder; also, update the low and count arguments
+            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
+                Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+            foreach (Geary.Email e in list_local) {
+                if (low == -1)
+                    low = e.position;
+                else if (low > e.position)
+                    low = e.position;
+                
+                local_map.set(e.id, e.email_flags);
+            }
+            
+            // now roll back PULL_CHUNK_COUNT earlier
+            low = Numeric.int_floor(low - PULL_CHUNK_COUNT, 1);
+            
+            // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
+            // and the latest to be gotten from the server (updating the cache in the process)
+            Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
+                Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
+            if (list_remote == null || list_remote.size == 0)
                 continue;
             
-            if (!local_map.get(e.id).equals(e.email_flags))
-                changed_map.set(e.id, e.email_flags);
-        }
-        
-        if (!cancellable.is_cancelled() && changed_map.size > 0) {
-            debug("do_flag_watch_async: %d email flags changed in %s", changed_map.size, folder.to_string());
+            // Build map of emails that have changed.
+            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
+                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
+                Geary.Equalable.equal_func);
+            foreach (Geary.Email e in list_remote) {
+                if (!local_map.has_key(e.id))
+                    continue;
+                
+                if (!local_map.get(e.id).equals(e.email_flags))
+                    changed_map.set(e.id, e.email_flags);
+            }
             
-            email_flags_changed(changed_map);
+            if (!cancellable.is_cancelled() && changed_map.size > 0)
+                email_flags_changed(changed_map);
         }
         
         Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: completed %s", folder.to_string());

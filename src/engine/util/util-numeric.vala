@@ -1,7 +1,7 @@
 /* Copyright 2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 namespace Geary.Numeric {
@@ -40,6 +40,10 @@ public inline bool int_in_range_exclusive(int value, int min, int max) {
 
 public inline bool int64_in_range_exclusive(int64 value, int64 min, int64 max) {
     return (value > min) && (value < max);
+}
+
+public inline int int_round_up(int value, int multiple_of) {
+    return ((value / multiple_of) * multiple_of) + ((value % multiple_of != 0) ? multiple_of : 0);
 }
 
 }

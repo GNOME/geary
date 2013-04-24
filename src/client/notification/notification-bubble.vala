@@ -1,11 +1,11 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Displays a notification bubble
-public class NotificationBubble : GLib.Object {
+public class NotificationBubble : Geary.BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
     
@@ -53,14 +53,14 @@ public class NotificationBubble : GLib.Object {
             Canberra.Context.create(out sound_context);
     }
     
-    private void on_new_messages_arrived() {
+    private void on_new_messages_arrived(Geary.Folder folder) {
         try {
             if (monitor.total_count == 1 && monitor.last_new_message_folder != null &&
                 monitor.last_new_message != null) {
                 notify_one_message_async.begin(monitor.last_new_message_folder,
                     monitor.last_new_message, null);
             } else if (monitor.total_count > 0) {
-                notify_new_mail(monitor.total_count);
+                notify_new_mail(folder, monitor.total_count);
             }
         } catch (Error err) {
             debug("Unable to notify of new mail: %s", err.message);
@@ -72,13 +72,13 @@ public class NotificationBubble : GLib.Object {
         GearyApplication.instance.activate(new string[0]);
     }
     
-    private void notify_new_mail(int count) throws GLib.Error {
+    private void notify_new_mail(Geary.Folder folder, int count) throws GLib.Error {
         // don't pass email if invoked
-        folder = null;
+        this.folder = null;
         email = null;
         
         if (!GearyApplication.instance.config.show_notifications ||
-            !monitor.should_notify_new_messages())
+            !monitor.should_notify_new_messages(folder))
             return;
         
         notification.set_category("email.arrived");
@@ -97,13 +97,13 @@ public class NotificationBubble : GLib.Object {
         this.email = email;
         
         if (!GearyApplication.instance.config.show_notifications ||
-            !monitor.should_notify_new_messages())
+            !monitor.should_notify_new_messages(folder))
             return;
         
         // possible to receive email with no originator
         Geary.RFC822.MailboxAddress? primary = email.get_primary_originator();
         if (primary == null) {
-            notify_new_mail(1);
+            notify_new_mail(folder, 1);
             
             return;
         }

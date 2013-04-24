@@ -14,6 +14,7 @@
     <accelerator action="strikethrough" />
     
     <accelerator action="removeformat" />
+    <accelerator action="compose as html" />
     
     <accelerator action="indent" />
     <accelerator action="outdent" />
@@ -26,4 +27,6 @@
     <accelerator action="font" />
     <accelerator action="color" />
     <accelerator action="insertlink" />
+    
+    <accelerator action="close" />
 </ui>

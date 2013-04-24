@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -23,11 +23,17 @@
  * passed to equals() and compare().  This may be added in the future.
  */
 
-public abstract class Geary.EmailIdentifier : Object, Geary.Equalable, Geary.Comparable, Geary.Hashable {
+public abstract class Geary.EmailIdentifier : BaseObject, Geary.Equalable, Geary.Comparable, Geary.Hashable {
     public int64 ordering { get; protected set; }
     
     protected EmailIdentifier(int64 ordering) {
         this.ordering = ordering;
+    }
+    
+    // Used by some EmailIdentifiers to indicate they are specific to a
+    // particular folder.
+    public virtual Geary.FolderPath? get_folder_path() {
+        return null;
     }
     
     public virtual uint to_hash() {

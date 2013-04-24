@@ -1,35 +1,63 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.NonblockingMailbox<G> : Object {
+public class Geary.NonblockingMailbox<G> : BaseObject {
     public int size { get { return queue.size; } }
+    public bool allow_duplicates { get; set; default = true; }
+    public bool requeue_duplicate { get; set; default = false; }
     
-    private Gee.List<G> queue;
+    private Gee.Queue<G> queue;
     private NonblockingSpinlock spinlock = new NonblockingSpinlock();
     
-    public NonblockingMailbox() {
-        queue = new Gee.LinkedList<G>();
+    public NonblockingMailbox(CompareFunc<G>? comparator = null) {
+        // can't use ternary here, Vala bug
+        if (comparator == null)
+            queue = new Gee.LinkedList<G>();
+        else
+            queue = new Gee.PriorityQueue<G>(comparator);
     }
     
-    public void send(G msg) throws Error {
-        queue.add(msg);
-        spinlock.notify();
+    public bool send(G msg) {
+        if (!allow_duplicates && queue.contains(msg)) {
+            if (requeue_duplicate)
+                queue.remove(msg);
+            else
+                return false;
+        }
+        
+        if (!queue.offer(msg))
+            return false;
+        
+        spinlock.blind_notify();
+        
+        return true;
     }
     
     /**
      * Returns true if the message was revoked.
      */
-    public bool revoke(G msg) throws Error {
+    public bool revoke(G msg) {
         return queue.remove(msg);
+    }
+    
+    /**
+     * Returns number of removed items.
+     */
+    public int clear() {
+        int count = queue.size;
+        if (count != 0)
+            queue.clear();
+        
+        return count;
     }
     
     public async G recv_async(Cancellable? cancellable = null) throws Error {
         for (;;) {
             if (queue.size > 0)
-                return queue.remove_at(0);
+                return queue.poll();
             
             yield spinlock.wait_async(cancellable);
         }
@@ -42,7 +70,7 @@ public class Geary.NonblockingMailbox<G> : Object {
      * This returns a read-only list in queue-order.  Altering will not affect the queue.  Use
      * revoke() to remove enqueued operations.
      */
-    public Gee.List<G> get_all() {
+    public Gee.Collection<G> get_all() {
         return queue.read_only_view;
     }
 }

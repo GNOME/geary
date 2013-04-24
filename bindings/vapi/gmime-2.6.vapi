@@ -1398,7 +1398,7 @@ public class InternetAddressGroup : InternetAddress {
 	[CCode (cname = "internet_address_group_add_member")]
 	public int add_member (InternetAddress member);
 	[CCode (cname = "internet_address_group_get_members")]
-	public InternetAddressList get_members ();
+	public unowned InternetAddressList get_members ();
 	[CCode (cname = "internet_address_group_set_members")]
 	public void set_members (InternetAddressList members);
 }

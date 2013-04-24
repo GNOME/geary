@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -18,7 +18,7 @@
  * in the background and asking the user to reauthenticate each time is deemed inconvenient.
  */
  
-public class Geary.Credentials {
+public class Geary.Credentials : BaseObject, Geary.Equalable {
     public string? user { get; set; }
     public string? pass { get; set; }
     
@@ -41,6 +41,17 @@ public class Geary.Credentials {
     
     public string to_string() {
         return user;
+    }
+    
+    public bool equals(Equalable other) {
+        Geary.Credentials? c = other as Geary.Credentials;
+        if (c == null)
+            return false;
+        
+        if (this == c)
+            return true;
+        
+        return user == c.user && pass == c.pass;
     }
 }
 

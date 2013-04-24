@@ -1,4 +1,4 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -29,21 +29,23 @@ public interface Geary.CredentialsMediator : Object {
      * service.  Return null if the password wasn't in the key store, or the
      * password if it was.
      */
-    public abstract async string? get_password_async(Service service, string username) throws Error;
+    public abstract async string? get_password_async(Service service, string username,
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * Add or update the key store's password entry for the given credentials
      * for the given service.
      */
     public abstract async void set_password_async(Service service,
-        Geary.Credentials credentials) throws Error;
+        Geary.Credentials credentials, Cancellable? cancellable = null) throws Error;
     
     /**
      * Deletes the key store's password entry for the given credentials for the
      * given service.  Do nothing (and do *not* throw an error) if the
      * credentials weren't in the key store.
      */
-    public abstract async void clear_password_async(Service service, string username) throws Error;
+    public abstract async void clear_password_async(Service service, string username,
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * Prompt the user to enter passwords for the given services in the given

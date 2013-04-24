@@ -1,10 +1,10 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.ReplayQueue {
+private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private class ReplayClose : ReplayOperation {
         public ReplayClose() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
@@ -139,14 +139,7 @@ private class Geary.ImapEngine.ReplayQueue {
         // in order), it's *vital* that even REMOTE_ONLY operations go through the local queue,
         // only being scheduled on the remote queue *after* local operations ahead of it have
         // completed; thus, no need for get_scope() to be called here.
-        try {
-            local_queue.send(op);
-        } catch (Error err) {
-            debug("Replay operation %s not scheduled on local queue %s: %s", op.to_string(),
-                to_string(), err.message);
-            
-            return false;
-        }
+        local_queue.send(op);
         
         scheduled(op);
         
@@ -273,12 +266,7 @@ private class Geary.ImapEngine.ReplayQueue {
             }
             
             if (remote_enqueue) {
-                try {
-                    remote_queue.send(op);
-                } catch (Error send_err) {
-                    error("ReplayOperation %s not scheduled on remote queue %s: %s", op.to_string(),
-                        to_string(), send_err.message);
-                }
+                remote_queue.send(op);
             } else {
                 // all code paths to this point should have notified ready if not enqueuing for
                 // next stage

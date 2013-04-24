@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 MainLoop? main_loop = null;
@@ -18,13 +18,13 @@ async void main_async() throws Error {
     
     for (int ctr = 0; ctr < arg_count; ctr++) {
         string subj_msg = "#%d".printf(ctr + 1);
-        composed_email.subject = new Geary.RFC822.Subject(subj_msg);
-        composed_email.body_text = new Geary.RFC822.Text(new Geary.Memory.StringBuffer(subj_msg));
+        composed_email.subject = subj_msg;
+        composed_email.body_text = subj_msg;
         
         Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email);
         stdout.printf("\n\n%s\n\n", msg.to_string());
         
-        yield session.send_email_async(msg);
+        yield session.send_email_async(msg.sender, msg);
         
         stdout.printf("Sent email #%d\n", ctr);
     }

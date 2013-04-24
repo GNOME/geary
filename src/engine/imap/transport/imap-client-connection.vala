@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.ClientConnection {
+public class Geary.Imap.ClientConnection : BaseObject {
     public const uint16 DEFAULT_PORT = 143;
     public const uint16 DEFAULT_PORT_SSL = 993;
     
@@ -441,7 +441,7 @@ public class Geary.Imap.ClientConnection {
     
     private void on_parameters_ready(RootParameters root) {
         try {
-            ServerResponse response = ServerResponse.from_server(root, out response_type);
+            ServerResponse response = ServerResponse.from_server(root);
         } catch (ImapError err) {
             received_bad_response(root, err);
             

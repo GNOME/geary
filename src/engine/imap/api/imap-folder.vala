@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.Imap.Folder : Object {
+private class Geary.Imap.Folder : BaseObject {
     public const bool CASE_SENSITIVE = true;
     
     public bool is_open { get; private set; default = false; }
@@ -37,9 +37,18 @@ private class Geary.Imap.Folder : Object {
         
         readonly = Trillian.UNKNOWN;
         
-        properties = (status != null)
-            ? new Imap.FolderProperties.status(status, info.attrs)
-            : new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
+        properties = new Imap.FolderProperties.status(status, info.attrs);
+    }
+    
+    internal Folder.unselectable(ClientSessionManager session_mgr, Geary.FolderPath path,
+        MailboxInformation info) {
+        this.session_mgr = session_mgr;
+        this.info = info;
+        this.path = path;
+        
+        readonly = Trillian.UNKNOWN;
+        
+        properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
     public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
@@ -65,6 +74,11 @@ private class Geary.Imap.Folder : Object {
         
         // update with new information
         this.readonly = Trillian.from_boolean(readonly);
+        
+        int old_status_messages = properties.status_messages;
+        properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, properties.unseen,
+            mailbox.uid_validity, mailbox.uid_next, properties.attrs);
+        properties.set_status_message_count(old_status_messages, false);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {

@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Defined by CMake build script.
@@ -14,7 +14,7 @@ public class GearyApplication : YorbaApplication {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
     public const string DESCRIPTION = DESKTOP_GENERIC_NAME;
-    public const string COPYRIGHT = _("Copyright 2011-2012 Yorba Foundation");
+    public const string COPYRIGHT = _("Copyright 2011-2013 Yorba Foundation");
     public const string WEBSITE = "http://www.yorba.org";
     public const string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
@@ -24,6 +24,7 @@ public class GearyApplication : YorbaApplication {
     public const string DESKTOP_NAME = _("Geary Mail");
     public const string DESKTOP_GENERIC_NAME = _("Mail Client");
     public const string DESKTOP_COMMENT = _("Send and receive email");
+    public const string DESKTOP_KEYWORDS = _("Email;E-mail;Mail;");
     public const string DESKTOP_COMPOSE_NAME = _("Compose Message");
     
     public const string VERSION = _VERSION;
@@ -37,6 +38,7 @@ public class GearyApplication : YorbaApplication {
         "Nate Lillich <nate@yorba.org>",
         "Matthew Pirocchi <matthew@yorba.org>",
         "Charles Lindsay <chaz@yorba.org>",
+        "Robert Schroll <rschroll@gmail.com>",
         null
     };
     
@@ -96,6 +98,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         
         Configuration.init(is_installed(), GSETTINGS_DIR);
         Date.init();
+        WebKit.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
         
         int ec = base.startup();
         if (ec != 0)
@@ -123,7 +126,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     private async void do_activate_async(owned string[] args) {
         // If Geary is already running, show the main window and return.
         if (controller != null && controller.main_window != null) {
-            controller.main_window.present_with_time((uint32) TimeVal().tv_sec);
+            controller.main_window.present();
             handle_args(args);
             return;
         }
@@ -137,7 +140,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         // Start Geary.
         try {
             yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory(),
-                new GnomeKeyringMediator());
+                new SecretMediator());
             if (Geary.Engine.instance.get_accounts().size == 0)
                 create_account();
         } catch (Error e) {
@@ -201,12 +204,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     // Returns null if we are done validating, or the revised account information if we should retry.
     private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
         Cancellable? cancellable = null) {
-        if (yield validate_async(account_information, cancellable))
+        Geary.Engine.ValidationResult result = yield validate_async(account_information, true, cancellable);
+        if (result == Geary.Engine.ValidationResult.OK)
             return null;
         
         debug("Validation failed. Prompting user for revised account information");
         Geary.AccountInformation? new_account_information =
-            request_account_information(account_information);
+            request_account_information(account_information, result);
         
         // If the user refused to enter account information. There is currently no way that we
         // could see this--we exit in request_account_information, and the only way that an
@@ -220,34 +224,64 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return new_account_information;
     }
     
-    // Attempts to validate and add an account.  Returns true on success, else false.
-    public async bool validate_async(Geary.AccountInformation account_information,
+    // Attempts to validate and add an account.  Returns a result code indicating
+    // success or one or more errors.
+    public async Geary.Engine.ValidationResult validate_async(
+        Geary.AccountInformation account_information, bool validate_connection,
         Cancellable? cancellable = null) {
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
         try {
-            if (!yield Geary.Engine.instance.validate_account_information_async(
-                account_information, cancellable))
-                return false;
+            result = yield Geary.Engine.instance.validate_account_information_async(account_information,
+                validate_connection, cancellable);
         } catch (Error err) {
             debug("Error validating account: %s", err.message);
-            return false;
+            exit(-1); // Fatal error
+            
+            return result;
         }
         
-        account_information.store_async.begin(cancellable);
-        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-            Geary.CredentialsMediator.ServiceFlag.SMTP, account_information);
+        if (result == Geary.Engine.ValidationResult.OK) {
+            Geary.AccountInformation real_account_information = account_information;
+            if (account_information.is_copy()) {
+                // We have a temporary copy of the account.  Find the "real" acct info object and
+                // copy the new data into it.
+                real_account_information = get_real_account_information(account_information);
+                real_account_information.copy_from(account_information);
+            }
+            
+            real_account_information.store_async.begin(cancellable);
+            do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
+                Geary.CredentialsMediator.ServiceFlag.SMTP, real_account_information);
+            
+            debug("Successfully validated account information");
+        }
         
-        debug("Successfully validated account information");
-        return true;
+        return result;
+    }
+    
+    // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
+    public Geary.AccountInformation? get_real_account_information(
+        Geary.AccountInformation account_information) {
+        if (account_information.is_copy()) {
+            try {
+                 return Geary.Engine.instance.get_accounts().get(account_information.email);
+            } catch (Error e) {
+                error("Account information is out of sync: %s", e.message);
+            }
+        }
+        
+        return null;
     }
     
     // Prompt the user for a service, real name, username, and password, and try to start Geary.
-    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info) {
+    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         Geary.AccountInformation? new_info = old_info;
         if (login_dialog == null)
             login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
         
         if (new_info != null)
-            login_dialog.set_account_information(new_info);
+            login_dialog.set_account_information(new_info, result);
         
         login_dialog.present();
         for (;;) {

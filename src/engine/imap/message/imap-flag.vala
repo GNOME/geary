@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.Imap.Flag : Equalable, Hashable {
+public abstract class Geary.Imap.Flag : BaseObject, Equalable, Hashable {
     public string value { get; private set; }
     
     public Flag(string value) {
@@ -95,6 +95,17 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
     
     public MessageFlag(string value) {
         base (value);
+    }
+    
+    // Call these at init time to prevent thread issues
+    internal static void init() {
+        MessageFlag to_init = ANSWERED;
+        to_init = DELETED;
+        to_init = DRAFT;
+        to_init = FLAGGED;
+        to_init = RECENT;
+        to_init = SEEN;
+        to_init = ALLOWS_NEW;
     }
     
     // Converts a list of email flags to add and remove to a list of message
@@ -244,6 +255,25 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
     
     public MailboxAttribute(string value) {
         base (value);
+    }
+    
+    // Call these at init time to prevent thread issues
+    internal static void init() {
+        MailboxAttribute to_init = NO_INFERIORS;
+        to_init = NO_SELECT;
+        to_init = MARKED;
+        to_init = UNMARKED;
+        to_init = HAS_NO_CHILDREN;
+        to_init = HAS_CHILDREN;
+        to_init = ALLOWS_NEW;
+        to_init = SPECIAL_FOLDER_ALL_MAIL;
+        to_init = SPECIAL_FOLDER_DRAFTS;
+        to_init = SPECIAL_FOLDER_IMPORTANT;
+        to_init = SPECIAL_FOLDER_INBOX;
+        to_init = SPECIAL_FOLDER_SENT;
+        to_init = SPECIAL_FOLDER_SPAM;
+        to_init = SPECIAL_FOLDER_STARRED;
+        to_init = SPECIAL_FOLDER_TRASH;
     }
 }
 

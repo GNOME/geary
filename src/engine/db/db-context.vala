@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -12,7 +12,7 @@
  * Geary.Db's major classes (Database, Connection, Statement, and Result) inherit from Context.
  */
 
-public abstract class Geary.Db.Context : Object {
+public abstract class Geary.Db.Context : BaseObject {
     public virtual Database? get_database() {
         return get_connection() != null ? get_connection().database : null;
     }
@@ -42,14 +42,14 @@ public abstract class Geary.Db.Context : Object {
         Statement? stmt = get_statement();
         
         if (stmt != null) {
-            Logging.debug(Logging.Flag.SQL, "%s %s\n\t<%s>".printf(
+            Logging.debug(Logging.Flag.SQL, "%s %s\n\t<%s>",
                 (cx != null) ? cx.to_string() : "[no cx]",
                 fmt.vprintf(va_list()),
-                (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql"));
+                (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql");
         } else {
-            Logging.debug(Logging.Flag.SQL, "%s %s".printf(
+            Logging.debug(Logging.Flag.SQL, "%s %s",
                 (cx != null) ? cx.to_string() : "[no cx]",
-                fmt.vprintf(va_list())));
+                fmt.vprintf(va_list()));
         }
     }
 }

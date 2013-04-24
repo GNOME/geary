@@ -1,5 +1,5 @@
 # Geary build script
-# Copyright 2011-2012 Yorba Foundation
+# Copyright 2011-2013 Yorba Foundation
 #
 # Check http://webdev.elementaryos.org/docs/developer-guide/cmake for documentation
 
@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
 #
 set(GETTEXT_PACKAGE "geary")
 set(RELEASE_NAME "Lightweight email client for GNOME.")
-set(VERSION "0.2.2+trunk")
+set(VERSION "0.3.1+trunk")
 set(VERSION_INFO "Release")
 set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 
@@ -31,6 +31,7 @@ set(GLADE_FILES ui/account_list.glade ui/account_cannot_remove.glade ui/account_
 option(DEBUG "Build for debugging." OFF)
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
 option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
+option(DESKTOP_VALIDATE "Check generated desktop file for errors during build." ON)
 
 if (DEBUG)
     message(STATUS "Debug build")
@@ -44,11 +45,13 @@ if (DESKTOP_UPDATE)
     message(STATUS "Desktop database will be updated")
 endif ()
 
+if (DESKTOP_VALIDATE)
+    message(STATUS "Generated desktop file will be checked for errors")
+endif ()
+
 find_package(PkgConfig)
-pkg_check_modules(LIBINDICATE QUIET indicate-0.7>=0.6.1)
 pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
 pkg_check_modules(LIBMESSAGINGMENU QUIET messaging-menu>=12.10.2)
-pkg_check_modules(LIBGRANITE QUIET granite>=0.1.1)
 
 # intl
 include(Gettext)

@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -17,7 +17,9 @@
  */
 
 public class Geary.Db.Database : Geary.Db.Context {
-    public const int DEFAULT_MAX_CONCURRENCY = 8;
+    // Dealing with BUSY signal is a bear, and so for now concurrency is turned off
+    // http://redmine.yorba.org/issues/6460
+    public const int DEFAULT_MAX_CONCURRENCY = 1;
     
     public File db_file { get; private set; }
     public DatabaseFlags flags { get; private set; }
@@ -223,7 +225,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         
         thread_pool.add(job);
         
-        return yield job.wait_for_completion_async(cancellable);
+        return yield job.wait_for_completion_async();
     }
     
     // This method must be thread-safe.

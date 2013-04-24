@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.RFC822.Message : Object {
+public class Geary.RFC822.Message : BaseObject {
     private const string DEFAULT_ENCODING = "UTF8";
     
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
@@ -83,18 +83,18 @@ public class Geary.RFC822.Message : Object {
         }
 
         if (email.in_reply_to != null) {
-            in_reply_to = email.in_reply_to;
-            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to.value);
+            in_reply_to = new Geary.RFC822.MessageID(email.in_reply_to);
+            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to);
         }
         
         if (email.references != null) {
-            references = email.references;
-            message.set_header(HEADER_REFERENCES, email.references.to_rfc822_string());
+            references = new Geary.RFC822.MessageIDList.from_rfc822_string(email.references);
+            message.set_header(HEADER_REFERENCES, email.references);
         }
         
         if (email.subject != null) {
-            subject = email.subject;
-            message.set_subject(email.subject.value);
+            subject = new Geary.RFC822.Subject(email.subject);
+            message.set_subject(email.subject);
         }
 
         // User-Agent
@@ -107,11 +107,11 @@ public class Geary.RFC822.Message : Object {
         GMime.Part? body_text = null;
         if (email.body_text != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body_text.buffer.get_array()),
+                new GMime.StreamMem.with_buffer(email.body_text.data),
                 GMime.ContentEncoding.DEFAULT);
             
             body_text = new GMime.Part();
-            body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8"));
+            body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8; format=flowed"));
             body_text.set_content_object(content);
         }
         
@@ -119,7 +119,7 @@ public class Geary.RFC822.Message : Object {
         GMime.Part? body_html = null;
         if (email.body_html != null) {
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body_html.buffer.get_array()),
+                new GMime.StreamMem.with_buffer(email.body_html.data),
                 GMime.ContentEncoding.DEFAULT);
             
             body_html = new GMime.Part();
@@ -312,7 +312,8 @@ public class Geary.RFC822.Message : Object {
             mailer = message.get_header(HEADER_MAILER);
     }
     
-    private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist) {
+    private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist,
+        int depth = 0) {
         if (addrlist == null || addrlist.length() == 0)
             return null;
         
@@ -329,12 +330,24 @@ public class Geary.RFC822.Message : Object {
                 continue;
             }
             
+            // Two problems here:
+            //
+            // First, GMime crashes when parsing a malformed group list (the case seen in the
+            // wild is -- weirdly enough -- a date appended to the end of a cc: list on a spam
+            // email.  GMime interprets it as a group list but segfaults when destroying the
+            // InterneAddresses it generated from it.  See:
+            // https://bugzilla.gnome.org/show_bug.cgi?id=695319
+            //
+            // Second, RFC 822 6.2.6: "This  standard  does  not  permit  recursive  specification
+            // of groups within groups."  So don't do it.
             InternetAddressGroup? group = addr as InternetAddressGroup;
             if (group != null) {
-                Gee.List<RFC822.MailboxAddress>? grouplist = convert_gmime_address_list(
-                    group.get_members());
-                if (grouplist != null)
-                    converted.add_all(grouplist);
+                if (depth == 0) {
+                    Gee.List<RFC822.MailboxAddress>? grouplist = convert_gmime_address_list(
+                        group.get_members(), depth + 1);
+                    if (grouplist != null)
+                        converted.add_all(grouplist);
+                }
                 
                 continue;
             }
@@ -364,7 +377,8 @@ public class Geary.RFC822.Message : Object {
         return new Geary.Memory.StringBuffer(message.to_string());
     }
     
-    public Geary.Memory.AbstractBuffer get_first_mime_part_of_content_type(string content_type)
+    public Geary.Memory.AbstractBuffer get_first_mime_part_of_content_type(string content_type,
+        bool to_html = false)
         throws RFC822Error {
         // search for content type starting from the root
         GMime.Part? part = find_first_mime_part(message.get_mime_part(), content_type);
@@ -374,7 +388,7 @@ public class Geary.RFC822.Message : Object {
         }
         
         // convert payload to a buffer
-        return mime_part_to_memory_buffer(part, true);
+        return mime_part_to_memory_buffer(part, true, to_html);
     }
 
     private GMime.Part? find_first_mime_part(GMime.Object current_root, string content_type) {
@@ -390,12 +404,31 @@ public class Geary.RFC822.Message : Object {
         }
 
         GMime.Part? part = current_root as GMime.Part;
-        if (part != null && part.get_content_type().to_string() == content_type &&
-            part.get_disposition() != "attachment") {
+        if (part != null && String.nullable_stri_equal(part.get_content_type().to_string(), content_type) &&
+            !String.nullable_stri_equal(part.get_disposition(), "attachment")) {
             return part;
         }
 
         return null;
+    }
+
+    public string? get_html_body() throws RFC822Error {
+        return get_first_mime_part_of_content_type("text/html").to_string();
+    }
+    
+    public string? get_text_body(bool convert_to_html = true) throws RFC822Error {
+        return get_first_mime_part_of_content_type("text/plain", convert_to_html).to_string();
+    }
+    
+    // Returns a body of the email as HTML.  The "html_format" flag tells it whether to try for a
+    // HTML format body or plain text body first.  But if it doesn't find that one, it'll return
+    // the other.
+    public string? get_body(bool html_format) throws RFC822Error {
+        try {
+            return html_format ? get_html_body() : get_text_body();
+        } catch (Error error) {
+            return html_format ? get_text_body() : get_html_body();
+        }
     }
 
     public Geary.Memory.AbstractBuffer get_content_by_mime_id(string mime_id) throws RFC822Error {
@@ -448,13 +481,13 @@ public class Geary.RFC822.Message : Object {
         }
 
         // Otherwise see if it has a content disposition of "attachment."
-        if (root is GMime.Part && root.get_disposition() == "attachment") {
+        if (root is GMime.Part && String.nullable_stri_equal(root.get_disposition(), "attachment")) {
             attachments.add(root as GMime.Part);
         }
     }
 
     private Geary.Memory.AbstractBuffer mime_part_to_memory_buffer(GMime.Part part,
-        bool to_utf8 = false) throws RFC822Error {
+        bool to_utf8 = false, bool to_html = false) throws RFC822Error {
 
         GMime.DataWrapper? wrapper = part.get_content_object();
         if (wrapper == null) {
@@ -470,15 +503,27 @@ public class Geary.RFC822.Message : Object {
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         if (to_utf8) {
             string? charset = part.get_content_type_parameter("charset");
-            if (charset == null)
+            if (String.is_empty(charset))
                 charset = DEFAULT_ENCODING;
-            stream_filter.add(new GMime.FilterCharset(charset, "UTF8"));
-            string? format = part.get_content_type_parameter("format");
-            if (format == "flowed")
-                stream_filter.add(new GMime.FilterFlowed());
+            stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
+        }
+        string format = part.get_content_type_parameter("format") ?? "";
+        bool flowed = (format.down() == "flowed");
+        string delsp_par = part.get_content_type_parameter("DelSp") ?? "no";
+        bool delsp = (delsp_par.down() == "yes");
+        if (flowed)
+            stream_filter.add(new GMime.FilterFlowed(to_html, delsp));
+        if (to_html) {
+            if (!flowed)
+                stream_filter.add(new GMime.FilterPlain());
+            // HTML filter does stupid stuff to \r, so get rid of them.
+            stream_filter.add(new GMime.FilterCRLF(false, false));
+            stream_filter.add(new GMime.FilterHTML(GMime.FILTER_HTML_CONVERT_URLS, 0));
+            stream_filter.add(new GMime.FilterBlockquotes());
         }
 
         wrapper.write_to_stream(stream_filter);
+        stream_filter.flush();
         
         return new Geary.Memory.Buffer(byte_array.data, byte_array.len);
     }

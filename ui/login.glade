@@ -47,6 +47,21 @@
       </packing>
     </child>
     <child>
+      <object class="GtkLabel" id="label: error">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="xalign">0</property>
+        <property name="xpad">2</property>
+        <property name="ypad">6</property>
+        <property name="use_markup">True</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkGrid" id="grid2">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -64,7 +79,6 @@
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">email@example.com</property>
-            <property name="input_purpose">email</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -85,7 +99,6 @@
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">Password</property>
-            <property name="input_purpose">password</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -99,7 +112,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">_Email address:</property>
+            <property name="label" translatable="yes">E_mail address:</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: email</property>
           </object>
@@ -144,7 +157,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">0</property>
-            <property name="label" translatable="yes">_Service:</property>
+            <property name="label" translatable="yes">S_ervice:</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">combo: service</property>
           </object>
@@ -175,6 +188,7 @@
           <object class="GtkEntry" id="entry: real_name">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
             <property name="hexpand">True</property>
             <property name="invisible_char">•</property>
             <property name="activates_default">True</property>
@@ -182,7 +196,6 @@
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">First Last</property>
-            <property name="input_purpose">name</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -193,7 +206,7 @@
         </child>
         <child>
           <object class="GtkCheckButton" id="check: remember_password">
-            <property name="label" translatable="yes">Re_member password</property>
+            <property name="label" translatable="yes">Remem_ber password</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
@@ -724,18 +737,6 @@
             <child>
               <placeholder/>
             </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
         </child>
       </object>
@@ -743,6 +744,79 @@
         <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="storage container">
+        <property name="can_focus">False</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="label: storage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">8</property>
+            <property name="xalign">0</property>
+            <property name="xpad">4</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">Storage</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid" id="grid3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkLabel" id="label: sync">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">12</property>
+                <property name="label" translatable="yes">_Download mail:</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="combo: storage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="active">0</property>
+                <property name="entry_text_column">0</property>
+                <property name="id_column">1</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">4</property>
       </packing>
     </child>
   </object>

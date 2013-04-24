@@ -1,11 +1,11 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Represents the relative "importance" of an occurance of a contact in a message.
+ * Represents the relative "importance" of an occurrence of a contact in a message.
  *
  * The first word (before the underscore) indicates where the account owner appeared in the
  * message. The second word (after the underscore) indicates where the contact appeared in the

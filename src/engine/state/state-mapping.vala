@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public delegate uint Geary.State.Transition(uint state, uint event, void *user = null,
@@ -10,7 +10,7 @@ public delegate uint Geary.State.Transition(uint state, uint event, void *user =
 public delegate void Geary.State.PostTransition(void *user = null, Object? object = null,
     Error? err = null);
 
-public class Geary.State.Mapping {
+public class Geary.State.Mapping : BaseObject {
     public uint state;
     public uint event;
     public unowned Transition transition;

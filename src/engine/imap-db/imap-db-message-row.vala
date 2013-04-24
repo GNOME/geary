@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.ImapDB.MessageRow {
@@ -136,8 +136,11 @@ public class Geary.ImapDB.MessageRow {
         if (fields.is_all_set(Geary.Email.Field.FLAGS))
             email.set_flags(get_generic_email_flags());
         
-        if (fields.is_all_set(Geary.Email.Field.PROPERTIES))
-            email.set_email_properties(get_imap_email_properties());
+        if (fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
+            Imap.EmailProperties? properties = get_imap_email_properties();
+            if (properties != null)
+                email.set_email_properties(properties);
+        }
         
         return email;
     }

@@ -1,6 +1,6 @@
 # Makefile.in
 #
-# Copyright 2012 Yorba Foundation
+# Copyright 2012-2013 Yorba Foundation
 
 BUILD_DIR := build
 BINARIES := geary gearyd geary-console geary-mailer

@@ -1,11 +1,11 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.NonblockingAbstractSemaphore {
-    private class Pending {
+public abstract class Geary.NonblockingAbstractSemaphore : BaseObject {
+    private class Pending : BaseObject {
         public unowned SourceFunc cb;
         public Cancellable? cancellable;
         public bool passed = false;
@@ -91,7 +91,7 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         }
     }
     
-    public virtual void notify() throws Error {
+    public virtual new void notify() throws Error {
         check_cancelled();
         
         passed = true;
@@ -144,6 +144,10 @@ public abstract class Geary.NonblockingAbstractSemaphore {
         passed = false;
         
         notify_at_reset();
+    }
+    
+    public bool is_passed() {
+        return passed;
     }
     
     public bool is_cancelled() {

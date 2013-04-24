@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
@@ -44,7 +44,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.ListEmail {
         }
         
         // since count can also indicate "to earliest" or "to latest", normalize
-        // (count is exclusive of initial_id, hence adding/substracting one, meaning that a count
+        // (count is exclusive of initial_id, hence adding/subtracting one, meaning that a count
         // of zero or one are accepted)
         int low, high;
         if (count < 0) {

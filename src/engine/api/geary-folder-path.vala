@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.FolderPath : Object, Hashable, Equalable, Comparable {
+public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
     public string basename { get; private set; }
     
     private Gee.List<Geary.FolderPath>? path = null;
@@ -88,7 +88,7 @@ public class Geary.FolderPath : Object, Hashable, Equalable, Comparable {
     public string get_fullpath(string? use_separator = null) {
         string? separator = use_separator ?? get_root().default_separator;
         
-        // no separator, no heirarchy
+        // no separator, no hierarchy
         if (separator == null)
             return basename;
         

@@ -3,15 +3,20 @@
 #
 
 include (FindIntltool)
+include (FindDesktopFileValidate)
 if (INTLTOOL_MERGE_FOUND)
     INTLTOOL_MERGE_DESKTOP (geary po)
+    
+    if (DESKTOP_VALIDATE)
+        if (DESKTOP_FILE_VALIDATE_FOUND)
+            VALIDATE_DESKTOP_FILE (geary)
+        else (DESKTOP_FILE_VALIDATE_FOUND)
+            message (FATAL_ERROR "desktop-file-validate must be installed to validate generated .desktop file")
+        endif (DESKTOP_FILE_VALIDATE_FOUND)
+    endif (DESKTOP_VALIDATE)
 else (INTLTOOL_MERGE_FOUND)
     message (FATAL_ERROR "intltool must be installed to generate .desktop file")
 endif (INTLTOOL_MERGE_FOUND)
-
-if (LIBINDICATE_FOUND)
-    install(FILES geary DESTINATION /usr/share/indicators/messages/applications)
-endif ()
 
 # Optional: run update-desktop-database at install time.
 # (This has to happen after the geary.desktop file is installed.)

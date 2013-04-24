@@ -1,10 +1,10 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.AbstractAccount : Object, Geary.Account {
+public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public Geary.AccountInformation information { get; protected set; }
     
     private string name;
@@ -22,6 +22,10 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     protected virtual void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
         Gee.Collection<Geary.Folder>? removed) {
         folders_added_removed(added, removed);
+    }
+    
+    protected virtual void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered) {
+        folders_contents_altered(altered);
     }
     
     protected virtual void notify_opened() {
@@ -59,8 +63,24 @@ public abstract class Geary.AbstractAccount : Object, Geary.Account {
     public abstract async Geary.Folder fetch_folder_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error;
     
+    public virtual Geary.Folder? get_special_folder(Geary.SpecialFolderType special) throws Error {
+        foreach (Folder folder in list_folders()) {
+            if (folder.get_special_folder_type() == special)
+                return folder;
+        }
+        
+        return null;
+    }
+    
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
+    
+    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error;
+    
+    public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     public virtual string to_string() {
         return name;

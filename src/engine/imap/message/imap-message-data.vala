@@ -1,7 +1,7 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -19,7 +19,7 @@
 public interface Geary.Imap.MessageData : Geary.Common.MessageData {
 }
 
-public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageData {
+public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageData, Comparable {
     // Using statics because int32.MAX is static, not const (??)
     public static int64 MIN = 1;
     public static int64 MAX = int32.MAX;
@@ -61,6 +61,19 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
             return new UID(MAX);
         else
             return new UID(Numeric.int64_floor(value - 1, MIN));
+    }
+    
+    public virtual int compare(Comparable o) {
+        UID? other = o as UID;
+        if (other == null)
+            return -1;
+        
+        if (value < other.value)
+            return -1;
+        else if (value > other.value)
+            return 1;
+        else
+            return 0;
     }
 }
 

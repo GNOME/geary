@@ -1,7 +1,7 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
@@ -15,6 +15,8 @@
  *
  * The design of the classes and interfaces owes a debt to SQLHeavy (http://code.google.com/p/sqlheavy/).
  */
+
+extern int sqlite3_enable_shared_cache(int enabled);
 
 namespace Geary.Db {
 
@@ -51,6 +53,9 @@ public delegate void PrepareConnection(Connection cx, bool master) throws Error;
  */
 public delegate TransactionOutcome TransactionMethod(Connection cx, Cancellable? cancellable) throws Error;
 
+// Used by exec_retry_locked().
+private delegate int SqliteExecOperation();
+
 /**
  * See http://www.sqlite.org/c3ref/threadsafe.html
  */
@@ -72,6 +77,13 @@ public int sqlite_version_number() {
     return Sqlite.libversion_number();
 }
 
+/**
+ * See http://www.sqlite.org/c3ref/enable_shared_cache.html
+ */
+public bool set_shared_cache_mode(bool enabled) {
+    return sqlite3_enable_shared_cache(enabled ? 1 : 0) == Sqlite.OK;
+}
+
 private void check_cancelled(string? method, Cancellable? cancellable) throws IOError {
     if (cancellable != null && cancellable.is_cancelled())
         throw new IOError.CANCELLED("%s cancelled", !String.is_empty(method) ? method : "Operation");
@@ -87,7 +99,9 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
             return result;
     }
     
-    string location = !String.is_empty(method) ? "(%s) ".printf(method) : "";
+    string location = !String.is_empty(method)
+        ? "(%s %s) ".printf(method, ctx.get_database().db_file.get_path())
+        : "(%s) ".printf(ctx.get_database().db_file.get_path());
     string errmsg = (ctx.get_connection() != null) ? " - %s".printf(ctx.get_connection().db.errmsg()) : "";
     string sql;
     if (ctx.get_statement() != null)
@@ -101,6 +115,7 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
     
     switch (result) {
         case Sqlite.BUSY:
+        case Sqlite.LOCKED:
             throw new DatabaseError.BUSY(msg);
         
         case Sqlite.PERM:
@@ -118,7 +133,6 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
             throw new DatabaseError.MEMORY(msg);
         
         case Sqlite.ABORT:
-        case Sqlite.LOCKED:
             throw new DatabaseError.ABORT(msg);
         
         case Sqlite.INTERRUPT:

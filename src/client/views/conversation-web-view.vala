@@ -1,27 +1,17 @@
-/* Copyright 2012 Yorba Foundation
+/* Copyright 2012-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class ConversationWebView : WebKit.WebView {
-    private const string[] always_loaded_prefixes = {
-        "http://www.gravatar.com/avatar/",
-        "data:"
-    };
-    
     private const string USER_CSS = "user-message.css";
     private const string STYLE_NAME = "STYLE";
-
-    public bool load_external_images { get; private set; default = false; }
 
     // HTML element that contains message DIVs.
     public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
 
-    private Gee.ArrayList<string>? external_images_uri = null;
     private FileMonitor? user_style_monitor = null;
-
-    public signal void image_load_requested();
 
     public signal void link_selected(string link);
 
@@ -33,7 +23,6 @@ public class ConversationWebView : WebKit.WebView {
         config.enable_scripts = false;
         config.enable_java_applet = false;
         config.enable_plugins = false;
-        config.enable_default_context_menu = false; // Deprecated, still needed for Precise
         config.enable_developer_extras = Args.inspector;
         settings = config;
         
@@ -90,70 +79,8 @@ public class ConversationWebView : WebKit.WebView {
         }
 
         string? uri = request.get_uri();
-        if (!is_always_loaded(uri) && !(is_image(uri) && load_external_images))
+        if (uri.has_prefix("remote:"))
             request.set_uri("about:blank");
-    }
-
-    public void set_external_images_uris(Gee.ArrayList<string> uris) {
-        external_images_uri = uris;
-    }
-
-    public bool is_image(string? uri) {
-        if (Geary.String.is_empty_or_whitespace(uri))
-            return false;
-
-        if (uri.has_prefix("data:image/"))
-            return true;
-
-        // check if external_images_uri is null in case this is called before a page is loaded
-        return (external_images_uri != null) ? (uri in external_images_uri) : false;
-    }
-
-    private bool is_always_loaded(string? uri) {
-        if (uri == null)
-            return false;
-        
-        foreach (string prefix in always_loaded_prefixes) {
-            if (uri.has_prefix(prefix))
-                return true;
-        }
-        
-        return false;
-    }
-    
-    public void apply_load_external_images(bool load_external_images) {
-        this.load_external_images = load_external_images;
-        
-        // Refreshing the images would do nothing in this case--the resource has already been
-        // loaded, so no additional resource request will be sent.
-        if (load_external_images == false)
-            return;
-        
-        // We can't simply set load_external_images to true before refreshing, then set it back to
-        // false afterwards. If one of the images' sources is redirected, an additional resource
-        // request will come after we reset load_external_images to false.
-        try {
-            WebKit.DOM.Document document = get_dom_document();
-            WebKit.DOM.NodeList nodes = document.query_selector_all("img");
-            for (ulong i = 0; i < nodes.length; i++) {
-                WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
-                if (element == null)
-                    continue;
-                
-                if (!element.has_attribute("src"))
-                    continue;
-                
-                string src = element.get_attribute("src");
-                if (Geary.String.is_empty_or_whitespace(src) || is_always_loaded(src))
-                    continue;
-                
-                // Refresh the image source. Requests are denied when load_external_images
-                // is false, so we need to force webkit to send the request again.
-                element.set_attribute("src", src);
-            }
-        } catch (Error err) {
-            debug("Error refreshing images: %s", err.message);
-        }
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
@@ -185,6 +112,7 @@ public class ConversationWebView : WebKit.WebView {
         set_icon_src("#email_template .starred .icon", "starred");
         set_icon_src("#email_template .unstarred .icon", "non-starred-grey");
         set_icon_src("#email_template .attachment.icon", "mail-attachment");
+        set_icon_src("#email_template .close_show_images", "gtk-close");
     }
     
     private void load_user_style() {

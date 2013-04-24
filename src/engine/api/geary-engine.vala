@@ -1,30 +1,42 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Engine {
+public class Geary.Engine : BaseObject {
+    [Flags]
+    public enum ValidationResult {
+        OK = 0,
+        INVALID_NICKNAME,
+        IMAP_CONNECTION_FAILED,
+        IMAP_CREDENTIALS_INVALID,
+        SMTP_CONNECTION_FAILED,
+        SMTP_CREDENTIALS_INVALID;
+        
+        public inline bool is_all_set(ValidationResult result) {
+            return (result & this) == result;
+        }
+    }
+    
     private static Engine? _instance = null;
     public static Engine instance {
         get {
-            if (_instance == null)
-                _instance = new Engine();
-
-            return _instance;
+            return (_instance != null) ? _instance : (_instance = new Engine());
         }
     }
 
     public File? user_data_dir { get; private set; default = null; }
     public File? resource_dir { get; private set; default = null; }
     public Geary.CredentialsMediator? authentication_mediator { get; private set; default = null; }
-
+    
+    private bool is_initialized = false;
     private bool is_open = false;
     private Gee.HashMap<string, AccountInformation>? accounts = null;
     private Gee.HashMap<string, Account>? account_instances = null;
 
     /**
-     * Fired when the engine is opened.
+     * Fired when the engine is opened and all the existing accounts are loaded.
      */
     public signal void opened();
 
@@ -58,15 +70,30 @@ public class Geary.Engine {
     public signal void account_removed(AccountInformation account);
 
     private Engine() {
-        // Initialize GMime
-        GMime.init(0);
     }
-
+    
     private void check_opened() throws EngineError {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
     }
-
+    
+    // This can't be called from within the ctor, as initialization code may want to access the
+    // Engine instance to make their own calls and, in particular, subscribe to signals.
+    //
+    // TODO: It would make sense to have a terminate_library() call, but it technically should not
+    // be called until the application is exiting, not merely if the Engine is closed, as termination
+    // means shutting down resources for good
+    private void initialize_library() {
+        if (is_initialized)
+            return;
+        
+        is_initialized = true;
+        
+        RFC822.init();
+        ImapEngine.init();
+        Imap.init();
+    }
+    
     /**
      * Initializes the engine, and makes all existing accounts available.  The
      * given authentication mediator will be used to retrieve all passwords
@@ -75,9 +102,13 @@ public class Geary.Engine {
     public async void open_async(File user_data_dir, File resource_dir,
                                  Geary.CredentialsMediator? authentication_mediator,
                                  Cancellable? cancellable = null) throws Error {
+        // initialize *before* opening the Engine ... all initialize code should assume the Engine
+        // is closed
+        initialize_library();
+        
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
-
+        
         this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
         this.authentication_mediator = authentication_mediator;
@@ -86,9 +117,10 @@ public class Geary.Engine {
         account_instances = new Gee.HashMap<string, Account>();
 
         is_open = true;
-        opened();
 
         yield add_existing_accounts_async(cancellable);
+        
+        opened();
    }
 
     private async void add_existing_accounts_async(Cancellable? cancellable = null) throws Error {
@@ -118,7 +150,7 @@ public class Geary.Engine {
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
                 // TODO: check for geary.ini
-                add_account(new AccountInformation(user_data_dir.get_child(info.get_name())));
+                add_account(new AccountInformation.from_file(user_data_dir.get_child(info.get_name())));
             }
         }
      }
@@ -161,39 +193,52 @@ public class Geary.Engine {
         if (accounts.has_key(email))
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", email);
 
-        return new AccountInformation(user_data_dir.get_child(email));
+        return new AccountInformation.from_file(user_data_dir.get_child(email));
     }
     
     /**
-     * Returns whether the account information "validates", which means here
-     * that we can connect to the endpoints and authenticate using the supplied
-     * credentials.
+     * Returns whether the account information "validates."  If validate_connection is true,
+     * we check if we can connect to the endpoints and authenticate using the supplied credentials.
      */
-    public async bool validate_account_information_async(AccountInformation account,
-        Cancellable? cancellable = null) throws Error {
+    public async ValidationResult validate_account_information_async(AccountInformation account,
+        bool validate_connection = true, Cancellable? cancellable = null) throws Error {
         check_opened();
+        ValidationResult error_code = ValidationResult.OK;
         
         // Make sure the account nickname is not in use.
         foreach (AccountInformation a in get_accounts().values) {
-            if (account != a && Geary.String.equals_ci(account.nickname, a.nickname))
-                return false;
+            if (account.email != a.email && Geary.String.equals_ci(account.nickname, a.nickname))
+                error_code |= ValidationResult.INVALID_NICKNAME;
         }
         
+        // If we don't need to validate the connection, exit out here.
+        if (!validate_connection)
+            return error_code;
+        
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
-        bool imap_valid = false;
         Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);
         try {
             yield imap_session.connect_async(cancellable);
-            yield imap_session.initiate_session_async(account.imap_credentials, cancellable);
-            
-            // Connected and initiated, still need to be sure connection authorized
-            string current_mailbox;
-            if (imap_session.get_context(out current_mailbox) == Imap.ClientSession.Context.AUTHORIZED)
-                imap_valid = true;
         } catch (Error err) {
-            debug("Error validating IMAP account info: %s", err.message);
-            
-            // fall through so session can be disconnected
+            debug("Error connecting to IMAP server: %s", err.message);
+            error_code |= ValidationResult.IMAP_CONNECTION_FAILED;
+        }
+        
+        if (!error_code.is_all_set(ValidationResult.IMAP_CONNECTION_FAILED)) {
+            try {
+                yield imap_session.initiate_session_async(account.imap_credentials, cancellable);
+                
+                // Connected and initiated, still need to be sure connection authorized
+                string current_mailbox;
+                if (imap_session.get_context(out current_mailbox) != Imap.ClientSession.Context.AUTHORIZED)
+                    error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
+            } catch (Error err) {
+                debug("Error validating IMAP account info: %s", err.message);
+                if (err is ImapError.UNAUTHENTICATED)
+                    error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
+                else
+                    error_code |= ValidationResult.IMAP_CONNECTION_FAILED;
+            }
         }
         
         try {
@@ -204,19 +249,16 @@ public class Geary.Engine {
             imap_session = null;
         }
         
-        if (!imap_valid)
-            return false;
-        
         // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
-        bool smtp_valid = false;
         Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(account.get_smtp_endpoint());
         try {
             yield smtp_session.login_async(account.smtp_credentials, cancellable);
-            smtp_valid = true;
         } catch (Error err) {
             debug("Error validating SMTP account info: %s", err.message);
-            
-            // fall through so session can be disconnected
+            if (err is SmtpError.AUTHENTICATION_FAILED)
+                error_code |= ValidationResult.SMTP_CREDENTIALS_INVALID;
+            else
+                error_code |= ValidationResult.SMTP_CONNECTION_FAILED;
         }
         
         try {
@@ -227,7 +269,7 @@ public class Geary.Engine {
             smtp_session = null;
         }
         
-        return smtp_valid;
+        return error_code;
     }
     
     /**

@@ -1,13 +1,13 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.ClientSessionManager {
+public class Geary.Imap.ClientSessionManager : BaseObject {
     public const int DEFAULT_MIN_POOL_SIZE = 2;
     
-    public bool is_opened { get; private set; default = false; }
+    public bool is_open { get; private set; default = false; }
     
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
@@ -67,8 +67,6 @@ public class Geary.Imap.ClientSessionManager {
         is_opened = true;
         
         account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
-        
-        adjust_session_pool.begin();
     }
     
     public async void close_async() throws Error {
@@ -82,15 +80,66 @@ public class Geary.Imap.ClientSessionManager {
         // TODO: Tear down all connections
     }
     
+    public async void open_async(Cancellable? cancellable) throws Error {
+        if (is_open)
+            throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
+        
+        is_open = true;
+        
+        adjust_session_pool.begin();
+    }
+    
+    public async void close_async(Cancellable? cancellable) throws Error {
+        if (!is_open)
+            return;
+        
+        is_open = false;
+        
+        int token;
+        try {
+            token = yield sessions_mutex.claim_async();
+        } catch (Error claim_err) {
+            debug("Unable to claim session table mutex for closing pool: %s", claim_err.message);
+            
+            return;
+        }
+        
+        // disconnect all existing sessions at once; don't wait for each, since as they disconnect
+        // they'll remove themselves from the sessions list and cause this foreach to explode
+        foreach (ClientSession session in sessions)
+            session.disconnect_async.begin();
+        
+        try {
+            sessions_mutex.release(ref token);
+        } catch (Error release_err) {
+            debug("Unable to release session table mutex after closing pool: %s", release_err.message);
+        }
+        
+        // TODO: This isn't the best (deterministic) way to deal with this, but it's easy and works
+        // for now
+        while (sessions.size > 0) {
+            debug("Waiting for ClientSessions to disconnect from ClientSessionManager...");
+            Timeout.add(250, close_async.callback);
+            yield;
+        }
+    }
+    
     private void on_imap_credentials_notified() {
         authentication_failed = false;
-        adjust_session_pool.begin();
+        
+        if (is_open)
+            adjust_session_pool.begin();
+    }
+    
+    private void check_open() throws Error {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("ClientSessionManager is not open");
     }
     
     // TODO: Need a more thorough and bulletproof system for maintaining a pool of ready
     // authorized sessions.
     private async void adjust_session_pool() {
-        if (!is_opened)
+        if (!is_open)
             return;
         
         int token;
@@ -102,7 +151,7 @@ public class Geary.Imap.ClientSessionManager {
             return;
         }
         
-        while (sessions.size < min_pool_size && !authentication_failed) {
+        while (sessions.size < min_pool_size && !authentication_failed && is_open) {
             try {
                 yield create_new_authorized_session(null);
             } catch (Error err) {

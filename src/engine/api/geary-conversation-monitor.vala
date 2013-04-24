@@ -1,13 +1,13 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.ConversationMonitor : Object {
+public class Geary.ConversationMonitor : BaseObject {
     /**
      * These are the fields Conversations require to thread emails together.  These fields will
-     * be retrieved irregardless of the Field parameter passed to the constructor.
+     * be retrieved regardless of the Field parameter passed to the constructor.
      */
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES | 
         Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
@@ -23,41 +23,41 @@ public class Geary.ConversationMonitor : Object {
             Hashable.hash_func, Equalable.equal_func);
         private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>(
             Hashable.hash_func, Equalable.equal_func);
+        private Geary.EmailIdentifier? lowest_id;
         
         // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
         // the number of times they're accessed makes it worth it
-        private Gee.SortedSet<Email> date_ascending = new Gee.TreeSet<Email>(
+        private Gee.SortedSet<Email> date_ascending = new Collection.FixedTreeSet<Email>(
             (CompareFunc) compare_date_ascending);
-        private Gee.SortedSet<Email> date_descending = new Gee.TreeSet<Email>(
+        private Gee.SortedSet<Email> date_descending = new Collection.FixedTreeSet<Email>(
             (CompareFunc) compare_date_descending);
-        private Gee.SortedSet<Email> id_ascending = new Gee.TreeSet<Email>(
-            (CompareFunc) compare_id_ascending);
-        private Gee.SortedSet<Email> id_descending = new Gee.TreeSet<Email>(
-            (CompareFunc) compare_id_descending);
         
         public ImplConversation(Geary.ConversationMonitor owner) {
             convnum = next_convnum++;
             this.owner = owner;
+            lowest_id = null;
         }
         
         public void clear_owner() {
             owner = null;
         }
         
-        public override int get_count() {
-            return emails.size;
+        public override int get_count(bool folder_email_ids_only = false) {
+            if (!folder_email_ids_only)
+                return emails.size;
+            
+            int folder_count = 0;
+            foreach (Geary.EmailIdentifier id in emails.keys) {
+                if (id.get_folder_path() != null)
+                    ++folder_count;
+            }
+            return folder_count;
         }
         
         public override Gee.List<Geary.Email> get_emails(Conversation.Ordering ordering) {
             switch (ordering) {
                 case Conversation.Ordering.DATE_ASCENDING:
                     return Collection.to_array_list<Email>(date_ascending);
-                
-                case Conversation.Ordering.ID_ASCENDING:
-                    return Collection.to_array_list<Email>(id_ascending);
-                
-                case Conversation.Ordering.ID_DESCENDING:
-                    return Collection.to_array_list<Email>(id_descending);
                 
                 case Conversation.Ordering.DATE_DESCENDING:
                     return Collection.to_array_list<Email>(date_descending);
@@ -72,8 +72,21 @@ public class Geary.ConversationMonitor : Object {
             return emails.get(id);
         }
         
-        public override Gee.Collection<Geary.EmailIdentifier> get_email_ids() {
-            return emails.keys;
+        public override Gee.Collection<Geary.EmailIdentifier> get_email_ids(
+            bool folder_email_ids_only = false) {
+            if (!folder_email_ids_only)
+                return emails.keys;
+            
+            Gee.ArrayList<Geary.EmailIdentifier> folder_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+            foreach (Geary.EmailIdentifier id in emails.keys) {
+                if (id.get_folder_path() != null)
+                    folder_ids.add(id);
+            }
+            return folder_ids;
+        }
+        
+        public override Geary.EmailIdentifier? get_lowest_email_id() {
+            return lowest_id;
         }
         
         public void add(Email email) {
@@ -87,12 +100,12 @@ public class Geary.ConversationMonitor : Object {
             emails.set(email.id, email);
             date_ascending.add(email);
             date_descending.add(email);
-            id_ascending.add(email);
-            id_descending.add(email);
             
             Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
             if (ancestors != null)
                 message_ids.add_all(ancestors);
+            
+            check_lowest_id(email.id);
         }
         
         // Returns the removed Message-IDs
@@ -100,8 +113,6 @@ public class Geary.ConversationMonitor : Object {
             emails.unset(email.id);
             date_ascending.remove(email);
             date_descending.remove(email);
-            id_ascending.remove(email);
-            id_descending.remove(email);
             
             Gee.Set<RFC822.MessageID> removed_message_ids = new Gee.HashSet<RFC822.MessageID>(
                 Hashable.hash_func, Equalable.equal_func);
@@ -116,7 +127,16 @@ public class Geary.ConversationMonitor : Object {
                 }
             }
             
+            lowest_id = null;
+            foreach (Email e in emails.values)
+                check_lowest_id(e.id);
+            
             return (removed_message_ids.size > 0) ? removed_message_ids : null;
+        }
+        
+        private void check_lowest_id(EmailIdentifier id) {
+            if (id.get_folder_path() != null && (lowest_id == null || id.compare(lowest_id) < 0))
+                lowest_id = id;
         }
         
         private static int compare_date_ascending(Email a, Email b) {
@@ -131,21 +151,42 @@ public class Geary.ConversationMonitor : Object {
         }
         
         private static int compare_id_ascending(Email a, Email b) {
-            int64 diff = a.id.ordering - b.id.ordering;
-            if (diff < 0)
-                return -1;
-            else if (diff > 0)
+            // Arbitrarily, "account" email ids come after "folder" email ids.
+            if (a.id.get_folder_path() == null && b.id.get_folder_path() != null)
                 return 1;
-            else
-                return 0;
-        }
-        
-        private static int compare_id_descending(Email a, Email b) {
-            return compare_id_ascending(b, a);
+            if (a.id.get_folder_path() != null && b.id.get_folder_path() == null)
+                return -1;
+            return a.id.compare(b.id);
         }
         
         public string to_string() {
             return "[#%d] (%d emails)".printf(convnum, emails.size);
+        }
+    }
+    
+    private class LocalSearchOperation : NonblockingBatchOperation {
+        // IN
+        public Geary.Account account;
+        public RFC822.MessageID message_id;
+        public Geary.Email.Field required_fields;
+        public Gee.Collection<Geary.FolderPath>? blacklist;
+        
+        // OUT
+        public Gee.MultiMap<Geary.Email, Geary.FolderPath?>? emails = null;
+        
+        public LocalSearchOperation(Geary.Account account, RFC822.MessageID message_id,
+            Geary.Email.Field required_fields, Gee.Collection<Geary.FolderPath?> blacklist) {
+            this.account = account;
+            this.message_id = message_id;
+            this.required_fields = required_fields;
+            this.blacklist = blacklist;
+        }
+        
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            emails = yield account.local_search_message_id_async(message_id, required_fields,
+                false, blacklist);
+            
+            return null;
         }
     }
     
@@ -162,8 +203,10 @@ public class Geary.ConversationMonitor : Object {
         Geary.RFC822.MessageID, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
     private Cancellable? cancellable_monitor = null;
     private bool retry_connection = false;
+    private int64 last_retry_time = 0;
     private uint retry_id = 0;
     private int min_window_count = 0;
+    private bool reseed_notified = false;
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
@@ -213,6 +256,14 @@ public class Geary.ConversationMonitor : Object {
      */
     public virtual signal void scan_completed() {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed",
+            folder.to_string());
+    }
+    
+    /**
+     * "seed-completed" is fired when the folder has opened and email has been populated.
+     */
+    public virtual signal void seed_completed() {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::seed_completed",
             folder.to_string());
     }
     
@@ -283,15 +334,19 @@ public class Geary.ConversationMonitor : Object {
         this.folder = folder;
         this.readonly = readonly;
         this.required_fields = required_fields | REQUIRED_FIELDS;
+        
+        folder.account.information.notify["imap-credentials"].connect(on_imap_credentials_notified);
     }
     
-    ~Conversations() {
+    ~ConversationMonitor() {
         if (is_monitoring)
             debug("Warning: Conversations object destroyed without stopping monitoring");
         
         // Manually detach all the weak refs in the Conversation objects
         foreach (ImplConversation conversation in conversations)
             conversation.clear_owner();
+        
+        folder.account.information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
     }
     
     protected virtual void notify_monitoring_started() {
@@ -312,6 +367,10 @@ public class Geary.ConversationMonitor : Object {
     
     protected virtual void notify_scan_completed() {
         scan_completed();
+    }
+    
+    protected virtual void notify_seed_completed() {
+        seed_completed();
     }
     
     protected virtual void notify_conversations_added(Gee.Collection<Conversation> conversations) {
@@ -364,24 +423,27 @@ public class Geary.ConversationMonitor : Object {
         folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
         
-        bool reseed_now = true;
-        if (folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
-            try {
-                yield folder.open_async(readonly, cancellable);
-            } catch (Error err) {
-                is_monitoring = false;
-                
-                throw err;
-            }
+        bool reseed_now = (folder.get_open_state() != Geary.Folder.OpenState.CLOSED);
+        try {
+            yield folder.open_async(readonly, cancellable);
+        } catch (Error err) {
+            is_monitoring = false;
             
-            reseed_now = false;
+            folder.email_appended.disconnect(on_folder_email_appended);
+            folder.email_removed.disconnect(on_folder_email_removed);
+            folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+            folder.opened.disconnect(on_folder_opened);
+            folder.closed.disconnect(on_folder_closed);
+            
+            throw err;
         }
         
         notify_monitoring_started();
+        reseed_notified = false;
         
         // pull in all the local email immediamente
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
-        yield load_async(-1, -1, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+        yield load_async(-1, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
         debug("ConversationMonitor seeded for %s", folder.to_string());
         
         // if already opened, go ahead and do a full load now from remote and local; otherwise,
@@ -448,24 +510,11 @@ public class Geary.ConversationMonitor : Object {
         Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
-            Gee.List<Email>? list = yield folder.list_email_async(low, count, required_fields, flags,
-                cancellable);
-            on_email_listed(list, null);
-            if (list != null)
-                on_email_listed(null, null);
+            yield process_email_async(yield folder.list_email_async(low, count,
+                required_fields, flags, cancellable));
         } catch (Error err) {
-            on_email_listed(null, err);
+            list_error(err);
         }
-    }
-    
-    /**
-     * See Geary.Folder.lazy_list_email() for details of how these parameters operate.  Instead
-     * of returning emails, this method will load the Conversations object with them sorted into
-     * Conversation objects.
-     */
-    public void lazy_load(int low, int count, Geary.Folder.ListFlags flags, Cancellable? cancellable) {
-        notify_scan_started();
-        folder.lazy_list_email(low, count, required_fields, flags, on_email_listed, cancellable);
     }
     
     /**
@@ -477,27 +526,12 @@ public class Geary.ConversationMonitor : Object {
         Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
-            Gee.List<Email>? list = yield folder.list_email_by_id_async(initial_id, count,
-                required_fields, flags, cancellable);
-            on_email_listed(list, null);
-            if (list != null)
-                on_email_listed(null, null);
+            yield process_email_async(yield folder.list_email_by_id_async(initial_id,
+                count, required_fields, flags, cancellable));
         } catch (Error err) {
-            on_email_listed(null, err);
+            list_error(err);
             throw err;
         }
-    }
-    
-    /**
-     * See Geary.Folder.lazy_list_email_by_id() for details of how these parameters operate.  Instead
-     * of returning emails, this method will load the Conversations object with them sorted into
-     * Conversation objects.
-     */
-    public void lazy_load_by_id(Geary.EmailIdentifier initial_id, int count, Geary.Folder.ListFlags flags,
-        Cancellable? cancellable) {
-        notify_scan_started();
-        folder.lazy_list_email_by_id(initial_id, count, required_fields, flags, on_email_listed,
-            cancellable);
     }
     
     public async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
@@ -505,35 +539,31 @@ public class Geary.ConversationMonitor : Object {
         notify_scan_started();
         
         try {
-            Gee.List<Geary.Email>? list = yield folder.list_email_by_sparse_id_async(ids,
-                required_fields, flags, cancellable);
-            on_email_listed(list, null);
-            if (list != null)
-                on_email_listed(null, null);
+            yield process_email_async(yield folder.list_email_by_sparse_id_async(ids,
+                required_fields, flags, cancellable));
         } catch (Error err) {
-            on_email_listed(null, err);
+            list_error(err);
         }
     }
     
-    private void on_email_listed(Gee.List<Geary.Email>? emails, Error? err) {
-        if (err != null) {
-            debug("Error while assembling conversations in %s: %s", folder.to_string(), err.message);
-            notify_scan_error(err);
-        }
-        
-        // check for completion
-        if (emails == null) {
+    private void list_error(Error err) {
+        debug("Error while assembling conversations in %s: %s", folder.to_string(), err.message);
+        notify_scan_error(err);
+        notify_scan_completed();
+    }
+    
+    private async void process_email_async(Gee.Collection<Geary.Email>? emails) {
+        if (emails == null || emails.size == 0) {
             notify_scan_completed();
-            
             return;
         }
         
-        process_email(emails);
-    }
-    
-    private void process_email(Gee.List<Geary.Email> emails) {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email: %d emails",
             folder.to_string(), emails.size);
+        
+        // MessageIDs we're adding to each conversation.
+        Gee.HashSet<RFC822.MessageID> new_message_ids = new Gee.HashSet<RFC822.MessageID>(
+                Hashable.hash_func, Equalable.equal_func);
         
         Gee.HashSet<Conversation> new_conversations = new Gee.HashSet<Conversation>();
         Gee.MultiMap<Conversation, Geary.Email> appended_conversations = new Gee.HashMultiMap<
@@ -583,8 +613,13 @@ public class Geary.ConversationMonitor : Object {
             
             // map ancestors to this conversation
             if (ancestors != null) {
-                foreach (RFC822.MessageID ancestor in ancestors)
+                foreach (RFC822.MessageID ancestor in ancestors) {
                     message_id_map.set(ancestor, conversation);
+                    
+                    // Log every new ancestor for later searching.
+                    if (!new_message_ids.contains(ancestor))
+                        new_message_ids.add(ancestor);
+                }
             }
         }
         
@@ -598,8 +633,90 @@ public class Geary.ConversationMonitor : Object {
                 notify_conversation_appended(conversation, appended_conversations.get(conversation));
         }
         
+        // Expand the conversation to include any Message-IDs we know we need
+        // and may have on disk, but aren't in the folder.
+        yield expand_conversations(new_message_ids);
+        
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email completed: %d emails",
             folder.to_string(), emails.size);
+    }
+    
+    private Gee.Collection<Geary.FolderPath> get_search_blacklist() {
+        Geary.SpecialFolderType[] blacklisted_folder_types = {
+            Geary.SpecialFolderType.SPAM,
+            Geary.SpecialFolderType.TRASH,
+            Geary.SpecialFolderType.DRAFTS,
+        };
+        
+        Gee.ArrayList<Geary.FolderPath?> blacklist
+            = new Gee.ArrayList<Geary.FolderPath?>(Equalable.nullable_equal_func);
+        foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
+            try {
+                Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
+                if (blacklist_folder != null)
+                    blacklist.add(blacklist_folder.get_path());
+            } catch (Error e) {
+                debug("Error finding special folder %s on account %s: %s",
+                    type.to_string(), folder.account.to_string(), e.message);
+            }
+        }
+        
+        // Add the current folder so we omit search results we can find through
+        // folder monitoring.  Add "no folders" so we omit results that have
+        // been deleted permanently from the server.
+        blacklist.add(folder.get_path());
+        blacklist.add(null);
+        
+        return blacklist;
+    }
+    
+    private async void expand_conversations(Gee.Set<RFC822.MessageID> needed_message_ids) {
+        if (needed_message_ids.size == 0) {
+            notify_scan_completed();
+            return;
+        }
+        
+        Logging.debug(Logging.Flag.CONVERSATIONS,
+            "[%s] ConversationMonitor::expand_conversations: %d email ids",
+            folder.to_string(), needed_message_ids.size);
+        
+        Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_blacklist();
+        
+        // execute all the local search operations at once
+        NonblockingBatch batch = new NonblockingBatch();
+        foreach (RFC822.MessageID message_id in needed_message_ids) {
+            batch.add(new LocalSearchOperation(folder.account, message_id, required_fields,
+                folder_blacklist));
+        }
+        
+        try {
+            yield batch.execute_all_async();
+        } catch (Error err) {
+            debug("Unable to search local mail for conversations: %s", err.message);
+            
+            return;
+        }
+        
+        // collect their results into a single collection of addt'l emails
+        Gee.HashMap<Geary.EmailIdentifier, Geary.Email> needed_messages = new Gee.HashMap<
+            Geary.EmailIdentifier, Geary.Email>(Hashable.hash_func, Equalable.equal_func);
+        foreach (int id in batch.get_ids()) {
+            LocalSearchOperation op = (LocalSearchOperation) batch.get_operation(id);
+            if (op.emails != null) {
+                foreach (Geary.Email email in op.emails.get_keys()) {
+                    if (!needed_messages.has_key(email.id))
+                        needed_messages.set(email.id, email);
+                }
+            }
+        }
+        
+        // process them as through they're been loaded from the folder; this, in turn, may
+        // require more local searching of email
+        yield process_email_async(needed_messages.values);
+        
+        Logging.debug(Logging.Flag.CONVERSATIONS,
+            "[%s] ConversationMonitor::expand_conversations completed: %d email ids (%d found)",
+            folder.to_string(), needed_message_ids.size, needed_messages.size);
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
@@ -644,7 +761,7 @@ public class Geary.ConversationMonitor : Object {
             
             trimmed.set(conversation, found);
             
-            if (conversation.get_count() == 0) {
+            if (conversation.get_count(true) == 0) {
                 bool is_removed = conversations.remove((ImplConversation) conversation);
                 if (is_removed) {
                     debug("Removing Email ID %s evaporates conversation %s", removed_id.to_string(),
@@ -685,26 +802,56 @@ public class Geary.ConversationMonitor : Object {
         }
     }
     
-    private Geary.EmailIdentifier? get_earliest_id() {
+    private Geary.EmailIdentifier? get_lowest_email_id() {
         Geary.EmailIdentifier? earliest_id = null;
-        foreach (Geary.EmailIdentifier email_id in geary_id_map.keys) {
-            if ((earliest_id == null) || (earliest_id.compare(email_id) > 0))
-                earliest_id = email_id;
+        foreach (Geary.Conversation conversation in conversations) {
+            Geary.EmailIdentifier? id = conversation.get_lowest_email_id();
+            if (id != null && (earliest_id == null || id.compare(earliest_id) < 0))
+                earliest_id = id;
         }
         
         return earliest_id;
     }
     
     private void reseed(string why) {
-        Geary.EmailIdentifier? earliest_id = get_earliest_id();
+        Geary.EmailIdentifier? earliest_id = get_lowest_email_id();
+        
         if (earliest_id != null) {
             debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
                 earliest_id.to_string(), folder.to_string());
-            lazy_load_by_id(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+            load_by_id_async.begin(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE,
+                cancellable_monitor, on_reseed_by_id_complete);
         } else {
             debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
                 min_window_count, folder.to_string());
-            lazy_load(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+            load_async.begin(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor,
+                on_reseed_complete);
+        }
+    }
+    
+    private void on_reseed_complete(GLib.Object? object, GLib.AsyncResult result) {
+        try {
+            load_async.end(result);
+        } catch (Error err) {
+            debug("Reseed error: %s", err.message);
+        }
+        
+        if (!reseed_notified) {
+            reseed_notified = true;
+            notify_seed_completed();
+        }
+    }
+    
+    private void on_reseed_by_id_complete(GLib.Object? object, GLib.AsyncResult result) {
+        try {
+            load_by_id_async.end(result);
+        } catch (Error err) {
+            debug("Reseed error: %s", err.message);
+        }
+        
+        if (!reseed_notified) {
+            reseed_notified = true;
+            notify_seed_completed();
         }
     }
     
@@ -739,11 +886,12 @@ public class Geary.ConversationMonitor : Object {
         debug("Folder %s closed due to error, reestablishing connection to continue monitoring conversations",
             folder.to_string());
         
-        // First retry is immediate; thereafter, a delay
-        do_restart_monitoring_async.begin();
+        schedule_retry();
     }
     
     private async void do_restart_monitoring_async() {
+        last_retry_time = get_monotonic_time();
+        
         try {
             debug("Restarting conversation monitoring of folder %s, stopping previous monitoring...",
                 folder.to_string());
@@ -766,19 +914,34 @@ public class Geary.ConversationMonitor : Object {
             debug("Unable to reestablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
                 RETRY_CONNECTION_SEC, start_err.message);
             
-            schedule_retry(true);
+            schedule_retry();
         }
     }
     
-    // TODO: A back-off algorithm would make tons of sense here; the reschedule flag can assist
-    // in that calculation
-    private void schedule_retry(bool reschedule) {
-        if (reschedule)
-            unschedule_retry();
-        else if (retry_id != 0)
+    // If we've got a pending retry and the folder's account's password is
+    // updated, cancel the pending retry and retry now.  This prevents the user
+    // waiting while nothing happens after they type in their password.
+    private void on_imap_credentials_notified() {
+        if (retry_id == 0)
+            return;
+        unschedule_retry();
+        do_restart_monitoring_async.begin();
+    }
+    
+    private void schedule_retry() {
+        if (retry_id != 0)
             return;
         
-        Timeout.add_seconds(RETRY_CONNECTION_SEC, on_delayed_retry);
+        // Number of us in the future we can schedule a retry, so we have a
+        // minimum of RETRY_CONNECTION_SEC s between retries.
+        int64 next_retry_time = RETRY_CONNECTION_SEC * 1000000 - (get_monotonic_time() - last_retry_time);
+        
+        // If it's been enough time since last retry we can retry immediately
+        // (note we schedule on ms, translated from us).
+        if (next_retry_time <= 0)
+            do_restart_monitoring_async.begin();
+        else
+            retry_id = Timeout.add((uint) (next_retry_time / 1000), on_delayed_retry);
     }
     
     private void unschedule_retry() {

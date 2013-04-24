@@ -1,16 +1,14 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.ServerData : ServerResponse {
     public ServerDataType server_data_type { get; private set; }
     
-    public ServerData.reconstitute(RootParameters root) throws ImapError {
-        base.reconstitute(root);
-        
-        server_data_type = ServerDataType.from_response(this);
+    public ServerData.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
     }
     
     public static bool is_server_data(RootParameters root) {

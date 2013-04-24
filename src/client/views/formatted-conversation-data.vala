@@ -1,11 +1,11 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2013 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution. 
+ * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 // Stores formatted data for a message.
-public class FormattedConversationData : Object {
+public class FormattedConversationData : Geary.BaseObject {
     private const string ME = _("Me");
     
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
@@ -19,7 +19,7 @@ public class FormattedConversationData : Object {
     private const int FONT_SIZE_PREVIEW = 8;
     private const int FONT_SIZE_MESSAGE_COUNT = 8;
     
-    private class ParticipantDisplay : Geary.Equalable {
+    private class ParticipantDisplay : Geary.BaseObject, Geary.Equalable {
         public string key;
         public Geary.RFC822.MailboxAddress address;
         public bool is_unread;
@@ -85,7 +85,7 @@ public class FormattedConversationData : Object {
     public string date { get; private set; }
     public string subject { get; private set; }
     public string? body { get; private set; default = null; } // optional
-    public int num_emails { get; private set; }
+    public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
     
     private Geary.Conversation? conversation = null;
