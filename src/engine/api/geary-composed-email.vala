@@ -29,7 +29,7 @@ public class Geary.ComposedEmail : BaseObject {
     public string? body_html { get; set; default = null; }
     public string? mailer { get; set; default = null; }
     public Gee.Set<File> attachment_files { get; private set;
-        default = new Gee.HashSet<File>(File.hash, (EqualFunc) File.equal); }
+        default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
     
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
         RFC822.MailboxAddresses? to = null, RFC822.MailboxAddresses? cc = null,

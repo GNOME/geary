@@ -19,11 +19,11 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
         return folder_path;
     }
     
-    public override uint to_hash() {
-        return uid.to_hash();
+    public override uint hash() {
+        return uid.hash();
     }
     
-    public override bool equals(Equalable o) {
+    public override bool equal_to(Geary.EmailIdentifier o) {
         Geary.Imap.EmailIdentifier? other = o as Geary.Imap.EmailIdentifier;
         if (other == null)
             return false;
@@ -31,7 +31,7 @@ private class Geary.Imap.EmailIdentifier : Geary.EmailIdentifier {
         if (this == other)
             return true;
         
-        return uid.equals(other.uid) && folder_path.equals(other.folder_path);
+        return uid.equal_to(other.uid) && folder_path.equal_to(other.folder_path);
     }
     
     public override string to_string() {

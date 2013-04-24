@@ -31,11 +31,45 @@ public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
     return true;
 }
 
+/**
+ * To be used by a Hashable's to_hash() method.
+ */
+public static uint int64_hash(int64 value) {
+    return hash_memory(&value, sizeof(int64));
+}
+
+/**
+ * To be used as a raw HashFunc where an int64 is being stored directly.
+ */
+public static uint bare_int64_hash(void *ptr) {
+    return hash_memory(ptr, sizeof(int64));
+}
+
+/**
+ * A HashFunc for DateTime.
+ */
+public static uint date_time_hash(void *a) {
+    return ((DateTime) a).hash();
+}
+
+/**
+ * A rotating-XOR hash that can be used to hash memory buffers of any size.  Use only if
+ * equality is determined by memory contents.
+ */
+public static uint hash_memory(void *ptr, size_t bytes) {
+    uint8 *u8 = (uint8 *) ptr;
+    uint hash = 0;
+    for (int ctr = 0; ctr < bytes; ctr++)
+        hash = (hash << 4) ^ (hash >> 28) ^ (*u8++);
+    
+    return hash;
+}
+
 // This *must* be used in place of Gee,TreeSet until the fix for this bug is widely distributed:
 // https://bugzilla.gnome.org/show_bug.cgi?id=695045
 public class FixedTreeSet<G> : Gee.TreeSet<G> {
-    public FixedTreeSet(CompareFunc? compare_func = null) {
-        base (compare_func);
+    public FixedTreeSet(owned GLib.CompareDataFunc<G>? compare_func = null) {
+        base ( (owned) compare_func);
     }
     
     ~FixedTreeSet() {

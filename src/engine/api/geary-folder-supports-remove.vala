@@ -29,8 +29,7 @@ public interface Geary.FolderSupportsRemove : Geary.Folder {
      */
     public virtual async void remove_single_email_async(Geary.EmailIdentifier email_id,
         Cancellable? cancellable = null) throws Error {
-        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>(
-            Equalable.equal_func);
+        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         ids.add(email_id);
         
         yield remove_email_async(ids, cancellable);

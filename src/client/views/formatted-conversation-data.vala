@@ -19,7 +19,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private const int FONT_SIZE_PREVIEW = 8;
     private const int FONT_SIZE_MESSAGE_COUNT = 8;
     
-    private class ParticipantDisplay : Geary.BaseObject, Geary.Equalable {
+    private class ParticipantDisplay : Geary.BaseObject, Gee.Hashable<ParticipantDisplay> {
         public string key;
         public Geary.RFC822.MailboxAddress address;
         public bool is_unread;
@@ -65,15 +65,15 @@ public class FormattedConversationData : Geary.BaseObject {
                 is_unread ? "<b>" : "", Geary.HTML.escape_markup(participant), is_unread ? "</b>" : "");
         }
         
-        public bool equals(Geary.Equalable o) {
-            ParticipantDisplay? other = o as ParticipantDisplay;
-            if (other == null)
-                return false;
-            
+        public bool equal_to(ParticipantDisplay other) {
             if (this == other)
                 return true;
             
             return key == other.key;
+        }
+        
+        public uint hash() {
+            return key.hash();
         }
     }
     
@@ -185,7 +185,7 @@ public class FormattedConversationData : Geary.BaseObject {
         
         // Build chronological list of AuthorDisplay records, setting to unread if any message by
         // that author is unread
-        Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>(Geary.Equalable.equal_func);
+        Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
         foreach (Geary.Email message in conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING)) {
             // only display if something to display
             Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;

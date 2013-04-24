@@ -22,7 +22,7 @@ private class Geary.ImapDB.Account : BaseObject {
     private AccountInformation account_information;
     private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
-        new Gee.HashMap<Geary.FolderPath, FolderReference>(Hashable.hash_func, Equalable.equal_func);
+        new Gee.HashMap<Geary.FolderPath, FolderReference>();
     public ContactStore contact_store { get; private set; }
     
     public Account(Geary.AccountInformation account_information) {
@@ -233,9 +233,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // TODO: A better solution here would be to only pull the FolderProperties if the Folder
         // object itself doesn't already exist
         Gee.HashMap<Geary.FolderPath, int64?> id_map = new Gee.HashMap<
-            Geary.FolderPath, int64?>(Hashable.hash_func, Equalable.equal_func);
+            Geary.FolderPath, int64?>();
         Gee.HashMap<Geary.FolderPath, Geary.Imap.FolderProperties> prop_map = new Gee.HashMap<
-            Geary.FolderPath, Geary.Imap.FolderProperties>(Hashable.hash_func, Equalable.equal_func);
+            Geary.FolderPath, Geary.Imap.FolderProperties>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             int64 parent_id = Db.INVALID_ROWID;
             if (parent != null) {

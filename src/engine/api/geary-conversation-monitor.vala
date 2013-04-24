@@ -19,18 +19,16 @@ public class Geary.ConversationMonitor : BaseObject {
         
         private int convnum;
         private weak Geary.ConversationMonitor? owner;
-        private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>(
-            Hashable.hash_func, Equalable.equal_func);
-        private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>(
-            Hashable.hash_func, Equalable.equal_func);
+        private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>();
+        private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
         private Geary.EmailIdentifier? lowest_id;
         
         // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
         // the number of times they're accessed makes it worth it
         private Gee.SortedSet<Email> date_ascending = new Collection.FixedTreeSet<Email>(
-            (CompareFunc) compare_date_ascending);
+            Geary.Email.compare_date_ascending);
         private Gee.SortedSet<Email> date_descending = new Collection.FixedTreeSet<Email>(
-            (CompareFunc) compare_date_descending);
+            Geary.Email.compare_date_descending);
         
         public ImplConversation(Geary.ConversationMonitor owner) {
             convnum = next_convnum++;
@@ -114,8 +112,7 @@ public class Geary.ConversationMonitor : BaseObject {
             date_ascending.remove(email);
             date_descending.remove(email);
             
-            Gee.Set<RFC822.MessageID> removed_message_ids = new Gee.HashSet<RFC822.MessageID>(
-                Hashable.hash_func, Equalable.equal_func);
+            Gee.Set<RFC822.MessageID> removed_message_ids = new Gee.HashSet<RFC822.MessageID>();
             
             Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
             if (ancestors != null) {
@@ -135,28 +132,8 @@ public class Geary.ConversationMonitor : BaseObject {
         }
         
         private void check_lowest_id(EmailIdentifier id) {
-            if (id.get_folder_path() != null && (lowest_id == null || id.compare(lowest_id) < 0))
+            if (id.get_folder_path() != null && (lowest_id == null || id.compare_to(lowest_id) < 0))
                 lowest_id = id;
-        }
-        
-        private static int compare_date_ascending(Email a, Email b) {
-            int diff = a.date.value.compare(b.date.value);
-            
-            // stabilize the sort if the same date
-            return (diff != 0) ? diff : compare_id_ascending(a, b);
-        }
-        
-        private static int compare_date_descending(Email a, Email b) {
-            return compare_date_ascending(b, a);
-        }
-        
-        private static int compare_id_ascending(Email a, Email b) {
-            // Arbitrarily, "account" email ids come after "folder" email ids.
-            if (a.id.get_folder_path() == null && b.id.get_folder_path() != null)
-                return 1;
-            if (a.id.get_folder_path() != null && b.id.get_folder_path() == null)
-                return -1;
-            return a.id.compare(b.id);
         }
         
         public string to_string() {
@@ -198,9 +175,9 @@ public class Geary.ConversationMonitor : BaseObject {
     private bool readonly;
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
     private Gee.HashMap<Geary.EmailIdentifier, ImplConversation> geary_id_map = new Gee.HashMap<
-        Geary.EmailIdentifier, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
+        Geary.EmailIdentifier, ImplConversation>();
     private Gee.HashMap<Geary.RFC822.MessageID, ImplConversation> message_id_map = new Gee.HashMap<
-        Geary.RFC822.MessageID, ImplConversation>(Hashable.hash_func, Equalable.equal_func);
+        Geary.RFC822.MessageID, ImplConversation>();
     private Cancellable? cancellable_monitor = null;
     private bool retry_connection = false;
     private int64 last_retry_time = 0;
@@ -562,8 +539,7 @@ public class Geary.ConversationMonitor : BaseObject {
             folder.to_string(), emails.size);
         
         // MessageIDs we're adding to each conversation.
-        Gee.HashSet<RFC822.MessageID> new_message_ids = new Gee.HashSet<RFC822.MessageID>(
-                Hashable.hash_func, Equalable.equal_func);
+        Gee.HashSet<RFC822.MessageID> new_message_ids = new Gee.HashSet<RFC822.MessageID>();
         
         Gee.HashSet<Conversation> new_conversations = new Gee.HashSet<Conversation>();
         Gee.MultiMap<Conversation, Geary.Email> appended_conversations = new Gee.HashMultiMap<
@@ -649,7 +625,7 @@ public class Geary.ConversationMonitor : BaseObject {
         };
         
         Gee.ArrayList<Geary.FolderPath?> blacklist
-            = new Gee.ArrayList<Geary.FolderPath?>(Equalable.nullable_equal_func);
+            = new Gee.ArrayList<Geary.FolderPath?>();
         foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
             try {
                 Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
@@ -699,7 +675,7 @@ public class Geary.ConversationMonitor : BaseObject {
         
         // collect their results into a single collection of addt'l emails
         Gee.HashMap<Geary.EmailIdentifier, Geary.Email> needed_messages = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email>(Hashable.hash_func, Equalable.equal_func);
+            Geary.EmailIdentifier, Geary.Email>();
         foreach (int id in batch.get_ids()) {
             LocalSearchOperation op = (LocalSearchOperation) batch.get_operation(id);
             if (op.emails != null) {
@@ -806,7 +782,7 @@ public class Geary.ConversationMonitor : BaseObject {
         Geary.EmailIdentifier? earliest_id = null;
         foreach (Geary.Conversation conversation in conversations) {
             Geary.EmailIdentifier? id = conversation.get_lowest_email_id();
-            if (id != null && (earliest_id == null || id.compare(earliest_id) < 0))
+            if (id != null && (earliest_id == null || id.compare_to(earliest_id) < 0))
                 earliest_id = id;
         }
         

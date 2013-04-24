@@ -62,8 +62,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private string account_owner_email;
     private int64 folder_id;
     private Geary.Imap.FolderProperties properties;
-    private Gee.HashSet<Geary.EmailIdentifier> marked_removed = new Gee.HashSet<Geary.EmailIdentifier>(
-        Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashSet<Geary.EmailIdentifier> marked_removed = new Gee.HashSet<Geary.EmailIdentifier>();
     
     internal Folder(ImapDB.Database db, Geary.FolderPath path, ContactStore contact_store,
         string account_owner_email, int64 folder_id, Geary.Imap.FolderProperties properties) {
@@ -660,7 +659,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return null;
         
         Gee.HashMap<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email.Field>(Hashable.hash_func, Equalable.equal_func);
+            Geary.EmailIdentifier, Geary.Email.Field>();
         
         // Break up the work
         Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
@@ -1054,7 +1053,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Db.Statement fetch_stmt = cx.prepare("SELECT flags FROM MessageTable WHERE id=?");
         
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.EmailFlags>(Hashable.hash_func, Equalable.equal_func);
+            Geary.EmailIdentifier, Geary.EmailFlags>();
         
         foreach (Geary.EmailIdentifier id in ids) {
             int64 message_id = do_find_message(cx, id, ListFlags.NONE, cancellable);

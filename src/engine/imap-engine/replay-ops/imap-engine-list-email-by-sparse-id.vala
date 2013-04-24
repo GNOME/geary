@@ -73,8 +73,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
     }
     
     private GenericFolder owner;
-    private Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>(
-        Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
     private Geary.Email.Field required_fields;
     private Folder.ListFlags flags;
     private bool local_only;
@@ -83,7 +82,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
     private unowned EmailCallback cb;
     private Cancellable? cancellable;
     private Gee.HashMultiMap<Geary.Email.Field, Geary.EmailIdentifier> unfulfilled = new Gee.HashMultiMap<
-        Geary.Email.Field, Geary.EmailIdentifier>(null, null, Hashable.hash_func, Equalable.equal_func);
+        Geary.Email.Field, Geary.EmailIdentifier>();
     
     public ListEmailBySparseID(GenericFolder owner, Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator,
@@ -173,7 +172,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
                 if (accumulator != null) {
                     Gee.HashSet<Geary.Email> wb_removed = new Gee.HashSet<Geary.Email>();
                     foreach (Geary.Email email in accumulator) {
-                        if (email.id.equals(id))
+                        if (email.id.equal_to(id))
                             wb_removed.add(email);
                     }
                     

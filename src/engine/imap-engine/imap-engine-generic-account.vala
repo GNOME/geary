@@ -14,11 +14,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private ImapDB.Account local;
     private bool open = false;
     private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
-        FolderPath, Imap.FolderProperties>(Hashable.hash_func, Equalable.equal_func);
+        FolderPath, Imap.FolderProperties>();
     private Gee.HashMap<FolderPath, GenericFolder> existing_folders = new Gee.HashMap<
-        FolderPath, GenericFolder>(Hashable.hash_func, Equalable.equal_func);
-    private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>(
-        Hashable.hash_func, Equalable.equal_func);
+        FolderPath, GenericFolder>();
+    private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>();
     private uint refresh_folder_timeout_id = 0;
     private bool in_refresh_enumerate = false;
     private Cancellable refresh_cancellable = new Cancellable();
@@ -179,7 +178,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         foreach(FolderPath path in existing_folders.keys) {
             FolderPath? path_parent = path.get_parent();
             if ((parent == null && path_parent == null) ||
-                (parent != null && path_parent != null && path_parent.equals(parent))) {
+                (parent != null && path_parent != null && path_parent.equal_to(parent))) {
                 matches.add(existing_folders.get(path));
             }
         }
@@ -317,8 +316,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
         
         // update all remote folders properties in the local store and active in the system
-        Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>(
-            Hashable.hash_func, Equalable.equal_func);
+        Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>();
         foreach (Imap.Folder remote_folder in remote_folders) {
             // only worry about alterations if the remote is openable
             if (remote_folder.get_properties().is_openable.is_possible()) {
@@ -347,14 +345,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
         
         // Get local paths of all engine (local) folders
-        Gee.Set<Geary.FolderPath> local_paths = new Gee.HashSet<Geary.FolderPath>(
-            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+        Gee.Set<Geary.FolderPath> local_paths = new Gee.HashSet<Geary.FolderPath>();
         foreach (Geary.Folder local_folder in engine_folders)
             local_paths.add(local_folder.get_path());
         
         // Get remote paths of all remote folders
-        Gee.Set<Geary.FolderPath> remote_paths = new Gee.HashSet<Geary.FolderPath>(
-            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+        Gee.Set<Geary.FolderPath> remote_paths = new Gee.HashSet<Geary.FolderPath>();
         foreach (Geary.Imap.Folder remote_folder in remote_folders) {
             remote_paths.add(remote_folder.get_path());
             

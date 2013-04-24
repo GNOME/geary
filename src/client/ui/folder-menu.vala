@@ -24,7 +24,7 @@ public class FolderMenu : GtkUtil.ToggleToolbarDropdown {
     
     public void add_folder(Geary.Folder folder) {
         folder_list.add(folder);
-        folder_list.sort((CompareFunc) folder_sort);
+        folder_list.sort(folder_sort);
         
         int index = folder_list.index_of(folder);
         menu.insert(build_menu_item(folder), index);
@@ -65,7 +65,7 @@ public class FolderMenu : GtkUtil.ToggleToolbarDropdown {
     }
     
     private static int folder_sort(Geary.Folder a, Geary.Folder b) {
-        return a.get_path().compare(b.get_path());
+        return a.get_path().compare_to(b.get_path());
     }
 }
 

@@ -42,7 +42,7 @@ public class ConversationViewer : Gtk.Box {
 
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Geary.Collection.FixedTreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
+        new Geary.Collection.FixedTreeSet<Geary.Email>(Geary.Email.compare_date_ascending); }
     
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
@@ -52,8 +52,7 @@ public class ConversationViewer : Gtk.Box {
     
     // Maps emails to their corresponding elements.
     private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
-        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>(Geary.Hashable.hash_func,
-        Geary.Equalable.equal_func);
+        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
     
     private string? hover_url = null;
     private Gtk.Menu? context_menu = null;
@@ -472,7 +471,7 @@ public class ConversationViewer : Gtk.Box {
         
         // Update the flags in our message set.
         foreach (Geary.Email message in messages) {
-            if (message.id.equals(email.id)) {
+            if (message.id.equal_to(email.id)) {
                 message.set_flags(flags);
                 break;
             }

@@ -106,7 +106,7 @@ public class ConversationListStore : Gtk.ListStore {
             if (conversation_lowest == null)
                 continue;
             
-            if (lowest_id == null || conversation_lowest.compare(lowest_id) < 0)
+            if (lowest_id == null || conversation_lowest.compare_to(lowest_id) < 0)
                 lowest_id = conversation_lowest;
         } while (iter_next(ref iter));
         
@@ -227,13 +227,11 @@ public class ConversationListStore : Gtk.ListStore {
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
         Gee.TreeSet<Geary.Conversation> sorted_conversations = new Geary.Collection.FixedTreeSet<Geary.Conversation>(
-            (CompareFunc) compare_conversation_descending);
+            compare_conversation_descending);
         sorted_conversations.add_all(conversation_monitor.get_conversations());
         
-        folder_emails = new Gee.HashSet<Geary.EmailIdentifier>(
-            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
-        account_emails = new Gee.HashSet<Geary.EmailIdentifier>(
-            Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+        folder_emails = new Gee.HashSet<Geary.EmailIdentifier>();
+        account_emails = new Gee.HashSet<Geary.EmailIdentifier>();
         foreach (Geary.Conversation conversation in sorted_conversations) {
             Geary.Email? need_preview = conversation.get_latest_email();
             if (need_preview == null)
@@ -243,7 +241,7 @@ public class ConversationListStore : Gtk.ListStore {
             
             // if all preview fields present and it's the same email, don't need to refresh
             if (current_preview != null
-                && need_preview.id.equals(current_preview.id)
+                && need_preview.id.equal_to(current_preview.id)
                 && current_preview.fields.is_all_set(ConversationListStore.WITH_PREVIEW_FIELDS)) {
                 continue;
             }
@@ -301,7 +299,7 @@ public class ConversationListStore : Gtk.ListStore {
         
         FormattedConversationData? existing_message_data = get_message_data_at_iter(iter);
         
-        if (existing_message_data == null || !existing_message_data.preview.id.equals(last_email.id)) {
+        if (existing_message_data == null || !existing_message_data.preview.id.equal_to(last_email.id)) {
             set_row(iter, conversation, last_email);
         } else if (existing_message_data != null &&
             existing_message_data.num_emails != conversation.get_count()) {

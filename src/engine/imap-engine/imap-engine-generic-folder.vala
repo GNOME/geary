@@ -151,7 +151,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.Collection<Geary.EmailIdentifier> all_locally_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.EmailIdentifier> all_removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> all_flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
-            Geary.EmailFlags>(Hashable.hash_func, Equalable.equal_func);
+            Geary.EmailFlags>();
         
         Geary.Imap.EmailIdentifier current_start_id = new Geary.Imap.EmailIdentifier(earliest_uid, local_folder.get_path());
         for (;;) {
@@ -218,7 +218,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     Geary.Imap.EmailFlags? local_email_flags = (Geary.Imap.EmailFlags) local_email.email_flags;
                     Geary.Imap.EmailFlags remote_email_flags = (Geary.Imap.EmailFlags) remote_email.email_flags;
                     
-                    if ((local_email_flags == null) || !local_email_flags.equals(remote_email_flags)) {
+                    if ((local_email_flags == null) || !local_email_flags.equal_to(remote_email_flags)) {
                         // check before writebehind
                         if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
                             remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
@@ -364,8 +364,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             
             // if gone past both local and remote extremes, time to exit
             // TODO: If UIDNEXT isn't available on server, will need to fetch the highest UID
-            if (current_start_id.uid.compare(latest_uid) >= 0
-                && current_start_id.uid.compare(remote_properties.uid_next) >= 0)
+            if (current_start_id.uid.compare_to(latest_uid) >= 0
+                && current_start_id.uid.compare_to(remote_properties.uid_next) >= 0)
                 break;
         }
         
@@ -618,10 +618,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         debug("do_replay_appended_messages %s: remote_count=%d new_remote_count=%d", to_string(),
             remote_count, new_remote_count);
         
-        Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>(
-            Hashable.hash_func, Equalable.equal_func);
-        Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>(
-            Hashable.hash_func, Equalable.equal_func);
+        Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
+        Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
         
         try {
             // If remote doesn't fully open, then don't fire signal, as we'll be unable to
@@ -1066,8 +1064,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         int mutex_token = yield normalize_email_positions_mutex.claim_async(cancellable);
         
-        Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
-            Hashable.hash_func, Equalable.equal_func);
+        Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
         Error? error = null;
         try {
             local_count = yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,

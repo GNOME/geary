@@ -181,10 +181,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     private ClientConnection? cx = null;
     private string? current_mailbox = null;
     private bool current_mailbox_readonly = false;
-    private Gee.HashMap<Tag, CommandCallback> tag_cb = new Gee.HashMap<Tag, CommandCallback>(
-        Hashable.hash_func, Equalable.equal_func);
-    private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>(
-        Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashMap<Tag, CommandCallback> tag_cb = new Gee.HashMap<Tag, CommandCallback>();
+    private Gee.HashMap<Tag, CommandResponse> tag_response = new Gee.HashMap<Tag, CommandResponse>();
     private Capabilities capabilities = new Capabilities(0);
     private int next_capabilities_revision = 1;
     private CommandResponse current_cmd_response = new CommandResponse();
@@ -1311,7 +1309,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(removed);
         
         assert(cmd_response.is_sealed());
-        assert(cmd_response.status_response.tag.equals(cmd.tag));
+        assert(cmd_response.status_response.tag.equal_to(cmd.tag));
         
         if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN) {
             try {

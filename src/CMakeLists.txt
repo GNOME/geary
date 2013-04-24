@@ -347,7 +347,7 @@ pkg_check_modules(DEPS REQUIRED
     glib-2.0>=${TARGET_GLIB}.0
     gio-2.0>=2.28.0
     gtk+-3.0>=3.4.0
-    gee-1.0>=0.6.0
+    gee-0.8>=0.8.0
     unique-3.0>=3.0.0
     libnotify>=0.7.5
     libcanberra>=0.28
@@ -359,7 +359,7 @@ pkg_check_modules(DEPS REQUIRED
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-1.0 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3
+    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3
 )
 
 set(CLIENT_PACKAGES
@@ -371,7 +371,7 @@ set(CONSOLE_PACKAGES
 )
 
 set(DBUSSERVICE_PACKAGES
-    gee-1.0 glib-2.0
+    gee-0.8 glib-2.0
 )
 
 set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/desktop)

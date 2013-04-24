@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
+public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
     public const string UNTAGGED_VALUE = "*";
     public const string CONTINUATION_VALUE = "+";
     public const string UNASSIGNED_VALUE = "----";
@@ -54,15 +54,11 @@ public class Geary.Imap.Tag : StringParameter, Hashable, Equalable {
         return (value != UNASSIGNED_VALUE) && (value != CONTINUATION_VALUE);
     }
     
-    public uint to_hash() {
+    public uint hash() {
         return str_hash(value);
     }
     
-    public bool equals(Equalable e) {
-        Tag? tag = e as Tag;
-        if (tag == null)
-            return false;
-        
+    public bool equal_to(Geary.Imap.Tag tag) {
         if (this == tag)
             return true;
         

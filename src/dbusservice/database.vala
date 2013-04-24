@@ -7,11 +7,11 @@
 namespace Geary.DBus {
 
 public uint db_email_hash(Geary.Email key) {
-    return key.id.to_hash();
+    return key.id.hash();
 }
 
 public bool db_email_equal(Geary.Email a, Geary.Email b) {
-    return a.id.equals(b.id);
+    return a.id.equal_to(b.id);
 }
 
 }

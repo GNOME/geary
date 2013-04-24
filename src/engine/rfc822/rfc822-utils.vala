@@ -92,7 +92,7 @@ public string reply_references(Geary.Email source) {
     
     // 2. If there's an In-Reply-To Message-ID and it's not the last Message-ID on the 
     //    References list, append it
-    if (source.in_reply_to != null && list.size > 0 && !list.last().equals(source.in_reply_to))
+    if (source.in_reply_to != null && list.size > 0 && !list.last().equal_to(source.in_reply_to))
         list.add(source.in_reply_to);
     
     // 3. Append the source's Message-ID, if available.

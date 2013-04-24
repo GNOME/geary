@@ -18,7 +18,7 @@
  * in the background and asking the user to reauthenticate each time is deemed inconvenient.
  */
  
-public class Geary.Credentials : BaseObject, Geary.Equalable {
+public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
     public string? user { get; set; }
     public string? pass { get; set; }
     
@@ -43,15 +43,15 @@ public class Geary.Credentials : BaseObject, Geary.Equalable {
         return user;
     }
     
-    public bool equals(Equalable other) {
-        Geary.Credentials? c = other as Geary.Credentials;
-        if (c == null)
-            return false;
-        
+    public bool equal_to(Geary.Credentials c) {
         if (this == c)
             return true;
         
         return user == c.user && pass == c.pass;
+    }
+    
+    public uint hash() {
+        return to_string().hash();
     }
 }
 

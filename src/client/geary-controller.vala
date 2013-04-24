@@ -677,7 +677,7 @@ public class GearyController {
                 return;
             }
             
-            all_accounts.sort((CompareFunc) Geary.AccountInformation.compare_ascending);
+            all_accounts.sort(Geary.AccountInformation.compare_ascending);
             account_to_select = Geary.Engine.instance.get_account_instance(all_accounts.get(0));
         } catch (Error e) {
             debug("Error selecting first inbox: %s", e.message);

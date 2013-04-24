@@ -8,18 +8,15 @@
  * Singleton is a simple way of creating a one-item read-only collection.
  */
 private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
-    private class IteratorImpl<G> : BaseObject, Gee.Iterator<G> {
+    private class IteratorImpl<G> : BaseObject, Gee.Traversable<G>, Gee.Iterator<G> {
+        public bool read_only { get { return true; } }
+        public bool valid { get { return !done; } }
+        
         private G item;
         private bool done = false;
         
         public IteratorImpl(G item) {
             this.item = item;
-        }
-        
-        public bool first() {
-            done = false;
-            
-            return true;
         }
         
         public new G? get() {
@@ -41,23 +38,27 @@ private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
         
         public void remove() {
             message("Geary.Singleton is read-only");
-        }
+        } 
+        
+        public new bool @foreach(Gee.ForallFunc<G> f) {
+            return f(item);
+       }
     }
     
+    public override bool read_only { get { return true; } }
     public G item { get; private set; }
     public override int size { get { return 1; } }
     
-    private EqualFunc equal_func;
+    private Gee.EqualDataFunc equal_func;
     
-    public Singleton(G item, EqualFunc? equal_func = null) {
+    public Singleton(G item, owned Gee.EqualDataFunc? equal_func = null) {
         this.item = item;
         
         if (equal_func != null)
-            this.equal_func = equal_func;
-        else if (typeof(G).is_a(typeof(Geary.Equalable)))
-            this.equal_func = Geary.Equalable.equal_func;
-        else
+            this.equal_func = (owned) equal_func;
+        else {
             this.equal_func = Gee.Functions.get_equal_func_for(typeof(G));
+        }
     }
     
     public override bool add(G element) {

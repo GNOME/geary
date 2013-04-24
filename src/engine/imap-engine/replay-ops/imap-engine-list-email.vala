@@ -55,7 +55,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
     private Gee.List<Geary.Email>? local_list = null;
     private int local_list_size = 0;
     private Gee.HashMultiMap<Geary.Email.Field, Geary.EmailIdentifier> unfulfilled = new Gee.HashMultiMap<
-        Geary.Email.Field, Geary.EmailIdentifier>(null, null, Hashable.hash_func, Equalable.equal_func);
+        Geary.Email.Field, Geary.EmailIdentifier>();
     
     public ListEmail(GenericFolder engine, int low, int count, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb, Cancellable? cancellable) {
@@ -215,7 +215,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
                 if (accumulator != null) {
                     Gee.HashSet<Geary.Email> wb_removed = new Gee.HashSet<Geary.Email>();
                     foreach (Geary.Email email in accumulator) {
-                        if (email.id.equals(id))
+                        if (email.id.equal_to(id))
                             wb_removed.add(email);
                     }
                     
@@ -372,8 +372,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         assert(create_op.merged != null);
         
         // report locally added (non-duplicate, not unknown) emails & collect emails post-merge
-        Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>(
-            Hashable.hash_func, Equalable.equal_func);
+        Gee.HashSet<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
         foreach (Geary.Email email in create_op.created.keys) {
             // true means created
             if (create_op.created.get(email))

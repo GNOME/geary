@@ -6,8 +6,7 @@
 
 private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_copy = new Gee.ArrayList<Geary.EmailIdentifier>(
-        Equalable.equal_func);
+    private Gee.List<Geary.EmailIdentifier> to_copy = new Gee.ArrayList<Geary.EmailIdentifier>();
     private Geary.FolderPath destination;
     private Cancellable? cancellable;
 

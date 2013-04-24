@@ -19,10 +19,10 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
     
     protected override void notify_added(Gee.Collection<EmailFlag> added) {
         foreach (EmailFlag flag in added) {
-            if (flag.equals(UNREAD))
+            if (flag.equal_to(UNREAD))
                 message_flags.remove(MessageFlag.SEEN);
             
-            if (flag.equals(FLAGGED))
+            if (flag.equal_to(FLAGGED))
                 message_flags.add(MessageFlag.FLAGGED);
         }
         
@@ -31,10 +31,10 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
     
     protected override void notify_removed(Gee.Collection<EmailFlag> removed) {
         foreach (EmailFlag flag in removed) {
-            if (flag.equals(UNREAD))
+            if (flag.equal_to(UNREAD))
                 message_flags.add(MessageFlag.SEEN);
             
-            if (flag.equals(FLAGGED))
+            if (flag.equal_to(FLAGGED))
                 message_flags.remove(MessageFlag.FLAGGED);
         }
         

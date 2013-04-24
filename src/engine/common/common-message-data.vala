@@ -18,10 +18,11 @@ public abstract class Geary.Common.MessageData : BaseObject {
     public abstract string to_string();
 }
 
-public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData, Hashable, Equalable {
+public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData,
+    Gee.Hashable<Geary.Common.StringMessageData> {
     public string value { get; private set; }
     
-    private uint hash = uint.MAX;
+    private uint stored_hash = uint.MAX;
     
     public StringMessageData(string value) {
         this.value = value;
@@ -30,22 +31,18 @@ public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData,
     /**
      * Default definition of equals is case-sensitive comparison.
      */
-    public virtual bool equals(Equalable e) {
-        StringMessageData? other = e as StringMessageData;
-        if (other == null)
-            return false;
-        
+    public virtual bool equal_to(StringMessageData other) {
         if (this == other)
             return true;
         
-        if (to_hash() != other.to_hash())
+        if (hash() != other.hash())
             return false;
         
         return (value == other.value);
     }
     
-    public virtual uint to_hash() {
-        return (hash != uint.MAX) ? hash : (hash = str_hash(value));
+    public virtual uint hash() {
+        return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = str_hash(value));
     }
     
     public override string to_string() {
@@ -53,28 +50,24 @@ public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData,
     }
 }
 
-public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Hashable, Equalable {
+public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Gee.Hashable<Geary.Common.IntMessageData> {
     public int value { get; private set; }
     
-    private uint hash = uint.MAX;
+    private uint stored_hash = uint.MAX;
     
     public IntMessageData(int value) {
         this.value = value;
     }
     
-    public virtual bool equals(Equalable e) {
-        IntMessageData? other = e as IntMessageData;
-        if (other == null)
-            return false;
-        
+    public virtual bool equal_to(Geary.Common.IntMessageData other) {
         if (this == other)
             return true;
         
         return (value == other.value);
     }
     
-    public virtual uint to_hash() {
-        return (hash != uint.MAX) ? hash : (hash = int_hash(value));
+    public virtual uint hash() {
+        return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = int_hash(value));
     }
     
     public override string to_string() {
@@ -82,28 +75,25 @@ public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Ha
     }
 }
 
-public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData, Hashable, Equalable {
+public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData,
+    Gee.Hashable<Geary.Common.LongMessageData> {
     public long value { get; private set; }
     
-    private uint hash = uint.MAX;
+    private uint stored_hash = uint.MAX;
     
     public LongMessageData(long value) {
         this.value = value;
     }
     
-    public virtual bool equals(Equalable e) {
-        LongMessageData? other = e as LongMessageData;
-        if (other == null)
-            return false;
-        
+    public virtual bool equal_to(Geary.Common.LongMessageData other) {
         if (this == other)
             return true;
         
         return (value == other.value);
     }
     
-    public virtual uint to_hash() {
-        return (hash != uint.MAX) ? hash : (hash = int64_hash((int64) value));
+    public virtual uint hash() {
+        return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = int64_hash((int64) value));
     }
     
     public override string to_string() {
@@ -111,28 +101,25 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData, H
     }
 }
 
-public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData, Hashable, Equalable {
+public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData,
+    Gee.Hashable<Geary.Common.Int64MessageData> {
     public int64 value { get; private set; }
     
-    private uint hash = uint.MAX;
+    private uint stored_hash = uint.MAX;
     
     public Int64MessageData(int64 value) {
         this.value = value;
     }
     
-    public virtual bool equals(Equalable e) {
-        Int64MessageData? other = e as Int64MessageData;
-        if (other == null)
-            return false;
-        
+    public virtual bool equal_to(Geary.Common.Int64MessageData other) {
         if (this == other)
             return true;
         
         return (value == other.value);
     }
     
-    public virtual uint to_hash() {
-        return (hash != uint.MAX) ? hash : (hash = int64_hash(value));
+    public virtual uint hash() {
+        return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = int64_hash(value));
     }
     
     public override string to_string() {

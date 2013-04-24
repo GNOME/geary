@@ -53,7 +53,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         }
         
         // Sort accounts and add them to the UI.
-        account_list.sort((CompareFunc) Geary.AccountInformation.compare_ascending);
+        account_list.sort(Geary.AccountInformation.compare_ascending);
         foreach (Geary.AccountInformation account in account_list)
             on_account_added(account);
         

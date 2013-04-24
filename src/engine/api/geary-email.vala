@@ -287,8 +287,7 @@ public class Geary.Email : BaseObject {
      * this method to return a complete list.
      */
     public Gee.Set<RFC822.MessageID>? get_ancestors() {
-        Gee.Set<RFC822.MessageID> ancestors = new Gee.HashSet<RFC822.MessageID>(
-            Hashable.hash_func, Equalable.equal_func);
+        Gee.Set<RFC822.MessageID> ancestors = new Gee.HashSet<RFC822.MessageID>();
         
         // the email's Message-ID counts as its lineage
         if (message_id != null)
@@ -348,50 +347,47 @@ public class Geary.Email : BaseObject {
      * CompareFunc to sort Email by date.  If the date field is not available on both Emails, their
      * identifiers are compared.
      */
-    public static int compare_date_ascending(void* a, void *b) {
-        Geary.Email *aemail = (Geary.Email *) a;
-        Geary.Email *bemail = (Geary.Email *) b;
-        
+    public static int compare_date_ascending(Geary.Email aemail, Geary.Email bemail) {
         int diff = 0;
-        if (aemail->date != null && bemail->date != null)
-            diff = aemail->date.value.compare(bemail->date.value);
+        if (aemail.date != null && bemail.date != null)
+            diff = aemail.date.value.compare(bemail.date.value);
         
         // stabilize sort by using the mail's ordering, which is always unique in a folder
-        return (diff != 0) ? diff : aemail->id.compare(bemail->id);
+        return (diff != 0) ? diff : aemail.id.compare_to(bemail.id);
     }
     
     /**
      * CompareFunc to sort Email by date.  If the date field is not available on both Emails, their
      * identifiers are compared.
      */
-    public static int compare_date_descending(void* a, void *b) {
-        return compare_date_ascending(b, a);
+    public static int compare_date_descending(Geary.Email aemail, Geary.Email bemail) {
+        return compare_date_ascending(bemail, aemail);
     }
     
     /**
      * CompareFunc to sort Email by EmailIdentifier.
      */
-    public static int compare_id_ascending(void* a, void *b) {
-        return ((Email *) a)->id.compare(((Email *) b)->id);
+    public static int compare_id_ascending(Geary.Email aemail, Geary.Email bemail) {
+        return aemail.id.compare_to(bemail.id);
     }
     
     /**
      * CompareFunc to sort Email by EmailIdentifier.
      */
-    public static int compare_id_descending(void* a, void *b) {
-        return compare_id_ascending(b, a);
+    public static int compare_id_descending(Geary.Email aemail, Geary.Email bemail) {
+        return compare_id_ascending(bemail, aemail);
     }
     
     /**
      * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
      * compared by EmailIdentifier.
      */
-    public static int compare_size_ascending(void *a, void *b) {
-        Geary.EmailProperties? aprop = (Geary.EmailProperties) ((Geary.Email *) a)->properties;
-        Geary.EmailProperties? bprop = (Geary.EmailProperties) ((Geary.Email *) b)->properties;
+    public static int compare_size_ascending(Geary.Email aemail, Geary.Email bemail) {
+        Geary.EmailProperties? aprop = (Geary.EmailProperties) aemail.properties;
+        Geary.EmailProperties? bprop = (Geary.EmailProperties) bemail.properties;
         
         if (aprop == null || bprop == null)
-            return compare_id_ascending(a, b);
+            return compare_id_ascending(aemail, bemail);
         
         long asize = aprop.total_bytes;
         long bsize = bprop.total_bytes;
@@ -401,39 +397,36 @@ public class Geary.Email : BaseObject {
         else if (asize > bsize)
             return 1;
         else
-            return compare_id_ascending(a, b);
+            return compare_id_ascending(aemail, bemail);
     }
     
     /**
      * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
      * compared by EmailIdentifier.
      */
-    public static int compare_size_descending(void *a, void *b) {
-        return compare_size_ascending(b, a);
+    public static int compare_size_descending(Geary.Email aemail, Geary.Email bemail) {
+        return compare_size_ascending(bemail, aemail);
     }
     
     /**
      * CompareFunc to sort Email by EmailProperties.date_received.  If not available, emails are
      * compared by EmailIdentifier.
      */
-    public static int compare_date_received_ascending(void *a, void *b) {
-        Geary.Email aemail = (Geary.Email) a;
-        Geary.Email bemail = (Geary.Email) b;
-        
+    public static int compare_date_received_ascending(Geary.Email aemail, Geary.Email bemail) {
         if (aemail.properties == null || bemail.properties == null)
-            return compare_id_ascending(a, b);
+            return compare_id_ascending(aemail, bemail);
         
         int cmp = aemail.properties.date_received.compare(bemail.properties.date_received);
         
-        return (cmp != 0) ? cmp : compare_id_ascending(a, b);
+        return (cmp != 0) ? cmp : compare_id_ascending(aemail, bemail);
     }
     
     /**
      * CompareFunc to sort Email by EmailProperties.date_received.  If not available, emails are
      * compared by EmailIdentifier.
      */
-    public static int compare_date_received_descending(void *a, void *b) {
-        return compare_date_received_ascending(b, a);
+    public static int compare_date_received_descending(Geary.Email aemail, Geary.Email bemail) {
+        return compare_date_received_ascending(bemail, aemail);
     }
 }
 

@@ -3,7 +3,7 @@ Section: gnome
 Priority: optional
 Maintainer: Jim Nelson <jim@yorba.org>
 Build-Depends: debhelper (>= 8), 
- libgee-dev (>= 0.6.0),
+ libgee-0.8-dev (>= 0.8.0),
  libglib2.0-dev (>= 2.30.0),
  libgtk-3-dev (>= 3.2.0),
  libunique-3.0-dev (>= 3.0.0),
@@ -26,7 +26,7 @@ Homepage: http://www.yorba.org
 Package: geary
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, 
- libgee2 (>= 0.6.0),
+ libgee-0.8-2 (>= 0.8.0),
  libglib2.0-0 (>= 2.30.0),
  libgtk-3-0 (>= 3.2.0),
  libunique-3.0-0 (>= 3.0.0),
