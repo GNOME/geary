@@ -96,9 +96,6 @@ class GMime.FilterFlowed : GMime.Filter {
                     // write it now.
                     for (uint j = 0; j < current_quote_level; j++)
                         outbuf[out_index++] = quote_marker;
-                } else if (delsp) {
-                    // Line was flowed, so get rid of trailing space
-                    out_index -= 1;
                 }
                 
                 // We saw a character other than '>', so we're done scanning the prefix.
@@ -114,18 +111,18 @@ class GMime.FilterFlowed : GMime.Filter {
             
             switch (c) {
                 case ' ':
+                    if (saw_space)
+                        outbuf[out_index++] = ' ';
                     saw_space = true;
                     saw_cr = false;
-                    
-                    // We'll write the space right away, since it often will be needed.  The 
-                    // exception is if it's a space marking a flowed line and DelSp is true, but
-                    // we deal with that by deleting this space before later.
-                    outbuf[out_index++] = c;
+                    // We can't write the space yet, since it might be removed if DelSp is true.
                 break;
                 
                 case '\r':
                     if (saw_cr) {
-                        // The last 3 charcters were ' \r\r', so we can't have ' \r\n'.
+                        // The last 2 charcters were '\r\r', so we can't have '\r\n'.
+                        if (saw_space)
+                            outbuf[out_index++] = ' ';
                         saw_space = false;
                         // We didn't write the preceding CR when we saw it, so we write it now.
                         outbuf[out_index++] = '\r';
@@ -139,6 +136,8 @@ class GMime.FilterFlowed : GMime.Filter {
                     if (saw_cr) {
                         // If the last 3 charcters were ' \r\n', the line was flowed.
                         last_line_was_flowed = saw_space;
+                        if (saw_space && !delsp)
+                            outbuf[out_index++] = ' ';
                         
                         // We are done with this line, so we are in the prefix of the next line
                         // (and have not yet seen any '>' charcacters in the next line).
@@ -146,6 +145,8 @@ class GMime.FilterFlowed : GMime.Filter {
                         current_quote_level = 0;
                     } else {
                         // The LF wasn't part of a CRLF, so just write it.
+                        if (saw_space)
+                            outbuf[out_index++] = ' ';
                         outbuf[out_index++] = c;
                     }
                     
@@ -155,6 +156,8 @@ class GMime.FilterFlowed : GMime.Filter {
                 
                 default:
                     // We cannot be in a ' \r\n' sequence, so just write the character.
+                    if (saw_space)
+                        outbuf[out_index++] = ' ';
                     saw_space = false;
                     saw_cr = false;
                     outbuf[out_index++] = c;
