@@ -200,10 +200,15 @@ hr {
     }
     .email.hide .body,
     .email.hide > .attachment_container,
-    .email:not(.hide) .header_container .preview {
+    .email:not(.hide) .header_container .preview,
+    .email.hide .email {
         display: none;
     }
-    .email:not(:only-of-type) .header_container {
+    .email.hide .header_container .preview {
+        display: block;
+    }
+    .email:not(:only-of-type) .header_container,
+    .email .email .header_container {
         cursor: pointer;
     }
     .email:not(.hide) .header .field .value {
@@ -263,6 +268,18 @@ hr {
     cursor: hand;
 }
 
+.email .email {
+    box-shadow: none;
+    margin-top: 0;
+    border: none;
+    border-top: 1px rgba(0,0,0,0.4) solid;
+}
+.email .email .email_container .menu,
+.email .email .email_container .starred,
+.email .email .email_container .unstarred {
+    display: none;
+}
+
 .email:not(.attachment) .attachment.icon {
     display: none;
 }
@@ -279,6 +296,10 @@ hr {
     height: 10px;
     background-color: white;
     margin: 0 16px 5px;
+}
+.email > .email + .attachment_container .top_border{
+    height: auto;
+    margin: 0;
 }
 .email > .attachment_container > .attachment {
     margin: 10px 10px 0 10px;

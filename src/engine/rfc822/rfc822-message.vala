@@ -22,6 +22,7 @@ public class Geary.RFC822.Message : BaseObject {
     public RFC822.MessageIDList? references { get; private set; default = null; }
     public RFC822.Subject? subject { get; private set; default = null; }
     public string? mailer { get; private set; default = null; }
+    public Geary.RFC822.Date? date { get; private set; default = null; }
     
     private GMime.Message message;
     
@@ -33,6 +34,11 @@ public class Geary.RFC822.Message : BaseObject {
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
         
+        stock_from_gmime();
+    }
+    
+    public Message.from_gmime_message(GMime.Message message) {
+        this.message = message;
         stock_from_gmime();
     }
     
@@ -162,7 +168,8 @@ public class Geary.RFC822.Message : BaseObject {
         sender = email.sender;
         message.set_sender(email.message.get_sender());
         
-        message.set_date_as_string(email.message.get_date_as_string());
+        date = email.date;
+        message.set_date_as_string(email.date.to_string());
         
         // Optional headers.
         if (email.to != null) {
@@ -248,43 +255,43 @@ public class Geary.RFC822.Message : BaseObject {
         
         email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
             message.get_headers())));
-        email.set_send_date(new Geary.RFC822.Date(message.get_date_as_string()));
+        email.set_send_date(date);
         email.set_originators(from, new Geary.RFC822.MailboxAddresses.single(sender), null);
         email.set_receivers(to, cc, bcc);
         email.set_full_references(null, in_reply_to, references);
         email.set_message_subject(subject);
         email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.StringBuffer(
             message.get_body().to_string())));
-        email.set_message_preview(new Geary.RFC822.PreviewText.from_string(
-            preview_from_email(email)));
+        email.set_message_preview(new Geary.RFC822.PreviewText.from_string(get_preview()));
         
         return email;
     }
     
     // Takes an e-mail object with a body and generates a preview.  If there is no body
     // or the body is the empty string, the empty string will be returned.
-    //
-    // Note that this is intended for outgoing messages, and as such we rely on the text
-    // section existing.
-    private string preview_from_email(Geary.Email email) {
+    public string get_preview() {
+        string? preview = null;
         try {
-            return Geary.String.safe_byte_substring(email.get_message().
-                get_first_mime_part_of_content_type("text/plain").to_string().
-                chug(), Geary.Email.MAX_PREVIEW_BYTES);
+            preview = get_text_body(false);
         } catch (Error e) {
-            debug("Could not generate outbox preview: %s", e.message);
-            
-            // fall through
+            try {
+                preview = Geary.HTML.remove_html_tags(get_html_body());
+            } catch (Error error) {
+                debug("Could not generate message preview: %s\n and: %s", e.message, error.message);
+            }
         }
         
-        return "";
+        return Geary.String.safe_byte_substring((preview ?? "").chug(),
+            Geary.Email.MAX_PREVIEW_BYTES);
     }
     
     private void stock_from_gmime() {
-        from = new RFC822.MailboxAddresses.from_rfc822_string(message.get_sender());
-        
-        // sender is defined as first From address, from better or worse
-        sender = (from.size != 0) ? from[0] : null;
+        string? message_sender = message.get_sender();
+        if (message_sender != null) {
+            from = new RFC822.MailboxAddresses.from_rfc822_string(message_sender);
+            // sender is defined as first From address, from better or worse
+            sender = (from.size != 0) ? from[0] : null;
+        }
         
         Gee.List<RFC822.MailboxAddress>? converted = convert_gmime_address_list(
             message.get_recipients(GMime.RecipientType.TO));
@@ -310,6 +317,14 @@ public class Geary.RFC822.Message : BaseObject {
         
         if (!String.is_empty(message.get_header(HEADER_MAILER)))
             mailer = message.get_header(HEADER_MAILER);
+        
+        if (!String.is_empty(message.get_date_as_string())) {
+            try {
+                date = new Geary.RFC822.Date(message.get_date_as_string());
+            } catch (Error error) {
+                debug("Could not get date from message: %s", error.message);
+            }
+        }
     }
     
     private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist,
@@ -483,6 +498,30 @@ public class Geary.RFC822.Message : BaseObject {
         // Otherwise see if it has a content disposition of "attachment."
         if (root is GMime.Part && String.nullable_stri_equal(root.get_disposition(), "attachment")) {
             attachments.add(root as GMime.Part);
+        }
+    }
+    
+    public Gee.List<Geary.RFC822.Message> get_sub_messages() {
+        Gee.List<Geary.RFC822.Message> messages = new Gee.ArrayList<Geary.RFC822.Message>();
+        find_sub_messages(messages, message.get_mime_part());
+        return messages;
+    }
+    
+    private void find_sub_messages(Gee.List<Geary.RFC822.Message> messages, GMime.Object root) {
+        // If this is a multipart container, check each of its children.
+        GMime.Multipart? multipart = root as GMime.Multipart;
+        if (multipart != null) {
+            int count = multipart.get_count();
+            for (int i = 0; i < count; ++i) {
+                find_sub_messages(messages, multipart.get_part(i));
+            }
+            return;
+        }
+        
+        GMime.MessagePart? messagepart = root as GMime.MessagePart;
+        if (messagepart != null) {
+            GMime.Message sub_message = messagepart.get_message();
+            messages.add(new Geary.RFC822.Message.from_gmime_message(sub_message));
         }
     }
 

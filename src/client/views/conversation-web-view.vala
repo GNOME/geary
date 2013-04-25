@@ -104,7 +104,7 @@ public class ConversationWebView : WebKit.WebView {
         }
     }
     
-    private bool is_always_loaded(string? uri) {
+    public bool is_always_loaded(string? uri) {
         if (uri == null)
             return true;
         
