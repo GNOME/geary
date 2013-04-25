@@ -56,7 +56,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // - From open remote folder
         // - Fetch from local store
         if (remote_folder != null && get_open_state() == OpenState.BOTH)
-            return remote_folder.get_properties();
+            return remote_folder.properties;
         
         return local_folder.get_properties();
     }
@@ -106,7 +106,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         debug("normalize_folders %s", to_string());
         
         Geary.Imap.FolderProperties local_properties = local_folder.get_properties();
-        Geary.Imap.FolderProperties remote_properties = remote_folder.get_properties();
+        Geary.Imap.FolderProperties remote_properties = remote_folder.properties;
         
         // and both must have their next UID's (it's possible they don't if it's a non-selectable
         // folder)
@@ -454,12 +454,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 yield local.update_folder_async(folder, cancellable);
                 
                 // signals
+                /*
                 folder.messages_appended.connect(on_remote_messages_appended);
                 folder.message_at_removed.connect(on_remote_message_at_removed);
                 folder.disconnected.connect(on_remote_disconnected);
+                */
                 
                 // state
-                remote_count = folder.get_email_count();
+                remote_count = folder.properties.email_total;
                 
                 // all set; bless the remote folder as opened
                 remote_folder = folder;
@@ -547,9 +549,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         if (closing_remote_folder != null) {
+            /*
             closing_remote_folder.messages_appended.disconnect(on_remote_messages_appended);
             closing_remote_folder.message_at_removed.disconnect(on_remote_message_at_removed);
             closing_remote_folder.disconnected.disconnect(on_remote_disconnected);
+            */
             
             // to avoid keeping the caller waiting while the remote end closes, close it in the
             // background

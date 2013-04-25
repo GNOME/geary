@@ -440,8 +440,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
     
     private void on_parameters_ready(RootParameters root) {
+        ServerResponse response;
         try {
-            ServerResponse response = ServerResponse.from_server(root);
+            response = ServerResponse.migrate_from_server(root);
         } catch (ImapError err) {
             received_bad_response(root, err);
             
@@ -469,7 +470,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             return;
         }
         
-        error("[%s] Unknown ServerResponse of type %s received: %s:", to_string(), response.type().name(),
+        error("[%s] Unknown ServerResponse of type %s received: %s:", to_string(), response.get_type().name(),
             response.to_string());
     }
     

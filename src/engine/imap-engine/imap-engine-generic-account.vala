@@ -309,7 +309,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.Collection<Geary.Folder> engine_folders, Cancellable? cancellable) {
         Gee.Collection<Geary.Imap.Folder> remote_folders;
         try {
-            remote_folders = yield remote.list_folders_async(parent, cancellable);
+            remote_folders = yield remote.list_mailboxes_async(parent, cancellable);
         } catch (Error remote_error) {
             debug("Unable to retrieve folder list from server: %s", remote_error.message);
             
@@ -321,20 +321,20 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             Hashable.hash_func, Equalable.equal_func);
         foreach (Imap.Folder remote_folder in remote_folders) {
             // only worry about alterations if the remote is openable
-            if (remote_folder.get_properties().is_openable.is_possible()) {
+            if (remote_folder.properties.is_openable.is_possible()) {
                 ImapDB.Folder? local_folder = null;
                 try {
-                    local_folder = yield local.fetch_folder_async(remote_folder.get_path(), cancellable);
+                    local_folder = yield local.fetch_folder_async(remote_folder.path, cancellable);
                 } catch (Error err) {
                     if (!(err is EngineError.NOT_FOUND)) {
-                        debug("Unable to fetch local folder for remote %s: %s", remote_folder.get_path().to_string(),
+                        debug("Unable to fetch local folder for remote %s: %s", remote_folder.path.to_string(),
                             err.message);
                     }
                 }
                 
                 if (local_folder != null) {
-                    if (remote_folder.get_properties().have_contents_changed(local_folder.get_properties()).is_possible())
-                        altered_paths.add(remote_folder.get_path());
+                    if (remote_folder.properties.have_contents_changed(local_folder.get_properties()).is_possible())
+                        altered_paths.add(remote_folder.path);
                 }
             }
             
@@ -356,23 +356,23 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.Set<Geary.FolderPath> remote_paths = new Gee.HashSet<Geary.FolderPath>(
             Geary.Hashable.hash_func, Geary.Equalable.equal_func);
         foreach (Geary.Imap.Folder remote_folder in remote_folders) {
-            remote_paths.add(remote_folder.get_path());
+            remote_paths.add(remote_folder.path);
             
             // use this iteration to add discovered properties to map
-            properties_map.set(remote_folder.get_path(), remote_folder.get_properties());
+            properties_map.set(remote_folder.path, remote_folder.properties);
             
             // also use this iteration to set the local folder's special type
             // (but only promote, not demote, since getting the special folder type via its
             // properties relies on the optional XLIST extension)
-            GenericFolder? local_folder = existing_folders.get(remote_folder.get_path());
+            GenericFolder? local_folder = existing_folders.get(remote_folder.path);
             if (local_folder != null && local_folder.get_special_folder_type() == SpecialFolderType.NONE)
-                local_folder.set_special_folder_type(remote_folder.get_properties().attrs.get_special_folder_type());
+                local_folder.set_special_folder_type(remote_folder.properties.attrs.get_special_folder_type());
         }
         
         // If path in remote but not local, need to add it
         Gee.List<Geary.Imap.Folder> to_add = new Gee.ArrayList<Geary.Imap.Folder>();
         foreach (Geary.Imap.Folder folder in remote_folders) {
-            if (!local_paths.contains(folder.get_path()))
+            if (!local_paths.contains(folder.path))
                 to_add.add(folder);
         }
         
@@ -396,7 +396,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 try {
                     yield local.clone_folder_async(folder, cancellable);
                 } catch (Error err) {
-                    debug("Unable to add/remove folder %s: %s", folder.get_path().to_string(),
+                    debug("Unable to add/remove folder %s: %s", folder.path.to_string(),
                         err.message);
                 }
             }
@@ -411,7 +411,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             foreach (Geary.Imap.Folder remote_folder in to_add) {
                 try {
                     folders_to_build.add((ImapDB.Folder) yield local.fetch_folder_async(
-                        remote_folder.get_path(), cancellable));
+                        remote_folder.path, cancellable));
                 } catch (Error convert_err) {
                     // This isn't fatal, but irksome ... in the future, when local folders are
                     // removed, it's possible for one to disappear between cloning it and fetching
@@ -449,11 +449,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         // enumerate children of each remote folder
         foreach (Imap.Folder remote_folder in remote_folders) {
-            if (remote_folder.get_properties().has_children.is_possible()) {
+            if (remote_folder.properties.has_children.is_possible()) {
                 try {
-                    yield enumerate_folders_async(remote_folder.get_path(), cancellable);
+                    yield enumerate_folders_async(remote_folder.path, cancellable);
                 } catch (Error err) {
-                    debug("Unable to enumerate children of %s: %s", remote_folder.get_path().to_string(),
+                    debug("Unable to enumerate children of %s: %s", remote_folder.path.to_string(),
                         err.message);
                 }
             }

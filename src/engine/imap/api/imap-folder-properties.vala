@@ -6,17 +6,18 @@
 
 public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     /**
-     * -1 if the Folder was not opened via SELECT or EXAMINE.
+     * -1 if the Folder was not opened via SELECT or EXAMINE.  Updated as EXISTS server data
+     * arrives.
      */
     public int select_examine_messages { get; private set; }
     /**
      * -1 if the FolderProperties were not obtained via a STATUS command
      */
     public int status_messages { get; private set; }
-    public int unseen { get; private set; }
-    public int recent { get; private set; }
-    public UIDValidity? uid_validity { get; private set; }
-    public UID? uid_next { get; private set; }
+    public int unseen { get; internal set; }
+    public int recent { get; internal set; }
+    public UIDValidity? uid_validity { get; internal set; }
+    public UID? uid_next { get; internal set; }
     public MailboxAttributes attrs { get; private set; }
     
     // Note that unseen from SELECT/EXAMINE is the *position* of the first unseen message,

@@ -53,31 +53,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
-    }
-    
-    ~ClientSessionManager() {
-        if (is_opened)
-            warning("Destroying opened ClientSessionManager");
-    }
-    
-    public async void open_async() throws Error {
-        if (is_opened)
-            throw ImapError.INVALID("ClientSessionManager is already open");
-        
-        is_opened = true;
         
         account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
     }
     
-    public async void close_async() throws Error {
-        if (!is_opened)
-            return;
-        
-        is_opened = false;
-        
-        account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
-        
-        // TODO: Tear down all connections
+    ~ClientSessionManager() {
+        if (is_open)
+            warning("Destroying opened ClientSessionManager");
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -304,7 +286,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 assert_not_reached();
         }
         
-        int token = yield session_mutex.claim_async(cancellable);
+        int token = yield sessions_mutex.claim_async(cancellable);
         
         if (!sessions.contains(session))
             debug("Attempting to release a session not owned by client session manager: %s", session.to_string());
@@ -312,7 +294,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (!reserved_sessions.remove(session))
             debug("Attempting to release an unreserved session: %s", session.to_string());
         
-        session_mutex.release(ref token);
+        sessions_mutex.release(ref token);
     }
     
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {

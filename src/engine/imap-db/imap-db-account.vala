@@ -96,12 +96,12 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.Imap.FolderProperties? properties = imap_folder.get_properties();
+        Geary.Imap.FolderProperties? properties = imap_folder.properties;
         
         // properties *must* be available to perform a clone
         assert(properties != null);
         
-        Geary.FolderPath path = imap_folder.get_path();
+        Geary.FolderPath path = imap_folder.path;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,
@@ -137,8 +137,8 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.Imap.FolderProperties properties = imap_folder.get_properties();
-        Geary.FolderPath path = imap_folder.get_path();
+        Geary.Imap.FolderProperties properties = imap_folder.properties;
+        Geary.FolderPath path = imap_folder.path;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 parent_id;

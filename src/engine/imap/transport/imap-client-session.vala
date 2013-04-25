@@ -127,7 +127,7 @@ public class Geary.Imap.ClientSession : BaseObject {
      * capabilities, only watch for them as they're reported.  Thus, it's recommended that users
      * of ClientSession issue a CapabilityCommand (if needed) before login.
      */
-    private Capabilities capabilities { get; private set; default = new Capabilities(0); }
+    public Capabilities capabilities { get; private set; default = new Capabilities(0); }
     
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
@@ -270,7 +270,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.SELECTING, Event.CLOSE_MAILBOX, on_close_mailbox),
             new Geary.State.Mapping(State.SELECTING, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.SELECTING, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.SELECTING, Event.RECV_STATUS, on_selecting_recv_status),
+            new Geary.State.Mapping(State.SELECTING, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_COMPLETION, on_selecting_recv_completion),
             new Geary.State.Mapping(State.SELECTING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_ERROR, on_recv_error),
@@ -448,7 +448,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         // only use IDLE when in SELECTED or EXAMINED state
         cx.set_idle_when_quiet(false);
         
-        result.proceed = true;
+        params.proceed = true;
         
         return State.CONNECTING;
     }
@@ -487,7 +487,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
     }
     
-    private void on_connected(uint state, uint event) {
+    private uint on_connected(uint state, uint event) {
         debug("[%s] Connected", to_string());
         
         fsm.do_post_transition(() => { connected(); });
@@ -496,7 +496,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         return state;
     }
     
-    private void on_connecting_recv_status(uint state, uint event, void *user, Object? object) {
+    private uint on_connecting_recv_status(uint state, uint event, void *user, Object? object) {
         StatusResponse status_response = (StatusResponse) object;
         
         if (status_response.status == Status.OK)
@@ -504,7 +504,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         debug("[%s] Connect denied: %s", to_string(), status_response.to_string());
         
-        fsm.do_post_transition(() => { session_denied(status_response.text); });
+        fsm.do_post_transition(() => { session_denied(status_response.get_text()); });
         
         return State.LOGGED_OUT;
     }
@@ -522,12 +522,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         LoginCommand cmd = new LoginCommand(credentials.user, credentials.pass);
         
         MachineParams params = new MachineParams(cmd);
-        fsm.issue(Event.LOGIN, null, param);
+        fsm.issue(Event.LOGIN, null, params);
         
         if (params.err != null)
             throw params.err;
         
-        assert(result.proceed);
+        // should always proceed; only an Error could change this
+        assert(params.proceed);
         
         return yield command_transaction_async(cmd, cancellable);
     }
@@ -562,12 +563,12 @@ public class Geary.Imap.ClientSession : BaseObject {
                     yield cx.starttls_async(cancellable);
                     debug("[%s] STARTTLS completed", to_string());
                 } else {
-                    debug("[%s} STARTTLS refused: %s", to_string(), resp.status_response.to_string());
+                    debug("[%s} STARTTLS refused: %s", to_string(), resp.status.to_string());
                     
                     // throw an exception and fail rather than send credentials under suspect
                     // conditions
                     throw new ImapError.NOT_SUPPORTED("STARTTLS refused by %s: %s", to_string(),
-                        resp.status_response.to_string());
+                        resp.status.to_string());
                 }
             break;
             
@@ -781,7 +782,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     public bool supports_idle() {
-        return get_capabilities().has_capability(Capabilities.IDLE);
+        return capabilities.has_capability(Capabilities.IDLE);
     }
     
     //
@@ -862,7 +863,12 @@ public class Geary.Imap.ClientSession : BaseObject {
         Cancellable? cancellable) throws Error {
         string? old_mailbox = current_mailbox;
         
-        Command cmd = is_select ? new SelectCommand(mailbox) : new ExamineCommand(mailbox);
+        // Ternary troubles
+        Command cmd;
+        if (is_select)
+            cmd = new SelectCommand(new MailboxParameter(mailbox));
+        else
+            cmd = new ExamineCommand(new MailboxParameter(mailbox));
         
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.SELECT, null, params);
@@ -1055,7 +1061,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (params.err != null)
             throw params.err;
         
-        if (result.proceed)
+        if (params.proceed)
             yield cx.disconnect_async(cancellable);
     }
     
@@ -1228,14 +1234,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         // server) in the context of send_async(), wait for it now
         if (!seen_completion_responses.has_key(cmd.tag)) {
             debug("[%s] Waiting for completion status response %s...", to_string(), cmd.to_string());
-            waiting_for_completion.set(cmd.tag, new CommandCallback(issue_command_async.callback));
+            waiting_for_completion.set(cmd.tag, new CommandCallback(command_transaction_async.callback));
             yield;
         }
         
         // it should be seen now; if not, it's because of disconnection cancelling all the outstanding
         // requests
         CompletionStatusResponse? completion_response;
-        if (!seen_completion_response.remove(cmd.tag, out completion_response)) {
+        if (!seen_completion_responses.unset(cmd.tag, out completion_response)) {
             assert(cx == null);
             
             throw new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
@@ -1295,7 +1301,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         // update state machine before notifying subscribers, who may turn around and query ClientSession
         fsm.issue(Event.RECV_STATUS, null, coded_response, null);
         
-        coded_status_response_received(coded_response);
+        coded_response_received(coded_response);
     }
     
     private void on_received_completion_status_response(CompletionStatusResponse completion_status_response) {
@@ -1309,14 +1315,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         // this command to the server ... this mechanism (seen_completion_response and
         // waiting_for_completion) assures that in either case issue_command_async() returns
         // when the command is completed
-        seen_completion_response.set(completion_status_response.tag, completion_status_response);
+        seen_completion_responses.set(completion_status_response.tag, completion_status_response);
         
         CommandCallback? cmd_cb;
-        if (waiting_for_completion.remove(completion_status_response.tag, out cmd_cb))
-            Idle.schedule(cmd_cb.callback);
+        if (waiting_for_completion.unset(completion_status_response.tag, out cmd_cb))
+            Idle.add(cmd_cb.callback);
     }
     
-    private void notify(ServerData server_data) throws ImapError {
+    private void notify_received_data(ServerData server_data) throws ImapError {
         switch (server_data.server_data_type) {
             case ServerDataType.CAPABILITY:
                 // update ClientSession capabilities before firing signal, so external signal
@@ -1372,7 +1378,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         // send ServerData to upper layers for processing and storage
         try {
-            notify(server_data);
+            notify_received_data(server_data);
         } catch (ImapError ierr) {
             debug("[%s] Failure notifying of server data: %s %s", to_string(), server_data.to_string(),
                 ierr.message);

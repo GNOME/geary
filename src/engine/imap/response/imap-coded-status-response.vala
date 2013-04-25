@@ -8,11 +8,12 @@ public class Geary.Imap.CodedStatusResponse : StatusResponse {
     public ResponseCodeType response_code_type { get; private set; }
     public ResponseCode response_code { get; private set; }
     
-    public CodedStatusResponse() {
+    public CodedStatusResponse(Tag tag) {
+        base (tag);
     }
     
-    public CodedStatusResponse.reconstitute(RootParameters root) throws ImapError {
-        base.reconstitute(root);
+    public CodedStatusResponse.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
         
         if (tag.is_tagged()) {
             throw new ImapError.PARSE_ERROR("Not a CodedStatusResponse: tagged response: %s",

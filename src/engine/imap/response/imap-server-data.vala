@@ -7,6 +7,10 @@
 public class Geary.Imap.ServerData : ServerResponse {
     public ServerDataType server_data_type { get; private set; }
     
+    protected ServerData(Tag tag) {
+        base (tag);
+    }
+    
     public ServerData.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
     }

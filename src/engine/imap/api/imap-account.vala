@@ -10,6 +10,13 @@ private class Geary.Imap.Account : BaseObject {
     public const string INBOX_NAME = "INBOX";
     public const string ASSUMED_SEPARATOR = "/";
     
+    private static MailboxParameter? _GLOB_PARAMETER = null;
+    private static MailboxParameter GLOB_PARAMETER {
+        get {
+            return (_GLOB_PARAMETER != null) ? _GLOB_PARAMETER : _GLOB_PARAMETER = new MailboxParameter("%");
+        }
+    }
+    
     public bool is_open { get; private set; default = false; }
     
     private string name;
@@ -18,7 +25,7 @@ private class Geary.Imap.Account : BaseObject {
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     private ClientSession? account_session = null;
     private NonblockingMutex cmd_mutex = new NonblockingMutex();
-    private Gee.ArrayList<MailboxInformation> mailbox_collector = new Gee.ArrayList<MailboxInformation>();
+    private Gee.ArrayList<MailboxInformation> list_collector = new Gee.ArrayList<MailboxInformation>();
     private Gee.ArrayList<StatusData> status_collector = new Gee.ArrayList<StatusData>();
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
@@ -31,6 +38,11 @@ private class Geary.Imap.Account : BaseObject {
         this.session_mgr = session_mgr;
         
         session_mgr.login_failed.connect(on_login_failed);
+    }
+    
+    private void check_open() throws Error {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("Imap.Account not open");
     }
     
     public async void open_async(Cancellable? cancellable = null) throws Error {
@@ -71,13 +83,14 @@ private class Geary.Imap.Account : BaseObject {
         
         Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
         if (processed == null)
-            throw new ImapError.INVALID_PATH("Invalid path %s", path.to_string());
+            throw new ImapError.INVALID("Invalid path %s", path.to_string());
         
         bool can_xlist = account_session.capabilities.has_capability(Capabilities.XLIST);
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         CompletionStatusResponse response = yield send_command_async(
-            new ListCommand(processed.get_fullpath(), can_xlist), list_results, null, cancellable);
+            new ListCommand(new Imap.MailboxParameter(processed.get_fullpath()), can_xlist), list_results,
+            null, cancellable);
         
         if (response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server reports LIST error for path %s: %s", path.to_string(),
@@ -89,7 +102,7 @@ private class Geary.Imap.Account : BaseObject {
                 list_results.size, path.get_fullpath());
         }
         
-        return (list_results == 1) ? list_results[0] : null;
+        return (list_results.size == 1) ? list_results[0] : null;
     }
     
     public async Gee.List<MailboxInformation>? list_children_command(FolderPath? parent, Cancellable? cancellable = null)
@@ -103,14 +116,14 @@ private class Geary.Imap.Account : BaseObject {
         
         ListCommand cmd;
         if (processed == null) {
-            cmd = new ListCommand.wildcarded("", "%", can_xlist);
+            cmd = new ListCommand.wildcarded("", new MailboxParameter("%"), can_xlist);
         } else {
             string specifier = processed.get_fullpath();
             string delim = processed.get_root().default_separator;
             
-            specified += specifier.has_suffix(delim) ? "%" : (delim + "%");
+            specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
             
-            cmd = new ListCommand(specifier, can_xlist);
+            cmd = new ListCommand(new Imap.MailboxParameter(specifier), can_xlist);
         }
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
@@ -118,7 +131,7 @@ private class Geary.Imap.Account : BaseObject {
             cancellable);
         
         if (response.status != Status.OK)
-            throw_not_found(path);
+            throw_not_found(processed ?? parent);
         
         return (list_results.size > 0) ? list_results : null;
     }
@@ -129,12 +142,12 @@ private class Geary.Imap.Account : BaseObject {
         
         Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
         if (processed == null)
-            throw new ImapError.INVALID_PATH("Invalid path %s", path.to_string());
+            throw new ImapError.INVALID("Invalid path %s", path.to_string());
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         CompletionStatusResponse response = yield send_command_async(
-            new StatusCommand(processed.get_fullpath(), StatusDataType.all()), null, status_results,
-            cancellable);
+            new StatusCommand(new MailboxParameter(processed.get_fullpath()), StatusDataType.all()),
+            null, status_results, cancellable);
         
         if (response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server reports STATUS error for path %s: %s", path.to_string(),
@@ -201,7 +214,7 @@ private class Geary.Imap.Account : BaseObject {
         // 3. Parent and basename supplied, verify parent is not Inbox, as IMAP does not allow it
         //    to have children
         if (parent != null && !empty_basename && parent.get_root().basename.up() == INBOX_NAME)
-            throw new ImapError.INVALID_PATH("Inbox may not have children");
+            throw new ImapError.INVALID("Inbox may not have children");
         
         // 4. Parent supplied but basename is not; if parent points to Inbox, normalize it
         if (parent != null && empty_basename && parent.basename.up() == INBOX_NAME)

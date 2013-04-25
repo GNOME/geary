@@ -5,11 +5,12 @@
  */
 
 public class Geary.Imap.CompletionStatusResponse : StatusResponse {
-    private CompletionStatusResponse() {
+    private CompletionStatusResponse(Tag tag) {
+        base (tag);
     }
     
-    public CompletionStatusResponse.reconstitute(RootParameters root) throws ImapError {
-        base.reconstitute(root);
+    public CompletionStatusResponse.migrate(RootParameters root) throws ImapError {
+        base.migrate(root);
         
         // check this is actually a CompletionStatusResponse
         if (!tag.is_tagged()) {

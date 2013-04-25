@@ -64,8 +64,8 @@ private class Geary.Imap.Folder : BaseObject {
         session.expunge.connect(on_expunge);
         session.fetch.connect(on_fetch);
         session.recent.connect(on_recent);
-        session.coded_status_response.connect(on_coded_status_response);
-        session.disconnected.connect(on_disconnected);
+        session.coded_response_received.connect(on_coded_status_response);
+        //session.disconnected.connect(on_disconnected);
         
         CompletionStatusResponse response = yield session.select_examine_async(path.get_fullpath(info.delim),
             !readonly, cancellable);
@@ -74,11 +74,6 @@ private class Geary.Imap.Folder : BaseObject {
         
         // update with new information
         this.readonly = Trillian.from_boolean(readonly);
-        
-        int old_status_messages = properties.status_messages;
-        properties = new Imap.FolderProperties(mailbox.exists, mailbox.recent, properties.unseen,
-            mailbox.uid_validity, mailbox.uid_next, properties.attrs);
-        properties.set_status_message_count(old_status_messages, false);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
@@ -89,8 +84,8 @@ private class Geary.Imap.Folder : BaseObject {
         session.expunge.disconnect(on_expunge);
         session.fetch.disconnect(on_fetch);
         session.recent.disconnect(on_recent);
-        session.coded_status_response.disconnect(on_coded_status_response);
-        session.disconnected.disconnect(on_disconnected);
+        session.coded_response_received.disconnect(on_coded_status_response);
+        //session.disconnected.disconnect(on_disconnected);
         
         try {
             yield session.close_mailbox_async(cancellable);
@@ -104,7 +99,7 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_exists(int count) {
-        properties.messages = count;
+        properties.set_select_examine_message_count(count);
         
         exists(count);
     }
@@ -124,10 +119,23 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_coded_status_response(CodedStatusResponse coded_response) {
-        switch (coded_response.response_code_type) {
-            case ResponseCodeType.UIDNEXT:
-                properties.uid_next = coded_response.get_uid_next();
-            break;
+        try {
+            switch (coded_response.response_code_type) {
+                case ResponseCodeType.UIDNEXT:
+                    properties.uid_next = coded_response.get_uid_next();
+                break;
+                
+                case ResponseCodeType.UIDVALIDITY:
+                    properties.uid_validity = coded_response.get_uid_validity();
+                break;
+                
+                case ResponseCodeType.UNSEEN:
+                    properties.unseen = coded_response.get_unseen();
+                break;
+            }
+        } catch (ImapError ierr) {
+            debug("Unable to parse CodedStatusResponse %s: %s", coded_response.to_string(),
+                ierr.message);
         }
     }
     
@@ -150,13 +158,18 @@ private class Geary.Imap.Folder : BaseObject {
     
     public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable = null) throws Error {
+        /*
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
         return yield mailbox.list_set_async(msg_set, fields, cancellable);
+        */
+        
+        return null;
     }
     
     public async void remove_email_async(MessageSet msg_set, Cancellable? cancellable = null) throws Error {
+        /*
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
@@ -168,10 +181,12 @@ private class Geary.Imap.Folder : BaseObject {
         // mailbox could've closed during call
         if (mailbox != null)
             yield mailbox.expunge_email_async(msg_set, cancellable);
+        */
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable = null) throws Error {
+        /*
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
         
@@ -181,23 +196,28 @@ private class Geary.Imap.Folder : BaseObject {
             out msg_flags_remove);
         
         yield mailbox.mark_email_async(msg_set, msg_flags_add, msg_flags_remove, cancellable);
+        */
     }
-
+    
     public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
         Cancellable? cancellable = null) throws Error {
+        /*
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
-
+        
         yield mailbox.copy_email_async(msg_set, destination, cancellable);
+        */
     }
 
     public async void move_email_async(MessageSet msg_set, Geary.FolderPath destination,
         Cancellable? cancellable = null) throws Error {
+        /*
         if (mailbox == null)
             throw new EngineError.OPEN_REQUIRED("%s not opened", to_string());
-
+        
         yield copy_email_async(msg_set, destination, cancellable);
         yield remove_email_async(msg_set, cancellable);
+        */
     }
 
     public string to_string() {

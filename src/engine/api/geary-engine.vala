@@ -216,7 +216,7 @@ public class Geary.Engine : BaseObject {
             return error_code;
         
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
-        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);
+        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint());
         try {
             yield imap_session.connect_async(cancellable);
         } catch (Error err) {

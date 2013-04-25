@@ -38,7 +38,7 @@ public class Geary.Imap.StatusData : Object {
     public static StatusData decode(ServerData server_data) throws ImapError {
         if (!server_data.get_as_string(1).equals_ci(StatusCommand.NAME)) {
             throw new ImapError.PARSE_ERROR("Bad STATUS command name in response \"%s\"",
-                response.to_string());
+                server_data.to_string());
         }
         
         int messages = UNSET;
@@ -83,7 +83,7 @@ public class Geary.Imap.StatusData : Object {
                 }
             } catch (ImapError ierr) {
                 message("Bad value at %d/%d in STATUS response \"%s\": %s", ctr, ctr + 1,
-                    response.to_string(), ierr.message);
+                    server_data.to_string(), ierr.message);
             }
         }
         

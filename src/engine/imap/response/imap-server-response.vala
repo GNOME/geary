@@ -18,7 +18,7 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
     }
     
     // The RootParameters are migrated and will be stripped upon exit.
-    public static ServerResponse migrate_from_server(RootParameters root, out Type response_type)
+    public static ServerResponse migrate_from_server(RootParameters root)
         throws ImapError {
         Tag tag = new Tag.from_parameter(root.get_as_string(0));
         if (tag.is_tagged()) {
@@ -28,30 +28,24 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
             if (statusparam != null)
                 Status.decode(statusparam.value);
             
-            // tagged and has proper status, so it's a status response
-            response_type = Type.STATUS_RESPONSE;
-            
             return new StatusResponse.migrate(root);
         } else if (tag.is_continuation()) {
-            // nothing to decode; everything after the tag is human-readable stuff
-            response_type = Type.CONTINUATION_RESPONSE;
-            
             return new ContinuationResponse.migrate(root);
         }
         
         // All CompletionStatusResponses are StatusResponses, so check for it first
         if (CompletionStatusResponse.is_completion_status_response(root))
-            return new CompletionStatusResponse.reconstitute(root);
+            return new CompletionStatusResponse.migrate(root);
         
         // All CodedStatusResponses are StatusResponses, so check for it first
         if (CodedStatusResponse.is_coded_status_response(root))
-            return new CodedStatusResponse.reconstitute(root);
+            return new CodedStatusResponse.migrate(root);
         
         if (StatusResponse.is_status_response(root))
-            return new StatusResponse.reconstitute(root);
+            return new StatusResponse.migrate(root);
         
         if (ServerData.is_server_data(root))
-            return new ServerData.reconstitute(root);
+            return new ServerData.migrate(root);
         
         throw new ImapError.PARSE_ERROR("Unknown server response: %s", root.to_string());
     }

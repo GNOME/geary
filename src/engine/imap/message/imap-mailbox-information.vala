@@ -54,17 +54,17 @@ public class Geary.Imap.MailboxInformation : Object {
     }
     
     public static MailboxInformation decode(ServerData server_data) throws ImapError {
-        StringParameter cmd = data.get_as_string(1);
+        StringParameter cmd = server_data.get_as_string(1);
         if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(ListCommand.XLIST_NAME))
-            throw ImapError.PARSE_ERROR("Not LIST or XLIST data: %s", server_data.to_string());
+            throw new ImapError.PARSE_ERROR("Not LIST or XLIST data: %s", server_data.to_string());
         
-        ListParameter attrs = data.get_as_list(2);
+        ListParameter attrs = server_data.get_as_list(2);
         Gee.Collection<MailboxAttribute> attrlist = new Gee.ArrayList<MailboxAttribute>();
         foreach (Parameter attr in attrs.get_all()) {
             StringParameter? stringp = attr as StringParameter;
             if (stringp == null) {
                 debug("Bad list attribute \"%s\": Attribute not a string value",
-                    data.to_string());
+                    server_data.to_string());
                 
                 continue;
             }
@@ -72,8 +72,8 @@ public class Geary.Imap.MailboxInformation : Object {
             attrlist.add(new MailboxAttribute(stringp.value));
         }
         
-        StringParameter? delim = data.get_as_nullable_string(3);
-        StringParameter mailbox = data.get_as_string(4);
+        StringParameter? delim = server_data.get_as_nullable_string(3);
+        StringParameter mailbox = server_data.get_as_string(4);
         
         // Set \Inbox to standard path
         MailboxInformation info;

@@ -7,7 +7,8 @@
 public class Geary.Imap.StatusResponse : ServerResponse {
     public Status status { get; private set; }
     
-    public StatusResponse() {
+    public StatusResponse(Tag tag) {
+        base (tag);
     }
     
     public StatusResponse.migrate(RootParameters root) throws ImapError {

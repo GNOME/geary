@@ -49,9 +49,9 @@ public class Geary.Imap.FetchedData : Object {
                 
                 // watch for empty return values
                 if (has_value)
-                    fetched_data.set_data(data_item, decoder.decode(list.get_required(ctr + 1)));
+                    fetched_data.map.set(data_item, decoder.decode(list.get_required(ctr + 1)));
                 else
-                    fetched_data.set_data(data_item, decoder.decode(NilParameter.instance));
+                    fetched_data.map.set(data_item, decoder.decode(NilParameter.instance));
             }
         }
         
