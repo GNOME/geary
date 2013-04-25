@@ -4,25 +4,21 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.EmailFlag : BaseObject, Geary.Equalable, Geary.Hashable {
+public class Geary.EmailFlag : BaseObject, Gee.Hashable<Geary.EmailFlag> {
     private string name;
     
     public EmailFlag(string name) {
         this.name = name;
     }
     
-    public bool equals(Equalable o) {
-        EmailFlag? other = o as EmailFlag;
-        if (other == null)
-            return false;
-        
+    public bool equal_to(Geary.EmailFlag other) {
         if (this == other)
             return true;
         
         return name.down() == other.name.down();
     }
     
-    public uint to_hash() {
+    public uint hash() {
         return name.down().hash();
     }
     

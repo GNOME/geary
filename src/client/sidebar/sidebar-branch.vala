@@ -48,16 +48,13 @@ public class Sidebar.Branch : Object {
             this.comparator = comparator;
         }
         
-        private static int comparator_wrapper(void *a, void *b) {
-            if (a == b)
+        private static int comparator_wrapper(Node anode, Node bnode) {
+            if (anode == bnode)
                 return 0;
             
-            Node *anode = (Node *) a;
-            Node *bnode = (Node *) b;
+            assert(anode.parent == bnode.parent);
             
-            assert(anode->parent == bnode->parent);
-            
-            return anode->parent.comparator(anode->entry, bnode->entry);
+            return anode.parent.comparator(anode.entry, bnode.entry);
         }
         
         public bool has_children() {

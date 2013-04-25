@@ -28,8 +28,7 @@ public interface Geary.FolderSupportsArchive : Geary.Folder {
      */
     public virtual async void archive_single_email_async(Geary.EmailIdentifier email_id,
         Cancellable? cancellable = null) throws Error {
-        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>(
-            Equalable.equal_func);
+        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         ids.add(email_id);
         
         yield archive_email_async(ids, cancellable);

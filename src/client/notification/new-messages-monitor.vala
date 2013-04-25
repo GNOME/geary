@@ -19,8 +19,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
         public Cancellable? cancellable = null;
         public int count = 0;
         public Gee.HashSet<Geary.EmailIdentifier> new_ids
-            = new Gee.HashSet<Geary.EmailIdentifier>(
-                Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+            = new Gee.HashSet<Geary.EmailIdentifier>();
         
         public MonitorInformation(Geary.Folder folder, Cancellable? cancellable) {
             this.folder = folder;
@@ -180,7 +179,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
         MonitorInformation info = folder_information.get(folder);
         
         foreach (Geary.EmailIdentifier email_id in email_ids) {
-            if (last_new_message != null && last_new_message.id.equals(email_id)) {
+            if (last_new_message != null && last_new_message.id.equal_to(email_id)) {
                 last_new_message_folder = null;
                 last_new_message = null;
             }

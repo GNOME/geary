@@ -127,7 +127,8 @@ public class ComposerWindow : Gtk.Window {
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
     private string? body_html = null;
-    private Gee.Set<File> attachment_files = new Gee.HashSet<File>(File.hash, (EqualFunc) File.equal);
+    private Gee.Set<File> attachment_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
+        Geary.Files.nullable_equal);
     
     private Gtk.Builder builder;
     private Gtk.Label from_label;

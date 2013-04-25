@@ -109,7 +109,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             // Get all email identifiers in the local folder; also, update the low and count arguments
             Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
-                Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func, Geary.Equalable.equal_func);
+                Geary.EmailIdentifier, Geary.EmailFlags>();
             foreach (Geary.Email e in list_local) {
                 if (low == -1)
                     low = e.position;
@@ -131,13 +131,12 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             // Build map of emails that have changed.
             Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
-                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>(Geary.Hashable.hash_func,
-                Geary.Equalable.equal_func);
+                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
             foreach (Geary.Email e in list_remote) {
                 if (!local_map.has_key(e.id))
                     continue;
                 
-                if (!local_map.get(e.id).equals(e.email_flags))
+                if (!local_map.get(e.id).equal_to(e.email_flags))
                     changed_map.set(e.id, e.email_flags);
             }
             

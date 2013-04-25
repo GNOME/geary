@@ -97,7 +97,8 @@ public class Geary.RFC822.MessageIDList : Geary.Common.MessageData, Geary.RFC822
     }
 }
 
-public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData, Equalable, Hashable {
+public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData,
+    Gee.Hashable<Geary.RFC822.Date> {
     public string original { get; private set; }
     public DateTime value { get; private set; }
     public time_t as_time_t { get; private set; }
@@ -111,18 +112,14 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageD
         original = iso8601;
     }
     
-    public virtual bool equals(Equalable e) {
-        RFC822.Date? other = e as RFC822.Date;
-        if (other == null)
-            return false;
-        
+    public virtual bool equal_to(Geary.RFC822.Date other) {
         if (this == other)
             return true;
         
         return value.equal(other.value);
     }
     
-    public virtual uint to_hash() {
+    public virtual uint hash() {
         return value.hash();
     }
     

@@ -6,8 +6,7 @@
 
 private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_remove = new Gee.ArrayList<EmailIdentifier>(
-        Equalable.equal_func);
+    private Gee.List<Geary.EmailIdentifier> to_remove = new Gee.ArrayList<EmailIdentifier>();
     private Cancellable? cancellable;
     private int original_count = 0;
     

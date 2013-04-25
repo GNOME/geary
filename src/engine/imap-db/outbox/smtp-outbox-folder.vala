@@ -413,7 +413,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         check_open();
         
         Gee.Map<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email.Field>(Hashable.hash_func, Equalable.equal_func);
+            Geary.EmailIdentifier, Geary.Email.Field>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare(
                 "SELECT id FROM SmtpOutboxTable WHERE ordering=?");

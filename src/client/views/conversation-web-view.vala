@@ -5,11 +5,18 @@
  */
 
 public class ConversationWebView : WebKit.WebView {
+    private const string[] always_loaded_prefixes = {
+        "http://www.gravatar.com/avatar/",
+        "data:"
+    };
+    
     private const string USER_CSS = "user-message.css";
     private const string STYLE_NAME = "STYLE";
 
     // HTML element that contains message DIVs.
     public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
+    
+    public string allow_prefix { get; private set; default = ""; }
 
     private FileMonitor? user_style_monitor = null;
 
@@ -18,6 +25,7 @@ public class ConversationWebView : WebKit.WebView {
     public ConversationWebView() {
         // Set defaults.
         set_border_width(0);
+        allow_prefix = random_string(10) + ":";
         
         WebKit.WebSettings config = new WebKit.WebSettings();
         config.enable_scripts = false;
@@ -37,6 +45,15 @@ public class ConversationWebView : WebKit.WebView {
         // Note: load_finished signal MUST be hooked up before this call.
         string html_text = GearyApplication.instance.read_theme_file("message-viewer.html") ?? "";
         load_string(html_text, "text/html", "UTF8", "");
+    }
+    
+    private string random_string(int length) {
+        // No upper case letters, since request gets lower-cased.
+        string chars = "abcdefghijklmnopqrstuvwxyz";
+        char[] random = new char[length];
+        for (int i = 0; i < length; i++)
+            random[i] = chars[Random.int_range(0, chars.length)];
+        return (string) random;
     }
     
     public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
@@ -79,8 +96,24 @@ public class ConversationWebView : WebKit.WebView {
         }
 
         string? uri = request.get_uri();
-        if (uri.has_prefix("remote:"))
-            request.set_uri("about:blank");
+        if (!is_always_loaded(uri)) {
+            if (uri.has_prefix(allow_prefix))
+                request.set_uri(uri.substring(allow_prefix.length));
+            else
+                request.set_uri("about:blank");
+        }
+    }
+    
+    public bool is_always_loaded(string? uri) {
+        if (uri == null)
+            return true;
+        
+        foreach (string prefix in always_loaded_prefixes) {
+            if (uri.has_prefix(prefix))
+                return true;
+        }
+        
+        return false;
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {

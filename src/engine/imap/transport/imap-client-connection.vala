@@ -89,8 +89,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;
     private bool idle_when_quiet = false;
-    private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>(Hashable.hash_func,
-        Equalable.equal_func);
+    private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>();
     private uint timeout_id = 0;
     private uint timeout_cmd_count = 0;
     

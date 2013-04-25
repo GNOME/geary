@@ -54,5 +54,27 @@ public async void recursive_delete_async(File folder, Cancellable? cancellable =
     }
 }
 
+public uint hash(File file) {
+    return file.hash();
+}
+
+public bool equal(File a, File b) {
+    return a.equal(b);
+}
+
+public uint nullable_hash(File? file) {
+    return (file != null) ? file.hash() : 0;
+}
+
+public bool nullable_equal(File? a, File? b) {
+    if (a == null && b == null)
+        return true;
+    
+    if (a == null || b == null)
+        return false;
+    
+    return a.equal(b);
+}
+
 }
 

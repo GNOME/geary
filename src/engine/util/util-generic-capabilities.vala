@@ -8,8 +8,11 @@ public class Geary.GenericCapabilities : BaseObject {
     public string name_separator { get; private set; }
     public string? value_separator { get; private set; }
     
+    // All params must be nullable to support both libgee 0.8.0 and 0.8.6 (for Quantal and Rarring, respectively.)
+    // This behavior was changed in the following libgee commit:
+    // https://git.gnome.org/browse/libgee/commit/?id=5a35303cb04154d0e929a7d8895d4a4812ba7a1c
     private Gee.HashMultiMap<string, string?> map = new Gee.HashMultiMap<string, string?>(
-        String.stri_hash, String.stri_equal, String.nullable_stri_hash, String.nullable_stri_equal);
+        String.nullable_stri_hash, String.nullable_stri_equal, String.nullable_stri_hash, String.nullable_stri_equal);
     
     /**
      * Creates an empty set of capabilities.

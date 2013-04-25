@@ -19,7 +19,15 @@ async void main_async() throws Error {
     for (int ctr = 0; ctr < arg_count; ctr++) {
         string subj_msg = "#%d".printf(ctr + 1);
         composed_email.subject = subj_msg;
-        composed_email.body_text = subj_msg;
+        
+        if (Geary.String.is_empty(arg_file)) {
+            composed_email.body_text = subj_msg;
+        } else {
+            string contents;
+            FileUtils.get_contents(arg_file, out contents);
+            
+            composed_email.body_text = contents;
+        }
         
         Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email);
         stdout.printf("\n\n%s\n\n", msg.to_string());
@@ -55,6 +63,7 @@ string arg_pass;
 string arg_from;
 string arg_to;
 int arg_count = 1;
+string? arg_file = null;
 const OptionEntry[] options = {
     { "debug",    0,    0,  OptionArg.NONE,     ref arg_debug,  "Output debugging information", null },
     { "host",   'h',    0,  OptionArg.STRING,   ref arg_hostname, "SMTP server host",   "<hostname-or-dotted-address>" },
@@ -66,6 +75,7 @@ const OptionEntry[] options = {
     { "from",   'f',    0,  OptionArg.STRING,   ref arg_from,   "From (sender)",        "<email>" },
     { "to",     't',    0,  OptionArg.STRING,   ref arg_to,     "To (recipient)",       "<email>" },
     { "count",  'c',    0,  OptionArg.INT,      ref arg_count,  "Number of emails to send", null },
+    { "file",   'i',    0,  OptionArg.STRING,   ref arg_file,   "File to send (must be RFC 822 ready!)", "<filename>"},
     { null }
 };
 

@@ -9,7 +9,7 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
         base (message_id);
     }
     
-    public override bool equals(Geary.Equalable o) {
+    public override bool equal_to(Geary.EmailIdentifier o) {
         Geary.ImapDB.EmailIdentifier? other = o as Geary.ImapDB.EmailIdentifier;
         if (other == null)
             return false;

@@ -9,7 +9,7 @@ private class Geary.SmtpOutboxEmailIdentifier : Geary.EmailIdentifier {
         base (ordering);
     }
     
-    public override bool equals(Geary.Equalable o) {
+    public override bool equal_to(Geary.EmailIdentifier o) {
         SmtpOutboxEmailIdentifier? other = o as SmtpOutboxEmailIdentifier;
         if (other == null)
             return false;

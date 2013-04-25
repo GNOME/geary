@@ -120,7 +120,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             return cmp;
         
         // sort by path to stabilize the sort
-        return a.get_path().compare(b.get_path());
+        return a.get_path().compare_to(b.get_path());
     }
     
     // Lower the score, the higher the importance.

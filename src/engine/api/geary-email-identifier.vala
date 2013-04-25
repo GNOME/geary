@@ -23,7 +23,8 @@
  * passed to equals() and compare().  This may be added in the future.
  */
 
-public abstract class Geary.EmailIdentifier : BaseObject, Geary.Equalable, Geary.Comparable, Geary.Hashable {
+public abstract class Geary.EmailIdentifier : BaseObject, Gee.Comparable<Geary.EmailIdentifier>,
+    Gee.Hashable<Geary.EmailIdentifier> {
     public int64 ordering { get; protected set; }
     
     protected EmailIdentifier(int64 ordering) {
@@ -36,19 +37,15 @@ public abstract class Geary.EmailIdentifier : BaseObject, Geary.Equalable, Geary
         return null;
     }
     
-    public virtual uint to_hash() {
-        return Geary.Hashable.int64_hash(ordering);
+    public virtual uint hash() {
+        return Geary.Collection.int64_hash(ordering);
     }
     
     // Virtual default implementation not provided because base class *must* verify that the
     // Equalable is of its own type.
-    public abstract bool equals(Geary.Equalable other);
+    public abstract bool equal_to(Geary.EmailIdentifier e);
     
-    public virtual int compare(Geary.Comparable o) {
-        Geary.EmailIdentifier? other = o as Geary.EmailIdentifier;
-        if (other == null)
-            return -1;
-        
+    public virtual int compare_to(Geary.EmailIdentifier other) {
         if (this == other)
             return 0;
         

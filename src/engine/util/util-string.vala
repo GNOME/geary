@@ -48,23 +48,23 @@ public inline bool ascii_equali(string a, string b) {
     return ascii_cmpi(a, b) == 0;
 }
 
-public uint stri_hash(void *str) {
-    return str_hash(((string *) str)->down());
+public uint stri_hash(string str) {
+    return str_hash(str.down());
 }
 
-public uint nullable_stri_hash(void *str) {
+public uint nullable_stri_hash(string? str) {
     return (str != null) ? stri_hash(str) : 0;
 }
 
-public bool stri_equal(void *a, void *b) {
-    return str_equal(((string *) a)->down(), ((string *) b)->down());
+public bool stri_equal(string a, string b) {
+    return str_equal(a.down(), b.down());
 }
 
 public bool equals_ci(string a, string b) {
     return a.down() == b.down();
 }
 
-public bool nullable_stri_equal(void *a, void *b) {
+public bool nullable_stri_equal(string? a, string? b) {
     if (a == null)
         return (b == null);
     

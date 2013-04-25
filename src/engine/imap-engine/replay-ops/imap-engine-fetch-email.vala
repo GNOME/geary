@@ -84,7 +84,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     
     public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
         EmailIdentifier id, Imap.EmailFlags? flags) {
-        if (!this.id.equals(id))
+        if (!this.id.equal_to(id))
             return true;
         
         switch (op) {

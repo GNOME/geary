@@ -6,8 +6,7 @@
 
 private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>(
-        Equalable.equal_func);
+    private Gee.List<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>();
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? original_flags = null;

@@ -17,7 +17,7 @@ public class Geary.NonblockingMailbox<G> : BaseObject {
         if (comparator == null)
             queue = new Gee.LinkedList<G>();
         else
-            queue = new Gee.PriorityQueue<G>(comparator);
+            queue = new Gee.PriorityQueue<G>();
     }
     
     public bool send(G msg) {

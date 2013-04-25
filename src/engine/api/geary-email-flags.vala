@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.EmailFlags : BaseObject, Geary.Equalable {
+public class Geary.EmailFlags : BaseObject, Gee.Hashable<Geary.EmailFlags> {
     private static EmailFlag? _unread = null;
     public static EmailFlag UNREAD { get {
         if (_unread == null)
@@ -21,7 +21,7 @@ public class Geary.EmailFlags : BaseObject, Geary.Equalable {
         return _flagged;
     } }
 
-    private Gee.Set<EmailFlag> list = new Gee.HashSet<EmailFlag>(Hashable.hash_func, Equalable.equal_func);
+    private Gee.Set<EmailFlag> list = new Gee.HashSet<EmailFlag>();
     
     public virtual signal void added(Gee.Collection<EmailFlag> flags) {
     }
@@ -96,11 +96,7 @@ public class Geary.EmailFlags : BaseObject, Geary.Equalable {
         return contains(FLAGGED);
     }
 
-    public bool equals(Equalable o) {
-        Geary.EmailFlags? other = o as Geary.EmailFlags;
-        if (other == null)
-            return false;
-        
+    public bool equal_to(Geary.EmailFlags other) {
         if (this == other)
             return true;
         
@@ -113,6 +109,10 @@ public class Geary.EmailFlags : BaseObject, Geary.Equalable {
         }
         
         return true;
+    }
+    
+    public uint hash() {
+        return Geary.String.stri_hash(to_string());
     }
     
     public string to_string() {

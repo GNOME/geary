@@ -135,9 +135,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     private string? current_mailbox = null;
     private bool current_mailbox_readonly = false;
     private Gee.HashMap<Tag, CompletionStatusResponse> seen_completion_responses = new Gee.HashMap<
-        Tag, CompletionStatusResponse>(Hashable.hash_func, Equalable.equal_func);
+        Tag, CompletionStatusResponse>();
     private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
-        Tag, CommandCallback>(Hashable.hash_func, Equalable.equal_func);
+        Tag, CommandCallback>();
     private int next_capabilities_revision = 1;
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
@@ -637,7 +637,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         // only interested in LoginCommand returning
         assert(state_change_cmd != null);
-        if (!completion_response.tag.equals(state_change_cmd.tag))
+        if (!completion_response.tag.equal_to(state_change_cmd.tag))
             return on_recv_completion(state, event, user, object);
         
         debug("[%s] on_login_recv_completion: %s", to_string(), completion_response.to_string());
@@ -928,7 +928,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         CompletionStatusResponse completion_response = (CompletionStatusResponse) object;
         
         assert(state_change_cmd != null);
-        if (!completion_response.tag.equals(state_change_cmd.tag))
+        if (!completion_response.tag.equal_to(state_change_cmd.tag))
             return on_recv_completion(state, event, user, object);
         
         switch (completion_response.status) {
@@ -992,7 +992,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         CompletionStatusResponse completion_response = (CompletionStatusResponse) object;
         
         assert(state_change_cmd != null);
-        if (!completion_response.tag.equals(state_change_cmd.tag))
+        if (!completion_response.tag.equal_to(state_change_cmd.tag))
             return on_recv_completion(state, event, user, object);
         
         state_change_cmd = null;
@@ -1040,7 +1040,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         CompletionStatusResponse completion_response = (CompletionStatusResponse) object;
         
         assert(state_change_cmd != null);
-        if (!completion_response.tag.equals(state_change_cmd.tag))
+        if (!completion_response.tag.equal_to(state_change_cmd.tag))
             return on_recv_completion(state, event, user, object);
         
         state_change_cmd = null;

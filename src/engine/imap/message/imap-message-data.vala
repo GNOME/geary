@@ -19,7 +19,7 @@
 public interface Geary.Imap.MessageData : Geary.Common.MessageData {
 }
 
-public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageData, Comparable {
+public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageData, Gee.Comparable<Geary.Imap.UID> {
     // Using statics because int32.MAX is static, not const (??)
     public static int64 MIN = 1;
     public static int64 MAX = int32.MAX;
@@ -63,11 +63,7 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
             return new UID(Numeric.int64_floor(value - 1, MIN));
     }
     
-    public virtual int compare(Comparable o) {
-        UID? other = o as UID;
-        if (other == null)
-            return -1;
-        
+    public virtual int compare_to(Geary.Imap.UID other) {
         if (value < other.value)
             return -1;
         else if (value > other.value)
@@ -94,13 +90,14 @@ public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.
     }
 }
 
-public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData, Equalable {
+public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData,
+    Gee.Hashable<Geary.Imap.Flags> {
     public int size { get { return list.size; } }
     
     protected Gee.Set<Flag> list;
     
     public Flags(Gee.Collection<Flag> flags) {
-        list = new Gee.HashSet<Flag>(Hashable.hash_func, Equalable.equal_func);
+        list = new Gee.HashSet<Flag>();
         list.add_all(flags);
     }
     
@@ -120,11 +117,7 @@ public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.Me
         return to_string();
     }
     
-    public bool equals(Equalable e) {
-        Imap.Flags? other = e as Imap.Flags;
-        if (other == null)
-            return false;
-        
+    public bool equal_to(Geary.Imap.Flags other) {
         if (this == other)
             return true;
         
@@ -149,6 +142,10 @@ public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.Me
         }
         
         return builder.str;
+    }
+    
+    public uint hash() {
+        return to_string().hash();
     }
 }
 

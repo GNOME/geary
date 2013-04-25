@@ -61,7 +61,7 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
      */
     public Trillian have_contents_changed(Geary.Imap.FolderProperties other) {
         // UIDNEXT changes indicate messages have been added, but not if they've been removed
-        if (uid_next != null && other.uid_next != null && !uid_next.equals(other.uid_next))
+        if (uid_next != null && other.uid_next != null && !uid_next.equal_to(other.uid_next))
             return Trillian.TRUE;
         
         // Gmail includes Chat messages in STATUS results but not in SELECT/EXAMINE

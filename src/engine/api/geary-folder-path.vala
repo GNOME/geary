@@ -4,13 +4,14 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
+public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
+    Gee.Comparable<Geary.FolderPath> {
     public string basename { get; private set; }
     
     private Gee.List<Geary.FolderPath>? path = null;
     private string? fullpath = null;
     private string? fullpath_separator = null;
-    private uint hash = uint.MAX;
+    private uint stored_hash = uint.MAX;
     
     protected FolderPath(string basename) {
         assert(this is FolderRoot);
@@ -123,11 +124,7 @@ public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
      * are less-than longer paths, assuming the path elements are equal up to the shorter path's
      * length.
      */
-    public int compare(Comparable o) {
-        FolderPath? other = o as FolderPath;
-        if (other == null)
-            return -1;
-        
+    public int compare_to(Geary.FolderPath other) {
         if (this == other)
             return 0;
         
@@ -149,9 +146,9 @@ public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
         return this_list.size - other_list.size;
     }
     
-    public uint to_hash() {
-        if (hash != uint.MAX)
-            return hash;
+    public uint hash() {
+        if (stored_hash != uint.MAX)
+            return stored_hash;
         
         bool cs = get_root().case_sensitive;
         
@@ -162,23 +159,16 @@ public class Geary.FolderPath : BaseObject, Hashable, Equalable, Comparable {
         for (int ctr = 1; ctr < path_length; ctr++)
             calc ^= get_folder_at(ctr).get_basename_hash(cs);
         
-        hash = calc;
+        stored_hash = calc;
         
-        return hash;
+        return stored_hash;
     }
     
     private bool is_basename_equal(string cmp, bool cs) {
         return cs ? (basename == cmp) : (basename.down() == cmp.down());
     }
     
-    public bool equals(Equalable o) {
-        FolderPath? other = o as FolderPath;
-        if (o == null)
-            return false;
-        
-        if (o == this)
-            return true;
-        
+    public bool equal_to(Geary.FolderPath other) {
         int path_length = get_path_length();
         if (other.get_path_length() != path_length)
             return false;

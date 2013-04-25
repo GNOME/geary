@@ -42,7 +42,7 @@ public class ConversationViewer : Gtk.Box {
 
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Geary.Collection.FixedTreeSet<Geary.Email>((CompareFunc<Geary.Email>) Geary.Email.compare_date_ascending); }
+        new Geary.Collection.FixedTreeSet<Geary.Email>(Geary.Email.compare_date_ascending); }
     
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
@@ -52,8 +52,7 @@ public class ConversationViewer : Gtk.Box {
     
     // Maps emails to their corresponding elements.
     private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
-        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>(Geary.Hashable.hash_func,
-        Geary.Equalable.equal_func);
+        Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
     
     private string? hover_url = null;
     private Gtk.Menu? context_menu = null;
@@ -150,7 +149,6 @@ public class ConversationViewer : Gtk.Box {
             return;
         
         string message_id = get_div_id(email.id);
-        string header = "";
         
         WebKit.DOM.Node insert_before = web_view.container.get_last_child();
         
@@ -159,36 +157,12 @@ public class ConversationViewer : Gtk.Box {
         if (higher != null)
             insert_before = web_view.get_dom_document().get_element_by_id(get_div_id(higher.id));
         
-        WebKit.DOM.HTMLElement div_email_container;
         WebKit.DOM.HTMLElement div_message;
+        
         try {
-            // The HTML is like this:
-            // <div id="$MESSAGE_ID" class="email">
-            //     <div class="geary_spacer"></div>
-            //     <div class="email_container">
-            //         <div class="button_bar">
-            //             <div class="starred button"><img class="icon" /></div>
-            //             <div class="unstarred button"><img class="icon" /></div>
-            //             <div class="menu button"><img class="icon" /></div>
-            //         </div>
-            //         <table>$HEADER</table>
-            //         <span>
-            //             $EMAIL_BODY
-            //
-            //             <div class="signature">$SIGNATURE</div>
-            //
-            //             <div class="quote_container controllable">
-            //                 <div class="shower">[show]</div>
-            //                 <div class="hider">[hide]</div>
-            //                 <div class="quote">$QUOTE</div>
-            //             </div>
-            //         </span>
-            //     </div>
-            // </div>
-            div_message = Util.DOM.clone_select(web_view.get_dom_document(), "#email_template");
+            div_message = make_email_div();
             div_message.set_attribute("id", message_id);
             web_view.container.insert_before(div_message, insert_before);
-            div_email_container = Util.DOM.select(div_message, "div.email_container");
             if (email.is_unread() == Geary.Trillian.FALSE) {
                 div_message.get_class_list().add("hide");
             }
@@ -197,93 +171,35 @@ public class ConversationViewer : Gtk.Box {
             
             return;
         }
-        
         email_to_element.set(email.id, div_message);
         
-        insert_header_address(ref header, _("From:"), email.from != null ? email.from : email.sender,
-            true);
-        
-        if (email.to != null)
-             insert_header_address(ref header, _("To:"), email.to);
-        
-        if (email.cc != null) {
-            insert_header_address(ref header, _("Cc:"), email.cc);
-        }
-
-        if (email.bcc != null) {
-            insert_header_address(ref header, _("Bcc:"), email.bcc);
-        }
-            
-        if (email.subject != null)
-            insert_header(ref header, _("Subject:"), email.get_subject_as_string());
-            
-        if (email.date != null)
-            insert_header_date(ref header, _("Date:"), email.date.value, true);
-
-        // Add the avatar.
-        Geary.RFC822.MailboxAddress? primary = email.get_primary_originator();
-        if (primary != null) {
-            try {
-                WebKit.DOM.HTMLImageElement icon = Util.DOM.select(div_message, ".avatar")
-                    as WebKit.DOM.HTMLImageElement;
-                icon.set_attribute("src",
-                    Gravatar.get_image_uri(primary, Gravatar.Default.MYSTERY_MAN, 48));
-            } catch (Error error) {
-                debug("Failed to inject avatar URL: %s", error.message);
-            }
-        }
-        
-        // Insert the preview text.
-        try {
-            WebKit.DOM.HTMLElement preview =
-                Util.DOM.select(div_message, ".header_container .preview");
-            string preview_str = email.get_preview_as_string();
-            if (preview_str.length == Geary.Email.MAX_PREVIEW_BYTES) {
-                preview_str += "…";
-            }
-            preview.set_inner_text(Geary.String.reduce_whitespace(preview_str));
-        } catch (Error error) {
-            debug("Failed to add preview text: %s", error.message);
-        }
-
-        string body_text = "";
         bool remote_images = false;
         try {
-            body_text = email.get_message().get_body(true);
-            body_text = insert_html_markup(body_text, email, out remote_images);
-        } catch (Error err) {
-            debug("Could not get message text. %s", err.message);
+            set_message_html(email.get_message(), div_message, out remote_images);
+        } catch (Error error) {
+            warning("Error getting message from email: %s", error.message);
         }
-
-        // Graft header and email body into the email container.
-        try {
-            WebKit.DOM.HTMLElement table_header =
-                Util.DOM.select(div_email_container, ".header_container .header");
-            table_header.set_inner_html(header);
-            
-            WebKit.DOM.HTMLElement span_body = Util.DOM.select(div_email_container, ".body");
-            span_body.set_inner_html(body_text);
-            
-            if (remote_images) {
-                WebKit.DOM.HTMLElement remote_images_bar =
-                    Util.DOM.select(div_email_container, ".remote_images");
+        
+        if (remote_images) {
+            WebKit.DOM.HTMLElement remote_images_bar =
+                Util.DOM.select(div_message, ".remote_images");
+            try {
                 ((WebKit.DOM.Element) remote_images_bar).get_class_list().add("show");
                 remote_images_bar.set_inner_html("""%s %s
                     <input type="button" value="%s" class="show_images" />""".printf(
                     remote_images_bar.get_inner_html(), _("This message contains remote images."),
                     _("Show Images")));
+            } catch (Error error) {
+                warning("Error showing remote images bar: %s", error.message);
             }
-
-        } catch (Error html_error) {
-            warning("Error setting HTML for message: %s", html_error.message);
         }
-
+        
         // Set attachment icon and add the attachments container if we have any attachments.
         set_attachment_icon(div_message, email.attachments.size > 0);
         if (email.attachments.size > 0) {
             insert_attachments(div_message, email.attachments);
         }
-
+        
         // Add classes according to the state of the email.
         update_flags(email);
         
@@ -305,12 +221,126 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email_container .starred", "click", (Callback) on_unstar_clicked, this);
         bind_event(web_view, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
         bind_event(web_view, ".header .field .value", "click", (Callback) on_value_clicked, this);
-        bind_event(web_view, ".email:not(:only-of-type) .header_container", "click", (Callback) on_body_toggle_clicked, this);
+        bind_event(web_view, ".email:not(:only-of-type) .header_container, .email .email .header_container","click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
         bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
         bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
+    }
+    
+    private WebKit.DOM.HTMLElement make_email_div() {
+        // The HTML is like this:
+        // <div id="$MESSAGE_ID" class="email">
+        //     <div class="geary_spacer"></div>
+        //     <div class="email_container">
+        //         <div class="button_bar">
+        //             <div class="starred button"><img class="icon" /></div>
+        //             <div class="unstarred button"><img class="icon" /></div>
+        //             <div class="menu button"><img class="icon" /></div>
+        //         </div>
+        //         <table>$HEADER</table>
+        //         <span>
+        //             $EMAIL_BODY
+        //
+        //             <div class="signature">$SIGNATURE</div>
+        //
+        //             <div class="quote_container controllable">
+        //                 <div class="shower">[show]</div>
+        //                 <div class="hider">[hide]</div>
+        //                 <div class="quote">$QUOTE</div>
+        //             </div>
+        //         </span>
+        //     </div>
+        // </div>
+        return Util.DOM.clone_select(web_view.get_dom_document(), "#email_template");
+    }
+    
+    private void set_message_html(Geary.RFC822.Message message, WebKit.DOM.HTMLElement div_message,
+        out bool remote_images) {
+        string header = "";
+        WebKit.DOM.HTMLElement div_email_container = Util.DOM.select(div_message, "div.email_container");
+        
+        insert_header_address(ref header, _("From:"), message.from, true);
+        
+        if (message.to != null)
+             insert_header_address(ref header, _("To:"), message.to);
+        
+        if (message.cc != null)
+            insert_header_address(ref header, _("Cc:"), message.cc);
+        
+        if (message.bcc != null)
+            insert_header_address(ref header, _("Bcc:"), message.bcc);
+        
+        if (message.subject != null)
+            insert_header(ref header, _("Subject:"), message.subject.value);
+        
+        if (message.date != null)
+            insert_header_date(ref header, _("Date:"), message.date.value, true);
+
+        // Add the avatar.
+        Geary.RFC822.MailboxAddress? primary = message.sender;
+        if (primary != null) {
+            try {
+                WebKit.DOM.HTMLImageElement icon = Util.DOM.select(div_message, ".avatar")
+                    as WebKit.DOM.HTMLImageElement;
+                icon.set_attribute("src",
+                    Gravatar.get_image_uri(primary, Gravatar.Default.MYSTERY_MAN, 48));
+            } catch (Error error) {
+                debug("Failed to inject avatar URL: %s", error.message);
+            }
+        }
+        
+        // Insert the preview text.
+        try {
+            WebKit.DOM.HTMLElement preview =
+                Util.DOM.select(div_message, ".header_container .preview");
+            string preview_str = message.get_preview();
+            if (preview_str.length == Geary.Email.MAX_PREVIEW_BYTES) {
+                preview_str += "…";
+            }
+            preview.set_inner_text(Geary.String.reduce_whitespace(preview_str));
+        } catch (Error error) {
+            debug("Failed to add preview text: %s", error.message);
+        }
+
+        string body_text = "";
+        remote_images = false;
+        try {
+            body_text = message.get_body(true);
+            body_text = insert_html_markup(body_text, message, out remote_images);
+        } catch (Error err) {
+            debug("Could not get message text. %s", err.message);
+        }
+
+        // Graft header and email body into the email container.
+        try {
+            WebKit.DOM.HTMLElement table_header =
+                Util.DOM.select(div_email_container, ".header_container .header");
+            table_header.set_inner_html(header);
+            
+            WebKit.DOM.HTMLElement span_body = Util.DOM.select(div_email_container, ".body");
+            span_body.set_inner_html(body_text);
+        } catch (Error html_error) {
+            warning("Error setting HTML for message: %s", html_error.message);
+        }
+
+        // Look for any attached emails
+        Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
+        foreach (Geary.RFC822.Message sub_message in sub_messages) {
+            WebKit.DOM.HTMLElement div_sub_message = make_email_div();
+            bool sub_remote_images = false;
+            try {
+                div_sub_message.set_attribute("id", "");
+                div_sub_message.get_class_list().add("read");
+                div_sub_message.get_class_list().add("hide");
+                div_message.append_child(div_sub_message);
+                set_message_html(sub_message, div_sub_message, out sub_remote_images);
+                remote_images = remote_images || sub_remote_images;
+            } catch (Error error) {
+                debug("Error adding message: %s", error.message);
+            }
+        }
     }
     
     public void unhide_last_email() {
@@ -472,7 +502,7 @@ public class ConversationViewer : Gtk.Box {
         
         // Update the flags in our message set.
         foreach (Geary.Email message in messages) {
-            if (message.id.equals(email.id)) {
+            if (message.id.equal_to(email.id)) {
                 message.set_flags(flags);
                 break;
             }
@@ -645,15 +675,22 @@ public class ConversationViewer : Gtk.Box {
     private void show_images_email(WebKit.DOM.Element email_element) {
         // TODO: Remember that these images have been shown.
         try {
-            WebKit.DOM.NodeList nodes = email_element.query_selector_all("img");
-            for (ulong i = 0; i < nodes.length; i++) {
-                WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
-                if (element == null || !element.has_attribute("src"))
+            WebKit.DOM.NodeList body_nodes = email_element.query_selector_all(".body");
+            for (ulong j = 0; j < body_nodes.length; j++) {
+                WebKit.DOM.Element? body = body_nodes.item(j) as WebKit.DOM.Element;
+                if (body == null)
                     continue;
                 
-                string src = element.get_attribute("src");
-                if (src.has_prefix("remote:"))
-                    element.set_attribute("src", src.substring(7));
+                WebKit.DOM.NodeList nodes = body.query_selector_all("img");
+                for (ulong i = 0; i < nodes.length; i++) {
+                    WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
+                    if (element == null || !element.has_attribute("src"))
+                        continue;
+                    
+                    string src = element.get_attribute("src");
+                    if (!web_view.is_always_loaded(src))
+                        element.set_attribute("src", web_view.allow_prefix + src);
+                }
             }
             
             WebKit.DOM.Element? remote_images = email_element.query_selector(".remote_images");
@@ -890,7 +927,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private string insert_html_markup(string text, Geary.Email email, out bool remote_images) {
+    private string insert_html_markup(string text, Geary.RFC822.Message message, out bool remote_images) {
         remote_images = false;
         try {
             // Create a workspace for manipulating the HTML.
@@ -946,7 +983,7 @@ public class ConversationViewer : Gtk.Box {
                 } else if (src.has_prefix("cid:")) {
                     string mime_id = src.substring(4);
                     Geary.Memory.AbstractBuffer image_content =
-                        email.get_message().get_content_by_mime_id(mime_id);
+                        message.get_content_by_mime_id(mime_id);
                     uint8[] image_data = image_content.get_array();
 
                     // Get the content type.
@@ -957,7 +994,6 @@ public class ConversationViewer : Gtk.Box {
                     // Then set the source to a data url.
                     web_view.set_data_url(img, mimetype, image_data);
                 } else if (!src.has_prefix("data:")) {  // TODO: Test whether to show images
-                    img.set_attribute("src", "remote:" + src);
                     remote_images = true;
                 }
             }

@@ -20,8 +20,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
     private unowned Geary.Folder folder;
     private int start_delay_sec;
     private NonblockingMutex mutex = new NonblockingMutex();
-    private Gee.HashSet<Geary.EmailIdentifier> prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>(
-        Hashable.hash_func, Equalable.equal_func);
+    private Gee.HashSet<Geary.EmailIdentifier> prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>();
     private uint schedule_id = 0;
     private Cancellable cancellable = new Cancellable();
     
@@ -119,8 +118,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
             
             low = Numeric.int_floor(low - PREFETCH_CHUNKS, 1);
             
-            Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>(
-                Hashable.hash_func, Equalable.equal_func);
+            Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
             foreach (Geary.Email email in list)
                 ids.add(email.id);
             
@@ -176,7 +174,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
     private async void do_prefetch_batch() throws Error {
         // snarf up all requested EmailIdentifiers for this round
         Gee.HashSet<Geary.EmailIdentifier> ids = prefetch_ids;
-        prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>(Hashable.hash_func, Equalable.equal_func);
+        prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>();
         
         if (ids.size == 0)
             return;
