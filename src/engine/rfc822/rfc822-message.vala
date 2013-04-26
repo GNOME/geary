@@ -551,14 +551,14 @@ public class Geary.RFC822.Message : BaseObject {
         string delsp_par = part.get_content_type_parameter("DelSp") ?? "no";
         bool delsp = (delsp_par.down() == "yes");
         if (flowed)
-            stream_filter.add(new GMime.FilterFlowed(to_html, delsp));
+            stream_filter.add(new Geary.RFC822.FilterFlowed(to_html, delsp));
         if (to_html) {
             if (!flowed)
-                stream_filter.add(new GMime.FilterPlain());
+                stream_filter.add(new Geary.RFC822.FilterPlain());
             // HTML filter does stupid stuff to \r, so get rid of them.
             stream_filter.add(new GMime.FilterCRLF(false, false));
             stream_filter.add(new GMime.FilterHTML(GMime.FILTER_HTML_CONVERT_URLS, 0));
-            stream_filter.add(new GMime.FilterBlockquotes());
+            stream_filter.add(new Geary.RFC822.FilterBlockquotes());
         }
 
         wrapper.write_to_stream(stream_filter);

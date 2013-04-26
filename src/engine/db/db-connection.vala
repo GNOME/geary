@@ -38,21 +38,21 @@ public class Geary.Db.Connection : Geary.Db.Context {
     private static int next_cx_number = 0;
     
     /**
-     * See http://www.sqlite.org/c3ref/last_insert_rowid.html
+     * See [[http://www.sqlite.org/c3ref/last_insert_rowid.html]]
      */
     public int64 last_insert_rowid { get {
         return db.last_insert_rowid();
     } }
     
     /**
-     * See http://www.sqlite.org/c3ref/changes.html
+     * See [[http://www.sqlite.org/c3ref/changes.html]]
      */
     public int last_modified_rows { get {
         return db.changes();
     } }
     
     /**
-     * See http://www.sqlite.org/c3ref/total_changes.html
+     * See [[http://www.sqlite.org/c3ref/total_changes.html]]
      */
     public int total_modified_rows { get {
         return db.total_changes();
@@ -88,14 +88,14 @@ public class Geary.Db.Connection : Geary.Db.Context {
     
     /**
      * Execute a plain text SQL statement.  More than one SQL statement may be in the string.  See
-     * http://www.sqlite.org/lang.html for more information on SQLite's SQL syntax.
+     * [[http://www.sqlite.org/lang.html]] for more information on SQLite's SQL syntax.
      *
      * There is no way to retrieve a result iterator from this call.
      *
      * This may be called from a TransactionMethod called within exec_transaction() or
      * Db.Database.exec_transaction_async().
      *
-     * See http://www.sqlite.org/c3ref/exec.html
+     * See [[http://www.sqlite.org/c3ref/exec.html]]
      */
     public void exec(string sql, Cancellable? cancellable = null) throws Error {
         check_cancelled("Connection.exec", cancellable);
@@ -133,7 +133,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     
     /**
      * Prepares a Statement which may have values bound to it and executed.  See
-     * http://www.sqlite.org/c3ref/prepare.html
+     * [[http://www.sqlite.org/c3ref/prepare.html]]
      */
     public Statement prepare(string sql) throws DatabaseError {
         return new Statement(this, sql);
@@ -164,7 +164,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
-     * Returns the result of a PRAGMA as a boolean.  See http://www.sqlite.org/pragma.html.
+     * Returns the result of a PRAGMA as a boolean.  See [[http://www.sqlite.org/pragma.html]]
      *
      * Note that if the PRAGMA does not return a boolean, the results are undefined.  A boolean
      * in SQLite, however, includes 1 and 0, so an integer may be mistaken as a boolean.
@@ -200,7 +200,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
-     * Returns the result of a PRAGMA as an integer.  See http://www.sqlite.org/pragma.html
+     * Returns the result of a PRAGMA as an integer.  See [[http://www.sqlite.org/pragma.html]]
      *
      * Note that if the PRAGMA does not return an integer, the results are undefined.  Since a
      * boolean in SQLite includes 1 and 0, it's possible for those values to be converted to an
@@ -218,7 +218,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
-     * Returns the result of a PRAGMA as a string.  See http://www.sqlite.org/pragma.html
+     * Returns the result of a PRAGMA as a string.  See [[http://www.sqlite.org/pragma.html]]
      */
     public string get_pragma_string(string name) throws Error {
         return query("PRAGMA %s".printf(name)).string_at(0);
@@ -242,7 +242,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * Sets the user version number, which is a private number maintained by the user.
      * VersionedDatabase uses this to maintain the version number of the database.
      *
-     * See http://www.sqlite.org/pragma.html#pragma_schema_version
+     * See [[http://www.sqlite.org/pragma.html#pragma_schema_version]]
      */
     public void set_user_version_number(int version) throws Error {
         set_pragma_int(PRAGMA_USER_VERSION, version);
@@ -250,7 +250,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
     
     /**
      * Gets the schema version number, which is maintained by SQLite. See
-     * http://www.sqlite.org/pragma.html#pragma_schema_version
+     * [[http://www.sqlite.org/pragma.html#pragma_schema_version]]
      *
      * Since this number is maintained by SQLite, Geary.Db doesn't offer a way to set it.
      */
@@ -259,56 +259,56 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_foreign_keys
+     * See [[http://www.sqlite.org/pragma.html#pragma_foreign_keys]]
      */
     public void set_foreign_keys(bool enabled) throws Error {
         set_pragma_bool(PRAGMA_FOREIGN_KEYS, enabled);
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_foreign_keys
+     * See [[http://www.sqlite.org/pragma.html#pragma_foreign_keys]]
      */
     public bool get_foreign_keys() throws Error {
         return get_pragma_bool(PRAGMA_FOREIGN_KEYS);
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_recursive_triggers
+     * See [[http://www.sqlite.org/pragma.html#pragma_recursive_triggers]]
      */
     public void set_recursive_triggers(bool enabled) throws Error {
         set_pragma_bool(PRAGMA_RECURSIVE_TRIGGERS, enabled);
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_recursive_triggers
+     * See [[http://www.sqlite.org/pragma.html#pragma_recursive_triggers]]
      */
     public bool get_recursive_triggers() throws Error {
         return get_pragma_bool(PRAGMA_RECURSIVE_TRIGGERS);
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_secure_delete
+     * See [[http://www.sqlite.org/pragma.html#pragma_secure_delete]]
      */
     public void set_secure_delete(bool enabled) throws Error {
         set_pragma_bool(PRAGMA_SECURE_DELETE, enabled);
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_secure_delete
+     * See [[http://www.sqlite.org/pragma.html#pragma_secure_delete]]
      */
     public bool get_secure_delete() throws Error {
         return get_pragma_bool(PRAGMA_SECURE_DELETE);
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_synchronous
+     * See [[http://www.sqlite.org/pragma.html#pragma_synchronous]]
      */
     public void set_synchronous(SynchronousMode mode) throws Error {
         set_pragma_string(PRAGMA_SYNCHRONOUS, mode.sql());
     }
     
     /**
-     * See http://www.sqlite.org/pragma.html#pragma_synchronous
+     * See [[http://www.sqlite.org/pragma.html#pragma_synchronous]]
      */
     public SynchronousMode get_synchronous() throws Error {
         return SynchronousMode.parse(get_pragma_string(PRAGMA_SYNCHRONOUS));
@@ -326,7 +326,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * It's inadvisable to call exec_transaction() inside exec_transaction().  SQLite has a notion
      * of savepoints that allow for nested transactions; they are not currently supported.
      *
-     * See http://www.sqlite.org/lang_transaction.html
+     * See [[http://www.sqlite.org/lang_transaction.html]]
      */
     public TransactionOutcome exec_transaction(TransactionType type, TransactionMethod cb,
         Cancellable? cancellable = null) throws Error {

@@ -51,9 +51,10 @@ public interface Geary.Folder : BaseObject {
     
     /**
      * Flags used for retrieving email.
-     *   LOCAL_ONLY:   fetch from the local store only
-     *   FORCE_UPDATE: fetch from remote only (results merged into local store)
-     *   EXCLUDING_ID: exclude the provided ID
+     *
+     * * LOCAL_ONLY:   fetch from the local store only
+     * * FORCE_UPDATE: fetch from remote only (results merged into local store)
+     * * EXCLUDING_ID: exclude the provided ID
      */
     [Flags]
     public enum ListFlags {
