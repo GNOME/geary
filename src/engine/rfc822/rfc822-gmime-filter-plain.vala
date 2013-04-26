@@ -5,7 +5,7 @@
 */
 
 // Filter to mark quoted text in plain (non-flowed) text
-class GMime.FilterPlain : GMime.Filter {
+private class Geary.RFC822.FilterPlain : GMime.Filter {
     // Invariant: True iff we are either at the beginning of a line, or all characters seen so far
     // have been quote markers.
     private bool in_prefix;

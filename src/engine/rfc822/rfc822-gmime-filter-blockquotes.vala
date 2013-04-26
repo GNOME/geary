@@ -6,7 +6,7 @@
 
 // Filter to insert blockquotes, put a div around the signature marker, and wrap the whole thing
 // in a styled div.
-class GMime.FilterBlockquotes : GMime.Filter {
+private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
     // Invariant: True iff we are either at the beginning of a line, or all characters seen so far
     // have been quote markers or part of a tag.
     private bool in_prefix;

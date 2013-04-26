@@ -57,28 +57,28 @@ public delegate TransactionOutcome TransactionMethod(Connection cx, Cancellable?
 private delegate int SqliteExecOperation();
 
 /**
- * See http://www.sqlite.org/c3ref/threadsafe.html
+ * See [[http://www.sqlite.org/c3ref/threadsafe.html]]
  */
 public bool threadsafe() {
     return Sqlite.threadsafe() != 0;
 }
 
 /**
- * See http://www.sqlite.org/c3ref/libversion.html
+ * See [[http://www.sqlite.org/c3ref/libversion.html]]
  */
 public unowned string sqlite_version() {
     return Sqlite.libversion();
 }
 
 /**
- * See http://www.sqlite.org/c3ref/libversion.html
+ * See [[http://www.sqlite.org/c3ref/libversion.html]]
  */
 public int sqlite_version_number() {
     return Sqlite.libversion_number();
 }
 
 /**
- * See http://www.sqlite.org/c3ref/enable_shared_cache.html
+ * See [[http://www.sqlite.org/c3ref/enable_shared_cache.html]]
  */
 public bool set_shared_cache_mode(bool enabled) {
     return sqlite3_enable_shared_cache(enabled ? 1 : 0) == Sqlite.OK;

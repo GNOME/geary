@@ -542,6 +542,21 @@ add_custom_command(
         ${CMAKE_COMMAND} -E copy gearyd ${CMAKE_BINARY_DIR}/
 )
 
+# Valadoc
+#################################################
+foreach(pkg ${ENGINE_PACKAGES})
+    list(APPEND valadoc_pkg_opts "--pkg=${pkg}")
+endforeach(pkg ${ENGINE_PACKAGES})
+
+include(FindValadoc)
+add_custom_target(
+    valadoc
+    WORKING_DIRECTORY
+        ${CMAKE_SOURCE_DIR}/src
+    COMMAND
+        ${VALADOC_EXECUTABLE} --force --no-protected -b ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_SOURCE_DIR}/valadoc --package-name=geary --package-version=${VERSION} ${ENGINE_SRC} ${valadoc_pkg_opts} --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+)
+
 ## Make clean: remove copied files
 ##################################################
 set_property(

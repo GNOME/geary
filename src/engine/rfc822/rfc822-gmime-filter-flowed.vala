@@ -5,7 +5,7 @@
 */
 
 // Filter to correctly handle flowed text as described in RFC 2646.
-class GMime.FilterFlowed : GMime.Filter {
+private class Geary.RFC822.FilterFlowed : GMime.Filter {
     private char quote_marker;
     private bool delsp;
     

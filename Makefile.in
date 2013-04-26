@@ -46,3 +46,7 @@ dist:
 ubuntu:
 	@$(MAKE) -C $(BUILD_DIR) ubuntu
 
+.PHONY: valadoc
+valadoc:
+	@$(MAKE) -C $(BUILD_DIR) valadoc
+
