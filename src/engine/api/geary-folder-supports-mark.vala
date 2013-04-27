@@ -5,14 +5,14 @@
  */
 
 /**
- * The addition of the Geary.FolderSupportsMark interface indicates the Folder supports mark and
- * unmark operations on email messages.
+ * The addition of the Geary.FolderSupport.Mark interface indicates the {@link Geary.Folder}
+ * supports marking and unmarking messages with system and user-defined flags.
  */
-public interface Geary.FolderSupportsMark : Geary.Folder {
+public interface Geary.FolderSupport.Mark : Geary.Folder {
     /**
      * Adds and removes flags from a list of messages.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public abstract async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
@@ -21,7 +21,7 @@ public interface Geary.FolderSupportsMark : Geary.Folder {
     /**
      * Adds and removes flags from a single message.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public virtual async void mark_single_email_async(Geary.EmailIdentifier to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,

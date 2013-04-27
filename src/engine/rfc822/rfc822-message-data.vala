@@ -10,10 +10,10 @@
  * MessageData because they exist in an RFC822 header in list (i.e. multiple email addresses) form.
  */
 
-public interface Geary.RFC822.MessageData : Geary.Common.MessageData {
+public interface Geary.RFC822.MessageData : Geary.MessageData.AbstractMessageData {
 }
 
-public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.MessageID : Geary.MessageData.StringMessageData, Geary.RFC822.MessageData {
     public MessageID(string value) {
         base (value);
     }
@@ -22,7 +22,7 @@ public class Geary.RFC822.MessageID : Geary.Common.StringMessageData, Geary.RFC8
 /**
  * A Message-ID list stores its IDs from earliest to latest.
  */
-public class Geary.RFC822.MessageIDList : Geary.Common.MessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData, Geary.RFC822.MessageData {
     public Gee.List<MessageID> list { get; private set; }
     
     public MessageIDList() {
@@ -97,7 +97,7 @@ public class Geary.RFC822.MessageIDList : Geary.Common.MessageData, Geary.RFC822
     }
 }
 
-public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageData,
+public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,
     Gee.Hashable<Geary.RFC822.Date> {
     public string original { get; private set; }
     public DateTime value { get; private set; }
@@ -128,13 +128,13 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.Common.MessageD
     }
 }
 
-public class Geary.RFC822.Size : Geary.Common.LongMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Size : Geary.MessageData.LongMessageData, Geary.RFC822.MessageData {
     public Size(long value) {
         base (value);
     }
 }
 
-public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData, Geary.RFC822.MessageData {
     public const string REPLY_PREFACE = "Re:";
     public const string FORWARD_PREFACE = "Fwd:";
     
@@ -169,7 +169,7 @@ public class Geary.RFC822.Subject : Geary.Common.StringMessageData, Geary.RFC822
     }
 }
 
-public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
     private GMime.Message? message = null;
     private string[]? names = null;
     
@@ -215,13 +215,13 @@ public class Geary.RFC822.Header : Geary.Common.BlockMessageData, Geary.RFC822.M
     }
 }
 
-public class Geary.RFC822.Text : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Text : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
     public Text(Geary.Memory.AbstractBuffer buffer) {
         base ("RFC822.Text", buffer);
     }
 }
 
-public class Geary.RFC822.Full : Geary.Common.BlockMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Full : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
     public Full(Geary.Memory.AbstractBuffer buffer) {
         base ("RFC822.Full", buffer);
     }

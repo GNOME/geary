@@ -4,15 +4,15 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.NonblockingMutex : BaseObject {
+public class Geary.Nonblocking.Mutex : BaseObject {
     public const int INVALID_TOKEN = -1;
     
-    private NonblockingSpinlock spinlock = new NonblockingSpinlock();
+    private Spinlock spinlock = new Spinlock();
     private bool locked = false;
     private int next_token = INVALID_TOKEN + 1;
     private int locked_token = INVALID_TOKEN;
     
-    public NonblockingMutex() {
+    public Mutex() {
     }
     
     public async int claim_async(Cancellable? cancellable = null) throws Error {

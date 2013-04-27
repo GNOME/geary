@@ -5,7 +5,7 @@
  */
 
 private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplayOperation {
-    private class LocalBatchOperation : NonblockingBatchOperation {
+    private class LocalBatchOperation : Nonblocking.BatchOperation {
         public GenericFolder owner;
         public Geary.EmailIdentifier id;
         public Geary.Email.Field required_fields;
@@ -33,7 +33,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
         }
     }
     
-    private class RemoteBatchOperation : NonblockingBatchOperation {
+    private class RemoteBatchOperation : Nonblocking.BatchOperation {
         public GenericFolder owner;
         public Imap.MessageSet msg_set;
         public Geary.Email.Field unfulfilled_fields;
@@ -115,7 +115,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
             return ReplayOperation.Status.CONTINUE;
         }
         
-        NonblockingBatch batch = new NonblockingBatch();
+        Nonblocking.Batch batch = new Nonblocking.Batch();
         
         // Fetch emails by ID from local store all at once
         foreach (Geary.EmailIdentifier id in ids)
@@ -192,7 +192,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.SendReplay
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        NonblockingBatch batch = new NonblockingBatch();
+        Nonblocking.Batch batch = new Nonblocking.Batch();
         
         // schedule operations to remote for each set of email with unfulfilled fields and merge
         // in results, pulling out the entire email

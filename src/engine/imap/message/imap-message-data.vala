@@ -13,13 +13,13 @@
  * one is present, which is why these elements are MessageData but not the elements within the
  * lists (Flag, Attribute).
  *
- * Also note that Imap.MessageData inherits from Common.MessageData.
+ * Also note that Imap.MessageData requires {@link Geary.MessageData.AbstractMessageData}.
  */
 
-public interface Geary.Imap.MessageData : Geary.Common.MessageData {
+public interface Geary.Imap.MessageData : Geary.MessageData.AbstractMessageData {
 }
 
-public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageData, Gee.Comparable<Geary.Imap.UID> {
+public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData, Gee.Comparable<Geary.Imap.UID> {
     // Using statics because int32.MAX is static, not const (??)
     public static int64 MIN = 1;
     public static int64 MAX = int32.MAX;
@@ -73,7 +73,7 @@ public class Geary.Imap.UID : Geary.Common.Int64MessageData, Geary.Imap.MessageD
     }
 }
 
-public class Geary.Imap.UIDValidity : Geary.Common.Int64MessageData, Geary.Imap.MessageData {
+public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData {
     // Using statics because int32.MAX is static, not const (??)
     public static int64 MIN = 1;
     public static int64 MAX = int32.MAX;
@@ -84,13 +84,13 @@ public class Geary.Imap.UIDValidity : Geary.Common.Int64MessageData, Geary.Imap.
     }
 }
 
-public class Geary.Imap.MessageNumber : Geary.Common.IntMessageData, Geary.Imap.MessageData {
+public class Geary.Imap.MessageNumber : Geary.MessageData.IntMessageData, Geary.Imap.MessageData {
     public MessageNumber(int value) {
         base (value);
     }
 }
 
-public abstract class Geary.Imap.Flags : Geary.Common.MessageData, Geary.Imap.MessageData,
+public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, Geary.Imap.MessageData,
     Gee.Hashable<Geary.Imap.Flags> {
     public int size { get { return list.size; } }
     
@@ -245,7 +245,7 @@ public class Geary.Imap.RFC822Size : Geary.RFC822.Size, Geary.Imap.MessageData {
     }
 }
 
-public class Geary.Imap.Envelope : Geary.Common.MessageData, Geary.Imap.MessageData {
+public class Geary.Imap.Envelope : Geary.MessageData.AbstractMessageData, Geary.Imap.MessageData {
     public Geary.RFC822.Date? sent { get; private set; }
     public Geary.RFC822.Subject subject { get; private set; }
     public Geary.RFC822.MailboxAddresses from { get; private set; }

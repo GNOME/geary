@@ -12,7 +12,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private AccountInformation account_information;
     private int min_pool_size;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
-    private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
+    private Geary.Nonblocking.Mutex sessions_mutex = new Geary.Nonblocking.Mutex();
     private Gee.HashSet<SelectedContext> examined_contexts = new Gee.HashSet<SelectedContext>();
     private Gee.HashSet<SelectedContext> selected_contexts = new Gee.HashSet<SelectedContext>();
     private uint unselected_keepalive_sec = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC;

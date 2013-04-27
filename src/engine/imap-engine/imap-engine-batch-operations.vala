@@ -11,7 +11,7 @@
  * Note that this operation always returns null.  The result of Geary.Sqlite.Folder.create_email_async()
  * is stored in the created property.
  */
-private class Geary.ImapEngine.CreateLocalEmailOperation : Geary.NonblockingBatchOperation {
+private class Geary.ImapEngine.CreateLocalEmailOperation : Geary.Nonblocking.BatchOperation {
     public ImapDB.Folder folder { get; private set; }
     public Gee.Collection<Geary.Email> emails { get; private set; }
     public Geary.Email.Field required_fields { get; private set; }
@@ -58,7 +58,7 @@ private class Geary.ImapEngine.CreateLocalEmailOperation : Geary.NonblockingBatc
  * Note that this operation always returns null, as Geary.Sqlite.Folder.remove_email_async() has no
  * returned value.
  */
-private class Geary.ImapEngine.RemoveLocalEmailOperation : Geary.NonblockingBatchOperation {
+private class Geary.ImapEngine.RemoveLocalEmailOperation : Geary.Nonblocking.BatchOperation {
     public ImapDB.Folder folder { get; private set; }
     public Gee.Collection<Geary.EmailIdentifier> email_ids { get; private set; }
     

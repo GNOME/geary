@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.RFC822.MailboxAddresses : Geary.Common.MessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageData, Geary.RFC822.MessageData {
     public int size { get { return addrs.size; } }
     
     private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();

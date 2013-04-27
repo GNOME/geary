@@ -5,10 +5,10 @@
  */
 
 /**
- * A NonblockingBatchOperation is an abstract base class used by NonblockingBatch.  It represents
- * a single task of asynchronous work.  NonblockingBatch will execute it one time only.
+ * A Nonblocking.BatchOperation is an abstract base class used by Nonblocking.Batch.  It represents
+ * a single task of asynchronous work.  Nonblocking.Batch will execute it one time only.
  */
-public abstract class Geary.NonblockingBatchOperation : BaseObject {
+public abstract class Geary.Nonblocking.BatchOperation : BaseObject {
     public abstract async Object? execute_async(Cancellable? cancellable) throws Error;
 }
 
@@ -45,25 +45,25 @@ public abstract class Geary.NonblockingBatchOperation : BaseObject {
  * operations in smaller chunks (to avoid flooding the thread's MainLoop).  These may be added in
  * the future.
  */
-public class Geary.NonblockingBatch : BaseObject {
+public class Geary.Nonblocking.Batch : BaseObject {
     public const int INVALID_ID = -1;
     
     private const int START_ID = 1;
     
     private class BatchContext : BaseObject {
         public int id;
-        public NonblockingBatchOperation op;
-        public NonblockingBatch? owner = null;
+        public Nonblocking.BatchOperation op;
+        public Nonblocking.Batch? owner = null;
         public bool completed = false;
         public Object? returned = null;
         public Error? threw = null;
         
-        public BatchContext(int id, NonblockingBatchOperation op) {
+        public BatchContext(int id, Nonblocking.BatchOperation op) {
             this.id = id;
             this.op = op;
         }
         
-        public void schedule(NonblockingBatch owner, Cancellable? cancellable) {
+        public void schedule(Nonblocking.Batch owner, Cancellable? cancellable) {
             // hold a strong ref to the owner until the operation is completed
             this.owner = owner;
             
@@ -100,21 +100,21 @@ public class Geary.NonblockingBatch : BaseObject {
     public Error? first_exception { get; private set; default = null; }
     
     private Gee.HashMap<int, BatchContext> contexts = new Gee.HashMap<int, BatchContext>();
-    private NonblockingSemaphore sem = new NonblockingSemaphore();
+    private Nonblocking.Semaphore sem = new Nonblocking.Semaphore();
     private int next_result_id = START_ID;
     private bool locked = false;
     private int completed_ops = 0;
     
-    public signal void added(NonblockingBatchOperation op, int id);
+    public signal void added(Nonblocking.BatchOperation op, int id);
     
     public signal void started(int count);
     
-    public signal void operation_completed(NonblockingBatchOperation op, Object? returned,
+    public signal void operation_completed(Nonblocking.BatchOperation op, Object? returned,
         Error? threw);
     
     public signal void completed(int count, Error? first_error);
     
-    public NonblockingBatch() {
+    public Batch() {
     }
     
     /**
@@ -126,7 +126,7 @@ public class Geary.NonblockingBatch : BaseObject {
      * same algorithm, different instances will likely return the same ID, so they must be
      * associated with the NonblockingBatch they originated from.
      */
-    public int add(NonblockingBatchOperation op) {
+    public int add(Nonblocking.BatchOperation op) {
         if (locked) {
             warning("NonblockingBatch already executed or executing");
             
@@ -194,7 +194,7 @@ public class Geary.NonblockingBatch : BaseObject {
      * Returns the NonblockingBatchOperation for the supplied ID.  Returns null if the ID is invalid
      * or unknown.
      */
-    public NonblockingBatchOperation? get_operation(int id) {
+    public Nonblocking.BatchOperation? get_operation(int id) {
         BatchContext? context = contexts.get(id);
         
         return (context != null) ? context.op : null;

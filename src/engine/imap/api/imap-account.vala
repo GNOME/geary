@@ -12,7 +12,7 @@ private class Geary.Imap.Account : BaseObject {
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
     
-    private class StatusOperation : Geary.NonblockingBatchOperation {
+    private class StatusOperation : Geary.Nonblocking.BatchOperation {
         public ClientSessionManager session_mgr;
         public MailboxInformation mbox;
         public Geary.FolderPath path;
@@ -72,7 +72,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.Collection<Geary.Imap.Folder> folders = new Gee.ArrayList<Geary.Imap.Folder>();
         
-        Geary.NonblockingBatch batch = new Geary.NonblockingBatch();
+        Geary.Nonblocking.Batch batch = new Geary.Nonblocking.Batch();
         foreach (MailboxInformation mbox in mboxes) {
             Geary.FolderPath path = process_path(processed, mbox.get_basename(), mbox.delim);
             

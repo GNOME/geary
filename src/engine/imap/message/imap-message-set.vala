@@ -169,7 +169,7 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(msg_nums.length > 0);
         
         // sort array to search for spans
-        qsort(msg_nums, msg_nums.length, sizeof(int64), Comparable.int64_compare);
+        qsort(msg_nums, msg_nums.length, sizeof(int64), Numeric.int64_compare);
         
         int64 start_of_span = -1;
         int64 last_msg_num = -1;

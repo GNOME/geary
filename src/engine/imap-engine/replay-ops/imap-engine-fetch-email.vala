@@ -120,12 +120,12 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         assert(email != null);
         
         Gee.Map<Geary.Email, bool> created_or_merged =
-            yield engine.local_folder.create_or_merge_email_async(new Geary.Singleton<Geary.Email>(email),
+            yield engine.local_folder.create_or_merge_email_async(new Collection.SingleItem<Geary.Email>(email),
                 cancellable);
         
         // true means created
         if (created_or_merged.get(email))
-            engine.notify_email_locally_appended(new Geary.Singleton<Geary.EmailIdentifier>(email.id));
+            engine.notify_email_locally_appended(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that

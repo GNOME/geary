@@ -5,22 +5,23 @@
  */
 
 /**
- * The addition of the Geary.FolderSupportsCreate interface on a Folder indicates the create email
- * operation is supported.  Created emails are uploaded to the Folder and stored there.
+ * The addition of the Geary.FolderSupport.Create interface on a {@link Geary.Folder} indicates it supports
+ * creating email.
+ *
+ * Created emails are uploaded to the Folder and stored there.
  *
  * Note that creating an email in the Outbox will queue it for sending.  Thus, it may be removed
- * without user interaction at some point the future.
+ * without user interaction at some point in the future.
  */
-public interface Geary.FolderSupportsCreate : Geary.Folder {
+public interface Geary.FolderSupport.Create : Geary.Folder {
     public enum Result {
         CREATED,
         MERGED
     }
     
     /**
-     * Creates a message in the folder.  If the message already exists in the Folder, it will be
-     * merged (that is, fields in the message not already present will be added).  Not all folders
-     * support merging.
+     * Creates a message in the folder.  If the message already exists in the {@link Geary.Folder},
+     * it will be merged (that is, fields in the message not already present will be added).
      *
      * The Folder must be opened prior to attempting this operation.
      */

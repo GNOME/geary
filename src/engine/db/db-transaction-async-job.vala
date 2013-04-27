@@ -8,7 +8,7 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
     private TransactionType type;
     private unowned TransactionMethod cb;
     private Cancellable cancellable;
-    private NonblockingEvent completed;
+    private Nonblocking.Event completed;
     private TransactionOutcome outcome = TransactionOutcome.ROLLBACK;
     private Error? caught_err = null;
     
@@ -17,7 +17,7 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
         this.cb = cb;
         this.cancellable = cancellable ?? new Cancellable();
         
-        completed = new NonblockingEvent();
+        completed = new Nonblocking.Event();
     }
     
     public void cancel() {

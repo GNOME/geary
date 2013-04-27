@@ -191,7 +191,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
     private bool allow_idle = true;
-    private NonblockingMutex serialized_cmds_mutex = new NonblockingMutex();
+    private Nonblocking.Mutex serialized_cmds_mutex = new Nonblocking.Mutex();
     private int waiting_to_send = 0;
     
     // state used only during connect and disconnect
@@ -1262,7 +1262,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (cx == null)
             return new AsyncCommandResponse(null, user, not_connected_err);
         
-        int claim_stub = NonblockingMutex.INVALID_TOKEN;
+        int claim_stub = Nonblocking.Mutex.INVALID_TOKEN;
         if (!imap_server_pipeline) {
             try {
                 debug("[%s] Waiting to send cmd %s: %d", to_full_string(), cmd.to_string(), ++waiting_to_send);
@@ -1281,7 +1281,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             yield cx.send_async(cmd, cancellable);
         } catch (Error send_err) {
             try {
-                if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN)
+                if (!imap_server_pipeline && claim_stub != Nonblocking.Mutex.INVALID_TOKEN)
                     serialized_cmds_mutex.release(ref claim_stub);
             } catch (Error abort_err) {
                 debug("Error attempting to abort from send operation: %s", abort_err.message);
@@ -1311,7 +1311,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(cmd_response.is_sealed());
         assert(cmd_response.status_response.tag.equal_to(cmd.tag));
         
-        if (!imap_server_pipeline && claim_stub != NonblockingMutex.INVALID_TOKEN) {
+        if (!imap_server_pipeline && claim_stub != Nonblocking.Mutex.INVALID_TOKEN) {
             try {
                 serialized_cmds_mutex.release(ref claim_stub);
             } catch (Error notify_err) {

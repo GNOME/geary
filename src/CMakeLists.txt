@@ -197,12 +197,11 @@ engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
-engine/util/util-interfaces.vala
 engine/util/util-memory.vala
 engine/util/util-numeric.vala
 engine/util/util-reference-semantics.vala
 engine/util/util-scheduler.vala
-engine/util/util-singleton.vala
+engine/util/util-single-item.vala
 engine/util/util-stream.vala
 engine/util/util-string.vala
 engine/util/util-trillian.vala

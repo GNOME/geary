@@ -5,16 +5,17 @@
  */
 
 /**
- * The addition of the Geary.FolderSupportsMove interface indicates that the Folder supports a move
- * email operation.  Moved messages are removed from this Folder.
+ * The addition of the Geary.FolderSupport.Move interface indicates that the
+ * {@link Geary.Folder} supports a move email operation.  Moved messages are
+ * removed from this Folder.
  *
- * FoldeSupportsMove does not imply FolderSupportsCopy, or vice-versa.
+ * Move does not imply {@link Geary.FolderSupport.Copy}, or vice-versa.
  */
-public interface Geary.FolderSupportsMove : Geary.Folder {
+public interface Geary.FolderSupport.Move : Geary.Folder {
     /**
      * Moves messages to another folder.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public abstract async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;

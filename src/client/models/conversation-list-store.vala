@@ -42,7 +42,7 @@ public class ConversationListStore : Gtk.ListStore {
     private Cancellable? cancellable_folder = null;
     private bool loading_local_only = true;
     private int conversations_added_counter = 0;
-    private Geary.NonblockingMutex refresh_mutex = new Geary.NonblockingMutex();
+    private Geary.Nonblocking.Mutex refresh_mutex = new Geary.Nonblocking.Mutex();
     
     public signal void conversations_added_began();
     

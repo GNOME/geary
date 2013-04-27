@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.ImapDB.MessageRow {
+private class Geary.ImapDB.MessageRow {
     public int64 id { get; set; default = Db.INVALID_ROWID; }
     public Geary.Email.Field fields { get; set; default = Geary.Email.Field.NONE; }
     

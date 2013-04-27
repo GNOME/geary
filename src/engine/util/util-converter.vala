@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.MidstreamConverter : BaseObject, Converter {
+public class Geary.Stream.MidstreamConverter : BaseObject, Converter {
     public uint64 total_bytes_read { get; private set; default = 0; }
     public uint64 total_bytes_written { get; private set; default = 0; }
     public uint64 converted_bytes_read { get; private set; default = 0; }

@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.NonblockingAbstractSemaphore : BaseObject {
+public abstract class Geary.Nonblocking.AbstractSemaphore : BaseObject {
     private class Pending : BaseObject {
         public unowned SourceFunc cb;
         public Cancellable? cancellable;
@@ -49,7 +49,7 @@ public abstract class Geary.NonblockingAbstractSemaphore : BaseObject {
     public virtual signal void at_reset() {
     }
     
-    protected NonblockingAbstractSemaphore(bool broadcast, bool autoreset, Cancellable? cancellable = null) {
+    protected AbstractSemaphore(bool broadcast, bool autoreset, Cancellable? cancellable = null) {
         this.broadcast = broadcast;
         this.autoreset = autoreset;
         this.cancellable = cancellable;
@@ -58,7 +58,7 @@ public abstract class Geary.NonblockingAbstractSemaphore : BaseObject {
             cancellable.cancelled.connect(on_cancelled);
     }
     
-    ~NonblockingAbstractSemaphore() {
+    ~AbstractSemaphore() {
         if (pending_queue.size > 0) {
             warning("Nonblocking semaphore destroyed with %d pending callers", pending_queue.size);
             

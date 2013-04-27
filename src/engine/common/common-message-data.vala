@@ -5,12 +5,12 @@
  */
 
 /**
- * Common.MessageData is an abstract base class to unify the various message-related data and
+ * AbstractData is an abstract base class to unify the various message-related data and
  * metadata that may be associated with a mail message, whether it's embedded in its MIME
- * structure, its RFC822 header, IMAP metadata, or details from a POP server.
+ * structure, its RFC822 header, IMAP metadata, details from a POP server, etc.
  */
 
-public abstract class Geary.Common.MessageData : BaseObject {
+public abstract class Geary.MessageData.AbstractMessageData : BaseObject {
     /**
      * to_string() is intended for debugging and logging purposes, not user-visible text or
      * serialization.
@@ -18,8 +18,8 @@ public abstract class Geary.Common.MessageData : BaseObject {
     public abstract string to_string();
 }
 
-public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData,
-    Gee.Hashable<Geary.Common.StringMessageData> {
+public abstract class Geary.MessageData.StringMessageData : AbstractMessageData,
+    Gee.Hashable<StringMessageData> {
     public string value { get; private set; }
     
     private uint stored_hash = uint.MAX;
@@ -50,7 +50,8 @@ public abstract class Geary.Common.StringMessageData : Geary.Common.MessageData,
     }
 }
 
-public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Gee.Hashable<Geary.Common.IntMessageData> {
+public abstract class Geary.MessageData.IntMessageData : AbstractMessageData,
+    Gee.Hashable<IntMessageData> {
     public int value { get; private set; }
     
     private uint stored_hash = uint.MAX;
@@ -59,7 +60,7 @@ public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Ge
         this.value = value;
     }
     
-    public virtual bool equal_to(Geary.Common.IntMessageData other) {
+    public virtual bool equal_to(IntMessageData other) {
         if (this == other)
             return true;
         
@@ -75,8 +76,8 @@ public abstract class Geary.Common.IntMessageData : Geary.Common.MessageData, Ge
     }
 }
 
-public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData,
-    Gee.Hashable<Geary.Common.LongMessageData> {
+public abstract class Geary.MessageData.LongMessageData : AbstractMessageData,
+    Gee.Hashable<LongMessageData> {
     public long value { get; private set; }
     
     private uint stored_hash = uint.MAX;
@@ -85,7 +86,7 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData,
         this.value = value;
     }
     
-    public virtual bool equal_to(Geary.Common.LongMessageData other) {
+    public virtual bool equal_to(LongMessageData other) {
         if (this == other)
             return true;
         
@@ -101,8 +102,8 @@ public abstract class Geary.Common.LongMessageData : Geary.Common.MessageData,
     }
 }
 
-public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData,
-    Gee.Hashable<Geary.Common.Int64MessageData> {
+public abstract class Geary.MessageData.Int64MessageData : AbstractMessageData,
+    Gee.Hashable<Int64MessageData> {
     public int64 value { get; private set; }
     
     private uint stored_hash = uint.MAX;
@@ -111,7 +112,7 @@ public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData,
         this.value = value;
     }
     
-    public virtual bool equal_to(Geary.Common.Int64MessageData other) {
+    public virtual bool equal_to(Int64MessageData other) {
         if (this == other)
             return true;
         
@@ -127,7 +128,7 @@ public abstract class Geary.Common.Int64MessageData : Geary.Common.MessageData,
     }
 }
 
-public abstract class Geary.Common.BlockMessageData : Geary.Common.MessageData {
+public abstract class Geary.MessageData.BlockMessageData : AbstractMessageData {
     public string data_name { get; private set; }
     public Geary.Memory.AbstractBuffer buffer { get; private set; }
     

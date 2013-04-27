@@ -4,15 +4,15 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.NonblockingMailbox<G> : BaseObject {
+public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     public int size { get { return queue.size; } }
     public bool allow_duplicates { get; set; default = true; }
     public bool requeue_duplicate { get; set; default = false; }
     
     private Gee.Queue<G> queue;
-    private NonblockingSpinlock spinlock = new NonblockingSpinlock();
+    private Nonblocking.Spinlock spinlock = new Nonblocking.Spinlock();
     
-    public NonblockingMailbox(CompareFunc<G>? comparator = null) {
+    public Mailbox(CompareFunc<G>? comparator = null) {
         // can't use ternary here, Vala bug
         if (comparator == null)
             queue = new Gee.LinkedList<G>();

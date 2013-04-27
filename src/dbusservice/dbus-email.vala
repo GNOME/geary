@@ -53,7 +53,7 @@ public class Geary.DBus.Email : Object {
     }
     
     public async void remove() throws IOError {
-        Geary.FolderSupportsRemove? supports_remove = folder as Geary.FolderSupportsRemove;
+        Geary.FolderSupport.Remove? supports_remove = folder as Geary.FolderSupport.Remove;
         if (supports_remove == null)
             return;
         

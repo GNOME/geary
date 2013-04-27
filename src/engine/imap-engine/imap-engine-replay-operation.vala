@@ -47,7 +47,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     public bool failed { get; private set; default = false; }
     public bool notified { get; private set; default = false; }
     
-    private NonblockingSemaphore semaphore = new NonblockingSemaphore();
+    private Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
     
     public ReplayOperation(string name, Scope scope) {
         this.name = name;

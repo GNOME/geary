@@ -84,7 +84,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private IOStream? ios = null;
     private Serializer? ser = null;
     private Deserializer? des = null;
-    private Geary.NonblockingMutex send_mutex = new Geary.NonblockingMutex();
+    private Geary.Nonblocking.Mutex send_mutex = new Geary.Nonblocking.Mutex();
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;
@@ -563,7 +563,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // NOTE: Because this is happening in the background, it's possible for ser to go to null
         // after any yield (if a close occurs while blocking); this is why all the checking is
         // required
-        int token = NonblockingMutex.INVALID_TOKEN;
+        int token = Nonblocking.Mutex.INVALID_TOKEN;
         try {
             token = yield send_mutex.claim_async();
             
@@ -595,7 +595,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             idle_cmd = null;
             send_failure(err);
         } finally {
-            if (token != NonblockingMutex.INVALID_TOKEN) {
+            if (token != Nonblocking.Mutex.INVALID_TOKEN) {
                 try {
                     send_mutex.release(ref token);
                 } catch (Error err2) {
