@@ -5,9 +5,9 @@
  */
 
 /**
- * Singleton is a simple way of creating a one-item read-only collection.
+ * SingleItem is a simple way of creating a one-item read-only Gee.Collection.
  */
-private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
+private class Geary.Collection.SingleItem<G> : Gee.AbstractCollection<G> {
     private class IteratorImpl<G> : BaseObject, Gee.Traversable<G>, Gee.Iterator<G> {
         public bool read_only { get { return true; } }
         public bool valid { get { return !done; } }
@@ -37,8 +37,8 @@ private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
         }
         
         public void remove() {
-            message("Geary.Singleton is read-only");
-        } 
+            warn_readonly();
+        }
         
         public new bool @foreach(Gee.ForallFunc<G> f) {
             return f(item);
@@ -51,7 +51,7 @@ private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
     
     private Gee.EqualDataFunc equal_func;
     
-    public Singleton(G item, owned Gee.EqualDataFunc? equal_func = null) {
+    public SingleItem(G item, owned Gee.EqualDataFunc? equal_func = null) {
         this.item = item;
         
         if (equal_func != null)
@@ -61,12 +61,16 @@ private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
         }
     }
     
+    private static void warn_readonly() {
+        message("Geary.Collection.SingleItem is read-only");
+    }
+    
     public override bool add(G element) {
         return false;
     }
     
     public override void clear() {
-        message("Geary.Singleton is read-only");
+        warn_readonly();
     }
     
     public override bool contains(G element) {
@@ -78,7 +82,7 @@ private class Geary.Singleton<G> : Gee.AbstractCollection<G> {
     }
     
     public override bool remove(G element) {
-        message("Geary.Singleton is read-only");
+        warn_readonly();
         
         return false;
     }

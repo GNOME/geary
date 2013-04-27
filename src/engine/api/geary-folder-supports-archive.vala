@@ -5,18 +5,19 @@
  */
 
 /**
- * The addition of this interface to Geary.Folder indicates that this Folder supports an archive
- * operation (which may or may not be in addition to a remove operation via Geary.SupportsRemove).
+ * The addition of this interface to {@link Geary.Folder} indicates that it supports an archive
+ * operation (which may or may not be in addition to a remove operation via
+ * {@link Geary.FolderSupport.Remove}).
  *
  * An archive operation acts like remove except that the mail is still available on the server,
  * usually in an All Mail folder and perhaps others.  It does not imply that the mail message was
  * moved to the Trash folder.
  */
-public interface Geary.FolderSupportsArchive : Geary.Folder {
+public interface Geary.FolderSupport.Archive : Geary.Folder {
     /**
      * Archives the specified emails from the folder.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public abstract async void archive_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error;
@@ -24,7 +25,7 @@ public interface Geary.FolderSupportsArchive : Geary.Folder {
     /**
      * Archive one email from the folder.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public virtual async void archive_single_email_async(Geary.EmailIdentifier email_id,
         Cancellable? cancellable = null) throws Error {

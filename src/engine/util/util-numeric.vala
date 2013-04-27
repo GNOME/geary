@@ -46,5 +46,15 @@ public inline int int_round_up(int value, int multiple_of) {
     return ((value / multiple_of) * multiple_of) + ((value % multiple_of != 0) ? multiple_of : 0);
 }
 
+public int int64_compare(void* a, void *b) {
+    int64 diff = *((int64 *) a) - *((int64 *) b);
+    if (diff < 0)
+        return -1;
+    else if (diff > 0)
+        return 1;
+    else
+        return 0;
+}
+
 }
 

@@ -5,7 +5,7 @@
  */
 
 private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation {
-    private class RemoteListPositional : NonblockingBatchOperation {
+    private class RemoteListPositional : Nonblocking.BatchOperation {
         private ListEmail owner;
         private int[] needed_by_position;
         
@@ -21,7 +21,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         }
     }
     
-    private class RemoteListPartial : NonblockingBatchOperation {
+    private class RemoteListPartial : Nonblocking.BatchOperation {
         private ListEmail owner;
         private Geary.Email.Field remaining_fields;
         private Gee.Collection<EmailIdentifier> ids;
@@ -264,7 +264,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         Logging.debug(Logging.Flag.REPLAY, "ListEmail.replay_remote %s: %d by position, %d unfulfilled",
             engine.to_string(), needed_by_position.length, unfulfilled.get_values().size);
         
-        NonblockingBatch batch = new NonblockingBatch();
+        Nonblocking.Batch batch = new Nonblocking.Batch();
         
         // fetch in full whatever is needed wholesale
         if (needed_by_position.length > 0)
@@ -361,7 +361,7 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         CreateLocalEmailOperation create_op = new CreateLocalEmailOperation(engine.local_folder,
             list, required_fields);
         
-        NonblockingBatch batch = new NonblockingBatch();
+        Nonblocking.Batch batch = new Nonblocking.Batch();
         batch.add(create_op);
         
         yield batch.execute_all_async(cancellable);

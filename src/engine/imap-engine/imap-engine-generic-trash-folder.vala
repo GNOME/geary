@@ -9,7 +9,7 @@
 //
 // Service-specific accounts can use this or subclass it for further customization
 
-private class Geary.ImapEngine.GenericTrashFolder : GenericFolder, Geary.FolderSupportsRemove {
+private class Geary.ImapEngine.GenericTrashFolder : GenericFolder, Geary.FolderSupport.Remove {
     public GenericTrashFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         base (account, remote, local, local_folder, special_folder_type);

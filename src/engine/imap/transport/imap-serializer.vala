@@ -24,7 +24,7 @@ public class Geary.Imap.Serializer : BaseObject {
     private ConverterOutputStream couts;
     private MemoryOutputStream mouts;
     private DataOutputStream douts;
-    private Geary.MidstreamConverter midstream = new Geary.MidstreamConverter("Serializer");
+    private Geary.Stream.MidstreamConverter midstream = new Geary.Stream.MidstreamConverter("Serializer");
     
     public Serializer(OutputStream outs) {
         this.outs = outs;

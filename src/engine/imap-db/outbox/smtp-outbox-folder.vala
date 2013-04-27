@@ -11,8 +11,8 @@
 // on the ImapDB.Database.  SmtpOutboxFolder assumes the database is opened before it's passed in
 // to the constructor -- it does not open or close the database itself and will start using it
 // immediately.
-private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupportsRemove,
-    Geary.FolderSupportsCreate {
+private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport.Remove,
+    Geary.FolderSupport.Create {
     private class OutboxRow {
         public int64 id;
         public int position;
@@ -44,7 +44,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     private weak Account _account;
     private Geary.Smtp.ClientSession smtp;
     private int open_count = 0;
-    private NonblockingMailbox<OutboxRow> outbox_queue = new NonblockingMailbox<OutboxRow>();
+    private Nonblocking.Mailbox<OutboxRow> outbox_queue = new Nonblocking.Mailbox<OutboxRow>();
     private SmtpOutboxFolderProperties properties = new SmtpOutboxFolderProperties(0, 0);
     
     public override Account account { get { return _account; } }
@@ -293,13 +293,13 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         return row.outbox_id;
     }
     
-    public virtual async Geary.FolderSupportsCreate.Result create_email_async(Geary.RFC822.Message rfc822,
+    public virtual async Geary.FolderSupport.Create.Result create_email_async(Geary.RFC822.Message rfc822,
         Cancellable? cancellable = null) throws Error {
         check_open();
         
         yield enqueue_email_async(rfc822, cancellable);
         
-        return FolderSupportsCreate.Result.CREATED;
+        return FolderSupport.Create.Result.CREATED;
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,

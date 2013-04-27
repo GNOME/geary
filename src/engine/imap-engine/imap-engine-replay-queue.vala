@@ -44,9 +44,9 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         return remote_queue.size;
     } }
     
-    private NonblockingReportingSemaphore<bool> remote_reporting_semaphore;
-    private NonblockingMailbox<ReplayOperation> local_queue = new NonblockingMailbox<ReplayOperation>();
-    private NonblockingMailbox<ReplayOperation> remote_queue = new NonblockingMailbox<ReplayOperation>();
+    private Nonblocking.ReportingSemaphore<bool> remote_reporting_semaphore;
+    private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
+    private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
     
     private bool is_closed = false;
     
@@ -115,7 +115,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * each ReplayOperation waiting to perform a remote operation, cancelling it if the remote
      * folder is not ready.
      */
-    public ReplayQueue(string name, NonblockingReportingSemaphore<bool> remote_reporting_semaphore) {
+    public ReplayQueue(string name, Nonblocking.ReportingSemaphore<bool> remote_reporting_semaphore) {
         this.name = name;
         this.remote_reporting_semaphore = remote_reporting_semaphore;
         

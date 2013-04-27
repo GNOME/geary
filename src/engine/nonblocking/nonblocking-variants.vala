@@ -4,20 +4,20 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.NonblockingSemaphore : Geary.NonblockingAbstractSemaphore {
-    public NonblockingSemaphore(Cancellable? cancellable = null) {
+public class Geary.Nonblocking.Semaphore : Geary.Nonblocking.AbstractSemaphore {
+    public Semaphore(Cancellable? cancellable = null) {
         base (true, false, cancellable);
     }
 }
 
-public class Geary.NonblockingEvent : Geary.NonblockingAbstractSemaphore {
-    public NonblockingEvent(Cancellable? cancellable = null) {
+public class Geary.Nonblocking.Event : Geary.Nonblocking.AbstractSemaphore {
+    public Event(Cancellable? cancellable = null) {
         base (true, true, cancellable);
     }
 }
 
-public class Geary.NonblockingSpinlock : Geary.NonblockingAbstractSemaphore {
-    public NonblockingSpinlock(Cancellable? cancellable = null) {
+public class Geary.Nonblocking.Spinlock : Geary.Nonblocking.AbstractSemaphore {
+    public Spinlock(Cancellable? cancellable = null) {
         base (false, true, cancellable);
     }
 }

@@ -51,7 +51,7 @@ public class Geary.EmailFlags : BaseObject, Gee.Hashable<Geary.EmailFlags> {
     public virtual void add(EmailFlag flag) {
         if (!list.contains(flag)) {
             list.add(flag);
-            notify_added(new Singleton<EmailFlag>(flag));
+            notify_added(new Collection.SingleItem<EmailFlag>(flag));
         }
     }
     
@@ -69,7 +69,7 @@ public class Geary.EmailFlags : BaseObject, Gee.Hashable<Geary.EmailFlags> {
     public virtual bool remove(EmailFlag flag) {
         bool removed = list.remove(flag);
         if (removed)
-            notify_removed(new Singleton<EmailFlag>(flag));
+            notify_removed(new Collection.SingleItem<EmailFlag>(flag));
         
         return removed;
     }

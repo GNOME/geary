@@ -70,8 +70,8 @@ public class Geary.Imap.Deserializer : BaseObject {
     private Geary.State.Machine fsm;
     private ListParameter context;
     private Cancellable? cancellable = null;
-    private NonblockingSemaphore closed_semaphore = new NonblockingSemaphore();
-    private Geary.MidstreamConverter midstream = new Geary.MidstreamConverter("Deserializer");
+    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
+    private Geary.Stream.MidstreamConverter midstream = new Geary.Stream.MidstreamConverter("Deserializer");
     private RootParameters root = new RootParameters();
     private StringBuilder? current_string = null;
     private size_t literal_length_remaining = 0;

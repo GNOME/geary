@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.NonblockingReportingSemaphore<G> : Geary.NonblockingSemaphore {
+public class Geary.Nonblocking.ReportingSemaphore<G> : Geary.Nonblocking.Semaphore {
     public G result { get; private set; }
     public Error? err { get; private set; default = null; }
     
     private G default_result;
     
-    public NonblockingReportingSemaphore(G default_result, Cancellable? cancellable = null) {
+    public ReportingSemaphore(G default_result, Cancellable? cancellable = null) {
         base (cancellable);
         
         this.default_result = default_result;

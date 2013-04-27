@@ -5,13 +5,14 @@
  */
 
 /**
- * The addition of the Geary.FolderSupportsCopy interface indicates the Folder supports a copy
- * email operation.  A copied email will not be removed from the current folder but will appear in
- * the destination.
+ * The addition of the Geary.FolderSupport.Copy interface to a {@link Geary.Folder} indicates it
+ * supports a copy email operation.
  *
- * FolderSupportsCopy does not imply FolderSupportsMove, or vice-versa.
+ * A copied email will not be removed from the current folder but will appear in the destination.
+ *
+ * Copy does not imply {@link Geary.FolderSupport.Move}, or vice-versa.
  */
-public interface Geary.FolderSupportsCopy : Geary.Folder {
+public interface Geary.FolderSupport.Copy : Geary.Folder {
     /**
      * Copies messages into another folder.
      *

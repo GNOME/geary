@@ -11,7 +11,7 @@
  *
  * The EmailPrefetcher does not maintain a reference to the folder.
  */
-public class Geary.ImapEngine.EmailPrefetcher : Object {
+private class Geary.ImapEngine.EmailPrefetcher : Object {
     public const int PREFETCH_DELAY_SEC = 1;
     
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
@@ -19,7 +19,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
     
     private unowned Geary.Folder folder;
     private int start_delay_sec;
-    private NonblockingMutex mutex = new NonblockingMutex();
+    private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
     private Gee.HashSet<Geary.EmailIdentifier> prefetch_ids = new Gee.HashSet<Geary.EmailIdentifier>();
     private uint schedule_id = 0;
     private Cancellable cancellable = new Cancellable();
@@ -149,7 +149,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
     }
     
     private async void do_prefetch() {
-        int token = NonblockingMutex.INVALID_TOKEN;
+        int token = Nonblocking.Mutex.INVALID_TOKEN;
         try {
             token = yield mutex.claim_async(cancellable);
             yield do_prefetch_batch();
@@ -162,7 +162,7 @@ public class Geary.ImapEngine.EmailPrefetcher : Object {
         if (prefetch_ids.size == 0)
             halting();
         
-        if (token != NonblockingMutex.INVALID_TOKEN) {
+        if (token != Nonblocking.Mutex.INVALID_TOKEN) {
             try {
                 mutex.release(ref token);
             } catch (Error release_err) {

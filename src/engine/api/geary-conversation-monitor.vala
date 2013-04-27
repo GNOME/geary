@@ -141,7 +141,7 @@ public class Geary.ConversationMonitor : BaseObject {
         }
     }
     
-    private class LocalSearchOperation : NonblockingBatchOperation {
+    private class LocalSearchOperation : Nonblocking.BatchOperation {
         // IN
         public Geary.Account account;
         public RFC822.MessageID message_id;
@@ -659,7 +659,7 @@ public class Geary.ConversationMonitor : BaseObject {
         Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_blacklist();
         
         // execute all the local search operations at once
-        NonblockingBatch batch = new NonblockingBatch();
+        Nonblocking.Batch batch = new Nonblocking.Batch();
         foreach (RFC822.MessageID message_id in needed_message_ids) {
             batch.add(new LocalSearchOperation(folder.account, message_id, required_fields,
                 folder_blacklist));

@@ -4,8 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.FolderSupportsCopy,
-    Geary.FolderSupportsMark, Geary.FolderSupportsMove {
+private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.FolderSupport.Copy,
+    Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
     internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
     private const int NORMALIZATION_CHUNK_COUNT = 5000;
     
@@ -23,9 +23,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private ImapDB.Account local;
     private SpecialFolderType special_folder_type;
     private int open_count = 0;
-    private NonblockingReportingSemaphore<bool>? remote_semaphore = null;
+    private Nonblocking.ReportingSemaphore<bool>? remote_semaphore = null;
     private ReplayQueue? replay_queue = null;
-    private NonblockingMutex normalize_email_positions_mutex = new NonblockingMutex();
+    private Nonblocking.Mutex normalize_email_positions_mutex = new Nonblocking.Mutex();
     private int remote_count = -1;
     
     public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
@@ -317,7 +317,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // existing emails or removing them, both operations being performed using EmailIdentifiers
             // rather than positional addressing ... this means the order of operation is not important
             // and can be batched up rather than performed serially
-            NonblockingBatch batch = new NonblockingBatch();
+            Nonblocking.Batch batch = new Nonblocking.Batch();
             
             CreateLocalEmailOperation? create_op = null;
             if (to_create_or_merge.size > 0) {
@@ -412,7 +412,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (open_count++ > 0)
             return;
         
-        remote_semaphore = new Geary.NonblockingReportingSemaphore<bool>(false);
+        remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
         // start the replay queue
         replay_queue = new ReplayQueue(get_path().to_string(), remote_semaphore);
@@ -760,7 +760,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // notify of change
         if (!marked && owned_id != null)
-            notify_email_removed(new Geary.Singleton<Geary.EmailIdentifier>(owned_id));
+            notify_email_removed(new Collection.SingleItem<Geary.EmailIdentifier>(owned_id));
         
         if (!marked && changed)
             notify_email_count_changed(remote_count, CountChangeReason.REMOVED);

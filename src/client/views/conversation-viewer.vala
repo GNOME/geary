@@ -866,7 +866,7 @@ public class ConversationViewer : Gtk.Box {
         menu.append(new Gtk.SeparatorMenuItem());
         
         // Mark as read/unread.
-        if (email.id.get_folder_path() != null && current_folder is Geary.FolderSupportsMark) {
+        if (email.id.get_folder_path() != null && current_folder is Geary.FolderSupport.Mark) {
             if (email.is_unread().to_boolean(false)) {
                 Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
                 mark_read_item.activate.connect(() => on_mark_read_message(email));
@@ -1256,7 +1256,7 @@ public class ConversationViewer : Gtk.Box {
             }
         }
 
-        Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
+        Geary.FolderSupport.Mark? supports_mark = current_folder as Geary.FolderSupport.Mark;
         if (supports_mark != null & ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);

@@ -5,7 +5,7 @@
  */
 
 public class Geary.Imap.Mailbox : Geary.SmartReference {
-    private class MailboxOperation : NonblockingBatchOperation {
+    private class MailboxOperation : Nonblocking.BatchOperation {
         public SelectedContext context;
         public Command cmd;
         
@@ -94,7 +94,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (fields == Geary.Email.Field.NONE)
             throw new EngineError.BAD_PARAMETERS("No email fields specified");
         
-        NonblockingBatch batch = new NonblockingBatch();
+        Nonblocking.Batch batch = new Nonblocking.Batch();
         
         Gee.List<FetchDataType> data_type_list = new Gee.ArrayList<FetchDataType>();
         Gee.List<FetchBodyDataType> body_data_type_list = new Gee.ArrayList<FetchBodyDataType>();
@@ -103,14 +103,14 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         // if nothing else, should always fetch the UID, which is gotten via data_type_list
         // (necessary to create the EmailIdentifier, also provides mappings of position -> UID)
         // *unless* MessageSet is UID addressing
-        int plain_id = NonblockingBatch.INVALID_ID;
+        int plain_id = Nonblocking.Batch.INVALID_ID;
         if (data_type_list.size > 0 || body_data_type_list.size > 0) {
             FetchCommand fetch_cmd = new FetchCommand.from_collection(msg_set, data_type_list,
                 body_data_type_list);
             plain_id = batch.add(new MailboxOperation(context, fetch_cmd));
         }
         
-        int body_id = NonblockingBatch.INVALID_ID;
+        int body_id = Nonblocking.Batch.INVALID_ID;
         if (fields.require(Geary.Email.Field.BODY)) {
             // Fetch the body.
             Gee.List<FetchBodyDataType> types = new Gee.ArrayList<FetchBodyDataType>();
@@ -121,8 +121,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             body_id = batch.add(new MailboxOperation(context, fetch_body));
         }
         
-        int preview_id = NonblockingBatch.INVALID_ID;
-        int preview_charset_id = NonblockingBatch.INVALID_ID;
+        int preview_id = Nonblocking.Batch.INVALID_ID;
+        int preview_charset_id = Nonblocking.Batch.INVALID_ID;
         if (fields.require(Geary.Email.Field.PREVIEW)) {
             // Preview text.
             FetchBodyDataType fetch_preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
@@ -146,7 +146,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
             preview_charset_id = batch.add(new MailboxOperation(context, preview_charset_cmd));
         }
         
-        int properties_id = NonblockingBatch.INVALID_ID;
+        int properties_id = Nonblocking.Batch.INVALID_ID;
         if (fields.is_any_set(Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS)) {
             // Properties and flags.
             Gee.List<FetchDataType> properties_data_types_list = new Gee.ArrayList<FetchDataType>();
@@ -173,7 +173,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         Gee.HashMap<int, Geary.Email> pos_map = new Gee.HashMap<int, Geary.Email>();
         
         // process "plain" fetch results (i.e. simple IMAP data)
-        if (plain_id != NonblockingBatch.INVALID_ID) {
+        if (plain_id != Nonblocking.Batch.INVALID_ID) {
             MailboxOperation plain_op = (MailboxOperation) batch.get_operation(plain_id);
             CommandResponse plain_resp = (CommandResponse) batch.get_result(plain_id);
             
@@ -196,7 +196,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         // Process body results.
-        if (body_id != NonblockingBatch.INVALID_ID) {
+        if (body_id != Nonblocking.Batch.INVALID_ID) {
             MailboxOperation body_op = (MailboxOperation) batch.get_operation(body_id);
             CommandResponse body_resp = (CommandResponse) batch.get_result(body_id);
             
@@ -216,7 +216,7 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         // Process properties results.
-        if (properties_id != NonblockingBatch.INVALID_ID) {
+        if (properties_id != Nonblocking.Batch.INVALID_ID) {
             MailboxOperation properties_op = (MailboxOperation) batch.get_operation(properties_id);
             CommandResponse properties_resp = (CommandResponse) batch.get_result(properties_id);
             
@@ -237,8 +237,8 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         }
         
         // process preview FETCH results
-        if (preview_id != NonblockingBatch.INVALID_ID && 
-            preview_charset_id != NonblockingBatch.INVALID_ID) {
+        if (preview_id != Nonblocking.Batch.INVALID_ID && 
+            preview_charset_id != Nonblocking.Batch.INVALID_ID) {
             
             MailboxOperation preview_op = (MailboxOperation) batch.get_operation(preview_id);
             CommandResponse preview_resp = (CommandResponse) batch.get_result(preview_id);
@@ -544,9 +544,9 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         if (context.is_closed())
             throw new ImapError.NOT_SELECTED("Mailbox %s closed", name);
         
-        NonblockingBatch batch = new NonblockingBatch();
-        int add_flags_id = NonblockingBatch.INVALID_ID;
-        int remove_flags_id = NonblockingBatch.INVALID_ID;
+        Nonblocking.Batch batch = new Nonblocking.Batch();
+        int add_flags_id = Nonblocking.Batch.INVALID_ID;
+        int remove_flags_id = Nonblocking.Batch.INVALID_ID;
         
         if (flags_to_add != null && flags_to_add.size > 0)
             add_flags_id = batch.add(new MailboxOperation(context, new StoreCommand(
@@ -558,12 +558,12 @@ public class Geary.Imap.Mailbox : Geary.SmartReference {
         
         yield batch.execute_all_async(cancellable);
         
-        if (add_flags_id != NonblockingBatch.INVALID_ID) {
+        if (add_flags_id != Nonblocking.Batch.INVALID_ID) {
             gather_flag_results((MailboxOperation) batch.get_operation(add_flags_id),
                 (CommandResponse) batch.get_result(add_flags_id), ref ret);
         }
         
-        if (remove_flags_id != NonblockingBatch.INVALID_ID) {
+        if (remove_flags_id != Nonblocking.Batch.INVALID_ID) {
             gather_flag_results((MailboxOperation) batch.get_operation(remove_flags_id),
                 (CommandResponse) batch.get_result(remove_flags_id), ref ret);
         }

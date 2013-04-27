@@ -9,12 +9,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     public GenericAccount account { get; private set; }
     
-    private NonblockingMailbox<GenericFolder> bg_queue = new NonblockingMailbox<GenericFolder>(bg_queue_comparator);
+    private Nonblocking.Mailbox<GenericFolder> bg_queue = new Nonblocking.Mailbox<GenericFolder>(bg_queue_comparator);
     private Gee.HashSet<GenericFolder> made_available = new Gee.HashSet<GenericFolder>();
     private GenericFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
-    private NonblockingSemaphore stopped = new NonblockingSemaphore();
-    private NonblockingSemaphore prefetcher_semaphore = new NonblockingSemaphore();
+    private Nonblocking.Semaphore stopped = new Nonblocking.Semaphore();
+    private Nonblocking.Semaphore prefetcher_semaphore = new Nonblocking.Semaphore();
     
     public AccountSynchronizer(GenericAccount account) {
         this.account = account;
@@ -251,7 +251,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         // set up monitoring the Folder's prefetcher so an exception doesn't leave dangling
         // signal subscriptions
-        prefetcher_semaphore = new NonblockingSemaphore();
+        prefetcher_semaphore = new Nonblocking.Semaphore();
         folder.email_prefetcher.halting.connect(on_email_prefetcher_completed);
         folder.closed.connect(on_email_prefetcher_completed);
         

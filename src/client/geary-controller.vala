@@ -76,7 +76,7 @@ public class GearyController {
     private NotificationBubble? notification_bubble = null;
     private uint select_folder_timeout_id = 0;
     private Geary.Folder? folder_to_select = null;
-    private Geary.NonblockingMutex select_folder_mutex = new Geary.NonblockingMutex();
+    private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
     
     public GearyController() {
@@ -373,7 +373,7 @@ public class GearyController {
     private void update_ui() {
         update_tooltips();
         Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
-        if (current_folder is Geary.FolderSupportsArchive) {
+        if (current_folder is Geary.FolderSupport.Archive) {
             delete_message.label = ARCHIVE_MESSAGE_LABEL;
             delete_message.icon_name = ARCHIVE_MESSAGE_ICON_NAME;
         } else {
@@ -868,7 +868,7 @@ public class GearyController {
 
     private void mark_selected_conversations(Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, bool preview_message_only = false) {
-        Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
+        Geary.FolderSupport.Mark? supports_mark = current_folder as Geary.FolderSupport.Mark;
         if (supports_mark == null)
             return;
         
@@ -965,7 +965,7 @@ public class GearyController {
     
     private void on_mark_conversation(Geary.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview = false) {
-        Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
+        Geary.FolderSupport.Mark? supports_mark = current_folder as Geary.FolderSupport.Mark;
         if (supports_mark == null)
             return;
         
@@ -980,7 +980,7 @@ public class GearyController {
 
     private void on_conversation_viewer_mark_message(Geary.Email message, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove) {
-        Geary.FolderSupportsMark? supports_mark = current_folder as Geary.FolderSupportsMark;
+        Geary.FolderSupport.Mark? supports_mark = current_folder as Geary.FolderSupport.Mark;
         if (supports_mark == null)
             return;
         
@@ -1052,7 +1052,7 @@ public class GearyController {
         if (ids.size == 0)
             return;
         
-        Geary.FolderSupportsCopy? supports_copy = current_folder as Geary.FolderSupportsCopy;
+        Geary.FolderSupport.Copy? supports_copy = current_folder as Geary.FolderSupport.Copy;
         if (supports_copy == null)
             return;
         
@@ -1074,7 +1074,7 @@ public class GearyController {
         if (ids.size == 0)
             return;
         
-        Geary.FolderSupportsMove? supports_move = current_folder as Geary.FolderSupportsMove;
+        Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
         if (supports_move == null)
             return;
         
@@ -1296,14 +1296,14 @@ public class GearyController {
     // one or the other in a folder.  This will try archiving first, then remove.
     private async void delete_messages(Gee.List<Geary.EmailIdentifier> ids, Cancellable? cancellable)
         throws Error {
-        Geary.FolderSupportsArchive? supports_archive = current_folder as Geary.FolderSupportsArchive;
+        Geary.FolderSupport.Archive? supports_archive = current_folder as Geary.FolderSupport.Archive;
         if (supports_archive != null) {
             yield supports_archive.archive_email_async(ids, cancellable);
             
             return;
         }
         
-        Geary.FolderSupportsRemove? supports_remove = current_folder as Geary.FolderSupportsRemove;
+        Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
         if (supports_remove != null) {
             yield supports_remove.remove_email_async(ids, cancellable);
             
@@ -1371,13 +1371,13 @@ public class GearyController {
 
         // Mutliple message buttons.
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive =
-            (current_folder is Geary.FolderSupportsRemove) || (current_folder is Geary.FolderSupportsArchive);
+            (current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive);
         GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive =
-            current_folder is Geary.FolderSupportsMark;
+            current_folder is Geary.FolderSupport.Mark;
         GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).sensitive =
-            current_folder is Geary.FolderSupportsCopy;
+            current_folder is Geary.FolderSupport.Copy;
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
-            current_folder is Geary.FolderSupportsMove;
+            current_folder is Geary.FolderSupport.Move;
     }
 
     // Enables or disables the message buttons on the toolbar.
@@ -1388,13 +1388,13 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
-            && ((current_folder is Geary.FolderSupportsRemove) || (current_folder is Geary.FolderSupportsArchive));
+            && ((current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive));
         GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive =
-            sensitive && (current_folder is Geary.FolderSupportsMark);
+            sensitive && (current_folder is Geary.FolderSupport.Mark);
         GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).sensitive =
-            sensitive && (current_folder is Geary.FolderSupportsCopy);
+            sensitive && (current_folder is Geary.FolderSupport.Copy);
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
-            sensitive && (current_folder is Geary.FolderSupportsMove);
+            sensitive && (current_folder is Geary.FolderSupport.Move);
     }
     
     // Updates tooltip text depending on number of conversations selected.
@@ -1408,7 +1408,7 @@ public class GearyController {
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).tooltip = single ?
             MOVE_MESSAGE_TOOLTIP_SINGLE : MOVE_MESSAGE_TOOLTIP_MULTIPLE;
         
-        if (current_folder is Geary.FolderSupportsArchive) {
+        if (current_folder is Geary.FolderSupport.Archive) {
             GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
                 ARCHIVE_MESSAGE_TOOLTIP_SINGLE : ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE;
         } else {

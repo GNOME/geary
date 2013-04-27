@@ -5,19 +5,25 @@
  */
 
 /**
- * The addition of the Geary.FolderSupportsRemove interface to a Geary.Folder indicates that it
- * supports a remove email operation.  This generally means that the message is deleted from the
- * server and is not recoverable.  It may mean the message is moved to a Trash folder where it may
- * or may not be automatically deleted some time later.
+ * The addition of the Geary.FolderSupport.Remove interface to a {@link Geary.Folder}
+ * indicates that it supports removing (deleting) email.
+ *
+ * This generally means that the message is deleted from the server and is not recoverable.
+ * It _may_ mean the message is moved to a Trash folder where it may or may not be
+ * automatically deleted some time later; this behavior is server-specific and not always
+ * determinable by Geary (or worked around, either).
  *
  * The remove operation is distinct from the archive operation, available via
- * Geary.FolderSupportsArchive.
+ * {@link Geary.FolderSupport.Archive}.
+ *
+ * A Folder that does not support Remove does not imply that email might not be removed later,
+ * such as by the server.
  */
-public interface Geary.FolderSupportsRemove : Geary.Folder {
+public interface Geary.FolderSupport.Remove : Geary.Folder {
     /**
      * Removes the specified emails from the folder.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public abstract async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error;
@@ -25,7 +31,7 @@ public interface Geary.FolderSupportsRemove : Geary.Folder {
     /**
      * Removes one email from the folder.
      *
-     * The Folder must be opened prior to attempting this operation.
+     * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public virtual async void remove_single_email_async(Geary.EmailIdentifier email_id,
         Cancellable? cancellable = null) throws Error {
