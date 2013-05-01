@@ -33,8 +33,7 @@ public class ComposerWindow : Gtk.Window {
     private const string ACTION_JUSTIFY_RIGHT = "justifyright";
     private const string ACTION_JUSTIFY_CENTER = "justifycenter";
     private const string ACTION_JUSTIFY_FULL = "justifyfull";
-    private const string ACTION_FONT = "font";
-    private const string ACTION_FONT_SIZE = "fontsize";
+    private const string ACTION_MENU = "menu";
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_LINK = "insertlink";
     private const string ACTION_COMPOSE_AS_HTML = "compose as html";
@@ -140,8 +139,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Entry subject_entry;
     private Gtk.Button discard_button;
     private Gtk.Button send_button;
-    private Gtk.ToggleToolButton font_button;
-    private Gtk.ToggleToolButton font_size_button;
+    private Gtk.ToggleToolButton menu_button;
     private Gtk.Label message_overlay_label;
     private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
@@ -152,14 +150,14 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     private Gtk.Widget visible_on_attachment_drag_over_child;
     
+    private Gtk.Menu menu_html;
+    private Gtk.Menu menu_plain;
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
     private Gtk.RadioMenuItem font_large;
-    private Gtk.Menu font_size_menu;
     private Gtk.RadioMenuItem font_sans;
     private Gtk.RadioMenuItem font_serif;
     private Gtk.RadioMenuItem font_monospace;
-    private Gtk.Menu font_menu;
     
     private Gtk.ActionGroup actions;
     private string? hover_url = null;
@@ -272,8 +270,7 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_JUSTIFY_CENTER).activate.connect(on_formatting_action);
         actions.get_action(ACTION_JUSTIFY_FULL).activate.connect(on_formatting_action);
         
-        actions.get_action(ACTION_FONT).activate.connect(on_select_font);
-        actions.get_action(ACTION_FONT_SIZE).activate.connect(on_select_font_size);
+        actions.get_action(ACTION_MENU).activate.connect(on_open_menu);
         actions.get_action(ACTION_COLOR).activate.connect(on_select_color);
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
@@ -358,38 +355,52 @@ public class ComposerWindow : Gtk.Window {
         
         GearyApplication.instance.config.spell_check_changed.connect(on_spell_check_changed);
         
-        font_button = builder.get_object("font button") as Gtk.ToggleToolButton;
-        font_size_button = builder.get_object("font size button") as Gtk.ToggleToolButton;
+        menu_button = builder.get_object("menu button") as Gtk.ToggleToolButton;
         
-        // Build font menu.
-        font_menu = new Gtk.Menu();
-        font_menu.deactivate.connect(on_deactivate_font_menu);
-        font_menu.attach_to_widget(font_button, null);
+        // Build menu
+        menu_html = new Gtk.Menu();
+        menu_html.deactivate.connect(on_deactivate_menu);
+        menu_html.attach_to_widget(menu_button, null);
+        
         font_sans = new Gtk.RadioMenuItem.with_label(new SList<Gtk.RadioMenuItem>(),
             _("Sans Serif"));
         font_sans.activate.connect(on_font_sans);
-        font_menu.append(font_sans);
+        menu_html.append(font_sans);
         font_serif = new Gtk.RadioMenuItem.with_label_from_widget(font_sans, _("Serif"));
         font_serif.activate.connect(on_font_serif);
-        font_menu.append(font_serif);
+        menu_html.append(font_serif);
         font_monospace = new Gtk.RadioMenuItem.with_label_from_widget(font_sans,
             _("Fixed width"));
         font_monospace.activate.connect(on_font_monospace);
-        font_menu.append(font_monospace);
+        menu_html.append(font_monospace);
+        menu_html.append(new Gtk.SeparatorMenuItem());
         
-        // Build font size menu.
-        font_size_menu = new Gtk.Menu();
-        font_size_menu.deactivate.connect(on_deactivate_font_size_menu);
-        font_size_menu.attach_to_widget(font_size_button, null);
         font_small = new Gtk.RadioMenuItem.with_label(new SList<Gtk.RadioMenuItem>(), _("Small"));
         font_small.activate.connect(on_font_size_small);
-        font_size_menu.append(font_small);
+        menu_html.append(font_small);
         font_medium = new Gtk.RadioMenuItem.with_label_from_widget(font_small, _("Medium"));
         font_medium.activate.connect(on_font_size_medium);
-        font_size_menu.append(font_medium);
+        menu_html.append(font_medium);
         font_large = new Gtk.RadioMenuItem.with_label_from_widget(font_small, _("Large"));
         font_large.activate.connect(on_font_size_large);
-        font_size_menu.append(font_large);
+        menu_html.append(font_large);
+        menu_html.append(new Gtk.SeparatorMenuItem());
+        
+        Gtk.MenuItem color_item = new Gtk.MenuItem();
+        color_item.related_action = ui.get_action("ui/color");
+        menu_html.append(color_item);
+        menu_html.append(new Gtk.SeparatorMenuItem());
+        Gtk.MenuItem html_item = new Gtk.CheckMenuItem();
+        html_item.related_action = ui.get_action("ui/htmlcompose");
+        menu_html.append(html_item);
+        
+        menu_plain = new Gtk.Menu();
+        menu_plain.deactivate.connect(on_deactivate_menu);
+        menu_plain.attach_to_widget(menu_button, null);
+        
+        Gtk.MenuItem html_item2 = new Gtk.CheckMenuItem();
+        html_item2.related_action = ui.get_action("ui/htmlcompose");
+        menu_plain.append(html_item2);
         
         WebKit.WebSettings s = new WebKit.WebSettings();
         s.enable_spell_checking = GearyApplication.instance.config.spell_check;
@@ -970,8 +981,8 @@ public class ComposerWindow : Gtk.Window {
     
     private void toggle_toolbar_buttons(bool show) {
         string[] buttons = {"bold button", "italic button", "underline button",
-            "strikethrough button", "toolbar separator 1", "toolbar separator 2", "font button",
-            "font size button", "color button", "link button", "remove format button"};
+            "strikethrough button", "toolbar separator 1", "toolbar separator 2",
+            "link button", "remove format button"};
         foreach (string button in buttons) {
             Gtk.Widget widget = (Gtk.Widget) builder.get_object(button);
             if (show)
@@ -981,28 +992,21 @@ public class ComposerWindow : Gtk.Window {
         }
     }
     
-    private void on_select_font() {
-        if (!font_button.active)
+    private void on_open_menu() {
+        if (!menu_button.active)
             return;
         
-        font_menu.show_all();
-        font_menu.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
+        if (compose_as_html) {
+            menu_html.show_all();
+            menu_html.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
+        } else {
+            menu_plain.show_all();
+            menu_plain.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
+        }
     }
     
-    private void on_deactivate_font_menu() {
-        font_button.active = false;
-    }
-    
-    private void on_select_font_size() {
-        if (!font_size_button.active)
-            return;
-        
-        font_size_menu.show_all();
-        font_size_menu.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
-    }
-    
-    private void on_deactivate_font_size_menu() {
-        font_size_button.active = false;
+    private void on_deactivate_menu() {
+        menu_button.active = false;
     }
     
     private void on_font_sans() {
@@ -1275,11 +1279,6 @@ public class ComposerWindow : Gtk.Window {
         Gtk.MenuItem select_all_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.SELECT_ALL, null);
         select_all_item.activate.connect(on_select_all);
         context_menu.append(select_all_item);
-        
-        // HTML or plain text
-        Gtk.CheckMenuItem html_item = new Gtk.CheckMenuItem();
-        html_item.related_action = actions.get_action(ACTION_COMPOSE_AS_HTML);
-        context_menu.append(html_item);
         
         context_menu.show_all();
         
