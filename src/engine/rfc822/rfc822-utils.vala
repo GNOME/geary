@@ -189,6 +189,9 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
     string to_line = email_addresses_for_reply(email.to, html_format);
     if (!String.is_empty_or_whitespace(to_line))
         quoted += _("To: %s\n").printf(to_line);
+    string cc_line = email_addresses_for_reply(email.cc, html_format);
+    if (!String.is_empty_or_whitespace(cc_line))
+        quoted += _("Cc: %s\n").printf(cc_line);
     quoted += "\n";  // A blank line between headers and body
     
     quoted = quoted.replace("\n", "<br />");
