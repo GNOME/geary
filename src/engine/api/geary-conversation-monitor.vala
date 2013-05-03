@@ -738,6 +738,11 @@ public class Geary.ConversationMonitor : BaseObject {
             trimmed.set(conversation, found);
             
             if (conversation.get_count(true) == 0) {
+                // remove non-folder message id's from the message_id_map to truly drop the
+                // conversation (that's all that's remaining in Conversation at this point)
+                foreach (Geary.Email email in conversation.get_emails(Conversation.Ordering.NONE))
+                    message_id_map.unset(email.message_id);
+                
                 bool is_removed = conversations.remove((ImplConversation) conversation);
                 if (is_removed) {
                     debug("Removing Email ID %s evaporates conversation %s", removed_id.to_string(),
