@@ -253,8 +253,8 @@ public string html_to_flowed_text(WebKit.DOM.Document doc) {
         }
     }
     
-    // Reassemble plain text out of parts
-    string doctext = resolve_nesting(doc.get_body().get_inner_text(), bqtexts);
+    // Reassemble plain text out of parts, replace non-breaking space with regular space
+    string doctext = resolve_nesting(doc.get_body().get_inner_text(), bqtexts).replace("\xc2\xa0", " ");
     
     // Reassemble DOM
     for (int i = 0; i < nbq; i++) {

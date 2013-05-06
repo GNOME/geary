@@ -181,16 +181,20 @@ public class ConversationViewer : Gtk.Box {
         }
         
         if (remote_images) {
-            WebKit.DOM.HTMLElement remote_images_bar =
-                Util.DOM.select(div_message, ".remote_images");
-            try {
-                ((WebKit.DOM.Element) remote_images_bar).get_class_list().add("show");
-                remote_images_bar.set_inner_html("""%s %s
-                    <input type="button" value="%s" class="show_images" />""".printf(
-                    remote_images_bar.get_inner_html(), _("This message contains remote images."),
-                    _("Show Images")));
-            } catch (Error error) {
-                warning("Error showing remote images bar: %s", error.message);
+            if (email.load_remote_images().is_certain()) {
+                show_images_email(div_message);
+            } else {
+                WebKit.DOM.HTMLElement remote_images_bar =
+                    Util.DOM.select(div_message, ".remote_images");
+                try {
+                    ((WebKit.DOM.Element) remote_images_bar).get_class_list().add("show");
+                    remote_images_bar.set_inner_html("""%s %s
+                        <input type="button" value="%s" class="show_images" />""".printf(
+                        remote_images_bar.get_inner_html(),
+                        _("This message contains remote images."), _("Show Images")));
+                } catch (Error error) {
+                    warning("Error showing remote images bar: %s", error.message);
+                }
             }
         }
         
@@ -698,6 +702,14 @@ public class ConversationViewer : Gtk.Box {
                 remote_images.get_class_list().remove("show");
         } catch (Error error) {
             warning("Error showing images: %s", error.message);
+        }
+        
+        // only add flag to load remote images if not already present
+        Geary.Email? message = get_email_from_element(email_element);
+        if (message != null && !message.load_remote_images().is_certain()) {
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
+            mark_message(message, flags, null);
         }
     }
     

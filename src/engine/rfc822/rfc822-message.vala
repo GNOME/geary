@@ -119,6 +119,8 @@ public class Geary.RFC822.Message : BaseObject {
             body_text = new GMime.Part();
             body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8; format=flowed"));
             body_text.set_content_object(content);
+            body_text.set_content_encoding(body_text.get_best_content_encoding(
+                GMime.EncodingConstraint.7BIT));
         }
         
         // Body: HTML format (also optional)
@@ -131,6 +133,8 @@ public class Geary.RFC822.Message : BaseObject {
             body_html = new GMime.Part();
             body_html.set_content_type(new GMime.ContentType.from_string("text/html; charset=utf-8"));
             body_html.set_content_object(content);
+            body_html.set_content_encoding(body_html.get_best_content_encoding(
+                GMime.EncodingConstraint.7BIT));
         }
         
         // Build the message's mime part.
@@ -245,7 +249,7 @@ public class Geary.RFC822.Message : BaseObject {
         part.set_content_object(new GMime.DataWrapper.with_stream(stream, GMime.ContentEncoding.BINARY));
         
         // This encoding is the "Content-Transfer-Encoding", which GMime automatically converts to.
-        part.set_content_encoding(GMime.ContentEncoding.BASE64);
+        part.set_content_encoding(part.get_best_content_encoding(GMime.EncodingConstraint.7BIT));
         
         return part;
     }

@@ -168,6 +168,10 @@ public class Geary.Email : BaseObject {
     public inline Trillian is_flagged() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_flagged()) : Trillian.UNKNOWN;
     }
+    
+    public inline Trillian load_remote_images() {
+        return email_flags != null ? Trillian.from_boolean(email_flags.load_remote_images()) : Trillian.UNKNOWN;
+    }
 
     public void set_send_date(Geary.RFC822.Date? date) {
         this.date = date;

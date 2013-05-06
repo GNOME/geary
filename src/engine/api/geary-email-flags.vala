@@ -21,6 +21,14 @@ public class Geary.EmailFlags : BaseObject, Gee.Hashable<Geary.EmailFlags> {
         return _flagged;
     } }
 
+    private static EmailFlag? _load_remote_images = null;
+    public static EmailFlag LOAD_REMOTE_IMAGES { get {
+        if (_load_remote_images == null)
+            _load_remote_images = new EmailFlag("LOADREMOTEIMAGES");
+        
+        return _load_remote_images;
+    } }
+    
     private Gee.Set<EmailFlag> list = new Gee.HashSet<EmailFlag>();
     
     public virtual signal void added(Gee.Collection<EmailFlag> flags) {
@@ -94,6 +102,10 @@ public class Geary.EmailFlags : BaseObject, Gee.Hashable<Geary.EmailFlags> {
 
     public inline bool is_flagged() {
         return contains(FLAGGED);
+    }
+    
+    public inline bool load_remote_images() {
+        return contains(LOAD_REMOTE_IMAGES);
     }
 
     public bool equal_to(Geary.EmailFlags other) {
