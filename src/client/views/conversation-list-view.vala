@@ -18,6 +18,7 @@ public class ConversationListView : Gtk.TreeView {
     private Geary.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
+    private Gtk.Menu? context_menu = null;
     
     public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
     
@@ -151,6 +152,49 @@ public class ConversationListView : Gtk.TreeView {
             }
             return true;
         }
+        
+        if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
+            Geary.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
+            
+            string?[] action_names = {};
+            action_names += GearyController.ACTION_DELETE_MESSAGE;
+            
+            if (conversation.is_unread())
+                action_names += GearyController.ACTION_MARK_AS_READ;
+            
+            if (conversation.has_any_read_message())
+                action_names += GearyController.ACTION_MARK_AS_UNREAD;
+            
+            if (conversation.is_flagged())
+                action_names += GearyController.ACTION_MARK_AS_UNSTARRED;
+            else
+                action_names += GearyController.ACTION_MARK_AS_STARRED;
+            
+            // treat null as separator
+            action_names += null;
+            action_names += GearyController.ACTION_REPLY_TO_MESSAGE;
+            action_names += GearyController.ACTION_REPLY_ALL_MESSAGE;
+            action_names += GearyController.ACTION_FORWARD_MESSAGE;
+            
+            context_menu = new Gtk.Menu();
+            foreach (string? action_name in action_names) {
+                if (action_name == null) {
+                    context_menu.add(new Gtk.SeparatorMenuItem());
+                    
+                    continue;
+                }
+                
+                Gtk.Action? menu_action = GearyApplication.instance.actions.get_action(action_name);
+                if (menu_action != null)
+                    context_menu.add(menu_action.create_menu_item());
+            }
+            
+            context_menu.show_all();
+            context_menu.popup(null, null, null, event.button, event.time);
+            
+            return false;
+        }
+        
         return false;
     }
 
