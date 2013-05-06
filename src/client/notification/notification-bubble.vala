@@ -54,16 +54,12 @@ public class NotificationBubble : Geary.BaseObject {
     }
     
     private void on_new_messages_arrived(Geary.Folder folder) {
-        try {
-            if (monitor.total_count == 1 && monitor.last_new_message_folder != null &&
-                monitor.last_new_message != null) {
-                notify_one_message_async.begin(monitor.last_new_message_folder,
-                    monitor.last_new_message, null);
-            } else if (monitor.total_count > 0) {
-                notify_new_mail(folder, monitor.total_count);
-            }
-        } catch (Error err) {
-            debug("Unable to notify of new mail: %s", err.message);
+        if (monitor.total_count == 1 && monitor.last_new_message_folder != null &&
+            monitor.last_new_message != null) {
+            notify_one_message_async.begin(monitor.last_new_message_folder,
+                monitor.last_new_message, null);
+        } else if (monitor.total_count > 0) {
+            notify_new_mail(folder, monitor.total_count);
         }
     }
     
@@ -72,7 +68,7 @@ public class NotificationBubble : Geary.BaseObject {
         GearyApplication.instance.activate(new string[0]);
     }
     
-    private void notify_new_mail(Geary.Folder folder, int count) throws GLib.Error {
+    private void notify_new_mail(Geary.Folder folder, int count) {
         // don't pass email if invoked
         this.folder = null;
         email = null;
@@ -82,11 +78,14 @@ public class NotificationBubble : Geary.BaseObject {
             return;
         
         notification.set_category("email.arrived");
-        notification.set("summary", null);
+        notification.set("summary", ngettext("%d new message", "%d new messages", count).printf(count));
         
-        prepare_notification(ngettext("%d new message", "%d new messages", count).printf(count),
-           "message-new-email");
-        notification.show();
+        try {
+            prepare_notification(null, "message-new-email");
+            notification.show();
+        } catch (GLib.Error error) {
+            warning("Failed to show notification: %s", error.message);
+        }
     }
     
     private async void notify_one_message_async(Geary.Folder folder, Geary.Email email, GLib.Cancellable? cancellable) throws GLib.Error {
@@ -137,7 +136,7 @@ public class NotificationBubble : Geary.BaseObject {
         }
     }
     
-    private void prepare_notification(string message, string sound) throws GLib.Error {
+    private void prepare_notification(string? message, string sound) throws GLib.Error {
         notification.set("body", message);
         
         if (caps.find("sound") != null)
