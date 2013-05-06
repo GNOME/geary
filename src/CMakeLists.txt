@@ -353,7 +353,7 @@ pkg_check_modules(DEPS REQUIRED
     sqlite3>=3.7.4
     gmime-2.6>=2.6.0
     libsecret-1>=0.11
-    webkitgtk-3.0>=1.8.0
+    webkitgtk-3.0>=1.10.0
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
