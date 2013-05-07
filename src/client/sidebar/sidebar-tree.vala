@@ -126,11 +126,15 @@ public class Sidebar.Tree : Gtk.TreeView {
         // Sidebar.Entry as it was added, but that's a tad too complicated for our needs
         // currently
         enable_model_drag_dest(target_entries, actions);
-
-        Gtk.TargetEntry[] source_entries = new Gtk.TargetEntry[0];
-        enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, source_entries,
-            Gdk.DragAction.COPY);
-
+        
+        // Drag source removed as per http://redmine.yorba.org/issues/4701
+        //
+        // Reason: this isn't working correctly (Sidebar.InternalDragSourceEntry should be
+        // the trigger for enable dragging, but that doesn't work anymore).  It looks like
+        // the entire mechanism shifted somehow under GTK 3; see Gtk.TreeDragSource and
+        // Gtk.TreeDragDest for more information on how Sidebar should implement this
+        // properly
+        
         this.drop_handler = drop_handler;
         
         popup_menu.connect(on_context_menu_keypress);
