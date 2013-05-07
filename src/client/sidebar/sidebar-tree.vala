@@ -111,6 +111,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         
         set_headers_visible(false);
         set_enable_search(false);
+        set_search_column(-1);
         set_rules_hint(false);
         set_show_expanders(true);
         set_reorderable(false);

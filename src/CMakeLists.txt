@@ -269,6 +269,7 @@ client/util/util-gtk.vala
 client/util/util-webkit.vala
 
 client/views/formatted-conversation-data.vala
+client/views/conversation-find-bar.vala
 client/views/conversation-list-cell-renderer.vala
 client/views/conversation-list-view.vala
 client/views/conversation-viewer.vala

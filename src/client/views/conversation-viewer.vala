@@ -60,6 +60,7 @@ public class ConversationViewer : Gtk.Box {
     private Gtk.Menu? attachment_menu = null;
     private weak Geary.Folder? current_folder = null;
     private Geary.AccountInformation? current_account_information = null;
+    private ConversationFindBar conversation_find_bar;
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -87,6 +88,11 @@ public class ConversationViewer : Gtk.Box {
         message_overlay.add_overlay(message_overlay_label);
         
         pack_start(message_overlay);
+        
+        conversation_find_bar = new ConversationFindBar(web_view);
+        conversation_find_bar.no_show_all = true;
+        
+        pack_start(conversation_find_bar, false);
     }
     
     public Geary.Email? get_last_message() {
@@ -109,6 +115,9 @@ public class ConversationViewer : Gtk.Box {
         
         current_folder = new_folder;
         current_account_information = account_information;
+        
+        if (conversation_find_bar.visible)
+            conversation_find_bar.hide();
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
@@ -231,6 +240,10 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
         bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
         bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
+        
+        // Update the search results
+        if (conversation_find_bar.visible)
+            conversation_find_bar.commence_search();
     }
     
     private WebKit.DOM.HTMLElement make_email_div() {
@@ -651,6 +664,9 @@ public class ConversationViewer : Gtk.Box {
 
     private void on_body_toggle_clicked_self(WebKit.DOM.Element element) {
         try {
+            if (web_view.get_dom_document().get_body().get_class_list().contains("nohide"))
+                return;
+            
             WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
             if (email_element == null)
                 return;
@@ -1244,7 +1260,19 @@ public class ConversationViewer : Gtk.Box {
             dialog.run();
         }
     }
-
+    
+    public void show_find_bar() {
+        conversation_find_bar.show();
+        conversation_find_bar.focus_entry();
+    }
+    
+    public void find(bool forward) {
+        if (!conversation_find_bar.visible)
+            show_find_bar();
+        
+        conversation_find_bar.find(forward);
+    }
+    
     public void mark_read() {
         Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         WebKit.DOM.Document document = web_view.get_dom_document();

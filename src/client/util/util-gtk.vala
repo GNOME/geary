@@ -207,7 +207,7 @@ public void add_accelerator(Gtk.UIManager ui_manager, Gtk.ActionGroup action_gro
     ui_manager.get_accel_group().connect(key, modifiers, Gtk.AccelFlags.VISIBLE,
         (group, obj, key, modifiers) => {
             action_group.get_action(action).activate();
-            return false;
+            return true;
         });
 }
 
