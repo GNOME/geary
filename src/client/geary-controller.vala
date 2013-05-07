@@ -15,6 +15,9 @@ public class GearyController {
     public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
     public const string ACTION_FORWARD_MESSAGE = "GearyForwardMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
+    public const string ACTION_FIND_IN_CONVERSATION = "GearyFindInConversation";
+    public const string ACTION_FIND_NEXT_IN_CONVERSATION = "GearyFindNextInConversation";
+    public const string ACTION_FIND_PREVIOUS_IN_CONVERSATION = "GearyFindPreviousInConversation";
     public const string ACTION_ZOOM_IN = "GearyZoomIn";
     public const string ACTION_ZOOM_OUT = "GearyZoomOut";
     public const string ACTION_ZOOM_NORMAL = "GearyZoomNormal";
@@ -245,6 +248,19 @@ public class GearyController {
         forward_message.label = _("_Forward");
         entries += forward_message;
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
+        
+        Gtk.ActionEntry find_in_conversation = { ACTION_FIND_IN_CONVERSATION, null, null, "<Ctrl>F",
+        null, on_find_in_conversation_action };
+        entries += find_in_conversation;
+        add_accelerator("slash", ACTION_FIND_IN_CONVERSATION);
+        
+        Gtk.ActionEntry find_next_in_conversation = { ACTION_FIND_NEXT_IN_CONVERSATION, null, null,
+            "<Ctrl>G", null, on_find_next_in_conversation_action };
+        entries += find_next_in_conversation;
+        
+        Gtk.ActionEntry find_previous_in_conversation = { ACTION_FIND_PREVIOUS_IN_CONVERSATION,
+            null, null, "<Shift><Ctrl>G", null, on_find_previous_in_conversation_action };
+        entries += find_previous_in_conversation;
         
         // although this action changes according to Geary.Folder capabilities, set to Archive
         // until they're known so the "translatable" string doesn't first appear
@@ -1268,6 +1284,18 @@ public class GearyController {
         Geary.Email? message = main_window.conversation_viewer.get_last_message();
         if (message != null)
             on_forward_message(message);
+    }
+    
+    private void on_find_in_conversation_action() {
+            main_window.conversation_viewer.show_find_bar();
+    }
+    
+    private void on_find_next_in_conversation_action() {
+            main_window.conversation_viewer.find(true);
+    }
+    
+    private void on_find_previous_in_conversation_action() {
+            main_window.conversation_viewer.find(false);
     }
     
     // This method is used for both removing and archive a message; currently Geary only supports

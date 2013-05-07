@@ -157,7 +157,7 @@ hr {
     border-radius: 5px;
 }
 
-.email.hide .header_container .avatar {
+body:not(.nohide) .email.hide .header_container .avatar {
     width: 32px;
     height: 32px;
     margin-right: 12px;
@@ -194,63 +194,67 @@ hr {
         background-color: #ccc !important;
     }
 
-    .email.hide {
+    body:not(.nohide) .email.hide {
         background-color: #f5f5f5;
         box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
-    .email.hide .body,
-    .email.hide > .attachment_container,
+    body:not(.nohide) .email.hide .body,
+    body:not(.nohide) .email.hide > .attachment_container,
     .email:not(.hide) .header_container .preview,
-    .email.hide .email {
+    body.nohide .email .header_container .preview,
+    body:not(.nohide) .email.hide .email {
         display: none;
     }
-    .email.hide .header_container .preview {
+    body:not(.nohide) .email.hide .header_container .preview {
         display: block;
     }
-    .email:not(:only-of-type) .header_container,
-    .email .email .header_container {
+    body:not(.nohide) .email:not(:only-of-type) .header_container,
+    body:not(.nohide) .email .email .header_container {
         cursor: pointer;
     }
-    .email:not(.hide) .header .field .value {
+    .email:not(.hide) .header .field .value,
+    body.nohide .email .header .field .value {
         cursor: auto;
     }
-    .email.hide .header {
+    body:not(.nohide) .email.hide .header {
         padding: 0;
         text-align: right;
     }
-    .email.hide .header .field {
+    body:not(.nohide) .email.hide .header .field {
         display: inline;
         margin-right: 2px;
         text-align: left;
     }
-    .email.hide .header .field:not(:first-child) {
+    body:not(.nohide) .email.hide .header .field:not(:first-child) {
         display: inline-block;
     }
-    .email.hide .header .field:not(.important),
-    .email.hide .header .field .title {
+    body:not(.nohide) .email.hide .header .field:not(.important),
+    body:not(.nohide) .email.hide .header .field .title {
         display: none;
     }
-    .email.hide .header .field .value {
+    body:not(.nohide) .email.hide .header .field .value {
         margin-left: 0;
     }
-    .email.hide .header .field .not_hidden_only,
-    .email:not(.hide) .header .field .hidden_only {
+    body:not(.nohide) .email.hide .header .field .not_hidden_only,
+    .email:not(.hide) .header .field .hidden_only,
+    body.nohide .email .header .field .hidden_only {
         display: none;
     }
-    .email.hide .header .field a {
+    body:not(.nohide) .email.hide .header .field a {
         pointer-events: none;
     }
-    .email:not(.hide) .remote_images.show {
+    .email:not(.hide) .remote_images.show,
+    body.nohide .email .remote_images.show {
         display: block;
     }
-    .email.compressed {
+    body:not(.nohide) .email.compressed {
         margin-top: -1px;
         height: 10px;
     }
-    .email.compressed + .email {
+    body:not(.nohide) .email.compressed + .email {
         margin-top: -1px;
     }
-    .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed {
+    body:not(.nohide) .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed {
         display:none;
     }
 
@@ -266,6 +270,9 @@ hr {
     background: #f5f5f5;
     position: relative;
     cursor: hand;
+}
+body.nohide .email .compressed_note > span {
+    display: none !important;
 }
 
 .email .email {
@@ -425,18 +432,18 @@ hr {
     cursor: pointer;
     display: none;
 }
-.quote_container.controllable > .shower {
+body:not(.nohide) .quote_container.controllable > .shower {
     display: block;
 }
 .quote_container.controllable > .hider,
-.quote_container.controllable > .quote {
+body:not(.nohide) .quote_container.controllable > .quote {
     display: none;
 }
-.quote_container.controllable.show > .shower {
+body:not(.nohide) .quote_container.controllable.show > .shower {
     display: none;
 }
-.quote_container.controllable.show > .hider,
-.quote_container.controllable.show > .quote {
+body:not(.nohide) .quote_container.controllable.show > .hider,
+body:not(.nohide) .quote_container.controllable.show > .quote {
     display: block;
 }
 .quote_container > .shower:hover,
@@ -471,4 +478,8 @@ blockquote {
     padding-right: 5px;
     border: 0;
     border-left: 3px #aaa solid;
+}
+
+.search_coloring *::selection {
+    background-color: #00ddff;
 }

@@ -68,7 +68,7 @@ public class MainWindow : Gtk.Window {
     
     public override bool configure_event(Gdk.EventConfigure event) {
         // Get window dimensions.
-        window_maximized = (get_window().get_state() == Gdk.WindowState.MAXIMIZED);
+        window_maximized = ((get_window().get_state() & Gdk.WindowState.MAXIMIZED) != 0);
         if (!window_maximized) {
             int width, height;
             get_size(out width, out height);
@@ -133,6 +133,8 @@ public class MainWindow : Gtk.Window {
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
+        
+        this.key_press_event.connect(on_key_press_event);
     }
     
     // Returns true when there's a conversation list scrollbar visible, i.e. the list is tall
@@ -140,6 +142,12 @@ public class MainWindow : Gtk.Window {
     public bool conversation_list_has_scrollbar() {
         Gtk.Scrollbar? scrollbar = conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar;
         return scrollbar != null && scrollbar.get_visible();
+    }
+    
+    private bool on_key_press_event(Gdk.EventKey event) {
+        // Check whether the focused widget wants to handle it, if not let the accelerators kick in
+        // via the default handling
+        return propagate_key_event(event);
     }
 }
 
