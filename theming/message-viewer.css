@@ -432,18 +432,18 @@ body.nohide .email .compressed_note > span {
     cursor: pointer;
     display: none;
 }
-.quote_container.controllable > .shower {
+body:not(.nohide) .quote_container.controllable > .shower {
     display: block;
 }
 .quote_container.controllable > .hider,
-.quote_container.controllable > .quote {
+body:not(.nohide) .quote_container.controllable > .quote {
     display: none;
 }
-.quote_container.controllable.show > .shower {
+body:not(.nohide) .quote_container.controllable.show > .shower {
     display: none;
 }
-.quote_container.controllable.show > .hider,
-.quote_container.controllable.show > .quote {
+body:not(.nohide) .quote_container.controllable.show > .hider,
+body:not(.nohide) .quote_container.controllable.show > .quote {
     display: block;
 }
 .quote_container > .shower:hover,
