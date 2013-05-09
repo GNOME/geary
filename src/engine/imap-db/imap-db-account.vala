@@ -201,8 +201,7 @@ private class Geary.ImapDB.Account : BaseObject {
             (context) => {
             Db.Statement statement = context.prepare(
                 "SELECT email, real_name, highest_importance, normalized_email " +
-                "FROM ContactTable WHERE highest_importance >= ?");
-            statement.bind_int(0, ContactImportance.VISIBILITY_THRESHOLD);
+                "FROM ContactTable");
             
             Db.Result result = statement.exec(cancellable);
             while (!result.finished) {

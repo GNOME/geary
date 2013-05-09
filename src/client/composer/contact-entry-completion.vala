@@ -8,6 +8,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     // Sort column indices.
     private const int SORT_COLUMN = 0;
     
+    // Minimum visibility for the contact to appear in autocompletion.
+    private const Geary.ContactImportance CONTACT_VISIBILITY_THRESHOLD = Geary.ContactImportance.TO_TO;
+    
     private Gtk.ListStore list_store;
     
     private Gtk.TreeIter? last_iter = null;
@@ -53,6 +56,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     }
     
     private void add_contact(Geary.Contact contact) {
+        if (contact.highest_importance < CONTACT_VISIBILITY_THRESHOLD)
+            return;
+        
         string full_address = contact.get_rfc822_address().get_full_address();
         Gtk.TreeIter iter;
         list_store.append(out iter);
