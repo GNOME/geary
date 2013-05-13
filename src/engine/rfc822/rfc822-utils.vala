@@ -231,11 +231,16 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
 /*
  * This function is adapted from the GMimeFilterBest source in the GMime
  * library (gmime-filter-best.c) by Jeffrey Stedfast, LGPL 2.1.
+ *
+ * WARNING: This call does not perform async I/O, meaning it will loop on the
+ * stream without relinquishing control to the event loop.  Use with
+ * caution.
  */
 public GMime.ContentEncoding get_best_content_encoding(GMime.Stream stream,
     GMime.EncodingConstraint constraint) {
     int count0 = 0, count8 = 0, linelen = 0, maxline = 0;
     size_t total = 0, readlen;
+    // TODO: Increase buffer size?
     uint8[] buffer = new uint8[1024];
     
     while ((readlen = stream.read(buffer)) > 0) {
