@@ -112,28 +112,28 @@ public class Geary.RFC822.Message : BaseObject {
         // Body: text format (optional)
         GMime.Part? body_text = null;
         if (email.body_text != null) {
-            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body_text.data),
+            GMime.StreamMem stream = new GMime.StreamMem.with_buffer(email.body_text.data);
+            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(stream,
                 GMime.ContentEncoding.DEFAULT);
             
             body_text = new GMime.Part();
             body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8; format=flowed"));
             body_text.set_content_object(content);
-            body_text.set_content_encoding(body_text.get_best_content_encoding(
+            body_text.set_content_encoding(Geary.RFC822.Utils.get_best_content_encoding(stream,
                 GMime.EncodingConstraint.7BIT));
         }
         
         // Body: HTML format (also optional)
         GMime.Part? body_html = null;
         if (email.body_html != null) {
-            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
-                new GMime.StreamMem.with_buffer(email.body_html.data),
+            GMime.StreamMem stream = new GMime.StreamMem.with_buffer(email.body_html.data);
+            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(stream,
                 GMime.ContentEncoding.DEFAULT);
             
             body_html = new GMime.Part();
             body_html.set_content_type(new GMime.ContentType.from_string("text/html; charset=utf-8"));
             body_html.set_content_object(content);
-            body_html.set_content_encoding(body_html.get_best_content_encoding(
+            body_html.set_content_encoding(Geary.RFC822.Utils.get_best_content_encoding(stream,
                 GMime.EncodingConstraint.7BIT));
         }
         
@@ -249,7 +249,8 @@ public class Geary.RFC822.Message : BaseObject {
         part.set_content_object(new GMime.DataWrapper.with_stream(stream, GMime.ContentEncoding.BINARY));
         
         // This encoding is the "Content-Transfer-Encoding", which GMime automatically converts to.
-        part.set_content_encoding(part.get_best_content_encoding(GMime.EncodingConstraint.7BIT));
+        part.set_content_encoding(Geary.RFC822.Utils.get_best_content_encoding(stream,
+            GMime.EncodingConstraint.7BIT));
         
         return part;
     }

@@ -966,7 +966,7 @@ namespace GMime {
 		[CCode (cname = "g_mime_stream_printf")]
 		public ssize_t printf (string fmt);
 		[CCode (cname = "g_mime_stream_read")]
-		public virtual ssize_t read (string buf, size_t len);
+		public virtual ssize_t read (uint8[] buf);
 		[CCode (cname = "g_mime_stream_reset")]
 		public virtual int reset ();
 		[CCode (cname = "g_mime_stream_seek")]
