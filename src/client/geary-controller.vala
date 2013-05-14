@@ -81,6 +81,7 @@ public class GearyController {
     private Geary.Folder? folder_to_select = null;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
+    private Geary.Folder? previous_non_search_folder = null;
     
     public GearyController() {
         // This initializes the IconFactory, important to do before the actions are created (as they
@@ -116,6 +117,7 @@ public class GearyController {
         main_window.folder_list.move_conversation.connect(on_move_conversation);
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
+        main_window.main_toolbar.search_text_changed.connect(on_search_text_changed);
         main_window.conversation_viewer.link_selected.connect(on_link_selected);
         main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
@@ -324,10 +326,15 @@ public class GearyController {
         account.email_sent.connect(on_sent);
         
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
+        
+        update_search_placeholder_text();
     }
     
     public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {
         cancel_inbox(account);
+        
+        previous_non_search_folder = null;
+        main_window.main_toolbar.set_search_text(""); // Reset search.
         if (current_account == account) {
             cancel_folder();
             cancel_message();
@@ -365,6 +372,8 @@ public class GearyController {
         } catch (Error e) {
             message("Error enumerating accounts: %s", e.message);
         }
+        
+        update_search_placeholder_text();
     }
     
     // Returns the number of open accounts.
@@ -388,6 +397,7 @@ public class GearyController {
     // by other utility methods
     private void update_ui() {
         update_tooltips();
+        update_search_placeholder_text();
         Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
         if (current_folder is Geary.FolderSupport.Archive) {
             delete_message.label = ARCHIVE_MESSAGE_LABEL;
@@ -463,6 +473,9 @@ public class GearyController {
         
         current_folder = folder;
         current_account = folder.account;
+        
+        if (!(current_folder is Geary.SearchFolder))
+            previous_non_search_folder = current_folder;
         
         main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
         main_window.conversation_list_store.account_owner_email = current_account.information.email;
@@ -1458,6 +1471,39 @@ public class GearyController {
         }
         
         return ret.size >= 1 ? ret : null;
+    }
+    
+    private void on_search_text_changed(string search_text) {
+        if (search_text == "") {
+            if (previous_non_search_folder != null && current_folder is Geary.SearchFolder)
+                main_window.folder_list.select_folder(previous_non_search_folder);
+            
+            main_window.folder_list.remove_search();
+            
+            return;
+        }
+        
+        if (current_account == null)
+            return;
+        
+        Geary.SearchFolder? folder;
+        try {
+            folder = (Geary.SearchFolder) current_account.get_special_folder(
+                Geary.SpecialFolderType.SEARCH);
+            folder.set_search_keywords(search_text);
+        } catch (Error e) {
+            debug("Could not get search folder: %s", e.message);
+            
+            return;
+        }
+        
+        main_window.folder_list.set_search(folder);
+    }
+    
+    private void update_search_placeholder_text() {
+        main_window.main_toolbar.set_search_placeholder_text(
+            current_account == null || GearyApplication.instance.get_num_accounts() == 1 ?
+             _("Search") : _("Search %s account").printf(current_account.information.nickname));
     }
 }
 

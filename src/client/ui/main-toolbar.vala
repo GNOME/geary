@@ -6,12 +6,17 @@
 
 // Draws the main toolbar.
 public class MainToolbar : Gtk.Box {
+    private const string ICON_CLEAR_NAME = "edit-clear-symbolic";
+    
     private Gtk.Toolbar toolbar;
     public FolderMenu copy_folder_menu { get; private set; }
     public FolderMenu move_folder_menu { get; private set; }
     
     private GtkUtil.ToggleToolbarDropdown mark_menu_dropdown;
     private GtkUtil.ToggleToolbarDropdown app_menu_dropdown;
+    private Gtk.Entry search_entry;
+    
+    public signal void search_text_changed(string search_text);
     
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -55,6 +60,14 @@ public class MainToolbar : Gtk.Box {
             Gtk.IconSize.LARGE_TOOLBAR, mark_menu, mark_proxy_menu);
         mark_menu_dropdown.attach(mark_menu_button);
         
+        // Search bar.
+        search_entry = (Gtk.Entry) builder.get_object("search_entry");
+        search_entry.changed.connect(on_search_entry_changed);
+        search_entry.icon_release.connect(on_search_entry_icon_release);
+        search_entry.key_press_event.connect(on_search_key_press);
+        on_search_entry_changed(); // set initial state
+        search_entry.has_focus = true;
+        
         // Setup the application menu.
         GearyApplication.instance.load_ui_file("toolbar_menu.ui");
         Gtk.Menu application_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu")
@@ -78,6 +91,33 @@ public class MainToolbar : Gtk.Box {
         Gtk.ToolButton button = builder.get_object(action) as Gtk.ToolButton;
         button.set_related_action(GearyApplication.instance.actions.get_action(action));
         return button;
+    }
+    
+    public void set_search_text(string text) {
+        search_entry.text = text;
+    }
+    
+    public void set_search_placeholder_text(string placeholder) {
+        search_entry.placeholder_text = placeholder;
+    }
+    
+    private void on_search_entry_changed() {
+        search_text_changed(search_entry.text);
+        // Enable/disable clear button.
+        search_entry.secondary_icon_name = search_entry.text != "" ? ICON_CLEAR_NAME : null;
+    }
+    
+    private void on_search_entry_icon_release(Gtk.EntryIconPosition icon_pos, Gdk.Event event) {
+        if (icon_pos == Gtk.EntryIconPosition.SECONDARY)
+            search_entry.text = "";
+    }
+    
+    private bool on_search_key_press(Gdk.EventKey event) {
+        // Clear box if user hits escape.
+        if (Gdk.keyval_name(event.keyval) == "Escape")
+            search_entry.text = "";
+        
+        return false;
     }
 }
 

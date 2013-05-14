@@ -81,6 +81,9 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         FolderEntry folder_entry = new FolderEntry(folder);
         Geary.SpecialFolderType special_folder_type = folder.get_special_folder_type();
         if (special_folder_type != Geary.SpecialFolderType.NONE) {
+            if (special_folder_type == Geary.SpecialFolderType.SEARCH)
+                return; // Don't show search folder under the account.
+            
             switch (special_folder_type) {
                 // These special folders go in the root of the account.
                 case Geary.SpecialFolderType.INBOX:

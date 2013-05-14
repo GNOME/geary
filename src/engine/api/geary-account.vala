@@ -182,6 +182,14 @@ public interface Geary.Account : BaseObject {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
+     * Performs a search with the given keyword string.  Optionally, a list of folders not to search
+     * can be passed as well as a list of email identifiers to restrict the search to only those messages.
+     */
+    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords, 
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
+    
+    /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */
     public abstract string to_string();

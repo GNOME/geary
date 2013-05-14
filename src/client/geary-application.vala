@@ -463,5 +463,19 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public Gee.List<ComposerWindow>? get_composer_windows_for_account(Geary.AccountInformation account) {
         return controller.get_composer_windows_for_account(account);
     }
+    
+    /**
+     * Returns the number of accounts that exist in Geary.  Note that not all accounts may be
+     * open.  Zero is returned on an error.
+     */
+    public int get_num_accounts() {
+        try {
+            return Geary.Engine.instance.get_accounts().size;
+        } catch (Error e) {
+            debug("Error getting number of accounts: %s", e.message);
+        }
+        
+        return 0; // on error
+    }
 }
 

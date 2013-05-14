@@ -17,6 +17,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
+    public SearchFolder? search_folder { get; private set; default = null; }
     
     private string name;
     private AccountInformation account_information;
@@ -72,6 +73,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
         outbox = new SmtpOutboxFolder(db, account);
         
+        // Search folder
+        search_folder = new SearchFolder(account);
+        
         // Need to clear duplicate folders due to old bug that caused multiple folders to be
         // created in the database ... benign due to other logic, but want to prevent this from
         // happening if possible
@@ -90,6 +94,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         outbox = null;
+        search_folder = null;
     }
     
     public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)

@@ -9,6 +9,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
+    private static Geary.FolderPath? search_path = null;
     
     private Imap.Account remote;
     private ImapDB.Account local;
@@ -40,6 +41,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (outbox_path == null) {
             outbox_path = new SmtpOutboxFolderRoot();
         }
+        
+        if (search_path == null) {
+            search_path = new SearchFolderRoot();
+        }
     }
     
     internal Imap.FolderProperties? get_properties_for_folder(FolderPath path) {
@@ -66,6 +71,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         // outbox is now available
         local.outbox.report_problem.connect(notify_report_problem);
         local_only.set(outbox_path, local.outbox);
+        
+        // Search folder.
+        local_only.set(search_path, local.search_folder);
         
         // need to back out local.open_async() if remote fails
         try {
@@ -136,7 +144,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
     // set using either the properties from the local folder or its path.
     //
-    // This won't be called to build the Outbox, but for all others (including Inbox) it will.
+    // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
     protected abstract GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder);
     
@@ -187,8 +195,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
 
     public override Gee.Collection<Geary.Folder> list_folders() throws Error {
         check_open();
+        Gee.HashSet<Geary.Folder> all_folders = new Gee.HashSet<Geary.Folder>();
+        all_folders.add_all(existing_folders.values);
+        all_folders.add_all(local_only.values);
         
-        return existing_folders.values;
+        return all_folders;
     }
     
     private void reschedule_folder_refresh(bool immediate) {
@@ -480,6 +491,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         return yield local.fetch_email_async(email_id, required_fields, cancellable);
+    }
+    
+    public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords, 
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
+        return null; // TODO: search!
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

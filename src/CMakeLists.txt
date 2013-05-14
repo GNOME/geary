@@ -11,6 +11,7 @@ common/common-yorba-application.vala
 set(ENGINE_SRC
 engine/abstract/geary-abstract-account.vala
 engine/abstract/geary-abstract-folder.vala
+engine/abstract/geary-abstract-local-folder.vala
 
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
@@ -42,6 +43,7 @@ engine/api/geary-folder-supports-mark.vala
 engine/api/geary-folder-supports-move.vala
 engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
+engine/api/geary-search-folder.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
 
@@ -235,11 +237,13 @@ client/dialogs/alert-dialog.vala
 client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
 
+client/folder-list/folder-list-abstract-folder-entry.vala
 client/folder-list/folder-list-account-branch.vala
 client/folder-list/folder-list-folder-entry.vala
 client/folder-list/folder-list-tree.vala
 client/folder-list/folder-list-inboxes-branch.vala
 client/folder-list/folder-list-inbox-folder-entry.vala
+client/folder-list/folder-list-search-branch.vala
 client/folder-list/folder-list-special-grouping.vala
 
 client/models/conversation-list-store.vala

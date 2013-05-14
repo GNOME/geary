@@ -5,31 +5,30 @@
  */
 
 // A folder of any type in the folder list.
-public class FolderList.FolderEntry : Geary.BaseObject, Sidebar.Entry, Sidebar.InternalDropTargetEntry,
-    Sidebar.SelectableEntry, Sidebar.EmphasizableEntry {
-    public Geary.Folder folder { get; private set; }
+public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.InternalDropTargetEntry,
+    Sidebar.EmphasizableEntry {
     private bool has_new;
     private int unread_count;
     
     public FolderEntry(Geary.Folder folder) {
-        this.folder = folder;
+        base(folder);
         has_new = false;
         unread_count = 0;
     }
     
-    public virtual string get_sidebar_name() {
+    public override string get_sidebar_name() {
         return (unread_count == 0 ? folder.get_display_name() :
             /// This string gets the folder name and the unread messages count,
             /// e.g. All Mail (5).
             _("%s (%d)").printf(folder.get_display_name(), unread_count));
     }
     
-    public string? get_sidebar_tooltip() {
+    public override string? get_sidebar_tooltip() {
         return (unread_count == 0 ? null :
             ngettext("%d unread message", "%d unread messages", unread_count).printf(unread_count));
     }
     
-    public Icon? get_sidebar_icon() {
+    public override Icon? get_sidebar_icon() {
         switch (folder.get_special_folder_type()) {
             case Geary.SpecialFolderType.NONE:
                 return IconFactory.instance.get_custom_icon("tag", IconFactory.ICON_SIDEBAR);
@@ -66,7 +65,7 @@ public class FolderList.FolderEntry : Geary.BaseObject, Sidebar.Entry, Sidebar.I
         }
     }
     
-    public virtual string to_string() {
+    public override string to_string() {
         return "FolderEntry: " + get_sidebar_name();
     }
     
