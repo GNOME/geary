@@ -10,7 +10,6 @@ private class Geary.Imap.Folder : BaseObject {
     private ClientSessionManager session_mgr;
     private MailboxInformation info;
     private Geary.FolderPath path;
-    private Trillian readonly;
     private Imap.FolderProperties properties;
     private Mailbox? mailbox = null;
     
@@ -26,8 +25,6 @@ private class Geary.Imap.Folder : BaseObject {
         this.info = info;
         this.path = path;
         
-        readonly = Trillian.UNKNOWN;
-        
         properties = new Imap.FolderProperties.status(status, info.attrs);
     }
     
@@ -36,8 +33,6 @@ private class Geary.Imap.Folder : BaseObject {
         this.session_mgr = session_mgr;
         this.info = info;
         this.path = path;
-        
-        readonly = Trillian.UNKNOWN;
         
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
@@ -50,15 +45,11 @@ private class Geary.Imap.Folder : BaseObject {
         return properties;
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public async void open_async(Cancellable? cancellable = null) throws Error {
         if (mailbox != null)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
-        mailbox = yield session_mgr.select_examine_mailbox(path, info.delim, !readonly,
-            cancellable);
-        
-        // update with new information
-        this.readonly = Trillian.from_boolean(readonly);
+        mailbox = yield session_mgr.select_mailbox(path, info.delim, cancellable);
         
         // connect to signals
         mailbox.exists_altered.connect(on_exists_altered);
@@ -86,7 +77,6 @@ private class Geary.Imap.Folder : BaseObject {
         mailbox.disconnected.disconnect(on_disconnected);
         
         mailbox = null;
-        readonly = Trillian.UNKNOWN;
     }
     
     private void on_exists_altered(int old_exists, int new_exists) {

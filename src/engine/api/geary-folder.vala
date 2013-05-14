@@ -50,6 +50,28 @@ public interface Geary.Folder : BaseObject {
     }
     
     /**
+     * Flags describing open modifiers.
+     *
+     * * FAST_OPEN:     perform the minimal amount of activity possible to open the folder
+     *                  and be synchronized with the server.  This may mean some attributes of
+     *                  the messages (such as their flags or other metadata) may not be up-to-date
+     *                  when the folder opens.  Not all folders will support this flag.
+     */
+    [Flags]
+    public enum OpenFlags {
+        NONE = 0,
+        FAST_OPEN;
+        
+        public bool is_any_set(OpenFlags flags) {
+            return (this & flags) != 0;
+        }
+        
+        public bool is_all_set(OpenFlags flags) {
+            return (this & flags) == flags;
+        }
+    }
+    
+    /**
      * Flags used for retrieving email.
      *
      * * LOCAL_ONLY:   fetch from the local store only
@@ -245,13 +267,16 @@ public interface Geary.Folder : BaseObject {
      * associated signals will be fired as well.
      *
      * If the Folder has been opened previously, an internal open count is incremented and the
-     * method returns.  There are no other side-effects.
+     * method returns.  There are no other side-effects.  This means it's possible for the
+     * open_flags parameter to be ignored.  See the returned result for more information.
      *
      * A Folder may be reopened after it has been closed.  This allows for Folder objects to be
      * emitted by the Account object cheaply, but the client should only have a few open at a time,
      * as each may represent an expensive resource (such as a network connection).
+     *
+     * Returns false if already opened.
      */
-    public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
+    public abstract async bool open_async(OpenFlags open_flags, Cancellable? cancellable = null) throws Error;
     
     /**
      * Wait for the Folder to become fully open or fails to open due to error.  If not opened

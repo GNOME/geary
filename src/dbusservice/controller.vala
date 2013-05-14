@@ -62,7 +62,7 @@ public class Geary.DBus.Controller {
                 warning("No inbox folder found");
                 return;
             }
-            yield folder.open_async(false, null);
+            yield folder.open_async(Geary.Folder.OpenFlags.NONE, null);
             
             conversations = new Geary.DBus.Conversations(folder);
             

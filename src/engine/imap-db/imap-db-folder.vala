@@ -93,7 +93,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.properties = properties;
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public async void open_async(Cancellable? cancellable = null) throws Error {
         if (opened)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
