@@ -172,7 +172,7 @@ public class Geary.ConversationMonitor : BaseObject {
     public bool is_monitoring { get; private set; default = false; }
     
     private Geary.Email.Field required_fields;
-    private bool readonly;
+    private Geary.Folder.OpenFlags open_flags;
     private Gee.Set<ImplConversation> conversations = new Gee.HashSet<ImplConversation>();
     private Gee.HashMap<Geary.EmailIdentifier, ImplConversation> geary_id_map = new Gee.HashMap<
         Geary.EmailIdentifier, ImplConversation>();
@@ -307,9 +307,9 @@ public class Geary.ConversationMonitor : BaseObject {
             folder.to_string());
     }
     
-    public ConversationMonitor(Geary.Folder folder, bool readonly, Geary.Email.Field required_fields) {
+    public ConversationMonitor(Geary.Folder folder, Geary.Folder.OpenFlags open_flags, Geary.Email.Field required_fields) {
         this.folder = folder;
-        this.readonly = readonly;
+        this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS;
         
         folder.account.information.notify["imap-credentials"].connect(on_imap_credentials_notified);
@@ -402,7 +402,7 @@ public class Geary.ConversationMonitor : BaseObject {
         
         bool reseed_now = (folder.get_open_state() != Geary.Folder.OpenState.CLOSED);
         try {
-            yield folder.open_async(readonly, cancellable);
+            yield folder.open_async(open_flags, cancellable);
         } catch (Error err) {
             is_monitoring = false;
             

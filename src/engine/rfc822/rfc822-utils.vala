@@ -1,4 +1,5 @@
 /* Copyright 2011-2013 Yorba Foundation
+ * Portions copyright (C) 2000-2013 Jeffrey Stedfast
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -225,6 +226,70 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
     }
     
     return true;
+}
+
+/*
+ * This function is adapted from the GMimeFilterBest source in the GMime
+ * library (gmime-filter-best.c) by Jeffrey Stedfast, LGPL 2.1.
+ *
+ * WARNING: This call does not perform async I/O, meaning it will loop on the
+ * stream without relinquishing control to the event loop.  Use with
+ * caution.
+ */
+public GMime.ContentEncoding get_best_content_encoding(GMime.Stream stream,
+    GMime.EncodingConstraint constraint) {
+    int count0 = 0, count8 = 0, linelen = 0, maxline = 0;
+    size_t total = 0, readlen;
+    // TODO: Increase buffer size?
+    uint8[] buffer = new uint8[1024];
+    
+    while ((readlen = stream.read(buffer)) > 0) {
+        total += readlen;
+        for(int i = 0; i < readlen; i++) {
+            char c = (char) buffer[i];
+            if (c == '\n') {
+                maxline = maxline > linelen ? maxline : linelen;
+                linelen = 0;
+            } else {
+                linelen++;
+                if (c == 0)
+                    count0++;
+                else if ((c & 0x80) != 0)
+                    count8++;
+            }
+        }
+    }
+    maxline = maxline > linelen ? maxline : linelen;
+    
+    GMime.ContentEncoding encoding = GMime.ContentEncoding.DEFAULT;
+    switch (constraint) {
+        case GMime.EncodingConstraint.7BIT:
+            if (count0 > 0) {
+                encoding = GMime.ContentEncoding.BASE64;
+            } else if (count8 > 0) {
+                if (count8 > (int) (total * 0.17))
+                    encoding = GMime.ContentEncoding.BASE64;
+                else
+                    encoding = GMime.ContentEncoding.QUOTEDPRINTABLE;
+            } else if (maxline > 998) {
+                encoding = GMime.ContentEncoding.QUOTEDPRINTABLE;
+            }
+        break;
+        
+        case GMime.EncodingConstraint.8BIT:
+            if (count0 > 0)
+                encoding = GMime.ContentEncoding.BASE64;
+            else if (maxline > 998)
+                encoding = GMime.ContentEncoding.QUOTEDPRINTABLE;
+        break;
+        
+        case GMime.EncodingConstraint.BINARY:
+            if (count0 + count8 > 0)
+                encoding = GMime.ContentEncoding.BINARY;
+        break;
+    }
+    
+    return encoding;
 }
 
 }

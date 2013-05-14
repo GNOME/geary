@@ -212,12 +212,14 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             throw new EngineError.OPEN_REQUIRED("Outbox not open");
     }
     
-    public override async void open_async(bool readonly, Cancellable? cancellable = null)
+    public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
         if (open_count++ > 0)
-            return;
+            return false;
         
         notify_opened(Geary.Folder.OpenState.LOCAL, properties.email_total);
+        
+        return true;
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {

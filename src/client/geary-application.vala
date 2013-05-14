@@ -76,8 +76,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public Configuration config { get; private set; }
-    public File system_desktop_file_directory { get; private set;
-        default = File.new_for_path("/usr/share/applications/"); }
     
     private static GearyApplication _instance = null;
     
@@ -383,21 +381,29 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public File? get_desktop_file() {
-        File desktop_file = is_installed()
-            ? system_desktop_file_directory.get_child("geary.desktop")
+        File? install_dir = get_install_dir();
+        File desktop_file = (install_dir != null)
+            ? install_dir.get_child("share").get_child("applications").get_child("geary.desktop")
             : File.new_for_path(SOURCE_ROOT_DIR).get_child("build").get_child("desktop").get_child("geary.desktop");
         
         return desktop_file.query_exists() ? desktop_file : null;
     }
     
     public bool is_installed() {
-        return exec_dir.has_prefix(File.new_for_path(INSTALL_PREFIX));
+        return exec_dir.has_prefix(get_install_prefix_dir());
     }
-
+    
+    // Returns the configure installation prefix directory, which does not imply Geary is installed
+    // or that it's running from this directory.
+    public File get_install_prefix_dir() {
+        return File.new_for_path(INSTALL_PREFIX);
+    }
+    
     // Returns the installation directory, or null if we're running outside of the installation
     // directory.
     public File? get_install_dir() {
-        File prefix_dir = File.new_for_path(INSTALL_PREFIX);
+        File prefix_dir = get_install_prefix_dir();
+        
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
     

@@ -25,6 +25,8 @@ public class ConversationFindBar : Gtk.Layout {
     private WebKit.WebView web_view;
     private Gtk.Label result_label;
     private Gtk.CheckButton case_sensitive_check;
+    private Gtk.Button next_button;
+    private Gtk.Button prev_button;
     private bool wrapped;
     private uint matches;
     private bool searching = false;
@@ -58,10 +60,12 @@ public class ConversationFindBar : Gtk.Layout {
         result_label = (Gtk.Label) builder.get_object("label: result");
         update_result_label();
         
-        Gtk.Button prev_button = (Gtk.Button) builder.get_object("button: previous");
+        prev_button = (Gtk.Button) builder.get_object("button: previous");
+        prev_button.set_sensitive(false);
         prev_button.clicked.connect(on_previous_button_clicked);
         
-        Gtk.Button next_button = (Gtk.Button) builder.get_object("button: next");
+        next_button = (Gtk.Button) builder.get_object("button: next");
+        next_button.set_sensitive(false);
         next_button.clicked.connect(on_next_button_clicked);
         
         Gtk.Button close_button = (Gtk.Button) builder.get_object("button: close");
@@ -135,6 +139,7 @@ public class ConversationFindBar : Gtk.Layout {
     
     private void on_entry_buffer_inserted_text(uint position, string text, uint n_chars) {
         highlight_text_matches();
+        set_button_sensitivity();
     }
     
     private void color_according_to_result() {
@@ -156,6 +161,7 @@ public class ConversationFindBar : Gtk.Layout {
         
         update_result_label();
         color_according_to_result();
+        set_button_sensitivity();
     }
     
     private bool on_key_press(Gdk.EventKey event) {
@@ -200,6 +206,13 @@ public class ConversationFindBar : Gtk.Layout {
         }
         
         update_result_label();
+    }
+    
+    private void set_button_sensitivity() {
+        bool sensitive = (matches != 0 && searching);
+        
+        prev_button.set_sensitive(sensitive);
+        next_button.set_sensitive(sensitive);
     }
     
     private void update_result_label() {
@@ -297,5 +310,6 @@ public class ConversationFindBar : Gtk.Layout {
     
     private void on_case_sensitive_check_toggled() {
         commence_search();
+        set_button_sensitivity();
     }
 }

@@ -13,7 +13,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
         
         File? desktop_file = GearyApplication.instance.get_desktop_file();
         if (desktop_file == null
-            || !desktop_file.get_parent().equal(GearyApplication.instance.system_desktop_file_directory)) {
+            || !desktop_file.has_prefix(GearyApplication.instance.get_install_prefix_dir())) {
             debug("Only an installed version of Geary with its .desktop file installed can use Messaging Menu");
             
             return;

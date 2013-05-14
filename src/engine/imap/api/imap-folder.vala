@@ -11,7 +11,6 @@ private class Geary.Imap.Folder : BaseObject {
     public FolderPath path { get; private set; }
     public Imap.FolderProperties properties { get; private set; }
     public MailboxInformation info { get; private set; }
-    public Trillian readonly { get; private set; }
     
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
@@ -35,8 +34,6 @@ private class Geary.Imap.Folder : BaseObject {
         this.info = info;
         this.path = path;
         
-        readonly = Trillian.UNKNOWN;
-        
         properties = new Imap.FolderProperties.status(status, info.attrs);
     }
     
@@ -46,12 +43,10 @@ private class Geary.Imap.Folder : BaseObject {
         this.info = info;
         this.path = path;
         
-        readonly = Trillian.UNKNOWN;
-        
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public async void open_async(Cancellable? cancellable = null) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
@@ -71,9 +66,6 @@ private class Geary.Imap.Folder : BaseObject {
             !readonly, cancellable);
         if (response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
-        
-        // update with new information
-        this.readonly = Trillian.from_boolean(readonly);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {

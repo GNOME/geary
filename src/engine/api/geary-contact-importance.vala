@@ -31,8 +31,5 @@ public enum Geary.ContactImportance {
     TO_CC = 50,
     CC_FROM = 40,
     CC_TO = 30,
-    CC_CC = 20,
-    
-    // Minimum visibility for the contact to appear in autocompletion.
-    VISIBILITY_THRESHOLD = TO_TO;
+    CC_CC = 20
 }
