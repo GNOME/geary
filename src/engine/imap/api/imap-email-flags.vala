@@ -20,8 +20,8 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
             add(LOAD_REMOTE_IMAGES);
     }
     
-    protected override void notify_added(Gee.Collection<EmailFlag> added) {
-        foreach (EmailFlag flag in added) {
+    protected override void notify_added(Gee.Collection<NamedFlag> added) {
+        foreach (NamedFlag flag in added) {
             if (flag.equal_to(UNREAD))
                 message_flags.remove(MessageFlag.SEEN);
             
@@ -35,8 +35,8 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
         base.notify_added(added);
     }
     
-    protected override void notify_removed(Gee.Collection<EmailFlag> removed) {
-        foreach (EmailFlag flag in removed) {
+    protected override void notify_removed(Gee.Collection<NamedFlag> removed) {
+        foreach (NamedFlag flag in removed) {
             if (flag.equal_to(UNREAD))
                 message_flags.add(MessageFlag.SEEN);
             
