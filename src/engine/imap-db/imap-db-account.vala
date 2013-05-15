@@ -23,11 +23,11 @@ private class Geary.ImapDB.Account : BaseObject {
     private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
-    public ContactStore contact_store { get; private set; }
+    public ImapEngine.ContactStore contact_store { get; private set; }
     
     public Account(Geary.AccountInformation account_information) {
         this.account_information = account_information;
-        contact_store = new ContactStore();
+        contact_store = new ImapEngine.ContactStore(this);
         
         name = "IMAP database account for %s".printf(account_information.imap_credentials.user);
     }
@@ -262,14 +262,14 @@ private class Geary.ImapDB.Account : BaseObject {
         Db.TransactionOutcome outcome = db.exec_transaction(Db.TransactionType.RO,
             (context) => {
             Db.Statement statement = context.prepare(
-                "SELECT email, real_name, highest_importance, normalized_email " +
+                "SELECT email, real_name, highest_importance, normalized_email, flags " +
                 "FROM ContactTable");
             
             Db.Result result = statement.exec(cancellable);
             while (!result.finished) {
                 try {
                     Contact contact = new Contact(result.string_at(0), result.string_at(1),
-                        result.int_at(2), result.string_at(3));
+                        result.int_at(2), result.string_at(3), ContactFlags.deserialize(result.string_at(4)));
                     contacts.add(contact);
                 } catch (Geary.DatabaseError err) {
                     // We don't want to abandon loading all contacts just because there was a
@@ -550,6 +550,21 @@ private class Geary.ImapDB.Account : BaseObject {
         
         assert(email != null);
         return email;
+    }
+    
+    public async void update_contact_flags_async(Geary.Contact contact, Cancellable? cancellable)
+        throws Error{
+        check_open();
+        
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
+            Db.Statement update_stmt =
+                cx.prepare("UPDATE ContactTable SET flags=? WHERE email=?");
+            update_stmt.bind_string(0, contact.contact_flags.serialize());
+            update_stmt.bind_string(1, contact.email);
+            update_stmt.exec(cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
     }
     
     private void clear_duplicate_folders() {

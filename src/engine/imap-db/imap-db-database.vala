@@ -43,7 +43,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 MessageAddresses message_addresses =
                     new MessageAddresses.from_result(account_owner_email, result);
                 foreach (Contact contact in message_addresses.contacts)
-                    do_update_contact_importance(get_master_connection(), contact);
+                    do_update_contact(get_master_connection(), contact, null);
                 result.next();
             }
         } catch (Error err) {
