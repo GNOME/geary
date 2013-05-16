@@ -94,6 +94,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public override int startup() {
         exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
         
+        Geary.Logging.init();
         Configuration.init(is_installed(), GSETTINGS_DIR);
         Date.init();
         WebKit.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
@@ -102,7 +103,15 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (ec != 0)
             return ec;
         
-        return Args.parse(args);
+        ec = Args.parse(args);
+        if (ec != 0)
+            return ec;
+        
+        // do *after* parsing args, as they dicate where logging is sent to, if anywhere
+        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
+            exec_dir.get_path(), is_installed().to_string());
+        
+        return 0;
     }
     
     public override bool exiting(bool panicked) {

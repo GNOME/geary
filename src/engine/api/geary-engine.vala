@@ -89,6 +89,7 @@ public class Geary.Engine : BaseObject {
         
         is_initialized = true;
         
+        Logging.init();
         RFC822.init();
         ImapEngine.init();
         Imap.init();
