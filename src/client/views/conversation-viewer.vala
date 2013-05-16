@@ -725,13 +725,17 @@ public class ConversationViewer : Gtk.Box {
             for (ulong i = 0; i < nodes.length; i ++) {
                 WebKit.DOM.Element? email_element = nodes.item(i) as WebKit.DOM.Element;
                 if (email_element != null) {
-                    WebKit.DOM.Element? address = email_element.query_selector(".address_name");
-                    if (address != null) {
-                        WebKit.DOM.Element? mailto_link = address.parent_node as WebKit.DOM.Element;
-                        if (mailto_link != null && contact.normalized_email ==
-                            mailto_link.get_attribute("href").substring(7).normalize().casefold())
-                            conversation_viewer.show_images_email(email_element, false);
+                    string? address = null;
+                    WebKit.DOM.Element? address_el = email_element.query_selector(".address_value");
+                    if (address_el != null) {
+                        address = ((WebKit.DOM.HTMLElement) address_el).get_inner_text();
+                    } else {
+                        address_el = email_element.query_selector(".address_name");
+                        if (address_el != null)
+                            address = ((WebKit.DOM.HTMLElement) address_el).get_inner_text();
                     }
+                    if (address != null && address.normalize().casefold() == contact.normalized_email)
+                        conversation_viewer.show_images_email(email_element, false);
                 }
             }
         } catch (Error error) {
@@ -1177,11 +1181,13 @@ public class ConversationViewer : Gtk.Box {
         string value = "";
         Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
         foreach (Geary.RFC822.MailboxAddress a in list) {
-            value += "<a href='mailto:%s'>".printf(a.address);
             if (a.name != null) {
+                value += "<a href='mailto:%s'>".printf(
+                    Uri.escape_string("%s <%s>".printf(a.name, a.address)));
                 value += "<span class='address_name'>%s</span> ".printf(a.name);
                 value += "<span class='address_value'>%s</span>".printf(a.address);
             } else {
+                value += "<a href='mailto:%s'>".printf(a.address);
                 value += "<span class='address_name'>%s</span>".printf(a.address);
             }
             value += "</a>";
@@ -1254,7 +1260,7 @@ public class ConversationViewer : Gtk.Box {
     private void on_hovering_over_link(string? title, string? url) {
         // Copy the link the user is hovering over.  Note that when the user mouses-out, 
         // this signal is called again with null for both parameters.
-        hover_url = url;
+        hover_url = url != null ? Uri.unescape_string(url) : null;
         message_overlay_label.label = hover_url;
     }
     
