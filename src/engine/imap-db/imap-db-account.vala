@@ -496,6 +496,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 // Ignore any messages that don't have the required fields.
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
                     Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     
                     Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, cancellable);
                     if (folders == null) {
