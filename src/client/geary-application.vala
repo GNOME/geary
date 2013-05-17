@@ -103,15 +103,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         if (ec != 0)
             return ec;
         
-        ec = Args.parse(args);
-        if (ec != 0)
-            return ec;
-        
-        // do *after* parsing args, as they dicate where logging is sent to, if anywhere
-        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
-            exec_dir.get_path(), is_installed().to_string());
-        
-        return 0;
+        return Args.parse(args);
     }
     
     public override bool exiting(bool panicked) {
@@ -137,7 +129,13 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
             handle_args(args);
             return;
         }
-
+        
+        // do *after* parsing args, as they dicate where logging is sent to, if anywhere, and only
+        // after activate (which means this is only logged for the one user-visible instance, not
+        // the other instances called when sending commands to the app via the command-line)
+        message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
+            exec_dir.get_path(), is_installed().to_string());
+        
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
         
