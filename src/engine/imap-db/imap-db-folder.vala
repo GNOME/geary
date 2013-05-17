@@ -6,6 +6,10 @@
 
 private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public const Geary.Email.Field REQUIRED_FOR_DUPLICATE_DETECTION = Geary.Email.Field.PROPERTIES;
+    public const Geary.Email.Field REQUIRED_FOR_SEARCH =
+        Geary.Email.Field.ORIGINATORS | Geary.Email.Field.RECEIVERS |
+        Geary.Email.Field.SUBJECT | Geary.Email.Field.HEADER | Geary.Email.Field.BODY |
+        Geary.Attachment.REQUIRED_FIELDS;
     
     private const int LIST_EMAIL_CHUNK_COUNT = 5;
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
@@ -909,6 +913,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (email.fields.fulfills(Attachment.REQUIRED_FIELDS))
             do_save_attachments(cx, message_id, email.get_message().get_attachments(), cancellable);
         
+        do_add_email_to_search_table(cx, message_id, email, cancellable);
+        
         MessageAddresses message_addresses =
             new MessageAddresses.from_email(account_owner_email, email);
         foreach (Contact contact in message_addresses.contacts)
@@ -916,6 +922,38 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         updated_contacts = message_addresses.contacts;
         
         return true;
+    }
+    
+    internal static void do_add_email_to_search_table(Db.Connection cx, int64 message_id,
+        Geary.Email email, Cancellable? cancellable) throws Error {
+        string? body = null;
+        try {
+            body = email.get_message().get_searchable_body();
+        } catch (Error e) {
+            // Ignore.
+        }
+        string? recipients = null;
+        try {
+            recipients = email.get_message().get_searchable_recipients();
+        } catch (Error e) {
+            // Ignore.
+        }
+        
+        Db.Statement stmt = cx.prepare("""
+            INSERT INTO MessageSearchTable
+                (id, body, attachment, subject, from_field, receivers, cc, bcc)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """);
+        stmt.bind_rowid(0, message_id);
+        stmt.bind_string(1, body);
+        stmt.bind_string(2, email.get_searchable_attachment_list());
+        stmt.bind_string(3, (email.subject != null ? email.subject.to_searchable_string() : null));
+        stmt.bind_string(4, (email.from != null ? email.from.to_searchable_string() : null));
+        stmt.bind_string(5, recipients);
+        stmt.bind_string(6, (email.cc != null ? email.cc.to_searchable_string() : null));
+        stmt.bind_string(7, (email.bcc != null ? email.bcc.to_searchable_string() : null));
+        
+        stmt.exec_insert();
     }
     
     private Gee.List<Geary.Email>? do_list_email(Db.Connection cx, Gee.List<LocationIdentifier> locations,
@@ -1242,6 +1280,38 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         updated_contacts = message_addresses.contacts;
     }
     
+    private void do_merge_email_in_search_table(Db.Connection cx, int64 message_id,
+        Geary.Email email, Cancellable? cancellable) throws Error {
+        string? body = null;
+        try {
+            body = email.get_message().get_searchable_body();
+        } catch (Error e) {
+            // Ignore.
+        }
+        string? recipients = null;
+        try {
+            recipients = email.get_message().get_searchable_recipients();
+        } catch (Error e) {
+            // Ignore.
+        }
+        
+        Db.Statement stmt = cx.prepare("""
+            UPDATE MessageSearchTable
+            SET body=?, attachment=?, subject=?, from_field=?, receivers=?, cc=?, bcc=?
+            WHERE id=?
+        """);
+        stmt.bind_string(0, body);
+        stmt.bind_string(1, email.get_searchable_attachment_list());
+        stmt.bind_string(2, (email.subject != null ? email.subject.to_searchable_string() : null));
+        stmt.bind_string(3, (email.from != null ? email.from.to_searchable_string() : null));
+        stmt.bind_string(4, recipients);
+        stmt.bind_string(5, (email.cc != null ? email.cc.to_searchable_string() : null));
+        stmt.bind_string(6, (email.bcc != null ? email.bcc.to_searchable_string() : null));
+        stmt.bind_rowid(7, message_id);
+        
+        stmt.exec();
+    }
+    
     private void do_merge_email(Db.Connection cx, int64 message_id, Geary.Email email,
         out Gee.Collection<Contact> updated_contacts, Cancellable? cancellable) throws Error {
         assert(message_id != Db.INVALID_ROWID);
@@ -1253,13 +1323,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return;
         
         // fetch message from database and merge in this email
-        MessageRow row = do_fetch_message_row(cx, message_id, email.fields | Attachment.REQUIRED_FIELDS,
-            cancellable);
+        MessageRow row = do_fetch_message_row(cx, message_id,
+            email.fields | REQUIRED_FOR_SEARCH | Attachment.REQUIRED_FIELDS, cancellable);
         Geary.Email.Field db_fields = row.fields;
         row.merge_from_remote(email);
         
         // Build the combined email from the merge, which will be used to save the attachments
         Geary.Email combined_email = row.to_email(email.position, email.id);
+        do_add_attachments(cx, combined_email, message_id, cancellable);
         
         // Merge in any fields in the submitted email that aren't already in the database or are mutable
         if (((db_fields & email.fields) != email.fields) || email.fields.is_any_set(Geary.Email.MUTABLE_FIELDS)) {
@@ -1272,6 +1343,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     cancellable);
             }
         }
+        
+        do_merge_email_in_search_table(cx, message_id, combined_email, cancellable);
     }
     
     private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,

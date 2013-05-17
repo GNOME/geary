@@ -442,7 +442,7 @@ OPTIONS
 )
 
 add_library(geary-static STATIC ${ENGINE_VALA_C})
-target_link_libraries(geary-static ${DEPS_LIBRARIES} gthread-2.0)
+target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn gthread-2.0)
 
 # Geary client app
 #################################################
@@ -580,3 +580,4 @@ set_property(
         gearyd
 )
 
+add_subdirectory(sqlite3-unicodesn)

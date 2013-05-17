@@ -4,6 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
+
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const string DB_FILENAME = "geary.db";
     private string account_owner_email;
@@ -31,6 +33,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             
             case 6:
                 post_upgrade_encode_folder_names();
+            break;
+            
+            case 10:
+                post_upgrade_add_search_table();
             break;
         }
     }
@@ -77,11 +83,76 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         }
     }
     
+    // Version 10.
+    private void post_upgrade_add_search_table() {
+        try {
+            // This can't go in the .sql file because its schema (the stemmer
+            // algorithm) is determined at runtime.
+            string stemmer = "english"; // TODO
+            exec("""
+                CREATE VIRTUAL TABLE MessageSearchTable USING fts4(
+                    id INTEGER PRIMARY KEY,
+                    body,
+                    attachment,
+                    subject,
+                    from_field,
+                    receivers,
+                    cc,
+                    bcc,
+                    
+                    tokenize=unicodesn "stemmer=%s",
+                    prefix="2,4,6,8,10",
+                );
+            """.printf(stemmer));
+        } catch (Error e) {
+            error("Error creating search table: %s", e.message);
+        }
+        
+        bool done = false;
+        int limit = 100;
+        for (int offset = 0; !done; offset += limit) {
+            try {
+                exec_transaction(Db.TransactionType.RW, (cx) => {
+                    Db.Statement stmt = prepare(
+                        "SELECT id FROM MessageTable ORDER BY id LIMIT ? OFFSET ?");
+                    stmt.bind_int(0, limit);
+                    stmt.bind_int(1, offset);
+                    
+                    Db.Result result = stmt.exec();
+                    if (result.finished)
+                        done = true;
+                    
+                    while (!result.finished) {
+                        int64 id = result.rowid_at(0);
+                        
+                        try {
+                            MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                                cx, id, Geary.ImapDB.Folder.REQUIRED_FOR_SEARCH, null);
+                            Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                            Geary.ImapDB.Folder.do_add_attachments(cx, email, id);
+                            
+                            Geary.ImapDB.Folder.do_add_email_to_search_table(cx, id, email, null);
+                        } catch (Error e) {
+                            debug("Error adding message %lld to the search table: %s", id, e.message);
+                        }
+                        
+                        result.next();
+                    }
+                    
+                    return Db.TransactionOutcome.DONE;
+                });
+            } catch (Error e) {
+                debug("Error populating search table: %s", e.message);
+            }
+        }
+    }
+    
     private void on_prepare_database_connection(Db.Connection cx) throws Error {
         cx.set_busy_timeout_msec(Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC);
         cx.set_foreign_keys(true);
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.OFF);
+        sqlite3_unicodesn_register_tokenizer(cx.db);
     }
 }
 

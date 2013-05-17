@@ -450,7 +450,53 @@ public class Geary.RFC822.Message : BaseObject {
             return html_format ? get_text_body() : get_html_body();
         }
     }
-
+    
+    /**
+     * Return the body as a searchable string.  The body in this case should
+     * include everything visible in the message's body in the client, which
+     * would be only one body part, plus any visible attachments.  Note that
+     * values that come out of this function are persisted.
+     */
+    public string? get_searchable_body() {
+        string? body = null;
+        bool html = false;
+        try {
+            body = get_html_body();
+            html = true;
+        } catch (Error e) {
+            try {
+                body = get_text_body();
+            } catch (Error e) {
+                // Ignore.
+            }
+        }
+        if (body == null)
+            return null;
+        
+        // TODO: add bodies of attached emails.
+        
+        if (html) {
+            // FIXME: this is inadequate.  For example, <br> needs to be turned
+            // into at least one space character, not just omitted.  Also, we
+            // should also replace entities with the characters they represent.
+            body = Geary.HTML.remove_html_tags(body);
+        }
+        
+        return body;
+    }
+    
+    /**
+     * Return the full list of recipients (to, cc, and bcc) as a searchable
+     * string.  Note that values that come out of this function are persisted.
+     */
+    public string? get_searchable_recipients() {
+        Gee.List<RFC822.MailboxAddress>? recipients = get_recipients();
+        if (recipients == null)
+            return null;
+        
+        return RFC822.MailboxAddress.list_to_string(recipients, "", (a) => a.to_searchable_string());
+    }
+    
     public Geary.Memory.AbstractBuffer get_content_by_mime_id(string mime_id) throws RFC822Error {
         GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
         if (part == null) {

@@ -18,6 +18,18 @@ public abstract class Geary.MessageData.AbstractMessageData : BaseObject {
     public abstract string to_string();
 }
 
+/**
+ * Allows message data fields to define how they'll expose themselves to search
+ * queries.
+ */
+public interface Geary.MessageData.SearchableMessageData {
+    /**
+     * Return a string representing the data as a corpus of text to be searched
+     * against.  Return values from this may be stored in the search index.
+     */
+    public abstract string to_searchable_string();
+}
+
 public abstract class Geary.MessageData.StringMessageData : AbstractMessageData,
     Gee.Hashable<StringMessageData> {
     public string value { get; private set; }

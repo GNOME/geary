@@ -256,6 +256,15 @@ public class Geary.Email : BaseObject {
         this.attachments.add_all(attachments);
     }
     
+    public string get_searchable_attachment_list() {
+        StringBuilder search = new StringBuilder();
+        foreach (Geary.Attachment attachment in attachments) {
+            search.append(attachment.filename);
+            search.append("\n");
+        }
+        return search.str;
+    }
+    
     /**
      * This method requires Geary.Email.Field.HEADER and Geary.Email.Field.BODY be present.
      * If not, EngineError.INCOMPLETE_MESSAGE is thrown.
