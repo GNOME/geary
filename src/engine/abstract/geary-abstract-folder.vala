@@ -68,7 +68,8 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
     
     public abstract Geary.Folder.OpenState get_open_state();
     
-    public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
+    public abstract async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
+        throws Error;
     
     public abstract async void wait_for_open_async(Cancellable? cancellable = null) throws Error;
     

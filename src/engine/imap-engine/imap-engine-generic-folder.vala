@@ -11,6 +11,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     private const Geary.Email.Field NORMALIZATION_FIELDS =
         Geary.Email.Field.PROPERTIES | Geary.Email.Field.FLAGS | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
+    private const Geary.Email.Field FAST_NORMALIZATION_FIELDS =
+        Geary.Email.Field.PROPERTIES | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
     public override Account account { get { return _account; } }
     internal ImapDB.Folder local_folder  { get; protected set; }
@@ -102,8 +104,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         return (remote_count >= 0) ? remote_count : last_seen_remote_count;
     }
     
-    private async bool normalize_folders(Geary.Imap.Folder remote_folder, Cancellable? cancellable) throws Error {
-        debug("normalize_folders %s", to_string());
+    private async bool normalize_folders(Geary.Imap.Folder remote_folder, Geary.Folder.OpenFlags open_flags,
+        Cancellable? cancellable) throws Error {
+        bool is_fast_open = open_flags.is_any_set(Geary.Folder.OpenFlags.FAST_OPEN);
+        if (is_fast_open)
+            debug("fast-open normalize_folders %s", to_string());
+        else
+            debug("normalize_folders %s", to_string());
         
         Geary.Imap.FolderProperties local_properties = local_folder.get_properties();
         Geary.Imap.FolderProperties remote_properties = remote_folder.get_properties();
@@ -147,17 +154,54 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return true;
         }
         
+        // if UIDNEXT has changed, that indicates messages have been appended (and possibly removed)
+        int64 uidnext_diff = remote_properties.uid_next.value - local_properties.uid_next.value;
+        
+        // fast-open means no updating of flags, so if UIDNEXT is the same as last time AND the total count
+        // of email is the same, then nothing has been added or removed (but flags may have changed)
+        if (is_fast_open && uidnext_diff == 0 && local_properties.email_total == remote_properties.email_total) {
+            debug("No messages added/removed in fast-open of %s, normalization completed", to_string());
+            
+            return true;
+        }
+        
         Gee.Collection<Geary.EmailIdentifier> all_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.EmailIdentifier> all_locally_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.EmailIdentifier> all_removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> all_flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
             Geary.EmailFlags>();
         
+        // to match all flags and find all removed interior to the local store's vector of messages, start from
+        // local earliest message and work upwards
         Geary.Imap.EmailIdentifier current_start_id = new Geary.Imap.EmailIdentifier(earliest_uid, local_folder.get_path());
+        
+        // if fast-open and the difference in UIDNEXT values equals the difference in message count, then only
+        // an append could have happened, so only pull in the new messages ... note that this is not foolproof,
+        // as UIDs are not guaranteed to increase by 1; however, this is a standard implementation practice,
+        // so it's worth looking for
+        //
+        // (Also, this cannot fail; if this situation exists, then it cannot by definition indicate another
+        // situation, esp. messages being removed.)
+        if (is_fast_open) {
+            if (uidnext_diff == (remote_properties.select_examine_messages - local_properties.select_examine_messages)) {
+                current_start_id = new Geary.Imap.EmailIdentifier(latest_uid.next(), local_folder.get_path());
+                
+                debug("fast-open %s: Messages only appended (local/remote UIDNEXT=%s/%s total=%d/%d diff=%s), only gathering new mail at %s",
+                    to_string(), local_properties.uid_next.to_string(), remote_properties.uid_next.to_string(),
+                    local_properties.select_examine_messages, remote_properties.select_examine_messages, uidnext_diff.to_string(),
+                    current_start_id.to_string());
+            } else {
+                debug("fast-open %s: Messages appended/removed (local/remote UIDNEXT=%s/%s total=%d/%d diff=%s)", to_string(),
+                    local_properties.uid_next.to_string(), remote_properties.uid_next.to_string(),
+                    local_properties.select_examine_messages, remote_properties.select_examine_messages, uidnext_diff.to_string());
+            }
+        }
+        
         for (;;) {
             // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
             Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-                current_start_id, NORMALIZATION_CHUNK_COUNT, NORMALIZATION_FIELDS,
+                current_start_id, NORMALIZATION_CHUNK_COUNT,
+                is_fast_open ? FAST_NORMALIZATION_FIELDS : NORMALIZATION_FIELDS,
                 ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
             
             // verify still open
@@ -213,23 +257,26 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     break;
                 
                 if (remote_uid != null && local_uid != null && remote_uid.value == local_uid.value) {
-                    // same, update flags (if changed) and move on
-                    // Because local is PARTIAL_OK, EmailFlags may not be present
-                    Geary.Imap.EmailFlags? local_email_flags = (Geary.Imap.EmailFlags) local_email.email_flags;
-                    Geary.Imap.EmailFlags remote_email_flags = (Geary.Imap.EmailFlags) remote_email.email_flags;
-                    
-                    if ((local_email_flags == null) || !local_email_flags.equal_to(remote_email_flags)) {
-                        // check before writebehind
-                        if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
-                            remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
-                            to_create_or_merge.add(remote_email);
-                            all_flags_changed.set(remote_email.id, remote_email.email_flags);
-                            
-                            Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
-                                to_string(), remote_email.id.to_string());
-                        } else {
-                            Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for merge of %s",
-                                to_string(), remote_email.id.to_string());
+                    // only update flags if not doing a fast-open
+                    if (!is_fast_open) {
+                        // same, update flags (if changed) and move on
+                        // Because local is PARTIAL_OK, EmailFlags may not be present
+                        Geary.Imap.EmailFlags? local_email_flags = (Geary.Imap.EmailFlags) local_email.email_flags;
+                        Geary.Imap.EmailFlags remote_email_flags = (Geary.Imap.EmailFlags) remote_email.email_flags;
+                        
+                        if ((local_email_flags == null) || !local_email_flags.equal_to(remote_email_flags)) {
+                            // check before writebehind
+                            if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
+                                remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
+                                to_create_or_merge.add(remote_email);
+                                all_flags_changed.set(remote_email.id, remote_email.email_flags);
+                                
+                                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
+                                    to_string(), remote_email.id.to_string());
+                            } else {
+                                Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: writebehind cancelled for merge of %s",
+                                    to_string(), remote_email.id.to_string());
+                            }
                         }
                     }
                     
@@ -408,9 +455,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
     }
     
-    public override async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
+        throws Error {
         if (open_count++ > 0)
-            return;
+            return false;
         
         remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
@@ -418,7 +466,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         replay_queue = new ReplayQueue(get_path().to_string(), remote_semaphore);
         
         try {
-            yield local_folder.open_async(readonly, cancellable);
+            yield local_folder.open_async(cancellable);
         } catch (Error err) {
             notify_open_failed(OpenFailed.LOCAL_FAILED, err);
             
@@ -436,22 +484,24 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // wait_for_remote_ready_async(), which uses a NonblockingSemaphore to indicate that the remote
         // is open (or has failed to open).  This allows for early calls to list and fetch emails
         // can work out of the local cache until the remote is ready.
-        open_remote_async.begin(readonly, cancellable);
+        open_remote_async.begin(open_flags, cancellable);
+        
+        return true;
     }
     
-    private async void open_remote_async(bool readonly, Cancellable? cancellable) {
+    private async void open_remote_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable) {
         try {
             debug("Opening remote %s", to_string());
             Imap.Folder folder = (Imap.Folder) yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
             
-            yield folder.open_async(readonly, cancellable);
+            yield folder.open_async(cancellable);
             
             // allow subclasses to examine the opened folder and resolve any vital
             // inconsistencies
-            if (yield normalize_folders(folder, cancellable)) {
+            if (yield normalize_folders(folder, open_flags, cancellable)) {
                 // update flags, properties, etc.
-                yield local.update_folder_async(folder, cancellable);
+                yield local.update_folder_select_examine_async(folder, cancellable);
                 
                 // signals
                 folder.messages_appended.connect(on_remote_messages_appended);

@@ -4,6 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Provides some control over Engine logging.
+ *
+ * This is a crude implementation and could be improved.  Most importantly, when the Engine is
+ * initialized logging is disabled for all users of GLib's logging functions.
+ */
+
 namespace Geary.Logging {
 
 [Flags]
@@ -26,8 +33,22 @@ public enum Flag {
     }
 }
 
+private int init_count = 0;
 private Flag logging_flags = Flag.NONE;
 private unowned FileStream? stream = null;
+
+/**
+ * Must be called before ''any'' call to the Logging namespace.
+ *
+ * This will be initialized by the Engine when it's opened, but applications may want to set up
+ * logging before that, in which case, call this directly.
+ */
+public void init() {
+    if (init_count++ != 0)
+        return;
+    
+    log_to(null);
+}
 
 /**
  * Replaces the current logging flags with flags.  Use Geary.Logging.Flag.NONE to clear all
@@ -90,19 +111,38 @@ public inline void debug(Flag flags, string fmt, ...) {
         logv(null, LogLevelFlags.LEVEL_DEBUG, fmt, va_list());
 }
 
-public void log_to(FileStream stream) {
+/**
+ * Registers a FileStream to receive all log output from the Engine, be it via the specialized
+ * Logging calls (which use the topic-based {@link Flag} or GLib's standard issue
+ * debug/message/error/etc. calls ... thus, calling this will also affect the Engine user's calls
+ * to those functions.
+ *
+ * If stream is null, no logging occurs.  This is default.
+ */
+public void log_to(FileStream? stream) {
     Logging.stream = stream;
     
-    // TODO: Should handle all LogLevels
-    Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG, on_log_debug);
+    Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG,
+        (domain, levels, msg) => { on_log(" [deb]", levels, msg); });
+    Log.set_handler(null, LogLevelFlags.LEVEL_INFO,
+        (domain, levels, msg) => { on_log(" [inf]", levels, msg); });
+    Log.set_handler(null, LogLevelFlags.LEVEL_MESSAGE,
+        (domain, levels, msg) => { on_log(" [msg]", levels, msg); });
+    Log.set_handler(null, LogLevelFlags.LEVEL_WARNING,
+        (domain, levels, msg) => { on_log("*[wrn]", levels, msg); });
+    Log.set_handler(null, LogLevelFlags.LEVEL_CRITICAL,
+        (domain, levels, msg) => { on_log("![crt]", levels, msg); });
+    Log.set_handler(null, LogLevelFlags.LEVEL_ERROR,
+        (domain, levels, msg) => { on_log("![err]", levels, msg); });
 }
 
-private void on_log_debug(string? log_domain, LogLevelFlags log_levels, string message) {
-    if (stream != null) {
-        Time tm = Time.local(time_t());
-        stream.printf(" \x001b[%dm[deb]\x001b[0m %02d:%02d:%02d %s\n", 2 + 30 + 60, tm.hour,
-            tm.minute, tm.second, message);
-    }
+private void on_log(string prefix, LogLevelFlags log_levels, string message) {
+    if (stream == null)
+        return;
+    
+    Time tm = Time.local(time_t());
+    stream.printf("%s %02d:%02d:%02d %s\n", prefix, tm.hour, tm.minute, tm.second, message);
 }
 
-}   // namespace
+}
+

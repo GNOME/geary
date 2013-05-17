@@ -126,7 +126,7 @@ public abstract class Geary.Conversation : BaseObject {
      */
     public abstract Geary.EmailIdentifier? get_lowest_email_id();
     
-    private bool check_flag(Geary.EmailFlag flag, bool contains) {
+    private bool check_flag(Geary.NamedFlag flag, bool contains) {
         foreach (Geary.Email email in get_emails(Ordering.NONE)) {
             if (email.email_flags != null && email.email_flags.contains(flag) == contains)
                 return true;
@@ -135,11 +135,11 @@ public abstract class Geary.Conversation : BaseObject {
         return false;
     }
 
-    private bool has_flag(Geary.EmailFlag flag) {
+    private bool has_flag(Geary.NamedFlag flag) {
         return check_flag(flag, true);
     }
 
-    private bool is_missing_flag(Geary.EmailFlag flag) {
+    private bool is_missing_flag(Geary.NamedFlag flag) {
         return check_flag(flag, false);
     }
 }

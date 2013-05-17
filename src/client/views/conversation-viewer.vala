@@ -190,17 +190,23 @@ public class ConversationViewer : Gtk.Box {
         }
         
         if (remote_images) {
-            if (email.load_remote_images().is_certain()) {
-                show_images_email(div_message);
+            Geary.Contact contact = current_folder.account.get_contact_store().get_by_rfc822(
+                email.get_primary_originator());
+            bool always_load = contact != null && contact.always_load_remote_images();
+            
+            if (always_load || email.load_remote_images().is_certain()) {
+                show_images_email(div_message, false);
             } else {
                 WebKit.DOM.HTMLElement remote_images_bar =
                     Util.DOM.select(div_message, ".remote_images");
                 try {
                     ((WebKit.DOM.Element) remote_images_bar).get_class_list().add("show");
                     remote_images_bar.set_inner_html("""%s %s
-                        <input type="button" value="%s" class="show_images" />""".printf(
+                        <input type="button" value="%s" class="show_images" />
+                        <input type="button" value="%s" class="show_from" />""".printf(
                         remote_images_bar.get_inner_html(),
-                        _("This message contains remote images."), _("Show Images")));
+                        _("This message contains remote images."), _("Show images"),
+                        _("Always show from sender")));
                 } catch (Error error) {
                     warning("Error showing remote images bar: %s", error.message);
                 }
@@ -239,6 +245,7 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
         bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
+        bind_event(web_view, ".remote_images .show_from", "click", (Callback) on_show_images_from, this);
         bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
         
         // Update the search results
@@ -689,11 +696,54 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
         if (email_element != null)
-            conversation_viewer.show_images_email(email_element);
+            conversation_viewer.show_images_email(email_element, true);
     }
     
-    private void show_images_email(WebKit.DOM.Element email_element) {
-        // TODO: Remember that these images have been shown.
+    private static void on_show_images_from(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        Geary.Email? email = conversation_viewer.get_email_from_element(element);
+        if (email == null)
+            return;
+        
+        Geary.ContactStore contact_store =
+            conversation_viewer.current_folder.account.get_contact_store();
+        Geary.Contact? contact = contact_store.get_by_rfc822(email.get_primary_originator());
+        if (contact == null) {
+            debug("Couldn't find contact for %s", email.from.to_string());
+            return;
+        }
+        
+        Geary.ContactFlags flags = new Geary.ContactFlags();
+        flags.add(Geary.ContactFlags.ALWAYS_LOAD_REMOTE_IMAGES);
+        Gee.ArrayList<Geary.Contact> contact_list = new Gee.ArrayList<Geary.Contact>();
+        contact_list.add(contact);
+        contact_store.mark_contacts_async.begin(contact_list, flags, null);
+        
+        WebKit.DOM.Document document = conversation_viewer.web_view.get_dom_document();
+        try {
+            WebKit.DOM.NodeList nodes = document.query_selector_all(".email");
+            for (ulong i = 0; i < nodes.length; i ++) {
+                WebKit.DOM.Element? email_element = nodes.item(i) as WebKit.DOM.Element;
+                if (email_element != null) {
+                    string? address = null;
+                    WebKit.DOM.Element? address_el = email_element.query_selector(".address_value");
+                    if (address_el != null) {
+                        address = ((WebKit.DOM.HTMLElement) address_el).get_inner_text();
+                    } else {
+                        address_el = email_element.query_selector(".address_name");
+                        if (address_el != null)
+                            address = ((WebKit.DOM.HTMLElement) address_el).get_inner_text();
+                    }
+                    if (address != null && address.normalize().casefold() == contact.normalized_email)
+                        conversation_viewer.show_images_email(email_element, false);
+                }
+            }
+        } catch (Error error) {
+            debug("Error showing images: %s", error.message);
+        }
+    }
+    
+    private void show_images_email(WebKit.DOM.Element email_element, bool remember) {
         try {
             WebKit.DOM.NodeList body_nodes = email_element.query_selector_all(".body");
             for (ulong j = 0; j < body_nodes.length; j++) {
@@ -720,12 +770,14 @@ public class ConversationViewer : Gtk.Box {
             warning("Error showing images: %s", error.message);
         }
         
-        // only add flag to load remote images if not already present
-        Geary.Email? message = get_email_from_element(email_element);
-        if (message != null && !message.load_remote_images().is_certain()) {
-            Geary.EmailFlags flags = new Geary.EmailFlags();
-            flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
-            mark_message(message, flags, null);
+        if (remember) {
+            // only add flag to load remote images if not already present
+            Geary.Email? message = get_email_from_element(email_element);
+            if (message != null && !message.load_remote_images().is_certain()) {
+                Geary.EmailFlags flags = new Geary.EmailFlags();
+                flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
+                mark_message(message, flags, null);
+            }
         }
     }
     
@@ -1129,11 +1181,13 @@ public class ConversationViewer : Gtk.Box {
         string value = "";
         Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
         foreach (Geary.RFC822.MailboxAddress a in list) {
-            value += "<a href='mailto:%s'>".printf(a.address);
             if (a.name != null) {
+                value += "<a href='mailto:%s'>".printf(
+                    Uri.escape_string("%s <%s>".printf(a.name, a.address)));
                 value += "<span class='address_name'>%s</span> ".printf(a.name);
                 value += "<span class='address_value'>%s</span>".printf(a.address);
             } else {
+                value += "<a href='mailto:%s'>".printf(a.address);
                 value += "<span class='address_name'>%s</span>".printf(a.address);
             }
             value += "</a>";
@@ -1206,7 +1260,7 @@ public class ConversationViewer : Gtk.Box {
     private void on_hovering_over_link(string? title, string? url) {
         // Copy the link the user is hovering over.  Note that when the user mouses-out, 
         // this signal is called again with null for both parameters.
-        hover_url = url;
+        hover_url = url != null ? Uri.unescape_string(url) : null;
         message_overlay_label.label = hover_url;
     }
     

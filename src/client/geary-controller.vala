@@ -489,7 +489,7 @@ public class GearyController {
         
         update_ui();
         
-        current_conversations = new Geary.ConversationMonitor(current_folder, false,
+        current_conversations = new Geary.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NONE,
             ConversationListStore.REQUIRED_FIELDS);
         
         if (inboxes.values.contains(current_folder)) {
@@ -752,7 +752,7 @@ public class GearyController {
                             main_window.folder_list.select_folder(select_folder);
                     }
                     
-                    folder.open_async.begin(false, inbox_cancellables.get(folder.account));
+                    folder.open_async.begin(Geary.Folder.OpenFlags.NONE, inbox_cancellables.get(folder.account));
                     
                     new_messages_monitor.add_folder(folder, inbox_cancellables.get(folder.account));
                 }

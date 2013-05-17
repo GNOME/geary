@@ -93,7 +93,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.properties = properties;
     }
     
-    public async void open_async(bool readonly, Cancellable? cancellable = null) throws Error {
+    public async void open_async(Cancellable? cancellable = null) throws Error {
         if (opened)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
@@ -559,12 +559,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 Geary.Imap.EmailFlags flags = ((Geary.Imap.EmailFlags) map.get(id));
                 
                 if (flags_to_add != null) {
-                    foreach (Geary.EmailFlag flag in flags_to_add.get_all())
+                    foreach (Geary.NamedFlag flag in flags_to_add.get_all())
                         flags.add(flag);
                 }
                 
                 if (flags_to_remove != null) {
-                    foreach (Geary.EmailFlag flag in flags_to_remove.get_all())
+                    foreach (Geary.NamedFlag flag in flags_to_remove.get_all())
                         flags.remove(flag);
                 }
             }
@@ -912,7 +912,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         MessageAddresses message_addresses =
             new MessageAddresses.from_email(account_owner_email, email);
         foreach (Contact contact in message_addresses.contacts)
-            do_update_contact_importance(cx, contact, cancellable);
+            do_update_contact(cx, contact, cancellable);
         updated_contacts = message_addresses.contacts;
         
         return true;
@@ -1238,7 +1238,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         MessageAddresses message_addresses =
             new MessageAddresses.from_row(account_owner_email, row);
         foreach (Geary.Contact contact in message_addresses.contacts)
-            do_update_contact_importance(cx, contact, cancellable);
+            do_update_contact(cx, contact, cancellable);
         updated_contacts = message_addresses.contacts;
     }
     

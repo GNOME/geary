@@ -348,7 +348,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             }
             
             try {
-                yield local.update_folder_async(remote_folder, cancellable);
+                yield local.update_folder_status_async(remote_folder, cancellable);
             } catch (Error update_error) {
                 debug("Unable to update local folder %s with remote properties: %s",
                     remote_folder.to_string(), update_error.message);

@@ -21,7 +21,10 @@ public interface Geary.Folder : BaseObject {
     }
     
     /**
-     * The "closed" signal will be fired multiple times after a Folder is opened.  It is fired
+     * Provides the reason why the folder is closing or closed when the {@link closed} signal
+     * is fired.
+     *
+     * The closed signal will be fired multiple times after a Folder is opened.  It is fired
      * after the remote and local sessions close for various reasons, and fires once and only
      * once when the folder is completely closed.
      *
@@ -29,7 +32,7 @@ public interface Geary.Folder : BaseObject {
      * value.  The same is true for REMOTE_CLOSE and REMOTE_ERROR.  A REMOTE_ERROR can trigger
      * a LOCAL_CLOSE and vice-versa.  The values may be called in any order.
      *
-     * When the local and remote stores have closed (either normally or due to errors, FOLDER_CLOSED
+     * When the local and remote stores have closed (either normally or due to errors), FOLDER_CLOSED
      * will be sent.
      */
     public enum CloseReason {
@@ -50,17 +53,46 @@ public interface Geary.Folder : BaseObject {
     }
     
     /**
-     * Flags used for retrieving email.
-     *
-     * * LOCAL_ONLY:   fetch from the local store only
-     * * FORCE_UPDATE: fetch from remote only (results merged into local store)
-     * * EXCLUDING_ID: exclude the provided ID
+     * Flags modifying the behavior of open_async().
+     */
+    [Flags]
+    public enum OpenFlags {
+        NONE = 0,
+        /**
+         * Perform the minimal amount of activity possible to open the folder
+         * and be synchronized with the server.  This may mean some attributes of
+         * the messages (such as their flags or other metadata) may not be up-to-date
+         * when the folder opens.  Not all folders will support this flag.
+         */
+        FAST_OPEN;
+        
+        public bool is_any_set(OpenFlags flags) {
+            return (this & flags) != 0;
+        }
+        
+        public bool is_all_set(OpenFlags flags) {
+            return (this & flags) == flags;
+        }
+    }
+    
+    /**
+     * Flags modifying how email is retrieved.
      */
     [Flags]
     public enum ListFlags {
         NONE = 0,
+        /**
+         * Fetch from the local store only.
+         */
         LOCAL_ONLY,
+        /**
+         * Fetch from remote store only (results merged into local store).
+         */
         FORCE_UPDATE,
+        /**
+         * Exclude the provided EmailIdentifier (only respected by {@link list_email_by_id_async} and
+         * {@link lazy_list_email_by_id}).
+         */
         EXCLUDING_ID;
         
         public bool is_any_set(ListFlags flags) {
@@ -75,28 +107,32 @@ public interface Geary.Folder : BaseObject {
     public abstract Geary.Account account { get; }
     
     /**
-     * This is fired when the Folder is successfully opened by a caller.  It will only fire once
-     * until the Folder is closed, with the OpenState indicating what has been opened and the count
-     * indicating the number of messages in the folder (in the case of OpenState.BOTH or
-     * OpenState.REMOTE, it refers to the authoritative number).
+     * Fired when the folder is successfully opened by a caller.
      *
-     * OpenState.REMOTE will only fire if there's no local store, indicating that it's not a
-     * synchronized folder but rather one entirely backed by a network server.  Geary currently
-     * has no such folder implemented like this.
+     * It will only fire once until the Folder is closed, with the {@link OpenState} indicating what
+     * has been opened and the count indicating the number of messages in the folder.  In the case
+     * of {@link OpenState.BOTH} or {@link OpenState.REMOTE}, it refers to the authoritative number.
+     * For {@link OpenState.LOCAL}, it refers to the number of messages in the local store.
      *
-     * This signal will never fire with Geary.OpenState.CLOSED as a parameter.
+     * {@link OpenState.REMOTE} will only be passed if there's no local store, indicating that it's
+     * not a synchronized folder but rather one entirely backed by a network server.  Geary
+     * currently has no such folder implemented like this.
+     *
+     * This signal will never fire with {@link OpenState.CLOSED} as a parameter.
+     *
+     * @see get_open_state
      */
     public signal void opened(OpenState state, int count);
     
     /**
-     * This is fired when open_async() fails for one or more reasons.
+     * Fired when {@link open_async} fails for one or more reasons.
      *
-     * See open_async() and "opened" for more information on how opening a Folder works, in particular
-     * how open_async() may return immediately although the remote has not completely opened.
-     * This signal may be called in the context of, or after completion of, open_async().  It will
-     * *not* be called after close_async() has completed, however.
+     * See open_async and {@link opened} for more information on how opening a Folder works, i  particular
+     * how open_async may return immediately although the remote has not completely opened.
+     * This signal may be called in the context of, or after completion of, open_async.  It will
+     * ''not'' be called after {@link close_async} has completed, however.
      *
-     * Note that this signal may be fired *and* open_async() throw an Error.
+     * Note that this signal may be fired ''and'' open_async throw an Error.
      *
      * This signal may be fired more than once before the Folder is closed.  It will only fire once
      * for each type of failure, however.
@@ -104,66 +140,73 @@ public interface Geary.Folder : BaseObject {
     public signal void open_failed(OpenFailed failure, Error? err);
     
     /**
-     * This is fired when the Folder is closed, either by the caller or due to errors in the local
-     * or remote store(s).  It will fire three times: to report how the local store closed
+     * Fired when the Folder is closed, either by the caller or due to errors in the local
+     * or remote store(s).
+     *
+     * It will fire three times: to report how the local store closed
      * (gracefully or due to error), how the remote closed (similarly) and finally with
-     * FOLDER_CLOSED.  The first two may come in either order; the third is always the last.
+     * {@link CloseReason.FOLDER_CLOSED}.  The first two may come in either order; the third is
+     * always the last.
      */
     public signal void closed(CloseReason reason);
     
     /**
-     * "email-appended" is fired when new messages have been appended to the list of messages in
-     * the folder (and therefore old message position numbers remain valid, but the total count of
-     * the messages in the folder has changed).
+     * Fired when email has been appended to the list of messages in the folder.
+     *
+     * The {@link EmailIdentifier} for all appended messages is supplied as a signal parameter.
+     * Email positions remain valid, but the total count of the messages in the folder has changed.
+     *
+     * @see email_locally_appended
      */
     public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
-     * "email-locally-appended" is fired when previously unknown messages have been appended to the
-     * list of messages in the folder.  This is similar to "email-appended", but that signal
-     * lists all messages appended to the folder.  "email-locally-appended" only reports emails that
+     * Fired when previously unknown messages have been appended to the list of email in the folder.
+     *
+     * This is similar to {@link email_appended}, but that signal
+     * lists ''all'' messages appended to the folder.  email_locally_appended only reports email that
      * have not been seen prior.  Hence, an email that is removed from the folder and returned
      * later will not be listed here (unless it was removed from the local store in the meantime).
      *
      * Note that these messages were appended as well, hence their positional addressing may have
-     * changed since last seen in this folder.  However, it's important to realize that this list
-     * does *not* represent all newly appended messages.
+     * changed since last seen in this folder.
+     *
+     * @see email_appended
      */
     public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
-     * "email-removed" is fired when a message has been removed (deleted or moved) from the
-     * folder (and therefore old message position numbers may no longer be valid, i.e. those after
-     * the removed message).
+     * Fired when email has been removed (deleted or moved) from the folder.
      *
-     * NOTE: It's possible for the remote server to report a message has been removed that is not
+     * This may occur due to the local user's action or reported from the server (i.e. another
+     * client has performed the action).  Email positions greater than the removed emails are
+     * affected.
+     *
+     * ''Note:'' It's possible for the remote server to report a message has been removed that is not
      * known locally (and therefore the caller could not have record of).  If this happens, this
-     * signal will *not* fire, although "email-count-changed" will.
+     * signal will ''not'' fire, although {@link email_count_changed} will.
      */
     public signal void email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
-     * "email-count-changed" is fired when the total count of email in a folder has changed in any way.
+     * Fired when the total count of email in a folder has changed in any way.
      *
-     * Note that this signal will be fired alongside "messages-appended" or "message-removed".
-     * That is, do not use both signals to process email count changes; one will suffice.
-     * This signal will fire after those (although see the note at "messages-removed").
+     * Note that this signal will fire after {@link email_appended}, {@link email_locally_appended},
+     * and {@link email_removed} (although see the note at email_removed).
      */
     public signal void email_count_changed(int new_count, CountChangeReason reason);
     
     /**
-     * "email-flags-changed" is fired when an email's flag changed.
-     *
-     * This signal will be fired both when changes occur on the client side via the
-     * mark_email_async() method as well as changes occur remotely.
+     * Fired when the supplied email flags have changed, whether due to local action or reported by
+     * the server.
      */
     public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
 
     /**
-    * "special-folder-type-changed" is fired when the special folder type has changed.
+    * Fired when the {@link SpecialFolderType} has changed.
     *
-    * This will usually happen when the local account object has been updated with data
-    * from the remote account.
+    * This will usually happen when the local object has been updated with data discovered from the
+    * remote account.
     */
     public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);
@@ -245,13 +288,16 @@ public interface Geary.Folder : BaseObject {
      * associated signals will be fired as well.
      *
      * If the Folder has been opened previously, an internal open count is incremented and the
-     * method returns.  There are no other side-effects.
+     * method returns.  There are no other side-effects.  This means it's possible for the
+     * open_flags parameter to be ignored.  See the returned result for more information.
      *
      * A Folder may be reopened after it has been closed.  This allows for Folder objects to be
      * emitted by the Account object cheaply, but the client should only have a few open at a time,
      * as each may represent an expensive resource (such as a network connection).
+     *
+     * Returns false if already opened.
      */
-    public abstract async void open_async(bool readonly, Cancellable? cancellable = null) throws Error;
+    public abstract async bool open_async(OpenFlags open_flags, Cancellable? cancellable = null) throws Error;
     
     /**
      * Wait for the Folder to become fully open or fails to open due to error.  If not opened

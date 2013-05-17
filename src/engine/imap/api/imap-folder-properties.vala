@@ -4,6 +4,40 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Geary.Imap.FolderProperties represent the Geary API's notion of FolderProperties but
+ * also hangs additional useful information available to IMAP-specific code (in the Engine,
+ * that includes imap, imap-engine, and imap-db).
+ *
+ * One important concept here is that there are two IMAP commands that return this information:
+ * STATUS (which is used by the background folder monitor to watch for specific events) and
+ * SELECT/EXAMINE (which is used to "enter" or "cd" into a folder and perform operations on mail
+ * within).
+ *
+ * Experience has shown that these commands are *not* guaranteed to return the same information,
+ * even if no state has changed on the server.  This would seem to be a server bug, but one that
+ * has to be worked around.
+ *
+ * In any event, the properties here are updated by the following logic:
+ *
+ * When a folder is first "seen" by Geary, it generates an Imap.FolderProperties object with all
+ * the fields filled in except for status_messages or select_examine_messages, depending on which
+ * command was used to discover it.  (In practice, the folder will be first recognized via STATUS,
+ * but this isn't guaranteed.)
+ *
+ * When new STATUS information comes in, this object's status_messages, unseen, recent, and attrs
+ * fields are updated.
+ *
+ * When a SELECT/EXAMINE occurs on this folder, this object's select_examine_messages, unseen,
+ * recent, uid_validity, and uid_next are updated.
+ *
+ * Over time, this object accumulates information depending on what operation was last
+ * performed on it.
+ *
+ * The base class' email_total is updated when either *_messages is updated; however, SELECT/EXAMINE
+ * is considered more authoritative than STATUS.
+ */
+ 
 public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     /**
      * -1 if the Folder was not opened via SELECT or EXAMINE.
@@ -13,11 +47,11 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
      * -1 if the FolderProperties were not obtained via a STATUS command
      */
     public int status_messages { get; private set; }
-    public int unseen { get; private set; }
-    public int recent { get; private set; }
-    public UIDValidity? uid_validity { get; private set; }
-    public UID? uid_next { get; private set; }
-    public MailboxAttributes attrs { get; private set; }
+    public int unseen { get; internal set; }
+    public int recent { get; internal set; }
+    public UIDValidity? uid_validity { get; internal set; }
+    public UID? uid_next { get; internal set; }
+    public MailboxAttributes attrs { get; internal set; }
     
     // Note that unseen from SELECT/EXAMINE is the *position* of the first unseen message,
     // not the total unseen count, so it should not be passed in here, but rather the unseen

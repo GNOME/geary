@@ -24,11 +24,11 @@ private class Geary.ImapDB.Account : BaseObject {
     private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
-    public ContactStore contact_store { get; private set; }
+    public ImapEngine.ContactStore contact_store { get; private set; }
     
     public Account(Geary.AccountInformation account_information) {
         this.account_information = account_information;
-        contact_store = new ContactStore();
+        contact_store = new ImapEngine.ContactStore(this);
         
         name = "IMAP database account for %s".printf(account_information.imap_credentials.user);
     }
@@ -138,7 +138,11 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
     }
     
-    public async void update_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
+    /**
+     * Only updates folder's STATUS message count, attributes, recent, and unseen; UIDVALIDITY and UIDNEXT
+     * updated when the folder is SELECT/EXAMINED (see update_folder_select_examine_async())
+     */
+    public async void update_folder_status_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable)
         throws Error {
         check_open();
         
@@ -156,33 +160,18 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Statement stmt;
             if (parent_id != Db.INVALID_ROWID) {
                 stmt = cx.prepare(
-                    "UPDATE FolderTable SET uid_validity=?, uid_next=?, attributes=? "
-                    + "WHERE parent_id=? AND name=?");
-                stmt.bind_int64(0, (properties.uid_validity != null) ? properties.uid_validity.value
-                    : Imap.UIDValidity.INVALID);
-                stmt.bind_int64(1, (properties.uid_next != null) ? properties.uid_next.value
-                    : Imap.UID.INVALID);
-                stmt.bind_string(2, properties.attrs.serialize());
-                stmt.bind_rowid(3, parent_id);
-                stmt.bind_string(4, path.basename);
+                    "UPDATE FolderTable SET attributes=? WHERE parent_id=? AND name=?");
+                stmt.bind_string(0, properties.attrs.serialize());
+                stmt.bind_rowid(1, parent_id);
+                stmt.bind_string(2, path.basename);
             } else {
                 stmt = cx.prepare(
-                    "UPDATE FolderTable SET uid_validity=?, uid_next=?, attributes=? "
-                    + "WHERE parent_id IS NULL AND name=?");
-                stmt.bind_int64(0, (properties.uid_validity != null) ? properties.uid_validity.value
-                    : Imap.UIDValidity.INVALID);
-                stmt.bind_int64(1, (properties.uid_next != null) ? properties.uid_next.value
-                    : Imap.UID.INVALID);
-                stmt.bind_string(2, properties.attrs.serialize());
-                stmt.bind_string(3, path.basename);
+                    "UPDATE FolderTable SET attributes=? WHERE parent_id IS NULL AND name=?");
+                stmt.bind_string(0, properties.attrs.serialize());
+                stmt.bind_string(1, path.basename);
             }
             
             stmt.exec();
-            
-            if (properties.select_examine_messages >= 0) {
-                do_update_last_seen_total(cx, parent_id, path.basename, properties.select_examine_messages,
-                    cancellable);
-            }
             
             if (properties.status_messages >= 0) {
                 do_update_last_seen_status_total(cx, parent_id, path.basename, properties.status_messages,
@@ -192,10 +181,83 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
         
-        // update properties in the local folder
+        // update appropriate properties in the local folder
         ImapDB.Folder? db_folder = get_local_folder(path);
-        if (db_folder != null)
-            db_folder.set_properties(properties);
+        if (db_folder != null) {
+            Imap.FolderProperties local_properties = db_folder.get_properties();
+            
+            local_properties.unseen = properties.unseen;
+            local_properties.recent = properties.recent;
+            local_properties.attrs = properties.attrs;
+            
+            if (properties.status_messages >= 0)
+                local_properties.set_status_message_count(properties.status_messages, false);
+        }
+    }
+    
+    /**
+     * Only updates folder's SELECT/EXAMINE message count, UIDVALIDITY, UIDNEXT, unseen, and recent.
+     * See also update_folder_status_async().
+     */
+    public async void update_folder_select_examine_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable)
+        throws Error {
+        check_open();
+        
+        Geary.Imap.FolderProperties properties = imap_folder.get_properties();
+        Geary.FolderPath path = imap_folder.get_path();
+        
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            int64 parent_id;
+            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable)) {
+                debug("Unable to find parent ID of %s to update properties", path.to_string());
+                
+                return Db.TransactionOutcome.ROLLBACK;
+            }
+            
+            int64 uid_validity = (properties.uid_validity != null) ? properties.uid_validity.value
+                    : Imap.UIDValidity.INVALID;
+            int64 uid_next = (properties.uid_next != null) ? properties.uid_next.value
+                : Imap.UID.INVALID;
+            
+            Db.Statement stmt;
+            if (parent_id != Db.INVALID_ROWID) {
+                stmt = cx.prepare(
+                    "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE parent_id=? AND name=?");
+                stmt.bind_int64(0, uid_validity);
+                stmt.bind_int64(1, uid_next);
+                stmt.bind_rowid(2, parent_id);
+                stmt.bind_string(3, path.basename);
+            } else {
+                stmt = cx.prepare(
+                    "UPDATE FolderTable SET uid_validity=?, uid_next=?  WHERE parent_id IS NULL AND name=?");
+                stmt.bind_int64(0, uid_validity);
+                stmt.bind_int64(1, uid_next);
+                stmt.bind_string(2, path.basename);
+            }
+            
+            stmt.exec();
+            
+            if (properties.select_examine_messages >= 0) {
+                do_update_last_seen_select_examine_total(cx, parent_id, path.basename,
+                    properties.select_examine_messages, cancellable);
+            }
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
+        // update appropriate properties in the local folder
+        ImapDB.Folder? db_folder = get_local_folder(path);
+        if (db_folder != null) {
+            Imap.FolderProperties local_properties = db_folder.get_properties();
+            
+            local_properties.unseen = properties.unseen;
+            local_properties.recent = properties.recent;
+            local_properties.uid_validity = properties.uid_validity;
+            local_properties.uid_next = properties.uid_next;
+            
+            if (properties.select_examine_messages >= 0)
+                local_properties.set_select_examine_message_count(properties.select_examine_messages);
+        }
     }
     
     private void initialize_contacts(Cancellable? cancellable = null) throws Error {
@@ -205,14 +267,14 @@ private class Geary.ImapDB.Account : BaseObject {
         Db.TransactionOutcome outcome = db.exec_transaction(Db.TransactionType.RO,
             (context) => {
             Db.Statement statement = context.prepare(
-                "SELECT email, real_name, highest_importance, normalized_email " +
+                "SELECT email, real_name, highest_importance, normalized_email, flags " +
                 "FROM ContactTable");
             
             Db.Result result = statement.exec(cancellable);
             while (!result.finished) {
                 try {
                     Contact contact = new Contact(result.string_at(0), result.string_at(1),
-                        result.int_at(2), result.string_at(3));
+                        result.int_at(2), result.string_at(3), ContactFlags.deserialize(result.string_at(4)));
                     contacts.add(contact);
                 } catch (Geary.DatabaseError err) {
                     // We don't want to abandon loading all contacts just because there was a
@@ -439,6 +501,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 // Ignore any messages that don't have the required fields.
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
                     Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     
                     Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, cancellable);
                     if (folders == null) {
@@ -493,6 +556,21 @@ private class Geary.ImapDB.Account : BaseObject {
         
         assert(email != null);
         return email;
+    }
+    
+    public async void update_contact_flags_async(Geary.Contact contact, Cancellable? cancellable)
+        throws Error{
+        check_open();
+        
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
+            Db.Statement update_stmt =
+                cx.prepare("UPDATE ContactTable SET flags=? WHERE email=?");
+            update_stmt.bind_string(0, contact.contact_flags.serialize());
+            update_stmt.bind_string(1, contact.email);
+            update_stmt.exec(cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
     }
     
     private void clear_duplicate_folders() {
@@ -669,11 +747,13 @@ private class Geary.ImapDB.Account : BaseObject {
         return (parent_path == null ? null : parent_path.get_child(name));
     }
     
-    private void do_update_last_seen_total(Db.Connection cx, int64 parent_id, string name, int total,
+    // For SELECT/EXAMINE responses, not STATUS responses
+    private void do_update_last_seen_select_examine_total(Db.Connection cx, int64 parent_id, string name, int total,
         Cancellable? cancellable) throws Error {
         do_update_total(cx, parent_id, name, "last_seen_total", total, cancellable);
     }
     
+    // For STATUS responses, not SELECT/EXAMINE responses
     private void do_update_last_seen_status_total(Db.Connection cx, int64 parent_id, string name,
         int total, Cancellable? cancellable) throws Error {
         do_update_total(cx, parent_id, name, "last_seen_status_total", total, cancellable);

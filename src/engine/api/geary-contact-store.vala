@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
  
-public class Geary.ContactStore : BaseObject {
+public abstract class Geary.ContactStore : BaseObject {
     public Gee.Collection<Contact> contacts {
         owned get { return contact_map.values; }
     }
@@ -22,6 +22,13 @@ public class Geary.ContactStore : BaseObject {
     public void update_contacts(Gee.Collection<Contact> new_contacts) {
         foreach (Contact contact in new_contacts)
             update_contact(contact);
+    }
+    
+    public abstract async void mark_contacts_async(Gee.Collection<Contact> contacts, ContactFlags? to_add,
+        ContactFlags? to_remove) throws Error;
+    
+    public Contact? get_by_rfc822(Geary.RFC822.MailboxAddress address) {
+        return contact_map[address.address.normalize().casefold()];
     }
     
     private void update_contact(Contact contact) {

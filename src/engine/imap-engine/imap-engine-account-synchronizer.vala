@@ -237,7 +237,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         }
         
         try {
-            yield folder.open_async(true, bg_cancellable);
+            yield folder.open_async(Folder.OpenFlags.FAST_OPEN, bg_cancellable);
             yield folder.wait_for_open_async(bg_cancellable);
         } catch (Error err) {
             // don't need to close folder; if either calls throws an error, the folder is not open
