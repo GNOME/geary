@@ -496,7 +496,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords, 
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
-        return null; // TODO: search!
+        return yield local.search_async(keywords, folder_blacklist, search_ids, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

@@ -530,6 +530,31 @@ private class Geary.ImapDB.Account : BaseObject {
         return (messages.size == 0 ? null : messages);
     }
     
+    public async Gee.Collection<Geary.EmailIdentifier>? search_async(string keywords, 
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
+        Gee.Collection<Geary.EmailIdentifier> search_results = new Gee.HashSet<Geary.EmailIdentifier>();
+        
+        // TODO: support blacklist, search_ids, use real full-text search
+        
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE body LIKE ?");
+            stmt.bind_string(0, "%%%s%%".printf(keywords)); // i.e. LIKE %foo%
+            
+            Db.Result result = stmt.exec(cancellable);
+            while (!result.finished) {
+                int64 id = result.int64_at(0);
+                search_results.add(new Geary.ImapDB.EmailIdentifier(id));
+                
+                result.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return (search_results.size == 0 ? null : search_results);
+    }
+    
     public async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         if (!(email_id is Geary.ImapDB.EmailIdentifier))

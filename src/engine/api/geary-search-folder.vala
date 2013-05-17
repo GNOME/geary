@@ -35,6 +35,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     private Gee.HashSet<Geary.FolderPath> exclude_folders = new Gee.HashSet<Geary.FolderPath>();
     private Geary.SpecialFolderType[] exclude_types = { Geary.SpecialFolderType.SPAM,
         Geary.SpecialFolderType.TRASH };
+    private Gee.TreeSet<Geary.EmailIdentifier> search_results = new Gee.TreeSet<Geary.EmailIdentifier>();
+    private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
     /**
      * Fired when the search keywords have changed.
@@ -55,19 +57,61 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
      */
     public void set_search_keywords(string keywords) {
         search_keywords_changed(keywords);
-        account.local_search_async.begin(keywords, exclude_folders, null, null, on_local_search_complete);
+        set_search_keywords_async.begin(keywords, on_set_search_keywords_complete);
     }
     
-    private void on_local_search_complete(Object? source, AsyncResult result) {
-        Gee.Collection<Geary.EmailIdentifier>? search_results = null;
+    private void on_set_search_keywords_complete(Object? source, AsyncResult result) {
         try {
-            search_results = account.local_search_async.end(result);
-        } catch (Error e) {
-            debug("Error gathering search results: %s", e.message);
+            set_search_keywords_async.end(result);
+        } catch(Error e) {
+            debug("Search error: %s", e.message);
+        }
+    }
+    
+    private async void set_search_keywords_async(string keywords) throws Error {
+        int result_mutex_token = yield result_mutex.claim_async();
+        Gee.Collection<Geary.EmailIdentifier>? new_results = yield account.local_search_async(
+            keywords, exclude_folders, null, null);
+        
+        if (new_results == null) {
+            // No results?  Remove all existing results and return early.
+            Gee.TreeSet<Geary.EmailIdentifier> local_results = search_results;
+            search_results = new Gee.TreeSet<Geary.EmailIdentifier>(); // clear existing results
+            notify_email_removed(local_results);
+            notify_email_count_changed(0, Geary.Folder.CountChangeReason.REMOVED);
+        } else {
+            // Match the new results up with the existing results.
+            Gee.HashSet<Geary.EmailIdentifier> to_add = new Gee.HashSet<Geary.EmailIdentifier>();
+            Gee.HashSet<Geary.EmailIdentifier> to_remove = new Gee.HashSet<Geary.EmailIdentifier>();
+            
+            foreach(Geary.EmailIdentifier id in new_results)
+                if (!search_results.contains(id))
+                    to_add.add(id);
+            
+            foreach(Geary.EmailIdentifier id in search_results)
+                if (!new_results.contains(id))
+                    to_remove.add(id);
+            
+            search_results.remove_all(to_remove);
+            search_results.add_all(to_add);
+            
+            Geary.Folder.CountChangeReason reason = CountChangeReason.NONE;
+            
+            if (to_add.size > 0) {
+                notify_email_appended(to_add);
+                reason |= Geary.Folder.CountChangeReason.ADDED;
+            }
+            
+            if (to_remove.size > 0) {
+                notify_email_removed(to_remove);
+                reason |= Geary.Folder.CountChangeReason.REMOVED;
+            }
+            
+            if (reason != CountChangeReason.NONE)
+                notify_email_count_changed(search_results.size, reason);
         }
         
-        if (search_results != null)
-            search_results.clear(); // TODO: something useful.
+        result_mutex.release(ref result_mutex_token);
     }
     
     public override Geary.FolderPath get_path() {
@@ -88,35 +132,51 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
-        return yield account.get_special_folder(Geary.SpecialFolderType.INBOX).list_email_async(low, count,
-            required_fields, flags, cancellable);
+        // TODO (this is a temporary implementation that can't handle positional addressing)
+        int result_mutex_token = yield result_mutex.claim_async();
+        
+        Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
+        int i = 0;
+        foreach(Geary.EmailIdentifier id in search_results) {
+            results.add(yield fetch_email_async(id, required_fields, flags, cancellable));
+            i++;
+            if (count > 0 && i >= count)
+                break;
+        }
+        
+        result_mutex.release(ref result_mutex_token);
+        return (results.size == 0 ? null : results);
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
-        return yield account.get_special_folder(Geary.SpecialFolderType.INBOX).list_email_by_id_async(initial_id,
-            count, required_fields, flags, cancellable);
+        // TODO: This method is not currently called, but is required by the interface.  Before completing
+        // this feature, it should either be implemented either here or in AbstractLocalFolder. 
+        error("Search folder does not implement list_email_by_id_async");
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
-        return yield account.get_special_folder(Geary.SpecialFolderType.INBOX).list_email_by_sparse_id_async(ids,
-            required_fields, flags, cancellable);
+        Gee.List<Geary.Email> result = new Gee.ArrayList<Geary.Email>();
+        foreach(Geary.EmailIdentifier id in ids)
+            result.add(yield fetch_email_async(id, required_fields, flags, cancellable));
+        
+        return (result.size == 0 ? null : result);
     }
     
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? list_local_email_fields_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        return yield account.get_special_folder(Geary.SpecialFolderType.INBOX).list_local_email_fields_async(
-            ids, cancellable);
+        // TODO: This method is not currently called, but is required by the interface.  Before completing
+        // this feature, it should either be implemented either here or in AbstractLocalFolder. 
+        error("Search folder does not implement list_local_email_fields_async");
     }
     
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
-        return yield account.get_special_folder(Geary.SpecialFolderType.INBOX).fetch_email_async(id,
-            required_fields, flags, cancellable);
+        return yield account.local_fetch_email_async(id, required_fields, cancellable);
     }
     
     private void exclude_special_folder(Geary.SpecialFolderType type) {
