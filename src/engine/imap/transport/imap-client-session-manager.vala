@@ -45,7 +45,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     
     private AccountInformation account_information;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
-    private Geary.NonblockingMutex sessions_mutex = new Geary.NonblockingMutex();
+    private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
     private bool authentication_failed = false;
     

@@ -24,7 +24,7 @@ private class Geary.Imap.Account : BaseObject {
     private ClientSessionManager session_mgr;
     private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     private ClientSession? account_session = null;
-    private NonblockingMutex cmd_mutex = new NonblockingMutex();
+    private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.ArrayList<MailboxInformation> list_collector = new Gee.ArrayList<MailboxInformation>();
     private Gee.ArrayList<StatusData> status_collector = new Gee.ArrayList<StatusData>();
     

@@ -62,8 +62,8 @@ private class Geary.Imap.Folder : BaseObject {
         session.coded_response_received.connect(on_coded_status_response);
         //session.disconnected.connect(on_disconnected);
         
-        CompletionStatusResponse response = yield session.select_examine_async(path.get_fullpath(info.delim),
-            !readonly, cancellable);
+        CompletionStatusResponse response = yield session.select_async(path.get_fullpath(info.delim),
+            cancellable);
         if (response.status != Status.OK)
             throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
     }
@@ -84,8 +84,6 @@ private class Geary.Imap.Folder : BaseObject {
             yield session_mgr.release_session_async(session, cancellable);
         } finally {
             session = null;
-            readonly = Trillian.UNKNOWN;
-            
             is_open = false;
         }
     }
