@@ -266,7 +266,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (yield local.folder_exists_async(path, cancellable))
             return true;
         
-        return yield remote.folder_exists_async(path, cancellable);
+        return (yield remote.list_mailbox_async(path, cancellable)) != null;
     }
     
     // TODO: This needs to be made into a single transaction
@@ -308,7 +308,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.Collection<Geary.Folder> engine_folders, Cancellable? cancellable) {
         Gee.Collection<Geary.Imap.Folder> remote_folders;
         try {
-            remote_folders = yield remote.list_mailboxes_async(parent, cancellable);
+            remote_folders = yield remote.list_children_async(parent, cancellable);
         } catch (Error remote_error) {
             debug("Unable to retrieve folder list from server: %s", remote_error.message);
             

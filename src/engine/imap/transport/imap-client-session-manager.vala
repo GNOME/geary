@@ -207,6 +207,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
     
     public async ClientSession claim_authorized_session_async(Cancellable? cancellable) throws Error {
+        check_open();
+        
         int token = yield sessions_mutex.claim_async(cancellable);
         
         ClientSession? found_session = null;
@@ -248,6 +250,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
     
     public async void release_session_async(ClientSession session, Cancellable? cancellable) throws Error {
+        check_open();
+        
         string? mailbox;
         ClientSession.Context context = session.get_context(out mailbox);
         

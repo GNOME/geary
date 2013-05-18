@@ -492,7 +492,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private async void open_remote_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable) {
         try {
             debug("Opening remote %s", to_string());
-            Imap.Folder folder = (Imap.Folder) yield remote.fetch_folder_async(local_folder.get_path(),
+            Imap.Folder folder = yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
             
             yield folder.open_async(cancellable);

@@ -76,7 +76,6 @@ public class Geary.Imap.MailboxInformation : Object {
         StringParameter mailbox = server_data.get_as_string(4);
         
         // Set \Inbox to standard path
-        MailboxInformation info;
         MailboxAttributes attributes = new MailboxAttributes(attrlist);
         if (Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
             return new MailboxInformation(Geary.Imap.Account.INBOX_NAME,

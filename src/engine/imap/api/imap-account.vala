@@ -10,32 +10,26 @@ private class Geary.Imap.Account : BaseObject {
     public const string INBOX_NAME = "INBOX";
     public const string ASSUMED_SEPARATOR = "/";
     
-    private static MailboxParameter? _GLOB_PARAMETER = null;
-    private static MailboxParameter GLOB_PARAMETER {
-        get {
-            return (_GLOB_PARAMETER != null) ? _GLOB_PARAMETER : _GLOB_PARAMETER = new MailboxParameter("%");
-        }
-    }
-    
     public bool is_open { get; private set; default = false; }
     
     private string name;
     private AccountInformation account_information;
     private ClientSessionManager session_mgr;
-    private Gee.HashMap<string, string?> delims = new Gee.HashMap<string, string?>();
     private ClientSession? account_session = null;
+    private Gee.HashMap<FolderPath, Imap.Folder> folder_map = new Gee.HashMap<FolderPath, Imap.Folder>();
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
-    private Gee.ArrayList<MailboxInformation> list_collector = new Gee.ArrayList<MailboxInformation>();
-    private Gee.ArrayList<StatusData> status_collector = new Gee.ArrayList<StatusData>();
+    private Nonblocking.Mutex folder_map_mutex = new Nonblocking.Mutex();
+    private Gee.List<MailboxInformation>? list_collector = null;
+    private Gee.List<StatusData>? status_collector = null;
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
     
     public signal void login_failed(Geary.Credentials cred);
     
-    public Account(Geary.AccountInformation account_information, ClientSessionManager session_mgr) {
+    public Account(Geary.AccountInformation account_information) {
         name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
         this.account_information = account_information;
-        this.session_mgr = session_mgr;
+        this.session_mgr = new ClientSessionManager(account_information);
         
         session_mgr.login_failed.connect(on_login_failed);
     }
@@ -49,12 +43,24 @@ private class Geary.Imap.Account : BaseObject {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Imap.Account already open");
         
-        is_open = true;
+        yield session_mgr.open_async(cancellable);
         
-        // claim a ClientSession for use for all account-level activity
-        account_session = yield session_mgr.claim_authorized_session_async(cancellable);
-        account_session.list.connect(on_list_data);
-        account_session.status.connect(on_status_data);
+        try {
+            // claim a ClientSession for use for all account-level activity
+            account_session = yield session_mgr.claim_authorized_session_async(cancellable);
+            account_session.list.connect(on_list_data);
+            account_session.status.connect(on_status_data);
+        } catch (Error err) {
+            try {
+                yield session_mgr.close_async(cancellable);
+            } catch (Error close_err) {
+                // ignored
+            }
+            
+            throw err;
+        }
+        
+        is_open = true;
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
@@ -64,20 +70,68 @@ private class Geary.Imap.Account : BaseObject {
         account_session.list.disconnect(on_list_data);
         account_session.status.disconnect(on_status_data);
         
-        yield session_mgr.release_session_async(account_session, cancellable);
+        try {
+            yield session_mgr.release_session_async(account_session, cancellable);
+        } catch (Error err) {
+            // ignored
+        }
+        
+        try {
+            yield session_mgr.close_async(cancellable);
+        } catch (Error err) {
+            // ignored
+        }
         
         is_open = false;
     }
     
     private void on_list_data(MailboxInformation mailbox_info) {
-        list_collector.add(mailbox_info);
+        if (list_collector != null)
+            list_collector.add(mailbox_info);
     }
     
     private void on_status_data(StatusData status_data) {
-        status_collector.add(status_data);
+        if (status_collector != null)
+            status_collector.add(status_data);
     }
     
-    public async MailboxInformation? list_mailbox_async(FolderPath path, Cancellable? cancellable = null)
+    public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable) throws Error {
+        int token = yield folder_map_mutex.claim_async(cancellable);
+        
+        Imap.Folder? folder = null;
+        Error? err = null;
+        try {
+            folder = yield internal_fetch_folder_async(path, cancellable);
+        } catch (Error fetch_err) {
+            err = fetch_err;
+        }
+        
+        folder_map_mutex.release(ref token);
+        
+        if (err != null)
+            throw err;
+        
+        return folder;
+    }
+    
+    // To be called only when folder_map_mutex has been claimed
+    private async Imap.Folder internal_fetch_folder_async(FolderPath path, Cancellable? cancellable)
+        throws Error {
+        Imap.Folder? folder = folder_map.get(path);
+        if (folder != null)
+            return folder;
+        
+        MailboxInformation? mailbox_info = yield list_mailbox_async(path, cancellable);
+        if (mailbox_info == null)
+            throw new EngineError.NOT_FOUND("%s not found", path.to_string());
+        
+        folder = new Imap.Folder(session_mgr, path, null, mailbox_info);
+        folder_map.set(path, folder);
+        
+        return folder;
+    }
+    
+    public async MailboxInformation? list_mailbox_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
         
@@ -89,8 +143,8 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         CompletionStatusResponse response = yield send_command_async(
-            new ListCommand(new Imap.MailboxParameter(processed.get_fullpath()), can_xlist), list_results,
-            null, cancellable);
+            new ListCommand(new Imap.MailboxParameter(processed.get_fullpath()), can_xlist),
+            list_results, null, cancellable);
         
         if (response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server reports LIST error for path %s: %s", path.to_string(),
@@ -105,7 +159,7 @@ private class Geary.Imap.Account : BaseObject {
         return (list_results.size == 1) ? list_results[0] : null;
     }
     
-    public async Gee.List<MailboxInformation>? list_children_command(FolderPath? parent, Cancellable? cancellable = null)
+    public async Gee.List<MailboxInformation>? list_children_async(FolderPath? parent, Cancellable? cancellable)
         throws Error {
         check_open();
         
@@ -136,7 +190,7 @@ private class Geary.Imap.Account : BaseObject {
         return (list_results.size > 0) ? list_results : null;
     }
     
-    public async Gee.List<StatusData>? status_command_async(FolderPath path, Cancellable? cancellable = null)
+    public async Gee.List<StatusData>? status_command_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
         
@@ -162,6 +216,10 @@ private class Geary.Imap.Account : BaseObject {
         Cancellable? cancellable) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
         
+        // set up collectors
+        list_collector = list_results;
+        status_collector = status_results;
+        
         CompletionStatusResponse? response = null;
         Error? err = null;
         try {
@@ -170,16 +228,9 @@ private class Geary.Imap.Account : BaseObject {
             err = send_err;
         }
         
-        if (err == null) {
-            if (list_results != null)
-                list_results.add_all(list_collector);
-            
-            if (status_results != null)
-                status_results.add_all(status_collector);
-        }
-        
-        list_collector.clear();
-        status_collector.clear();
+        // disconnect collectors
+        list_collector = null;
+        status_collector = null;
         
         cmd_mutex.release(ref token);
         

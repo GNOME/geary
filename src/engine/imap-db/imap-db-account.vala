@@ -198,8 +198,8 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.Imap.FolderProperties properties = imap_folder.get_properties();
-        Geary.FolderPath path = imap_folder.get_path();
+        Geary.Imap.FolderProperties properties = imap_folder.properties;
+        Geary.FolderPath path = imap_folder.path;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 parent_id;
