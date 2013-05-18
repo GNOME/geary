@@ -535,11 +535,11 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         Gee.Collection<Geary.EmailIdentifier> search_results = new Gee.HashSet<Geary.EmailIdentifier>();
         
-        // TODO: support blacklist, search_ids, use real full-text search
+        // TODO: support blacklist, search_ids
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE body LIKE ?");
-            stmt.bind_string(0, "%%%s%%".printf(keywords)); // i.e. LIKE %foo%
+            Db.Statement stmt = cx.prepare("SELECT id FROM MessageSearchTable WHERE MessageSearchTable MATCH ?");
+            stmt.bind_string(0, keywords);
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
