@@ -33,7 +33,7 @@ public class GearyController {
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
 
-    public const int FETCH_EMAIL_CHUNK_COUNT = 200;
+    public const int MIN_CONVERSATION_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Delete, Backspace, A)");
@@ -477,7 +477,7 @@ public class GearyController {
         update_ui();
         
         current_conversations = new Geary.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NONE,
-            ConversationListStore.REQUIRED_FIELDS);
+            ConversationListStore.REQUIRED_FIELDS, MIN_CONVERSATION_COUNT);
         
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
@@ -496,7 +496,7 @@ public class GearyController {
         main_window.conversation_list_view.set_conversation_monitor(current_conversations);
         
         if (!current_conversations.is_monitoring)
-            yield current_conversations.start_monitoring_async(FETCH_EMAIL_CHUNK_COUNT, conversation_cancellable);
+            yield current_conversations.start_monitoring_async(conversation_cancellable);
         
         select_folder_mutex.release(ref mutex_token);
         
@@ -566,24 +566,7 @@ public class GearyController {
     
     private void on_load_more() {
         debug("on_load_more");
-        Geary.EmailIdentifier? low_id = main_window.conversation_list_store.get_lowest_email_id();
-        if (low_id == null)
-            return;
-        
-        set_busy(true);
-        current_conversations.load_by_id_async.begin(low_id, - FETCH_EMAIL_CHUNK_COUNT,
-            Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_folder, on_load_more_completed);
-    }
-    
-    private void on_load_more_completed(Object? source, AsyncResult result) {
-        debug("on load more completed");
-        try {
-            current_conversations.load_by_id_async.end(result);
-        } catch (Error err) {
-            debug("Error, unable to load conversations: %s", err.message);
-        }
-        
-        set_busy(false);
+        current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
     }
     
     private void on_email_flags_changed(Geary.Conversation conversation, Geary.Email email) {

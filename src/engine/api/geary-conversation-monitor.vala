@@ -14,6 +14,9 @@ public class Geary.ConversationMonitor : BaseObject {
     
     private const int RETRY_CONNECTION_SEC = 15;
     
+    // # of messages to load at a time as we attempt to fill the min window.
+    private const int WINDOW_FILL_MESSAGE_COUNT = 5;
+    
     private class ImplConversation : Conversation {
         private static int next_convnum = 0;
         
@@ -170,6 +173,12 @@ public class Geary.ConversationMonitor : BaseObject {
     public Geary.Folder folder { get; private set; }
     public bool reestablish_connections { get; set; default = true; }
     public bool is_monitoring { get; private set; default = false; }
+    public int min_window_count { get { return _min_window_count; } 
+        set {
+            _min_window_count = value;
+            fill_window();
+        }
+    }
     
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
@@ -182,8 +191,9 @@ public class Geary.ConversationMonitor : BaseObject {
     private bool retry_connection = false;
     private int64 last_retry_time = 0;
     private uint retry_id = 0;
-    private int min_window_count = 0;
     private bool reseed_notified = false;
+    private int _min_window_count = 0;
+    private bool in_fill_window = false;
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
@@ -307,10 +317,20 @@ public class Geary.ConversationMonitor : BaseObject {
             folder.to_string());
     }
     
-    public ConversationMonitor(Geary.Folder folder, Geary.Folder.OpenFlags open_flags, Geary.Email.Field required_fields) {
+    /**
+     * Creates a conversation monitor for the given folder.
+     *
+     * @param folder Folder to monitor
+     * @param open_flags See {@link Geary.Folder}
+     * @param required_fields See {@link Geary.Folder}
+     * @param min_window_count Minimum number of conversations that will be loaded
+     */
+    public ConversationMonitor(Geary.Folder folder, Geary.Folder.OpenFlags open_flags,
+        Geary.Email.Field required_fields, int min_window_count) {
         this.folder = folder;
         this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS;
+        _min_window_count = min_window_count;
         
         folder.account.information.notify["imap-credentials"].connect(on_imap_credentials_notified);
     }
@@ -383,7 +403,7 @@ public class Geary.ConversationMonitor : BaseObject {
         return geary_id_map.get(email_id);
     }
     
-    public async bool start_monitoring_async(int min_window_count, Cancellable? cancellable = null)
+    public async bool start_monitoring_async(Cancellable? cancellable = null)
         throws Error {
         if (is_monitoring)
             return false;
@@ -391,7 +411,6 @@ public class Geary.ConversationMonitor : BaseObject {
         // set before yield to guard against reentrancy
         is_monitoring = true;
         
-        this.min_window_count = min_window_count;
         cancellable_monitor = cancellable;
         
         folder.email_appended.connect(on_folder_email_appended);
@@ -483,7 +502,7 @@ public class Geary.ConversationMonitor : BaseObject {
      * of returning emails, this method will load the Conversations object with them sorted into
      * Conversation objects.
      */
-    public async void load_async(int low, int count, Geary.Folder.ListFlags flags,
+    private async void load_async(int low, int count, Geary.Folder.ListFlags flags,
         Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
@@ -499,7 +518,7 @@ public class Geary.ConversationMonitor : BaseObject {
      * of returning emails, this method will load the Conversations object with them sorted into
      * Conversation objects.
      */
-    public async void load_by_id_async(Geary.EmailIdentifier initial_id, int count,
+    private async void load_by_id_async(Geary.EmailIdentifier initial_id, int count,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
@@ -511,7 +530,7 @@ public class Geary.ConversationMonitor : BaseObject {
         }
     }
     
-    public async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
+    private async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
         notify_scan_started();
         
@@ -532,6 +551,8 @@ public class Geary.ConversationMonitor : BaseObject {
     private async void process_email_async(Gee.Collection<Geary.Email>? emails) {
         if (emails == null || emails.size == 0) {
             notify_scan_completed();
+            yield fill_window_async();
+            
             return;
         }
         
@@ -766,6 +787,8 @@ public class Geary.ConversationMonitor : BaseObject {
         
         foreach (Conversation conversation in removed)
             notify_conversation_removed(conversation);
+        
+        fill_window();
     }
     
     private void on_folder_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
@@ -886,7 +909,7 @@ public class Geary.ConversationMonitor : BaseObject {
         // and not a hard error
         debug("Restarting conversation monitoring of folder %s...", folder.to_string());
         try {
-            if (!yield start_monitoring_async(min_window_count, cancellable_monitor))
+            if (!yield start_monitoring_async(cancellable_monitor))
                 debug("Unable to restart monitoring of %s: already monitoring", folder.to_string());
             else
                 debug("Reestablished connection to %s, continuing to monitor conversations",
@@ -939,5 +962,46 @@ public class Geary.ConversationMonitor : BaseObject {
         
         return false;
     }
+    
+    private void fill_window() {
+        fill_window_async.begin();
+    }
+    
+    /**
+     * Attempts to load enough conversations to fill min_window_count.
+     */
+    private async void fill_window_async() {
+        if (in_fill_window || !is_monitoring)
+            return;
+        
+        in_fill_window = true;
+        while (min_window_count > conversations.size) {
+            int initial_message_count = geary_id_map.size;
+            
+            Geary.EmailIdentifier? low_id = get_lowest_email_id();
+            if (low_id == null)
+                break; // Folder doesn't contain any messages.
+            
+            // Load at least as many messages as remianing conversations.
+            int num_to_load = min_window_count - conversations.size;
+            if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
+                num_to_load = WINDOW_FILL_MESSAGE_COUNT;
+            
+            try {
+                yield load_by_id_async(low_id, -num_to_load,
+                    Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
+            } catch(Error e) {
+                debug("Error filling conversation window: %s", e.message);
+                
+                break;
+            }
+            
+            if (geary_id_map.size == initial_message_count)
+                break; // There were no more messages to load.
+        }
+        
+        in_fill_window = false;
+    }
+    
 }
 

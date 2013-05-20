@@ -28,14 +28,14 @@ public class Geary.DBus.Conversations : Object {
     public Conversations(Geary.Folder folder) {
         this.folder = folder;
         conversations = new Geary.ConversationMonitor(folder, Geary.Folder.OpenFlags.NONE,
-            Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS);
+            Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS, 20); // Download 20 conversations
         
         start_monitoring_async.begin();
     }
     
     private async void start_monitoring_async() {
         try {
-            yield conversations.start_monitoring_async(0);
+            yield conversations.start_monitoring_async();
         } catch (Error err) {
             debug("Unable to start monitoring %s for conversations: %s", folder.to_string(),
                 err.message);
@@ -52,10 +52,6 @@ public class Geary.DBus.Conversations : Object {
         conversations.conversation_removed.connect(on_conversation_removed);
         
         folder.email_flags_changed.connect(on_email_flags_changed);
-    }
-    
-    public void fetch_messages(int num_messages) throws IOError {
-        conversations.load_async.begin(-1, num_messages, Geary.Folder.ListFlags.NONE, null);
     }
     
     private void on_scan_started() {
