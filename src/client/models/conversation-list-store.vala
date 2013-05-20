@@ -393,14 +393,7 @@ public class ConversationListStore : Gtk.ListStore {
     
     private void on_scan_completed(Geary.ConversationMonitor sender) {
         refresh_previews_async.begin(sender);
-        
-        if (!loading_local_only)
-            return;
-        
-        debug("Loading all emails now");
         loading_local_only = false;
-        sender.load_async.begin(-1, GearyController.FETCH_EMAIL_CHUNK_COUNT,
-            Geary.Folder.ListFlags.NONE, cancellable_folder);
     }
     
     private void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
