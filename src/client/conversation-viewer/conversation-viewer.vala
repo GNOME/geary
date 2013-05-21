@@ -223,7 +223,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
-    private string get_div_id(Geary.EmailIdentifier id) {
+    public string get_div_id(Geary.EmailIdentifier id) {
         return "message_%s".printf(id.to_string());
     }
     

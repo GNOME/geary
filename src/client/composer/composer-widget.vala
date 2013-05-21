@@ -194,7 +194,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     public ComposerWidget(Geary.Account account, ComposeType compose_type,
-        Geary.Email? referred = null, bool is_referred_draft = false, bool in_window = true) {
+        Geary.Email? referred = null, bool is_referred_draft = false) {
         this.account = account;
         this.compose_type = compose_type;
         
@@ -461,7 +461,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (!from_multiple.visible)
             open_drafts_folder_async.begin(cancellable_drafts);
         
-        if (in_window)
+        if (!ComposerEmbed.create_embed(this, referred))
             new ComposerWindow(this);
     }
     
