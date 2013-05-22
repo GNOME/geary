@@ -465,7 +465,7 @@ public class Geary.RFC822.Message : BaseObject {
             html = true;
         } catch (Error e) {
             try {
-                body = get_text_body();
+                body = get_text_body(false);
             } catch (Error e) {
                 // Ignore.
             }
@@ -475,12 +475,8 @@ public class Geary.RFC822.Message : BaseObject {
         
         // TODO: add bodies of attached emails.
         
-        if (html) {
-            // FIXME: this is inadequate.  For example, <br> needs to be turned
-            // into at least one space character, not just omitted.  Also, we
-            // should also replace entities with the characters they represent.
-            body = Geary.HTML.remove_html_tags(body);
-        }
+        if (html)
+            body = Geary.HTML.html_to_text(body);
         
         return body;
     }

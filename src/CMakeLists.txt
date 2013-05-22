@@ -362,11 +362,12 @@ pkg_check_modules(DEPS REQUIRED
     gmime-2.6>=2.6.0
     libsecret-1>=0.11
     webkitgtk-3.0>=1.10.0
+    libxml-2.0>=2.7.8
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3
+    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3 libxml-2.0
 )
 
 set(CLIENT_PACKAGES
