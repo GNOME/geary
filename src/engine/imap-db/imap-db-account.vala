@@ -530,7 +530,53 @@ private class Geary.ImapDB.Account : BaseObject {
         return (messages.size == 0 ? null : messages);
     }
     
-    public async Gee.Collection<Geary.EmailIdentifier>? search_async(string keywords, 
+    public string prepare_search_query(string raw_query) {
+        // Two goals here:
+        //   1) append an * after every term so it becomes a prefix search
+        //      (see <https://www.sqlite.org/fts3.html#section_3>), and
+        //   2) strip out common words/operators that might get interpreted as
+        //      search operators.
+        // We ignore everything inside quotes to give the user a way to
+        // override our algorithm here.  The idea is to offer one search query
+        // syntax for Geary that we can use locally and via IMAP, etc.
+        string[] words = raw_query.split_set(" \t\r\n:()*");
+        bool in_quote = false;
+        StringBuilder prepared_query = new StringBuilder();
+        foreach (string s in words) {
+            s = s.strip();
+            
+            int quotes = Geary.String.count_char(s, '"');
+            if (!in_quote && quotes > 0) {
+                in_quote = true;
+                --quotes;
+            }
+            
+            if (!in_quote) {
+                string lower = s.down();
+                if (lower == "" || lower == "and" || lower == "or" || lower == "not" || lower == "near"
+                    || lower.has_prefix("near/"))
+                    continue;
+                
+                if (s.has_prefix("-"))
+                    s = s.substring(1);
+                
+                if (s == "")
+                    continue;
+                
+                s = s + "*";
+            }
+            
+            if (in_quote && quotes % 2 != 0)
+                in_quote = false;
+            
+            prepared_query.append(s);
+            prepared_query.append(" ");
+        }
+        
+        return prepared_query.str.strip();
+    }
+    
+    public async Gee.Collection<Geary.EmailIdentifier>? search_async(string prepared_query,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         Gee.Collection<Geary.EmailIdentifier> search_results = new Gee.HashSet<Geary.EmailIdentifier>();
@@ -539,7 +585,7 @@ private class Geary.ImapDB.Account : BaseObject {
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare("SELECT id FROM MessageSearchTable WHERE MessageSearchTable MATCH ?");
-            stmt.bind_string(0, keywords);
+            stmt.bind_string(0, prepared_query);
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
