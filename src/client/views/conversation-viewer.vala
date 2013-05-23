@@ -1010,9 +1010,22 @@ public class ConversationViewer : Gtk.Box {
     private string insert_html_markup(string text, Geary.RFC822.Message message, out bool remote_images) {
         remote_images = false;
         try {
+            string inner_text = text;
+            
+            // If email HTML has a BODY, use only that
+            GLib.Regex body_regex = new GLib.Regex("<body([^>]*)>(.*)</body>",
+                GLib.RegexCompileFlags.DOTALL);
+            GLib.MatchInfo matches;
+            if (body_regex.match(text, 0, out matches)) {
+                inner_text = matches.fetch(2);
+                string attrs = matches.fetch(1);
+                if (attrs != "")
+                    inner_text = @"<div$attrs>$inner_text</div>";
+            }
+            
             // Create a workspace for manipulating the HTML.
             WebKit.DOM.HTMLElement container = web_view.create_div();
-            container.set_inner_html(text);
+            container.set_inner_html(inner_text);
             
             // Some HTML messages like to wrap themselves in full, proper html, head, and body tags.
             // If we have that here, lets remove it since we are sticking it in our own document.
