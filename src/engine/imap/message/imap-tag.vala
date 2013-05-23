@@ -21,6 +21,12 @@ public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
         base (strparam.value);
     }
     
+    internal static void init() {
+        get_untagged();
+        get_continuation();
+        get_unassigned();
+    }
+    
     public static Tag get_untagged() {
         if (untagged == null)
             untagged = new Tag(UNTAGGED_VALUE);
@@ -40,6 +46,30 @@ public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
             unassigned = new Tag(UNASSIGNED_VALUE);
         
         return unassigned;
+    }
+    
+    /**
+     * Returns true if the StringParameter resembles a tag token: an unquoted non-empty string
+     * that either matches the untagged or continuation special tags or 
+     */
+    public static bool is_tag(StringParameter stringp) {
+        if (stringp is QuotedStringParameter)
+            return false;
+        
+        if (String.is_empty(stringp.value))
+            return false;
+        
+        if (stringp.value == UNTAGGED_VALUE || stringp.value == CONTINUATION_VALUE)
+            return true;
+        
+        int index = 0;
+        unichar ch;
+        while (stringp.value.get_next_char(ref index, out ch)) {
+            if (DataFormat.is_tag_special(ch))
+                return false;
+        }
+        
+        return true;
     }
     
     public bool is_tagged() {

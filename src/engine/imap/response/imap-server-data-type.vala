@@ -4,6 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A descriptor of what flavor of {@link ServerData} is found in the response.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.2]] for more information.
+ */
+
 public enum Geary.Imap.ServerDataType {
     CAPABILITY,
     EXISTS,
@@ -95,10 +101,23 @@ public enum Geary.Imap.ServerDataType {
         return new StringParameter(to_string());
     }
     
+    /**
+     * Convert a {@link StringParameter} into a ServerDataType.
+     *
+     * @throws ImapError.PARSE_ERROR if the StringParameter is not recognized as a ServerDataType.
+     */
     public static ServerDataType from_parameter(StringParameter param) throws ImapError {
         return decode(param.value);
     }
     
+    /**
+     * Examines the {@link RootParameters} looking for a ServerDataType.
+     *
+     * IMAP server responses don't offer a regular format for server data declations.  This method
+     * parses for the common patterns and returns the ServerDataType it detects.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-7.2]] for more information.
+     */
     public static ServerDataType from_response(RootParameters root) throws ImapError {
         StringParameter? firstparam = root.get_if_string(1);
         if (firstparam != null) {

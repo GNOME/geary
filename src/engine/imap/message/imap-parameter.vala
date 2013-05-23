@@ -91,8 +91,10 @@ public class Geary.Imap.StringParameter : Geary.Imap.Parameter {
 
 /**
  * This delivers the string to the IMAP server with quoting applied whether or not it's required.
- * (Deserializer will never generate this Parameter.)  This is generally legal, but some servers may
- * not appreciate it.
+ *
+ * This is generally legal, but some servers may not appreciate it.
+ *
+ * {@link Deserializer} will never generate this {@link Parameter}.
  */
 public class Geary.Imap.QuotedStringParameter : Geary.Imap.StringParameter {
     public QuotedStringParameter(string value) {
@@ -105,9 +107,11 @@ public class Geary.Imap.QuotedStringParameter : Geary.Imap.StringParameter {
 }
 
 /**
- * This delivers the string to the IMAP server with no quoting or formatting applied.  (Deserializer
- * will never generate this Parameter.)  This can lead to server errors if misused.  Use only if
- * absolutely necessary.
+ * This delivers the string to the IMAP server with no quoting or formatting applied.
+ *
+ * This can lead to server errors if misused.  Use only if absolutely necessary.
+ *
+ * {@link Deserializer} will never generate this Parameter.
  */
 public class Geary.Imap.UnquotedStringParameter : Geary.Imap.StringParameter {
     public UnquotedStringParameter(string value) {
@@ -425,10 +429,12 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Moves all child parameters from the supplied list into this list.  The supplied list will be
-     * "stripped" of children.
+     * Moves all child parameters from the supplied list into this list.
+     *
+     * The supplied list will be "stripped" of its children.  This ListParameter is cleared prior
+     * to adopting the new children.
      */
-    public void move_children(ListParameter src) {
+    public void adopt_children(ListParameter src) {
         list.clear();
         
         foreach (Parameter param in src.list) {
@@ -480,19 +486,41 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
         base (null, initial);
     }
     
+    /**
+     * Moves all contained {@link Parameter} objects inside the supplied RootParameters into a
+     * new RootParameters.
+     *
+     * The supplied root object is stripped clean by this call.
+     */
     public RootParameters.migrate(RootParameters root) {
         base (null);
         
-        move_children(root);
+        adopt_children(root);
     }
     
     /**
      * Returns null if the first parameter is not a StringParameter that resembles a Tag.
      */
     public Tag? get_tag() {
-        StringParameter? strparam = get_if_string(0);
+        StringParameter? strparam = get_only_if_string(0);
+        if (strparam == null)
+            return null;
         
-        return (strparam != null) ? new Tag.from_parameter(strparam) : null;
+        if (!Tag.is_tag(strparam))
+            return null;
+        
+        return new Tag.from_parameter(strparam);
+    }
+    
+    /**
+     * Returns true if the first parameter is a StringParameter that resembles a Tag.
+     */
+    public bool has_tag() {
+        StringParameter? strparam = get_only_if_string(0);
+        if (strparam == null)
+            return false;
+        
+        return (strparam != null) ? Tag.is_tag(strparam) : false;
     }
     
     public override string to_string() {

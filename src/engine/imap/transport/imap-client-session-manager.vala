@@ -249,7 +249,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         return found_session;
     }
     
-    public async void release_session_async(ClientSession session, Cancellable? cancellable) throws Error {
+    public async void release_session_async(ClientSession session, Cancellable? cancellable)
+        throws Error {
         check_open();
         
         string? mailbox;

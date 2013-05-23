@@ -4,18 +4,40 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Email data sent from the server to client in response to a command or unsolicited.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.2]] for more information.
+ */
+
 public class Geary.Imap.ServerData : ServerResponse {
     public ServerDataType server_data_type { get; private set; }
     
-    protected ServerData(Tag tag) {
+    public ServerData(Tag tag, ServerDataType server_data_type) {
         base (tag);
+        
+        this.server_data_type = server_data_type;
     }
     
+    /**
+     * Converts the {@link RootParameters} into {@link ServerData}.
+     *
+     * The supplied root is "stripped" of its children.  This may happen even if an exception is
+     * thrown.  It's recommended to use {@link is_server_data} prior to this call.
+     */
     public ServerData.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
+        
+        server_data_type = ServerDataType.from_response(root);
     }
     
+    /**
+     * Returns true if {@link RootParameters} is recognized by {@link ServerDataType.from_response}.
+     */
     public static bool is_server_data(RootParameters root) {
+        if (!root.has_tag())
+            return false;
+        
         try {
             ServerDataType.from_response(root);
             
@@ -26,13 +48,17 @@ public class Geary.Imap.ServerData : ServerResponse {
     }
     
     /**
-     * Since Capabilities are revisioned, pass a ref to an int that will be incremented after handed
-     * to the Capabilities constructor.  This can be used to track the revision of capabilities
-     * seen on the connection.
+     * Parses the {@link ServerData} into {@Capabilities}, if possible.
+     *
+     * Since Capabilities are revised with various {@link ClientSession} states, this method accepts
+     * a ref to an int that will be incremented after handed to the Capabilities constructor.  This
+     * can be used to track the revision of capabilities seen on the connection.
+     *
+     * @throws ImapError.INVALID if not a Capability.
      */
     public Capabilities get_capabilities(ref int next_revision) throws ImapError {
         if (server_data_type != ServerDataType.CAPABILITY)
-            throw new ImapError.PARSE_ERROR("Not CAPABILITY data: %s", to_string());
+            throw new ImapError.INVALID("Not CAPABILITY data: %s", to_string());
         
         Capabilities capabilities = new Capabilities(next_revision++);
         for (int ctr = 2; ctr < get_count(); ctr++) {
@@ -44,51 +70,86 @@ public class Geary.Imap.ServerData : ServerResponse {
         return capabilities;
     }
     
+    /**
+     * Parses the {@link ServerData} into an {@link ServerDataType.EXISTS} value, if possible.
+     *
+     * @throws ImapError.INVALID if not EXISTS.
+     */
     public int get_exists() throws ImapError {
         if (server_data_type != ServerDataType.EXISTS)
-            throw new ImapError.PARSE_ERROR("Not EXISTS data: %s", to_string());
+            throw new ImapError.INVALID("Not EXISTS data: %s", to_string());
         
         return get_as_string(1).as_int(0);
     }
     
+    /**
+     * Parses the {@link ServerData} into an expunged {@link MessageNumber}, if possible.
+     *
+     * @throws ImapError.INVALID if not an expunged MessageNumber.
+     */
     public MessageNumber get_expunge() throws ImapError {
         if (server_data_type != ServerDataType.EXPUNGE)
-            throw new ImapError.PARSE_ERROR("Not EXPUNGE data: %s", to_string());
+            throw new ImapError.INVALID("Not EXPUNGE data: %s", to_string());
         
         return new MessageNumber(get_as_string(1).as_int());
     }
     
+    /**
+     * Parses the {@link ServerData} into {@FetchedData}, if possible.
+     *
+     * @throws ImapError.INVALID if not FetchData.
+     */
     public FetchedData get_fetch() throws ImapError {
         if (server_data_type != ServerDataType.FETCH)
-            throw new ImapError.PARSE_ERROR("Not FETCH data: %s", to_string());
+            throw new ImapError.INVALID("Not FETCH data: %s", to_string());
         
         return FetchedData.decode(this);
     }
     
+    /**
+     * Parses the {@link ServerData} into {@link MailboxAttributes}, if possible.
+     *
+     * @throws ImapError.INVALID if not MailboxAttributes.
+     */
     public MailboxAttributes get_flags() throws ImapError {
         if (server_data_type != ServerDataType.FLAGS)
-            throw new ImapError.PARSE_ERROR("Not FLAGS data: %s", to_string());
+            throw new ImapError.INVALID("Not FLAGS data: %s", to_string());
         
         return MailboxAttributes.from_list(get_as_list(2));
     }
     
+    /**
+     * Parses the {@link ServerData} into {@link MailboxInformation}, if possible.
+     *
+     * @throws ImapError.INVALID if not MailboxInformation.
+     */
     public MailboxInformation get_list() throws ImapError {
         if (server_data_type != ServerDataType.LIST)
-            throw new ImapError.PARSE_ERROR("Not LIST data: %s", to_string());
+            throw new ImapError.INVALID("Not LIST data: %s", to_string());
         
         return MailboxInformation.decode(this);
     }
     
+    /**
+     * Parses the {@link ServerData} into a {@link ServerDataType.RECENT} value, if possible.
+     *
+     * @throws ImapError.INVALID if not a {@link ServerDataType.RECENT} value.
+     */
     public int get_recent() throws ImapError {
         if (server_data_type != ServerDataType.RECENT)
-            throw new ImapError.PARSE_ERROR("Not RECENT data: %s", to_string());
+            throw new ImapError.INVALID("Not RECENT data: %s", to_string());
         
         return get_as_string(1).as_int(0);
     }
     
+    /**
+     * Parses the {@link ServerData} into {@link StatusData}, if possible.
+     *
+     * @throws ImapError.INVALID if not {@link StatusData}.
+     */
     public StatusData get_status() throws ImapError {
         if (server_data_type != ServerDataType.STATUS)
-            throw new ImapError.PARSE_ERROR("Not STATUS data: %s", to_string());
+            throw new ImapError.INVALID("Not STATUS data: %s", to_string());
         
         return StatusData.decode(this);
     }

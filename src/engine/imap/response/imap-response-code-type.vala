@@ -4,8 +4,16 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * An optional response code accompanying a {@link ServerResponse}.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
+ */
+
 public enum Geary.Imap.ResponseCodeType {
     ALERT,
+    BADCHARSET,
+    CAPABILITY,
     NEWNAME,
     PARSE,
     PERMANENT_FLAGS,
@@ -21,6 +29,12 @@ public enum Geary.Imap.ResponseCodeType {
         switch (this) {
             case ALERT:
                 return "alert";
+            
+            case BADCHARSET:
+                return "badcharset";
+            
+            case CAPABILITY:
+                return "capability";
             
             case NEWNAME:
                 return "newname";
@@ -61,6 +75,12 @@ public enum Geary.Imap.ResponseCodeType {
         switch (value.down()) {
             case "alert":
                 return ALERT;
+            
+            case "badcharset":
+                return BADCHARSET;
+            
+            case "capability":
+                return CAPABILITY;
             
             case "newname":
                 return NEWNAME;

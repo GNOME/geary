@@ -4,6 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A response code and additional information that optionally accompanies a server response.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
+ */
+
 public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public ResponseCode(ListParameter parent, Parameter? initial = null) {
         base (parent, initial);

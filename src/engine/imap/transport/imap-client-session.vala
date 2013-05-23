@@ -120,12 +120,11 @@ public class Geary.Imap.ClientSession : BaseObject {
         state_to_string, event_to_string);
     
     /**
-     * ClientSession tracks server extensions reported via the CAPABILITY server data response.
-     * This comes automatically when logging in and can be fetched by the CAPABILITY command.
+     * {@link ClientSession} tracks server extensions reported via the CAPABILITY server data
+     * response.
+     *
      * ClientSession stores the last seen list as a service for users and uses it internally
-     * (specifically for IDLE support).  However, ClientSession will not automatically fetch
-     * capabilities, only watch for them as they're reported.  Thus, it's recommended that users
-     * of ClientSession issue a CapabilityCommand (if needed) before login.
+     * (specifically for IDLE support).
      */
     public Capabilities capabilities { get; private set; default = new Capabilities(0); }
     
@@ -534,8 +533,11 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     /**
-     * Prepares the connection and performs a login using the supplied credentials.  Preparing the
-     * connnection includes attempting compression and using STARTTLS if necessary.
+     * Prepares the connection and performs a login using the supplied credentials.
+     *
+     * Preparing the connnection includes attempting compression and using STARTTLS if necessary.
+     * {@link Capabilities} are also retrieved automatically at the right time to ensure the best
+     * results are available with {@link capabilities}.
      */
     public async void initiate_session_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
@@ -627,7 +629,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_logging_in(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
-        params.err = new ImapError.FAILED("Already logging in to %s", to_string());
+        params.err = new ImapError.ALREADY_CONNECTED("Already logging in to %s", to_string());
         
         return state;
     }
@@ -1176,7 +1178,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(object != null);
         
         MachineParams params = (MachineParams) object;
-        params.err = new ImapError.FAILED("Already connected or connecting to %s", to_string());
+        params.err = new ImapError.ALREADY_CONNECTED("Already connected or connecting to %s", to_string());
         
         return state;
     }
@@ -1185,7 +1187,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(object != null);
         
         MachineParams params = (MachineParams) object;
-        params.err = new ImapError.FAILED("Already logged in to %s", to_string());
+        params.err = new ImapError.ALREADY_CONNECTED("Already logged in to %s", to_string());
         
         return state;
     }
@@ -1250,7 +1252,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(completion_response != null);
         
         if (completion_response.status != Status.OK)
-            throw new ImapError.FAILED("Command %s failed: %s", cmd.name, completion_response.to_string());
+            throw new ImapError.SERVER_ERROR("Command %s failed: %s", cmd.name, completion_response.to_string());
         
         return completion_response;
     }
@@ -1300,6 +1302,9 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         // update state machine before notifying subscribers, who may turn around and query ClientSession
         fsm.issue(Event.RECV_STATUS, null, coded_response, null);
+        
+        // TODO: If CodedStatusResponse.response_code == CAPABILITIES, decode and update
+        // capabilities property
         
         coded_response_received(coded_response);
     }

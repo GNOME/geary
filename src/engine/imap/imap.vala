@@ -14,6 +14,7 @@ internal void init() {
     
     MessageFlag.init();
     MailboxAttribute.init();
+    Tag.init();
 }
 
 }
