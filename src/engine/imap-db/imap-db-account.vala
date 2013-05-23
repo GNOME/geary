@@ -24,6 +24,7 @@ private class Geary.ImapDB.Account : BaseObject {
     private ImapDB.Database? db = null;
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
+    private Cancellable? background_cancellable = null;
     public ImapEngine.ContactStore contact_store { get; private set; }
     
     public Account(Geary.AccountInformation account_information) {
@@ -68,6 +69,11 @@ private class Geary.ImapDB.Account : BaseObject {
             error("Error finding account from its information: %s", e.message);
         }
         
+        background_cancellable = new Cancellable();
+        
+        // Kick off a background update of the search table.
+        populate_search_table_async.begin(background_cancellable);
+        
         initialize_contacts(cancellable);
         
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
@@ -92,6 +98,9 @@ private class Geary.ImapDB.Account : BaseObject {
         } finally {
             db = null;
         }
+        
+        background_cancellable.cancel();
+        background_cancellable = null;
         
         outbox = null;
         search_folder = null;
@@ -682,6 +691,65 @@ private class Geary.ImapDB.Account : BaseObject {
         
         if (count > 0)
             debug("Deleted %d duplicate folders", count);
+    }
+    
+    private async void populate_search_table_async(Cancellable? cancellable) {
+        // TODO: send processing signal upwards.
+        debug("Populating search table");
+        try {
+            while (!yield populate_search_table_batch_async(100, cancellable))
+                ;
+        } catch (Error e) {
+            debug("Error populating search table: %s", e.message);
+        }
+        debug("Done populating search table");
+    }
+    
+    private async bool populate_search_table_batch_async(int limit = 100,
+        Cancellable? cancellable) throws Error {
+        bool done = false;
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT id
+                FROM MessageTable
+                WHERE id NOT IN (
+                    SELECT id
+                    FROM MessageSearchTable
+                )
+                LIMIT ?
+            """);
+            stmt.bind_int(0, limit);
+            
+            int count = 0;
+            Db.Result result = stmt.exec(cancellable);
+            while (!result.finished) {
+                int64 id = result.rowid_at(0);
+                
+                try {
+                    MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                        cx, id, Geary.ImapDB.Folder.REQUIRED_FOR_SEARCH, cancellable);
+                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
+                    
+                    Geary.ImapDB.Folder.do_add_email_to_search_table(cx, id, email, cancellable);
+                } catch (Error e) {
+                    // This is a somewhat serious issue since we rely on
+                    // there always being a row in the search table for
+                    // every message.
+                    warning("Error adding message %lld to the search table: %s", id, e.message);
+                }
+                
+                ++count;
+                result.next(cancellable);
+            }
+            
+            if (count < limit)
+                done = true;
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return done;
     }
     
     //

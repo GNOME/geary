@@ -953,7 +953,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         stmt.bind_string(6, (email.cc != null ? email.cc.to_searchable_string() : null));
         stmt.bind_string(7, (email.bcc != null ? email.bcc.to_searchable_string() : null));
         
-        stmt.exec_insert();
+        stmt.exec_insert(cancellable);
+    }
+    
+    private static bool do_check_for_message_search_row(Db.Connection cx, int64 message_id,
+        Cancellable? cancellable) throws Error {
+        Db.Statement stmt = cx.prepare("SELECT 'TRUE' FROM MessageSearchTable WHERE id=?");
+        stmt.bind_rowid(0, message_id);
+        
+        Db.Result result = stmt.exec(cancellable);
+        return !result.finished;
     }
     
     private Gee.List<Geary.Email>? do_list_email(Db.Connection cx, Gee.List<LocationIdentifier> locations,
@@ -1309,7 +1318,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         stmt.bind_string(6, (email.bcc != null ? email.bcc.to_searchable_string() : null));
         stmt.bind_rowid(7, message_id);
         
-        stmt.exec();
+        stmt.exec(cancellable);
     }
     
     private void do_merge_email(Db.Connection cx, int64 message_id, Geary.Email email,
@@ -1344,7 +1353,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
         }
         
-        do_merge_email_in_search_table(cx, message_id, combined_email, cancellable);
+        if (do_check_for_message_search_row(cx, message_id, cancellable))
+            do_merge_email_in_search_table(cx, message_id, combined_email, cancellable);
+        else
+            do_add_email_to_search_table(cx, message_id, combined_email, cancellable);
     }
     
     private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
