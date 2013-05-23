@@ -416,6 +416,7 @@ public class Geary.ConversationMonitor : BaseObject {
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
         folder.email_flags_changed.connect(on_folder_email_flags_changed);
+        folder.email_count_changed.connect(on_folder_email_count_changed);
         folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
         
@@ -428,6 +429,7 @@ public class Geary.ConversationMonitor : BaseObject {
             folder.email_appended.disconnect(on_folder_email_appended);
             folder.email_removed.disconnect(on_folder_email_removed);
             folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+            folder.email_count_changed.disconnect(on_folder_email_count_changed);
             folder.opened.disconnect(on_folder_opened);
             folder.closed.disconnect(on_folder_closed);
             
@@ -806,6 +808,10 @@ public class Geary.ConversationMonitor : BaseObject {
         }
     }
     
+    private void on_folder_email_count_changed(int new_count, Geary.Folder.CountChangeReason reason) {
+        fill_window();
+    }
+    
     private Geary.EmailIdentifier? get_lowest_email_id() {
         Geary.EmailIdentifier? earliest_id = null;
         foreach (Geary.Conversation conversation in conversations) {
@@ -979,21 +985,29 @@ public class Geary.ConversationMonitor : BaseObject {
             int initial_message_count = geary_id_map.size;
             
             Geary.EmailIdentifier? low_id = get_lowest_email_id();
-            if (low_id == null)
-                break; // Folder doesn't contain any messages.
-            
-            // Load at least as many messages as remianing conversations.
-            int num_to_load = min_window_count - conversations.size;
-            if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
-                num_to_load = WINDOW_FILL_MESSAGE_COUNT;
-            
-            try {
-                yield load_by_id_async(low_id, -num_to_load,
-                    Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
-            } catch(Error e) {
-                debug("Error filling conversation window: %s", e.message);
+            if (low_id != null) {
+                // Load at least as many messages as remianing conversations.
+                int num_to_load = min_window_count - conversations.size;
+                if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
+                    num_to_load = WINDOW_FILL_MESSAGE_COUNT;
                 
-                break;
+                try {
+                    yield load_by_id_async(low_id, -num_to_load,
+                        Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
+                } catch(Error e) {
+                    debug("Error filling conversation window: %s", e.message);
+                    
+                    break;
+                }
+            } else {
+                // No existing messages, need to start from scratch.
+                try {
+                    yield load_async(-1, min_window_count, Folder.ListFlags.NONE, cancellable_monitor);
+                } catch(Error e) {
+                    debug("Error filling conversation window: %s", e.message);
+                    
+                    break;
+                }
             }
             
             if (geary_id_map.size == initial_message_count)

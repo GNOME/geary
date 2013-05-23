@@ -58,6 +58,10 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Comparable<Geary.E
             return 0;
     }
     
+    public virtual int desc_compare_to(Geary.EmailIdentifier other) {
+        return -compare_to(other);
+    }
+    
     public virtual string to_string() {
         return ordering.to_string();
     }
