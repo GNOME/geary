@@ -567,15 +567,15 @@ public class ConversationViewer : Gtk.Box {
         }
         
         if (hover_url != null) {
-            // Add a menu item for copying the link.
-            Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
-            item.activate.connect(on_copy_link);
-            menu.append(item);
-            
             if (Geary.RFC822.MailboxAddress.is_valid_address(hover_url)) {
                 // Add a menu item for copying the address.
-                item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
+                Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
                 item.activate.connect(on_copy_email_address);
+                menu.append(item);
+            } else {
+                // Add a menu item for copying the link.
+                Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
+                item.activate.connect(on_copy_link);
                 menu.append(item);
             }
         }
