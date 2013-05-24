@@ -17,7 +17,7 @@ if (GSETTINGS_COMPILE_IN_PLACE)
     message(STATUS "GSettings schemas will be compiled in-place.")
 endif ()
 
-macro(add_schemas GSETTINGS_TARGET SCHEMA_DIRECTORY)
+macro(add_schemas GSETTINGS_TARGET SCHEMA_DIRECTORY PREFIX)
     set(PKG_CONFIG_EXECUTABLE pkg-config)
     
     # Locate all schema files.
@@ -25,16 +25,20 @@ macro(add_schemas GSETTINGS_TARGET SCHEMA_DIRECTORY)
         "${SCHEMA_DIRECTORY}/*.gschema.xml"
     )
     
-    # Find the GLib path for schema installation
-    execute_process(
-        COMMAND
-            ${PKG_CONFIG_EXECUTABLE}
-            glib-2.0
-            --variable prefix
-        OUTPUT_VARIABLE
-            _glib_prefix
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+    if ("${PREFIX}" STREQUAL "")
+        # Find the GLib path for schema installation
+        execute_process(
+            COMMAND
+                ${PKG_CONFIG_EXECUTABLE}
+                glib-2.0
+                --variable prefix
+            OUTPUT_VARIABLE
+                _glib_prefix
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    else ()
+        set(_glib_prefix ${PREFIX})
+    endif ()
     
     set(GSETTINGS_DIR "${_glib_prefix}/share/glib-2.0/schemas/" CACHE INTERNAL "")
     

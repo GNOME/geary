@@ -469,7 +469,7 @@ add_custom_command(
 # This needs to be here and not in desktop/CMakeLists.txt in order for Geary to run in the build
 # directory
 include(GSettings)
-add_schemas(geary ${GSETTINGS_DIR})
+add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
 
 IF (XGETTEXT_FOUND)
     MESSAGE("Creating POT file")
