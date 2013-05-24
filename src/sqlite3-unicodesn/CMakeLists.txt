@@ -1,10 +1,12 @@
 # CMake definitions to build sqlite3-unicodesn as a static library.  This file
 # was added for Geary based on the project's Makefile.
 
+# If you update this list, you should also double-check
+# find_appropriate_search_stemmer() in src/engine/imap-db/imap-db-database.vala
 set(STEMMERS
     danish dutch english finnish french german hungarian
-    italian norwegian porter portuguese romanian russian
-    spanish swedish
+    italian norwegian portuguese romanian russian spanish
+    swedish turkish
 )
 
 set(SQLITE3_UNICODESN_SRC

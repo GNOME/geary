@@ -86,9 +86,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     // Version 10.
     private void post_upgrade_add_search_table() {
         try {
+            string stemmer = find_appropriate_search_stemmer();
+            debug("Creating search table using %s stemmer", stemmer);
+            
             // This can't go in the .sql file because its schema (the stemmer
             // algorithm) is determined at runtime.
-            string stemmer = "english"; // TODO
             exec("""
                 CREATE VIRTUAL TABLE MessageSearchTable USING fts4(
                     id INTEGER PRIMARY KEY,
@@ -107,6 +109,40 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         } catch (Error e) {
             error("Error creating search table: %s", e.message);
         }
+    }
+    
+    private string find_appropriate_search_stemmer() {
+        // Unfortunately, the stemmer library only accepts the full language
+        // name for the stemming algorithm.  This translates between the user's
+        // preferred language ISO 639-1 code and our available stemmers.
+        // FIXME: the available list here is determined by what's included in
+        // src/sqlite3-unicodesn/CMakeLists.txt.  We should pass that list in
+        // instead of hardcoding it here.
+        foreach (string l in Intl.get_language_names()) {
+            switch (l) {
+                case "da": return "danish";
+                case "nl": return "dutch";
+                case "en": return "english";
+                case "fi": return "finnish";
+                case "fr": return "french";
+                case "de": return "german";
+                case "hu": return "hungarian";
+                case "it": return "italian";
+                case "no": return "norwegian";
+                case "pt": return "portuguese";
+                case "ro": return "romanian";
+                case "ru": return "russian";
+                case "es": return "spanish";
+                case "sv": return "swedish";
+                case "tr": return "turkish";
+            }
+        }
+        
+        // Default to English because it seems to be on average the language
+        // most likely to be present in emails, regardless of the user's
+        // language setting.  This is not an exact science, and search results
+        // should be ok either way in most cases.
+        return "english";
     }
     
     private void on_prepare_database_connection(Db.Connection cx) throws Error {
