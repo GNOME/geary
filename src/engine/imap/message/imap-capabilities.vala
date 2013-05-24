@@ -10,6 +10,7 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     public const string XLIST = "XLIST";
     public const string COMPRESS = "COMPRESS";
     public const string DEFLATE_SETTING = "DEFLATE";
+    public const string UIDPLUS = "UIDPLUS";
     
     public const string NAME_SEPARATOR = " ";
     public const string? VALUE_SEPARATOR = null;

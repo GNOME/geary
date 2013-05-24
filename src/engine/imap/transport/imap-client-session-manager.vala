@@ -160,14 +160,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
-        add_session(new_session);
+        locked_add_session(new_session);
         
         try {
             yield new_session.connect_async(cancellable);
         } catch (Error err) {
             debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
-            bool removed = remove_session(new_session);
+            bool removed = locked_remove_session(new_session);
             assert(removed);
             
             throw err;
@@ -187,7 +187,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                     new_session.to_string(), disconnect_err.message);
             }
             
-            bool removed = remove_session(new_session);
+            bool removed = locked_remove_session(new_session);
             assert(removed);
             
             throw err;
@@ -240,7 +240,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         try {
             sessions_mutex.release(ref token);
         } catch (Error release_err) {
-            debug("Error releasing mutex: %s", release_err.message);
+            debug("Error releasing sessions table mutex: %s", release_err.message);
         }
         
         if (err != null)
@@ -263,10 +263,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             
             case ClientSession.Context.UNAUTHORIZED:
             case ClientSession.Context.UNCONNECTED:
-                // drop ... this will remove it from the session pool
-                session.disconnect_async.begin();
+                yield force_disconnect_async(session, true);
                 
-                return;
+                break;
             
             case ClientSession.Context.IN_PROGRESS:
             case ClientSession.Context.EXAMINED:
@@ -280,11 +279,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 }
                 
                 // if not in authorized state now, drop it
-                if (session.get_context(out mailbox) != ClientSession.Context.AUTHORIZED) {
-                    session.disconnect_async.begin();
-                    
-                    return;
-                }
+                if (session.get_context(out mailbox) != ClientSession.Context.AUTHORIZED)
+                    yield force_disconnect_async(session, true);
             break;
             
             default:
@@ -302,11 +298,31 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         sessions_mutex.release(ref token);
     }
     
-    private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
-        bool removed = remove_session(session);
-        assert(removed);
+    private async void force_disconnect_async(ClientSession session, bool do_disconnect) {
+        try {
+            int token = yield sessions_mutex.claim_async();
+            
+            bool removed = locked_remove_session(session);
+            assert(removed);
+            
+            if (do_disconnect) {
+                try {
+                    yield session.disconnect_async();
+                } catch (Error err) {
+                    // ignored
+                }
+            }
+            
+            sessions_mutex.release(ref token);
+        } catch (Error err) {
+            debug("Error attempting to lock sessions table: %s", err.message);
+        }
         
         adjust_session_pool.begin();
+    }
+    
+    private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
+        force_disconnect_async.begin(session, false);
     }
     
     private void on_login_failed(ClientSession session) {
@@ -317,7 +333,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         session.disconnect_async.begin();
     }
     
-    private void add_session(ClientSession session) {
+    // Only call with sessions mutex locked
+    private void locked_add_session(ClientSession session) {
         sessions.add(session);
         
         // See create_new_authorized_session() for why the "disconnected" signal is not subscribed
@@ -325,7 +342,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         session.login_failed.connect(on_login_failed);
     }
     
-    private bool remove_session(ClientSession session) {
+    // Only call with sessions mutex locked
+    private bool locked_remove_session(ClientSession session) {
         bool removed = sessions.remove(session);
         if (removed) {
             session.disconnected.disconnect(on_disconnected);

@@ -56,6 +56,9 @@ public class Geary.Imap.CompletionStatusResponse : StatusResponse {
         if (tag == null || !tag.is_tagged())
             return false;
         
+        // TODO: Is this too stringent?  It means a faulty server could send back a completion
+        // with another Status code and cause the client to treat the command as "unanswered",
+        // requiring a timeout.
         try {
             switch (Status.from_parameter(root.get_as_string(1))) {
                 case Status.OK:
