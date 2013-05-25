@@ -10,9 +10,13 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
     private ComposerWidget? composer = null;
     private ConversationViewer conversation_viewer;
+    private Gee.Set<Geary.App.Conversation>? prev_selection = null;
     
     public Gtk.Window top_window {
         get { return (Gtk.Window) get_toplevel(); }
+    }
+    public bool is_active {
+        get { return composer != null; }
     }
     
     public ComposerEmbed(ConversationViewer conversation_viewer) {
@@ -45,15 +49,19 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
             email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
                 conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
         if (email_element == null) {
-            // TODO: clear conversation list selection and put in alone
-            new ComposerWindow(new_composer);
-            return;
+            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
+                instance.controller.main_window).conversation_list_view;
+            prev_selection = conversation_list_view.get_selected_conversations();
+            conversation_list_view.get_selection().unselect_all();
+            email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
+                "placeholder") as WebKit.DOM.HTMLElement;
         }
         
         try {
+            conversation_viewer.show_conversation_div();
             conversation_viewer.web_view.settings.enable_plugins = true;
             email_element.insert_adjacent_html("afterend",
-                @"<embed width='100%' height='600' type='composer' id='$embed_id' />");
+                @"<div id='$embed_id'><embed type='composer' /></div>");
         } catch (Error error) {
             debug("Error creating embed element: %s", error.message);
             return;
@@ -133,6 +141,17 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
             embed.parent_element.remove_child(embed);
         } catch (Error error) {
             warning("Could not remove embed from WebView: %s", error.message);
+        }
+        
+        if (prev_selection != null) {
+            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
+                instance.controller.main_window).conversation_list_view;
+            if (prev_selection.is_empty)
+                // Need to trigger "No messages selected"
+                conversation_list_view.conversations_selected(prev_selection);
+            else
+                conversation_list_view.select_conversations(prev_selection);
+            prev_selection = null;
         }
     }
 }

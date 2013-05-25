@@ -2154,5 +2154,10 @@ public class ConversationViewer : Gtk.Box {
         return current_folder != null && current_folder.special_folder_type
             == Geary.SpecialFolderType.DRAFTS;
     }
+    
+    // The Composer may need to adjust the mode back to conversation
+    public void show_conversation_div() {
+        set_mode(DisplayMode.CONVERSATION);
+    }
 }
 
