@@ -168,7 +168,7 @@ public enum Geary.Imap.ServerDataType {
             }
         }
         
-        throw new ImapError.PARSE_ERROR("\"%s\" is not recognized server data", root.to_string());
+        throw new ImapError.PARSE_ERROR("\"%s\" unrecognized server data", root.to_string());
     }
 }
 

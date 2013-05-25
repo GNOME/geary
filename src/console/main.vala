@@ -293,6 +293,8 @@ class ImapConsole : Gtk.Window {
         cx.sent_command.connect(on_sent_command);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
+        cx.received_coded_status_response.connect(on_received_coded_status_response);
+        cx.received_completion_status_response.connect(on_received_completion_status_response);
         cx.received_bad_response.connect(on_received_bad_response);
         
         status("Connecting to %s...".printf(args[0]));
@@ -325,6 +327,8 @@ class ImapConsole : Gtk.Window {
             cx.sent_command.disconnect(on_sent_command);
             cx.received_status_response.disconnect(on_received_status_response);
             cx.received_server_data.connect(on_received_server_data);
+            cx.received_coded_status_response.disconnect(on_received_coded_status_response);
+            cx.received_completion_status_response.disconnect(on_received_completion_status_response);
             cx.received_bad_response.disconnect(on_received_bad_response);
             
             cx = null;
@@ -583,6 +587,18 @@ class ImapConsole : Gtk.Window {
         append_to_console("\n");
     }
     
+    private void on_received_coded_status_response(Geary.Imap.CodedStatusResponse coded) {
+        append_to_console("[S] ");
+        append_to_console(coded.to_string());
+        append_to_console("\n");
+    }
+    
+    private void on_received_completion_status_response(Geary.Imap.CompletionStatusResponse csr) {
+        append_to_console("[S] ");
+        append_to_console(csr.to_string());
+        append_to_console("\n");
+    }
+    
     private void on_received_bad_response(Geary.Imap.RootParameters root, Geary.ImapError err) {
         append_to_console("[E] ");
         append_to_console(err.message);
@@ -600,6 +616,9 @@ class ImapConsole : Gtk.Window {
 
 void main(string[] args) {
     Gtk.init(ref args);
+    
+    Geary.Logging.set_flags(Geary.Logging.Flag.NETWORK);
+    Geary.Logging.log_to(stdout);
     
     ImapConsole console = new ImapConsole();
     console.show_all();

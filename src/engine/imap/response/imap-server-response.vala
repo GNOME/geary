@@ -28,13 +28,10 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
     public ServerResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
         
-        Tag? attempt_tag = root.get_tag();
-        if (attempt_tag == null) {
-            throw new ImapError.INVALID("Server response does not have a tag token: %s",
-                root.to_string());
-        }
+        if (!has_tag())
+            throw new ImapError.INVALID("Server response does not have a tag token: %s", to_string());
         
-        tag = attempt_tag;
+        tag = get_tag();
     }
     
     /**

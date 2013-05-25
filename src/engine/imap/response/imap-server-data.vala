@@ -28,7 +28,7 @@ public class Geary.Imap.ServerData : ServerResponse {
     public ServerData.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
         
-        server_data_type = ServerDataType.from_response(root);
+        server_data_type = ServerDataType.from_response(this);
     }
     
     /**
