@@ -6,51 +6,18 @@
 
 public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
-    public ulong signal_id;
-    private string embed_id;
-    private ComposerWidget composer;
+    private static string embed_id = "composer_embed";
+    
+    private ComposerWidget? composer = null;
+    private ConversationViewer conversation_viewer;
     
     public Gtk.Window top_window {
         get { return (Gtk.Window) get_toplevel(); }
     }
     
-    private static ConversationViewer conversation_viewer {
-        get { return GearyApplication.instance.controller.main_window.conversation_viewer; }
-    }
-    
-    public static bool create_embed(ComposerWidget composer, Geary.Email? referred) {
-        if (referred == null)
-            return false;
-        
-        WebKit.DOM.HTMLElement? email_element = conversation_viewer.web_view.get_dom_document()
-            .get_element_by_id(conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
-        if (email_element == null)
-            return false;
-        
-        string id = "%x".printf(Random.next_int());
-        ComposerEmbed plugin = new ComposerEmbed(id);
-        plugin.signal_id = conversation_viewer.web_view.create_plugin_widget.connect(() => {
-            conversation_viewer.web_view.disconnect(plugin.signal_id);
-            return plugin;
-        });
-        
-        try {
-            conversation_viewer.web_view.settings.enable_plugins = true;
-            email_element.insert_adjacent_html("afterend",
-                @"<embed width='100%' height='600' type='composer' id='$id' />");
-        } catch (Error error) {
-            debug("Error creating embed element: %s", error.message);
-            return false;
-        } finally {
-            conversation_viewer.web_view.settings.enable_plugins = false;
-        }
-        plugin.insert_composer(composer);
-        return true;
-    }
-    
-    public ComposerEmbed(string embed_id) {
+    public ComposerEmbed(ConversationViewer conversation_viewer) {
         Object(orientation: Gtk.Orientation.VERTICAL);
-        this.embed_id = embed_id;
+        this.conversation_viewer = conversation_viewer;
         
         Gtk.Toolbar toolbar = new Gtk.Toolbar();
         toolbar.set_icon_size(Gtk.IconSize.MENU);
@@ -66,12 +33,68 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         
         close.clicked.connect(on_close);
         detach.clicked.connect(on_detach);
+        conversation_viewer.web_view.create_plugin_widget.connect(on_plugin_requested);
     }
     
-    private void insert_composer(ComposerWidget composer) {
-        pack_start(composer, true, true);
+    public void new_composer(ComposerWidget new_composer, Geary.Email? referred) {
+        if (!abandon_existing_composition(new_composer))
+            return;
+        
+        WebKit.DOM.HTMLElement? email_element = null;
+        if (referred != null)
+            email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
+                conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
+        if (email_element == null) {
+            // TODO: clear conversation list selection and put in alone
+            new ComposerWindow(new_composer);
+            return;
+        }
+        
+        try {
+            conversation_viewer.web_view.settings.enable_plugins = true;
+            email_element.insert_adjacent_html("afterend",
+                @"<embed width='100%' height='600' type='composer' id='$embed_id' />");
+        } catch (Error error) {
+            debug("Error creating embed element: %s", error.message);
+            return;
+        } finally {
+            conversation_viewer.web_view.settings.enable_plugins = false;
+        }
+        pack_start(new_composer, true, true);
         show_all();
-        this.composer = composer;
+        present();
+        this.composer = new_composer;
+    }
+    
+    public bool abandon_existing_composition(ComposerWidget? new_composer = null) {
+        if (composer == null)
+            return true;
+        
+        present();
+        AlertDialog dialog;
+        if (new_composer != null)
+            dialog = new AlertDialog(top_window, Gtk.MessageType.QUESTION,
+                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
+                Gtk.Stock.CANCEL, _("Open New Composition Window"), Gtk.ResponseType.YES);
+        else
+            dialog = new AlertDialog(top_window, Gtk.MessageType.QUESTION,
+                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
+                Gtk.Stock.CANCEL, _("Move Composition to New Window"), Gtk.ResponseType.YES);
+        Gtk.ResponseType response = dialog.run();
+        if (response == Gtk.ResponseType.OK) {
+            close();
+            return true;
+        }
+        if (new_composer != null) {
+            if (response == Gtk.ResponseType.YES)
+                new ComposerWindow(new_composer);
+            else
+                new_composer.destroy();
+        } else if (response == Gtk.ResponseType.YES) {
+            on_detach();
+            return true;
+        }
+        return false;
     }
     
     private void on_close() {
@@ -82,7 +105,12 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     private void on_detach() {
         remove(composer);
         new ComposerWindow(composer);
+        composer = null;
         close();
+    }
+    
+    private Gtk.Widget on_plugin_requested() {
+        return this;
     }
     
     public void present() {
@@ -94,13 +122,18 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     private void close() {
+        if (composer != null) {
+            remove(composer);
+            composer.destroy();
+            composer = null;
+        }
+        
         WebKit.DOM.Element embed = conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id);
         try{
             embed.parent_element.remove_child(embed);
         } catch (Error error) {
             warning("Could not remove embed from WebView: %s", error.message);
         }
-        destroy();  // We seem to need this to ensure the ComposerWidget is destroyed.
     }
 }
 

@@ -461,8 +461,8 @@ public class ComposerWidget : Gtk.EventBox {
         if (!from_multiple.visible)
             open_drafts_folder_async.begin(cancellable_drafts);
         
-        if (!ComposerEmbed.create_embed(this, referred))
-            new ComposerWindow(this);
+        ((MainWindow) GearyApplication.instance.controller.main_window).composer_embed.
+            new_composer(this, referred);
     }
     
     public ComposerWidget.from_mailto(Geary.Account account, string mailto) {

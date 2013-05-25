@@ -203,6 +203,10 @@ public class ConversationListView : Gtk.TreeView {
             }
         }
         
+        if (!get_selection().path_is_selected(path) && !((MainWindow) GearyApplication.
+            instance.controller.main_window).composer_embed.abandon_existing_composition())
+            return true;
+        
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             Geary.App.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
             
