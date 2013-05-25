@@ -153,6 +153,8 @@ engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
+engine/nonblocking/nonblocking-counting-semaphore.vala
+engine/nonblocking/nonblocking-error.vala
 engine/nonblocking/nonblocking-mailbox.vala
 engine/nonblocking/nonblocking-mutex.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala

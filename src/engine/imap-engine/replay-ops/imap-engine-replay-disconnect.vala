@@ -6,9 +6,9 @@
 
 private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReceiveReplayOperation {
     public GenericFolder owner;
-    public Geary.Folder.CloseReason reason;
+    public Imap.ClientSession.DisconnectReason reason;
     
-    public ReplayDisconnect(GenericFolder owner, Geary.Folder.CloseReason reason) {
+    public ReplayDisconnect(GenericFolder owner, Imap.ClientSession.DisconnectReason reason) {
         base ("Disconnect");
         
         this.owner = owner;

@@ -4,15 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+private interface Geary.Imap.PositionToUIDConverter : Object {
+    public abstract async UID? convert_async(MessageNumber pos, Cancellable? cancellable)
+        throws Error;
+}
+
 private class Geary.Imap.Folder : BaseObject {
     public const bool CASE_SENSITIVE = true;
     
     private const Geary.Email.Field BASIC_FETCH_FIELDS = Email.Field.ENVELOPE | Email.Field.DATE
         | Email.Field.ORIGINATORS | Email.Field.RECEIVERS | Email.Field.REFERENCES
         | Email.Field.SUBJECT | Email.Field.HEADER;
-    
-    public async delegate UID? PositionToUIDAsync(MessageNumber position, Cancellable? cancellable)
-        throws Error;
     
     private class ImapOperation : Nonblocking.BatchOperation {
         // IN
@@ -41,16 +43,27 @@ private class Geary.Imap.Folder : BaseObject {
     
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
-    private PositionToUIDAsync? position_to_uid_async = null;
-    private Cancellable? positional_cancellable = null;
+    private PositionToUIDConverter? position_to_uid = null;
+    private Nonblocking.Mutex fetch_mutex = new Nonblocking.Mutex();
+    private Gee.ArrayList<FetchedData> recently_fetched = new Gee.ArrayList<FetchedData>();
     
-    public signal void exists(int count);
+    public signal void exists(int total);
     
-    public signal void expunge(MessageNumber position);
+    public signal void expunge(int position);
     
-    public signal void fetched(Geary.Email email);
+    public signal void fetched(FetchedData fetched_data);
     
-    public signal void recent(int count);
+    public signal void recent(int total);
+    
+    /**
+     * Fabricated from the IMAP signals and state obtained at open_async().
+     */
+    public signal void appended(int total);
+    
+    /**
+     * Fabricated from the IMAP signals and state obtained at open_async().
+     */
+    public signal void removed(int pos, int total);
     
     /**
      * Note that close_async() still needs to be called after this signal is fired.
@@ -75,13 +88,13 @@ private class Geary.Imap.Folder : BaseObject {
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
-    public async void open_async(PositionToUIDAsync position_to_uid_async, Cancellable? cancellable)
+    public async void open_async(PositionToUIDConverter position_to_uid, Cancellable? cancellable)
         throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
-        this.position_to_uid_async = position_to_uid_async;
-        positional_cancellable = new Cancellable();
+        this.position_to_uid = position_to_uid;
+        recently_fetched.clear();
         
         session = yield session_mgr.claim_authorized_session_async(cancellable);
         
@@ -97,7 +110,7 @@ private class Geary.Imap.Folder : BaseObject {
             cancellable);
         if (response.status != Status.OK) {
             yield release_session_async(cancellable);
-            position_to_uid_async = null;
+            position_to_uid = null;
             
             throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
         }
@@ -111,9 +124,8 @@ private class Geary.Imap.Folder : BaseObject {
         
         yield release_session_async(cancellable);
         
-        position_to_uid_async = null;
-        positional_cancellable.cancel();
-        positional_cancellable = null;
+        position_to_uid = null;
+        recently_fetched.clear();
         
         is_open = false;
     }
@@ -138,43 +150,40 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
-    private void on_exists(int count) {
-        debug("EXISTS %s: %d", to_string(), count);
+    private void on_exists(int total) {
+        debug("EXISTS %s: %d", to_string(), total);
         
-        properties.set_select_examine_message_count(count);
+        int old_total = properties.select_examine_messages;
+        properties.set_select_examine_message_count(total);
         
-        exists(count);
+        exists(total);
+        
+        if (old_total < total)
+            appended(total);
     }
     
-    private void on_expunge(MessageNumber num) {
-        debug("EXPUNGE %s: %s", to_string(), num.to_string());
+    private void on_expunge(MessageNumber pos) {
+        debug("EXPUNGE %s: %s", to_string(), pos.to_string());
         
-        expunge(num);
+        expunge(pos.value);
+        
+        properties.set_select_examine_message_count(properties.select_examine_messages - 1);
+        removed(pos.value, properties.select_examine_messages);
     }
     
     private void on_fetch(FetchedData fetched_data) {
         debug("FETCH %s: %d items", to_string(), fetched_data.map.size + fetched_data.body_data.size);
         
-        // if UID is provided, use that, otherwise have to use resolver
-        UID? uid = (UID) fetched_data.map.get(FetchDataType.UID);
-        if (uid != null) {
-            try {
-                fetched(fetched_data_to_email(uid, fetched_data));
-            } catch (Error err) {
-                message("Unable to convert fetched data to email in %s: %s", to_string(),
-                    err.message);
-            }
-        } else {
-            fetched_data_to_email_async.begin(fetched_data);
-        }
+        recently_fetched.add(fetched_data);
+        fetched(fetched_data);
     }
     
-    private void on_recent(int count) {
-        debug("RECENT %s: %d", to_string(), count);
+    private void on_recent(int total) {
+        debug("RECENT %s: %d", to_string(), total);
         
-        properties.recent = count;
+        properties.recent = total;
         
-        recent(count);
+        recent(total);
     }
     
     private void on_coded_status_response(CodedStatusResponse coded_response) {
@@ -204,37 +213,6 @@ private class Geary.Imap.Folder : BaseObject {
         debug("DISCONNECTED %s: %s", to_string(), reason.to_string());
         
         disconnected(reason);
-    }
-    
-    private async void fetched_data_to_email_async(FetchedData fetched_data) {
-        if (position_to_uid_async == null) {
-            message("Unable to report fetched email in %s: unable to convert position %s to UID",
-                to_string(), fetched_data.msg_num.to_string());
-            
-            return;
-        }
-        
-        UID? uid = null;
-        try {
-            uid = yield position_to_uid_async(fetched_data.msg_num, positional_cancellable);
-        } catch (Error err) {
-            message("Unable to convert message number %s in %s to UID: %s",
-                fetched_data.msg_num.to_string(), to_string(), err.message);
-            
-            return;
-        }
-        
-        if (uid != null) {
-            try {
-                fetched(fetched_data_to_email(uid, fetched_data));
-            } catch (Error err) {
-                message("Unable to convert fetched data to email in %s: %s", to_string(),
-                    err.message);
-            }
-        } else {
-            message("Unable to convert message number %s in %s to UID",
-                fetched_data.msg_num.to_string(), to_string());
-        }
     }
     
     private void check_open() throws Error {
@@ -279,7 +257,7 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
-    public async void list_email_async(MessageSet msg_set, Geary.Email.Field fields,
+    public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable) throws Error {
         check_open();
         
@@ -334,7 +312,50 @@ private class Geary.Imap.Folder : BaseObject {
             batch.add(new ImapOperation(session, new FetchCommand(msg_set, data_types, null)));
         }
         
-        yield execute_batch_async(batch, cancellable);
+        Gee.List<FetchedData>? fetched_list = null;
+        Error? fetch_err = null;
+        
+        int token = yield fetch_mutex.claim_async(cancellable);
+        try {
+            yield execute_batch_async(batch, cancellable);
+            
+            // scoop up everything that came in to on_fetched and reset accumulator
+            fetched_list = recently_fetched;
+            recently_fetched = new Gee.ArrayList<FetchedData>();
+        } catch (Error err) {
+            fetch_err = err;
+        }
+        fetch_mutex.release(ref token);
+        
+        if (fetch_err != null)
+            throw fetch_err;
+        
+        if (fetched_list == null || fetched_list.size == 0)
+            return null;
+        
+        Gee.List<Geary.Email> email_list = new Gee.ArrayList<Geary.Email>();
+        foreach (FetchedData fetched_data in fetched_list) {
+            Geary.Email? email = null;
+            
+            // if UID is provided, use that, otherwise have to use resolver
+            UID? uid = (UID) fetched_data.map.get(FetchDataType.UID);
+            if (uid != null) {
+                try {
+                    email = fetched_data_to_email(uid, fetched_data);
+                } catch (Error err) {
+                    message("Unable to convert fetched data to email in %s: %s", to_string(),
+                        err.message);
+                }
+            } else {
+                // acquire semaphore in context of signal
+                email = yield fetched_data_to_email_async(fetched_data, cancellable);
+            }
+            
+            if (email != null)
+                email_list.add(email);
+        }
+        
+        return (email_list.size > 0) ? email_list : null;
     }
     
     public async void remove_email_async(MessageSet msg_set, Cancellable? cancellable) throws Error {
@@ -479,6 +500,39 @@ private class Geary.Imap.Folder : BaseObject {
             body_data_types_list.add(new FetchBodyDataType.peek(
                 FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, field_names));
         }
+    }
+    
+    private async Geary.Email? fetched_data_to_email_async(FetchedData fetched_data, Cancellable? cancellable) {
+        if (position_to_uid == null) {
+            message("Unable to report fetched email in %s: unable to convert position %s to UID",
+                to_string(), fetched_data.msg_num.to_string());
+            
+            return null;
+        }
+        
+        UID? uid = null;
+        try {
+            uid = yield position_to_uid.convert_async(fetched_data.msg_num, cancellable);
+        } catch (Error err) {
+            message("Unable to convert message number %s in %s to UID: %s",
+                fetched_data.msg_num.to_string(), to_string(), err.message);
+            
+            return null;
+        }
+        
+        if (uid != null) {
+            try {
+                return fetched_data_to_email(uid, fetched_data);
+            } catch (Error err) {
+                message("Unable to convert fetched data to email in %s: %s", to_string(),
+                    err.message);
+            }
+        } else {
+            message("Unable to convert message number %s in %s to UID",
+                fetched_data.msg_num.to_string(), to_string());
+        }
+        
+        return null;
     }
     
     private Geary.Email fetched_data_to_email(UID uid, FetchedData fetched_data) throws Error {
@@ -631,6 +685,8 @@ private class Geary.Imap.Folder : BaseObject {
         
         if (message_id != null || in_reply_to != null || references != null)
             email.set_full_references(message_id, in_reply_to, references);
+        
+        return email;
     }
     
     public string to_string() {

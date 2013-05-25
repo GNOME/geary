@@ -35,7 +35,11 @@ public class Geary.Imap.ClientSession : BaseObject {
         LOCAL_CLOSE,
         LOCAL_ERROR,
         REMOTE_CLOSE,
-        REMOTE_ERROR
+        REMOTE_ERROR;
+        
+        public bool is_error() {
+            return (this == LOCAL_ERROR) || (this == REMOTE_ERROR);
+        }
     }
     
     // Many of the async commands go through the FSM, and this is used to pass state in and out of
@@ -1324,7 +1328,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         CommandCallback? cmd_cb;
         if (waiting_for_completion.unset(completion_status_response.tag, out cmd_cb))
-            Idle.add(cmd_cb.callback);
+            Scheduler.on_idle(cmd_cb.callback);
     }
     
     private void notify_received_data(ServerData server_data) throws ImapError {

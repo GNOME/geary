@@ -429,9 +429,11 @@ class ImapConsole : Gtk.Window {
             ? new Geary.Imap.MessageSet.custom(args[0])
             : new Geary.Imap.MessageSet.uid_custom(args[0]);
         
-        Geary.Imap.FetchDataType[] data_items = new Geary.Imap.FetchDataType[0];
-        for (int ctr = 1; ctr < args.length; ctr++)
-            data_items += Geary.Imap.FetchDataType.decode(args[ctr]);
+        Gee.ArrayList<Geary.Imap.FetchDataType> data_items = new Gee.ArrayList<Geary.Imap.FetchDataType>();
+        for (int ctr = 1; ctr < args.length; ctr++) {
+            Geary.Imap.FetchDataType data_type = Geary.Imap.FetchDataType.decode(args[ctr]);
+            data_items.add(data_type);
+        }
         
         cx.send_async.begin(new Geary.Imap.FetchCommand(msg_set, data_items, null), null, on_fetch);
     }
