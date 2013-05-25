@@ -69,6 +69,8 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
             conversation_viewer.web_view.settings.enable_plugins = false;
         }
         pack_start(new_composer, true, true);
+        new_composer.editor.focus_in_event.connect(on_focus_in);
+        new_composer.editor.focus_out_event.connect(on_focus_out);
         show_all();
         present();
         this.composer = new_composer;
@@ -111,6 +113,9 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     private void on_detach() {
+        on_focus_out();
+        composer.editor.focus_in_event.disconnect(on_focus_in);
+        composer.editor.focus_out_event.disconnect(on_focus_out);
         remove(composer);
         new ComposerWindow(composer);
         composer = null;
@@ -119,6 +124,16 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
     private Gtk.Widget on_plugin_requested() {
         return this;
+    }
+    
+    private bool on_focus_in() {
+        top_window.add_accel_group(composer.ui.get_accel_group());
+        return false;
+    }
+    
+    private bool on_focus_out() {
+        top_window.remove_accel_group(composer.ui.get_accel_group());
+        return false;
     }
     
     public void present() {
@@ -131,6 +146,8 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
     private void close() {
         if (composer != null) {
+            composer.editor.focus_in_event.disconnect(on_focus_in);
+            composer.editor.focus_out_event.disconnect(on_focus_out);
             remove(composer);
             composer.destroy();
             composer = null;

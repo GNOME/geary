@@ -184,7 +184,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Cancellable cancellable_save_draft = new Cancellable();
     private bool in_draft_save = false;
     
-    private WebKit.WebView editor;
+    public WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
     // garbage-collected.
     private WebViewEditFixer edit_fixer;
