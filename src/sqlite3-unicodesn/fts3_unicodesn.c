@@ -353,6 +353,14 @@ else if ( nIn==7 &&  memcmp("swedish", zIn, 7)==0 ) {
    p->stemmer.stem = swedish_UTF_8_stem;
 }
 #endif
+#ifdef WITH_STEMMER_turkish
+else if ( nIn==7 &&  memcmp("turkish", zIn, 7)==0 ) {
+#include "libstemmer_c/src_c/stem_UTF_8_turkish.h"
+   p->stemmer.create = turkish_UTF_8_create_env;
+   p->stemmer.close = turkish_UTF_8_close_env;
+   p->stemmer.stem = turkish_UTF_8_stem;
+}
+#endif
   else {
       rc  = SQLITE_ERROR;
   }

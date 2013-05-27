@@ -7,7 +7,7 @@ DESTDIR?= /usr
 
 STEMMERS?= danish dutch english finnish french german hungarian \
   italian norwegian porter portuguese romanian russian \
-  spanish swedish
+  spanish swedish turkish
 
 CFLAGS+= \
   -DSQLITE_ENABLE_FTS4 \
