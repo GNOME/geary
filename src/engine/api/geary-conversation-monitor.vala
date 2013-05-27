@@ -20,10 +20,11 @@ public class Geary.ConversationMonitor : BaseObject {
     private class ImplConversation : Conversation {
         private static int next_convnum = 0;
         
+        public Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
+        
         private int convnum;
         private weak Geary.ConversationMonitor? owner;
         private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>();
-        private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
         private Geary.EmailIdentifier? lowest_id;
         
         // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
@@ -760,9 +761,13 @@ public class Geary.ConversationMonitor : BaseObject {
             
             if (conversation.get_count(true) == 0) {
                 // remove non-folder message id's from the message_id_map to truly drop the
-                // conversation (that's all that's remaining in Conversation at this point)
-                foreach (Geary.Email email in conversation.get_emails(Conversation.Ordering.NONE))
-                    message_id_map.unset(email.message_id);
+                // conversation (that's all that's remaining in Conversation at this point) ...
+                // the Conversation must be *completely* dropped from this reverse lookup map,
+                // otherwise future messages coming in will look like appends and not new
+                // conversations
+                foreach (RFC822.MessageID message_id in conversation.message_ids)
+                    message_id_map.unset(message_id);
+                assert(!message_id_map.values.contains(conversation));
                 
                 bool is_removed = conversations.remove((ImplConversation) conversation);
                 if (is_removed) {
