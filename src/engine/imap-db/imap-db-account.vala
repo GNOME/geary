@@ -726,8 +726,12 @@ private class Geary.ImapDB.Account : BaseObject {
                 int64 id = result.rowid_at(0);
                 
                 try {
+                    Geary.Email.Field search_fields = Geary.Email.REQUIRED_FOR_MESSAGE |
+                        Geary.Email.Field.ORIGINATORS | Geary.Email.Field.RECEIVERS |
+                        Geary.Email.Field.SUBJECT;
+                    
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
-                        cx, id, Geary.ImapDB.Folder.REQUIRED_FOR_SEARCH, cancellable);
+                        cx, id, search_fields, cancellable);
                     Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
                     Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     
