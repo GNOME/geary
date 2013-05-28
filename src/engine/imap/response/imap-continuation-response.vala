@@ -33,7 +33,7 @@ public class Geary.Imap.ContinuationResponse : ServerResponse {
     }
     
     /**
-     * Returns true if the {@link RootParameter}'s {@link Tag} is a continuation character ("+").
+     * Returns true if the {@link RootParameters}'s {@link Tag} is a continuation character ("+").
      */
     public static bool is_continuation_response(RootParameters root) {
         Tag? tag = root.get_tag();

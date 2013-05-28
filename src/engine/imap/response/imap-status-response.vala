@@ -9,7 +9,7 @@
  * change in state.
  *
  * StatusResponses may be tagged or untagged, depending on their nature.  See
- * {@link CompletionStatusResponse} and {@link @CodedStatusResponse} for special types of
+ * {@link CompletionStatusResponse} and {@link CodedStatusResponse} for special types of
  * StatusResponses.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.

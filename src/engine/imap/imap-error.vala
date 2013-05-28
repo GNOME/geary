@@ -17,8 +17,9 @@ public errordomain Geary.ImapError {
     /**
      * Indicates a type conversion error.
      *
-     * This largely occurs inside of {@link ListParameter}, where various {@link Parameter}s are
-     * retrieved by specific type according to the flavor of the response.
+     * This largely occurs inside of {@link Imap.ListParameter}, where various
+     * {@link Imap.Parameter}s are retrieved by specific type according to the flavor of the
+     * response.
      */
     TYPE_ERROR,
     /**

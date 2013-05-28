@@ -24,7 +24,7 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.AbstractSem
     /**
      * Called by a task to acquire (and, hence, lock) the semaphore.
      *
-     * @returns Number of acquired tasks, including the one that made this call.
+     * @return Number of acquired tasks, including the one that made this call.
      */
     public int acquire() {
         return ++count;

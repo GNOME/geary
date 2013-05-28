@@ -48,7 +48,7 @@ public class Geary.Imap.ServerData : ServerResponse {
     }
     
     /**
-     * Parses the {@link ServerData} into {@Capabilities}, if possible.
+     * Parses the {@link ServerData} into {@link Capabilities}, if possible.
      *
      * Since Capabilities are revised with various {@link ClientSession} states, this method accepts
      * a ref to an int that will be incremented after handed to the Capabilities constructor.  This
@@ -95,7 +95,7 @@ public class Geary.Imap.ServerData : ServerResponse {
     }
     
     /**
-     * Parses the {@link ServerData} into {@FetchedData}, if possible.
+     * Parses the {@link ServerData} into {@link FetchedData}, if possible.
      *
      * @throws ImapError.INVALID if not FetchData.
      */
