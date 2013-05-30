@@ -86,13 +86,14 @@
         </child>
         <child>
           <object class="GtkButton" id="button: previous">
-            <property name="label" translatable="yes">Previous</property>
+            <property name="label" translatable="yes">_Previous</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="margin_left">2</property>
             <property name="image">image3</property>
             <property name="relief">none</property>
+            <property name="use_underline">True</property>
             <property name="always_show_image">True</property>
           </object>
           <packing>
@@ -103,12 +104,13 @@
         </child>
         <child>
           <object class="GtkButton" id="button: next">
-            <property name="label" translatable="yes">Next</property>
+            <property name="label" translatable="yes">_Next</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="image">image1</property>
             <property name="relief">none</property>
+            <property name="use_underline">True</property>
             <property name="image_position">right</property>
             <property name="always_show_image">True</property>
           </object>
@@ -120,13 +122,14 @@
         </child>
         <child>
           <object class="GtkCheckButton" id="check: case_sensitive">
-            <property name="label" translatable="yes">Case sensitive</property>
+            <property name="label" translatable="yes">_Case sensitive</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="margin_left">8</property>
             <property name="margin_right">8</property>
             <property name="relief">none</property>
+            <property name="use_underline">True</property>
             <property name="xalign">0</property>
             <property name="draw_indicator">True</property>
           </object>

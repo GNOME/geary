@@ -188,6 +188,32 @@ body:not(.nohide) .email.hide .header_container .avatar {
     margin-right: -0.67em;
 }
 
+.email .link_warning {
+    display: inline-block;
+    position: absolute;
+    margin-top: -1em;
+    border: 1px solid #999;
+    padding: 1em;
+    background: #ffc;
+    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
+    /* Reset styles */
+    font-size: small;
+    font-family: sans;
+    color: black;
+}
+.email .link_warning a {
+    color: #08c;
+}
+.email .link_warning span {
+    display: block;
+    padding-left: 1em;
+}
+.email .link_warning .close_link_warning {
+    float: right;
+    margin-top: -0.67em;
+    margin-right: -0.67em;
+}
+
 @media screen {
 
     body {
@@ -468,7 +494,8 @@ body:not(.nohide) .quote_container.controllable.show > .quote {
     padding: 15px;
 }
 #email_template,
-#attachment_template {
+#attachment_template,
+#link_warning_template {
     display: none;
 }
 

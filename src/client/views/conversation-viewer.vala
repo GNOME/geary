@@ -247,6 +247,7 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
         bind_event(web_view, ".remote_images .show_from", "click", (Callback) on_show_images_from, this);
         bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
+        bind_event(web_view, ".body a", "click", (Callback) on_link_clicked, this);
         
         // Update the search results
         if (conversation_find_bar.visible)
@@ -790,6 +791,130 @@ public class ConversationViewer : Gtk.Box {
             } catch (Error error) {
                 warning("Error hiding \"Show images\" bar: %s", error.message);
             }
+        }
+    }
+    
+    private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        if (conversation_viewer.on_link_clicked_self(element))
+            event.prevent_default();
+    }
+    
+    private bool on_link_clicked_self(WebKit.DOM.Element element) {
+        if (!Geary.String.is_empty(element.get_attribute("warning"))) {
+            // A warning is open, so ignore clicks.
+            return true;
+        }
+        
+        string? href = element.get_attribute("href");
+        if (Geary.String.is_empty(href))
+            return false;
+        string text = ((WebKit.DOM.HTMLElement) element).get_inner_text();
+        string href_short, text_short;
+        if (!deceptive_text(href, ref text, out href_short, out text_short))
+            return false;
+        
+        WebKit.DOM.HTMLElement div = Util.DOM.clone_select(web_view.get_dom_document(),
+            "#link_warning_template");
+        try {
+            div.set_inner_html("""%s %s <span><a href="%s">%s</a></span> %s
+                <span><a href="%s">%s</a></span>""".printf(div.get_inner_html(),
+                _("This link appears to go to"), text, text_short,
+                _("but actually goes to"), href, href_short));
+            div.remove_attribute("id");
+            element.parent_node.insert_before(div, element);
+            element.set_attribute("warning", "open");
+            
+            long overhang = div.get_offset_left() + div.get_offset_width() -
+                web_view.get_dom_document().get_body().get_offset_width();
+            if (overhang > 0)
+                div.set_attribute("style", @"margin-left: -$(overhang)px;");
+        } catch (Error error) {
+            warning("Error showing link warning dialog: %s", error.message);
+        }
+        bind_event(web_view, ".link_warning .close_link_warning, .link_warning a", "click",
+            (Callback) on_close_link_warning, this);
+        return true;
+    }
+    
+    /*
+     * Test whether text looks like a URI that leads somewhere other than href.  The text
+     * will have a scheme prepended if it doesn't already have one, and the short versions
+     * have the scheme skipped and long paths truncated.
+     */
+    private bool deceptive_text(string href, ref string text, out string href_short,
+        out string text_short) {
+        href_short = "";
+        text_short = "";
+        // mailto URLs have a different form, and the worst they can do is pop up a composer,
+        // so we don't trigger on them.
+        if (href.has_prefix("mailto:"))
+            return false;
+        
+        // First, does text look like a URI?  Right now, just test whether it has
+        // <string>.<string> in it.  More sophisticated tests are possible.
+        GLib.MatchInfo text_match, href_match;
+        try {
+            GLib.Regex domain = new GLib.Regex(
+                "([a-z]*://)?"                  // Optional scheme
+                + "([^\\s:/]+\\.[^\\s:/\\.]+)"  // Domain
+                + "(/[^\\s]*)?"                 // Optional path
+                );
+            if (!domain.match(text, 0, out text_match))
+                return false;
+            if (!domain.match(href, 0, out href_match)) {
+                // If href doesn't look like a URL, something is fishy, so warn the user
+                href_short = href + _(" (Invalid?)");
+                text_short = text;
+                return true;
+            }
+        } catch (Error error) {
+            warning("Error in Regex text for deceptive urls: %s", error.message);
+            return false;
+        }
+        
+        // Second, do the top levels of the two domains match?  We compare the top n levels,
+        // where n is the minimum of the number of levels of the two domains.
+        string[] href_parts = href_match.fetch_all();
+        string[] text_parts = text_match.fetch_all();
+        string[] text_domain = text_parts[2].reverse().split(".");
+        string[] href_domain = href_parts[2].reverse().split(".");
+        for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
+            if (text_domain[i] != href_domain[i]) {
+                if (href_parts[1] == "")
+                    href_parts[1] = "http://";
+                if (text_parts[1] == "")
+                    text_parts[1] = href_parts[1];
+                string temp;
+                assemble_uris(href_parts, out temp, out href_short);
+                assemble_uris(text_parts, out text, out text_short);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void assemble_uris(string[] parts, out string full, out string short_) {
+        full = parts[1] + parts[2];
+        short_ = parts[2];
+        if (parts.length == 4 && parts[3] != "/") {
+            full += parts[3];
+            if (parts[3].length > 20)
+                short_ += parts[3].substring(0, 20) + "…";
+            else
+                short_ += parts[3];
+        }
+    }
+    
+    private static void on_close_link_warning(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ConversationViewer conversation_viewer) {
+        try {
+            WebKit.DOM.Element warning_div = closest_ancestor(element, ".link_warning");
+            WebKit.DOM.Element link = (WebKit.DOM.Element) warning_div.get_next_sibling();
+            link.remove_attribute("warning");
+            warning_div.parent_node.remove_child(warning_div);
+        } catch (Error error) {
+            warning("Error removing link warning dialog: %s", error.message);
         }
     }
 
