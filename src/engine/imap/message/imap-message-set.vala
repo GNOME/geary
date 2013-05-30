@@ -20,7 +20,7 @@ public class Geary.Imap.MessageSet : BaseObject {
     public MessageSet.uid(UID uid) {
         assert(uid.value > 0);
         
-        value = uid.value.to_string();
+        value = uid.serialize();
         is_uid = true;
     }
     
@@ -57,13 +57,11 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(low.value > 0);
         assert(high.value > 0);
         
-        if (low.equal_to(high)) {
-            MessageSet.uid(low);
-            
-            return;
-        }
+        if (low.equal_to(high))
+            value = low.serialize();
+        else
+            value = "%s:%s".printf(low.serialize(), high.serialize());
         
-        value = "%s:%s".printf(low.value.to_string(), high.value.to_string());
         is_uid = true;
     }
     
@@ -85,29 +83,28 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(initial.value > 0);
         
         if (count == 0) {
-            MessageSet.uid(initial);
-            
-            return;
-        }
-        
-        int64 low, high;
-        if (count < 0) {
-            high = initial.value;
-            low = (high + count).clamp(1, uint32.MAX);
+            value = initial.serialize();
         } else {
-            // count > 0
-            low = initial.value;
-            high = (low + count).clamp(1, uint32.MAX);
+            int64 low, high;
+            if (count < 0) {
+                high = initial.value;
+                low = (high + count).clamp(1, uint32.MAX);
+            } else {
+                // count > 0
+                low = initial.value;
+                high = (low + count).clamp(1, uint32.MAX);
+            }
+            
+            value = "%s:%s".printf(low.to_string(), high.to_string());
         }
         
-        value = "%s:%s".printf(low.to_string(), high.to_string());
         is_uid = true;
     }
     
     public MessageSet.uid_range_to_highest(UID low) {
         assert(low.value > 0);
         
-        value = "%s:*".printf(low.value.to_string());
+        value = "%s:*".printf(low.serialize());
         is_uid = true;
     }
     

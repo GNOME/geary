@@ -222,7 +222,7 @@ public class Geary.Imap.FetchBodyDataType : BaseObject {
      * the easiest way to determine if a response contains requested data is to compare it with
      * this returned object.
      */
-    public FetchBodyDataIdentifier get_identifer() {
+    public FetchBodyDataIdentifier get_identifier() {
         return new FetchBodyDataIdentifier(this);
     }
     

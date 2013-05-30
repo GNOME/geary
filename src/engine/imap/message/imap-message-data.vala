@@ -72,6 +72,10 @@ public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.Mes
         else
             return 0;
     }
+    
+    public string serialize() {
+        return value.to_string();
+    }
 }
 
 public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData {
@@ -93,6 +97,10 @@ public class Geary.Imap.MessageNumber : Geary.MessageData.IntMessageData, Geary.
     
     public virtual int compare_to(MessageNumber other) {
         return value - other.value;
+    }
+    
+    public string serialize() {
+        return value.to_string();
     }
 }
 

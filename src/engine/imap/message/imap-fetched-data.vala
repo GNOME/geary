@@ -92,7 +92,7 @@ public class Geary.Imap.FetchedData : Object {
      * The results are undefined if both FetchData objects contain the same {@link FetchDataType}
      * or {@link FetchBodyDataType}s.
      *
-     * See warnings at {@link body_data} for dealing with multiple FetchBodyDataTypes.
+     * See warnings at {@link body_data_map} for dealing with multiple FetchBodyDataTypes.
      *
      * @return null if the FetchedData do not have the same {@link msg_num}.
      */

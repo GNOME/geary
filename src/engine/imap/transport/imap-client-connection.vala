@@ -77,8 +77,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     public uint command_timeout_sec { get; set; default = DEFAULT_COMMAND_TIMEOUT_SEC; }
     
+    /**
+     * This identifier is used only for debugging, to differentiate connections from one another
+     * in logs and debug output.
+     */
+    public int cx_id { get; private set; }
+    
     private Geary.Endpoint endpoint;
-    private int cx_id;
     private Geary.State.Machine fsm;
     private SocketConnection? cx = null;
     private IOStream? ios = null;

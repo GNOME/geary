@@ -122,29 +122,26 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_exists(int total) {
-        debug("EXISTS %s: %d", to_string(), total);
+        debug("%s EXISTS %d", to_string(), total);
         
         int old_total = properties.select_examine_messages;
         properties.set_select_examine_message_count(total);
         
         exists(total);
-        
         if (old_total < total)
             appended(total);
     }
     
     private void on_expunge(MessageNumber pos) {
-        debug("EXPUNGE %s: %s", to_string(), pos.to_string());
-        
-        expunge(pos.value);
+        debug("%s EXPUNGE %s", to_string(), pos.to_string());
         
         properties.set_select_examine_message_count(properties.select_examine_messages - 1);
+        
+        expunge(pos.value);
         removed(pos.value, properties.select_examine_messages);
     }
     
     private void on_fetch(FetchedData fetched_data) {
-        debug("FETCH %s: %s", to_string(), fetched_data.to_string());
-        
         // add if not found, merge if already received data for this email
         FetchedData? already_present = fetch_accumulator.get(fetched_data.msg_num);
         fetch_accumulator.set(fetched_data.msg_num,
@@ -154,7 +151,7 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_recent(int total) {
-        debug("RECENT %s: %d", to_string(), total);
+        debug("%s RECENT %d", to_string(), total);
         
         properties.recent = total;
         
@@ -162,8 +159,6 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_coded_status_response(CodedStatusResponse coded_response) {
-        debug("CodedStatusResponse %s: %s", to_string(), coded_response.to_string());
-        
         try {
             switch (coded_response.response_code_type) {
                 case ResponseCodeType.UIDNEXT:
@@ -177,6 +172,11 @@ private class Geary.Imap.Folder : BaseObject {
                 case ResponseCodeType.UNSEEN:
                     properties.unseen = coded_response.get_unseen();
                 break;
+                
+                default:
+                    debug("%s: Ignoring coded status response %s", to_string(),
+                        coded_response.to_string());
+                break;
             }
         } catch (ImapError ierr) {
             debug("Unable to parse CodedStatusResponse %s: %s", coded_response.to_string(),
@@ -185,7 +185,7 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_disconnected(ClientSession.DisconnectReason reason) {
-        debug("DISCONNECTED %s: %s", to_string(), reason.to_string());
+        debug("%s DISCONNECTED %s", to_string(), reason.to_string());
         
         disconnected(reason);
     }
@@ -195,20 +195,40 @@ private class Geary.Imap.Folder : BaseObject {
             throw new EngineError.OPEN_REQUIRED("Imap.Folder %s not open", to_string());
     }
     
-    // *Must* be called with fetch_mutex locked.
-    private async Gee.HashMap<MessageNumber, FetchedData> fetch_commands_async(MessageSet msg_set,
-        Gee.Collection<FetchCommand> fetch_cmds, Cancellable? cancellable) throws Error {
-        assert(fetch_mutex.is_locked());
+    // For FETCH or STORE commands, both of which return FETCH results.
+    private async Gee.HashMap<MessageNumber, FetchedData> store_fetch_commands_async(MessageSet msg_set,
+        Gee.Collection<Command> store_fetch_cmds, bool lock_mutex, Cancellable? cancellable)
+        throws Error {
+        // watch for deadlock
+        assert(fetch_mutex.is_locked() != lock_mutex);
         
-        // execute commands
-        Gee.Map<Command, CompletionStatusResponse> responses =
-            yield session.send_multiple_commands_async(fetch_cmds, cancellable);
+        int token = Nonblocking.Mutex.INVALID_TOKEN;
+        if (lock_mutex) 
+            token = yield fetch_mutex.claim_async(cancellable);
         
-        // swap out results
+        // execute commands with mutex locked
+        Gee.Map<Command, CompletionStatusResponse>? responses = null;
+        Error? err = null;
+        try {
+            responses = yield session.send_multiple_commands_async(store_fetch_cmds, cancellable);
+        } catch (Error store_fetch_err) {
+            err = store_fetch_err;
+        }
+        
+        // swap out results and clear accumulator
         Gee.HashMap<MessageNumber, FetchedData> results = fetch_accumulator;
         fetch_accumulator = new Gee.HashMap<MessageNumber, FetchedData>();
         
-        // process response stati *after* clearing accumulator
+        // unlock after clearing accumulator
+        if (token != Nonblocking.Mutex.INVALID_TOKEN)
+            fetch_mutex.release(ref token);
+        
+        if (err != null)
+            throw err;
+        
+        assert(responses != null);
+        
+        // process response stati after unlocking and clearing accumulator
         foreach (Command cmd in responses.keys)
             throw_on_failed_status(responses.get(cmd), cmd);
         
@@ -255,7 +275,7 @@ private class Geary.Imap.Folder : BaseObject {
                 body_data_types.add(header_body_type);
                 
                 // save identifier for later
-                partial_header_identifier = header_body_type.get_identifer();
+                partial_header_identifier = header_body_type.get_identifier();
             }
             
             if (data_types.size > 0 || body_data_types != null)
@@ -269,7 +289,7 @@ private class Geary.Imap.Folder : BaseObject {
                 null, -1, -1, null);
             
             // save identifier for later retrieval from responses
-            body_identifier = body.get_identifer();
+            body_identifier = body.get_identifier();
             
             cmds.add(new FetchCommand.body_data_type(msg_set, body));
         }
@@ -281,13 +301,13 @@ private class Geary.Imap.Folder : BaseObject {
             // Get the preview text (the initial MAX_PREVIEW_BYTES of the first MIME section
             FetchBodyDataType preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
                 { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES, null);
-            preview_identifier = preview.get_identifer();
+            preview_identifier = preview.get_identifier();
             cmds.add(new FetchCommand.body_data_type(msg_set, preview));
             
             // Also get the character set to properly decode it
             FetchBodyDataType preview_charset = new FetchBodyDataType.peek(
                 FetchBodyDataType.SectionPart.MIME, { 1 }, -1, -1, null);
-            preview_charset_identifier = preview_charset.get_identifer();
+            preview_charset_identifier = preview_charset.get_identifier();
             cmds.add(new FetchCommand.body_data_type(msg_set, preview_charset));
         }
         
@@ -321,8 +341,8 @@ private class Geary.Imap.Folder : BaseObject {
                 pos_uid_map = new Gee.HashMap<MessageNumber, UID>();
                 
                 FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataType.UID);
-                Gee.HashMap<MessageData, FetchedData> uids = yield fetch_commands_async(
-                    msg_set, new Collection.SingleItem<FetchCommand>(cmd), cancellable);
+                Gee.HashMap<MessageData, FetchedData> uids = yield store_fetch_commands_async(
+                    msg_set, new Collection.SingleItem<FetchCommand>(cmd), false, cancellable);
                 
                 // convert fetched UIDs into easy-lookup map
                 foreach (FetchedData fetched_data in uids.values) {
@@ -334,7 +354,7 @@ private class Geary.Imap.Folder : BaseObject {
             }
             
             // now execute the remaining FETCH commands
-            fetched = yield fetch_commands_async(msg_set, cmds, cancellable);
+            fetched = yield store_fetch_commands_async(msg_set, cmds, false, cancellable);
         } catch (Error err) {
             fetch_err = err;
         }
@@ -350,8 +370,6 @@ private class Geary.Imap.Folder : BaseObject {
         Gee.List<Geary.Email> email_list = new Gee.ArrayList<Geary.Email>();
         foreach (MessageNumber msg_num in fetched.keys) {
             FetchedData fetched_data = fetched.get(msg_num);
-            
-            debug("FETCHEDDATA: %s", fetched_data.to_string());
             
             // the UID should either have been looked up (if using positional addressing) or should
             // have come back with the response (if using UID addressing)
@@ -390,12 +408,7 @@ private class Geary.Imap.Folder : BaseObject {
         else
             cmds.add(new ExpungeCommand());
         
-        Gee.Map<Command, CompletionStatusResponse> responses = yield session.send_multiple_commands_async(
-            cmds, cancellable);
-        
-        // only interested in the StoreCommand response
-        if (responses.has_key(store_cmd))
-            throw_on_failed_status(responses.get(store_cmd), store_cmd);
+        yield store_fetch_commands_async(msg_set, cmds, true, cancellable);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
@@ -418,10 +431,7 @@ private class Geary.Imap.Folder : BaseObject {
         if (msg_flags_remove.size > 0)
             cmds.add(new StoreCommand(msg_set, msg_flags_remove, false, false));
         
-        Gee.Map<Command, CompletionStatusResponse> responses = yield session.send_multiple_commands_async(
-            cmds, cancellable);
-        foreach (Command cmd in responses.keys)
-            throw_on_failed_status(responses.get(cmd), cmd); 
+        yield store_fetch_commands_async(msg_set, cmds, true, cancellable);
     }
     
     public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
