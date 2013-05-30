@@ -15,6 +15,8 @@ private class Geary.Imap.Folder : BaseObject {
     public FolderPath path { get; private set; }
     public Imap.FolderProperties properties { get; private set; }
     public MailboxInformation info { get; private set; }
+    public MessageFlags? permanent_flags { get; private set; default = null; }
+    public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
     
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
@@ -87,6 +89,11 @@ private class Geary.Imap.Folder : BaseObject {
             throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
         }
         
+        // if at end of SELECT command accepts_user_flags is still UNKKNOWN, treat as TRUE because,
+        // according to IMAP spec, if PERMANENTFLAGS are not returned, then assume OK
+        if (accepts_user_flags == Trillian.UNKNOWN)
+            accepts_user_flags = Trillian.TRUE;
+        
         is_open = true;
     }
     
@@ -97,6 +104,8 @@ private class Geary.Imap.Folder : BaseObject {
         yield release_session_async(cancellable);
         
         fetch_accumulator.clear();
+        
+        accepts_user_flags = Trillian.UNKNOWN;
         
         is_open = false;
     }
@@ -171,6 +180,12 @@ private class Geary.Imap.Folder : BaseObject {
                 
                 case ResponseCodeType.UNSEEN:
                     properties.unseen = coded_response.get_unseen();
+                break;
+                
+                case ResponseCodeType.PERMANENT_FLAGS:
+                    permanent_flags = coded_response.get_permanent_flags();
+                    accepts_user_flags = Trillian.from_boolean(
+                        permanent_flags.contains(MessageFlag.ALLOWS_NEW));
                 break;
                 
                 default:

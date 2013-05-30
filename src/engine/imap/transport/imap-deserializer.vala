@@ -34,6 +34,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         TAG,
         START_PARAM,
         ATOM,
+        SYSTEM_FLAG,
         QUOTED,
         QUOTED_ESCAPE,
         PARTIAL_BODY_ATOM,
@@ -138,7 +139,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         context = root;
         
         Geary.State.Mapping[] mappings = {
-            new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_or_atom_char),
+            new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
             new Geary.State.Mapping(State.TAG, Event.EOS, on_eos),
             new Geary.State.Mapping(State.TAG, Event.ERROR, on_error),
             
@@ -147,10 +148,15 @@ public class Geary.Imap.Deserializer : BaseObject {
             new Geary.State.Mapping(State.START_PARAM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.START_PARAM, Event.ERROR, on_error),
             
-            new Geary.State.Mapping(State.ATOM, Event.CHAR, on_tag_or_atom_char),
+            new Geary.State.Mapping(State.ATOM, Event.CHAR, on_atom_char),
             new Geary.State.Mapping(State.ATOM, Event.EOL, on_atom_eol),
             new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
+            
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.CHAR, on_system_flag_char),
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.EOL, on_atom_eol),
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.QUOTED, Event.CHAR, on_quoted_char),
             new Geary.State.Mapping(State.QUOTED, Event.EOS, on_eos),
@@ -516,24 +522,37 @@ public class Geary.Imap.Deserializer : BaseObject {
                 if (ch == get_current_context_terminator())
                     return pop();
                 else
-                    return on_tag_or_atom_char(State.ATOM, event, user);
+                    return on_atom_char(state, event, user);
         }
     }
     
-    private uint on_eol(uint state, uint event, void *user) {
-        return flush_params();
+    private uint on_tag_char(uint state, uint event, void *user) {
+        unichar ch = *((unichar *) user);
+        
+        // drop if not allowed for tags (allowing for continuations and watching for spaces, which
+        // indicate a change of state)
+        if (DataFormat.is_tag_special(ch, " +"))
+            return State.TAG;
+        
+        // space indicates end of tag
+        if (ch == ' ') {
+            save_string_parameter();
+            
+            return State.START_PARAM;
+        }
+        
+        append_to_string(ch);
+        
+        return State.TAG;
     }
     
-    private uint on_tag_or_atom_char(uint state, uint event, void *user) {
-        assert(state == State.TAG || state == State.ATOM);
-        
+    private uint on_atom_char(uint state, uint event, void *user) {
         unichar ch = *((unichar *) user);
         
         // The partial body fetch results ("BODY[section]" or "BODY[section]<partial>" and their
         // .peek variants) offer so many exceptions to the decoding process they're given their own
         // state
-        if (state == State.ATOM && ch == '['
-            && (has_current_string_prefix("body") || has_current_string_prefix("body.peek"))) {
+        if (ch == '[' && (has_current_string_prefix("body") || has_current_string_prefix("body.peek"))) {
             append_to_string(ch);
             
             return State.PARTIAL_BODY_ATOM;
@@ -545,29 +564,25 @@ public class Geary.Imap.Deserializer : BaseObject {
         char terminator = get_current_context_terminator();
         atom_specials_exceptions[1] = terminator;
         
-        // Atom specials includes space and close-parens, but those are handled in particular ways
-        // while in the ATOM state, so they're excluded here.  Like atom specials, the space is 
-        // treated in a particular way for tags, but unlike atom, the close-parens character is not.
-        // The + symbol indicates a continuation and needs to be excepted when searching for a tag.
-        if (state == State.TAG && DataFormat.is_tag_special(ch, " +"))
-            return state;
-        else if (state == State.ATOM && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
-            return state;
+        // drop if not allowed for atoms, barring specials which indicate special state changes
+        if (DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
+            return State.ATOM;
         
         // message flag indicator is only legal at start of atom
-        if (state == State.ATOM && ch == '\\' && !is_current_string_empty())
-            return state;
+        if (ch == '\\' && is_current_string_empty()) {
+            append_to_string(ch);
+            
+            return State.SYSTEM_FLAG;
+        }
         
-        // space indicates end-of-atom or end-of-tag
+        // space indicates end-of-atom, end-of-tag, or end-of-system-flag
         if (ch == ' ') {
             save_string_parameter();
             
             return State.START_PARAM;
         }
         
-        // close-parens/close-square-bracket after an atom indicates end-of-list/end-of-response
-        // code
-        if (state == State.ATOM && ch == terminator) {
+        if (ch == get_current_context_terminator()) {
             save_string_parameter();
             
             return pop();
@@ -575,7 +590,43 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         append_to_string(ch);
         
-        return state;
+        return State.ATOM;
+    }
+    
+    private uint on_system_flag_char(uint state, uint event, void *user) {
+        unichar ch = *((unichar *) user);
+        
+        // see note in on_atom_char for why/how this works
+        char terminator = get_current_context_terminator();
+        atom_specials_exceptions[1] = terminator;
+        
+        // drop if not allowed for atoms, barring specials which indicate state changes
+        // note that asterisk is allowed for flags
+        if (ch != '*' && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
+            return State.SYSTEM_FLAG;
+        
+        // space indicates end-of-system-flag
+        if (ch == ' ') {
+            save_string_parameter();
+            
+            return State.START_PARAM;
+        }
+        
+        // close-parens/close-square-bracket after a system flag indicates end-of-list/end-of-response
+        // code
+        if (ch == terminator) {
+            save_string_parameter();
+            
+            return pop();
+        }
+        
+        append_to_string(ch);
+        
+        return State.SYSTEM_FLAG;
+    }
+    
+    private uint on_eol(uint state, uint event, void *user) {
+        return flush_params();
     }
     
     private uint on_atom_eol(uint state, uint event, void *user) {
