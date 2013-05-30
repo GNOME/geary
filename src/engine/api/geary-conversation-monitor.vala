@@ -508,7 +508,7 @@ public class Geary.ConversationMonitor : BaseObject {
         Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
-            yield process_email_async(yield folder.list_email_async(low, count,
+            yield start_process_email_async(yield folder.list_email_async(low, count,
                 required_fields, flags, cancellable));
         } catch (Error err) {
             list_error(err);
@@ -524,7 +524,7 @@ public class Geary.ConversationMonitor : BaseObject {
         Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
-            yield process_email_async(yield folder.list_email_by_id_async(initial_id,
+            yield start_process_email_async(yield folder.list_email_by_id_async(initial_id,
                 count, required_fields, flags, cancellable));
         } catch (Error err) {
             list_error(err);
@@ -537,7 +537,7 @@ public class Geary.ConversationMonitor : BaseObject {
         notify_scan_started();
         
         try {
-            yield process_email_async(yield folder.list_email_by_sparse_id_async(ids,
+            yield start_process_email_async(yield folder.list_email_by_sparse_id_async(ids,
                 required_fields, flags, cancellable));
         } catch (Error err) {
             list_error(err);
@@ -550,11 +550,21 @@ public class Geary.ConversationMonitor : BaseObject {
         notify_scan_completed();
     }
     
-    private async void process_email_async(Gee.Collection<Geary.Email>? emails) {
+    private async void start_process_email_async(Gee.Collection<Geary.Email>? emails) {
+        yield process_email_async(emails, new Gee.HashSet<ImplConversation>(),
+            new Gee.HashMultiMap<ImplConversation, Geary.Email>(),
+            new Gee.HashMap<Geary.EmailIdentifier, ImplConversation>(),
+            new Gee.HashMap<Geary.RFC822.MessageID, ImplConversation>());
+    }
+    
+    private async void process_email_async(Gee.Collection<Geary.Email>? emails,
+        Gee.HashSet<ImplConversation> job_new_conversations,
+        Gee.MultiMap<ImplConversation, Geary.Email> job_appended_conversations,
+        Gee.HashMap<Geary.EmailIdentifier, ImplConversation> job_geary_id_map,
+        Gee.HashMap<Geary.RFC822.MessageID, ImplConversation> job_message_id_map) {
         if (emails == null || emails.size == 0) {
-            notify_scan_completed();
-            yield fill_window_async();
-            
+            process_email_complete(job_new_conversations, job_appended_conversations,
+                job_geary_id_map, job_message_id_map);
             return;
         }
         
@@ -564,9 +574,6 @@ public class Geary.ConversationMonitor : BaseObject {
         // MessageIDs we're adding to each conversation.
         Gee.HashSet<RFC822.MessageID> new_message_ids = new Gee.HashSet<RFC822.MessageID>();
         
-        Gee.HashSet<Conversation> new_conversations = new Gee.HashSet<Conversation>();
-        Gee.MultiMap<Conversation, Geary.Email> appended_conversations = new Gee.HashMultiMap<
-            Conversation, Geary.Email>();
         foreach (Geary.Email email in emails) {
             // Skip messages already assigned to a conversation; this also deals with the problem
             // of messages with no Message-ID being loaded twice (most often encountered when
@@ -575,7 +582,7 @@ public class Geary.ConversationMonitor : BaseObject {
             //
             // TODO: Combine fields from this email with existing email so the monitor is holding
             // the freshest stuff ... this may require more signals
-            if (geary_id_map.has_key(email.id))
+            if (geary_id_map.has_key(email.id) || job_geary_id_map.has_key(email.id))
                 continue;
             
             // Right now, all threading is done with Message-IDs (no parsing of subject lines, etc.)
@@ -586,7 +593,7 @@ public class Geary.ConversationMonitor : BaseObject {
             ImplConversation? conversation = null;
             if (ancestors != null) {
                 foreach (RFC822.MessageID ancestor in ancestors) {
-                    conversation = message_id_map.get(ancestor);
+                    conversation = message_id_map.get(ancestor) ?? job_message_id_map.get(ancestor);
                     if (conversation != null)
                         break;
                 }
@@ -595,25 +602,18 @@ public class Geary.ConversationMonitor : BaseObject {
             // create new conversation if not seen before
             if (conversation == null) {
                 conversation = new ImplConversation(this);
-                
-                // add to list that's used in signal and to the master list, in case another email
-                // in the supplied emails list falls into this conversation as well
-                new_conversations.add(conversation);
-                conversations.add(conversation);
-            } else {
-                appended_conversations.set(conversation, email);
+                job_new_conversations.add(conversation);
             }
             
-            // add this email to the conversation
-            conversation.add(email);
+            job_appended_conversations.set(conversation, email);
             
             // map email identifier to email (for later removal)
-            geary_id_map.set(email.id, conversation);
+            job_geary_id_map.set(email.id, conversation);
             
             // map ancestors to this conversation
             if (ancestors != null) {
                 foreach (RFC822.MessageID ancestor in ancestors) {
-                    message_id_map.set(ancestor, conversation);
+                    job_message_id_map.set(ancestor, conversation);
                     
                     // Log every new ancestor for later searching.
                     if (!new_message_ids.contains(ancestor))
@@ -622,19 +622,10 @@ public class Geary.ConversationMonitor : BaseObject {
             }
         }
         
-        // Save and signal the new conversations
-        if (new_conversations.size > 0)
-            notify_conversations_added(new_conversations);
-        
-        // fire signals for other changes
-        foreach (Conversation conversation in appended_conversations.get_all_keys()) {
-            if (!new_conversations.contains(conversation))
-                notify_conversation_appended(conversation, appended_conversations.get(conversation));
-        }
-        
         // Expand the conversation to include any Message-IDs we know we need
         // and may have on disk, but aren't in the folder.
-        yield expand_conversations(new_message_ids);
+        yield expand_conversations(new_message_ids, job_new_conversations, job_appended_conversations,
+            job_geary_id_map, job_message_id_map);
         
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email completed: %d emails",
             folder.to_string(), emails.size);
@@ -669,9 +660,14 @@ public class Geary.ConversationMonitor : BaseObject {
         return blacklist;
     }
     
-    private async void expand_conversations(Gee.Set<RFC822.MessageID> needed_message_ids) {
+    private async void expand_conversations(Gee.Set<RFC822.MessageID> needed_message_ids,
+        Gee.HashSet<ImplConversation> job_new_conversations,
+        Gee.MultiMap<ImplConversation, Geary.Email> job_appended_conversations,
+        Gee.HashMap<Geary.EmailIdentifier, ImplConversation> job_geary_id_map,
+        Gee.HashMap<Geary.RFC822.MessageID, ImplConversation> job_message_id_map) {
         if (needed_message_ids.size == 0) {
-            notify_scan_completed();
+            process_email_complete(job_new_conversations, job_appended_conversations,
+                job_geary_id_map, job_message_id_map);
             return;
         }
         
@@ -693,6 +689,8 @@ public class Geary.ConversationMonitor : BaseObject {
         } catch (Error err) {
             debug("Unable to search local mail for conversations: %s", err.message);
             
+            process_email_complete(job_new_conversations, job_appended_conversations,
+                job_geary_id_map, job_message_id_map);
             return;
         }
         
@@ -711,11 +709,42 @@ public class Geary.ConversationMonitor : BaseObject {
         
         // process them as through they're been loaded from the folder; this, in turn, may
         // require more local searching of email
-        yield process_email_async(needed_messages.values);
+        yield process_email_async(needed_messages.values, job_new_conversations,
+            job_appended_conversations, job_geary_id_map, job_message_id_map);
         
         Logging.debug(Logging.Flag.CONVERSATIONS,
             "[%s] ConversationMonitor::expand_conversations completed: %d email ids (%d found)",
             folder.to_string(), needed_message_ids.size, needed_messages.size);
+    }
+    
+    private void process_email_complete(Gee.HashSet<ImplConversation> job_new_conversations,
+        Gee.MultiMap<ImplConversation, Geary.Email> job_appended_conversations,
+        Gee.HashMap<Geary.EmailIdentifier, ImplConversation> job_geary_id_map,
+        Gee.HashMap<Geary.RFC822.MessageID, ImplConversation> job_message_id_map) {
+        foreach(ImplConversation conversation in job_new_conversations)
+            conversations.add(conversation);
+        
+        foreach (ImplConversation conversation in job_appended_conversations.get_keys()) {
+            foreach (Geary.Email email in job_appended_conversations.get(conversation))
+                conversation.add(email);
+        }
+        
+        foreach (Geary.EmailIdentifier id in job_geary_id_map.keys)
+            geary_id_map.set(id, job_geary_id_map.get(id));
+        
+        foreach (Geary.RFC822.MessageID message_id in job_message_id_map.keys)
+            message_id_map.set(message_id, job_message_id_map.get(message_id));
+        
+        if (job_new_conversations.size > 0)
+            notify_conversations_added(job_new_conversations);
+        
+        foreach (ImplConversation conversation in job_appended_conversations.get_keys()) {
+            if (!job_new_conversations.contains(conversation))
+                notify_conversation_appended(conversation, job_appended_conversations.get(conversation));
+        }
+
+        notify_scan_completed();
+        fill_window();
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
