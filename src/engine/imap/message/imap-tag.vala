@@ -4,6 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A representation of an IMAP command tag.
+ *
+ * Tags are assigned by the client for each {@link Command} it sends to the server.  Tags have
+ * a general form of <a-z><000-999>, although that's only by convention and is not required.
+ *
+ * Special tags exist, namely to indicated an untagged response and continuations.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-2.2.1]]
+ */
+
 public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
     public const string UNTAGGED_VALUE = "*";
     public const string CONTINUATION_VALUE = "+";

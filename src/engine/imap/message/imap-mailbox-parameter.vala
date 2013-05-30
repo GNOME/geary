@@ -5,12 +5,22 @@
  */
 
 /**
- * A StringParameter that holds a mailbox reference (can be wildcarded).  Used
- * to juggle between our internal UTF-8 representation of mailboxes and IMAP's
+ * A {@link StringParameter} that holds a mailbox reference (can be wildcarded).
+ *
+ * Used to juggle between our internal UTF-8 representation of mailboxes and IMAP's
  * odd "modified UTF-7" representation.  The value is stored in IMAP's encoded
  * format since that's how it comes across the wire.
  */
+
 public class Geary.Imap.MailboxParameter : StringParameter {
+    public MailboxParameter(string mailbox) {
+        base (utf8_to_imap_utf7(mailbox));
+    }
+    
+    public MailboxParameter.from_string_parameter(StringParameter string_parameter) {
+        base (string_parameter.value);
+    }
+    
     private static string utf8_to_imap_utf7(string utf8) {
         try {
             return Geary.ImapUtf7.utf8_to_imap_utf7(utf8);
@@ -29,15 +39,8 @@ public class Geary.Imap.MailboxParameter : StringParameter {
         }
     }
     
-    public MailboxParameter(string mailbox) {
-        base (utf8_to_imap_utf7(mailbox));
-    }
-    
-    public MailboxParameter.from_string_parameter(StringParameter string_parameter) {
-        base (string_parameter.value);
-    }
-    
     public string decode() {
         return imap_utf7_to_utf8(value);
     }
 }
+

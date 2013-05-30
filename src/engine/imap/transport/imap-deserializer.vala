@@ -6,13 +6,15 @@
 
 /**
  * The Deserializer performs asynchronous I/O on a supplied input stream and transforms the raw
- * bytes into IMAP Parameters (which can then be converted into ServerResponses or ServerData).
- * The Deserializer will only begin reading from the stream when start_async() is called.  Calling
- * stop_async() will halt reading without closing the stream itself.  A Deserializer may not be
- * reused once stop_async() has been invoked.
+ * bytes into IMAP {@link Parameter}s (which can then be converted into {@link ServerResponse}s or
+ * {@link ServerData}).
+ *
+ * The Deserializer will only begin reading from the stream when {@link start_async} is called.
+ * Calling {@link stop_async} will halt reading without closing the stream itself.  A Deserializer
+ * may not be reused once stop_async has been invoked.
  * 
  * Since all results from the Deserializer are reported via signals, those signals should be
- * connected to prior to calling start_async(), or the caller risks missing early messages.  (Note
+ * connected to prior to calling start_async, or the caller risks missing early messages.  (Note
  * that since Deserializer uses async I/O, this isn't technically possible unless the signals are
  * connected after the Idle loop has a chance to run; however, this is an implementation detail and
  * shouldn't be relied upon.)
@@ -81,25 +83,34 @@ public class Geary.Imap.Deserializer : BaseObject {
     private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
     
     /**
-     * Fired when a complete set of Parameters have been received.  Note that RootParameters may
-     * contain StringParameters, ListParameters, NilParameters, and so on.  One special Parameter
-     * decoded by Deserializer is ResponseCode, which is structured internally as a ListParameter
-     * subclass for convenience when decoding.
+     * Fired when a complete set of IMAP {@link Parameter}s have been received.
+     *
+     * Note that {@link RootParameters} may contain {@link StringParameter}s, {@link ListParameter}s,
+     * {@link NilParameter}s, and so on.  One special Parameter decoded by Deserializer is
+     * {@link ResponseCode}, which is structured internally as a ListParameter subclass for
+     * convenience when decoding and can be deduced at the syntax level.
      */
     public signal void parameters_ready(RootParameters root);
     
     /**
-     * "eos" is fired when the underlying InputStream is closed, whether due to normal EOS or input
-     * error.  Subscribe to "receive-failure" to be notified of errors.
+     * Fired when the underlying InputStream is closed, whether due to normal EOS or input error.
+     *
+     * @see receive_failure
      */
     public signal void eos();
     
+    /**
+     * Fired when an Error is trapped on the input stream.
+     *
+     * This is nonrecoverable and means the stream should be closed and this Deserializer destroyed.
+     */
     public signal void receive_failure(Error err);
     
     /**
-     * "data-received" is fired as data blocks are received during download.  The bytes themselves
-     * may be partial and unusable out of context, so they're not provided, but their size is, to allow
-     * monitoring of speed and such.
+     * Fired as data blocks are received during download.
+     *
+     * The bytes themselves may be partial and unusable out of context, so they're not provided,
+     * but their size is, to allow monitoring of speed and such.
      *
      * Note that this is fired for both line data (i.e. responses, status, etc.) and literal data
      * (block transfers).
@@ -109,6 +120,12 @@ public class Geary.Imap.Deserializer : BaseObject {
      */
     public signal void bytes_received(size_t bytes);
     
+    /**
+     * Fired when a syntax error has occurred.
+     *
+     * This generally means the data looks like garbage and further deserialization is unlikely
+     * or impossible.
+     */
     public signal void deserialize_failure();
     
     public Deserializer(InputStream ins) {
@@ -174,10 +191,20 @@ public class Geary.Imap.Deserializer : BaseObject {
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
     }
     
+    /**
+     * Install a custom Converter into the input stream.
+     *
+     * Can be used for decompression, decryption, and so on.
+     */
     public bool install_converter(Converter converter) {
         return midstream.install(converter);
     }
     
+    /**
+     * Begin deserializing IMAP responses from the input stream.
+     *
+     * Subscribe to the various signals before starting to ensure that all responses are trapped.
+     */
     public async void start_async(int priority = GLib.Priority.DEFAULT) throws Error {
         if (cancellable != null)
             throw new EngineError.ALREADY_OPEN("Deserializer already open");

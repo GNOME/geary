@@ -6,15 +6,29 @@
 
 extern void qsort(void *base, size_t num, size_t size, CompareFunc compare_func);
 
+/**
+ * A represenation of an IMAP message range specifier.
+ *
+ * A MessageSet can be for {@link SequenceNumber}s (which use positional addressing) or
+ * {@link UID}s.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-9]], "sequence-set" and "seq-range".
+ */
+
 public class Geary.Imap.MessageSet : BaseObject {
+    /**
+     * True if the {@link MessageSet} was created with a UID or a UID range.
+     *
+     * For {@link Command}s that accept MessageSets, they will use a UID variant
+     */
     public bool is_uid { get; private set; default = false; }
     
     private string value { get; private set; }
     
-    public MessageSet(int msg_num) {
-        assert(msg_num > 0);
+    public MessageSet(SequenceNumber seq_num) {
+        assert(seq_num.value > 0);
         
-        value = "%d".printf(msg_num);
+        value = seq_num.serialize();
     }
     
     public MessageSet.uid(UID uid) {
@@ -28,29 +42,29 @@ public class Geary.Imap.MessageSet : BaseObject {
         MessageSet.uid(((Geary.Imap.EmailIdentifier) email_id).uid);
     }
     
-    public MessageSet.range_by_count(int low_msg_num, int count) {
-        assert(low_msg_num > 0);
+    public MessageSet.range_by_count(SequenceNumber low_seq_num, int count) {
+        assert(low_seq_num.value > 0);
         assert(count > 0);
         
         value = (count > 1)
-            ? "%d:%d".printf(low_msg_num, low_msg_num + count - 1)
-            : "%d".printf(low_msg_num);
+            ? "%d:%d".printf(low_seq_num.value, low_seq_num.value + count - 1)
+            : low_seq_num.serialize();
     }
     
-    public MessageSet.range_by_first_last(int low_msg_num, int high_msg_num) {
-        assert(low_msg_num > 0);
-        assert(high_msg_num > 0);
+    public MessageSet.range_by_first_last(SequenceNumber low_seq_num, SequenceNumber high_seq_num) {
+        assert(low_seq_num.value > 0);
+        assert(high_seq_num.value > 0);
         
         // correct range problems (i.e. last before first)
-        if (low_msg_num > high_msg_num) {
-            int swap = low_msg_num;
-            low_msg_num = high_msg_num;
-            high_msg_num = swap;
+        if (low_seq_num.value > high_seq_num.value) {
+            SequenceNumber swap = low_seq_num;
+            low_seq_num = high_seq_num;
+            high_seq_num = swap;
         }
         
-        value = (low_msg_num != high_msg_num)
-            ? "%d:%d".printf(low_msg_num, high_msg_num)
-            : "%d".printf(low_msg_num);
+        value = (!low_seq_num.equal_to(high_seq_num))
+            ? "%s:%s".printf(low_seq_num.serialize(), high_seq_num.serialize())
+            : low_seq_num.serialize();
     }
     
     public MessageSet.uid_range(UID low, UID high) {
@@ -65,10 +79,10 @@ public class Geary.Imap.MessageSet : BaseObject {
         is_uid = true;
     }
     
-    public MessageSet.range_to_highest(int low_msg_num) {
-        assert(low_msg_num > 0);
+    public MessageSet.range_to_highest(SequenceNumber low_seq_num) {
+        assert(low_seq_num.value > 0);
         
-        value = "%d:*".printf(low_msg_num);
+        value = "%s:*".printf(low_seq_num.serialize());
     }
     
     /**
@@ -108,8 +122,8 @@ public class Geary.Imap.MessageSet : BaseObject {
         is_uid = true;
     }
     
-    public MessageSet.sparse(int[] msg_nums) {
-        value = build_sparse_range(msg_array_to_int64(msg_nums));
+    public MessageSet.sparse(SequenceNumber[] seq_nums) {
+        value = build_sparse_range(seq_array_to_int64(seq_nums));
     }
     
     public MessageSet.uid_sparse(UID[] msg_uids) {
@@ -124,8 +138,8 @@ public class Geary.Imap.MessageSet : BaseObject {
         is_uid = true;
     }
     
-    public MessageSet.sparse_to_highest(int[] msg_nums) {
-        value = "%s:*".printf(build_sparse_range(msg_array_to_int64(msg_nums)));
+    public MessageSet.sparse_to_highest(SequenceNumber[] seq_nums) {
+        value = "%s:*".printf(build_sparse_range(seq_array_to_int64(seq_nums)));
     }
     
     public MessageSet.multirange(MessageSet[] msg_sets) {
@@ -168,29 +182,29 @@ public class Geary.Imap.MessageSet : BaseObject {
     // Builds sparse range of either UID values or message numbers.
     // NOTE: This method assumes the supplied array is internally allocated, and so an in-place sort
     // is allowable
-    private static string build_sparse_range(int64[] msg_nums) {
-        assert(msg_nums.length > 0);
+    private static string build_sparse_range(int64[] seq_nums) {
+        assert(seq_nums.length > 0);
         
         // sort array to search for spans
-        qsort(msg_nums, msg_nums.length, sizeof(int64), Numeric.int64_compare);
+        qsort(seq_nums, seq_nums.length, sizeof(int64), Numeric.int64_compare);
         
         int64 start_of_span = -1;
-        int64 last_msg_num = -1;
+        int64 last_seq_num = -1;
         int span_count = 0;
         StringBuilder builder = new StringBuilder();
-        foreach (int64 msg_num in msg_nums) {
-            assert(msg_num >= 0);
+        foreach (int64 seq_num in seq_nums) {
+            assert(seq_num >= 0);
             
             // the first number is automatically the start of a span, although it may be a span of one
             // (start_of_span < 0 should only happen on first iteration; can't easily break out of
             // loop because foreach/Iterator would still require a special case to skip it)
             if (start_of_span < 0) {
                 // start of first span
-                builder.append(msg_num.to_string());
+                builder.append(seq_num.to_string());
                 
-                start_of_span = msg_num;
+                start_of_span = seq_num;
                 span_count = 1;
-            } else if ((start_of_span + span_count) == msg_num) {
+            } else if ((start_of_span + span_count) == seq_num) {
                 // span continues
                 span_count++;
             } else {
@@ -198,40 +212,40 @@ public class Geary.Imap.MessageSet : BaseObject {
                 
                 // span ends, another begins
                 if (span_count == 1) {
-                    builder.append_printf(",%s", msg_num.to_string());
+                    builder.append_printf(",%s", seq_num.to_string());
                 } else if (span_count == 2) {
                     builder.append_printf(",%s,%s", (start_of_span + 1).to_string(),
-                        msg_num.to_string());
+                        seq_num.to_string());
                 } else {
                     builder.append_printf(":%s,%s", (start_of_span + span_count - 1).to_string(),
-                        msg_num.to_string());
+                        seq_num.to_string());
                 }
                 
-                start_of_span = msg_num;
+                start_of_span = seq_num;
                 span_count = 1;
             }
             
-            last_msg_num = msg_num;
+            last_seq_num = seq_num;
         }
         
-        // there should always be one msg_num in sorted, so the loop should exit with some state
+        // there should always be one seq_num in sorted, so the loop should exit with some state
         assert(start_of_span >= 0);
         assert(span_count > 0);
-        assert(last_msg_num >= 0);
+        assert(last_seq_num >= 0);
         
         // look for open-ended span
         if (span_count == 2)
-            builder.append_printf(",%s", last_msg_num.to_string());
+            builder.append_printf(",%s", last_seq_num.to_string());
         else
-            builder.append_printf(":%s", last_msg_num.to_string());
+            builder.append_printf(":%s", last_seq_num.to_string());
         
         return builder.str;
     }
     
-    private static int64[] msg_array_to_int64(int[] msg_nums) {
+    private static int64[] seq_array_to_int64(SequenceNumber[] seq_nums) {
         int64[] ret = new int64[0];
-        foreach (int num in msg_nums)
-            ret += (int64) num;
+        foreach (SequenceNumber seq_num in seq_nums)
+            ret += (int64) seq_num.value;
         
         return ret;
     }
@@ -252,6 +266,10 @@ public class Geary.Imap.MessageSet : BaseObject {
         return ret;
     }
     
+    /**
+     * Returns the {@link MessageSet} as a {@link Parameter} suitable for inclusion in a
+     * {@link Command}.
+     */
     public Parameter to_parameter() {
         // Message sets are not quoted, even if they use an atom-special character (this *might*
         // be a Gmailism...)

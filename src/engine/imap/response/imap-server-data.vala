@@ -83,15 +83,15 @@ public class Geary.Imap.ServerData : ServerResponse {
     }
     
     /**
-     * Parses the {@link ServerData} into an expunged {@link MessageNumber}, if possible.
+     * Parses the {@link ServerData} into an expunged {@link SequenceNumber}, if possible.
      *
      * @throws ImapError.INVALID if not an expunged MessageNumber.
      */
-    public MessageNumber get_expunge() throws ImapError {
+    public SequenceNumber get_expunge() throws ImapError {
         if (server_data_type != ServerDataType.EXPUNGE)
             throw new ImapError.INVALID("Not EXPUNGE data: %s", to_string());
         
-        return new MessageNumber(get_as_string(1).as_int());
+        return new SequenceNumber(get_as_string(1).as_int());
     }
     
     /**

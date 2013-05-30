@@ -19,8 +19,8 @@ private class Geary.Imap.Folder : BaseObject {
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
     private Nonblocking.Mutex fetch_mutex = new Nonblocking.Mutex();
-    private Gee.HashMap<MessageNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
-        MessageNumber, FetchedData>();
+    private Gee.HashMap<SequenceNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
+        SequenceNumber, FetchedData>();
     
     public signal void exists(int total);
     
@@ -132,7 +132,7 @@ private class Geary.Imap.Folder : BaseObject {
             appended(total);
     }
     
-    private void on_expunge(MessageNumber pos) {
+    private void on_expunge(SequenceNumber pos) {
         debug("%s EXPUNGE %s", to_string(), pos.to_string());
         
         properties.set_select_examine_message_count(properties.select_examine_messages - 1);
@@ -143,8 +143,8 @@ private class Geary.Imap.Folder : BaseObject {
     
     private void on_fetch(FetchedData fetched_data) {
         // add if not found, merge if already received data for this email
-        FetchedData? already_present = fetch_accumulator.get(fetched_data.msg_num);
-        fetch_accumulator.set(fetched_data.msg_num,
+        FetchedData? already_present = fetch_accumulator.get(fetched_data.seq_num);
+        fetch_accumulator.set(fetched_data.seq_num,
             (already_present != null) ? fetched_data.combine(already_present) : fetched_data);
         
         fetched(fetched_data);
@@ -196,7 +196,7 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     // For FETCH or STORE commands, both of which return FETCH results.
-    private async Gee.HashMap<MessageNumber, FetchedData> store_fetch_commands_async(MessageSet msg_set,
+    private async Gee.HashMap<SequenceNumber, FetchedData> store_fetch_commands_async(MessageSet msg_set,
         Gee.Collection<Command> store_fetch_cmds, bool lock_mutex, Cancellable? cancellable)
         throws Error {
         // watch for deadlock
@@ -216,8 +216,8 @@ private class Geary.Imap.Folder : BaseObject {
         }
         
         // swap out results and clear accumulator
-        Gee.HashMap<MessageNumber, FetchedData> results = fetch_accumulator;
-        fetch_accumulator = new Gee.HashMap<MessageNumber, FetchedData>();
+        Gee.HashMap<SequenceNumber, FetchedData> results = fetch_accumulator;
+        fetch_accumulator = new Gee.HashMap<SequenceNumber, FetchedData>();
         
         // unlock after clearing accumulator
         if (token != Nonblocking.Mutex.INVALID_TOKEN)
@@ -326,8 +326,8 @@ private class Geary.Imap.Folder : BaseObject {
             cmds.add(new FetchCommand(msg_set, data_types, null));
         }
         
-        Gee.HashMap<MessageNumber, UID>? pos_uid_map = null;
-        Gee.HashMap<MessageNumber, FetchedData>? fetched = null;
+        Gee.HashMap<SequenceNumber, UID>? pos_uid_map = null;
+        Gee.HashMap<SequenceNumber, FetchedData>? fetched = null;
         Error? fetch_err = null;
         
         // Commands prepped, do the actual fetching with the mutex in place
@@ -338,7 +338,7 @@ private class Geary.Imap.Folder : BaseObject {
             // for responses to come back in any order, broken up in any way, with only positional
             // addressing, and there's no way to build Email's without the UID.
             if (!msg_set.is_uid) {
-                pos_uid_map = new Gee.HashMap<MessageNumber, UID>();
+                pos_uid_map = new Gee.HashMap<SequenceNumber, UID>();
                 
                 FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataType.UID);
                 Gee.HashMap<MessageData, FetchedData> uids = yield store_fetch_commands_async(
@@ -346,10 +346,13 @@ private class Geary.Imap.Folder : BaseObject {
                 
                 // convert fetched UIDs into easy-lookup map
                 foreach (FetchedData fetched_data in uids.values) {
-                    if (fetched_data.data_map.has_key(FetchDataType.UID))
-                        pos_uid_map.set(fetched_data.msg_num, (UID) fetched_data.data_map.get(FetchDataType.UID));
-                    else
-                        debug("No UID in FetchedData for %s on %s", fetched_data.msg_num.to_string(), to_string());
+                    if (fetched_data.data_map.has_key(FetchDataType.UID)) {
+                        pos_uid_map.set(fetched_data.seq_num,
+                            (UID) fetched_data.data_map.get(FetchDataType.UID));
+                    } else {
+                        debug("No UID in FetchedData for %s on %s", fetched_data.seq_num.to_string(),
+                            to_string());
+                    }
                 }
             }
             
@@ -368,14 +371,14 @@ private class Geary.Imap.Folder : BaseObject {
         
         // Convert fetched data into Geary.Email objects
         Gee.List<Geary.Email> email_list = new Gee.ArrayList<Geary.Email>();
-        foreach (MessageNumber msg_num in fetched.keys) {
-            FetchedData fetched_data = fetched.get(msg_num);
+        foreach (SequenceNumber seq_num in fetched.keys) {
+            FetchedData fetched_data = fetched.get(seq_num);
             
             // the UID should either have been looked up (if using positional addressing) or should
             // have come back with the response (if using UID addressing)
             UID? uid = null;
             if (pos_uid_map != null)
-                uid = pos_uid_map.get(msg_num);
+                uid = pos_uid_map.get(seq_num);
             else
                 uid = (UID) fetched_data.data_map.get(FetchDataType.UID);
             assert(uid != null);
@@ -534,7 +537,7 @@ private class Geary.Imap.Folder : BaseObject {
         FetchBodyDataIdentifier? partial_header_identifier, FetchBodyDataIdentifier? body_identifier,
         FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier)
         throws Error {
-        Geary.Email email = new Geary.Email(fetched_data.msg_num.value,
+        Geary.Email email = new Geary.Email(fetched_data.seq_num.value,
             new Imap.EmailIdentifier(uid, path));
         
         // accumulate these to submit Imap.EmailProperties all at once

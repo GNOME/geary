@@ -4,6 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A representation of the IMAP FETCH command.
+ *
+ * FETCH is easily the most complicated IMAP command.  It has a number of parameters, some of which
+ * have a number of variants, and the data that is returned requires involved decoding patterns.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-6.4.5]]
+ *
+ * @see FetchedData
+ * @see StoreCommand
+ */
+
 public class Geary.Imap.FetchCommand : Command {
     public const string NAME = "fetch";
     public const string UID_NAME = "uid fetch";

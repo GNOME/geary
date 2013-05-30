@@ -202,7 +202,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public signal void exists(int count);
     
-    public signal void expunge(MessageNumber msg_num);
+    public signal void expunge(SequenceNumber seq_num);
     
     public signal void fetch(FetchedData fetched_data);
     
@@ -1304,9 +1304,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         assert(completion_response != null);
         
-        if (completion_response.status != Status.OK)
-            throw new ImapError.SERVER_ERROR("Command %s failed: %s", cmd.name, completion_response.to_string());
-        
         return completion_response;
     }
     
@@ -1387,8 +1384,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 // update ClientSession capabilities before firing signal, so external signal
                 // handlers that refer back to property aren't surprised
                 capabilities = server_data.get_capabilities(ref next_capabilities_revision);
-                debug("[%s] #%d %s", to_string(), next_capabilities_revision,
-                    capabilities.to_string());
+                debug("[%s] %s", to_string(), capabilities.to_string());
                 
                 capability(capabilities);
             break;

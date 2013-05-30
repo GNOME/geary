@@ -10,13 +10,14 @@
  * See [[http://tools.ietf.org/html/rfc3501#section-7.4.2]]
  *
  * @see FetchCommand
+ * @see StoreCommand
  */
 public class Geary.Imap.FetchedData : Object {
     /**
      * The positional address of the email in the mailbox.
      */
+    public SequenceNumber seq_num { get; private set; }
     
-    public MessageNumber msg_num { get; private set; }
     /**
      * A Map of {@link FetchDataType}s to their {@link Imap.MessageData} for this email.
      *
@@ -36,15 +37,24 @@ public class Geary.Imap.FetchedData : Object {
     public Gee.Map<FetchBodyDataIdentifier, Memory.AbstractBuffer> body_data_map { get; private set;
         default = new Gee.HashMap<FetchBodyDataIdentifier, Memory.AbstractBuffer>(); }
     
-    public FetchedData(MessageNumber msg_num) {
-        this.msg_num = msg_num;
+    public FetchedData(SequenceNumber seq_num) {
+        this.seq_num = seq_num;
     }
     
+    /**
+     * Decodes {@link ServerData} into a FetchedData representation.
+     *
+     * The ServerData must be the response to a FETCH or STORE command.
+     *
+     * @see FetchCommand
+     * @see StoreCommand
+     * @see ServerData.get_fetch
+     */
     public static FetchedData decode(ServerData server_data) throws ImapError {
         if (!server_data.get_as_string(2).equals_ci(FetchCommand.NAME))
             throw new ImapError.PARSE_ERROR("Not FETCH data: %s", server_data.to_string());
         
-        FetchedData fetched_data = new FetchedData(new MessageNumber(server_data.get_as_string(1).as_int()));
+        FetchedData fetched_data = new FetchedData(new SequenceNumber(server_data.get_as_string(1).as_int()));
         
         // walk the list for each returned fetch data item, which is paired by its data item name
         // and the structured data itself
@@ -94,13 +104,13 @@ public class Geary.Imap.FetchedData : Object {
      *
      * See warnings at {@link body_data_map} for dealing with multiple FetchBodyDataTypes.
      *
-     * @return null if the FetchedData do not have the same {@link msg_num}.
+     * @return null if the FetchedData do not have the same {@link seq_num}.
      */
     public FetchedData? combine(FetchedData other) {
-        if (!msg_num.equal_to(other.msg_num))
+        if (!seq_num.equal_to(other.seq_num))
             return null;
         
-        FetchedData combined = new FetchedData(msg_num);
+        FetchedData combined = new FetchedData(seq_num);
         Collection.map_set_all<FetchDataType, MessageData>(combined.data_map, data_map);
         Collection.map_set_all<FetchDataType, MessageData>(combined.data_map, other.data_map);
         Collection.map_set_all<FetchBodyDataIdentifier, Memory.AbstractBuffer>(combined.body_data_map,
@@ -114,7 +124,7 @@ public class Geary.Imap.FetchedData : Object {
     public string to_string() {
         StringBuilder builder = new StringBuilder();
         
-        builder.append_printf("[%s] ", msg_num.to_string());
+        builder.append_printf("[%s] ", seq_num.to_string());
         
         foreach (FetchDataType data_type in data_map.keys)
             builder.append_printf("%s=%s ", data_type.to_string(), data_map.get(data_type).to_string());

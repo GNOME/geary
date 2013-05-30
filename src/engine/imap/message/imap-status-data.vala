@@ -4,6 +4,14 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * The decoded response to a STATUS command.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.2.4]]
+ *
+ * @see StatusCommand
+ */
+
 public class Geary.Imap.StatusData : Object {
     // NOTE: This must be negative one; other values won't work well due to how the values are
     // decoded
@@ -15,18 +23,33 @@ public class Geary.Imap.StatusData : Object {
      * See {@link MailboxParameter} for the encoded version of this string.
      */
     public string mailbox { get; private set; }
+    
     /**
-     * UNSET if not set.
+     * {@link UNSET} if not set.
      */
     public int messages { get; private set; }
+    
     /**
-     * UNSET if not set.
+     * {@link UNSET} if not set.
      */
     public int recent { get; private set; }
-    public UID? uid_next { get; private set; }
-    public UIDValidity? uid_validity { get; private set; }
+    
     /**
-     * UNSET if not set.
+     * The UIDNEXT of the mailbox, if returned.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-2.3.1.1]]
+     */
+    public UID? uid_next { get; private set; }
+    
+    /**
+     * The UIDVALIDITY of the mailbox, if returned.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-2.3.1.1]]
+     */
+    public UIDValidity? uid_validity { get; private set; }
+    
+    /**
+     * {@link UNSET} if not set.
      */
     public int unseen { get; private set; }
     
@@ -40,11 +63,22 @@ public class Geary.Imap.StatusData : Object {
         this.unseen = unseen;
     }
     
+    /**
+     * Decodes {@link ServerData} into a StatusData representation.
+     *
+     * The ServerData must be the response to a STATUS command.
+     *
+     * @see StatusCommand
+     * @see ServerData.get_status
+     */
     public static StatusData decode(ServerData server_data) throws ImapError {
         if (!server_data.get_as_string(1).equals_ci(StatusCommand.NAME)) {
             throw new ImapError.PARSE_ERROR("Bad STATUS command name in response \"%s\"",
                 server_data.to_string());
         }
+        
+        MailboxParameter mailbox_param = new MailboxParameter.from_string_parameter(
+            server_data.get_as_string(2));
         
         int messages = UNSET;
         int recent = UNSET;
@@ -92,8 +126,14 @@ public class Geary.Imap.StatusData : Object {
             }
         }
         
-        return new StatusData(server_data.get_as_string(2).value, messages, recent, uid_next,
-            uid_validity, unseen);
+        return new StatusData(mailbox_param.decode(), messages, recent, uid_next, uid_validity,
+            unseen);
+    }
+    
+    public string to_string() {
+        return "%s/%d/UIDNEXT=%s/UIDVALIDITY=%s".printf(mailbox, messages,
+            (uid_next != null) ? uid_next.to_string() : "(none)",
+            (uid_validity != null) ? uid_validity.to_string() : "(none)");
     }
 }
 

@@ -86,9 +86,12 @@ engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-set.vala
 engine/imap/message/imap-parameter.vala
+engine/imap/message/imap-sequence-number.vala
 engine/imap/message/imap-status-data.vala
 engine/imap/message/imap-status-data-type.vala
 engine/imap/message/imap-tag.vala
+engine/imap/message/imap-uid.vala
+engine/imap/message/imap-uid-validity.vala
 engine/imap/response/imap-coded-status-response.vala
 engine/imap/response/imap-completion-status-response.vala
 engine/imap/response/imap-continuation-response.vala
