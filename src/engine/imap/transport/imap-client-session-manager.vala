@@ -298,12 +298,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         sessions_mutex.release(ref token);
     }
     
+    // It's possible this will be called more than once on the same session, especially in the case of a
+    // remote close on reserved ClientSession, so this code is forgiving.
     private async void force_disconnect_async(ClientSession session, bool do_disconnect) {
         try {
             int token = yield sessions_mutex.claim_async();
             
-            bool removed = locked_remove_session(session);
-            assert(removed);
+            locked_remove_session(session);
             
             if (do_disconnect) {
                 try {
