@@ -193,8 +193,8 @@ public class Geary.Nonblocking.Batch : BaseObject {
         
         started(contexts.size);
         
-        // although they should technically be able to execute in any order, fire them off in the
-        // order they were submitted; this may hide bugs, but it also makes other bugs reproducible
+        // fire them off in order they were submitted; this may hide bugs, but it also makes other
+        // bugs reproducible
         int count = 0;
         for (int id = START_ID; id < next_result_id; id++) {
             BatchContext? context = contexts.get(id);

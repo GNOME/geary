@@ -18,7 +18,7 @@ private class Geary.Imap.Folder : BaseObject {
     
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
-    private Nonblocking.Mutex fetch_mutex = new Nonblocking.Mutex();
+    private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.HashMap<SequenceNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
         SequenceNumber, FetchedData>();
     
@@ -195,33 +195,29 @@ private class Geary.Imap.Folder : BaseObject {
             throw new EngineError.OPEN_REQUIRED("Imap.Folder %s not open", to_string());
     }
     
-    // For FETCH or STORE commands, both of which return FETCH results.
-    private async Gee.HashMap<SequenceNumber, FetchedData> store_fetch_commands_async(MessageSet msg_set,
-        Gee.Collection<Command> store_fetch_cmds, bool lock_mutex, Cancellable? cancellable)
-        throws Error {
-        // watch for deadlock
-        assert(fetch_mutex.is_locked() != lock_mutex);
-        
-        int token = Nonblocking.Mutex.INVALID_TOKEN;
-        if (lock_mutex) 
-            token = yield fetch_mutex.claim_async(cancellable);
+    // All commands must executed inside the cmd_mutex; returns FETCH or STORE results
+    private async Gee.HashMap<SequenceNumber, FetchedData>? exec_commands_async(
+        Gee.Collection<Command> cmds, Cancellable? cancellable) throws Error {
+        int token = yield cmd_mutex.claim_async(cancellable);
         
         // execute commands with mutex locked
         Gee.Map<Command, CompletionStatusResponse>? responses = null;
         Error? err = null;
         try {
-            responses = yield session.send_multiple_commands_async(store_fetch_cmds, cancellable);
+            responses = yield session.send_multiple_commands_async(cmds, cancellable);
         } catch (Error store_fetch_err) {
             err = store_fetch_err;
         }
         
         // swap out results and clear accumulator
-        Gee.HashMap<SequenceNumber, FetchedData> results = fetch_accumulator;
-        fetch_accumulator = new Gee.HashMap<SequenceNumber, FetchedData>();
+        Gee.HashMap<SequenceNumber, FetchedData>? results = null;
+        if (fetch_accumulator.size > 0) {
+            results = fetch_accumulator;
+            fetch_accumulator = new Gee.HashMap<SequenceNumber, FetchedData>();
+        }
         
         // unlock after clearing accumulator
-        if (token != Nonblocking.Mutex.INVALID_TOKEN)
-            fetch_mutex.release(ref token);
+        cmd_mutex.release(ref token);
         
         if (err != null)
             throw err;
@@ -261,6 +257,12 @@ private class Geary.Imap.Folder : BaseObject {
         // getting all the fields can require multiple FETCH commands (some servers don't handle
         // well putting every required data item into single command), so aggregate FetchCommands
         Gee.Collection<FetchCommand> cmds = new Gee.ArrayList<FetchCommand>();
+        
+        // if not a UID FETCH, request UIDs for all messages so their EmailIdentifier can be
+        // created without going back to the database (assuming the messages have already been
+        // pulled down, not a guarantee)
+        if (!msg_set.is_uid)
+            cmds.add(new FetchCommand.data_type(msg_set, FetchDataType.UID));
         
         // convert bulk of the "basic" fields into a single FETCH command
         FetchBodyDataIdentifier? partial_header_identifier = null;
@@ -326,46 +328,9 @@ private class Geary.Imap.Folder : BaseObject {
             cmds.add(new FetchCommand(msg_set, data_types, null));
         }
         
-        Gee.HashMap<SequenceNumber, UID>? pos_uid_map = null;
-        Gee.HashMap<SequenceNumber, FetchedData>? fetched = null;
-        Error? fetch_err = null;
-        
-        // Commands prepped, do the actual fetching with the mutex in place
-        int token = yield fetch_mutex.claim_async(cancellable);
-        try {
-            // If positional addressing is used, get all UIDs first in a non-pipelined request so they
-            // can be matched against the remaining calls ... this has to be done because it's possible
-            // for responses to come back in any order, broken up in any way, with only positional
-            // addressing, and there's no way to build Email's without the UID.
-            if (!msg_set.is_uid) {
-                pos_uid_map = new Gee.HashMap<SequenceNumber, UID>();
-                
-                FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataType.UID);
-                Gee.HashMap<MessageData, FetchedData> uids = yield store_fetch_commands_async(
-                    msg_set, new Collection.SingleItem<FetchCommand>(cmd), false, cancellable);
-                
-                // convert fetched UIDs into easy-lookup map
-                foreach (FetchedData fetched_data in uids.values) {
-                    if (fetched_data.data_map.has_key(FetchDataType.UID)) {
-                        pos_uid_map.set(fetched_data.seq_num,
-                            (UID) fetched_data.data_map.get(FetchDataType.UID));
-                    } else {
-                        debug("No UID in FetchedData for %s on %s", fetched_data.seq_num.to_string(),
-                            to_string());
-                    }
-                }
-            }
-            
-            // now execute the remaining FETCH commands
-            fetched = yield store_fetch_commands_async(msg_set, cmds, false, cancellable);
-        } catch (Error err) {
-            fetch_err = err;
-        }
-        fetch_mutex.release(ref token);
-        
-        if (fetch_err != null)
-            throw fetch_err;
-        
+        // Commands prepped, do the fetch and accumulate all the responses
+        Gee.HashMap<SequenceNumber, FetchedData>? fetched = yield exec_commands_async(cmds,
+            cancellable);
         if (fetched == null || fetched.size == 0)
             return null;
         
@@ -374,14 +339,15 @@ private class Geary.Imap.Folder : BaseObject {
         foreach (SequenceNumber seq_num in fetched.keys) {
             FetchedData fetched_data = fetched.get(seq_num);
             
-            // the UID should either have been looked up (if using positional addressing) or should
+            // the UID should either have been fetched (if using positional addressing) or should
             // have come back with the response (if using UID addressing)
-            UID? uid = null;
-            if (pos_uid_map != null)
-                uid = pos_uid_map.get(seq_num);
-            else
-                uid = (UID) fetched_data.data_map.get(FetchDataType.UID);
-            assert(uid != null);
+            UID? uid = fetched_data.data_map.get(FetchDataType.UID) as UID;
+            if (uid == null) {
+                message("Unable to list message #%s on %s: No UID returned from server",
+                    seq_num.to_string(), to_string());
+                
+                continue;
+            }
             
             try {
                 email_list.add(fetched_data_to_email(uid, fetched_data, partial_header_identifier,
@@ -411,7 +377,7 @@ private class Geary.Imap.Folder : BaseObject {
         else
             cmds.add(new ExpungeCommand());
         
-        yield store_fetch_commands_async(msg_set, cmds, true, cancellable);
+        yield exec_commands_async(cmds, cancellable);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
@@ -434,7 +400,7 @@ private class Geary.Imap.Folder : BaseObject {
         if (msg_flags_remove.size > 0)
             cmds.add(new StoreCommand(msg_set, msg_flags_remove, false, false));
         
-        yield store_fetch_commands_async(msg_set, cmds, true, cancellable);
+        yield exec_commands_async(cmds, cancellable);
     }
     
     public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
@@ -442,19 +408,33 @@ private class Geary.Imap.Folder : BaseObject {
         check_open();
         
         CopyCommand cmd = new CopyCommand(msg_set, new Imap.MailboxParameter(destination.get_fullpath()));
-        CompletionStatusResponse response = yield session.send_command_async(cmd, cancellable);
+        Gee.Collection<Command> cmds = new Collection.SingleItem<Command>(cmd);
         
-        throw_on_failed_status(response, cmd);
+        yield exec_commands_async(cmds, cancellable);
     }
     
+    // TODO: Support MOVE extension
     public async void move_email_async(MessageSet msg_set, Geary.FolderPath destination,
         Cancellable? cancellable) throws Error {
         check_open();
         
-        // TODO: Support MOVE extension
+        Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
         
-        yield copy_email_async(msg_set, destination, cancellable);
-        yield remove_email_async(msg_set, cancellable);
+        // Don't use copy_email_async followed by remove_email_async; this needs to be one
+        // set of commands executed in order without releasing the cmd_mutex; this is especially
+        // vital if positional addressing is used
+        cmds.add(new CopyCommand(msg_set, new Imap.MailboxParameter(destination.get_fullpath())));
+        
+        Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
+        flags.add(MessageFlag.DELETED);
+        cmds.add(new StoreCommand(msg_set, flags, true, false));
+        
+        if (msg_set.is_uid)
+            cmds.add(new ExpungeCommand.uid(msg_set));
+        else
+            cmds.add(new ExpungeCommand());
+        
+        yield exec_commands_async(cmds, cancellable);
     }
     
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated
