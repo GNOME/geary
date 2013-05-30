@@ -14,43 +14,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private const Geary.Email.Field FAST_NORMALIZATION_FIELDS =
         Geary.Email.Field.PROPERTIES | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
-    private class EnginePositionToUIDConverter : Object, Imap.PositionToUIDConverter {
-        public weak GenericFolder owner;
-        
-        public EnginePositionToUIDConverter(GenericFolder owner) {
-            this.owner = owner;
-        }
-        
-        public async Imap.UID? convert_async(Imap.MessageNumber pos, Cancellable? cancellable)
-            throws Error {
-            debug("convert_async: pos=%s", pos.to_string());
-            
-            int local_count = yield owner.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
-                cancellable);
-            debug("convert_async: local_count=%d", local_count);
-            if (local_count <= 0)
-                return null;
-            
-            int local_pos = remote_position_to_local_position(pos.value, local_count,
-                owner.remote_count);
-            debug("convert_async: local_pos=%d", local_pos);
-            if (local_pos < 0)
-                return null;
-            
-            Gee.List<Geary.Email>? email = yield owner.local_folder.list_email_async(local_pos, 1,
-                Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
-            debug("convert_async: email=%s", (email != null) ? email.size.to_string() : "(null)");
-            if (email == null || email.size == 0)
-                return null;
-            
-            Imap.EmailIdentifier id = (Imap.EmailIdentifier) email[0].id;
-            
-            debug("convert_async: uid=%s", id.uid.to_string());
-            
-            return id.uid;
-        }
-    }
-    
     public override Account account { get { return _account; } }
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
@@ -533,7 +496,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             Imap.Folder folder = yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
             
-            yield folder.open_async(new EnginePositionToUIDConverter(this), cancellable);
+            yield folder.open_async(cancellable);
             
             // allow subclasses to examine the opened folder and resolve any vital
             // inconsistencies

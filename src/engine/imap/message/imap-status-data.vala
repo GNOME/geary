@@ -9,6 +9,11 @@ public class Geary.Imap.StatusData : Object {
     // decoded
     public const int UNSET = -1;
     
+    /**
+     * Decoded mailbox path name.
+     *
+     * See {@link MailboxParameter} for the encoded version of this string.
+     */
     public string mailbox { get; private set; }
     /**
      * UNSET if not set.

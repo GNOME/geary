@@ -266,7 +266,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (yield local.folder_exists_async(path, cancellable))
             return true;
         
-        return (yield remote.list_mailbox_async(path, cancellable)) != null;
+        return yield remote.folder_exists_async(path, cancellable);
     }
     
     // TODO: This needs to be made into a single transaction
@@ -306,9 +306,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     private async void background_update_folders(Geary.FolderPath? parent,
         Gee.Collection<Geary.Folder> engine_folders, Cancellable? cancellable) {
-        Gee.Collection<Geary.Imap.Folder> remote_folders;
+        Gee.Collection<Geary.Imap.Folder>? remote_folders;
         try {
-            remote_folders = yield remote.list_children_async(parent, cancellable);
+            remote_folders = yield remote.list_child_folders_async(parent, cancellable);
+            
+            // following code is just easier if this is never null
+            if (remote_folders == null)
+                remote_folders = new Gee.ArrayList<Imap.Folder>();
         } catch (Error remote_error) {
             debug("Unable to retrieve folder list from server: %s", remote_error.message);
             
@@ -402,7 +406,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.Collection<Geary.Folder> engine_added = null;
         if (to_add != null) {
             engine_added = new Gee.ArrayList<Geary.Folder>();
-
+            
             Gee.ArrayList<ImapDB.Folder> folders_to_build = new Gee.ArrayList<ImapDB.Folder>();
             foreach (Geary.Imap.Folder remote_folder in to_add) {
                 try {
@@ -415,7 +419,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                     debug("Unable to fetch local folder after cloning: %s", convert_err.message);
                 }
             }
-
+            
             engine_added.add_all(build_folders(folders_to_build));
         }
         

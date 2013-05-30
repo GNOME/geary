@@ -4,37 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private interface Geary.Imap.PositionToUIDConverter : Object {
-    public abstract async UID? convert_async(MessageNumber pos, Cancellable? cancellable)
-        throws Error;
-}
-
 private class Geary.Imap.Folder : BaseObject {
     public const bool CASE_SENSITIVE = true;
     
     private const Geary.Email.Field BASIC_FETCH_FIELDS = Email.Field.ENVELOPE | Email.Field.DATE
         | Email.Field.ORIGINATORS | Email.Field.RECEIVERS | Email.Field.REFERENCES
         | Email.Field.SUBJECT | Email.Field.HEADER;
-    
-    private class ImapOperation : Nonblocking.BatchOperation {
-        // IN
-        public ClientSession session;
-        public Command cmd;
-        
-        // OUT
-        public CompletionStatusResponse? response = null;
-        
-        public ImapOperation(ClientSession session, Command cmd) {
-            this.session = session;
-            this.cmd = cmd;
-        }
-        
-        public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            response = yield session.send_command_async(cmd, cancellable);
-            
-            return response;
-        }
-    }
     
     public bool is_open { get; private set; default = false; }
     public FolderPath path { get; private set; }
@@ -43,9 +18,9 @@ private class Geary.Imap.Folder : BaseObject {
     
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
-    private PositionToUIDConverter? position_to_uid = null;
     private Nonblocking.Mutex fetch_mutex = new Nonblocking.Mutex();
-    private Gee.ArrayList<FetchedData> recently_fetched = new Gee.ArrayList<FetchedData>();
+    private Gee.HashMap<MessageNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
+        MessageNumber, FetchedData>();
     
     public signal void exists(int total);
     
@@ -70,7 +45,7 @@ private class Geary.Imap.Folder : BaseObject {
      */
     public signal void disconnected(ClientSession.DisconnectReason reason);
     
-    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusData? status,
+    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusData status,
         MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
@@ -88,13 +63,11 @@ private class Geary.Imap.Folder : BaseObject {
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
-    public async void open_async(PositionToUIDConverter position_to_uid, Cancellable? cancellable)
-        throws Error {
+    public async void open_async(Cancellable? cancellable) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
         
-        this.position_to_uid = position_to_uid;
-        recently_fetched.clear();
+        fetch_accumulator.clear();
         
         session = yield session_mgr.claim_authorized_session_async(cancellable);
         
@@ -110,7 +83,6 @@ private class Geary.Imap.Folder : BaseObject {
             cancellable);
         if (response.status != Status.OK) {
             yield release_session_async(cancellable);
-            position_to_uid = null;
             
             throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
         }
@@ -124,8 +96,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         yield release_session_async(cancellable);
         
-        position_to_uid = null;
-        recently_fetched.clear();
+        fetch_accumulator.clear();
         
         is_open = false;
     }
@@ -172,9 +143,13 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void on_fetch(FetchedData fetched_data) {
-        debug("FETCH %s: %d items", to_string(), fetched_data.map.size + fetched_data.body_data.size);
+        debug("FETCH %s: %s", to_string(), fetched_data.to_string());
         
-        recently_fetched.add(fetched_data);
+        // add if not found, merge if already received data for this email
+        FetchedData? already_present = fetch_accumulator.get(fetched_data.msg_num);
+        fetch_accumulator.set(fetched_data.msg_num,
+            (already_present != null) ? fetched_data.combine(already_present) : fetched_data);
+        
         fetched(fetched_data);
     }
     
@@ -220,22 +195,24 @@ private class Geary.Imap.Folder : BaseObject {
             throw new EngineError.OPEN_REQUIRED("Imap.Folder %s not open", to_string());
     }
     
-    private async void send_command(Command cmd, Cancellable? cancellable) throws Error {
-        CompletionStatusResponse response = yield session.send_command_async(cmd, cancellable);
-        throw_on_failed_status(response, cmd);
-    }
-    
-    private async void execute_batch_async(Nonblocking.Batch batch, Cancellable? cancellable)
-        throws Error {
-        // execute all at once to pipeline
-        yield batch.execute_all_async(cancellable);
-        batch.throw_first_exception();
+    // *Must* be called with fetch_mutex locked.
+    private async Gee.HashMap<MessageNumber, FetchedData> fetch_commands_async(MessageSet msg_set,
+        Gee.Collection<FetchCommand> fetch_cmds, Cancellable? cancellable) throws Error {
+        assert(fetch_mutex.is_locked());
         
-        // throw error if any command returned a server error
-        foreach (int id in batch.get_ids()) {
-            ImapOperation op = (ImapOperation) batch.get_operation(id);
-            throw_on_failed_status(op.response, op.cmd);
-        }
+        // execute commands
+        Gee.Map<Command, CompletionStatusResponse> responses =
+            yield session.send_multiple_commands_async(fetch_cmds, cancellable);
+        
+        // swap out results
+        Gee.HashMap<MessageNumber, FetchedData> results = fetch_accumulator;
+        fetch_accumulator = new Gee.HashMap<MessageNumber, FetchedData>();
+        
+        // process response stati *after* clearing accumulator
+        foreach (Command cmd in responses.keys)
+            throw_on_failed_status(responses.get(cmd), cmd);
+        
+        return results;
     }
     
     private void throw_on_failed_status(CompletionStatusResponse response, Command cmd) throws Error {
@@ -262,39 +239,56 @@ private class Geary.Imap.Folder : BaseObject {
         check_open();
         
         // getting all the fields can require multiple FETCH commands (some servers don't handle
-        // well putting every required data item into single command), so use a Nonblocking.Batch
-        // to pipeline the requests
-        Nonblocking.Batch batch = new Nonblocking.Batch();
+        // well putting every required data item into single command), so aggregate FetchCommands
+        Gee.Collection<FetchCommand> cmds = new Gee.ArrayList<FetchCommand>();
         
         // convert bulk of the "basic" fields into a single FETCH command
+        FetchBodyDataIdentifier? partial_header_identifier = null;
         if (fields.requires_any(BASIC_FETCH_FIELDS)) {
             Gee.List<FetchDataType> data_types = new Gee.ArrayList<FetchDataType>();
-            Gee.List<FetchBodyDataType> body_data_types = new Gee.ArrayList<FetchBodyDataType>();
-            fields_to_fetch_data_types(msg_set.is_uid, fields, data_types, body_data_types);
+            FetchBodyDataType? header_body_type;
+            fields_to_fetch_data_types(fields, data_types, out header_body_type);
             
-            if (data_types.size > 0 || body_data_types.size > 0)
-                batch.add(new ImapOperation(session, new FetchCommand(msg_set, data_types, body_data_types)));
+            Gee.List<FetchBodyDataType>? body_data_types = null;
+            if (header_body_type != null) {
+                body_data_types = new Gee.ArrayList<FetchBodyDataType>();
+                body_data_types.add(header_body_type);
+                
+                // save identifier for later
+                partial_header_identifier = header_body_type.get_identifer();
+            }
+            
+            if (data_types.size > 0 || body_data_types != null)
+                cmds.add(new FetchCommand(msg_set, data_types, body_data_types));
         }
         
         // RFC822 BODY is a separate command
+        FetchBodyDataIdentifier? body_identifier = null;
         if (fields.require(Email.Field.BODY)) {
             FetchBodyDataType body = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.TEXT,
                 null, -1, -1, null);
-            batch.add(new ImapOperation(session, new FetchCommand.body_data_type(msg_set, body)));
+            
+            // save identifier for later retrieval from responses
+            body_identifier = body.get_identifer();
+            
+            cmds.add(new FetchCommand.body_data_type(msg_set, body));
         }
         
         // PREVIEW requires two separate commands
+        FetchBodyDataIdentifier? preview_identifier = null;
+        FetchBodyDataIdentifier? preview_charset_identifier = null;
         if (fields.require(Email.Field.PREVIEW)) {
             // Get the preview text (the initial MAX_PREVIEW_BYTES of the first MIME section
             FetchBodyDataType preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
                 { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES, null);
-            batch.add(new ImapOperation(session, new FetchCommand.body_data_type(msg_set, preview)));
+            preview_identifier = preview.get_identifer();
+            cmds.add(new FetchCommand.body_data_type(msg_set, preview));
             
             // Also get the character set to properly decode it
             FetchBodyDataType preview_charset = new FetchBodyDataType.peek(
                 FetchBodyDataType.SectionPart.MIME, { 1 }, -1, -1, null);
-            batch.add(new ImapOperation(session, new FetchCommand.body_data_type(msg_set,
-                preview_charset)));
+            preview_charset_identifier = preview_charset.get_identifer();
+            cmds.add(new FetchCommand.body_data_type(msg_set, preview_charset));
         }
         
         // PROPERTIES and FLAGS are a separate command
@@ -309,19 +303,38 @@ private class Geary.Imap.Folder : BaseObject {
             if (fields.require(Geary.Email.Field.FLAGS))
                 data_types.add(FetchDataType.FLAGS);
             
-            batch.add(new ImapOperation(session, new FetchCommand(msg_set, data_types, null)));
+            cmds.add(new FetchCommand(msg_set, data_types, null));
         }
         
-        Gee.List<FetchedData>? fetched_list = null;
+        Gee.HashMap<MessageNumber, UID>? pos_uid_map = null;
+        Gee.HashMap<MessageNumber, FetchedData>? fetched = null;
         Error? fetch_err = null;
         
+        // Commands prepped, do the actual fetching with the mutex in place
         int token = yield fetch_mutex.claim_async(cancellable);
         try {
-            yield execute_batch_async(batch, cancellable);
+            // If positional addressing is used, get all UIDs first in a non-pipelined request so they
+            // can be matched against the remaining calls ... this has to be done because it's possible
+            // for responses to come back in any order, broken up in any way, with only positional
+            // addressing, and there's no way to build Email's without the UID.
+            if (!msg_set.is_uid) {
+                pos_uid_map = new Gee.HashMap<MessageNumber, UID>();
+                
+                FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataType.UID);
+                Gee.HashMap<MessageData, FetchedData> uids = yield fetch_commands_async(
+                    msg_set, new Collection.SingleItem<FetchCommand>(cmd), cancellable);
+                
+                // convert fetched UIDs into easy-lookup map
+                foreach (FetchedData fetched_data in uids.values) {
+                    if (fetched_data.data_map.has_key(FetchDataType.UID))
+                        pos_uid_map.set(fetched_data.msg_num, (UID) fetched_data.data_map.get(FetchDataType.UID));
+                    else
+                        debug("No UID in FetchedData for %s on %s", fetched_data.msg_num.to_string(), to_string());
+                }
+            }
             
-            // scoop up everything that came in to on_fetched and reset accumulator
-            fetched_list = recently_fetched;
-            recently_fetched = new Gee.ArrayList<FetchedData>();
+            // now execute the remaining FETCH commands
+            fetched = yield fetch_commands_async(msg_set, cmds, cancellable);
         } catch (Error err) {
             fetch_err = err;
         }
@@ -330,29 +343,32 @@ private class Geary.Imap.Folder : BaseObject {
         if (fetch_err != null)
             throw fetch_err;
         
-        if (fetched_list == null || fetched_list.size == 0)
+        if (fetched == null || fetched.size == 0)
             return null;
         
+        // Convert fetched data into Geary.Email objects
         Gee.List<Geary.Email> email_list = new Gee.ArrayList<Geary.Email>();
-        foreach (FetchedData fetched_data in fetched_list) {
-            Geary.Email? email = null;
+        foreach (MessageNumber msg_num in fetched.keys) {
+            FetchedData fetched_data = fetched.get(msg_num);
             
-            // if UID is provided, use that, otherwise have to use resolver
-            UID? uid = (UID) fetched_data.map.get(FetchDataType.UID);
-            if (uid != null) {
-                try {
-                    email = fetched_data_to_email(uid, fetched_data);
-                } catch (Error err) {
-                    message("Unable to convert fetched data to email in %s: %s", to_string(),
-                        err.message);
-                }
-            } else {
-                // acquire semaphore in context of signal
-                email = yield fetched_data_to_email_async(fetched_data, cancellable);
+            debug("FETCHEDDATA: %s", fetched_data.to_string());
+            
+            // the UID should either have been looked up (if using positional addressing) or should
+            // have come back with the response (if using UID addressing)
+            UID? uid = null;
+            if (pos_uid_map != null)
+                uid = pos_uid_map.get(msg_num);
+            else
+                uid = (UID) fetched_data.data_map.get(FetchDataType.UID);
+            assert(uid != null);
+            
+            try {
+                email_list.add(fetched_data_to_email(uid, fetched_data, partial_header_identifier,
+                    body_identifier, preview_identifier, preview_charset_identifier));
+            } catch (Error err) {
+                debug("Unable to fetch email for %s from %s: %s", uid.to_string(), to_string(),
+                    err.message);
             }
-            
-            if (email != null)
-                email_list.add(email);
         }
         
         return (email_list.size > 0) ? email_list : null;
@@ -364,19 +380,22 @@ private class Geary.Imap.Folder : BaseObject {
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         flags.add(MessageFlag.DELETED);
         
-        // TODO: Pipeline these requests ... can't use Nonblocking.Batch, as that makes
-        // no guarantee of the order these command will be sent in.  Adding a pipelining
-        // feature will mean changing ClientSession
+        Gee.List<Command> cmds = new Gee.ArrayList<Command>();
         
-        yield send_command(new StoreCommand(msg_set, flags, true, false), cancellable);
+        StoreCommand store_cmd = new StoreCommand(msg_set, flags, true, false);
+        cmds.add(store_cmd);
         
-        ExpungeCommand expunge_cmd;
         if (session.capabilities.has_capability(Capabilities.UIDPLUS))
-            expunge_cmd = new ExpungeCommand.uid(msg_set);
+            cmds.add(new ExpungeCommand.uid(msg_set));
         else
-            expunge_cmd = new ExpungeCommand();
+            cmds.add(new ExpungeCommand());
         
-        yield send_command(expunge_cmd, cancellable);
+        Gee.Map<Command, CompletionStatusResponse> responses = yield session.send_multiple_commands_async(
+            cmds, cancellable);
+        
+        // only interested in the StoreCommand response
+        if (responses.has_key(store_cmd))
+            throw_on_failed_status(responses.get(store_cmd), store_cmd);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
@@ -391,34 +410,34 @@ private class Geary.Imap.Folder : BaseObject {
         if (msg_flags_add.size == 0 && msg_flags_remove.size == 0)
             return;
         
-        Nonblocking.Batch batch = new Nonblocking.Batch();
+        Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
         
-        if (msg_flags_add.size > 0) {
-            batch.add(new ImapOperation(session, new StoreCommand(msg_set, msg_flags_add,
-                true, false)));
-        }
+        if (msg_flags_add.size > 0)
+            cmds.add(new StoreCommand(msg_set, msg_flags_add, true, false));
         
-        if (msg_flags_remove.size > 0) {
-            batch.add(new ImapOperation(session, new StoreCommand(msg_set, msg_flags_remove,
-                false, false)));
-        }
+        if (msg_flags_remove.size > 0)
+            cmds.add(new StoreCommand(msg_set, msg_flags_remove, false, false));
         
-        yield execute_batch_async(batch, cancellable);
+        Gee.Map<Command, CompletionStatusResponse> responses = yield session.send_multiple_commands_async(
+            cmds, cancellable);
+        foreach (Command cmd in responses.keys)
+            throw_on_failed_status(responses.get(cmd), cmd); 
     }
     
     public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
         Cancellable? cancellable) throws Error {
         check_open();
         
-        yield send_command(new CopyCommand(msg_set, new Imap.MailboxParameter(destination.get_fullpath())),
-            cancellable);
+        CopyCommand cmd = new CopyCommand(msg_set, new Imap.MailboxParameter(destination.get_fullpath()));
+        CompletionStatusResponse response = yield session.send_command_async(cmd, cancellable);
+        
+        throw_on_failed_status(response, cmd);
     }
     
     public async void move_email_async(MessageSet msg_set, Geary.FolderPath destination,
         Cancellable? cancellable) throws Error {
         check_open();
         
-        // TODO: Pipeline, but can't use Nonblocking.Batch
         // TODO: Support MOVE extension
         
         yield copy_email_async(msg_set, destination, cancellable);
@@ -427,13 +446,8 @@ private class Geary.Imap.Folder : BaseObject {
     
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated
     // as well
-    private void fields_to_fetch_data_types(bool is_uid_request, Geary.Email.Field fields,
-        Gee.List<FetchDataType> data_types_list, Gee.List<FetchBodyDataType> body_data_types_list) {
-        // always fetch UID because it's needed for EmailIdentifier UNLESS UID addressing is being
-        // used, in which case UID will return with the response
-        if (!is_uid_request)
-            data_types_list.add(FetchDataType.UID);
-        
+    private void fields_to_fetch_data_types(Geary.Email.Field fields,
+        Gee.List<FetchDataType> data_types_list, out FetchBodyDataType? header_body_type) {
         // pack all the needed headers into a single FetchBodyDataType
         string[] field_names = new string[0];
         
@@ -479,6 +493,8 @@ private class Geary.Imap.Folder : BaseObject {
                 break;
                 
                 case Geary.Email.Field.HEADER:
+                    // TODO: If the entire header is being pulled, then no need to pull down partial
+                    // headers; simply get them all and decode what is needed directly
                     data_types_list.add(FetchDataType.RFC822_HEADER);
                 break;
                 
@@ -495,47 +511,19 @@ private class Geary.Imap.Folder : BaseObject {
             }
         }
         
-        // convert field names into FetchBodyDataType object
+        // convert field names into single FetchBodyDataType object
         if (field_names.length > 0) {
-            body_data_types_list.add(new FetchBodyDataType.peek(
-                FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, field_names));
-        }
-    }
-    
-    private async Geary.Email? fetched_data_to_email_async(FetchedData fetched_data, Cancellable? cancellable) {
-        if (position_to_uid == null) {
-            message("Unable to report fetched email in %s: unable to convert position %s to UID",
-                to_string(), fetched_data.msg_num.to_string());
-            
-            return null;
-        }
-        
-        UID? uid = null;
-        try {
-            uid = yield position_to_uid.convert_async(fetched_data.msg_num, cancellable);
-        } catch (Error err) {
-            message("Unable to convert message number %s in %s to UID: %s",
-                fetched_data.msg_num.to_string(), to_string(), err.message);
-            
-            return null;
-        }
-        
-        if (uid != null) {
-            try {
-                return fetched_data_to_email(uid, fetched_data);
-            } catch (Error err) {
-                message("Unable to convert fetched data to email in %s: %s", to_string(),
-                    err.message);
-            }
+            header_body_type = new FetchBodyDataType.peek(
+                FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, field_names);
         } else {
-            message("Unable to convert message number %s in %s to UID",
-                fetched_data.msg_num.to_string(), to_string());
+            header_body_type = null;
         }
-        
-        return null;
     }
     
-    private Geary.Email fetched_data_to_email(UID uid, FetchedData fetched_data) throws Error {
+    private Geary.Email fetched_data_to_email(UID uid, FetchedData fetched_data,
+        FetchBodyDataIdentifier? partial_header_identifier, FetchBodyDataIdentifier? body_identifier,
+        FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier)
+        throws Error {
         Geary.Email email = new Geary.Email(fetched_data.msg_num.value,
             new Imap.EmailIdentifier(uid, path));
         
@@ -549,8 +537,8 @@ private class Geary.Imap.Folder : BaseObject {
         RFC822.MessageIDList? references = null;
         
         // loop through all available FetchDataTypes and gather converted data
-        foreach (FetchDataType data_type in fetched_data.map.keys) {
-            MessageData? data = fetched_data.map.get(data_type);
+        foreach (FetchDataType data_type in fetched_data.data_map.keys) {
+            MessageData? data = fetched_data.data_map.get(data_type);
             if (data == null)
                 continue;
             
@@ -598,11 +586,12 @@ private class Geary.Imap.Folder : BaseObject {
         if (internaldate != null && rfc822_size != null)
             email.set_email_properties(new Geary.Imap.EmailProperties(internaldate, rfc822_size));
         
-        // fields_to_fetch_data_types() will always generate a single FetchBodyDataType for all
-        // the header fields it needs
-        if (fetched_data.body_data.size > 0) {
-            assert(fetched_data.body_data.size == 1);
-            RFC822.Header headers = new RFC822.Header(fetched_data.body_data[0]);
+        // if the header was requested, convert its fields now
+        if (partial_header_identifier != null) {
+            assert(fetched_data.body_data_map.has_key(partial_header_identifier));
+            
+            RFC822.Header headers = new RFC822.Header(
+                fetched_data.body_data_map.get(partial_header_identifier));
             
             // DATE
             if (!email.fields.is_all_set(Geary.Email.Field.DATE)) {
@@ -685,6 +674,25 @@ private class Geary.Imap.Folder : BaseObject {
         
         if (message_id != null || in_reply_to != null || references != null)
             email.set_full_references(message_id, in_reply_to, references);
+        
+        // if body was requested, get it now
+        if (body_identifier != null) {
+            assert(fetched_data.body_data_map.has_key(body_identifier));
+            
+            email.set_message_body(new Geary.RFC822.Text(
+                fetched_data.body_data_map.get(body_identifier)));
+        }
+        
+        // if preview was requested, get it now ... both identifiers must be supplied if one is
+        if (preview_identifier != null || preview_charset_identifier != null) {
+            assert(preview_identifier != null && preview_charset_identifier != null);
+            assert(fetched_data.body_data_map.has_key(preview_identifier));
+            assert(fetched_data.body_data_map.has_key(preview_charset_identifier));
+            
+            email.set_message_preview(new RFC822.PreviewText.with_header(
+                fetched_data.body_data_map.get(preview_identifier),
+                fetched_data.body_data_map.get(preview_charset_identifier)));
+        }
         
         return email;
     }

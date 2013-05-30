@@ -447,7 +447,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             
             return;
         }
-            
+        
         StatusResponse? status_response = response as StatusResponse;
         if (status_response != null) {
             fsm.issue(Event.RECVD_STATUS_RESPONSE, null, status_response);

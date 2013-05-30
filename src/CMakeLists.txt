@@ -75,6 +75,7 @@ engine/imap/imap.vala
 engine/imap/imap-error.vala
 engine/imap/message/imap-capabilities.vala
 engine/imap/message/imap-data-format.vala
+engine/imap/message/imap-fetch-body-data-identifier.vala
 engine/imap/message/imap-fetch-body-data-type.vala
 engine/imap/message/imap-fetch-data-decoder.vala
 engine/imap/message/imap-fetch-data-type.vala

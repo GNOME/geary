@@ -4,6 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Provides an interface into the IMAP stack that provides a simpler interface for a
+ * Geary.Account implementation.
+ *
+ * Because of the complexities of the IMAP protocol, this private class takes common operations
+ * that a Geary.Account implementation would need (in particular, {@link Geary.ImapEngine.Account}
+ * and makes them into simple async calls.
+ *
+ * Geary.Imap.Account does __no__ management of the {@link Imap.Folder} objects it returns.  Thus,
+ * calling a fetch or list operation several times in a row will return separate Folder objects
+ * each time.  It is up to the higher layers of the stack to manage these objects.
+ */
 private class Geary.Imap.Account : BaseObject {
     // all references to Inbox are converted to this string, purely for sanity sake when dealing
     // with Inbox's case issues
@@ -16,9 +28,7 @@ private class Geary.Imap.Account : BaseObject {
     private AccountInformation account_information;
     private ClientSessionManager session_mgr;
     private ClientSession? account_session = null;
-    private Gee.HashMap<FolderPath, Imap.Folder> folder_map = new Gee.HashMap<FolderPath, Imap.Folder>();
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
-    private Nonblocking.Mutex folder_map_mutex = new Nonblocking.Mutex();
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
     
@@ -95,46 +105,36 @@ private class Geary.Imap.Account : BaseObject {
             status_collector.add(status_data);
     }
     
-    public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable) throws Error {
-        int token = yield folder_map_mutex.claim_async(cancellable);
-        
-        Imap.Folder? folder = null;
-        Error? err = null;
+    public async bool folder_exists_async(FolderPath path, Cancellable? cancellable) throws Error {
         try {
-            folder = yield internal_fetch_folder_async(path, cancellable);
-        } catch (Error fetch_err) {
-            err = fetch_err;
+            yield fetch_mailbox_async(path, cancellable);
+            
+            return true;
+        } catch (Error err) {
+            if (err is IOError.CANCELLED)
+                throw err;
+            
+            return false;
         }
-        
-        folder_map_mutex.release(ref token);
-        
-        if (err != null)
-            throw err;
-        
-        return folder;
     }
     
-    // To be called only when folder_map_mutex has been claimed
-    private async Imap.Folder internal_fetch_folder_async(FolderPath path, Cancellable? cancellable)
-        throws Error {
-        Imap.Folder? folder = folder_map.get(path);
-        if (folder != null)
-            return folder;
-        
-        MailboxInformation? mailbox_info = yield list_mailbox_async(path, cancellable);
-        if (mailbox_info == null)
-            throw new EngineError.NOT_FOUND("%s not found", path.to_string());
-        
-        folder = new Imap.Folder(session_mgr, path, null, mailbox_info);
-        folder_map.set(path, folder);
-        
-        return folder;
-    }
-    
-    public async MailboxInformation? list_mailbox_async(FolderPath path, Cancellable? cancellable)
+    public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
         
+        MailboxInformation mailbox_info = yield fetch_mailbox_async(path, cancellable);
+        
+        if (!mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
+            StatusData status = yield fetch_status_async(path, cancellable);
+            
+            return new Imap.Folder(session_mgr, path, status, mailbox_info);
+        } else {
+            return new Imap.Folder.unselectable(session_mgr, path, mailbox_info);
+        }
+    }
+    
+    private async MailboxInformation fetch_mailbox_async(FolderPath path, Cancellable? cancellable)
+        throws Error {
         Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
         if (processed == null)
             throw new ImapError.INVALID("Invalid path %s", path.to_string());
@@ -146,23 +146,118 @@ private class Geary.Imap.Account : BaseObject {
             new ListCommand(new Imap.MailboxParameter(processed.get_fullpath()), can_xlist),
             list_results, null, cancellable);
         
-        if (response.status != Status.OK) {
-            throw new ImapError.SERVER_ERROR("Server reports LIST error for path %s: %s", path.to_string(),
-                response.to_string());
-        }
+        throw_fetch_error(response, processed, list_results.size);
         
-        if (list_results.size > 1) {
-            throw new ImapError.INVALID("Server reports %d results for simple LIST path %s",
-                list_results.size, path.get_fullpath());
-        }
-        
-        return (list_results.size == 1) ? list_results[0] : null;
+        return list_results[0];
     }
     
-    public async Gee.List<MailboxInformation>? list_children_async(FolderPath? parent, Cancellable? cancellable)
+    private async StatusData fetch_status_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
         
+        Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
+        if (processed == null)
+            throw new ImapError.INVALID("Invalid path %s", path.to_string());
+        
+        Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
+        CompletionStatusResponse response = yield send_command_async(
+            new StatusCommand(new MailboxParameter(processed.get_fullpath()), StatusDataType.all()),
+            null, status_results, cancellable);
+        
+        throw_fetch_error(response, processed, status_results.size);
+        
+        return status_results[0];
+    }
+    
+    private void throw_fetch_error(CompletionStatusResponse response, FolderPath path, int result_count)
+        throws Error {
+        if (response.status != Status.OK) {
+            throw new ImapError.SERVER_ERROR("Server reports error for path %s: %s", path.to_string(),
+                response.to_string());
+        }
+        
+        if (result_count != 1) {
+            throw new ImapError.INVALID("Server reports %d results for fetch of path %s: %s",
+                result_count, path.to_string(), response.to_string());
+        }
+    }
+    
+    public async Gee.List<Imap.Folder>? list_child_folders_async(FolderPath? parent, Cancellable? cancellable)
+        throws Error {
+        check_open();
+        
+        Geary.FolderPath? processed = process_path(parent, null,
+            (parent != null) ? parent.get_root().default_separator : null);
+        
+        Gee.List<MailboxInformation>? child_info = yield list_children_async(processed, cancellable);
+        if (child_info == null || child_info.size == 0)
+            return null;
+        
+        Gee.List<Imap.Folder> child_folders = new Gee.ArrayList<Imap.Folder>();
+        
+        Gee.Map<FolderPath, MailboxInformation> info_map = new Gee.HashMap<FolderPath, MailboxInformation>();
+        Gee.Map<StatusCommand, FolderPath> cmd_map = new Gee.HashMap<StatusCommand, FolderPath>();
+        foreach (MailboxInformation mailbox_info in child_info) {
+            FolderPath? child_path = process_path(processed, mailbox_info.get_basename(),
+                mailbox_info.delim);
+            if (child_path == null)
+                continue;
+            
+            if (mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
+                child_folders.add(new Imap.Folder.unselectable(session_mgr, child_path, mailbox_info));
+                
+                continue;
+            }
+            
+            info_map.set(child_path, mailbox_info);
+            cmd_map.set(new StatusCommand(new MailboxParameter(child_path.get_fullpath()),
+                StatusDataType.all()), child_path);
+        }
+        
+        Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
+        Gee.Map<Command, CompletionStatusResponse> responses = yield send_multiple_async(cmd_map.keys,
+            null, status_results, cancellable);
+        
+        foreach (Command cmd in responses.keys) {
+            StatusCommand status_cmd = (StatusCommand) cmd;
+            CompletionStatusResponse response = responses.get(cmd);
+            
+            FolderPath child_path = cmd_map.get(status_cmd);
+            MailboxInformation mailbox_info = info_map.get(child_path);
+            
+            if (response.status != Status.OK) {
+                message("Unable to get STATUS of %s: %s", child_path.to_string(), response.to_string());
+                
+                continue;
+            }
+            
+            StatusData? found_status = null;
+            foreach (StatusData status_data in status_results) {
+                if (status_data.mailbox == child_path.get_fullpath()) {
+                    found_status = status_data;
+                    
+                    break;
+                }
+            }
+            
+            if (found_status == null) {
+                message("Unable to get STATUS of %s: not returned from server", child_path.to_string());
+                
+                continue;
+            }
+            
+            status_results.remove(found_status);
+            child_folders.add(new Imap.Folder(session_mgr, child_path, found_status, mailbox_info));
+        }
+        
+        if (status_results.size > 0)
+            debug("%d STATUS results leftover", status_results.size);
+        
+        return child_folders;
+    }
+    
+    private async Gee.List<MailboxInformation>? list_children_async(FolderPath? parent, Cancellable? cancellable)
+        throws Error {
         Geary.FolderPath? processed = process_path(parent, null,
             (parent != null) ? parent.get_root().default_separator : ASSUMED_SEPARATOR);
         
@@ -190,40 +285,31 @@ private class Geary.Imap.Account : BaseObject {
         return (list_results.size > 0) ? list_results : null;
     }
     
-    public async Gee.List<StatusData>? status_command_async(FolderPath path, Cancellable? cancellable)
-        throws Error {
-        check_open();
-        
-        Geary.FolderPath? processed = process_path(path, null, path.get_root().default_separator);
-        if (processed == null)
-            throw new ImapError.INVALID("Invalid path %s", path.to_string());
-        
-        Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
-        CompletionStatusResponse response = yield send_command_async(
-            new StatusCommand(new MailboxParameter(processed.get_fullpath()), StatusDataType.all()),
-            null, status_results, cancellable);
-        
-        if (response.status != Status.OK) {
-            throw new ImapError.SERVER_ERROR("Server reports STATUS error for path %s: %s", path.to_string(),
-                response.to_string());
-        }
-        
-        return (status_results.size > 0) ? status_results : null;
-    }
-    
     private async CompletionStatusResponse send_command_async(Command cmd,
         Gee.List<MailboxInformation>? list_results, Gee.List<StatusData>? status_results,
         Cancellable? cancellable) throws Error {
+        Gee.Map<Command, CompletionStatusResponse> responses = yield send_multiple_async(
+            new Geary.Collection.SingleItem<Command>(cmd), list_results, status_results,
+            cancellable);
+        
+        assert(responses.size == 1);
+        
+        return Geary.Collection.get_first(responses.values);
+    }
+    
+    private async Gee.Map<Command, CompletionStatusResponse> send_multiple_async(
+        Gee.Collection<Command> cmds, Gee.List<MailboxInformation>? list_results,
+        Gee.List<StatusData>? status_results, Cancellable? cancellable) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
         
         // set up collectors
         list_collector = list_results;
         status_collector = status_results;
         
-        CompletionStatusResponse? response = null;
+        Gee.Map<Command, CompletionStatusResponse>? responses = null;
         Error? err = null;
         try {
-            response = yield account_session.send_command_async(cmd, cancellable);
+            responses = yield account_session.send_multiple_commands_async(cmds, cancellable);
         } catch (Error send_err) {
             err = send_err;
         }
@@ -237,9 +323,9 @@ private class Geary.Imap.Account : BaseObject {
         if (err != null)
             throw err;
         
-        assert(response != null);
+        assert(responses != null);
         
-        return response;
+        return responses;
     }
     
     [NoReturn]

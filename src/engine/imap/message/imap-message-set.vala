@@ -57,6 +57,12 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(low.value > 0);
         assert(high.value > 0);
         
+        if (low.equal_to(high)) {
+            MessageSet.uid(low);
+            
+            return;
+        }
+        
         value = "%s:%s".printf(low.value.to_string(), high.value.to_string());
         is_uid = true;
     }

@@ -66,6 +66,26 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
     }
     
+    private class SendCommandOperation : Nonblocking.BatchOperation {
+        // IN
+        public ClientSession owner;
+        public Command cmd;
+        
+        // OUT
+        public CompletionStatusResponse response;
+        
+        public SendCommandOperation(ClientSession owner, Command cmd) {
+            this.owner = owner;
+            this.cmd = cmd;
+        }
+        
+        public override async Object? execute_async(Cancellable? cancellable) throws Error {
+            response = yield owner.command_transaction_async(cmd, cancellable);
+            
+            return response;
+        }
+    }
+    
     private enum State {
         // canonical IMAP session states
         DISCONNECTED,
@@ -188,6 +208,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public signal void flags(MailboxAttributes mailbox_attrs);
     
+    /**
+     * Fired when a LIST or XLIST {@link ServerData} is returned from the server.
+     */
     public signal void list(MailboxInformation mailbox_info);
     
     // TODO: LSUB results
@@ -352,7 +375,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
-        fsm.set_logging(true);
+        fsm.set_logging(false);
     }
     
     ~ClientSession() {
@@ -797,15 +820,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public async CompletionStatusResponse send_command_async(Command cmd, Cancellable? cancellable = null) 
         throws Error {
-        // look for special commands that we wish to handle directly, as they affect the state
-        // machine
-        //
-        // TODO: Convert commands into proper calls to avoid throwing an exception
-        if (cmd.has_name(LoginCommand.NAME) || cmd.has_name(LogoutCommand.NAME)
-            || cmd.has_name(SelectCommand.NAME) || cmd.has_name(ExamineCommand.NAME)
-            || cmd.has_name(CloseCommand.NAME)) {
-            throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands for %s", cmd.name);
-        }
+        check_unsupported_send_command(cmd);
         
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.SEND_CMD, null, params);
@@ -816,6 +831,55 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(params.proceed);
         
         return yield command_transaction_async(cmd, cancellable);
+    }
+    
+    public async Gee.Map<Command, CompletionStatusResponse> send_multiple_commands_async(
+        Gee.Collection<Command> cmds, Cancellable? cancellable = null) throws Error {
+        if (cmds.size == 0)
+            throw new ImapError.INVALID("Must supply at least one command");
+        
+        foreach (Command cmd in cmds)
+            check_unsupported_send_command(cmd);
+        
+        // only issue one event to the state machine for all commands; either all succeed or all fail
+        MachineParams params = new MachineParams(Geary.Collection.get_first(cmds));
+        fsm.issue(Event.SEND_CMD, null, params);
+        
+        if (params.err != null)
+            throw params.err;
+        
+        assert(params.proceed);
+        
+        // Issue all at once using a Nonblocking.Batch
+        Nonblocking.Batch batch = new Nonblocking.Batch();
+        foreach (Command cmd in cmds)
+            batch.add(new SendCommandOperation(this, cmd));
+        
+        yield batch.execute_all_async(cancellable);
+        batch.throw_first_exception();
+        
+        Gee.Map<Command, CompletionStatusResponse> map = new Gee.HashMap<Command, CompletionStatusResponse>();
+        foreach (int id in batch.get_ids()) {
+            SendCommandOperation op = (SendCommandOperation) batch.get_operation(id);
+            map.set(op.cmd, op.response);
+        }
+        
+        return map;
+    }
+    
+    private void check_unsupported_send_command(Command cmd) throws Error {
+        // look for special commands that we wish to handle directly, as they affect the state
+        // machine
+        //
+        // TODO: Convert commands into proper calls to avoid throwing an exception
+        switch (cmd.name) {
+            case LoginCommand.NAME:
+            case LogoutCommand.NAME:
+            case SelectCommand.NAME:
+            case ExamineCommand.NAME:
+            case CloseCommand.NAME:
+                throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands for %s", cmd.name);
+        }
     }
     
     private uint on_send_command(uint state, uint event, void *user, Object? object) {
@@ -1357,6 +1421,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
             
             case ServerDataType.LIST:
+            case ServerDataType.XLIST:
                 list(server_data.get_list());
             break;
             

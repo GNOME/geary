@@ -21,7 +21,7 @@ public class Geary.Imap.FetchCommand : Command {
         if (data_items_length == 1 && body_items_length == 0) {
             add(data_items[0].to_parameter());
         } else if (data_items_length == 0 && body_items_length == 1) {
-            add(body_data_items[0].to_parameter());
+            add(body_data_items[0].to_request_parameter());
         } else {
             ListParameter list = new ListParameter(this);
             
@@ -32,7 +32,7 @@ public class Geary.Imap.FetchCommand : Command {
             
             if (body_items_length > 0) {
                 foreach (FetchBodyDataType body_item in body_data_items)
-                    list.add(body_item.to_parameter());
+                    list.add(body_item.to_request_parameter());
             }
             
             add(list);
@@ -50,7 +50,7 @@ public class Geary.Imap.FetchCommand : Command {
         base (msg_set.is_uid ? UID_NAME : NAME);
         
         add(msg_set.to_parameter());
-        add(body_data_type.to_parameter());
+        add(body_data_type.to_request_parameter());
     }
 }
 

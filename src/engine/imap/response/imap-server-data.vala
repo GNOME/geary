@@ -124,8 +124,8 @@ public class Geary.Imap.ServerData : ServerResponse {
      * @throws ImapError.INVALID if not MailboxInformation.
      */
     public MailboxInformation get_list() throws ImapError {
-        if (server_data_type != ServerDataType.LIST)
-            throw new ImapError.INVALID("Not LIST data: %s", to_string());
+        if (server_data_type != ServerDataType.LIST && server_data_type != ServerDataType.XLIST)
+            throw new ImapError.INVALID("Not LIST/XLIST data: %s", to_string());
         
         return MailboxInformation.decode(this);
     }

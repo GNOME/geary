@@ -19,7 +19,8 @@
 public interface Geary.Imap.MessageData : Geary.MessageData.AbstractMessageData {
 }
 
-public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData, Gee.Comparable<Geary.Imap.UID> {
+public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData,
+    Gee.Comparable<Geary.Imap.UID> {
     // Using statics because int32.MAX is static, not const (??)
     public static int64 MIN = 1;
     public static int64 MAX = int32.MAX;
@@ -84,9 +85,14 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
     }
 }
 
-public class Geary.Imap.MessageNumber : Geary.MessageData.IntMessageData, Geary.Imap.MessageData {
+public class Geary.Imap.MessageNumber : Geary.MessageData.IntMessageData, Geary.Imap.MessageData,
+    Gee.Comparable<MessageNumber> {
     public MessageNumber(int value) {
         base (value);
+    }
+    
+    public virtual int compare_to(MessageNumber other) {
+        return value - other.value;
     }
 }
 

@@ -20,7 +20,8 @@ public enum Geary.Imap.ServerDataType {
     LSUB,
     RECENT,
     SEARCH,
-    STATUS;
+    STATUS,
+    XLIST;
     
     public string to_string() {
         switch (this) {
@@ -53,6 +54,9 @@ public enum Geary.Imap.ServerDataType {
             
             case STATUS:
                 return "status";
+            
+            case XLIST:
+                return "xlist";
             
             default:
                 assert_not_reached();
@@ -91,6 +95,9 @@ public enum Geary.Imap.ServerDataType {
             
             case "status":
                 return STATUS;
+            
+            case "xlist":
+                return XLIST;
             
             default:
                 throw new ImapError.PARSE_ERROR("\"%s\" is not a valid server data type", value);
@@ -139,6 +146,9 @@ public enum Geary.Imap.ServerDataType {
                 
                 case "status":
                     return STATUS;
+                
+                case "xlist":
+                    return XLIST;
                 
                 default:
                     // fall-through
