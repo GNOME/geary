@@ -71,11 +71,6 @@ private class Geary.ImapDB.Account : BaseObject {
         
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
         outbox = new SmtpOutboxFolder(db, account);
-        
-        // Need to clear duplicate folders due to old bug that caused multiple folders to be
-        // created in the database ... benign due to other logic, but want to prevent this from
-        // happening if possible
-        clear_duplicate_folders();
     }
     
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -562,46 +557,6 @@ private class Geary.ImapDB.Account : BaseObject {
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-    }
-    
-    private void clear_duplicate_folders() {
-        int count = 0;
-        
-        try {
-            // Find all folders with duplicate names
-            Db.Result result = db.query("SELECT id, name FROM FolderTable WHERE name IN "
-                + "(SELECT name FROM FolderTable GROUP BY name HAVING (COUNT(name) > 1))");
-            while (!result.finished) {
-                int64 id = result.int64_at(0);
-                
-                // see if any folders have this folder as a parent OR if there are messages associated
-                // with this folder
-                Db.Statement child_stmt = db.prepare("SELECT id FROM FolderTable WHERE parent_id=?");
-                child_stmt.bind_int64(0, id);
-                Db.Result child_result = child_stmt.exec();
-                
-                Db.Statement message_stmt = db.prepare(
-                    "SELECT id FROM MessageLocationTable WHERE folder_id=?");
-                message_stmt.bind_int64(0, id);
-                Db.Result message_result = message_stmt.exec();
-                
-                if (child_result.finished && message_result.finished) {
-                    // no children, delete it
-                    Db.Statement delete_stmt = db.prepare("DELETE FROM FolderTable WHERE id=?");
-                    delete_stmt.bind_int64(0, id);
-                    
-                    delete_stmt.exec();
-                    count++;
-                }
-                
-                result.next();
-            }
-        } catch (Error err) {
-            debug("Error attempting to clear duplicate folders from account: %s", err.message);
-        }
-        
-        if (count > 0)
-            debug("Deleted %d duplicate folders", count);
     }
     
     //

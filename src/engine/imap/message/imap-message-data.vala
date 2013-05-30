@@ -89,7 +89,10 @@ public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
         return new MessageFlags(list);
     }
     
-    public static MessageFlags deserialize(string str) {
+    public static MessageFlags deserialize(string? str) {
+        if (String.is_empty(str))
+            return new MessageFlags(new Gee.ArrayList<MessageFlag>());
+        
         string[] tokens = str.split(" ");
         
         Gee.Collection<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
@@ -121,7 +124,10 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         return new MailboxAttributes(list);
     }
     
-    public static MailboxAttributes deserialize(string str) {
+    public static MailboxAttributes deserialize(string? str) {
+        if (String.is_empty(str))
+            return new MailboxAttributes(new Gee.ArrayList<MailboxAttribute>());
+        
         string[] tokens = str.split(" ");
         
         Gee.Collection<MailboxAttribute> attrs = new Gee.ArrayList<MailboxAttribute>();
