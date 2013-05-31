@@ -372,11 +372,18 @@ private class Geary.Imap.Folder : BaseObject {
             }
             
             try {
-                email_list.add(fetched_data_to_email(uid, fetched_data, partial_header_identifier,
-                    body_identifier, preview_identifier, preview_charset_identifier));
+                Geary.Email email = fetched_data_to_email(uid, fetched_data, fields,
+                    partial_header_identifier, body_identifier, preview_identifier,
+                    preview_charset_identifier);
+                if (!email.fields.fulfills(fields)) {
+                    debug("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
+                        fields.clear(email.fields).to_list_string(), fetched_data.to_string());
+                }
+                
+                email_list.add(email);
             } catch (Error err) {
-                debug("Unable to fetch email for %s from %s: %s", uid.to_string(), to_string(),
-                    err.message);
+                debug("%s: Unable to convert email for %s %s: %s", to_string(), uid.to_string(),
+                    fetched_data.to_string(), err.message);
             }
         }
         
@@ -535,7 +542,7 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
-    private Geary.Email fetched_data_to_email(UID uid, FetchedData fetched_data,
+    private Geary.Email fetched_data_to_email(UID uid, FetchedData fetched_data, Geary.Email.Field required_fields,
         FetchBodyDataIdentifier? partial_header_identifier, FetchBodyDataIdentifier? body_identifier,
         FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier)
         throws Error {
@@ -687,7 +694,9 @@ private class Geary.Imap.Folder : BaseObject {
             }
         }
         
-        if (message_id != null || in_reply_to != null || references != null)
+        // It's possible for all these fields to be null even though they were requested from
+        // the server, so use requested fields for determination
+        if (required_fields.require(Geary.Email.Field.REFERENCES))
             email.set_full_references(message_id, in_reply_to, references);
         
         // if body was requested, get it now
