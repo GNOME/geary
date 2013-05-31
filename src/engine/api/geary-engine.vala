@@ -230,7 +230,7 @@ public class Geary.Engine : BaseObject {
                 yield imap_session.initiate_session_async(account.imap_credentials, cancellable);
                 
                 // Connected and initiated, still need to be sure connection authorized
-                string current_mailbox;
+                Imap.MailboxSpecifier current_mailbox;
                 if (imap_session.get_context(out current_mailbox) != Imap.ClientSession.Context.AUTHORIZED)
                     error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
             } catch (Error err) {

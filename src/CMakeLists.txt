@@ -82,6 +82,7 @@ engine/imap/message/imap-fetch-data-type.vala
 engine/imap/message/imap-fetched-data.vala
 engine/imap/message/imap-flag.vala
 engine/imap/message/imap-mailbox-information.vala
+engine/imap/message/imap-mailbox-specifier.vala
 engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-set.vala

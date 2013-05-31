@@ -74,8 +74,23 @@ public class Geary.Imap.Command : RootParameters {
         add(tag);
         add(new UnquotedStringParameter(name));
         if (args != null) {
-            foreach (string arg in args)
-                add(new StringParameter(arg));
+            foreach (string arg in args) {
+                switch (DataFormat.is_quoting_required(arg)) {
+                    case DataFormat.Quoting.REQUIRED:
+                        add(new QuotedStringParameter(arg));
+                    break;
+                    
+                    case DataFormat.Quoting.OPTIONAL:
+                        add(new UnquotedStringParameter(arg));
+                    break;
+                    
+                    case DataFormat.Quoting.UNALLOWED:
+                        error("Command continuations currently unsupported");
+                    
+                    default:
+                        assert_not_reached();
+                }
+            }
         }
     }
     

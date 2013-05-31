@@ -159,7 +159,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
-    private string? current_mailbox = null;
+    private MailboxSpecifier? current_mailbox = null;
     private bool current_mailbox_readonly = false;
     private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
         Tag, StatusResponse>();
@@ -227,7 +227,8 @@ public class Geary.Imap.ClientSession : BaseObject {
      * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
      * ignored.
      */
-    public signal void current_mailbox_changed(string? old_name, string? new_name, bool readonly);
+    public signal void current_mailbox_changed(MailboxSpecifier? old_name, MailboxSpecifier? new_name,
+        bool readonly);
     
     public ClientSession(Endpoint imap_endpoint) {
         this.imap_endpoint = imap_endpoint;
@@ -394,7 +395,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         debug("DTOR: ClientSession");
     }
     
-    public string? get_current_mailbox() {
+    public MailboxSpecifier? get_current_mailbox() {
         return current_mailbox;
     }
     
@@ -402,7 +403,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         return current_mailbox_readonly;
     }
     
-    public Context get_context(out string? current_mailbox) {
+    public Context get_context(out MailboxSpecifier? current_mailbox) {
         current_mailbox = null;
         
         switch (fsm.get_state()) {
@@ -464,7 +465,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(connect_waiter != null);
         
         // connect and let ClientConnection's signals drive the show
-        yield cx.connect_async(cancellable);
+        try {
+            yield cx.connect_async(cancellable);
+        } catch (Error err) {
+            fsm.issue(Event.SEND_ERROR, null, null, err);
+            
+            throw err;
+        }
         
         // set up timer to wait for greeting from server
         Scheduler.Scheduled timeout = Scheduler.after_sec(GREETING_TIMEOUT_SEC, on_greeting_timeout);
@@ -970,26 +977,26 @@ public class Geary.Imap.ClientSession : BaseObject {
     // select/examine
     //
     
-    public async StatusResponse select_async(string mailbox, Cancellable? cancellable = null) 
+    public async StatusResponse select_async(MailboxSpecifier mailbox, Cancellable? cancellable = null) 
         throws Error {
         return yield select_examine_async(mailbox, true, cancellable);
     }
     
-    public async StatusResponse examine_async(string mailbox, Cancellable? cancellable = null)
+    public async StatusResponse examine_async(MailboxSpecifier mailbox, Cancellable? cancellable = null)
         throws Error {
         return yield select_examine_async(mailbox, false, cancellable);
     }
     
-    public async StatusResponse select_examine_async(string mailbox, bool is_select,
+    public async StatusResponse select_examine_async(MailboxSpecifier mailbox, bool is_select,
         Cancellable? cancellable) throws Error {
-        string? old_mailbox = current_mailbox;
+        MailboxSpecifier? old_mailbox = current_mailbox;
         
         // Ternary troubles
         Command cmd;
         if (is_select)
-            cmd = new SelectCommand(new MailboxParameter(mailbox));
+            cmd = new SelectCommand(mailbox);
         else
-            cmd = new ExamineCommand(new MailboxParameter(mailbox));
+            cmd = new ExamineCommand(mailbox);
         
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.SELECT, null, params);
@@ -1069,7 +1076,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     
     public async StatusResponse close_mailbox_async(Cancellable? cancellable = null) throws Error {
-        string? old_mailbox = current_mailbox;
+        MailboxSpecifier? old_mailbox = current_mailbox;
         
         CloseCommand cmd = new CloseCommand();
         
@@ -1219,7 +1226,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_connecting_send_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);
         
-        debug("[%s] Connecting send error, dropping client connection: %s", to_string(), err.message);
+        debug("[%s] Connecting send/recv error, dropping client connection: %s", to_string(), err.message);
         
         fsm.do_post_transition(() => { drop_connection(); });
         

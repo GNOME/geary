@@ -213,7 +213,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         ClientSession? found_session = null;
         foreach (ClientSession session in sessions) {
-            string? mailbox;
+            MailboxSpecifier? mailbox;
             if (!reserved_sessions.contains(session) &&
                 (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)) {
                 found_session = session;
@@ -253,7 +253,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         throws Error {
         check_open();
         
-        string? mailbox;
+        MailboxSpecifier? mailbox;
         ClientSession.Context context = session.get_context(out mailbox);
         
         switch (context) {

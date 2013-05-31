@@ -16,6 +16,7 @@
  * calling a fetch or list operation several times in a row will return separate Folder objects
  * each time.  It is up to the higher layers of the stack to manage these objects.
  */
+
 private class Geary.Imap.Account : BaseObject {
     // all references to Inbox are converted to this string, purely for sanity sake when dealing
     // with Inbox's case issues
@@ -127,9 +128,9 @@ private class Geary.Imap.Account : BaseObject {
         if (!mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
             StatusData status = yield fetch_status_async(path, cancellable);
             
-            return new Imap.Folder(session_mgr, path, status, mailbox_info);
+            return new Imap.Folder(session_mgr, status, mailbox_info);
         } else {
-            return new Imap.Folder.unselectable(session_mgr, path, mailbox_info);
+            return new Imap.Folder.unselectable(session_mgr, mailbox_info);
         }
     }
     
@@ -143,7 +144,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         StatusResponse response = yield send_command_async(
-            new ListCommand(new Imap.MailboxParameter(processed.get_fullpath()), can_xlist),
+            new ListCommand(new MailboxSpecifier.from_folder_path(processed), can_xlist),
             list_results, null, cancellable);
         
         throw_fetch_error(response, processed, list_results.size);
@@ -161,7 +162,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         StatusResponse response = yield send_command_async(
-            new StatusCommand(new MailboxParameter(processed.get_fullpath()), StatusDataType.all()),
+            new StatusCommand(new MailboxSpecifier.from_folder_path(processed), StatusDataType.all()),
             null, status_results, cancellable);
         
         throw_fetch_error(response, processed, status_results.size);
@@ -197,23 +198,20 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.List<Imap.Folder> child_folders = new Gee.ArrayList<Imap.Folder>();
         
-        Gee.Map<FolderPath, MailboxInformation> info_map = new Gee.HashMap<FolderPath, MailboxInformation>();
-        Gee.Map<StatusCommand, FolderPath> cmd_map = new Gee.HashMap<StatusCommand, FolderPath>();
+        Gee.Map<MailboxSpecifier, MailboxInformation> info_map = new Gee.HashMap<
+            MailboxSpecifier, MailboxInformation>();
+        Gee.Map<StatusCommand, MailboxSpecifier> cmd_map = new Gee.HashMap<
+            StatusCommand, MailboxSpecifier>();
         foreach (MailboxInformation mailbox_info in child_info) {
-            FolderPath? child_path = process_path(processed, mailbox_info.get_basename(),
-                mailbox_info.delim);
-            if (child_path == null)
-                continue;
-            
             if (mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
-                child_folders.add(new Imap.Folder.unselectable(session_mgr, child_path, mailbox_info));
+                child_folders.add(new Imap.Folder.unselectable(session_mgr, mailbox_info));
                 
                 continue;
             }
             
-            info_map.set(child_path, mailbox_info);
-            cmd_map.set(new StatusCommand(new MailboxParameter(child_path.get_fullpath()),
-                StatusDataType.all()), child_path);
+            info_map.set(mailbox_info.mailbox, mailbox_info);
+            cmd_map.set(new StatusCommand(mailbox_info.mailbox, StatusDataType.all()),
+                mailbox_info.mailbox);
         }
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
@@ -224,18 +222,18 @@ private class Geary.Imap.Account : BaseObject {
             StatusCommand status_cmd = (StatusCommand) cmd;
             StatusResponse response = responses.get(cmd);
             
-            FolderPath child_path = cmd_map.get(status_cmd);
-            MailboxInformation mailbox_info = info_map.get(child_path);
+            MailboxSpecifier mailbox = cmd_map.get(status_cmd);
+            MailboxInformation mailbox_info = info_map.get(mailbox);
             
             if (response.status != Status.OK) {
-                message("Unable to get STATUS of %s: %s", child_path.to_string(), response.to_string());
+                message("Unable to get STATUS of %s: %s", mailbox.to_string(), response.to_string());
                 
                 continue;
             }
             
             StatusData? found_status = null;
             foreach (StatusData status_data in status_results) {
-                if (status_data.mailbox == child_path.get_fullpath()) {
+                if (status_data.mailbox.equal_to(mailbox)) {
                     found_status = status_data;
                     
                     break;
@@ -243,13 +241,13 @@ private class Geary.Imap.Account : BaseObject {
             }
             
             if (found_status == null) {
-                message("Unable to get STATUS of %s: not returned from server", child_path.to_string());
+                message("Unable to get STATUS of %s: not returned from server", mailbox.to_string());
                 
                 continue;
             }
             
             status_results.remove(found_status);
-            child_folders.add(new Imap.Folder(session_mgr, child_path, found_status, mailbox_info));
+            child_folders.add(new Imap.Folder(session_mgr, found_status, mailbox_info));
         }
         
         if (status_results.size > 0)
@@ -267,14 +265,14 @@ private class Geary.Imap.Account : BaseObject {
         
         ListCommand cmd;
         if (processed == null) {
-            cmd = new ListCommand.wildcarded("", new MailboxParameter("%"), can_xlist);
+            cmd = new ListCommand.wildcarded("", new MailboxSpecifier("%"), can_xlist);
         } else {
             string specifier = processed.get_fullpath();
             string delim = processed.get_root().default_separator;
             
             specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
             
-            cmd = new ListCommand(new Imap.MailboxParameter(specifier), can_xlist);
+            cmd = new ListCommand(new MailboxSpecifier(specifier), can_xlist);
         }
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();

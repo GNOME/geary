@@ -47,20 +47,20 @@ private class Geary.Imap.Folder : BaseObject {
      */
     public signal void disconnected(ClientSession.DisconnectReason reason);
     
-    internal Folder(ClientSessionManager session_mgr, Geary.FolderPath path, StatusData status,
-        MailboxInformation info) {
+    internal Folder(ClientSessionManager session_mgr, StatusData status, MailboxInformation info) {
+        assert(status.mailbox.equal_to(info.mailbox));
+        
         this.session_mgr = session_mgr;
         this.info = info;
-        this.path = path;
+        path = info.mailbox.to_folder_path(info.delim);
         
         properties = new Imap.FolderProperties.status(status, info.attrs);
     }
     
-    internal Folder.unselectable(ClientSessionManager session_mgr, Geary.FolderPath path,
-        MailboxInformation info) {
+    internal Folder.unselectable(ClientSessionManager session_mgr, MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
-        this.path = path;
+        path = info.mailbox.to_folder_path(info.delim);
         
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
@@ -81,8 +81,8 @@ private class Geary.Imap.Folder : BaseObject {
         session.status_response_received.connect(on_status_response);
         session.disconnected.connect(on_disconnected);
         
-        StatusResponse response = yield session.select_async(path.get_fullpath(info.delim),
-            cancellable);
+        StatusResponse response = yield session.select_async(
+            new MailboxSpecifier.from_folder_path(path, info.delim), cancellable);
         if (response.status != Status.OK) {
             yield release_session_async(cancellable);
             
@@ -436,7 +436,7 @@ private class Geary.Imap.Folder : BaseObject {
         Cancellable? cancellable) throws Error {
         check_open();
         
-        CopyCommand cmd = new CopyCommand(msg_set, new Imap.MailboxParameter(destination.get_fullpath()));
+        CopyCommand cmd = new CopyCommand(msg_set, new MailboxSpecifier.from_folder_path(destination));
         Gee.Collection<Command> cmds = new Collection.SingleItem<Command>(cmd);
         
         yield exec_commands_async(cmds, cancellable);
@@ -452,7 +452,7 @@ private class Geary.Imap.Folder : BaseObject {
         // Don't use copy_email_async followed by remove_email_async; this needs to be one
         // set of commands executed in order without releasing the cmd_mutex; this is especially
         // vital if positional addressing is used
-        cmds.add(new CopyCommand(msg_set, new Imap.MailboxParameter(destination.get_fullpath())));
+        cmds.add(new CopyCommand(msg_set, new MailboxSpecifier.from_folder_path(destination)));
         
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         flags.add(MessageFlag.DELETED);

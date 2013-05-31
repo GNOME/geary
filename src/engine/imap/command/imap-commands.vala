@@ -62,28 +62,36 @@ public class Geary.Imap.ListCommand : Command {
     public const string NAME = "list";
     public const string XLIST_NAME = "xlist";
     
-    public ListCommand(Geary.Imap.MailboxParameter mailbox, bool use_xlist) {
-        base (use_xlist ? XLIST_NAME : NAME, { "", mailbox.value });
+    public ListCommand(MailboxSpecifier mailbox, bool use_xlist) {
+        base (use_xlist ? XLIST_NAME : NAME, { "" });
+        
+        add(mailbox.to_parameter());
     }
     
-    public ListCommand.wildcarded(string reference, Geary.Imap.MailboxParameter mailbox, bool use_xlist) {
-        base (use_xlist ? XLIST_NAME : NAME, { reference, mailbox.value });
+    public ListCommand.wildcarded(string reference, MailboxSpecifier mailbox, bool use_xlist) {
+        base (use_xlist ? XLIST_NAME : NAME, { reference });
+        
+        add(mailbox.to_parameter());
     }
 }
 
 public class Geary.Imap.ExamineCommand : Command {
     public const string NAME = "examine";
     
-    public ExamineCommand(Geary.Imap.MailboxParameter mailbox) {
-        base (NAME, { mailbox.value });
+    public ExamineCommand(MailboxSpecifier mailbox) {
+        base (NAME);
+        
+        add(mailbox.to_parameter());
     }
 }
 
 public class Geary.Imap.SelectCommand : Command {
     public const string NAME = "select";
     
-    public SelectCommand(Geary.Imap.MailboxParameter mailbox) {
-        base (NAME, { mailbox.value });
+    public SelectCommand(MailboxSpecifier mailbox) {
+        base (NAME);
+        
+        add(mailbox.to_parameter());
     }
 }
 
@@ -98,10 +106,10 @@ public class Geary.Imap.CloseCommand : Command {
 public class Geary.Imap.StatusCommand : Command {
     public const string NAME = "status";
     
-    public StatusCommand(Geary.Imap.MailboxParameter mailbox, StatusDataType[] data_items) {
+    public StatusCommand(MailboxSpecifier mailbox, StatusDataType[] data_items) {
         base (NAME);
         
-        add(mailbox);
+        add(mailbox.to_parameter());
         
         assert(data_items.length > 0);
         ListParameter data_item_list = new ListParameter(this);
@@ -161,11 +169,11 @@ public class Geary.Imap.CopyCommand : Command {
     public const string NAME = "copy";
     public const string UID_NAME = "uid copy";
 
-    public CopyCommand(MessageSet message_set, Geary.Imap.MailboxParameter destination) {
+    public CopyCommand(MessageSet message_set, MailboxSpecifier destination) {
         base (message_set.is_uid ? UID_NAME : NAME);
 
         add(message_set.to_parameter());
-        add(destination);
+        add(destination.to_parameter());
     }
 }
 

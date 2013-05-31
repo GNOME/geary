@@ -101,6 +101,10 @@ public class Geary.Imap.QuotedStringParameter : Geary.Imap.StringParameter {
         base (value);
     }
     
+    public override string to_string() {
+        return "\"%s\"".printf(value);
+    }
+    
     public override async void serialize(Serializer ser) throws Error {
         ser.push_quoted_string(value);
     }

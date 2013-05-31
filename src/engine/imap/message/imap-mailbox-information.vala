@@ -16,11 +16,9 @@
 
 public class Geary.Imap.MailboxInformation : Object {
     /**
-     * The decoded mailbox name.
-     *
-     * See {@link MailboxParameter} for the encoded version of this string.
+     * Name of the mailbox.
      */
-    public string name { get; private set; }
+    public MailboxSpecifier mailbox { get; private set; }
     
     /**
      * The (optional) delimiter specified by the server.
@@ -32,50 +30,10 @@ public class Geary.Imap.MailboxInformation : Object {
      */
     public MailboxAttributes attrs { get; private set; }
     
-    public MailboxInformation(string name, string? delim, MailboxAttributes attrs) {
-        this.name = name;
+    public MailboxInformation(MailboxSpecifier mailbox, string? delim, MailboxAttributes attrs) {
+        this.mailbox = mailbox;
         this.delim = delim;
         this.attrs = attrs;
-    }
-    
-    /**
-     * Will always return a list with at least one element in it.  If no delimiter is specified,
-     * the name is returned as a single element.
-     */
-    public Gee.List<string> get_path() {
-        Gee.List<string> path = new Gee.ArrayList<string>();
-        
-        if (!String.is_empty(delim)) {
-            string[] split = name.split(delim);
-            foreach (string str in split) {
-                if (!String.is_empty(str))
-                    path.add(str);
-            }
-        }
-        
-        if (path.size == 0)
-            path.add(name);
-        
-        return path;
-    }
-    
-    /**
-     * The mailbox's name without parent folders.
-     *
-     * If name is non-empty, will return a non-empty value which is the final folder name (i.e.
-     * the parent components are stripped).  If no delimiter is specified, the name is returned.
-     */
-    public string get_basename() {
-        if (String.is_empty(delim))
-            return name;
-        
-        int index = name.last_index_of(delim);
-        if (index < 0)
-            return name;
-        
-        string basename = name.substring(index + 1);
-        
-        return !String.is_empty(basename) ? basename : name;
     }
     
     /**
@@ -114,10 +72,10 @@ public class Geary.Imap.MailboxInformation : Object {
         
         // Set \Inbox to standard path
         if (Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
-            return new MailboxInformation(Geary.Imap.Account.INBOX_NAME,
+            return new MailboxInformation(MailboxSpecifier.inbox,
                 (delim != null) ? delim.nullable_value : null, attributes);
         } else {
-            return new MailboxInformation(mailbox.decode(),
+            return new MailboxInformation(new MailboxSpecifier.from_parameter(mailbox),
                 (delim != null) ? delim.nullable_value : null, attributes);
         }
     }

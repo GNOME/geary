@@ -18,11 +18,9 @@ public class Geary.Imap.StatusData : Object {
     public const int UNSET = -1;
     
     /**
-     * Decoded mailbox path name.
-     *
-     * See {@link MailboxParameter} for the encoded version of this string.
+     * Name of the mailbox.
      */
-    public string mailbox { get; private set; }
+    public MailboxSpecifier mailbox { get; private set; }
     
     /**
      * {@link UNSET} if not set.
@@ -53,7 +51,7 @@ public class Geary.Imap.StatusData : Object {
      */
     public int unseen { get; private set; }
     
-    public StatusData(string mailbox, int messages, int recent, UID? uid_next,
+    public StatusData(MailboxSpecifier mailbox, int messages, int recent, UID? uid_next,
         UIDValidity? uid_validity, int unseen) {
         this.mailbox = mailbox;
         this.messages = messages;
@@ -126,12 +124,12 @@ public class Geary.Imap.StatusData : Object {
             }
         }
         
-        return new StatusData(mailbox_param.decode(), messages, recent, uid_next, uid_validity,
-            unseen);
+        return new StatusData(new MailboxSpecifier.from_parameter(mailbox_param), messages, recent,
+            uid_next, uid_validity, unseen);
     }
     
     public string to_string() {
-        return "%s/%d/UIDNEXT=%s/UIDVALIDITY=%s".printf(mailbox, messages,
+        return "%s/%d/UIDNEXT=%s/UIDVALIDITY=%s".printf(mailbox.to_string(), messages,
             (uid_next != null) ? uid_next.to_string() : "(none)",
             (uid_validity != null) ? uid_validity.to_string() : "(none)");
     }
