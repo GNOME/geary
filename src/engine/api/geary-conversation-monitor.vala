@@ -882,7 +882,7 @@ public class Geary.ConversationMonitor : BaseObject {
             return;
         
         if (!retry_connection) {
-            debug("Folder %s closed due to error, not reestablishing connection", folder.to_string());
+            debug("Folder %s closed normally, not reestablishing connection", folder.to_string());
             
             stop_monitoring_internal_async.begin(false, false, null);
             

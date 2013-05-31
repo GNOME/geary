@@ -16,6 +16,7 @@ private class Geary.Imap.Folder : BaseObject {
     public Imap.FolderProperties properties { get; private set; }
     public MailboxInformation info { get; private set; }
     public MessageFlags? permanent_flags { get; private set; default = null; }
+    public Trillian readonly { get; private set; default = Trillian.UNKNOWN; }
     public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
     
     private ClientSessionManager session_mgr;
@@ -105,6 +106,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         fetch_accumulator.clear();
         
+        readonly = Trillian.UNKNOWN;
         accepts_user_flags = Trillian.UNKNOWN;
         
         is_open = false;
@@ -175,6 +177,14 @@ private class Geary.Imap.Folder : BaseObject {
         
         try {
             switch (response_code.get_response_code_type()) {
+                case ResponseCodeType.READONLY:
+                    readonly = Trillian.TRUE;
+                break;
+                
+                case ResponseCodeType.READWRITE:
+                    readonly = Trillian.FALSE;
+                break;
+                
                 case ResponseCodeType.UIDNEXT:
                     properties.uid_next = response_code.get_uid_next();
                 break;

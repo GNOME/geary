@@ -831,7 +831,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         debug("do_replay_remote_disconnected reason=%s", reason.to_string());
         
         Geary.Folder.CloseReason folder_reason = reason.is_error()
-            ? Geary.Folder.CloseReason.REMOTE_CLOSE : Geary.Folder.CloseReason.REMOTE_ERROR;
+            ? Geary.Folder.CloseReason.REMOTE_ERROR : Geary.Folder.CloseReason.REMOTE_CLOSE;
         
         // because close_internal_async() issues ReceiveReplayQueue.close_async() (which cannot
         // be called from within a ReceiveReplayOperation), schedule the close rather than

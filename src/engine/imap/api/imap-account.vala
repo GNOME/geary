@@ -29,6 +29,7 @@ private class Geary.Imap.Account : BaseObject {
     private AccountInformation account_information;
     private ClientSessionManager session_mgr;
     private ClientSession? account_session = null;
+    private Nonblocking.Mutex account_session_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
@@ -56,21 +57,6 @@ private class Geary.Imap.Account : BaseObject {
         
         yield session_mgr.open_async(cancellable);
         
-        try {
-            // claim a ClientSession for use for all account-level activity
-            account_session = yield session_mgr.claim_authorized_session_async(cancellable);
-            account_session.list.connect(on_list_data);
-            account_session.status.connect(on_status_data);
-        } catch (Error err) {
-            try {
-                yield session_mgr.close_async(cancellable);
-            } catch (Error close_err) {
-                // ignored
-            }
-            
-            throw err;
-        }
-        
         is_open = true;
     }
     
@@ -78,11 +64,23 @@ private class Geary.Imap.Account : BaseObject {
         if (!is_open)
             return;
         
-        account_session.list.disconnect(on_list_data);
-        account_session.status.disconnect(on_status_data);
+        int token = yield account_session_mutex.claim_async(cancellable);
+        
+        if (account_session != null) {
+            account_session.list.disconnect(on_list_data);
+            account_session.status.disconnect(on_status_data);
+            
+            try {
+                yield session_mgr.release_session_async(account_session, cancellable);
+            } catch (Error err) {
+                // ignored
+            }
+            
+            account_session = null;
+        }
         
         try {
-            yield session_mgr.release_session_async(account_session, cancellable);
+            account_session_mutex.release(ref token);
         } catch (Error err) {
             // ignored
         }
@@ -94,6 +92,32 @@ private class Geary.Imap.Account : BaseObject {
         }
         
         is_open = false;
+    }
+    
+    // Claiming session in open_async() would delay opening, which make take too long ... rather,
+    // this is used by the various calls to put off claiming a session until needed (which
+    // possibly is long enough for ClientSessionManager to get a few ready).
+    private async ClientSession claim_session_async(Cancellable? cancellable) throws Error {
+        int token = yield account_session_mutex.claim_async(cancellable);
+        
+        Error? err = null;
+        if (account_session == null) {
+            try {
+                account_session = yield session_mgr.claim_authorized_session_async(cancellable);
+                
+                account_session.list.connect(on_list_data);
+                account_session.status.connect(on_status_data);
+            } catch (Error claim_err) {
+                err = claim_err;
+            }
+        }
+        
+        account_session_mutex.release(ref token);
+        
+        if (err != null)
+            throw err;
+        
+        return account_session;
     }
     
     private void on_list_data(MailboxInformation mailbox_info) {
@@ -140,7 +164,8 @@ private class Geary.Imap.Account : BaseObject {
         if (processed == null)
             throw new ImapError.INVALID("Invalid path %s", path.to_string());
         
-        bool can_xlist = account_session.capabilities.has_capability(Capabilities.XLIST);
+        ClientSession session = yield claim_session_async(cancellable);
+        bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         StatusResponse response = yield send_command_async(
@@ -261,7 +286,8 @@ private class Geary.Imap.Account : BaseObject {
         Geary.FolderPath? processed = process_path(parent, null,
             (parent != null) ? parent.get_root().default_separator : ASSUMED_SEPARATOR);
         
-        bool can_xlist = account_session.capabilities.has_capability(Capabilities.XLIST);
+        ClientSession session = yield claim_session_async(cancellable);
+        bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
         
         ListCommand cmd;
         if (processed == null) {
@@ -308,7 +334,8 @@ private class Geary.Imap.Account : BaseObject {
         Gee.Map<Command, StatusResponse>? responses = null;
         Error? err = null;
         try {
-            responses = yield account_session.send_multiple_commands_async(cmds, cancellable);
+            ClientSession session = yield claim_session_async(cancellable);
+            responses = yield session.send_multiple_commands_async(cmds, cancellable);
         } catch (Error send_err) {
             err = send_err;
         }
