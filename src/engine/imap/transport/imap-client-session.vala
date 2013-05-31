@@ -22,6 +22,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
     public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
     
+    private const int GREETING_TIMEOUT_SEC = 30;
+    
     public enum Context {
         UNCONNECTED,
         UNAUTHORIZED,
@@ -132,6 +134,8 @@ public class Geary.Imap.ClientSession : BaseObject {
         RECV_ERROR,
         SEND_ERROR,
         
+        TIMEOUT,
+        
         COUNT;
     }
     
@@ -168,6 +172,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint selected_with_idle_keepalive_secs = 0;
     private bool allow_idle = true;
     private Command? state_change_cmd = null;
+    private Nonblocking.Semaphore? connect_waiter = null;
+    private Error? connect_err = null;
     
     //
     // Connection state changes
@@ -252,6 +258,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.CONNECTING, Event.RECV_COMPLETION, on_dropped_response),
             new Geary.State.Mapping(State.CONNECTING, Event.SEND_ERROR, on_connecting_send_recv_error),
             new Geary.State.Mapping(State.CONNECTING, Event.RECV_ERROR, on_connecting_send_recv_error),
+            new Geary.State.Mapping(State.CONNECTING, Event.TIMEOUT, on_connecting_timeout),
             
             new Geary.State.Mapping(State.NOAUTH, Event.CONNECT, on_already_connected),
             new Geary.State.Mapping(State.NOAUTH, Event.LOGIN, on_login),
@@ -437,6 +444,17 @@ public class Geary.Imap.ClientSession : BaseObject {
     // connect
     //
     
+    /**
+     * Connect to the server.
+     *
+     * This performs no transaction or session initiation with the server.  See {@link login_async}
+     * and {@link initiate_session_async} for next steps.
+     *
+     * The signals {@link connected} or {@link session_denied} will be fired in the context of this
+     * call, depending on the results of the connection greeting from the server.  However,
+     * command should only be transmitted (login, initiate session, etc.) after this call has
+     * completed.
+     */
     public async void connect_async(Cancellable? cancellable = null) throws Error {
         MachineParams params = new MachineParams(null);
         fsm.issue(Event.CONNECT, null, params);
@@ -446,10 +464,34 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         assert(params.proceed);
         
-        // ClientConnection should exist at this point
+        // ClientConnection and the connection waiter should exist at this point
         assert(cx != null);
+        assert(connect_waiter != null);
         
+        // connect and let ClientConnection's signals drive the show
         yield cx.connect_async(cancellable);
+        
+        // set up timer to wait for greeting from server
+        Scheduler.Scheduled timeout = Scheduler.after_sec(GREETING_TIMEOUT_SEC, on_greeting_timeout);
+        
+        // wait for the initial greeting or a timeout ... this prevents the caller from turning
+        // around and issuing a command while still in CONNECTING state
+        yield connect_waiter.wait_async(cancellable);
+        
+        // cancel the timeout, if it's not already fired
+        timeout.cancel();
+        
+        // if session was denied or timeout, throw the Error
+        if (connect_err != null)
+            throw connect_err;
+    }
+    
+    private bool on_greeting_timeout() {
+        // if still in CONNECTING state, the greeting never arrived
+        if (fsm.get_state() == State.CONNECTING)
+            fsm.issue(Event.TIMEOUT);
+        
+        return false;
     }
     
     private uint on_connect(uint state, uint event, void *user, Object? object) {
@@ -470,6 +512,9 @@ public class Geary.Imap.ClientSession : BaseObject {
         cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
         cx.deserialize_failure.connect(on_network_receive_failure);
+        
+        assert(connect_waiter == null);
+        connect_waiter = new Nonblocking.Semaphore();
         
         // only use IDLE when in SELECTED or EXAMINED state
         cx.set_idle_when_quiet(false);
@@ -516,8 +561,6 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_connected(uint state, uint event) {
         debug("[%s] Connected", to_string());
         
-        fsm.do_post_transition(() => { connected(); });
-        
         // stay in current state -- wait for initial status response to move into NOAUTH or LOGGED OUT
         return state;
     }
@@ -525,12 +568,41 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_connecting_recv_status(uint state, uint event, void *user, Object? object) {
         StatusResponse status_response = (StatusResponse) object;
         
-        if (status_response.status == Status.OK)
+        // see on_connected() why signals and semaphore are delayed for this event
+        try {
+            connect_waiter.notify();
+        } catch (Error err) {
+            message("[%s] Unable to notify connect_waiter of connection: %s", to_string(),
+                err.message);
+        }
+        
+        if (status_response.status == Status.OK) {
+            fsm.do_post_transition(() => { connected(); });
+            
             return State.NOAUTH;
+        }
         
         debug("[%s] Connect denied: %s", to_string(), status_response.to_string());
         
         fsm.do_post_transition(() => { session_denied(status_response.get_text()); });
+        connect_err = new ImapError.SERVER_ERROR("Session denied: %s", status_response.get_text());
+        
+        return State.LOGGED_OUT;
+    }
+    
+    private uint on_connecting_timeout(uint state, uint event) {
+        // wake up the waiting task in connect_async
+        try {
+            connect_waiter.notify();
+        } catch (Error err) {
+            message("[%s] Unable to notify connect_waiter of timeout: %s", to_string(),
+                err.message);
+        }
+        
+        debug("[%s] Connect timed-out", to_string());
+        
+        connect_err = new IOError.TIMED_OUT("Session greeting not seen in %d seconds",
+            GREETING_TIMEOUT_SEC);
         
         return State.LOGGED_OUT;
     }
@@ -1212,7 +1284,8 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(object != null);
         
         MachineParams params = (MachineParams) object;
-        params.err = new ImapError.NOT_CONNECTED("Not connected to %s", to_string());
+        params.err = new ImapError.NOT_CONNECTED("Command %s too early: not connected to %s",
+            params.cmd.name, to_string());
         
         return state;
     }

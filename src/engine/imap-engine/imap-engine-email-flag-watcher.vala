@@ -92,10 +92,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
         int low = -1;
         bool finished = false;
         int total = 0;
-        for (;;) {
-            if (finished)
-                break;
-            
+        do {
             // Fetch a chunk of email flags in local folder.
             Gee.List<Geary.Email>? list_local = yield folder.list_email_async(low, PULL_CHUNK_COUNT,
                 Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
@@ -104,22 +101,20 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             total += list_local.size;
             
-            // if this request's low was 1 or processed the top 2000, then this is the last iteration
-            finished = (low == 1 || total >= MAX_EMAIL_WATCHED);
-            
             // Get all email identifiers in the local folder; also, update the low and count arguments
             Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
                 Geary.EmailIdentifier, Geary.EmailFlags>();
             foreach (Geary.Email e in list_local) {
-                if (low == -1)
-                    low = e.position;
-                else if (low > e.position)
+                if (low == -1 || e.position < low)
                     low = e.position;
                 
                 local_map.set(e.id, e.email_flags);
             }
             
-            // now roll back PULL_CHUNK_COUNT earlier
+            // if this request's low was 1 or processed the top 2000, then this is the last iteration
+            finished = (low == 1 || total >= MAX_EMAIL_WATCHED);
+            
+            // now roll back PULL_CHUNK_COUNT earlier for next iteration
             low = Numeric.int_floor(low - PULL_CHUNK_COUNT, 1);
             
             // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
@@ -127,7 +122,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
                 Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
             if (list_remote == null || list_remote.size == 0)
-                continue;
+                break;
             
             // Build map of emails that have changed.
             Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map = 
@@ -142,7 +137,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             if (!cancellable.is_cancelled() && changed_map.size > 0)
                 email_flags_changed(changed_map);
-        }
+        } while (!finished);
         
         Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: completed %s", folder.to_string());
     }

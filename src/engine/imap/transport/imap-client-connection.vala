@@ -25,7 +25,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     /**
      * The default timeout for an issued command to result in a response code from the server.
-     * A timed-out command will result in the connection being forcibly closed.
+     *
+     * @see command_timeout_sec
      */
     public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 15;
     
@@ -75,6 +76,14 @@ public class Geary.Imap.ClientConnection : BaseObject {
     // Used solely for debugging
     private static int next_cx_id = 0;
     
+    /**
+     * The timeout in seconds before an uncompleted {@link Command} is considered abandoned.
+     *
+     * ClientConnection does not time out the initial greeting from the server (as there's no
+     * command associated with it).  That's the responsibility of the caller.
+     *
+     * A timed-out command will result in the connection being forcibly closed.
+     */
     public uint command_timeout_sec { get; set; default = DEFAULT_COMMAND_TIMEOUT_SEC; }
     
     /**
