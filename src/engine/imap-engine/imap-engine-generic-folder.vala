@@ -730,7 +730,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             notify_email_locally_appended(created);
         
         if (changed)
-            notify_email_count_changed(remote_count, CountChangeReason.ADDED);
+            notify_email_count_changed(remote_count, CountChangeReason.APPENDED);
         
         debug("do_replay_appended_messages: completed for %s", to_string());
     }

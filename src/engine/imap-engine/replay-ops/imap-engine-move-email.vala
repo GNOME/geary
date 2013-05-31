@@ -77,7 +77,7 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         yield engine.local_folder.mark_removed_async(to_move, false, cancellable);
 
         engine.notify_email_appended(to_move);
-        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.ADDED);
+        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.APPENDED);
     }
 
     public override string describe_state() {

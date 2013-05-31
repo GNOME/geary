@@ -104,7 +104,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
                 Geary.Folder.CountChangeReason reason = CountChangeReason.NONE;
                 
                 if (to_add.size > 0) {
-                    reason |= Geary.Folder.CountChangeReason.ADDED;
+                    reason |= Geary.Folder.CountChangeReason.INSERTED;
                 }
                 
                 if (to_remove.size > 0) {

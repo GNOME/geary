@@ -50,7 +50,8 @@ public interface Geary.Folder : BaseObject {
     [Flags]
     public enum CountChangeReason {
         NONE = 0,
-        ADDED,
+        APPENDED,
+        INSERTED,
         REMOVED
     }
     
