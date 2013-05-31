@@ -10,8 +10,8 @@
  * A Command is created by the caller and then submitted to a {@link ClientSession} or
  * {@link ClientConnection} for transmission to the server.  In response, one or more
  * {@link ServerResponse}s are returned, generally zero or more {@link ServerData}s followed by
- * a {@link CompletionStatusResponse}.  {@link ResponseCode}s, {@link StatusResponse}s, and/or
- * {@link CodedStatusResponse}s may also be returned, depending on the Command.
+ * a completion {@link StatusResponse}.  Untagged {@link StatusResponse}s may also be returned,
+ * depending on the Command.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-6]]
  */

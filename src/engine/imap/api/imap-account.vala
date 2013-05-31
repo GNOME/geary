@@ -142,7 +142,7 @@ private class Geary.Imap.Account : BaseObject {
         bool can_xlist = account_session.capabilities.has_capability(Capabilities.XLIST);
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
-        CompletionStatusResponse response = yield send_command_async(
+        StatusResponse response = yield send_command_async(
             new ListCommand(new Imap.MailboxParameter(processed.get_fullpath()), can_xlist),
             list_results, null, cancellable);
         
@@ -160,7 +160,7 @@ private class Geary.Imap.Account : BaseObject {
             throw new ImapError.INVALID("Invalid path %s", path.to_string());
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
-        CompletionStatusResponse response = yield send_command_async(
+        StatusResponse response = yield send_command_async(
             new StatusCommand(new MailboxParameter(processed.get_fullpath()), StatusDataType.all()),
             null, status_results, cancellable);
         
@@ -169,8 +169,10 @@ private class Geary.Imap.Account : BaseObject {
         return status_results[0];
     }
     
-    private void throw_fetch_error(CompletionStatusResponse response, FolderPath path, int result_count)
+    private void throw_fetch_error(StatusResponse response, FolderPath path, int result_count)
         throws Error {
+        assert(response.is_completion);
+        
         if (response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server reports error for path %s: %s", path.to_string(),
                 response.to_string());
@@ -215,12 +217,12 @@ private class Geary.Imap.Account : BaseObject {
         }
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
-        Gee.Map<Command, CompletionStatusResponse> responses = yield send_multiple_async(cmd_map.keys,
+        Gee.Map<Command, StatusResponse> responses = yield send_multiple_async(cmd_map.keys,
             null, status_results, cancellable);
         
         foreach (Command cmd in responses.keys) {
             StatusCommand status_cmd = (StatusCommand) cmd;
-            CompletionStatusResponse response = responses.get(cmd);
+            StatusResponse response = responses.get(cmd);
             
             FolderPath child_path = cmd_map.get(status_cmd);
             MailboxInformation mailbox_info = info_map.get(child_path);
@@ -276,8 +278,7 @@ private class Geary.Imap.Account : BaseObject {
         }
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
-        CompletionStatusResponse response = yield send_command_async(cmd, list_results, null,
-            cancellable);
+        StatusResponse response = yield send_command_async(cmd, list_results, null, cancellable);
         
         if (response.status != Status.OK)
             throw_not_found(processed ?? parent);
@@ -285,10 +286,10 @@ private class Geary.Imap.Account : BaseObject {
         return (list_results.size > 0) ? list_results : null;
     }
     
-    private async CompletionStatusResponse send_command_async(Command cmd,
+    private async StatusResponse send_command_async(Command cmd,
         Gee.List<MailboxInformation>? list_results, Gee.List<StatusData>? status_results,
         Cancellable? cancellable) throws Error {
-        Gee.Map<Command, CompletionStatusResponse> responses = yield send_multiple_async(
+        Gee.Map<Command, StatusResponse> responses = yield send_multiple_async(
             new Geary.Collection.SingleItem<Command>(cmd), list_results, status_results,
             cancellable);
         
@@ -297,7 +298,7 @@ private class Geary.Imap.Account : BaseObject {
         return Geary.Collection.get_first(responses.values);
     }
     
-    private async Gee.Map<Command, CompletionStatusResponse> send_multiple_async(
+    private async Gee.Map<Command, StatusResponse> send_multiple_async(
         Gee.Collection<Command> cmds, Gee.List<MailboxInformation>? list_results,
         Gee.List<StatusData>? status_results, Cancellable? cancellable) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
@@ -306,7 +307,7 @@ private class Geary.Imap.Account : BaseObject {
         list_collector = list_results;
         status_collector = status_results;
         
-        Gee.Map<Command, CompletionStatusResponse>? responses = null;
+        Gee.Map<Command, StatusResponse>? responses = null;
         Error? err = null;
         try {
             responses = yield account_session.send_multiple_commands_async(cmds, cancellable);

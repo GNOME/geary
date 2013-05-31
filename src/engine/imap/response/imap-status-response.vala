@@ -8,9 +8,7 @@
  * A response line from the server indicating either a result from a command or an unsolicited
  * change in state.
  *
- * StatusResponses may be tagged or untagged, depending on their nature.  See
- * {@link CompletionStatusResponse} and {@link CodedStatusResponse} for special types of
- * StatusResponses.
+ * StatusResponses may be tagged or untagged, depending on their nature.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
  *
@@ -18,12 +16,30 @@
  */
 
 public class Geary.Imap.StatusResponse : ServerResponse {
+    /**
+     * Returns true if this {@link StatusResponse} represents the completion of a {@link Command}.
+     *
+     * This is true if (a) the StatusResponse is tagged and (b) the {@link status} is
+     * {@link Status.OK}, {@link Status.NO}, or {@link Status.BAD}.
+     */
+    public bool is_completion { get; private set; default = false; }
+    
+    /**
+     * The {@link Status} being reported by the server in this {@link ServerResponse}.
+     */
     public Status status { get; private set; }
     
-    public StatusResponse(Tag tag, Status status) {
+    /**
+     * An optional {@link ResponseCode} reported by the server in this {@link ServerResponse}.
+     */
+    public ResponseCode? response_code { get; private set; }
+    
+    private StatusResponse(Tag tag, Status status, ResponseCode? response_code) {
         base (tag);
         
         this.status = status;
+        this.response_code = response_code;
+        update_is_completion();
     }
     
     /**
@@ -36,6 +52,28 @@ public class Geary.Imap.StatusResponse : ServerResponse {
         base.migrate(root);
         
         status = Status.from_parameter(get_as_string(1));
+        response_code = get_if_list(2) as ResponseCode;
+        update_is_completion();
+    }
+    
+    private void update_is_completion() {
+        // TODO: Is this too stringent?  It means a faulty server could send back a completion
+        // with another Status code and cause the client to treat the command as "unanswered",
+        // requiring a timeout.
+        is_completion = false;
+        if (tag.is_tagged()) {
+            switch (status) {
+                case Status.OK:
+                case Status.NO:
+                case Status.BAD:
+                    is_completion = true;
+                break;
+                
+                default:
+                    // fall through
+                break;
+            }
+        }
     }
     
     /**

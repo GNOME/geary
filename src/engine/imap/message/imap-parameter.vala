@@ -410,6 +410,34 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return param ?? new LiteralParameter(Geary.Memory.EmptyBuffer.instance);
     }
     
+    /**
+     * Returns a {@link Memory.AbstractBuffer} for the {@link Parameter} at position index.
+     *
+     * Only converts {@link StringParameter} and {@link LiteralParameter}.  All other types return
+     * null.
+     */
+    public Memory.AbstractBuffer? get_as_nullable_buffer(int index) throws ImapError {
+        LiteralParameter? literalp = get_if_literal(index);
+        if (literalp != null)
+            return literalp.get_buffer();
+        
+        StringParameter? stringp = get_if_string(index);
+        if (stringp != null)
+            return new Memory.StringBuffer(stringp.value);
+        
+        return null;
+    }
+    
+    /**
+     * Returns a {@link Memory.AbstractBuffer} for the {@link Parameter} at position index.
+     *
+     * Only converts {@link StringParameter} and {@link LiteralParameter}.  All other types return
+     * as an empty buffer.
+     */
+    public Memory.AbstractBuffer get_as_empty_buffer(int index) throws ImapError {
+        return get_as_nullable_buffer(index) ?? Memory.EmptyBuffer.instance;
+    }
+    
     public Gee.List<Parameter> get_all() {
         return list.read_only_view;
     }

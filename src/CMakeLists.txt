@@ -92,8 +92,6 @@ engine/imap/message/imap-status-data-type.vala
 engine/imap/message/imap-tag.vala
 engine/imap/message/imap-uid.vala
 engine/imap/message/imap-uid-validity.vala
-engine/imap/response/imap-coded-status-response.vala
-engine/imap/response/imap-completion-status-response.vala
 engine/imap/response/imap-continuation-response.vala
 engine/imap/response/imap-response-code.vala
 engine/imap/response/imap-response-code-type.vala

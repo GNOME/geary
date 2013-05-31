@@ -37,9 +37,8 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
     /**
      * Migrate the contents of RootParameters into a new, properly-typed ServerResponse.
      *
-     * The returned ServerResponse may be a {@link CompletionStatusResponse},
-     * {@link CodedStatusResponse}, {@link ContinuationResponse}, {@link ServerData}, or a generic
-     * {@link StatusResponse}.
+     * The returned ServerResponse may be a {@link ContinuationResponse}, {@link ServerData},
+     * or a generic {@link StatusResponse}.
      *
      * The RootParameters will be migrated and stripped clean upon exit.
      *
@@ -48,14 +47,6 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
     public static ServerResponse migrate_from_server(RootParameters root) throws ImapError {
         if (ContinuationResponse.is_continuation_response(root))
             return new ContinuationResponse.migrate(root);
-        
-        // All CompletionStatusResponses are StatusResponses, so check for them first
-        if (CompletionStatusResponse.is_completion_status_response(root))
-            return new CompletionStatusResponse.migrate(root);
-        
-        // All CodedStatusResponses are StatusResponses, so check for them second
-        if (CodedStatusResponse.is_coded_status_response(root))
-            return new CodedStatusResponse.migrate(root);
         
         if (StatusResponse.is_status_response(root))
             return new StatusResponse.migrate(root);

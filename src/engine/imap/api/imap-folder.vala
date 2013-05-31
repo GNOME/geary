@@ -78,10 +78,10 @@ private class Geary.Imap.Folder : BaseObject {
         session.expunge.connect(on_expunge);
         session.fetch.connect(on_fetch);
         session.recent.connect(on_recent);
-        session.coded_response_received.connect(on_coded_status_response);
+        session.status_response_received.connect(on_status_response);
         session.disconnected.connect(on_disconnected);
         
-        CompletionStatusResponse response = yield session.select_async(path.get_fullpath(info.delim),
+        StatusResponse response = yield session.select_async(path.get_fullpath(info.delim),
             cancellable);
         if (response.status != Status.OK) {
             yield release_session_async(cancellable);
@@ -118,7 +118,7 @@ private class Geary.Imap.Folder : BaseObject {
         session.expunge.disconnect(on_expunge);
         session.fetch.disconnect(on_fetch);
         session.recent.disconnect(on_recent);
-        session.coded_response_received.disconnect(on_coded_status_response);
+        session.status_response_received.disconnect(on_status_response);
         session.disconnected.disconnect(on_disconnected);
         
         try {
@@ -167,34 +167,39 @@ private class Geary.Imap.Folder : BaseObject {
         recent(total);
     }
     
-    private void on_coded_status_response(CodedStatusResponse coded_response) {
+    private void on_status_response(StatusResponse status_response) {
+        // only interested in ResponseCodes here
+        ResponseCode? response_code = status_response.response_code;
+        if (response_code == null)
+            return;
+        
         try {
-            switch (coded_response.response_code_type) {
+            switch (response_code.get_response_code_type()) {
                 case ResponseCodeType.UIDNEXT:
-                    properties.uid_next = coded_response.get_uid_next();
+                    properties.uid_next = response_code.get_uid_next();
                 break;
                 
                 case ResponseCodeType.UIDVALIDITY:
-                    properties.uid_validity = coded_response.get_uid_validity();
+                    properties.uid_validity = response_code.get_uid_validity();
                 break;
                 
                 case ResponseCodeType.UNSEEN:
-                    properties.unseen = coded_response.get_unseen();
+                    properties.unseen = response_code.get_unseen();
                 break;
                 
                 case ResponseCodeType.PERMANENT_FLAGS:
-                    permanent_flags = coded_response.get_permanent_flags();
+                    permanent_flags = response_code.get_permanent_flags();
                     accepts_user_flags = Trillian.from_boolean(
                         permanent_flags.contains(MessageFlag.ALLOWS_NEW));
                 break;
                 
                 default:
-                    debug("%s: Ignoring coded status response %s", to_string(),
-                        coded_response.to_string());
+                    debug("%s: Ignoring response code %s", to_string(),
+                        response_code.to_string());
                 break;
             }
         } catch (ImapError ierr) {
-            debug("Unable to parse CodedStatusResponse %s: %s", coded_response.to_string(),
+            debug("Unable to parse ResponseCode %s: %s", response_code.to_string(),
                 ierr.message);
         }
     }
@@ -216,7 +221,7 @@ private class Geary.Imap.Folder : BaseObject {
         int token = yield cmd_mutex.claim_async(cancellable);
         
         // execute commands with mutex locked
-        Gee.Map<Command, CompletionStatusResponse>? responses = null;
+        Gee.Map<Command, StatusResponse>? responses = null;
         Error? err = null;
         try {
             responses = yield session.send_multiple_commands_async(cmds, cancellable);
@@ -246,7 +251,9 @@ private class Geary.Imap.Folder : BaseObject {
         return results;
     }
     
-    private void throw_on_failed_status(CompletionStatusResponse response, Command cmd) throws Error {
+    private void throw_on_failed_status(StatusResponse response, Command cmd) throws Error {
+        assert(response.is_completion);
+        
         switch (response.status) {
             case Status.OK:
                 return;

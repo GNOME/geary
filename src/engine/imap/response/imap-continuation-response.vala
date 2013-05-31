@@ -15,12 +15,12 @@
  */
 
 public class Geary.Imap.ContinuationResponse : ServerResponse {
-    public ContinuationResponse() {
+    private ContinuationResponse() {
         base (Tag.get_continuation());
     }
     
     /**
-     * Converts the {@link RootParameters} into a {@link CodedStatusResponse}.
+     * Converts the {@link RootParameters} into a {@link ContinuationResponse}.
      *
      * The supplied root is "stripped" of its children.  This may happen even if an exception is
      * thrown.  It's recommended to use {@link is_continuation_response} prior to this call.

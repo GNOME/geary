@@ -13,7 +13,7 @@
 public class Geary.Imap.ServerData : ServerResponse {
     public ServerDataType server_data_type { get; private set; }
     
-    public ServerData(Tag tag, ServerDataType server_data_type) {
+    private ServerData(Tag tag, ServerDataType server_data_type) {
         base (tag);
         
         this.server_data_type = server_data_type;

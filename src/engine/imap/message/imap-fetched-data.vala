@@ -72,7 +72,7 @@ public class Geary.Imap.FetchedData : Object {
                 FetchBodyDataIdentifier identifer = new FetchBodyDataIdentifier.from_parameter(data_item_param);
                 
                 if (has_value)
-                    fetched_data.body_data_map.set(identifer, list.get_as_empty_literal(ctr + 1).get_buffer());
+                    fetched_data.body_data_map.set(identifer, list.get_as_empty_buffer(ctr + 1));
                 else
                     fetched_data.body_data_map.set(identifer, Memory.EmptyBuffer.instance);
             } else {

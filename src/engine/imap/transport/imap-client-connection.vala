@@ -129,14 +129,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), status_response.to_string());
     }
     
-    public virtual signal void received_coded_status_response(CodedStatusResponse coded_status_response) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), coded_status_response.to_string());
-    }
-    
-    public virtual signal void received_completion_status_response(CompletionStatusResponse completion_status_response) {
-        Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), completion_status_response.to_string());
-    }
-    
     public virtual signal void received_server_data(ServerData server_data) {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), server_data.to_string());
     }
@@ -726,21 +718,10 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
     
     private void signal_status_response(void *user, Object? object) {
-        CompletionStatusResponse? completion_status_response = object as CompletionStatusResponse;
-        if (completion_status_response != null) {
+        StatusResponse? status_response = object as StatusResponse;
+        if (status_response != null && status_response.is_completion) {
             // stop the countdown timer on the associated command
             cmd_completed_timeout();
-            
-            received_completion_status_response(completion_status_response);
-            
-            return;
-        }
-        
-        CodedStatusResponse? coded_status_response = object as CodedStatusResponse;
-        if (coded_status_response != null) {
-            received_coded_status_response(coded_status_response);
-            
-            return;
         }
         
         received_status_response((StatusResponse) object);
