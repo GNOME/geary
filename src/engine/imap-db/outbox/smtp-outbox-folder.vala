@@ -134,8 +134,14 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                 
                 outbox_queue.send(row);
                 
+                bool should_nap = true;
+                
                 if (send_err is SmtpError.AUTHENTICATION_FAILED) {
                     bool report = true;
+                    
+                    // Retry immediately (bug 6387)
+                    should_nap = false;
+                    
                     try {
                         if (yield _account.information.fetch_passwords_async(
                             CredentialsMediator.ServiceFlag.SMTP))
@@ -148,11 +154,13 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                         report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, send_err);
                 }
                 
-                // Take a brief nap before continuing to allow connection problems to resolve.
-                yield Geary.Scheduler.sleep_async(send_retry_seconds);
-                send_retry_seconds *= 2;
-                send_retry_seconds = Geary.Numeric.uint_ceiling(send_retry_seconds, MAX_SEND_RETRY_INTERVAL_SEC);
-
+                if (should_nap) {
+                    // Take a brief nap before continuing to allow connection problems to resolve.
+                    yield Geary.Scheduler.sleep_async(send_retry_seconds);
+                    send_retry_seconds *= 2;
+                    send_retry_seconds = Geary.Numeric.uint_ceiling(send_retry_seconds, MAX_SEND_RETRY_INTERVAL_SEC);
+                }
+                
                 continue;
             }
             
