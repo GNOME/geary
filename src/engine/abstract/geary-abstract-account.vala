@@ -82,7 +82,8 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords, 
+    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords,
+        Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     

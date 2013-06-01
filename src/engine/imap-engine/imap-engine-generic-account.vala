@@ -493,11 +493,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.fetch_email_async(email_id, required_fields, cancellable);
     }
     
-    public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords, 
+    public override async Gee.Collection<Geary.Email>? local_search_async(string keywords,
+        Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         return yield local.search_async(local.prepare_search_query(keywords),
-            folder_blacklist, search_ids, cancellable);
+            requested_fields, partial_ok, folder_blacklist, search_ids, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

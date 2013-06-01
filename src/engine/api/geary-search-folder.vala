@@ -35,7 +35,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     private Gee.HashSet<Geary.FolderPath> exclude_folders = new Gee.HashSet<Geary.FolderPath>();
     private Geary.SpecialFolderType[] exclude_types = { Geary.SpecialFolderType.SPAM,
         Geary.SpecialFolderType.TRASH };
-    private Gee.TreeSet<Geary.EmailIdentifier> search_results = new Gee.TreeSet<Geary.EmailIdentifier>(compare_id_desc);
+    private Gee.TreeSet<Geary.Email> search_results;
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
     /**
@@ -45,6 +45,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     
     public SearchFolder(Account account) {
         _account = account;
+        
+        clear_search_results();
         
         // TODO: The exclusion system needs to watch for changes, since the special folders are
         // not always ready by the time this c'tor executes.
@@ -72,31 +74,35 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         int result_mutex_token = yield result_mutex.claim_async();
         Error? error = null;
         try {
-            Gee.Collection<Geary.EmailIdentifier>? new_results = yield account.local_search_async(
-                keywords, exclude_folders, null, null);
+            Gee.Collection<Geary.Email>? _new_results = yield account.local_search_async(
+                keywords, Geary.Email.Field.PROPERTIES, false, exclude_folders, null, null);
             
-            if (new_results == null) {
+            if (_new_results == null) {
                 // No results?  Remove all existing results and return early.  If there are no
                 // existing results, there's nothing to do.
                 if (search_results.size > 0) {
-                    Gee.TreeSet<Geary.EmailIdentifier> local_results = search_results;
+                    Gee.TreeSet<Geary.Email> local_results = search_results;
                     // Clear existing results.
-                    search_results = new Gee.TreeSet<Geary.EmailIdentifier>(compare_id_desc);
-                    notify_email_removed(local_results);
+                    clear_search_results();
+                    notify_email_removed(email_collection_to_ids(local_results));
                     notify_email_count_changed(0, Geary.Folder.CountChangeReason.REMOVED);
                 }
             } else {
+                // Move new search results into a hashset, using email ID for equality.
+                Gee.HashSet<Geary.Email> new_results = new Gee.HashSet<Geary.Email>(email_id_hash, email_id_equal);
+                new_results.add_all(_new_results);
+            
                 // Match the new results up with the existing results.
-                Gee.HashSet<Geary.EmailIdentifier> to_add = new Gee.HashSet<Geary.EmailIdentifier>();
-                Gee.HashSet<Geary.EmailIdentifier> to_remove = new Gee.HashSet<Geary.EmailIdentifier>();
+                Gee.HashSet<Geary.Email> to_add = new Gee.HashSet<Geary.Email>(email_id_hash, email_id_equal);
+                Gee.HashSet<Geary.Email> to_remove = new Gee.HashSet<Geary.Email>(email_id_hash, email_id_equal);
                 
-                foreach(Geary.EmailIdentifier id in new_results)
-                    if (!search_results.contains(id))
-                        to_add.add(id);
+                foreach(Geary.Email email in new_results)
+                    if (!search_results.contains(email))
+                        to_add.add(email);
                 
-                foreach(Geary.EmailIdentifier id in search_results)
-                    if (!new_results.contains(id))
-                        to_remove.add(id);
+                foreach(Geary.Email email in search_results)
+                    if (!new_results.contains(email))
+                        to_remove.add(email);
                 
                 search_results.remove_all(to_remove);
                 search_results.add_all(to_add);
@@ -108,7 +114,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
                 }
                 
                 if (to_remove.size > 0) {
-                    notify_email_removed(to_remove);
+                    notify_email_removed(email_collection_to_ids(to_remove));
                     reason |= Geary.Folder.CountChangeReason.REMOVED;
                 }
                 
@@ -152,8 +158,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         Error? error = null;
         try {
             int i = 0;
-            foreach(Geary.EmailIdentifier id in search_results) {
-                results.add(yield fetch_email_async(id, required_fields, flags, cancellable));
+            foreach(Geary.Email email in search_results) {
+                results.add(yield fetch_email_async(email.id, required_fields, flags, cancellable));
                 
                 i++;
                 if (count > 0 && i >= count)
@@ -215,8 +221,26 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
             exclude_folders.add(folder.get_path());
     }
     
-    private static int compare_id_desc(Geary.EmailIdentifier a, Geary.EmailIdentifier b) {
-        return a.desc_compare_to(b);
+    private uint email_id_hash(Geary.Email a) {
+        return a.id.hash();
+    }
+    
+    private bool email_id_equal(Geary.Email a, Geary.Email b) {
+        return a.id.equal_to(b.id);
+    }
+    
+    // Destroys existing results.
+    private void clear_search_results() {
+        search_results = new Gee.TreeSet<Geary.Email>(Geary.Email.compare_date_received_ascending);
+    }
+    
+    // Converts a collection of emails to a set of email ids.
+    private Gee.Set<Geary.EmailIdentifier> email_collection_to_ids(Gee.Collection<Geary.Email> collection) {
+        Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
+        foreach(Geary.Email email in collection)
+            ids.add(email.id);
+        
+        return ids;
     }
 }
 

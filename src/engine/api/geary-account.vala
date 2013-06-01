@@ -184,8 +184,11 @@ public interface Geary.Account : BaseObject {
     /**
      * Performs a search with the given keyword string.  Optionally, a list of folders not to search
      * can be passed as well as a list of email identifiers to restrict the search to only those messages.
+     * Returns a list of email objects with the requested fields.  If partial_ok is false,  mail
+     * will only be returned if it includes all requested fields.
      */
-    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords, 
+    public abstract async Gee.Collection<Geary.Email>? local_search_async(string keywords,
+        Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     

@@ -585,10 +585,11 @@ private class Geary.ImapDB.Account : BaseObject {
         return prepared_query.str.strip();
     }
     
-    public async Gee.Collection<Geary.EmailIdentifier>? search_async(string prepared_query,
+    public async Gee.Collection<Geary.Email>? search_async(string prepared_query,
+        Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
-        Gee.Collection<Geary.EmailIdentifier> search_results = new Gee.HashSet<Geary.EmailIdentifier>();
+        Gee.Collection<Geary.Email> search_results = new Gee.HashSet<Geary.Email>();
         
         // TODO: support blacklist, search_ids
         
@@ -599,7 +600,11 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 id = result.int64_at(0);
-                search_results.add(new Geary.ImapDB.EmailIdentifier(id));
+                MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
+                    cx, id, requested_fields, cancellable);
+                    
+                if (partial_ok || row.fields.fulfills(requested_fields))
+                    search_results.add(row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id)));
                 
                 result.next(cancellable);
             }
