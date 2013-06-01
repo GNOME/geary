@@ -75,6 +75,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     private bool mask_entry_selected_signal = false;
     private weak EntryWrapper? selected_wrapper = null;
     private Gtk.Menu? default_context_menu = null;
+    private bool is_expander_arrow_action_enabled = true;
     private bool is_internal_drag_in_progress = false;
     private Sidebar.Entry? internal_drag_source_entry = null;
     private Gtk.TreeRowReference? old_path_ref = null;
@@ -883,8 +884,20 @@ public class Sidebar.Tree : Gtk.TreeView {
         return true;
     }
     
+    public override bool button_release_event(Gdk.EventButton event) {
+        // see bug 4985
+        if (event.button == 1 && event.type == Gdk.EventType.BUTTON_RELEASE) {
+            if (!is_expander_arrow_action_enabled) {
+                is_expander_arrow_action_enabled = true;
+                return false;
+            }
+        }
+        return base.button_release_event(event);
+    }
+    
     public override bool button_press_event(Gdk.EventButton event) {
         Gtk.TreePath? path = get_path_from_event(event);
+        EntryWrapper? wrapper = get_wrapper_at_path(path);
 
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             // single right click
@@ -892,17 +905,23 @@ public class Sidebar.Tree : Gtk.TreeView {
                 popup_context_menu(path, event);
             else
                 popup_default_context_menu(event);
-        } else if (event.button == 1 && event.type == Gdk.EventType.2BUTTON_PRESS) {
-            // double left click
-            if (path != null) {
-                toggle_branch_expansion(path, false);
-                
-                if (can_rename_path(path))
-                    return false;
-            }
         } else if (event.button == 1 && event.type == Gdk.EventType.BUTTON_PRESS) {
+            if (path == null) {
+                old_path_ref = null;
+                return base.button_press_event(event);
+            }
+            
+            // Enable single click to toggle tree entries (bug 4985)
+            is_expander_arrow_action_enabled = true;
+            if (wrapper.entry is Sidebar.ExpandableEntry
+                || wrapper.entry is Sidebar.InternalDropTargetEntry) {
+                // all labels are InternalDropTargetEntries
+                is_expander_arrow_action_enabled = false;
+                toggle_branch_expansion(path, false);
+            }
+            
             // Is this a click on an already-highlighted tree item?
-            if (path != null && (old_path_ref != null) && (old_path_ref.get_path() != null)
+            if ((old_path_ref != null) && (old_path_ref.get_path() != null)
                 && (old_path_ref.get_path().compare(path) == 0)) {
                 // yes, don't allow single-click editing, but 
                 // pass the event on for dragging.
@@ -912,13 +931,13 @@ public class Sidebar.Tree : Gtk.TreeView {
             
             // Got click on different tree item, make sure it is editable
             // if it needs to be.
-            if (path != null && get_wrapper_at_path(path).entry is Sidebar.RenameableEntry &&
-                ((Sidebar.RenameableEntry) get_wrapper_at_path(path).entry).is_user_renameable()) {
+            if (wrapper.entry is Sidebar.RenameableEntry &&
+                ((Sidebar.RenameableEntry) wrapper.entry).is_user_renameable()) {
                 text_renderer.editable = true;
             }
             
             // Remember what tree item is highlighted for next time.
-            old_path_ref = (path != null) ?  new Gtk.TreeRowReference(store, path) : null;
+            old_path_ref = new Gtk.TreeRowReference(store, path);
         }
 
         return base.button_press_event(event);
