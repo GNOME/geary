@@ -66,6 +66,7 @@ public class GearyController {
     private Geary.ConversationMonitor? current_conversations = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
+    private Cancellable cancellable_search = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
     private int busy_count = 0;
@@ -783,6 +784,13 @@ public class GearyController {
         old_cancellable.cancel();
     }
     
+    private void cancel_search() {
+        Cancellable old_cancellable = cancellable_search;
+        cancellable_search = new Cancellable();
+        
+        old_cancellable.cancel();
+    }
+    
     // We need to include the second parameter, or valac doesn't recognize the function as matching
     // YorbaApplication.exiting's signature.
     private bool on_application_exiting(YorbaApplication sender, bool panicked) {
@@ -1469,11 +1477,13 @@ public class GearyController {
         if (current_account == null)
             return;
         
+        cancel_search(); // Stop any search in progress.
+        
         Geary.SearchFolder? folder;
         try {
             folder = (Geary.SearchFolder) current_account.get_special_folder(
                 Geary.SpecialFolderType.SEARCH);
-            folder.set_search_keywords(search_text);
+            folder.set_search_keywords(search_text, cancellable_search);
         } catch (Error e) {
             debug("Could not get search folder: %s", e.message);
             

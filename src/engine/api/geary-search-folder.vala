@@ -57,9 +57,9 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     /**
      * Sets the keyword string for this search.
      */
-    public void set_search_keywords(string keywords) {
+    public void set_search_keywords(string keywords, Cancellable? cancellable = null) {
         search_keywords_changed(keywords);
-        set_search_keywords_async.begin(keywords, on_set_search_keywords_complete);
+        set_search_keywords_async.begin(keywords, cancellable, on_set_search_keywords_complete);
     }
     
     private void on_set_search_keywords_complete(Object? source, AsyncResult result) {
@@ -70,12 +70,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         }
     }
     
-    private async void set_search_keywords_async(string keywords) throws Error {
+    private async void set_search_keywords_async(string keywords, Cancellable? cancellable = null) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
         Error? error = null;
         try {
             Gee.Collection<Geary.Email>? _new_results = yield account.local_search_async(
-                keywords, Geary.Email.Field.PROPERTIES, false, exclude_folders, null, null);
+                keywords, Geary.Email.Field.PROPERTIES, false, exclude_folders, null, cancellable);
             
             if (_new_results == null) {
                 // No results?  Remove all existing results and return early.  If there are no
