@@ -335,7 +335,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGING_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGOUT, Geary.State.nop),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_recv_status),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_recv_disconnecting_status),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_ERROR, on_disconnected),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_ERROR, on_send_error),
@@ -347,7 +347,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGED_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.LOGOUT, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_recv_status),
+            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_recv_disconnecting_status),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_COMPLETION, on_dropped_response),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_ERROR, on_disconnected),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.SEND_ERROR, on_send_error),
@@ -961,6 +961,21 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     private uint on_recv_status(uint state, uint event, void *user, Object? object) {
+        StatusResponse status_response = (StatusResponse) object;
+        
+        switch (status_response.status) {
+            case Status.BYE:
+                // this is REMOTE_ERROR because it occurs in a state where the client didn't
+                // expect to go away (see on_recv_disconnecting_status)
+                fsm.do_post_transition(() => { disconnected(DisconnectReason.REMOTE_ERROR); });
+                
+                return State.DISCONNECTED;
+        }
+        
+        return state;
+    }
+    
+    private uint on_recv_disconnecting_status(uint state, uint event, void *user, Object? object) {
         StatusResponse status_response = (StatusResponse) object;
         
         switch (status_response.status) {
