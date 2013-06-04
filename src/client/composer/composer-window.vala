@@ -164,7 +164,6 @@ public class ComposerWindow : Gtk.Window {
     private bool action_flag = false;
     private bool is_attachment_overlay_visible = false;
     private Gee.List<Geary.Attachment>? pending_attachments = null;
-    private string? current_folder = null;
     
     private WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
@@ -687,32 +686,16 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_add_attachment_button_clicked() {
-        bool finished = true;
+        AttachmentDialog dialog = null;
         do {
-            Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
-                _("Choose a file"), this, Gtk.FileChooserAction.OPEN,
-                Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                _("_Attach"), Gtk.ResponseType.ACCEPT);
-            if (!Geary.String.is_empty(current_folder))
-                dialog.set_current_folder(current_folder);
-            dialog.set_local_only(false);
-            dialog.set_select_multiple(true);
-            
-            if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-                current_folder = dialog.get_current_folder();
-                
-                foreach (File file in dialog.get_files()) {
-                    if (!add_attachment(file)) {
-                        finished = false;
-                        break;
-                    }
-                }
-            } else {
-                finished = true;
-            }
-            
-            dialog.destroy();
-        } while (!finished);
+            // Transient parent of AttachmentDialog is this ComposerWindow
+            // But this generates the following warning:
+            // Attempting to add a widget with type AttachmentDialog to a
+            // ComposerWindow, but as a GtkBin subclass a ComposerWindow can
+            // only contain one widget at a time;
+            // it already contains a widget of type GtkBox
+            dialog = new AttachmentDialog(this);
+        } while (!dialog.is_finished(add_attachment));
     }
     
     private void on_pending_attachments_button_clicked() {

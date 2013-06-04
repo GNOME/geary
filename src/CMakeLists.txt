@@ -235,6 +235,7 @@ client/composer/email-entry.vala
 client/composer/webview-edit-fixer.vala
 
 client/dialogs/alert-dialog.vala
+client/dialogs/attachment-dialog.vala
 client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
 
