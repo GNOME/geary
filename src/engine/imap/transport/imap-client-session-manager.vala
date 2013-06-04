@@ -301,22 +301,29 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     // It's possible this will be called more than once on the same session, especially in the case of a
     // remote close on reserved ClientSession, so this code is forgiving.
     private async void force_disconnect_async(ClientSession session, bool do_disconnect) {
+        int token;
         try {
-            int token = yield sessions_mutex.claim_async();
+            token = yield sessions_mutex.claim_async();
+        } catch (Error err) {
+            debug("Unable to acquire sessions mutex: %s", err.message);
             
-            locked_remove_session(session);
-            
-            if (do_disconnect) {
-                try {
-                    yield session.disconnect_async();
-                } catch (Error err) {
-                    // ignored
-                }
+            return;
+        }
+        
+        locked_remove_session(session);
+        
+        if (do_disconnect) {
+            try {
+                yield session.disconnect_async();
+            } catch (Error err) {
+                // ignored
             }
-            
+        }
+        
+        try {
             sessions_mutex.release(ref token);
         } catch (Error err) {
-            debug("Error attempting to lock sessions table: %s", err.message);
+            debug("Unable to release sessions mutex: %s", err.message);
         }
         
         adjust_session_pool.begin();

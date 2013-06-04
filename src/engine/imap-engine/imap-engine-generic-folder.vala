@@ -741,7 +741,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     private void on_remote_removed(int pos, int total) {
-        debug("on_remote_expunge: position=%d total=%d", pos, total);
+        debug("on_remote_removed: position=%d total=%d", pos, total);
         replay_queue.schedule(new ReplayRemoval(this, pos, total));
     }
     
