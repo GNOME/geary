@@ -6,11 +6,9 @@
     <property name="can_focus">False</property>
     <child>
       <object class="GtkToolButton" id="GearyNewMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes" comments="Button for creating a new email message">Start new conversation (Ctrl+N, N)</property>
-        <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">New Message</property>
         <property name="use_underline">True</property>
@@ -18,15 +16,13 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkSeparatorToolItem" id="separator">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -34,11 +30,9 @@
     </child>
     <child>
       <object class="GtkToolButton" id="GearyReplyToMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Reply to last message in conversation (Ctrl+R, R)</property>
-        <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Reply</property>
         <property name="use_underline">True</property>
@@ -46,16 +40,14 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkToolButton" id="GearyReplyAllMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)</property>
-        <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Reply All</property>
         <property name="use_underline">True</property>
@@ -63,16 +55,14 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkToolButton" id="GearyForwardMessage">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Send copy of last message in conversation (Ctrl+L, F)</property>
-        <property name="use_action_appearance">False</property>
         <property name="is_important">True</property>
         <property name="label" translatable="yes">Forward</property>
         <property name="use_underline">True</property>
@@ -80,15 +70,13 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkSeparatorToolItem" id="separator2">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -96,52 +84,44 @@
     </child>
     <child>
       <object class="GtkToggleToolButton" id="GearyMarkAsMenuButton">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Mark</property>
         <property name="icon_name">edit-mark</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkToggleToolButton" id="GearyCopyMenuButton">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Label as</property>
         <property name="icon_name">tag-new</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkToggleToolButton" id="GearyMoveMenuButton">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Move to</property>
         <property name="icon_name">mail-move</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkSeparatorToolItem" id="separator3">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -156,15 +136,13 @@
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkToolItem" id="filler">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
         <child>
           <placeholder/>
         </child>
@@ -177,12 +155,13 @@
       <object class="GtkToolItem" id="search_container">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
         <child>
           <object class="GtkEntry" id="search_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
             <property name="invisible_char">•</property>
-            <property name="width_chars">35</property>
             <property name="primary_icon_name">edit-find-symbolic</property>
             <property name="secondary_icon_name">edit-clear-symbolic</property>
             <property name="primary_icon_sensitive">False</property>
@@ -190,23 +169,21 @@
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
+        <property name="expand">True</property>
         <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
       <object class="GtkToggleToolButton" id="GearyGearMenuButton">
-        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Menu</property>
         <property name="use_underline">True</property>
         <property name="icon_name">application-menu</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="homogeneous">False</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
   </object>

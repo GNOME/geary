@@ -33,6 +33,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         this.remote.login_failed.connect(on_login_failed);
         this.remote.email_sent.connect(on_email_sent);
         
+        search_upgrade_monitor = local.search_index_monitor;
+        
         if (inbox_path == null) {
             inbox_path = new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
                 Imap.Folder.CASE_SENSITIVE);

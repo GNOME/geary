@@ -77,6 +77,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     public Configuration config { get; private set; }
     
+    /**
+     * Fired when the current account in the UI has changed.
+     * TODO: This signal really belongs in the controller.  See #7032 for the refactoring ticket.
+     */
+    public signal void current_account_changed(Geary.Account? account);
+    
     private static GearyApplication _instance = null;
     
     private GearyController? controller = null;
@@ -483,6 +489,10 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
         
         return 0; // on error
+    }
+    
+    public void notify_current_account_changed(Geary.Account? account) {
+        current_account_changed(account);
     }
 }
 

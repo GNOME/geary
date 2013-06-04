@@ -26,6 +26,8 @@ private class Geary.ImapDB.Account : BaseObject {
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
     private Cancellable? background_cancellable = null;
     public ImapEngine.ContactStore contact_store { get; private set; }
+    public IntervalProgressMonitor search_index_monitor { get; private set; 
+        default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     
     public Account(Geary.AccountInformation account_information) {
         this.account_information = account_information;
@@ -698,15 +700,35 @@ private class Geary.ImapDB.Account : BaseObject {
             debug("Deleted %d duplicate folders", count);
     }
     
+    public async int get_email_count_async(Cancellable? cancellable) throws Error {
+        check_open();
+        
+        int count = 0;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            count = do_get_email_count(cx, cancellable);
+            
+            return Db.TransactionOutcome.SUCCESS;
+        }, cancellable);
+        
+        return count;
+    }
+    
     private async void populate_search_table_async(Cancellable? cancellable) {
-        // TODO: send processing signal upwards.
         debug("Populating search table");
         try {
+            int total = yield get_email_count_async(cancellable);
+            search_index_monitor.set_interval(0, total);
+            search_index_monitor.notify_start();
+            
             while (!yield populate_search_table_batch_async(100, cancellable))
                 ;
         } catch (Error e) {
             debug("Error populating search table: %s", e.message);
         }
+        
+        if (search_index_monitor.is_in_progress)
+            search_index_monitor.notify_finish();
+        
         debug("Done populating search table");
     }
     
@@ -749,6 +771,8 @@ private class Geary.ImapDB.Account : BaseObject {
                 }
                 
                 ++count;
+                search_index_monitor.increment();
+                
                 result.next(cancellable);
             }
             
@@ -924,6 +948,18 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         stmt.exec(cancellable);
+    }
+    
+    private int do_get_email_count(Db.Connection cx, Cancellable? cancellable)
+        throws Error {
+        Db.Statement stmt = cx.prepare(
+            "SELECT COUNT(*) FROM MessageTable");
+        
+        Db.Result results = stmt.exec(cancellable);
+        if (results.finished)
+            return 0;
+        
+        return results.int_at(0);
     }
 }
 

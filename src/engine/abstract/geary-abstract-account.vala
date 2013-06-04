@@ -6,6 +6,7 @@
 
 public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public Geary.AccountInformation information { get; protected set; }
+    public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     
     private string name;
     

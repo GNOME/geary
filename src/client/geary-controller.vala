@@ -327,8 +327,6 @@ public class GearyController {
         account.email_sent.connect(on_sent);
         
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
-        
-        update_search_placeholder_text();
     }
     
     public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {
@@ -373,8 +371,6 @@ public class GearyController {
         } catch (Error e) {
             message("Error enumerating accounts: %s", e.message);
         }
-        
-        update_search_placeholder_text();
     }
     
     // Returns the number of open accounts.
@@ -398,7 +394,6 @@ public class GearyController {
     // by other utility methods
     private void update_ui() {
         update_tooltips();
-        update_search_placeholder_text();
         Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
         if (current_folder is Geary.FolderSupport.Archive) {
             delete_message.label = ARCHIVE_MESSAGE_LABEL;
@@ -473,7 +468,10 @@ public class GearyController {
             debug("switching to %s", folder.to_string());
         
         current_folder = folder;
-        current_account = folder.account;
+        if (current_account != folder.account) {
+            current_account = folder.account;
+            GearyApplication.instance.notify_current_account_changed(current_account);
+        }
         
         if (!(current_folder is Geary.SearchFolder))
             previous_non_search_folder = current_folder;
@@ -1491,12 +1489,6 @@ public class GearyController {
         }
         
         main_window.folder_list.set_search(folder);
-    }
-    
-    private void update_search_placeholder_text() {
-        main_window.main_toolbar.set_search_placeholder_text(
-            current_account == null || GearyApplication.instance.get_num_accounts() == 1 ?
-             _("Search") : _("Search %s account").printf(current_account.information.nickname));
     }
 }
 

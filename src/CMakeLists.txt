@@ -45,6 +45,7 @@ engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
 engine/api/geary-named-flag.vala
 engine/api/geary-named-flags.vala
+engine/api/geary-progress-monitor.vala
 engine/api/geary-search-folder.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
@@ -267,6 +268,7 @@ client/ui/folder-menu.vala
 client/ui/icon-factory.vala
 client/ui/main-toolbar.vala
 client/ui/main-window.vala
+client/ui/monitored-progress-bar.vala
 
 client/util/util-date.vala
 client/util/util-email.vala

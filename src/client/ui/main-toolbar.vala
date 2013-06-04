@@ -7,6 +7,7 @@
 // Draws the main toolbar.
 public class MainToolbar : Gtk.Box {
     private const string ICON_CLEAR_NAME = "edit-clear-symbolic";
+    private const string DEFAULT_SEARCH_TEXT = _("Search");
     
     private Gtk.Toolbar toolbar;
     public FolderMenu copy_folder_menu { get; private set; }
@@ -14,13 +15,18 @@ public class MainToolbar : Gtk.Box {
     
     private GtkUtil.ToggleToolbarDropdown mark_menu_dropdown;
     private GtkUtil.ToggleToolbarDropdown app_menu_dropdown;
+    private Gtk.ToolItem search_container;
     private Gtk.Entry search_entry;
+    private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
+    private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
     
     public signal void search_text_changed(string search_text);
     
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
-
+        
+        GearyApplication.instance.current_account_changed.connect(on_account_changed);
+        
         Gtk.Builder builder = GearyApplication.instance.create_builder("toolbar.glade");
         toolbar = builder.get_object("toolbar") as Gtk.Toolbar;
 
@@ -61,6 +67,7 @@ public class MainToolbar : Gtk.Box {
         mark_menu_dropdown.attach(mark_menu_button);
         
         // Search bar.
+        search_container = (Gtk.ToolItem) builder.get_object("search_container");
         search_entry = (Gtk.Entry) builder.get_object("search_entry");
         search_entry.changed.connect(on_search_entry_changed);
         search_entry.icon_release.connect(on_search_entry_icon_release);
@@ -84,7 +91,11 @@ public class MainToolbar : Gtk.Box {
         
         toolbar.get_style_context().add_class("primary-toolbar");
         
+        search_upgrade_progress_bar.show_text = true;
+        search_upgrade_progress_bar.margin_top = search_upgrade_progress_bar.margin_bottom = 3;
+        
         add(toolbar);
+        set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
     }
     
     private Gtk.ToolButton set_toolbutton_action(Gtk.Builder builder, string action) {
@@ -118,6 +129,42 @@ public class MainToolbar : Gtk.Box {
             search_entry.text = "";
         
         return false;
+    }
+    
+    private void on_search_upgrade_start() {
+        search_container.remove(search_container.get_child());
+        search_container.add(search_upgrade_progress_bar);
+        search_upgrade_progress_bar.show();
+    }
+    
+    private void on_search_upgrade_finished() {
+        search_container.remove(search_container.get_child());
+        search_container.add(search_entry);
+    }
+    
+    private void on_account_changed(Geary.Account? account) {
+        on_search_upgrade_finished(); // Reset search box.
+        
+        if (search_upgrade_progress_monitor != null) {
+            search_upgrade_progress_monitor.start.disconnect(on_search_upgrade_start);
+            search_upgrade_progress_monitor.finish.disconnect(on_search_upgrade_finished);
+            search_upgrade_progress_monitor = null;
+        }
+        
+        if (account != null) {
+            search_upgrade_progress_monitor = account.search_upgrade_monitor;
+            search_upgrade_progress_bar.set_progress_monitor(search_upgrade_progress_monitor);
+            
+            search_upgrade_progress_monitor.start.connect(on_search_upgrade_start);
+            search_upgrade_progress_monitor.finish.connect(on_search_upgrade_finished);
+            if (search_upgrade_progress_monitor.is_in_progress)
+                on_search_upgrade_start(); // Remove search box, we're already in progress.
+        }
+        
+        search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
+        
+        set_search_placeholder_text(account == null || GearyApplication.instance.get_num_accounts() == 1 ?
+             DEFAULT_SEARCH_TEXT : _("Search %s account").printf(account.information.nickname));
     }
 }
 
