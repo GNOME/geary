@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public abstract class Geary.Imap.Parameter : BaseObject, Serializable {
+public abstract class Geary.Imap.Parameter : BaseObject {
     public abstract async void serialize(Serializer ser) throws Error;
     
     /**
