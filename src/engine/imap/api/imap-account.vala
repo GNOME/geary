@@ -66,17 +66,13 @@ private class Geary.Imap.Account : BaseObject {
         
         int token = yield account_session_mutex.claim_async(cancellable);
         
-        if (account_session != null) {
-            account_session.list.disconnect(on_list_data);
-            account_session.status.disconnect(on_status_data);
-            
+        ClientSession? dropped = drop_session();
+        if (dropped != null) {
             try {
-                yield session_mgr.release_session_async(account_session, cancellable);
+                yield session_mgr.release_session_async(dropped, cancellable);
             } catch (Error err) {
                 // ignored
             }
-            
-            account_session = null;
         }
         
         try {
@@ -107,6 +103,7 @@ private class Geary.Imap.Account : BaseObject {
                 
                 account_session.list.connect(on_list_data);
                 account_session.status.connect(on_status_data);
+                account_session.disconnected.connect(on_disconnected);
             } catch (Error claim_err) {
                 err = claim_err;
             }
@@ -120,6 +117,22 @@ private class Geary.Imap.Account : BaseObject {
         return account_session;
     }
     
+    // Can be called locked or unlocked, but only unlocked if you know what you're doing -- i.e.
+    // not yielding.
+    private ClientSession? drop_session() {
+        if (account_session == null)
+            return null;
+        
+        account_session.list.disconnect(on_list_data);
+        account_session.status.disconnect(on_status_data);
+        account_session.disconnected.disconnect(on_disconnected);
+        
+        ClientSession dropped = account_session;
+        account_session = null;
+        
+        return dropped;
+    }
+    
     private void on_list_data(MailboxInformation mailbox_info) {
         if (list_collector != null)
             list_collector.add(mailbox_info);
@@ -128,6 +141,10 @@ private class Geary.Imap.Account : BaseObject {
     private void on_status_data(StatusData status_data) {
         if (status_collector != null)
             status_collector.add(status_data);
+    }
+    
+    private void on_disconnected() {
+        drop_session();
     }
     
     public async bool folder_exists_async(FolderPath path, Cancellable? cancellable) throws Error {

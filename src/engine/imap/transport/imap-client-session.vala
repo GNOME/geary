@@ -264,7 +264,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.NOAUTH, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.NOAUTH, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.NOAUTH, Event.RECV_STATUS, on_recv_status),
-            new Geary.State.Mapping(State.NOAUTH, Event.RECV_COMPLETION, Geary.State.nop),
+            new Geary.State.Mapping(State.NOAUTH, Event.RECV_COMPLETION, on_recv_status),
             new Geary.State.Mapping(State.NOAUTH, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.NOAUTH, Event.RECV_ERROR, on_recv_error),
             
@@ -288,7 +288,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.AUTHORIZED, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.AUTHORIZED, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_STATUS, on_recv_status),
-            new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_COMPLETION, Geary.State.nop),
+            new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_COMPLETION, on_recv_status),
             new Geary.State.Mapping(State.AUTHORIZED, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.AUTHORIZED, Event.RECV_ERROR, on_recv_error),
             
@@ -312,7 +312,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.SELECTED, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.SELECTED, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTED, Event.RECV_STATUS, on_recv_status),
-            new Geary.State.Mapping(State.SELECTED, Event.RECV_COMPLETION, Geary.State.nop),
+            new Geary.State.Mapping(State.SELECTED, Event.RECV_COMPLETION, on_recv_status),
             new Geary.State.Mapping(State.SELECTED, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.SELECTED, Event.RECV_ERROR, on_recv_error),
             
@@ -434,6 +434,35 @@ public class Geary.Imap.ClientSession : BaseObject {
             default:
                 assert_not_reached();
         }
+    }
+    
+    // Some commands require waiting for a completion response in order to shift the state machine's
+    // State; this allocates such a wait, returning false if another command is outstanding also
+    // waiting for one to finish
+    private bool reserve_state_change_cmd(MachineParams params, uint state, uint event) {
+        if (state_change_cmd != null || params.cmd == null) {
+            params.proceed = false;
+            params.err = new ImapError.NOT_SUPPORTED("Cannot perform operation %s while session is %s",
+                fsm.get_event_string(event), fsm.get_state_string(state));
+            
+            return false;
+        }
+        
+        state_change_cmd = params.cmd;
+        params.proceed = true;
+        
+        return true;
+    }
+    
+    // This is the complement to reserve_state_change_cmd(), returning true if the response represents
+    // the pending state change Command (and clearing it if it is)
+    private bool validate_state_change_cmd(ServerResponse response) {
+        if (state_change_cmd == null || !state_change_cmd.tag.equal_to(response.tag))
+            return false;
+        
+        state_change_cmd = null;
+        
+        return true;
     }
     
     //
@@ -718,10 +747,9 @@ public class Geary.Imap.ClientSession : BaseObject {
         MachineParams params = (MachineParams) object;
         
         assert(params.cmd is LoginCommand);
-        state_change_cmd = params.cmd;
+        if (!reserve_state_change_cmd(params, state, event))
+            return state;
         
-        params.proceed = true;
-         
         return State.AUTHORIZING;
     }
     
@@ -736,13 +764,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_login_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
         
-        // only interested in LoginCommand returning
-        assert(state_change_cmd != null);
-        if (!completion_response.tag.equal_to(state_change_cmd.tag))
+        if (!validate_state_change_cmd(completion_response))
             return state;
-        
-        // release for next state change command
-        state_change_cmd = null;
         
         // Remember: only you can prevent firing signals inside state transition handlers
         switch (completion_response.status) {
@@ -752,6 +775,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.AUTHORIZED;
             
             default:
+                debug("[%s] Unable to LOGIN: %s", to_string(), completion_response.to_string());
                 fsm.do_post_transition(() => { login_failed(); });
                 
                 return State.NOAUTH;
@@ -964,12 +988,20 @@ public class Geary.Imap.ClientSession : BaseObject {
         StatusResponse status_response = (StatusResponse) object;
         
         switch (status_response.status) {
+            case Status.OK:
+                // some good-feeling text that doesn't need to be handled when in this state
+            break;
+            
             case Status.BYE:
                 // this is REMOTE_ERROR because it occurs in a state where the client didn't
                 // expect to go away (see on_recv_disconnecting_status)
                 fsm.do_post_transition(() => { disconnected(DisconnectReason.REMOTE_ERROR); });
                 
                 return State.DISCONNECTED;
+            
+            default:
+                debug("[%s] Received error from server: %s", to_string(), status_response.to_string());
+            break;
         }
         
         return state;
@@ -1043,8 +1075,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_select(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
-        assert(params.cmd != null);
-        state_change_cmd = params.cmd;
+        if (!reserve_state_change_cmd(params, state, event))
+            return state;
         
         // Allow IDLE *before* issuing SELECT/EXAMINE because there's no guarantee another command
         // will be issued any time soon, which is necessary for the IDLE command to be tacked on
@@ -1052,8 +1084,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         // SELECT/EXAMINE command is too late unless another command is sent (set_idle_when_quiet()
         // performs no I/O).
         cx.set_idle_when_quiet(allow_idle && supports_idle());
-        
-        params.proceed = true;
         
         return State.SELECTING;
     }
@@ -1069,8 +1099,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_selecting_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
         
-        assert(state_change_cmd != null);
-        if (!completion_response.tag.equal_to(state_change_cmd.tag))
+        if (!validate_state_change_cmd(completion_response))
             return state;
         
         switch (completion_response.status) {
@@ -1079,6 +1108,8 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.SELECTED;
             
             default:
+                debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
+                
                 // turn off IDLE, not entering SELECTED/EXAMINED state
                 cx.set_idle_when_quiet(false);
                 
@@ -1120,12 +1151,11 @@ public class Geary.Imap.ClientSession : BaseObject {
         MachineParams params = (MachineParams) object;
         
         assert(params.cmd is CloseCommand);
-        state_change_cmd = params.cmd;
+        if (!reserve_state_change_cmd(params, state, event))
+            return state;
         
         // returning to AUTHORIZED state, turn off IDLE
         cx.set_idle_when_quiet(false);
-        
-        params.proceed = true;
         
         return State.CLOSING_MAILBOX;
     }
@@ -1133,11 +1163,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_closing_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
         
-        assert(state_change_cmd != null);
-        if (!completion_response.tag.equal_to(state_change_cmd.tag))
+        if (!validate_state_change_cmd(completion_response))
             return state;
-        
-        state_change_cmd = null;
         
         switch (completion_response.status) {
             case Status.OK:
@@ -1146,6 +1173,8 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.AUTHORIZED;
             
             default:
+                debug("[%s] Unable to CLOSE: %s", to_string(), completion_response.to_string());
+                
                 return State.SELECTED;
         }
     }
@@ -1170,10 +1199,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_logout(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
-        assert(params.cmd != null);
-        state_change_cmd = params.cmd;
-        
-        params.proceed = true;
+        assert(params.cmd is LogoutCommand);
+        if (!reserve_state_change_cmd(params, state, event))
+            return state;
         
         return State.LOGGING_OUT;
     }
@@ -1181,11 +1209,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_logging_out_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
         
-        assert(state_change_cmd != null);
-        if (!completion_response.tag.equal_to(state_change_cmd.tag))
+        if (!validate_state_change_cmd(completion_response))
             return state;
-        
-        state_change_cmd = null;
         
         fsm.do_post_transition(() => { logged_out(); });
         
@@ -1560,7 +1585,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (cx == null) {
             return "%s %s".printf(imap_endpoint.to_string(), fsm.get_state_string(fsm.get_state()));
         } else {
-            return "%s/%s %s".printf(cx.cx_id.to_string(), imap_endpoint.to_string(),
+            return "%04X/%s %s".printf(cx.cx_id, imap_endpoint.to_string(),
                 fsm.get_state_string(fsm.get_state()));
         }
     }

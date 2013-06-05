@@ -127,9 +127,9 @@ private class Geary.Imap.Folder : BaseObject {
             yield session_mgr.release_session_async(session, cancellable);
         } catch (Error err) {
             debug("Unable to release session %s: %s", session.to_string(), err.message);
-        } finally {
-            session = null;
         }
+        
+        session = null;
     }
     
     private void on_exists(int total) {

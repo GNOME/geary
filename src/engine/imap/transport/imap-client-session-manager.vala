@@ -256,16 +256,20 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         MailboxSpecifier? mailbox;
         ClientSession.Context context = session.get_context(out mailbox);
         
+        bool unreserve = false;
         switch (context) {
             case ClientSession.Context.AUTHORIZED:
-                // keep as-is
+                // keep as-is, but remove from the reserved list
+                unreserve = true;
             break;
             
             case ClientSession.Context.UNAUTHORIZED:
-            case ClientSession.Context.UNCONNECTED:
                 yield force_disconnect_async(session, true);
-                
-                break;
+            break;
+            
+            case ClientSession.Context.UNCONNECTED:
+                yield force_disconnect_async(session, false);
+            break;
             
             case ClientSession.Context.IN_PROGRESS:
             case ClientSession.Context.EXAMINED:
@@ -278,8 +282,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                         imap_error.message);
                 }
                 
-                // if not in authorized state now, drop it
-                if (session.get_context(out mailbox) != ClientSession.Context.AUTHORIZED)
+                // if not in authorized state now, drop it, otherwise remove from reserved list
+                if (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)
+                    unreserve = true;
+                else
                     yield force_disconnect_async(session, true);
             break;
             
@@ -287,15 +293,20 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 assert_not_reached();
         }
         
-        int token = yield sessions_mutex.claim_async(cancellable);
-        
-        if (!sessions.contains(session))
-            debug("Attempting to release a session not owned by client session manager: %s", session.to_string());
-        
-        if (!reserved_sessions.remove(session))
-            debug("Attempting to release an unreserved session: %s", session.to_string());
-        
-        sessions_mutex.release(ref token);
+        if (unreserve) {
+            try {
+                // don't respect Cancellable because this *must* happen; don't want this lingering 
+                // on the reserved list forever
+                int token = yield sessions_mutex.claim_async();
+                
+                bool removed = reserved_sessions.remove(session);
+                assert(removed);
+                
+                sessions_mutex.release(ref token);
+            } catch (Error err) {
+                message("Unable to remove %s from reserved list: %s", session.to_string(), err.message);
+            }
+        }
     }
     
     // It's possible this will be called more than once on the same session, especially in the case of a
