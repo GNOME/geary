@@ -345,6 +345,7 @@ public class ComposerWindow : Gtk.Window {
         editor.undo.connect(update_actions);
         editor.redo.connect(update_actions);
         editor.selection_changed.connect(update_actions);
+        editor.key_press_event.connect(on_key_press);
         
         // only do this after setting body_html
         editor.load_string(HTML_BODY, "text/html", "UTF8", "");
@@ -1266,6 +1267,49 @@ public class ComposerWindow : Gtk.Window {
         context_menu.show_all();
         
         update_actions();
+        
+        return false;
+    }
+    
+    private bool on_key_press(Gdk.EventKey event) {
+        if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0)
+            return false;
+        
+        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+            if (event.keyval == Gdk.Key.Tab) {
+                child_focus(Gtk.DirectionType.TAB_FORWARD);
+                return true;
+            }
+            if (event.keyval == Gdk.Key.ISO_Left_Tab) {
+                child_focus(Gtk.DirectionType.TAB_BACKWARD);
+                return true;
+            }
+            return false;
+        }
+        
+        WebKit.DOM.Document document = editor.get_dom_document();
+        if (event.keyval == Gdk.Key.Tab) {
+            document.exec_command("inserthtml", false,
+                "<span style='white-space: pre-wrap'>\t</span>");
+            return true;
+        }
+        
+        if (event.keyval == Gdk.Key.ISO_Left_Tab) {
+            // If there is no selection and the character before the cursor is tab, delete it.
+            WebKit.DOM.DOMSelection selection = document.get_default_view().get_selection();
+            if (selection.is_collapsed) {
+                selection.modify("extend", "backward", "character");
+                try {
+                    if (selection.get_range_at(0).get_text() == "\t")
+                        selection.delete_from_document();
+                    else
+                        selection.collapse_to_end();
+                } catch (Error error) {
+                    debug("Error handling Left Tab: %s", error.message);
+                }
+            }
+            return true;
+        }
         
         return false;
     }
