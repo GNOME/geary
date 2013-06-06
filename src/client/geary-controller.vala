@@ -295,7 +295,7 @@ public class GearyController {
     private Gtk.ToggleActionEntry[] create_toggle_actions() {
         Gtk.ToggleActionEntry[] entries = new Gtk.ToggleActionEntry[0];
         
-        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, null, "F10",
+        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, _("Menu"), "F10",
             null, null, false };
         entries += gear_menu;
         
