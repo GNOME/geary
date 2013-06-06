@@ -113,7 +113,8 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     private void on_detach() {
-        on_focus_out();
+        if (composer.editor.has_focus)
+            on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
         remove(composer);
