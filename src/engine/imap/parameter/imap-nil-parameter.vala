@@ -40,8 +40,8 @@ public class Geary.Imap.NilParameter : Geary.Imap.Parameter {
      * means that the mailbox is actually named NIL and does not represent an empty string or empty
      * list.
      */
-    public static bool is_nil(string str) {
-        return String.ascii_equali(VALUE, str);
+    public static bool is_nil(StringParameter stringp) {
+        return String.ascii_equali(VALUE, stringp.value);
     }
     
     /**

@@ -120,7 +120,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         // Because Deserializer doesn't produce NilParameters, check manually if this Parameter
         // can legally be NIL according to IMAP grammer.
         StringParameter? stringp = param as StringParameter;
-        if (stringp != null && NilParameter.is_nil(stringp.value))
+        if (stringp != null && NilParameter.is_nil(stringp))
             return null;
         
         if (!param.get_type().is_a(type)) {
@@ -199,7 +199,6 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      * @see get_as_string
      * @throws ImapError.TYPE_ERROR if literal is longer than MAX_STRING_LITERAL_LENGTH.
      */
-     
     public StringParameter? get_as_nullable_string(int index) throws ImapError {
         Parameter? param = get_as_nullable(index, typeof(Parameter));
         if (param == null)

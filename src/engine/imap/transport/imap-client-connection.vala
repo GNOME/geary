@@ -390,8 +390,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         // not buffering the Serializer because it buffers using a MemoryOutputStream and not
         // buffering the Deserializer because it uses a DataInputStream, which is buffered
-        ser = new Serializer(ios.output_stream);
-        des = new Deserializer(ios.input_stream);
+        ser = new Serializer(to_string(), ios.output_stream);
+        des = new Deserializer(to_string(), ios.input_stream);
         
         des.parameters_ready.connect(on_parameters_ready);
         des.bytes_received.connect(on_bytes_received);

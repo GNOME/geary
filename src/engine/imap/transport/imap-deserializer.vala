@@ -68,6 +68,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
+    private string identifier;
     private ConverterInputStream cins;
     private DataInputStream dins;
     private Geary.State.Machine fsm;
@@ -129,7 +130,9 @@ public class Geary.Imap.Deserializer : BaseObject {
      */
     public signal void deserialize_failure();
     
-    public Deserializer(InputStream ins) {
+    public Deserializer(string identifier, InputStream ins) {
+        this.identifier = identifier;
+        
         cins = new ConverterInputStream(ins, midstream);
         cins.set_close_base_stream(false);
         dins = new DataInputStream(cins);
@@ -278,10 +281,14 @@ public class Geary.Imap.Deserializer : BaseObject {
             size_t bytes_read;
             string? line = dins.read_line_async.end(result, out bytes_read);
             if (line == null) {
+                Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line EOS", to_string());
+                
                 push_eos();
                 
                 return;
             }
+            
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line %s", to_string(), line);
             
             bytes_received(bytes_read);
             
@@ -301,10 +308,14 @@ public class Geary.Imap.Deserializer : BaseObject {
             // happens when actually pulling data
             size_t bytes_read = dins.read_async.end(result);
             if (bytes_read == 0 && literal_length_remaining > 0) {
+                Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block EOS", to_string());
+                
                 push_eos();
                 
                 return;
             }
+            
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block %lub", to_string(), bytes_read);
             
             bytes_received(bytes_read);
             
@@ -485,6 +496,10 @@ public class Geary.Imap.Deserializer : BaseObject {
         parameters_ready(ready);
         
         return State.TAG;
+    }
+    
+    public string to_string() {
+        return "des:%s/%s".printf(identifier, fsm.get_state_string(fsm.get_state()));
     }
     
     //
@@ -790,10 +805,6 @@ public class Geary.Imap.Deserializer : BaseObject {
         warning("Bad event %s at state %s", event_to_string(event), state_to_string(state));
         
         return State.FAILED;
-    }
-    
-    public string to_string() {
-        return "%s/%s".printf(fsm.to_string(), get_mode().to_string());
     }
 }
 
