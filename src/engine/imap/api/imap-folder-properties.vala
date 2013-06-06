@@ -127,10 +127,14 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
             has_children = Trillian.UNKNOWN;
         
         // has_children implies supports_children
-        if (has_children != Trillian.UNKNOWN)
+        if (has_children != Trillian.UNKNOWN) {
             supports_children = has_children;
-        else
+        } else {
+            // !supports_children implies !has_children
             supports_children = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_INFERIORS));
+            if (supports_children.is_impossible())
+                has_children = Trillian.FALSE;
+        }
         
         is_openable = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_SELECT));
     }
