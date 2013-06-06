@@ -12,12 +12,12 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     private Gee.Queue<G> queue;
     private Nonblocking.Spinlock spinlock = new Nonblocking.Spinlock();
     
-    public Mailbox(CompareFunc<G>? comparator = null) {
+    public Mailbox(owned CompareDataFunc<G>? comparator = null) {
         // can't use ternary here, Vala bug
         if (comparator == null)
             queue = new Gee.LinkedList<G>();
         else
-            queue = new Gee.PriorityQueue<G>();
+            queue = new Gee.PriorityQueue<G>((owned) comparator);
     }
     
     public bool send(G msg) {

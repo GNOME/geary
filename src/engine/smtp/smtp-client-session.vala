@@ -46,29 +46,72 @@ public class Geary.Smtp.ClientSession {
         notify_connected(greeting);
         
         // authenticate if credentials supplied (they should be if ESMTP is supported)
-        if (creds != null) {
-            // detect which authentication is available, using PLAIN if none found as a hail mary
-            Authenticator? authenticator = null;
-            if (cx.capabilities != null) {
-                if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_PLAIN))
-                    authenticator = new PlainAuthenticator(creds);
-                else if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_LOGIN))
-                    authenticator = new LoginAuthenticator(creds);
-            }
-            
-            if (authenticator == null)
-                authenticator = new PlainAuthenticator(creds);
-            
-            debug("[%s] Using %s authenticator", to_string(), authenticator.to_string());
-            
-            Response response = yield cx.authenticate_async(authenticator, cancellable);
-            if (!response.code.is_success_completed())
-                throw new SmtpError.AUTHENTICATION_FAILED("Unable to authenticate with %s", to_string());
-            
-            notify_authenticated(authenticator);
-        }
+        if (creds != null)
+            notify_authenticated(yield attempt_authentication_async(creds, cancellable));
         
         return greeting;
+    }
+    
+    // Returns authenticator used for successful authentication, otherwise throws exception
+    private async Authenticator attempt_authentication_async(Credentials creds, Cancellable? cancellable)
+        throws Error {
+        // build an authentication style ordering to attempt, going from reported capabilities to standard
+        // fallbacks, while avoiding repetition ... this is necessary due to server bugs that report
+        // an authentication type is available but actually isn't, see
+        // http://redmine.yorba.org/issues/6091
+        // and
+        // http://comments.gmane.org/gmane.mail.pine.general/4004
+        Gee.ArrayList<string> auth_order = new Gee.ArrayList<string>(String.stri_equal);
+        
+        // start with advertised authentication styles, in order of our preference (PLAIN
+        // only requires one round-trip)
+        if (cx.capabilities != null) {
+            if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_PLAIN))
+                auth_order.add(Capabilities.AUTH_PLAIN);
+            
+            if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_LOGIN))
+                auth_order.add(Capabilities.AUTH_LOGIN);
+        }
+        
+        // fallback on commonly-implemented styles, again in our order of preference
+        if (!auth_order.contains(Capabilities.AUTH_PLAIN))
+            auth_order.add(Capabilities.AUTH_PLAIN);
+        
+        if (!auth_order.contains(Capabilities.AUTH_LOGIN))
+            auth_order.add(Capabilities.AUTH_LOGIN);
+        
+        // in current situation, should always have one authentication type to attempt
+        assert(auth_order.size > 0);
+        
+        // go through the list, in order, until one style is accepted
+        do {
+            Authenticator? authenticator;
+            switch (auth_order.remove_at(0)) {
+                case Capabilities.AUTH_PLAIN:
+                    authenticator = new PlainAuthenticator(creds);
+                break;
+                
+                case Capabilities.AUTH_LOGIN:
+                    authenticator = new LoginAuthenticator(creds);
+                break;
+                
+                default:
+                    assert_not_reached();
+            }
+            
+            debug("[%s] Attempting %s authenticator", to_string(), authenticator.to_string());
+            
+            Response response = yield cx.authenticate_async(authenticator, cancellable);
+            if (response.code.is_success_completed())
+                return authenticator;
+            
+            // syntax errors indicate the command was unknown or unimplemented, i.e. unavailable
+            // authentication type, so try again, otherwise treat as authentication failure
+            if (!response.code.is_syntax_error())
+                break;
+        } while (auth_order.size > 0);
+        
+        throw new SmtpError.AUTHENTICATION_FAILED("Unable to authenticate with %s", to_string());
     }
     
     public async Response? logout_async(Cancellable? cancellable = null) throws Error {

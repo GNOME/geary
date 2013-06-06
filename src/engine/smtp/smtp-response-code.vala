@@ -36,7 +36,7 @@ public class Geary.Smtp.ResponseCode {
     public ResponseCode(string str) throws SmtpError {
         // these two checks are sufficient to make sure the Status is valid, but not the Condition
         if (str.length != STRLEN)
-            throw new SmtpError.PARSE_ERROR("Reply code too long: %s", str);
+            throw new SmtpError.PARSE_ERROR("Reply code wrong length: %s (%d)", str, str.length);
         
         int as_int = int.parse(str);
         if (as_int < MIN || as_int > MAX)
@@ -109,7 +109,20 @@ public class Geary.Smtp.ResponseCode {
     public bool is_denied() {
         return str == DENIED_CODE;
     }
-
+    
+    /**
+     * Returns true for [@link Status.PERMANENT_FAILURE} {@link Condition.SYNTAX} errors.
+     *
+     * Generally this means the command (or sequence of commands) was unknown or unimplemented,
+     * i.e. "500 Syntax error", "502 Command not implemented", etc.
+     *
+     * See [[http://tools.ietf.org/html/rfc5321#section-4.2.2]]
+     */
+    public bool is_syntax_error() {
+        return get_status() == ResponseCode.Status.PERMANENT_FAILURE
+            && get_condition() == ResponseCode.Condition.SYNTAX;
+    }
+    
     public string serialize() {
         return str;
     }
