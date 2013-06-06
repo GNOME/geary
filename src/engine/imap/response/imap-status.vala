@@ -66,11 +66,7 @@ public enum Geary.Imap.Status {
     }
     
     public Parameter to_parameter() {
-        return new StringParameter(to_string());
-    }
-    
-    public void serialize(Serializer ser) throws Error {
-        ser.push_string(to_string());
+        return new AtomParameter(to_string());
     }
 }
 

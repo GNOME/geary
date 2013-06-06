@@ -20,11 +20,11 @@ public class Geary.Imap.StoreCommand : Command {
         base (message_set.is_uid ? UID_NAME : NAME);
         
         add(message_set.to_parameter());
-        add(new StringParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));
+        add(new AtomParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));
         
         ListParameter list = new ListParameter(this);
         foreach(MessageFlag flag in flag_list)
-            list.add(new StringParameter(flag.value));
+            list.add(new AtomParameter(flag.value));
         
         add(list);
     }

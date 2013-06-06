@@ -171,7 +171,7 @@ public enum Geary.Imap.ResponseCodeType {
     }
     
     public StringParameter to_parameter() {
-        return new StringParameter(to_string());
+        return new AtomParameter(to_string());
     }
 }
 

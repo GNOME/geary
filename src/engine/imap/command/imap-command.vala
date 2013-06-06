@@ -72,24 +72,14 @@ public class Geary.Imap.Command : RootParameters {
     
     private void stock_params() {
         add(tag);
-        add(new UnquotedStringParameter(name));
+        add(new AtomParameter(name));
         if (args != null) {
             foreach (string arg in args) {
-                switch (DataFormat.is_quoting_required(arg)) {
-                    case DataFormat.Quoting.REQUIRED:
-                        add(new QuotedStringParameter(arg));
-                    break;
-                    
-                    case DataFormat.Quoting.OPTIONAL:
-                        add(new UnquotedStringParameter(arg));
-                    break;
-                    
-                    case DataFormat.Quoting.UNALLOWED:
-                        error("Command continuations currently unsupported");
-                    
-                    default:
-                        assert_not_reached();
-                }
+                StringParameter? stringp = StringParameter.get_best_for(arg);
+                if (stringp != null)
+                    add(stringp);
+                else
+                    error("Command continuations currently unsupported");
             }
         }
     }

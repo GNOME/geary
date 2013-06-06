@@ -236,7 +236,7 @@ public class Geary.Imap.MessageSet : BaseObject {
         // look for open-ended span
         if (span_count == 2)
             builder.append_printf(",%s", last_seq_num.to_string());
-        else
+        else if (last_seq_num != start_of_span)
             builder.append_printf(":%s", last_seq_num.to_string());
         
         return builder.str;

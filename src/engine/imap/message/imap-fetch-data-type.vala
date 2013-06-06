@@ -132,7 +132,7 @@ public enum Geary.Imap.FetchDataType {
      * Turns this {@link FetchDataType} into a {@link StringParameter} for transmission.
      */
     public StringParameter to_parameter() {
-        return new StringParameter(to_string());
+        return new AtomParameter(to_string());
     }
     
     /**

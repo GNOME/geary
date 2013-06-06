@@ -152,9 +152,7 @@ public class Geary.Imap.FetchBodyDataType : BaseObject {
     }
     
     public Parameter to_request_parameter() {
-        // Because of the kooky formatting of the Body[section]<partial> fetch field, use an
-        // unquoted string and format it ourselves.
-        return new UnquotedStringParameter(serialize_request());
+        return new AtomParameter(serialize_request());
     }
     
     private string serialize_part_number() {

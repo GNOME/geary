@@ -68,7 +68,7 @@ public enum Geary.Imap.StatusDataType {
     }
     
     public StringParameter to_parameter() {
-        return new StringParameter(to_string());
+        return new AtomParameter(to_string());
     }
     
     public static StatusDataType from_parameter(StringParameter stringp) throws ImapError {

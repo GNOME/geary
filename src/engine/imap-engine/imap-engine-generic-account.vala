@@ -290,8 +290,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (remote_children != null) {
             foreach (Imap.Folder remote_child in remote_children) {
                 result.set(remote_child.path, remote_child);
-                Collection.map_set_all<FolderPath, Imap.Folder>(result,
-                    yield enumerate_remote_folders_async(remote_child.path, cancellable));
+                if (remote_child.properties.has_children.is_possible()) {
+                    Collection.map_set_all<FolderPath, Imap.Folder>(result,
+                        yield enumerate_remote_folders_async(remote_child.path, cancellable));
+                }
             }
         }
         

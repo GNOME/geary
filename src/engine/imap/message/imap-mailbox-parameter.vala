@@ -42,5 +42,19 @@ public class Geary.Imap.MailboxParameter : StringParameter {
     public string decode() {
         return imap_utf7_to_utf8(value);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public override async void serialize(Serializer ser) throws Error {
+        serialize_string(ser);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public override string to_string() {
+        return value;
+    }
 }
 

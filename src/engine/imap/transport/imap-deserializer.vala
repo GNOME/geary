@@ -86,10 +86,10 @@ public class Geary.Imap.Deserializer : BaseObject {
     /**
      * Fired when a complete set of IMAP {@link Parameter}s have been received.
      *
-     * Note that {@link RootParameters} may contain {@link StringParameter}s, {@link ListParameter}s,
-     * {@link NilParameter}s, and so on.  One special Parameter decoded by Deserializer is
-     * {@link ResponseCode}, which is structured internally as a ListParameter subclass for
-     * convenience when decoding and can be deduced at the syntax level.
+     * Note that {@link RootParameters} may contain {@link QuotedStringParameter}s,
+     * {@link UnquotedStringParameter}s, {@link ResponseCode}, and {@link ListParameter}s.
+     * Deserializer does not produce any other kind of Parameter due to its inability to deduce
+     * them from syntax alone.  ResponseCode, however, can be.
      */
     public signal void parameters_ready(RootParameters root);
     
@@ -414,14 +414,14 @@ public class Geary.Imap.Deserializer : BaseObject {
         current_string.append_unichar(ch);
     }
     
-    private void save_string_parameter() {
+    private void save_string_parameter(bool quoted) {
         if (is_current_string_empty())
             return;
         
-        if (NilParameter.is_nil(current_string.str))
-            save_parameter(NilParameter.instance);
+        if (quoted)
+            save_parameter(new QuotedStringParameter(current_string.str));
         else
-            save_parameter(new StringParameter(current_string.str));
+            save_parameter(new UnquotedStringParameter(current_string.str));
         
         current_string = null;
     }
@@ -536,7 +536,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         // space indicates end of tag
         if (ch == ' ') {
-            save_string_parameter();
+            save_string_parameter(false);
             
             return State.START_PARAM;
         }
@@ -575,15 +575,15 @@ public class Geary.Imap.Deserializer : BaseObject {
             return State.SYSTEM_FLAG;
         }
         
-        // space indicates end-of-atom, end-of-tag, or end-of-system-flag
+        // space indicates end-of-atom
         if (ch == ' ') {
-            save_string_parameter();
+            save_string_parameter(false);
             
             return State.START_PARAM;
         }
         
         if (ch == get_current_context_terminator()) {
-            save_string_parameter();
+            save_string_parameter(false);
             
             return pop();
         }
@@ -607,7 +607,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         // space indicates end-of-system-flag
         if (ch == ' ') {
-            save_string_parameter();
+            save_string_parameter(false);
             
             return State.START_PARAM;
         }
@@ -615,7 +615,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         // close-parens/close-square-bracket after a system flag indicates end-of-list/end-of-response
         // code
         if (ch == terminator) {
-            save_string_parameter();
+            save_string_parameter(false);
             
             return pop();
         }
@@ -631,7 +631,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     
     private uint on_atom_eol(uint state, uint event, void *user) {
         // clean up final atom
-        save_string_parameter();
+        save_string_parameter(false);
         
         return flush_params();
     }
@@ -649,7 +649,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         // DQUOTE ends quoted string and return to parsing atoms
         if (ch == '\"') {
-            save_string_parameter();
+            save_string_parameter(true);
             
             return State.START_PARAM;
         }
@@ -706,7 +706,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         if (ch != ' ')
             return on_partial_body_atom_char(State.PARTIAL_BODY_ATOM, event, user);
         
-        save_string_parameter();
+        save_string_parameter(false);
         
         return State.START_PARAM;
     }

@@ -822,7 +822,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         try {
             Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), "done");
-            ser.push_string("done");
+            ser.push_unquoted_string("done");
             ser.push_eol();
         } catch (Error err) {
             debug("[%s] Unable to close IDLE: %s", to_string(), err.message);
