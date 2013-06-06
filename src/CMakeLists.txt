@@ -93,9 +93,12 @@ engine/imap/message/imap-data-format.vala
 engine/imap/message/imap-fetch-body-data-type.vala
 engine/imap/message/imap-fetch-data-type.vala
 engine/imap/message/imap-flag.vala
+engine/imap/message/imap-flags.vala
 engine/imap/message/imap-mailbox-specifier.vala
 engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
+engine/imap/message/imap-message-flag.vala
+engine/imap/message/imap-message-flags.vala
 engine/imap/message/imap-sequence-number.vala
 engine/imap/message/imap-status-data-type.vala
 engine/imap/message/imap-tag.vala
@@ -115,6 +118,8 @@ engine/imap/response/imap-continuation-response.vala
 engine/imap/response/imap-fetch-body-data-identifier.vala
 engine/imap/response/imap-fetch-data-decoder.vala
 engine/imap/response/imap-fetched-data.vala
+engine/imap/response/imap-mailbox-attribute.vala
+engine/imap/response/imap-mailbox-attributes.vala
 engine/imap/response/imap-mailbox-information.vala
 engine/imap/response/imap-response-code.vala
 engine/imap/response/imap-response-code-type.vala
