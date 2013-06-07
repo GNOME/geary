@@ -456,7 +456,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     // This is the complement to reserve_state_change_cmd(), returning true if the response represents
     // the pending state change Command (and clearing it if it is)
-    private bool validate_state_change_cmd(ServerResponse response) {
+    private bool validate_state_change_cmd(ServerResponse response, out Command? cmd = null) {
+        cmd = state_change_cmd;
+        
         if (state_change_cmd == null || !state_change_cmd.tag.equal_to(response.tag))
             return false;
         
@@ -1036,8 +1038,6 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public async StatusResponse select_examine_async(MailboxSpecifier mailbox, bool is_select,
         Cancellable? cancellable) throws Error {
-        MailboxSpecifier? old_mailbox = current_mailbox;
-        
         // Ternary troubles
         Command cmd;
         if (is_select)
@@ -1053,23 +1053,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         assert(params.proceed);
         
-        StatusResponse completion_response = yield command_transaction_async(cmd, cancellable);
-        
-        // TODO: change this state inside state machine
-        if (completion_response.status == Status.OK) {
-            current_mailbox = mailbox;
-            current_mailbox_readonly = !is_select;
-        }
-        
-        // TODO: We may want to move this signal into the async completion handler rather than
-        // fire it here because async callbacks are scheduled on the event loop and their order
-        // of execution is not guaranteed
-        //
-        // TODO: fire this post-transition
-        assert(current_mailbox != null);
-        current_mailbox_changed(old_mailbox, current_mailbox, current_mailbox_readonly);
-        
-        return completion_response;
+        return yield command_transaction_async(cmd, cancellable);
     }
     
     private uint on_select(uint state, uint event, void *user, Object? object) {
@@ -1099,12 +1083,32 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint on_selecting_recv_completion(uint state, uint event, void *user, Object? object) {
         StatusResponse completion_response = (StatusResponse) object;
         
-        if (!validate_state_change_cmd(completion_response))
+        Command? cmd;
+        if (!validate_state_change_cmd(completion_response, out cmd))
             return state;
+        
+        // get the mailbox from the command
+        MailboxSpecifier? mailbox = null;
+        if (cmd is SelectCommand) {
+            mailbox = ((SelectCommand) cmd).mailbox;
+            current_mailbox_readonly = false;
+        } else if (cmd is ExamineCommand) {
+            mailbox = ((ExamineCommand) cmd).mailbox;
+            current_mailbox_readonly = true;
+        }
+        
+        // should only get to this point if cmd was SELECT or EXAMINE
+        assert(mailbox != null);
         
         switch (completion_response.status) {
             case Status.OK:
-                // mailbox is SELECTED/EXAMINED
+                // mailbox is SELECTED/EXAMINED, report change after completion of transition
+                MailboxSpecifier? old_mailbox = current_mailbox;
+                current_mailbox = mailbox;
+                
+                if (old_mailbox != current_mailbox)
+                    fsm.do_post_transition(notify_select_completed, null, old_mailbox);
+                
                 return State.SELECTED;
             
             default:
@@ -1117,13 +1121,15 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
     }
     
+    private void notify_select_completed(void *user, Object? object) {
+        current_mailbox_changed((MailboxSpecifier) object, current_mailbox, current_mailbox_readonly);
+    }
+    
     //
     // close mailbox
     //
     
     public async StatusResponse close_mailbox_async(Cancellable? cancellable = null) throws Error {
-        MailboxSpecifier? old_mailbox = current_mailbox;
-        
         CloseCommand cmd = new CloseCommand();
         
         MachineParams params = new MachineParams(cmd);
@@ -1132,19 +1138,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (params.err != null)
             throw params.err;
         
-        StatusResponse completion_response = yield command_transaction_async(cmd, cancellable);
-        
-        // possible for a close_mailbox to occur when already closed, but don't fire signal in
-        // that case
-        //
-        // TODO: See note in select_examine_async() for why it might be better to fire this signal
-        // in the async completion handler rather than here
-        //
-        // TODO: Do this inside FSM
-        if (completion_response.status == Status.OK && old_mailbox != null)
-            current_mailbox_changed(old_mailbox, null, false);
-        
-        return completion_response;
+        return yield command_transaction_async(cmd, cancellable);
     }
     
     private uint on_close_mailbox(uint state, uint event, void *user, Object? object) {
@@ -1168,7 +1162,11 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         switch (completion_response.status) {
             case Status.OK:
+                MailboxSpecifier? old_mailbox = current_mailbox;
                 current_mailbox = null;
+                
+                if (old_mailbox != null)
+                    fsm.do_post_transition(notify_mailbox_closed, null, old_mailbox);
                 
                 return State.AUTHORIZED;
             
@@ -1177,6 +1175,10 @@ public class Geary.Imap.ClientSession : BaseObject {
                 
                 return State.SELECTED;
         }
+    }
+    
+    private void notify_mailbox_closed(void *user, Object? object) {
+        current_mailbox_changed((MailboxSpecifier) object, null, false);
     }
     
     //

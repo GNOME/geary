@@ -13,8 +13,12 @@
 public class Geary.Imap.SelectCommand : Command {
     public const string NAME = "select";
     
+    public MailboxSpecifier mailbox { get; private set; }
+    
     public SelectCommand(MailboxSpecifier mailbox) {
         base (NAME);
+        
+        this.mailbox = mailbox;
         
         add(mailbox.to_parameter());
     }

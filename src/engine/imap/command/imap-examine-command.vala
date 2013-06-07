@@ -13,8 +13,12 @@
 public class Geary.Imap.ExamineCommand : Command {
     public const string NAME = "examine";
     
+    public MailboxSpecifier mailbox { get; private set; }
+    
     public ExamineCommand(MailboxSpecifier mailbox) {
         base (NAME);
+        
+        this.mailbox = mailbox;
         
         add(mailbox.to_parameter());
     }
