@@ -75,7 +75,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     private bool mask_entry_selected_signal = false;
     private weak EntryWrapper? selected_wrapper = null;
     private Gtk.Menu? default_context_menu = null;
-    private bool is_expander_arrow_action_enabled = true;
+    private bool expander_called_manually = false;
     private bool is_internal_drag_in_progress = false;
     private Sidebar.Entry? internal_drag_source_entry = null;
     private Gtk.TreeRowReference? old_path_ref = null;
@@ -123,6 +123,9 @@ public class Sidebar.Tree : Gtk.TreeView {
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.BROWSE);
         selection.set_select_function(on_selection);
+        
+        test_expand_row.connect(on_toggle_row);
+        test_collapse_row.connect(on_toggle_row);
         
         // It Would Be Nice if the target entries and actions were gleaned by querying each 
         // Sidebar.Entry as it was added, but that's a tad too complicated for our needs
@@ -320,6 +323,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
     
     public void toggle_branch_expansion(Gtk.TreePath path, bool expand_all) {
+        expander_called_manually = true;
         if (is_row_expanded(path))
             collapse_row(path);
         else
@@ -327,6 +331,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
     
     public bool expand_to_entry(Sidebar.Entry entry) {
+        expander_called_manually = true;
         EntryWrapper? wrapper = get_wrapper(entry);
         if (wrapper == null)
             return false;
@@ -337,6 +342,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
     
     public void expand_to_first_child(Sidebar.Entry entry) {
+        expander_called_manually = true;
         EntryWrapper? wrapper = get_wrapper(entry);
         if (wrapper == null)
             return;
@@ -884,21 +890,20 @@ public class Sidebar.Tree : Gtk.TreeView {
         return true;
     }
     
-    public override bool button_release_event(Gdk.EventButton event) {
-        // see bug 4985
-        if (event.button == 1 && event.type == Gdk.EventType.BUTTON_RELEASE) {
-            if (!is_expander_arrow_action_enabled) {
-                is_expander_arrow_action_enabled = true;
-                return false;
-            }
+    public bool on_toggle_row() {
+        if (expander_called_manually) {
+            // This flag is set each time a manual toggle occurs
+            expander_called_manually = false;
+            // Allow branch expansion toggle
+            return false;
         }
-        return base.button_release_event(event);
+        // Prevent branch expansion toggle
+        return true;
     }
     
     public override bool button_press_event(Gdk.EventButton event) {
         Gtk.TreePath? path = get_path_from_event(event);
-        EntryWrapper? wrapper = get_wrapper_at_path(path);
-
+        
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             // single right click
             if (path != null)
@@ -911,12 +916,17 @@ public class Sidebar.Tree : Gtk.TreeView {
                 return base.button_press_event(event);
             }
             
+            EntryWrapper? wrapper = get_wrapper_at_path(path);
+            
+            if (wrapper == null) {
+                old_path_ref = null;
+                return base.button_press_event(event);
+            }
+            
             // Enable single click to toggle tree entries (bug 4985)
-            is_expander_arrow_action_enabled = true;
             if (wrapper.entry is Sidebar.ExpandableEntry
                 || wrapper.entry is Sidebar.InternalDropTargetEntry) {
                 // all labels are InternalDropTargetEntries
-                is_expander_arrow_action_enabled = false;
                 toggle_branch_expansion(path, false);
             }
             
