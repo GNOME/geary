@@ -145,6 +145,138 @@ public class Geary.ConversationMonitor : BaseObject {
         }
     }
     
+    private class ConversationOperationQueue : BaseObject {
+        public bool is_processing { get; private set; default = false; }
+        
+        private Geary.Nonblocking.Mailbox<ConversationOperation> mailbox
+            = new Geary.Nonblocking.Mailbox<ConversationOperation>();
+        private Geary.Nonblocking.Spinlock processing_done_spinlock
+            = new Geary.Nonblocking.Spinlock();
+        
+        public void clear() {
+            mailbox.clear();
+        }
+        
+        public void add(ConversationOperation op) {
+            // There should only ever be one FillWindowOperation at a time.
+            if (op is FillWindowOperation)
+                mailbox.remove_matching((o) => { return (o is FillWindowOperation); });
+            
+            mailbox.send(op);
+        }
+        
+        public async void stop_processing_async(Cancellable? cancellable) {
+            clear();
+            add(new TerminateOperation());
+            
+            try {
+                yield processing_done_spinlock.wait_async(cancellable);
+            } catch (Error e) {
+                debug("Error waiting for conversation operation queue to finish processing: %s",
+                    e.message);
+            }
+        }
+        
+        public async void run_process_async() {
+            is_processing = true;
+            
+            for (;;) {
+                ConversationOperation op;
+                try {
+                    op = yield mailbox.recv_async();
+                } catch (Error e) {
+                    debug("Error processing in conversation operation mailbox: %s", e.message);
+                    break;
+                }
+                if (op is TerminateOperation)
+                    break;
+                
+                yield op.execute_async();
+            }
+            
+            is_processing = false;
+            processing_done_spinlock.blind_notify();
+        }
+    }
+    
+    private abstract class ConversationOperation : BaseObject {
+        protected ConversationMonitor? monitor = null;
+        
+        public ConversationOperation(ConversationMonitor? monitor) {
+            this.monitor = monitor;
+        }
+        
+        public abstract async void execute_async();
+    }
+    
+    private class LocalLoadOperation : ConversationOperation {
+        public LocalLoadOperation(ConversationMonitor monitor) {
+            base(monitor);
+        }
+        
+        public override async void execute_async() {
+            yield monitor.local_load_async();
+        }
+    }
+    
+    private class ReseedOperation : ConversationOperation {
+        private string why;
+        
+        public ReseedOperation(ConversationMonitor monitor, string why) {
+            base(monitor);
+            this.why = why;
+        }
+        
+        public override async void execute_async() {
+             yield monitor.reseed_async(why);
+        }
+    }
+    
+    private class AppendOperation : ConversationOperation {
+        private Gee.Collection<Geary.EmailIdentifier> appended_ids;
+        
+        public AppendOperation(ConversationMonitor monitor, Gee.Collection<Geary.EmailIdentifier> appended_ids) {
+            base(monitor);
+            this.appended_ids = appended_ids;
+        }
+        
+        public override async void execute_async() {
+            yield monitor.append_emails_async(appended_ids);
+        }
+    }
+    
+    private class RemoveOperation : ConversationOperation {
+        private Gee.Collection<Geary.EmailIdentifier> removed_ids;
+        
+        public RemoveOperation(ConversationMonitor monitor, Gee.Collection<Geary.EmailIdentifier> removed_ids) {
+            base(monitor);
+            this.removed_ids = removed_ids;
+        }
+        
+        public override async void execute_async() {
+            monitor.remove_emails(removed_ids);
+        }
+    }
+    
+    private class FillWindowOperation : ConversationOperation {
+        public FillWindowOperation(ConversationMonitor monitor) {
+            base(monitor);
+        }
+        
+        public override async void execute_async() {
+            yield monitor.fill_window_async();
+        }
+    }
+    
+    private class TerminateOperation : ConversationOperation {
+        public TerminateOperation() {
+            base(null);
+        }
+        
+        public override async void execute_async() {
+        }
+    }
+    
     private class LocalSearchOperation : Nonblocking.BatchOperation {
         // IN
         public Geary.Account account;
@@ -177,7 +309,7 @@ public class Geary.ConversationMonitor : BaseObject {
     public int min_window_count { get { return _min_window_count; } 
         set {
             _min_window_count = value;
-            fill_window();
+            operation_queue.add(new FillWindowOperation(this));
         }
     }
     
@@ -194,7 +326,7 @@ public class Geary.ConversationMonitor : BaseObject {
     private uint retry_id = 0;
     private bool reseed_notified = false;
     private int _min_window_count = 0;
-    private bool in_fill_window = false;
+    private ConversationOperationQueue operation_queue = new ConversationOperationQueue();
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
@@ -414,6 +546,23 @@ public class Geary.ConversationMonitor : BaseObject {
         
         cancellable_monitor = cancellable;
         
+        // Double check that the last run of the queue got stopped and that
+        // it's empty.
+        if (operation_queue.is_processing)
+            yield operation_queue.stop_processing_async(cancellable_monitor);
+        operation_queue.clear();
+        
+        bool reseed_now = (folder.get_open_state() != Geary.Folder.OpenState.CLOSED);
+        
+        // Add the necessary initial operations ahead of anything the folder
+        // might add as it opens.
+        operation_queue.add(new LocalLoadOperation(this));
+        // if already opened, go ahead and do a full load now from remote and local; otherwise,
+        // the reseed has to wait until the folder's remote is opened (handled in on_folder_opened)
+        if (reseed_now)
+            operation_queue.add(new ReseedOperation(this, "already opened"));
+        operation_queue.add(new FillWindowOperation(this));
+        
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
         folder.email_flags_changed.connect(on_folder_email_flags_changed);
@@ -421,7 +570,6 @@ public class Geary.ConversationMonitor : BaseObject {
         folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
         
-        bool reseed_now = (folder.get_open_state() != Geary.Folder.OpenState.CLOSED);
         try {
             yield folder.open_async(open_flags, cancellable);
         } catch (Error err) {
@@ -440,17 +588,20 @@ public class Geary.ConversationMonitor : BaseObject {
         notify_monitoring_started();
         reseed_notified = false;
         
-        // pull in all the local email immediamente
-        debug("ConversationMonitor seeding with local email for %s", folder.to_string());
-        yield load_async(-1, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
-        debug("ConversationMonitor seeded for %s", folder.to_string());
-        
-        // if already opened, go ahead and do a full load now from remote and local; otherwise,
-        // the reseed has to wait until the folder's remote is opened (handled in on_folder_opened)
-        if (reseed_now)
-            reseed("already opened");
+        // Process operations in the background.
+        operation_queue.run_process_async.begin();
         
         return true;
+    }
+    
+    private async void local_load_async() {
+        debug("ConversationMonitor seeding with local email for %s", folder.to_string());
+        try {
+            yield load_async(-1, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+        } catch (Error e) {
+            debug("Error loading local messages: %s", e.message);
+        }
+        debug("ConversationMonitor seeded for %s", folder.to_string());
     }
     
     /**
@@ -470,6 +621,8 @@ public class Geary.ConversationMonitor : BaseObject {
         
         if (!is_monitoring)
             return;
+        
+        yield operation_queue.stop_processing_async(cancellable);
         
         // set now to prevent reentrancy during yield or signal
         is_monitoring = false;
@@ -745,17 +898,25 @@ public class Geary.ConversationMonitor : BaseObject {
         }
 
         notify_scan_completed();
-        fill_window();
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
-        debug("%d message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
-            folder.to_string());
-        
-        load_by_sparse_id.begin(appended_ids, Geary.Folder.ListFlags.NONE, null);
+        operation_queue.add(new AppendOperation(this, appended_ids));
     }
     
     private void on_folder_email_removed(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
+        operation_queue.add(new RemoveOperation(this, removed_ids));
+        operation_queue.add(new FillWindowOperation(this));
+    }
+    
+    private async void append_emails_async(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
+        debug("%d message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
+            folder.to_string());
+        
+        yield load_by_sparse_id(appended_ids, Geary.Folder.ListFlags.NONE, null);
+    }
+    
+    private void remove_emails(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
         debug("%d messages(s) removed to %s, trimming/removing conversations...", removed_ids.size,
             folder.to_string());
         
@@ -823,8 +984,6 @@ public class Geary.ConversationMonitor : BaseObject {
         
         foreach (Conversation conversation in removed)
             notify_conversation_removed(conversation);
-        
-        fill_window();
     }
     
     private void on_folder_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
@@ -843,7 +1002,9 @@ public class Geary.ConversationMonitor : BaseObject {
     }
     
     private void on_folder_email_count_changed(int new_count, Geary.Folder.CountChangeReason reason) {
-        fill_window();
+        // Only trap INSERTED here because append/remove is handled above.
+        if ((reason & Geary.Folder.CountChangeReason.INSERTED) != 0)
+            operation_queue.add(new FillWindowOperation(this));
     }
     
     private Geary.EmailIdentifier? get_lowest_email_id() {
@@ -857,40 +1018,22 @@ public class Geary.ConversationMonitor : BaseObject {
         return earliest_id;
     }
     
-    private void reseed(string why) {
+    private async void reseed_async(string why) {
         Geary.EmailIdentifier? earliest_id = get_lowest_email_id();
         
-        if (earliest_id != null) {
-            debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
-                earliest_id.to_string(), folder.to_string());
-            load_by_id_async.begin(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE,
-                cancellable_monitor, on_reseed_by_id_complete);
-        } else {
-            debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
-                min_window_count, folder.to_string());
-            load_async.begin(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor,
-                on_reseed_complete);
-        }
-    }
-    
-    private void on_reseed_complete(GLib.Object? object, GLib.AsyncResult result) {
         try {
-            load_async.end(result);
-        } catch (Error err) {
-            debug("Reseed error: %s", err.message);
-        }
-        
-        if (!reseed_notified) {
-            reseed_notified = true;
-            notify_seed_completed();
-        }
-    }
-    
-    private void on_reseed_by_id_complete(GLib.Object? object, GLib.AsyncResult result) {
-        try {
-            load_by_id_async.end(result);
-        } catch (Error err) {
-            debug("Reseed error: %s", err.message);
+            if (earliest_id != null) {
+                debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
+                    earliest_id.to_string(), folder.to_string());
+                yield load_by_id_async(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE,
+                    cancellable_monitor);
+            } else {
+                debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
+                    min_window_count, folder.to_string());
+                yield load_async(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+            }
+        } catch (Error e) {
+            debug("Reseed error: %s", e.message);
         }
         
         if (!reseed_notified) {
@@ -902,7 +1045,7 @@ public class Geary.ConversationMonitor : BaseObject {
     private void on_folder_opened(Geary.Folder.OpenState state, int count) {
         // once remote is open, reseed with messages from the earliest ID to the latest
         if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
-            reseed(state.to_string());
+            operation_queue.add(new ReseedOperation(this, state.to_string()));
     }
     
     private void on_folder_closed(Folder.CloseReason reason) {
@@ -1003,52 +1146,40 @@ public class Geary.ConversationMonitor : BaseObject {
         return false;
     }
     
-    private void fill_window() {
-        fill_window_async.begin();
-    }
-    
     /**
      * Attempts to load enough conversations to fill min_window_count.
      */
     private async void fill_window_async() {
-        if (in_fill_window || !is_monitoring)
+        if (!is_monitoring || min_window_count <= conversations.size)
             return;
         
-        in_fill_window = true;
-        while (min_window_count > conversations.size) {
-            int initial_message_count = geary_id_map.size;
+        int initial_message_count = geary_id_map.size;
+        
+        Geary.EmailIdentifier? low_id = get_lowest_email_id();
+        if (low_id != null) {
+            // Load at least as many messages as remianing conversations.
+            int num_to_load = min_window_count - conversations.size;
+            if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
+                num_to_load = WINDOW_FILL_MESSAGE_COUNT;
             
-            Geary.EmailIdentifier? low_id = get_lowest_email_id();
-            if (low_id != null) {
-                // Load at least as many messages as remianing conversations.
-                int num_to_load = min_window_count - conversations.size;
-                if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
-                    num_to_load = WINDOW_FILL_MESSAGE_COUNT;
-                
-                try {
-                    yield load_by_id_async(low_id, -num_to_load,
-                        Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
-                } catch(Error e) {
-                    debug("Error filling conversation window: %s", e.message);
-                    
-                    break;
-                }
-            } else {
-                // No existing messages, need to start from scratch.
-                try {
-                    yield load_async(-1, min_window_count, Folder.ListFlags.NONE, cancellable_monitor);
-                } catch(Error e) {
-                    debug("Error filling conversation window: %s", e.message);
-                    
-                    break;
-                }
+            try {
+                yield load_by_id_async(low_id, -num_to_load,
+                    Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
+            } catch(Error e) {
+                debug("Error filling conversation window: %s", e.message);
             }
-            
-            if (geary_id_map.size == initial_message_count)
-                break; // There were no more messages to load.
+        } else {
+            // No existing messages, need to start from scratch.
+            try {
+                yield load_async(-1, min_window_count, Folder.ListFlags.NONE, cancellable_monitor);
+            } catch(Error e) {
+                debug("Error filling conversation window: %s", e.message);
+            }
         }
         
-        in_fill_window = false;
+        // Run again to make sure we're full unless we ran out of messages.
+        if (geary_id_map.size != initial_message_count)
+            operation_queue.add(new FillWindowOperation(this));
     }
     
 }
