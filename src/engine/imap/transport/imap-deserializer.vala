@@ -426,13 +426,17 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private void save_string_parameter(bool quoted) {
-        if (is_current_string_empty())
+        // deal with empty quoted strings
+        if (!quoted && is_current_string_empty())
             return;
         
+        // deal with empty quoted strings
+        string str = (quoted && current_string == null) ? "" : current_string.str;
+        
         if (quoted)
-            save_parameter(new QuotedStringParameter(current_string.str));
+            save_parameter(new QuotedStringParameter(str));
         else
-            save_parameter(new UnquotedStringParameter(current_string.str));
+            save_parameter(new UnquotedStringParameter(str));
         
         current_string = null;
     }

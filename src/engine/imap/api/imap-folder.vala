@@ -620,6 +620,12 @@ private class Geary.Imap.Folder : BaseObject {
         
         // if the header was requested, convert its fields now
         if (partial_header_identifier != null) {
+            if (!fetched_data.body_data_map.has_key(partial_header_identifier)) {
+                debug("[%s] No partial header identifier \"%s\" found:", to_string(),
+                    partial_header_identifier.to_string());
+                foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
+                    debug("[%s] has %s", to_string(), id.to_string());
+            }
             assert(fetched_data.body_data_map.has_key(partial_header_identifier));
             
             RFC822.Header headers = new RFC822.Header(
