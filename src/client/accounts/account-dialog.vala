@@ -112,7 +112,7 @@ public class AccountDialog : Gtk.Dialog {
         // Check for open composer windows.
         bool composer_window_found = false;
         Gee.List<ComposerWindow>? windows = 
-            GearyApplication.instance.get_composer_windows_for_account(account);
+            GearyApplication.instance.controller.get_composer_windows_for_account(account);
         
         if (windows != null) {
             foreach (ComposerWindow cw in windows) {
@@ -139,7 +139,7 @@ public class AccountDialog : Gtk.Dialog {
         assert(account != null); // Should not be able to happen since we checked earlier.
         
         // Remove account, then set the page back to the account list.
-        GearyApplication.instance.remove_account_async.begin(account, null, () => {
+        GearyApplication.instance.controller.remove_account_async.begin(account, null, () => {
             account_list_pane.present(); });
     }
     
@@ -151,7 +151,7 @@ public class AccountDialog : Gtk.Dialog {
         bool validate_connection = true;
         if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy()) {
             Geary.AccountInformation? real_info =
-                GearyApplication.instance.get_real_account_information(info);
+                GearyApplication.instance.controller.get_real_account_information(info);
             if (real_info != null) {
                 validate_connection = !real_info.imap_credentials.equal_to(info.imap_credentials) ||
                     (info.smtp_credentials != null && !real_info.smtp_credentials.equal_to(info.smtp_credentials));
@@ -159,13 +159,13 @@ public class AccountDialog : Gtk.Dialog {
         }
         
         // Validate account.
-        GearyApplication.instance.validate_async.begin(info, validate_connection, null,
+        GearyApplication.instance.controller.validate_async.begin(info, validate_connection, null,
             on_save_add_or_edit_completed);
     }
     
     private void on_save_add_or_edit_completed(Object? source, AsyncResult result) {
         Geary.Engine.ValidationResult validation_result =
-            GearyApplication.instance.validate_async.end(result);
+            GearyApplication.instance.controller.validate_async.end(result);
         
         // If account was successfully added return to the account list. Otherwise, go back to the
         // account add page so the user can try again.

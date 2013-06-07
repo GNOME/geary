@@ -163,7 +163,7 @@ public class MainToolbar : Gtk.Box {
         
         search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
         
-        set_search_placeholder_text(account == null || GearyApplication.instance.get_num_accounts() == 1 ?
+        set_search_placeholder_text(account == null || GearyApplication.instance.controller.get_num_accounts() == 1 ?
              DEFAULT_SEARCH_TEXT : _("Search %s account").printf(account.information.nickname));
     }
 }

@@ -125,7 +125,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     private void update_buttons() {
         edit_action.sensitive = get_selected_account() != null;
         delete_action.sensitive = edit_action.sensitive &&
-            GearyApplication.instance.get_num_accounts() > 1;
+            GearyApplication.instance.controller.get_num_accounts() > 1;
     }
     
     private void on_account_added(Geary.AccountInformation account) {
