@@ -81,8 +81,35 @@ public class GearyController {
     private Geary.Folder? folder_to_select = null;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
+    private LoginDialog? login_dialog = null;
+    
+    /**
+     * Fired when the currently selected account has changed.
+     */
+    public signal void account_selected(Geary.Account? account);
+    
+    /**
+     * Fired when the currently selected folder has changed.
+     */
+    public signal void folder_selected(Geary.Folder? folder);
+    
+    /**
+     * Fired when the currently selected conversation(s) has/have changed.
+     */
+    public signal void conversations_selected(Gee.Set<Geary.Conversation>? conversations,
+        Geary.Folder? current_folder);
     
     public GearyController() {
+    }
+    
+    ~GearyController() {
+        assert(current_account == null);
+    }
+    
+    /**
+     * Starts the controller and brings up Geary.
+     */
+    public async void open_async() {
         // This initializes the IconFactory, important to do before the actions are created (as they
         // refer to some of Geary's custom icons)
         IconFactory.instance.init();
@@ -105,7 +132,20 @@ public class GearyController {
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
         
         enable_message_buttons(false);
-
+        
+        Geary.Engine.instance.account_available.connect(on_account_available);
+        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
+        
+        // Start Geary.
+        try {
+            yield Geary.Engine.instance.open_async(GearyApplication.instance.get_user_data_directory(), 
+                GearyApplication.instance.get_resource_directory(), new SecretMediator());
+            if (Geary.Engine.instance.get_accounts().size == 0)
+                create_account();
+        } catch (Error e) {
+            error("Error opening Geary.Engine instance: %s", e.message);
+        }
+        
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.load_more.connect(on_load_more);
@@ -149,10 +189,16 @@ public class GearyController {
         main_window.show_all();
     }
     
-    ~GearyController() {
-        assert(current_account == null);
+    /**
+     * Stops the controller and shuts down Geary.
+     */
+    public void close() {
+        main_window.destroy();
+        main_window = null;
+        current_account = null;
+        account_selected(null);
     }
-
+    
     private void add_accelerator(string accelerator, string action) {
         GtkUtil.add_accelerator(GearyApplication.instance.ui_manager, GearyApplication.instance.actions,
             accelerator, action);
@@ -307,9 +353,208 @@ public class GearyController {
         GearyApplication.instance.get_action(ACTION_DELETE_MESSAGE).is_important = true;
     }
     
+    private void open_account(Geary.Account account) {
+        account.report_problem.connect(on_report_problem);
+        connect_account_async.begin(account);
+    }
+    
+    private void close_account(Geary.Account account) {
+        account.report_problem.disconnect(on_report_problem);
+        disconnect_account_async.begin(account);
+    }
+    
+    private Geary.Account get_account_instance(Geary.AccountInformation account_information) {
+        try {
+            return Geary.Engine.instance.get_account_instance(account_information);
+        } catch (Error e) {
+            error("Error creating account instance: %s", e.message);
+        }
+    }
+    
+    private void on_account_available(Geary.AccountInformation account_information) {
+        open_account(get_account_instance(account_information));
+    }
+    
+    private void on_account_unavailable(Geary.AccountInformation account_information) {
+        close_account(get_account_instance(account_information));
+    }
+    
+    private void create_account() {
+        Geary.AccountInformation? account_information = request_account_information(null);
+        if (account_information != null)
+            do_validate_until_successful_async.begin(account_information);
+    }
+    
+    private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
+        Cancellable? cancellable = null) {
+        Geary.AccountInformation? result = account_information;
+        do {
+            result = yield validate_or_retry_async(result, cancellable);
+        } while (result != null);
+        
+        if (login_dialog != null)
+            login_dialog.hide();
+    }
+    
+    // Returns null if we are done validating, or the revised account information if we should retry.
+    private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
+        Cancellable? cancellable = null) {
+        Geary.Engine.ValidationResult result = yield validate_async(account_information, true, cancellable);
+        if (result == Geary.Engine.ValidationResult.OK)
+            return null;
+        
+        debug("Validation failed. Prompting user for revised account information");
+        Geary.AccountInformation? new_account_information =
+            request_account_information(account_information, result);
+        
+        // If the user refused to enter account information. There is currently no way that we
+        // could see this--we exit in request_account_information, and the only way that an
+        // exit could be canceled is if there are unsaved composer windows open (which won't
+        // happen before an account is created). However, best to include this check for the
+        // future.
+        if (new_account_information == null)
+            return null;
+        
+        debug("User entered revised account information, retrying validation");
+        return new_account_information;
+    }
+    
+    // Attempts to validate and add an account.  Returns a result code indicating
+    // success or one or more errors.
+    public async Geary.Engine.ValidationResult validate_async(
+        Geary.AccountInformation account_information, bool validate_connection,
+        Cancellable? cancellable = null) {
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
+        try {
+            result = yield Geary.Engine.instance.validate_account_information_async(account_information,
+                validate_connection, cancellable);
+        } catch (Error err) {
+            debug("Error validating account: %s", err.message);
+            GearyApplication.instance.exit(-1); // Fatal error
+            
+            return result;
+        }
+        
+        if (result == Geary.Engine.ValidationResult.OK) {
+            Geary.AccountInformation real_account_information = account_information;
+            if (account_information.is_copy()) {
+                // We have a temporary copy of the account.  Find the "real" acct info object and
+                // copy the new data into it.
+                real_account_information = get_real_account_information(account_information);
+                real_account_information.copy_from(account_information);
+            }
+            
+            real_account_information.store_async.begin(cancellable);
+            do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
+                Geary.CredentialsMediator.ServiceFlag.SMTP, real_account_information);
+            
+            debug("Successfully validated account information");
+        }
+        
+        return result;
+    }
+    
+    // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
+    public Geary.AccountInformation? get_real_account_information(
+        Geary.AccountInformation account_information) {
+        if (account_information.is_copy()) {
+            try {
+                 return Geary.Engine.instance.get_accounts().get(account_information.email);
+            } catch (Error e) {
+                error("Account information is out of sync: %s", e.message);
+            }
+        }
+        
+        return null;
+    }
+    
+    // Prompt the user for a service, real name, username, and password, and try to start Geary.
+    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
+        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
+        Geary.AccountInformation? new_info = old_info;
+        if (login_dialog == null)
+            login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
+        
+        if (new_info != null)
+            login_dialog.set_account_information(new_info, result);
+        
+        login_dialog.present();
+        for (;;) {
+            login_dialog.show_spinner(false);
+            if (login_dialog.run() != Gtk.ResponseType.OK) {
+                debug("User refused to enter account information. Exiting...");
+                GearyApplication.instance.exit(1);
+                
+                return null;
+            }
+            
+            login_dialog.show_spinner(true);
+            new_info = login_dialog.get_account_information();
+            
+            if ((!new_info.default_imap_server_ssl && !new_info.default_imap_server_starttls)
+                || (!new_info.default_smtp_server_ssl && !new_info.default_smtp_server_starttls)) {
+                ConfirmationDialog security_dialog = new ConfirmationDialog(main_window,
+                    _("Your settings are insecure"),
+                    _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),
+                    _("Co_ntinue"));
+                if (security_dialog.run() != Gtk.ResponseType.OK)
+                    continue;
+            }
+            
+            break;
+        }
+        
+        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
+            Geary.CredentialsMediator.ServiceFlag.SMTP, new_info);
+        
+        return new_info;
+    }
+    
+    private async void do_update_stored_passwords_async(Geary.CredentialsMediator.ServiceFlag services,
+        Geary.AccountInformation account_information) {
+        try {
+            yield account_information.update_stored_passwords_async(services);
+        } catch (Error e) {
+            debug("Error updating stored passwords: %s", e.message);
+        }
+    }
+    
+    private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
+        debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
+        
+        switch (problem) {
+            case Geary.Account.Problem.DATABASE_FAILURE:
+            case Geary.Account.Problem.HOST_UNREACHABLE:
+            case Geary.Account.Problem.NETWORK_UNAVAILABLE:
+                // TODO
+            break;
+            
+            case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
+            case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
+                // At this point, we've prompted them for the password and
+                // they've hit cancel, so there's not much for us to do here.
+                close_account(account);
+            break;
+            
+            default:
+                assert_not_reached();
+        }
+    }
+    
+    // Removes an existing account.
+    public async void remove_account_async(Geary.AccountInformation account,
+        Cancellable? cancellable = null) {
+        try {
+            yield get_account_instance(account).close_async(cancellable);
+            yield remove_account_async(account, cancellable);
+        } catch (Error e) {
+            message("Error removing account: %s", e.message);
+        }
+    }
+    
     public async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
-
+        
         try {
             yield account.open_async(cancellable);
         } catch (Error open_err) {
@@ -379,11 +624,6 @@ public class GearyController {
         return num;
     }
     
-    private bool is_viewed_conversation(Geary.Conversation? conversation) {
-        return conversation != null && selected_conversations.size > 0 &&
-            Geary.Collection.get_first<Geary.Conversation>(selected_conversations) == conversation;
-    }
-    
     // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
     // by other utility methods
     private void update_ui() {
@@ -407,7 +647,7 @@ public class GearyController {
         if (folder == null) {
             current_folder = null;
             main_window.conversation_list_store.clear();
-            main_window.conversation_viewer.clear(null, null);
+            folder_selected(null);
             
             return;
         }
@@ -434,6 +674,9 @@ public class GearyController {
     }
     
     private async void do_select_folder(Geary.Folder folder) throws Error {
+        if (folder == current_folder)
+            return;
+        
         set_busy(true);
         
         cancel_folder();
@@ -462,7 +705,12 @@ public class GearyController {
             debug("switching to %s", folder.to_string());
         
         current_folder = folder;
-        current_account = folder.account;
+        if (current_account != folder.account) {
+            current_account = folder.account;
+            account_selected(current_account);
+        }
+        
+        folder_selected(current_folder);
         
         main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
         main_window.conversation_list_store.account_owner_email = current_account.information.email;
@@ -488,9 +736,6 @@ public class GearyController {
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.scan_completed.connect(on_scan_completed);
         current_conversations.seed_completed.connect(on_seed_completed);
-        current_conversations.conversation_appended.connect(on_conversation_appended);
-        current_conversations.conversation_trimmed.connect(on_conversation_trimmed);
-        current_conversations.email_flags_changed.connect(on_email_flags_changed);
         
         main_window.conversation_list_store.set_conversation_monitor(current_conversations);
         main_window.conversation_list_view.set_conversation_monitor(current_conversations);
@@ -551,26 +796,9 @@ public class GearyController {
         main_window.folder_list.select_folder(folder);
     }
     
-    private void on_conversation_appended(Geary.Conversation conversation,
-        Gee.Collection<Geary.Email> email) {
-        if (is_viewed_conversation(conversation)) {
-            do_show_message.begin(conversation.get_emails(Geary.Conversation.Ordering.NONE), cancellable_message,
-                false, on_show_message_completed);
-        }
-    }
-    
-    private void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
-        if (is_viewed_conversation(conversation))
-            main_window.conversation_viewer.remove_message(email);
-    }
-    
     private void on_load_more() {
         debug("on_load_more");
         current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
-    }
-    
-    private void on_email_flags_changed(Geary.Conversation conversation, Geary.Email email) {
-        main_window.conversation_viewer.update_flags(email);
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
@@ -583,17 +811,14 @@ public class GearyController {
     
     private void on_conversations_selected(Gee.Set<Geary.Conversation> selected) {
         cancel_message();
-
+        
         selected_conversations = selected;
+        conversations_selected(selected_conversations, current_folder);
         
         // Disable message buttons until conversation loads.
         enable_message_buttons(false);
         
-        if (selected.size == 1 && current_folder != null) {
-            Geary.Conversation conversation = Geary.Collection.get_first(selected);
-            do_show_message.begin(conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING),
-                cancellable_message, true, on_conversation_selected_completed);
-        } else if (current_folder != null) {
+        if (selected.size > 1 && current_folder != null) {
             main_window.conversation_viewer.show_multiple_selected(selected.size);
             if (selected.size > 1) {
                 enable_multiple_message_buttons();
@@ -601,62 +826,6 @@ public class GearyController {
                 enable_message_buttons(false);
             }
         }
-    }
-    
-    private async void do_show_message(Gee.Collection<Geary.Email> messages, Cancellable? 
-        cancellable = null, bool clear_view = true) throws Error {
-        set_busy(true);
-        
-        // Clear view before we yield, to make sure it happens
-        if (clear_view) {
-            main_window.conversation_viewer.clear(current_folder, current_account.information);
-            main_window.conversation_viewer.scroll_reset();
-        }
-        
-        // Fetch full messages.
-        Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
-        foreach (Geary.Email email in messages) {
-            Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
-                Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
-            
-            Geary.Email full_email;
-            if (email.id.get_folder_path() == null) {
-                full_email = yield current_folder.account.local_fetch_email_async(
-                    email.id, required_fields, cancellable);
-            } else {
-                full_email = yield current_folder.fetch_email_async(email.id,
-                    required_fields, Geary.Folder.ListFlags.NONE, cancellable);
-            }
-            
-            if (cancellable.is_cancelled())
-                throw new IOError.CANCELLED("do_select_message cancelled");
-            
-            messages_to_add.add(full_email);
-        }
-        
-        // Add messages.  conversation_viewer.add_message only adds new messages
-        foreach (Geary.Email email in messages_to_add)
-            main_window.conversation_viewer.add_message(email);
-        
-        main_window.conversation_viewer.unhide_last_email();
-        main_window.conversation_viewer.compress_emails();
-    }
-    
-    private void on_show_message_completed(Object? source, AsyncResult result) {
-        try {
-            do_show_message.end(result);
-            enable_message_buttons(true);
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED))
-                debug("Unable to show message: %s", err.message);
-        }
-        
-        set_busy(false);
-    }
-    
-    private void on_conversation_selected_completed(Object? source, AsyncResult result) {
-        on_show_message_completed(source, result);
-        main_window.conversation_viewer.mark_read();
     }
     
     private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
@@ -1285,7 +1454,7 @@ public class GearyController {
     // one or the other in a folder
     private void on_delete_message() {
         // Prevent deletes of the same conversation from repeating.
-        if (is_viewed_conversation(last_deleted_conversation)) {
+        if (main_window.conversation_viewer.current_conversation ==last_deleted_conversation) {
             debug("not archiving/deleting, viewed conversation is last deleted conversation");
             
             return;

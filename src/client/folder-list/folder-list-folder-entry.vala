@@ -96,7 +96,7 @@ public class FolderList.FolderEntry : Geary.BaseObject, Sidebar.Entry, Sidebar.I
         Gdk.ModifierType mask;
         double[] axes = new double[2];
         context.get_device().get_state(context.get_dest_window(), axes, out mask);
-        MainWindow main_window = GearyApplication.instance.get_main_window() as MainWindow;
+        MainWindow main_window = GearyApplication.instance.controller.main_window;
         if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
             main_window.folder_list.copy_conversation(folder);
         } else {

@@ -67,6 +67,8 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
+    public GearyController controller { get; private set; default = new GearyController(); }
+    
     public Gtk.ActionGroup actions {
         get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
     }
@@ -78,10 +80,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public Configuration config { get; private set; }
     
     private static GearyApplication _instance = null;
-    
-    private GearyController? controller = null;
-    
-    private LoginDialog? login_dialog = null;
     
     private File exec_dir;
     
@@ -107,9 +105,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public override bool exiting(bool panicked) {
-        if (controller.main_window != null)
-            controller.main_window.destroy();
-        
+        controller.close();
         Date.terminate();
         
         return true;
@@ -136,22 +132,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
             exec_dir.get_path(), is_installed().to_string());
         
-        Geary.Engine.instance.account_available.connect(on_account_available);
-        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
-        
         config = new Configuration();
-        controller = new GearyController();
+        yield controller.open_async();
         
-        // Start Geary.
-        try {
-            yield Geary.Engine.instance.open_async(get_user_data_directory(), get_resource_directory(),
-                new SecretMediator());
-            if (Geary.Engine.instance.get_accounts().size == 0)
-                create_account();
-        } catch (Error e) {
-            error("Error opening Geary.Engine instance: %s", e.message);
-        }
-
         handle_args(args);
     }
     
@@ -161,204 +144,6 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         assert(action != null);
         
         return action;
-    }
-    
-    private void open_account(Geary.Account account) {
-        account.report_problem.connect(on_report_problem);
-        controller.connect_account_async.begin(account);
-    }
-    
-    private void close_account(Geary.Account account) {
-        account.report_problem.disconnect(on_report_problem);
-        controller.disconnect_account_async.begin(account);
-    }
-    
-    private Geary.Account get_account_instance(Geary.AccountInformation account_information) {
-        try {
-            return Geary.Engine.instance.get_account_instance(account_information);
-        } catch (Error e) {
-            error("Error creating account instance: %s", e.message);
-        }
-    }
-    
-    private void on_account_available(Geary.AccountInformation account_information) {
-        open_account(get_account_instance(account_information));
-    }
-    
-    private void on_account_unavailable(Geary.AccountInformation account_information) {
-        close_account(get_account_instance(account_information));
-    }
-    
-    private void create_account() {
-        Geary.AccountInformation? account_information = request_account_information(null);
-        if (account_information != null)
-            do_validate_until_successful_async.begin(account_information);
-    }
-    
-    private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
-        Geary.AccountInformation? result = account_information;
-        do {
-            result = yield validate_or_retry_async(result, cancellable);
-        } while (result != null);
-
-        if (login_dialog != null)
-            login_dialog.hide();
-    }
-
-    // Returns null if we are done validating, or the revised account information if we should retry.
-    private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
-        Geary.Engine.ValidationResult result = yield validate_async(account_information, true, cancellable);
-        if (result == Geary.Engine.ValidationResult.OK)
-            return null;
-        
-        debug("Validation failed. Prompting user for revised account information");
-        Geary.AccountInformation? new_account_information =
-            request_account_information(account_information, result);
-        
-        // If the user refused to enter account information. There is currently no way that we
-        // could see this--we exit in request_account_information, and the only way that an
-        // exit could be canceled is if there are unsaved composer windows open (which won't
-        // happen before an account is created). However, best to include this check for the
-        // future.
-        if (new_account_information == null)
-            return null;
-        
-        debug("User entered revised account information, retrying validation");
-        return new_account_information;
-    }
-    
-    // Attempts to validate and add an account.  Returns a result code indicating
-    // success or one or more errors.
-    public async Geary.Engine.ValidationResult validate_async(
-        Geary.AccountInformation account_information, bool validate_connection,
-        Cancellable? cancellable = null) {
-        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
-        try {
-            result = yield Geary.Engine.instance.validate_account_information_async(account_information,
-                validate_connection, cancellable);
-        } catch (Error err) {
-            debug("Error validating account: %s", err.message);
-            exit(-1); // Fatal error
-            
-            return result;
-        }
-        
-        if (result == Geary.Engine.ValidationResult.OK) {
-            Geary.AccountInformation real_account_information = account_information;
-            if (account_information.is_copy()) {
-                // We have a temporary copy of the account.  Find the "real" acct info object and
-                // copy the new data into it.
-                real_account_information = get_real_account_information(account_information);
-                real_account_information.copy_from(account_information);
-            }
-            
-            real_account_information.store_async.begin(cancellable);
-            do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-                Geary.CredentialsMediator.ServiceFlag.SMTP, real_account_information);
-            
-            debug("Successfully validated account information");
-        }
-        
-        return result;
-    }
-    
-    // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
-    public Geary.AccountInformation? get_real_account_information(
-        Geary.AccountInformation account_information) {
-        if (account_information.is_copy()) {
-            try {
-                 return Geary.Engine.instance.get_accounts().get(account_information.email);
-            } catch (Error e) {
-                error("Account information is out of sync: %s", e.message);
-            }
-        }
-        
-        return null;
-    }
-    
-    // Prompt the user for a service, real name, username, and password, and try to start Geary.
-    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
-        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
-        Geary.AccountInformation? new_info = old_info;
-        if (login_dialog == null)
-            login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
-        
-        if (new_info != null)
-            login_dialog.set_account_information(new_info, result);
-        
-        login_dialog.present();
-        for (;;) {
-            login_dialog.show_spinner(false);
-            if (login_dialog.run() != Gtk.ResponseType.OK) {
-                debug("User refused to enter account information. Exiting...");
-                exit(1);
-                return null;
-            }
-            
-            login_dialog.show_spinner(true);
-            new_info = login_dialog.get_account_information();
-            
-            if ((!new_info.default_imap_server_ssl && !new_info.default_imap_server_starttls)
-                || (!new_info.default_smtp_server_ssl && !new_info.default_smtp_server_starttls)) {
-                ConfirmationDialog security_dialog = new ConfirmationDialog(controller.main_window,
-                    _("Your settings are insecure"),
-                    _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),
-                    _("Co_ntinue"));
-                if (security_dialog.run() != Gtk.ResponseType.OK)
-                    continue;
-            }
-            
-            break;
-        }
-        
-        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-            Geary.CredentialsMediator.ServiceFlag.SMTP, new_info);
-        
-        return new_info;
-    }
-    
-    private async void do_update_stored_passwords_async(Geary.CredentialsMediator.ServiceFlag services,
-        Geary.AccountInformation account_information) {
-        try {
-            yield account_information.update_stored_passwords_async(services);
-        } catch (Error e) {
-            debug("Error updating stored passwords: %s", e.message);
-        }
-    }
-    
-    private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
-        debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
-        
-        switch (problem) {
-            case Geary.Account.Problem.DATABASE_FAILURE:
-            case Geary.Account.Problem.HOST_UNREACHABLE:
-            case Geary.Account.Problem.NETWORK_UNAVAILABLE:
-                // TODO
-            break;
-            
-            case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-            case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
-                // At this point, we've prompted them for the password and
-                // they've hit cancel, so there's not much for us to do here.
-                close_account(account);
-            break;
-            
-            default:
-                assert_not_reached();
-        }
-    }
-    
-    // Removes an existing account.
-    public async void remove_account_async(Geary.AccountInformation account,
-        Cancellable? cancellable = null) {
-        try {
-            yield GearyApplication.instance.get_account_instance(account).close_async(cancellable);
-            yield Geary.Engine.instance.remove_account_async(account, cancellable);
-        } catch (Error e) {
-            message("Error removing account: %s", e.message);
-        }
     }
     
     public File get_user_data_directory() {
@@ -455,20 +240,12 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         load_ui_file_for_manager(ui_manager, ui_filename);
     }
     
-    public Gtk.Window get_main_window() {
-        return controller.main_window;
-    }
-
     private void handle_args(string[] args) {
         foreach(string arg in args) {
             if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
                 controller.compose_mailto(arg);
             }
         }
-    }
-    
-    public Gee.List<ComposerWindow>? get_composer_windows_for_account(Geary.AccountInformation account) {
-        return controller.get_composer_windows_for_account(account);
     }
 }
 

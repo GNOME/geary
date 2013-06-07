@@ -11,6 +11,21 @@ public abstract class Geary.Conversation : BaseObject {
         DATE_DESCENDING,
     }
     
+    /**
+     * Fired when email has been added to this conversation.
+     */
+    public signal void appended(Geary.Email email);
+    
+    /**
+     * Fired when email has been trimmed from this conversation.
+     */
+    public signal void trimmed(Geary.Email email);
+    
+    /**
+     * Fired when the flags of an email in this conversation have changed.
+     */
+    public signal void email_flags_changed(Geary.Email email);
+    
     protected Conversation() {
     }
     
@@ -141,6 +156,18 @@ public abstract class Geary.Conversation : BaseObject {
 
     private bool is_missing_flag(Geary.NamedFlag flag) {
         return check_flag(flag, false);
+    }
+    
+    protected void notify_appended(Geary.Email email) {
+        appended(email);
+    }
+    
+    protected void notify_trimmed(Geary.Email email) {
+        trimmed(email);
+    }
+    
+    protected void notify_email_flags_changed(Geary.Email email) {
+        email_flags_changed(email);
     }
 }
 
