@@ -29,14 +29,16 @@ public class Geary.Imap.FetchBodyDataIdentifier : BaseObject, Gee.Hashable<Fetch
     // Current changes:
     // * case-insensitive
     // * leading/trailing whitespace stripped
-    // * BODY.peek[...] is returned as simply BODY[...] in some server implementations
+    // * BODY.peek[...] is returned as simply BODY[...]
     // * The span in the returned response is merely the offset ("1.15" becomes "1") because the
     //   associated literal specifies its length
+    // * Remove quoting (some servers return field names quoted, some don't, Geary never uses them
+    //   when requesting)
     //
     // Some of these changes are reflected by using serialize_response() instead of
     // serialize_request() in the constructore.
     private static string munge(string str) {
-        return str.down().strip();
+        return str.down().replace("\"", "").strip();
     }
     
     public bool equal_to(FetchBodyDataIdentifier other) {
