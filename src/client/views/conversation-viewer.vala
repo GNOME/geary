@@ -47,6 +47,9 @@ public class ConversationViewer : Gtk.Box {
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
     
+    // Current conversation, or null if none.
+    public Geary.Conversation? current_conversation = null;
+    
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
     
@@ -61,11 +64,15 @@ public class ConversationViewer : Gtk.Box {
     private weak Geary.Folder? current_folder = null;
     private Geary.AccountInformation? current_account_information = null;
     private ConversationFindBar conversation_find_bar;
+    private Cancellable cancellable_fetch = new Cancellable();
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
         web_view = new ConversationWebView();
+        
+        GearyApplication.instance.controller.conversations_selected.connect(on_conversations_selected);
+        GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
@@ -100,7 +107,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     // Removes all displayed e-mails from the view.
-    public void clear(Geary.Folder? new_folder, Geary.AccountInformation? account_information) {
+    private void clear(Geary.Folder? new_folder, Geary.AccountInformation? account_information) {
         // Remove all messages from DOM.
         try {
             foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
@@ -145,7 +152,115 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    public void add_message(Geary.Email email) {
+    private void on_folder_selected(Geary.Folder? folder) {
+        if (folder == null) {
+            clear(null, null);
+            current_conversation = null;
+        }
+    }
+    
+    private void on_conversations_selected(Gee.Set<Geary.Conversation>? conversations,
+        Geary.Folder? current_folder) {
+        cancel_load();
+        if (current_conversation != null) {
+            current_conversation.appended.disconnect(on_conversation_appended);
+            current_conversation.trimmed.disconnect(on_conversation_trimmed);
+            current_conversation.email_flags_changed.disconnect(update_flags);
+        }
+        
+        if (conversations != null && conversations.size == 1 && current_folder != null) {
+            // Clear view before we yield, to make sure it happens.
+            clear(current_folder, current_folder.account.information);
+            web_view.scroll_reset();
+            GearyApplication.instance.controller.enable_message_buttons(false);
+            
+            current_conversation = Geary.Collection.get_first(conversations);
+            
+            select_conversation_async.begin(current_conversation, current_folder,
+                on_select_conversation_completed);
+            
+            current_conversation.appended.connect(on_conversation_appended);
+            current_conversation.trimmed.connect(on_conversation_trimmed);
+            current_conversation.email_flags_changed.connect(update_flags);
+        } else if (conversations == null || conversations.size == 0) {
+            current_conversation = null;
+        }
+    }
+    
+    private async void select_conversation_async(Geary.Conversation conversation,
+        Geary.Folder current_folder) throws Error {
+        Gee.Collection<Geary.Email> messages = conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
+        
+        // Fetch full messages.
+        Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
+        foreach (Geary.Email email in messages)
+            messages_to_add.add(yield fetch_full_message_async(email));
+        
+        // Add messages.
+        foreach (Geary.Email email in messages_to_add)
+            add_message(email);
+        
+        unhide_last_email();
+        compress_emails();
+    }
+    
+    private void on_select_conversation_completed(Object? source, AsyncResult result) {
+        try {
+            select_conversation_async.end(result);
+            
+            GearyApplication.instance.controller.enable_message_buttons(true);
+            mark_read();
+        } catch (Error err) {
+            debug("Unable to select conversation: %s", err.message);
+        }
+    }
+    
+    // Given an email, fetch the full version with all required fields.
+    private async Geary.Email fetch_full_message_async(Geary.Email email) throws Error {
+        Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
+            Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
+        
+        Geary.Email full_email;
+        if (email.id.get_folder_path() == null) {
+            full_email = yield current_folder.account.local_fetch_email_async(
+                email.id, required_fields, cancellable_fetch);
+        } else {
+            full_email = yield current_folder.fetch_email_async(email.id,
+                required_fields, Geary.Folder.ListFlags.NONE, cancellable_fetch);
+        }
+        
+        return full_email;
+    }
+    
+    // Cancels the current message load, if in progress.
+    private void cancel_load() {
+        Cancellable old_cancellable = cancellable_fetch;
+        cancellable_fetch = new Cancellable();
+        
+        old_cancellable.cancel();
+    }
+    
+    private void on_conversation_appended(Geary.Email email) {
+        on_conversation_appended_async.begin(email, on_conversation_appended_complete);
+    }
+    
+    private async void on_conversation_appended_async(Geary.Email email) throws Error {
+        add_message(yield fetch_full_message_async(email));
+    }
+    
+    private void on_conversation_appended_complete(Object? source, AsyncResult result) {
+        try {
+            on_conversation_appended_async.end(result);
+        } catch (Error err) {
+            debug("Unable to append email to conversation: %s", err.message);
+        }
+    }
+    
+    private void on_conversation_trimmed(Geary.Email email) {
+        remove_message(email);
+    }
+    
+    private void add_message(Geary.Email email) {
         // Make sure the message container is showing and the multi-message counter hidden.
         try {
             web_view.show_element_by_id(MESSAGE_CONTAINER_ID);
@@ -368,7 +483,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    public void unhide_last_email() {
+    private void unhide_last_email() {
         WebKit.DOM.HTMLElement last_email = (WebKit.DOM.HTMLElement) web_view.container.get_last_child().previous_sibling;
         if (last_email != null) {
             WebKit.DOM.DOMTokenList class_list = last_email.get_class_list();
@@ -380,7 +495,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    public void compress_emails() {
+    private void compress_emails() {
         if (messages.size == 0)
             return;
         
@@ -435,7 +550,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    public void decompress_emails(WebKit.DOM.Element email_element) {
+    private void decompress_emails(WebKit.DOM.Element email_element) {
         WebKit.DOM.Element iter_element = email_element;
         try {
             while ((iter_element != null) && iter_element.get_class_list().contains("compressed")) {
@@ -517,7 +632,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
 
-    public void update_flags(Geary.Email email) {
+    private void update_flags(Geary.Email email) {
         // Nothing to do if we aren't displaying this email.
         if (!email_to_element.has_key(email.id)) {
             return;
@@ -1263,7 +1378,7 @@ public class ConversationViewer : Gtk.Box {
         parent.append_child(signature_container);
     }
     
-    public void remove_message(Geary.Email email) {
+    private void remove_message(Geary.Email email) {
         if (!messages.contains(email))
             return;
         
@@ -1391,10 +1506,6 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    public void scroll_reset() {
-        web_view.scroll_reset();
-    }
-    
     private void on_hovering_over_link(string? title, string? url) {
         // Copy the link the user is hovering over.  Note that when the user mouses-out, 
         // this signal is called again with null for both parameters.
@@ -1447,7 +1558,7 @@ public class ConversationViewer : Gtk.Box {
             string temporary_uri = Filename.to_uri(temporary_filename, null);
             Gtk.show_uri(web_view.get_screen(), temporary_uri, Gdk.CURRENT_TIME);
         } catch (Error error) {
-            ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.get_main_window(),
+            ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.controller.main_window,
                 _("Failed to open default text editor."), error.message);
             dialog.run();
         }

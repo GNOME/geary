@@ -38,9 +38,17 @@ public class Geary.ConversationMonitor : BaseObject {
             convnum = next_convnum++;
             this.owner = owner;
             lowest_id = null;
+            owner.email_flags_changed.connect(on_email_flags_changed);
+        }
+        
+        ~ImplConversation() {
+            clear_owner();
         }
         
         public void clear_owner() {
+            if (owner != null)
+                owner.email_flags_changed.disconnect(on_email_flags_changed);
+            
             owner = null;
         }
         
@@ -108,6 +116,7 @@ public class Geary.ConversationMonitor : BaseObject {
                 message_ids.add_all(ancestors);
             
             check_lowest_id(email.id);
+            notify_appended(email);
         }
         
         // Returns the removed Message-IDs
@@ -132,6 +141,8 @@ public class Geary.ConversationMonitor : BaseObject {
             foreach (Email e in emails.values)
                 check_lowest_id(e.id);
             
+            notify_trimmed(email);
+            
             return (removed_message_ids.size > 0) ? removed_message_ids : null;
         }
         
@@ -142,6 +153,11 @@ public class Geary.ConversationMonitor : BaseObject {
         
         public string to_string() {
             return "[#%d] (%d emails)".printf(convnum, emails.size);
+        }
+        
+        private void on_email_flags_changed(Geary.Conversation conversation, Geary.Email email) {
+            if (conversation == this)
+                notify_email_flags_changed(email);
         }
     }
     
