@@ -38,6 +38,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 10:
                 post_upgrade_add_search_table();
             break;
+            
+            case 11:
+                post_upgrade_populate_internal_date_time_t();
+            break;
         }
     }
     
@@ -143,6 +147,40 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         // language setting.  This is not an exact science, and search results
         // should be ok either way in most cases.
         return "english";
+    }
+    
+    // Version 11.
+    private void post_upgrade_populate_internal_date_time_t() {
+        try {
+            exec_transaction(Db.TransactionType.RW, (cx) => {
+                Db.Result select = cx.query("SELECT id, internaldate FROM MessageTable");
+                while (!select.finished) {
+                    int64 id = select.rowid_at(0);
+                    string? internaldate = select.string_at(1);
+                    
+                    try {
+                        time_t as_time_t = (internaldate != null ?
+                            new Geary.Imap.InternalDate(internaldate).as_time_t : -1);
+                        
+                        Db.Statement update = cx.prepare(
+                            "UPDATE MessageTable SET internaldate_time_t=? WHERE id=?");
+                        update.bind_int64(0, (int64) as_time_t);
+                        update.bind_rowid(1, id);
+                        update.exec();
+                    } catch (Error e) {
+                        debug("Error converting internaldate '%s' to time_t: %s",
+                            internaldate, e.message);
+                    }
+                    
+                    select.next();
+                }
+                
+                return Db.TransactionOutcome.COMMIT;
+            });
+        } catch (Error e) {
+            debug("Error populating internaldate_time_t column during upgrade to database schema 11: %s",
+                e.message);
+        }
     }
     
     private void on_prepare_database_connection(Db.Connection cx) throws Error {

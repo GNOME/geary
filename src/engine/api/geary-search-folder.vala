@@ -26,6 +26,9 @@ public class Geary.SearchFolderProperties : Geary.FolderProperties {
  * Special folder type used to query and display search results.
  */
 public class Geary.SearchFolder : Geary.AbstractLocalFolder {
+    // Max number of emails that can ever be in the folder.
+    public static const int MAX_RESULT_EMAILS = 1000;
+    
     public override Account account { get { return _account; } }
     
     private static FolderRoot? path = null;
@@ -74,8 +77,13 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         int result_mutex_token = yield result_mutex.claim_async();
         Error? error = null;
         try {
+            // TODO: don't limit this to MAX_RESULT_EMAILS.  Instead, we could
+            // be smarter about only fetching the search results in
+            // list_email_async() etc., but this leads to some more
+            // complications when redoing the search.
             Gee.Collection<Geary.Email>? _new_results = yield account.local_search_async(
-                keywords, Geary.Email.Field.PROPERTIES, false, exclude_folders, null, cancellable);
+                keywords, Geary.Email.Field.PROPERTIES, false, MAX_RESULT_EMAILS, 0,
+                exclude_folders, null, cancellable);
             
             if (_new_results == null) {
                 // No results?  Remove all existing results and return early.  If there are no

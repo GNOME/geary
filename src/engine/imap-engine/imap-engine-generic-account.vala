@@ -496,11 +496,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     public override async Gee.Collection<Geary.Email>? local_search_async(string keywords,
-        Geary.Email.Field requested_fields, bool partial_ok,
+        Geary.Email.Field requested_fields, bool partial_ok, int limit = 100, int offset = 0,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
+        if (offset < 0)
+            throw new EngineError.BAD_PARAMETERS("Offset must not be negative");
+        
         return yield local.search_async(local.prepare_search_query(keywords),
-            requested_fields, partial_ok, folder_blacklist, search_ids, cancellable);
+            requested_fields, partial_ok, limit, offset, folder_blacklist, search_ids, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

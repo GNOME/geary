@@ -588,7 +588,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<Geary.Email>? search_async(string prepared_query,
-        Geary.Email.Field requested_fields, bool partial_ok,
+        Geary.Email.Field requested_fields, bool partial_ok, int limit = 100, int offset = 0,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         Gee.Collection<Geary.Email> search_results = new Gee.HashSet<Geary.Email>();
@@ -596,8 +596,21 @@ private class Geary.ImapDB.Account : BaseObject {
         // TODO: support blacklist, search_ids
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("SELECT id FROM MessageSearchTable WHERE MessageSearchTable MATCH ?");
+            string sql = """
+                SELECT id
+                FROM MessageSearchTable
+                JOIN MessageTable USING (id)
+                WHERE MessageSearchTable MATCH ?
+                ORDER BY internaldate_time_t DESC
+            """;
+            if (limit > 0)
+                sql += " LIMIT ? OFFSET ?";
+            Db.Statement stmt = cx.prepare(sql);
             stmt.bind_string(0, prepared_query);
+            if (limit > 0) {
+                stmt.bind_int(1, limit);
+                stmt.bind_int(2, offset);
+            }
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {

@@ -878,8 +878,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             "INSERT INTO MessageTable "
             + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
             + "message_id, in_reply_to, reference_ids, subject, header, body, preview, flags, "
-            + "internaldate, rfc822_size) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            + "internaldate, internaldate_time_t, rfc822_size) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         stmt.bind_int(0, row.fields);
         stmt.bind_string(1, row.date);
         stmt.bind_int64(2, row.date_time_t);
@@ -898,7 +898,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         stmt.bind_string(15, row.preview);
         stmt.bind_string(16, row.email_flags);
         stmt.bind_string(17, row.internaldate);
-        stmt.bind_long(18, row.rfc822_size);
+        stmt.bind_int64(18, row.internaldate_time_t);
+        stmt.bind_long(19, row.rfc822_size);
         
         message_id = stmt.exec_insert(cancellable);
         do_associate_with_folder(cx, message_id, email, cancellable);
@@ -1076,7 +1077,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     break;
                     
                     case Geary.Email.Field.PROPERTIES:
-                        append = "internaldate, rfc822_size";
+                        append = "internaldate, internaldate_time_t, rfc822_size";
                     break;
                 }
             }
@@ -1262,10 +1263,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         if (new_fields.is_any_set(Geary.Email.Field.PROPERTIES)) {
             Db.Statement stmt = cx.prepare(
-                "UPDATE MessageTable SET internaldate=?, rfc822_size=? WHERE id=?");
+                "UPDATE MessageTable SET internaldate=?, internaldate_time_t=?, rfc822_size=? WHERE id=?");
             stmt.bind_string(0, row.internaldate);
-            stmt.bind_long(1, row.rfc822_size);
-            stmt.bind_rowid(2, row.id);
+            stmt.bind_int64(1, row.internaldate_time_t);
+            stmt.bind_long(2, row.rfc822_size);
+            stmt.bind_rowid(3, row.id);
             
             stmt.exec(cancellable);
         }
