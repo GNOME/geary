@@ -115,6 +115,19 @@ public class FormattedConversationData : Geary.BaseObject {
         this.num_emails = conversation.get_count();
     }
     
+    public bool update_date_string() {
+        if (preview.date == null) {
+            return false;
+        }
+        string new_date = Date.pretty_print(preview.date.value,
+            GearyApplication.instance.config.clock_format);
+        if (new_date == date) {
+            return false;
+        }
+        date = new_date;
+        return true;
+    }
+    
     // Creates an example message (used interally for styling calculations.)
     public FormattedConversationData.create_example() {
         this.is_unread = false;
