@@ -795,6 +795,8 @@ public class Geary.ConversationMonitor : BaseObject {
                         conversation.to_string(), removed_id.to_string());
                 }
             }
+            
+            conversation.clear_owner();
         }
         
         // for Conversations that have been removed, don't notify they're trimmed
