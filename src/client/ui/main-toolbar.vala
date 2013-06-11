@@ -12,6 +12,7 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Toolbar toolbar;
     public FolderMenu copy_folder_menu { get; private set; }
     public FolderMenu move_folder_menu { get; private set; }
+    public string search_text { get { return search_entry.text; } }
     
     private GtkUtil.ToggleToolbarDropdown mark_menu_dropdown;
     private GtkUtil.ToggleToolbarDropdown app_menu_dropdown;

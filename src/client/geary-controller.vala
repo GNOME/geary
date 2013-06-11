@@ -56,6 +56,7 @@ public class GearyController {
     private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
     
     private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
+    private const int SEARCH_TIMEOUT_MSEC = 100;
     
     public MainWindow main_window { get; private set; }
     
@@ -83,6 +84,7 @@ public class GearyController {
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
     private Geary.Folder? previous_non_search_folder = null;
+    private uint search_timeout_id = 0;
     private LoginDialog? login_dialog = null;
     
     /**
@@ -1639,7 +1641,7 @@ public class GearyController {
         return ret.size >= 1 ? ret : null;
     }
     
-    private void on_search_text_changed(string search_text) {
+    private void do_search(string search_text) {
         if (search_text == "") {
             if (previous_non_search_folder != null && current_folder is Geary.SearchFolder)
                 main_window.folder_list.select_folder(previous_non_search_folder);
@@ -1666,6 +1668,22 @@ public class GearyController {
         }
         
         main_window.folder_list.set_search(folder);
+    }
+    
+    private void on_search_text_changed(string search_text) {
+        // So we don't thrash the disk as the user types, we run the actual
+        // search after a quick delay when they finish typing.
+        if (search_timeout_id != 0)
+            Source.remove(search_timeout_id);
+        search_timeout_id = Timeout.add(SEARCH_TIMEOUT_MSEC, on_search_timeout);
+    }
+    
+    private bool on_search_timeout() {
+        search_timeout_id = 0;
+        
+        do_search(main_window.main_toolbar.search_text);
+        
+        return false;
     }
 }
 
