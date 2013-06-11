@@ -100,6 +100,10 @@ public class MainToolbar : Gtk.Box {
     
     private Gtk.ToolButton set_toolbutton_action(Gtk.Builder builder, string action) {
         Gtk.ToolButton button = builder.get_object(action) as Gtk.ToolButton;
+        
+        // Must manually set use_action_appearance to false until Glade re-adds this feature.
+        // See this ticket: https://bugzilla.gnome.org/show_bug.cgi?id=694407#c11
+        button.use_action_appearance = false;
         button.set_related_action(GearyApplication.instance.actions.get_action(action));
         return button;
     }
