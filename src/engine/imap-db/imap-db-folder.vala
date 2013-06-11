@@ -85,6 +85,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return path;
     }
     
+    // Use with caution; ImapDB.Account uses this to "improve" the path with one from the server,
+    // which has a usable path delimiter.
+    internal void set_path(FolderPath path) {
+        this.path = path;
+    }
+    
     public Geary.Imap.FolderProperties get_properties() {
         return properties;
     }

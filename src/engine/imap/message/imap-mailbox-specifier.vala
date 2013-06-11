@@ -48,8 +48,21 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         init(param.decode());
     }
     
-    public MailboxSpecifier.from_folder_path(FolderPath path, string? delim = null) {
-        init(path.get_fullpath(delim));
+    /**
+     * Converts a generic {@link FolderPath} into an IMAP mailbox specifier.
+     *
+     * If the delimiter was supplied from a {@link ListCommand} response, it can be supplied here.
+     * Otherwise, the path's {@link FolderRoot.default_separator} will be used.  If neither have a
+     * separator, {@link ImapError.INVALID} is thrown.
+     */
+    public MailboxSpecifier.from_folder_path(FolderPath path, string? delim) throws ImapError {
+        string? fullpath = path.get_fullpath(delim);
+        if (fullpath == null) {
+            throw new ImapError.INVALID("Unable to convert FolderPath to MailboxSpecifier: no delimiter for %s",
+                path.to_string());
+        }
+        
+        init(fullpath);
     }
     
     private void init(string decoded) {

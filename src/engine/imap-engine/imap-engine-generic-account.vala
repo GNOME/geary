@@ -7,7 +7,6 @@
 private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private const int REFRESH_FOLDER_LIST_SEC = 10 * 60;
     
-    private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
     
     private Imap.Account remote;
@@ -30,14 +29,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         this.remote.login_failed.connect(on_login_failed);
         this.remote.email_sent.connect(on_email_sent);
         
-        if (inbox_path == null) {
-            inbox_path = new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
-                Imap.Folder.CASE_SENSITIVE);
-        }
-        
-        if (outbox_path == null) {
+        if (outbox_path == null)
             outbox_path = new SmtpOutboxFolderRoot();
-        }
     }
     
     private void check_open() throws EngineError {
@@ -162,12 +155,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return return_folders;
     }
     
-    public override Gee.Collection<Geary.Folder> list_matching_folders(
-        Geary.FolderPath? parent) throws Error {
+    public override Gee.Collection<Geary.Folder> list_matching_folders(Geary.FolderPath? parent)
+        throws Error {
         check_open();
         
         Gee.ArrayList<Geary.Folder> matches = new Gee.ArrayList<Geary.Folder>();
-
+        
         foreach(FolderPath path in folder_map.keys) {
             FolderPath? path_parent = path.get_parent();
             if ((parent == null && path_parent == null) ||

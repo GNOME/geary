@@ -446,7 +446,8 @@ private class Geary.Imap.Folder : BaseObject {
         Cancellable? cancellable) throws Error {
         check_open();
         
-        CopyCommand cmd = new CopyCommand(msg_set, new MailboxSpecifier.from_folder_path(destination));
+        CopyCommand cmd = new CopyCommand(msg_set,
+            new MailboxSpecifier.from_folder_path(destination, null));
         Gee.Collection<Command> cmds = new Collection.SingleItem<Command>(cmd);
         
         yield exec_commands_async(cmds, cancellable);
@@ -462,7 +463,7 @@ private class Geary.Imap.Folder : BaseObject {
         // Don't use copy_email_async followed by remove_email_async; this needs to be one
         // set of commands executed in order without releasing the cmd_mutex; this is especially
         // vital if positional addressing is used
-        cmds.add(new CopyCommand(msg_set, new MailboxSpecifier.from_folder_path(destination)));
+        cmds.add(new CopyCommand(msg_set, new MailboxSpecifier.from_folder_path(destination, null)));
         
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         flags.add(MessageFlag.DELETED);

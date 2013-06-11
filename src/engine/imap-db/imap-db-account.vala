@@ -345,7 +345,7 @@ private class Geary.ImapDB.Account : BaseObject {
         
         if (id_map.size == 0) {
             throw new EngineError.NOT_FOUND("No local folders in %s",
-                (parent != null) ? parent.get_fullpath() : "root");
+                (parent != null) ? parent.to_string() : "root");
         }
         
         Gee.Collection<Geary.ImapDB.Folder> folders = new Gee.ArrayList<Geary.ImapDB.Folder>();
@@ -431,8 +431,19 @@ private class Geary.ImapDB.Account : BaseObject {
     
     private Geary.ImapDB.Folder? get_local_folder(Geary.FolderPath path) {
         FolderReference? folder_ref = folder_refs.get(path);
+        if (folder_ref == null)
+            return null;
         
-        return (folder_ref != null) ? (Geary.ImapDB.Folder) folder_ref.get_reference() : null;
+        ImapDB.Folder? folder = (Geary.ImapDB.Folder?) folder_ref.get_reference();
+        if (folder == null)
+            return null;
+        
+        // use supplied FolderPath rather than one here; if it came from the server, it has
+        // a usable separator
+        if (path.get_root().default_separator != null)
+            folder.set_path(path);
+        
+        return folder;
     }
     
     private Geary.ImapDB.Folder create_local_folder(Geary.FolderPath path, int64 folder_id,
@@ -684,10 +695,8 @@ private class Geary.ImapDB.Account : BaseObject {
             return null;
         }
         
-        if (parent_id <= 0) {
-            return new Geary.FolderRoot(name,
-                Geary.Imap.Account.ASSUMED_SEPARATOR, Geary.Imap.Folder.CASE_SENSITIVE);
-        }
+        if (parent_id <= 0)
+            return new Geary.FolderRoot(name, null, Geary.Imap.Folder.CASE_SENSITIVE);
         
         Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
         return (parent_path == null ? null : parent_path.get_child(name));
