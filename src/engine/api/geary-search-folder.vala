@@ -239,7 +239,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     
     // Destroys existing results.
     private void clear_search_results() {
-        search_results = new Gee.TreeSet<Geary.Email>(Geary.Email.compare_date_received_ascending);
+        search_results = new Gee.TreeSet<Geary.Email>(Geary.Email.compare_date_received_descending);
     }
     
     // Converts a collection of emails to a set of email ids.
