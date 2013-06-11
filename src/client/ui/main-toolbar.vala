@@ -25,7 +25,7 @@ public class MainToolbar : Gtk.Box {
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
-        GearyApplication.instance.current_account_changed.connect(on_account_changed);
+        GearyApplication.instance.controller.account_selected.connect(on_account_changed);
         
         Gtk.Builder builder = GearyApplication.instance.create_builder("toolbar.glade");
         toolbar = builder.get_object("toolbar") as Gtk.Toolbar;
