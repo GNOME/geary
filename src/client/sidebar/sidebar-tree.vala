@@ -76,6 +76,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     private weak EntryWrapper? selected_wrapper = null;
     private Gtk.Menu? default_context_menu = null;
     private bool expander_called_manually = false;
+    private int expander_special_count = 0;
     private bool is_internal_drag_in_progress = false;
     private Sidebar.Entry? internal_drag_source_entry = null;
     private Gtk.TreeRowReference? old_path_ref = null;
@@ -890,11 +891,36 @@ public class Sidebar.Tree : Gtk.TreeView {
         return true;
     }
     
-    public bool on_toggle_row() {
-        if (expander_called_manually) {
-            // This flag is set each time a manual toggle occurs
-            expander_called_manually = false;
-            // Allow branch expansion toggle
+    public bool on_toggle_row(Gtk.TreeIter iter, Gtk.TreePath path) {
+        // Determine whether to allow the row to toggle
+        EntryWrapper? wrapper = get_wrapper_at_iter(iter);
+        if (wrapper == null) {
+            return false; // don't affect things
+        }
+        
+        // Most of the time, only allow manual toggles
+        bool should_allow_toggle = expander_called_manually;
+        
+        // Cancel out the manual flag
+        expander_called_manually = false;
+        
+        // If we are an expanded parent entry with content
+        if (is_row_expanded(path) && store.iter_has_child(iter) && wrapper.entry is Sidebar.SelectableEntry) {
+            // We are taking a special action
+            expander_special_count++;
+            if (expander_special_count == 1) {
+                // Workaround that prevents arrows from double-toggling
+                return true;
+            } else {
+                // Toggle only if non-manual, as opposed to the usual behavior
+                should_allow_toggle = !should_allow_toggle;
+            }
+        } else {
+            // Reset the special behavior count
+            expander_special_count = 0;
+        }
+        
+        if (should_allow_toggle) {
             return false;
         }
         // Prevent branch expansion toggle
