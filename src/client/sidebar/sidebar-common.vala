@@ -69,6 +69,26 @@ public class Sidebar.RootOnlyBranch : Sidebar.Branch {
     }
 }
 
+/**
+ * A header is an entry that is visually distinguished from its children. Bug 6397 recommends
+ * headers to appear bolded and without any icons. To prevent the icons from rendering, we set the
+ * icons to null in the base class @see Sidebar.Grouping. But we also go a step further by
+ * using a custom cell_data_function (@see Sidebar.Tree::icon_renderer_function) which ensures that
+ * header icons won't be rendered. This approach avoids the blank icon spacing issues.
+ */
+public class Sidebar.Header : Sidebar.Grouping, Sidebar.EmphasizableEntry {
+    private bool emphasized;
+    
+    public Header(string name, bool emphasized = true) {
+        base(name, null);
+        this.emphasized = emphasized;
+    }
+    
+    public bool is_emphasized() {
+        return emphasized;
+    }
+}
+
 public interface Sidebar.Contextable : Object {
     // Return null if the context menu should not be invoked for this event
     public abstract Gtk.Menu? get_sidebar_context_menu(Gdk.EventButton event);

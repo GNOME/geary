@@ -104,6 +104,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         text_column.add_attribute(icon_renderer, "pixbuf", Columns.PIXBUF);
         text_column.add_attribute(icon_renderer, "pixbuf_expander_closed", Columns.CLOSED_PIXBUF);
         text_column.add_attribute(icon_renderer, "pixbuf_expander_open", Columns.OPEN_PIXBUF);
+        text_column.set_cell_data_func(icon_renderer, icon_renderer_function);
         text_renderer = new Gtk.CellRendererText();
         text_renderer.editing_canceled.connect(on_editing_canceled);
         text_renderer.editing_started.connect(on_editing_started);
@@ -159,6 +160,14 @@ public class Sidebar.Tree : Gtk.TreeView {
         text_renderer.editing_canceled.disconnect(on_editing_canceled);
         text_renderer.editing_started.disconnect(on_editing_started);
         icon_theme.changed.disconnect(on_theme_change);
+    }
+    
+    public void icon_renderer_function(Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        EntryWrapper? wrapper = get_wrapper_at_iter(iter);
+        if (wrapper == null) {
+            return;
+        }
+        renderer.visible = !(wrapper.entry is Sidebar.Header);
     }
     
     private void on_drag_begin(Gdk.DragContext ctx) {
