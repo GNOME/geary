@@ -734,6 +734,9 @@ public class GearyController {
         
         folder_selected(current_folder);
         
+        if (!(current_folder is Geary.SearchFolder))
+            previous_non_search_folder = current_folder;
+        
         main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
         main_window.conversation_list_store.account_owner_email = current_account.information.email;
         
