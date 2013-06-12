@@ -113,12 +113,25 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
     DateTime now = new DateTime.now_local();
     
     string fmt;
-    if (same_day(datetime, now))
+    if (same_day(datetime, now)) {
+        TimeSpan diff = now.difference(datetime);
+        
+        if (diff < TimeSpan.MINUTE) {
+            return _("now");
+        }
+        if (diff < TimeSpan.HOUR) {
+            return _("%dm ago").printf(diff / TimeSpan.MINUTE);
+        }
+        if (diff < 6 * TimeSpan.HOUR) {
+            return _("%dh ago").printf(diff / TimeSpan.HOUR);
+        }
+        
         fmt = xlat_pretty_dates[clock_format.to_index()];
-    else if (datetime.get_year() == now.get_year())
+    } else if (datetime.get_year() == now.get_year()) {
         fmt = xlat_same_year;
-    else
+    } else {
         fmt = xlat_diff_year;
+    }
     
     return datetime.format(fmt);
 }
