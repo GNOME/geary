@@ -12,7 +12,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
     public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
     
     public AccountBranch(Geary.Account account) {
-        base(new Sidebar.Grouping(account.information.nickname, new ThemedIcon("emblem-mail")),
+        base(new Sidebar.Header(account.information.nickname),
             Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
         
         this.account = account;
