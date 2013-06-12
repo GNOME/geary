@@ -72,7 +72,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         notify_opened();
 
-        notify_folders_available_unavailable(local_only.values, null);
+        notify_folders_available_unavailable(sort_by_path(local_only.values), null);
         
         // schedule an immediate sweep of the folders; once this is finished, folders will be
         // regularly enumerated
@@ -83,8 +83,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (!open)
             return;
 
-        notify_folders_available_unavailable(null, local_only.values);
-        notify_folders_available_unavailable(null, folder_map.values);
+        notify_folders_available_unavailable(null, sort_by_path(local_only.values));
+        notify_folders_available_unavailable(null, sort_by_path(folder_map.values));
         
         local.outbox.report_problem.disconnect(notify_report_problem);
         
@@ -150,7 +150,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
         
         if (built_folders.size > 0)
-            notify_folders_available_unavailable(built_folders, null);
+            notify_folders_available_unavailable(sort_by_path(built_folders), null);
         
         return return_folders;
     }
@@ -419,7 +419,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             debug(@"Need to remove folder $folder");
         
         if (engine_added.size > 0)
-            notify_folders_added_removed(engine_added, null);
+            notify_folders_added_removed(sort_by_path(engine_added), null);
         
         // report all altered folders
         if (altered_paths.size > 0) {

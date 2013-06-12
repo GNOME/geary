@@ -14,13 +14,13 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
         this.information = information;
     }
     
-    protected virtual void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable) {
+    protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
+        Gee.List<Geary.Folder>? unavailable) {
         folders_available_unavailable(available, unavailable);
     }
 
-    protected virtual void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
-        Gee.Collection<Geary.Folder>? removed) {
+    protected virtual void notify_folders_added_removed(Gee.List<Geary.Folder>? added,
+        Gee.List<Geary.Folder>? removed) {
         folders_added_removed(added, removed);
     }
     
