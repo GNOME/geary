@@ -138,6 +138,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
     }
     
+    private void clear_marked_removed() {
+        lock (marked_removed) {
+            marked_removed.clear();
+        }
+    }
+    
     private bool is_marked_removed(Geary.EmailIdentifier id) {
         lock (marked_removed) {
             return marked_removed.contains(id);
@@ -520,6 +526,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return Imap.UID.is_value_valid(ordering) ? new Imap.UID(ordering) : null;
     }
     
+    // TODO: Rename to detach_email_async().
     public async void remove_email_async(Gee.Collection<Geary.EmailIdentifier> ids,
         Cancellable? cancellable = null) throws Error {
         check_open();
@@ -543,6 +550,20 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             // Remove any that may have been marked removed
             mark_unmark_removed(ids, false);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+    }
+    
+    public async void detach_all_emails_async(Cancellable? cancellable) throws Error {
+        check_open();
+        
+        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "DELETE FROM MessageLocationTable WHERE folder_id=?");
+            stmt.bind_rowid(0, folder_id);
+            
+            clear_marked_removed();
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);

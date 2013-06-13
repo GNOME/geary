@@ -133,10 +133,20 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return false;
         }
         
+        // If UIDVALIDITY changes, all email in the folder must be removed as the UIDs are now
+        // invalid ... we merely detach the emails (leaving their contents behind) so duplicate
+        // detection can fix them up.  But once all UIDs are removed, it's must like the next
+        // if case where no earliest UID available, so simply exit.
+        //
+        // see http://tools.ietf.org/html/rfc3501#section-2.3.1.1
         if (local_properties.uid_validity.value != remote_properties.uid_validity.value) {
-            // TODO: Don't deal with UID validity changes yet
-            error("UID validity changed: %s -> %s", local_properties.uid_validity.value.to_string(),
+            debug("%s UID validity changed, detaching all email: %s -> %s", get_path().to_string(),
+                local_properties.uid_validity.value.to_string(),
                 remote_properties.uid_validity.value.to_string());
+            
+            yield local_folder.detach_all_emails_async(cancellable);
+            
+            return true;
         }
         
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
