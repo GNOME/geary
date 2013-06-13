@@ -138,6 +138,10 @@ private class Geary.Imap.Folder : BaseObject {
         int old_total = properties.select_examine_messages;
         properties.set_select_examine_message_count(total);
         
+        // don't fire signals until opened
+        if (!is_open)
+            return;
+        
         exists(total);
         if (old_total < total)
             appended(total);
@@ -147,6 +151,10 @@ private class Geary.Imap.Folder : BaseObject {
         debug("%s EXPUNGE %s", to_string(), pos.to_string());
         
         properties.set_select_examine_message_count(properties.select_examine_messages - 1);
+        
+        // don't fire signals until opened
+        if (!is_open)
+            return;
         
         expunge(pos.value);
         removed(pos.value, properties.select_examine_messages);
@@ -158,7 +166,9 @@ private class Geary.Imap.Folder : BaseObject {
         fetch_accumulator.set(fetched_data.seq_num,
             (already_present != null) ? fetched_data.combine(already_present) : fetched_data);
         
-        fetched(fetched_data);
+        // don't fire signal until opened
+        if (is_open)
+            fetched(fetched_data);
     }
     
     private void on_recent(int total) {
@@ -166,7 +176,9 @@ private class Geary.Imap.Folder : BaseObject {
         
         properties.recent = total;
         
-        recent(total);
+        // don't fire signal until opened
+        if (is_open)
+            recent(total);
     }
     
     private void on_status_response(StatusResponse status_response) {
