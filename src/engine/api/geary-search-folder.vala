@@ -35,9 +35,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     
     private weak Account _account;
     private SearchFolderProperties properties = new SearchFolderProperties(0, 0);
-    private Gee.HashSet<Geary.FolderPath> exclude_folders = new Gee.HashSet<Geary.FolderPath>();
-    private Geary.SpecialFolderType[] exclude_types = { Geary.SpecialFolderType.SPAM,
-        Geary.SpecialFolderType.TRASH };
+    private Gee.HashSet<Geary.FolderPath?> exclude_folders = new Gee.HashSet<Geary.FolderPath?>();
+    private Geary.SpecialFolderType[] exclude_types = {
+        Geary.SpecialFolderType.SPAM,
+        Geary.SpecialFolderType.TRASH,
+        // Orphan emails (without a folder) are also excluded; see ctor.
+    };
     private Gee.TreeSet<Geary.Email> search_results;
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
@@ -49,12 +52,28 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     public SearchFolder(Account account) {
         _account = account;
         
+        account.folders_available_unavailable.connect(on_folders_available_unavailable);
+        
         clear_search_results();
         
-        // TODO: The exclusion system needs to watch for changes, since the special folders are
-        // not always ready by the time this c'tor executes.
-        foreach(Geary.SpecialFolderType type in exclude_types)
-            exclude_special_folder(type);
+        // We always want to exclude emails that don't live anywhere from
+        // search results.
+        exclude_orphan_emails();
+    }
+    
+    ~SearchFolder() {
+        account.folders_available_unavailable.disconnect(on_folders_available_unavailable);;
+    }
+    
+    private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
+        Gee.Collection<Geary.Folder>? unavailable) {
+        if (available != null) {
+            foreach (Geary.Folder folder in available) {
+                // Exclude it from searching if it's got the right special type.
+                if (folder.get_special_folder_type() in exclude_types)
+                    exclude_folder(folder);
+            }
+        }
     }
     
     /**
@@ -217,16 +236,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         return yield account.local_fetch_email_async(id, required_fields, cancellable);
     }
     
-    private void exclude_special_folder(Geary.SpecialFolderType type) {
-        Geary.Folder? folder = null;
-        try {
-            folder = account.get_special_folder(type);
-        } catch (Error e) {
-            debug("Could not get special folder: %s", e.message);
-        }
-        
-        if (folder != null)
-            exclude_folders.add(folder.get_path());
+    private void exclude_folder(Geary.Folder folder) {
+        exclude_folders.add(folder.get_path());
+    }
+    
+    private void exclude_orphan_emails() {
+        exclude_folders.add(null);
     }
     
     private uint email_id_hash(Geary.Email a) {

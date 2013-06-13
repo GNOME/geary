@@ -587,22 +587,41 @@ private class Geary.ImapDB.Account : BaseObject {
         return prepared_query.str.strip();
     }
     
+    // Append each id in the collection to the StringBuilder, in a format
+    // suitable for use in an SQL statement IN (...) clause.
+    private void sql_append_ids(StringBuilder s, Gee.Collection<int64?> ids) {
+        bool first = true;
+        foreach (int64? id in ids) {
+            assert(id != null);
+            
+            if (!first)
+                s.append(", ");
+            s.append(id.to_string());
+            first = false;
+        }
+    }
+    
     public async Gee.Collection<Geary.Email>? search_async(string prepared_query,
         Geary.Email.Field requested_fields, bool partial_ok, int limit = 100, int offset = 0,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         Gee.Collection<Geary.Email> search_results = new Gee.HashSet<Geary.Email>();
         
-        // TODO: support blacklist, search_ids
+        // TODO: support search_ids
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            string blacklisted_ids_sql = do_get_blacklisted_message_ids_sql(
+                folder_blacklist, cx, cancellable);
+            
             string sql = """
                 SELECT id
                 FROM MessageSearchTable
                 JOIN MessageTable USING (id)
                 WHERE MessageSearchTable MATCH ?
-                ORDER BY internaldate_time_t DESC
             """;
+            if (blacklisted_ids_sql != "")
+                sql += " AND id NOT IN (%s)".printf(blacklisted_ids_sql);
+            sql += " ORDER BY internaldate_time_t DESC";
             if (limit > 0)
                 sql += " LIMIT ? OFFSET ?";
             Db.Statement stmt = cx.prepare(sql);
@@ -618,8 +637,11 @@ private class Geary.ImapDB.Account : BaseObject {
                 MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                     cx, id, requested_fields, cancellable);
                     
-                if (partial_ok || row.fields.fulfills(requested_fields))
-                    search_results.add(row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id)));
+                if (partial_ok || row.fields.fulfills(requested_fields)) {
+                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
+                    search_results.add(email);
+                }
                 
                 result.next(cancellable);
             }
@@ -875,6 +897,71 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         return do_fetch_folder_id(cx, path.get_parent(), create, out parent_id, cancellable);
+    }
+    
+    // Turn the collection of folder paths into actual folder ids.  As a
+    // special case, if "folderless" or orphan emails are to be blacklisted,
+    // set the out bool to true.
+    private Gee.Collection<int64?> do_get_blacklisted_folder_ids(Gee.Collection<Geary.FolderPath?>? folder_blacklist,
+        Db.Connection cx, out bool blacklist_folderless, Cancellable? cancellable) throws Error {
+        blacklist_folderless = false;
+        Gee.ArrayList<int64?> ids = new Gee.ArrayList<int64?>();
+        
+        if (folder_blacklist != null) {
+            foreach (Geary.FolderPath? folder_path in folder_blacklist) {
+                if (folder_path == null) {
+                    blacklist_folderless = true;
+                } else {
+                    int64 id;
+                    do_fetch_folder_id(cx, folder_path, true, out id, cancellable);
+                    if (id != Db.INVALID_ROWID)
+                        ids.add(id);
+                }
+            }
+        }
+        
+        return ids;
+    }
+    
+    // Return a parameterless SQL statement that selects any message ids that
+    // are in a blacklisted folder.  This is used as a sub-select for the
+    // search query to omit results from blacklisted folders.
+    private string do_get_blacklisted_message_ids_sql(Gee.Collection<Geary.FolderPath?>? folder_blacklist,
+        Db.Connection cx, Cancellable? cancellable) throws Error {
+        bool blacklist_folderless;
+        Gee.Collection<int64?> blacklisted_ids = do_get_blacklisted_folder_ids(
+            folder_blacklist, cx, out blacklist_folderless, cancellable);
+        
+        StringBuilder sql = new StringBuilder();
+        if (blacklisted_ids.size > 0 || blacklist_folderless) {
+            if (blacklist_folderless) {
+                // We select out of the MessageTable and join on the location
+                // table so we can recognize emails that aren't in any folders.
+                // This is slightly more complicated than the case below, where
+                // we can just select directly out of the location table.
+                sql.append("""
+                    SELECT m.id
+                    FROM MessageTable m
+                    LEFT JOIN MessageLocationTable l ON l.message_id = m.id
+                    WHERE folder_id IS NULL
+                """);
+                if (blacklisted_ids.size > 0) {
+                    sql.append(" OR folder_id IN (");
+                    sql_append_ids(sql, blacklisted_ids);
+                    sql.append(")");
+                }
+            } else {
+                sql.append("""
+                    SELECT message_id
+                    FROM MessageLocationTable
+                    WHERE folder_id IN (
+                """);
+                sql_append_ids(sql, blacklisted_ids);
+                sql.append(")");
+            }
+        }
+        
+        return sql.str;
     }
     
     // For a message row id, return a set of all folders it's in, or null if
