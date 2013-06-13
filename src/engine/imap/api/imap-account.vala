@@ -325,6 +325,18 @@ private class Geary.Imap.Account : BaseObject {
         if (response.status != Status.OK)
             throw_not_found(processed ?? parent);
         
+        // See note at ListCommand about some servers returning the parent's name alongside their
+        // children ... this filters this out
+        if (processed != null) {
+            MailboxSpecifier parent_spec = new MailboxSpecifier.from_folder_path(processed, null);
+            foreach (MailboxInformation mailbox_info in list_results.to_array()) {
+                if (mailbox_info.mailbox.equal_to(parent_spec)) {
+                    debug("Removing parent from LIST results: %s", parent_spec.to_string());
+                    list_results.remove(mailbox_info);
+                }
+            }
+        }
+        
         return (list_results.size > 0) ? list_results : null;
     }
     

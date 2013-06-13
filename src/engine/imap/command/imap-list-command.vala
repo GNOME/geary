@@ -7,6 +7,11 @@
 /**
  * See [[http://tools.ietf.org/html/rfc3501#section-6.3.8]]
  *
+ * Some implementations may return the mailbox name itself when using wildcarding.  For example:
+ * LIST "" "Parent/%"
+ * may return "Parent/Child" on most systems, but some will return "Parent" as well.  Callers
+ * should be aware of this when processing, especially if performing a recursive decent.
+ *
  * @see MailboxInformation
  */
 
