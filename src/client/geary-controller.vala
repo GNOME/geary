@@ -1007,14 +1007,11 @@ public class GearyController {
     }
     
     private void on_accounts() {
-        AccountDialog dialog = new AccountDialog();
-        dialog.run();
-        dialog.destroy();
+        AccountDialog.show_instance();
     }
     
     private void on_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(GearyApplication.instance.config);
-        dialog.run();
+        PreferencesDialog.show_instance();
     }
 
     private Gee.List<Geary.EmailIdentifier> get_selected_folder_email_ids(
