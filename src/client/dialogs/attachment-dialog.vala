@@ -86,7 +86,7 @@ public class AttachmentDialog : Gtk.FileChooserDialog {
             return;
         }
         
-        pixbuf.apply_embedded_orientation();
+        pixbuf = pixbuf.apply_embedded_orientation();
         
         // distribute the extra space around the image
         int extra_space = PREVIEW_SIZE - pixbuf.width;
