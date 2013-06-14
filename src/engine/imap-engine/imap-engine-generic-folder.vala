@@ -380,7 +380,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             CreateLocalEmailOperation? create_op = null;
             if (to_create_or_merge.size > 0) {
                 create_op = new CreateLocalEmailOperation(local_folder, to_create_or_merge,
-                    NORMALIZATION_FIELDS);
+                    normalization_fields);
                 batch.add(create_op);
             }
             
