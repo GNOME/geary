@@ -328,11 +328,12 @@ private class Geary.Imap.Account : BaseObject {
         // See note at ListCommand about some servers returning the parent's name alongside their
         // children ... this filters this out
         if (processed != null) {
-            MailboxSpecifier parent_spec = new MailboxSpecifier.from_folder_path(processed, null);
-            foreach (MailboxInformation mailbox_info in list_results.to_array()) {
-                if (mailbox_info.mailbox.equal_to(parent_spec)) {
-                    debug("Removing parent from LIST results: %s", parent_spec.to_string());
-                    list_results.remove(mailbox_info);
+            Gee.Iterator<MailboxInformation> iter = list_results.iterator();
+            while (iter.next()) {
+                FolderPath list_path = iter.get().mailbox.to_folder_path(processed.get_root().default_separator);
+                if (list_path.equal_to(processed)) {
+                    debug("Removing parent from LIST results: %s", list_path.to_string());
+                    iter.remove();
                 }
             }
         }
