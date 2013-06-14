@@ -462,10 +462,11 @@ public class Geary.RFC822.Message : BaseObject {
     /**
      * Return the body as a searchable string.  The body in this case should
      * include everything visible in the message's body in the client, which
-     * would be only one body part, plus any visible attachments.  Note that
-     * values that come out of this function are persisted.
+     * would be only one body part, plus any visible attachments (which can be
+     * disabled by passing false in include_sub_messages).  Note that values
+     * that come out of this function are persisted.
      */
-    public string? get_searchable_body() {
+    public string? get_searchable_body(bool include_sub_messages = true) {
         string? body = null;
         bool html = false;
         try {
@@ -478,13 +479,45 @@ public class Geary.RFC822.Message : BaseObject {
                 // Ignore.
             }
         }
-        if (body == null)
-            return null;
         
-        // TODO: add bodies of attached emails.
-        
-        if (html)
+        if (body != null && html)
             body = Geary.HTML.html_to_text(body);
+        
+        if (include_sub_messages) {
+            foreach (Message sub_message in get_sub_messages()) {
+                // We index a rough approximation of what a client would be
+                // displaying for each sub-message, including the subject,
+                // recipients, etc.  We can avoid attachments here because
+                // they're recursively picked up in the top-level message,
+                // indexed separately.
+                StringBuilder sub_full = new StringBuilder();
+                if (sub_message.subject != null) {
+                    sub_full.append(sub_message.subject.to_searchable_string());
+                    sub_full.append("\n");
+                }
+                if (sub_message.from != null) {
+                    sub_full.append(sub_message.from.to_searchable_string());
+                    sub_full.append("\n");
+                }
+                string? recipients = sub_message.get_searchable_recipients();
+                if (recipients != null) {
+                    sub_full.append(recipients);
+                    sub_full.append("\n");
+                }
+                // Our top-level get_sub_messages() recursively parses the
+                // whole MIME tree, so when we get the body for a sub-message,
+                // we don't need to invoke it again.
+                string? sub_body = sub_message.get_searchable_body(false);
+                if (sub_body != null)
+                    sub_full.append(sub_body);
+                
+                if (sub_full.len > 0) {
+                    if (body == null)
+                        body = "";
+                    body += "\n" + sub_full.str;
+                }
+            }
+        }
         
         return body;
     }
