@@ -7,6 +7,8 @@
 public class AccountDialog : Gtk.Dialog {
     private const int MARGIN = 12;
     
+    private static AccountDialog? account_dialog = null;
+    
     private Gtk.Notebook notebook = new Gtk.Notebook();
     private AccountDialogAccountListPane account_list_pane;
     private AccountDialogAddEditPane add_edit_pane;
@@ -14,7 +16,7 @@ public class AccountDialog : Gtk.Dialog {
     private AccountDialogRemoveConfirmPane remove_confirm_pane;
     private AccountDialogRemoveFailPane remove_fail_pane;
     
-    public AccountDialog() {
+    private AccountDialog() {
         set_size_request(450, -1); // Sets min size.
         title = _("Accounts");
         get_content_area().margin_top = MARGIN;
@@ -39,6 +41,8 @@ public class AccountDialog : Gtk.Dialog {
         remove_confirm_pane.ok.connect(on_delete_account_confirmed);
         remove_confirm_pane.cancel.connect(on_cancel_back_to_list);
         remove_fail_pane.ok.connect(on_cancel_back_to_list);
+        delete_event.connect(on_delete);
+        response.connect(on_close);
         
         // Set default page.
         account_list_pane.present();
@@ -52,8 +56,20 @@ public class AccountDialog : Gtk.Dialog {
         notebook.show_all(); // Required due to longstanding Gtk.Notebook bug
     }
     
+    public static void show_instance() {
+        if (account_dialog == null) {
+            account_dialog = new AccountDialog();
+        }
+        account_dialog.show_all();
+        account_dialog.present();
+    }
+    
+    private bool on_delete() {
+        return hide_on_delete();
+    }
+    
     private void on_close() {
-        destroy();
+        hide();
     }
     
     private void on_add_account() {
