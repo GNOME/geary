@@ -308,24 +308,30 @@ private class Geary.Imap.Folder : BaseObject {
         if (!msg_set.is_uid)
             cmds.add(new FetchCommand.data_type(msg_set, FetchDataType.UID));
         
-        // convert bulk of the "basic" fields into a single FETCH command
+        // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have
+        // exhibited bugs or return NO when too many FETCH data types are combined on a single
+        // command)
         FetchBodyDataIdentifier? partial_header_identifier = null;
         if (fields.requires_any(BASIC_FETCH_FIELDS)) {
             Gee.List<FetchDataType> data_types = new Gee.ArrayList<FetchDataType>();
             FetchBodyDataType? header_body_type;
             fields_to_fetch_data_types(fields, data_types, out header_body_type);
             
+            // Add all simple data types as one FETCH command
+            if (data_types.size > 0)
+                cmds.add(new FetchCommand(msg_set, data_types, null));
+            
+            // Add all body data types as separate FETCH command
             Gee.List<FetchBodyDataType>? body_data_types = null;
             if (header_body_type != null) {
                 body_data_types = new Gee.ArrayList<FetchBodyDataType>();
                 body_data_types.add(header_body_type);
                 
-                // save identifier for later
+                // save identifier for later decoding
                 partial_header_identifier = header_body_type.get_identifier();
+                
+                cmds.add(new FetchCommand(msg_set, null, body_data_types));
             }
-            
-            if (data_types.size > 0 || body_data_types != null)
-                cmds.add(new FetchCommand(msg_set, data_types, body_data_types));
         }
         
         // RFC822 BODY is a separate command

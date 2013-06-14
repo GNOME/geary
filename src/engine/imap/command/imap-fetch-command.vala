@@ -7,8 +7,9 @@
 /**
  * A representation of the IMAP FETCH command.
  *
- * FETCH is easily the most complicated IMAP command.  It has a number of parameters, some of which
- * have a number of variants, and the data that is returned requires involved decoding patterns.
+ * FETCH is easily the most complicated IMAP command.  It has a large number of parameters, some of
+ * which have a number of variants, others defined as macros combining other fields, and the
+ * returned {@link ServerData} requires involved decoding patterns.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-6.4.5]]
  *
