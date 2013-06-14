@@ -40,7 +40,8 @@
  
 public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     /**
-     * -1 if the Folder was not opened via SELECT or EXAMINE.
+     * -1 if the Folder was not opened via SELECT or EXAMINE.  Updated as EXISTS server data
+     * arrives.
      */
     public int select_examine_messages { get; private set; }
     /**
@@ -71,7 +72,7 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         init_flags();
     }
     
-    public FolderProperties.status(StatusResults status, MailboxAttributes attrs) {
+    public FolderProperties.status(StatusData status, MailboxAttributes attrs) {
         base (status.messages, status.unseen, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
         
         select_examine_messages = -1;
@@ -116,8 +117,6 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     }
     
     private void init_flags() {
-        supports_children = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_INFERIORS));
-        
         // \HasNoChildren & \HasChildren are optional attributes (could check for CHILDREN extension,
         // but unnecessary here)
         if (attrs.contains(MailboxAttribute.HAS_NO_CHILDREN))
@@ -126,6 +125,16 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
             has_children = Trillian.TRUE;
         else
             has_children = Trillian.UNKNOWN;
+        
+        // has_children implies supports_children
+        if (has_children != Trillian.UNKNOWN) {
+            supports_children = has_children;
+        } else {
+            // !supports_children implies !has_children
+            supports_children = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_INFERIORS));
+            if (supports_children.is_impossible())
+                has_children = Trillian.FALSE;
+        }
         
         is_openable = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_SELECT));
     }

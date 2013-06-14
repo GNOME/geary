@@ -9,6 +9,7 @@ namespace Args {
 private const OptionEntry[] options = {
     { "debug", 'd', 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
     { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Log conversation monitoring"), null },
+    { "log-deserializer", 0, 0, OptionArg.NONE, ref log_deserializer, N_("Log network deserialization"), null },
     { "log-network", 0, 0, OptionArg.NONE, ref log_network, N_("Log network activity"), null },
     /// The IMAP replay queue is how changes on the server are replicated on the client.
     /// It could also be called the IMAP events queue.
@@ -28,6 +29,7 @@ private const OptionEntry[] options = {
 public bool log_debug = false;
 public bool log_network = false;
 public bool log_serializer = false;
+public bool log_deserializer = false;
 public bool log_replay_queue = false;
 public bool log_conversations = false;
 public bool log_periodic = false;
@@ -93,6 +95,9 @@ public int parse(string[] args) {
     
     if (log_folder_normalization)
         Geary.Logging.enable_flags(Geary.Logging.Flag.FOLDER_NORMALIZATION);
+    
+    if (log_deserializer)
+        Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
     
     if (log_debug)
         Geary.Logging.log_to(stdout);

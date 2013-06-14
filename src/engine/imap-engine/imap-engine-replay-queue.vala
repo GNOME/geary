@@ -301,12 +301,16 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 break;
             }
             
+            // ReplayClose means this queue (and the folder) are closing, so handle errors a little
+            // differently
+            bool is_close_op = op is ReplayClose;
+            
             // wait until the remote folder is opened (or returns false, in which case closed)
             bool folder_opened = false;
             try {
                 if (yield remote_reporting_semaphore.wait_for_result_async())
                     folder_opened = true;
-                else
+                else if (!is_close_op)
                     debug("Folder %s closed or failed to open, remote replay queue closing", to_string());
             } catch (Error remote_err) {
                 debug("Error for remote queue waiting for remote %s to open, remote queue closing: %s", to_string(),
@@ -315,7 +319,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 // fall through
             }
             
-            if (op is ReplayClose)
+            if (is_close_op)
                 queue_running = false;
             
             remotely_executing(op);
@@ -331,11 +335,11 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                     
                     remote_err = replay_err;
                 }
-            } else {
+            } else if (!is_close_op) {
                 remote_err = new EngineError.SERVER_UNAVAILABLE("Folder %s not available", to_string());
             }
             
-            bool has_failed = (status == ReplayOperation.Status.FAILED);
+            bool has_failed = !is_close_op && (status == ReplayOperation.Status.FAILED);
             
             // COMPLETED == CONTINUE, only FAILED or exception of interest here
             if (remote_err != null || has_failed) {

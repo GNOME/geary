@@ -391,7 +391,7 @@ class ImapConsole : Gtk.Window {
         
         status("Listing...");
         cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(args[0],
-            new Geary.Imap.MailboxParameter(args[1]), (cmd.down() == "xlist")), null, on_list);
+            new Geary.Imap.MailboxSpecifier(args[1]), (cmd.down() == "xlist")), null, on_list);
     }
     
     private void on_list(Object? source, AsyncResult result) {
@@ -407,7 +407,7 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 1, "<mailbox>");
         
         status("Opening %s read-only".printf(args[0]));
-        cx.send_async.begin(new Geary.Imap.ExamineCommand(new Geary.Imap.MailboxParameter(args[0])),
+        cx.send_async.begin(new Geary.Imap.ExamineCommand(new Geary.Imap.MailboxSpecifier(args[0])),
             null, on_examine);
     }
     
@@ -429,9 +429,11 @@ class ImapConsole : Gtk.Window {
             ? new Geary.Imap.MessageSet.custom(args[0])
             : new Geary.Imap.MessageSet.uid_custom(args[0]);
         
-        Geary.Imap.FetchDataType[] data_items = new Geary.Imap.FetchDataType[0];
-        for (int ctr = 1; ctr < args.length; ctr++)
-            data_items += Geary.Imap.FetchDataType.decode(args[ctr]);
+        Gee.ArrayList<Geary.Imap.FetchDataType> data_items = new Gee.ArrayList<Geary.Imap.FetchDataType>();
+        for (int ctr = 1; ctr < args.length; ctr++) {
+            Geary.Imap.FetchDataType data_type = Geary.Imap.FetchDataType.decode(args[ctr]);
+            data_items.add(data_type);
+        }
         
         cx.send_async.begin(new Geary.Imap.FetchCommand(msg_set, data_items, null), null, on_fetch);
     }
@@ -486,7 +488,7 @@ class ImapConsole : Gtk.Window {
         for (int ctr = 1; ctr < args.length; ctr++)
             data_items += Geary.Imap.StatusDataType.decode(args[ctr]);
         
-        cx.send_async.begin(new Geary.Imap.StatusCommand(new Geary.Imap.MailboxParameter(args[0]),
+        cx.send_async.begin(new Geary.Imap.StatusCommand(new Geary.Imap.MailboxSpecifier(args[0]),
             data_items), null, on_get_status);
     }
     
@@ -598,6 +600,9 @@ class ImapConsole : Gtk.Window {
 
 void main(string[] args) {
     Gtk.init(ref args);
+    
+    Geary.Logging.set_flags(Geary.Logging.Flag.NETWORK);
+    Geary.Logging.log_to(stdout);
     
     ImapConsole console = new ImapConsole();
     console.show_all();

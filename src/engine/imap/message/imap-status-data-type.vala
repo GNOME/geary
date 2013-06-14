@@ -4,6 +4,14 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A representation of the types of data to be found in a STATUS response.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.2.4]]
+ *
+ * @see StatusData
+ */
+
 public enum Geary.Imap.StatusDataType {
     MESSAGES,
     RECENT,
@@ -60,7 +68,7 @@ public enum Geary.Imap.StatusDataType {
     }
     
     public StringParameter to_parameter() {
-        return new StringParameter(to_string());
+        return new AtomParameter(to_string());
     }
     
     public static StatusDataType from_parameter(StringParameter stringp) throws ImapError {

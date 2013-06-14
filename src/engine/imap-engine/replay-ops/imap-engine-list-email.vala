@@ -318,9 +318,11 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
                 list = needed_by_position;
             }
             
+            Imap.SequenceNumber[] seq_list = Imap.SequenceNumber.to_list(list);
+            
             // pull from server
             Gee.List<Geary.Email>? remote_list = yield engine.remote_folder.list_email_async(
-                new Imap.MessageSet.sparse(list), required_fields, cancellable);
+                new Imap.MessageSet.sparse(seq_list), required_fields, cancellable);
             if (remote_list == null || remote_list.size == 0)
                 break;
             

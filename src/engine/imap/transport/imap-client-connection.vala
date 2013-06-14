@@ -25,7 +25,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     /**
      * The default timeout for an issued command to result in a response code from the server.
-     * A timed-out command will result in the connection being forcibly closed.
+     *
+     * @see command_timeout_sec
      */
     public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 15;
     
@@ -75,10 +76,23 @@ public class Geary.Imap.ClientConnection : BaseObject {
     // Used solely for debugging
     private static int next_cx_id = 0;
     
+    /**
+     * The timeout in seconds before an uncompleted {@link Command} is considered abandoned.
+     *
+     * ClientConnection does not time out the initial greeting from the server (as there's no
+     * command associated with it).  That's the responsibility of the caller.
+     *
+     * A timed-out command will result in the connection being forcibly closed.
+     */
     public uint command_timeout_sec { get; set; default = DEFAULT_COMMAND_TIMEOUT_SEC; }
     
+    /**
+     * This identifier is used only for debugging, to differentiate connections from one another
+     * in logs and debug output.
+     */
+    public int cx_id { get; private set; }
+    
     private Geary.Endpoint endpoint;
-    private int cx_id;
     private Geary.State.Machine fsm;
     private SocketConnection? cx = null;
     private IOStream? ios = null;
@@ -326,6 +340,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
             cx = null;
             ios = null;
             
+            receive_failure(err);
+            
             throw err;
         }
     }
@@ -374,8 +390,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         // not buffering the Serializer because it buffers using a MemoryOutputStream and not
         // buffering the Deserializer because it uses a DataInputStream, which is buffered
-        ser = new Serializer(ios.output_stream);
-        des = new Deserializer(ios.input_stream);
+        ser = new Serializer(to_string(), ios.output_stream);
+        des = new Deserializer(to_string(), ios.input_stream);
         
         des.parameters_ready.connect(on_parameters_ready);
         des.bytes_received.connect(on_bytes_received);
@@ -429,29 +445,38 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
     
     private void on_parameters_ready(RootParameters root) {
+        ServerResponse response;
         try {
-            ServerResponse.Type response_type;
-            ServerResponse response = ServerResponse.migrate_from_server(root, out response_type);
-            
-            switch (response_type) {
-                case ServerResponse.Type.STATUS_RESPONSE:
-                    fsm.issue(Event.RECVD_STATUS_RESPONSE, null, response);
-                break;
-                
-                case ServerResponse.Type.SERVER_DATA:
-                    fsm.issue(Event.RECVD_SERVER_DATA, null, response);
-                break;
-                
-                case ServerResponse.Type.CONTINUATION_RESPONSE:
-                    fsm.issue(Event.RECVD_CONTINUATION_RESPONSE, null, response);
-                break;
-                
-                default:
-                    assert_not_reached();
-            }
+            response = ServerResponse.migrate_from_server(root);
         } catch (ImapError err) {
             received_bad_response(root, err);
+            
+            return;
         }
+        
+        StatusResponse? status_response = response as StatusResponse;
+        if (status_response != null) {
+            fsm.issue(Event.RECVD_STATUS_RESPONSE, null, status_response);
+            
+            return;
+        }
+        
+        ServerData? server_data = response as ServerData;
+        if (server_data != null) {
+            fsm.issue(Event.RECVD_SERVER_DATA, null, server_data);
+            
+            return;
+        }
+        
+        ContinuationResponse? continuation_response = response as ContinuationResponse;
+        if (continuation_response != null) {
+            fsm.issue(Event.RECVD_CONTINUATION_RESPONSE, null, continuation_response);
+            
+            return;
+        }
+        
+        error("[%s] Unknown ServerResponse of type %s received: %s:", to_string(), response.get_type().name(),
+            response.to_string());
     }
     
     private void on_bytes_received(size_t bytes) {
@@ -693,12 +718,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
     
     private void signal_status_response(void *user, Object? object) {
-        StatusResponse status_response = (StatusResponse) object;
+        StatusResponse? status_response = object as StatusResponse;
+        if (status_response != null && status_response.is_completion) {
+            // stop the countdown timer on the associated command
+            cmd_completed_timeout();
+        }
         
-        // stop the countdown timer on the associated command
-        cmd_completed_timeout();
-        
-        received_status_response(status_response);
+        received_status_response((StatusResponse) object);
     }
     
     private void signal_continuation(void *user, Object? object) {
@@ -796,7 +822,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         try {
             Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), "done");
-            ser.push_string("done");
+            ser.push_unquoted_string("done");
             ser.push_eol();
         } catch (Error err) {
             debug("[%s] Unable to close IDLE: %s", to_string(), err.message);

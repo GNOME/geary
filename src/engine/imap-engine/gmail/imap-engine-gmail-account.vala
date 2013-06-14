@@ -43,13 +43,13 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         if (path_type_map == null) {
             path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
             
-            path_type_map.set(new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
+            path_type_map.set(new Geary.FolderRoot(Imap.Account.INBOX_NAME, null,
                 Imap.Folder.CASE_SENSITIVE), SpecialFolderType.INBOX);
             
-            Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER,
-                Imap.Account.ASSUMED_SEPARATOR, Imap.Folder.CASE_SENSITIVE);
-            Geary.FolderPath googlemail_root = new Geary.FolderRoot(GOOGLEMAIL_FOLDER,
-                Imap.Account.ASSUMED_SEPARATOR, Imap.Folder.CASE_SENSITIVE);
+            Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER, null,
+                Imap.Folder.CASE_SENSITIVE);
+            Geary.FolderPath googlemail_root = new Geary.FolderRoot(GOOGLEMAIL_FOLDER, null,
+                Imap.Folder.CASE_SENSITIVE);
             
             path_type_map.set(gmail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);
             path_type_map.set(googlemail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);

@@ -85,6 +85,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return path;
     }
     
+    // Use with caution; ImapDB.Account uses this to "improve" the path with one from the server,
+    // which has a usable path delimiter.
+    internal void set_path(FolderPath path) {
+        this.path = path;
+    }
+    
     public Geary.Imap.FolderProperties get_properties() {
         return properties;
     }
@@ -129,6 +135,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 marked_removed.add_all(ids);
             else
                 marked_removed.remove_all(ids);
+        }
+    }
+    
+    private void clear_marked_removed() {
+        lock (marked_removed) {
+            marked_removed.clear();
         }
     }
     
@@ -514,6 +526,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return Imap.UID.is_value_valid(ordering) ? new Imap.UID(ordering) : null;
     }
     
+    // TODO: Rename to detach_email_async().
     public async void remove_email_async(Gee.Collection<Geary.EmailIdentifier> ids,
         Cancellable? cancellable = null) throws Error {
         check_open();
@@ -537,6 +550,20 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             // Remove any that may have been marked removed
             mark_unmark_removed(ids, false);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+    }
+    
+    public async void detach_all_emails_async(Cancellable? cancellable) throws Error {
+        check_open();
+        
+        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "DELETE FROM MessageLocationTable WHERE folder_id=?");
+            stmt.bind_rowid(0, folder_id);
+            
+            clear_marked_removed();
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
@@ -1120,7 +1147,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private void do_set_email_flags(Db.Connection cx, Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map,
         Cancellable? cancellable) throws Error {
         Db.Statement update_stmt = cx.prepare(
-            "UPDATE MessageTable SET flags=? WHERE id=?");
+            "UPDATE MessageTable SET flags=?, fields = fields | ? WHERE id=?");
         
         foreach (Geary.EmailIdentifier id in map.keys) {
             int64 message_id = do_find_message(cx, id, ListFlags.NONE, cancellable);
@@ -1131,7 +1158,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             update_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
             update_stmt.bind_string(0, flags.serialize());
-            update_stmt.bind_rowid(1, message_id);
+            update_stmt.bind_int(1, Geary.Email.Field.FLAGS);
+            update_stmt.bind_rowid(2, message_id);
             
             update_stmt.exec(cancellable);
         }

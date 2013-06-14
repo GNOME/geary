@@ -22,7 +22,8 @@ public enum Flag {
     CONVERSATIONS,
     PERIODIC,
     SQL,
-    FOLDER_NORMALIZATION;
+    FOLDER_NORMALIZATION,
+    DESERIALIZER;
     
     public inline bool is_all_set(Flag flags) {
         return (flags & this) == flags;

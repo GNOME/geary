@@ -43,7 +43,7 @@ public abstract class Geary.Imap.FetchDataDecoder : BaseObject {
             // reasonably-length literals into StringParameters), do so here manually
             try {
                 if (literalp.get_size() <= ListParameter.MAX_STRING_LITERAL_LENGTH)
-                    return decode_string(literalp.to_string_parameter());
+                    return decode_string(literalp.coerce_to_string_parameter());
             } catch (ImapError imap_err) {
                 // if decode_string() throws a TYPE_ERROR, retry as a LiteralParameter, otherwise
                 // relay the exception to the caller

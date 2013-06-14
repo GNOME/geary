@@ -7,16 +7,13 @@
 private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private const int REFRESH_FOLDER_LIST_SEC = 10 * 60;
     
-    private static Geary.FolderPath? inbox_path = null;
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
     
     private Imap.Account remote;
     private ImapDB.Account local;
     private bool open = false;
-    private Gee.HashMap<FolderPath, Imap.FolderProperties> properties_map = new Gee.HashMap<
-        FolderPath, Imap.FolderProperties>();
-    private Gee.HashMap<FolderPath, GenericFolder> existing_folders = new Gee.HashMap<
+    private Gee.HashMap<FolderPath, GenericFolder> folder_map = new Gee.HashMap<
         FolderPath, GenericFolder>();
     private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>();
     private uint refresh_folder_timeout_id = 0;
@@ -95,7 +92,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         notify_opened();
 
-        notify_folders_available_unavailable(local_only.values, null);
+        notify_folders_available_unavailable(sort_by_path(local_only.values), null);
         
         // schedule an immediate sweep of the folders; once this is finished, folders will be
         // regularly enumerated
@@ -106,8 +103,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (!open)
             return;
 
-        notify_folders_available_unavailable(null, local_only.values);
-        notify_folders_available_unavailable(null, existing_folders.values);
+        notify_folders_available_unavailable(null, sort_by_path(local_only.values));
+        notify_folders_available_unavailable(null, sort_by_path(folder_map.values));
         
         local.outbox.report_problem.disconnect(notify_report_problem);
         
@@ -125,9 +122,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         } catch (Error rclose_err) {
             remote_err = rclose_err;
         }
-
-        properties_map.clear();
-        existing_folders.clear();
+        
+        folder_map.clear();
         local_only.clear();
         open = false;
         
@@ -158,38 +154,38 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.ArrayList<ImapDB.Folder> folders_to_build = new Gee.ArrayList<ImapDB.Folder>();
         Gee.ArrayList<GenericFolder> built_folders = new Gee.ArrayList<GenericFolder>();
         Gee.ArrayList<GenericFolder> return_folders = new Gee.ArrayList<GenericFolder>();
-
+        
         foreach(ImapDB.Folder local_folder in local_folders) {
-            if (existing_folders.has_key(local_folder.get_path()))
-                return_folders.add(existing_folders.get(local_folder.get_path()));
+            if (folder_map.has_key(local_folder.get_path()))
+                return_folders.add(folder_map.get(local_folder.get_path()));
             else
                 folders_to_build.add(local_folder);
         }
-
+        
         foreach(ImapDB.Folder folder_to_build in folders_to_build) {
             GenericFolder folder = new_folder(folder_to_build.get_path(), remote, local, folder_to_build);
-            existing_folders.set(folder.get_path(), folder);
+            folder_map.set(folder.get_path(), folder);
             built_folders.add(folder);
             return_folders.add(folder);
         }
-
+        
         if (built_folders.size > 0)
-            notify_folders_available_unavailable(built_folders, null);
+            notify_folders_available_unavailable(sort_by_path(built_folders), null);
         
         return return_folders;
     }
     
-    public override Gee.Collection<Geary.Folder> list_matching_folders(
-        Geary.FolderPath? parent) throws Error {
+    public override Gee.Collection<Geary.Folder> list_matching_folders(Geary.FolderPath? parent)
+        throws Error {
         check_open();
         
         Gee.ArrayList<Geary.Folder> matches = new Gee.ArrayList<Geary.Folder>();
-
-        foreach(FolderPath path in existing_folders.keys) {
+        
+        foreach(FolderPath path in folder_map.keys) {
             FolderPath? path_parent = path.get_parent();
             if ((parent == null && path_parent == null) ||
                 (parent != null && path_parent != null && path_parent.equal_to(parent))) {
-                matches.add(existing_folders.get(path));
+                matches.add(folder_map.get(path));
             }
         }
         return matches;
@@ -224,7 +220,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     private bool on_refresh_folders() {
         in_refresh_enumerate = true;
-        enumerate_folders_async.begin(null, refresh_cancellable, on_refresh_completed);
+        enumerate_folders_async.begin(refresh_cancellable, on_refresh_completed);
         
         refresh_folder_timeout_id = 0;
         
@@ -243,29 +239,81 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         reschedule_folder_refresh(false);
     }
     
-    private async void enumerate_folders_async(Geary.FolderPath? parent, Cancellable? cancellable = null)
-        throws Error {
+    private async void enumerate_folders_async(Cancellable? cancellable) throws Error {
         check_open();
         
-        Gee.Collection<ImapDB.Folder>? local_list = null;
+        // get all local folders
+        Gee.HashMap<FolderPath, ImapDB.Folder> local_children = yield enumerate_local_folders_async(null,
+            cancellable);
+        
+        // convert to a list of Geary.Folder ... build_folder() also reports new folders, so this
+        // gets the word out quickly
+        Gee.Collection<Geary.Folder> existing_list = new Gee.ArrayList<Geary.Folder>();
+        existing_list.add_all(build_folders(local_children.values));
+        existing_list.add_all(local_only.values);
+        
+        Gee.HashMap<FolderPath, Geary.Folder> existing_folders = new Gee.HashMap<FolderPath, Geary.Folder>();
+        foreach (Geary.Folder folder in existing_list)
+            existing_folders.set(folder.get_path(), folder);
+        
+        // get all remote (server) folder paths
+        Gee.HashMap<FolderPath, Imap.Folder> remote_folders = yield enumerate_remote_folders_async(null,
+            cancellable);
+        
+        // combine the two and make sure everything is up-to-date
+        yield update_folders_async(existing_folders, remote_folders, cancellable);
+    }
+    
+    private async Gee.HashMap<FolderPath, ImapDB.Folder> enumerate_local_folders_async(
+        Geary.FolderPath? parent, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        Gee.Collection<ImapDB.Folder>? local_children = null;
         try {
-            local_list = yield local.list_folders_async(parent, cancellable);
+            local_children = yield local.list_folders_async(parent, cancellable);
         } catch (EngineError err) {
             // don't pass on NOT_FOUND's, that means we need to go to the server for more info
             if (!(err is EngineError.NOT_FOUND))
                 throw err;
         }
         
-        Gee.Collection<Geary.Folder> engine_list = new Gee.ArrayList<Geary.Folder>();
-        if (local_list != null && local_list.size > 0) {
-            engine_list.add_all(build_folders(local_list));
+        Gee.HashMap<FolderPath, ImapDB.Folder> result = new Gee.HashMap<FolderPath, ImapDB.Folder>();
+        if (local_children != null) {
+            foreach (ImapDB.Folder local_child in local_children) {
+                result.set(local_child.get_path(), local_child);
+                Collection.map_set_all<FolderPath, ImapDB.Folder>(result,
+                    yield enumerate_local_folders_async(local_child.get_path(), cancellable));
+            }
         }
         
-        // Add local folders (assume that local-only folders always go in root)
-        if (parent == null)
-            engine_list.add_all(local_only.values);
+        return result;
+    }
+    
+    private async Gee.HashMap<FolderPath, Imap.Folder> enumerate_remote_folders_async(
+        Geary.FolderPath? parent, Cancellable? cancellable) throws Error {
+        check_open();
         
-        background_update_folders.begin(parent, engine_list, cancellable);
+        Gee.List<Imap.Folder>? remote_children = null;
+        try {
+            remote_children = yield remote.list_child_folders_async(parent, cancellable);
+        } catch (Error err) {
+            // ignore everything but I/O errors
+            if (err is IOError)
+                throw err;
+        }
+        
+        Gee.HashMap<FolderPath, Imap.Folder> result = new Gee.HashMap<FolderPath, Imap.Folder>();
+        if (remote_children != null) {
+            foreach (Imap.Folder remote_child in remote_children) {
+                result.set(remote_child.path, remote_child);
+                if (remote_child.properties.has_children.is_possible()) {
+                    Collection.map_set_all<FolderPath, Imap.Folder>(result,
+                        yield enumerate_remote_folders_async(remote_child.path, cancellable));
+                }
+            }
+        }
+        
+        return result;
     }
     
     public override Geary.ContactStore get_contact_store() {
@@ -317,155 +365,97 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return build_folder((ImapDB.Folder) yield local.fetch_folder_async(path, cancellable));
     }
     
-    private async void background_update_folders(Geary.FolderPath? parent,
-        Gee.Collection<Geary.Folder> engine_folders, Cancellable? cancellable) {
-        Gee.Collection<Geary.Imap.Folder> remote_folders;
-        try {
-            remote_folders = yield remote.list_folders_async(parent, cancellable);
-        } catch (Error remote_error) {
-            debug("Unable to retrieve folder list from server: %s", remote_error.message);
-            
-            return;
-        }
-        
+    private async void update_folders_async(Gee.Map<FolderPath, Geary.Folder> existing_folders,
+        Gee.Map<FolderPath, Imap.Folder> remote_folders, Cancellable? cancellable) {
         // update all remote folders properties in the local store and active in the system
         Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>();
-        foreach (Imap.Folder remote_folder in remote_folders) {
+        foreach (Imap.Folder remote_folder in remote_folders.values) {
+            GenericFolder? generic_folder = existing_folders.get(remote_folder.path)
+                as GenericFolder;
+            if (generic_folder == null)
+                continue;
+            
             // only worry about alterations if the remote is openable
-            if (remote_folder.get_properties().is_openable.is_possible()) {
-                ImapDB.Folder? local_folder = null;
-                try {
-                    local_folder = yield local.fetch_folder_async(remote_folder.get_path(), cancellable);
-                } catch (Error err) {
-                    if (!(err is EngineError.NOT_FOUND)) {
-                        debug("Unable to fetch local folder for remote %s: %s", remote_folder.get_path().to_string(),
-                            err.message);
-                    }
-                }
-                
-                if (local_folder != null) {
-                    if (remote_folder.get_properties().have_contents_changed(local_folder.get_properties()).is_possible())
-                        altered_paths.add(remote_folder.get_path());
-                }
+            if (remote_folder.properties.is_openable.is_possible()) {
+                ImapDB.Folder local_folder = generic_folder.local_folder;
+                if (remote_folder.properties.have_contents_changed(local_folder.get_properties()).is_possible())
+                    altered_paths.add(remote_folder.path);
             }
             
+            // always update, openable or not
             try {
                 yield local.update_folder_status_async(remote_folder, cancellable);
             } catch (Error update_error) {
                 debug("Unable to update local folder %s with remote properties: %s",
                     remote_folder.to_string(), update_error.message);
             }
-        }
-        
-        // Get local paths of all engine (local) folders
-        Gee.Set<Geary.FolderPath> local_paths = new Gee.HashSet<Geary.FolderPath>();
-        foreach (Geary.Folder local_folder in engine_folders)
-            local_paths.add(local_folder.get_path());
-        
-        // Get remote paths of all remote folders
-        Gee.Set<Geary.FolderPath> remote_paths = new Gee.HashSet<Geary.FolderPath>();
-        foreach (Geary.Imap.Folder remote_folder in remote_folders) {
-            remote_paths.add(remote_folder.get_path());
             
-            // use this iteration to add discovered properties to map
-            properties_map.set(remote_folder.get_path(), remote_folder.get_properties());
-            
-            // also use this iteration to set the local folder's special type
+            // set the engine folder's special type
             // (but only promote, not demote, since getting the special folder type via its
             // properties relies on the optional XLIST extension)
-            GenericFolder? local_folder = existing_folders.get(remote_folder.get_path());
-            if (local_folder != null && local_folder.get_special_folder_type() == SpecialFolderType.NONE)
-                local_folder.set_special_folder_type(remote_folder.get_properties().attrs.get_special_folder_type());
+            // use this iteration to add discovered properties to map
+            if (generic_folder.get_special_folder_type() == SpecialFolderType.NONE)
+                generic_folder.set_special_folder_type(remote_folder.properties.attrs.get_special_folder_type());
         }
         
         // If path in remote but not local, need to add it
-        Gee.List<Geary.Imap.Folder> to_add = new Gee.ArrayList<Geary.Imap.Folder>();
-        foreach (Geary.Imap.Folder folder in remote_folders) {
-            if (!local_paths.contains(folder.get_path()))
-                to_add.add(folder);
+        Gee.List<Imap.Folder>? to_add = new Gee.ArrayList<Imap.Folder>();
+        foreach (Imap.Folder remote_folder in remote_folders.values) {
+            if (!existing_folders.has_key(remote_folder.path))
+                to_add.add(remote_folder);
         }
         
-        // If path in local but not remote (and isn't local-only, i.e. the Outbox), need to remove
-        // it
-        Gee.List<Geary.Folder>? to_remove = new Gee.ArrayList<Geary.Imap.Folder>();
-        foreach (Geary.Folder folder in engine_folders) {
-            if (!remote_paths.contains(folder.get_path()) && !local_only.keys.contains(folder.get_path()))
-                to_remove.add(folder);
+        // If path in local but not remote (and isn't local-only, i.e. the Outbox), need to remove it
+        Gee.List<Geary.Folder>? to_remove = new Gee.ArrayList<Geary.Folder>();
+        foreach (Geary.FolderPath existing_path in existing_folders.keys) {
+            if (!remote_folders.has_key(existing_path) && !local_only.has_key(existing_path))
+                to_remove.add(existing_folders.get(existing_path));
         }
-        
-        if (to_add.size == 0)
-            to_add = null;
-        
-        if (to_remove.size == 0)
-            to_remove = null;
         
         // For folders to add, clone them and their properties locally
-        if (to_add != null) {
-            foreach (Geary.Imap.Folder folder in to_add) {
-                try {
-                    yield local.clone_folder_async(folder, cancellable);
-                } catch (Error err) {
-                    debug("Unable to add/remove folder %s: %s", folder.get_path().to_string(),
-                        err.message);
-                }
+        foreach (Geary.Imap.Folder remote_folder in to_add) {
+            try {
+                yield local.clone_folder_async(remote_folder, cancellable);
+            } catch (Error err) {
+                debug("Unable to add/remove folder %s to local store: %s", remote_folder.path.to_string(),
+                    err.message);
             }
         }
         
         // Create Geary.Folder objects for all added folders
-        Gee.Collection<Geary.Folder> engine_added = null;
-        if (to_add != null) {
-            engine_added = new Gee.ArrayList<Geary.Folder>();
-
-            Gee.ArrayList<ImapDB.Folder> folders_to_build = new Gee.ArrayList<ImapDB.Folder>();
-            foreach (Geary.Imap.Folder remote_folder in to_add) {
-                try {
-                    folders_to_build.add((ImapDB.Folder) yield local.fetch_folder_async(
-                        remote_folder.get_path(), cancellable));
-                } catch (Error convert_err) {
-                    // This isn't fatal, but irksome ... in the future, when local folders are
-                    // removed, it's possible for one to disappear between cloning it and fetching
-                    // it
-                    debug("Unable to fetch local folder after cloning: %s", convert_err.message);
-                }
+        Gee.ArrayList<ImapDB.Folder> folders_to_build = new Gee.ArrayList<ImapDB.Folder>();
+        foreach (Geary.Imap.Folder remote_folder in to_add) {
+            try {
+                folders_to_build.add(yield local.fetch_folder_async(remote_folder.path, cancellable));
+            } catch (Error convert_err) {
+                // This isn't fatal, but irksome ... in the future, when local folders are
+                // removed, it's possible for one to disappear between cloning it and fetching
+                // it
+                debug("Unable to fetch local folder after cloning: %s", convert_err.message);
             }
-
-            engine_added.add_all(build_folders(folders_to_build));
         }
+        Gee.Collection<Geary.Folder> engine_added = new Gee.ArrayList<Geary.Folder>();
+        engine_added.add_all(build_folders(folders_to_build));
         
         // TODO: Remove local folders no longer available remotely.
-        if (to_remove != null) {
-            foreach (Geary.Folder folder in to_remove) {
-                debug(@"Need to remove folder $folder");
-            }
-        }
+        foreach (Geary.Folder folder in to_remove)
+            debug(@"Need to remove folder $folder");
         
-        if (engine_added != null)
-            notify_folders_added_removed(engine_added, null);
+        if (engine_added.size > 0)
+            notify_folders_added_removed(sort_by_path(engine_added), null);
         
         // report all altered folders
         if (altered_paths.size > 0) {
             Gee.ArrayList<Geary.Folder> altered = new Gee.ArrayList<Geary.Folder>();
-            foreach (Geary.FolderPath path in altered_paths) {
-                if (existing_folders.has_key(path))
-                    altered.add(existing_folders.get(path));
+            foreach (Geary.FolderPath altered_path in altered_paths) {
+                if (existing_folders.has_key(altered_path))
+                    altered.add(existing_folders.get(altered_path));
                 else
-                    debug("Unable to report %s altered: no local representation", path.to_string());
+                    debug("Unable to report %s altered: no local representation", altered_path.to_string());
             }
             
             if (altered.size > 0)
                 notify_folders_contents_altered(altered);
-        }
-        
-        // enumerate children of each remote folder
-        foreach (Imap.Folder remote_folder in remote_folders) {
-            if (remote_folder.get_properties().has_children.is_possible()) {
-                try {
-                    yield enumerate_folders_async(remote_folder.get_path(), cancellable);
-                } catch (Error err) {
-                    debug("Unable to enumerate children of %s: %s", remote_folder.get_path().to_string(),
-                        err.message);
-                }
-            }
         }
     }
     

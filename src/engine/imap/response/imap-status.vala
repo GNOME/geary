@@ -4,6 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * An optional status code accompanying a {@link ServerResponse}.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
+ */
+
 public enum Geary.Imap.Status {
     OK,
     NO,
@@ -60,11 +66,7 @@ public enum Geary.Imap.Status {
     }
     
     public Parameter to_parameter() {
-        return new StringParameter(to_string());
-    }
-    
-    public void serialize(Serializer ser) throws Error {
-        ser.push_string(to_string());
+        return new AtomParameter(to_string());
     }
 }
 

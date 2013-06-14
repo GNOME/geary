@@ -4,50 +4,57 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A response sent from the server to client.
+ *
+ * ServerResponses can take various shapes, including tagged/untagged and some common forms where
+ * status and status text are supplied.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7]] for more information.
+ */
+
 public abstract class Geary.Imap.ServerResponse : RootParameters {
-    public enum Type {
-        STATUS_RESPONSE,
-        SERVER_DATA,
-        CONTINUATION_RESPONSE
-    }
-    
     public Tag tag { get; private set; }
     
-    public ServerResponse(Tag tag) {
+    protected ServerResponse(Tag tag) {
         this.tag = tag;
     }
     
+    /**
+     * Converts the {@link RootParameters} into a ServerResponse.
+     *
+     * The supplied root is "stripped" of its children.
+     */
     public ServerResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
         
-        tag = new Tag.from_parameter((StringParameter) get_as(0, typeof(StringParameter)));
+        if (!has_tag())
+            throw new ImapError.INVALID("Server response does not have a tag token: %s", to_string());
+        
+        tag = get_tag();
     }
     
-    // The RootParameters are migrated and will be stripped upon exit.
-    public static ServerResponse migrate_from_server(RootParameters root, out Type response_type)
-        throws ImapError {
-        Tag tag = new Tag.from_parameter(root.get_as_string(0));
-        if (tag.is_tagged()) {
-            // Attempt to decode second parameter for predefined status codes (piggyback on
-            // Status.decode's exception if this is invalid)
-            StringParameter? statusparam = root.get_if_string(1);
-            if (statusparam != null)
-                Status.decode(statusparam.value);
-            
-            // tagged and has proper status, so it's a status response
-            response_type = Type.STATUS_RESPONSE;
-            
-            return new StatusResponse.migrate(root);
-        } else if (tag.is_continuation()) {
-            // nothing to decode; everything after the tag is human-readable stuff
-            response_type = Type.CONTINUATION_RESPONSE;
-            
+    /**
+     * Migrate the contents of RootParameters into a new, properly-typed ServerResponse.
+     *
+     * The returned ServerResponse may be a {@link ContinuationResponse}, {@link ServerData},
+     * or a generic {@link StatusResponse}.
+     *
+     * The RootParameters will be migrated and stripped clean upon exit.
+     *
+     * @throws ImapError.PARSE_ERROR if not a known form of ServerResponse.
+     */
+    public static ServerResponse migrate_from_server(RootParameters root) throws ImapError {
+        if (ContinuationResponse.is_continuation_response(root))
             return new ContinuationResponse.migrate(root);
-        }
         
-        response_type = Type.SERVER_DATA;
+        if (StatusResponse.is_status_response(root))
+            return new StatusResponse.migrate(root);
         
-        return new ServerData.migrate(root);
+        if (ServerData.is_server_data(root))
+            return new ServerData.migrate(root);
+        
+        throw new ImapError.PARSE_ERROR("Unknown server response: %s", root.to_string());
     }
 }
 

@@ -218,7 +218,7 @@ public class Geary.Engine : BaseObject {
             return error_code;
         
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
-        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint(), true);
+        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint());
         try {
             yield imap_session.connect_async(cancellable);
         } catch (Error err) {
@@ -231,7 +231,7 @@ public class Geary.Engine : BaseObject {
                 yield imap_session.initiate_session_async(account.imap_credentials, cancellable);
                 
                 // Connected and initiated, still need to be sure connection authorized
-                string current_mailbox;
+                Imap.MailboxSpecifier current_mailbox;
                 if (imap_session.get_context(out current_mailbox) != Imap.ClientSession.Context.AUTHORIZED)
                     error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
             } catch (Error err) {

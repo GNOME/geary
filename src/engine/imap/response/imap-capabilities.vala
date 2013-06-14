@@ -7,10 +7,12 @@
 public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     public const string IDLE = "IDLE";
     public const string STARTTLS = "STARTTLS";
+    public const string XLIST = "XLIST";
     public const string COMPRESS = "COMPRESS";
     public const string DEFLATE_SETTING = "DEFLATE";
+    public const string UIDPLUS = "UIDPLUS";
     
-    public const string NAME_SEPARATOR = " ";
+    public const string NAME_SEPARATOR = "=";
     public const string? VALUE_SEPARATOR = null;
     
     public int revision { get; private set; }

@@ -4,8 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * An optional response code accompanying a {@link ServerResponse}.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
+ */
+
 public enum Geary.Imap.ResponseCodeType {
     ALERT,
+    AUTHENTICATIONFAILED,
+    AUTHORIZATIONFAILED,
+    BADCHARSET,
+    CAPABILITY,
     NEWNAME,
     PARSE,
     PERMANENT_FLAGS,
@@ -15,12 +25,29 @@ public enum Geary.Imap.ResponseCodeType {
     UIDVALIDITY,
     UIDNEXT,
     UNSEEN,
-    MYRIGHTS;
+    MYRIGHTS,
+    UNAVAILABLE,
+    SERVERBUG,
+    CLIENTBUG,
+    ALREADYEXISTS,
+    NONEXISTANT;
     
     public string to_string() {
         switch (this) {
             case ALERT:
                 return "alert";
+            
+            case AUTHENTICATIONFAILED:
+                return "authenticationfailed";
+            
+            case AUTHORIZATIONFAILED:
+                return "authorizationfailed";
+            
+            case BADCHARSET:
+                return "badcharset";
+            
+            case CAPABILITY:
+                return "capability";
             
             case NEWNAME:
                 return "newname";
@@ -52,6 +79,21 @@ public enum Geary.Imap.ResponseCodeType {
             case MYRIGHTS:
                 return "myrights";
             
+            case UNAVAILABLE:
+                return "unavailable";
+            
+            case SERVERBUG:
+                return "serverbug";
+            
+            case CLIENTBUG:
+                return "clientbug";
+            
+            case ALREADYEXISTS:
+                return "alreadyexists";
+            
+            case NONEXISTANT:
+                return "nonexistant";
+            
             default:
                 assert_not_reached();
         }
@@ -61,6 +103,18 @@ public enum Geary.Imap.ResponseCodeType {
         switch (value.down()) {
             case "alert":
                 return ALERT;
+            
+            case "authenticationfailed":
+                return AUTHENTICATIONFAILED;
+            
+            case "authorizationfailed":
+                return AUTHORIZATIONFAILED;
+            
+            case "badcharset":
+                return BADCHARSET;
+            
+            case "capability":
+                return CAPABILITY;
             
             case "newname":
                 return NEWNAME;
@@ -92,6 +146,21 @@ public enum Geary.Imap.ResponseCodeType {
             case "myrights":
                 return MYRIGHTS;
             
+            case "unavailable":
+                return UNAVAILABLE;
+            
+            case "serverbug":
+                return SERVERBUG;
+            
+            case "clientbug":
+                return CLIENTBUG;
+            
+            case "alreadyexists":
+                return ALREADYEXISTS;
+            
+            case "nonexistant":
+                return NONEXISTANT;
+            
             default:
                 throw new ImapError.PARSE_ERROR("Unknown response code \"%s\"", value);
         }
@@ -102,7 +171,7 @@ public enum Geary.Imap.ResponseCodeType {
     }
     
     public StringParameter to_parameter() {
-        return new StringParameter(to_string());
+        return new AtomParameter(to_string());
     }
 }
 

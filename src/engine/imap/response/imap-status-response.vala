@@ -4,48 +4,113 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A response line from the server indicating either a result from a command or an unsolicited
+ * change in state.
+ *
+ * StatusResponses may be tagged or untagged, depending on their nature.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
+ *
+ * @see ServerResponse.migrate_from_server
+ */
+
 public class Geary.Imap.StatusResponse : ServerResponse {
-    public Status status { get; private set; }
-    public ResponseCode? response_code { get; private set; }
-    public string? text { get; private set; }
+    /**
+     * Returns true if this {@link StatusResponse} represents the completion of a {@link Command}.
+     *
+     * This is true if (a) the StatusResponse is tagged and (b) the {@link status} is
+     * {@link Status.OK}, {@link Status.NO}, or {@link Status.BAD}.
+     */
+    public bool is_completion { get; private set; default = false; }
     
-    public StatusResponse(Tag tag, Status status, ResponseCode? response_code, string? text) {
+    /**
+     * The {@link Status} being reported by the server in this {@link ServerResponse}.
+     */
+    public Status status { get; private set; }
+    
+    /**
+     * An optional {@link ResponseCode} reported by the server in this {@link ServerResponse}.
+     */
+    public ResponseCode? response_code { get; private set; }
+    
+    private StatusResponse(Tag tag, Status status, ResponseCode? response_code) {
         base (tag);
         
         this.status = status;
         this.response_code = response_code;
-        this.text = text;
-        
-        add(status.to_parameter());
-        if (response_code != null)
-            add(response_code);
-        if (text != null)
-            add(new StringParameter(text));
+        update_is_completion();
     }
     
+    /**
+     * Converts the {@link RootParameters} into a {@link StatusResponse}.
+     *
+     * The supplied root is "stripped" of its children.  This may happen even if an exception is
+     * thrown.  It's recommended to use {@link is_status_response} prior to this call.
+     */
     public StatusResponse.migrate(RootParameters root) throws ImapError {
         base.migrate(root);
         
-        status = Status.from_parameter((StringParameter) get_as(1, typeof(StringParameter)));
-        response_code = (ResponseCode?) get_if(2, typeof(ResponseCode));
-        text = (response_code != null) ? flatten_to_text(3) : flatten_to_text(2);
+        status = Status.from_parameter(get_as_string(1));
+        response_code = get_if_list(2) as ResponseCode;
+        update_is_completion();
     }
     
-    private string? flatten_to_text(int start_index) throws ImapError {
+    private void update_is_completion() {
+        // TODO: Is this too stringent?  It means a faulty server could send back a completion
+        // with another Status code and cause the client to treat the command as "unanswered",
+        // requiring a timeout.
+        is_completion = false;
+        if (tag.is_tagged()) {
+            switch (status) {
+                case Status.OK:
+                case Status.NO:
+                case Status.BAD:
+                    is_completion = true;
+                break;
+                
+                default:
+                    // fall through
+                break;
+            }
+        }
+    }
+    
+    /**
+     * Returns optional text provided by the server.  Note that this text is not internationalized
+     * and probably in English, and is not standard or uniformly declared.  It's not recommended
+     * this text be displayed to the user.
+     */
+    public string? get_text() {
+        // build text from all StringParameters ... this will skip any ResponseCode or ListParameter
+        // (or NilParameter, for that matter)
         StringBuilder builder = new StringBuilder();
-        
-        while (start_index < get_count()) {
-            StringParameter? strparam = get_if_string(start_index);
+        for (int index = 2; index < get_count(); index++) {
+            StringParameter? strparam = get_if_string(index);
             if (strparam != null) {
                 builder.append(strparam.value);
-                if (start_index < (get_count() - 1))
+                if (index < (get_count() - 1))
                     builder.append_c(' ');
             }
-            
-            start_index++;
         }
         
         return !String.is_empty(builder.str) ? builder.str : null;
+    }
+    
+    /**
+     * Returns true if {@link RootParameters} holds a {@link Status} parameter.
+     */
+    public static bool is_status_response(RootParameters root) {
+        if (!root.has_tag())
+            return false;
+        
+        try {
+            Status.from_parameter(root.get_as_string(1));
+            
+            return true;
+        } catch (ImapError err) {
+            return false;
+        }
     }
 }
 

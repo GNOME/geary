@@ -27,18 +27,31 @@ public interface Geary.Account : BaseObject {
     
     /**
      * Fired when folders become available or unavailable in the account.
+     *
      * Folders become available when the account is first opened or when
      * they're created later; they become unavailable when the account is
      * closed or they're deleted later.
+     *
+     * Folders are ordered for the convenience of the caller from the top of the heirarchy to
+     * lower in the heirarchy.  In other words, parents are listed before children, assuming the
+     * lists are traversed in natural order.
+     *
+     * @see sort_by_path
      */
-    public signal void folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable);
+    public signal void folders_available_unavailable(Gee.List<Geary.Folder>? available,
+        Gee.List<Geary.Folder>? unavailable);
 
     /**
      * Fired when folders are created or deleted.
+     *
+     * Folders are ordered for the convenience of the caller from the top of the heirarchy to
+     * lower in the heirarchy.  In other words, parents are listed before children, assuming the
+     * lists are traversed in natural order.
+     *
+     * @see sort_by_path
      */
-    public signal void folders_added_removed(Gee.Collection<Geary.Folder>? added,
-        Gee.Collection<Geary.Folder>? removed);
+    public signal void folders_added_removed(Gee.List<Geary.Folder>? added,
+        Gee.List<Geary.Folder>? removed);
     
     /**
      * Fired when a Folder's contents is detected having changed.
@@ -68,19 +81,35 @@ public interface Geary.Account : BaseObject {
     /**
      * Signal notification method for subclasses to use.
      */
-    public abstract void notify_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable);
-
+    protected abstract void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
+        Gee.List<Geary.Folder>? unavailable);
+    
     /**
      * Signal notification method for subclasses to use.
      */
-    protected abstract void notify_folders_added_removed(Gee.Collection<Geary.Folder>? added,
-        Gee.Collection<Geary.Folder>? removed);
+    protected abstract void notify_folders_added_removed(Gee.List<Geary.Folder>? added,
+        Gee.List<Geary.Folder>? removed);
     
     /**
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered);
+    
+    /**
+     * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
+     * to ensure they comport with {@link folders_available_unavailable} and
+     * {@link folders_added_removed} signals' contracts.
+     */
+    protected Gee.List<Geary.Folder> sort_by_path(Gee.Collection<Geary.Folder> folders) {
+        Gee.TreeSet<Geary.Folder> sorted = new Gee.TreeSet<Geary.Folder>(folder_path_comparator);
+        sorted.add_all(folders);
+        
+        return Collection.to_array_list<Geary.Folder>(sorted);
+    }
+    
+    private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
+        return a.get_path().compare_to(b.get_path());
+    }
     
     /**
      *

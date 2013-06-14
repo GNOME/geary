@@ -4,6 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A symbolic representation of IMAP FETCH's specifier parameter.
+ *
+ * Most FETCH requests can use this simple specifier to return various parts of the message.
+ * More complicated requests (and requests for partial header or body sections) must use a
+ * {@link FetchBodyDataType} specifier.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-6.4.5]]
+ *
+ * @see FetchBodyDataType
+ */
+
 public enum Geary.Imap.FetchDataType {
     UID,
     FLAGS,
@@ -65,6 +77,11 @@ public enum Geary.Imap.FetchDataType {
         }
     }
     
+    /**
+     * Converts a plain string into a {@link FetchDataType}.
+     *
+     * @throws ImapError.PARSE_ERROR if not a recognized value.
+     */
     public static FetchDataType decode(string value) throws ImapError {
         switch (value.down()) {
             case "uid":
@@ -111,14 +128,30 @@ public enum Geary.Imap.FetchDataType {
         }
     }
     
+    /**
+     * Turns this {@link FetchDataType} into a {@link StringParameter} for transmission.
+     */
     public StringParameter to_parameter() {
-        return new StringParameter(to_string());
+        return new AtomParameter(to_string());
     }
     
+    /**
+     * Decoders a {@link StringParameter} into a {@link FetchDataType} using {@link decode}.
+     *
+     * @see decode
+     */
     public static FetchDataType from_parameter(StringParameter strparam) throws ImapError {
         return decode(strparam.value);
     }
     
+    /**
+     * Returns the appropriate {@link FetchDataDecoder} for this {@link FetchDataType}.
+     *
+     * The FetchDataDecoder can then be used to convert the associated {@link Parameter}s into
+     * {@link Imap.MessageData}.
+     *
+     * @return null if no FetchDataDecoder is associated with this value, or an invalid value.
+     */
     public FetchDataDecoder? get_decoder() {
         switch (this) {
             case UID:

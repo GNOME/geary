@@ -168,12 +168,20 @@ public class ConversationViewer : Gtk.Box {
             current_conversation.email_flags_changed.disconnect(update_flags);
         }
         
-        if (conversations != null && conversations.size == 1 && current_folder != null) {
-            // Clear view before we yield, to make sure it happens.
-            clear(current_folder, current_folder.account.information);
-            web_view.scroll_reset();
-            GearyApplication.instance.controller.enable_message_buttons(false);
-            
+        // Disable message buttons until conversation loads.
+        GearyApplication.instance.controller.enable_message_buttons(false);
+        
+        if (conversations == null || conversations.size == 0 || current_folder == null) {
+            show_multiple_selected(0);
+            current_conversation = null;
+            return;
+        }
+        
+        // Clear view before we yield, to make sure it happens.
+        clear(current_folder, current_folder.account.information);
+        web_view.scroll_reset();
+        
+        if (conversations.size == 1) {
             current_conversation = Geary.Collection.get_first(conversations);
             
             select_conversation_async.begin(current_conversation, current_folder,
@@ -182,8 +190,12 @@ public class ConversationViewer : Gtk.Box {
             current_conversation.appended.connect(on_conversation_appended);
             current_conversation.trimmed.connect(on_conversation_trimmed);
             current_conversation.email_flags_changed.connect(update_flags);
-        } else if (conversations == null || conversations.size == 0) {
-            current_conversation = null;
+            
+            GearyApplication.instance.controller.enable_message_buttons(true);
+        } else if (conversations.size > 1) {
+            show_multiple_selected(conversations.size);
+            
+            GearyApplication.instance.controller.enable_multiple_message_buttons();
         }
     }
     

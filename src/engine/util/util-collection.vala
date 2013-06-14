@@ -32,6 +32,14 @@ public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
 }
 
 /**
+ * Sets the dest Map with all keys and values in src.
+ */
+public void map_set_all<K, V>(Gee.Map<K, V> dest, Gee.Map<K, V> src) {
+    foreach (K key in src.keys)
+        dest.set(key, src.get(key));
+}
+
+/**
  * To be used by a Hashable's to_hash() method.
  */
 public static uint int64_hash(int64 value) {

@@ -58,7 +58,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // - From open remote folder
         // - Fetch from local store
         if (remote_folder != null && get_open_state() == OpenState.BOTH)
-            return remote_folder.get_properties();
+            return remote_folder.properties;
         
         return local_folder.get_properties();
     }
@@ -113,7 +113,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("normalize_folders %s", to_string());
         
         Geary.Imap.FolderProperties local_properties = local_folder.get_properties();
-        Geary.Imap.FolderProperties remote_properties = remote_folder.get_properties();
+        Geary.Imap.FolderProperties remote_properties = remote_folder.properties;
         
         // and both must have their next UID's (it's possible they don't if it's a non-selectable
         // folder)
@@ -133,10 +133,20 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return false;
         }
         
+        // If UIDVALIDITY changes, all email in the folder must be removed as the UIDs are now
+        // invalid ... we merely detach the emails (leaving their contents behind) so duplicate
+        // detection can fix them up.  But once all UIDs are removed, it's must like the next
+        // if case where no earliest UID available, so simply exit.
+        //
+        // see http://tools.ietf.org/html/rfc3501#section-2.3.1.1
         if (local_properties.uid_validity.value != remote_properties.uid_validity.value) {
-            // TODO: Don't deal with UID validity changes yet
-            error("UID validity changed: %s -> %s", local_properties.uid_validity.value.to_string(),
+            debug("%s UID validity changed, detaching all email: %s -> %s", get_path().to_string(),
+                local_properties.uid_validity.value.to_string(),
                 remote_properties.uid_validity.value.to_string());
+            
+            yield local_folder.detach_all_emails_async(cancellable);
+            
+            return true;
         }
         
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
@@ -197,11 +207,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             }
         }
         
+        Geary.Email.Field normalization_fields = is_fast_open ? FAST_NORMALIZATION_FIELDS : NORMALIZATION_FIELDS;
+        
         for (;;) {
             // Get the local emails in the range ... use PARTIAL_OK to ensure all emails are normalized
             Gee.List<Geary.Email>? old_local = yield local_folder.list_email_by_id_async(
-                current_start_id, NORMALIZATION_CHUNK_COUNT,
-                is_fast_open ? FAST_NORMALIZATION_FIELDS : NORMALIZATION_FIELDS,
+                current_start_id, NORMALIZATION_CHUNK_COUNT, normalization_fields,
                 ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
             
             // verify still open
@@ -222,7 +233,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // Get the remote emails in the range to either add any not known, remove deleted messages,
             // and update the flags of the remainder
             Gee.List<Geary.Email>? old_remote = yield remote_folder.list_email_async(msg_set,
-                NORMALIZATION_FIELDS, cancellable);
+                normalization_fields, cancellable);
             
             // verify still open after I/O
             check_open("normalize_folders (list remote)");
@@ -491,10 +502,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     private async void open_remote_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable) {
         try {
-            debug("Opening remote %s", to_string());
-            Imap.Folder folder = (Imap.Folder) yield remote.fetch_folder_async(local_folder.get_path(),
+            debug("Fetching information for remote folder %s", to_string());
+            Imap.Folder folder = yield remote.fetch_folder_async(local_folder.get_path(),
                 cancellable);
             
+            debug("Opening remote folder %s", folder.to_string());
             yield folder.open_async(cancellable);
             
             // allow subclasses to examine the opened folder and resolve any vital
@@ -504,17 +516,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 yield local.update_folder_select_examine_async(folder, cancellable);
                 
                 // signals
-                folder.messages_appended.connect(on_remote_messages_appended);
-                folder.message_at_removed.connect(on_remote_message_at_removed);
+                folder.appended.connect(on_remote_appended);
+                folder.removed.connect(on_remote_removed);
                 folder.disconnected.connect(on_remote_disconnected);
-                
+            
                 // state
-                remote_count = folder.get_email_count();
+                remote_count = folder.properties.email_total;
                 
                 // all set; bless the remote folder as opened
                 remote_folder = folder;
             } else {
-                debug("Unable to prepare remote folder %s: prepare_opened_file() failed", to_string());
+                debug("Unable to prepare remote folder %s: normalize_folders() failed", to_string());
                 notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, null);
                 
                 // schedule immediate close
@@ -597,8 +609,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         if (closing_remote_folder != null) {
-            closing_remote_folder.messages_appended.disconnect(on_remote_messages_appended);
-            closing_remote_folder.message_at_removed.disconnect(on_remote_message_at_removed);
+            closing_remote_folder.appended.disconnect(on_remote_appended);
+            closing_remote_folder.removed.disconnect(on_remote_removed);
             closing_remote_folder.disconnected.disconnect(on_remote_disconnected);
             
             // to avoid keeping the caller waiting while the remote end closes, close it in the
@@ -652,8 +664,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         remote_semaphore.notify_result(false, null);
     }
     
-    private void on_remote_messages_appended(int total) {
-        debug("on_remote_messages_appended: total=%d", total);
+    private void on_remote_appended(int total) {
+        debug("on_remote_appended: total=%d", total);
         replay_queue.schedule(new ReplayAppend(this, total));
     }
     
@@ -667,6 +679,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     internal async void do_replay_appended_messages(int new_remote_count) {
         debug("do_replay_appended_messages %s: remote_count=%d new_remote_count=%d", to_string(),
             remote_count, new_remote_count);
+        
+        if (new_remote_count == remote_count) {
+            debug("do_replay_appended_messages %s: no messages appended", to_string());
+            
+            return;
+        }
         
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
@@ -682,8 +700,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             
             // normalize starting at the message *after* the highest position of the local store,
             // which has now changed
-            Imap.MessageSet msg_set = new Imap.MessageSet.range_by_first_last(remote_count + 1,
-                new_remote_count);
+            Imap.MessageSet msg_set = new Imap.MessageSet.range_by_first_last(
+                new Imap.SequenceNumber(remote_count + 1), new Imap.SequenceNumber(new_remote_count));
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
                 msg_set, ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, null);
             if (list != null && list.size > 0) {
@@ -715,7 +733,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         // save new remote count internally and in local store
-        bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
             yield local_folder.update_remote_selected_message_count(remote_count, null);
@@ -735,9 +752,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         debug("do_replay_appended_messages: completed for %s", to_string());
     }
     
-    private void on_remote_message_at_removed(int position, int total) {
-        debug("on_remote_message_at_removed: position=%d total=%d", position, total);
-        replay_queue.schedule(new ReplayRemoval(this, position, total));
+    private void on_remote_removed(int pos, int total) {
+        debug("on_remote_removed: position=%d total=%d", pos, total);
+        replay_queue.schedule(new ReplayRemoval(this, pos, total));
     }
     
     // This MUST only be called from ReplayRemoval.
@@ -817,14 +834,16 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             marked.to_string());
     }
     
-    private void on_remote_disconnected(Geary.Folder.CloseReason reason) {
+    private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
         debug("on_remote_disconnected: reason=%s", reason.to_string());
         replay_queue.schedule(new ReplayDisconnect(this, reason));
     }
     
-    internal async void do_replay_remote_disconnected(Geary.Folder.CloseReason reason) {
+    internal async void do_replay_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
         debug("do_replay_remote_disconnected reason=%s", reason.to_string());
-        assert(reason == CloseReason.REMOTE_CLOSE || reason == CloseReason.REMOTE_ERROR);
+        
+        Geary.Folder.CloseReason folder_reason = reason.is_error()
+            ? Geary.Folder.CloseReason.REMOTE_ERROR : Geary.Folder.CloseReason.REMOTE_CLOSE;
         
         // because close_internal_async() issues ReceiveReplayQueue.close_async() (which cannot
         // be called from within a ReceiveReplayOperation), schedule the close rather than
@@ -832,7 +851,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // the situation, it may not yield until it attempts to close the ReceiveReplayQueue,
         // which is the problem we're attempting to work around
         Idle.add(() => {
-            close_internal_async.begin(CloseReason.LOCAL_CLOSE, reason, null);
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, folder_reason, null);
             
             return false;
         });
@@ -1139,7 +1158,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // Normalize the local folder by fetching EmailIdentifiers for all missing email as well
             // as fields for duplicate detection
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(
-                new Imap.MessageSet.range_by_count(high, prefetch_count),
+                new Imap.MessageSet.range_by_count(new Imap.SequenceNumber(high), prefetch_count),
                 ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, cancellable);
             if (list == null || list.size != prefetch_count) {
                 throw new EngineError.BAD_PARAMETERS("Unable to prefetch %d email starting at %d in %s",

@@ -74,8 +74,16 @@ public class Geary.Email : BaseObject {
             return is_all_set(required_fields);
         }
         
+        public inline bool fulfills_any(Field required_fields) {
+            return is_any_set(required_fields);
+        }
+        
         public inline bool require(Field required_fields) {
             return is_all_set(required_fields);
+        }
+        
+        public inline bool requires_any(Field required_fields) {
+            return is_any_set(required_fields);
         }
         
         public string to_list_string() {

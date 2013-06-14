@@ -4,7 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
+/**
+ * A representation of an IMAP command tag.
+ *
+ * Tags are assigned by the client for each {@link Command} it sends to the server.  Tags have
+ * a general form of <a-z><000-999>, although that's only by convention and is not required.
+ *
+ * Special tags exist, namely to indicated an untagged response and continuations.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-2.2.1]]
+ */
+
+public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
     public const string UNTAGGED_VALUE = "*";
     public const string CONTINUATION_VALUE = "+";
     public const string UNASSIGNED_VALUE = "----";
@@ -19,6 +30,12 @@ public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
     
     public Tag.from_parameter(StringParameter strparam) {
         base (strparam.value);
+    }
+    
+    internal static void init() {
+        get_untagged();
+        get_continuation();
+        get_unassigned();
     }
     
     public static Tag get_untagged() {
@@ -40,6 +57,30 @@ public class Geary.Imap.Tag : StringParameter, Gee.Hashable<Geary.Imap.Tag> {
             unassigned = new Tag(UNASSIGNED_VALUE);
         
         return unassigned;
+    }
+    
+    /**
+     * Returns true if the StringParameter resembles a tag token: an unquoted non-empty string
+     * that either matches the untagged or continuation special tags or 
+     */
+    public static bool is_tag(StringParameter stringp) {
+        if (stringp is QuotedStringParameter)
+            return false;
+        
+        if (String.is_empty(stringp.value))
+            return false;
+        
+        if (stringp.value == UNTAGGED_VALUE || stringp.value == CONTINUATION_VALUE)
+            return true;
+        
+        int index = 0;
+        unichar ch;
+        while (stringp.value.get_next_char(ref index, out ch)) {
+            if (DataFormat.is_tag_special(ch))
+                return false;
+        }
+        
+        return true;
     }
     
     public bool is_tagged() {

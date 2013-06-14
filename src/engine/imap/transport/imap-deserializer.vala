@@ -6,13 +6,15 @@
 
 /**
  * The Deserializer performs asynchronous I/O on a supplied input stream and transforms the raw
- * bytes into IMAP Parameters (which can then be converted into ServerResponses or ServerData).
- * The Deserializer will only begin reading from the stream when start_async() is called.  Calling
- * stop_async() will halt reading without closing the stream itself.  A Deserializer may not be
- * reused once stop_async() has been invoked.
+ * bytes into IMAP {@link Parameter}s (which can then be converted into {@link ServerResponse}s or
+ * {@link ServerData}).
+ *
+ * The Deserializer will only begin reading from the stream when {@link start_async} is called.
+ * Calling {@link stop_async} will halt reading without closing the stream itself.  A Deserializer
+ * may not be reused once stop_async has been invoked.
  * 
  * Since all results from the Deserializer are reported via signals, those signals should be
- * connected to prior to calling start_async(), or the caller risks missing early messages.  (Note
+ * connected to prior to calling start_async, or the caller risks missing early messages.  (Note
  * that since Deserializer uses async I/O, this isn't technically possible unless the signals are
  * connected after the Idle loop has a chance to run; however, this is an implementation detail and
  * shouldn't be relied upon.)
@@ -32,6 +34,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         TAG,
         START_PARAM,
         ATOM,
+        SYSTEM_FLAG,
         QUOTED,
         QUOTED_ESCAPE,
         PARTIAL_BODY_ATOM,
@@ -65,6 +68,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         "Geary.Imap.Deserializer", State.TAG, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
+    private string identifier;
     private ConverterInputStream cins;
     private DataInputStream dins;
     private Geary.State.Machine fsm;
@@ -80,20 +84,35 @@ public class Geary.Imap.Deserializer : BaseObject {
     private int ins_priority = Priority.DEFAULT;
     private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
     
+    /**
+     * Fired when a complete set of IMAP {@link Parameter}s have been received.
+     *
+     * Note that {@link RootParameters} may contain {@link QuotedStringParameter}s,
+     * {@link UnquotedStringParameter}s, {@link ResponseCode}, and {@link ListParameter}s.
+     * Deserializer does not produce any other kind of Parameter due to its inability to deduce
+     * them from syntax alone.  ResponseCode, however, can be.
+     */
     public signal void parameters_ready(RootParameters root);
     
     /**
-     * "eos" is fired when the underlying InputStream is closed, whether due to normal EOS or input
-     * error.  Subscribe to "receive-failure" to be notified of errors.
+     * Fired when the underlying InputStream is closed, whether due to normal EOS or input error.
+     *
+     * @see receive_failure
      */
     public signal void eos();
     
+    /**
+     * Fired when an Error is trapped on the input stream.
+     *
+     * This is nonrecoverable and means the stream should be closed and this Deserializer destroyed.
+     */
     public signal void receive_failure(Error err);
     
     /**
-     * "data-received" is fired as data blocks are received during download.  The bytes themselves
-     * may be partial and unusable out of context, so they're not provided, but their size is, to allow
-     * monitoring of speed and such.
+     * Fired as data blocks are received during download.
+     *
+     * The bytes themselves may be partial and unusable out of context, so they're not provided,
+     * but their size is, to allow monitoring of speed and such.
      *
      * Note that this is fired for both line data (i.e. responses, status, etc.) and literal data
      * (block transfers).
@@ -103,9 +122,17 @@ public class Geary.Imap.Deserializer : BaseObject {
      */
     public signal void bytes_received(size_t bytes);
     
+    /**
+     * Fired when a syntax error has occurred.
+     *
+     * This generally means the data looks like garbage and further deserialization is unlikely
+     * or impossible.
+     */
     public signal void deserialize_failure();
     
-    public Deserializer(InputStream ins) {
+    public Deserializer(string identifier, InputStream ins) {
+        this.identifier = identifier;
+        
         cins = new ConverterInputStream(ins, midstream);
         cins.set_close_base_stream(false);
         dins = new DataInputStream(cins);
@@ -115,7 +142,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         context = root;
         
         Geary.State.Mapping[] mappings = {
-            new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_or_atom_char),
+            new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
             new Geary.State.Mapping(State.TAG, Event.EOS, on_eos),
             new Geary.State.Mapping(State.TAG, Event.ERROR, on_error),
             
@@ -124,10 +151,15 @@ public class Geary.Imap.Deserializer : BaseObject {
             new Geary.State.Mapping(State.START_PARAM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.START_PARAM, Event.ERROR, on_error),
             
-            new Geary.State.Mapping(State.ATOM, Event.CHAR, on_tag_or_atom_char),
+            new Geary.State.Mapping(State.ATOM, Event.CHAR, on_atom_char),
             new Geary.State.Mapping(State.ATOM, Event.EOL, on_atom_eol),
             new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
+            
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.CHAR, on_system_flag_char),
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.EOL, on_atom_eol),
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.QUOTED, Event.CHAR, on_quoted_char),
             new Geary.State.Mapping(State.QUOTED, Event.EOS, on_eos),
@@ -168,10 +200,20 @@ public class Geary.Imap.Deserializer : BaseObject {
         fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
     }
     
+    /**
+     * Install a custom Converter into the input stream.
+     *
+     * Can be used for decompression, decryption, and so on.
+     */
     public bool install_converter(Converter converter) {
         return midstream.install(converter);
     }
     
+    /**
+     * Begin deserializing IMAP responses from the input stream.
+     *
+     * Subscribe to the various signals before starting to ensure that all responses are trapped.
+     */
     public async void start_async(int priority = GLib.Priority.DEFAULT) throws Error {
         if (cancellable != null)
             throw new EngineError.ALREADY_OPEN("Deserializer already open");
@@ -239,10 +281,14 @@ public class Geary.Imap.Deserializer : BaseObject {
             size_t bytes_read;
             string? line = dins.read_line_async.end(result, out bytes_read);
             if (line == null) {
+                Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line EOS", to_string());
+                
                 push_eos();
                 
                 return;
             }
+            
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line %s", to_string(), line);
             
             bytes_received(bytes_read);
             
@@ -262,10 +308,14 @@ public class Geary.Imap.Deserializer : BaseObject {
             // happens when actually pulling data
             size_t bytes_read = dins.read_async.end(result);
             if (bytes_read == 0 && literal_length_remaining > 0) {
+                Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block EOS", to_string());
+                
                 push_eos();
                 
                 return;
             }
+            
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block %lub", to_string(), bytes_read);
             
             bytes_received(bytes_read);
             
@@ -375,14 +425,18 @@ public class Geary.Imap.Deserializer : BaseObject {
         current_string.append_unichar(ch);
     }
     
-    private void save_string_parameter() {
-        if (is_current_string_empty())
+    private void save_string_parameter(bool quoted) {
+        // deal with empty quoted strings
+        if (!quoted && is_current_string_empty())
             return;
         
-        if (NilParameter.is_nil(current_string.str))
-            save_parameter(NilParameter.instance);
+        // deal with empty quoted strings
+        string str = (quoted && current_string == null) ? "" : current_string.str;
+        
+        if (quoted)
+            save_parameter(new QuotedStringParameter(str));
         else
-            save_parameter(new StringParameter(current_string.str));
+            save_parameter(new UnquotedStringParameter(str));
         
         current_string = null;
     }
@@ -448,6 +502,10 @@ public class Geary.Imap.Deserializer : BaseObject {
         return State.TAG;
     }
     
+    public string to_string() {
+        return "des:%s/%s".printf(identifier, fsm.get_state_string(fsm.get_state()));
+    }
+    
     //
     // Transition handlers
     //
@@ -483,24 +541,37 @@ public class Geary.Imap.Deserializer : BaseObject {
                 if (ch == get_current_context_terminator())
                     return pop();
                 else
-                    return on_tag_or_atom_char(State.ATOM, event, user);
+                    return on_atom_char(state, event, user);
         }
     }
     
-    private uint on_eol(uint state, uint event, void *user) {
-        return flush_params();
+    private uint on_tag_char(uint state, uint event, void *user) {
+        unichar ch = *((unichar *) user);
+        
+        // drop if not allowed for tags (allowing for continuations and watching for spaces, which
+        // indicate a change of state)
+        if (DataFormat.is_tag_special(ch, " +"))
+            return State.TAG;
+        
+        // space indicates end of tag
+        if (ch == ' ') {
+            save_string_parameter(false);
+            
+            return State.START_PARAM;
+        }
+        
+        append_to_string(ch);
+        
+        return State.TAG;
     }
     
-    private uint on_tag_or_atom_char(uint state, uint event, void *user) {
-        assert(state == State.TAG || state == State.ATOM);
-        
+    private uint on_atom_char(uint state, uint event, void *user) {
         unichar ch = *((unichar *) user);
         
         // The partial body fetch results ("BODY[section]" or "BODY[section]<partial>" and their
         // .peek variants) offer so many exceptions to the decoding process they're given their own
         // state
-        if (state == State.ATOM && ch == '['
-            && (has_current_string_prefix("body") || has_current_string_prefix("body.peek"))) {
+        if (ch == '[' && (has_current_string_prefix("body") || has_current_string_prefix("body.peek"))) {
             append_to_string(ch);
             
             return State.PARTIAL_BODY_ATOM;
@@ -512,42 +583,74 @@ public class Geary.Imap.Deserializer : BaseObject {
         char terminator = get_current_context_terminator();
         atom_specials_exceptions[1] = terminator;
         
-        // Atom specials includes space and close-parens, but those are handled in particular ways
-        // while in the ATOM state, so they're excluded here.  Like atom specials, the space is 
-        // treated in a particular way for tags, but unlike atom, the close-parens character is not.
-        // The + symbol indicates a continuation and needs to be excepted when searching for a tag.
-        if (state == State.TAG && DataFormat.is_tag_special(ch, " +"))
-            return state;
-        else if (state == State.ATOM && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
-            return state;
+        // drop if not allowed for atoms, barring specials which indicate special state changes
+        if (DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
+            return State.ATOM;
         
         // message flag indicator is only legal at start of atom
-        if (state == State.ATOM && ch == '\\' && !is_current_string_empty())
-            return state;
+        if (ch == '\\' && is_current_string_empty()) {
+            append_to_string(ch);
+            
+            return State.SYSTEM_FLAG;
+        }
         
-        // space indicates end-of-atom or end-of-tag
+        // space indicates end-of-atom
         if (ch == ' ') {
-            save_string_parameter();
+            save_string_parameter(false);
             
             return State.START_PARAM;
         }
         
-        // close-parens/close-square-bracket after an atom indicates end-of-list/end-of-response
-        // code
-        if (state == State.ATOM && ch == terminator) {
-            save_string_parameter();
+        if (ch == get_current_context_terminator()) {
+            save_string_parameter(false);
             
             return pop();
         }
         
         append_to_string(ch);
         
-        return state;
+        return State.ATOM;
+    }
+    
+    private uint on_system_flag_char(uint state, uint event, void *user) {
+        unichar ch = *((unichar *) user);
+        
+        // see note in on_atom_char for why/how this works
+        char terminator = get_current_context_terminator();
+        atom_specials_exceptions[1] = terminator;
+        
+        // drop if not allowed for atoms, barring specials which indicate state changes
+        // note that asterisk is allowed for flags
+        if (ch != '*' && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
+            return State.SYSTEM_FLAG;
+        
+        // space indicates end-of-system-flag
+        if (ch == ' ') {
+            save_string_parameter(false);
+            
+            return State.START_PARAM;
+        }
+        
+        // close-parens/close-square-bracket after a system flag indicates end-of-list/end-of-response
+        // code
+        if (ch == terminator) {
+            save_string_parameter(false);
+            
+            return pop();
+        }
+        
+        append_to_string(ch);
+        
+        return State.SYSTEM_FLAG;
+    }
+    
+    private uint on_eol(uint state, uint event, void *user) {
+        return flush_params();
     }
     
     private uint on_atom_eol(uint state, uint event, void *user) {
         // clean up final atom
-        save_string_parameter();
+        save_string_parameter(false);
         
         return flush_params();
     }
@@ -565,7 +668,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         // DQUOTE ends quoted string and return to parsing atoms
         if (ch == '\"') {
-            save_string_parameter();
+            save_string_parameter(true);
             
             return State.START_PARAM;
         }
@@ -622,7 +725,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         if (ch != ' ')
             return on_partial_body_atom_char(State.PARTIAL_BODY_ATOM, event, user);
         
-        save_string_parameter();
+        save_string_parameter(false);
         
         return State.START_PARAM;
     }
@@ -706,10 +809,6 @@ public class Geary.Imap.Deserializer : BaseObject {
         warning("Bad event %s at state %s", event_to_string(event), state_to_string(state));
         
         return State.FAILED;
-    }
-    
-    public string to_string() {
-        return "%s/%s".printf(fsm.to_string(), get_mode().to_string());
     }
 }
 

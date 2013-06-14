@@ -83,11 +83,6 @@ private class Geary.ImapDB.Account : BaseObject {
         
         // Search folder
         search_folder = new SearchFolder(account);
-        
-        // Need to clear duplicate folders due to old bug that caused multiple folders to be
-        // created in the database ... benign due to other logic, but want to prevent this from
-        // happening if possible
-        clear_duplicate_folders();
     }
     
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -112,12 +107,8 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.Imap.FolderProperties? properties = imap_folder.get_properties();
-        
-        // properties *must* be available to perform a clone
-        assert(properties != null);
-        
-        Geary.FolderPath path = imap_folder.get_path();
+        Geary.Imap.FolderProperties properties = imap_folder.properties;
+        Geary.FolderPath path = imap_folder.path;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,
@@ -157,8 +148,8 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.Imap.FolderProperties properties = imap_folder.get_properties();
-        Geary.FolderPath path = imap_folder.get_path();
+        Geary.Imap.FolderProperties properties = imap_folder.properties;
+        Geary.FolderPath path = imap_folder.path;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 parent_id;
@@ -214,8 +205,8 @@ private class Geary.ImapDB.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.Imap.FolderProperties properties = imap_folder.get_properties();
-        Geary.FolderPath path = imap_folder.get_path();
+        Geary.Imap.FolderProperties properties = imap_folder.properties;
+        Geary.FolderPath path = imap_folder.path;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 parent_id;
@@ -370,7 +361,7 @@ private class Geary.ImapDB.Account : BaseObject {
         
         if (id_map.size == 0) {
             throw new EngineError.NOT_FOUND("No local folders in %s",
-                (parent != null) ? parent.get_fullpath() : "root");
+                (parent != null) ? parent.to_string() : "root");
         }
         
         Gee.Collection<Geary.ImapDB.Folder> folders = new Gee.ArrayList<Geary.ImapDB.Folder>();
@@ -456,8 +447,19 @@ private class Geary.ImapDB.Account : BaseObject {
     
     private Geary.ImapDB.Folder? get_local_folder(Geary.FolderPath path) {
         FolderReference? folder_ref = folder_refs.get(path);
+        if (folder_ref == null)
+            return null;
         
-        return (folder_ref != null) ? (Geary.ImapDB.Folder) folder_ref.get_reference() : null;
+        ImapDB.Folder? folder = (Geary.ImapDB.Folder?) folder_ref.get_reference();
+        if (folder == null)
+            return null;
+        
+        // use supplied FolderPath rather than one here; if it came from the server, it has
+        // a usable separator
+        if (path.get_root().default_separator != null)
+            folder.set_path(path);
+        
+        return folder;
     }
     
     private Geary.ImapDB.Folder create_local_folder(Geary.FolderPath path, int64 folder_id,
@@ -696,46 +698,6 @@ private class Geary.ImapDB.Account : BaseObject {
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-    }
-    
-    private void clear_duplicate_folders() {
-        int count = 0;
-        
-        try {
-            // Find all folders with duplicate names
-            Db.Result result = db.query("SELECT id, name FROM FolderTable WHERE name IN "
-                + "(SELECT name FROM FolderTable GROUP BY name HAVING (COUNT(name) > 1))");
-            while (!result.finished) {
-                int64 id = result.int64_at(0);
-                
-                // see if any folders have this folder as a parent OR if there are messages associated
-                // with this folder
-                Db.Statement child_stmt = db.prepare("SELECT id FROM FolderTable WHERE parent_id=?");
-                child_stmt.bind_int64(0, id);
-                Db.Result child_result = child_stmt.exec();
-                
-                Db.Statement message_stmt = db.prepare(
-                    "SELECT id FROM MessageLocationTable WHERE folder_id=?");
-                message_stmt.bind_int64(0, id);
-                Db.Result message_result = message_stmt.exec();
-                
-                if (child_result.finished && message_result.finished) {
-                    // no children, delete it
-                    Db.Statement delete_stmt = db.prepare("DELETE FROM FolderTable WHERE id=?");
-                    delete_stmt.bind_int64(0, id);
-                    
-                    delete_stmt.exec();
-                    count++;
-                }
-                
-                result.next();
-            }
-        } catch (Error err) {
-            debug("Error attempting to clear duplicate folders from account: %s", err.message);
-        }
-        
-        if (count > 0)
-            debug("Deleted %d duplicate folders", count);
     }
     
     public async int get_email_count_async(Cancellable? cancellable) throws Error {
@@ -1013,10 +975,8 @@ private class Geary.ImapDB.Account : BaseObject {
             return null;
         }
         
-        if (parent_id <= 0) {
-            return new Geary.FolderRoot(name,
-                Geary.Imap.Account.ASSUMED_SEPARATOR, Geary.Imap.Folder.CASE_SENSITIVE);
-        }
+        if (parent_id <= 0)
+            return new Geary.FolderRoot(name, null, Geary.Imap.Folder.CASE_SENSITIVE);
         
         Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
         return (parent_path == null ? null : parent_path.get_child(name));

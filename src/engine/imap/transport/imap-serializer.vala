@@ -20,13 +20,15 @@
  */
 
 public class Geary.Imap.Serializer : BaseObject {
+    private string identifier;
     private OutputStream outs;
     private ConverterOutputStream couts;
     private MemoryOutputStream mouts;
     private DataOutputStream douts;
     private Geary.Stream.MidstreamConverter midstream = new Geary.Stream.MidstreamConverter("Serializer");
     
-    public Serializer(OutputStream outs) {
+    public Serializer(string identifier, OutputStream outs) {
+        this.identifier = identifier;
         this.outs = outs;
         
         couts = new ConverterOutputStream(outs, midstream);
@@ -42,25 +44,6 @@ public class Geary.Imap.Serializer : BaseObject {
     
     public void push_ascii(char ch) throws Error {
         douts.put_byte(ch, null);
-    }
-    
-    public void push_string(string str) throws Error {
-        // see if need to convert to quoted string, only emitting it if required
-        switch (DataFormat.is_quoting_required(str)) {
-            case DataFormat.Quoting.OPTIONAL:
-                douts.put_string(str);
-            break;
-            
-            case DataFormat.Quoting.REQUIRED:
-                bool required = push_quoted_string(str);
-                assert(required);
-            break;
-            
-            case DataFormat.Quoting.UNALLOWED:
-            default:
-                // TODO: Not handled currently
-                assert_not_reached();
-        }
     }
     
     /**
@@ -119,7 +102,7 @@ public class Geary.Imap.Serializer : BaseObject {
             for (size_t ctr = 0; ctr < length; ctr++)
                 builder.append_c((char) mouts.get_data()[ctr]);
             
-            Logging.debug(Logging.Flag.SERIALIZER, "COMMIT:\n%s", builder.str);
+            Logging.debug(Logging.Flag.SERIALIZER, "[%s] send %s", to_string(), builder.str.strip());
         }
         
         ssize_t index = 0;
@@ -138,6 +121,10 @@ public class Geary.Imap.Serializer : BaseObject {
         yield commit_async(priority, cancellable);
         yield couts.flush_async(priority, cancellable);
         yield outs.flush_async(priority, cancellable);
+    }
+    
+    public string to_string() {
+        return "ser:%s".printf(identifier);
     }
 }
 
