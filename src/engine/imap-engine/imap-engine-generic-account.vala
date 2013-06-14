@@ -32,11 +32,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         search_upgrade_monitor = local.search_index_monitor;
         
-        if (inbox_path == null) {
-            inbox_path = new Geary.FolderRoot(Imap.Account.INBOX_NAME, Imap.Account.ASSUMED_SEPARATOR,
-                Imap.Folder.CASE_SENSITIVE);
-        }
-        
         if (outbox_path == null) {
             outbox_path = new SmtpOutboxFolderRoot();
         }
@@ -44,10 +39,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (search_path == null) {
             search_path = new SearchFolderRoot();
         }
-    }
-    
-    internal Imap.FolderProperties? get_properties_for_folder(FolderPath path) {
-        return properties_map.get(path);
     }
     
     private void check_open() throws EngineError {
@@ -194,7 +185,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     public override Gee.Collection<Geary.Folder> list_folders() throws Error {
         check_open();
         Gee.HashSet<Geary.Folder> all_folders = new Gee.HashSet<Geary.Folder>();
-        all_folders.add_all(existing_folders.values);
+        all_folders.add_all(folder_map.values);
         all_folders.add_all(local_only.values);
         
         return all_folders;

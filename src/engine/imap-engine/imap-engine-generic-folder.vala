@@ -733,6 +733,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         // save new remote count internally and in local store
+        bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
             yield local_folder.update_remote_selected_message_count(remote_count, null);
