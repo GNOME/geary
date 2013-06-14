@@ -550,7 +550,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // We ignore everything inside quotes to give the user a way to
         // override our algorithm here.  The idea is to offer one search query
         // syntax for Geary that we can use locally and via IMAP, etc.
-        string[] words = raw_query.split_set(" \t\r\n:()*");
+        string[] words = raw_query.split_set(" \t\r\n:()*\\");
         bool in_quote = false;
         StringBuilder prepared_query = new StringBuilder();
         foreach (string s in words) {
@@ -584,7 +584,10 @@ private class Geary.ImapDB.Account : BaseObject {
             prepared_query.append(" ");
         }
         
-        return prepared_query.str.strip();
+        string prepared = prepared_query.str.strip();
+        if (in_quote)
+            prepared += "\"";
+        return prepared;
     }
     
     // Append each id in the collection to the StringBuilder, in a format
