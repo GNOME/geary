@@ -1103,7 +1103,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private void do_set_email_flags(Db.Connection cx, Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map,
         Cancellable? cancellable) throws Error {
         Db.Statement update_stmt = cx.prepare(
-            "UPDATE MessageTable SET flags=? WHERE id=?");
+            "UPDATE MessageTable SET flags=?, fields = fields | ? WHERE id=?");
         
         foreach (Geary.EmailIdentifier id in map.keys) {
             int64 message_id = do_find_message(cx, id, ListFlags.NONE, cancellable);
@@ -1114,7 +1114,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             update_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
             update_stmt.bind_string(0, flags.serialize());
-            update_stmt.bind_rowid(1, message_id);
+            update_stmt.bind_int(1, Geary.Email.Field.FLAGS);
+            update_stmt.bind_rowid(2, message_id);
             
             update_stmt.exec(cancellable);
         }
