@@ -237,6 +237,7 @@ public class ConversationWebView : WebKit.WebView {
                 img.get_class_list().add("thumbnail");
                 Gdk.Pixbuf image = new Gdk.Pixbuf.from_file_at_scale(filename, maxwidth, maxheight,
                     true);
+                image = image.apply_embedded_orientation();
                 image.save_to_buffer(out content, "png");
                 icon_mime_type = "image/png";
             } else {

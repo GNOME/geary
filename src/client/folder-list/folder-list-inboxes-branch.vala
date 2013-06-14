@@ -11,7 +11,7 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
         get; private set; default = new Gee.HashMap<Geary.Account, InboxFolderEntry>(); }
     
     public InboxesBranch() {
-        base(new Sidebar.Grouping(_("Inboxes"), new ThemedIcon("mail-inbox")),
+        base(new Sidebar.Header(_("Inboxes")),
             Sidebar.Branch.Options.NONE, inbox_comparator);
     }
     

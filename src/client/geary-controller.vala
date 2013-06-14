@@ -140,16 +140,6 @@ public class GearyController {
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
         
-        // Start Geary.
-        try {
-            yield Geary.Engine.instance.open_async(GearyApplication.instance.get_user_data_directory(), 
-                GearyApplication.instance.get_resource_directory(), new SecretMediator());
-            if (Geary.Engine.instance.get_accounts().size == 0)
-                create_account();
-        } catch (Error e) {
-            error("Error opening Geary.Engine instance: %s", e.message);
-        }
-        
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.load_more.connect(on_load_more);
@@ -191,7 +181,18 @@ public class GearyController {
         
         set_busy(false);
         
-        main_window.show_all();
+        // Start Geary.
+        try {
+            yield Geary.Engine.instance.open_async(GearyApplication.instance.get_user_data_directory(), 
+                GearyApplication.instance.get_resource_directory(), new SecretMediator());
+            if (Geary.Engine.instance.get_accounts().size == 0) {
+                create_account();
+            } else {
+                main_window.show_all();
+            }
+        } catch (Error e) {
+            error("Error opening Geary.Engine instance: %s", e.message);
+        }
     }
     
     /**
@@ -397,6 +398,9 @@ public class GearyController {
             result = yield validate_or_retry_async(result, cancellable);
         } while (result != null);
         
+        if (main_window != null) {
+            main_window.show_all();
+        }
         if (login_dialog != null)
             login_dialog.hide();
     }
@@ -1035,14 +1039,11 @@ public class GearyController {
     }
     
     private void on_accounts() {
-        AccountDialog dialog = new AccountDialog();
-        dialog.run();
-        dialog.destroy();
+        AccountDialog.show_instance();
     }
     
     private void on_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(GearyApplication.instance.config);
-        dialog.run();
+        PreferencesDialog.show_instance();
     }
 
     private Gee.List<Geary.EmailIdentifier> get_selected_folder_email_ids(

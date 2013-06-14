@@ -43,6 +43,7 @@ public class ConversationListStore : Gtk.ListStore {
     private bool loading_local_only = true;
     private int conversations_added_counter = 0;
     private Geary.Nonblocking.Mutex refresh_mutex = new Geary.Nonblocking.Mutex();
+    private uint update_id = 0;
     
     public signal void conversations_added_began();
     
@@ -54,10 +55,14 @@ public class ConversationListStore : Gtk.ListStore {
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
         
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
+        update_id = Timeout.add_seconds_full(Priority.LOW, 60, update_date_strings);
     }
     
     ~ConversationListStore() {
         set_conversation_monitor(null);
+        
+        if (update_id != 0)
+            Source.remove(update_id);
     }
     
     public void set_conversation_monitor(Geary.ConversationMonitor? new_conversation_monitor) {
@@ -452,6 +457,23 @@ public class ConversationListStore : Gtk.ListStore {
         get(biter, Column.CONVERSATION_OBJECT, out b);
         
         return compare_conversation_ascending(a, b);
+    }
+    
+    private bool update_date_strings() {
+        this.foreach(update_date_string);
+        // Keep calling this SourceFunc
+        return true;
+    }
+    
+    private bool update_date_string(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
+        FormattedConversationData? message_data;
+        model.get(iter, Column.CONVERSATION_DATA, out message_data);
+        
+        if (message_data != null && message_data.update_date_string())
+            row_changed(path, iter);
+        
+        // Continue iterating, don't stop
+        return false;
     }
 }
 
