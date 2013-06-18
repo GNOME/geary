@@ -236,6 +236,15 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         return yield account.local_fetch_email_async(id, required_fields, cancellable);
     }
     
+    /**
+     * Given a list of mail IDs, returns a list of keywords that match for the current
+     * search keywords.
+     */
+    public async Gee.Collection<string>? get_search_keywords_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
+        return yield account.get_search_keywords_async(ids, cancellable);
+    }
+    
     private void exclude_folder(Geary.Folder folder) {
         exclude_folders.add(folder.get_path());
     }

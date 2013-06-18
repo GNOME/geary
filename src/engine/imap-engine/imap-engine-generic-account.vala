@@ -19,6 +19,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private uint refresh_folder_timeout_id = 0;
     private bool in_refresh_enumerate = false;
     private Cancellable refresh_cancellable = new Cancellable();
+    private string previous_prepared_search_query = "";
     
     public GenericAccount(string name, Geary.AccountInformation information, Imap.Account remote,
         ImapDB.Account local) {
@@ -483,8 +484,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (offset < 0)
             throw new EngineError.BAD_PARAMETERS("Offset must not be negative");
         
+        previous_prepared_search_query = local.prepare_search_query(keywords);
+        
         return yield local.search_async(local.prepare_search_query(keywords),
             requested_fields, partial_ok, limit, offset, folder_blacklist, search_ids, cancellable);
+    }
+    
+    public override async Gee.Collection<string>? get_search_keywords_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
+        return yield local.get_search_keywords_async(previous_prepared_search_query, ids, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

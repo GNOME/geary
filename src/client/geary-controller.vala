@@ -103,6 +103,12 @@ public class GearyController {
     public signal void conversations_selected(Gee.Set<Geary.Conversation>? conversations,
         Geary.Folder? current_folder);
     
+    /**
+     * Fired when the search text is changed according to the controller.  This accounts
+     * for a brief typmatic delay.
+     */
+    public signal void search_text_changed(string keywords);
+    
     public GearyController() {
     }
     
@@ -1639,6 +1645,7 @@ public class GearyController {
                 main_window.folder_list.select_folder(previous_non_search_folder);
             
             main_window.folder_list.remove_search();
+            search_text_changed("");
             
             return;
         }
@@ -1660,6 +1667,7 @@ public class GearyController {
         }
         
         main_window.folder_list.set_search(folder);
+        search_text_changed(main_window.main_toolbar.search_text);
     }
     
     private void on_search_text_changed(string search_text) {

@@ -15,6 +15,18 @@ private class Geary.ImapDB.Account : BaseObject {
         }
     }
     
+    private class SearchOffset {
+        public int column;      // Column in search table
+        public int byte_offset; // Offset (in bytes) of search term in string
+        public int size;        // Size (in bytes) of the search term in string
+        
+        public SearchOffset(string[] offset_string) {
+            column = int.parse(offset_string[0]);
+            byte_offset = int.parse(offset_string[2]);
+            size = int.parse(offset_string[3]);
+        }
+    }
+    
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
     public SearchFolder? search_folder { get; private set; default = null; }
@@ -655,6 +667,58 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         return (search_results.size == 0 ? null : search_results);
+    }
+    
+    public async Gee.Collection<string>? get_search_keywords_async(string prepared_query,
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
+        Gee.Set<string> search_keywords = new Gee.HashSet<string>();
+        
+        // Create a question mark for each ID.
+        string id_string = "";
+        for(int i = 0; i < ids.size; i++) {
+            id_string += "?";
+            if (i != ids.size - 1)
+                id_string += ", ";
+        }
+        
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("SELECT offsets(MessageSearchTable), * FROM MessageSearchTable " +
+                "WHERE MessageSearchTable MATCH ? AND id IN (%s)".printf(id_string));
+            
+            // Bind query and IDs.
+            int i = 0;
+            stmt.bind_string(i++, prepared_query);
+            foreach(Geary.EmailIdentifier id in ids)
+                stmt.bind_rowid(i++, id.ordering);
+            
+            Db.Result result = stmt.exec(cancellable);
+            while (!result.finished) {
+                // Build a list of search offsets.
+                string[] offset_array = result.string_at(0).split(" ");
+                Gee.ArrayList<SearchOffset> all_offsets = new Gee.ArrayList<SearchOffset>();
+                int j = 0;
+                while (true) {
+                    all_offsets.add(new SearchOffset(offset_array[j:j+4]));
+                    
+                    j += 4;
+                    if (j >= offset_array.length)
+                        break;
+                }
+                
+                // Iterate over the offset list, scrape strings from the database, and push
+                // the results into our return set.
+                foreach(SearchOffset offset in all_offsets) {
+                    string text = result.string_at(offset.column + 1);
+                    search_keywords.add(text[offset.byte_offset : offset.byte_offset + offset.size].down());
+                }
+                
+                result.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return (search_keywords.size == 0 ? null : search_keywords);
     }
     
     public async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,

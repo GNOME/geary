@@ -88,6 +88,9 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
         Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     
+    public abstract async Gee.Collection<string>? get_search_keywords_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
+    
     public virtual string to_string() {
         return name;
     }

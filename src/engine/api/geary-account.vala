@@ -228,6 +228,13 @@ public interface Geary.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     
     /**
+     * Given a list of mail IDs, returns a list of keywords that match for the current
+     * search keywords.
+     */
+    public abstract async Gee.Collection<string>? get_search_keywords_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
+    
+    /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */
     public abstract string to_string();

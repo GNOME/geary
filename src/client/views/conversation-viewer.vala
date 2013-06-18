@@ -19,6 +19,25 @@ public class ConversationViewer : Gtk.Box {
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     
+    private enum SearchState {
+        // Search/find states.
+        NONE,         // Not in search
+        FIND,         // Find toolbar
+        SEARCH_FOLDER, // Search folder
+        
+        COUNT;
+    }
+    
+    private enum SearchEvent {
+        // User-initated events.
+        RESET,
+        OPEN_FIND_BAR,
+        CLOSE_FIND_BAR,
+        ENTER_SEARCH_FOLDER,
+        
+        COUNT;
+    }
+    
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
     
@@ -57,6 +76,10 @@ public class ConversationViewer : Gtk.Box {
     private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
         Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
     
+    // State machine setup for search/find modes.
+    private Geary.State.MachineDescriptor search_machine_desc = new Geary.State.MachineDescriptor(
+        "ConversationViewer search", SearchState.NONE, SearchState.COUNT, SearchEvent.COUNT, null, null);
+    
     private string? hover_url = null;
     private Gtk.Menu? context_menu = null;
     private Gtk.Menu? message_menu = null;
@@ -65,14 +88,37 @@ public class ConversationViewer : Gtk.Box {
     private Geary.AccountInformation? current_account_information = null;
     private ConversationFindBar conversation_find_bar;
     private Cancellable cancellable_fetch = new Cancellable();
+    private Geary.State.Machine fsm;
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
         
         web_view = new ConversationWebView();
         
+        // Setup state machine for search/find states.
+        Geary.State.Mapping[] mappings = {
+            new Geary.State.Mapping(SearchState.NONE, SearchEvent.RESET, on_reset),
+            new Geary.State.Mapping(SearchState.NONE, SearchEvent.OPEN_FIND_BAR, on_open_find_bar),
+            new Geary.State.Mapping(SearchState.NONE, SearchEvent.CLOSE_FIND_BAR, Geary.State.nop),
+            new Geary.State.Mapping(SearchState.NONE, SearchEvent.ENTER_SEARCH_FOLDER, on_enter_search_folder),
+            
+            new Geary.State.Mapping(SearchState.FIND, SearchEvent.RESET, on_reset),
+            new Geary.State.Mapping(SearchState.FIND, SearchEvent.OPEN_FIND_BAR, Geary.State.nop),
+            new Geary.State.Mapping(SearchState.FIND, SearchEvent.CLOSE_FIND_BAR, on_close_find_bar),
+            new Geary.State.Mapping(SearchState.FIND, SearchEvent.ENTER_SEARCH_FOLDER, Geary.State.nop),
+            
+            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.RESET, on_reset),
+            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.OPEN_FIND_BAR, on_open_find_bar),
+            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.CLOSE_FIND_BAR, Geary.State.nop),
+            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.ENTER_SEARCH_FOLDER, Geary.State.nop),
+        };
+        
+        fsm = new Geary.State.Machine(search_machine_desc, mappings, null);
+        fsm.set_logging(false);
+        
         GearyApplication.instance.controller.conversations_selected.connect(on_conversations_selected);
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
+        GearyApplication.instance.controller.search_text_changed.connect(on_search_text_changed);
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
@@ -98,6 +144,7 @@ public class ConversationViewer : Gtk.Box {
         
         conversation_find_bar = new ConversationFindBar(web_view);
         conversation_find_bar.no_show_all = true;
+        conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
         
         pack_start(conversation_find_bar, false);
     }
@@ -120,11 +167,7 @@ public class ConversationViewer : Gtk.Box {
         email_to_element.clear();
         messages.clear();
         
-        current_folder = new_folder;
         current_account_information = account_information;
-        
-        if (conversation_find_bar.visible)
-            conversation_find_bar.hide();
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
@@ -153,9 +196,19 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private void on_folder_selected(Geary.Folder? folder) {
+        current_folder = folder;
+        fsm.issue(SearchEvent.RESET);
+        
         if (folder == null) {
             clear(null, null);
             current_conversation = null;
+        }
+        
+        if (current_folder is Geary.SearchFolder) {
+            fsm.issue(SearchEvent.ENTER_SEARCH_FOLDER);
+            web_view.allow_collapsing(false);
+        } else {
+            web_view.allow_collapsing(true);
         }
     }
     
@@ -212,8 +265,12 @@ public class ConversationViewer : Gtk.Box {
         foreach (Geary.Email email in messages_to_add)
             add_message(email);
         
-        unhide_last_email();
-        compress_emails();
+        if (current_folder is Geary.SearchFolder) {
+            yield highlight_search_terms();
+        } else {
+            unhide_last_email();
+            compress_emails();
+        }
     }
     
     private void on_select_conversation_completed(Object? source, AsyncResult result) {
@@ -225,6 +282,37 @@ public class ConversationViewer : Gtk.Box {
         } catch (Error err) {
             debug("Unable to select conversation: %s", err.message);
         }
+    }
+    
+    private void on_search_text_changed() {
+        highlight_search_terms.begin();
+    }
+    
+    private async void highlight_search_terms() {
+        Geary.SearchFolder? search_folder = current_folder as Geary.SearchFolder;
+        if (search_folder == null)
+            return;
+        
+        // List all IDs of emails we're viewing.
+        Gee.Collection<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (Geary.Email email in messages)
+            ids.add(email.id);
+        
+        try {
+            // Request a list of search terms.
+            Gee.Collection<string>? search_keywords = yield search_folder.get_search_keywords_async(
+                ids, cancellable_fetch);
+            
+            // Highlight the search terms.
+            if (search_keywords != null) {
+                foreach(string keyword in search_keywords)
+                    web_view.mark_text_matches(keyword, false, 0);
+            }
+        } catch (Error e) {
+            debug("Error highlighting search results: %s", e.message);
+        }
+        
+        web_view.set_highlight_text_matches(true);
     }
     
     // Given an email, fetch the full version with all required fields.
@@ -1577,7 +1665,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void show_find_bar() {
-        conversation_find_bar.show();
+        fsm.issue(SearchEvent.OPEN_FIND_BAR);
         conversation_find_bar.focus_entry();
     }
     
@@ -1617,6 +1705,47 @@ public class ConversationViewer : Gtk.Box {
             flags.add(Geary.EmailFlags.UNREAD);
             supports_mark.mark_email_async.begin(ids, null, flags, null);
         }
+    }
+    
+    // State reset.
+    private uint on_reset(uint state, uint event, void *user, Object? object) {
+        web_view.set_highlight_text_matches(false);
+        web_view.allow_collapsing(true);
+        web_view.unmark_text_matches();
+        
+        if (conversation_find_bar.visible)
+            conversation_find_bar.hide(); // Close the find bar.
+        
+        return SearchState.NONE;
+    }
+    
+    // Find bar opened.
+    private uint on_open_find_bar(uint state, uint event, void *user, Object? object) {
+        if (!conversation_find_bar.visible)
+            conversation_find_bar.show();
+        
+        conversation_find_bar.focus_entry();
+        web_view.allow_collapsing(false);
+        
+        return SearchState.FIND;
+    }
+    
+    // Find bar closed.
+    private uint on_close_find_bar(uint state, uint event, void *user, Object? object) {
+        if (current_folder is Geary.SearchFolder) {
+            highlight_search_terms.begin();
+            
+            return SearchState.SEARCH_FOLDER;
+        } else {
+            web_view.allow_collapsing(true);
+            
+            return SearchState.NONE;
+        } 
+    }
+    
+    // Search folder entered.
+    private uint on_enter_search_folder(uint state, uint event, void *user, Object? object) {
+        return SearchState.SEARCH_FOLDER;
     }
 }
 
