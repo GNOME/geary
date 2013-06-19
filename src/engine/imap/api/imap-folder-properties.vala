@@ -45,26 +45,33 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
      */
     public int select_examine_messages { get; private set; }
     /**
-     * -1 if the FolderProperties were not obtained via a STATUS command
+     * -1 if the FolderProperties were not obtained or updated via a STATUS command
      */
     public int status_messages { get; private set; }
-    public int unseen { get; internal set; }
+    /**
+     * -1 if the FolderProperties were not obtained or updated via a STATUS command
+     */
+    public int unseen { get; private set; }
     public int recent { get; internal set; }
     public UIDValidity? uid_validity { get; internal set; }
     public UID? uid_next { get; internal set; }
     public MailboxAttributes attrs { get; internal set; }
     
-    // Note that unseen from SELECT/EXAMINE is the *position* of the first unseen message,
-    // not the total unseen count, so it should not be passed in here, but rather the unseen
-    // count from a STATUS command
-    public FolderProperties(int messages, int recent, int unseen, UIDValidity? uid_validity,
+    /**
+     * Note that unseen from SELECT/EXAMINE is the *position* of the first unseen message,
+     * not the total unseen count, so it's not be passed in here, but rather only from the unseen
+     * count from a STATUS command
+     */
+    public FolderProperties(int messages, int recent, UIDValidity? uid_validity,
         UID? uid_next, MailboxAttributes attrs) {
-        base (messages, unseen, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
+        // give the base class a zero email_unread, as the notion of "unknown" doesn't exist in
+        // its contract
+        base (messages, 0, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
         
         select_examine_messages = messages;
         status_messages = -1;
         this.recent = recent;
-        this.unseen = unseen;
+        this.unseen = -1;
         this.uid_validity = uid_validity;
         this.uid_next = uid_next;
         this.attrs = attrs;
@@ -158,6 +165,17 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         
         // select/examine more authoritative than status
         email_total = messages;
+    }
+    
+    public void set_status_unseen(int count) {
+        // drop unknown counts, especially if known is held here
+        if (count < 0)
+            return;
+        
+        unseen = count;
+        
+        // update base class value (which clients see)
+        email_unread = count;
     }
 }
 

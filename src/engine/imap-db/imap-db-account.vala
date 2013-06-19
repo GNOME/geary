@@ -172,7 +172,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db_folder != null) {
             Imap.FolderProperties local_properties = db_folder.get_properties();
             
-            local_properties.unseen = properties.unseen;
+            local_properties.set_status_unseen(properties.unseen);
             local_properties.recent = properties.recent;
             local_properties.attrs = properties.attrs;
             
@@ -236,7 +236,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db_folder != null) {
             Imap.FolderProperties local_properties = db_folder.get_properties();
             
-            local_properties.unseen = properties.unseen;
+            local_properties.set_status_unseen(properties.unseen);
             local_properties.recent = properties.recent;
             local_properties.uid_validity = properties.uid_validity;
             local_properties.uid_next = properties.uid_next;
@@ -321,7 +321,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     : new Geary.FolderRoot(basename, "/", Geary.Imap.Folder.CASE_SENSITIVE);
                 
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties(
-                    result.int_for("last_seen_total"), 0, 0,
+                    result.int_for("last_seen_total"), 0,
                     new Imap.UIDValidity(result.int64_for("uid_validity")),
                     new Imap.UID(result.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")));
@@ -408,7 +408,7 @@ private class Geary.ImapDB.Account : BaseObject {
             
             Db.Result results = stmt.exec(cancellable);
             if (!results.finished) {
-                properties = new Imap.FolderProperties(results.int_for("last_seen_total"), 0, 0,
+                properties = new Imap.FolderProperties(results.int_for("last_seen_total"), 0,
                     new Imap.UIDValidity(results.int64_for("uid_validity")),
                     new Imap.UID(results.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(results.string_for("attributes")));

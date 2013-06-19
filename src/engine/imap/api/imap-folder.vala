@@ -63,7 +63,7 @@ private class Geary.Imap.Folder : BaseObject {
         this.info = info;
         path = info.mailbox.to_folder_path(info.delim);
         
-        properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
+        properties = new Imap.FolderProperties(0, 0, null, null, info.attrs);
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -206,7 +206,9 @@ private class Geary.Imap.Folder : BaseObject {
                 break;
                 
                 case ResponseCodeType.UNSEEN:
-                    properties.unseen = response_code.get_unseen();
+                    // do NOT update properties.unseen, as the UNSEEN response code (here) means
+                    // the sequence number of the first unseen message, not the total count of
+                    // unseen messages
                 break;
                 
                 case ResponseCodeType.PERMANENT_FLAGS:
