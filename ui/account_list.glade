@@ -14,7 +14,7 @@
     </child>
     <child>
       <object class="GtkAction" id="edit_account">
-        <property name="icon_name">gtk-edit</property>
+        <property name="icon_name">edit-symbolic</property>
       </object>
     </child>
     <child>
