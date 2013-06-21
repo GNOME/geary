@@ -5,7 +5,10 @@
  */
 
 public class ConversationListView : Gtk.TreeView {
-    const int LOAD_MORE_HEIGHT = 100;
+    private const int LOAD_MORE_HEIGHT = 100;
+    
+    // Key for associating conversation with context menu
+    private const string MENU_CONVERSATION_PROP = "menu-conversation";
     
     private bool enable_load_more = true;
     
@@ -97,6 +100,12 @@ public class ConversationListView : Gtk.TreeView {
     private void on_conversation_removed(Geary.Conversation conversation) {
         if (!GearyApplication.instance.config.autoselect)
             unselect_all();
+        
+        // Close context menu if it's for this conversation.
+        if (context_menu != null && context_menu.get_data<Geary.Conversation>(MENU_CONVERSATION_PROP)
+            == conversation) {
+            context_menu.deactivate();
+        }
     }
     
     private void on_conversations_added_began() {
@@ -177,6 +186,8 @@ public class ConversationListView : Gtk.TreeView {
             action_names += GearyController.ACTION_FORWARD_MESSAGE;
             
             context_menu = new Gtk.Menu();
+            context_menu.deactivate.connect(() => { context_menu = null; }); // Delete when closed.
+            context_menu.set_data(MENU_CONVERSATION_PROP, conversation);
             foreach (string? action_name in action_names) {
                 if (action_name == null) {
                     context_menu.add(new Gtk.SeparatorMenuItem());
