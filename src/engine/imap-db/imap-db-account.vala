@@ -798,7 +798,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     private async bool populate_search_table_batch_async(int limit = 100,
         Cancellable? cancellable) throws Error {
-        bool done = false;
+        int count = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             Db.Statement stmt = cx.prepare("""
                 SELECT id
@@ -811,7 +811,6 @@ private class Geary.ImapDB.Account : BaseObject {
             """);
             stmt.bind_int(0, limit);
             
-            int count = 0;
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 id = result.rowid_at(0);
@@ -835,18 +834,16 @@ private class Geary.ImapDB.Account : BaseObject {
                 }
                 
                 ++count;
-                search_index_monitor.increment();
                 
                 result.next(cancellable);
             }
             
-            if (count < limit)
-                done = true;
-            
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
-        return done;
+        search_index_monitor.increment(count);
+        
+        return (count < limit);
     }
     
     //
