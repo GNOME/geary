@@ -525,7 +525,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 
                 // Ignore any messages that don't have the required fields.
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
-                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id, null));
                     Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     
                     Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, cancellable);
@@ -619,8 +619,8 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<Geary.Email>? search_async(string prepared_query,
-        Geary.Email.Field requested_fields, bool partial_ok, int limit = 100, int offset = 0,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
+        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         Gee.Collection<Geary.Email> search_results = new Gee.HashSet<Geary.Email>();
         
@@ -655,7 +655,8 @@ private class Geary.ImapDB.Account : BaseObject {
                     cx, id, requested_fields, cancellable);
                     
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
-                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.Email email = row.to_email(-1,
+                        new Geary.ImapDB.EmailIdentifier(id, email_id_folder_path));
                     Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     search_results.add(email);
                 }
@@ -739,7 +740,8 @@ private class Geary.ImapDB.Account : BaseObject {
                     "Message %s only fulfills %Xh fields (required: %Xh)",
                     email_id.to_string(), row.fields, required_fields);
             
-            email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(email_id.ordering));
+            email = row.to_email(-1,
+                new Geary.ImapDB.EmailIdentifier(email_id.ordering, email_id.get_folder_path()));
             Geary.ImapDB.Folder.do_add_attachments(cx, email, email_id.ordering, cancellable);
             
             return Db.TransactionOutcome.DONE;
@@ -822,7 +824,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                         cx, id, search_fields, cancellable);
-                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id));
+                    Geary.Email email = row.to_email(-1, new Geary.ImapDB.EmailIdentifier(id, null));
                     Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     
                     Geary.ImapDB.Folder.do_add_email_to_search_table(cx, id, email, cancellable);

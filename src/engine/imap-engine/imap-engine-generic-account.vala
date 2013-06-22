@@ -478,8 +478,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     public override async Gee.Collection<Geary.Email>? local_search_async(string keywords,
-        Geary.Email.Field requested_fields, bool partial_ok, int limit = 100, int offset = 0,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
+        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         if (offset < 0)
             throw new EngineError.BAD_PARAMETERS("Offset must not be negative");
@@ -487,7 +487,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         previous_prepared_search_query = local.prepare_search_query(keywords);
         
         return yield local.search_async(local.prepare_search_query(keywords),
-            requested_fields, partial_ok, limit, offset, folder_blacklist, search_ids, cancellable);
+            requested_fields, partial_ok, email_id_folder_path, limit, offset,
+            folder_blacklist, search_ids, cancellable);
     }
     
     public override async Gee.Collection<string>? get_search_keywords_async(

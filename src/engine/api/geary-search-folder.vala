@@ -101,7 +101,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
             // list_email_async() etc., but this leads to some more
             // complications when redoing the search.
             Gee.Collection<Geary.Email>? _new_results = yield account.local_search_async(
-                keywords, Geary.Email.Field.PROPERTIES, false, MAX_RESULT_EMAILS, 0,
+                keywords, Geary.Email.Field.PROPERTIES, false, get_path(), MAX_RESULT_EMAILS, 0,
                 exclude_folders, null, cancellable);
             
             if (_new_results == null) {
@@ -176,6 +176,9 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
+        if (low >= 0)
+            error("Search folder can't list email positionally");
+        
         // TODO:
         // * This is a temporary implementation that can't handle positional addressing.
         // * Fetch emails as a batch, not one at a time.
@@ -207,9 +210,46 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
-        // TODO: This method is not currently called, but is required by the interface.  Before completing
-        // this feature, it should either be implemented either here or in AbstractLocalFolder. 
-        error("Search folder does not implement list_email_by_id_async");
+        // TODO: as above, this is incomplete and inefficient.
+        int result_mutex_token = yield result_mutex.claim_async();
+        
+        Geary.EmailIdentifier[] ids = new Geary.EmailIdentifier[search_results.size];
+        int initial_index = -1;
+        int i = 0;
+        foreach (Geary.Email email in search_results) {
+            if (email.id.equal_to(initial_id))
+                initial_index = i;
+            ids[i++] = email.id;
+        }
+        
+        Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
+        Error? error = null;
+        if (initial_index >= 0) {
+            try {
+                // A negative count means we walk forwards in our array and
+                // vice versa.
+                int real_count = count.abs();
+                int increment = (count < 0 ? 1 : -1);
+                i = initial_index;
+                if ((flags & Folder.ListFlags.EXCLUDING_ID) != 0)
+                    i += increment;
+                else
+                    ++real_count;
+                int end = i + real_count * increment;
+                
+                for (; i >= 0 && i < search_results.size && i != end; i += increment)
+                    results.add(yield fetch_email_async(ids[i], required_fields, flags, cancellable));
+            } catch (Error e) {
+                error = e;
+            }
+        }
+        
+        result_mutex.release(ref result_mutex_token);
+        
+        if (error != null)
+            throw error;
+        
+        return (results.size == 0 ? null : results);
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
