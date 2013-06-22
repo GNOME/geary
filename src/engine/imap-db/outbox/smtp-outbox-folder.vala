@@ -45,9 +45,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     private Geary.Smtp.ClientSession smtp;
     private int open_count = 0;
     private Nonblocking.Mailbox<OutboxRow> outbox_queue = new Nonblocking.Mailbox<OutboxRow>();
-    private SmtpOutboxFolderProperties properties = new SmtpOutboxFolderProperties(0, 0);
+    private SmtpOutboxFolderProperties _properties = new SmtpOutboxFolderProperties(0, 0);
     
     public override Account account { get { return _account; } }
+    
+    public override FolderProperties properties { get { return _properties; } }
     
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
@@ -91,7 +93,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             
             if (list.size > 0) {
                 // set properties now (can't do yield in ctor)
-                properties.set_total(list.size);
+                _properties.set_total(list.size);
                 
                 debug("Priming outbox postman with %d stored messages", list.size);
                 foreach (OutboxRow row in list)
@@ -178,7 +180,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             
             // update properties
             try {
-                properties.set_total(yield get_email_count_async(null));
+                _properties.set_total(yield get_email_count_async(null));
             } catch (Error err) {
                 debug("Outbox postman: Unable to fetch updated email count for properties: %s",
                     err.message);
@@ -196,10 +198,6 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             path = new SmtpOutboxFolderRoot();
         
         return path;
-    }
-    
-    public override Geary.FolderProperties get_properties() {
-        return properties;
     }
     
     public override Geary.SpecialFolderType get_special_folder_type() {
@@ -286,7 +284,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         assert(row != null);
         
         // update properties
-        properties.set_total(yield get_email_count_async(cancellable));
+        _properties.set_total(yield get_email_count_async(cancellable));
         
         // immediately add to outbox queue for delivery
         outbox_queue.send(row);

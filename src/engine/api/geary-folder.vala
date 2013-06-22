@@ -106,6 +106,8 @@ public interface Geary.Folder : BaseObject {
     
     public abstract Geary.Account account { get; }
     
+    public abstract Geary.FolderProperties properties { get; }
+    
     /**
      * Fired when the folder is successfully opened by a caller.
      *
@@ -232,19 +234,6 @@ public interface Geary.Folder : BaseObject {
         Geary.SpecialFolderType new_type);
     
     public abstract Geary.FolderPath get_path();
-    
-    /**
-     * Returns a FolderProperties that represents, if fully open, accurate values for this Folder,
-     * and if not, values that represent the last time the Folder was opened or examined by the
-     * Engine.
-     *
-     * The returned object is not guaranteed to be long-lived.  If the Folder's state changes, it's
-     * possible a new FolderProperties will be set in its place.  Instead of monitoring the fields
-     * of the FolderProperties for changes, use Account.folders_contents_changed() to be notified
-     * of changes and use the (potentially new) FolderProperties returned by this method at that
-     * point.
-     */
-    public abstract Geary.FolderProperties get_properties();
     
     /**
      * Returns the special folder type of the folder.

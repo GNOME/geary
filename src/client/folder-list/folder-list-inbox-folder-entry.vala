@@ -16,7 +16,10 @@ public class FolderList.InboxFolderEntry : FolderList.FolderEntry {
     }
     
     public override string get_sidebar_name() {
-        return folder.account.information.nickname;
+        return (folder.properties.email_unread == 0 ? folder.account.information.nickname :
+            /// This string gets the account nickname and the unread messages count,
+            /// e.g. Work (5).
+            _("%s (%d)").printf(folder.account.information.nickname, folder.properties.email_unread));
     }
     
     public Geary.AccountInformation get_account_information() {

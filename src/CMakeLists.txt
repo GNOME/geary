@@ -14,6 +14,7 @@ engine/abstract/geary-abstract-folder.vala
 
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
+engine/api/geary-aggregated-folder-properties.vala
 engine/api/geary-attachment.vala
 engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
@@ -230,6 +231,7 @@ engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
 engine/util/util-memory.vala
 engine/util/util-numeric.vala
+engine/util/util-object.vala
 engine/util/util-reference-semantics.vala
 engine/util/util-scheduler.vala
 engine/util/util-single-item.vala

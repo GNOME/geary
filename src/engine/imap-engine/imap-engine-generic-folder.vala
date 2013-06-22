@@ -15,12 +15,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Geary.Email.Field.PROPERTIES | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
     public override Account account { get { return _account; } }
+    public override FolderProperties properties { get { return _properties; } }
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
     internal EmailFlagWatcher email_flag_watcher;
     
     private weak GenericAccount _account;
+    private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties();
     private Imap.Account remote;
     private ImapDB.Account local;
     private SpecialFolderType special_folder_type;
@@ -37,6 +39,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         this.local = local;
         this.local_folder = local_folder;
         this.special_folder_type = special_folder_type;
+        _properties.add(local_folder.get_properties());
         
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
@@ -51,16 +54,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     public override Geary.FolderPath get_path() {
         return local_folder.get_path();
-    }
-    
-    public override Geary.FolderProperties get_properties() {
-        // Get properties in order of authoritativeness:
-        // - From open remote folder
-        // - Fetch from local store
-        if (remote_folder != null && get_open_state() == OpenState.BOTH)
-            return remote_folder.properties;
-        
-        return local_folder.get_properties();
     }
     
     public override Geary.SpecialFolderType get_special_folder_type() {
@@ -581,6 +574,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             return;
         }
         
+        _properties.add(remote_folder.properties);
+        
         // notify any subscribers with similar information
         notify_opened(
             (remote_folder != null) ? Geary.Folder.OpenState.BOTH : Geary.Folder.OpenState.LOCAL,
@@ -591,6 +586,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (open_count == 0 || --open_count > 0)
             return;
         
+        _properties.remove(remote_folder.properties);
         yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, cancellable);
     }
     

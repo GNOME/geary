@@ -227,7 +227,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                     debug("Oldest local email in %s not old enough (%s vs. %s), synchronizing...",
                         folder.to_string(), oldest_local.to_string(), epoch.to_string());
                 }
-            } else if (folder.get_properties().email_total == 0) {
+            } else if (folder.properties.email_total == 0) {
                 // no local messages, no remote messages -- this is as good as having everything up
                 // to the epoch
                 return true;
