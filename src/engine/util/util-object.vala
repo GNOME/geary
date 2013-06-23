@@ -13,9 +13,11 @@ public Gee.List<Binding>? mirror_properties(Object source, Object dest, BindingF
     flags = GLib.BindingFlags.DEFAULT | GLib.BindingFlags.SYNC_CREATE) {
     // Make sets of both object's properties.
     Gee.HashSet<ParamSpec> source_properties = new Gee.HashSet<ParamSpec>();
-    source_properties.add_all_array(source.get_class().list_properties());
+    Collection.add_all_array<ParamSpec>(source_properties,
+        source.get_class().list_properties());
     Gee.HashSet<ParamSpec> dest_properties = new Gee.HashSet<ParamSpec>();
-    dest_properties.add_all_array(dest.get_class().list_properties());
+    Collection.add_all_array<ParamSpec>(dest_properties,
+        dest.get_class().list_properties());
     
     // Remove properties from source_properties that are not in both sets.
     source_properties.retain_all(dest_properties);
