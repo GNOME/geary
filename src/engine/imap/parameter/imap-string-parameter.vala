@@ -26,7 +26,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public string value { get; private set; }
     
     /**
-     * Returns {@link} value or null if value is empty (zero-length).
+     * Returns {@link value} or null if value is empty (zero-length).
      */
     public string? nullable_value {
         get {

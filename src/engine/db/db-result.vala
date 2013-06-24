@@ -124,6 +124,18 @@ public class Geary.Db.Result : Geary.Db.Context {
         return s;
     }
     
+    /**
+     * column is zero-based.
+     */
+    public Memory.Buffer string_buffer_at(int column) throws DatabaseError {
+        // Memory.StringBuffer is not entirely suited for this, as it can result in extra copies
+        // internally ... GrowableBuffer is better for large blocks
+        Memory.GrowableBuffer buffer = new Memory.GrowableBuffer();
+        buffer.append(string_at(column).data);
+        
+        return buffer;
+    }
+    
     private void verify_at(int column) throws DatabaseError {
         if (finished)
             throw new DatabaseError.FINISHED("Query finished");
@@ -202,6 +214,14 @@ public class Geary.Db.Result : Geary.Db.Context {
      */
     public unowned string string_for(string name) throws DatabaseError {
         return string_at(convert_for(name));
+    }
+    
+    /**
+     * name is the name of the column in the result set.  See Statement.get_column_index() for name
+     * matching rules.
+     */
+    public Memory.Buffer string_buffer_for(string name) throws DatabaseError {
+        return string_buffer_at(convert_for(name));
     }
     
     private int convert_for(string name) throws DatabaseError {

@@ -34,8 +34,8 @@ public class Geary.Imap.FetchedData : Object {
      * now, these buffers are indexed with {@link FetchBodyDataIdentifier}s.  This means the results
      * can only be accessed against the original request's identifier.
      */
-    public Gee.Map<FetchBodyDataIdentifier, Memory.AbstractBuffer> body_data_map { get; private set;
-        default = new Gee.HashMap<FetchBodyDataIdentifier, Memory.AbstractBuffer>(); }
+    public Gee.Map<FetchBodyDataIdentifier, Memory.Buffer> body_data_map { get; private set;
+        default = new Gee.HashMap<FetchBodyDataIdentifier, Memory.Buffer>(); }
     
     public FetchedData(SequenceNumber seq_num) {
         this.seq_num = seq_num;
@@ -113,9 +113,9 @@ public class Geary.Imap.FetchedData : Object {
         FetchedData combined = new FetchedData(seq_num);
         Collection.map_set_all<FetchDataType, MessageData>(combined.data_map, data_map);
         Collection.map_set_all<FetchDataType, MessageData>(combined.data_map, other.data_map);
-        Collection.map_set_all<FetchBodyDataIdentifier, Memory.AbstractBuffer>(combined.body_data_map,
+        Collection.map_set_all<FetchBodyDataIdentifier, Memory.Buffer>(combined.body_data_map,
             body_data_map);
-        Collection.map_set_all<FetchBodyDataIdentifier, Memory.AbstractBuffer>(combined.body_data_map,
+        Collection.map_set_all<FetchBodyDataIdentifier, Memory.Buffer>(combined.body_data_map,
             other.body_data_map);
         
         return combined;
@@ -130,7 +130,7 @@ public class Geary.Imap.FetchedData : Object {
             builder.append_printf("%s=%s ", data_type.to_string(), data_map.get(data_type).to_string());
         
         foreach (FetchBodyDataIdentifier identifier in body_data_map.keys)
-            builder.append_printf("%s=%lu ", identifier.to_string(), body_data_map.get(identifier).get_size());
+            builder.append_printf("%s=%lu ", identifier.to_string(), body_data_map.get(identifier).size);
         
         return builder.str;
     }

@@ -17,10 +17,10 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         public int64 id;
         public int position;
         public int64 ordering;
-        public string? message;
+        public Memory.Buffer? message;
         public SmtpOutboxEmailIdentifier outbox_id;
         
-        public OutboxRow(int64 id, int position, int64 ordering, string? message) {
+        public OutboxRow(int64 id, int position, int64 ordering, Memory.Buffer? message) {
             assert(position >= 1);
             
             this.id = id;
@@ -84,7 +84,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                 int position = 1;
                 while (!results.finished) {
                     list.add(new OutboxRow(results.rowid_at(0), position++, results.int64_at(1),
-                        results.string_at(2)));
+                        results.string_buffer_at(2)));
                     results.next(cancellable);
                 }
                 
@@ -118,7 +118,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             // Convert row into RFC822 message suitable for sending or framing
             RFC822.Message message;
             try {
-                message = new RFC822.Message.from_string(row.message);
+                message = new RFC822.Message.from_buffer(row.message);
             } catch (RFC822Error msg_err) {
                 // TODO: This needs to be reported to the user
                 debug("Outbox postman message error: %s", msg_err.message);
@@ -270,7 +270,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             assert(!results.finished);
             
             int64 ordering = results.int64_at(0);
-            string message = results.string_at(1);
+            Memory.Buffer message = results.string_buffer_at(1);
             
             int position = do_get_position_by_ordering(cx, ordering, cancellable);
             
@@ -336,7 +336,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
             int position = low;
             do {
                 list.add(row_to_email(new OutboxRow(results.rowid_at(0), position++, results.int64_at(1),
-                    results.string_at(2))));
+                    results.string_buffer_at(2))));
             } while (results.next());
             
             return Db.TransactionOutcome.DONE;
@@ -381,7 +381,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
                 }
                 
                 list.add(row_to_email(new OutboxRow(results.rowid_at(0), position++, ordering,
-                    results.string_at(2))));
+                    results.string_buffer_at(2))));
             } while (results.next());
             
             return Db.TransactionOutcome.DONE;
@@ -516,7 +516,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
     
     // Utility for getting an email object back from an outbox row.
     private Geary.Email row_to_email(OutboxRow row) throws Error {
-        RFC822.Message message = new RFC822.Message.from_string(row.message);
+        RFC822.Message message = new RFC822.Message.from_buffer(row.message);
         
         Geary.Email email = message.get_email(row.position, row.outbox_id);
         // TODO: Determine message's total size (header + body) to store in Properties.
@@ -601,7 +601,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractFolder, Geary.FolderSupport
         if (position < 1)
             return null;
         
-        return new OutboxRow(results.rowid_at(0), position, ordering, results.string_at(1));
+        return new OutboxRow(results.rowid_at(0), position, ordering, results.string_buffer_at(1));
     }
     
     private bool do_remove_email(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)

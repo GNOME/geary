@@ -79,7 +79,7 @@ public class Geary.Imap.Command : RootParameters {
                 if (stringp != null)
                     add(stringp);
                 else
-                    error("Command continuations currently unsupported");
+                    add(new LiteralParameter(new Memory.StringBuffer(arg)));
             }
         }
     }
@@ -110,10 +110,11 @@ public class Geary.Imap.Command : RootParameters {
         return this.name.down() == name.down();
     }
     
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         assert(tag.is_assigned());
         
-        yield base.serialize(ser);
+        base.serialize(ser, tag);
+        ser.push_end_of_message();
     }
 }
 

@@ -83,6 +83,7 @@ class ImapConsole : Gtk.Window {
         "capabililties",
         "caps",
         "connect",
+        "unsecure",
         "disconnect",
         "login",
         "logout",
@@ -94,6 +95,7 @@ class ImapConsole : Gtk.Window {
         "fetch",
         "uid-fetch",
         "fetch-fields",
+        "append",
         "help",
         "exit",
         "quit",
@@ -138,6 +140,7 @@ class ImapConsole : Gtk.Window {
                     break;
                     
                     case "connect":
+                    case "unsecure":
                         connect_cmd(cmd, args);
                     break;
                     
@@ -179,6 +182,10 @@ class ImapConsole : Gtk.Window {
                     
                     case "fetch-fields":
                         fetch_fields(cmd, args);
+                    break;
+                    
+                    case "append":
+                        append(cmd, args);
                     break;
                     
                     case "help":
@@ -285,10 +292,13 @@ class ImapConsole : Gtk.Window {
         
         check_args(cmd, args, 1, "hostname[:port]");
         
+        Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+        if (cmd != "unsecure")
+            flags |= Geary.Endpoint.Flags.SSL;
+        
         cx = new Geary.Imap.ClientConnection(
             new Geary.Endpoint(args[0], Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
-                Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
-                Geary.Imap.ClientConnection.DEFAULT_TIMEOUT_SEC));
+                flags, Geary.Imap.ClientConnection.DEFAULT_TIMEOUT_SEC));
         
         cx.sent_command.connect(on_sent_command);
         cx.received_status_response.connect(on_received_status_response);
@@ -462,6 +472,25 @@ class ImapConsole : Gtk.Window {
         }
     }
     
+    private void append(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 2, "<mailbox> <filename>");
+        
+        status("Appending %s to %s".printf(args[1], args[0]));
+        
+        cx.send_async.begin(new Geary.Imap.AppendCommand(new Geary.Imap.MailboxSpecifier(args[0]),
+            null, null, new Geary.Memory.FileBuffer(File.new_for_path(args[1]), true)), null,
+            on_appended);
+    }
+    
+    private void on_appended(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Appended");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
     private void close(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
@@ -601,7 +630,7 @@ class ImapConsole : Gtk.Window {
 void main(string[] args) {
     Gtk.init(ref args);
     
-    Geary.Logging.set_flags(Geary.Logging.Flag.NETWORK);
+    Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
     Geary.Logging.log_to(stdout);
     
     ImapConsole console = new ImapConsole();

@@ -32,6 +32,13 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
         return (flag == this) ? true : flag.equals_string(value);
     }
     
+    /**
+     * Returns the {@link Flag} as an appropriate {@link Parameter}.
+     */
+    public Parameter to_parameter() {
+        return StringParameter.get_best_for(value);
+    }
+    
     public uint hash() {
         return str_hash(value.down());
     }

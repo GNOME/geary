@@ -35,6 +35,19 @@ public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, 
         return to_string();
     }
     
+    /**
+     * Returns a {@link ListParameter} representation of these flags.
+     *
+     * If empty, this returns an empty ListParameter.
+     */
+    public virtual Parameter to_parameter() {
+        ListParameter listp = new ListParameter(null);
+        foreach (Flag flag in list)
+            listp.add(flag.to_parameter());
+        
+        return listp;
+    }
+    
     public bool equal_to(Geary.Imap.Flags other) {
         if (this == other)
             return true;

@@ -130,15 +130,15 @@ public abstract class Geary.MessageData.Int64MessageData : AbstractMessageData,
 
 public abstract class Geary.MessageData.BlockMessageData : AbstractMessageData {
     public string data_name { get; private set; }
-    public Geary.Memory.AbstractBuffer buffer { get; private set; }
+    public Geary.Memory.Buffer buffer { get; private set; }
     
-    public BlockMessageData(string data_name, Geary.Memory.AbstractBuffer buffer) {
+    public BlockMessageData(string data_name, Geary.Memory.Buffer buffer) {
         this.data_name = data_name;
         this.buffer = buffer;
     }
     
     public override string to_string() {
-        return "%s (%lub)".printf(data_name, buffer.get_size());
+        return "%s (%lub)".printf(data_name, buffer.size);
     }
 }
 

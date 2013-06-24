@@ -21,6 +21,34 @@ public GMime.FilterCharset create_utf8_filter_charset(string from_charset) {
     return filter_charset;
 }
 
+/**
+ * Uses the best-possible transfer of bytes from the Memory.Buffer to the GMime.StreamMem object.
+ * The StreamMem object should be destroyed *before* the Memory.Buffer object, since this method
+ * will use unowned variants whenever possible.
+ */
+public GMime.StreamMem create_stream_mem(Memory.Buffer buffer) {
+    Memory.UnownedByteArrayBuffer? unowned_bytes_array_buffer = buffer as Memory.UnownedByteArrayBuffer;
+    if (unowned_bytes_array_buffer != null) {
+        // set_byte_array doesn't do any copying and doesn't take ownership -- perfect, this is
+        // the best of all possible worlds, assuming the Memory.Buffer is not destroyed first
+        GMime.StreamMem stream = new GMime.StreamMem();
+        stream.set_byte_array(unowned_bytes_array_buffer.to_unowned_byte_array());
+        
+        return stream;
+    }
+    
+    Memory.UnownedBytesBuffer? unowned_bytes_buffer = buffer as Memory.UnownedBytesBuffer;
+    if (unowned_bytes_buffer != null) {
+        // StreamMem.with_buffer does do a buffer copy (there's not set_buffer() call like
+        // set_byte_array() for some reason), but don't do a buffer copy when it comes out of the
+        // Memory.Buffer
+        return new GMime.StreamMem.with_buffer(unowned_bytes_buffer.to_unowned_uint8_array());
+    }
+    
+    // do plain-old buffer copy
+    return new GMime.StreamMem.with_buffer(buffer.get_uint8_array());
+}
+
 public string create_subject_for_reply(Geary.Email email) {
     return (email.subject ?? new Geary.RFC822.Subject("")).create_reply().value;
 }

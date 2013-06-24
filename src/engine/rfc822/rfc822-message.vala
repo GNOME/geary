@@ -27,8 +27,7 @@ public class Geary.RFC822.Message : BaseObject {
     private GMime.Message message;
     
     public Message(Full full) throws RFC822Error {
-        GMime.Parser parser = new GMime.Parser.with_stream(
-            new GMime.StreamMem.with_buffer(full.buffer.get_array()));
+        GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(full.buffer));
         
         message = parser.construct_message();
         if (message == null)
@@ -42,8 +41,8 @@ public class Geary.RFC822.Message : BaseObject {
         stock_from_gmime();
     }
     
-    public Message.from_string(string full_email) throws RFC822Error {
-        this(new Geary.RFC822.Full(new Geary.Memory.StringBuffer(full_email)));
+    public Message.from_buffer(Memory.Buffer full_email) throws RFC822Error {
+        this(new Geary.RFC822.Full(full_email));
     }
     
     public Message.from_parts(Header header, Text body) throws RFC822Error {
@@ -52,12 +51,12 @@ public class Geary.RFC822.Message : BaseObject {
         // http://redmine.yorba.org/issues/7034
         // and
         // https://bugzilla.gnome.org/show_bug.cgi?id=701572
-		//
-		// TODO: When fixed in GMime, return to original behavior of streaming each buffer in
-        uint8[] buffer = new uint8[header.buffer.get_size() + body.buffer.get_size()];
+        //
+        // TODO: When fixed in GMime, return to original behavior of streaming each buffer in
+        uint8[] buffer = new uint8[header.buffer.size + body.buffer.size];
         uint8* ptr = buffer;
-        GLib.Memory.copy(ptr, header.buffer.get_array(), header.buffer.get_size());
-        GLib.Memory.copy(ptr + header.buffer.get_size(), body.buffer.get_array(), body.buffer.get_size());
+        GLib.Memory.copy(ptr, header.buffer.get_bytes().get_data(), header.buffer.size);
+        GLib.Memory.copy(ptr + header.buffer.size, body.buffer.get_bytes().get_data(), body.buffer.size);
         
         GMime.Parser parser = new GMime.Parser.with_stream(new GMime.StreamMem.with_buffer(buffer));
         message = parser.construct_message();
@@ -401,12 +400,11 @@ public class Geary.RFC822.Message : BaseObject {
         return (addrs.size > 0) ? addrs : null;
     }
     
-    public Geary.Memory.AbstractBuffer get_body_rfc822_buffer() {
+    public Memory.Buffer get_body_rfc822_buffer() {
         return new Geary.Memory.StringBuffer(message.to_string());
     }
     
-    public Geary.Memory.AbstractBuffer get_first_mime_part_of_content_type(string content_type,
-        bool to_html = false)
+    public Memory.Buffer get_first_mime_part_of_content_type(string content_type, bool to_html = false)
         throws RFC822Error {
         // search for content type starting from the root
         GMime.Part? part = find_first_mime_part(message.get_mime_part(), content_type);
@@ -459,7 +457,7 @@ public class Geary.RFC822.Message : BaseObject {
         }
     }
 
-    public Geary.Memory.AbstractBuffer get_content_by_mime_id(string mime_id) throws RFC822Error {
+    public Memory.Buffer get_content_by_mime_id(string mime_id) throws RFC822Error {
         GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
         if (part == null) {
             throw new RFC822Error.NOT_FOUND("Could not find a MIME part with content-id %s",
@@ -538,7 +536,7 @@ public class Geary.RFC822.Message : BaseObject {
         }
     }
 
-    private Geary.Memory.AbstractBuffer mime_part_to_memory_buffer(GMime.Part part,
+    private Memory.Buffer mime_part_to_memory_buffer(GMime.Part part,
         bool to_utf8 = false, bool to_html = false) throws RFC822Error {
 
         GMime.DataWrapper? wrapper = part.get_content_object();
@@ -577,7 +575,7 @@ public class Geary.RFC822.Message : BaseObject {
         wrapper.write_to_stream(stream_filter);
         stream_filter.flush();
         
-        return new Geary.Memory.Buffer(byte_array.data, byte_array.len);
+        return new Geary.Memory.ByteBuffer.from_byte_array(byte_array);
     }
 
     public string to_string() {

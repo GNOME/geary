@@ -1330,9 +1330,8 @@ public class ConversationViewer : Gtk.Box {
                     continue;
                 } else if (src.has_prefix("cid:")) {
                     string mime_id = src.substring(4);
-                    Geary.Memory.AbstractBuffer image_content =
-                        message.get_content_by_mime_id(mime_id);
-                    uint8[] image_data = image_content.get_array();
+                    Geary.Memory.Buffer image_content = message.get_content_by_mime_id(mime_id);
+                    uint8[] image_data = image_content.get_bytes().get_data();
 
                     // Get the content type.
                     bool uncertain_content_type;

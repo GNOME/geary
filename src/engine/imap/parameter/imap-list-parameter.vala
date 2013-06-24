@@ -85,7 +85,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Returns {@link Paramater} at index if in range and of Type type, otherwise throws an
+     * Returns {@link Parameter} at index if in range and of Type type, otherwise throws an
      * {@link ImapError.TYPE_ERROR}.
      *
      * type must be of type Parameter.
@@ -154,7 +154,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     /**
      * Returns a {@link StringParameter} only if the {@link Parameter} at index is a StringParameter.
      *
-     * Compare to {@link get_if_string_or_literal}.
+     * Compare to {@link get_as_nullable_string}.
      */
     public StringParameter? get_if_string(int index) {
         return (StringParameter?) get_if(index, typeof(StringParameter));
@@ -307,12 +307,12 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Returns a {@link Memory.AbstractBuffer} for the {@link Parameter} at position index.
+     * Returns a {@link Memory.Buffer} for the {@link Parameter} at position index.
      *
      * Only converts {@link StringParameter} and {@link LiteralParameter}.  All other types return
      * null.
      */
-    public Memory.AbstractBuffer? get_as_nullable_buffer(int index) throws ImapError {
+    public Memory.Buffer? get_as_nullable_buffer(int index) throws ImapError {
         LiteralParameter? literalp = get_if_literal(index);
         if (literalp != null)
             return literalp.get_buffer();
@@ -325,12 +325,12 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Returns a {@link Memory.AbstractBuffer} for the {@link Parameter} at position index.
+     * Returns a {@link Memory.Buffer} for the {@link Parameter} at position index.
      *
      * Only converts {@link StringParameter} and {@link LiteralParameter}.  All other types return
      * as an empty buffer.
      */
-    public Memory.AbstractBuffer get_as_empty_buffer(int index) throws ImapError {
+    public Memory.Buffer get_as_empty_buffer(int index) throws ImapError {
         return get_as_nullable_buffer(index) ?? Memory.EmptyBuffer.instance;
     }
     
@@ -395,10 +395,10 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         return "(%s)".printf(stringize_list());
     }
     
-    protected async void serialize_list(Serializer ser) throws Error {
+    protected void serialize_list(Serializer ser, Tag tag) throws Error {
         int length = list.size;
         for (int ctr = 0; ctr < length; ctr++) {
-            yield list[ctr].serialize(ser);
+            list[ctr].serialize(ser, tag);
             if (ctr < (length - 1))
                 ser.push_space();
         }
@@ -407,9 +407,9 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     /**
      * {@inheritDoc}
      */
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         ser.push_ascii('(');
-        yield serialize_list(ser);
+        serialize_list(ser, tag);
         ser.push_ascii(')');
     }
 }

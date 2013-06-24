@@ -19,9 +19,22 @@
 public interface Geary.Imap.MessageData : Geary.MessageData.AbstractMessageData {
 }
 
+/**
+ * A representations of IMAP's INTERNALDATE field.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-2.3.3]]
+ */
+
 public class Geary.Imap.InternalDate : Geary.RFC822.Date, Geary.Imap.MessageData {
     public InternalDate(string iso8601) throws ImapError {
         base (iso8601);
+    }
+    
+    /**
+     * Returns the {@link InternalDate} as a {@link Parameter}.
+     */
+    public Parameter to_parameter() {
+        return StringParameter.get_best_for(serialize());
     }
 }
 
@@ -67,19 +80,19 @@ public class Geary.Imap.Envelope : Geary.MessageData.AbstractMessageData, Geary.
 }
 
 public class Geary.Imap.RFC822Header : Geary.RFC822.Header, Geary.Imap.MessageData {
-    public RFC822Header(Geary.Memory.AbstractBuffer buffer) {
+    public RFC822Header(Memory.Buffer buffer) {
         base (buffer);
     }
 }
 
 public class Geary.Imap.RFC822Text : Geary.RFC822.Text, Geary.Imap.MessageData {
-    public RFC822Text(Geary.Memory.AbstractBuffer buffer) {
+    public RFC822Text(Memory.Buffer buffer) {
         base (buffer);
     }
 }
 
 public class Geary.Imap.RFC822Full : Geary.RFC822.Full, Geary.Imap.MessageData {
-    public RFC822Full(Geary.Memory.AbstractBuffer buffer) {
+    public RFC822Full(Memory.Buffer buffer) {
         base (buffer);
     }
 }
