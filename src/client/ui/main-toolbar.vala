@@ -36,7 +36,7 @@ public class MainToolbar : Gtk.Box {
         set_toolbutton_action(builder, GearyController.ACTION_REPLY_TO_MESSAGE);
         set_toolbutton_action(builder, GearyController.ACTION_REPLY_ALL_MESSAGE);
         set_toolbutton_action(builder, GearyController.ACTION_FORWARD_MESSAGE);
-        set_toolbutton_action(builder, GearyController.ACTION_DELETE_MESSAGE);
+        set_toolbutton_action(builder, GearyController.ACTION_DELETE_MESSAGE, true);
 
         // Setup the folder menus (move/copy).
         
@@ -99,12 +99,13 @@ public class MainToolbar : Gtk.Box {
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
     }
     
-    private Gtk.ToolButton set_toolbutton_action(Gtk.Builder builder, string action) {
+    private Gtk.ToolButton set_toolbutton_action(Gtk.Builder builder, string action,
+        bool use_action_appearance = false) {
         Gtk.ToolButton button = builder.get_object(action) as Gtk.ToolButton;
         
         // Must manually set use_action_appearance to false until Glade re-adds this feature.
         // See this ticket: https://bugzilla.gnome.org/show_bug.cgi?id=694407#c11
-        button.use_action_appearance = false;
+        button.use_action_appearance = use_action_appearance;
         button.set_related_action(GearyApplication.instance.actions.get_action(action));
         return button;
     }
