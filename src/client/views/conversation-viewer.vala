@@ -85,6 +85,7 @@ public class ConversationViewer : Gtk.Box {
     private Gtk.Menu? message_menu = null;
     private Gtk.Menu? attachment_menu = null;
     private weak Geary.Folder? current_folder = null;
+    private weak Geary.SearchFolder? search_folder = null;
     private Geary.AccountInformation? current_account_information = null;
     private ConversationFindBar conversation_find_bar;
     private Cancellable cancellable_fetch = new Cancellable();
@@ -118,7 +119,6 @@ public class ConversationViewer : Gtk.Box {
         
         GearyApplication.instance.controller.conversations_selected.connect(on_conversations_selected);
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
-        GearyApplication.instance.controller.search_text_changed.connect(on_search_text_changed);
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
@@ -291,9 +291,11 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private async void highlight_search_terms() {
-        Geary.SearchFolder? search_folder = current_folder as Geary.SearchFolder;
         if (search_folder == null)
             return;
+        
+        // Remove existing highlights.
+        web_view.unmark_text_matches();
         
         // List all IDs of emails we're viewing.
         Gee.Collection<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
@@ -1715,6 +1717,11 @@ public class ConversationViewer : Gtk.Box {
         web_view.allow_collapsing(true);
         web_view.unmark_text_matches();
         
+        if (search_folder != null) {
+            search_folder.search_keywords_changed.disconnect(on_search_text_changed);
+            search_folder = null;
+        }
+        
         if (conversation_find_bar.visible)
             conversation_find_bar.hide(); // Close the find bar.
         
@@ -1747,6 +1754,10 @@ public class ConversationViewer : Gtk.Box {
     
     // Search folder entered.
     private uint on_enter_search_folder(uint state, uint event, void *user, Object? object) {
+        search_folder = current_folder as Geary.SearchFolder;
+        assert(search_folder != null);
+        search_folder.search_keywords_changed.connect(on_search_text_changed);
+        
         return SearchState.SEARCH_FOLDER;
     }
 }

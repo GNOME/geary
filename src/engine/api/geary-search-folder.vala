@@ -46,7 +46,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
     /**
-     * Fired when the search keywords have changed.
+     * Fired when the search keywords have changed.  This signal is fired *after* the search
+     * has completed.
      */
     public signal void search_keywords_changed(string keywords);
     
@@ -81,7 +82,6 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
      * Sets the keyword string for this search.
      */
     public void set_search_keywords(string keywords, Cancellable? cancellable = null) {
-        search_keywords_changed(keywords);
         set_search_keywords_async.begin(keywords, cancellable, on_set_search_keywords_complete);
     }
     
@@ -154,6 +154,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         }
         
         result_mutex.release(ref result_mutex_token);
+        
+        search_keywords_changed(keywords);
         
         if (error != null)
             throw error;
