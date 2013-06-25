@@ -19,6 +19,18 @@ public enum ClockFormat {
     }
 }
 
+public enum CoarseDate {
+    NOW,
+    MINUTES,
+    HOURS,
+    TODAY,
+    YESTERDAY,
+    THIS_WEEK,
+    THIS_YEAR,
+    YEARS,
+    FUTURE;
+}
+
 private int init_count = 0;
 private string[]? xlat_pretty_dates = null;
 private string[]? xlat_pretty_verbose_dates = null;
@@ -109,31 +121,86 @@ private bool same_day(DateTime a, DateTime b) {
     return year1 == year2 && month1 == month2 && day1 == day2;
 }
 
-public string pretty_print(DateTime datetime, ClockFormat clock_format) {
-    DateTime now = new DateTime.now_local();
-    
-    string fmt;
+// Computes the CoarseDate corresponding to the given datetime
+// The CoarseDate is a rough description of the date, to be used by the pretty printer
+public CoarseDate as_coarse_date(DateTime datetime, DateTime now, TimeSpan diff) {
     if (same_day(datetime, now)) {
-        TimeSpan diff = now.difference(datetime);
-        
         if (diff < TimeSpan.MINUTE) {
-            return _("now");
+            return CoarseDate.NOW;
         }
         if (diff < TimeSpan.HOUR) {
-            return _("%dm ago").printf(diff / TimeSpan.MINUTE);
+            return CoarseDate.MINUTES;
         }
         if (diff < 12 * TimeSpan.HOUR) {
-            return _("%dh ago").printf(diff / TimeSpan.HOUR);
+            return CoarseDate.HOURS;
         }
-        
-        fmt = xlat_pretty_dates[clock_format.to_index()];
-    } else if (datetime.get_year() == now.get_year()) {
-        fmt = xlat_same_year;
+        return CoarseDate.TODAY;
     } else {
-        fmt = xlat_diff_year;
+        if (datetime.compare(now) > 0) {
+            return CoarseDate.FUTURE;
+        }
+        DateTime temp;
+        temp = datetime.add_days(1);
+        if (same_day(temp, now)) {
+            return CoarseDate.YESTERDAY;
+        }
+        temp = datetime.add_weeks(1);
+        if (same_day(temp, now) || temp.compare(now) >= 0) {
+            return CoarseDate.THIS_WEEK;
+        }
+        if (datetime.get_year() == now.get_year()) {
+            return CoarseDate.THIS_YEAR;
+        } else {
+            return CoarseDate.YEARS;
+        }
+    }
+}
+
+// Private because it's just a helper method for pretty_print, which is the "public api"
+private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_format, DateTime datetime, TimeSpan diff) {
+    string fmt;
+    switch (coarse_date) {
+        case CoarseDate.NOW:
+            return _("Now");
+        
+        case CoarseDate.MINUTES:
+            return _("%dm ago").printf(diff / TimeSpan.MINUTE);
+        
+        case CoarseDate.HOURS:
+            return _("%dh ago").printf(diff / TimeSpan.HOUR);
+        
+        case CoarseDate.TODAY:
+            fmt = xlat_pretty_dates[clock_format.to_index()];
+        break;
+        
+        case CoarseDate.YESTERDAY:
+            return _("Yesterday");
+        
+        case CoarseDate.THIS_WEEK:
+            /// Date format that shows the weekday (Monday, Tuesday, ...)
+            /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+            fmt = _("%A");
+        break;
+        
+        case CoarseDate.THIS_YEAR:
+            fmt = xlat_same_year;
+        break;
+        
+        case CoarseDate.YEARS:
+        case CoarseDate.FUTURE:
+        default:
+            fmt = xlat_diff_year;
+        break;
     }
     
     return datetime.format(fmt);
+}
+
+public string pretty_print(DateTime datetime, ClockFormat clock_format) {
+    DateTime now = new DateTime.now_local();
+    TimeSpan diff = now.difference(datetime);
+    
+    return pretty_print_coarse(as_coarse_date(datetime, now, diff), clock_format, datetime, diff);
 }
 
 public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) {
@@ -141,4 +208,3 @@ public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) 
 }
 
 }
-
