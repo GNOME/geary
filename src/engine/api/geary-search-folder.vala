@@ -135,6 +135,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
                 search_results.remove_all(to_remove);
                 search_results.add_all(to_add);
                 
+                _properties.set_total(search_results.size);
+                
                 Geary.Folder.CountChangeReason reason = CountChangeReason.NONE;
                 
                 if (to_add.size > 0) {

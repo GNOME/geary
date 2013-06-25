@@ -23,11 +23,15 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
         
         Geary.Engine.instance.account_available.connect(on_accounts_changed);
         Geary.Engine.instance.account_unavailable.connect(on_accounts_changed);
+        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(
+            on_email_total_changed);
     }
     
     ~SearchEntry() {
         Geary.Engine.instance.account_available.disconnect(on_accounts_changed);
         Geary.Engine.instance.account_unavailable.disconnect(on_accounts_changed);
+        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(
+            on_email_total_changed);
     }
     
     public override string get_sidebar_name() {
@@ -49,6 +53,11 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     
     private void on_accounts_changed() {
         sidebar_name_changed(get_sidebar_name());
+        sidebar_tooltip_changed(get_sidebar_tooltip());
+    }
+    
+    private void on_email_total_changed() {
+        sidebar_tooltip_changed(get_sidebar_tooltip());
     }
 }
 

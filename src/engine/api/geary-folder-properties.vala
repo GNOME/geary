@@ -6,7 +6,7 @@
 
 public abstract class Geary.FolderProperties : BaseObject {
     public const string PROP_NAME_EMAIL_TOTAL = "email-total";
-    public const string PROP_NAME_EMAIL_UNDREAD = "email-unread";
+    public const string PROP_NAME_EMAIL_UNREAD = "email-unread";
     public const string PROP_NAME_HAS_CHILDREN = "has-children";
     public const string PROP_NAME_SUPPORTS_CHILDREN = "supports-children";
     public const string PROP_NAME_IS_OPENABLE = "is-openable";
