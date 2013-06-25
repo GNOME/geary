@@ -143,6 +143,7 @@
       <object class="GtkToolItem" id="filler">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
         <child>
           <placeholder/>
         </child>
@@ -162,6 +163,7 @@
             <property name="can_focus">True</property>
             <property name="hexpand">True</property>
             <property name="invisible_char">•</property>
+            <property name="width_chars">32</property>
             <property name="primary_icon_name">edit-find-symbolic</property>
             <property name="secondary_icon_name">edit-clear-symbolic</property>
             <property name="primary_icon_sensitive">False</property>
@@ -169,7 +171,7 @@
         </child>
       </object>
       <packing>
-        <property name="expand">True</property>
+        <property name="expand">False</property>
         <property name="homogeneous">True</property>
       </packing>
     </child>
