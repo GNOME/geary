@@ -138,5 +138,12 @@ public async void sleep_async(uint seconds) {
     Source.remove(id);
 }
 
+/// Sleeps for the specified number of milliseconds.
+public async void sleep_ms_async(uint milliseconds) {
+    uint id = Timeout.add(milliseconds, sleep_ms_async.callback);
+    yield;
+    Source.remove(id);
+}
+
 }
 

@@ -124,17 +124,8 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     
     private void update_buttons() {
         edit_action.sensitive = get_selected_account() != null;
-        delete_action.sensitive = edit_action.sensitive && get_num_accounts() > 1;
-    }
-    
-    private int get_num_accounts() {
-        try {
-            return Geary.Engine.instance.get_accounts().size;
-        } catch (Error e) {
-            debug("Error getting number of accounts: %s", e.message);
-        }
-        
-        return 0; // on error
+        delete_action.sensitive = edit_action.sensitive &&
+            GearyApplication.instance.controller.get_num_accounts() > 1;
     }
     
     private void on_account_added(Geary.AccountInformation account) {

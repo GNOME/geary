@@ -22,7 +22,7 @@ public class ConversationFindBar : Gtk.Layout {
     private Gtk.Builder builder;
     private Gtk.Box contents_box;
     private Gtk.Entry entry;
-    private WebKit.WebView web_view;
+    private ConversationWebView web_view;
     private Gtk.Label result_label;
     private Gtk.CheckButton case_sensitive_check;
     private Gtk.Button next_button;
@@ -31,7 +31,9 @@ public class ConversationFindBar : Gtk.Layout {
     private uint matches;
     private bool searching = false;
     
-    public ConversationFindBar(WebKit.WebView web_view) {
+    public signal void close();
+    
+    public ConversationFindBar(ConversationWebView web_view) {
         this.web_view = web_view;
         
         builder = GearyApplication.instance.create_builder("find_bar.glade");
@@ -83,24 +85,14 @@ public class ConversationFindBar : Gtk.Layout {
         
         base.show();
         
-        try {
-            web_view.get_dom_document().get_body().get_class_list().add("nohide");
-        } catch (Error error) {
-            debug("Error setting body class: %s", error.message);
-        }
-        
         fill_entry_with_web_view_selection();
         commence_search();
     }
     
     public override void hide() {
         base.hide();
+        
         end_search();
-        try {
-            web_view.get_dom_document().get_body().get_class_list().remove("nohide");
-        } catch (Error error) {
-            debug("Error setting body class: %s", error.message);
-        }
     }
     
     public void focus_entry() {
@@ -306,6 +298,7 @@ public class ConversationFindBar : Gtk.Layout {
     
     private void on_close_button_clicked() {
         hide();
+        close();
     }
     
     private void on_case_sensitive_check_toggled() {

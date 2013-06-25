@@ -20,6 +20,13 @@ public inline bool is_empty(string? str) {
     return (str == null || str[0] == EOS);
 }
 
+public int count_char(string s, unichar c) {
+    int count = 0;
+    for (int index = 0; (index = s.index_of_char(c, index)) >= 0; ++index, ++count)
+        ;
+    return count;
+}
+
 public int ascii_cmp(string a, string b) {
     return strcmp(a, b);
 }

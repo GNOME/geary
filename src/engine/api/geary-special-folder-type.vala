@@ -7,6 +7,7 @@
 public enum Geary.SpecialFolderType {
     NONE,
     INBOX,
+    SEARCH,
     DRAFTS,
     SENT,
     FLAGGED,
@@ -44,6 +45,9 @@ public enum Geary.SpecialFolderType {
             
             case OUTBOX:
                 return _("Outbox");
+            
+            case SEARCH:
+                return _("Search");
             
             case NONE:
             default:

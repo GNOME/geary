@@ -33,6 +33,7 @@ private class Geary.ImapDB.MessageRow {
     
     public string? email_flags { get; set; default = null; }
     public string? internaldate { get; set; default = null; }
+    public time_t internaldate_time_t { get; set; default = -1; }
     public long rfc822_size { get; set; default = -1; }
     
     public MessageRow() {
@@ -91,6 +92,7 @@ private class Geary.ImapDB.MessageRow {
         
         if (fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
             internaldate = results.string_for("internaldate");
+            internaldate_time_t = (time_t) results.int64_for("internaldate_time_t");
             rfc822_size = results.long_for("rfc822_size");
         }
     }
@@ -242,6 +244,7 @@ private class Geary.ImapDB.MessageRow {
         if (email.fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
             Geary.Imap.EmailProperties? imap_properties = (Geary.Imap.EmailProperties) email.properties;
             internaldate = (imap_properties != null) ? imap_properties.internaldate.original : null;
+            internaldate_time_t = (imap_properties != null) ? imap_properties.internaldate.as_time_t : -1;
             rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
             
             fields = fields.set(Geary.Email.Field.PROPERTIES);

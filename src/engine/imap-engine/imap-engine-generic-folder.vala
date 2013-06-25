@@ -729,6 +729,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         // save new remote count internally and in local store
+        bool changed = (remote_count != new_remote_count);
         remote_count = new_remote_count;
         try {
             yield local_folder.update_remote_selected_message_count(remote_count, null);
@@ -742,7 +743,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (created.size > 0)
             notify_email_locally_appended(created);
         
-        notify_email_count_changed(remote_count, CountChangeReason.ADDED);
+        if (changed)
+            notify_email_count_changed(remote_count, CountChangeReason.APPENDED);
         
         debug("do_replay_appended_messages: completed for %s", to_string());
     }

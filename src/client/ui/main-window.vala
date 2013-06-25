@@ -47,6 +47,7 @@ public class MainWindow : Gtk.Window {
         set_default_icon_list(pixbuf_list);
         
         delete_event.connect(on_delete_event);
+        key_press_event.connect(on_key_press_event);
         
         create_layout();
     }

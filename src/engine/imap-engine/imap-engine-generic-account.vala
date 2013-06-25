@@ -8,6 +8,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private const int REFRESH_FOLDER_LIST_SEC = 10 * 60;
     
     private static Geary.FolderPath? outbox_path = null;
+    private static Geary.FolderPath? search_path = null;
     
     private Imap.Account remote;
     private ImapDB.Account local;
@@ -18,6 +19,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private uint refresh_folder_timeout_id = 0;
     private bool in_refresh_enumerate = false;
     private Cancellable refresh_cancellable = new Cancellable();
+    private string previous_prepared_search_query = "";
     
     public GenericAccount(string name, Geary.AccountInformation information, Imap.Account remote,
         ImapDB.Account local) {
@@ -29,8 +31,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         this.remote.login_failed.connect(on_login_failed);
         this.remote.email_sent.connect(on_email_sent);
         
-        if (outbox_path == null)
+        search_upgrade_monitor = local.search_index_monitor;
+        
+        if (outbox_path == null) {
             outbox_path = new SmtpOutboxFolderRoot();
+        }
+        
+        if (search_path == null) {
+            search_path = new SearchFolderRoot();
+        }
     }
     
     private void check_open() throws EngineError {
@@ -53,6 +62,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         // outbox is now available
         local.outbox.report_problem.connect(notify_report_problem);
         local_only.set(outbox_path, local.outbox);
+        
+        // Search folder.
+        local_only.set(search_path, local.search_folder);
         
         // need to back out local.open_async() if remote fails
         try {
@@ -122,7 +134,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
     // set using either the properties from the local folder or its path.
     //
-    // This won't be called to build the Outbox, but for all others (including Inbox) it will.
+    // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
     protected abstract GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder);
     
@@ -173,8 +185,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
 
     public override Gee.Collection<Geary.Folder> list_folders() throws Error {
         check_open();
+        Gee.HashSet<Geary.Folder> all_folders = new Gee.HashSet<Geary.Folder>();
+        all_folders.add_all(folder_map.values);
+        all_folders.add_all(local_only.values);
         
-        return folder_map.values;
+        return all_folders;
     }
     
     private void reschedule_folder_refresh(bool immediate) {
@@ -460,6 +475,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         return yield local.fetch_email_async(email_id, required_fields, cancellable);
+    }
+    
+    public override async Gee.Collection<Geary.Email>? local_search_async(string keywords,
+        Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
+        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
+        if (offset < 0)
+            throw new EngineError.BAD_PARAMETERS("Offset must not be negative");
+        
+        previous_prepared_search_query = local.prepare_search_query(keywords);
+        
+        return yield local.search_async(local.prepare_search_query(keywords),
+            requested_fields, partial_ok, email_id_folder_path, limit, offset,
+            folder_blacklist, search_ids, cancellable);
+    }
+    
+    public override async Gee.Collection<string>? get_search_keywords_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
+        return yield local.get_search_keywords_async(previous_prepared_search_query, ids, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

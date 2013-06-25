@@ -456,7 +456,82 @@ public class Geary.RFC822.Message : BaseObject {
             return html_format ? get_text_body() : get_html_body();
         }
     }
-
+    
+    /**
+     * Return the body as a searchable string.  The body in this case should
+     * include everything visible in the message's body in the client, which
+     * would be only one body part, plus any visible attachments (which can be
+     * disabled by passing false in include_sub_messages).  Note that values
+     * that come out of this function are persisted.
+     */
+    public string? get_searchable_body(bool include_sub_messages = true) {
+        string? body = null;
+        bool html = false;
+        try {
+            body = get_html_body();
+            html = true;
+        } catch (Error e) {
+            try {
+                body = get_text_body(false);
+            } catch (Error e) {
+                // Ignore.
+            }
+        }
+        
+        if (body != null && html)
+            body = Geary.HTML.html_to_text(body);
+        
+        if (include_sub_messages) {
+            foreach (Message sub_message in get_sub_messages()) {
+                // We index a rough approximation of what a client would be
+                // displaying for each sub-message, including the subject,
+                // recipients, etc.  We can avoid attachments here because
+                // they're recursively picked up in the top-level message,
+                // indexed separately.
+                StringBuilder sub_full = new StringBuilder();
+                if (sub_message.subject != null) {
+                    sub_full.append(sub_message.subject.to_searchable_string());
+                    sub_full.append("\n");
+                }
+                if (sub_message.from != null) {
+                    sub_full.append(sub_message.from.to_searchable_string());
+                    sub_full.append("\n");
+                }
+                string? recipients = sub_message.get_searchable_recipients();
+                if (recipients != null) {
+                    sub_full.append(recipients);
+                    sub_full.append("\n");
+                }
+                // Our top-level get_sub_messages() recursively parses the
+                // whole MIME tree, so when we get the body for a sub-message,
+                // we don't need to invoke it again.
+                string? sub_body = sub_message.get_searchable_body(false);
+                if (sub_body != null)
+                    sub_full.append(sub_body);
+                
+                if (sub_full.len > 0) {
+                    if (body == null)
+                        body = "";
+                    body += "\n" + sub_full.str;
+                }
+            }
+        }
+        
+        return body;
+    }
+    
+    /**
+     * Return the full list of recipients (to, cc, and bcc) as a searchable
+     * string.  Note that values that come out of this function are persisted.
+     */
+    public string? get_searchable_recipients() {
+        Gee.List<RFC822.MailboxAddress>? recipients = get_recipients();
+        if (recipients == null)
+            return null;
+        
+        return RFC822.MailboxAddress.list_to_string(recipients, "", (a) => a.to_searchable_string());
+    }
+    
     public Memory.Buffer get_content_by_mime_id(string mime_id) throws RFC822Error {
         GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
         if (part == null) {

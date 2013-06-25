@@ -4,7 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.RFC822.MailboxAddress : BaseObject {
+public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageData, BaseObject {
+    internal delegate string ListToStringDelegate(MailboxAddress address);
+    
     public string? name { get; private set; }
     public string? source_route { get; private set; }
     public string mailbox { get; private set; }
@@ -124,8 +126,37 @@ public class Geary.RFC822.MailboxAddress : BaseObject {
             : "%s <%s>".printf(GMime.utils_quote_string(name), address);
     }
     
+    /**
+     * See Geary.MessageData.SearchableMessageData.
+     */
+    public string to_searchable_string() {
+        return get_full_address();
+    }
+    
     public string to_string() {
         return get_full_address();
+    }
+    
+    internal static string list_to_string(Gee.List<MailboxAddress> addrs,
+        string empty, ListToStringDelegate to_s) {
+        switch (addrs.size) {
+            case 0:
+                return empty;
+            
+            case 1:
+                return to_s(addrs[0]);
+            
+            default:
+                StringBuilder builder = new StringBuilder();
+                foreach (MailboxAddress addr in addrs) {
+                    if (!String.is_empty(builder.str))
+                        builder.append(", ");
+                    
+                    builder.append(to_s(addr));
+                }
+                
+                return builder.str;
+        }
     }
 }
 

@@ -6,6 +6,72 @@
 
 namespace Geary.HTML {
 
+private int init_count = 0;
+private Gee.HashSet<string>? breaking_elements = null;
+
+/**
+ * Must be called before ''any'' call to the HTML namespace.
+ *
+ * This will be initialized by the Engine when it's opened; or call this
+ * directly to use these functions earlier.
+ */
+public void init() {
+    if (init_count++ != 0)
+        return;
+    
+    init_breaking_elements();
+}
+
+private void init_breaking_elements() {
+    // Organized from <https://en.wikipedia.org/wiki/HTML_element>.  This is a
+    // list of block elements and some others that get special treatment.
+    // NOTE: this SHOULD be a const list, but due to
+    // <https://bugzilla.gnome.org/show_bug.cgi?id=646970>, it can't be.
+    string[] elements = {
+        "address",
+        "blockquote",
+        "br", // [1]
+        "caption", // [2]
+        "center",
+        "dd",
+        "del", // [3]
+        "dir",
+        "div",
+        "dl",
+        "dt",
+        "embed",
+        "h1", "h2", "h3", "h4", "h5", "h6",
+        "hr",
+        "img", // [1]
+        "ins", // [3]
+        "li",
+        "map", // [1]
+        "menu",
+        "noscript", // [2]
+        "object", // [1]
+        "ol",
+        "p",
+        "pre",
+        "script", // [2]
+        "table",
+        "tbody",
+        "td",
+        "tfoot",
+        "th",
+        "thead",
+        "tr",
+        "ul",
+        
+        // [1]: Not block elements, but still break up the text
+        // [2]: Some of these are oddities, but I figure they should break flow
+        // [3]: Can be used as either block or inline; we go for broke
+    };
+    
+    breaking_elements = new Gee.HashSet<string>(String.stri_hash, String.stri_equal);
+    foreach (string element in elements)
+        breaking_elements.add(element);
+}
+
 public inline string escape_markup(string? plain) {
     return (!String.is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
 }
@@ -67,6 +133,43 @@ public string remove_html_tags(string input) {
     }
     
     return input;
+}
+
+/** Does a very approximate conversion from HTML to text.  This does more than
+ * stripping tags -- it inserts line breaks where appropriate, decodes
+ * entities, etc.  The layout of the text is largely lost.  This is primarily
+ * useful for pulling out tokens for searching, not for presenting to the user.
+ */
+public string html_to_text(string html, string encoding = "UTF-8") {
+    Html.Doc *doc = Html.Doc.read_doc(html, "", encoding, Html.ParserOption.RECOVER |
+        Html.ParserOption.NOERROR | Html.ParserOption.NOWARNING | Html.ParserOption.NOBLANKS |
+        Html.ParserOption.NONET | Html.ParserOption.COMPACT);
+    
+    StringBuilder text = new StringBuilder();
+    if (doc != null) {
+        recurse_html_nodes_for_text(doc->get_root_element(), text);
+        delete doc;
+    }
+    
+    return text.str;
+}
+
+private void recurse_html_nodes_for_text(Xml.Node? node, StringBuilder text) {
+    // TODO: add alt text for things that have it?
+    
+    for (unowned Xml.Node? n = node; n != null; n = n.next) {
+        if (n.type == Xml.ElementType.TEXT_NODE)
+            text.append(n.content);
+        else if (n.type == Xml.ElementType.ELEMENT_NODE && element_needs_break(n.name))
+            text.append("\n");
+        
+        recurse_html_nodes_for_text(n.children, text);
+    }
+}
+
+// Determines if the named element should break the flow of text.
+private bool element_needs_break(string element) {
+    return breaking_elements.contains(element);
 }
 
 }

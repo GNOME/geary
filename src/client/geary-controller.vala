@@ -56,6 +56,7 @@ public class GearyController {
     private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
     
     private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
+    private const int SEARCH_TIMEOUT_MSEC = 100;
     
     public MainWindow main_window { get; private set; }
     
@@ -66,6 +67,7 @@ public class GearyController {
     private Geary.ConversationMonitor? current_conversations = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
+    private Cancellable cancellable_search = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
     private int busy_count = 0;
@@ -81,6 +83,8 @@ public class GearyController {
     private Geary.Folder? folder_to_select = null;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
+    private Geary.Folder? previous_non_search_folder = null;
+    private uint search_timeout_id = 0;
     private LoginDialog? login_dialog = null;
     
     /**
@@ -98,6 +102,12 @@ public class GearyController {
      */
     public signal void conversations_selected(Gee.Set<Geary.Conversation>? conversations,
         Geary.Folder? current_folder);
+    
+    /**
+     * Fired when the search text is changed according to the controller.  This accounts
+     * for a brief typmatic delay.
+     */
+    public signal void search_text_changed(string keywords);
     
     public GearyController() {
     }
@@ -146,6 +156,7 @@ public class GearyController {
         main_window.folder_list.move_conversation.connect(on_move_conversation);
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
+        main_window.main_toolbar.search_text_changed.connect(on_search_text_changed);
         main_window.conversation_viewer.link_selected.connect(on_link_selected);
         main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
@@ -339,7 +350,7 @@ public class GearyController {
     private Gtk.ToggleActionEntry[] create_toggle_actions() {
         Gtk.ToggleActionEntry[] entries = new Gtk.ToggleActionEntry[0];
         
-        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, null, "F10",
+        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, _("Menu"), "F10",
             null, null, false };
         entries += gear_menu;
         
@@ -577,6 +588,9 @@ public class GearyController {
     
     public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {
         cancel_inbox(account);
+        
+        previous_non_search_folder = null;
+        main_window.main_toolbar.set_search_text(""); // Reset search.
         if (current_account == account) {
             cancel_folder();
             cancel_message();
@@ -614,6 +628,20 @@ public class GearyController {
         } catch (Error e) {
             message("Error enumerating accounts: %s", e.message);
         }
+    }
+    
+    /**
+     * Returns the number of accounts that exist in Geary.  Note that not all accounts may be
+     * open.  Zero is returned on an error.
+     */
+    public int get_num_accounts() {
+        try {
+            return Geary.Engine.instance.get_accounts().size;
+        } catch (Error e) {
+            debug("Error getting number of accounts: %s", e.message);
+        }
+        
+        return 0; // on error
     }
     
     // Returns the number of open accounts.
@@ -715,6 +743,9 @@ public class GearyController {
         }
         
         folder_selected(current_folder);
+        
+        if (!(current_folder is Geary.SearchFolder))
+            previous_non_search_folder = current_folder;
         
         main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
         main_window.conversation_list_store.account_owner_email = current_account.information.email;
@@ -927,6 +958,13 @@ public class GearyController {
         cancellable_message = new Cancellable();
         
         set_busy(false);
+        
+        old_cancellable.cancel();
+    }
+    
+    private void cancel_search() {
+        Cancellable old_cancellable = cancellable_search;
+        cancellable_search = new Cancellable();
         
         old_cancellable.cancel();
     }
@@ -1599,6 +1637,53 @@ public class GearyController {
         }
         
         return ret.size >= 1 ? ret : null;
+    }
+    
+    private void do_search(string search_text) {
+        if (search_text == "") {
+            if (previous_non_search_folder != null && current_folder is Geary.SearchFolder)
+                main_window.folder_list.select_folder(previous_non_search_folder);
+            
+            main_window.folder_list.remove_search();
+            search_text_changed("");
+            
+            return;
+        }
+        
+        if (current_account == null)
+            return;
+        
+        cancel_search(); // Stop any search in progress.
+        
+        Geary.SearchFolder? folder;
+        try {
+            folder = (Geary.SearchFolder) current_account.get_special_folder(
+                Geary.SpecialFolderType.SEARCH);
+            folder.set_search_keywords(search_text, cancellable_search);
+        } catch (Error e) {
+            debug("Could not get search folder: %s", e.message);
+            
+            return;
+        }
+        
+        main_window.folder_list.set_search(folder);
+        search_text_changed(main_window.main_toolbar.search_text);
+    }
+    
+    private void on_search_text_changed(string search_text) {
+        // So we don't thrash the disk as the user types, we run the actual
+        // search after a quick delay when they finish typing.
+        if (search_timeout_id != 0)
+            Source.remove(search_timeout_id);
+        search_timeout_id = Timeout.add(SEARCH_TIMEOUT_MSEC, on_search_timeout);
+    }
+    
+    private bool on_search_timeout() {
+        search_timeout_id = 0;
+        
+        do_search(main_window.main_toolbar.search_text);
+        
+        return false;
     }
 }
 

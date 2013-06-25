@@ -5,7 +5,7 @@
  */
 
 public class Geary.Attachment : BaseObject {
-    public const Email.Field REQUIRED_FIELDS = Email.Field.HEADER | Email.Field.BODY;
+    public const Email.Field REQUIRED_FIELDS = Email.REQUIRED_FOR_MESSAGE;
     
     public string? filename { get; private set; }
     public string filepath { get; private set; }

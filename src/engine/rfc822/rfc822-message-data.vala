@@ -141,7 +141,8 @@ public class Geary.RFC822.Size : Geary.MessageData.LongMessageData, Geary.RFC822
     }
 }
 
-public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
+    Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData {
     public const string REPLY_PREFACE = "Re:";
     public const string FORWARD_PREFACE = "Fwd:";
     
@@ -173,6 +174,13 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData, Geary.R
     public Subject create_forward() {
         return is_forward() ? new Subject(value) : new Subject("%s %s".printf(FORWARD_PREFACE,
             value));
+    }
+    
+    /**
+     * See Geary.MessageData.SearchableMessageData.
+     */
+    public string to_searchable_string() {
+        return value;
     }
 }
 

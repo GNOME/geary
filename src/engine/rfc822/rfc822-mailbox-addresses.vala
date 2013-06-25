@@ -4,7 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageData, Geary.RFC822.MessageData {
+public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageData, 
+    Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData {
+    
     public int size { get { return addrs.size; } }
     
     private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();
@@ -72,46 +74,20 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
         return false;
     }
     
+    
     public string to_rfc822_string() {
-        switch (addrs.size) {
-            case 0:
-                return "";
-            
-            case 1:
-                return addrs[0].to_rfc822_string();
-            
-            default:
-                StringBuilder builder = new StringBuilder();
-                foreach (MailboxAddress addr in addrs) {
-                    if (!String.is_empty(builder.str))
-                        builder.append(", ");
-                    
-                    builder.append(addr.to_rfc822_string());
-                }
-                
-                return builder.str;
-        }
+        return MailboxAddress.list_to_string(addrs, "", (a) => a.to_rfc822_string());
+    }
+    
+    /**
+     * See Geary.MessageData.SearchableMessageData.
+     */
+    public string to_searchable_string() {
+        return MailboxAddress.list_to_string(addrs, "", (a) => a.to_searchable_string());
     }
     
     public override string to_string() {
-        switch (addrs.size) {
-            case 0:
-                return "(no addresses)";
-            
-            case 1:
-                return addrs[0].to_string();
-            
-            default:
-                StringBuilder builder = new StringBuilder();
-                foreach (MailboxAddress addr in addrs) {
-                    if (!String.is_empty(builder.str))
-                        builder.append(", ");
-                    
-                    builder.append(addr.to_string());
-                }
-                
-                return builder.str;
-        }
+        return MailboxAddress.list_to_string(addrs, "(no addresses)", (a) => a.to_string());
     }
 }
 

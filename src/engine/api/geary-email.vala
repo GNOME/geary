@@ -15,6 +15,12 @@ public class Geary.Email : BaseObject {
      */
     public const Field MUTABLE_FIELDS = Geary.Email.Field.FLAGS;
     
+    /**
+     * The fields required to build an RFC822.Message for get_message() and
+     * any attachments.
+     */
+    public const Field REQUIRED_FOR_MESSAGE = Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
+    
     // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
     public enum Field {
         NONE =              0,
@@ -264,15 +270,24 @@ public class Geary.Email : BaseObject {
         this.attachments.add_all(attachments);
     }
     
+    public string get_searchable_attachment_list() {
+        StringBuilder search = new StringBuilder();
+        foreach (Geary.Attachment attachment in attachments) {
+            search.append(attachment.filename);
+            search.append("\n");
+        }
+        return search.str;
+    }
+    
     /**
-     * This method requires Geary.Email.Field.HEADER and Geary.Email.Field.BODY be present.
+     * This method requires the REQUIRED_FOR_MESSAGE fields be present.
      * If not, EngineError.INCOMPLETE_MESSAGE is thrown.
      */
     public Geary.RFC822.Message get_message() throws EngineError, RFC822Error {
         if (message != null)
             return message;
         
-        if (!fields.fulfills(Field.HEADER | Field.BODY))
+        if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
             throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
         
         message = new Geary.RFC822.Message.from_parts(header, body);
@@ -280,8 +295,12 @@ public class Geary.Email : BaseObject {
         return message;
     }
 
+    /**
+     * Requires the REQUIRED_FOR_MESSAGE fields be present; else
+     * EngineError.INCOMPLETE_MESSAGE is thrown.
+     */
     public Geary.Attachment? get_attachment(int64 attachment_id) throws EngineError {
-        if (!fields.fulfills(Field.HEADER | Field.BODY))
+        if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
             throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
 
         foreach (Geary.Attachment attachment in attachments) {

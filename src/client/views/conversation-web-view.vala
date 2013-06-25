@@ -12,7 +12,8 @@ public class ConversationWebView : WebKit.WebView {
     
     private const string USER_CSS = "user-message.css";
     private const string STYLE_NAME = "STYLE";
-
+    private const string PREVENT_HIDE_STYLE = "nohide";
+    
     // HTML element that contains message DIVs.
     public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
     
@@ -299,6 +300,17 @@ public class ConversationWebView : WebKit.WebView {
         
         unowned WebKit.WebView r = inspector_view;
         return r;
+    }
+    
+    public void allow_collapsing(bool allow) {
+        try {
+            if (allow)
+                get_dom_document().get_body().get_class_list().remove("nohide");
+            else
+                get_dom_document().get_body().get_class_list().add("nohide");
+        } catch (Error error) {
+            debug("Error setting body class: %s", error.message);
+        }
     }
 }
 

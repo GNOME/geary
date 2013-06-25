@@ -5,10 +5,12 @@
  */
 
 public class FolderList.Tree : Sidebar.Tree {
-
     public const Gtk.TargetEntry[] TARGET_ENTRY_LIST = {
         { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
     };
+    
+    private const int INBOX_ORDINAL = -2; // First account branch is zero
+    private const int SEARCH_ORDINAL = -1;
     
     public signal void folder_selected(Geary.Folder? folder);
     public signal void copy_conversation(Geary.Folder folder);
@@ -17,6 +19,7 @@ public class FolderList.Tree : Sidebar.Tree {
     private Gee.HashMap<Geary.Account, AccountBranch> account_branches
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
+    private SearchBranch? search_branch = null;
     private NewMessagesMonitor? monitor = null;
     
     public Tree() {
@@ -43,9 +46,9 @@ public class FolderList.Tree : Sidebar.Tree {
     }
     
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
-        if (selectable is FolderEntry) {
-            folder_selected(((FolderEntry) selectable).folder);
-        }
+        AbstractFolderEntry? abstract_folder_entry = selectable as AbstractFolderEntry;
+        if (abstract_folder_entry != null)
+            folder_selected(abstract_folder_entry.folder);
     }
 
     private void on_new_messages_changed(Geary.Folder folder, int count) {
@@ -87,7 +90,7 @@ public class FolderList.Tree : Sidebar.Tree {
             graft(account_branch, folder.account.information.ordinal);
         
         if (account_branches.size > 1 && !has_branch(inboxes_branch))
-            graft(inboxes_branch, -1); // The Inboxes branch comes first.
+            graft(inboxes_branch, INBOX_ORDINAL); // The Inboxes branch comes first.
         if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX)
             inboxes_branch.add_inbox(folder);
         
@@ -191,4 +194,28 @@ public class FolderList.Tree : Sidebar.Tree {
         foreach (AccountBranch branch in branches_to_reorder)
             graft(branch, branch.account.information.ordinal);
     }
+    
+    public void set_search(Geary.SearchFolder search_folder) {
+        if (search_branch != null && has_branch(search_branch)) {
+            // We already have a search folder.  If it's the same one, do nothing.  If it's a new
+            // search folder, remove the old one and continue.
+            if (search_folder == search_branch.get_search_folder()) {
+                return;
+            } else {
+                remove_search();
+            }
+        }
+        
+        search_branch = new SearchBranch(search_folder);
+        graft(search_branch, SEARCH_ORDINAL);
+        place_cursor(search_branch.get_root(), false);
+    }
+    
+    public void remove_search() {
+        if (search_branch != null) {
+            prune(search_branch);
+            search_branch = null;
+        }
+    }
 }
+
