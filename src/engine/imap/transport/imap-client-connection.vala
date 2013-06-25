@@ -38,6 +38,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         IDLING,
         IDLE,
         DEIDLING,
+        DEIDLING_SYNCHRONIZING,
+        SYNCHRONIZING,
         DISCONNECTED,
         
         COUNT
@@ -55,6 +57,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // or not to continue; the transition handlers do no signalling or I/O
         SEND,
         SEND_IDLE,
+        
+        // To initiate a command continuation request
+        SYNCHRONIZE,
         
         // RECVD_* will emit appropriate signals inside their transition handlers; do *not* use
         // issue_conditional_event() for these events
@@ -99,11 +104,14 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private Serializer? ser = null;
     private Deserializer? des = null;
     private Geary.Nonblocking.Mutex send_mutex = new Geary.Nonblocking.Mutex();
+    private Geary.Nonblocking.Spinlock synchronized_notifier = new Geary.Nonblocking.Spinlock();
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;
     private bool idle_when_quiet = false;
     private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>();
+    private Tag? posted_synchronization_tag = null;
+    private StatusResponse? synchronization_status_response = null;
     private uint timeout_id = 0;
     private uint timeout_cmd_count = 0;
     
@@ -173,10 +181,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.UNCONNECTED, Event.CONNECTED, on_connected),
-            new Geary.State.Mapping(State.UNCONNECTED, Event.DISCONNECTED, Geary.State.nop),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.DISCONNECTED, on_disconnected),
             
             new Geary.State.Mapping(State.CONNECTED, Event.SEND, on_proceed),
             new Geary.State.Mapping(State.CONNECTED, Event.SEND_IDLE, on_send_idle),
+            new Geary.State.Mapping(State.CONNECTED, Event.SYNCHRONIZE, on_synchronize),
             new Geary.State.Mapping(State.CONNECTED, Event.RECVD_STATUS_RESPONSE, on_status_response),
             new Geary.State.Mapping(State.CONNECTED, Event.RECVD_SERVER_DATA, on_server_data),
             new Geary.State.Mapping(State.CONNECTED, Event.RECVD_CONTINUATION_RESPONSE, on_continuation),
@@ -198,10 +207,29 @@ public class Geary.Imap.ClientConnection : BaseObject {
             
             new Geary.State.Mapping(State.DEIDLING, Event.SEND, on_proceed),
             new Geary.State.Mapping(State.DEIDLING, Event.SEND_IDLE, on_send_idle),
+            new Geary.State.Mapping(State.DEIDLING, Event.SYNCHRONIZE, on_deidling_synchronize),
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_STATUS_RESPONSE, on_idle_status_response),
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_SERVER_DATA, on_server_data),
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_idling_continuation),
             new Geary.State.Mapping(State.DEIDLING, Event.DISCONNECTED, on_disconnected),
+            
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.SEND, on_no_proceed),
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.SEND_IDLE, on_no_proceed),
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.RECVD_STATUS_RESPONSE,
+                on_deidling_synchronizing_status_response),
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.RECVD_SERVER_DATA, on_server_data),
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.RECVD_CONTINUATION_RESPONSE,
+                on_synchronize_continuation),
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.DISCONNECTED, on_disconnected),
+            
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.SEND, on_no_proceed),
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.SEND_IDLE, on_no_proceed),
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.RECVD_STATUS_RESPONSE,
+                on_synchronize_status_response),
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.RECVD_SERVER_DATA, on_server_data),
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.RECVD_CONTINUATION_RESPONSE,
+                on_synchronize_continuation),
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.DISCONNECTED, on_disconnected),
             
             // TODO: A DISCONNECTING state would be helpful here, allowing for responses and data
             // received from the server after a send error caused a disconnect to be signalled to
@@ -210,6 +238,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             // everything to flush out before it shifted to a DISCONNECTED state as well.
             new Geary.State.Mapping(State.DISCONNECTED, Event.SEND, on_no_proceed),
             new Geary.State.Mapping(State.DISCONNECTED, Event.SEND_IDLE, on_no_proceed),
+            new Geary.State.Mapping(State.DISCONNECTED, Event.SYNCHRONIZE, on_no_proceed),
             new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_STATUS_RESPONSE, Geary.State.nop),
             new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_SERVER_DATA, Geary.State.nop),
             new Geary.State.Mapping(State.DISCONNECTED, Event.RECVD_CONTINUATION_RESPONSE, Geary.State.nop),
@@ -388,9 +417,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         assert(ser == null);
         assert(des == null);
         
-        // not buffering the Serializer because it buffers using a MemoryOutputStream and not
-        // buffering the Deserializer because it uses a DataInputStream, which is buffered
-        ser = new Serializer(to_string(), ios.output_stream);
+        // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
+        ser = new Serializer(to_string(), new BufferedOutputStream(ios.output_stream));
         des = new Deserializer(to_string(), ios.input_stream);
         
         des.parameters_ready.connect(on_parameters_ready);
@@ -415,7 +443,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
             yield des.stop_async();
         }
         
-        // TODO: May need to commit Serializer before disconnecting
         ser = null;
         des = null;
     }
@@ -500,7 +527,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
         recv_closed();
     }
     
-    // TODO: Guard against reentrancy
     public async void send_async(Command cmd, Cancellable? cancellable = null) throws Error {
         check_for_connection();
         
@@ -511,8 +537,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 fsm.get_state_string(fsm.get_state()));
         }
         
-        // need to run this in critical section because OutputStreams can only be written to
-        // serially
+        // need to run this in critical section because Serializer requires it (don't want to be
+        // pushing data while a flush_async() is occurring)
         int token = yield send_mutex.claim_async(cancellable);
         
         // Always assign a new tag; Commands with pre-assigned Tags should not be re-sent.
@@ -528,9 +554,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         try {
             // watch for disconnect while waiting for mutex
             if (ser != null) {
-                // TODO: Make serialize non-blocking; this would also remove the need for a send_mutex
-                // (although reentrancy should still be checked for)
-                yield cmd.serialize(ser);
+                cmd.serialize(ser, cmd.tag);
             } else {
                 ser_err = new ImapError.NOT_CONNECTED("Send not allowed: connection in %s state",
                     fsm.get_state_string(fsm.get_state()));
@@ -582,7 +606,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // need to signal when the IDLE command is sent, for completeness
         IdleCommand? idle_cmd = null;
         
-        // Like send_async(), need to use mutex when flushing as OutputStream must be accessed in
+        // Like send_async(), need to use mutex when flushing as Serializer must be accessed in
         // serialized fashion
         //
         // NOTE: Because this is happening in the background, it's possible for ser to go to null
@@ -595,9 +619,54 @@ public class Geary.Imap.ClientConnection : BaseObject {
             // Dovecot will hang the connection (not send any replies) if IDLE is sent in the
             // same buffer as normal commands, so flush the buffer first, enqueue IDLE, and
             // flush that behind the first
-            if (ser != null)
-                yield ser.flush_async();
+            bool is_synchronized = false;
+            while (ser != null) {
+                // prepare for upcoming synchronization point (continuation response could be
+                // recv'd before flush_async() completes) and reset prior synchronization response
+                posted_synchronization_tag = ser.next_synchronized_message();
+                synchronization_status_response = null;
                 
+                Tag? synchronize_tag;
+                yield ser.flush_async(is_synchronized, out synchronize_tag);
+                
+                // if no tag returned, all done, otherwise synchronization required
+                if (synchronize_tag == null)
+                    break;
+                
+                // no longer synchronized
+                is_synchronized = false;
+                
+                // synchronization is not always possible
+                if (!issue_conditional_event(Event.SYNCHRONIZE)) {
+                    debug("[%s] Unable to synchronize, exiting do_flush_async", to_string());
+                    
+                    return;
+                }
+                
+                // wait for synchronization point to be reached
+                debug("[%s] Synchronizing...", to_string());
+                yield synchronized_notifier.wait_async();
+                
+                // watch for the synchronization request to be thwarted
+                if (synchronization_status_response != null) {
+                    debug("[%s]: Failed to synchronize command continuation: %s", to_string(),
+                        synchronization_status_response.to_string());
+                    
+                    // skip pass current message, this one's done
+                    if (ser != null)
+                        ser.fast_forward_queue();
+                } else {
+                    debug("[%s] Synchronized, ready to continue", to_string());
+                    
+                    // now synchronized, ready to continue
+                    is_synchronized = true;
+                }
+            }
+            
+            // reset synchronization state
+            posted_synchronization_tag = null;
+            synchronization_status_response = null;
+            
             // as connection is "quiet" (haven't seen new command in n msec), go into IDLE state
             // if (a) allowed by owner and (b) allowed by state machine
             if (ser != null && idle_when_quiet && issue_conditional_event(Event.SEND_IDLE)) {
@@ -611,11 +680,14 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 Logging.debug(Logging.Flag.NETWORK, "[%s] Initiating IDLE: %s", to_string(),
                     idle_cmd.to_string());
                 
-                yield idle_cmd.serialize(ser);
+                idle_cmd.serialize(ser, idle_cmd.tag);
+                
+                Tag? synchronize_tag;
+                yield ser.flush_async(false, out synchronize_tag);
+                
+                // flushing IDLE should never require synchronization
+                assert(synchronize_tag == null);
             }
-            
-            if (ser != null)
-                yield ser.flush_async();
         } catch (Error err) {
             idle_cmd = null;
             send_failure(err);
@@ -779,6 +851,14 @@ public class Geary.Imap.ClientConnection : BaseObject {
         return do_proceed(State.IDLING, user);
     }
     
+    private uint on_synchronize(uint state, uint event, void *user) {
+        return do_proceed(State.SYNCHRONIZING, user);
+    }
+    
+    private uint on_deidling_synchronize(uint state, uint event, void *user) {
+        return do_proceed(State.DEIDLING_SYNCHRONIZING, user);
+    }
+    
     private uint on_status_response(uint state, uint event, void *user, Object? object) {
         fsm.do_post_transition(signal_status_response, user, object);
         
@@ -812,7 +892,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private uint on_idle_send(uint state, uint event, void *user) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] Closing IDLE", to_string());
         
-        // TODO: Because there is not DISCONNECTING state, need to watch for the Serializer
+        // TODO: Because there is no DISCONNECTING state, need to watch for the Serializer
         // disappearing during a disconnect while in a "normal" state
         if (ser == null) {
             debug("[%s] Unable to close IDLE: no serializer", to_string());
@@ -878,6 +958,55 @@ public class Geary.Imap.ClientConnection : BaseObject {
         }
         
         return state;
+    }
+    
+    private uint on_deidling_synchronizing_status_response(uint state, uint event, void *user,
+        Object? object) {
+        // piggyback on on_idle_status_response, but instead of jumping to CONNECTED, jump to
+        // SYNCHRONIZING (because IDLE has completed)
+        return (on_idle_status_response(state, event, user, object) == State.CONNECTED)
+            ? State.SYNCHRONIZING : state;
+    }
+    
+    private uint on_synchronize_status_response(uint state, uint event, void *user, Object? object) {
+        StatusResponse status_response = (StatusResponse) object;
+        
+        // waiting for status response to synchronization message, treat others normally
+        if (posted_synchronization_tag == null || !posted_synchronization_tag.equal_to(status_response.tag)) {
+            fsm.do_post_transition(signal_status_response, user, object);
+            
+            return state;
+        }
+        
+        // receive status response while waiting for synchronization of a command; this means the
+        // server has rejected it
+        debug("[%s] Command continuation rejected: %s", to_string(), status_response.to_string());
+        
+        // save result and notify sleeping flush_async()
+        synchronization_status_response = status_response;
+        synchronized_notifier.blind_notify();
+        
+        return State.CONNECTED;
+    }
+    
+    private uint on_synchronize_continuation(uint state, uint event, void *user, Object? object) {
+        ContinuationResponse continuation = (ContinuationResponse) object;
+        
+        if (posted_synchronization_tag == null) {
+            debug("[%s] Bad command continuation received: %s", to_string(),
+                continuation.to_string());
+        } else {
+            debug("[%s] Command continuation received for %s: %s", to_string(),
+                posted_synchronization_tag.to_string(), continuation.to_string());
+        }
+        
+        // wake up the sleeping flush_async() call so it will continue
+        synchronization_status_response = null;
+        synchronized_notifier.blind_notify();
+        
+        // There is no SYNCHRONIZED state, which is kind of fleeting; the moment the flush_async()
+        // call continues, no longer synchronized
+        return State.CONNECTED;
     }
     
     private uint on_bad_transition(uint state, uint event, void *user) {

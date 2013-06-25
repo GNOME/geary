@@ -47,7 +47,7 @@ public class Geary.Imap.NilParameter : Geary.Imap.Parameter {
     /**
      * {@inheritDoc}
      */
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         ser.push_nil();
     }
     

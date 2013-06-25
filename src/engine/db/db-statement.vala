@@ -31,6 +31,8 @@ public class Geary.Db.Statement : Geary.Db.Context {
      */
     public signal void bindings_cleared();
     
+    private Gee.HashSet<Memory.Buffer> held_buffers = new Gee.HashSet<Memory.Buffer>();
+    
     internal Statement(Connection connection, string sql) throws DatabaseError {
         this.connection = connection;
         // save for logging in case prepare_v2() fails
@@ -225,6 +227,38 @@ public class Geary.Db.Statement : Geary.Db.Context {
      */
     public Statement bind_string(int index, string? s) throws DatabaseError {
         throw_on_error("Statement.bind_string", stmt.bind_text(index + 1, s));
+        
+        return this;
+    }
+    
+    /**
+     * Binds the string representation of a {@link Memory.Buffer} to the replacement value
+     * in the {@link Statement}.
+     *
+     * If buffer supports {@link Memory.UnownedStringBuffer}, the unowned string will be used
+     * to avoid a memory copy.  However, this means the Statement will hold a reference to the
+     * buffer until the Statement is destroyed.
+     *
+     * index is zero-based.
+     */
+    public Statement bind_string_buffer(int index, Memory.Buffer? buffer) throws DatabaseError {
+        if (buffer == null)
+            return bind_string(index, null);
+        
+        Memory.UnownedStringBuffer? unowned_buffer = buffer as Memory.UnownedStringBuffer;
+        if (unowned_buffer == null) {
+            throw_on_error("Statement.bind_string_buffer", stmt.bind_text(index + 1, buffer.to_string()));
+            
+            return this;
+        }
+        
+        // hold on to buffer for lifetime of Statement, SQLite's callback isn't enough for us to
+        // selectively unref each Buffer as it's done with it
+        held_buffers.add(unowned_buffer);
+        
+        // note use of _bind_text, which is for static and other strings with their own memory
+        // management
+        stmt._bind_text(index + 1, unowned_buffer.to_unowned_string());
         
         return this;
     }

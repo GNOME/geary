@@ -46,7 +46,7 @@ public class Geary.Imap.MailboxParameter : StringParameter {
     /**
      * {@inheritDoc}
      */
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         serialize_string(ser);
     }
     

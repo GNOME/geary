@@ -94,9 +94,9 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         return "[%s]".printf(stringize_list());
     }
     
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         ser.push_ascii('[');
-        yield serialize_list(ser);
+        serialize_list(ser, tag);
         ser.push_ascii(']');
     }
 }

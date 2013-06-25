@@ -35,11 +35,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 post_upgrade_encode_folder_names();
             break;
             
-            case 10:
+            case 11:
                 post_upgrade_add_search_table();
             break;
             
-            case 11:
+            case 12:
                 post_upgrade_populate_internal_date_time_t();
             break;
         }
@@ -87,7 +87,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         }
     }
     
-    // Version 10.
+    // Version 11.
     private void post_upgrade_add_search_table() {
         try {
             string stemmer = find_appropriate_search_stemmer();
@@ -149,7 +149,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         return "english";
     }
     
-    // Version 11.
+    // Version 12.
     private void post_upgrade_populate_internal_date_time_t() {
         try {
             exec_transaction(Db.TransactionType.RW, (cx) => {

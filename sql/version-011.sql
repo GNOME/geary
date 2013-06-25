@@ -1,7 +1,5 @@
 --
--- Add the internaldate column as a time_t value so we can sort on it.
+-- Dummy database upgrade to add MessageSearchTable, whose parameters depend on
+-- things we need at run-time.  See src/engine/imap-db/imap-db-database.vala in
+-- post_upgrade() for the code that runs the upgrade.
 --
-
-ALTER TABLE MessageTable ADD COLUMN internaldate_time_t INTEGER;
-
-CREATE INDEX MessageTableInternalDateTimeTIndex ON MessageTable(internaldate_time_t);

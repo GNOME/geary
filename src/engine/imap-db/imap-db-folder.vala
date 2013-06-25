@@ -920,8 +920,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         stmt.bind_string(10, row.in_reply_to);
         stmt.bind_string(11, row.references);
         stmt.bind_string(12, row.subject);
-        stmt.bind_string(13, row.header);
-        stmt.bind_string(14, row.body);
+        stmt.bind_string_buffer(13, row.header);
+        stmt.bind_string_buffer(14, row.body);
         stmt.bind_string(15, row.preview);
         stmt.bind_string(16, row.email_flags);
         stmt.bind_string(17, row.internaldate);
@@ -1256,7 +1256,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (new_fields.is_any_set(Geary.Email.Field.HEADER)) {
             Db.Statement stmt = cx.prepare(
                 "UPDATE MessageTable SET header=? WHERE id=?");
-            stmt.bind_string(0, row.header);
+            stmt.bind_string_buffer(0, row.header);
             stmt.bind_rowid(1, row.id);
             
             stmt.exec(cancellable);
@@ -1265,7 +1265,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (new_fields.is_any_set(Geary.Email.Field.BODY)) {
             Db.Statement stmt = cx.prepare(
                 "UPDATE MessageTable SET body=? WHERE id=?");
-            stmt.bind_string(0, row.body);
+            stmt.bind_string_buffer(0, row.body);
             stmt.bind_rowid(1, row.id);
             
             stmt.exec(cancellable);

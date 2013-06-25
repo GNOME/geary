@@ -80,6 +80,10 @@ public class ComposerWindow : Gtk.Window {
         </style>
         </head><body id="message-body"></body></html>""";
     
+    public const string ATTACHMENT_KEYWORDS_GENERIC = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
+    /// A list of keywords, separated by pipe ("|") characters, that suggest an attachment
+    public const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|enclosed|enclosing|cover letter");
+    
     // Signal sent when the "Send" button is clicked.
     public signal void send(ComposerWindow composer);
     
@@ -304,7 +308,7 @@ public class ComposerWindow : Gtk.Window {
                     try {
                         body_html = referred.get_message().get_body(true);
                     } catch (Error error) {
-                        debug("Error getting messae body: %s", error.message);
+                        debug("Error getting message body: %s", error.message);
                     }
                     add_attachments(referred.attachments);
                 break;
@@ -659,9 +663,56 @@ public class ComposerWindow : Gtk.Window {
         on_discard();
     }
     
+    private bool email_contains_attachment_keywords() {
+        // Filter out all content contained in block quotes
+        string filtered = @"$subject\n";
+        filtered += Util.DOM.get_text_representation(editor.get_dom_document(), "blockquote");
+        
+        Regex url_regex = null;
+        try {
+            // Prepare to ignore urls later
+            url_regex = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
+        } catch (Error error) {
+            debug("Error building regex in keyword checker: %s", error.message);
+        }
+        
+        string[] keys = ATTACHMENT_KEYWORDS_GENERIC.casefold().split("|");
+        foreach (string key in ATTACHMENT_KEYWORDS_LOCALIZED.casefold().split("|")) {
+            keys += key;
+        }
+        
+        string folded;
+        foreach (string line in filtered.split("\n")) {
+            // Stop looking once we hit forwarded content
+            if (line.has_prefix("--")) {
+                break;
+            }
+            
+            folded = line.casefold();
+            foreach (string key in keys) {
+                if (key in folded) {
+                    try {
+                        // Make sure the match isn't coming from a url
+                        if (key in url_regex.replace(folded, -1, 0, "")) {
+                            return true;
+                        }
+                    } catch (Error error) {
+                        debug("Regex replacement error in keyword checker: %s", error.message);
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
     private bool should_send() {
         bool has_subject = !Geary.String.is_empty(subject.strip());
-        bool has_body_or_attachment = !Geary.String.is_empty(get_html()) || attachment_files.size > 0;
+        bool has_body = !Geary.String.is_empty(get_html());
+        bool has_attachment = attachment_files.size > 0;
+        bool has_body_or_attachment = has_body || has_attachment;
+        
         string? confirmation = null;
         if (!has_subject && !has_body_or_attachment) {
             confirmation = _("Send message with an empty subject and body?");
@@ -669,6 +720,8 @@ public class ComposerWindow : Gtk.Window {
             confirmation = _("Send message with an empty subject?");
         } else if (!has_body_or_attachment) {
             confirmation = _("Send message with an empty body?");
+        } else if (!has_attachment && email_contains_attachment_keywords()) {
+            confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {
             ConfirmationDialog dialog = new ConfirmationDialog(this,

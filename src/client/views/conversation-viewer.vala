@@ -219,6 +219,7 @@ public class ConversationViewer : Gtk.Box {
             current_conversation.appended.disconnect(on_conversation_appended);
             current_conversation.trimmed.disconnect(on_conversation_trimmed);
             current_conversation.email_flags_changed.disconnect(update_flags);
+            current_conversation = null;
         }
         
         // Disable message buttons until conversation loads.
@@ -226,15 +227,13 @@ public class ConversationViewer : Gtk.Box {
         
         if (conversations == null || conversations.size == 0 || current_folder == null) {
             show_multiple_selected(0);
-            current_conversation = null;
             return;
         }
         
-        // Clear view before we yield, to make sure it happens.
-        clear(current_folder, current_folder.account.information);
-        web_view.scroll_reset();
-        
         if (conversations.size == 1) {
+            clear(current_folder, current_folder.account.information);
+            web_view.scroll_reset();
+            
             current_conversation = Geary.Collection.get_first(conversations);
             
             select_conversation_async.begin(current_conversation, current_folder,
@@ -256,10 +255,13 @@ public class ConversationViewer : Gtk.Box {
         Geary.Folder current_folder) throws Error {
         Gee.Collection<Geary.Email> messages = conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
         
+        // Load this once, so if it's cancelled, we cancel the WHOLE load.
+        Cancellable cancellable = cancellable_fetch;
+        
         // Fetch full messages.
         Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
         foreach (Geary.Email email in messages)
-            messages_to_add.add(yield fetch_full_message_async(email));
+            messages_to_add.add(yield fetch_full_message_async(email, cancellable));
         
         // Add messages.
         foreach (Geary.Email email in messages_to_add)
@@ -316,17 +318,18 @@ public class ConversationViewer : Gtk.Box {
     }
     
     // Given an email, fetch the full version with all required fields.
-    private async Geary.Email fetch_full_message_async(Geary.Email email) throws Error {
+    private async Geary.Email fetch_full_message_async(Geary.Email email,
+        Cancellable? cancellable) throws Error {
         Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
             Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
         
         Geary.Email full_email;
         if (email.id.get_folder_path() == null) {
             full_email = yield current_folder.account.local_fetch_email_async(
-                email.id, required_fields, cancellable_fetch);
+                email.id, required_fields, cancellable);
         } else {
             full_email = yield current_folder.fetch_email_async(email.id,
-                required_fields, Geary.Folder.ListFlags.NONE, cancellable_fetch);
+                required_fields, Geary.Folder.ListFlags.NONE, cancellable);
         }
         
         return full_email;
@@ -345,7 +348,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private async void on_conversation_appended_async(Geary.Email email) throws Error {
-        add_message(yield fetch_full_message_async(email));
+        add_message(yield fetch_full_message_async(email, cancellable_fetch));
     }
     
     private void on_conversation_appended_complete(Object? source, AsyncResult result) {
@@ -1415,9 +1418,8 @@ public class ConversationViewer : Gtk.Box {
                     continue;
                 } else if (src.has_prefix("cid:")) {
                     string mime_id = src.substring(4);
-                    Geary.Memory.AbstractBuffer image_content =
-                        message.get_content_by_mime_id(mime_id);
-                    uint8[] image_data = image_content.get_array();
+                    Geary.Memory.Buffer image_content = message.get_content_by_mime_id(mime_id);
+                    uint8[] image_data = image_content.get_bytes().get_data();
 
                     // Get the content type.
                     bool uncertain_content_type;

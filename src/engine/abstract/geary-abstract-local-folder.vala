@@ -33,7 +33,7 @@ public abstract class Geary.AbstractLocalFolder : Geary.AbstractFolder {
         if (open_count++ > 0)
             return false;
         
-        notify_opened(Geary.Folder.OpenState.LOCAL, get_properties().email_total);
+        notify_opened(Geary.Folder.OpenState.LOCAL, properties.email_total);
         
         return true;
     }

@@ -135,7 +135,7 @@ private class Geary.ImapDB.Account : BaseObject {
             // create the folder object
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO FolderTable (name, parent_id, last_seen_total, last_seen_status_total, "
-                + "uid_validity, uid_next, attributes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                + "uid_validity, uid_next, attributes, unread_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             stmt.bind_string(0, path.basename);
             stmt.bind_rowid(1, parent_id);
             stmt.bind_int(2, Numeric.int_floor(properties.select_examine_messages, 0));
@@ -145,6 +145,7 @@ private class Geary.ImapDB.Account : BaseObject {
             stmt.bind_int64(5, (properties.uid_next != null) ? properties.uid_next.value
                 : Imap.UID.INVALID);
             stmt.bind_string(6, properties.attrs.serialize());
+            stmt.bind_int(7, properties.email_unread);
             
             stmt.exec(cancellable);
             
@@ -174,15 +175,17 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Statement stmt;
             if (parent_id != Db.INVALID_ROWID) {
                 stmt = cx.prepare(
-                    "UPDATE FolderTable SET attributes=? WHERE parent_id=? AND name=?");
+                    "UPDATE FolderTable SET attributes=?, unread_count=? WHERE parent_id=? AND name=?");
                 stmt.bind_string(0, properties.attrs.serialize());
-                stmt.bind_rowid(1, parent_id);
-                stmt.bind_string(2, path.basename);
+                stmt.bind_int(1, properties.email_unread);
+                stmt.bind_rowid(2, parent_id);
+                stmt.bind_string(3, path.basename);
             } else {
                 stmt = cx.prepare(
-                    "UPDATE FolderTable SET attributes=? WHERE parent_id IS NULL AND name=?");
+                    "UPDATE FolderTable SET attributes=?, unread_count=? WHERE parent_id IS NULL AND name=?");
                 stmt.bind_string(0, properties.attrs.serialize());
-                stmt.bind_string(1, path.basename);
+                stmt.bind_int(1, properties.email_unread);
+                stmt.bind_string(2, path.basename);
             }
             
             stmt.exec();
@@ -200,7 +203,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db_folder != null) {
             Imap.FolderProperties local_properties = db_folder.get_properties();
             
-            local_properties.unseen = properties.unseen;
+            local_properties.set_status_unseen(properties.unseen);
             local_properties.recent = properties.recent;
             local_properties.attrs = properties.attrs;
             
@@ -264,7 +267,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db_folder != null) {
             Imap.FolderProperties local_properties = db_folder.get_properties();
             
-            local_properties.unseen = properties.unseen;
+            local_properties.set_status_unseen(properties.unseen);
             local_properties.recent = properties.recent;
             local_properties.uid_validity = properties.uid_validity;
             local_properties.uid_next = properties.uid_next;
@@ -349,7 +352,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     : new Geary.FolderRoot(basename, "/", Geary.Imap.Folder.CASE_SENSITIVE);
                 
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties(
-                    result.int_for("last_seen_total"), 0, 0,
+                    result.int_for("last_seen_total"), 0,
                     new Imap.UIDValidity(result.int64_for("uid_validity")),
                     new Imap.UID(result.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")));
@@ -436,7 +439,7 @@ private class Geary.ImapDB.Account : BaseObject {
             
             Db.Result results = stmt.exec(cancellable);
             if (!results.finished) {
-                properties = new Imap.FolderProperties(results.int_for("last_seen_total"), 0, 0,
+                properties = new Imap.FolderProperties(results.int_for("last_seen_total"), 0,
                     new Imap.UIDValidity(results.int64_for("uid_validity")),
                     new Imap.UID(results.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(results.string_for("attributes")));

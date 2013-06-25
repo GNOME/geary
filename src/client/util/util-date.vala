@@ -122,7 +122,7 @@ public string pretty_print(DateTime datetime, ClockFormat clock_format) {
         if (diff < TimeSpan.HOUR) {
             return _("%dm ago").printf(diff / TimeSpan.MINUTE);
         }
-        if (diff < 6 * TimeSpan.HOUR) {
+        if (diff < 12 * TimeSpan.HOUR) {
             return _("%dh ago").printf(diff / TimeSpan.HOUR);
         }
         

@@ -15,8 +15,12 @@
 public abstract class Geary.Imap.Parameter : BaseObject {
     /**
      * Invoked when the {@link Parameter} is to be serialized out to the network.
+     *
+     * The supplied Tag will have (or will be) assigned to the message, so it should be passed
+     * to all serialize() calls this call may make.  The {@link Parameter} should not use its own
+     * internal Tag object, if it has a reference to one.
      */
-    public abstract async void serialize(Serializer ser) throws Error;
+    public abstract void serialize(Serializer ser, Tag tag) throws Error;
     
     /**
      * Returns a representation of the {@link Parameter} suitable for logging and debugging,

@@ -50,9 +50,9 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
 
     public abstract Geary.Account account { get; }
     
-    public abstract Geary.FolderPath get_path();
+    public abstract Geary.FolderProperties properties { get; }
     
-    public abstract Geary.FolderProperties get_properties();
+    public abstract Geary.FolderPath get_path();
     
     public abstract Geary.SpecialFolderType get_special_folder_type();
     

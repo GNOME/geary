@@ -30,7 +30,7 @@ public class Geary.Imap.QuotedStringParameter : Geary.Imap.StringParameter {
     /**
      * {@inheritDoc}
      */
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         ser.push_quoted_string(value);
     }
 }

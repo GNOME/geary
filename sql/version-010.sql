@@ -1,5 +1,5 @@
 --
--- Dummy database upgrade to add MessageSearchTable, whose parameters depend on
--- things we need at run-time.  See src/engine/imap-db/imap-db-database.vala in
--- post_upgrade() for the code that runs the upgrade.
+-- Add unread count column to the FolderTable
 --
+
+ALTER TABLE FolderTable ADD COLUMN unread_count INTEGER DEFAULT 0;

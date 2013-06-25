@@ -13,6 +13,11 @@ public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
     return list;
 }
 
+public void add_all_array<G>(Gee.Collection<G> c, G[] ar) {
+    foreach (G g in ar)
+        c.add(g);
+}
+
 public G? get_first<G>(Gee.Collection<G> c) {
     Gee.Iterator<G> iter = c.iterator();
     

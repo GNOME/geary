@@ -217,7 +217,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * are less-than longer paths, assuming the path elements are equal up to the shorter path's
      * length.
      *
-     * Note that the {@ link FolderRoot.default_separator} has no bearing on comparisons, although
+     * Note that the {@link FolderRoot.default_separator} has no bearing on comparisons, although
      * {@link FolderRoot.case_sensitive} does.
      *
      * Returns -1 if this path is lexiographically before the other, 1 if its after, and 0 if they

@@ -8,24 +8,30 @@
 public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.InternalDropTargetEntry,
     Sidebar.EmphasizableEntry {
     private bool has_new;
-    private int unread_count;
     
     public FolderEntry(Geary.Folder folder) {
         base(folder);
         has_new = false;
-        unread_count = 0;
+        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNDREAD].connect(
+            on_email_unread_count_changed);
+    }
+    
+    ~FolderEntry() {
+        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNDREAD].disconnect(
+            on_email_unread_count_changed);
     }
     
     public override string get_sidebar_name() {
-        return (unread_count == 0 ? folder.get_display_name() :
+        return (folder.properties.email_unread == 0 ? folder.get_display_name() :
             /// This string gets the folder name and the unread messages count,
             /// e.g. All Mail (5).
-            _("%s (%d)").printf(folder.get_display_name(), unread_count));
+            _("%s (%d)").printf(folder.get_display_name(), folder.properties.email_unread));
     }
     
     public override string? get_sidebar_tooltip() {
-        return (unread_count == 0 ? null :
-            ngettext("%d unread message", "%d unread messages", unread_count).printf(unread_count));
+        return (folder.properties.email_unread == 0 ? null :
+            ngettext("%d unread message", "%d unread messages", folder.properties.email_unread).
+            printf(folder.properties.email_unread));
     }
     
     public override Icon? get_sidebar_icon() {
@@ -81,15 +87,6 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         is_emphasized_changed(has_new);
     }
     
-    public void set_unread_count(int unread_count) {
-        if (this.unread_count == unread_count)
-            return;
-        
-        this.unread_count = unread_count;
-        sidebar_name_changed(get_sidebar_name());
-        sidebar_tooltip_changed(get_sidebar_tooltip());
-    }
-
     public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
         // Copy or move?
         Gdk.ModifierType mask;
@@ -103,5 +100,10 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         }
 
         return true;
+    }
+    
+    private void on_email_unread_count_changed() {
+        sidebar_name_changed(get_sidebar_name());
+        sidebar_tooltip_changed(get_sidebar_tooltip());
     }
 }

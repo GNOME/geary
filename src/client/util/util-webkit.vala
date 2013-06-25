@@ -42,6 +42,69 @@ namespace Util.DOM {
             class_list.remove(clas);
         }
     }
+    
+    // Returns the text contained in the DOM document, after ignoring tags of type "exclude"
+    // and padding newlines where appropriate. Used to scan for attachment keywords.
+    public string get_text_representation(WebKit.DOM.Document doc, string exclude) {
+        WebKit.DOM.HTMLElement? copy = Util.DOM.clone_node(doc.get_body());
+        if (copy == null) {
+            return "";
+        }
+        
+        // Keep deleting the next excluded element until there are none left
+        while (true) {
+            WebKit.DOM.HTMLElement? current = Util.DOM.select(copy, exclude);
+            if (current == null) {
+                break;
+            }
+            
+            WebKit.DOM.Node parent = current.get_parent_node();
+            try {
+                parent.remove_child(current);
+            } catch (Error error) {
+                debug("Error removing blockquotes: %s", error.message);
+                break;
+            }
+        }
+        
+        WebKit.DOM.NodeList node_list;
+        try {
+            node_list = copy.query_selector_all("br");
+        } catch (Error error) {
+            debug("Error finding <br>s: %s", error.message);
+            return copy.get_inner_text();
+        }
+        
+        // Replace <br> tags with newlines
+        for (int i = 0; i < node_list.length; ++i) {
+            WebKit.DOM.Node br = node_list.item(i);
+            WebKit.DOM.Node parent = br.get_parent_node();
+            try {
+                parent.replace_child(doc.create_text_node("\n"), br);
+            } catch (Error error) {
+                debug("Error replacing <br>: %s", error.message);
+            }
+        }
+        
+        try {
+            node_list = copy.query_selector_all("div");
+        } catch (Error error) {
+            debug("Error finding <div>s: %s", error.message);
+            return copy.get_inner_text();
+        }
+        
+        // Pad each <div> with newlines
+        for (int i = 0; i < node_list.length; ++i) {
+            WebKit.DOM.Node div = node_list.item(i);
+            try {
+                div.insert_before(doc.create_text_node("\n"), div.first_child);
+                div.append_child(doc.create_text_node("\n"));
+            } catch (Error error) {
+                debug("Error padding <div> with newlines: %s", error.message);
+            }
+        }
+        return copy.get_inner_text();
+    }
 }
 
 public void bind_event(WebKit.WebView view, string selector, string event, Callback callback,

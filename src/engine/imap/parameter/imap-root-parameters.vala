@@ -66,8 +66,8 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
     /**
      * {@inheritDoc}
      */
-    public override async void serialize(Serializer ser) throws Error {
-        yield serialize_list(ser);
+    public override void serialize(Serializer ser, Tag tag) throws Error {
+        serialize_list(ser, tag);
         ser.push_eol();
     }
 }

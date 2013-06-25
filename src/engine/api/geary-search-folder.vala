@@ -30,11 +30,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     public static const int MAX_RESULT_EMAILS = 1000;
     
     public override Account account { get { return _account; } }
+    public override FolderProperties properties { get { return _properties; } }
     
     private static FolderRoot? path = null;
     
     private weak Account _account;
-    private SearchFolderProperties properties = new SearchFolderProperties(0, 0);
+    private SearchFolderProperties _properties = new SearchFolderProperties(0, 0);
     private Gee.HashSet<Geary.FolderPath?> exclude_folders = new Gee.HashSet<Geary.FolderPath?>();
     private Geary.SpecialFolderType[] exclude_types = {
         Geary.SpecialFolderType.SPAM,
@@ -167,10 +168,6 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     
     public override Geary.SpecialFolderType get_special_folder_type() {
         return Geary.SpecialFolderType.SEARCH;
-    }
-    
-    public override Geary.FolderProperties get_properties() {
-        return properties;
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,

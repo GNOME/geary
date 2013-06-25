@@ -15,6 +15,7 @@ engine/abstract/geary-abstract-local-folder.vala
 
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
+engine/api/geary-aggregated-folder-properties.vala
 engine/api/geary-attachment.vala
 engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
@@ -73,6 +74,7 @@ engine/imap/api/imap-email-identifier.vala
 engine/imap/api/imap-email-properties.vala
 engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
+engine/imap/command/imap-append-command.vala
 engine/imap/command/imap-capability-command.vala
 engine/imap/command/imap-close-command.vala
 engine/imap/command/imap-command.vala
@@ -184,6 +186,16 @@ engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 
+engine/memory/memory-buffer.vala
+engine/memory/memory-byte-buffer.vala
+engine/memory/memory-empty-buffer.vala
+engine/memory/memory-file-buffer.vala
+engine/memory/memory-growable-buffer.vala
+engine/memory/memory-string-buffer.vala
+engine/memory/memory-unowned-byte-array-buffer.vala
+engine/memory/memory-unowned-bytes-buffer.vala
+engine/memory/memory-unowned-string-buffer.vala
+
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-counting-semaphore.vala
@@ -231,8 +243,8 @@ engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
-engine/util/util-memory.vala
 engine/util/util-numeric.vala
+engine/util/util-object.vala
 engine/util/util-reference-semantics.vala
 engine/util/util-scheduler.vala
 engine/util/util-single-item.vala

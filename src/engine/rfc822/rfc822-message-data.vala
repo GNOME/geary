@@ -119,6 +119,13 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
         return value.equal(other.value);
     }
     
+    /**
+     * Returns the {@link Date} in ISO-8601 format.
+     */
+    public virtual string serialize() {
+        return GMime.utils_header_format_date(as_time_t, 0);
+    }
+    
     public virtual uint hash() {
         return value.hash();
     }
@@ -181,7 +188,7 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
     private GMime.Message? message = null;
     private string[]? names = null;
     
-    public Header(Geary.Memory.AbstractBuffer buffer) {
+    public Header(Memory.Buffer buffer) {
         base ("RFC822.Header", buffer);
     }
     
@@ -189,8 +196,7 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
         if (message != null)
             return message.get_header_list();
         
-        GMime.Parser parser = new GMime.Parser.with_stream(
-            new GMime.StreamMem.with_buffer(buffer.get_array()));
+        GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(buffer));
         parser.set_respect_content_length(false);
         parser.set_scan_from(false);
         
@@ -224,32 +230,30 @@ public class Geary.RFC822.Header : Geary.MessageData.BlockMessageData, Geary.RFC
 }
 
 public class Geary.RFC822.Text : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
-    public Text(Geary.Memory.AbstractBuffer buffer) {
+    public Text(Memory.Buffer buffer) {
         base ("RFC822.Text", buffer);
     }
 }
 
 public class Geary.RFC822.Full : Geary.MessageData.BlockMessageData, Geary.RFC822.MessageData {
-    public Full(Geary.Memory.AbstractBuffer buffer) {
+    public Full(Memory.Buffer buffer) {
         base ("RFC822.Full", buffer);
     }
 }
 
 // Used for decoding preview text.
 public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
-    public PreviewText(Geary.Memory.AbstractBuffer _buffer) {
+    public PreviewText(Memory.Buffer _buffer) {
         base (_buffer);
     }
     
-    public PreviewText.with_header(Geary.Memory.AbstractBuffer buffer, Geary.Memory.AbstractBuffer
-        preview_header) {
+    public PreviewText.with_header(Memory.Buffer preview, Memory.Buffer preview_header) {
         string? charset = null;
         string? encoding = null;
         bool is_html = false;
         
         // Parse the header.
-        GMime.Stream header_stream = new GMime.StreamMem.with_buffer(
-            preview_header.get_array());
+        GMime.Stream header_stream = Utils.create_stream_mem(preview_header);
         GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
         GMime.Part? part = parser.construct_part() as GMime.Part;
         if (part != null) {
@@ -259,8 +263,7 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
             encoding = part.get_header("Content-Transfer-Encoding");
         }
         
-        GMime.StreamMem input_stream = new GMime.StreamMem.with_buffer(buffer.get_array());
-        
+        GMime.StreamMem input_stream = Utils.create_stream_mem(preview);
         ByteArray output = new ByteArray();
         GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
         output_stream.set_owner(false);

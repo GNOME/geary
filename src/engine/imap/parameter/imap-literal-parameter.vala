@@ -15,9 +15,9 @@
  */
 
 public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
-    private Geary.Memory.AbstractBuffer buffer;
+    private Memory.Buffer buffer;
     
-    public LiteralParameter(Geary.Memory.AbstractBuffer buffer) {
+    public LiteralParameter(Memory.Buffer buffer) {
         this.buffer = buffer;
     }
     
@@ -25,13 +25,13 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
      * Returns the number of bytes in the literal parameter's buffer.
      */
     public size_t get_size() {
-        return buffer.get_size();
+        return buffer.size;
     }
     
     /**
      * Returns the literal paremeter's buffer.
      */
-    public Geary.Memory.AbstractBuffer get_buffer() {
+    public Memory.Buffer get_buffer() {
         return buffer;
     }
     
@@ -45,7 +45,7 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
      * for transmitting on the wire.
      */
     public StringParameter coerce_to_string_parameter() {
-        return new UnquotedStringParameter(buffer.to_valid_utf8());
+        return new UnquotedStringParameter(buffer.get_valid_utf8());
     }
     
     /**
@@ -58,10 +58,10 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
     /**
      * {@inheritDoc}
      */
-    public override async void serialize(Serializer ser) throws Error {
+    public override void serialize(Serializer ser, Tag tag) throws Error {
         ser.push_unquoted_string("{%lu}".printf(get_size()));
         ser.push_eol();
-        yield ser.push_input_stream_literal_data_async(buffer.get_input_stream());
+        ser.push_synchronized_literal_data(tag, buffer);
     }
 }
 

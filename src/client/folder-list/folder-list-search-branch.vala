@@ -36,7 +36,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     }
     
     public override string? get_sidebar_tooltip() {
-        return _("%d results").printf(folder.get_properties().email_total);
+        return _("%d results").printf(folder.properties.email_total);
     }
     
     public override Icon? get_sidebar_icon() {

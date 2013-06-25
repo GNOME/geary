@@ -18,6 +18,9 @@
  * that since Deserializer uses async I/O, this isn't technically possible unless the signals are
  * connected after the Idle loop has a chance to run; however, this is an implementation detail and
  * shouldn't be relied upon.)
+ *
+ * Internally Deserializer uses a DataInputStream to help decode the data.  Since DataInputStream
+ * is buffered, there's no need to buffer the InputStream passed to Deserializer's constructor.
  */
 
 public class Geary.Imap.Deserializer : BaseObject {
@@ -320,7 +323,7 @@ public class Geary.Imap.Deserializer : BaseObject {
             bytes_received(bytes_read);
             
             // adjust the current buffer's size to the amount that was actually read in
-            block_buffer.adjust(current_buffer, bytes_read);
+            block_buffer.trim(current_buffer, bytes_read);
             
             push_data(bytes_read);
         } catch (Error err) {
