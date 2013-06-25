@@ -55,10 +55,17 @@ public class MainToolbar : Gtk.Box {
             Gtk.IconSize.LARGE_TOOLBAR, mark_menu, mark_proxy_menu);
         mark_menu_dropdown.attach(mark_menu_button);
         
+        // Ensure that shortcut keys are drawn in the mark menu
+        mark_menu.foreach(GtkUtil.show_menuitem_accel_labels);
+        
         // Setup the application menu.
         GearyApplication.instance.load_ui_file("toolbar_menu.ui");
         Gtk.Menu application_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu")
             as Gtk.Menu;
+        
+        // Ensure that shortcut keys are drawn in the gear menu
+        application_menu.foreach(GtkUtil.show_menuitem_accel_labels);
+        
         Gtk.Menu application_proxy_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenuProxy")
             as Gtk.Menu;
         Gtk.ToggleToolButton app_menu_button = set_toolbutton_action(builder, GearyController.ACTION_GEAR_MENU)

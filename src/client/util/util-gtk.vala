@@ -211,5 +211,38 @@ public void add_accelerator(Gtk.UIManager ui_manager, Gtk.ActionGroup action_gro
         });
 }
 
+public void show_menuitem_accel_labels(Gtk.Widget widget) {
+    Gtk.MenuItem? item = widget as Gtk.MenuItem;
+    if (item == null) {
+        return;
+    }
+    
+    string? path = item.get_accel_path();
+    if (path == null) {
+        return;
+    }
+    Gtk.AccelKey? key = null;
+    Gtk.AccelMap.lookup_entry(path, out key);
+    if (key == null) {
+        return;
+    }
+    item.foreach(
+        (widget) => { add_accel_to_label(widget, key); }
+    );
 }
 
+private void add_accel_to_label(Gtk.Widget widget, Gtk.AccelKey key) {
+    Gtk.AccelLabel? label = widget as Gtk.AccelLabel;
+    if (label == null) {
+        return;
+    }
+
+    // We should check for (key.accel_flags & Gtk.AccelFlags.VISIBLE) before
+    // running the following code. However, there appears to be some
+    // funny business going on because key.accel_flags always turns up as 0,
+    // even though we explicitly set it to Gtk.AccelFlags.VISIBLE before.
+    label.set_accel(key.accel_key, key.accel_mods);
+    label.refetch();
+}
+
+}
