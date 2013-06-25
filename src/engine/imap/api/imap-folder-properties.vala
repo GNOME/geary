@@ -62,11 +62,11 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
      * not the total unseen count, so it's not be passed in here, but rather only from the unseen
      * count from a STATUS command
      */
-    public FolderProperties(int messages, int recent, UIDValidity? uid_validity,
+    public FolderProperties(int messages, int email_unread, int recent, UIDValidity? uid_validity,
         UID? uid_next, MailboxAttributes attrs) {
         // give the base class a zero email_unread, as the notion of "unknown" doesn't exist in
         // its contract
-        base (messages, 0, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
+        base (messages, email_unread, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
         
         select_examine_messages = messages;
         status_messages = -1;

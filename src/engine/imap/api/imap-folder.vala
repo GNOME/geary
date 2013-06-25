@@ -63,7 +63,7 @@ private class Geary.Imap.Folder : BaseObject {
         this.info = info;
         path = info.mailbox.to_folder_path(info.delim);
         
-        properties = new Imap.FolderProperties(0, 0, null, null, info.attrs);
+        properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {

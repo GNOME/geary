@@ -307,13 +307,13 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Statement stmt;
             if (parent_id != Db.INVALID_ROWID) {
                 stmt = cx.prepare(
-                    "SELECT id, name, last_seen_total, last_seen_status_total, uid_validity, uid_next, attributes "
-                    + "FROM FolderTable WHERE parent_id=?");
+                    "SELECT id, name, last_seen_total, unread_count, last_seen_status_total, "
+                    + "uid_validity, uid_next, attributes FROM FolderTable WHERE parent_id=?");
                 stmt.bind_rowid(0, parent_id);
             } else {
                 stmt = cx.prepare(
-                    "SELECT id, name, last_seen_total, last_seen_status_total, uid_validity, uid_next, attributes "
-                    + "FROM FolderTable WHERE parent_id IS NULL");
+                    "SELECT id, name, last_seen_total, unread_count, last_seen_status_total, "
+                    + "uid_validity, uid_next, attributes FROM FolderTable WHERE parent_id IS NULL");
             }
             
             Db.Result result = stmt.exec(cancellable);
@@ -324,7 +324,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     : new Geary.FolderRoot(basename, "/", Geary.Imap.Folder.CASE_SENSITIVE);
                 
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties(
-                    result.int_for("last_seen_total"), 0,
+                    result.int_for("last_seen_total"), result.int_for("unread_count"), 0,
                     new Imap.UIDValidity(result.int64_for("uid_validity")),
                     new Imap.UID(result.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")));
@@ -405,13 +405,14 @@ private class Geary.ImapDB.Account : BaseObject {
                 return Db.TransactionOutcome.DONE;
             
             Db.Statement stmt = cx.prepare(
-                "SELECT last_seen_total, last_seen_status_total, uid_validity, uid_next, attributes "
-                + "FROM FolderTable WHERE id=?");
+                "SELECT last_seen_total, unread_count, last_seen_status_total, uid_validity, uid_next, "
+                + "attributes FROM FolderTable WHERE id=?");
             stmt.bind_rowid(0, folder_id);
             
             Db.Result results = stmt.exec(cancellable);
             if (!results.finished) {
-                properties = new Imap.FolderProperties(results.int_for("last_seen_total"), 0,
+                properties = new Imap.FolderProperties(results.int_for("last_seen_total"),
+                    results.int_for("unread_count"), 0,
                     new Imap.UIDValidity(results.int64_for("uid_validity")),
                     new Imap.UID(results.int64_for("uid_next")),
                     Geary.Imap.MailboxAttributes.deserialize(results.string_for("attributes")));
