@@ -23,11 +23,11 @@ public class Geary.DBus.Conversations : Object {
     public signal void conversation_trimmed(ObjectPath conversation, ObjectPath email);
     
     private Geary.Folder folder;
-    private Geary.ConversationMonitor conversations;
+    private Geary.App.ConversationMonitor conversations;
     
     public Conversations(Geary.Folder folder) {
         this.folder = folder;
-        conversations = new Geary.ConversationMonitor(folder, Geary.Folder.OpenFlags.NONE,
+        conversations = new Geary.App.ConversationMonitor(folder, Geary.Folder.OpenFlags.NONE,
             Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS, 20); // Download 20 conversations
         
         start_monitoring_async.begin();

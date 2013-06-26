@@ -64,7 +64,7 @@ public class GearyController {
     private Gee.HashMap<Geary.Account, Geary.Folder> inboxes
         = new Gee.HashMap<Geary.Account, Geary.Folder>();
     private Geary.Folder? current_folder = null;
-    private Geary.ConversationMonitor? current_conversations = null;
+    private Geary.App.ConversationMonitor? current_conversations = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -759,7 +759,7 @@ public class GearyController {
         
         update_ui();
         
-        current_conversations = new Geary.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NONE,
+        current_conversations = new Geary.App.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NONE,
             ConversationListStore.REQUIRED_FIELDS, MIN_CONVERSATION_COUNT);
         
         if (inboxes.values.contains(current_folder)) {

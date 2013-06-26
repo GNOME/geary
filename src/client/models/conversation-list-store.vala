@@ -37,7 +37,7 @@ public class ConversationListStore : Gtk.ListStore {
     
     public string? account_owner_email { get; set; default = null; }
     
-    private Geary.ConversationMonitor conversation_monitor;
+    private Geary.App.ConversationMonitor conversation_monitor;
     private Geary.Folder? current_folder = null;
     private Cancellable? cancellable_folder = null;
     private bool loading_local_only = true;
@@ -65,7 +65,7 @@ public class ConversationListStore : Gtk.ListStore {
             Source.remove(update_id);
     }
     
-    public void set_conversation_monitor(Geary.ConversationMonitor? new_conversation_monitor) {
+    public void set_conversation_monitor(Geary.App.ConversationMonitor? new_conversation_monitor) {
         if (conversation_monitor != null) {
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
             conversation_monitor.conversations_added.disconnect(on_conversations_added);
@@ -134,7 +134,7 @@ public class ConversationListStore : Gtk.ListStore {
         return get_path(iter);
     }
     
-    private async void refresh_previews_async(Geary.ConversationMonitor conversation_monitor) {
+    private async void refresh_previews_async(Geary.App.ConversationMonitor conversation_monitor) {
         // Use a mutex because it's possible for the conversation monitor to fire multiple
         // "scan-started" signals as messages come in fast and furious, but only want to process
         // previews one at a time, otherwise it's possible to issue multiple requests for the
@@ -158,7 +158,7 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     // should only be called by refresh_previews_async()
-    private async void do_refresh_previews_async(Geary.ConversationMonitor conversation_monitor) {
+    private async void do_refresh_previews_async(Geary.App.ConversationMonitor conversation_monitor) {
         if (current_folder == null || !GearyApplication.instance.config.display_preview)
             return;
         
@@ -188,7 +188,7 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private async Gee.List<Geary.Email> do_get_folder_previews_async(
-        Geary.ConversationMonitor conversation_monitor,
+        Geary.App.ConversationMonitor conversation_monitor,
         Gee.Collection<Geary.EmailIdentifier> emails_needing_previews) {
         Geary.Folder.ListFlags flags = (loading_local_only) ? Geary.Folder.ListFlags.LOCAL_ONLY
             : Geary.Folder.ListFlags.NONE;
@@ -208,7 +208,7 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private async Gee.List<Geary.Email> do_get_account_previews_async(
-        Geary.ConversationMonitor conversation_monitor,
+        Geary.App.ConversationMonitor conversation_monitor,
         Gee.Collection<Geary.EmailIdentifier> emails_needing_previews) {
         debug("Loading %d previews from %s...", emails_needing_previews.size,
             current_folder.account.to_string());
@@ -396,7 +396,7 @@ public class ConversationListStore : Gtk.ListStore {
         return true;
     }
     
-    private void on_scan_completed(Geary.ConversationMonitor sender) {
+    private void on_scan_completed(Geary.App.ConversationMonitor sender) {
         refresh_previews_async.begin(sender);
         loading_local_only = false;
     }

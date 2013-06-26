@@ -15,7 +15,7 @@ public class ConversationListView : Gtk.TreeView {
     private bool reset_adjustment = false;
     private Gee.Set<Geary.Conversation> selected = new Gee.HashSet<Geary.Conversation>();
     private ConversationListStore conversation_list_store;
-    private Geary.ConversationMonitor? conversation_monitor;
+    private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gtk.Menu? context_menu = null;
@@ -66,7 +66,7 @@ public class ConversationListView : Gtk.TreeView {
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
     }
     
-    public void set_conversation_monitor(Geary.ConversationMonitor? new_conversation_monitor) {
+    public void set_conversation_monitor(Geary.App.ConversationMonitor? new_conversation_monitor) {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
