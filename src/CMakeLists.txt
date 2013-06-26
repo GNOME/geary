@@ -346,7 +346,7 @@ dbusservice/main.vala
 # Vala
 find_package(Vala REQUIRED)
 include(ValaVersion)
-ensure_vala_version("0.17.4" MINIMUM)
+ensure_vala_version("0.20.1" MINIMUM)
 include(ValaPrecompile)
 
 # Packages
@@ -396,7 +396,7 @@ pkg_check_modules(DEPS REQUIRED
     gthread-2.0
     glib-2.0>=${TARGET_GLIB}.0
     gio-2.0>=2.28.0
-    gtk+-3.0>=3.4.0
+    gtk+-3.0>=3.6.0
     gee-0.8>=0.8.0
     unique-3.0>=3.0.0
     libnotify>=0.7.5
