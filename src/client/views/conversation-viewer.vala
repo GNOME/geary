@@ -395,6 +395,9 @@ public class ConversationViewer : Gtk.Box {
             if (email.is_unread() == Geary.Trillian.FALSE) {
                 div_message.get_class_list().add("hide");
             }
+            if (email.from.contains_normalized(current_account_information.email)) {
+                div_message.get_class_list().add("sent");
+            }
         } catch (Error setup_error) {
             warning("Error setting up webkit: %s", setup_error.message);
             

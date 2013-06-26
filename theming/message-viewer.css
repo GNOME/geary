@@ -1,3 +1,14 @@
+/**
+ * Background colors associated with received emails:
+ *  recv-normal: white
+ *  recv-quoted: #e8e8e8
+ *  recv-collapsed: #f5f5f5
+ *
+ * Background colors associated with sent emails:
+ *  sent-normal: #ffd
+ *  sent-quoted: #eeb
+ *  sent-collapsed: #f7f7c7
+ */
 @media print {
 
     body {
@@ -79,7 +90,7 @@ hr {
 
 .email {
     border: 1px rgba(0,0,0,1) solid;
-    background-color: white;
+    background-color: white;/* recv-normal */
     color: black;
     font-size: small;
     box-shadow: 0 3px 11px rgba(0,0,0,1);
@@ -88,6 +99,10 @@ hr {
     width: 100%;
     box-sizing:border-box;
     margin-top: 16px;
+}
+
+.email.sent {
+    background-color: #ffd;/* sent-normal */
 }
 
 .email .starred {
@@ -219,10 +234,14 @@ body:not(.nohide) .email.hide .header_container .avatar {
     body {
         background-color: #ccc !important;
     }
-
-    body:not(.nohide) .email.hide {
-        background-color: #f5f5f5;
+    body:not(.nohide) .email.hide,
+    body:not(.nohide) .email .email.hide {
+        background-color: #f5f5f5;/* recv-collapsed */
         box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    }
+    body:not(.nohide) .email.sent.hide,
+    body:not(.nohide) .email.sent .email.hide {
+        background-color: #f7f7c7;/* sent-collapsed */
     }
     body:not(.nohide) .email.hide .body,
     body:not(.nohide) .email.hide > .attachment_container,
@@ -293,9 +312,12 @@ body:not(.nohide) .email.hide .header_container .avatar {
 .email .compressed_note > span {
     display: none;
     padding: 0px 10px;
-    background: #f5f5f5;
+    background-color: #f5f5f5;/* recv-collapsed */
     position: relative;
     cursor: hand;
+}
+.email.sent .compressed_note > span {
+    background-color: #f7f7c7;/* sent-collapsed */
 }
 body.nohide .email .compressed_note > span {
     display: none !important;
@@ -306,6 +328,10 @@ body.nohide .email .compressed_note > span {
     margin-top: 0;
     border: none;
     border-top: 1px rgba(0,0,0,0.4) solid;
+    background-color: white;/* recv-normal */
+}
+.email.sent .email {
+    background-color: #ffd;/* sent-normal */
 }
 .email .email .email_container .menu,
 .email .email .email_container .starred,
@@ -321,13 +347,11 @@ body.nohide .email .compressed_note > span {
     margin-top: 7px;
 }
 .email > .attachment_container {
-    background-color: white;
     padding-bottom: 10px;
 }
 .email > .attachment_container > .top_border {
     border-bottom: 1px solid #aaa;
     height: 10px;
-    background-color: white;
     margin: 0 16px 5px;
 }
 .email > .email + .attachment_container .top_border{
@@ -354,7 +378,7 @@ body.nohide .email .compressed_note > span {
 .email > .attachment_container > .attachment:active {
     padding: 3px 1px 1px 3px;
     border-color: rgba(0,0,0,0.20);
-    background-color: rgba(0,0,0,0.05);;
+    background-color: rgba(0,0,0,0.05);
     box-shadow: inset 0px 0px 2px rgba(0,0,0,0.05);
 }
 
@@ -446,8 +470,12 @@ body.nohide .email .compressed_note > span {
     margin: 5px 0;
     padding: 12px;
     color: #303030;
-    background-color: #e8e8e8;
+    background-color: #e8e8e8;/* recv-quoted */
     border-radius: 4px;
+}
+
+.email.sent .quote_container {
+    background-color: #eeb;/* sent-quoted */
 }
 
 .quote_container > .shower,
