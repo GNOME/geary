@@ -108,7 +108,7 @@ public interface Geary.Account : BaseObject {
     }
     
     private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
-        return a.get_path().compare_to(b.get_path());
+        return a.path.compare_to(b.path);
     }
     
     /**

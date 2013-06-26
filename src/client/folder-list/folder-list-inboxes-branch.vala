@@ -30,7 +30,7 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
     }
     
     public void add_inbox(Geary.Folder inbox) {
-        assert(inbox.get_special_folder_type() == Geary.SpecialFolderType.INBOX);
+        assert(inbox.special_folder_type == Geary.SpecialFolderType.INBOX);
         
         InboxFolderEntry folder_entry = new InboxFolderEntry(inbox);
         graft(get_root(), folder_entry);

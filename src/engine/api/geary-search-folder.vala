@@ -25,17 +25,30 @@ public class Geary.SearchFolderProperties : Geary.FolderProperties {
 /**
  * Special folder type used to query and display search results.
  */
+
 public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     // Max number of emails that can ever be in the folder.
     public static const int MAX_RESULT_EMAILS = 1000;
     
+    private weak Account _account;
     public override Account account { get { return _account; } }
+    
+    private SearchFolderProperties _properties = new SearchFolderProperties(0, 0);
     public override FolderProperties properties { get { return _properties; } }
     
-    private static FolderRoot? path = null;
+    private FolderPath? _path = null;
+    public override FolderPath path {
+        get {
+            return (_path != null) ? _path : _path = new SearchFolderRoot();
+        }
+    }
     
-    private weak Account _account;
-    private SearchFolderProperties _properties = new SearchFolderProperties(0, 0);
+    public override SpecialFolderType special_folder_type {
+        get {
+            return Geary.SpecialFolderType.SEARCH;
+        }
+    }
+    
     private Gee.HashSet<Geary.FolderPath?> exclude_folders = new Gee.HashSet<Geary.FolderPath?>();
     private Geary.SpecialFolderType[] exclude_types = {
         Geary.SpecialFolderType.SPAM,
@@ -72,7 +85,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         if (available != null) {
             foreach (Geary.Folder folder in available) {
                 // Exclude it from searching if it's got the right special type.
-                if (folder.get_special_folder_type() in exclude_types)
+                if (folder.special_folder_type in exclude_types)
                     exclude_folder(folder);
             }
         }
@@ -102,7 +115,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
             // list_email_async() etc., but this leads to some more
             // complications when redoing the search.
             Gee.Collection<Geary.Email>? _new_results = yield account.local_search_async(
-                keywords, Geary.Email.Field.PROPERTIES, false, get_path(), MAX_RESULT_EMAILS, 0,
+                keywords, Geary.Email.Field.PROPERTIES, false, path, MAX_RESULT_EMAILS, 0,
                 exclude_folders, null, cancellable);
             
             if (_new_results == null) {
@@ -159,17 +172,6 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         
         if (error != null)
             throw error;
-    }
-    
-    public override Geary.FolderPath get_path() {
-        if (path == null)
-            path = new SearchFolderRoot();
-        
-        return path;
-    }
-    
-    public override Geary.SpecialFolderType get_special_folder_type() {
-        return Geary.SpecialFolderType.SEARCH;
     }
     
     public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
@@ -285,7 +287,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     }
     
     private void exclude_folder(Geary.Folder folder) {
-        exclude_folders.add(folder.get_path());
+        exclude_folders.add(folder.path);
     }
     
     private void exclude_orphan_emails() {

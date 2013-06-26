@@ -42,7 +42,7 @@ public class FolderList.Tree : Sidebar.Tree {
     private FolderEntry? get_folder_entry(Geary.Folder folder) {
         AccountBranch? account_branch = account_branches.get(folder.account);
         return (account_branch == null ? null :
-            account_branch.get_entry_for_path(folder.get_path()));
+            account_branch.get_entry_for_path(folder.path));
     }
     
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
@@ -91,7 +91,7 @@ public class FolderList.Tree : Sidebar.Tree {
         
         if (account_branches.size > 1 && !has_branch(inboxes_branch))
             graft(inboxes_branch, INBOX_ORDINAL); // The Inboxes branch comes first.
-        if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX)
+        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
             inboxes_branch.add_inbox(folder);
         
         folder.account.information.notify["ordinal"].connect(on_ordinal_changed);
@@ -104,13 +104,13 @@ public class FolderList.Tree : Sidebar.Tree {
         assert(has_branch(account_branch));
         
         // If this is the current folder, unselect it.
-        Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.get_path());
+        Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.path);
         if (has_branch(inboxes_branch) && (entry == null || !is_selected(entry)))
             entry = inboxes_branch.get_entry_for_account(folder.account);
         if (entry != null && is_selected(entry))
             folder_selected(null);
         
-        if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX)
+        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
             inboxes_branch.remove_inbox(folder.account);
         
         account_branch.remove_folder(folder);

@@ -56,7 +56,7 @@ public class FolderMenu : GtkUtil.ToggleToolbarDropdown {
     }
     
     private Gtk.MenuItem build_menu_item(Geary.Folder folder) {
-        Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label(folder.get_path().to_string());
+        Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label(folder.path.to_string());
         menu_item.activate.connect(() => {
             folder_selected(folder);
         });
@@ -65,7 +65,7 @@ public class FolderMenu : GtkUtil.ToggleToolbarDropdown {
     }
     
     private static int folder_sort(Geary.Folder a, Geary.Folder b) {
-        return a.get_path().compare_to(b.get_path());
+        return a.path.compare_to(b.path);
     }
 }
 

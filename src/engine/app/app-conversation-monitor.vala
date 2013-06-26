@@ -531,7 +531,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             try {
                 Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
                 if (blacklist_folder != null)
-                    blacklist.add(blacklist_folder.get_path());
+                    blacklist.add(blacklist_folder.path);
             } catch (Error e) {
                 debug("Error finding special folder %s on account %s: %s",
                     type.to_string(), folder.account.to_string(), e.message);
@@ -541,7 +541,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // Add the current folder so we omit search results we can find through
         // folder monitoring.  Add "no folders" so we omit results that have
         // been deleted permanently from the server.
-        blacklist.add(folder.get_path());
+        blacklist.add(folder.path);
         blacklist.add(null);
         
         return blacklist;

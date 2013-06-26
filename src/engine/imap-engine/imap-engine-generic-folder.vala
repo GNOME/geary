@@ -15,7 +15,22 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Geary.Email.Field.PROPERTIES | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
     
     public override Account account { get { return _account; } }
+    
     public override FolderProperties properties { get { return _properties; } }
+    
+    public override FolderPath path {
+        get {
+            return local_folder.get_path();
+        }
+    }
+    
+    private SpecialFolderType _special_folder_type;
+    public override SpecialFolderType special_folder_type {
+        get {
+            return _special_folder_type;
+        }
+    }
+    
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
@@ -25,7 +40,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties();
     private Imap.Account remote;
     private ImapDB.Account local;
-    private SpecialFolderType special_folder_type;
     private int open_count = 0;
     private Nonblocking.ReportingSemaphore<bool>? remote_semaphore = null;
     private ReplayQueue? replay_queue = null;
@@ -38,7 +52,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         this.remote = remote;
         this.local = local;
         this.local_folder = local_folder;
-        this.special_folder_type = special_folder_type;
+        _special_folder_type = special_folder_type;
         _properties.add(local_folder.get_properties());
         
         email_flag_watcher = new EmailFlagWatcher(this);
@@ -52,22 +66,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             warning("Folder %s destroyed without closing", to_string());
     }
     
-    public override Geary.FolderPath get_path() {
-        return local_folder.get_path();
-    }
-    
-    public override Geary.SpecialFolderType get_special_folder_type() {
-        return special_folder_type;
-    }
-    
     public void set_special_folder_type(SpecialFolderType new_type) {
-        if (special_folder_type == new_type)
-            return;
-        
-        Geary.SpecialFolderType old_type = special_folder_type;
-        special_folder_type = new_type;
-        
-        notify_special_folder_type_changed(old_type, new_type);
+        _special_folder_type = new_type;
     }
     
     public override Geary.Folder.OpenState get_open_state() {
@@ -112,7 +112,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // folder)
         if (local_properties.uid_next == null || local_properties.uid_validity == null) {
             debug("Unable to verify UID next for %s: missing local UID next (%s) and/or validity (%s)",
-                get_path().to_string(), (local_properties.uid_next == null).to_string(),
+                path.to_string(), (local_properties.uid_next == null).to_string(),
                 (local_properties.uid_validity == null).to_string());
             
             return false;
@@ -120,7 +120,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         if (remote_properties.uid_next == null || remote_properties.uid_validity == null) {
             debug("Unable to verify UID next for %s: missing remote UID next (%s) and/or validity (%s)",
-                get_path().to_string(), (remote_properties.uid_next == null).to_string(),
+                path.to_string(), (remote_properties.uid_next == null).to_string(),
                 (remote_properties.uid_validity == null).to_string());
             
             return false;
@@ -133,7 +133,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         //
         // see http://tools.ietf.org/html/rfc3501#section-2.3.1.1
         if (local_properties.uid_validity.value != remote_properties.uid_validity.value) {
-            debug("%s UID validity changed, detaching all email: %s -> %s", get_path().to_string(),
+            debug("%s UID validity changed, detaching all email: %s -> %s", path.to_string(),
                 local_properties.uid_validity.value.to_string(),
                 remote_properties.uid_validity.value.to_string());
             
@@ -467,7 +467,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
         // start the replay queue
-        replay_queue = new ReplayQueue(get_path().to_string(), remote_semaphore);
+        replay_queue = new ReplayQueue(path.to_string(), remote_semaphore);
         
         try {
             yield local_folder.open_async(cancellable);

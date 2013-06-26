@@ -52,18 +52,16 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
     
     public abstract Geary.FolderProperties properties { get; }
     
-    public abstract Geary.FolderPath get_path();
+    public abstract Geary.FolderPath path { get; }
     
-    public abstract Geary.SpecialFolderType get_special_folder_type();
+    public abstract Geary.SpecialFolderType special_folder_type { get; }
     
     /**
      * Default is to display the basename of the Folder's path.
      */
     public virtual string get_display_name() {
-        Geary.SpecialFolderType special_folder_type = get_special_folder_type();
-        
         return (special_folder_type == Geary.SpecialFolderType.NONE)
-            ? get_path().basename : special_folder_type.get_display_name();
+            ? path.basename : special_folder_type.get_display_name();
     }
     
     public abstract Geary.Folder.OpenState get_open_state();
@@ -156,7 +154,7 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
         Cancellable? cancellable = null) throws Error;
     
     public virtual string to_string() {
-        return "%s:%s".printf(account.to_string(), get_path().to_string());
+        return "%s:%s".printf(account.to_string(), path.to_string());
     }
 }
 

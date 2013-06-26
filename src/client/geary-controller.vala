@@ -902,7 +902,7 @@ public class GearyController {
                 }
                 
                 // monitor the Inbox for notifications
-                if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX &&
+                if (folder.special_folder_type == Geary.SpecialFolderType.INBOX &&
                     !inboxes.has_key(folder.account)) {
                     inboxes.set(folder.account, folder);
                     Geary.Folder? select_folder = get_initial_selection_folder(folder);
@@ -925,7 +925,7 @@ public class GearyController {
         
         if (unavailable != null) {
             foreach (Geary.Folder folder in unavailable) {
-                if (folder.get_special_folder_type() == Geary.SpecialFolderType.INBOX &&
+                if (folder.special_folder_type == Geary.SpecialFolderType.INBOX &&
                     inboxes.has_key(folder.account)) {
                     new_messages_monitor.remove_folder(folder);
                 }
@@ -1107,9 +1107,9 @@ public class GearyController {
         }
         
         if (spam_folder != null &&
-            current_folder.get_special_folder_type() != Geary.SpecialFolderType.DRAFTS &&
-            current_folder.get_special_folder_type() != Geary.SpecialFolderType.OUTBOX) {
-            if (current_folder.get_special_folder_type() == Geary.SpecialFolderType.SPAM) {
+            current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
+            current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
+            if (current_folder.special_folder_type == Geary.SpecialFolderType.SPAM) {
                 // We're in the spam folder.
                 actions.get_action(ACTION_MARK_AS_SPAM).sensitive = true;
                 actions.get_action(ACTION_MARK_AS_SPAM).label = MARK_AS_NOT_SPAM_LABEL;
@@ -1218,7 +1218,7 @@ public class GearyController {
     
     private void on_mark_as_spam() {
         Geary.Folder? destination_folder = null;
-        if (current_folder.get_special_folder_type() != Geary.SpecialFolderType.SPAM) {
+        if (current_folder.special_folder_type != Geary.SpecialFolderType.SPAM) {
             // Move to spam folder.
             try {
                 destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.SPAM);
@@ -1252,7 +1252,7 @@ public class GearyController {
             return;
         
         set_busy(true);
-        supports_copy.copy_email_async.begin(ids, destination.get_path(), cancellable_message,
+        supports_copy.copy_email_async.begin(ids, destination.path, cancellable_message,
             on_copy_complete);
     }
 
@@ -1274,7 +1274,7 @@ public class GearyController {
             return;
         
         set_busy(true);
-        supports_move.move_email_async.begin(ids, destination.get_path(), cancellable_message,
+        supports_move.move_email_async.begin(ids, destination.path, cancellable_message,
             on_move_complete);
     }
 

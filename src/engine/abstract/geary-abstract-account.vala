@@ -66,7 +66,7 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     
     public virtual Geary.Folder? get_special_folder(Geary.SpecialFolderType special) throws Error {
         foreach (Folder folder in list_folders()) {
-            if (folder.get_special_folder_type() == special)
+            if (folder.special_folder_type == special)
                 return folder;
         }
         

@@ -81,7 +81,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
     
-    public Geary.FolderPath get_path() {
+    public unowned Geary.FolderPath get_path() {
         return path;
     }
     

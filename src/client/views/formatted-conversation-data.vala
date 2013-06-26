@@ -99,7 +99,7 @@ public class FormattedConversationData : Geary.BaseObject {
         
         this.conversation = conversation;
         this.account_owner_email = account_owner_email;
-        use_to = (folder != null) && folder.get_special_folder_type().is_outgoing();
+        use_to = (folder != null) && folder.special_folder_type.is_outgoing();
         
         // Load preview-related data.
         this.date = (preview.date != null)

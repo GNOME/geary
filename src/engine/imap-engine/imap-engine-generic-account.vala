@@ -156,7 +156,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         foreach(ImapDB.Folder folder_to_build in folders_to_build) {
             GenericFolder folder = new_folder(folder_to_build.get_path(), remote, local, folder_to_build);
-            folder_map.set(folder.get_path(), folder);
+            folder_map.set(folder.path, folder);
             built_folders.add(folder);
             return_folders.add(folder);
         }
@@ -246,7 +246,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         Gee.HashMap<FolderPath, Geary.Folder> existing_folders = new Gee.HashMap<FolderPath, Geary.Folder>();
         foreach (Geary.Folder folder in existing_list)
-            existing_folders.set(folder.get_path(), folder);
+            existing_folders.set(folder.path, folder);
         
         // get all remote (server) folder paths
         Gee.HashMap<FolderPath, Imap.Folder> remote_folders = yield enumerate_remote_folders_async(null,
@@ -386,7 +386,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             // (but only promote, not demote, since getting the special folder type via its
             // properties relies on the optional XLIST extension)
             // use this iteration to add discovered properties to map
-            if (generic_folder.get_special_folder_type() == SpecialFolderType.NONE)
+            if (generic_folder.special_folder_type == SpecialFolderType.NONE)
                 generic_folder.set_special_folder_type(remote_folder.properties.attrs.get_special_folder_type());
         }
         

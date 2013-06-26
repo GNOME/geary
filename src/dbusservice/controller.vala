@@ -52,7 +52,7 @@ public class Geary.DBus.Controller {
             Geary.Folder? folder = null;
             Gee.Collection<Geary.Folder> folders = account.list_matching_folders(null);
             foreach(Geary.Folder folder_to_check in folders) {
-                if(folder_to_check.get_special_folder_type() == Geary.SpecialFolderType.INBOX) {
+                if(folder_to_check.special_folder_type == Geary.SpecialFolderType.INBOX) {
                     folder = folder_to_check;
                     break;
                 }

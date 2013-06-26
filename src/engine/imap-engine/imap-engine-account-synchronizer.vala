@@ -120,12 +120,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             return cmp;
         
         // sort by path to stabilize the sort
-        return a.get_path().compare_to(b.get_path());
+        return a.path.compare_to(b.path);
     }
     
     // Lower the score, the higher the importance.
     private static int score_folder(Folder a) {
-        switch (a.get_special_folder_type()) {
+        switch (a.special_folder_type) {
             case SpecialFolderType.INBOX:
                 return -60;
             

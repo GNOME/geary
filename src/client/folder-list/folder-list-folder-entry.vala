@@ -35,7 +35,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override Icon? get_sidebar_icon() {
-        switch (folder.get_special_folder_type()) {
+        switch (folder.special_folder_type) {
             case Geary.SpecialFolderType.NONE:
                 return IconFactory.instance.get_custom_icon("tag", IconFactory.ICON_SIDEBAR);
             

@@ -111,6 +111,10 @@ public interface Geary.Folder : BaseObject {
     
     public abstract Geary.FolderProperties properties { get; }
     
+    public abstract Geary.FolderPath path { get; }
+    
+    public abstract Geary.SpecialFolderType special_folder_type { get; }
+    
     /**
      * Fired when the folder is successfully opened by a caller.
      *
@@ -235,13 +239,6 @@ public interface Geary.Folder : BaseObject {
     
     protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);
-    
-    public abstract Geary.FolderPath get_path();
-    
-    /**
-     * Returns the special folder type of the folder.
-     */
-    public abstract Geary.SpecialFolderType get_special_folder_type();
     
     /**
      * Returns a name suitable for displaying to the user.

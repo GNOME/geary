@@ -39,7 +39,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
     }
     
     private string get_source_id(Geary.Folder folder) {
-        return "new-messages-id-%s-%s".printf(folder.account.information.email, folder.get_path().to_string());
+        return "new-messages-id-%s-%s".printf(folder.account.information.email, folder.path.to_string());
     }
     
     private void on_activate_source(string source_id) {
