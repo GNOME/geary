@@ -400,8 +400,23 @@ public class Geary.RFC822.Message : BaseObject {
         return (addrs.size > 0) ? addrs : null;
     }
     
-    public Memory.Buffer get_body_rfc822_buffer() {
-        return new Geary.Memory.StringBuffer(message.to_string());
+    /**
+     * Returns the {@link Message} as a {@link Memory.Buffer} suitable for in-memory use (i.e.
+     * with native linefeed characters).
+     */
+    public Memory.Buffer get_body_rfc822_buffer_native() throws RFC822Error {
+        return message_to_memory_buffer(false, false);
+    }
+    
+    /**
+     * Returns the {@link Message} as a {@link Memory.Buffer} suitable for transmission or
+     * storage (i.e. using protocol-specific linefeeds).
+     *
+     * The buffer can also be dot-stuffed if required.  See
+     * [[http://tools.ietf.org/html/rfc2821#section-4.5.2]]
+     */
+    public Memory.Buffer get_body_rfc822_buffer_smtp(bool dotstuffed) throws RFC822Error {
+        return message_to_memory_buffer(true, dotstuffed);
     }
     
     public Memory.Buffer get_first_mime_part_of_content_type(string content_type, bool to_html = false)
@@ -610,7 +625,21 @@ public class Geary.RFC822.Message : BaseObject {
             messages.add(new Geary.RFC822.Message.from_gmime_message(sub_message));
         }
     }
-
+    
+    private Memory.Buffer message_to_memory_buffer(bool encoded, bool dotstuffed) throws RFC822Error {
+        ByteArray byte_array = new ByteArray();
+        GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
+        stream.set_owner(false);
+        
+        GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
+        stream_filter.add(new GMime.FilterCRLF(encoded, dotstuffed));
+        
+        message.write_to_stream(stream_filter);
+        stream_filter.flush();
+        
+        return new Memory.ByteBuffer.from_byte_array(byte_array);
+    }
+    
     private Memory.Buffer mime_part_to_memory_buffer(GMime.Part part,
         bool to_utf8 = false, bool to_html = false) throws RFC822Error {
 

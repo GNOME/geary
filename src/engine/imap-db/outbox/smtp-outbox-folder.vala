@@ -226,10 +226,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         int email_count = 0;
         OutboxRow? row = null;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
+            // save in database ready for SMTP, but without dot-stuffing
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO SmtpOutboxTable (message, ordering)"
                 + "VALUES (?, (SELECT COALESCE(MAX(ordering), 0) + 1 FROM SmtpOutboxTable))");
-            stmt.bind_string(0, rfc822.get_body_rfc822_buffer().to_string());
+            stmt.bind_string_buffer(0, rfc822.get_body_rfc822_buffer_smtp(false));
             
             int64 id = stmt.exec_insert(cancellable);
             

@@ -93,14 +93,16 @@ public class Geary.Smtp.ClientConnection {
 
     /**
      * Sends a block of data (mail message) by first issuing the DATA command and transmitting
-     * the block if the appropriate response is sent.  The data block should *not* have the SMTP
-     * data terminator (<CR><LF><dot><CR><LF>).  The caller is also responsible to ensure that this
-     * pattern does not occur anywhere in the data, causing an early termination of the message.
+     * the block if the appropriate response is sent.
+     *
+     * Dot-stuffing is performed on the data if !already_dotstuffed.  See
+     * [[http://tools.ietf.org/html/rfc2821#section-4.5.2]]
      *
      * Returns the final Response of the transaction.  If the ResponseCode is not a successful
      * completion, the message should not be considered sent.
      */
-    public async Response send_data_async(uint8[] data, Cancellable? cancellable = null) throws Error {
+    public async Response send_data_async(Memory.Buffer data, bool already_dotstuffed,
+        Cancellable? cancellable = null) throws Error {
         check_connected();
         
         // In the case of DATA, want to receive an intermediate response code, specifically 354
@@ -108,10 +110,35 @@ public class Geary.Smtp.ClientConnection {
         if (!response.code.is_start_data())
             return response;
         
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%ldb>", to_string(), data.length);
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%ldb>", to_string(), data.size);
         
-        yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
-        douts.put_string(DataFormat.DATA_TERMINATOR);
+        if (!already_dotstuffed) {
+            // By using DataStreamNewlineType.ANY, we're assured to get each line and convert to
+            // a proper line terminator for SMTP
+            DataInputStream dins = new DataInputStream(data.get_input_stream());
+            dins.set_newline_type(DataStreamNewlineType.ANY);
+            
+            // Read each line and dot-stuff if necessary
+            for (;;) {
+                size_t length;
+                string? line = yield dins.read_line_async(Priority.DEFAULT, cancellable, out length);
+                if (line == null)
+                    break;
+                
+                // stuffing
+                if (!already_dotstuffed && line[0] == '.')
+                    yield douts.write_async(".".data, Priority.DEFAULT, cancellable);
+                
+                yield douts.write_async(line.data, Priority.DEFAULT, cancellable);
+                yield douts.write_async(DataFormat.LINE_TERMINATOR.data, Priority.DEFAULT, cancellable);
+            }
+        } else {
+            // ready to go, send and commit
+            yield douts.write_bytes_async(data.get_bytes());
+        }
+        
+        // terminate buffer and flush to server
+        yield douts.write_async(DataFormat.DATA_TERMINATOR.data, Priority.DEFAULT, cancellable);
         yield douts.flush_async(Priority.DEFAULT, cancellable);
         
         return yield recv_response_async(cancellable);

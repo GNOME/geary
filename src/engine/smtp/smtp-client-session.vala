@@ -173,7 +173,7 @@ public class Geary.Smtp.ClientSession {
         
         // DATA
         Geary.RFC822.Message email_copy = new Geary.RFC822.Message.without_bcc(email);
-        response = yield cx.send_data_async(email_copy.get_body_rfc822_buffer().get_bytes().get_data(),
+        response = yield cx.send_data_async(email_copy.get_body_rfc822_buffer_smtp(true), true,
             cancellable);
         if (!response.code.is_success_completed())
             response.throw_error("Unable to send message");
