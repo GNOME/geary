@@ -12,12 +12,12 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     public FolderEntry(Geary.Folder folder) {
         base(folder);
         has_new = false;
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNDREAD].connect(
+        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].connect(
             on_email_unread_count_changed);
     }
     
     ~FolderEntry() {
-        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNDREAD].disconnect(
+        folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].disconnect(
             on_email_unread_count_changed);
     }
     
