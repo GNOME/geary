@@ -11,8 +11,7 @@
  */
 
 public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
-    public ResponseCode(ListParameter parent, Parameter? initial = null) {
-        base (parent, initial);
+    public ResponseCode() {
     }
     
     public ResponseCodeType get_response_code_type() throws ImapError {
@@ -81,7 +80,7 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
             throw new ImapError.INVALID("Not CAPABILITY response code: %s", to_string());
         
         Capabilities capabilities = new Capabilities(next_revision++);
-        for (int ctr = 1; ctr < get_count(); ctr++) {
+        for (int ctr = 1; ctr < size; ctr++) {
             StringParameter? param = get_if_string(ctr);
             if (param != null)
                 capabilities.add_parameter(param);

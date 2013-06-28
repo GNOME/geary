@@ -15,8 +15,7 @@
  */
 
 public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
-    public RootParameters(Parameter? initial = null) {
-        base (null, initial);
+    public RootParameters() {
     }
     
     /**
@@ -26,8 +25,6 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
      * The supplied root object is stripped clean by this call.
      */
     public RootParameters.migrate(RootParameters root) {
-        base (null);
-        
         adopt_children(root);
     }
     

@@ -22,7 +22,7 @@ public class Geary.Imap.MessageFlags : Geary.Imap.Flags {
      */
     public static MessageFlags from_list(ListParameter listp) throws ImapError {
         Gee.Collection<MessageFlag> list = new Gee.ArrayList<MessageFlag>();
-        for (int ctr = 0; ctr < listp.get_count(); ctr++)
+        for (int ctr = 0; ctr < listp.size; ctr++)
             list.add(new MessageFlag(listp.get_as_string(ctr).value));
         
         return new MessageFlags(list);

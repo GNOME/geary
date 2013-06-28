@@ -61,7 +61,7 @@ public class Geary.Imap.ServerData : ServerResponse {
             throw new ImapError.INVALID("Not CAPABILITY data: %s", to_string());
         
         Capabilities capabilities = new Capabilities(next_revision++);
-        for (int ctr = 2; ctr < get_count(); ctr++) {
+        for (int ctr = 2; ctr < size; ctr++) {
             StringParameter? param = get_if_string(ctr);
             if (param != null)
                 capabilities.add_parameter(param);
@@ -140,6 +140,23 @@ public class Geary.Imap.ServerData : ServerResponse {
             throw new ImapError.INVALID("Not RECENT data: %s", to_string());
         
         return get_as_string(1).as_int(0);
+    }
+    
+    /**
+     * Parses the {@link ServerData} into a {@link ServerDataType.RECENT} value, if possible.
+     *
+     * @throws ImapError.INVALID if not a {@link ServerDataType.RECENT} value.
+     */
+    public Gee.List<int> get_search() throws ImapError {
+        if (server_data_type != ServerDataType.SEARCH)
+            throw new ImapError.INVALID("Not SEARCH data: %s", to_string());
+        
+        Gee.List<int> results = new Gee.ArrayList<int>();
+        for (int ctr = 2; ctr < size; ctr++) {
+            results.add(get_as_string(ctr).as_int(0));
+        }
+        
+        return results;
     }
     
     /**

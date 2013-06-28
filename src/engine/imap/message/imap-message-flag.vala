@@ -79,6 +79,9 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         return _load_remote_images;
     } }
     
+    /**
+     * Creates an IMAP message (email) named flag.
+     */
     public MessageFlag(string value) {
         base (value);
     }
@@ -92,6 +95,7 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         to_init = RECENT;
         to_init = SEEN;
         to_init = ALLOWS_NEW;
+        to_init = LOAD_REMOTE_IMAGES;
     }
     
     // Converts a list of email flags to add and remove to a list of message
@@ -119,6 +123,37 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
             if (email_flags_remove.contains(Geary.EmailFlags.LOAD_REMOTE_IMAGES))
                 msg_flags_remove.add(MessageFlag.LOAD_REMOTE_IMAGES);
         }
+    }
+    
+    /**
+     * Returns a keyword suitable for the IMAP SEARCH command.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-6.4.4]].  This only returns a value for
+     * SEARCH's known flag keywords, all of which are system keywords.
+     *
+     * If present is false, the ''negative'' value is returned.  So, ANSWERED !present is
+     * UNANSWERED.  One exception: there is no UNRECENT, and so that will return null.
+     */
+    public string? get_search_keyword(bool present) {
+        if (equal_to(ANSWERED))
+            return present ? "answered" : "unanswered";
+        
+        if (equal_to(DELETED))
+            return present ? "deleted" : "undeleted";
+        
+        if (equal_to(DRAFT))
+            return present ? "draft" : "undraft";
+        
+        if (equal_to(FLAGGED))
+            return present ? "flagged" : "unflagged";
+        
+        if (equal_to(RECENT))
+            return present ? "recent" : null;
+        
+        if (equal_to(SEEN))
+            return present ? "seen" : "unseen";
+        
+        return null;
     }
 }
 

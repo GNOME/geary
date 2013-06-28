@@ -59,11 +59,11 @@ public class Geary.Imap.FetchedData : Object {
         // walk the list for each returned fetch data item, which is paired by its data item name
         // and the structured data itself
         ListParameter list = server_data.get_as_list(3);
-        for (int ctr = 0; ctr < list.get_count(); ctr += 2) {
+        for (int ctr = 0; ctr < list.size; ctr += 2) {
             StringParameter data_item_param = list.get_as_string(ctr);
             
             // watch for truncated lists, which indicate an empty return value
-            bool has_value = (ctr < (list.get_count() - 1));
+            bool has_value = (ctr < (list.size - 1));
             
             if (FetchBodyDataType.is_fetch_body(data_item_param)) {
                 // "fake" the identifier by merely dropping in the StringParameter wholesale ...

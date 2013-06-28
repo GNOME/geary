@@ -24,13 +24,27 @@ private class Geary.Imap.Folder : BaseObject {
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.HashMap<SequenceNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
         SequenceNumber, FetchedData>();
+    private Gee.HashSet<Geary.EmailIdentifier> search_accumulator = new Gee.HashSet<Geary.EmailIdentifier>();
     
+    /**
+     * A (potentially unsolicited) response from the server.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-7.3.1]]
+     */
     public signal void exists(int total);
     
+    /**
+     * A (potentially unsolicited) response from the server.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-7.4.1]]
+     */
     public signal void expunge(int position);
     
-    public signal void fetched(FetchedData fetched_data);
-    
+    /**
+     * A (potentially unsolicited) response from the server.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-7.3.2]]
+     */
     public signal void recent(int total);
     
     /**
@@ -79,6 +93,7 @@ private class Geary.Imap.Folder : BaseObject {
         session.expunge.connect(on_expunge);
         session.fetch.connect(on_fetch);
         session.recent.connect(on_recent);
+        session.search.connect(on_search);
         session.status_response_received.connect(on_status_response);
         session.disconnected.connect(on_disconnected);
         
@@ -120,6 +135,7 @@ private class Geary.Imap.Folder : BaseObject {
         session.expunge.disconnect(on_expunge);
         session.fetch.disconnect(on_fetch);
         session.recent.disconnect(on_recent);
+        session.search.disconnect(on_search);
         session.status_response_received.disconnect(on_status_response);
         session.disconnected.disconnect(on_disconnected);
         
@@ -165,10 +181,6 @@ private class Geary.Imap.Folder : BaseObject {
         FetchedData? already_present = fetch_accumulator.get(fetched_data.seq_num);
         fetch_accumulator.set(fetched_data.seq_num,
             (already_present != null) ? fetched_data.combine(already_present) : fetched_data);
-        
-        // don't fire signal until opened
-        if (is_open)
-            fetched(fetched_data);
     }
     
     private void on_recent(int total) {
@@ -179,6 +191,13 @@ private class Geary.Imap.Folder : BaseObject {
         // don't fire signal until opened
         if (is_open)
             recent(total);
+    }
+    
+    private void on_search(Gee.List<int> seq_or_uid) {
+        // All SEARCH from this class are UID SEARCH, so can reliably convert and add to
+        // accumulator
+        foreach (int uid in seq_or_uid)
+            search_accumulator.add(new Imap.EmailIdentifier(new UID(uid), path));
     }
     
     private void on_status_response(StatusResponse status_response) {
@@ -240,8 +259,9 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     // All commands must executed inside the cmd_mutex; returns FETCH or STORE results
-    private async Gee.HashMap<SequenceNumber, FetchedData>? exec_commands_async(
-        Gee.Collection<Command> cmds, Cancellable? cancellable) throws Error {
+    private async void exec_commands_async(Gee.Collection<Command> cmds,
+        out Gee.HashMap<SequenceNumber, FetchedData>? fetched,
+        out Gee.HashSet<Geary.EmailIdentifier>? search_results, Cancellable? cancellable) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
         
         // execute commands with mutex locked
@@ -253,26 +273,31 @@ private class Geary.Imap.Folder : BaseObject {
             err = store_fetch_err;
         }
         
-        // swap out results and clear accumulator
-        Gee.HashMap<SequenceNumber, FetchedData>? results = null;
+        // swap out results and clear accumulators
         if (fetch_accumulator.size > 0) {
-            results = fetch_accumulator;
+            fetched = fetch_accumulator;
             fetch_accumulator = new Gee.HashMap<SequenceNumber, FetchedData>();
+        } else {
+            fetched = null;
         }
         
-        // unlock after clearing accumulator
+        if (search_accumulator.size > 0) {
+            search_results = search_accumulator;
+            search_accumulator = new Gee.HashSet<Geary.EmailIdentifier>();
+        } else {
+            search_results = null;
+        }
+        
+        // unlock after clearing accumulators
         cmd_mutex.release(ref token);
         
         if (err != null)
             throw err;
         
+        // process response stati after unlocking and clearing accumulators
         assert(responses != null);
-        
-        // process response stati after unlocking and clearing accumulator
         foreach (Command cmd in responses.keys)
             throw_on_failed_status(responses.get(cmd), cmd);
-        
-        return results;
     }
     
     private void throw_on_failed_status(StatusResponse response, Command cmd) throws Error {
@@ -381,8 +406,8 @@ private class Geary.Imap.Folder : BaseObject {
         }
         
         // Commands prepped, do the fetch and accumulate all the responses
-        Gee.HashMap<SequenceNumber, FetchedData>? fetched = yield exec_commands_async(cmds,
-            cancellable);
+        Gee.HashMap<SequenceNumber, FetchedData>? fetched;
+        yield exec_commands_async(cmds, out fetched, null, cancellable);
         if (fetched == null || fetched.size == 0)
             return null;
         
@@ -436,7 +461,7 @@ private class Geary.Imap.Folder : BaseObject {
         else
             cmds.add(new ExpungeCommand());
         
-        yield exec_commands_async(cmds, cancellable);
+        yield exec_commands_async(cmds, null, null, cancellable);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
@@ -459,7 +484,7 @@ private class Geary.Imap.Folder : BaseObject {
         if (msg_flags_remove.size > 0)
             cmds.add(new StoreCommand(msg_set, msg_flags_remove, false, false));
         
-        yield exec_commands_async(cmds, cancellable);
+        yield exec_commands_async(cmds, null, null, cancellable);
     }
     
     public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
@@ -470,7 +495,7 @@ private class Geary.Imap.Folder : BaseObject {
             new MailboxSpecifier.from_folder_path(destination, null));
         Gee.Collection<Command> cmds = new Collection.SingleItem<Command>(cmd);
         
-        yield exec_commands_async(cmds, cancellable);
+        yield exec_commands_async(cmds, null, null, cancellable);
     }
     
     // TODO: Support MOVE extension
@@ -494,7 +519,21 @@ private class Geary.Imap.Folder : BaseObject {
         else
             cmds.add(new ExpungeCommand());
         
-        yield exec_commands_async(cmds, cancellable);
+        yield exec_commands_async(cmds, null, null, cancellable);
+    }
+    
+    public async Gee.Set<Geary.EmailIdentifier>? search_async(SearchCriteria criteria,
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        // always perform a UID SEARCH
+        Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
+        cmds.add(new SearchCommand(criteria, true));
+        
+        Gee.HashSet<Geary.EmailIdentifier>? search_results;
+        yield exec_commands_async(cmds, null, out search_results, cancellable);
+        
+        return (search_results != null && search_results.size > 0) ? search_results : null;
     }
     
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated

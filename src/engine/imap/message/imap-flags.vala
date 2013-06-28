@@ -41,7 +41,7 @@ public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, 
      * If empty, this returns an empty ListParameter.
      */
     public virtual Parameter to_parameter() {
-        ListParameter listp = new ListParameter(null);
+        ListParameter listp = new ListParameter();
         foreach (Flag flag in list)
             listp.add(flag.to_parameter());
         

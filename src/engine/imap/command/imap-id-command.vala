@@ -14,7 +14,7 @@ public class Geary.Imap.IdCommand : Command {
     public IdCommand(Gee.HashMap<string, string> fields) {
         base (NAME);
         
-        ListParameter list = new ListParameter(this);
+        ListParameter list = new ListParameter();
         foreach (string key in fields.keys) {
             list.add(new QuotedStringParameter(key));
             list.add(new QuotedStringParameter(fields.get(key)));

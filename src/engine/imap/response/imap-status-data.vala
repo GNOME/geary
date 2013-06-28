@@ -85,7 +85,7 @@ public class Geary.Imap.StatusData : Object {
         int unseen = UNSET;
         
         ListParameter values = server_data.get_as_list(3);
-        for (int ctr = 0; ctr < values.get_count(); ctr += 2) {
+        for (int ctr = 0; ctr < values.size; ctr += 2) {
             try {
                 StringParameter typep = values.get_as_string(ctr);
                 StringParameter valuep = values.get_as_string(ctr + 1);

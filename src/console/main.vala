@@ -96,6 +96,8 @@ class ImapConsole : Gtk.Window {
         "uid-fetch",
         "fetch-fields",
         "append",
+        "search",
+        "uid-search",
         "help",
         "exit",
         "quit",
@@ -186,6 +188,11 @@ class ImapConsole : Gtk.Window {
                     
                     case "append":
                         append(cmd, args);
+                    break;
+                    
+                    case "search":
+                    case "uid-search":
+                        search(cmd, args);
                     break;
                     
                     case "help":
@@ -486,6 +493,28 @@ class ImapConsole : Gtk.Window {
         try {
             cx.send_async.end(result);
             status("Appended");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
+    private void search(string cmd, string[] args) throws Error {
+        check_min_connected(cmd, args, 1, "<arg> ...");
+        
+        status("Searching");
+        
+        Geary.Imap.SearchCriteria criteria = new Geary.Imap.SearchCriteria();
+        foreach (string arg in args)
+            criteria.and(new Geary.Imap.SearchCriterion.simple(arg));
+        
+        cx.send_async.begin(new Geary.Imap.SearchCommand(criteria, cmd == "uid-search"),
+            null, on_searched);
+    }
+    
+    private void on_searched(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Searched");
         } catch (Error err) {
             exception(err);
         }

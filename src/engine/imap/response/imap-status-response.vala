@@ -85,11 +85,11 @@ public class Geary.Imap.StatusResponse : ServerResponse {
         // build text from all StringParameters ... this will skip any ResponseCode or ListParameter
         // (or NilParameter, for that matter)
         StringBuilder builder = new StringBuilder();
-        for (int index = 2; index < get_count(); index++) {
+        for (int index = 2; index < size; index++) {
             StringParameter? strparam = get_if_string(index);
             if (strparam != null) {
                 builder.append(strparam.value);
-                if (index < (get_count() - 1))
+                if (index < (size - 1))
                     builder.append_c(' ');
             }
         }

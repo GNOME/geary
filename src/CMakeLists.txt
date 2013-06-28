@@ -102,6 +102,9 @@ engine/imap/command/imap-login-command.vala
 engine/imap/command/imap-logout-command.vala
 engine/imap/command/imap-message-set.vala
 engine/imap/command/imap-noop-command.vala
+engine/imap/command/imap-search-command.vala
+engine/imap/command/imap-search-criteria.vala
+engine/imap/command/imap-search-criterion.vala
 engine/imap/command/imap-select-command.vala
 engine/imap/command/imap-starttls-command.vala
 engine/imap/command/imap-status-command.vala
@@ -125,6 +128,7 @@ engine/imap/parameter/imap-atom-parameter.vala
 engine/imap/parameter/imap-list-parameter.vala
 engine/imap/parameter/imap-literal-parameter.vala
 engine/imap/parameter/imap-nil-parameter.vala
+engine/imap/parameter/imap-number-parameter.vala
 engine/imap/parameter/imap-parameter.vala
 engine/imap/parameter/imap-quoted-string-parameter.vala
 engine/imap/parameter/imap-root-parameters.vala

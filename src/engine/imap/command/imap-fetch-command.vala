@@ -36,7 +36,7 @@ public class Geary.Imap.FetchCommand : Command {
         } else if (data_items_length == 0 && body_items_length == 1) {
             add(body_data_items[0].to_request_parameter());
         } else {
-            ListParameter list = new ListParameter(this);
+            ListParameter list = new ListParameter();
             
             if (data_items_length > 0) {
                 foreach (FetchDataType data_item in data_items)

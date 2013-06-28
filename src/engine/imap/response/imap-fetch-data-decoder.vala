@@ -96,7 +96,7 @@ public class Geary.Imap.MessageFlagsDecoder : Geary.Imap.FetchDataDecoder {
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
         Gee.List<Flag> flags = new Gee.ArrayList<Flag>();
-        for (int ctr = 0; ctr < listp.get_count(); ctr++)
+        for (int ctr = 0; ctr < listp.size; ctr++)
             flags.add(new MessageFlag(listp.get_as_string(ctr).value));
         
         return new MessageFlags(flags);
@@ -159,7 +159,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
     // ImapError.TYPE_ERROR if this occurs.
     private Geary.RFC822.MailboxAddresses? parse_addresses(ListParameter listp) throws ImapError {
         Gee.List<Geary.RFC822.MailboxAddress> list = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
-        for (int ctr = 0; ctr < listp.get_count(); ctr++) {
+        for (int ctr = 0; ctr < listp.size; ctr++) {
             ListParameter fields = listp.get_as_empty_list(ctr);
             StringParameter? name = fields.get_as_nullable_string(0);
             StringParameter? source_route = fields.get_as_nullable_string(1);

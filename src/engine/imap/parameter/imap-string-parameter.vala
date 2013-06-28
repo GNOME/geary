@@ -51,6 +51,9 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      * @return null if the string must be represented with a {@link LiteralParameter}.
      */
     public static StringParameter? get_best_for(string value) {
+        if (NumberParameter.is_numeric(value, null))
+            return new NumberParameter.from_string(value);
+        
         switch (DataFormat.is_quoting_required(value)) {
             case DataFormat.Quoting.REQUIRED:
                 return new QuotedStringParameter(value);

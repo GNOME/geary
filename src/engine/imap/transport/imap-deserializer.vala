@@ -459,7 +459,6 @@ public class Geary.Imap.Deserializer : BaseObject {
     
     // ListParameter's parent *must* be current context
     private void push(ListParameter child) {
-        assert(child.get_parent() == context);
         context.add(child);
         
         context = child;
@@ -470,7 +469,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private State pop() {
-        ListParameter? parent = context.get_parent();
+        ListParameter? parent = context.parent;
         if (parent == null) {
             warning("Attempt to close unopened list/response code");
             
@@ -520,7 +519,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         switch (ch) {
             case '[':
                 // open response code
-                ResponseCode response_code = new ResponseCode(context);
+                ResponseCode response_code = new ResponseCode();
                 push(response_code);
                 
                 return State.START_PARAM;
@@ -533,7 +532,7 @@ public class Geary.Imap.Deserializer : BaseObject {
             
             case '(':
                 // open list
-                ListParameter list = new ListParameter(context);
+                ListParameter list = new ListParameter();
                 push(list);
                 
                 return State.START_PARAM;

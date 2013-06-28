@@ -218,7 +218,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public signal void recent(int count);
     
-    // TODO: SEARCH results
+    public signal void search(Gee.List<int> seq_or_uid);
     
     public signal void status(StatusData status_data);
     
@@ -1534,9 +1534,12 @@ public class Geary.Imap.ClientSession : BaseObject {
                 status(server_data.get_status());
             break;
             
-            // TODO: LSUB and SEARCH
-            case ServerDataType.LSUB:
             case ServerDataType.SEARCH:
+                search(server_data.get_search());
+            break;
+            
+            // TODO: LSUB
+            case ServerDataType.LSUB:
             default:
                 // do nothing
                 debug("[%s] Not notifying of unhandled server data: %s", to_string(),

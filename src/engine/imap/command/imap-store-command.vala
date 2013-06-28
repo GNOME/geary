@@ -22,7 +22,7 @@ public class Geary.Imap.StoreCommand : Command {
         add(message_set.to_parameter());
         add(new AtomParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));
         
-        ListParameter list = new ListParameter(this);
+        ListParameter list = new ListParameter();
         foreach(MessageFlag flag in flag_list)
             list.add(new AtomParameter(flag.value));
         

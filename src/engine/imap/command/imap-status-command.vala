@@ -19,7 +19,7 @@ public class Geary.Imap.StatusCommand : Command {
         add(mailbox.to_parameter());
         
         assert(data_items.length > 0);
-        ListParameter data_item_list = new ListParameter(this);
+        ListParameter data_item_list = new ListParameter();
         foreach (StatusDataType data_item in data_items)
             data_item_list.add(data_item.to_parameter());
         
