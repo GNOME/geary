@@ -2,6 +2,7 @@ set(ICONS_DEST share/geary/icons)
 
 set(ICON_FILES
     application-menu.svg
+    edit-symbolic.svg
     mail-inbox.png
     mail-outbox.svg
     mail-sent.png
