@@ -40,8 +40,6 @@ public class Geary.Imap.SearchCriterion : BaseObject {
     
     /**
      * Create a single criterion with a simple name and custom value.
-     *
-     * @throws ImapError.INVALID if name must be transmitted as a {@link LiteralParameter}.
      */
     public SearchCriterion.string_value(string name, string value) {
         Parameter? valuep = StringParameter.get_best_for(value);

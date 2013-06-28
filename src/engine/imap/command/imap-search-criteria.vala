@@ -27,10 +27,10 @@ public class Geary.Imap.SearchCriteria : ListParameter {
     }
     
     /**
-     * Clears the {@link SearchCriteria} and sets the supplied {@SearchCriterion} to the first in
-     * the list.
+     * Clears the {@link SearchCriteria} and sets the supplied {@link SearchCriterion} to the first
+     * in the list.
      *
-     * @returns This SearchCriteria for chaining.
+     * @return This SearchCriteria for chaining.
      */
     public unowned SearchCriteria is_(SearchCriterion first) {
         clear();
@@ -40,9 +40,9 @@ public class Geary.Imap.SearchCriteria : ListParameter {
     }
     
     /**
-     * AND another {@link SearchCriterion} to the {@link SearchCriteria).
+     * AND another {@link SearchCriterion} to the {@link SearchCriteria}.
      *
-     * @returns This SearchCriteria for chaining.
+     * @return This SearchCriteria for chaining.
      */
     public unowned SearchCriteria and(SearchCriterion next) {
         add(next.to_parameter());
@@ -51,9 +51,9 @@ public class Geary.Imap.SearchCriteria : ListParameter {
     }
     
     /**
-     * OR another {@link SearchCriterion} to the {@link SearchCriteria).
+     * OR another {@link SearchCriterion} to the {@link SearchCriteria}.
      *
-     * @returns This SearchCriteria for chaining.
+     * @return This SearchCriteria for chaining.
      */
     public unowned SearchCriteria or(SearchCriterion a, SearchCriterion b) {
         add(SearchCriterion.or(a, b).to_parameter());

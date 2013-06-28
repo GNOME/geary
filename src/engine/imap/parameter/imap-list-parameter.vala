@@ -51,7 +51,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      * The same {@link Parameter} can't be added more than once to the same {@link ListParameter}.
      * There are no other restrictions, however.
      *
-     * @returns true if added.
+     * @return true if added.
      */
     public bool add(Parameter param) {
         // if adding a ListParameter, set its parent
@@ -63,7 +63,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Appends the {@ListParameter} to the end of this ListParameter.
+     * Appends the {@link ListParameter} to the end of this ListParameter.
      *
      * The difference between this call and {@link add} is that add() will simply insert the
      * {@link Parameter} to the tail of the list.  Thus, add(ListParameter) will add a child list
@@ -80,7 +80,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      * returns empty.  This is slightly different than {@link adopt_children}, which preserves the
      * list structure.
      *
-     * @returns Number of added elements.  append() will not abort if an element fails to add.
+     * @return Number of added elements.  append() will not abort if an element fails to add.
      */
     public int append(ListParameter listp) {
         // snap the child list off the supplied ListParameter so it's wiped clean

@@ -43,8 +43,9 @@ public abstract class Geary.ProgressMonitor : BaseObject {
     public signal void finish();
     
     /**
-     * Users must call this before calling update.  Must not be called again until
-     * {@link notify_finish()} has been called.
+     * Users must call this before calling update.
+     *
+     * Must not be called again until {@link ProgressMonitor.notify_finish} has been called.
      */ 
     public virtual void notify_start() {
         assert(!is_in_progress);
@@ -55,7 +56,9 @@ public abstract class Geary.ProgressMonitor : BaseObject {
     }
     
     /**
-     * Users must call this when progress has completed.  Must only be called after {@link notify_start()}
+     * Users must call this when progress has completed.
+     *
+     * Must only be called after {@link ProgressMonitor.notify_start}.
      */
     public virtual void notify_finish() {
         assert(is_in_progress);
@@ -77,8 +80,11 @@ public class Geary.SimpleProgressMonitor : Geary.ProgressMonitor {
     }
     
     /**
-     * Updates the progress by the given value.  Must be between {@link MIN} and {@link MAX}.  Must only
-     * be called after {@link notify_start()} and before {@link notify_finish()}
+     * Updates the progress by the given value.  Must be between {@link ProgressMonitor.MIN} and
+     * {@link ProgressMonitor.MAX}.
+     *
+     * Must only be called after {@link ProgressMonitor.notify_start} and before
+     * {@link ProgressMonitor.notify_finish}.
      */
     public void increment(double value) {
         assert(value > 0);

@@ -135,8 +135,10 @@ public string remove_html_tags(string input) {
     return input;
 }
 
-/** Does a very approximate conversion from HTML to text.  This does more than
- * stripping tags -- it inserts line breaks where appropriate, decodes
+/**
+ * Does a very approximate conversion from HTML to text.
+ *
+ * This does more than stripping tags -- it inserts line breaks where appropriate, decodes
  * entities, etc.  The layout of the text is largely lost.  This is primarily
  * useful for pulling out tokens for searching, not for presenting to the user.
  */
