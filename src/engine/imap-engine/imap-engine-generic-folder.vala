@@ -461,8 +461,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
-        if (open_count++ > 0)
+        if (open_count++ > 0) {
+            debug("Not opening %s: already open (open_count=%d)", to_string(), open_count);
+            
             return false;
+        }
         
         remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
@@ -472,6 +475,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         try {
             yield local_folder.open_async(cancellable);
         } catch (Error err) {
+            debug("Not opening %s: unable to open local folder: %s", to_string(), err.message);
+            
             notify_open_failed(OpenFailed.LOCAL_FAILED, err);
             
             // schedule close now
