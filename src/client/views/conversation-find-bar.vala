@@ -93,6 +93,7 @@ public class ConversationFindBar : Gtk.Layout {
         base.hide();
         
         end_search();
+        close();
     }
     
     public void focus_entry() {
