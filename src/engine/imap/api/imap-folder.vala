@@ -431,8 +431,10 @@ private class Geary.Imap.Folder : BaseObject {
                     partial_header_identifier, body_identifier, preview_identifier,
                     preview_charset_identifier);
                 if (!email.fields.fulfills(fields)) {
-                    debug("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
+                    message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
                         fields.clear(email.fields).to_list_string(), fetched_data.to_string());
+                    
+                    continue;
                 }
                 
                 email_list.add(email);
@@ -679,15 +681,13 @@ private class Geary.Imap.Folder : BaseObject {
             email.set_email_properties(new Geary.Imap.EmailProperties(internaldate, rfc822_size));
         
         // if the header was requested, convert its fields now
-        if (partial_header_identifier != null) {
-            if (!fetched_data.body_data_map.has_key(partial_header_identifier)) {
-                debug("[%s] No partial header identifier \"%s\" found:", to_string(),
-                    partial_header_identifier.to_string());
-                foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                    debug("[%s] has %s", to_string(), id.to_string());
-            }
-            assert(fetched_data.body_data_map.has_key(partial_header_identifier));
-            
+        bool has_partial_header = fetched_data.body_data_map.has_key(partial_header_identifier);
+        if (partial_header_identifier != null && !has_partial_header) {
+            message("[%s] No partial header identifier \"%s\" found:", to_string(),
+                partial_header_identifier.to_string());
+            foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
+                message("[%s] has %s", to_string(), id.to_string());
+        } else if (partial_header_identifier != null && has_partial_header) {
             RFC822.Header headers = new RFC822.Header(
                 fetched_data.body_data_map.get(partial_header_identifier));
             
