@@ -42,6 +42,18 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public ListParameter() {
     }
     
+    ~ListParameter() {
+        // Although every attempt is made to make sure the parent-child relationship is maintained,
+        // be lenient here and only drop it if coherent ... this is done because, although it's
+        // a weak ref, sometimes ListParameters are temporarily made and current Vala doesn't
+        // reset weak refs
+        foreach (Parameter param in list) {
+            ListParameter? listp = param as ListParameter;
+            if (listp != null && listp.parent == this)
+                listp.parent = null;
+        }
+    }
+    
     /**
      * Adds the {@link Parameter} to the end of the {@link ListParameter}.
      *
@@ -60,6 +72,25 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
             listp.parent = this;
         
         return list.add(param);
+    }
+    
+    /**
+     * Adds all the {@link Parameter}s to the end of the {@link ListParameter}.
+     *
+     * If any Parameter is itself a ListParameter, it's {@link parent} will be set to this
+     * ListParameter.
+     *
+     * The same {@link Parameter} can't be added more than once to the same {@link ListParameter}.
+     * There are no other restrictions, however.
+     *
+     * @return number of Parameters added.
+     */
+    public int add_all(Gee.Collection<Parameter> params) {
+        int count = 0;
+        foreach (Parameter param in params)
+            count += add(param) ? 1 : 0;
+        
+        return count;
     }
     
     /**

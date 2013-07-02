@@ -48,17 +48,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         }
         
         int remote_count;
-        int last_seen_remote_count;
-        int usable_remote_count = engine.get_remote_counts(out remote_count,
-            out last_seen_remote_count);
-        
-        // fixup position
-        if (email != null && usable_remote_count > 0) {
-            int local_count = yield engine.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
-                cancellable);
-            if (local_count < usable_remote_count)
-                email.update_position(email.position + (usable_remote_count - local_count));
-        }
+        engine.get_remote_counts(out remote_count, null);
         
         // If returned in full, done
         if (email != null && email.fields.fulfills(required_fields))
@@ -118,6 +108,11 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         // save to local store
         email = list[0];
         assert(email != null);
+        
+        // use position to normalize any missing emails in the span (prevent holes in the local
+        // email vector)
+        assert(email.position >= 1);
+        yield engine.normalize_email_positions_async(email.position, 1, null, cancellable);
         
         Gee.Map<Geary.Email, bool> created_or_merged =
             yield engine.local_folder.create_or_merge_email_async(new Collection.SingleItem<Geary.Email>(email),

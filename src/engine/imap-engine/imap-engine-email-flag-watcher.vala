@@ -89,13 +89,20 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     private async void do_flag_watch_async() throws Error {
         Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async begin %s", folder.to_string());
         
-        int low = -1;
-        bool finished = false;
+        Geary.EmailIdentifier? lowest = null;
         int total = 0;
         do {
             // Fetch a chunk of email flags in local folder.
-            Gee.List<Geary.Email>? list_local = yield folder.list_email_async(low, PULL_CHUNK_COUNT,
-                Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            Gee.List<Geary.Email>? list_local;
+            if (lowest == null) {
+                list_local = yield folder.list_email_async(-1, PULL_CHUNK_COUNT,
+                    Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            } else {
+                // note using negative count to move down the stack
+                list_local = yield folder.list_email_by_id_async(lowest, 0 - PULL_CHUNK_COUNT,
+                    Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            }
+            
             if (list_local == null || list_local.size == 0)
                 break;
             
@@ -105,17 +112,11 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
                 Geary.EmailIdentifier, Geary.EmailFlags>();
             foreach (Geary.Email e in list_local) {
-                if (low == -1 || e.position < low)
-                    low = e.position;
+                if (lowest == null || e.id.compare_to(lowest) < 0)
+                    lowest = e.id;
                 
                 local_map.set(e.id, e.email_flags);
             }
-            
-            // if this request's low was 1 or processed the top 2000, then this is the last iteration
-            finished = (low == 1 || total >= MAX_EMAIL_WATCHED);
-            
-            // now roll back PULL_CHUNK_COUNT earlier for next iteration
-            low = Numeric.int_floor(low - PULL_CHUNK_COUNT, 1);
             
             // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
             // and the latest to be gotten from the server (updating the cache in the process)
@@ -137,9 +138,10 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             if (!cancellable.is_cancelled() && changed_map.size > 0)
                 email_flags_changed(changed_map);
-        } while (!finished);
+        } while (total < MAX_EMAIL_WATCHED);
         
-        Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: completed %s", folder.to_string());
+        Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: completed %s, %d messages updates",
+            folder.to_string(), total);
     }
 }
 

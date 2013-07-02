@@ -310,60 +310,31 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     private async void expand_folder_async(GenericFolder folder, DateTime epoch, DateTime? oldest_local,
         Geary.EmailIdentifier? oldest_local_id) throws Error {
-        // if oldest local ID is known, attempt to turn that into a position on the remote server
-        int oldest_local_pos = -1;
+        // use IMAP SEARCH to discover the epoch email
+        Imap.SearchCriteria criteria = new Imap.SearchCriteria();
+        criteria.is_(Imap.SearchCriterion.since_internaldate(new Imap.InternalDate.from_date_time(epoch)));
+        
+        // if local email available, only search for messages before it
         if (oldest_local_id != null) {
-            try {
-                Geary.Email email = yield folder.fetch_email_async(oldest_local_id,
-                    Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.NONE);
-                oldest_local_pos = email.position;
-                debug("%s oldest_id=%s oldest_local=%s oldest_position=%d", folder.to_string(),
-                    oldest_local_id.to_string(), oldest_local.to_string(), oldest_local_pos);
-            } catch (Error err) {
-                debug("Error fetching oldest position on %s: %s", folder.to_string(), err.message);
-            }
+            Imap.UID oldest_uid = ((Imap.EmailIdentifier) oldest_local_id).uid;
+            criteria.and(Imap.SearchCriterion.message_set(
+                new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), oldest_uid.previous())));
         }
         
-        // TODO: This could be done in a single IMAP SEARCH command, as INTERNALDATE may be searched
-        // upon (returning all messages that fit the criteria).  For now, simply iterating backward
-        // in the folder until the oldest is found, then pulling the email down in chunks
-        int low = (oldest_local_pos >= 1)
-            ? Numeric.int_floor(oldest_local_pos - FETCH_DATE_RECEIVED_CHUNK_COUNT, 1) : -1;
-        int count = FETCH_DATE_RECEIVED_CHUNK_COUNT;
-        for (;;) {
-            Gee.List<Email>? list = yield folder.list_email_async(low, count, Geary.Email.Field.PROPERTIES,
-                Folder.ListFlags.NONE, bg_cancellable);
-            if (list == null || list.size == 0)
-                break;
+        Gee.SortedSet<Geary.EmailIdentifier>? since_ids = yield folder.remote_folder.search_async(
+            criteria, null);
+        if (since_ids == null || since_ids.size == 0) {
+            debug("Unable to locate epoch messages on remote folder %s", folder.to_string());
             
-            // sort these by their received date so they're walked in order
-            Gee.TreeSet<Email> sorted_list = new Collection.FixedTreeSet<Email>(Email.compare_date_received_descending);
-            sorted_list.add_all(list);
-            
-            // look for any that are older than epoch and bail out if found
-            bool found = false;
-            int lowest = int.MAX;
-            foreach (Email email in sorted_list) {
-                if (email.properties.date_received.compare(epoch) < 0) {
-                    debug("Found epoch for %s at %s (%s)", folder.to_string(), email.id.to_string(),
-                        email.properties.date_received.to_string());
-                    
-                    found = true;
-                    
-                    break;
-                }
-                
-                // find lowest position for next round of fetching
-                if (email.position < lowest)
-                    lowest = email.position;
-            }
-            
-            if (found || low == 1)
-                break;
-            
-            low = Numeric.int_floor(lowest - FETCH_DATE_RECEIVED_CHUNK_COUNT, 1);
-            count = (lowest - low).clamp(1, FETCH_DATE_RECEIVED_CHUNK_COUNT);
+            return;
         }
+        
+        debug("%s: %d discovered since epoch %s, fetching from %s", folder.to_string(), since_ids.size,
+            epoch.to_string(), since_ids.first().to_string());
+        
+        // fetch the oldest one; the Folder will perform the vector expansion and the email
+        // prefetcher will pull them all in
+        yield folder.fetch_email_async(since_ids.first(), Email.Field.NONE, Folder.ListFlags.NONE);
     }
     
     private void on_email_prefetcher_completed() {

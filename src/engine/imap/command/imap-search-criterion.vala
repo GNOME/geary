@@ -15,27 +15,29 @@
  */
 
 public class Geary.Imap.SearchCriterion : BaseObject {
-    private Parameter parameter;
+    private Gee.List<Parameter> parameters = new Gee.ArrayList<Parameter>();
     
     /**
      * Create a single simple criterion for the {@link SearchCommand}.
      */
-    public SearchCriterion(Parameter parameter) {
-        this.parameter = parameter;
+    public SearchCriterion(Parameter? parameter = null) {
+        if (parameter != null)
+            parameters.add(parameter);
     }
     
     /**
      * Creates a simple search criterion.
      */
     public SearchCriterion.simple(string name) {
-        parameter = prep_name(name);
+        parameters.add(prep_name(name));
     }
     
     /**
      * Create a single criterion with a simple name and custom value.
      */
     public SearchCriterion.parameter_value(string name, Parameter value) {
-        parameter = make_list(prep_name(name), value);
+        parameters.add(prep_name(name));
+        parameters.add(value);
     }
     
     /**
@@ -46,7 +48,8 @@ public class Geary.Imap.SearchCriterion : BaseObject {
         if (valuep == null)
             valuep = new LiteralParameter(new Memory.StringBuffer(value));
         
-        parameter = make_list(prep_name(name), valuep);
+        parameters.add(prep_name(name));
+        parameters.add(valuep);
     }
     
     private static Parameter prep_name(string name) {
@@ -57,14 +60,6 @@ public class Geary.Imap.SearchCriterion : BaseObject {
         }
         
         return namep;
-    }
-    
-    private static ListParameter make_list(Parameter namep, Parameter valuep) {
-        ListParameter listp = new ListParameter();
-        listp.add(namep);
-        listp.add(valuep);
-        
-        return listp;
     }
     
     /**
@@ -78,12 +73,20 @@ public class Geary.Imap.SearchCriterion : BaseObject {
      * The IMAP SEARCH OR criterion, which operates on other {@link SearchCriterion}.
      */
     public static SearchCriterion or(SearchCriterion a, SearchCriterion b) {
-        ListParameter listp = new ListParameter();
-        listp.add(StringParameter.get_best_for("or"));
-        listp.add(a.to_parameter());
-        listp.add(b.to_parameter());
+        SearchCriterion criterion = new SearchCriterion.simple("or");
         
-        return new SearchCriterion(listp);
+        // add each set of Parameters as lists (which are AND-ed)
+        criterion.parameters.add(a.to_list_parameter());
+        criterion.parameters.add(b.to_list_parameter());
+        
+        return criterion;
+    }
+    
+    /**
+     * The IMAP SEARCH NOT criterion.
+     */
+    public static SearchCriterion not(SearchCriterion a) {
+        return new SearchCriterion.parameter_value("not", a.to_list_parameter());
     }
     
     /**
@@ -123,17 +126,24 @@ public class Geary.Imap.SearchCriterion : BaseObject {
     }
     
     /**
+     * The IMAP SEARCH BEFORE criterion.
+     */
+    public static SearchCriterion before_internaldate(InternalDate internaldate) {
+        return new SearchCriterion.parameter_value("before", internaldate.to_search_parameter());
+    }
+    
+    /**
      * The IMAP SEARCH ON criterion.
      */
     public static SearchCriterion on_internaldate(InternalDate internaldate) {
-        return new SearchCriterion.parameter_value("on", internaldate.to_parameter());
+        return new SearchCriterion.parameter_value("on", internaldate.to_search_parameter());
     }
     
     /**
      * The IMAP SEARCH SINCE criterion.
      */
     public static SearchCriterion since_internaldate(InternalDate internaldate) {
-        return new SearchCriterion.parameter_value("since", internaldate.to_parameter());
+        return new SearchCriterion.parameter_value("since", internaldate.to_search_parameter());
     }
     
     /**
@@ -173,14 +183,33 @@ public class Geary.Imap.SearchCriterion : BaseObject {
     }
     
     /**
-     * Returns the {@link SearchCriterion} as an IMAP {@link Parameter}.
+     * Returns the {@link SearchCriterion} as one or more IMAP {@link Parameter}s.
+     *
+     * Although each set of multiple parameters could be a list, the "usual" way of specifying
+     * SEARCH arguments is without parentheses, and this strives to emulate that programmatically.
+     *
+     * The Parameters should be included in the {@link Command} in exactly the order returned.
      */
-    public Parameter to_parameter() {
-        return parameter;
+    public Gee.List<Parameter> to_parameters() {
+        return parameters;
+    }
+    
+    /**
+     * Return {@link Parameter}s as a {@link ListParameter} if multiple, a single Parameter
+     * otherwise.
+     */
+    public Parameter to_list_parameter() {
+        if (parameters.size == 1)
+            return parameters[0];
+        
+        ListParameter listp = new ListParameter();
+        listp.add_all(parameters);
+        
+        return listp;
     }
     
     public string to_string() {
-        return parameter.to_string();
+        return to_list_parameter().to_string();
     }
 }
 

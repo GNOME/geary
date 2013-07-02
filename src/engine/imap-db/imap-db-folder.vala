@@ -909,7 +909,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // to err on the side of safety
         Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
         string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
-            ? imap_properties.internaldate.original : null;
+            ? imap_properties.internaldate.serialize() : null;
         long rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
         
         if (String.is_empty(internaldate) || rfc822_size < 0) {
@@ -1127,8 +1127,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
         
         // look for perverse case
-        if (required_fields == Geary.Email.Field.NONE)
-            return new Geary.Email(location.position, location.email_id);
+        if (required_fields == Geary.Email.Field.NONE) {
+            Geary.Email email = new Geary.Email(location.email_id);
+            email.position = location.position;
+            
+            return email;
+        }
         
         MessageRow row = do_fetch_message_row(cx, location.message_id, required_fields, cancellable);
         if (!flags.is_all_set(ListFlags.PARTIAL_OK) && !row.fields.fulfills(required_fields)) {

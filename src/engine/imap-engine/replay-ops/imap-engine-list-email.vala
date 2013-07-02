@@ -149,13 +149,6 @@ private class Geary.ImapEngine.ListEmail : Geary.ImapEngine.SendReplayOperation 
         
         local_list_size = (local_list != null) ? local_list.size : 0;
         
-        // fixup local email positions to match server's positions
-        if (local_list_size > 0 && usable_remote_count > 0 && local_count < usable_remote_count) {
-            int adjustment = usable_remote_count - local_count;
-            foreach (Geary.Email email in local_list)
-                email.update_position(email.position + adjustment);
-        }
-        
         // Break into two pools: a list of emails where all field requirements are met and a hash
         // table of messages keyed by what fields are required
         Gee.List<Geary.Email> fulfilled = new Gee.ArrayList<Geary.Email>();

@@ -7,9 +7,9 @@
 /**
  * A collection of one or more {@link SearchCriterion} for a {@link SearchCommand}.
  *
- * Criterion are added to the SearchCriteria one at a time with the {@link and} and {@link or}
- * methods.  Both methods return the SearchCriteria object, and so chaining can be used for
- * convenience:
+ * Criterion are added to the SearchCriteria one at a time with the {@link and}, {@link or}, and/or
+ * {@link not} methods.  Both methods return the SearchCriteria object, and so chaining can be used
+ * for convenience:
  *
  * SearchCriteria criteria = new SearchCriteria();
  * criteria.is_(SearchCriterion.new_messages()).and(SearchCriterion.has_flag(MessageFlag.DRAFT));
@@ -34,7 +34,7 @@ public class Geary.Imap.SearchCriteria : ListParameter {
      */
     public unowned SearchCriteria is_(SearchCriterion first) {
         clear();
-        add(first.to_parameter());
+        add_all(first.to_parameters());
         
         return this;
     }
@@ -45,18 +45,29 @@ public class Geary.Imap.SearchCriteria : ListParameter {
      * @return This SearchCriteria for chaining.
      */
     public unowned SearchCriteria and(SearchCriterion next) {
-        add(next.to_parameter());
+        add_all(next.to_parameters());
         
         return this;
     }
     
     /**
-     * OR another {@link SearchCriterion} to the {@link SearchCriteria}.
+     * OR two {@link SearchCriterion}s to the {@link SearchCriteria}.
      *
      * @return This SearchCriteria for chaining.
      */
     public unowned SearchCriteria or(SearchCriterion a, SearchCriterion b) {
-        add(SearchCriterion.or(a, b).to_parameter());
+        add_all(SearchCriterion.or(a, b).to_parameters());
+        
+        return this;
+    }
+    
+    /**
+     * NOT another {@link SearchCriterion} to the {@link SearchCriteria}.
+     *
+     * @return This SearchCriteria for chaining.
+     */
+    public unowned SearchCriteria not(SearchCriterion next) {
+        add_all(SearchCriterion.not(next).to_parameters());
         
         return this;
     }

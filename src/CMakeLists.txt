@@ -110,10 +110,12 @@ engine/imap/command/imap-starttls-command.vala
 engine/imap/command/imap-status-command.vala
 engine/imap/command/imap-store-command.vala
 engine/imap/message/imap-data-format.vala
+engine/imap/message/imap-envelope.vala
 engine/imap/message/imap-fetch-body-data-type.vala
 engine/imap/message/imap-fetch-data-type.vala
 engine/imap/message/imap-flag.vala
 engine/imap/message/imap-flags.vala
+engine/imap/message/imap-internal-date.vala
 engine/imap/message/imap-mailbox-specifier.vala
 engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala

@@ -101,7 +101,8 @@ private class Geary.ImapDB.MessageRow {
         // Important to set something in the Email object if the field bit is set ... for example,
         // if the caller expects to see a DATE field, that field is set in the Email's bitmask,
         // even if the Date object is null
-        Geary.Email email = new Geary.Email(position, id);
+        Geary.Email email = new Geary.Email(id);
+        email.position = position;
         
         if (fields.is_all_set(Geary.Email.Field.DATE))
             email.set_send_date(!String.is_empty(date) ? new RFC822.Date(date) : null);
@@ -243,7 +244,7 @@ private class Geary.ImapDB.MessageRow {
         
         if (email.fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
             Geary.Imap.EmailProperties? imap_properties = (Geary.Imap.EmailProperties) email.properties;
-            internaldate = (imap_properties != null) ? imap_properties.internaldate.original : null;
+            internaldate = (imap_properties != null) ? imap_properties.internaldate.serialize() : null;
             internaldate_time_t = (imap_properties != null) ? imap_properties.internaldate.as_time_t : -1;
             rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
             

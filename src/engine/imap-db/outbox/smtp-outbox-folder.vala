@@ -490,7 +490,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     private Geary.Email row_to_email(OutboxRow row) throws Error {
         RFC822.Message message = new RFC822.Message.from_buffer(row.message);
         
-        Geary.Email email = message.get_email(row.position, row.outbox_id);
+        Geary.Email email = message.get_email(row.outbox_id);
         // TODO: Determine message's total size (header + body) to store in Properties.
         email.set_email_properties(new SmtpOutboxEmailProperties(new DateTime.now_local(), -1));
         email.set_flags(new Geary.EmailFlags());

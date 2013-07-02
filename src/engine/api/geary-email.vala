@@ -110,9 +110,9 @@ public class Geary.Email : BaseObject {
      * operations may change the Email's position in the folder (or simply remove it).  This value
      * is *not* updated to reflect this.
      *
-     * This field is always returned, no matter what Fields are used to retrieve the Email.
+     * This field is not always returned valid, depending on the Folder it originates from.
      */
-    public int position { get; private set; }
+    internal int position { get; set; default = -1; }
     
     /**
      * id is a unique identifier for the Email in the Folder.  It is guaranteed to be unique for
@@ -164,17 +164,10 @@ public class Geary.Email : BaseObject {
     
     private Geary.RFC822.Message? message = null;
     
-    public Email(int position, Geary.EmailIdentifier id) {
-        this.position = position;
+    public Email(Geary.EmailIdentifier id) {
         this.id = id;
     }
     
-    internal void update_position(int position) {
-        assert(position >= 1);
-        
-        this.position = position;
-    }
-
     public inline Trillian is_unread() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_unread()) : Trillian.UNKNOWN;
     }
@@ -364,14 +357,7 @@ public class Geary.Email : BaseObject {
     }
     
     public string to_string() {
-        StringBuilder builder = new StringBuilder();
-        
-        builder.append_printf("[#%d/%s] ", position, id.to_string());
-        
-        if (date != null)
-            builder.append_printf("%s/", date.to_string());
-        
-        return builder.str;
+        return "[%s] ".printf(id.to_string());
     }
     
     /**

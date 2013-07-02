@@ -262,8 +262,8 @@ public class Geary.RFC822.Message : BaseObject {
         return part;
     }
     
-    public Geary.Email get_email(int position, Geary.EmailIdentifier id) throws Error {
-        Geary.Email email = new Geary.Email(position, id);
+    public Geary.Email get_email(Geary.EmailIdentifier id) throws Error {
+        Geary.Email email = new Geary.Email(id);
         
         email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
             message.get_headers())));
