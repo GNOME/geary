@@ -47,6 +47,8 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         if (stopped.is_passed())
             return;
         
+        account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
+        
         bg_queue.allow_duplicates = false;
         bg_queue.requeue_duplicate = false;
         bg_cancellable = new Cancellable();
@@ -56,8 +58,22 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     private void on_account_closed() {
+        account.information.notify["prefetch-period-days"].disconnect(on_account_prefetch_changed);
+        
         bg_cancellable.cancel();
         bg_queue.clear();
+    }
+    
+    private void on_account_prefetch_changed() {
+        try {
+            // treat as an availability check (i.e. as if the account had just opened) because
+            // just because this value has changed doesn't mean the contents in the folders
+            // have changed
+            send_all(account.list_folders(), true);
+        } catch (Error err) {
+            debug("Unable to schedule re-sync for %s due to prefetch time changing: %s",
+                account.to_string(), err.message);
+        }
     }
     
     private void on_folders_available_unavailable(Gee.Collection<Folder>? available,
@@ -290,8 +306,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         debug("Background sync'ing %s", folder.to_string());
         
         // only perform vector expansion if oldest isn't old enough
-        if (oldest_local == null || oldest_local.compare(epoch) > 0)
+        if (oldest_local == null || oldest_local.compare(epoch) > 0) {
             yield expand_folder_async(folder, epoch, oldest_local, oldest_local_id);
+        } else {
+            debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
+                folder.to_string(), oldest_local.to_string(), epoch.to_string());
+        }
         
         // always give email prefetcher time to finish its work
         if (folder.email_prefetcher.has_work()) {
