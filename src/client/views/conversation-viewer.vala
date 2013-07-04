@@ -1375,13 +1375,6 @@ public class ConversationViewer : Gtk.Box {
             WebKit.DOM.HTMLElement container = web_view.create_div();
             container.set_inner_html(inner_text);
             
-            // Some HTML messages like to wrap themselves in full, proper html, head, and body tags.
-            // If we have that here, lets remove it since we are sticking it in our own document.
-            WebKit.DOM.HTMLElement? body = Util.DOM.select(container, "body");
-            if (body != null) {
-                container.set_inner_html(body.get_inner_html());
-            }
-
             // Get all the top level block quotes and stick them into a hide/show controller.
             WebKit.DOM.NodeList blockquote_list = container.query_selector_all("blockquote");
             for (int i = 0; i < blockquote_list.length; ++i) {
@@ -1412,8 +1405,7 @@ public class ConversationViewer : Gtk.Box {
             wrap_html_signature(ref container);
 
             // Then look for all <img> tags. Inline images are replaced with
-            // data URLs, while external images have the prefix "remote:" added
-            // to their src, which is trapped in the conversation_web_view.
+            // data URLs.
             WebKit.DOM.NodeList inline_list = container.query_selector_all("img");
             for (ulong i = 0; i < inline_list.length; ++i) {
                 // Get the MIME content for the image.
@@ -1433,7 +1425,7 @@ public class ConversationViewer : Gtk.Box {
 
                     // Then set the source to a data url.
                     web_view.set_data_url(img, mimetype, image_data);
-                } else if (!src.has_prefix("data:")) {  // TODO: Test whether to show images
+                } else if (!src.has_prefix("data:")) {
                     remote_images = true;
                 }
             }
