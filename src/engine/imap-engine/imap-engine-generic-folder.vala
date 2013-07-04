@@ -556,7 +556,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // notify any threads of execution waiting for the remote folder to open that the result
         // of that operation is ready
         try {
-            remote_semaphore.notify_result(remote != null, null);
+            remote_semaphore.notify_result(remote_folder != null, null);
         } catch (Error notify_err) {
             debug("Unable to fire semaphore notifying remote folder ready/not ready: %s",
                 notify_err.message);
