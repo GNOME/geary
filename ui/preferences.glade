@@ -91,7 +91,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="display_preview">
-                <property name="label" translatable="yes">_Display message preview</property>
+                <property name="label" translatable="yes">_Display conversation preview</property>
                 <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
