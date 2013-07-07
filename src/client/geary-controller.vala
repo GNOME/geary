@@ -1466,22 +1466,23 @@ public class GearyController {
     }
     
     private void on_find_in_conversation_action() {
-            main_window.conversation_viewer.show_find_bar();
+        main_window.conversation_viewer.show_find_bar();
     }
     
     private void on_find_next_in_conversation_action() {
-            main_window.conversation_viewer.find(true);
+        main_window.conversation_viewer.find(true);
     }
     
     private void on_find_previous_in_conversation_action() {
-            main_window.conversation_viewer.find(false);
+        main_window.conversation_viewer.find(false);
     }
     
     // This method is used for both removing and archive a message; currently Geary only supports
     // one or the other in a folder
     private void on_delete_message() {
         // Prevent deletes of the same conversation from repeating.
-        if (main_window.conversation_viewer.current_conversation ==last_deleted_conversation) {
+        if (main_window.conversation_viewer.current_conversation != null
+            && main_window.conversation_viewer.current_conversation == last_deleted_conversation) {
             debug("not archiving/deleting, viewed conversation is last deleted conversation");
             
             return;
@@ -1491,7 +1492,7 @@ public class GearyController {
         // button is disabled, but better safe than segfaulted.
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.Collection.get_first<Geary.Conversation>(selected_conversations) : null;
-
+        
         // If the user clicked the toolbar button, we want to move focus back to the message list.
         main_window.conversation_list_view.grab_focus();
         set_busy(true);
