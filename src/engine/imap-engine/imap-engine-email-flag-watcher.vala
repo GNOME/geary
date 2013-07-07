@@ -67,23 +67,32 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     }
     
     private bool on_flag_watch() {
-        if (enabled)
-            flag_watch_async.begin();
+        if (!enabled) {
+            // try again later
+            return true;
+        }
         
-        return true;
+        flag_watch_async.begin();
+        
+        watch_id = 0;
+        
+        // return false and reschedule when finished
+        return false;
     }
     
     private async void flag_watch_async() {
-        if (in_flag_watch)
-            return;
-        
-        in_flag_watch = true;
-        try {
-            yield do_flag_watch_async();
-        } catch (Error err) {
-            message("Flag watch error: %s", err.message);
+        if (!in_flag_watch) {
+            in_flag_watch = true;
+            try {
+                yield do_flag_watch_async();
+            } catch (Error err) {
+                message("Flag watch error: %s", err.message);
+            }
+            in_flag_watch = false;
         }
-        in_flag_watch = false;
+        
+        if (watch_id == 0)
+            watch_id = Timeout.add_seconds(seconds, on_flag_watch);
     }
     
     private async void do_flag_watch_async() throws Error {
@@ -96,11 +105,12 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             Gee.List<Geary.Email>? list_local;
             if (lowest == null) {
                 list_local = yield folder.list_email_async(-1, PULL_CHUNK_COUNT,
-                    Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+                    Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
             } else {
                 // note using negative count to move down the stack
                 list_local = yield folder.list_email_by_id_async(lowest, 0 - PULL_CHUNK_COUNT,
-                    Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+                    Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY | Geary.Folder.ListFlags.EXCLUDING_ID,
+                    cancellable);
             }
             
             if (list_local == null || list_local.size == 0)
@@ -120,6 +130,8 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
             // and the latest to be gotten from the server (updating the cache in the process)
+            Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: fetching %d flags for %s",
+                local_map.keys.size, folder.to_string());
             Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
                 Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
             if (list_remote == null || list_remote.size == 0)
