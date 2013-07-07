@@ -692,14 +692,16 @@ private class Geary.Imap.Folder : BaseObject {
                 fetched_data.body_data_map.get(partial_header_identifier));
             
             // DATE
-            if (!email.fields.is_all_set(Geary.Email.Field.DATE)) {
+            if (required_but_not_set(Geary.Email.Field.DATE, required_fields, email)) {
                 string? value = headers.get_header("Date");
                 if (!String.is_empty(value))
                     email.set_send_date(new RFC822.Date(value));
+                else
+                    email.set_send_date(null);
             }
             
             // ORIGINATORS
-            if (!email.fields.is_all_set(Geary.Email.Field.ORIGINATORS)) {
+            if (required_but_not_set(Geary.Email.Field.ORIGINATORS, required_fields, email)) {
                 RFC822.MailboxAddresses? from = null;
                 string? value = headers.get_header("From");
                 if (!String.is_empty(value))
@@ -715,12 +717,11 @@ private class Geary.Imap.Folder : BaseObject {
                 if (!String.is_empty(value))
                     reply_to = new RFC822.MailboxAddresses.from_rfc822_string(value);
                 
-                if (from != null || sender != null || reply_to != null)
-                    email.set_originators(from, sender, reply_to);
+                email.set_originators(from, sender, reply_to);
             }
             
             // RECEIVERS
-            if (!email.fields.is_all_set(Geary.Email.Field.RECEIVERS)) {
+            if (required_but_not_set(Geary.Email.Field.RECEIVERS, required_fields, email)) {
                 RFC822.MailboxAddresses? to = null;
                 string? value = headers.get_header("To");
                 if (!String.is_empty(value))
@@ -736,8 +737,7 @@ private class Geary.Imap.Folder : BaseObject {
                 if (!String.is_empty(value))
                     bcc = new RFC822.MailboxAddresses.from_rfc822_string(value);
                 
-                if (to != null || cc != null || bcc != null)
-                    email.set_receivers(to, cc, bcc);
+                email.set_receivers(to, cc, bcc);
             }
             
             // REFERENCES
@@ -763,16 +763,19 @@ private class Geary.Imap.Folder : BaseObject {
             }
             
             // SUBJECT
-            if (!email.fields.is_all_set(Geary.Email.Field.SUBJECT)) {
+            // Unlike DATE, allow for empty subjects
+            if (required_but_not_set(Geary.Email.Field.SUBJECT, required_fields, email)) {
                 string? value = headers.get_header("Subject");
-                if (!String.is_empty(value))
+                if (value != null)
                     email.set_message_subject(new RFC822.Subject.decode(value));
+                else
+                    email.set_message_subject(null);
             }
         }
         
         // It's possible for all these fields to be null even though they were requested from
         // the server, so use requested fields for determination
-        if (required_fields.require(Geary.Email.Field.REFERENCES))
+        if (required_but_not_set(Geary.Email.Field.REFERENCES, required_fields, email))
             email.set_full_references(message_id, in_reply_to, references);
         
         // if body was requested, get it now
@@ -795,6 +798,10 @@ private class Geary.Imap.Folder : BaseObject {
         }
         
         return email;
+    }
+    
+    private bool required_but_not_set(Geary.Email.Field check, Geary.Email.Field users_fields, Geary.Email email) {
+        return users_fields.require(check) ? !email.fields.is_all_set(check) : false;
     }
     
     public string to_string() {
