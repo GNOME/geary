@@ -299,6 +299,7 @@ client/dialogs/alert-dialog.vala
 client/dialogs/attachment-dialog.vala
 client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
+client/dialogs/upgrade-dialog.vala
 
 client/folder-list/folder-list-abstract-folder-entry.vala
 client/folder-list/folder-list-account-branch.vala

@@ -32,6 +32,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         this.remote.email_sent.connect(on_email_sent);
         
         search_upgrade_monitor = local.search_index_monitor;
+        db_upgrade_monitor = local.upgrade_monitor;
         
         if (outbox_path == null) {
             outbox_path = new SmtpOutboxFolderRoot();

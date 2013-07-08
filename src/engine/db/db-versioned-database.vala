@@ -6,11 +6,13 @@
 
 public class Geary.Db.VersionedDatabase : Geary.Db.Database {
     public File schema_dir { get; private set; }
+    public ProgressMonitor upgrade_monitor { get; private set; }
     
-    public VersionedDatabase(File db_file, File schema_dir) {
+    public VersionedDatabase(File db_file, File schema_dir, ProgressMonitor upgrade_monitor) {
         base (db_file);
         
         this.schema_dir = schema_dir;
+        this.upgrade_monitor = upgrade_monitor;
     }
     
     protected virtual void pre_upgrade(int version) {
@@ -40,6 +42,11 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
             if (!upgrade_script.query_exists(cancellable))
                 break;
             
+            if (!upgrade_monitor.is_in_progress)
+                upgrade_monitor.notify_start();
+            
+            pump_event_loop();
+            
             pre_upgrade(db_version);
             
             check_cancelled("VersionedDatabase.open", cancellable);
@@ -58,8 +65,18 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
                 throw err;
             }
             
+            pump_event_loop();
+            
             post_upgrade(db_version);
         }
+        
+        if (upgrade_monitor.is_in_progress)
+            upgrade_monitor.notify_finish();
+    }
+    
+    protected void pump_event_loop() {
+        while (Gtk.events_pending())
+            Gtk.main_iteration();
     }
 }
 

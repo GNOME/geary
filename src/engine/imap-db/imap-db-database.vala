@@ -10,8 +10,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const string DB_FILENAME = "geary.db";
     private string account_owner_email;
     
-    public Database(File db_dir, File schema_dir, string account_owner_email) {
-        base (db_dir.get_child(DB_FILENAME), schema_dir);
+    public Database(File db_dir, File schema_dir, ProgressMonitor upgrade_monitor,
+        string account_owner_email) {
+        base (db_dir.get_child(DB_FILENAME), schema_dir, upgrade_monitor);
         this.account_owner_email = account_owner_email;
     }
     
@@ -52,8 +53,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             while (!result.finished) {
                 MessageAddresses message_addresses =
                     new MessageAddresses.from_result(account_owner_email, result);
-                foreach (Contact contact in message_addresses.contacts)
+                foreach (Contact contact in message_addresses.contacts) {
                     do_update_contact(get_master_connection(), contact, null);
+                    pump_event_loop();
+                }
+                
                 result.next();
             }
         } catch (Error err) {
@@ -81,6 +85,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 }
                 
                 select.next();
+                
+                pump_event_loop();
             }
         } catch (Error e) {
             debug("Error decoding folder names during upgrade to database schema 6: %s", e.message);
@@ -173,6 +179,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     }
                     
                     select.next();
+                    
+                    pump_event_loop();
                 }
                 
                 return Db.TransactionOutcome.COMMIT;

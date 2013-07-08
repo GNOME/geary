@@ -58,6 +58,8 @@ public class GearyController {
     private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
     private const int SEARCH_TIMEOUT_MSEC = 100;
     
+    private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
+    
     public MainWindow main_window { get; private set; }
     
     private Geary.Account? current_account = null;
@@ -68,6 +70,7 @@ public class GearyController {
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
+    private Cancellable cancellable_open_account = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
     private int busy_count = 0;
@@ -86,6 +89,7 @@ public class GearyController {
     private Geary.Folder? previous_non_search_folder = null;
     private uint search_timeout_id = 0;
     private LoginDialog? login_dialog = null;
+    private UpgradeDialog upgrade_dialog;
     
     /**
      * Fired when the currently selected account has changed.
@@ -136,6 +140,10 @@ public class GearyController {
         
         // Listen for attempts to close the application.
         GearyApplication.instance.exiting.connect(on_application_exiting);
+        
+        // Create DB upgrade dialog.
+        upgrade_dialog = new UpgradeDialog();
+        upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
         
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow();
@@ -193,8 +201,6 @@ public class GearyController {
                 GearyApplication.instance.get_resource_directory(), new SecretMediator());
             if (Geary.Engine.instance.get_accounts().size == 0) {
                 create_account();
-            } else {
-                main_window.show_all();
             }
         } catch (Error e) {
             error("Error opening Geary.Engine instance: %s", e.message);
@@ -367,7 +373,7 @@ public class GearyController {
     
     private void open_account(Geary.Account account) {
         account.report_problem.connect(on_report_problem);
-        connect_account_async.begin(account);
+        connect_account_async.begin(account, cancellable_open_account);
     }
     
     private void close_account(Geary.Account account) {
@@ -384,7 +390,10 @@ public class GearyController {
     }
     
     private void on_account_available(Geary.AccountInformation account_information) {
-        open_account(get_account_instance(account_information));
+        Geary.Account account = get_account_instance(account_information);
+        
+        upgrade_dialog.add_account(account, cancellable_open_account);
+        open_account(account);
     }
     
     private void on_account_unavailable(Geary.AccountInformation account_information) {
@@ -404,9 +413,6 @@ public class GearyController {
             result = yield validate_or_retry_async(result, cancellable);
         } while (result != null);
         
-        if (main_window != null) {
-            main_window.show_all();
-        }
         if (login_dialog != null)
             login_dialog.hide();
     }
@@ -571,6 +577,7 @@ public class GearyController {
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         
         try {
+            account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
             yield account.open_async(cancellable);
         } catch (Error open_err) {
             // TODO: Better error reporting to user
@@ -584,6 +591,7 @@ public class GearyController {
         account.email_sent.connect(on_sent);
         
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
+        display_main_window_if_ready();
     }
     
     public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {
@@ -628,6 +636,32 @@ public class GearyController {
         } catch (Error e) {
             message("Error enumerating accounts: %s", e.message);
         }
+    }
+    
+    /**
+     * Returns true if we've attempted to open all accounts at this point.
+     */
+    private bool did_attempt_open_all_accounts() {
+        try {
+            foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
+                Geary.Account a = Geary.Engine.instance.get_account_instance(info);
+                if (a.get_data<bool?>(PROP_ATTEMPT_OPEN_ACCOUNT) == null)
+                    return false;
+            }
+        } catch(Error e) {
+            error("Could not open accounts: %s", e.message);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Displays the main window if we're ready.  Otherwise does nothing.
+     */
+    private void display_main_window_if_ready() {
+        if (did_attempt_open_all_accounts() && !upgrade_dialog.visible &&
+            !cancellable_open_account.is_cancelled())
+            main_window.show_all();
     }
     
     /**

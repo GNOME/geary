@@ -30,6 +30,11 @@ private class Geary.ImapDB.Account : BaseObject {
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
     public SearchFolder? search_folder { get; private set; default = null; }
+    public ImapEngine.ContactStore contact_store { get; private set; }
+    public IntervalProgressMonitor search_index_monitor { get; private set; 
+        default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
+    public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
+        ProgressType.DB_UPGRADE); }
     
     private string name;
     private AccountInformation account_information;
@@ -37,9 +42,6 @@ private class Geary.ImapDB.Account : BaseObject {
     private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
         new Gee.HashMap<Geary.FolderPath, FolderReference>();
     private Cancellable? background_cancellable = null;
-    public ImapEngine.ContactStore contact_store { get; private set; }
-    public IntervalProgressMonitor search_index_monitor { get; private set; 
-        default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     
     public Account(Geary.AccountInformation account_information) {
         this.account_information = account_information;
@@ -58,7 +60,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
-        db = new ImapDB.Database(user_data_dir, schema_dir, account_information.email);
+        db = new ImapDB.Database(user_data_dir, schema_dir, upgrade_monitor, account_information.email);
         
         try {
             db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE, null,

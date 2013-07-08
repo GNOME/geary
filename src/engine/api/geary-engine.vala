@@ -136,7 +136,9 @@ public class Geary.Engine : BaseObject {
         FileEnumerator enumerator
             = yield user_data_dir.enumerate_children_async("standard::*",
                 FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
-
+        
+        Gee.List<AccountInformation> account_list = new Gee.ArrayList<AccountInformation>();
+        
         for (;;) {
             List<FileInfo> info_list;
             try {
@@ -152,9 +154,12 @@ public class Geary.Engine : BaseObject {
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
                 // TODO: check for geary.ini
-                add_account(new AccountInformation.from_file(user_data_dir.get_child(info.get_name())));
+                account_list.add(new AccountInformation.from_file(user_data_dir.get_child(info.get_name())));
             }
         }
+        
+        foreach(AccountInformation info in account_list)
+            add_account(info);
      }
 
     /**
