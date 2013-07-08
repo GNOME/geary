@@ -207,7 +207,10 @@ private class Geary.Imap.Folder : BaseObject {
             return;
         
         try {
-            switch (response_code.get_response_code_type()) {
+            // Have to take a copy of the string property before evaluation due to this bug:
+            // https://bugzilla.gnome.org/show_bug.cgi?id=703818
+            string value = response_code.get_response_code_type().value;
+            switch (value) {
                 case ResponseCodeType.READONLY:
                     readonly = Trillian.TRUE;
                 break;
@@ -237,8 +240,7 @@ private class Geary.Imap.Folder : BaseObject {
                 break;
                 
                 default:
-                    debug("%s: Ignoring response code %s", to_string(),
-                        response_code.to_string());
+                    // ignored
                 break;
             }
         } catch (ImapError ierr) {

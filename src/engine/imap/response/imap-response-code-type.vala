@@ -7,171 +7,90 @@
 /**
  * An optional response code accompanying a {@link ServerResponse}.
  *
- * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
+ * See
+ * [[http://tools.ietf.org/html/rfc3501#section-7.1]],
+ * [[http://tools.ietf.org/html/rfc5530]], and
+ * [[http://tools.ietf.org/html/rfc4315]]
+ * for more information.
  */
 
-public enum Geary.Imap.ResponseCodeType {
-    ALERT,
-    AUTHENTICATIONFAILED,
-    AUTHORIZATIONFAILED,
-    BADCHARSET,
-    CAPABILITY,
-    NEWNAME,
-    PARSE,
-    PERMANENT_FLAGS,
-    READONLY,
-    READWRITE,
-    TRY_CREATE,
-    UIDVALIDITY,
-    UIDNEXT,
-    UNSEEN,
-    MYRIGHTS,
-    UNAVAILABLE,
-    SERVERBUG,
-    CLIENTBUG,
-    ALREADYEXISTS,
-    NONEXISTANT;
+public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCodeType> {
+    public const string ALERT = "alert";
+    public const string ALREADYEXISTS = "alreadyexists";
+    public const string AUTHENTICATIONFAILED = "authenticationfailed";
+    public const string AUTHORIZATIONFAILED = "authorizationfailed";
+    public const string BADCHARSET = "badcharset";
+    public const string CAPABILITY = "capability";
+    public const string CLIENTBUG = "clientbug";
+    public const string MYRIGHTS = "myrights";
+    public const string NEWNAME = "newname";
+    public const string NONEXISTANT = "nonexistant";
+    public const string PARSE = "parse";
+    public const string PERMANENT_FLAGS = "permanentflags";
+    public const string READONLY = "read-only";
+    public const string READWRITE = "read-write";
+    public const string SERVERBUG = "serverbug";
+    public const string TRY_CREATE = "trycreate";
+    public const string UIDVALIDITY = "uidvalidity";
+    public const string UIDNEXT = "uidnext";
+    public const string UNAVAILABLE = "unavailable";
+    public const string UNSEEN = "unseen";
     
-    public string to_string() {
-        switch (this) {
-            case ALERT:
-                return "alert";
-            
-            case AUTHENTICATIONFAILED:
-                return "authenticationfailed";
-            
-            case AUTHORIZATIONFAILED:
-                return "authorizationfailed";
-            
-            case BADCHARSET:
-                return "badcharset";
-            
-            case CAPABILITY:
-                return "capability";
-            
-            case NEWNAME:
-                return "newname";
-            
-            case PARSE:
-                return "parse";
-            
-            case PERMANENT_FLAGS:
-                return "permanentflags";
-            
-            case READONLY:
-                return "read-only";
-            
-            case READWRITE:
-                return "read-write";
-            
-            case TRY_CREATE:
-                return "trycreate";
-            
-            case UIDVALIDITY:
-                return "uidvalidity";
-            
-            case UIDNEXT:
-                return "uidnext";
-            
-            case UNSEEN:
-                return "unseen";
-            
-            case MYRIGHTS:
-                return "myrights";
-            
-            case UNAVAILABLE:
-                return "unavailable";
-            
-            case SERVERBUG:
-                return "serverbug";
-            
-            case CLIENTBUG:
-                return "clientbug";
-            
-            case ALREADYEXISTS:
-                return "alreadyexists";
-            
-            case NONEXISTANT:
-                return "nonexistant";
-            
-            default:
-                assert_not_reached();
-        }
+    /**
+     * The original response code value submitted to the object (possibly off-the-wire).
+     */
+    public string original { get; private set; }
+    
+    /**
+     * The response code value set to lowercase, making it easy to compare to constant strings
+     * in a uniform way.
+     */
+    public string value { get; private set; }
+    
+    /**
+     * Throws an {@link ImapError.INVALID} if the string cannot be represented as an
+     * {link ResponseCodeType}.
+     */
+    public ResponseCodeType(string value) throws ImapError {
+        init(value);
     }
     
-    public static ResponseCodeType decode(string value) throws ImapError {
-        switch (value.down()) {
-            case "alert":
-                return ALERT;
-            
-            case "authenticationfailed":
-                return AUTHENTICATIONFAILED;
-            
-            case "authorizationfailed":
-                return AUTHORIZATIONFAILED;
-            
-            case "badcharset":
-                return BADCHARSET;
-            
-            case "capability":
-                return CAPABILITY;
-            
-            case "newname":
-                return NEWNAME;
-            
-            case "parse":
-                return PARSE;
-            
-            case "permanentflags":
-                return PERMANENT_FLAGS;
-            
-            case "read-only":
-                return READONLY;
-            
-            case "read-write":
-                return READWRITE;
-            
-            case "trycreate":
-                return TRY_CREATE;
-            
-            case "uidvalidity":
-                return UIDVALIDITY;
-            
-            case "uidnext":
-                return UIDNEXT;
-            
-            case "unseen":
-                return UNSEEN;
-            
-            case "myrights":
-                return MYRIGHTS;
-            
-            case "unavailable":
-                return UNAVAILABLE;
-            
-            case "serverbug":
-                return SERVERBUG;
-            
-            case "clientbug":
-                return CLIENTBUG;
-            
-            case "alreadyexists":
-                return ALREADYEXISTS;
-            
-            case "nonexistant":
-                return NONEXISTANT;
-            
-            default:
-                throw new ImapError.PARSE_ERROR("Unknown response code \"%s\"", value);
-        }
+    /**
+     * Throws an {@link ImapError.INVALID} if the {@link StringParameter} cannot be represented as
+     * an {link ResponseCodeType}.
+     */
+    public ResponseCodeType.from_parameter(StringParameter stringp) throws ImapError {
+        init(stringp.value);
     }
     
-    public static ResponseCodeType from_parameter(StringParameter stringp) throws ImapError {
-        return decode(stringp.value);
+    private void init(string str) throws ImapError {
+        // note that is_quoting_required() also catches empty strings (as they require quoting)
+        if (DataFormat.is_quoting_required(str) != DataFormat.Quoting.OPTIONAL)
+            throw new ImapError.INVALID("\"%s\" cannot be represented as a ResponseCodeType", str);
+        
+        // store lowercased so it's easily compared with const strings above
+        original = str;
+        value = str.down();
+    }
+    
+    public bool is_value(string str) {
+        return String.stri_equal(value, str);
     }
     
     public StringParameter to_parameter() {
-        return new AtomParameter(to_string());
+        return new AtomParameter(original);
+    }
+    
+    public bool equal_to(ResponseCodeType other) {
+        return (this == other) ? true : String.stri_equal(value, other.value);
+    }
+    
+    public uint hash() {
+        return String.stri_hash(value);
+    }
+    
+    public string to_string() {
+        return value;
     }
 }
 

@@ -1460,7 +1460,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         ResponseCode? response_code = status_response.response_code;
         if (response_code != null) {
             try {
-                if (response_code.get_response_code_type() == ResponseCodeType.CAPABILITY) {
+                if (response_code.get_response_code_type().is_value(ResponseCodeType.CAPABILITY)) {
                     capabilities = response_code.get_capabilities(ref next_capabilities_revision);
                     debug("[%s] %s %s", to_string(), status_response.status.to_string(),
                         capabilities.to_string());
