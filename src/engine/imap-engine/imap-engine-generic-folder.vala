@@ -591,7 +591,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (open_count == 0 || --open_count > 0)
             return;
         
-        _properties.remove(remote_folder.properties);
+        if (remote_folder != null)
+            _properties.remove(remote_folder.properties);
         yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, cancellable);
     }
     
