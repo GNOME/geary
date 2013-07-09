@@ -100,7 +100,7 @@ public class ConversationViewer : Gtk.Box {
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(SearchState.NONE, SearchEvent.RESET, on_reset),
             new Geary.State.Mapping(SearchState.NONE, SearchEvent.OPEN_FIND_BAR, on_open_find_bar),
-            new Geary.State.Mapping(SearchState.NONE, SearchEvent.CLOSE_FIND_BAR, Geary.State.nop),
+            new Geary.State.Mapping(SearchState.NONE, SearchEvent.CLOSE_FIND_BAR, on_close_find_bar),
             new Geary.State.Mapping(SearchState.NONE, SearchEvent.ENTER_SEARCH_FOLDER, on_enter_search_folder),
             
             new Geary.State.Mapping(SearchState.FIND, SearchEvent.RESET, on_reset),
@@ -110,7 +110,7 @@ public class ConversationViewer : Gtk.Box {
             
             new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.RESET, on_reset),
             new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.OPEN_FIND_BAR, on_open_find_bar),
-            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.CLOSE_FIND_BAR, Geary.State.nop),
+            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.CLOSE_FIND_BAR, on_close_find_bar),
             new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.ENTER_SEARCH_FOLDER, Geary.State.nop),
         };
         
@@ -1718,7 +1718,7 @@ public class ConversationViewer : Gtk.Box {
         }
         
         if (conversation_find_bar.visible)
-            conversation_find_bar.hide(); // Close the find bar.
+            fsm.do_post_transition(() => { conversation_find_bar.hide(); }, user, object);
         
         return SearchState.NONE;
     }
