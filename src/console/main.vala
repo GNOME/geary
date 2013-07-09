@@ -179,7 +179,7 @@ class ImapConsole : Gtk.Window {
                     break;
                     
                     case "close":
-                        close(cmd, args);
+                        close_cmd(cmd, args);
                     break;
                     
                     case "fetch-fields":
@@ -520,7 +520,7 @@ class ImapConsole : Gtk.Window {
         }
     }
     
-    private void close(string cmd, string[] args) throws Error {
+    private void close_cmd(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
         
         status("Closing");
