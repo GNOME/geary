@@ -17,45 +17,47 @@
  * fields in the same Folder that match the email's position within it.  The ordering field may
  * or may not be the actual unique identifier; in IMAP, for example, it is, while in other systems
  * it may not be.
- *
- * TODO:
- * EmailIdentifier currently does not verify it is in the same Folder as the other EmailIdentifier
- * passed to equals() and compare().  This may be added in the future.
  */
 
 public abstract class Geary.EmailIdentifier : BaseObject, Gee.Comparable<Geary.EmailIdentifier>,
     Gee.Hashable<Geary.EmailIdentifier> {
     public int64 ordering { get; protected set; }
+    public Geary.FolderPath? folder_path { get; protected set; }
     
-    protected EmailIdentifier(int64 ordering) {
+    protected EmailIdentifier(int64 ordering, Geary.FolderPath? folder_path) {
         this.ordering = ordering;
-    }
-    
-    // Used by some EmailIdentifiers to indicate they are specific to a
-    // particular folder.
-    public virtual Geary.FolderPath? get_folder_path() {
-        return null;
+        this.folder_path = folder_path;
     }
     
     public virtual uint hash() {
-        return Geary.Collection.int64_hash(ordering);
+        return Geary.Collection.int64_hash(ordering) ^ (folder_path != null ? folder_path.hash() : 0);
     }
     
-    // Virtual default implementation not provided because base class *must* verify that the
-    // Equalable is of its own type.
-    public abstract bool equal_to(Geary.EmailIdentifier e);
+    public virtual bool equal_to(Geary.EmailIdentifier other) {
+        if (this == other)
+            return true;
+        
+        if (get_type() != other.get_type())
+            return false;
+        
+        return (ordering == other.ordering && folder_path == other.folder_path);
+    }
     
     public virtual int compare_to(Geary.EmailIdentifier other) {
-        if (this == other)
-            return 0;
+        // Arbitrary type-based ordering, so we never accidentally compare two
+        // different types of EmailIdentifier in an unpredictable way.
+        if (get_type() != other.get_type())
+            return (int) ((long) get_type() - (long) other.get_type()).clamp(-1, 1);
         
-        int64 diff = ordering - other.ordering;
-        if (diff < 0)
-            return -1;
-        else if (diff > 0)
-            return 1;
-        else
-            return 0;
+        if (folder_path != null && other.folder_path != null) {
+            if (!folder_path.equal_to(other.folder_path))
+                return folder_path.compare_to(other.folder_path);
+        } else if (folder_path != null || other.folder_path != null) {
+            // Arbitrarily, folderless ids come after ones with folder.
+            return (folder_path == null ? 1 : -1);
+        }
+        
+        return (int) (ordering - other.ordering).clamp(-1, 1);
     }
     
     public virtual int desc_compare_to(Geary.EmailIdentifier other) {
@@ -63,7 +65,8 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Comparable<Geary.E
     }
     
     public virtual string to_string() {
-        return ordering.to_string();
+        return "%s(%s)".printf(ordering.to_string(),
+            (folder_path == null ? "null" : folder_path.to_string()));
     }
 }
 

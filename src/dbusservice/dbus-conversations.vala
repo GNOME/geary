@@ -98,13 +98,16 @@ public class Geary.DBus.Conversations : Object {
             email_paths);
     }
     
-    private void on_conversation_trimmed(Geary.Conversation conversation, Geary.Email email) {
+    private void on_conversation_trimmed(Geary.Conversation conversation,
+        Gee.Collection<Geary.Email> emails) {
         debug("conversation trimmed");
-        // Fire signal, then delete.
-        ObjectPath email_path = Database.instance.get_email_path(email, folder);
-        conversation_trimmed(Database.instance.get_conversation_path(conversation, folder),
-            email_path);
-        Database.instance.remove_by_path(email_path);
+        foreach (Geary.Email email in emails) {
+            // Fire signal, then delete.
+            ObjectPath email_path = Database.instance.get_email_path(email, folder);
+            conversation_trimmed(Database.instance.get_conversation_path(conversation, folder),
+                email_path);
+            Database.instance.remove_by_path(email_path);
+        }
     }
     
     private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {

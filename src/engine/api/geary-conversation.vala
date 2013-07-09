@@ -40,6 +40,11 @@ public abstract class Geary.Conversation : BaseObject {
     public abstract Gee.List<Geary.Email> get_emails(Ordering ordering);
     
     /**
+     * Return all Message IDs associated with the conversation.
+     */
+    public abstract Gee.Collection<Geary.RFC822.MessageID> get_message_ids();
+    
+    /**
      * Returns the email associated with the EmailIdentifier, if present in this conversation.
      */
     public abstract Geary.Email? get_email_by_id(Geary.EmailIdentifier id);
@@ -129,7 +134,7 @@ public abstract class Geary.Conversation : BaseObject {
     private Geary.Email? get_single_email(Geary.Conversation.Ordering ordering,
         bool folder_email_ids_only) {
         foreach (Geary.Email email in get_emails(ordering)) {
-            if (!folder_email_ids_only || email.id.get_folder_path() != null)
+            if (!folder_email_ids_only || email.id.folder_path != null)
                 return email;
         }
         return null;

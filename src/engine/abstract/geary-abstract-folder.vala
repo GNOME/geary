@@ -43,6 +43,10 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
         email_flags_changed(flag_map);
     }
     
+    internal virtual void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_complete(ids);
+    }
+    
     internal virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type) {
         special_folder_type_changed(old_type, new_type);

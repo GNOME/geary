@@ -251,7 +251,7 @@ public class ConversationListStore : Gtk.ListStore {
                 continue;
             }
             
-            if (need_preview.id.get_folder_path() == null)
+            if (need_preview.id.folder_path == null)
                 account_emails.add(need_preview.id);
             else
                 folder_emails.add(need_preview.id);

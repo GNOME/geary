@@ -43,6 +43,38 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
     }
     
+    protected override void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
+        Gee.List<Geary.Folder>? unavailable) {
+        base.notify_folders_available_unavailable(available, unavailable);
+        if (available != null) {
+            foreach (Geary.Folder folder in available) {
+                folder.email_appended.connect(on_folder_email_appended);
+                folder.email_removed.connect(on_folder_email_removed);
+                folder.email_locally_complete.connect(on_folder_email_locally_complete);
+            }
+        }
+        if (unavailable != null) {
+            foreach (Geary.Folder folder in unavailable) {
+                folder.email_appended.disconnect(on_folder_email_appended);
+                folder.email_removed.disconnect(on_folder_email_removed);
+                folder.email_locally_complete.disconnect(on_folder_email_locally_complete);
+            }
+        }
+    }
+    
+    private void on_folder_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_appended(folder, ids);
+    }
+    
+    private void on_folder_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_removed(folder, ids);
+    }
+    
+    private void on_folder_email_locally_complete(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_locally_complete(folder, ids);
+    }
+    
     private void check_open() throws EngineError {
         if (!open)
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
@@ -476,6 +508,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         return yield local.fetch_email_async(email_id, required_fields, cancellable);
+    }
+    
+    public override async Geary.EmailIdentifier? folder_email_id_to_search(
+        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
+        Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error {
+        return yield local.folder_email_id_to_search(folder_path, id, return_folder_path, cancellable);
     }
     
     public override async Gee.Collection<Geary.Email>? local_search_async(string keywords,

@@ -30,6 +30,19 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
         folders_contents_altered(altered);
     }
     
+    protected virtual void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_appended(folder, ids);
+    }
+    
+    protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_removed(folder, ids);
+    }
+    
+    protected virtual void notify_email_locally_complete(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_complete(folder, ids);
+    }
+    
     protected virtual void notify_opened() {
         opened();
     }
@@ -83,6 +96,10 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     
     public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+    
+    public abstract async Geary.EmailIdentifier? folder_email_id_to_search(
+        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
+        Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error;
     
     public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string keywords,
         Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,

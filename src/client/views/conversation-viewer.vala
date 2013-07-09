@@ -326,7 +326,7 @@ public class ConversationViewer : Gtk.Box {
             Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
         
         Geary.Email full_email;
-        if (email.id.get_folder_path() == null) {
+        if (email.id.folder_path == null) {
             full_email = yield current_folder.account.local_fetch_email_async(
                 email.id, required_fields, cancellable);
         } else {
@@ -856,7 +856,7 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         Geary.Email? email = conversation_viewer.get_email_from_element(element);
-        if (email != null && email.id.get_folder_path() != null)
+        if (email != null && email.id.folder_path != null)
             conversation_viewer.unflag_message(email);
     }
 
@@ -864,7 +864,7 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         Geary.Email? email = conversation_viewer.get_email_from_element(element);
-        if (email != null && email.id.get_folder_path() != null)
+        if (email != null && email.id.folder_path != null)
             conversation_viewer.flag_message(email);
     }
 
@@ -1294,7 +1294,7 @@ public class ConversationViewer : Gtk.Box {
         menu.append(new Gtk.SeparatorMenuItem());
         
         // Mark as read/unread.
-        if (email.id.get_folder_path() != null && current_folder is Geary.FolderSupport.Mark) {
+        if (email.id.folder_path != null && current_folder is Geary.FolderSupport.Mark) {
             if (email.is_unread().to_boolean(false)) {
                 Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
                 mark_read_item.activate.connect(() => on_mark_read_message(email));
@@ -1686,7 +1686,7 @@ public class ConversationViewer : Gtk.Box {
                 if (message.email_flags.is_unread()) {
                     WebKit.DOM.HTMLElement element = email_to_element.get(message.id);
                     WebKit.DOM.HTMLElement body = (WebKit.DOM.HTMLElement) element.get_elements_by_class_name("body").item(0);
-                    if (message.id.get_folder_path() != null &&
+                    if (message.id.folder_path != null &&
                             !element.get_class_list().contains("manual_read") &&
                             body.offset_top + body.offset_height > scroll_top &&
                             body.offset_top + 28 < scroll_top + scroll_height) {  // 28 = 15 padding + 13 first line of text

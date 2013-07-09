@@ -210,6 +210,12 @@ public interface Geary.Folder : BaseObject {
      * the server.
      */
     public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
+    
+    /**
+     * Fired when one or more emails have been locally saved with the full set
+     * of Fields.
+     */
+    public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
 
     /**
     * Fired when the {@link SpecialFolderType} has changed.
@@ -236,6 +242,8 @@ public interface Geary.Folder : BaseObject {
     
     protected abstract void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
         Geary.EmailFlags> flag_map);
+    
+    protected abstract void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
     
     protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);

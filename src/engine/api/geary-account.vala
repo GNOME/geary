@@ -60,6 +60,23 @@ public interface Geary.Account : BaseObject {
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
+     * Fired when emails are appended to a folder in this account.
+     */
+    public signal void email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Fired when emails are removed from a folder in this account.
+     */
+    public signal void email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Fired when one or more emails have been locally saved to a folder with
+     * the full set of Fields.
+     */
+    public signal void email_locally_complete(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_opened();
@@ -95,6 +112,19 @@ public interface Geary.Account : BaseObject {
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    protected abstract void notify_email_locally_complete(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
@@ -206,12 +236,21 @@ public interface Geary.Account : BaseObject {
     /**
      * Return a single email fulfilling the required fields.  The email to pull
      * is identified by an EmailIdentifier from a previous call to
-     * local_search_message_id_async().  Throw EngineError.NOT_FOUND if the
-     * email isn't found and EngineError.INCOMPLETE_MESSAGE if the fields
-     * aren't available.
+     * local_search_message_id_async() or local_search_async().  Throw
+     * EngineError.NOT_FOUND if the email isn't found and
+     * EngineError.INCOMPLETE_MESSAGE if the fields aren't available.
      */
     public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Return the given EmailIdentifier as a "search" EmailIdentifier that can
+     * be used in local_fetch_email_async().  Return null if the email id isn't
+     * in the local database.
+     */
+    public abstract async Geary.EmailIdentifier? folder_email_id_to_search(
+        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
+        Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error;
     
     /**
      * Performs a search with the given keyword string.  Optionally, a list of folders not to search

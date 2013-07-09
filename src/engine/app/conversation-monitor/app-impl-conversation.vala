@@ -45,7 +45,7 @@ private class Geary.App.ImplConversation : Geary.Conversation {
         
         int folder_count = 0;
         foreach (Geary.EmailIdentifier id in emails.keys) {
-            if (id.get_folder_path() != null)
+            if (id.folder_path != null)
                 ++folder_count;
         }
         return folder_count;
@@ -65,6 +65,13 @@ private class Geary.App.ImplConversation : Geary.Conversation {
         }
     }
     
+    public override Gee.Collection<RFC822.MessageID> get_message_ids() {
+        // Turn into a HashSet first, so we don't return duplicates.
+        Gee.HashSet<RFC822.MessageID> ids = new Gee.HashSet<RFC822.MessageID>();
+        ids.add_all(message_ids);
+        return ids;
+    }
+    
     public override Geary.Email? get_email_by_id(EmailIdentifier id) {
         return emails.get(id);
     }
@@ -76,7 +83,7 @@ private class Geary.App.ImplConversation : Geary.Conversation {
         
         Gee.ArrayList<Geary.EmailIdentifier> folder_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.EmailIdentifier id in emails.keys) {
-            if (id.get_folder_path() != null)
+            if (id.folder_path != null)
                 folder_ids.add(id);
         }
         return folder_ids;
@@ -86,17 +93,24 @@ private class Geary.App.ImplConversation : Geary.Conversation {
         return lowest_id;
     }
     
-    public void add(Email email) {
+    /**
+     * Add the email to the conversation.  If an email with a matching id
+     * already exists, the old email may be removed and the new one inserted in
+     * its place (this will happen if the new email is "in-folder" but the old
+     * one was "out-of-folder", for example).  Return false if the new email is
+     * ignored entirely, or true if it's either new or replaced an older one.
+     */
+    public bool add(Email email) {
         Email? existing = emails.get(email.id);
         if (existing != null) {
             // We "promote" out-of-folder emails to in-folder emails so we
             // always have the most useful version.
             // FIXME: this assumes that all data about the existing and new
             // email are identical.  That might not be the case.
-            if (existing.id.get_folder_path() == null && email.id.get_folder_path() != null)
+            if (existing.id.folder_path == null && email.id.folder_path != null)
                 remove(existing);
             else
-                return;
+                return false;
         }
         
         emails.set(email.id, email);
@@ -109,6 +123,8 @@ private class Geary.App.ImplConversation : Geary.Conversation {
         
         check_lowest_id(email.id);
         notify_appended(email);
+        
+        return true;
     }
     
     // Returns the removed Message-IDs
@@ -139,7 +155,7 @@ private class Geary.App.ImplConversation : Geary.Conversation {
     }
     
     private void check_lowest_id(EmailIdentifier id) {
-        if (id.get_folder_path() != null && (lowest_id == null || id.compare_to(lowest_id) < 0))
+        if (id.folder_path != null && (lowest_id == null || id.compare_to(lowest_id) < 0))
             lowest_id = id;
     }
     

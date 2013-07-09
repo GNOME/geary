@@ -59,11 +59,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
         
         email_prefetcher = new EmailPrefetcher(this);
+        
+        local_folder.email_complete.connect(on_email_complete);
     }
     
     ~EngineFolder() {
         if (open_count > 0)
             warning("Folder %s destroyed without closing", to_string());
+        
+        local_folder.email_complete.disconnect(on_email_complete);
     }
     
     public void set_special_folder_type(SpecialFolderType new_type) {
@@ -220,7 +224,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // if nothing, keep going because there could be remote messages to pull down
             Geary.Imap.EmailIdentifier current_end_id = new Geary.Imap.EmailIdentifier(
                 new Imap.UID(current_start_id.uid.value + NORMALIZATION_CHUNK_COUNT),
-                current_start_id.get_folder_path());
+                current_start_id.folder_path);
             Imap.MessageSet msg_set = new Imap.MessageSet.uid_range(current_start_id.uid, current_end_id.uid);
             
             // Get the remote emails in the range to either add any not known, remove deleted messages,
@@ -664,6 +668,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         remote_semaphore.reset();
         remote_semaphore.notify_result(false, null);
+    }
+    
+    private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
+        notify_email_locally_complete(email_ids);
     }
     
     private void on_remote_appended(int total) {
