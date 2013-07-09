@@ -567,7 +567,7 @@ public class GearyController {
         Cancellable? cancellable = null) {
         try {
             yield get_account_instance(account).close_async(cancellable);
-            yield remove_account_async(account, cancellable);
+            yield Geary.Engine.instance.remove_account_async(account, cancellable);
         } catch (Error e) {
             message("Error removing account: %s", e.message);
         }
