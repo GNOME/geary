@@ -1675,12 +1675,23 @@ public class GearyController {
     }
     
     private void do_search(string search_text) {
+        Geary.SearchFolder? folder = null;
+        try {
+            folder = (Geary.SearchFolder) current_account.get_special_folder(
+                Geary.SpecialFolderType.SEARCH);
+        } catch (Error e) {
+            debug("Could not get search folder: %s", e.message);
+            
+            return;
+        }
+        
         if (search_text == "") {
             if (previous_non_search_folder != null && current_folder is Geary.SearchFolder)
                 main_window.folder_list.select_folder(previous_non_search_folder);
             
             main_window.folder_list.remove_search();
             search_text_changed("");
+            folder.clear();
             
             return;
         }
@@ -1690,16 +1701,7 @@ public class GearyController {
         
         cancel_search(); // Stop any search in progress.
         
-        Geary.SearchFolder? folder;
-        try {
-            folder = (Geary.SearchFolder) current_account.get_special_folder(
-                Geary.SpecialFolderType.SEARCH);
-            folder.set_search_keywords(search_text, cancellable_search);
-        } catch (Error e) {
-            debug("Could not get search folder: %s", e.message);
-            
-            return;
-        }
+        folder.set_search_query(search_text, cancellable_search);
         
         main_window.folder_list.set_search(folder);
         search_text_changed(main_window.main_toolbar.search_text);

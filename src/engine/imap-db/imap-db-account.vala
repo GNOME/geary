@@ -625,14 +625,32 @@ private class Geary.ImapDB.Account : BaseObject {
         }
     }
     
+    private string? get_search_ids_sql(Gee.Collection<Geary.EmailIdentifier>? search_ids) throws Error {
+        if (search_ids == null)
+            return null;
+        
+        Gee.ArrayList<int64?> ids = new Gee.ArrayList<int64?>();
+        foreach (Geary.EmailIdentifier id in search_ids) {
+            if (!(id is Geary.ImapDB.EmailIdentifier)) {
+                throw new EngineError.BAD_PARAMETERS(
+                    "search_ids must contain only Geary.ImapDB.EmailIdentifiers");
+            }
+
+            ids.add(id.ordering);
+        }
+        
+        StringBuilder sql = new StringBuilder();
+        sql_append_ids(sql, ids);
+        return sql.str;
+    }
+    
     public async Gee.Collection<Geary.Email>? search_async(string prepared_query,
         Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         Gee.Collection<Geary.Email> search_results = new Gee.HashSet<Geary.Email>();
         
-        // TODO: support search_ids
-        
+        string? search_ids_sql = get_search_ids_sql(search_ids);
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             string blacklisted_ids_sql = do_get_blacklisted_message_ids_sql(
                 folder_blacklist, cx, cancellable);
@@ -645,6 +663,8 @@ private class Geary.ImapDB.Account : BaseObject {
             """;
             if (blacklisted_ids_sql != "")
                 sql += " AND id NOT IN (%s)".printf(blacklisted_ids_sql);
+            if (!Geary.String.is_empty(search_ids_sql))
+                sql += " AND id IN (%s)".printf(search_ids_sql);
             sql += " ORDER BY internaldate_time_t DESC";
             if (limit > 0)
                 sql += " LIMIT ? OFFSET ?";
@@ -678,9 +698,9 @@ private class Geary.ImapDB.Account : BaseObject {
         return (search_results.size == 0 ? null : search_results);
     }
     
-    public async Gee.Collection<string>? get_search_keywords_async(string prepared_query,
+    public async Gee.Collection<string>? get_search_matches_async(string prepared_query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        Gee.Set<string> search_keywords = new Gee.HashSet<string>();
+        Gee.Set<string> search_matches = new Gee.HashSet<string>();
         
         // Create a question mark for each ID.
         string id_string = "";
@@ -718,7 +738,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 // the results into our return set.
                 foreach(SearchOffset offset in all_offsets) {
                     string text = result.string_at(offset.column + 1);
-                    search_keywords.add(text[offset.byte_offset : offset.byte_offset + offset.size].down());
+                    search_matches.add(text[offset.byte_offset : offset.byte_offset + offset.size].down());
                 }
                 
                 result.next(cancellable);
@@ -727,7 +747,7 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
-        return (search_keywords.size == 0 ? null : search_keywords);
+        return (search_matches.size == 0 ? null : search_matches);
     }
     
     public async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
@@ -760,7 +780,7 @@ private class Geary.ImapDB.Account : BaseObject {
         return email;
     }
     
-    public async Geary.EmailIdentifier? folder_email_id_to_search(
+    public async Geary.EmailIdentifier? folder_email_id_to_search_async(
         Geary.FolderPath folder_path, Geary.EmailIdentifier id,
         Geary.FolderPath? return_folder_path, Cancellable? cancellable) throws Error {
         int64? row_id = null;

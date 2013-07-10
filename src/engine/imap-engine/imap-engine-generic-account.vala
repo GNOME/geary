@@ -510,29 +510,30 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.fetch_email_async(email_id, required_fields, cancellable);
     }
     
-    public override async Geary.EmailIdentifier? folder_email_id_to_search(
+    public override async Geary.EmailIdentifier? folder_email_id_to_search_async(
         Geary.FolderPath folder_path, Geary.EmailIdentifier id,
         Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error {
-        return yield local.folder_email_id_to_search(folder_path, id, return_folder_path, cancellable);
+        return yield local.folder_email_id_to_search_async(
+            folder_path, id, return_folder_path, cancellable);
     }
     
-    public override async Gee.Collection<Geary.Email>? local_search_async(string keywords,
+    public override async Gee.Collection<Geary.Email>? local_search_async(string query,
         Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         if (offset < 0)
             throw new EngineError.BAD_PARAMETERS("Offset must not be negative");
         
-        previous_prepared_search_query = local.prepare_search_query(keywords);
+        previous_prepared_search_query = local.prepare_search_query(query);
         
-        return yield local.search_async(local.prepare_search_query(keywords),
+        return yield local.search_async(previous_prepared_search_query,
             requested_fields, partial_ok, email_id_folder_path, limit, offset,
             folder_blacklist, search_ids, cancellable);
     }
     
-    public override async Gee.Collection<string>? get_search_keywords_async(
+    public override async Gee.Collection<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        return yield local.get_search_keywords_async(previous_prepared_search_query, ids, cancellable);
+        return yield local.get_search_matches_async(previous_prepared_search_query, ids, cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

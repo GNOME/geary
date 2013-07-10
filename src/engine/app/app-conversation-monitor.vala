@@ -476,7 +476,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             foreach (Geary.EmailIdentifier id in relevant_ids) {
                 // TODO: parallelize this.
                 try {
-                    Geary.EmailIdentifier? search_id = yield folder.account.folder_email_id_to_search(
+                    Geary.EmailIdentifier? search_id = yield folder.account.folder_email_id_to_search_async(
                         folder.path, id, null, cancellable);
                     if (search_id != null) {
                         Geary.Email email = yield folder.account.local_fetch_email_async(

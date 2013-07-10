@@ -55,19 +55,21 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         Geary.SpecialFolderType.TRASH,
         // Orphan emails (without a folder) are also excluded; see ctor.
     };
+    private string? search_query = null;
     private Gee.TreeSet<Geary.Email> search_results;
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
     /**
-     * Fired when the search keywords have changed.  This signal is fired *after* the search
+     * Fired when the search query has changed.  This signal is fired *after* the search
      * has completed.
      */
-    public signal void search_keywords_changed(string keywords);
+    public signal void search_query_changed(string? query);
     
     public SearchFolder(Account account) {
         _account = account;
         
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
+        account.email_locally_complete.connect(on_email_locally_complete);
         
         clear_search_results();
         
@@ -78,6 +80,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     
     ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);;
+        account.email_locally_complete.disconnect(on_email_locally_complete);
     }
     
     private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
@@ -91,22 +94,102 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         }
     }
     
+    private async Gee.ArrayList<Geary.EmailIdentifier> folder_ids_to_search_async(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> folder_ids, Cancellable? cancellable) throws Error {
+        Gee.ArrayList<Geary.EmailIdentifier> local_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (Geary.EmailIdentifier folder_id in folder_ids) {
+            // TODO: parallelize.
+            Geary.EmailIdentifier? local_id = yield account.folder_email_id_to_search_async(
+                folder.path, folder_id, path, cancellable);
+            if (local_id != null)
+                local_ids.add(local_id);
+        }
+        return local_ids;
+    }
+    
+    private async void append_new_email_async(string query, Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.ArrayList<Geary.EmailIdentifier> local_ids = yield folder_ids_to_search_async(
+            folder, ids, cancellable);
+        
+        int result_mutex_token = yield result_mutex.claim_async();
+        Error? error = null;
+        try {
+            Gee.Collection<Geary.Email>? results = yield account.local_search_async(
+                query, Geary.Email.Field.PROPERTIES, false, path, MAX_RESULT_EMAILS, 0,
+                exclude_folders, local_ids, cancellable);
+            
+            if (results != null) {
+                Gee.HashMap<Geary.EmailIdentifier, Geary.Email> to_add
+                    = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>();
+                foreach(Geary.Email email in results)
+                    if (!search_results.contains(email))
+                        to_add.set(email.id, email);
+                
+                if (to_add.size > 0) {
+                    search_results.add_all(to_add.values);
+                    
+                    _properties.set_total(search_results.size);
+                    
+                    notify_email_appended(to_add.keys);
+                    notify_email_count_changed(search_results.size, CountChangeReason.APPENDED);
+                }
+            }
+        } catch(Error e) {
+            error = e;
+        }
+        
+        result_mutex.release(ref result_mutex_token);
+        
+        if (error != null)
+            throw error;
+    }
+    
+    private void on_append_new_email_complete(Object? source, AsyncResult result) {
+        try {
+            append_new_email_async.end(result);
+        } catch(Error e) {
+            debug("Error appending new email to search results: %s", e.message);
+        }
+    }
+    
+    private void on_email_locally_complete(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        if (search_query != null)
+            append_new_email_async.begin(search_query, folder, ids, null, on_append_new_email_complete);
+    }
+    
+    /**
+     * Clears the search query and results.
+     */
+    public void clear() {
+        Gee.TreeSet<Geary.Email> local_results = search_results;
+        clear_search_results();
+        notify_email_removed(email_collection_to_ids(local_results));
+        notify_email_count_changed(0, Geary.Folder.CountChangeReason.REMOVED);
+        
+        if (search_query != null) {
+            search_query = null;
+            search_query_changed(null);
+        }
+    }
+    
     /**
      * Sets the keyword string for this search.
      */
-    public void set_search_keywords(string keywords, Cancellable? cancellable = null) {
-        set_search_keywords_async.begin(keywords, cancellable, on_set_search_keywords_complete);
+    public void set_search_query(string query, Cancellable? cancellable = null) {
+        set_search_query_async.begin(query, cancellable, on_set_search_query_complete);
     }
     
-    private void on_set_search_keywords_complete(Object? source, AsyncResult result) {
+    private void on_set_search_query_complete(Object? source, AsyncResult result) {
         try {
-            set_search_keywords_async.end(result);
+            set_search_query_async.end(result);
         } catch(Error e) {
             debug("Search error: %s", e.message);
         }
     }
     
-    private async void set_search_keywords_async(string keywords, Cancellable? cancellable = null) throws Error {
+    private async void set_search_query_async(string query, Cancellable? cancellable = null) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
         Error? error = null;
         try {
@@ -115,7 +198,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
             // list_email_async() etc., but this leads to some more
             // complications when redoing the search.
             Gee.Collection<Geary.Email>? _new_results = yield account.local_search_async(
-                keywords, Geary.Email.Field.PROPERTIES, false, path, MAX_RESULT_EMAILS, 0,
+                query, Geary.Email.Field.PROPERTIES, false, path, MAX_RESULT_EMAILS, 0,
                 exclude_folders, null, cancellable);
             
             if (_new_results == null) {
@@ -125,6 +208,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
                     Gee.TreeSet<Geary.Email> local_results = search_results;
                     // Clear existing results.
                     clear_search_results();
+                    
+                    // Note that we probably shouldn't be firing these signals
+                    // from inside our mutex lock.  We do it here, below, and
+                    // in append_new_email_async().  Keep an eye on it, and if
+                    // there's ever a case where it might cause problems, it
+                    // shouldn't be too hard to move the firings outside.
                     notify_email_removed(email_collection_to_ids(local_results));
                     notify_email_count_changed(0, Geary.Folder.CountChangeReason.REMOVED);
                 }
@@ -132,7 +221,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
                 // Move new search results into a hashset, using email ID for equality.
                 Gee.HashSet<Geary.Email> new_results = new Gee.HashSet<Geary.Email>(email_id_hash, email_id_equal);
                 new_results.add_all(_new_results);
-            
+                
                 // Match the new results up with the existing results.
                 Gee.HashSet<Geary.Email> to_add = new Gee.HashSet<Geary.Email>(email_id_hash, email_id_equal);
                 Gee.HashSet<Geary.Email> to_remove = new Gee.HashSet<Geary.Email>(email_id_hash, email_id_equal);
@@ -170,7 +259,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         
         result_mutex.release(ref result_mutex_token);
         
-        search_keywords_changed(keywords);
+        search_query = query;
+        search_query_changed(query);
         
         if (error != null)
             throw error;
@@ -280,12 +370,14 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     }
     
     /**
-     * Given a list of mail IDs, returns a list of keywords that match for the current
-     * search keywords.
+     * Given a list of mail IDs, returns a list of words that match for the current
+     * search query.
      */
-    public async Gee.Collection<string>? get_search_keywords_async(
+    public async Gee.Collection<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        return yield account.get_search_keywords_async(ids, cancellable);
+        if (search_query == null)
+            return null;
+        return yield account.get_search_matches_async(ids, cancellable);
     }
     
     private void exclude_folder(Geary.Folder folder) {

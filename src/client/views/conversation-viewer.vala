@@ -286,8 +286,9 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private void on_search_text_changed() {
-        highlight_search_terms.begin();
+    private void on_search_text_changed(string? query) {
+        if (query != null)
+            highlight_search_terms.begin();
     }
     
     private async void highlight_search_terms() {
@@ -304,7 +305,7 @@ public class ConversationViewer : Gtk.Box {
         
         try {
             // Request a list of search terms.
-            Gee.Collection<string>? search_keywords = yield search_folder.get_search_keywords_async(
+            Gee.Collection<string>? search_keywords = yield search_folder.get_search_matches_async(
                 ids, cancellable_fetch);
             
             // Highlight the search terms.
@@ -1713,7 +1714,7 @@ public class ConversationViewer : Gtk.Box {
         web_view.unmark_text_matches();
         
         if (search_folder != null) {
-            search_folder.search_keywords_changed.disconnect(on_search_text_changed);
+            search_folder.search_query_changed.disconnect(on_search_text_changed);
             search_folder = null;
         }
         
@@ -1751,7 +1752,7 @@ public class ConversationViewer : Gtk.Box {
     private uint on_enter_search_folder(uint state, uint event, void *user, Object? object) {
         search_folder = current_folder as Geary.SearchFolder;
         assert(search_folder != null);
-        search_folder.search_keywords_changed.connect(on_search_text_changed);
+        search_folder.search_query_changed.connect(on_search_text_changed);
         
         return SearchState.SEARCH_FOLDER;
     }
