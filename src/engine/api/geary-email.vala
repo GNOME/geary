@@ -361,6 +361,23 @@ public class Geary.Email : BaseObject {
     }
     
     /**
+     * Converts a Collection of {@link Email}s to a Map of Emails keyed by {@link EmailIdentifier}s.
+     *
+     * @return null if emails is empty or null.
+     */
+    public static Gee.Map<Geary.EmailIdentifier, Geary.Email>? emails_to_map(Gee.Collection<Geary.Email>? emails) {
+        if (emails == null || emails.size == 0)
+            return null;
+        
+        Gee.Map<Geary.EmailIdentifier, Geary.Email> map = new Gee.HashMap<Geary.EmailIdentifier,
+            Geary.Email>();
+        foreach (Email email in emails)
+            map.set(email.id, email);
+        
+        return map;
+    }
+    
+    /**
      * CompareFunc to sort Email by date.  If the date field is not available on both Emails, their
      * identifiers are compared.
      */

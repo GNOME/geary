@@ -37,6 +37,17 @@ public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
 }
 
 /**
+ * Removes all elements from the Collection that do not pass the Predicate function.
+ */
+public void filtered_remove<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
+    Gee.Iterator<G> iter = c.iterator();
+    while (iter.next()) {
+        if (!pred(iter.get()))
+            iter.remove();
+    }
+}
+
+/**
  * Sets the dest Map with all keys and values in src.
  */
 public void map_set_all<K, V>(Gee.Map<K, V> dest, Gee.Map<K, V> src) {
