@@ -299,7 +299,6 @@ public class ConversationFindBar : Gtk.Layout {
     
     private void on_close_button_clicked() {
         hide();
-        close();
     }
     
     private void on_case_sensitive_check_toggled() {
