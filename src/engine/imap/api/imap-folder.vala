@@ -782,21 +782,32 @@ private class Geary.Imap.Folder : BaseObject {
         
         // if body was requested, get it now
         if (body_identifier != null) {
-            assert(fetched_data.body_data_map.has_key(body_identifier));
-            
-            email.set_message_body(new Geary.RFC822.Text(
-                fetched_data.body_data_map.get(body_identifier)));
+            if (fetched_data.body_data_map.has_key(body_identifier)) {
+                email.set_message_body(new Geary.RFC822.Text(
+                    fetched_data.body_data_map.get(body_identifier)));
+            } else {
+                message("[%s] No body identifier \"%s\" found", to_string(),
+                    body_identifier.to_string());
+                foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
+                    message("[%s] has %s", to_string(), id.to_string());
+            }
         }
         
         // if preview was requested, get it now ... both identifiers must be supplied if one is
         if (preview_identifier != null || preview_charset_identifier != null) {
             assert(preview_identifier != null && preview_charset_identifier != null);
-            assert(fetched_data.body_data_map.has_key(preview_identifier));
-            assert(fetched_data.body_data_map.has_key(preview_charset_identifier));
             
-            email.set_message_preview(new RFC822.PreviewText.with_header(
-                fetched_data.body_data_map.get(preview_identifier),
-                fetched_data.body_data_map.get(preview_charset_identifier)));
+            if (fetched_data.body_data_map.has_key(preview_identifier)
+                && fetched_data.body_data_map.has_key(preview_charset_identifier)) {
+                email.set_message_preview(new RFC822.PreviewText.with_header(
+                    fetched_data.body_data_map.get(preview_identifier),
+                    fetched_data.body_data_map.get(preview_charset_identifier)));
+            } else {
+                message("[%s] No preview identifiers \"%s\" and \"%s\" found", to_string(),
+                    preview_identifier.to_string(), preview_charset_identifier.to_string());
+                foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
+                    message("[%s] has %s", to_string(), id.to_string());
+            }
         }
         
         return email;
