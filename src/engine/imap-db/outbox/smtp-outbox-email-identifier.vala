@@ -5,8 +5,8 @@
  */
 
 private class Geary.SmtpOutboxEmailIdentifier : Geary.EmailIdentifier {
-    public SmtpOutboxEmailIdentifier(int64 ordering) {
-        base (ordering, null);
+    public SmtpOutboxEmailIdentifier(int64 ordering, SmtpOutboxFolderRoot root) {
+        base (ordering, root);
     }
 }
 
