@@ -15,6 +15,7 @@ install(FILES remove_confirm.glade DESTINATION ${UI_DEST})
 install(FILES toolbar.glade DESTINATION ${UI_DEST})
 install(FILES toolbar_mark_menu.ui DESTINATION ${UI_DEST})
 install(FILES toolbar_menu.ui DESTINATION ${UI_DEST})
+install(FILES upgrade_dialog.glade DESTINATION ${UI_DEST})
 
 #
 # NOTE: Update GLADE_FILES in ../CMakeLists.txt with additions and removals
