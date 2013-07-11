@@ -22,7 +22,7 @@ public class MainWindow : Gtk.Window {
     private Gtk.Paned conversations_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     
     private Gtk.ScrolledWindow conversation_list_scrolled;
-    private Gtk.Spinner spinner = new Gtk.Spinner();
+    private MonitoredSpinner spinner = new MonitoredSpinner();
     
     public MainWindow() {
         title = GearyApplication.NAME;
@@ -82,15 +82,11 @@ public class MainWindow : Gtk.Window {
         return base.configure_event(event);
     }
     
-    // Displays or stops displaying busy spinner.
-    public void set_busy(bool is_busy) {
-        if (is_busy) {
-            spinner.start();
-            spinner.show();
-        } else {
-            spinner.stop();
-            spinner.hide();
-        }
+    /**
+     * Sets the progress monitor to display in the status bar.
+     */
+    public void set_progress_monitor(Geary.ProgressMonitor? monitor) {
+        spinner.set_progress_monitor(monitor);
     }
     
     private void create_layout() {

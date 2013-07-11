@@ -38,6 +38,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
+    public Geary.ProgressMonitor progress_monitor { get { return operation_queue.progress_monitor; } }
+    
     private ConversationSet conversations = new ConversationSet();
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;

@@ -73,7 +73,6 @@ public class GearyController {
     private Cancellable cancellable_open_account = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
-    private int busy_count = 0;
     private Gee.Set<Geary.Conversation> selected_conversations = new Gee.HashSet<Geary.Conversation>();
     private Geary.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
@@ -192,8 +191,6 @@ public class GearyController {
         Geary.Engine.instance.opened.connect(on_engine_opened);
         
         main_window.conversation_list_view.grab_focus();
-        
-        set_busy(false);
         
         // Start Geary.
         try {
@@ -743,8 +740,6 @@ public class GearyController {
         if (folder == current_folder)
             return;
         
-        set_busy(true);
-        
         cancel_folder();
         
         // This function is not reentrant.  It should be, because it can be
@@ -763,6 +758,7 @@ public class GearyController {
         if (current_conversations != null) {
             yield current_conversations.stop_monitoring_async(!current_is_inbox, null);
             current_conversations = null;
+            main_window.set_progress_monitor(null);
         } else if (current_folder != null && !current_is_inbox) {
             yield current_folder.close_async();
         }
@@ -801,32 +797,21 @@ public class GearyController {
             clear_new_messages("do_select_folder (inbox)", null);
         }
         
-        current_conversations.scan_started.connect(on_scan_started);
         current_conversations.scan_error.connect(on_scan_error);
-        current_conversations.scan_completed.connect(on_scan_completed);
         current_conversations.seed_completed.connect(on_seed_completed);
         
         main_window.conversation_list_store.set_conversation_monitor(current_conversations);
         main_window.conversation_list_view.set_conversation_monitor(current_conversations);
+        main_window.set_progress_monitor(current_conversations.progress_monitor);
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
         
         select_folder_mutex.release(ref mutex_token);
-        
-        set_busy(false);
-    }
-    
-    private void on_scan_started() {
-        set_busy(true);
     }
     
     private void on_scan_error(Error err) {
-        set_busy(false);
-    }
-    
-    private void on_scan_completed() {
-        set_busy(false);
+        debug("Scan error: %s", err.message);
     }
     
     private void on_seed_completed() {
@@ -991,8 +976,6 @@ public class GearyController {
         Cancellable old_cancellable = cancellable_message;
         cancellable_message = new Cancellable();
         
-        set_busy(false);
-        
         old_cancellable.cancel();
     }
     
@@ -1104,9 +1087,8 @@ public class GearyController {
         // Mark the emails.
         Gee.List<Geary.EmailIdentifier> ids = get_selected_folder_email_ids(preview_message_only);
         if (ids.size > 0) {
-            set_busy(true);
             supports_mark.mark_email_async.begin(ids, flags_to_add, flags_to_remove,
-                cancellable_message, on_mark_complete);
+                cancellable_message);
         }
     }
 
@@ -1201,9 +1183,8 @@ public class GearyController {
         Gee.Collection<Geary.EmailIdentifier> ids
             = get_conversation_email_ids(conversation, true, only_mark_preview);
         if (ids.size > 0) {
-            set_busy(true);
             supports_mark.mark_email_async.begin(Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids),
-                flags_to_add, flags_to_remove, cancellable_message, on_mark_complete);
+                flags_to_add, flags_to_remove, cancellable_message);
         }
     }
 
@@ -1213,9 +1194,8 @@ public class GearyController {
         if (supports_mark == null)
             return;
         
-        set_busy(true);
         supports_mark.mark_single_email_async.begin(message.id, flags_to_add, flags_to_remove,
-            cancellable_message, on_mark_complete);
+            cancellable_message);
     }
     
     private void on_mark_as_read() {
@@ -1244,10 +1224,6 @@ public class GearyController {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
         mark_selected_conversations(null, flags);
-    }
-    
-    private void on_mark_complete() {
-        set_busy(false);
     }
     
     private void on_mark_as_spam() {
@@ -1285,15 +1261,9 @@ public class GearyController {
         if (supports_copy == null)
             return;
         
-        set_busy(true);
-        supports_copy.copy_email_async.begin(ids, destination.path, cancellable_message,
-            on_copy_complete);
+        supports_copy.copy_email_async.begin(ids, destination.path, cancellable_message);
     }
-
-    private void on_copy_complete() {
-        set_busy(false);
-    }
-
+    
     private void on_move_conversation(Geary.Folder destination) {
         // Nothing to do if nothing selected.
         if (selected_conversations == null || selected_conversations.size == 0)
@@ -1307,15 +1277,9 @@ public class GearyController {
         if (supports_move == null)
             return;
         
-        set_busy(true);
-        supports_move.move_email_async.begin(ids, destination.path, cancellable_message,
-            on_move_complete);
+        supports_move.move_email_async.begin(ids, destination.path, cancellable_message);
     }
-
-    private void on_move_complete() {
-        set_busy(false);
-    }
-
+    
     private void on_open_attachment(Geary.Attachment attachment) {
         if (GearyApplication.instance.config.ask_open_attachment) {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
@@ -1529,7 +1493,6 @@ public class GearyController {
         
         // If the user clicked the toolbar button, we want to move focus back to the message list.
         main_window.conversation_list_view.grab_focus();
-        set_busy(true);
         
         delete_messages.begin(get_selected_folder_email_ids(), cancellable_folder, on_delete_messages_completed);
     }
@@ -1561,8 +1524,6 @@ public class GearyController {
         } catch (Error err) {
             debug("Error, unable to delete messages: %s", err.message);
         }
-        
-        set_busy(false);
     }
     
     private void on_zoom_in() {
@@ -1586,14 +1547,6 @@ public class GearyController {
         NotificationBubble.play_sound("message-sent-email");
     }
     
-    public void set_busy(bool is_busy) {
-        busy_count += is_busy ? 1 : -1;
-        if (busy_count < 0)
-            busy_count = 0;
-        
-        main_window.set_busy(busy_count > 0);
-    }
-
     private void on_link_selected(string link) {
         if (link.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
             compose_mailto(link);

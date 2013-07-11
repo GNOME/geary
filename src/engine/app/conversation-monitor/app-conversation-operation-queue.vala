@@ -6,6 +6,8 @@
 
 private class Geary.App.ConversationOperationQueue : BaseObject {
     public bool is_processing { get; private set; default = false; }
+    public Geary.SimpleProgressMonitor progress_monitor { get; private set; default = 
+        new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
     
     private Geary.Nonblocking.Mailbox<ConversationOperation> mailbox
         = new Geary.Nonblocking.Mailbox<ConversationOperation>();
@@ -50,7 +52,13 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
             if (op is TerminateOperation)
                 break;
             
+            if (!progress_monitor.is_in_progress)
+                progress_monitor.notify_start();
+            
             yield op.execute_async();
+            
+            if (mailbox.size == 0)
+                progress_monitor.notify_finish();
         }
         
         is_processing = false;
