@@ -40,7 +40,12 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Comparable<Geary.E
         if (get_type() != other.get_type())
             return false;
         
-        return (ordering == other.ordering && folder_path == other.folder_path);
+        if (ordering != other.ordering)
+            return false;
+        
+        if (folder_path != null && other.folder_path != null)
+            return folder_path.equal_to(other.folder_path);
+        return (folder_path == null && other.folder_path == null);
     }
     
     public virtual int compare_to(Geary.EmailIdentifier other) {

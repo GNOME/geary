@@ -106,7 +106,7 @@ private class Geary.App.ConversationSet : BaseObject {
         Geary.Email email, Geary.FolderPath? preferred_folder_path) {
         Email? existing = null;
         foreach (Geary.Email other in conversation.get_emails(Geary.Conversation.Ordering.NONE)) {
-            if (email.message_id.equal_to(other.message_id)) {
+            if (other.message_id != null && email.message_id.equal_to(other.message_id)) {
                 existing = email;
                 break;
             }
@@ -131,33 +131,35 @@ private class Geary.App.ConversationSet : BaseObject {
     }
     
     /**
-     * Add the email (requires Field.REFERENCES) to the mix, creating a new
-     * conversation if necessary.  In the event a duplicate email is added (as
-     * detected by Message-ID), the email whose EmailIdentifier has the
+     * Add the email (requires Field.REFERENCES) to the mix, potentially
+     * replacing an existing email with the same id, or creating a new
+     * conversation if necessary.  In the event of a duplicate (as detected by
+     * Message-ID), the email whose EmailIdentifier has the
      * preferred_folder_path will be kept, and the other discarded (note that
      * we always prefer an identifier with a non-null folder path over a null
-     * folder path, regardless of what the non-null path is).  Return the
-     * conversation the email was added to.  Return in added_conversation
-     * whether a new conversation was created.
+     * folder path, regardless of what the non-null path is).  Return null if
+     * we didn't add the email (e.g. it was a dupe and we preferred the
+     * existing email), or the conversation it was added to.  Return in
+     * added_conversation whether a new conversation was created.
      */
-    public Geary.Conversation add_email(Geary.Email email, ConversationMonitor monitor,
+    public Geary.Conversation? add_email(Geary.Email email, ConversationMonitor monitor,
         Geary.FolderPath? preferred_folder_path, out bool added_conversation) {
         added_conversation = false;
         
-        // This kind of duplicate is safe to re-add because it's got the same
-        // EmailIdentifier, and ImplConversation handles all the necessary
-        // juggling.
-        ImplConversation? conversation = email_id_map.get(email.id);
+        if (email_id_map.has_key(email.id))
+            return null;
         
-        if (conversation == null && email.message_id != null) {
+        ImplConversation? conversation = null;
+        if (email.message_id != null) {
             conversation = contained_message_id_map.get(email.message_id);
-            // This can happen when we find results in multiple folders.  They
-            // won't have the same EmailIdentifier, but (we assume) they're the
-            // same message otherwise.  Under some circumstances, we can't
-            // re-add the duplicate, because of the different identifiers.
+            // This can happen when we find results in multiple folders or a
+            // message gets moved into the current folder after we found it
+            // through "full conversations".  They won't have the same
+            // EmailIdentifier, but (we assume) they're the same message
+            // otherwise.
             if (conversation != null &&
                 !remove_duplicate_email_by_message_id(conversation, email, preferred_folder_path)) {
-                return conversation;
+                return null;
             }
         }
         
@@ -177,24 +179,21 @@ private class Geary.App.ConversationSet : BaseObject {
             added_conversation = true;
         }
         
-        // It's desired to call add even though the email may be a duplicate,
-        // to make sure we always have the "best copy" of the email.
-        if (conversation.add(email)) {
-            // We could check that nothing we're about to set in these maps
-            // is already there, but since we're allowed to re-add emails, that
-            // can be complicated.  Instead, we add extra scrutiny to the
-            // remove_email_by_identifier method, below.
-            email_id_map.set(email.id, conversation);
-            
-            if (email.message_id == null)
-                debug("Adding email %s without Message-ID to conversation set", email.id.to_string());
-            else
-                contained_message_id_map.set(email.message_id, conversation);
-            
-            if (ancestors != null) {
-                foreach (Geary.RFC822.MessageID ancestor in ancestors)
-                    logical_message_id_map.set(ancestor, conversation);
-            }
+        if (!conversation.add(email)) {
+            error("Couldn't add duplicate email %s to conversation %s",
+                email.id.to_string(), conversation.to_string());
+        }
+        
+        email_id_map.set(email.id, conversation);
+        
+        if (email.message_id == null)
+            debug("Adding email %s without Message-ID to conversation set", email.id.to_string());
+        else
+            contained_message_id_map.set(email.message_id, conversation);
+        
+        if (ancestors != null) {
+            foreach (Geary.RFC822.MessageID ancestor in ancestors)
+                logical_message_id_map.set(ancestor, conversation);
         }
         
         return conversation;
@@ -210,8 +209,11 @@ private class Geary.App.ConversationSet : BaseObject {
         
         foreach (Geary.Email email in emails) {
             bool added_conversation;
-            Geary.Conversation conversation = add_email(
+            Geary.Conversation? conversation = add_email(
                 email, monitor, preferred_folder_path, out added_conversation);
+            
+            if (conversation == null)
+                continue;
             
             if (added_conversation) {
                 _added.add(conversation);

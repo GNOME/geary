@@ -174,5 +174,7 @@ public abstract class Geary.Conversation : BaseObject {
     protected void notify_email_flags_changed(Geary.Email email) {
         email_flags_changed(email);
     }
+    
+    public abstract string to_string();
 }
 

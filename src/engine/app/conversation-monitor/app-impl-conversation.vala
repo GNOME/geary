@@ -94,24 +94,12 @@ private class Geary.App.ImplConversation : Geary.Conversation {
     }
     
     /**
-     * Add the email to the conversation.  If an email with a matching id
-     * already exists, the old email may be removed and the new one inserted in
-     * its place (this will happen if the new email is "in-folder" but the old
-     * one was "out-of-folder", for example).  Return false if the new email is
-     * ignored entirely, or true if it's either new or replaced an older one.
+     * Add the email to the conversation if it wasn't already in there.  Return
+     * whether it was added.
      */
     public bool add(Email email) {
-        Email? existing = emails.get(email.id);
-        if (existing != null) {
-            // We "promote" out-of-folder emails to in-folder emails so we
-            // always have the most useful version.
-            // FIXME: this assumes that all data about the existing and new
-            // email are identical.  That might not be the case.
-            if (existing.id.folder_path == null && email.id.folder_path != null)
-                remove(existing);
-            else
-                return false;
-        }
+        if (emails.has_key(email.id))
+            return false;
         
         emails.set(email.id, email);
         date_ascending.add(email);
@@ -159,7 +147,7 @@ private class Geary.App.ImplConversation : Geary.Conversation {
             lowest_id = id;
     }
     
-    public string to_string() {
+    public override string to_string() {
         return "[#%d] (%d emails)".printf(convnum, emails.size);
     }
     
