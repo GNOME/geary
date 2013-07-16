@@ -634,8 +634,11 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         stream_filter.add(new GMime.FilterCRLF(encoded, dotstuffed));
         
-        message.write_to_stream(stream_filter);
-        stream_filter.flush();
+        if (message.write_to_stream(stream_filter) < 0)
+            throw new RFC822Error.FAILED("Unable to write RFC822 message to memory buffer");
+        
+        if (stream_filter.flush() != 0)
+            throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory buffer");
         
         return new Memory.ByteBuffer.from_byte_array(byte_array);
     }

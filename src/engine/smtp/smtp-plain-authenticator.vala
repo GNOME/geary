@@ -19,7 +19,7 @@ public class Geary.Smtp.PlainAuthenticator : Geary.Smtp.AbstractAuthenticator {
         return new Request(Command.AUTH, { "plain" });
     }
     
-    public override uint8[]? challenge(int step, Response response) throws SmtpError {
+    public override Memory.Buffer? challenge(int step, Response response) throws SmtpError {
         // only a single challenge is issued in PLAIN
         if (step > 0)
             return null;
@@ -31,7 +31,8 @@ public class Geary.Smtp.PlainAuthenticator : Geary.Smtp.AbstractAuthenticator {
         growable.append(nul);
         growable.append((credentials.pass ?? "").data);
         
-        return Base64.encode(growable.get_bytes().get_data()).data;
+        // convert to Base64
+        return new Memory.StringBuffer(Base64.encode(growable.get_bytes().get_data()));
     }
 }
 

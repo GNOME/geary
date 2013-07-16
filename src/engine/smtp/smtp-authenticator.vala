@@ -25,7 +25,7 @@ public interface Geary.Smtp.Authenticator : Object {
      * If an error is thrown, the entire process is aborted without any further I/O with the
      * server.  Generally this leaves the connection in a bad state and should be closed.
      */
-    public abstract uint8[]? challenge(int step, Response response) throws SmtpError;
+    public abstract Memory.Buffer? challenge(int step, Response response) throws SmtpError;
     
     public virtual string to_string() {
         return get_name();

@@ -15,6 +15,6 @@ public abstract class Geary.Smtp.AbstractAuthenticator : BaseObject, Geary.Smtp.
     
     public abstract Request initiate();
     
-    public abstract uint8[]? challenge(int step, Response response) throws SmtpError;
+    public abstract Memory.Buffer? challenge(int step, Response response) throws SmtpError;
 }
 

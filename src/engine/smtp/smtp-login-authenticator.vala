@@ -17,13 +17,13 @@ public class Geary.Smtp.LoginAuthenticator : Geary.Smtp.AbstractAuthenticator {
         return new Request(Command.AUTH, { "login" });
     }
     
-    public override uint8[]? challenge(int step, Response response) throws SmtpError {
+    public override Memory.Buffer? challenge(int step, Response response) throws SmtpError {
         switch (step) {
             case 0:
-                return Base64.encode(credentials.user.data).data;
+                return new Memory.StringBuffer(Base64.encode(credentials.user.data));
             
             case 1:
-                return Base64.encode((credentials.pass ?? "").data).data;
+                return new Memory.StringBuffer(Base64.encode((credentials.pass ?? "").data));
             
             default:
                 return null;

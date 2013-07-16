@@ -75,13 +75,13 @@ public class Geary.Smtp.ClientConnection {
         // completed.
         int step = 0;
         while (response.code.is_success_intermediate()) {
-            uint8[]? data = authenticator.challenge(step++, response);
-            if (data == null || data.length == 0)
-                data = DataFormat.CANCEL_AUTHENTICATION.data;
+            Memory.Buffer? data = authenticator.challenge(step++, response);
+            if (data == null || data.size == 0)
+                data = new Memory.StringBuffer(DataFormat.CANCEL_AUTHENTICATION);
             
             Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP AUTH Challenge recvd", to_string());
             
-            yield Stream.write_all_async(douts, data, 0, -1, Priority.DEFAULT, cancellable);
+            yield Stream.write_all_async(douts, data, cancellable);
             douts.put_string(DataFormat.LINE_TERMINATOR);
             yield douts.flush_async(Priority.DEFAULT, cancellable);
             
@@ -126,19 +126,19 @@ public class Geary.Smtp.ClientConnection {
                     break;
                 
                 // stuffing
-                if (!already_dotstuffed && line[0] == '.')
-                    yield douts.write_async(".".data, Priority.DEFAULT, cancellable);
+                if (line[0] == '.')
+                    yield Stream.write_string_async(douts, ".", cancellable);
                 
-                yield douts.write_async(line.data, Priority.DEFAULT, cancellable);
-                yield douts.write_async(DataFormat.LINE_TERMINATOR.data, Priority.DEFAULT, cancellable);
+                yield Stream.write_string_async(douts, line, cancellable);
+                yield Stream.write_string_async(douts, DataFormat.LINE_TERMINATOR, cancellable);
             }
         } else {
             // ready to go, send and commit
-            yield douts.write_bytes_async(data.get_bytes());
+            yield Stream.write_all_async(douts, data, cancellable);
         }
         
         // terminate buffer and flush to server
-        yield douts.write_async(DataFormat.DATA_TERMINATOR.data, Priority.DEFAULT, cancellable);
+        yield Stream.write_string_async(douts, DataFormat.DATA_TERMINATOR, cancellable);
         yield douts.flush_async(Priority.DEFAULT, cancellable);
         
         return yield recv_response_async(cancellable);

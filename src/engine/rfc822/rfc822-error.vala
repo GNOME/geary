@@ -6,6 +6,7 @@
 
 public errordomain Geary.RFC822Error {
     INVALID,
-    NOT_FOUND
+    NOT_FOUND,
+    FAILED
 }
 
