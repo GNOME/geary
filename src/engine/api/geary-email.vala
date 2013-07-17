@@ -102,19 +102,6 @@ public class Geary.Email : BaseObject {
     }
     
     /**
-     * position is the one-based addressing of the email in the folder, in the notion that messages
-     * are "stacked" from 1 to n, earliest to newest.  "Earliest" and "newest" do not necessarily
-     * correspond to the emails' send or receive time, merely how they've been arranged on the stack.
-     *
-     * This value is only good at the time the Email is requested from the folder.  Subsequent
-     * operations may change the Email's position in the folder (or simply remove it).  This value
-     * is *not* updated to reflect this.
-     *
-     * This field is not always returned valid, depending on the Folder it originates from.
-     */
-    internal int position { get; set; default = -1; }
-    
-    /**
      * id is a unique identifier for the Email in the Folder.  It is guaranteed to be unique for
      * as long as the Folder is open.  Once closed, guarantees are no longer made.
      *

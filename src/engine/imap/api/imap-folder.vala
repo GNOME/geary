@@ -24,7 +24,7 @@ private class Geary.Imap.Folder : BaseObject {
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.HashMap<SequenceNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
         SequenceNumber, FetchedData>();
-    private Gee.TreeSet<Geary.EmailIdentifier> search_accumulator = new Gee.TreeSet<Geary.EmailIdentifier>();
+    private Gee.TreeSet<Imap.UID> search_accumulator = new Gee.TreeSet<Imap.UID>();
     
     /**
      * A (potentially unsolicited) response from the server.
@@ -197,7 +197,7 @@ private class Geary.Imap.Folder : BaseObject {
         // All SEARCH from this class are UID SEARCH, so can reliably convert and add to
         // accumulator
         foreach (int uid in seq_or_uid)
-            search_accumulator.add(new Imap.EmailIdentifier(new UID(uid), path));
+            search_accumulator.add(new UID(uid));
     }
     
     private void on_status_response(StatusResponse status_response) {
@@ -263,7 +263,7 @@ private class Geary.Imap.Folder : BaseObject {
     // All commands must executed inside the cmd_mutex; returns FETCH or STORE results
     private async void exec_commands_async(Gee.Collection<Command> cmds,
         out Gee.HashMap<SequenceNumber, FetchedData>? fetched,
-        out Gee.TreeSet<Geary.EmailIdentifier>? search_results, Cancellable? cancellable) throws Error {
+        out Gee.TreeSet<Imap.UID>? search_results, Cancellable? cancellable) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
         
         // execute commands with mutex locked
@@ -285,7 +285,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         if (search_accumulator.size > 0) {
             search_results = search_accumulator;
-            search_accumulator = new Gee.TreeSet<Geary.EmailIdentifier>();
+            search_accumulator = new Gee.TreeSet<Imap.UID>();
         } else {
             search_results = null;
         }
@@ -449,6 +449,29 @@ private class Geary.Imap.Folder : BaseObject {
         return (email_list.size > 0) ? email_list : null;
     }
     
+    public async Gee.Map<UID, SequenceNumber>? uid_to_position_async(MessageSet msg_set,
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        // MessageSet better be UID addressing
+        assert(msg_set.is_uid);
+        
+        Gee.List<Command> cmds = new Gee.ArrayList<Command>();
+        cmds.add(new FetchCommand.data_type(msg_set, FetchDataType.UID));
+        
+        Gee.HashMap<SequenceNumber, FetchedData>? fetched;
+        yield exec_commands_async(cmds, out fetched, null, cancellable);
+        
+        if (fetched == null || fetched.size == 0)
+            return null;
+        
+        Gee.Map<UID, SequenceNumber> map = new Gee.HashMap<UID, SequenceNumber>();
+        foreach (SequenceNumber seq_num in fetched.keys)
+            map.set((UID) fetched.get(seq_num).data_map.get(FetchDataType.UID), seq_num);
+        
+        return map;
+    }
+    
     public async void remove_email_async(MessageSet msg_set, Cancellable? cancellable) throws Error {
         check_open();
         
@@ -526,15 +549,15 @@ private class Geary.Imap.Folder : BaseObject {
         yield exec_commands_async(cmds, null, null, cancellable);
     }
     
-    public async Gee.SortedSet<Geary.EmailIdentifier>? search_async(SearchCriteria criteria,
-        Cancellable? cancellable) throws Error {
+    public async Gee.SortedSet<Imap.UID>? search_async(SearchCriteria criteria, Cancellable? cancellable)
+        throws Error {
         check_open();
         
         // always perform a UID SEARCH
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
         cmds.add(new SearchCommand(criteria, true));
         
-        Gee.TreeSet<Geary.EmailIdentifier>? search_results;
+        Gee.TreeSet<Imap.UID>? search_results;
         yield exec_commands_async(cmds, null, out search_results, cancellable);
         
         return (search_results != null && search_results.size > 0) ? search_results : null;
@@ -621,7 +644,6 @@ private class Geary.Imap.Folder : BaseObject {
         FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier)
         throws Error {
         Geary.Email email = new Geary.Email(new Imap.EmailIdentifier(uid, path));
-        email.position = fetched_data.seq_num.value;
         
         // accumulate these to submit Imap.EmailProperties all at once
         InternalDate? internaldate = null;

@@ -334,7 +334,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     internal async void local_load_async() {
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
         try {
-            yield load_async(-1, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+            yield load_by_id_async(null, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
         } catch (Error e) {
             debug("Error loading local messages: %s", e.message);
         }
@@ -392,27 +392,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     /**
-     * See Geary.Folder.list_email_async() for details of how these parameters operate.  Instead
-     * of returning emails, this method will load the Conversations object with them sorted into
-     * Conversation objects.
-     */
-    private async void load_async(int low, int count, Geary.Folder.ListFlags flags,
-        Cancellable? cancellable) throws Error {
-        notify_scan_started();
-        try {
-            yield process_email_async(yield folder.list_email_async(low, count,
-                required_fields, flags, cancellable), new ProcessJobContext(true));
-        } catch (Error err) {
-            list_error(err);
-        }
-    }
-    
-    /**
      * See Geary.Folder.list_email_by_id_async() for details of how these parameters operate.  Instead
      * of returning emails, this method will load the Conversations object with them sorted into
      * Conversation objects.
      */
-    private async void load_by_id_async(Geary.EmailIdentifier initial_id, int count,
+    private async void load_by_id_async(Geary.EmailIdentifier? initial_id, int count,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
@@ -734,12 +718,12 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (earliest_id != null) {
                 debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
                     earliest_id.to_string(), folder.to_string());
-                yield load_by_id_async(earliest_id, int.MAX, Geary.Folder.ListFlags.NONE,
+                yield load_by_id_async(earliest_id, int.MAX, Geary.Folder.ListFlags.OLDEST_TO_NEWEST,
                     cancellable_monitor);
             } else {
                 debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
                     min_window_count, folder.to_string());
-                yield load_async(-1, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+                yield load_by_id_async(null, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
             }
         } catch (Error e) {
             debug("Reseed error: %s", e.message);
@@ -872,8 +856,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 num_to_load = WINDOW_FILL_MESSAGE_COUNT;
             
             try {
-                yield load_by_id_async(low_id, -num_to_load,
-                    Geary.Folder.ListFlags.EXCLUDING_ID, cancellable_monitor);
+                yield load_by_id_async(low_id, num_to_load,
+                    Geary.Folder.ListFlags.NONE, cancellable_monitor);
             } catch(Error e) {
                 debug("Error filling conversation window: %s", e.message);
             }
@@ -881,7 +865,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
             try {
-                yield load_async(-1, min_window_count, Folder.ListFlags.NONE, cancellable_monitor);
+                yield load_by_id_async(null, min_window_count, Folder.ListFlags.NONE, cancellable_monitor);
             } catch(Error e) {
                 debug("Error filling conversation window: %s", e.message);
             }

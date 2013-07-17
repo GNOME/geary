@@ -101,19 +101,9 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
         Geary.EmailIdentifier? lowest = null;
         int total = 0;
         do {
-            // Fetch a chunk of email flags in local folder.
-            Gee.List<Geary.Email>? list_local;
-            if (lowest == null) {
-                list_local = yield folder.list_email_async(-1, PULL_CHUNK_COUNT,
-                    Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
-            } else {
-                // note using negative count to move down the stack
-                list_local = yield folder.list_email_by_id_async(lowest, 0 - PULL_CHUNK_COUNT,
-                    Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY | Geary.Folder.ListFlags.EXCLUDING_ID,
-                    cancellable);
-            }
-            
-            if (list_local == null || list_local.size == 0)
+            Gee.List<Geary.Email>? list_local = yield folder.list_email_by_id_async(lowest,
+                PULL_CHUNK_COUNT, Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            if (list_local == null || list_local.is_empty)
                 break;
             
             total += list_local.size;
@@ -134,7 +124,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
                 local_map.keys.size, folder.to_string());
             Gee.List<Geary.Email>? list_remote = yield folder.list_email_by_sparse_id_async(local_map.keys,
                 Email.Field.FLAGS, Geary.Folder.ListFlags.FORCE_UPDATE, cancellable);
-            if (list_remote == null || list_remote.size == 0)
+            if (list_remote == null || list_remote.is_empty)
                 break;
             
             // Build map of emails that have changed.

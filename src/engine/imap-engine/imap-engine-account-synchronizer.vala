@@ -14,7 +14,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private GenericFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
     private Nonblocking.Semaphore stopped = new Nonblocking.Semaphore();
-    private Nonblocking.Semaphore prefetcher_semaphore = new Nonblocking.Semaphore();
     
     public AccountSynchronizer(GenericAccount account) {
         this.account = account;
@@ -221,8 +220,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         DateTime? oldest_local = null;
         Geary.EmailIdentifier? oldest_local_id = null;
         try {
-            Gee.List<Geary.Email>? list = yield folder.local_folder.local_list_email_async(1, 1,
-                Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.NONE, bg_cancellable);
+            Gee.List<Geary.Email>? list = yield folder.local_folder.list_email_by_id_async(null, 1,
+                Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
+                bg_cancellable);
             if (list != null && list.size > 0) {
                 oldest_local = list[0].properties.date_received;
                 oldest_local_id = list[0].id;
@@ -265,12 +265,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             return true;
         }
         
-        // set up monitoring the Folder's prefetcher so an exception doesn't leave dangling
-        // signal subscriptions
-        prefetcher_semaphore = new Nonblocking.Semaphore();
-        folder.email_prefetcher.halting.connect(on_email_prefetcher_completed);
-        folder.closed.connect(on_email_prefetcher_completed);
-        
         // turn off the flag watcher whilst synchronizing, as that can cause addt'l load on the
         // CPU
         folder.email_flag_watcher.enabled = false;
@@ -285,9 +279,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             
             // fallthrough and close
         } finally {
-            folder.email_prefetcher.halting.disconnect(on_email_prefetcher_completed);
-            folder.closed.disconnect(on_email_prefetcher_completed);
-            
             folder.email_flag_watcher.enabled = true;
         }
         
@@ -307,59 +298,27 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         // only perform vector expansion if oldest isn't old enough
         if (oldest_local == null || oldest_local.compare(epoch) > 0) {
-            yield expand_folder_async(folder, epoch, oldest_local, oldest_local_id);
+            Geary.EmailIdentifier? epoch_id = yield folder.find_earliest_email_async(epoch,
+                oldest_local_id, bg_cancellable);
+            if (epoch_id == null) {
+                debug("Unable to locate epoch messages on remote folder %s%s", folder.to_string(),
+                    (oldest_local_id != null) ? " earlier than oldest local" : "");
+            }
         } else {
             debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
                 folder.to_string(), oldest_local.to_string(), epoch.to_string());
         }
         
         // always give email prefetcher time to finish its work
-        if (folder.email_prefetcher.has_work()) {
-            // expanding an already opened folder doesn't guarantee the prefetcher will start
-            debug("Waiting for email prefetcher to complete %s...", folder.to_string());
-            try {
-                yield prefetcher_semaphore.wait_async(bg_cancellable);
-            } catch (Error err) {
-                debug("Error waiting for email prefetcher to complete %s: %s", folder.to_string(),
-                    err.message);
-            }
+        debug("Waiting for email prefetcher to complete %s...", folder.to_string());
+        try {
+            yield folder.email_prefetcher.active_sem.wait_async(bg_cancellable);
+        } catch (Error err) {
+            debug("Error waiting for email prefetcher to complete %s: %s", folder.to_string(),
+                err.message);
         }
         
         debug("Done background sync'ing %s", folder.to_string());
-    }
-    
-    private async void expand_folder_async(GenericFolder folder, DateTime epoch, DateTime? oldest_local,
-        Geary.EmailIdentifier? oldest_local_id) throws Error {
-        // use IMAP SEARCH to discover the epoch email
-        Imap.SearchCriteria criteria = new Imap.SearchCriteria();
-        criteria.is_(Imap.SearchCriterion.since_internaldate(new Imap.InternalDate.from_date_time(epoch)));
-        
-        // if local email available, only search for messages before it
-        if (oldest_local_id != null) {
-            Imap.UID oldest_uid = ((Imap.EmailIdentifier) oldest_local_id).uid;
-            criteria.and(Imap.SearchCriterion.message_set(
-                new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), oldest_uid.previous())));
-        }
-        
-        Gee.SortedSet<Geary.EmailIdentifier>? since_ids = yield folder.remote_folder.search_async(
-            criteria, null);
-        if (since_ids == null || since_ids.size == 0) {
-            debug("Unable to locate epoch messages on remote folder %s", folder.to_string());
-            
-            return;
-        }
-        
-        debug("%s: %d discovered since epoch %s, fetching from %s", folder.to_string(), since_ids.size,
-            epoch.to_string(), since_ids.first().to_string());
-        
-        // fetch the oldest one; the Folder will perform the vector expansion and the email
-        // prefetcher will pull them all in
-        yield folder.fetch_email_async(since_ids.first(), Email.Field.NONE, Folder.ListFlags.NONE);
-    }
-    
-    private void on_email_prefetcher_completed() {
-        debug("on_email_prefetcher_completed");
-        prefetcher_semaphore.blind_notify();
     }
 }
 

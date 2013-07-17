@@ -85,36 +85,6 @@ public class Geary.Imap.MessageSet : BaseObject {
         value = "%s:*".printf(low_seq_num.serialize());
     }
     
-    /**
-     * A positive count yields a range going from initial up the stack (toward the most recently
-     * added message).  A negative count yields a range going from initial down the stack (toward
-     * the earliest added message).  A count of zero yields a message range for one UID, initial.
-     *
-     * Underflows and overflows are accounted for by clamping the arithmetic result to the possible
-     * range of UID's.
-     */
-    public MessageSet.uid_range_by_count(UID initial, int count) {
-        assert(initial.value > 0);
-        
-        if (count == 0) {
-            value = initial.serialize();
-        } else {
-            int64 low, high;
-            if (count < 0) {
-                high = initial.value;
-                low = (high + count).clamp(1, uint32.MAX);
-            } else {
-                // count > 0
-                low = initial.value;
-                high = (low + count).clamp(1, uint32.MAX);
-            }
-            
-            value = "%s:%s".printf(low.to_string(), high.to_string());
-        }
-        
-        is_uid = true;
-    }
-    
     public MessageSet.uid_range_to_highest(UID low) {
         assert(low.value > 0);
         

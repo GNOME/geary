@@ -192,10 +192,10 @@ engine/imap-engine/gmail/imap-engine-gmail-account.vala
 engine/imap-engine/gmail/imap-engine-gmail-folder.vala
 engine/imap-engine/other/imap-engine-other-account.vala
 engine/imap-engine/other/imap-engine-other-folder.vala
+engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 engine/imap-engine/replay-ops/imap-engine-expunge-email.vala
 engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
-engine/imap-engine/replay-ops/imap-engine-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
 engine/imap-engine/replay-ops/imap-engine-mark-email.vala

@@ -17,8 +17,14 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.AbstractSem
      */
     public int count { get; private set; default = 0; }
     
+    /**
+     * Indicates that the {@link count} has changed due to either {@link acquire} or
+     * {@link notify} being invoked.
+     */
+    public signal void count_changed(int count);
+    
     public CountingSemaphore(Cancellable? cancellable) {
-        base (true, false, cancellable);
+        base (true, true, cancellable);
     }
     
     /**
@@ -27,7 +33,14 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.AbstractSem
      * @return Number of acquired tasks, including the one that made this call.
      */
     public int acquire() {
-        return ++count;
+        count++;
+        
+        // store on stack in case of reentrancy from signal handler; also note that Vala doesn't
+        // deal well with properties, pre/post-inc, and assignment on same line
+        int new_count = count;
+        count_changed(new_count);
+        
+        return new_count;
     }
     
     /**
@@ -43,7 +56,14 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.AbstractSem
         if (count == 0)
             throw new NonblockingError.INVALID("notify() on a zeroed CountingSemaphore");
         
-        if (count-- == 0)
+        count--;
+        
+        // store on stack in case of reentrancy from signal handler; also note that Vala doesn't
+        // deal well with properties, pre/post-inc, and assignment on same line
+        int new_count = count;
+        count_changed(new_count);
+        
+        if (new_count == 0)
             base.notify();
     }
     
@@ -54,7 +74,7 @@ public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.AbstractSem
      */
     public async override void wait_async(Cancellable? cancellable = null) throws Error {
         if (count != 0)
-            yield wait_async(cancellable);
+            yield base.wait_async(cancellable);
     }
 }
 

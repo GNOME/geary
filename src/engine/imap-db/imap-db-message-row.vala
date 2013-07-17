@@ -97,12 +97,11 @@ private class Geary.ImapDB.MessageRow {
         }
     }
     
-    public Geary.Email to_email(int position, Geary.EmailIdentifier id) throws Error {
+    public Geary.Email to_email(Geary.EmailIdentifier id) throws Error {
         // Important to set something in the Email object if the field bit is set ... for example,
         // if the caller expects to see a DATE field, that field is set in the Email's bitmask,
         // even if the Date object is null
         Geary.Email email = new Geary.Email(id);
-        email.position = position;
         
         if (fields.is_all_set(Geary.Email.Field.DATE))
             email.set_send_date(!String.is_empty(date) ? new RFC822.Date(date) : null);

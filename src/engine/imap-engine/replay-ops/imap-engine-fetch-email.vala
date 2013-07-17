@@ -47,16 +47,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
                 throw err;
         }
         
-        int remote_count;
-        engine.get_remote_counts(out remote_count, null);
-        
         // If returned in full, done
         if (email != null && email.fields.fulfills(required_fields))
             return ReplayOperation.Status.COMPLETED;
         
         // If local only (or not connected) and not found fully in local store, throw NOT_FOUND;
         // there is no fallback
-        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY) || remote_count < 0) {
+        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY)) {
             throw new EngineError.NOT_FOUND("Email %s with fields %Xh not found in %s", id.to_string(),
                 required_fields, to_string());
         }
@@ -109,18 +106,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         email = list[0];
         assert(email != null);
         
-        // use position to normalize any missing emails in the span (prevent holes in the local
-        // email vector)
-        assert(email.position >= 1);
-        yield engine.normalize_email_positions_async(email.position, 1, null, cancellable);
-        
         Gee.Map<Geary.Email, bool> created_or_merged =
             yield engine.local_folder.create_or_merge_email_async(new Collection.SingleItem<Geary.Email>(email),
                 cancellable);
         
         // true means created
         if (created_or_merged.get(email))
-            engine.notify_email_locally_appended(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
+            engine.notify_local_expansion(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that

@@ -266,43 +266,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
             throw error;
     }
     
-    public override async Gee.List<Geary.Email>? list_email_async(int low, int count,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
-        throws Error {
-        if (low >= 0)
-            error("Search folder can't list email positionally");
-        
-        // TODO:
-        // * This is a temporary implementation that can't handle positional addressing.
-        // * Fetch emails as a batch, not one at a time.
-        int result_mutex_token = yield result_mutex.claim_async();
-        
-        Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
-        Error? error = null;
-        try {
-            int i = 0;
-            foreach(Geary.Email email in search_results) {
-                results.add(yield fetch_email_async(email.id, required_fields, flags, cancellable));
-                
-                i++;
-                if (count > 0 && i >= count)
-                    break;
-            }
-        } catch(Error e) {
-            error = e;
-        }
-        
-        result_mutex.release(ref result_mutex_token);
-        
-        if (error != null)
-            throw error;
-        
-        return (results.size == 0 ? null : results);
-    }
-    
-    public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
+    public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
+        if (count <= 0)
+            return null;
+        
         // TODO: as above, this is incomplete and inefficient.
         int result_mutex_token = yield result_mutex.claim_async();
         
@@ -310,37 +279,33 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         int initial_index = -1;
         int i = 0;
         foreach (Geary.Email email in search_results) {
-            if (email.id.equal_to(initial_id))
+            if (initial_id != null && email.id.equal_to(initial_id))
                 initial_index = i;
             ids[i++] = email.id;
         }
         
+        if (initial_id == null)
+            initial_index = ids.length - 1;
+        
         Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
-        Error? error = null;
         if (initial_index >= 0) {
-            try {
-                // A negative count means we walk forwards in our array and
-                // vice versa.
-                int real_count = count.abs();
-                int increment = (count < 0 ? 1 : -1);
-                i = initial_index;
-                if ((flags & Folder.ListFlags.EXCLUDING_ID) != 0)
-                    i += increment;
-                else
-                    ++real_count;
-                int end = i + real_count * increment;
-                
-                for (; i >= 0 && i < search_results.size && i != end; i += increment)
+            int increment = flags.is_oldest_to_newest() ? 1 : -1;
+            i = initial_index;
+            if (!flags.is_including_id() && initial_id != null)
+                i += increment;
+            int end = i + (count * increment);
+            
+            for (; i >= 0 && i < search_results.size && i != end; i += increment) {
+                try {
                     results.add(yield fetch_email_async(ids[i], required_fields, flags, cancellable));
-            } catch (Error e) {
-                error = e;
+                } catch (Error err) {
+                    if (!(err is EngineError.NOT_FOUND))
+                        throw err;
+                }
             }
         }
         
         result_mutex.release(ref result_mutex_token);
-        
-        if (error != null)
-            throw error;
         
         return (results.size == 0 ? null : results);
     }

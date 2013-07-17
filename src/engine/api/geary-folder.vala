@@ -93,10 +93,14 @@ public interface Geary.Folder : BaseObject {
          */
         FORCE_UPDATE,
         /**
-         * Exclude the provided EmailIdentifier (only respected by {@link list_email_by_id_async} and
+         * Include the provided EmailIdentifier (only respected by {@link list_email_by_id_async} and
          * {@link lazy_list_email_by_id}).
          */
-        EXCLUDING_ID;
+        INCLUDING_ID,
+        /**
+         * Direction of list traversal (if not set, from newest to oldest).
+         */
+        OLDEST_TO_NEWEST;
         
         public bool is_any_set(ListFlags flags) {
             return (this & flags) != 0;
@@ -104,6 +108,26 @@ public interface Geary.Folder : BaseObject {
         
         public bool is_all_set(ListFlags flags) {
             return (this & flags) == flags;
+        }
+        
+        public bool is_local_only() {
+            return is_all_set(LOCAL_ONLY);
+        }
+        
+        public bool is_force_update() {
+            return is_all_set(FORCE_UPDATE);
+        }
+        
+        public bool is_including_id() {
+            return is_all_set(INCLUDING_ID);
+        }
+        
+        public bool is_oldest_to_newest() {
+            return is_all_set(OLDEST_TO_NEWEST);
+        }
+        
+        public bool is_newest_to_oldest() {
+            return !is_oldest_to_newest();
         }
     }
     
@@ -163,7 +187,6 @@ public interface Geary.Folder : BaseObject {
      * Fired when email has been appended to the list of messages in the folder.
      *
      * The {@link EmailIdentifier} for all appended messages is supplied as a signal parameter.
-     * Email positions remain valid, but the total count of the messages in the folder has changed.
      *
      * @see email_locally_appended
      */
@@ -176,9 +199,6 @@ public interface Geary.Folder : BaseObject {
      * lists ''all'' messages appended to the folder.  email_locally_appended only reports email that
      * have not been seen prior.  Hence, an email that is removed from the folder and returned
      * later will not be listed here (unless it was removed from the local store in the meantime).
-     *
-     * Note that these messages were appended as well, hence their positional addressing may have
-     * changed since last seen in this folder.
      *
      * @see email_appended
      */
@@ -321,98 +341,28 @@ public interface Geary.Folder : BaseObject {
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     /**
-     * Returns a list of messages that fulfill the required_fields flags starting at the low
-     * position and moving up to (low + count).  If count is -1, the returned list starts at low
-     * and proceeds to all available emails.  If low is -1, the *last* (most recent) 'count' emails
-     * are returned.  If both low and count are -1, it's no different than calling with low as
-     * 1 and count -1, that is, all emails are returned.  (See normalize_span_specifiers() for
-     * a utility function that handles all aspects of these requirements.)  low is one-based, unless
-     * -1 is specified, as explained above.
+     * List emails from the {@link Folder} starting at a particular location within the vector
+     * and moving either direction along the mail stack.
      *
-     * The returned list is not guaranteed to be in any particular order.  The position index
-     * (starting from low) *is* ordered, however, from oldest to newest (in terms of receipt by the 
-     * SMTP server, not necessarily the Sent: field), so if the caller wants the latest emails,
-     * they should calculate low by subtracting from get_email_count() or set low to -1 and use
-     * count to fetch the last n emails.
+     * If the {@link EmailIdentifier} is null, it indicates the end of the vector.  Which end
+     * depends on the {@link ListFlags.OLDEST_TO_NEWEST} flag.  Without, the default is to traverse
+     * from newest to oldest, with null being the newest email.  If set, the direction is reversed
+     * and null indicates the oldest email.
      *
-     * If any position in low to (low + count) are out of range, only the email within range are
-     * reported.  No error is thrown.  This allows callers to blindly request the first or last n
-     * emails in a folder without determining the count first.
+     * If not null, the EmailIdentifier ''must'' have originated from this Folder.
      *
-     * If the caller would prefer the Folder return emails it has immediately available rather than
-     * make an expensive network call to "properly" fetch the emails, it should pass ListFlags.LOCAL_ONLY.
-     * However, this also means avoiding a full synchronization, so it's possible the fetched
-     * emails do not correspond to what's actually available on the server.  The best use of this
-     * method is to quickly retrieve a block of email for display or processing purposes,
-     * immediately followed by a non-fast list operation and then merging the two results.
+     * To fetch all available messages in one call, use a count of int.MAX.
      *
-     * Likewise, if this is called while Folder is in an OPENING or LOCAL state (that is, the remote
-     * server is not yet available), only local mail will be returned.  This is to avoid two poor
-     * situations: (a) waiting to connect to the server to ensure that positional addressing is
-     * correctly calculated (and potentially missing the opportunity to return available local data)
-     * and (b) fetching locally, waiting, then fetching remotely, which means the returned emails
-     * could potentially mix stale and fresh data.  A ListFlag may be offered in the future to allow
-     * the caller to force the engine to wait for a server connection before continuing.  See
-     * get_open_state() and "opened" for more information.
-     *
-     * Note that LOCAL_ONLY only returns the emails with the required fields that are available in
-     * the Folder's local store.  It may have fewer or incomplete messages, meaning that this will
-     * return an incomplete list.
-     *
-     * Similarly, if the caller wants the Folder to always go out to the network to retrieve the
-     * information (even if it is already present in the local store), use ListFlags.FORCE_UPDATE.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async Gee.List<Geary.Email>? list_email_async(int low, int count,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
-        throws Error;
-    
-    /**
-     * Similar in contract to list_email_async(), however instead of the emails being returned all
-     * at once at completion time, the emails are delivered to the caller in chunks via the
-     * EmailCallback.  The method indicates when all the message have been fetched by passing a null
-     * for the first parameter.  If an Error occurs while processing, it will be passed as the
-     * second parameter.  There's no guarantess of the order the messages will be delivered to the
-     * caller.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract void lazy_list_email(int low, int count, Geary.Email.Field required_fields,
-        ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
-    
-    /**
-     * Similar in contract to list_email_async(), but uses Geary.EmailIdentifier rather than
-     * positional addressing.  This allows for a batch of messages to be listed from a starting
-     * identifier, going up and down the stack depending on the count parameter.
-     *
-     * The count parameter is exclusive of the Email at initial_id.  That is, if count is one,
-     * two Emails may be returned: the one for initial_id and the next one.  If count is zero,
-     * only the Email with the specified initial_id will be listed, making this method operate
-     * like fetch_email_async().
-     *
-     * If count is positive, initial_id is the *lowest* identifier and the returned list is going
-     * up the stack (toward the most recently added).  If the count is negative, initial_id is
-     * the *highest* identifier and the returned list is going down the stack (toward the earliest
-     * added).
-     *
-     * To fetch all available messages in one direction or another, use int.MIN or int.MAX.
-     *
-     * initial_id *must* be an EmailIdentifier available to the Folder for this to work, as listing
-     * a range inevitably requires positional addressing under the covers.  However, since it's
-     * some times desirable to list messages excluding the specified EmailIdentifier, callers may
-     * use ListFlags.EXCLUDING_ID (which is a flag only recognized by this method and
-     * lazy_list_email_by_id()).  If the count is zero or one (or the number of messages remaining
-     * on the stack from the initial ID's position is zero or one) *and* this flag is set, no
-     * messages will be returned.
+     * Use {@link ListFlags.INCLUDING_ID} to include the {@link Email} for the particular identifier
+     * in the results.  Otherwise, the specified email will not be included.  A null
+     * EmailIdentifier implies that the top most email is included in the result (i.e.
+     * ListFlags.INCLUDING_ID is not required);
      *
      * There's no guarantee of the returned messages' order.
      *
-     * There is (currently) no sparse version of list_email_by_id_async().
-     *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier initial_id,
+    public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
         throws Error;
     
@@ -426,18 +376,16 @@ public interface Geary.Folder : BaseObject {
      *
      * The Folder must be opened prior to attempting this operation.
      */
-    public abstract void lazy_list_email_by_id(Geary.EmailIdentifier initial_id, int count,
-        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null);
+    public abstract void lazy_list_email_by_id(Geary.EmailIdentifier? initial_id, int count,
+        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
     
     /**
-     * Similar in contract to list_email_async(), but uses a list of Geary.EmailIdentifiers rather
-     * than positional addressing, much like list_email_by_id_async().  See that method for more
-     * information on its contract and how the flags parameter works.
+     * Similar in contract to {@link list_email_by_id_async}, but uses a list of
+     * {@link Geary.EmailIdentifier}s rather than a range.
      *
      * Any Gee.Collection is accepted for EmailIdentifiers, but the returned list will only contain
-     * one email for each requested; duplicates are ignored.  ListFlags.EXCLUDING_ID is ignored
-     * for this call and lazy_list_email_by_sparse_id().
+     * one email for each requested; duplicates are ignored.  ListFlags.INCLUDING_ID is ignored
+     * for this call and {@link lazy_list_email_by_sparse_id}.
      *
      * The Folder must be opened prior to attempting this operation.
      */
@@ -446,11 +394,11 @@ public interface Geary.Folder : BaseObject {
         Cancellable? cancellable = null) throws Error;
     
     /**
-     * Similar in contract to lazy_list_email(), but uses a list of Geary.EmailIdentifiers rather
-     * than positional addressing.  See list_email_by_id_async() and list_email_by_sparse_id_async()
-     * for more information on their contracts and how the flags and callback parameter works.
+     * See {@link list_email_by_id_async} and {@link list_email_by_sparse_id_async}
+     * for more information on {@link EmailIdentifier}s and how the flags and callback parameter
+     * works.
      *
-     * Like the other "lazy" methods, this method will call EmailCallback while the operation is
+     * Like the other "lazy" method, this method will call EmailCallback while the operation is
      * processing.  This method does not block.
      *
      * The Folder must be opened prior to attempting this operation.
@@ -491,56 +439,6 @@ public interface Geary.Folder : BaseObject {
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * check_span_specifiers() verifies that the span specifiers match the requirements set by
-     * list_email_async() and lazy_list_email_async().  If not, this method throws
-     * EngineError.BAD_PARAMETERS.
-     */
-    protected static void check_span_specifiers(int low, int count) throws EngineError {
-        if ((low < 1 && low != -1) || (count < 0 && count != -1))
-            throw new EngineError.BAD_PARAMETERS("low=%d count=%d", low, count);
-    }
-    
-    /**
-     * normalize_span_specifiers() deals with the varieties of span specifiers that can be passed
-     * to list_email_async() and lazy_list_email_async().  Note that this function is for
-     * implementations to convert 'low' and 'count' into positive values (1-based in the case of
-     * low) that are within an appropriate range.
-     *
-     * If total is zero, low and count will return as zero as well.
-     *
-     * The caller should plug in 'low' and 'count' passed from the user as well as the total
-     * number of emails available (i.e. the complete span is 1..total).
-     */
-    internal static void normalize_span_specifiers(ref int low, ref int count, int total) 
-        throws EngineError {
-        check_span_specifiers(low, count);
-        
-        if (total < 0)
-            throw new EngineError.BAD_PARAMETERS("total=%d", total);
-        
-        if (total == 0) {
-            low = 0;
-            count = 0;
-            
-            return;
-        }
-        
-        // if both are -1, it's no different than low=1 count=-1 (that is, return all email)
-        if (low == -1 && count == -1)
-            low = 1;
-        
-        // if count is -1, it's like a globbed star (return everything starting at low)
-        if (count == -1)
-            count = total;
-        
-        if (low == -1)
-            low = ((total - count) + 1).clamp(1, total);
-        
-        if ((low + (count - 1)) > total)
-            count = ((total - low) + 1).clamp(1, total);
-    }
     
     /**
      * Used for debugging.  Should not be used for user-visible labels.
