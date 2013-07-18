@@ -404,7 +404,7 @@ public class Geary.RFC822.Message : BaseObject {
      * Returns the {@link Message} as a {@link Memory.Buffer} suitable for in-memory use (i.e.
      * with native linefeed characters).
      */
-    public Memory.Buffer get_body_rfc822_buffer_native() throws RFC822Error {
+    public Memory.Buffer get_native_buffer() throws RFC822Error {
         return message_to_memory_buffer(false, false);
     }
     
@@ -415,7 +415,7 @@ public class Geary.RFC822.Message : BaseObject {
      * The buffer can also be dot-stuffed if required.  See
      * [[http://tools.ietf.org/html/rfc2821#section-4.5.2]]
      */
-    public Memory.Buffer get_body_rfc822_buffer_smtp(bool dotstuffed) throws RFC822Error {
+    public Memory.Buffer get_network_buffer(bool dotstuffed) throws RFC822Error {
         return message_to_memory_buffer(true, dotstuffed);
     }
     

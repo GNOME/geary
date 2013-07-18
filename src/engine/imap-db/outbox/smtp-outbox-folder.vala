@@ -231,7 +231,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             Db.Statement stmt = cx.prepare(
                 "INSERT INTO SmtpOutboxTable (message, ordering)"
                 + "VALUES (?, (SELECT COALESCE(MAX(ordering), 0) + 1 FROM SmtpOutboxTable))");
-            stmt.bind_string_buffer(0, rfc822.get_body_rfc822_buffer_smtp(false));
+            stmt.bind_string_buffer(0, rfc822.get_network_buffer(false));
             
             int64 id = stmt.exec_insert(cancellable);
             
@@ -274,13 +274,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         return row.outbox_id;
     }
     
-    public virtual async Geary.FolderSupport.Create.Result create_email_async(Geary.RFC822.Message rfc822,
-        Cancellable? cancellable = null) throws Error {
+    public virtual async void create_email_async(Geary.RFC822.Message rfc822, EmailFlags? flags,
+        DateTime? date_received, Cancellable? cancellable = null) throws Error {
         check_open();
         
         yield enqueue_email_async(rfc822, cancellable);
-        
-        return FolderSupport.Create.Result.CREATED;
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(

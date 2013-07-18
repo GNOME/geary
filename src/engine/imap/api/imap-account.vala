@@ -341,6 +341,30 @@ private class Geary.Imap.Account : BaseObject {
         return (list_results.size > 0) ? list_results : null;
     }
     
+    public async void create_email_async(Geary.FolderPath path, RFC822.Message message,
+        Geary.EmailFlags? flags, DateTime? date_received, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        Geary.FolderPath? processed = normalize_inbox(path);
+        if (processed == null)
+            throw new ImapError.INVALID("Invalid path %s", path.to_string());
+        
+        MessageFlags? msg_flags = null;
+        if (flags != null) {
+            Imap.EmailFlags imap_flags = Imap.EmailFlags.from_api_email_flags(flags);
+            msg_flags = imap_flags.message_flags;
+        }
+        
+        InternalDate? internaldate = null;
+        if (date_received != null)
+            internaldate = new InternalDate.from_date_time(date_received);
+        
+        AppendCommand cmd = new AppendCommand(new MailboxSpecifier.from_folder_path(processed, null),
+            msg_flags, internaldate, message.get_network_buffer(false));
+        
+        yield send_command_async(cmd, null, null, cancellable);
+    }
+    
     private async StatusResponse send_command_async(Command cmd,
         Gee.List<MailboxInformation>? list_results, Gee.List<StatusData>? status_results,
         Cancellable? cancellable) throws Error {

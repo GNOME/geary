@@ -109,6 +109,30 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public abstract async Gee.Collection<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
     
+    public virtual async void create_email_async(Geary.FolderPath path, Geary.RFC822.Message rfc822,
+        Geary.EmailFlags? flags, DateTime? date_received, Cancellable? cancellable = null) throws Error {
+        Folder folder = yield fetch_folder_async(path, cancellable);
+        
+        FolderSupport.Create? supports_create = folder as FolderSupport.Create;
+        if (supports_create == null)
+            throw new EngineError.UNSUPPORTED("Folder %s does not support create", path.to_string());
+        
+        yield supports_create.open_async(Folder.OpenFlags.NONE, cancellable);
+        
+        // don't leave folder open if create fails
+        Error? create_err = null;
+        try {
+            yield supports_create.create_email_async(rfc822, flags, date_received, cancellable);
+        } catch (Error err) {
+            create_err = err;
+        }
+        
+        yield supports_create.close_async(cancellable);
+        
+        if (create_err != null)
+            throw create_err;
+    }
+    
     public virtual string to_string() {
         return name;
     }

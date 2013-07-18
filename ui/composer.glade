@@ -142,6 +142,11 @@
       <object class="GtkAction" id="close"/>
       <accelerator key="w" modifiers="GDK_CONTROL_MASK"/>
     </child>
+    <child>
+      <object class="GtkAction" id="save">
+        <property name="label" translatable="yes">Sa_ve Draft</property>
+      </object>
+    </child>
   </object>
   <object class="GtkArrow" id="menu arrow">
     <property name="visible">True</property>
@@ -554,10 +559,8 @@
         </child>
         <child>
           <object class="GtkToolItem" id="filler">
-            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="use_action_appearance">False</property>
             <child>
               <placeholder/>
             </child>
@@ -568,8 +571,8 @@
         </child>
         <child>
           <object class="GtkToggleToolButton" id="menu button">
-            <property name="related_action">menu</property>
             <property name="use_action_appearance">False</property>
+            <property name="related_action">menu</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="tooltip_text" translatable="yes" comments="Various options for formatting text">Formatting Menu</property>
@@ -665,10 +668,9 @@
         <child>
           <object class="GtkButton" id="add_pending_attachments">
             <property name="label" translatable="yes">_Include Original Attachments</property>
-            <property name="visible">False</property>
-            <property name="no_show_all">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="no_show_all">True</property>
             <property name="halign">start</property>
             <property name="valign">center</property>
             <property name="use_underline">True</property>
@@ -677,6 +679,19 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_draft">
+            <property name="related_action">save</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>

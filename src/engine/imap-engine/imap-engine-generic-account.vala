@@ -536,6 +536,20 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.get_search_matches_async(previous_prepared_search_query, ids, cancellable);
     }
     
+    public override async void create_email_async(FolderPath path, RFC822.Message rfc822, Geary.EmailFlags? flags,
+        DateTime? date_received, Cancellable? cancellable = null) throws Error {
+        // local folders go through normal paths
+        Folder? folder = local_only.get(path);
+        if (folder != null) {
+            yield base.create_email_async(path, rfc822, flags, date_received, cancellable);
+            
+            return;
+        }
+        
+        // use IMAP APPEND command on remote folders, which doesn't require opening a folder
+        yield remote.create_email_async(path, rfc822, flags, date_received, cancellable);
+    }
+    
     private void on_login_failed(Geary.Credentials? credentials) {
         do_login_failed_async.begin(credentials);
     }

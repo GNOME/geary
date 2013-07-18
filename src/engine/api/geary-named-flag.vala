@@ -11,7 +11,7 @@
  */
 
 public class Geary.NamedFlag : BaseObject, Gee.Hashable<Geary.NamedFlag> {
-    private string name;
+    public string name { get; private set; }
     
     public NamedFlag(string name) {
         this.name = name;
