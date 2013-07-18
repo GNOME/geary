@@ -216,9 +216,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     // Returns false if IOError.CANCELLED received
     private async bool process_folder_async(GenericFolder folder, bool availability_check, DateTime epoch) {
-        // get oldest local email and its position to start syncing from
+        // get oldest local email and its time, as well as number of messages in local store
         DateTime? oldest_local = null;
         Geary.EmailIdentifier? oldest_local_id = null;
+        int local_count = 0;
         try {
             Gee.List<Geary.Email>? list = yield folder.local_folder.list_email_by_id_async(null, 1,
                 Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
@@ -227,6 +228,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 oldest_local = list[0].properties.date_received;
                 oldest_local_id = list[0].id;
             }
+            
+            local_count = yield folder.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+                bg_cancellable);
         } catch (Error err) {
             debug("Unable to fetch oldest local email for %s: %s", folder.to_string(), err.message);
         }
@@ -238,6 +242,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             if (oldest_local != null) {
                 if (oldest_local.compare(epoch) < 0) {
                     // Oldest local email before epoch, don't sync from network
+                    return true;
+                } else if (folder.properties.email_total == local_count) {
+                    // Local email is after epoch, but there's nothing before it
                     return true;
                 } else {
                     debug("Oldest local email in %s not old enough (%s vs. %s), synchronizing...",

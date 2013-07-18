@@ -79,7 +79,6 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     
     // emails should include PROPERTIES
     private void schedule_prefetch(Gee.Collection<Geary.Email> emails) {
-        debug("%s: scheduling %d emails for prefetch", folder.to_string(), emails.size);
         prefetch_emails.add_all(emails);
         
         // only increment active state if not rescheduling
