@@ -43,6 +43,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 12:
                 post_upgrade_populate_internal_date_time_t();
             break;
+            
+            case 13:
+                post_upgrade_populate_inline_attachments();
+            break;
         }
     }
     
@@ -186,7 +190,46 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 return Db.TransactionOutcome.COMMIT;
             });
         } catch (Error e) {
-            debug("Error populating internaldate_time_t column during upgrade to database schema 11: %s",
+            debug("Error populating internaldate_time_t column during upgrade to database schema 12: %s",
+                e.message);
+        }
+    }
+    
+    // Version 13.
+    private void post_upgrade_populate_inline_attachments() {
+        try {
+            exec_transaction(Db.TransactionType.RO, (cx) => {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT id, header, body
+                    FROM MessageTable
+                    WHERE (fields & ?) = ?
+                    """);
+                stmt.bind_int(0, Geary.Email.REQUIRED_FOR_MESSAGE);
+                stmt.bind_int(1, Geary.Email.REQUIRED_FOR_MESSAGE);
+                Db.Result select = stmt.exec();
+                while (!select.finished) {
+                    int64 id = select.rowid_at(0);
+                    Geary.Memory.Buffer header = select.string_buffer_at(1);
+                    Geary.Memory.Buffer body = select.string_buffer_at(2);
+                    
+                    try {
+                        Geary.RFC822.Message message = new Geary.RFC822.Message.from_parts(
+                            new RFC822.Header(header), new RFC822.Text(body));
+                        Geary.ImapDB.Folder.do_save_attachments_db(cx, id,
+                            message.get_attachments(Geary.Attachment.Disposition.INLINE),
+                            this, null);
+                    } catch (Error e) {
+                        debug("Error fetching inline Mime parts: %s", e.message);
+                    }
+                    
+                    select.next();
+                    pump_event_loop();
+                }
+                
+                return Db.TransactionOutcome.COMMIT;
+            });
+        } catch (Error e) {
+            debug("Error populating old inline attachments during upgrade to database schema 13: %s",
                 e.message);
         }
     }

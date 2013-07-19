@@ -15,6 +15,9 @@ public class ConversationViewer : Gtk.Box {
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
     
+    public const string INLINE_MIME_TYPES =
+        "image/png image/gif image/jpeg image/pjpeg image/bmp image/x-icon image/x-xbitmap image/x-xbm";
+    
     private const int ATTACHMENT_PREVIEW_SIZE = 50;
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
     private const string MESSAGE_CONTAINER_ID = "message_container";
@@ -473,9 +476,10 @@ public class ConversationViewer : Gtk.Box {
             }
         }
         
-        // Set attachment icon and add the attachments container if we have any attachments.
-        set_attachment_icon(div_message, email.attachments.size > 0);
-        if (email.attachments.size > 0) {
+        // Set attachment icon and add the attachments container if there are displayed attachments.
+        int displayed = displayed_attachments(email);
+        set_attachment_icon(div_message, displayed > 0);
+        if (displayed > 0) {
             insert_attachments(div_message, email.attachments);
         }
         
@@ -1284,7 +1288,7 @@ public class ConversationViewer : Gtk.Box {
         save_attachment_item.activate.connect(() => save_attachment(attachment));
         menu.append(save_attachment_item);
         
-        if (email.attachments.size > 1) {
+        if (displayed_attachments(email) > 1) {
             Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
             save_all_item.activate.connect(() => save_attachments(email.attachments));
             menu.append(save_all_item);
@@ -1303,9 +1307,10 @@ public class ConversationViewer : Gtk.Box {
         Gtk.Menu menu = new Gtk.Menu();
         menu.selection_done.connect(on_message_menu_selection_done);
         
-        if (email.attachments.size > 0) {
+        int displayed = displayed_attachments(email);
+        if (displayed > 0) {
             string mnemonic = ngettext("Save A_ttachment...", "Save All A_ttachments...",
-                email.attachments.size);
+                displayed);
             Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(mnemonic);
             save_all_item.activate.connect(() => save_attachments(email.attachments));
             menu.append(save_all_item);
@@ -1588,6 +1593,29 @@ public class ConversationViewer : Gtk.Box {
         header_text += create_header_row(Geary.HTML.escape_markup(title), value, important);
     }
     
+    private static bool should_show_attachment(Geary.Attachment attachment) {
+        switch (attachment.disposition) {
+            case Geary.Attachment.Disposition.ATTACHMENT:
+                return true;
+            
+            case Geary.Attachment.Disposition.INLINE:
+                return !(attachment.mime_type in INLINE_MIME_TYPES);
+            
+            default:
+                assert_not_reached();
+        }
+    }
+    
+    private static int displayed_attachments(Geary.Email email) {
+        int ret = 0;
+        foreach (Geary.Attachment attachment in email.attachments) {
+            if (should_show_attachment(attachment)) {
+                ret++;
+            }
+        }
+        return ret;
+    }
+    
     private void insert_attachments(WebKit.DOM.HTMLElement email_container,
         Gee.List<Geary.Attachment> attachments) {
 
@@ -1618,6 +1646,9 @@ public class ConversationViewer : Gtk.Box {
 
             // Create an attachment table for each attachment.
             foreach (Geary.Attachment attachment in attachments) {
+                if (!should_show_attachment(attachment)) {
+                    continue;
+                }
                 // Generate the attachment table.
                 WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
                 string filename = Geary.String.is_empty_or_whitespace(attachment.filename) ?

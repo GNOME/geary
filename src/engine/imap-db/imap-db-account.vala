@@ -1065,7 +1065,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
-    private Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
+    private static Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT folder_id FROM MessageLocationTable WHERE message_id=?");
         stmt.bind_int64(0, message_id);
@@ -1090,7 +1090,7 @@ private class Geary.ImapDB.Account : BaseObject {
     // For a folder row id, return the folder path (constructed with default
     // separator and case sensitivity) of that folder, or null in the event
     // it's not found.
-    private Geary.FolderPath? do_find_folder_path(Db.Connection cx, int64 folder_id,
+    private static Geary.FolderPath? do_find_folder_path(Db.Connection cx, int64 folder_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT parent_id, name FROM FolderTable WHERE id=?");
         stmt.bind_int64(0, folder_id);

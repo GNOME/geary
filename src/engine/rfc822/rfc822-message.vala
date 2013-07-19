@@ -576,29 +576,48 @@ public class Geary.RFC822.Message : BaseObject {
         }
         return null;
     }
-
-    internal Gee.List<GMime.Part> get_attachments() throws RFC822Error {
+    
+    internal Gee.List<GMime.Part> get_attachments(Geary.Attachment.Disposition? disposition = null)
+        throws RFC822Error {
+        // A null disposition means "return all Mime parts recognized by Geary.Attachment.Disposition"
         Gee.List<GMime.Part> attachments = new Gee.ArrayList<GMime.Part>();
-        find_attachments(attachments, message.get_mime_part() );
+        get_attachments_recursively(attachments, message.get_mime_part(), disposition);
         return attachments;
     }
-
-    private void find_attachments(Gee.List<GMime.Part> attachments, GMime.Object root)
-        throws RFC822Error {
-
+    
+    private void get_attachments_recursively(Gee.List<GMime.Part> attachments, GMime.Object root,
+        Geary.Attachment.Disposition? requested_disposition) throws RFC822Error {
         // If this is a multipart container, dive into each of its children.
-        if (root is GMime.Multipart) {
-            GMime.Multipart multipart = root as GMime.Multipart;
+        GMime.Multipart? multipart = root as GMime.Multipart;
+        if (multipart != null) {
             int count = multipart.get_count();
             for (int i = 0; i < count; ++i) {
-                find_attachments(attachments, multipart.get_part(i));
+                get_attachments_recursively(attachments, multipart.get_part(i), requested_disposition);
             }
             return;
         }
-
-        // Otherwise see if it has a content disposition of "attachment."
-        if (root is GMime.Part && String.nullable_stri_equal(root.get_disposition(), "attachment")) {
-            attachments.add(root as GMime.Part);
+        
+        // Otherwise, check if this part should be an attachment
+        GMime.Part? part = root as GMime.Part;
+        if (part == null) {
+            return;
+        }
+        
+        Geary.Attachment.Disposition? part_disposition = Geary.Attachment.Disposition.from_string(
+            part.get_disposition());
+        if (part_disposition == null) {
+            // The part disposition was unknown to Geary.Attachment.Disposition
+            return;
+        }
+        
+        if (requested_disposition == null) {
+            // Return any attachment whose disposition is recognized by Geary.Attachment.Disposition
+            attachments.add(part);
+            return;
+        }
+        
+        if (part_disposition == requested_disposition) {
+            attachments.add(part);
         }
     }
     
