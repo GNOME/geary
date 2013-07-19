@@ -20,7 +20,11 @@ public class ConversationListView : Gtk.TreeView {
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gtk.Menu? context_menu = null;
     
+    // Signal for conversations that have been single clicked or otherwise selected.
     public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
+    
+    // Signal for when a conversation has been double-clicked, or selected and enter is pressed.
+    public signal void conversation_activated(Geary.Conversation activated);
     
     public virtual signal void load_more() {
         enable_load_more = false;
@@ -48,6 +52,7 @@ public class ConversationListView : Gtk.TreeView {
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
         style_set.connect(on_style_changed);
         show.connect(on_show);
+        row_activated.connect(on_row_activated);
         
         get_model().row_inserted.connect(on_rows_changed);
         get_model().rows_reordered.connect(on_rows_changed);
@@ -351,6 +356,12 @@ public class ConversationListView : Gtk.TreeView {
     private bool refresh_path(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
         model.row_changed(path, iter);
         return false;
+    }
+    
+    private void on_row_activated(Gtk.TreePath path) {
+        Geary.Conversation? c = conversation_list_store.get_conversation_at_path(path);
+        if (c != null)
+            conversation_activated(c);
     }
 }
 

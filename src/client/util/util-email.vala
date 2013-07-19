@@ -20,3 +20,16 @@ public int compare_conversation_descending(Geary.Conversation a, Geary.Conversat
     return compare_conversation_ascending(b, a);
 }
 
+public async Geary.Email fetch_full_message_async(Geary.Email email, Geary.Folder folder,
+    Geary.Email.Field required_fields, Cancellable? cancellable) throws Error {
+    Geary.Email full_email;
+    if (email.id.folder_path == null) {
+        full_email = yield folder.account.local_fetch_email_async(
+            email.id, required_fields, cancellable);
+    } else {
+        full_email = yield folder.fetch_email_async(email.id,
+            required_fields, Geary.Folder.ListFlags.NONE, cancellable);
+    }
+    
+    return full_email;
+}

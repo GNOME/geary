@@ -155,6 +155,7 @@ public class GearyController {
         
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
+        main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
         main_window.conversation_list_view.load_more.connect(on_load_more);
         main_window.conversation_list_view.mark_conversation.connect(on_mark_conversation);
         main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
@@ -171,7 +172,8 @@ public class GearyController {
         main_window.conversation_viewer.mark_message.connect(on_conversation_viewer_mark_message);
         main_window.conversation_viewer.open_attachment.connect(on_open_attachment);
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
-
+        main_window.conversation_viewer.edit_draft.connect(on_edit_draft);
+        
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
         
@@ -870,6 +872,20 @@ public class GearyController {
         conversations_selected(selected_conversations, current_folder);
     }
     
+    private void on_conversation_activated(Geary.Conversation activated) {
+        // Currently activating a conversation is only available for drafts folders.
+        if (current_folder == null || current_folder.special_folder_type !=
+            Geary.SpecialFolderType.DRAFTS)
+            return;
+        
+        // TODO: Determine how to map between conversations and drafts correctly.
+        on_edit_draft(activated.get_latest_email(true));
+    }
+    
+    private void on_edit_draft(Geary.Email draft) {
+        create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE, draft);
+    }
+    
     private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type) {
         main_window.folder_list.remove_folder(folder);
@@ -1406,14 +1422,30 @@ public class GearyController {
     
     private void create_compose_window(ComposerWindow.ComposeType compose_type,
         Geary.Email? referred = null, string? mailto = null) {
+        create_compose_window_async.begin(compose_type, referred, mailto);
+    }
+    
+    private async void create_compose_window_async(ComposerWindow.ComposeType compose_type,
+        Geary.Email? referred = null, string? mailto = null) {
         if (current_account == null)
             return;
         
         ComposerWindow window;
         if (mailto != null)
             window = new ComposerWindow.from_mailto(current_account, mailto);
-        else
-            window = new ComposerWindow(current_account, compose_type, referred);
+        else {
+            Geary.Email? full = null;
+            if (referred != null) {
+                try {
+                    full = yield fetch_full_message_async(referred, current_folder,
+                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS, cancellable_folder);
+                } catch (Error e) {
+                    warning("Could not load full message: %s", e.message);
+                }
+            }
+            
+            window = new ComposerWindow(current_account, compose_type, full);
+        }
         window.set_position(Gtk.WindowPosition.CENTER);
         
         // We want to keep track of the open composer windows, so we can allow the user to cancel
@@ -1573,9 +1605,14 @@ public class GearyController {
     public void enable_message_buttons(bool sensitive) {
         update_tooltips();
         
-        GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = sensitive;
-        GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = sensitive;
-        GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = sensitive;
+        // No reply/forward in drafts folder.
+        bool respond_sensitive = sensitive;
+        if (current_folder != null && current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS)
+            respond_sensitive = false;
+        
+        GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = respond_sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = respond_sensitive;
+        GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = respond_sensitive;
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
             && ((current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive));
         GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive =

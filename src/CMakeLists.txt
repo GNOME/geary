@@ -181,6 +181,7 @@ engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
 engine/imap-engine/imap-engine-generic-account.vala
 engine/imap-engine/imap-engine-generic-all-mail-folder.vala
+engine/imap-engine/imap-engine-generic-drafts-folder.vala
 engine/imap-engine/imap-engine-generic-folder.vala
 engine/imap-engine/imap-engine-generic-sent-mail-folder.vala
 engine/imap-engine/imap-engine-generic-trash-folder.vala

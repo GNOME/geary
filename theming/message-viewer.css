@@ -539,6 +539,16 @@ blockquote {
     background-color: #00ddff;
 }
 
+.draft_edit {
+    display: none;
+    margin: 16px;
+    text-align: right;
+}
+
+.draft_edit_button {
+    background-color: #e8e8e8;
+}
+
 #spinner {
     display: none;
     margin: 100px auto;
