@@ -7,7 +7,8 @@
 private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmail {
     private Imap.EmailIdentifier? initial_id;
     private int count;
-    private int local_list_count = 0;
+    private int fulfilled_count = 0;
+    private bool initial_id_found = false;
     
     public ListEmailByID(GenericFolder owner, Geary.EmailIdentifier? initial_id, int count,
         Geary.Email.Field required_fields, Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator,
@@ -32,6 +33,9 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         Gee.ArrayList<Geary.Email> fulfilled = new Gee.ArrayList<Geary.Email>();
         if (list != null) {
             foreach (Geary.Email email in list) {
+                if (initial_id != null && email.id.equal_to(initial_id))
+                    initial_id_found = true;
+                
                 if (email.fields.fulfills(required_fields))
                     fulfilled.add(email);
                 else
@@ -39,8 +43,16 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
             }
         }
         
+        // verify that the initial_id was found; if not, then want to get it from the remote
+        // (this will force a vector expansion, if required)
+        if (initial_id != null && !initial_id_found) {
+            unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION,
+                initial_id);
+        }
+        
         // report fulfilled items
-        if (fulfilled.size > 0) {
+        fulfilled_count = fulfilled.size;
+        if (fulfilled_count > 0) {
             if (accumulator != null)
                 accumulator.add_all(fulfilled);
             
@@ -48,10 +60,33 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                 cb(fulfilled, null);
         }
         
+        // determine if everything was listed
+        bool finished = false;
+        if (flags.is_local_only()) {
+            // local-only operations stop here
+            finished = true;
+        } else if (count != int.MAX) {
+            // fetching 'count' fulfilled items and no unfulfilled items means listing is done
+            // this is true for both oldest-to-newest, newest-to-oldest, whether or not they have
+            // an initial_id
+            finished = (unfulfilled.size == 0 && fulfilled_count >= count);
+        } else {
+            // count == int.MAX
+            // This sentinel means "get everything from this point", so this has different meanings
+            // depending on direction
+            if (flags.is_newest_to_oldest()) {
+                // only finished if the folder is entirely normalized
+                Trillian is_fully_expanded = yield is_fully_expanded_async();
+                finished = (is_fully_expanded == Trillian.TRUE);
+            } else {
+                // for oldest-to-newest, finished if no unfulfilled items
+                finished = (unfulfilled.size == 0);
+            }
+        }
+        
         // local-only operations stop here; also, since the local store is normalized from the top
         // of the vector on down, if enough items came back fulfilled, then done
-        local_list_count = (list != null) ? list.size : 0;
-        if (flags.is_local_only() || (unfulfilled.size == 0 && local_list_count >= count)) {
+        if (finished) {
             if (cb != null)
                 cb(null, null);
             
@@ -62,10 +97,36 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        // To get this far, either the local store doesn't have all the contents of the items in
-        // the request range, or it doesn't have any row for items in the range (i.e. the vector
-        // is too short).
-        if (local_list_count + unfulfilled.size < count) {
+        bool expansion_required = false;
+        Trillian is_fully_expanded = yield is_fully_expanded_async();
+        if (is_fully_expanded == Trillian.FALSE) {
+            if (flags.is_oldest_to_newest()) {
+                if (initial_id != null) {
+                    // expand vector if not initial_id not discovered
+                    expansion_required = !initial_id_found;
+                } else {
+                    // initial_id == null, expansion required if not fully already
+                    expansion_required = true;
+                }
+            } else {
+                // newest-to-oldest
+                if (count == int.MAX) {
+                    // if infinite count, expansion required if not already
+                    expansion_required = true;
+                } else if (initial_id != null) {
+                    // finite count, expansion required if initial not found *or* not enough
+                    // items were pulled in
+                    expansion_required = !initial_id_found || (fulfilled_count + unfulfilled.size < count);
+                } else {
+                    // initial_id == null
+                    // finite count, expansion required if not enough found
+                    expansion_required = (fulfilled_count + unfulfilled.size < count);
+                }
+            }
+        }
+        
+        // If the vector is too short, expand it now
+        if (expansion_required) {
             Gee.List<Geary.Email>? expanded = yield expand_vector_async();
             if (expanded != null) {
                 // take all the IDs from the expanded vector and call them unfulfilled; base class
@@ -85,6 +146,23 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         return yield base.replay_remote_async();
     }
     
+    private async Trillian is_fully_expanded_async() throws Error {
+        int remote_count;
+        owner.get_remote_counts(out remote_count, null);
+        
+        // if unknown (unconnected), say so
+        if (remote_count < 0)
+            return Trillian.UNKNOWN;
+        
+        // include marked for removed in the count in case this is being called while a removal
+        // is in process, in which case don't want to expand vector this moment because the
+        // vector is in flux
+        int local_count_with_marked = yield owner.local_folder.get_email_count_async(
+            ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+        
+        return Trillian.from_boolean(local_count_with_marked >= remote_count);
+    }
+    
     private async Gee.List<Geary.Email>? expand_vector_async() throws Error {
         // watch out for situations where the entire folder is represented locally (i.e. no
         // expansion necessary)
@@ -97,18 +175,6 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         // vector is in flux
         int local_count = yield owner.local_folder.get_email_count_async(
             ImapDB.Folder.ListFlags.NONE, cancellable);
-        int local_count_with_marked = yield owner.local_folder.get_email_count_async(
-            ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
-        
-        if (local_count_with_marked >= remote_count) {
-            // watch for sync discrepencies ... this is not something that can be fixed up here
-            if (local_count_with_marked > remote_count) {
-                message("%s: not expanding vector remote_count=%d local_count=%d", to_string(),
-                    remote_count, local_count);
-            }
-            
-            return null;
-        }
         
         // determine low and high position for expansion ... default in most code paths for high
         // is the SequenceNumber just below the lowest known message, unless no local messages
@@ -168,6 +234,13 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         
         // low_pos must be defined by this point
         assert(low_pos != null);
+        
+        if (high_pos != null && low_pos.value > high_pos.value) {
+            debug("%s: Aborting vector expansion, low_pos=%s > high_pos=%s", owner.to_string(),
+                low_pos.to_string(), high_pos.to_string());
+            
+            return null;
+        }
         
         Imap.MessageSet msg_set;
         if (high_pos != null)

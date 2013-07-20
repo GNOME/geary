@@ -45,6 +45,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     
     private AccountInformation account_information;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
+    private int pending_sessions = 0;
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
     private bool authentication_failed = false;
@@ -133,21 +134,33 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             return;
         }
         
-        while (sessions.size < min_pool_size && !authentication_failed && is_open) {
-            try {
-                yield create_new_authorized_session(null);
-            } catch (Error err) {
-                debug("Unable to create authorized session to %s: %s",
-                    account_information.get_imap_endpoint().to_string(), err.message);
-                
-                break;
-            }
-        }
+        while ((sessions.size + pending_sessions) < min_pool_size && !authentication_failed && is_open)
+            schedule_new_authorized_session();
         
         try {
             sessions_mutex.release(ref token);
         } catch (Error release_err) {
             debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
+        }
+    }
+    
+    private void schedule_new_authorized_session() {
+        pending_sessions++;
+        
+        create_new_authorized_session.begin(null, on_created_new_authorized_session);
+    }
+    
+    private void on_created_new_authorized_session(Object? source, AsyncResult result) {
+        pending_sessions--;
+        
+        try {
+            create_new_authorized_session.end(result);
+        } catch (Error err) {
+            debug("Unable to create authorized session to %s: %s",
+                account_information.get_imap_endpoint().to_string(), err.message);
+            
+            // try again
+            adjust_session_pool.begin();
         }
     }
     

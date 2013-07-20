@@ -673,6 +673,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (get_search_blacklist().contains(folder.path))
             return;
         
+        if (conversations.is_empty)
+            return;
+        
         debug("%d out of folder message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
             folder.to_string());
         
@@ -718,7 +721,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (earliest_id != null) {
                 debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
                     earliest_id.to_string(), folder.to_string());
-                yield load_by_id_async(earliest_id, int.MAX, Geary.Folder.ListFlags.OLDEST_TO_NEWEST,
+                yield load_by_id_async(earliest_id, int.MAX,
+                    Geary.Folder.ListFlags.OLDEST_TO_NEWEST | Geary.Folder.ListFlags.INCLUDING_ID,
                     cancellable_monitor);
             } else {
                 debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
