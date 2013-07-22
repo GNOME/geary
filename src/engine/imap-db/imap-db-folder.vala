@@ -232,47 +232,34 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
         Gee.ArrayList<Geary.EmailIdentifier> complete_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Contact> updated_contacts = new Gee.ArrayList<Contact>();
-        Error? error = null;
         int unread_change = 0;
-        try {
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             foreach (Geary.Email email in emails) {
-                Db.TransactionOutcome outcome = yield db.exec_transaction_async(Db.TransactionType.RW,
-                    (cx) => {
-                    Gee.Collection<Contact>? contacts_this_email = null;
-                    Geary.Email.Field combined_fields;
-                    bool created = do_create_or_merge_email(cx, email, out combined_fields,
-                        out contacts_this_email, ref unread_change, cancellable);
-                    
-                    if (contacts_this_email != null)
-                        updated_contacts.add_all(contacts_this_email);
-                    
-                    results.set(email, created);
-                    
-                    if (combined_fields.is_all_set(Geary.Email.Field.ALL))
-                        complete_ids.add(email.id);
-                    
-                    // Update unread count in DB.
-                    do_add_to_unread_count(cx, unread_change, cancellable);
-                    
-                    return Db.TransactionOutcome.COMMIT;
-                }, cancellable);
+                Gee.Collection<Contact>? contacts_this_email = null;
+                Geary.Email.Field combined_fields;
+                bool created = do_create_or_merge_email(cx, email, out combined_fields,
+                    out contacts_this_email, ref unread_change, cancellable);
                 
-                if (outcome == Db.TransactionOutcome.COMMIT && updated_contacts.size > 0)
-                    contact_store.update_contacts(updated_contacts);
+                if (contacts_this_email != null)
+                    updated_contacts.add_all(contacts_this_email);
                 
-                // clear each iteration
-                updated_contacts.clear();
+                results.set(email, created);
+                
+                if (combined_fields.is_all_set(Geary.Email.Field.ALL))
+                    complete_ids.add(email.id);
+                
+                // Update unread count in DB.
+                do_add_to_unread_count(cx, unread_change, cancellable);
             }
-        } catch (Error e) {
-            error = e;
-        }
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
+        if (updated_contacts.size > 0)
+            contact_store.update_contacts(updated_contacts);
         
         // Update the email_unread properties.
-        if (error == null) {
-            properties.set_status_unseen((properties.email_unread + unread_change).clamp(0, int.MAX));
-        } else {
-            throw error;
-        }
+        properties.set_status_unseen((properties.email_unread + unread_change).clamp(0, int.MAX));
         
         if (complete_ids.size > 0)
             email_complete(complete_ids);
@@ -1472,6 +1459,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         int new_unread_count = 0;
         
+        if (associate_with_folder) {
+            // Note: no check is performed here to prevent double-adds.  The caller of this method
+            // is responsible for only setting associate_with_folder if required.
+            do_associate_with_folder(cx, message_id, email, cancellable);
+            unread_count_change++;
+        }
+        
         // Default to an empty list, in case we never call do_merge_message_row.
         updated_contacts = new Gee.LinkedList<Contact>();
         
@@ -1509,13 +1503,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 do_merge_email_in_search_table(cx, message_id, new_fields, combined_email, cancellable);
             else
                 do_add_email_to_search_table(cx, message_id, combined_email, cancellable);
-        }
-        
-        if (associate_with_folder) {
-            // Note: no check is performed here to prevent double-adds.  The caller of this method
-            // is responsible for only setting associate_with_folder if required.
-            do_associate_with_folder(cx, message_id, email, cancellable);
-            unread_count_change++;
         }
         
         unread_count_change += new_unread_count;

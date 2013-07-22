@@ -333,22 +333,36 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         // only perform vector expansion if oldest isn't old enough
         if (oldest_local == null || oldest_local.compare(epoch) > 0) {
-            Geary.EmailIdentifier? epoch_id = yield folder.find_earliest_email_async(epoch,
-                oldest_local_id, bg_cancellable);
-            if (epoch_id == null) {
-                debug("Unable to locate epoch messages on remote folder %s%s, fetching one past oldest...",
-                    folder.to_string(),
-                    (oldest_local_id != null) ? " earlier than oldest local" : "");
+            // go back one month at a time to the epoch, performing a little vector expansion at a
+            // time rather than all at once (which will stall the replay queue)
+            DateTime current_epoch = (oldest_local != null) ? oldest_local : new DateTime.now_local();
+            do {
+                current_epoch = current_epoch.add_months(-1);
                 
-                // if there's nothing between the oldest local and the epoch, that means the
-                // mail just prior to our local oldest is oldest than the epoch; rather than
-                // continually thrashing looking for something that's just out of reach, add it
-                // to the folder and be done with it ... note that this even works if oldest_local_id
-                // is null, as that means the local folder is empty and so we should at least
-                // pull the first one to get a marker of age
-                yield folder.list_email_by_id_async(oldest_local_id, 1, Geary.Email.Field.NONE,
-                    Geary.Folder.ListFlags.NONE, bg_cancellable);
-            }
+                // don't go past epoch
+                if (current_epoch.compare(epoch) < 0)
+                    current_epoch = epoch;
+                
+                debug("Background sync'ing %s to %s", folder.to_string(), current_epoch.to_string());
+                Geary.EmailIdentifier? epoch_id = yield folder.find_earliest_email_async(current_epoch,
+                    oldest_local_id, bg_cancellable);
+                if (epoch_id == null && current_epoch.compare(epoch) <= 0) {
+                    debug("Unable to locate epoch messages on remote folder %s%s, fetching one past oldest...",
+                        folder.to_string(),
+                        (oldest_local_id != null) ? " earlier than oldest local" : "");
+                    
+                    // if there's nothing between the oldest local and the epoch, that means the
+                    // mail just prior to our local oldest is oldest than the epoch; rather than
+                    // continually thrashing looking for something that's just out of reach, add it
+                    // to the folder and be done with it ... note that this even works if oldest_local_id
+                    // is null, as that means the local folder is empty and so we should at least
+                    // pull the first one to get a marker of age
+                    yield folder.list_email_by_id_async(oldest_local_id, 1, Geary.Email.Field.NONE,
+                        Geary.Folder.ListFlags.NONE, bg_cancellable);
+                } else if (epoch_id != null) {
+                    oldest_local_id = epoch_id;
+                }
+            } while (current_epoch.compare(epoch) > 0);
         } else {
             debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
                 folder.to_string(), oldest_local.to_string(), epoch.to_string());
