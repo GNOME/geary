@@ -236,16 +236,19 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             foreach (Geary.Email email in emails) {
                 Gee.Collection<Contact>? contacts_this_email = null;
-                Geary.Email.Field combined_fields;
-                bool created = do_create_or_merge_email(cx, email, out combined_fields,
-                    out contacts_this_email, ref unread_change, cancellable);
+                Geary.Email.Field pre_fields;
+                Geary.Email.Field post_fields;
+                bool created = do_create_or_merge_email(cx, email, out pre_fields,
+                    out post_fields, out contacts_this_email, ref unread_change, cancellable);
                 
                 if (contacts_this_email != null)
                     updated_contacts.add_all(contacts_this_email);
                 
                 results.set(email, created);
                 
-                if (combined_fields.is_all_set(Geary.Email.Field.ALL))
+                // in essence, only fire the "email-completed" signal if the local version didn't
+                // have all the fields but after the create/merge now does
+                if (post_fields.is_all_set(Geary.Email.Field.ALL) && !pre_fields.is_all_set(Geary.Email.Field.ALL))
                     complete_ids.add(email.id);
                 
                 // Update unread count in DB.
@@ -921,8 +924,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
     
     private bool do_create_or_merge_email(Db.Connection cx, Geary.Email email,
-        out Geary.Email.Field combined_fields, out Gee.Collection<Contact> updated_contacts,
-        ref int unread_count_change, Cancellable? cancellable) throws Error {
+        out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
+        out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
+        Cancellable? cancellable) throws Error {
         // see if message already present in current folder, if not, search for duplicate throughout
         // mailbox
         bool associated;
@@ -930,8 +934,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         // if found, merge, and associate if necessary
         if (message_id != Db.INVALID_ROWID) {
-            do_merge_email(cx, message_id, email, out combined_fields, out updated_contacts,
-                ref unread_count_change, !associated, cancellable);
+            do_merge_email(cx, message_id, email, out pre_fields, out post_fields,
+                out updated_contacts, ref unread_count_change, !associated, cancellable);
             
             // return false to indicate a merge
             return false;
@@ -940,7 +944,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // not found, so create and associate with this folder
         MessageRow row = new MessageRow.from_email(email);
         
-        combined_fields = email.fields;
+        pre_fields = Geary.Email.Field.NONE;
+        post_fields = email.fields;
         
         Db.Statement stmt = cx.prepare(
             "INSERT INTO MessageTable "
@@ -1452,9 +1457,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
     
     private void do_merge_email(Db.Connection cx, int64 message_id, Geary.Email email,
-        out Geary.Email.Field combined_fields, out Gee.Collection<Contact> updated_contacts,
-        ref int unread_count_change, bool associate_with_folder,
-        Cancellable? cancellable) throws Error {
+        out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
+        out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
+        bool associate_with_folder, Cancellable? cancellable) throws Error {
         assert(message_id != Db.INVALID_ROWID);
         
         int new_unread_count = 0;
@@ -1470,12 +1475,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         updated_contacts = new Gee.LinkedList<Contact>();
         
         // fetch message from database and merge in this email
-        Geary.Email.Field db_fields;
         MessageRow row = do_fetch_message_row(cx, message_id,
             email.fields | Email.REQUIRED_FOR_MESSAGE | Attachment.REQUIRED_FIELDS,
-            out db_fields, cancellable);
+            out pre_fields, cancellable);
         Geary.Email.Field fetched_fields = row.fields;
-        combined_fields = db_fields | email.fields;
+        post_fields = pre_fields | email.fields;
         row.merge_from_remote(email);
         
         if (email.fields == Geary.Email.Field.NONE)
