@@ -597,6 +597,14 @@ public class Geary.RFC822.Message : BaseObject {
             return;
         }
         
+        // If this is an attached message, go through it.
+        GMime.MessagePart? messagepart = root as GMime.MessagePart;
+        if (messagepart != null) {
+            get_attachments_recursively(attachments, messagepart.get_message().get_mime_part(),
+                requested_disposition);
+            return;
+        }
+        
         // Otherwise, check if this part should be an attachment
         GMime.Part? part = root as GMime.Part;
         if (part == null) {
