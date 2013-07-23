@@ -600,7 +600,26 @@ public class Geary.RFC822.Message : BaseObject {
         // If this is an attached message, go through it.
         GMime.MessagePart? messagepart = root as GMime.MessagePart;
         if (messagepart != null) {
-            get_attachments_recursively(attachments, messagepart.get_message().get_mime_part(),
+            GMime.Message message = messagepart.get_message();
+            Geary.Attachment.Disposition? disposition = Geary.Attachment.Disposition.from_string(
+                root.get_disposition());
+            if (disposition == null) {
+                // This is often the case, and we'll treat these as attached
+                disposition = Geary.Attachment.Disposition.ATTACHMENT;
+            }
+            
+            if (requested_disposition == null || disposition == requested_disposition) {
+                GMime.Stream stream = new GMime.StreamMem();
+                message.write_to_stream(stream);
+                GMime.DataWrapper data = new GMime.DataWrapper.with_stream(stream,
+                    GMime.ContentEncoding.BINARY);  // Equivalent to no encoding
+                GMime.Part part = new GMime.Part.with_type("message", "rfc822");
+                part.set_content_object(data);
+                part.set_filename(message.get_subject() + ".eml");
+                attachments.add(part);
+            }
+            
+            get_attachments_recursively(attachments, message.get_mime_part(),
                 requested_disposition);
             return;
         }
