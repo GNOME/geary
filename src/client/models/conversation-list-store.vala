@@ -36,6 +36,8 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     public string? account_owner_email { get; set; default = null; }
+    public Geary.ProgressMonitor preview_monitor { get; private set; default = 
+        new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
     
     private Geary.App.ConversationMonitor conversation_monitor;
     private Geary.Folder? current_folder = null;
@@ -56,16 +58,17 @@ public class ConversationListStore : Gtk.ListStore {
         
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
         update_id = Timeout.add_seconds_full(Priority.LOW, 60, update_date_strings);
+        
+        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
+            connect(on_conversation_monitor_changed);
     }
     
     ~ConversationListStore() {
-        set_conversation_monitor(null);
-        
         if (update_id != 0)
             Source.remove(update_id);
     }
     
-    public void set_conversation_monitor(Geary.App.ConversationMonitor? new_conversation_monitor) {
+    private void on_conversation_monitor_changed() {
         if (conversation_monitor != null) {
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
             conversation_monitor.conversations_added.disconnect(on_conversations_added);
@@ -76,7 +79,7 @@ public class ConversationListStore : Gtk.ListStore {
         }
         
         clear();
-        conversation_monitor = new_conversation_monitor;
+        conversation_monitor = GearyApplication.instance.controller.current_conversations;
         
         if (conversation_monitor != null) {
             // add all existing conversations
@@ -148,7 +151,11 @@ public class ConversationListStore : Gtk.ListStore {
             return;
         }
         
+        preview_monitor.notify_start();
+        
         yield do_refresh_previews_async(conversation_monitor);
+        
+        preview_monitor.notify_finish();
         
         try {
             refresh_mutex.release(ref token);

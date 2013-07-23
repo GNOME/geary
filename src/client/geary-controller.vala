@@ -5,7 +5,7 @@
  */
 
 // Primary controller object for Geary.
-public class GearyController {
+public class GearyController : Geary.BaseObject {
     // Named actions.
     public const string ACTION_HELP = "GearyHelp";
     public const string ACTION_ABOUT = "GearyAbout";
@@ -32,7 +32,9 @@ public class GearyController {
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
-
+    
+    public const string PROP_CURRENT_CONVERSATION ="current-conversations";
+    
     public const int MIN_CONVERSATION_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
@@ -62,11 +64,12 @@ public class GearyController {
     
     public MainWindow main_window { get; private set; }
     
+    public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
+    
     private Geary.Account? current_account = null;
     private Gee.HashMap<Geary.Account, Geary.Folder> inboxes
         = new Gee.HashMap<Geary.Account, Geary.Folder>();
     private Geary.Folder? current_folder = null;
-    private Geary.App.ConversationMonitor? current_conversations = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -758,7 +761,6 @@ public class GearyController {
         if (current_conversations != null) {
             yield current_conversations.stop_monitoring_async(!current_is_inbox, null);
             current_conversations = null;
-            main_window.set_progress_monitor(null);
         } else if (current_folder != null && !current_is_inbox) {
             yield current_folder.close_async();
         }
@@ -799,10 +801,6 @@ public class GearyController {
         
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.seed_completed.connect(on_seed_completed);
-        
-        main_window.conversation_list_store.set_conversation_monitor(current_conversations);
-        main_window.conversation_list_view.set_conversation_monitor(current_conversations);
-        main_window.set_progress_monitor(current_conversations.progress_monitor);
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
