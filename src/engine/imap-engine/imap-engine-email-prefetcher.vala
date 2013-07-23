@@ -14,9 +14,11 @@
 private class Geary.ImapEngine.EmailPrefetcher : Object {
     public const int PREFETCH_DELAY_SEC = 1;
     
-    private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
+    // Don't fetch FLAGS; those are fetched by the FlagWatcher and during normalization when a
+    // standard open_async() is invoked on the Folder
+    private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL & ~(Geary.Email.MUTABLE_FIELDS);
     private const int PREFETCH_IDS_CHUNKS = 500;
-    private const int PREFETCH_CHUNK_BYTES = 128 * 1024;
+    private const int PREFETCH_CHUNK_BYTES = 64 * 1024;
     
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
@@ -169,8 +171,6 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         if (emails.size == 0)
             return;
         
-        debug("do_prefetch_batch_async %s start_total=%d", folder.to_string(), emails.size);
-        
         // Remove anything that is fully prefetched
         Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? fields = null;
         try {
@@ -191,6 +191,11 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
             // only prefetch if missing fields
             return !fields.get(email.id).fulfills(PREFETCH_FIELDS);
         });
+        
+        if (emails.size == 0)
+            return;
+        
+        debug("do_prefetch_batch_async %s start_total=%d", folder.to_string(), emails.size);
         
         // Big TODO: The engine needs to be able to synthesize ENVELOPE (and any of the fields
         // constituting it) and PREVIEW from HEADER and BODY if available.  When it can do that

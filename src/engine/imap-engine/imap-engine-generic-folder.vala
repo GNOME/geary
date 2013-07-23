@@ -261,6 +261,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
             Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
             for (;;) {
+                // this loop can be long, so manually check for cancellation
+                if (cancellable != null && cancellable.is_cancelled())
+                    throw new IOError.CANCELLED("Folder %s normalization cancelled", to_string());
+                
                 Geary.Email? remote_email = null;
                 Geary.Imap.UID? remote_uid = null;
                 if (old_remote != null && remote_ctr < remote_length) {

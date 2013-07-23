@@ -107,7 +107,7 @@ private class Geary.App.ConversationSet : BaseObject {
         Email? existing = null;
         foreach (Geary.Email other in conversation.get_emails(Geary.Conversation.Ordering.NONE)) {
             if (other.message_id != null && email.message_id.equal_to(other.message_id)) {
-                existing = email;
+                existing = other;
                 break;
             }
         }
