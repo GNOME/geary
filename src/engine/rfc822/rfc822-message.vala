@@ -419,56 +419,105 @@ public class Geary.RFC822.Message : BaseObject {
         return message_to_memory_buffer(true, dotstuffed);
     }
     
-    public Memory.Buffer get_first_mime_part_of_content_type(string content_type, bool to_html = false)
-        throws RFC822Error {
-        // search for content type starting from the root
-        GMime.Part? part = find_first_mime_part(message.get_mime_part(), content_type);
-        if (part == null) {
-            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with content-type %s",
-                content_type);
+    /**
+     * This delegate is an optional parameter to the body constructers that allows callers
+     * to process arbitrary non-text, inline MIME parts.
+     */
+    public delegate string? InlinePartReplacer(string filename, string mimetype,
+        Geary.Memory.Buffer buffer);
+        
+    /**
+     * This method is the main utility method used by the other body constructors. It calls itself
+     * recursively via the last argument ("node").
+     * 
+     * The constructed body is stored in ref string? body. If the constructed body is null,
+     * ref string? body remains unmodified.
+     *
+     * ref string? body is only modified if the constructed body is non-empty
+     * 
+     * Returns: a bool indicating whether a text part with the desired text_subtype was found
+     */
+    private bool construct_body_from_mime_parts(ref string? body, InlinePartReplacer? replacer,
+        string text_subtype, bool to_html = false, GMime.Object? node = null) throws RFC822Error {
+        if (node == null) {
+            node = message.get_mime_part();
         }
         
-        // convert payload to a buffer
-        return mime_part_to_memory_buffer(part, true, to_html);
-    }
-
-    private GMime.Part? find_first_mime_part(GMime.Object current_root, string content_type) {
-        // descend looking for the content type in a GMime.Part
-        GMime.Multipart? multipart = current_root as GMime.Multipart;
+        // If this is a multipart, call ourselves recursively on the children
+        GMime.Multipart? multipart = node as GMime.Multipart;
         if (multipart != null) {
+            bool found_text_subtype = false;
+            StringBuilder builder = new StringBuilder();
             int count = multipart.get_count();
-            for (int ctr = 0; ctr < count; ctr++) {
-                GMime.Part? child_part = find_first_mime_part(multipart.get_part(ctr), content_type);
-                if (child_part != null)
-                    return child_part;
+            for (int i = 0; i < count; ++i) {
+                GMime.Object child = multipart.get_part(i);
+                string? child_body = null;
+                found_text_subtype |= construct_body_from_mime_parts(ref child_body, replacer,
+                    text_subtype, to_html, child);
+                if (child_body != null)
+                    builder.append(child_body);
             }
+            
+            if (!Geary.String.is_empty_or_whitespace(builder.str))
+                body = builder.str;
+            return found_text_subtype;
         }
-
-        GMime.Part? part = current_root as GMime.Part;
-        if (part != null && String.nullable_stri_equal(part.get_content_type().to_string(), content_type) &&
-            !String.nullable_stri_equal(part.get_disposition(), "attachment")) {
-            return part;
+        
+        // Only process inline leaf parts
+        GMime.Part? part = node as GMime.Part;
+        if (part == null)
+            return false;
+        
+        string? disposition = part.get_disposition();
+        if (disposition != null && disposition.down() == "attachment")
+            return false;
+        
+        // Handle inline text parts
+        GMime.ContentType content_type = part.get_content_type();
+        if (content_type.get_media_type() == "text") {
+            if (content_type.get_media_subtype() == text_subtype) {
+                body = mime_part_to_memory_buffer(part, true, to_html).to_string();
+                return true;
+            }
+            
+            // We were the wrong kind of text part
+            return false;
         }
-
-        return null;
-    }
-
-    public string? get_html_body() throws RFC822Error {
-        return get_first_mime_part_of_content_type("text/html").to_string();
+        
+        // Hand off to the replacer for processing
+        if (replacer == null)
+            return false;
+        
+        string? replaced_part = replacer(RFC822.Utils.get_attachment_filename(part), content_type.to_string(),
+            mime_part_to_memory_buffer(part));
+        if (replaced_part != null)
+            body = replaced_part;
+        
+        return false;
     }
     
-    public string? get_text_body(bool convert_to_html = true) throws RFC822Error {
-        return get_first_mime_part_of_content_type("text/plain", convert_to_html).to_string();
+    public string? get_html_body(InlinePartReplacer? replacer = null) throws RFC822Error {
+        string? body = null;
+        if (!construct_body_from_mime_parts(ref body, replacer, "html"))
+            throw new RFC822Error.NOT_FOUND("Could not find any \"text/html\" parts");
+        return body;
+    }
+    
+    public string? get_text_body(bool convert_to_html = true, InlinePartReplacer? replacer = null) throws RFC822Error {
+        string? body = null;
+        if (!construct_body_from_mime_parts(ref body, replacer, "plain", convert_to_html))
+            throw new RFC822Error.NOT_FOUND("Could not find any \"text/plain\" parts");
+        return body;
     }
     
     // Returns a body of the email as HTML.  The "html_format" flag tells it whether to try for a
     // HTML format body or plain text body first.  But if it doesn't find that one, it'll return
     // the other.
-    public string? get_body(bool html_format) throws RFC822Error {
+    public string? get_body(bool html_format, InlinePartReplacer? replacer = null) throws RFC822Error {
         try {
-            return html_format ? get_html_body() : get_text_body();
+            return html_format ? get_html_body(replacer) : get_text_body(true, replacer);
         } catch (Error error) {
-            return html_format ? get_text_body() : get_html_body();
+            return html_format ? get_text_body(true, replacer) : get_html_body(replacer);
         }
     }
     

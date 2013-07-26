@@ -596,7 +596,7 @@ public class ConversationViewer : Gtk.Box {
         string body_text = "";
         remote_images = false;
         try {
-            body_text = message.get_body(true);
+            body_text = message.get_body(true, inline_image_replacer);
             body_text = insert_html_markup(body_text, message, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
@@ -630,6 +630,16 @@ public class ConversationViewer : Gtk.Box {
                 debug("Error adding message: %s", error.message);
             }
         }
+    }
+    
+    private static string? inline_image_replacer(string filename, string mimetype, Geary.Memory.Buffer buffer) {
+        if (!(mimetype in INLINE_MIME_TYPES))
+            return null;
+        
+        uint8[] image_data = buffer.get_uint8_array();
+        return "<img src=\"%s\" alt=\"%s\" class=\"%s\" />".printf(
+            @"data:$mimetype;base64,$(Base64.encode(image_data))",
+            filename, "replaced_inline_image");
     }
     
     private void unhide_last_email() {
@@ -1458,7 +1468,7 @@ public class ConversationViewer : Gtk.Box {
                 } else if (src.has_prefix("cid:")) {
                     string mime_id = src.substring(4);
                     Geary.Memory.Buffer image_content = message.get_content_by_mime_id(mime_id);
-                    uint8[] image_data = image_content.get_bytes().get_data();
+                    uint8[] image_data = image_content.get_uint8_array();
 
                     // Get the content type.
                     bool uncertain_content_type;

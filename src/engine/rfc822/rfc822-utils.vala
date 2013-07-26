@@ -320,5 +320,14 @@ public GMime.ContentEncoding get_best_content_encoding(GMime.Stream stream,
     return encoding;
 }
 
+public string get_attachment_filename(GMime.Part part) {
+    string? filename = part.get_filename();
+    if (String.is_empty(filename)) {
+        /// Placeholder filename for attachments with no filename.
+        filename = _("none");
+    }
+    return filename;
+}
+
 }
 
