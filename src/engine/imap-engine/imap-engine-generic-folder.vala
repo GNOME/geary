@@ -86,7 +86,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     public void set_special_folder_type(SpecialFolderType new_type) {
+        SpecialFolderType old_type = _special_folder_type;
         _special_folder_type = new_type;
+        if(old_type != new_type)
+            notify_special_folder_type_changed(old_type, new_type);
     }
     
     public override Geary.Folder.OpenState get_open_state() {
