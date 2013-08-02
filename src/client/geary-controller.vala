@@ -230,20 +230,20 @@ public class GearyController : Geary.BaseObject {
         accounts.label = _("A_ccounts");
         entries += accounts;
         
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, "<Ctrl>E",
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Stock._PREFERENCES, TRANSLATABLE, "<Ctrl>E",
             null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
 
-        Gtk.ActionEntry help = { ACTION_HELP, Gtk.Stock.HELP, TRANSLATABLE, "F1", null, on_help };
+        Gtk.ActionEntry help = { ACTION_HELP, Stock._HELP, TRANSLATABLE, "F1", null, on_help };
         help.label = _("_Help");
         entries += help;
 
-        Gtk.ActionEntry about = { ACTION_ABOUT, Gtk.Stock.ABOUT, TRANSLATABLE, null, null, on_about };
+        Gtk.ActionEntry about = { ACTION_ABOUT, Stock._ABOUT, TRANSLATABLE, null, null, on_about };
         about.label = _("_About");
         entries += about;
         
-        Gtk.ActionEntry quit = { ACTION_QUIT, Gtk.Stock.QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
+        Gtk.ActionEntry quit = { ACTION_QUIT, Stock._QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
         quit.label = _("_Quit");
         entries += quit;
         
@@ -1016,7 +1016,7 @@ public class GearyController : Geary.BaseObject {
         } catch (Error error) {
             debug("Error showing help: %s", error.message);
             Gtk.Dialog dialog = new Gtk.Dialog.with_buttons("Error", null,
-                Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE, null);
+                Gtk.DialogFlags.DESTROY_WITH_PARENT, Stock._CLOSE, Gtk.ResponseType.CLOSE, null);
             dialog.response.connect(() => { dialog.destroy(); });
             dialog.get_content_area().add(new Gtk.Label("Error showing help: %s".printf(error.message)));
             dialog.show_all();
@@ -1283,7 +1283,7 @@ public class GearyController : Geary.BaseObject {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open \"%s\"?").printf(attachment.filename),
                 _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Gtk.Stock.OPEN, Gtk.Stock.CANCEL, _("Don't _ask me again"), false);
+                Stock._OPEN, Stock._CANCEL, _("Don't _ask me again"), false);
             if (ask_to_open.run() != Gtk.ResponseType.OK)
                 return;
             
@@ -1319,7 +1319,7 @@ public class GearyController : Geary.BaseObject {
             ? Gtk.FileChooserAction.SAVE
             : Gtk.FileChooserAction.SELECT_FOLDER;
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
-            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.SAVE, Gtk.ResponseType.ACCEPT, null);
+            Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
         if (attachments.size == 1) {

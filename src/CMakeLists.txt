@@ -332,6 +332,7 @@ client/ui/main-toolbar.vala
 client/ui/main-window.vala
 client/ui/monitored-progress-bar.vala
 client/ui/monitored-spinner.vala
+client/ui/stock.vala
 
 client/util/util-date.vala
 client/util/util-email.vala

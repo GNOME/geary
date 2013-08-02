@@ -1344,7 +1344,7 @@ public class ConversationViewer : Gtk.Box {
         }
         
         // Print a message.
-        Gtk.MenuItem print_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.PRINT, null);
+        Gtk.MenuItem print_item = new Gtk.MenuItem.with_mnemonic(Stock._PRINT);
         print_item.activate.connect(() => on_print_message(email));
         menu.append(print_item);
 
