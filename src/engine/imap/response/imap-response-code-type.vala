@@ -17,6 +17,7 @@
 public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCodeType> {
     public const string ALERT = "alert";
     public const string ALREADYEXISTS = "alreadyexists";
+    public const string APPENDUID = "appenduid";
     public const string AUTHENTICATIONFAILED = "authenticationfailed";
     public const string AUTHORIZATIONFAILED = "authorizationfailed";
     public const string BADCHARSET = "badcharset";

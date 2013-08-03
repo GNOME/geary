@@ -276,30 +276,6 @@ public interface Geary.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Creates (appends) the message to the specified {@link Folder}.
-     *
-     * Some implementations may locate the Folder for the caller, check that it supports
-     * {@link FolderSupport.Create}, then call its create method.  In that case, the usual
-     * {@link EngineError} exceptions apply, except for the requirement that the Folder be open.
-     * (@link Account} will open the Folder for the caller.)
-     *
-     * For other Folders, the Account may be able to bypass opening the folder and save it directly.
-     *
-     * The optional {@link EmailFlags} allows for those flags to be set when saved.  Some Folders
-     * may ignore those flags (i.e. Outbox) if not applicable.
-     *
-     * The optional DateTime allows for the message's "date received" time to be set when saved.
-     * Like EmailFlags, this is optional if not applicable.
-     *
-     * Both values can be retrieved later via {@link EmailProperties}.
-     *
-     * @throws EngineError.NOT_FOUND If {@link FolderPath} could not be resolved.
-     * @throws EngineError.UNSUPPORTED If the Folder does not support FolderSupport.Create.
-     */
-    public abstract async void create_email_async(Geary.FolderPath path, Geary.RFC822.Message rfc822,
-        Geary.EmailFlags? flags, DateTime? date_received, Cancellable? cancellable = null) throws Error;
-    
-    /**
      * Used only for debugging.  Should not be used for user-visible strings.
      */
     public abstract string to_string();

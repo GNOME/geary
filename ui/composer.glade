@@ -145,6 +145,7 @@
     <child>
       <object class="GtkAction" id="save">
         <property name="label" translatable="yes">Sa_ve Draft</property>
+        <property name="visible">False</property>
       </object>
     </child>
   </object>
@@ -682,7 +683,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="save_draft">
+          <object class="GtkButton" id="save_draft_button">
             <property name="related_action">save</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>

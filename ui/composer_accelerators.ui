@@ -28,4 +28,6 @@
     <accelerator action="insertlink" />
     
     <accelerator action="close" />
+    
+    <accelerator action="save" />
 </ui>

@@ -274,11 +274,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         return row.outbox_id;
     }
     
-    public virtual async void create_email_async(Geary.RFC822.Message rfc822, EmailFlags? flags,
-        DateTime? date_received, Cancellable? cancellable = null) throws Error {
+    public virtual async Geary.EmailIdentifier? create_email_async(Geary.RFC822.Message rfc822, EmailFlags? flags,
+        DateTime? date_received, Geary.EmailIdentifier? id = null, Cancellable? cancellable = null) throws Error {
         check_open();
         
-        yield enqueue_email_async(rfc822, cancellable);
+        return yield enqueue_email_async(rfc822, cancellable);
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(
