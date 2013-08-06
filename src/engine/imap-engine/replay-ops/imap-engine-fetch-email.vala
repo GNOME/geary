@@ -111,7 +111,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         
         // true means created
         if (created_or_merged.get(email))
-            engine.notify_email_locally_appended(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
+            engine.notify_local_expansion(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that

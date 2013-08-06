@@ -232,12 +232,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
         Gee.ArrayList<Geary.EmailIdentifier> complete_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Contact> updated_contacts = new Gee.ArrayList<Contact>();
-        int unread_change = 0;
+        int total_unread_change = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             foreach (Geary.Email email in emails) {
                 Gee.Collection<Contact>? contacts_this_email = null;
                 Geary.Email.Field pre_fields;
                 Geary.Email.Field post_fields;
+                int unread_change = 0;
                 bool created = do_create_or_merge_email(cx, email, out pre_fields,
                     out post_fields, out contacts_this_email, ref unread_change, cancellable);
                 
@@ -253,6 +254,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 
                 // Update unread count in DB.
                 do_add_to_unread_count(cx, unread_change, cancellable);
+                
+                total_unread_change += unread_change;
             }
             
             return Db.TransactionOutcome.COMMIT;
@@ -262,7 +265,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             contact_store.update_contacts(updated_contacts);
         
         // Update the email_unread properties.
-        properties.set_status_unseen((properties.email_unread + unread_change).clamp(0, int.MAX));
+        properties.set_status_unseen((properties.email_unread + total_unread_change).clamp(0, int.MAX));
         
         if (complete_ids.size > 0)
             email_complete(complete_ids);

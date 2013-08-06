@@ -23,6 +23,8 @@ public class MainWindow : Gtk.Window {
     
     private Gtk.ScrolledWindow conversation_list_scrolled;
     private MonitoredSpinner spinner = new MonitoredSpinner();
+    private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
+    private Geary.ProgressMonitor? conversation_monitor_progress = null;
     
     public MainWindow() {
         title = GearyApplication.NAME;
@@ -42,12 +44,19 @@ public class MainWindow : Gtk.Window {
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
+        spinner.set_progress_monitor(progress_monitor);
+        progress_monitor.add(conversation_list_store.preview_monitor);
+        
         GLib.List<Gdk.Pixbuf> pixbuf_list = new GLib.List<Gdk.Pixbuf>();
         pixbuf_list.append(IconFactory.instance.application_icon);
         set_default_icon_list(pixbuf_list);
         
         delete_event.connect(on_delete_event);
         key_press_event.connect(on_key_press_event);
+        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
+            connect(on_conversation_monitor_changed);
+        Geary.Engine.instance.account_available.connect(on_account_available);
+        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
         
         create_layout();
     }
@@ -80,13 +89,6 @@ public class MainWindow : Gtk.Window {
         }
         
         return base.configure_event(event);
-    }
-    
-    /**
-     * Sets the progress monitor to display in the status bar.
-     */
-    public void set_progress_monitor(Geary.ProgressMonitor? monitor) {
-        spinner.set_progress_monitor(monitor);
     }
     
     private void create_layout() {
@@ -145,6 +147,39 @@ public class MainWindow : Gtk.Window {
         // Check whether the focused widget wants to handle it, if not let the accelerators kick in
         // via the default handling
         return propagate_key_event(event);
+    }
+    
+    private void on_conversation_monitor_changed() {
+        Geary.App.ConversationMonitor? conversation_monitor =
+            GearyApplication.instance.controller.current_conversations;
+        
+        // Remove existing progress monitor.
+        if (conversation_monitor_progress != null) {
+            progress_monitor.remove(conversation_monitor_progress);
+            conversation_monitor_progress = null;
+        }
+        
+        // Add new one.
+        if (conversation_monitor != null) {
+            conversation_monitor_progress = conversation_monitor.progress_monitor;
+            progress_monitor.add(conversation_monitor_progress);
+        }
+    }
+    
+    private void on_account_available(Geary.AccountInformation account) {
+        try {
+            progress_monitor.add(Geary.Engine.instance.get_account_instance(account).opening_monitor);
+        } catch (Error e) {
+            debug("Could not access account opening progress monitor: %s", e.message);
+        }
+    }
+    
+    private void on_account_unavailable(Geary.AccountInformation account) {
+        try {
+            progress_monitor.remove(Geary.Engine.instance.get_account_instance(account).opening_monitor);
+        } catch (Error e) {
+            debug("Could not access account opening progress monitor: %s", e.message);
+        }
     }
 }
 

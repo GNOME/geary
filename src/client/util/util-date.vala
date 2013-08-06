@@ -144,7 +144,7 @@ public CoarseDate as_coarse_date(DateTime datetime, DateTime now, TimeSpan diff)
         if (same_day(temp, now)) {
             return CoarseDate.YESTERDAY;
         }
-        temp = datetime.add_weeks(1);
+        temp = datetime.add_days(6);
         if (same_day(temp, now) || temp.compare(now) >= 0) {
             return CoarseDate.THIS_WEEK;
         }

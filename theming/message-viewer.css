@@ -5,9 +5,9 @@
  *  recv-collapsed: #f5f5f5
  *
  * Background colors associated with sent emails:
- *  sent-normal: #ffd
- *  sent-quoted: #eeb
- *  sent-collapsed: #f7f7c7
+ *  sent-normal: white
+ *  sent-quoted: #e8e8e8
+ *  sent-collapsed: #f5f5f5
  */
 @media print {
 
@@ -102,7 +102,7 @@ hr {
 }
 
 .email.sent {
-    background-color: #ffd;/* sent-normal */
+    background-color: white;/* sent-normal */
 }
 
 .email .starred {
@@ -241,7 +241,7 @@ body:not(.nohide) .email.hide .header_container .avatar {
     }
     body:not(.nohide) .email.sent.hide,
     body:not(.nohide) .email.sent .email.hide {
-        background-color: #f7f7c7;/* sent-collapsed */
+        background-color: #f5f5f5;/* sent-collapsed */
     }
     body:not(.nohide) .email.hide .body,
     body:not(.nohide) .email.hide > .attachment_container,
@@ -317,7 +317,7 @@ body:not(.nohide) .email.hide .header_container .avatar {
     cursor: hand;
 }
 .email.sent .compressed_note > span {
-    background-color: #f7f7c7;/* sent-collapsed */
+    background-color: #f5f5f5;/* sent-collapsed */
 }
 body.nohide .email .compressed_note > span {
     display: none !important;
@@ -331,7 +331,7 @@ body.nohide .email .compressed_note > span {
     background-color: white;/* recv-normal */
 }
 .email.sent .email {
-    background-color: #ffd;/* sent-normal */
+    background-color: white;/* sent-normal */
 }
 .email .email .email_container .menu,
 .email .email .email_container .starred,
@@ -475,7 +475,7 @@ body.nohide .email .compressed_note > span {
 }
 
 .email.sent .quote_container {
-    background-color: #eeb;/* sent-quoted */
+    background-color: #e8e8e8;/* sent-quoted */
 }
 
 .quote_container > .shower,

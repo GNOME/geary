@@ -33,6 +33,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         search_upgrade_monitor = local.search_index_monitor;
         db_upgrade_monitor = local.upgrade_monitor;
+        opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
         
         if (outbox_path == null) {
             outbox_path = new SmtpOutboxFolderRoot();
@@ -245,6 +246,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     private bool on_refresh_folders() {
         in_refresh_enumerate = true;
+        opening_monitor.notify_start();
         enumerate_folders_async.begin(refresh_cancellable, on_refresh_completed);
         
         refresh_folder_timeout_id = 0;
@@ -253,6 +255,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private void on_refresh_completed(Object? source, AsyncResult result) {
+        opening_monitor.notify_finish();
         try {
             enumerate_folders_async.end(result);
         } catch (Error err) {

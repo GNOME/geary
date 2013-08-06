@@ -19,7 +19,7 @@ public class AttachmentDialog : Gtk.FileChooserDialog {
     }
     
     construct {
-        add_button(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL);
+        add_button(Stock._CANCEL, Gtk.ResponseType.CANCEL);
         add_button(_("_Attach"), Gtk.ResponseType.ACCEPT);
 
         if (!Geary.String.is_empty(current_folder)) {

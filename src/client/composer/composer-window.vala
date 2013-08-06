@@ -641,7 +641,7 @@ public class ComposerWindow : Gtk.Window {
         if (editor.can_undo()) {
             present();
             ConfirmationDialog dialog = new ConfirmationDialog(this,
-                _("Do you want to discard the unsaved message?"), null, Gtk.Stock.DISCARD);
+                _("Do you want to discard the unsaved message?"), null, Stock._DISCARD);
             if (dialog.run() != Gtk.ResponseType.OK)
                 return false;
         }
@@ -725,7 +725,7 @@ public class ComposerWindow : Gtk.Window {
         }
         if (confirmation != null) {
             ConfirmationDialog dialog = new ConfirmationDialog(this,
-                confirmation, null, Gtk.Stock.OK);
+                confirmation, null, Stock._OK);
             if (dialog.run() != Gtk.ResponseType.OK)
                 return false;
         }
@@ -832,7 +832,7 @@ public class ComposerWindow : Gtk.Window {
         label.halign = Gtk.Align.START;
         label.xpad = 4;
         
-        Gtk.Button remove_button = new Gtk.Button.from_stock(Gtk.Stock.REMOVE);
+        Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
         box.pack_start(remove_button, false, false);
         remove_button.clicked.connect(() => remove_attachment(attachment_file, box));
         
@@ -1145,10 +1145,10 @@ public class ComposerWindow : Gtk.Window {
         if (selected != null && (selected is WebKit.DOM.HTMLAnchorElement ||
             selected.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
             existing_link = true;
-            dialog.add_buttons(Gtk.Stock. REMOVE, Gtk.ResponseType.REJECT);
+            dialog.add_buttons(Stock._REMOVE, Gtk.ResponseType.REJECT);
         }
         
-        dialog.add_buttons(Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.OK,
+        dialog.add_buttons(Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._OK,
             Gtk.ResponseType.OK);
         
         Gtk.Entry entry = new Gtk.Entry();
@@ -1313,7 +1313,7 @@ public class ComposerWindow : Gtk.Window {
         context_menu.append(new Gtk.SeparatorMenuItem());
         
         // Select all.
-        Gtk.MenuItem select_all_item = new Gtk.ImageMenuItem.from_stock(Gtk.Stock.SELECT_ALL, null);
+        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(Stock.SELECT__ALL);
         select_all_item.activate.connect(on_select_all);
         context_menu.append(select_all_item);
         
