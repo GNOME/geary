@@ -323,6 +323,7 @@ client/notification/unity-launcher.vala
 
 client/sidebar/sidebar-branch.vala
 client/sidebar/sidebar-common.vala
+client/sidebar/sidebar-count-cell-renderer.vala
 client/sidebar/sidebar-entry.vala
 client/sidebar/sidebar-tree.vala
 

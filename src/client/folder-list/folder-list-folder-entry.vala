@@ -22,10 +22,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override string get_sidebar_name() {
-        return (folder.properties.email_unread == 0 ? folder.get_display_name() :
-            /// This string gets the folder name and the unread messages count,
-            /// e.g. All Mail (5).
-            _("%s (%d)").printf(folder.get_display_name(), folder.properties.email_unread));
+        return folder.get_display_name();
     }
     
     public override string? get_sidebar_tooltip() {
@@ -103,7 +100,11 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     private void on_email_unread_count_changed() {
-        sidebar_name_changed(get_sidebar_name());
+        sidebar_count_changed(get_count());
         sidebar_tooltip_changed(get_sidebar_tooltip());
+    }
+    
+    public override int get_count() {
+        return folder.properties.email_unread;
     }
 }

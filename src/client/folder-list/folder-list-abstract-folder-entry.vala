@@ -22,6 +22,8 @@ public abstract class FolderList.AbstractFolderEntry : Geary.BaseObject, Sidebar
     
     public abstract Icon? get_sidebar_icon();
     
+    public abstract int get_count();
+    
     public virtual string to_string() {
         return "AbstractFolderEntry: " + get_sidebar_name();
     }
