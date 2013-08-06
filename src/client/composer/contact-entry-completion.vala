@@ -5,98 +5,26 @@
  */
 
 public class ContactEntryCompletion : Gtk.EntryCompletion {
-    // Sort column indices.
-    private const int SORT_COLUMN = 0;
-    
-    // Minimum visibility for the contact to appear in autocompletion.
-    private const Geary.ContactImportance CONTACT_VISIBILITY_THRESHOLD = Geary.ContactImportance.TO_TO;
-    
-    private Gtk.ListStore list_store;
-    
+    private ContactListStore list_store;
     private Gtk.TreeIter? last_iter = null;
     
-    private enum Column {
-        CONTACT_OBJECT,
-        CONTACT_MARKUP_NAME,
-        LAST_KEY;
-        
-        public static Type[] get_types() {
-            return {
-                typeof (Geary.Contact), // CONTACT_OBJECT
-                typeof (string),        // CONTACT_MARKUP_NAME
-                typeof (string)         // LAST_KEY
-            };
-        }
-    }
-    
-    public ContactEntryCompletion(Geary.ContactStore? contact_store) {
-        list_store = new Gtk.ListStore.newv(Column.get_types());
-        list_store.set_sort_func(SORT_COLUMN, sort_func);
-        list_store.set_sort_column_id(SORT_COLUMN, Gtk.SortType.ASCENDING);
-        
-        if (contact_store == null)
-            return;
-        
-        foreach (Geary.Contact contact in contact_store.contacts)
-            add_contact(contact);
-        
-        contact_store.contact_added.connect(on_contact_added);
-        contact_store.contact_updated.connect(on_contact_updated);
+    public ContactEntryCompletion(ContactListStore list_store) {
+        this.list_store = list_store;
         
         model = list_store;
         set_match_func(completion_match_func);
         
         Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
         pack_start(text_renderer, true);
-        add_attribute(text_renderer, "markup", Column.CONTACT_MARKUP_NAME);
+        add_attribute(text_renderer, "markup", ContactListStore.Column.CONTACT_MARKUP_NAME);
         
         set_inline_selection(true);
         match_selected.connect(on_match_selected);
         cursor_on_match.connect(on_cursor_on_match);
     }
     
-    private void add_contact(Geary.Contact contact) {
-        if (contact.highest_importance < CONTACT_VISIBILITY_THRESHOLD)
-            return;
-        
-        string full_address = contact.get_rfc822_address().get_full_address();
-        Gtk.TreeIter iter;
-        list_store.append(out iter);
-        list_store.set(iter,
-            Column.CONTACT_OBJECT, contact,
-            Column.CONTACT_MARKUP_NAME, Markup.escape_text(full_address),
-            Column.LAST_KEY, "");
-    }
-    
-    private void update_contact(Geary.Contact updated_contact) {
-        Gtk.TreeIter iter;
-        if (!list_store.get_iter_first(out iter))
-            return;
-        
-        do {
-            if (get_contact(iter) != updated_contact)
-                continue;
-            
-            Gtk.TreePath? path = list_store.get_path(iter);
-            if (path != null)
-                list_store.row_changed(path, iter);
-            
-            return;
-        } while (list_store.iter_next(ref iter));
-    }
-    
-    private void on_contact_added(Geary.Contact contact) {
-        add_contact(contact);
-    }
-    
-    private void on_contact_updated(Geary.Contact contact) {
-        update_contact(contact);
-    }
-    
     private bool on_match_selected(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        string? full_address = get_full_address(iter);
-        if (full_address == null)
-            return false;
+        string full_address = list_store.get_full_address(iter);
             
         Gtk.Entry? entry = sender.get_entry() as Gtk.Entry;
         if (entry == null)
@@ -137,43 +65,21 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         last_iter = null;
     }
     
-    private Geary.Contact? get_contact(Gtk.TreeIter iter) {
-        GLib.Value contact_value;
-        list_store.get_value(iter, Column.CONTACT_OBJECT, out contact_value);
-        return contact_value.get_object() as Geary.Contact;
-    }
-    
-    private string? get_full_address(Gtk.TreeIter iter) {
-        Geary.Contact? contact = get_contact(iter);
-        return contact == null ? null : contact.get_rfc822_address().to_rfc822_string();
-    }
-    
     private bool completion_match_func(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
         // We don't use the provided key, because the user can enter multiple addresses.
         int current_address_index;
         string current_address_key;
         get_addresses(completion, out current_address_index, out current_address_key);
         
-        Geary.Contact? contact = get_contact(iter);
+        Geary.Contact? contact = list_store.get_contact(iter);
         if (contact == null)
             return false;
         
         string highlighted_result;
         if (!match_prefix_contact(current_address_key, contact, out highlighted_result))
             return false;
-            
-        // Changing a row in the list store causes Gtk.EntryCompletion to re-evaluate
-        // completion_match_func for that row. Thus we need to make sure the key has
-        // actually changed before settings the highlighting--otherwise we will cause
-        // an infinite loop.
-        GLib.Value last_key_value;
-        list_store.get_value(iter, Column.LAST_KEY, out last_key_value);
-        string? last_key = last_key_value.get_string();
-        if (current_address_key != last_key) {
-            list_store.set(iter,
-                Column.CONTACT_MARKUP_NAME, highlighted_result,
-                Column.LAST_KEY, current_address_key, -1);
-        }
+        
+        list_store.set_highlighted_result(iter, highlighted_result, current_address_key);
         
         return true;
     }
@@ -258,14 +164,15 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
 
     private bool match_prefix_string(string needle, string? haystack = null,
         out string highlighted_result = null) {
-        bool matched = false;
         highlighted_result = "";
-        if (haystack == null)
+        
+        if (Geary.String.is_empty(haystack) || Geary.String.is_empty(needle))
             return false;
         
         // Default result if there is no match or we encounter an error.
         highlighted_result = haystack;
         
+        bool matched = false;
         try {
             string escaped_needle = Regex.escape_string(needle.normalize());
             Regex regex = new Regex("\\b" + escaped_needle, RegexCompileFlags.CASELESS);
@@ -279,6 +186,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         
         highlighted_result = Markup.escape_text(highlighted_result)
             .replace("&#x91;", "<b>").replace("&#x92;", "</b>");
+        
         return matched;
     }
 
@@ -290,44 +198,6 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         }
         
         return false;
-    }
-    
-    private int sort_func(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
-        // Order by importance, then by real name, then by email.
-        GLib.Value avalue, bvalue;
-        model.get_value(aiter, Column.CONTACT_OBJECT, out avalue);
-        model.get_value(biter, Column.CONTACT_OBJECT, out bvalue);
-        Geary.Contact? acontact = avalue.get_object() as Geary.Contact;
-        Geary.Contact? bcontact = bvalue.get_object() as Geary.Contact;
-        
-        // Contacts can be null if the sort func is called between TreeModel.append and
-        // TreeModel.set.
-        if (acontact == bcontact)
-            return 0;
-        if (acontact == null && bcontact != null)
-            return -1;
-        if (acontact != null && bcontact == null)
-            return 1;
-        
-        // First order by importance.
-        if (acontact.highest_importance > bcontact.highest_importance)
-            return -1;
-        if (acontact.highest_importance < bcontact.highest_importance)
-            return 1;
-        
-        // Then order by real name.
-        string? anormalized_real_name = acontact.real_name == null ? null :
-            acontact.real_name.normalize().casefold();
-        string? bnormalized_real_name = bcontact.real_name == null ? null :
-            bcontact.real_name.normalize().casefold();
-        // strcmp correctly marks 'null' as first in lexigraphic order, so we don't need to
-        // special-case it.
-        int result = strcmp(anormalized_real_name, bnormalized_real_name);
-        if (result != 0)
-            return result;
-        
-        // Finally, order by email.
-        return strcmp(acontact.normalized_email, bcontact.normalized_email);
     }
 }
 
