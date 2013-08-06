@@ -686,6 +686,16 @@ public class Geary.RFC822.Message : BaseObject {
             return;
         }
         
+        GMime.ContentType content_type = part.get_content_type();
+        if (part_disposition == Geary.Attachment.Disposition.INLINE &&
+            content_type.get_media_type().down() == "text") {
+            string subtype = content_type.get_media_subtype().down();
+            if (subtype == "html" || subtype == "plain") {
+                // These are part of the body.
+                return;
+            }
+        }
+        
         if (requested_disposition == null) {
             // Return any attachment whose disposition is recognized by Geary.Attachment.Disposition
             attachments.add(part);
