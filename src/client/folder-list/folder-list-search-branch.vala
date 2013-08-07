@@ -59,5 +59,9 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     private void on_email_total_changed() {
         sidebar_tooltip_changed(get_sidebar_tooltip());
     }
+    
+    public override int get_count() {
+        return 0;
+    }
 }
 

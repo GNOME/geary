@@ -11,11 +11,15 @@ public interface Sidebar.Entry : Object {
     
     public signal void sidebar_icon_changed(Icon? icon);
     
+    public signal void sidebar_count_changed(int count);
+    
     public abstract string get_sidebar_name();
     
     public abstract string? get_sidebar_tooltip();
     
     public abstract Icon? get_sidebar_icon();
+    
+    public abstract int get_count();
     
     public abstract string to_string();
     
