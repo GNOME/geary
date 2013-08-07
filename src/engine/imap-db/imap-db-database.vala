@@ -45,7 +45,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             break;
             
             case 13:
-                post_upgrade_populate_inline_attachments();
+                post_upgrade_populate_additional_attachments();
             break;
         }
     }
@@ -196,7 +196,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     }
     
     // Version 13.
-    private void post_upgrade_populate_inline_attachments() {
+    private void post_upgrade_populate_additional_attachments() {
         try {
             exec_transaction(Db.TransactionType.RO, (cx) => {
                 Db.Statement stmt = cx.prepare("""
@@ -215,9 +215,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     try {
                         Geary.RFC822.Message message = new Geary.RFC822.Message.from_parts(
                             new RFC822.Header(header), new RFC822.Text(body));
+                        Geary.Attachment.Disposition? target_disposition = null;
+                        if (message.get_sub_messages().is_empty)
+                            target_disposition = Geary.Attachment.Disposition.INLINE;
                         Geary.ImapDB.Folder.do_save_attachments_db(cx, id,
-                            message.get_attachments(Geary.Attachment.Disposition.INLINE),
-                            this, null);
+                            message.get_attachments(target_disposition), this, null);
                     } catch (Error e) {
                         debug("Error fetching inline Mime parts: %s", e.message);
                     }
