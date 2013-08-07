@@ -198,7 +198,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     // Version 13.
     private void post_upgrade_populate_additional_attachments() {
         try {
-            exec_transaction(Db.TransactionType.RO, (cx) => {
+            exec_transaction(Db.TransactionType.RW, (cx) => {
                 Db.Statement stmt = cx.prepare("""
                     SELECT id, header, body
                     FROM MessageTable
@@ -227,6 +227,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     select.next();
                     pump_event_loop();
                 }
+                
+                // additionally, because this schema change (and code changes as well) introduces
+                // two new types of attachments as well as processing for all MIME text sections
+                // of messages (not just the first one), blow away the search table and let the
+                // search indexer start afresh
+                cx.exec("DELETE FROM MessageSearchTable");
                 
                 return Db.TransactionOutcome.COMMIT;
             });
