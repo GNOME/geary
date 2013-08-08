@@ -86,7 +86,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     public void set_special_folder_type(SpecialFolderType new_type) {
+        SpecialFolderType old_type = _special_folder_type;
         _special_folder_type = new_type;
+        if(old_type != new_type)
+            notify_special_folder_type_changed(old_type, new_type);
     }
     
     public override Geary.Folder.OpenState get_open_state() {
@@ -261,6 +264,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             Gee.ArrayList<Geary.EmailIdentifier> appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
             Gee.ArrayList<Geary.EmailIdentifier> removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
             for (;;) {
+                // this loop can be long, so manually check for cancellation
+                if (cancellable != null && cancellable.is_cancelled())
+                    throw new IOError.CANCELLED("Folder %s normalization cancelled", to_string());
+                
                 Geary.Email? remote_email = null;
                 Geary.Imap.UID? remote_uid = null;
                 if (old_remote != null && remote_ctr < remote_length) {
@@ -791,11 +798,18 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // marked for removal, which that helper function doesn't like
             local_position = remote_position - (remote_count - local_count);
             
-            debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
-            
-            Imap.UID? uid = yield local_folder.get_uid_at_async(local_position, null);
-            if (uid != null)
-                owned_id = new Imap.EmailIdentifier(uid, path);
+            // zero or negative means the message exists beyond the local vector's range, so
+            // nothing to do there
+            if (local_position > 0) {
+                debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
+                
+                Imap.UID? uid = yield local_folder.get_uid_at_async(local_position, null);
+                if (uid != null)
+                    owned_id = new Imap.EmailIdentifier(uid, path);
+            } else {
+                debug("do_replay_remove_message: message not stored locally (local_count=%d local_position=%d)",
+                    local_count, local_position);
+            }
         } catch (Error err) {
             debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
                 to_string(), err.message);

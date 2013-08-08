@@ -69,16 +69,18 @@ public class ConversationListView : Gtk.TreeView {
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
         
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
+        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
+            connect(on_conversation_monitor_changed);
     }
     
-    public void set_conversation_monitor(Geary.App.ConversationMonitor? new_conversation_monitor) {
+    private void on_conversation_monitor_changed() {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
             conversation_monitor.conversation_removed.disconnect(on_conversation_removed);
         }
         
-        conversation_monitor = new_conversation_monitor;
+        conversation_monitor = GearyApplication.instance.controller.current_conversations;
         
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.connect(on_scan_started);

@@ -5,7 +5,7 @@
  */
 
 // Primary controller object for Geary.
-public class GearyController {
+public class GearyController : Geary.BaseObject {
     // Named actions.
     public const string ACTION_HELP = "GearyHelp";
     public const string ACTION_ABOUT = "GearyAbout";
@@ -32,7 +32,9 @@ public class GearyController {
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
-
+    
+    public const string PROP_CURRENT_CONVERSATION ="current-conversations";
+    
     public const int MIN_CONVERSATION_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
@@ -62,11 +64,12 @@ public class GearyController {
     
     public MainWindow main_window { get; private set; }
     
+    public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
+    
     private Geary.Account? current_account = null;
     private Gee.HashMap<Geary.Account, Geary.Folder> inboxes
         = new Gee.HashMap<Geary.Account, Geary.Folder>();
     private Geary.Folder? current_folder = null;
-    private Geary.App.ConversationMonitor? current_conversations = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_message = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -229,20 +232,20 @@ public class GearyController {
         accounts.label = _("A_ccounts");
         entries += accounts;
         
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Gtk.Stock.PREFERENCES, TRANSLATABLE, "<Ctrl>E",
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Stock._PREFERENCES, TRANSLATABLE, "<Ctrl>E",
             null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
 
-        Gtk.ActionEntry help = { ACTION_HELP, Gtk.Stock.HELP, TRANSLATABLE, "F1", null, on_help };
+        Gtk.ActionEntry help = { ACTION_HELP, Stock._HELP, TRANSLATABLE, "F1", null, on_help };
         help.label = _("_Help");
         entries += help;
 
-        Gtk.ActionEntry about = { ACTION_ABOUT, Gtk.Stock.ABOUT, TRANSLATABLE, null, null, on_about };
+        Gtk.ActionEntry about = { ACTION_ABOUT, Stock._ABOUT, TRANSLATABLE, null, null, on_about };
         about.label = _("_About");
         entries += about;
         
-        Gtk.ActionEntry quit = { ACTION_QUIT, Gtk.Stock.QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
+        Gtk.ActionEntry quit = { ACTION_QUIT, Stock._QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
         quit.label = _("_Quit");
         entries += quit;
         
@@ -760,7 +763,6 @@ public class GearyController {
         if (current_conversations != null) {
             yield current_conversations.stop_monitoring_async(!current_is_inbox, null);
             current_conversations = null;
-            main_window.set_progress_monitor(null);
         } else if (current_folder != null && !current_is_inbox) {
             yield current_folder.close_async();
         }
@@ -801,10 +803,6 @@ public class GearyController {
         
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.seed_completed.connect(on_seed_completed);
-        
-        main_window.conversation_list_store.set_conversation_monitor(current_conversations);
-        main_window.conversation_list_view.set_conversation_monitor(current_conversations);
-        main_window.set_progress_monitor(current_conversations.progress_monitor);
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
@@ -1034,7 +1032,7 @@ public class GearyController {
         } catch (Error error) {
             debug("Error showing help: %s", error.message);
             Gtk.Dialog dialog = new Gtk.Dialog.with_buttons("Error", null,
-                Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.Stock.CLOSE, Gtk.ResponseType.CLOSE, null);
+                Gtk.DialogFlags.DESTROY_WITH_PARENT, Stock._CLOSE, Gtk.ResponseType.CLOSE, null);
             dialog.response.connect(() => { dialog.destroy(); });
             dialog.get_content_area().add(new Gtk.Label("Error showing help: %s".printf(error.message)));
             dialog.show_all();
@@ -1301,7 +1299,7 @@ public class GearyController {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open \"%s\"?").printf(attachment.filename),
                 _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Gtk.Stock.OPEN, Gtk.Stock.CANCEL, _("Don't _ask me again"), false);
+                Stock._OPEN, Stock._CANCEL, _("Don't _ask me again"), false);
             if (ask_to_open.run() != Gtk.ResponseType.OK)
                 return;
             
@@ -1337,7 +1335,7 @@ public class GearyController {
             ? Gtk.FileChooserAction.SAVE
             : Gtk.FileChooserAction.SELECT_FOLDER;
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
-            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL, Gtk.Stock.SAVE, Gtk.ResponseType.ACCEPT, null);
+            Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
         if (attachments.size == 1) {

@@ -172,6 +172,28 @@ public class Geary.AggregateProgressMonitor : Geary.ProgressMonitor {
         pm.finish.connect(on_finish);
     }
     
+    public void remove(Geary.ProgressMonitor pm) {
+        // TODO: Handle the case where we remove a new monitor during progress.
+        monitors.remove(pm);
+        pm.start.disconnect(on_start);
+        pm.update.disconnect(on_update);
+        pm.finish.disconnect(on_finish);
+        
+        if (pm.is_in_progress) {
+            // If no other PMs are in progress, we must issue a finish signal.
+            bool issue_signal = true;
+            foreach(ProgressMonitor p in monitors) {
+                if (p.is_in_progress) {
+                    issue_signal = false;
+                    break;
+                }
+            }
+            
+            if (issue_signal)
+                notify_finish();
+        }
+    }
+    
     private void on_start() {
         if (!is_in_progress)
             notify_start();

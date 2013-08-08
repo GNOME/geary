@@ -97,8 +97,8 @@ public class PasswordDialog {
         check_remember_password.active = account_information.imap_remember_password;
         
         // Add action buttons
-        Gtk.Button cancel_button = new Gtk.Button.from_stock(Gtk.Stock.CANCEL);
-        ok_button = new Gtk.Button.from_stock(Gtk.Stock.OK);
+        Gtk.Button cancel_button = new Gtk.Button.from_stock(Stock._CANCEL);
+        ok_button = new Gtk.Button.from_stock(Stock._OK);
         ok_button.can_default = true;
         dialog.add_action_widget(cancel_button, Gtk.ResponseType.CANCEL);
         dialog.add_action_widget(ok_button, Gtk.ResponseType.OK);

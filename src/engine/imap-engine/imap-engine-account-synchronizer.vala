@@ -6,6 +6,7 @@
 
 private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private const int FETCH_DATE_RECEIVED_CHUNK_COUNT = 25;
+    private const int SYNC_DELAY_SEC = 15;
     
     public GenericAccount account { get; private set; }
     
@@ -14,6 +15,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private GenericFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
     private Nonblocking.Semaphore stopped = new Nonblocking.Semaphore();
+    private Gee.HashSet<FolderPath> unavailable_paths = new Gee.HashSet<FolderPath>();
     
     public AccountSynchronizer(GenericAccount account) {
         this.account = account;
@@ -51,6 +53,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         bg_queue.allow_duplicates = false;
         bg_queue.requeue_duplicate = false;
         bg_cancellable = new Cancellable();
+        unavailable_paths.clear();
         
         // immediately start processing folders as they are announced as available
         process_queue_async.begin();
@@ -61,6 +64,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         bg_cancellable.cancel();
         bg_queue.clear();
+        unavailable_paths.clear();
     }
     
     private void on_account_prefetch_changed() {
@@ -68,7 +72,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             // treat as an availability check (i.e. as if the account had just opened) because
             // just because this value has changed doesn't mean the contents in the folders
             // have changed
-            send_all(account.list_folders(), true);
+            delayed_send_all(account.list_folders(), true);
         } catch (Error err) {
             debug("Unable to schedule re-sync for %s due to prefetch time changing: %s",
                 account.to_string(), err.message);
@@ -80,15 +84,38 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         if (stopped.is_passed())
             return;
         
-        if (available != null)
-            send_all(available, true);
+        if (available != null) {
+            foreach (Folder folder in available)
+                unavailable_paths.remove(folder.path);
+            
+            delayed_send_all(available, true);
+        }
         
-        if (unavailable != null)
+        if (unavailable != null) {
+            foreach (Folder folder in unavailable)
+                unavailable_paths.add(folder.path);
+            
             revoke_all(unavailable);
+        }
     }
     
     private void on_folders_contents_altered(Gee.Collection<Folder> altered) {
-        send_all(altered, false);
+        delayed_send_all(altered, false);
+    }
+    
+    private void delayed_send_all(Gee.Collection<Folder> folders, bool reason_available) {
+        Timeout.add_seconds(SYNC_DELAY_SEC, () => {
+            // remove any unavailable folders
+            Gee.ArrayList<Folder> trimmed_folders = new Gee.ArrayList<Folder>();
+            foreach (Folder folder in folders) {
+                if (!unavailable_paths.contains(folder.path))
+                    trimmed_folders.add(folder);
+            }
+            
+            send_all(trimmed_folders, reason_available);
+            
+            return false;
+        });
     }
     
     private void send_all(Gee.Collection<Folder> folders, bool reason_available) {
@@ -244,11 +271,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                     // Oldest local email before epoch, don't sync from network
                     return true;
                 } else if (folder.properties.email_total == local_count) {
-                    // Local email is after epoch, but there's nothing before it
+                    // Local earliest email is after epoch, but there's nothing before it
                     return true;
                 } else {
-                    debug("Oldest local email in %s not old enough (%s vs. %s), synchronizing...",
-                        folder.to_string(), oldest_local.to_string(), epoch.to_string());
+                    debug("Oldest local email in %s not old enough (%s vs. %s), email_total=%d vs. local_count=%d, synchronizing...",
+                        folder.to_string(), oldest_local.to_string(), epoch.to_string(),
+                        folder.properties.email_total, local_count);
                 }
             } else if (folder.properties.email_total == 0) {
                 // no local messages, no remote messages -- this is as good as having everything up
@@ -305,12 +333,36 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         // only perform vector expansion if oldest isn't old enough
         if (oldest_local == null || oldest_local.compare(epoch) > 0) {
-            Geary.EmailIdentifier? epoch_id = yield folder.find_earliest_email_async(epoch,
-                oldest_local_id, bg_cancellable);
-            if (epoch_id == null) {
-                debug("Unable to locate epoch messages on remote folder %s%s", folder.to_string(),
-                    (oldest_local_id != null) ? " earlier than oldest local" : "");
-            }
+            // go back one month at a time to the epoch, performing a little vector expansion at a
+            // time rather than all at once (which will stall the replay queue)
+            DateTime current_epoch = (oldest_local != null) ? oldest_local : new DateTime.now_local();
+            do {
+                current_epoch = current_epoch.add_months(-1);
+                
+                // don't go past epoch
+                if (current_epoch.compare(epoch) < 0)
+                    current_epoch = epoch;
+                
+                debug("Background sync'ing %s to %s", folder.to_string(), current_epoch.to_string());
+                Geary.EmailIdentifier? epoch_id = yield folder.find_earliest_email_async(current_epoch,
+                    oldest_local_id, bg_cancellable);
+                if (epoch_id == null && current_epoch.compare(epoch) <= 0) {
+                    debug("Unable to locate epoch messages on remote folder %s%s, fetching one past oldest...",
+                        folder.to_string(),
+                        (oldest_local_id != null) ? " earlier than oldest local" : "");
+                    
+                    // if there's nothing between the oldest local and the epoch, that means the
+                    // mail just prior to our local oldest is oldest than the epoch; rather than
+                    // continually thrashing looking for something that's just out of reach, add it
+                    // to the folder and be done with it ... note that this even works if oldest_local_id
+                    // is null, as that means the local folder is empty and so we should at least
+                    // pull the first one to get a marker of age
+                    yield folder.list_email_by_id_async(oldest_local_id, 1, Geary.Email.Field.NONE,
+                        Geary.Folder.ListFlags.NONE, bg_cancellable);
+                } else if (epoch_id != null) {
+                    oldest_local_id = epoch_id;
+                }
+            } while (current_epoch.compare(epoch) > 0);
         } else {
             debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
                 folder.to_string(), oldest_local.to_string(), epoch.to_string());

@@ -17,6 +17,7 @@ public interface Geary.Account : BaseObject {
     
     public abstract Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public abstract Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
+    public abstract Geary.ProgressMonitor opening_monitor { get; protected set; }
     
     public signal void opened();
     

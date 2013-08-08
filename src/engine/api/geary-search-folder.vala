@@ -276,7 +276,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         int result_mutex_token = yield result_mutex.claim_async();
         
         Geary.EmailIdentifier[] ids = new Geary.EmailIdentifier[search_results.size];
-        int initial_index = -1;
+        int initial_index = 0;
         int i = 0;
         foreach (Geary.Email email in search_results) {
             if (initial_id != null && email.id.equal_to(initial_id))
@@ -284,12 +284,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
             ids[i++] = email.id;
         }
         
-        if (initial_id == null)
+        if (initial_id == null && flags.is_all_set(Folder.ListFlags.OLDEST_TO_NEWEST))
             initial_index = ids.length - 1;
         
         Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
         if (initial_index >= 0) {
-            int increment = flags.is_oldest_to_newest() ? 1 : -1;
+            int increment = flags.is_oldest_to_newest() ? -1 : 1;
             i = initial_index;
             if (!flags.is_including_id() && initial_id != null)
                 i += increment;

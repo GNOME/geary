@@ -8,8 +8,8 @@
 public class AccountDialogAddEditPane : AccountDialogPane {
     public AddEditPage add_edit_page { get; private set; default = new AddEditPage(); }
     private Gtk.ButtonBox button_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
-    private Gtk.Button ok_button = new Gtk.Button.from_stock(Gtk.Stock.OK);
-    private Gtk.Button cancel_button = new Gtk.Button.from_stock(Gtk.Stock.CANCEL);
+    private Gtk.Button ok_button = new Gtk.Button.with_mnemonic(Stock._OK);
+    private Gtk.Button cancel_button = new Gtk.Button.with_mnemonic(Stock._CANCEL);
     
     public signal void ok(Geary.AccountInformation info);
     

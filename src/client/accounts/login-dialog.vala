@@ -24,9 +24,9 @@ public class LoginDialog : Gtk.Dialog {
         page.size_changed.connect(() => { resize(1, 1); });
         page.info_changed.connect(on_info_changed);
         
-        cancel_button = new Gtk.Button.from_stock(Gtk.Stock.CANCEL);
+        cancel_button = new Gtk.Button.from_stock(Stock._CANCEL);
         add_action_widget(cancel_button, Gtk.ResponseType.CANCEL);
-        ok_button = new Gtk.Button.from_stock(Gtk.Stock.ADD);
+        ok_button = new Gtk.Button.from_stock(Stock._ADD);
         ok_button.can_default = true;
         add_action_widget(ok_button, Gtk.ResponseType.OK);
         set_default_response(Gtk.ResponseType.OK);

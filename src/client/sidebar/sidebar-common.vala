@@ -49,6 +49,10 @@ public class Sidebar.Grouping : Object, Sidebar.Entry, Sidebar.ExpandableEntry,
         return closed_icon;
     }
     
+    public int get_count() {
+        return -1;
+    }
+    
     public string to_string() {
         return name;
     }
