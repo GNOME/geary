@@ -93,6 +93,9 @@ public class GearyController : Geary.BaseObject {
     private LoginDialog? login_dialog = null;
     private UpgradeDialog upgrade_dialog;
     
+    // List of windows we're waiting to close before Geary closes.
+    private Gee.List<ComposerWindow> waiting_to_close = new Gee.ArrayList<ComposerWindow>();
+    
     /**
      * Fired when the currently selected account has changed.
      */
@@ -1401,17 +1404,48 @@ public class GearyController : Geary.BaseObject {
     }
     
     private bool close_composition_windows() {
-        // We want to allow the user to cancel a quit when they have unsent text.
+        Gee.List<ComposerWindow> composers_to_destroy = new Gee.ArrayList<ComposerWindow>();
+        bool quit_cancelled = false;
         
-        // We are modifying the list as we go, so we can't simply iterate through it.
-        while (composer_windows.size > 0) {
-            ComposerWindow composer_window = composer_windows.first();
-            if (!composer_window.should_close())
-                return false;
+        // If there's composer windows open, give the user a chance to save or cancel.
+        foreach(ComposerWindow cw in composer_windows) {
+            // Check if we should close the window immediately, or if we need to wait.
+            if (!cw.should_close()) {
+                if (cw.delayed_close) {
+                    // Window is currently busy saving.
+                    waiting_to_close.add(cw);
+                    
+                    continue;
+                } else {
+                    // User cancelled operation.
+                    quit_cancelled = true;
+                    
+                    break;
+                }
+            }
             
-            // This will remove composer_window from composer_windows.
-            // See GearyController.on_composer_window_destroy.
-            composer_window.destroy();
+            // Hide any existing composer windows for the moment; actually deleting the windows
+            // will result in their removal from composer_windows, which could crash this loop.
+            composers_to_destroy.add(cw);
+            cw.hide();
+        }
+        
+        // Safely destroy windows.
+        foreach(ComposerWindow cw in composers_to_destroy)
+            cw.destroy();
+        
+        // If we cancelled the quit we can bail here.
+        if (quit_cancelled) {
+            waiting_to_close.clear();
+            
+            return false;
+        }
+        
+        // If there's still windows saving, we can't exit just yet.  Hide the main window and wait.
+        if (waiting_to_close.size > 0) {
+            main_window.hide();
+            
+            return false;
         }
         
         // If we deleted all composer windows without the user cancelling, we can exit.
@@ -1456,6 +1490,12 @@ public class GearyController : Geary.BaseObject {
     
     private void on_composer_window_destroy(Gtk.Widget sender) {
         composer_windows.remove((ComposerWindow) sender);
+        
+        if (waiting_to_close.remove((ComposerWindow) sender)) {
+            // If we just removed the last window in the waiting to close list, it's time to exit!
+            if (waiting_to_close.size == 0)
+                GearyApplication.instance.exit();
+        }
     }
     
     private void on_new_message() {
