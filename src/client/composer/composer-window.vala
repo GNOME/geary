@@ -761,11 +761,32 @@ public class ComposerWindow : Gtk.Window {
         return true;
     }
     
+    // Sends the current message.
     private void on_send() {
         if (should_send()) {
-            linkify_document(editor.get_dom_document());
-            account.send_email_async.begin(get_composed_email());
+            on_send_async.begin();
             destroy();
+        }
+    }
+    
+    // Used internally by on_send()
+    private async void on_send_async() {
+        linkify_document(editor.get_dom_document());
+        
+        // Perform send.
+        try {
+            yield account.send_email_async(get_composed_email());
+        } catch (Error e) {
+            warning("Error sending email: %s", e.message);
+        }
+        
+        // If there's a draft, delete it.
+        Geary.FolderSupport.Remove? removable_drafts = drafts_folder as Geary.FolderSupport.Remove;
+        try {
+            if (draft_id != null && removable_drafts != null)
+                yield removable_drafts.remove_single_email_async(draft_id);
+        } catch (Error e) {
+            warning("Unable to delete draft: %s", e.message);
         }
     }
     
