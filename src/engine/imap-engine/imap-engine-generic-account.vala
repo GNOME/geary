@@ -5,7 +5,7 @@
  */
 
 private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
-    private const int REFRESH_FOLDER_LIST_SEC = 10 * 60;
+    private const int REFRESH_FOLDER_LIST_SEC = 2 * 60;
     
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
@@ -406,13 +406,19 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             // only worry about alterations if the remote is openable
             if (remote_folder.properties.is_openable.is_possible()) {
                 ImapDB.Folder local_folder = generic_folder.local_folder;
-                if (remote_folder.properties.have_contents_changed(local_folder.get_properties()).is_possible())
+                
+                if (remote_folder.properties.have_contents_changed(local_folder.get_properties(),
+                    generic_folder.to_string())) {
                     altered_paths.add(remote_folder.path);
+                }
             }
             
-            // always update, openable or not
+            // always update, openable or not; update UIDs if already open, otherwise will keep
+            // signalling that it's changed (because the only time UIDNEXT/UIDValidity is updated
+            // is when the folder is first opened)
             try {
-                yield local.update_folder_status_async(remote_folder, cancellable);
+                yield local.update_folder_status_async(remote_folder,
+                    generic_folder.get_open_state() != Geary.Folder.OpenState.CLOSED, cancellable);
             } catch (Error update_error) {
                 debug("Unable to update local folder %s with remote properties: %s",
                     remote_folder.to_string(), update_error.message);

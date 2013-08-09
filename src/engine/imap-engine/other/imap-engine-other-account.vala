@@ -13,7 +13,7 @@ private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
     protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         SpecialFolderType type;
-        if (path.basename == Imap.Account.INBOX_NAME)
+        if (Imap.MailboxSpecifier.folder_path_is_inbox(path))
             type = SpecialFolderType.INBOX;
         else
             type = local_folder.get_properties().attrs.get_special_folder_type();

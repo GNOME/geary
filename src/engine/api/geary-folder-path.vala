@@ -41,7 +41,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     }
     
     /**
-     * Returns true if this {@link FolderPath} is the root folder.
+     * Returns true if this {@link FolderPath} is a root folder.
      *
      * This means that the FolderPath ''should'' be castable into {@link FolderRoot}, which is
      * enforced through the constructor and accessor styles of this class.  However, this test
