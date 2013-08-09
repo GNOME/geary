@@ -317,7 +317,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
                         remote_email.id, null)) {
                         to_create_or_merge.add(remote_email);
-                        appended_ids.add(remote_email.id);
                         
                         Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending inside remote ID %s",
                             to_string(), remote_email.id.to_string());

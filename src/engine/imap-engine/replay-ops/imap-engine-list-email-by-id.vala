@@ -43,11 +43,16 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
             }
         }
         
-        // verify that the initial_id was found; if not, then want to get it from the remote
-        // (this will force a vector expansion, if required)
-        if (initial_id != null && !initial_id_found) {
-            unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION,
-                initial_id);
+        // If INCLUDING_ID specified, verify that the initial_id was found; if not, then want to
+        // get it from the remote (this will force a vector expansion, if required)
+        if (flags.is_including_id()) {
+            if (initial_id != null && !initial_id_found) {
+                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION,
+                    initial_id);
+            }
+        } else {
+            // fake it, as this flag is used later to determine vector expansion
+            initial_id_found = true;
         }
         
         // report fulfilled items
