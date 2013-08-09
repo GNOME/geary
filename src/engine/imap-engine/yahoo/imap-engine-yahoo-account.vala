@@ -40,8 +40,7 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
         if (special_map == null) {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
             
-            special_map.set(new Geary.FolderRoot(Imap.Account.INBOX_NAME, null, false),
-                Geary.SpecialFolderType.INBOX);
+            special_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(), Geary.SpecialFolderType.INBOX);
             special_map.set(new Geary.FolderRoot("Sent", null, false), Geary.SpecialFolderType.SENT);
             special_map.set(new Geary.FolderRoot("Draft", null, false), Geary.SpecialFolderType.DRAFTS);
             special_map.set(new Geary.FolderRoot("Bulk Mail", null, false), Geary.SpecialFolderType.SPAM);

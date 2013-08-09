@@ -16,9 +16,9 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     
     // Don't fetch FLAGS; those are fetched by the FlagWatcher and during normalization when a
     // standard open_async() is invoked on the Folder
-    private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL & ~(Geary.Email.MUTABLE_FIELDS);
+    private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
     private const int PREFETCH_IDS_CHUNKS = 500;
-    private const int PREFETCH_CHUNK_BYTES = 64 * 1024;
+    private const int PREFETCH_CHUNK_BYTES = 8 * 1024;
     
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
@@ -81,6 +81,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     
     // emails should include PROPERTIES
     private void schedule_prefetch(Gee.Collection<Geary.Email> emails) {
+        debug("%s: scheduling %d emails for prefetching", folder.to_string(), emails.size);
+        
         prefetch_emails.add_all(emails);
         
         // only increment active state if not rescheduling
@@ -105,8 +107,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         for (;;) {
             Gee.List<Geary.Email>? list = null;
             try {
-                list = yield folder.list_email_by_id_async(lowest, PREFETCH_IDS_CHUNKS,
-                    Geary.Email.Field.PROPERTIES, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+                list = yield folder.local_folder.list_email_by_id_async(lowest, PREFETCH_IDS_CHUNKS,
+                    Geary.Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.ONLY_INCOMPLETE, cancellable);
             } catch (Error err) {
                 debug("Error while list local emails for %s: %s", folder.to_string(), err.message);
             }
@@ -129,8 +131,9 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     private async void do_prepare_new_async(Gee.Collection<Geary.EmailIdentifier> ids) {
         Gee.List<Geary.Email>? list = null;
         try {
-            list = yield folder.list_email_by_sparse_id_async(ids, Geary.Email.Field.PROPERTIES,
-                Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
+            list = yield folder.local_folder.list_email_by_sparse_id_async(
+                (Gee.Collection<ImapDB.EmailIdentifier>) ids,
+                Geary.Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.ONLY_INCOMPLETE, cancellable);
         } catch (Error err) {
             debug("Error while list local emails for %s: %s", folder.to_string(), err.message);
         }
@@ -167,30 +170,6 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         // snarf up all requested Emails for this round
         Gee.TreeSet<Geary.Email> emails = prefetch_emails;
         prefetch_emails = new Collection.FixedTreeSet<Geary.Email>(Email.compare_date_received_descending);
-        
-        if (emails.size == 0)
-            return;
-        
-        // Remove anything that is fully prefetched
-        Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? fields = null;
-        try {
-            fields = yield folder.list_local_email_fields_async(Email.emails_to_map(emails).keys,
-                cancellable);
-        } catch (Error err) {
-            debug("do_prefetch_batch_async: Unable to list local fields for %s prefetch: %s",
-                folder.to_string(), err.message);
-            
-            return;
-        }
-        
-        Collection.filtered_remove<Geary.Email>(emails, (email) => {
-            // if not present, don't prefetch
-            if (fields == null || !fields.has_key(email.id))
-                return false;
-            
-            // only prefetch if missing fields
-            return !fields.get(email.id).fulfills(PREFETCH_FIELDS);
-        });
         
         if (emails.size == 0)
             return;

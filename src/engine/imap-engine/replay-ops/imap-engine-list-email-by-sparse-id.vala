@@ -5,34 +5,6 @@
  */
 
 private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractListEmail {
-    private class LocalBatchOperation : Nonblocking.BatchOperation {
-        public GenericFolder owner;
-        public Geary.EmailIdentifier id;
-        public Geary.Email.Field required_fields;
-        
-        public LocalBatchOperation(GenericFolder owner, Geary.EmailIdentifier id,
-            Geary.Email.Field required_fields) {
-            this.owner = owner;
-            this.id = id;
-            this.required_fields = required_fields;
-        }
-        
-        public override async Object? execute_async(Cancellable? cancellable) throws Error {
-            // TODO: Need a sparse ID fetch in ImapDB.Folder to scoop all these up at once
-            try {
-                return yield owner.local_folder.fetch_email_async(id, required_fields,
-                    ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
-            } catch (Error err) {
-                // only throw errors that are not NOT_FOUND and INCOMPLETE_MESSAGE, as these two
-                // are recoverable
-                if (!(err is Geary.EngineError.NOT_FOUND) && !(err is Geary.EngineError.INCOMPLETE_MESSAGE))
-                    throw err;
-            }
-            
-            return null;
-        }
-    }
-    
     private Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
     
     public ListEmailBySparseID(GenericFolder owner, Gee.Collection<Geary.EmailIdentifier> ids,
@@ -51,31 +23,30 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
             return ReplayOperation.Status.CONTINUE;
         }
         
-        Nonblocking.Batch batch = new Nonblocking.Batch();
-        
-        // Fetch emails by ID from local store all at once
-        foreach (Geary.EmailIdentifier id in ids)
-            batch.add(new LocalBatchOperation(owner, id, required_fields));
-        
-        yield batch.execute_all_async(cancellable);
-        batch.throw_first_exception();
+        Gee.List<Geary.Email>? list = yield owner.local_folder.list_email_by_sparse_id_async(ids, 
+            required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
         
         // Build list of emails fully fetched from local store and table of remaining emails by
         // their lack of completeness
         Gee.List<Geary.Email> fulfilled = new Gee.ArrayList<Geary.Email>();
-        foreach (int batch_id in batch.get_ids()) {
-            LocalBatchOperation local_op = (LocalBatchOperation) batch.get_operation(batch_id);
-            Geary.Email? email = (Geary.Email?) batch.get_result(batch_id);
+        if (list != null && list.size > 0) {
+            Gee.Map<Geary.EmailIdentifier, Geary.Email>? map = Email.emails_to_map(list);
+            assert(map != null);
             
-            // if completely unknown, make sure duplicate detection fields are included; otherwise,
-            // if known, then they were pulled down during folder normalization and during
-            // vector expansion
-            if (email == null)
-                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, local_op.id);
-            else if (!email.fields.fulfills(required_fields))
-                unfulfilled.set(required_fields.clear(email.fields), local_op.id);
-            else
-                fulfilled.add(email);
+            // walk list of *requested* IDs to ensure that unknown are considering unfulfilled
+            foreach (Geary.EmailIdentifier id in ids) {
+                Geary.Email? email = map.get(id);
+            
+                // if completely unknown, make sure duplicate detection fields are included; otherwise,
+                // if known, then they were pulled down during folder normalization and during
+                // vector expansion
+                if (email == null)
+                    unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION, id);
+                else if (!email.fields.fulfills(required_fields))
+                    unfulfilled.set(required_fields.clear(email.fields), id);
+                else
+                    fulfilled.add(email);
+            }
         }
         
         if (fulfilled.size > 0) {

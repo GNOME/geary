@@ -317,7 +317,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.CREATE,
                         remote_email.id, null)) {
                         to_create_or_merge.add(remote_email);
-                        appended_ids.add(remote_email.id);
                         
                         Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: appending inside remote ID %s",
                             to_string(), remote_email.id.to_string());
@@ -798,11 +797,18 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // marked for removal, which that helper function doesn't like
             local_position = remote_position - (remote_count - local_count);
             
-            debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
-            
-            Imap.UID? uid = yield local_folder.get_uid_at_async(local_position, null);
-            if (uid != null)
-                owned_id = new Imap.EmailIdentifier(uid, path);
+            // zero or negative means the message exists beyond the local vector's range, so
+            // nothing to do there
+            if (local_position > 0) {
+                debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
+                
+                Imap.UID? uid = yield local_folder.get_uid_at_async(local_position, null);
+                if (uid != null)
+                    owned_id = new Imap.EmailIdentifier(uid, path);
+            } else {
+                debug("do_replay_remove_message: message not stored locally (local_count=%d local_position=%d)",
+                    local_count, local_position);
+            }
         } catch (Error err) {
             debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
                 to_string(), err.message);

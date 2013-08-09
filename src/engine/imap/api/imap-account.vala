@@ -18,10 +18,6 @@
  */
 
 private class Geary.Imap.Account : BaseObject {
-    // all references to Inbox are converted to this string, purely for sanity sake when dealing
-    // with Inbox's case issues
-    public const string INBOX_NAME = "INBOX";
-    
     public bool is_open { get; private set; default = false; }
     
     private string name;
@@ -400,12 +396,12 @@ private class Geary.Imap.Account : BaseObject {
             return null;
         
         FolderRoot root = path.get_root();
-        if (root.basename.up() != INBOX_NAME)
+        if (root.basename.up() != Imap.MailboxSpecifier.NORMALIZED_INBOX_NAME)
             return path;
         
         // create new FolderPath with normalized INBOX at its root
-        FolderPath new_path = new Geary.FolderRoot(INBOX_NAME, root.default_separator,
-            root.case_sensitive);
+        FolderPath new_path = new Geary.FolderRoot(Imap.MailboxSpecifier.NORMALIZED_INBOX_NAME,
+            root.default_separator, root.case_sensitive);
         
         // copy in children starting at 1 (zero is INBOX)
         Gee.List<string> basenames = path.as_list();

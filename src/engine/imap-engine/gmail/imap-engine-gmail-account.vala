@@ -43,8 +43,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         if (path_type_map == null) {
             path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
             
-            path_type_map.set(new Geary.FolderRoot(Imap.Account.INBOX_NAME, null,
-                Imap.Folder.CASE_SENSITIVE), SpecialFolderType.INBOX);
+            path_type_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(), SpecialFolderType.INBOX);
             
             Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER, null,
                 Imap.Folder.CASE_SENSITIVE);

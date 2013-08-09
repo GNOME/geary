@@ -367,6 +367,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.email_appended.disconnect(on_folder_email_appended);
         folder.email_removed.disconnect(on_folder_email_removed);
         folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+        folder.email_count_changed.disconnect(on_folder_email_count_changed);
         folder.opened.disconnect(on_folder_opened);
         folder.closed.disconnect(on_folder_closed);
         folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
