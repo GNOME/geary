@@ -320,6 +320,15 @@ public class ComposerWindow : Gtk.Window {
                     } catch (Error error) {
                         debug("Error getting message body: %s", error.message);
                     }
+                    
+                    try {
+                        Geary.Folder? draft_folder = account.get_special_folder(Geary.SpecialFolderType.DRAFTS);
+                        if (draft_folder != null && referred.id.folder_path.equal_to(draft_folder.path))
+                            draft_id = referred.id;
+                    } catch (Error e) {
+                        debug("Error looking up special folder: %s", e.message);
+                    }
+                    
                     add_attachments(referred.attachments);
                 break;
                 
@@ -796,7 +805,6 @@ public class ComposerWindow : Gtk.Window {
             // Close existing folder.
             yield drafts_folder.close_async(cancellable);
             drafts_folder = null;
-            draft_id = null;
         }
         
         actions.get_action(ACTION_SAVE).sensitive = false;
