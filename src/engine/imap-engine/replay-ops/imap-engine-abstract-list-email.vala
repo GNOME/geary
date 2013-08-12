@@ -95,8 +95,18 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 }
                 
                 // remove from unfulfilled list, as there's nothing to fetch from the server
-                foreach (Geary.Email.Field field in unfulfilled.get_keys())
-                    unfulfilled.remove(field, id);
+                // this funky little loop ensures that all mentions of the EmailIdentifier in
+                // the unfulfilled MultiMap are removed, but must restart loop because removing
+                // within a foreach invalidates the Iterator
+                bool removed = false;
+                do {
+                    removed = false;
+                    foreach (Geary.Email.Field field in unfulfilled.get_keys()) {
+                        removed = unfulfilled.remove(field, id);
+                        if (removed)
+                            break;
+                    }
+                } while (removed);
                 
                 return true;
             
