@@ -1151,8 +1151,8 @@ public class ConversationViewer : Gtk.Box {
         // where n is the minimum of the number of levels of the two domains.
         string[] href_parts = href_match.fetch_all();
         string[] text_parts = text_match.fetch_all();
-        string[] text_domain = text_parts[2].reverse().split(".");
-        string[] href_domain = href_parts[2].reverse().split(".");
+        string[] text_domain = text_parts[2].down().reverse().split(".");
+        string[] href_domain = href_parts[2].down().reverse().split(".");
         for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
             if (text_domain[i] != href_domain[i]) {
                 if (href_parts[1] == "")
