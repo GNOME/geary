@@ -369,6 +369,17 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 } else if (epoch_id != null) {
                     oldest_local_id = epoch_id;
                 }
+                
+                // look for complete synchronization of UIDs (i.e. complete vector normalization)
+                // no need to keep searching once this happens
+                int local_count = yield folder.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
+                    bg_cancellable);
+                if (local_count >= folder.properties.email_total) {
+                    debug("Total vector normalization for %s: %d/%d emails", folder.to_string(), local_count,
+                        folder.properties.email_total);
+                    
+                    break;
+                }
             } while (current_epoch.compare(epoch) > 0);
         } else {
             debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",

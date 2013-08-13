@@ -1113,7 +1113,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // class.  Magically generating EmailIdentifiers is a bad idea.  (That's why this uses
         // list_email_by_id_async() and not fetch_email_async(), and why OLDEST_TO_NEWEST is set.)
         Gee.List<Geary.Email>? list = yield list_email_by_id_async(found_id, 1, Geary.Email.Field.NONE,
-            ListFlags.OLDEST_TO_NEWEST, cancellable);
+            ListFlags.OLDEST_TO_NEWEST | ListFlags.INCLUDING_ID, cancellable);
         if (list == null || list.size == 0)
             return null;
         
