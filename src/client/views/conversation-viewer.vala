@@ -15,6 +15,9 @@ public class ConversationViewer : Gtk.Box {
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
     
+    public const string INLINE_MIME_TYPES =
+        "image/png image/gif image/jpeg image/pjpeg image/bmp image/x-icon image/x-xbitmap image/x-xbm";
+    
     private const int ATTACHMENT_PREVIEW_SIZE = 50;
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
     private const string MESSAGE_CONTAINER_ID = "message_container";
@@ -462,9 +465,10 @@ public class ConversationViewer : Gtk.Box {
             }
         }
         
-        // Set attachment icon and add the attachments container if we have any attachments.
-        set_attachment_icon(div_message, email.attachments.size > 0);
-        if (email.attachments.size > 0) {
+        // Set attachment icon and add the attachments container if there are displayed attachments.
+        int displayed = displayed_attachments(email);
+        set_attachment_icon(div_message, displayed > 0);
+        if (displayed > 0) {
             insert_attachments(div_message, email.attachments);
         }
         
@@ -595,7 +599,7 @@ public class ConversationViewer : Gtk.Box {
         string body_text = "";
         remote_images = false;
         try {
-            body_text = message.get_body(true);
+            body_text = message.get_body(true, inline_image_replacer);
             body_text = insert_html_markup(body_text, message, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
@@ -629,6 +633,16 @@ public class ConversationViewer : Gtk.Box {
                 debug("Error adding message: %s", error.message);
             }
         }
+    }
+    
+    private static string? inline_image_replacer(string filename, string mimetype, Geary.Memory.Buffer buffer) {
+        if (!(mimetype in INLINE_MIME_TYPES))
+            return null;
+        
+        uint8[] image_data = buffer.get_uint8_array();
+        return "<img src=\"%s\" alt=\"%s\" class=\"%s\" />".printf(
+            @"data:$mimetype;base64,$(Base64.encode(image_data))",
+            filename, "replaced_inline_image");
     }
     
     private void unhide_last_email() {
@@ -1151,8 +1165,8 @@ public class ConversationViewer : Gtk.Box {
         // where n is the minimum of the number of levels of the two domains.
         string[] href_parts = href_match.fetch_all();
         string[] text_parts = text_match.fetch_all();
-        string[] text_domain = text_parts[2].reverse().split(".");
-        string[] href_domain = href_parts[2].reverse().split(".");
+        string[] text_domain = text_parts[2].down().reverse().split(".");
+        string[] href_domain = href_parts[2].down().reverse().split(".");
         for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
             if (text_domain[i] != href_domain[i]) {
                 if (href_parts[1] == "")
@@ -1298,7 +1312,7 @@ public class ConversationViewer : Gtk.Box {
         save_attachment_item.activate.connect(() => save_attachment(attachment));
         menu.append(save_attachment_item);
         
-        if (email.attachments.size > 1) {
+        if (displayed_attachments(email) > 1) {
             Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
             save_all_item.activate.connect(() => save_attachments(email.attachments));
             menu.append(save_all_item);
@@ -1317,9 +1331,10 @@ public class ConversationViewer : Gtk.Box {
         Gtk.Menu menu = new Gtk.Menu();
         menu.selection_done.connect(on_message_menu_selection_done);
         
-        if (email.attachments.size > 0) {
+        int displayed = displayed_attachments(email);
+        if (displayed > 0) {
             string mnemonic = ngettext("Save A_ttachment...", "Save All A_ttachments...",
-                email.attachments.size);
+                displayed);
             Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(mnemonic);
             save_all_item.activate.connect(() => save_attachments(email.attachments));
             menu.append(save_all_item);
@@ -1471,7 +1486,7 @@ public class ConversationViewer : Gtk.Box {
                 } else if (src.has_prefix("cid:")) {
                     string mime_id = src.substring(4);
                     Geary.Memory.Buffer image_content = message.get_content_by_mime_id(mime_id);
-                    uint8[] image_data = image_content.get_bytes().get_data();
+                    uint8[] image_data = image_content.get_uint8_array();
 
                     // Get the content type.
                     bool uncertain_content_type;
@@ -1606,6 +1621,29 @@ public class ConversationViewer : Gtk.Box {
         header_text += create_header_row(Geary.HTML.escape_markup(title), value, important);
     }
     
+    private static bool should_show_attachment(Geary.Attachment attachment) {
+        switch (attachment.disposition) {
+            case Geary.Attachment.Disposition.ATTACHMENT:
+                return true;
+            
+            case Geary.Attachment.Disposition.INLINE:
+                return !(attachment.mime_type in INLINE_MIME_TYPES);
+            
+            default:
+                assert_not_reached();
+        }
+    }
+    
+    private static int displayed_attachments(Geary.Email email) {
+        int ret = 0;
+        foreach (Geary.Attachment attachment in email.attachments) {
+            if (should_show_attachment(attachment)) {
+                ret++;
+            }
+        }
+        return ret;
+    }
+    
     private void insert_attachments(WebKit.DOM.HTMLElement email_container,
         Gee.List<Geary.Attachment> attachments) {
 
@@ -1636,6 +1674,9 @@ public class ConversationViewer : Gtk.Box {
 
             // Create an attachment table for each attachment.
             foreach (Geary.Attachment attachment in attachments) {
+                if (!should_show_attachment(attachment)) {
+                    continue;
+                }
                 // Generate the attachment table.
                 WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
                 string filename = Geary.String.is_empty_or_whitespace(attachment.filename) ?

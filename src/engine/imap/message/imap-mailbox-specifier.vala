@@ -13,6 +13,10 @@
  */
 
 public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpecifier>, Gee.Comparable<MailboxSpecifier> {
+    // all references to Inbox are converted to this string, purely for sanity sake when dealing
+    // with Inbox's case issues
+    public const string NORMALIZED_INBOX_NAME = "INBOX";
+    
     /**
      * An instance of an Inbox MailboxSpecifier.
      *
@@ -22,7 +26,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     private static MailboxSpecifier? _inbox = null;
     public static MailboxSpecifier inbox {
         get {
-            return (_inbox != null) ? _inbox : _inbox = new MailboxSpecifier("Inbox");
+            return (_inbox != null) ? _inbox : _inbox = new MailboxSpecifier(NORMALIZED_INBOX_NAME);
         }
     }
     
@@ -46,6 +50,10 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     
     public MailboxSpecifier.from_parameter(MailboxParameter param) {
         init(param.decode());
+    }
+    
+    public static bool folder_path_is_inbox(FolderPath path) {
+        return path.is_root() && path.basename.up() == NORMALIZED_INBOX_NAME;
     }
     
     /**

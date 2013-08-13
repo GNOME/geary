@@ -16,7 +16,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         PARTIAL_OK,
         INCLUDE_MARKED_FOR_REMOVE,
         INCLUDING_ID,
-        OLDEST_TO_NEWEST;
+        OLDEST_TO_NEWEST,
+        ONLY_INCOMPLETE;
         
         public bool is_all_set(ListFlags flags) {
             return (this & flags) == flags;
@@ -281,6 +282,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         bool including_id = flags.is_all_set(ListFlags.INCLUDING_ID);
         bool oldest_to_newest = flags.is_all_set(ListFlags.OLDEST_TO_NEWEST);
+        bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
         
         int64 start;
         if (initial_id != null) {
@@ -301,24 +303,35 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // database ... first, gather locations of all emails in database
         Gee.List<LocationIdentifier> ids = new Gee.ArrayList<LocationIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt;
-            if (oldest_to_newest) {
-                stmt = cx.prepare("""
-                    SELECT message_id, ordering
-                    FROM MessageLocationTable
-                    WHERE folder_id = ? AND ordering >= ?
-                    ORDER BY ordering ASC
-                    LIMIT ?
-                    """);
-            } else {
-                stmt = cx.prepare("""
-                    SELECT message_id, ordering
-                    FROM MessageLocationTable
-                    WHERE folder_id = ? AND ordering <= ?
-                    ORDER BY ordering DESC
-                    LIMIT ?
-                    """);
+            StringBuilder sql = new StringBuilder("""
+                SELECT MessageLocationTable.message_id, ordering
+                FROM MessageLocationTable
+            """);
+            if (only_incomplete) {
+                sql.append("""
+                    INNER JOIN MessageTable
+                    ON MessageTable.id = MessageLocationTable.message_id
+                """);
             }
+            
+            sql.append("WHERE folder_id = ? ");
+            
+            if (oldest_to_newest)
+                sql.append("AND ordering >= ? ");
+            else
+                sql.append("AND ordering <= ? ");
+            
+            if (only_incomplete)
+                sql.append_printf("AND fields != %d ", Geary.Email.Field.ALL);
+            
+            if (oldest_to_newest)
+                sql.append("ORDER BY ordering ASC ");
+            else
+                sql.append("ORDER BY ordering DESC ");
+            
+            sql.append("LIMIT ?");
+            
+            Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, start);
             stmt.bind_int(2, count);
@@ -351,6 +364,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Geary.EmailIdentifier end_id, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable)
         throws Error {
         bool including_id = flags.is_all_set(ListFlags.INCLUDING_ID);
+        bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
         
         int64 start = ((Geary.Imap.EmailIdentifier) start_id).uid.value;
         if (!including_id)
@@ -367,11 +381,23 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // database ... first, gather locations of all emails in database
         Gee.List<LocationIdentifier> ids = new Gee.ArrayList<LocationIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("""
-                SELECT message_id, ordering
+            StringBuilder sql = new StringBuilder("""
+                SELECT MessageLocationTable.message_id, ordering
                 FROM MessageLocationTable
-                WHERE folder_id = ? AND ordering >= ? AND ordering <= ?
             """);
+            
+            if (only_incomplete) {
+                sql.append("""
+                    INNER JOIN MessageTable
+                    ON MessageTable.id = MessageLocationTable.message_id
+                """);
+            }
+            
+            sql.append("WHERE folder_id = ? AND ordering >= ? AND ordering <= ? ");
+            if (only_incomplete)
+                sql.append_printf(" AND fields != %d ", Geary.Email.Field.ALL);
+            
+            Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, start);
             stmt.bind_int64(2, end);
@@ -397,6 +423,70 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         // Next, read in email in chunks
         return yield list_email_in_chunks_async(ids, required_fields, flags, cancellable);
+    }
+    
+    public async Gee.List<Geary.Email>? list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
+        if (ids.size == 0)
+            return null;
+        
+        bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
+        
+        // Break up work so all reading isn't done in single transaction that locks up the
+        // database ... first, gather locations of all emails in database
+        Gee.List<LocationIdentifier> locations = new Gee.ArrayList<LocationIdentifier>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            StringBuilder sql = new StringBuilder("""
+                SELECT MessageLocationTable.message_id, ordering
+                FROM MessageLocationTable
+            """);
+            
+            if (only_incomplete) {
+                sql.append("""
+                    INNER JOIN MessageTable
+                    ON MessageTable.id = MessageLocationTable.message_id
+                """);
+            }
+            
+            sql.append("WHERE folder_id = ? ");
+            if (only_incomplete)
+                sql.append_printf(" AND fields != %d ", Geary.Email.Field.ALL);
+            
+            sql.append("AND ordering IN (");
+            bool first = true;
+            foreach (Geary.EmailIdentifier id in ids) {
+                if (!first)
+                    sql.append(", ");
+                
+                sql.append(id.ordering.to_string());
+                first = false;
+            }
+            sql.append(")");
+            
+            Db.Statement stmt = cx.prepare(sql.str);
+            stmt.bind_rowid(0, folder_id);
+            
+            Db.Result results = stmt.exec(cancellable);
+            if (results.finished)
+                return Db.TransactionOutcome.SUCCESS;
+            
+            do {
+                int64 ordering = results.int64_at(1);
+                Geary.EmailIdentifier email_id = new Imap.EmailIdentifier(new Imap.UID(ordering), path);
+                
+                LocationIdentifier location = new LocationIdentifier(results.rowid_at(0), ordering,
+                    path, email_id);
+                if (!flags.include_marked_for_remove() && is_marked_removed(location.email_id))
+                    continue;
+                
+                locations.add(location);
+            } while (results.next(cancellable));
+            
+            return Db.TransactionOutcome.SUCCESS;
+        }, cancellable);
+        
+        // Next, read in email in chunks
+        return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
     }
     
     private async Gee.List<Geary.Email>? list_email_in_chunks_async(Gee.List<LocationIdentifier> ids,
@@ -1517,9 +1607,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     
     private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare(
-            "SELECT id, filename, mime_type, filesize FROM MessageAttachmentTable WHERE message_id=? "
-            + "ORDER BY id");
+        Db.Statement stmt = cx.prepare("""
+            SELECT id, filename, mime_type, filesize, disposition
+            FROM MessageAttachmentTable
+            WHERE message_id = ?
+            ORDER BY id
+            """);
         stmt.bind_rowid(0, message_id);
         
         Db.Result results = stmt.exec(cancellable);
@@ -1529,25 +1622,28 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
         do {
             list.add(new Geary.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
-                results.string_at(2), results.int64_at(3), message_id, results.rowid_at(0)));
+                results.string_at(2), results.int64_at(3), message_id, results.rowid_at(0),
+                Attachment.Disposition.from_int(results.int_at(4))));
         } while (results.next(cancellable));
         
         return list;
     }
-    
+
     private void do_save_attachments(Db.Connection cx, int64 message_id,
         Gee.List<GMime.Part>? attachments, Cancellable? cancellable) throws Error {
+        do_save_attachments_db(cx, message_id, attachments, db, cancellable);
+    }
+    
+    public static void do_save_attachments_db(Db.Connection cx, int64 message_id,
+        Gee.List<GMime.Part>? attachments, ImapDB.Database db, Cancellable? cancellable) throws Error {
         // nothing to do if no attachments
         if (attachments == null || attachments.size == 0)
             return;
         
         foreach (GMime.Part attachment in attachments) {
             string mime_type = attachment.get_content_type().to_string();
-            string? filename = attachment.get_filename();
-            if (String.is_empty(filename)) {
-                /// Placeholder filename for attachments with no filename.
-                filename = _("none");
-            }
+            string disposition = attachment.get_disposition();
+            string filename = RFC822.Utils.get_attachment_filename(attachment);
             
             // Convert the attachment content into a usable ByteArray.
             GMime.DataWrapper attachment_data = attachment.get_content_object();
@@ -1559,13 +1655,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             uint filesize = byte_array.len;
             
             // Insert it into the database.
-            Db.Statement stmt = cx.prepare(
-                "INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize) " +
-                "VALUES (?, ?, ?, ?)");
+            Db.Statement stmt = cx.prepare("""
+                INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize, disposition)
+                VALUES (?, ?, ?, ?, ?)
+                """);
             stmt.bind_rowid(0, message_id);
             stmt.bind_string(1, filename);
             stmt.bind_string(2, mime_type);
             stmt.bind_uint(3, filesize);
+            stmt.bind_int(4, Attachment.Disposition.from_string(disposition));
             
             int64 attachment_id = stmt.exec_insert(cancellable);
             

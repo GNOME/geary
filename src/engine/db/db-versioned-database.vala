@@ -52,7 +52,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
             check_cancelled("VersionedDatabase.open", cancellable);
             
             try {
-                debug("Upgrading database to to version %d with %s", db_version, upgrade_script.get_path());
+                debug("Upgrading database to version %d with %s", db_version, upgrade_script.get_path());
                 cx.exec_transaction(TransactionType.EXCLUSIVE, (cx) => {
                     cx.exec_file(upgrade_script, cancellable);
                     cx.set_user_version_number(db_version);

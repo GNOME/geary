@@ -26,9 +26,21 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override string? get_sidebar_tooltip() {
-        return (folder.properties.email_unread == 0 ? null :
-            ngettext("%d unread message", "%d unread messages", folder.properties.email_unread).
-            printf(folder.properties.email_unread));
+        // Label displaying total number of email messages in a folder
+        string total_msg = ngettext("%d message", "%d messages", folder.properties.email_total).
+            printf(folder.properties.email_total);
+        
+        if (folder.properties.email_unread == 0)
+            return total_msg;
+        
+        /// Label displaying number of unread email messages in a folder
+        string unread_msg = ngettext("%d unread", "%d unread", folder.properties.email_unread).
+            printf(folder.properties.email_unread);
+        
+        /// This string represents the divider between two messages: "n messages" and "n unread",
+        /// shown in the folder list as a tooltip.  Please use your languages conventions for
+        /// combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
+        return _("%s, %s").printf(total_msg, unread_msg);
     }
     
     public override Icon? get_sidebar_icon() {

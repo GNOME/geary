@@ -20,6 +20,11 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     public AccountSynchronizer(GenericAccount account) {
         this.account = account;
         
+        // don't allow duplicates because it's possible for a Folder to change several times
+        // before finally opened and synchronized, which we only want to do once
+        bg_queue.allow_duplicates = false;
+        bg_queue.requeue_duplicate = false;
+        
         account.opened.connect(on_account_opened);
         account.closed.connect(on_account_closed);
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
@@ -285,6 +290,8 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             } else {
                 debug("No oldest message found for %s, synchronizing...", folder.to_string());
             }
+        } else {
+            debug("Folder %s changed, synchronizing...", folder.to_string());
         }
         
         try {

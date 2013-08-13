@@ -157,10 +157,11 @@ private class Geary.ImapDB.Account : BaseObject {
     
     /**
      * Only updates folder's STATUS message count, attributes, recent, and unseen; UIDVALIDITY and UIDNEXT
-     * updated when the folder is SELECT/EXAMINED (see update_folder_select_examine_async())
+     * updated when the folder is SELECT/EXAMINED (see update_folder_select_examine_async()) unless
+     * update_uid_info is true.
      */
-    public async void update_folder_status_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable)
-        throws Error {
+    public async void update_folder_status_async(Geary.Imap.Folder imap_folder, bool update_uid_info,
+        Cancellable? cancellable) throws Error {
         check_open();
         
         Geary.Imap.FolderProperties properties = imap_folder.properties;
@@ -190,7 +191,10 @@ private class Geary.ImapDB.Account : BaseObject {
                 stmt.bind_string(2, path.basename);
             }
             
-            stmt.exec();
+            stmt.exec(cancellable);
+            
+            if (update_uid_info)
+                do_update_uid_info(cx, properties, parent_id, path, cancellable);
             
             if (properties.status_messages >= 0) {
                 do_update_last_seen_status_total(cx, parent_id, path.basename, properties.status_messages,
@@ -209,13 +213,18 @@ private class Geary.ImapDB.Account : BaseObject {
             local_properties.recent = properties.recent;
             local_properties.attrs = properties.attrs;
             
+            if (update_uid_info) {
+                local_properties.uid_validity = properties.uid_validity;
+                local_properties.uid_next = properties.uid_next;
+            }
+            
             if (properties.status_messages >= 0)
                 local_properties.set_status_message_count(properties.status_messages, false);
         }
     }
     
     /**
-     * Only updates folder's SELECT/EXAMINE message count, UIDVALIDITY, UIDNEXT, unseen, and recent.
+     * Updates folder's SELECT/EXAMINE message count, UIDVALIDITY, UIDNEXT, unseen, and recent.
      * See also update_folder_status_async().
      */
     public async void update_folder_select_examine_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable)
@@ -233,28 +242,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 return Db.TransactionOutcome.ROLLBACK;
             }
             
-            int64 uid_validity = (properties.uid_validity != null) ? properties.uid_validity.value
-                    : Imap.UIDValidity.INVALID;
-            int64 uid_next = (properties.uid_next != null) ? properties.uid_next.value
-                : Imap.UID.INVALID;
-            
-            Db.Statement stmt;
-            if (parent_id != Db.INVALID_ROWID) {
-                stmt = cx.prepare(
-                    "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE parent_id=? AND name=?");
-                stmt.bind_int64(0, uid_validity);
-                stmt.bind_int64(1, uid_next);
-                stmt.bind_rowid(2, parent_id);
-                stmt.bind_string(3, path.basename);
-            } else {
-                stmt = cx.prepare(
-                    "UPDATE FolderTable SET uid_validity=?, uid_next=?  WHERE parent_id IS NULL AND name=?");
-                stmt.bind_int64(0, uid_validity);
-                stmt.bind_int64(1, uid_next);
-                stmt.bind_string(2, path.basename);
-            }
-            
-            stmt.exec();
+            do_update_uid_info(cx, properties, parent_id, path, cancellable);
             
             if (properties.select_examine_messages >= 0) {
                 do_update_last_seen_select_examine_total(cx, parent_id, path.basename,
@@ -825,7 +813,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     private async void populate_search_table_async(Cancellable? cancellable) {
-        debug("Populating search table");
+        debug("%s: Populating search table", account_information.email);
         try {
             int total = yield get_email_count_async(cancellable);
             search_index_monitor.set_interval(0, total);
@@ -840,17 +828,19 @@ private class Geary.ImapDB.Account : BaseObject {
                 yield Geary.Scheduler.sleep_ms_async(50);
             }
         } catch (Error e) {
-            debug("Error populating search table: %s", e.message);
+            debug("Error populating %s search table: %s", account_information.email, e.message);
         }
         
         if (search_index_monitor.is_in_progress)
             search_index_monitor.notify_finish();
         
-        debug("Done populating search table");
+        debug("%s: Done populating search table", account_information.email);
     }
     
     private async bool populate_search_table_batch_async(int limit = 100,
         Cancellable? cancellable) throws Error {
+        debug("%s: Searching for missing indexed messages...", account_information.email);
+        
         int count = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             Db.Statement stmt = cx.prepare("""
@@ -896,6 +886,9 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         search_index_monitor.increment(count);
+        
+        if (count > 0)
+            debug("%s: Found %d/%d missing indexed messages...", account_information.email, count, limit);
         
         return (count < limit);
     }
@@ -1065,7 +1058,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
-    private Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
+    private static Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT folder_id FROM MessageLocationTable WHERE message_id=?");
         stmt.bind_int64(0, message_id);
@@ -1090,7 +1083,7 @@ private class Geary.ImapDB.Account : BaseObject {
     // For a folder row id, return the folder path (constructed with default
     // separator and case sensitivity) of that folder, or null in the event
     // it's not found.
-    private Geary.FolderPath? do_find_folder_path(Db.Connection cx, int64 folder_id,
+    private static Geary.FolderPath? do_find_folder_path(Db.Connection cx, int64 folder_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT parent_id, name FROM FolderTable WHERE id=?");
         stmt.bind_int64(0, folder_id);
@@ -1142,6 +1135,32 @@ private class Geary.ImapDB.Account : BaseObject {
                 "UPDATE FolderTable SET %s=? WHERE parent_id IS NULL AND name=?".printf(colname));
             stmt.bind_int(0, Numeric.int_floor(total, 0));
             stmt.bind_string(1, name);
+        }
+        
+        stmt.exec(cancellable);
+    }
+    
+    private void do_update_uid_info(Db.Connection cx, Imap.FolderProperties properties,
+        int64 parent_id, FolderPath path, Cancellable? cancellable) throws Error {
+        int64 uid_validity = (properties.uid_validity != null) ? properties.uid_validity.value
+                : Imap.UIDValidity.INVALID;
+        int64 uid_next = (properties.uid_next != null) ? properties.uid_next.value
+            : Imap.UID.INVALID;
+        
+        Db.Statement stmt;
+        if (parent_id != Db.INVALID_ROWID) {
+            stmt = cx.prepare(
+                "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE parent_id=? AND name=?");
+            stmt.bind_int64(0, uid_validity);
+            stmt.bind_int64(1, uid_next);
+            stmt.bind_rowid(2, parent_id);
+            stmt.bind_string(3, path.basename);
+        } else {
+            stmt = cx.prepare(
+                "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE parent_id IS NULL AND name=?");
+            stmt.bind_int64(0, uid_validity);
+            stmt.bind_int64(1, uid_next);
+            stmt.bind_string(2, path.basename);
         }
         
         stmt.exec(cancellable);

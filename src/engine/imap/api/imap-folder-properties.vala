@@ -94,16 +94,20 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     }
     
     /**
-     * Use with FolderProperties of the *same folder* seen at different times (i.e. after SELECTing
-     * versus data stored locally).  Only compares fields that suggest the contents of the folder
-     * have changed.
+     * Use with {@link FolderProperties} of the *same folder* seen at different times (i.e. after
+     * SELECTing versus data stored locally).  Only compares fields that suggest the contents of
+     * the folder have changed.
      *
-     * Note that this is *not* concerned with message flags changing.
+     * Note that have_contents_changed does *not* discern if message flags have changed.
      */
-    public Trillian have_contents_changed(Geary.Imap.FolderProperties other) {
+    public bool have_contents_changed(Geary.Imap.FolderProperties other, string name) {
         // UIDNEXT changes indicate messages have been added, but not if they've been removed
-        if (uid_next != null && other.uid_next != null && !uid_next.equal_to(other.uid_next))
-            return Trillian.TRUE;
+        if (uid_next != null && other.uid_next != null && !uid_next.equal_to(other.uid_next)) {
+            debug("%s FolderProperties changed: UIDNEXT=%s other.UIDNEXT=%s", name,
+                uid_next.to_string(), other.uid_next.to_string());
+            
+            return true;
+        }
         
         // Gmail includes Chat messages in STATUS results but not in SELECT/EXAMINE
         // results, so message count comparison has to be from the same origin ... use SELECT/EXAMINE
@@ -111,16 +115,27 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         //
         // TODO: If this continues to work, it might be worthwhile to change the result of this
         // method to boolean
-        if (select_examine_messages >= 0 && other.select_examine_messages >= 0
-            && select_examine_messages != other.select_examine_messages) {
-            return Trillian.TRUE;
+        if (select_examine_messages >= 0 && other.select_examine_messages >= 0) {
+            int diff = select_examine_messages - other.select_examine_messages;
+            if (diff != 0) {
+                debug("%s FolderProperties changed: SELECT/EXAMINE=%d other.SELECT/EXAMINE=%d diff=%d",
+                    name, select_examine_messages, other.select_examine_messages, diff);
+                
+                return true;
+            }
         }
         
-        if (status_messages >= 0 && other.status_messages >= 0 && status_messages != other.status_messages) {
-            return Trillian.TRUE;
+        if (status_messages >= 0 && other.status_messages >= 0) {
+            int diff = status_messages - other.status_messages;
+            if (diff != 0) {
+                debug("%s FolderProperties changed: STATUS=%d other.STATUS=%d diff=%d", name,
+                    status_messages, other.status_messages, diff);
+                
+                return true;
+            }
         }
         
-        return Trillian.FALSE;
+        return false;
     }
     
     private void init_flags() {
