@@ -45,26 +45,64 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
     public MessageIDList.from_rfc822_string(string value) {
         this ();
         
-        string[] ids = value.split_set(" \n\r\t");
+        // Have seen some mailers use commas between Message-IDs, meaning that the standard
+        // whitespace tokenizer is not sufficient; however, can't add the comma (or every other
+        // delimiter that mailers dream up) because it may be used within a Message-ID.  The
+        // only guarantee made of a Message-ID is that it's surrounded by angle brackets, so
+        // mark anything not an angle bracket as a space and strip
+        //
+        // NOTE: Seen at least one spamfilter mailer that imaginatively uses parens instead of
+        // angle brackets for its Message-IDs; accounting for that as well here.
+        StringBuilder canonicalized = new StringBuilder();
+        int index = 0;
+        unichar ch;
+        bool in_message_id = false;
+        while (value.get_next_char(ref index, out ch)) {
+            switch (ch) {
+                case '<':
+                    in_message_id = true;
+                break;
+                
+                case '(':
+                    if (!in_message_id) {
+                        ch = '<';
+                        in_message_id = true;
+                    }
+                break;
+                
+                case '>':
+                    in_message_id = false;
+                break;
+                
+                case ')':
+                    if (in_message_id) {
+                        ch = '>';
+                        in_message_id = false;
+                    }
+                break;
+                
+                // anything not inside the message-id brackets is turned into spaces
+                default:
+                    if (!in_message_id)
+                        ch = ' ';
+                break;
+            }
+            
+            canonicalized.append_unichar(ch);
+        }
+        
+        if (value != canonicalized.str)
+            debug("Message-ID list corrected: \"%s\" -> \"%s\"", value, canonicalized.str);
+        
+        // there's some additional paranoia here with getting the Message-ID sliced out of the
+        // strings, but it's worth it to get a valid Message-ID or none at all vs. a bogus one
+        string[] ids = canonicalized.str.split(" ");
         foreach (string id in ids) {
             if (String.is_empty(id))
                 continue;
             
-            // Have seen some mailers use commas between Message-IDs, meaning that the standard
-            // whitespace tokenizer is not sufficient; however, can't add the comma (or every other
-            // delimiter that mailers dream up) because it may be used within a Message-ID.  The
-            // only guarantee made of a Message-ID is that it's surrounded by angle brackets, so
-            // mark anything not an angle bracket as a space and strip
-            //
-            // NOTE: Seen at least one spamfilter mailer that imaginatively uses parens instead of
-            // angle brackets for its Message-IDs; accounting for that as well here.
             int start = id.index_of_char('<');
-            if (start < 0)
-                start = id.index_of_char('(');
-            
             int end = id.last_index_of_char('>');
-            if (end < 0)
-                end = id.last_index_of_char(')');
             
             // if either end not found or the end comes before the beginning, invalid Message-ID
             if (start < 0 || end < 0 || (start >= end)) {

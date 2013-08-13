@@ -10,8 +10,14 @@ public abstract class Geary.BaseObject : Object {
     
     protected BaseObject() {
         lock (refmap) {
-            if (refmap == null)
-                refmap = new Gee.HashMap<unowned string, int>(direct_hash, direct_equal);
+            if (refmap == null) {
+                // because strings are unowned and guaranteed to be
+                // unique by GType, use direct comparison functions,
+                // more efficient then string hash/equal
+                refmap = new Gee.HashMap<unowned string, int>(
+                    Gee.Functions.get_hash_func_for(typeof(void*)),
+                    Gee.Functions.get_equal_func_for(typeof(void*)));
+            }
             
             unowned string classname = get_classname();
             refmap.set(classname, refmap.get(classname) + 1);
@@ -42,7 +48,7 @@ public abstract class Geary.BaseObject : Object {
         
         Gee.ArrayList<unowned string> list = new Gee.ArrayList<unowned string>();
         list.add_all(refmap.keys);
-        list.sort(strcmp);
+        list.sort();
         foreach (unowned string classname in list)
             outs.printf("%9d %s\n", refmap.get(classname), classname);
     }
