@@ -6,10 +6,10 @@
  
 public class ConversationListStore : Gtk.ListStore {
     public const Geary.Email.Field REQUIRED_FIELDS =
-        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS;
+        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PROPERTIES;
     
     public const Geary.Email.Field WITH_PREVIEW_FIELDS =
-        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PREVIEW;
+        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PROPERTIES | Geary.Email.Field.PREVIEW;
     
     public enum Column {
         CONVERSATION_DATA,

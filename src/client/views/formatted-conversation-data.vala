@@ -102,9 +102,7 @@ public class FormattedConversationData : Geary.BaseObject {
         use_to = (folder != null) && folder.special_folder_type.is_outgoing();
         
         // Load preview-related data.
-        this.date = (preview.date != null)
-            ? Date.pretty_print(preview.date.value, GearyApplication.instance.config.clock_format)
-            : "";
+        update_date_string();
         this.subject = get_clean_subject_as_string(preview);
         this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
         this.preview = preview;
@@ -116,15 +114,20 @@ public class FormattedConversationData : Geary.BaseObject {
     }
     
     public bool update_date_string() {
-        if (preview.date == null) {
+        // get latest email *in folder* for the conversation's date
+        Geary.Email? latest = conversation.get_latest_email(true);
+        if (latest == null || latest.properties == null)
             return false;
-        }
-        string new_date = Date.pretty_print(preview.date.value,
+        
+        // conversation list store sorts by date-received, so display that instead of sender's
+        // Date:
+        string new_date = Date.pretty_print(latest.properties.date_received,
             GearyApplication.instance.config.clock_format);
-        if (new_date == date) {
+        if (new_date == date)
             return false;
-        }
+        
         date = new_date;
+        
         return true;
     }
     

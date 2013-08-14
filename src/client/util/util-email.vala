@@ -13,7 +13,9 @@ public int compare_conversation_ascending(Geary.Conversation a, Geary.Conversati
     else if (b_latest == null)
         return 1;
     
-    return a_latest.date.value.compare(b_latest.date.value);
+    // use date-received so newly-arrived messages float to the top, even if they're send date
+    // was earlier (think of mailing lists that batch up forwarded mail)
+    return a_latest.properties.date_received.compare(b_latest.properties.date_received);
 }
 
 public int compare_conversation_descending(Geary.Conversation a, Geary.Conversation b) {
