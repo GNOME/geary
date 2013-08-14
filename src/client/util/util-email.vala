@@ -5,15 +5,15 @@
  */
 
 public int compare_conversation_ascending(Geary.Conversation a, Geary.Conversation b) {
-    Gee.List<Geary.Email> apool = a.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
-    Gee.List<Geary.Email> bpool = b.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
+    Geary.Email? a_latest = a.get_latest_email(true);
+    Geary.Email? b_latest = b.get_latest_email(true);
     
-    if (apool.size == 0)
-        return (bpool.size > 0) ? -1 : 0;
-    else if (bpool.size == 0)
+    if (a_latest == null)
+        return (b_latest == null) ? 0 : -1;
+    else if (b_latest == null)
         return 1;
     
-    return Geary.Email.compare_date_ascending(apool.last(), bpool.last());
+    return a_latest.date.value.compare(b_latest.date.value);
 }
 
 public int compare_conversation_descending(Geary.Conversation a, Geary.Conversation b) {
