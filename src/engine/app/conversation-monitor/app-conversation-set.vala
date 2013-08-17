@@ -130,6 +130,24 @@ private class Geary.App.ConversationSet : BaseObject {
         return false;
     }
     
+    // Returns a Collection of zero or more Conversations that have Message-IDs associated with
+    // the ancestors of the supplied Email ... if more than one, then add_email() should not be
+    // called
+    private Gee.Set<ImplConversation> get_associated_conversations(Geary.Email email) {
+        Gee.Set<ImplConversation> associated = new Gee.HashSet<ImplConversation>();
+        
+        Gee.Set<Geary.RFC822.MessageID>? ancestors = email.get_ancestors();
+        if (ancestors != null) {
+            foreach (Geary.RFC822.MessageID ancestor in ancestors) {
+                ImplConversation conversation = logical_message_id_map.get(ancestor);
+                if (conversation != null)
+                    associated.add(conversation);
+            }
+        }
+        
+        return associated;
+    }
+    
     /**
      * Add the email (requires Field.REFERENCES) to the mix, potentially
      * replacing an existing email with the same id, or creating a new
@@ -141,8 +159,11 @@ private class Geary.App.ConversationSet : BaseObject {
      * we didn't add the email (e.g. it was a dupe and we preferred the
      * existing email), or the conversation it was added to.  Return in
      * added_conversation whether a new conversation was created.
+     *
+     * NOTE: Do not call this method if get_associated_conversations() returns a Collection with
+     * a size greater than one.  That indicates the Conversations *must* be merged before adding.
      */
-    public Geary.Conversation? add_email(Geary.Email email, ConversationMonitor monitor,
+    private Geary.Conversation? add_email(Geary.Email email, ConversationMonitor monitor,
         Geary.FolderPath? preferred_folder_path, out bool added_conversation) {
         added_conversation = false;
         
@@ -163,13 +184,12 @@ private class Geary.App.ConversationSet : BaseObject {
             }
         }
         
-        Gee.Set<Geary.RFC822.MessageID>? ancestors = email.get_ancestors();
-        if (conversation == null && ancestors != null) {
-            foreach (Geary.RFC822.MessageID ancestor in ancestors) {
-                conversation = logical_message_id_map.get(ancestor);
-                if (conversation != null)
-                    break;
-            }
+        if (conversation == null) {
+            Gee.Set<ImplConversation> associated = get_associated_conversations(email);
+            assert(associated.size <= 1);
+            
+            if (associated.size == 1)
+                conversation = Collection.get_first<ImplConversation>(associated);
         }
         
         if (conversation == null) {
@@ -179,6 +199,12 @@ private class Geary.App.ConversationSet : BaseObject {
             added_conversation = true;
         }
         
+        add_email_to_conversation(conversation, email);
+        
+        return conversation;
+    }
+    
+    private void add_email_to_conversation(ImplConversation conversation, Geary.Email email) {
         if (!conversation.add(email)) {
             error("Couldn't add duplicate email %s to conversation %s",
                 email.id.to_string(), conversation.to_string());
@@ -191,23 +217,59 @@ private class Geary.App.ConversationSet : BaseObject {
         else
             contained_message_id_map.set(email.message_id, conversation);
         
+        Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
         if (ancestors != null) {
             foreach (Geary.RFC822.MessageID ancestor in ancestors)
                 logical_message_id_map.set(ancestor, conversation);
         }
-        
-        return conversation;
     }
     
     public void add_all_emails(Gee.Collection<Geary.Email> emails,
         ConversationMonitor monitor, Geary.FolderPath? preferred_folder_path,
         out Gee.Collection<Geary.Conversation> added,
-        out Gee.MultiMap<Geary.Conversation, Geary.Email> appended) {
+        out Gee.MultiMap<Geary.Conversation, Geary.Email> appended,
+        out Gee.Collection<Geary.Conversation> removed_due_to_merge) {
         Gee.HashSet<Geary.Conversation> _added = new Gee.HashSet<Geary.Conversation>();
         Gee.HashMultiMap<Geary.Conversation, Geary.Email> _appended
             = new Gee.HashMultiMap<Geary.Conversation, Geary.Email>();
-        
+        Gee.HashSet<Geary.Conversation> _removed_due_to_merge = new Gee.HashSet<Geary.Conversation>();
         foreach (Geary.Email email in emails) {
+            Gee.Set<ImplConversation> associated = get_associated_conversations(email);
+            if (associated.size > 1) {
+                // When multiple conversations hold one or more of the Message-IDs in the email's
+                // ancestry, it means a prior email processed here didn't properly list their entire
+                // In-Reply-To or References and a split in the conversation appeared ...
+                // ConversationSet *requires* each Message-ID is associated with one and only one
+                // Conversation
+                //
+                // By doing this first, it prevents ConversationSet getting itself into a bad state
+                // where more than one Conversation thinks it "owns" a Message-ID
+                debug("Merging %d conversations due new email associating with all...", associated.size);
+                
+                // Note that this call will modify the List so it only holds the to-be-axed
+                // Conversations
+                Gee.Set<Geary.Email> moved_email = new Gee.HashSet<Geary.Email>();
+                ImplConversation dest = merge_conversations(associated, moved_email);
+                assert(!associated.contains(dest));
+                
+                // remove the remaining conversations from the added/appended Collections
+                _added.remove_all(associated);
+                foreach (Conversation removed_conversation in associated)
+                    _appended.remove_all(removed_conversation);
+                
+                // but notify caller they were merged away
+                _removed_due_to_merge.add_all(associated);
+                
+                // the dest was always appended to, never created
+                if (!_added.contains(dest)) {
+                    foreach (Geary.Email moved in moved_email)
+                        _appended.set(dest, moved);
+                }
+                
+                // Nasty ol' Email won't cause problems now -- but let's check anyway!
+                assert(get_associated_conversations(email).size <= 1);
+            }
+            
             bool added_conversation;
             Geary.Conversation? conversation = add_email(
                 email, monitor, preferred_folder_path, out added_conversation);
@@ -225,9 +287,55 @@ private class Geary.App.ConversationSet : BaseObject {
         
         added = _added;
         appended = _appended;
+        removed_due_to_merge = _removed_due_to_merge;
     }
     
-    public Geary.Conversation? remove_email_by_identifier(Geary.EmailIdentifier id,
+    // This method will remove the destination (merged) Conversation from the List and return it
+    // as the result, along with a Collection of email that must be merged into it
+    private ImplConversation merge_conversations(Gee.Set<ImplConversation> conversations,
+        Gee.Set<Geary.Email> moved_email) {
+        assert(conversations.size > 0);
+        
+        // find the largest conversation and merge the others into it
+        ImplConversation? dest = null;
+        foreach (ImplConversation conversation in conversations) {
+            if (dest == null || conversation.get_count() > dest.get_count())
+                dest = conversation;
+        }
+        
+        // remove the largest from the list so it's not included in the Collection of source
+        // conversations merged into it
+        bool removed = conversations.remove(dest);
+        assert(removed);
+        
+        foreach (ImplConversation conversation in conversations)
+            moved_email.add_all(conversation.get_emails(Conversation.Ordering.NONE));
+        
+        // convert total sum of Emails to move into map of ID -> Email
+        Gee.Map<Geary.EmailIdentifier, Geary.Email>? id_map = Geary.Email.emails_to_map(moved_email);
+        // there better be some Email here, otherwise things are really hosed
+        assert(id_map != null && id_map.size > 0);
+        
+        // remove using the standard call, to ensure all state is updated
+        Gee.MultiMap<Geary.Conversation, Geary.Email> trimmed_conversations;
+        Gee.Collection<Geary.Conversation> removed_conversations;
+        remove_all_emails_by_identifier(id_map.keys, out removed_conversations, out trimmed_conversations);
+        
+        // Conversations should have been removed, not trimmed, and it better have only been the
+        // conversations we're merging
+        assert(trimmed_conversations.size == 0);
+        assert(removed_conversations.size == conversations.size);
+        foreach (ImplConversation conversation in conversations)
+            assert(removed_conversations.contains(conversation));
+        
+        // now add all that email back to the destination Conversation
+        foreach (Geary.Email moved in moved_email)
+            add_email_to_conversation(dest, moved);
+        
+        return dest;
+    }
+    
+    private Geary.Conversation? remove_email_by_identifier(Geary.EmailIdentifier id,
         out Geary.Email? removed_email, out bool removed_conversation) {
         removed_email = null;
         removed_conversation = false;

@@ -611,7 +611,12 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private void process_email_complete(ProcessJobContext job) {
         Gee.Collection<Geary.Conversation> added;
         Gee.MultiMap<Geary.Conversation, Geary.Email> appended;
-        conversations.add_all_emails(job.emails.values, this, folder.path, out added, out appended);
+        Gee.Collection<Geary.Conversation> removed_due_to_merge;
+        conversations.add_all_emails(job.emails.values, this, folder.path, out added, out appended,
+            out removed_due_to_merge);
+        
+        foreach (Geary.Conversation conversation in removed_due_to_merge)
+            notify_conversation_removed(conversation);
         
         if (added.size > 0)
             notify_conversations_added(added);
