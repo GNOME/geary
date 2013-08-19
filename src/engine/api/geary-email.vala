@@ -373,8 +373,8 @@ public class Geary.Email : BaseObject {
         if (aemail.date != null && bemail.date != null)
             diff = aemail.date.value.compare(bemail.date.value);
         
-        // stabilize sort by using the mail's ordering, which is always unique in a folder
-        return (diff != 0) ? diff : aemail.id.compare_to(bemail.id);
+        // stabilize sort by using the mail identifier's stable sort ordering
+        return (diff != 0) ? diff : compare_id_ascending(aemail, bemail);
     }
     
     /**
@@ -385,18 +385,9 @@ public class Geary.Email : BaseObject {
         return compare_date_ascending(bemail, aemail);
     }
     
-    /**
-     * CompareFunc to sort Email by EmailIdentifier.
-     */
-    public static int compare_id_ascending(Geary.Email aemail, Geary.Email bemail) {
-        return aemail.id.compare_to(bemail.id);
-    }
-    
-    /**
-     * CompareFunc to sort Email by EmailIdentifier.
-     */
-    public static int compare_id_descending(Geary.Email aemail, Geary.Email bemail) {
-        return compare_id_ascending(bemail, aemail);
+    // only used to stabilize a sort
+    private static int compare_id_ascending(Geary.Email aemail, Geary.Email bemail) {
+        return aemail.id.stable_sort_comparator(bemail.id);
     }
     
     /**

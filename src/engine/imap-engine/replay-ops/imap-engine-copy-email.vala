@@ -6,11 +6,11 @@
 
 private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_copy = new Gee.ArrayList<Geary.EmailIdentifier>();
+    private Gee.HashSet<ImapDB.EmailIdentifier> to_copy = new Gee.HashSet<ImapDB.EmailIdentifier>();
     private Geary.FolderPath destination;
     private Cancellable? cancellable;
 
-    public CopyEmail(GenericFolder engine, Gee.List<Geary.EmailIdentifier> to_copy, 
+    public CopyEmail(GenericFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy, 
         Geary.FolderPath destination, Cancellable? cancellable = null) {
         base("CopyEmail");
         
@@ -32,20 +32,26 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
     
     public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
         EmailIdentifier id, Imap.EmailFlags? flags) {
+        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
+        if (imapdb_id == null)
+            return true;
+        
         // only interested in messages going away (i.e. can't be copied) ...
         // note that this method operates exactly the same way whether the EmailIdentifer is in
         // the to_copy list or not.
         if (op == ReplayOperation.WritebehindOperation.REMOVE)
-            to_copy.remove(id);
+            to_copy.remove(imapdb_id);
         
         return true;
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        // perform_immediate_local_operation() may have removed all messages to copy
-        if (to_copy.size > 0) {
-            yield engine.remote_folder.copy_email_async(new Imap.MessageSet.email_id_collection(to_copy),
-                destination, cancellable);
+        Gee.Set<Imap.UID>? uids = yield engine.local_folder.get_uids_async(to_copy,
+            ImapDB.Folder.ListFlags.NONE, cancellable);
+        
+        if (uids != null && uids.size > 0) {
+            yield engine.remote_folder.copy_email_async(
+                new Imap.MessageSet.uid_sparse(uids.to_array()), destination, cancellable);
         }
         
         return ReplayOperation.Status.COMPLETED;

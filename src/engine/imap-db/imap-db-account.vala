@@ -96,7 +96,7 @@ private class Geary.ImapDB.Account : BaseObject {
         outbox = new SmtpOutboxFolder(db, account);
         
         // Search folder
-        search_folder = new SearchFolder(account);
+        search_folder = ((ImapEngine.GenericAccount) account).new_search_folder();
     }
     
     public async void close_async(Cancellable? cancellable) throws Error {
@@ -619,12 +619,13 @@ private class Geary.ImapDB.Account : BaseObject {
         
         Gee.ArrayList<int64?> ids = new Gee.ArrayList<int64?>();
         foreach (Geary.EmailIdentifier id in search_ids) {
-            if (!(id is Geary.ImapDB.EmailIdentifier)) {
+            ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
+            if (imapdb_id == null) {
                 throw new EngineError.BAD_PARAMETERS(
                     "search_ids must contain only Geary.ImapDB.EmailIdentifiers");
             }
-
-            ids.add(id.ordering);
+            
+            ids.add(imapdb_id.message_id);
         }
         
         StringBuilder sql = new StringBuilder();
@@ -671,8 +672,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     cx, id, requested_fields, out db_fields, cancellable);
                     
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
-                    Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id,
-                        email_id_folder_path));
+                    Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
                     Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     search_results.add(email);
                 }
@@ -687,7 +687,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<string>? get_search_matches_async(string prepared_query,
-        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
+        Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         Gee.Set<string> search_matches = new Gee.HashSet<string>();
         
         // Create a question mark for each ID.
@@ -705,8 +705,8 @@ private class Geary.ImapDB.Account : BaseObject {
             // Bind query and IDs.
             int i = 0;
             stmt.bind_string(i++, prepared_query);
-            foreach(Geary.EmailIdentifier id in ids)
-                stmt.bind_rowid(i++, id.ordering);
+            foreach(ImapDB.EmailIdentifier id in ids)
+                stmt.bind_rowid(i++, id.message_id);
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
@@ -738,11 +738,8 @@ private class Geary.ImapDB.Account : BaseObject {
         return (search_matches.size == 0 ? null : search_matches);
     }
     
-    public async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
+    public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
-        if (!(email_id is Geary.ImapDB.EmailIdentifier))
-            throw new EngineError.BAD_PARAMETERS("email_id must be a Geary.ImapDB.EmailIdentifier");
-        
         Geary.Email? email = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             // TODO: once we have a way of deleting messages, we won't be able
@@ -750,38 +747,21 @@ private class Geary.ImapDB.Account : BaseObject {
             // transactions, because SQLite will reuse row ids.
             Geary.Email.Field db_fields;
             MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
-                cx, email_id.ordering, required_fields, out db_fields, cancellable);
+                cx, email_id.message_id, required_fields, out db_fields, cancellable);
             
             if (!row.fields.fulfills(required_fields))
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s only fulfills %Xh fields (required: %Xh)",
                     email_id.to_string(), row.fields, required_fields);
             
-            email = row.to_email(new Geary.ImapDB.EmailIdentifier(email_id.ordering,
-                email_id.folder_path));
-            Geary.ImapDB.Folder.do_add_attachments(cx, email, email_id.ordering, cancellable);
+            email = row.to_email(email_id);
+            Geary.ImapDB.Folder.do_add_attachments(cx, email, email_id.message_id, cancellable);
             
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
         assert(email != null);
         return email;
-    }
-    
-    public async Geary.EmailIdentifier? folder_email_id_to_search_async(
-        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
-        Geary.FolderPath? return_folder_path, Cancellable? cancellable) throws Error {
-        int64? row_id = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-            int64 folder_id;
-            do_fetch_folder_id(cx, folder_path, true, out folder_id, cancellable);
-            if (folder_id != Db.INVALID_ROWID)
-                row_id = do_get_message_row_id(cx, folder_id, id.ordering, cancellable);
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        return (row_id != null ? new Geary.ImapDB.EmailIdentifier(row_id, return_folder_path) : null);
     }
     
     public async void update_contact_flags_async(Geary.Contact contact, Cancellable? cancellable)
@@ -810,6 +790,32 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         return count;
+    }
+    
+    /**
+     * Return a map of each passed-in email identifier to the set of folders
+     * that contain it.  If an email id doesn't appear in the resulting map,
+     * it isn't contained in any folders.  Return null if the resulting map
+     * would be empty.  Only throw database errors et al., not errors due to
+     * the email id not being found.
+     */
+    public async Gee.MultiMap<Geary.ImapDB.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
+        Gee.Collection<Geary.ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.HashMultiMap<Geary.ImapDB.EmailIdentifier, Geary.FolderPath> map
+            = new Gee.HashMultiMap<Geary.ImapDB.EmailIdentifier, Geary.FolderPath>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+            foreach (Geary.ImapDB.EmailIdentifier id in ids) {
+                Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id.message_id, cancellable);
+                if (folders != null) {
+                    Geary.Collection.multi_map_set_all<Geary.ImapDB.EmailIdentifier,
+                        Geary.FolderPath>(map, id, folders);
+                }
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return (map.size == 0 ? null : map);
     }
     
     private async void populate_search_table_async(Cancellable? cancellable) {
@@ -970,25 +976,6 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         return do_fetch_folder_id(cx, path.get_parent(), create, out parent_id, cancellable);
-    }
-    
-    public int64? do_get_message_row_id(Db.Connection cx, int64 folder_id, int64 ordering,
-        Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare("""
-            SELECT message_id
-            FROM MessageLocationTable
-            WHERE folder_id = ?
-                AND ordering = ?
-        """);
-        stmt.bind_rowid(0, folder_id);
-        stmt.bind_int64(1, ordering);
-        
-        Db.Result result = stmt.exec(cancellable);
-        int64? row_id = null;
-        if (!result.finished)
-            row_id = result.rowid_at(0);
-        
-        return row_id;
     }
     
     // Turn the collection of folder paths into actual folder ids.  As a

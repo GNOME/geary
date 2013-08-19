@@ -39,7 +39,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         
         folder.opened.connect(on_opened);
         folder.closed.connect(on_closed);
-        folder.local_expansion.connect(on_local_expansion);
+        folder.email_discovered.connect(on_local_expansion);
     }
     
     ~EmailPrefetcher() {
@@ -48,7 +48,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         
         folder.opened.disconnect(on_opened);
         folder.closed.disconnect(on_closed);
-        folder.local_expansion.disconnect(on_local_expansion);
+        folder.email_discovered.disconnect(on_local_expansion);
     }
     
     private void on_opened(Geary.Folder.OpenState open_state) {
@@ -107,8 +107,9 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         for (;;) {
             Gee.List<Geary.Email>? list = null;
             try {
-                list = yield folder.local_folder.list_email_by_id_async(lowest, PREFETCH_IDS_CHUNKS,
-                    Geary.Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.ONLY_INCOMPLETE, cancellable);
+                list = yield folder.local_folder.list_email_by_id_async((ImapDB.EmailIdentifier) lowest,
+                    PREFETCH_IDS_CHUNKS, Geary.Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.ONLY_INCOMPLETE,
+                    cancellable);
             } catch (Error err) {
                 debug("Error while list local emails for %s: %s", folder.to_string(), err.message);
             }
@@ -117,10 +118,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
                 break;
             
             // find lowest for next iteration
-            foreach (Geary.Email email in list) {
-                if (lowest == null || email.id.compare_to(lowest) < 0)
-                    lowest = email.id;
-            }
+            lowest = Geary.EmailIdentifier.sort_emails(list).first().id;
             
             schedule_prefetch(list);
         }

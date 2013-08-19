@@ -324,6 +324,7 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
+    // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
     public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable) throws Error {
         check_open();
@@ -523,7 +524,7 @@ private class Geary.Imap.Folder : BaseObject {
             new MailboxSpecifier.from_folder_path(destination, null));
         Gee.Collection<Command> cmds = new Collection.SingleItem<Command>(cmd);
         
-        yield exec_commands_async(cmds, null, null,  cancellable);
+        yield exec_commands_async(cmds, null, null, cancellable);
     }
     
     // TODO: Support MOVE extension
@@ -644,7 +645,10 @@ private class Geary.Imap.Folder : BaseObject {
         FetchBodyDataIdentifier? partial_header_identifier, FetchBodyDataIdentifier? body_identifier,
         FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier)
         throws Error {
-        Geary.Email email = new Geary.Email(new Imap.EmailIdentifier(uid, path));
+        // note the use of INVALID_ROWID, as the rowid for this email (if one is present in the
+        // database) is unknown at this time; this means ImapDB *must* create a new EmailIdentifier
+        // for this email after create/merge is completed
+        Geary.Email email = new Geary.Email(new ImapDB.EmailIdentifier.no_message_id(uid));
         
         // accumulate these to submit Imap.EmailProperties all at once
         InternalDate? internaldate = null;
@@ -836,7 +840,8 @@ private class Geary.Imap.Folder : BaseObject {
         return email;
     }
     
-    internal async Geary.EmailIdentifier? create_email_async(RFC822.Message message, Geary.EmailFlags? flags,
+    // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
+    public async Geary.EmailIdentifier? create_email_async(RFC822.Message message, Geary.EmailFlags? flags,
         DateTime? date_received, Cancellable? cancellable) throws Error {
         check_open();
         
@@ -862,7 +867,7 @@ private class Geary.Imap.Folder : BaseObject {
             response.response_code.get_response_code_type().is_value("appenduid")) {
             UID new_id = new UID(response.response_code.get_as_string(2).as_int());
             
-            return new Geary.Imap.EmailIdentifier(new_id, path);
+            return new ImapDB.EmailIdentifier.no_message_id(new_id);
         }
         
         // We didn't get a UID back from the server.

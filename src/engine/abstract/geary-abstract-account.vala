@@ -44,6 +44,16 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
         email_locally_complete(folder, ids);
     }
     
+    protected virtual void notify_email_discovered(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_discovered(folder, ids);
+    }
+    
+    protected virtual void notify_email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
+        email_flags_changed(folder, flag_map);
+    }
+    
     protected virtual void notify_opened() {
         opened();
     }
@@ -98,10 +108,6 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
-    public abstract async Geary.EmailIdentifier? folder_email_id_to_search_async(
-        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
-        Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error;
-    
     public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string query,
         Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
@@ -109,6 +115,9 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     
     public abstract async Gee.Collection<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
+    
+    public abstract async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
     
     public virtual string to_string() {
         return name;

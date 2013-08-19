@@ -189,7 +189,7 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.UIManager ui;
     
     public ComposerWindow(Geary.Account account, ComposeType compose_type,
-        Geary.Email? referred = null) {
+        Geary.Email? referred = null, bool is_referred_draft = false) {
         this.account = account;
         this.compose_type = compose_type;
         
@@ -327,7 +327,7 @@ public class ComposerWindow : Gtk.Window {
                     
                     try {
                         Geary.Folder? draft_folder = account.get_special_folder(Geary.SpecialFolderType.DRAFTS);
-                        if (draft_folder != null && referred.id.folder_path.equal_to(draft_folder.path))
+                        if (draft_folder != null && is_referred_draft)
                             draft_id = referred.id;
                     } catch (Error e) {
                         debug("Error looking up special folder: %s", e.message);

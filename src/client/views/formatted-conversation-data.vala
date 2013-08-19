@@ -88,12 +88,12 @@ public class FormattedConversationData : Geary.BaseObject {
     public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
     
-    private Geary.Conversation? conversation = null;
+    private Geary.App.Conversation? conversation = null;
     private string? account_owner_email = null;
     private bool use_to = true;
     
     // Creates a formatted message data from an e-mail.
-    public FormattedConversationData(Geary.Conversation conversation, Geary.Email preview,
+    public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
         Geary.Folder folder, string account_owner_email) {
         assert(preview.fields.fulfills(ConversationListStore.REQUIRED_FIELDS));
         
@@ -202,7 +202,7 @@ public class FormattedConversationData : Geary.BaseObject {
         // Build chronological list of AuthorDisplay records, setting to unread if any message by
         // that author is unread
         Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
-        foreach (Geary.Email message in conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING)) {
+        foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.DATE_ASCENDING)) {
             // only display if something to display
             Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
             if (addresses == null || addresses.size < 1)

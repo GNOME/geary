@@ -66,18 +66,18 @@ public class Geary.DBus.Conversations : Object {
         scan_completed();
     }
     
-    private void on_conversations_added(Gee.Collection<Geary.Conversation> conversations) {
+    private void on_conversations_added(Gee.Collection<Geary.App.Conversation> conversations) {
         debug("Conversation added: %d conversations", conversations.size);
         ObjectPath[] paths = new ObjectPath[0];
         
-        foreach (Geary.Conversation c in conversations) {
+        foreach (Geary.App.Conversation c in conversations) {
             paths += new ObjectPath(Database.instance.get_conversation_path(c, folder));
         }
         
         conversations_added(paths);
     }
     
-    private void on_conversation_removed(Geary.Conversation conversation) {
+    private void on_conversation_removed(Geary.App.Conversation conversation) {
         debug("conversation removed");
         // Fire signal, then delete.
         ObjectPath path = Database.instance.get_conversation_path(conversation, folder);
@@ -86,7 +86,7 @@ public class Geary.DBus.Conversations : Object {
         Database.instance.remove_by_path(path);
     }
     
-    private void on_conversation_appended(Geary.Conversation conversation,
+    private void on_conversation_appended(Geary.App.Conversation conversation,
         Gee.Collection<Geary.Email> email_list) {
         debug("conversation appended");
         
@@ -98,7 +98,7 @@ public class Geary.DBus.Conversations : Object {
             email_paths);
     }
     
-    private void on_conversation_trimmed(Geary.Conversation conversation,
+    private void on_conversation_trimmed(Geary.App.Conversation conversation,
         Gee.Collection<Geary.Email> emails) {
         debug("conversation trimmed");
         foreach (Geary.Email email in emails) {

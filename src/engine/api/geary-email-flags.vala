@@ -15,28 +15,16 @@
  */
 
 public class Geary.EmailFlags : Geary.NamedFlags {
-    private static NamedFlag? _unread = null;
-    public static NamedFlag UNREAD { get {
-        if (_unread == null)
-            _unread = new NamedFlag("UNREAD");
-        
-        return _unread;
+    public static NamedFlag UNREAD { owned get {
+        return new NamedFlag("UNREAD");
     } }
 
-    private static NamedFlag? _flagged = null;
-    public static NamedFlag FLAGGED { get {
-        if (_flagged == null)
-            _flagged = new NamedFlag("FLAGGED");
-
-        return _flagged;
+    public static NamedFlag FLAGGED { owned get {
+        return new NamedFlag("FLAGGED");
     } }
 
-    private static NamedFlag? _load_remote_images = null;
-    public static NamedFlag LOAD_REMOTE_IMAGES { get {
-        if (_load_remote_images == null)
-            _load_remote_images = new NamedFlag("LOADREMOTEIMAGES");
-        
-        return _load_remote_images;
+    public static NamedFlag LOAD_REMOTE_IMAGES { owned get {
+        return new NamedFlag("LOADREMOTEIMAGES");
     } }
     
     public EmailFlags() {

@@ -23,8 +23,6 @@ public class ConversationViewer : Gtk.Box {
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string SPINNER_ID = "spinner";
-    private const Geary.Email.Field FULL_FETCH_FIELDS = ConversationViewer.REQUIRED_FIELDS |
-        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
     
     private enum SearchState {
         // Search/find states.
@@ -84,8 +82,9 @@ public class ConversationViewer : Gtk.Box {
     // Fired when the user clicks "forward" in the message menu.
     public signal void forward_message(Geary.Email message);
 
-    // Fired when the user marks a message.
-    public signal void mark_message(Geary.Email message, Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
+    // Fired when the user mark messages.
+    public signal void mark_messages(Gee.Collection<Geary.EmailIdentifier> emails,
+        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
     // Fired when the user opens an attachment.
     public signal void open_attachment(Geary.Attachment attachment);
@@ -104,7 +103,7 @@ public class ConversationViewer : Gtk.Box {
     public ConversationWebView web_view { get; private set; }
     
     // Current conversation, or null if none.
-    public Geary.Conversation? current_conversation = null;
+    public Geary.App.Conversation? current_conversation = null;
     
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
@@ -123,6 +122,7 @@ public class ConversationViewer : Gtk.Box {
     private Gtk.Menu? attachment_menu = null;
     private weak Geary.Folder? current_folder = null;
     private weak Geary.SearchFolder? search_folder = null;
+    private Geary.App.EmailStore? email_store = null;
     private Geary.AccountInformation? current_account_information = null;
     private ConversationFindBar conversation_find_bar;
     private Cancellable cancellable_fetch = new Cancellable();
@@ -235,6 +235,7 @@ public class ConversationViewer : Gtk.Box {
     
     private void on_folder_selected(Geary.Folder? folder) {
         current_folder = folder;
+        email_store = (current_folder == null ? null : new Geary.App.EmailStore(current_folder.account));
         fsm.issue(SearchEvent.RESET);
         
         if (folder == null) {
@@ -250,7 +251,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private void on_conversations_selected(Gee.Set<Geary.Conversation>? conversations,
+    private void on_conversations_selected(Gee.Set<Geary.App.Conversation>? conversations,
         Geary.Folder? current_folder) {
         cancel_load();
         if (current_conversation != null) {
@@ -300,22 +301,21 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private async void select_conversation_async(Geary.Conversation conversation,
+    private async void select_conversation_async(Geary.App.Conversation conversation,
         Geary.Folder current_folder) throws Error {
-        Gee.Collection<Geary.Email> messages = conversation.get_emails(Geary.Conversation.Ordering.DATE_ASCENDING);
-        
         // Load this once, so if it's cancelled, we cancel the WHOLE load.
         Cancellable cancellable = cancellable_fetch;
         
         // Fetch full messages.
-        Gee.Collection<Geary.Email> messages_to_add = new Gee.HashSet<Geary.Email>();
-        foreach (Geary.Email email in messages)
-            messages_to_add.add(yield fetch_full_message_async(email, current_folder, FULL_FETCH_FIELDS,
-                cancellable));
+        Gee.Collection<Geary.Email>? messages_to_add
+            = yield list_full_messages_async(conversation.get_emails(
+            Geary.App.Conversation.Ordering.DATE_ASCENDING), cancellable);
         
         // Add messages.
-        foreach (Geary.Email email in messages_to_add)
-            add_message(email);
+        if (messages_to_add != null) {
+            foreach (Geary.Email email in messages_to_add)
+                add_message(email, conversation.is_in_current_folder(email.id));
+        }
         
         if (current_folder is Geary.SearchFolder) {
             yield highlight_search_terms();
@@ -329,7 +329,6 @@ public class ConversationViewer : Gtk.Box {
         try {
             select_conversation_async.end(result);
             
-            GearyApplication.instance.controller.enable_message_buttons(true);
             mark_read();
         } catch (Error err) {
             debug("Unable to select conversation: %s", err.message);
@@ -370,6 +369,30 @@ public class ConversationViewer : Gtk.Box {
         web_view.set_highlight_text_matches(true);
     }
     
+    // Given some emails, fetch the full versions with all required fields.
+    private async Gee.Collection<Geary.Email>? list_full_messages_async(
+        Gee.Collection<Geary.Email> emails, Cancellable? cancellable) throws Error {
+        Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
+            Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
+        
+        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (Geary.Email email in emails)
+            ids.add(email.id);
+        
+        return yield email_store.list_email_by_sparse_id_async(ids, required_fields,
+            Geary.Folder.ListFlags.NONE, cancellable);
+    }
+    
+    // Given an email, fetch the full version with all required fields.
+    private async Geary.Email fetch_full_message_async(Geary.Email email,
+        Cancellable? cancellable) throws Error {
+        Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
+            Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
+        
+        return yield email_store.fetch_email_async(email.id, required_fields,
+            Geary.Folder.ListFlags.NONE, cancellable);
+    }
+    
     // Cancels the current message load, if in progress.
     private void cancel_load() {
         Cancellable old_cancellable = cancellable_fetch;
@@ -378,13 +401,14 @@ public class ConversationViewer : Gtk.Box {
         old_cancellable.cancel();
     }
     
-    private void on_conversation_appended(Geary.Email email) {
-        on_conversation_appended_async.begin(email, on_conversation_appended_complete);
+    private void on_conversation_appended(Geary.App.Conversation conversation, Geary.Email email) {
+        on_conversation_appended_async.begin(conversation, email, on_conversation_appended_complete);
     }
     
-    private async void on_conversation_appended_async(Geary.Email email) throws Error {
-        add_message(yield fetch_full_message_async(email, current_folder, FULL_FETCH_FIELDS,
-            cancellable_fetch));
+    private async void on_conversation_appended_async(Geary.App.Conversation conversation,
+        Geary.Email email) throws Error {
+        add_message(yield fetch_full_message_async(email, cancellable_fetch),
+            conversation.is_in_current_folder(email.id));
     }
     
     private void on_conversation_appended_complete(Object? source, AsyncResult result) {
@@ -399,7 +423,7 @@ public class ConversationViewer : Gtk.Box {
         remove_message(email);
     }
     
-    private void add_message(Geary.Email email) {
+    private void add_message(Geary.Email email, bool is_in_folder) {
         // Make sure the message container is showing and the multi-message counter hidden.
         set_mode(DisplayMode.CONVERSATION);
         
@@ -476,7 +500,7 @@ public class ConversationViewer : Gtk.Box {
         update_flags(email);
         
         // Edit draft button for drafts folder.
-        if (in_drafts_folder() && email.id.folder_path != null) {
+        if (in_drafts_folder() && is_in_folder) {
             WebKit.DOM.HTMLElement draft_edit_container = Util.DOM.select(div_message, ".draft_edit");
             WebKit.DOM.HTMLElement draft_edit_button =
                 Util.DOM.select(div_message, ".draft_edit_button");
@@ -910,7 +934,7 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         Geary.Email? email = conversation_viewer.get_email_from_element(element);
-        if (email != null && email.id.folder_path != null)
+        if (email != null)
             conversation_viewer.unflag_message(email);
     }
 
@@ -918,7 +942,7 @@ public class ConversationViewer : Gtk.Box {
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         Geary.Email? email = conversation_viewer.get_email_from_element(element);
-        if (email != null && email.id.folder_path != null)
+        if (email != null)
             conversation_viewer.flag_message(email);
     }
 
@@ -1054,7 +1078,8 @@ public class ConversationViewer : Gtk.Box {
             if (message != null && !message.load_remote_images().is_certain()) {
                 Geary.EmailFlags flags = new Geary.EmailFlags();
                 flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
-                mark_message(message, flags, null);
+                mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(
+                    message.id), flags, null);
             }
         }
     }
@@ -1254,14 +1279,14 @@ public class ConversationViewer : Gtk.Box {
     private void on_mark_read_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
-        mark_message(message, null, flags);
+        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(message.id), null, flags);
         mark_manual_read(message.id);
     }
 
     private void on_mark_unread_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
-        mark_message(message, flags, null);
+        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(message.id), flags, null);
         mark_manual_read(message.id);
     }
 
@@ -1289,13 +1314,13 @@ public class ConversationViewer : Gtk.Box {
     private void flag_message(Geary.Email email) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_message(email, flags, null);
+        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(email.id), flags, null);
     }
 
     private void unflag_message(Geary.Email email) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_message(email, null, flags);
+        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(email.id), null, flags);
     }
 
     private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
@@ -1364,16 +1389,14 @@ public class ConversationViewer : Gtk.Box {
         }
         
         // Mark as read/unread.
-        if (email.id.folder_path != null && current_folder is Geary.FolderSupport.Mark) {
-            if (email.is_unread().to_boolean(false)) {
-                Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
-                mark_read_item.activate.connect(() => on_mark_read_message(email));
-                menu.append(mark_read_item);
-            } else {
-                Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
-                mark_unread_item.activate.connect(() => on_mark_unread_message(email));
-                menu.append(mark_unread_item);
-            }
+        if (email.is_unread().to_boolean(false)) {
+            Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
+            mark_read_item.activate.connect(() => on_mark_read_message(email));
+            menu.append(mark_read_item);
+        } else {
+            Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
+            mark_unread_item.activate.connect(() => on_mark_unread_message(email));
+            menu.append(mark_unread_item);
         }
         
         // Print a message.
@@ -1772,7 +1795,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     public void mark_read() {
-        Gee.List<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.ArrayList<Geary.EmailIdentifier> emails = new Gee.ArrayList<Geary.EmailIdentifier>();
         WebKit.DOM.Document document = web_view.get_dom_document();
         long scroll_top = document.body.scroll_top;
         long scroll_height = document.document_element.scroll_height;
@@ -1782,11 +1805,10 @@ public class ConversationViewer : Gtk.Box {
                 if (message.email_flags.is_unread()) {
                     WebKit.DOM.HTMLElement element = email_to_element.get(message.id);
                     WebKit.DOM.HTMLElement body = (WebKit.DOM.HTMLElement) element.get_elements_by_class_name("body").item(0);
-                    if (message.id.folder_path != null &&
-                            !element.get_class_list().contains("manual_read") &&
+                    if (!element.get_class_list().contains("manual_read") &&
                             body.offset_top + body.offset_height > scroll_top &&
                             body.offset_top + 28 < scroll_top + scroll_height) {  // 28 = 15 padding + 13 first line of text
-                        ids.add(message.id);
+                        emails.add(message.id);
                     }
                 }
             } catch (Error error) {
@@ -1794,11 +1816,10 @@ public class ConversationViewer : Gtk.Box {
             }
         }
 
-        Geary.FolderSupport.Mark? supports_mark = current_folder as Geary.FolderSupport.Mark;
-        if (supports_mark != null & ids.size > 0) {
+        if (emails.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
-            supports_mark.mark_email_async.begin(ids, null, flags, null);
+            mark_messages(emails, null, flags);
         }
     }
     

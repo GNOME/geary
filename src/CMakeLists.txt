@@ -23,7 +23,6 @@ engine/api/geary-contact.vala
 engine/api/geary-contact-flags.vala
 engine/api/geary-contact-importance.vala
 engine/api/geary-contact-store.vala
-engine/api/geary-conversation.vala
 engine/api/geary-credentials.vala
 engine/api/geary-credentials-mediator.vala
 engine/api/geary-email-flags.vala
@@ -50,7 +49,9 @@ engine/api/geary-search-folder.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
 
+engine/app/app-conversation.vala
 engine/app/app-conversation-monitor.vala
+engine/app/app-email-store.vala
 
 engine/app/conversation-monitor/app-append-operation.vala
 engine/app/conversation-monitor/app-conversation-operation-queue.vala
@@ -58,12 +59,17 @@ engine/app/conversation-monitor/app-conversation-operation.vala
 engine/app/conversation-monitor/app-conversation-set.vala
 engine/app/conversation-monitor/app-external-append-operation.vala
 engine/app/conversation-monitor/app-fill-window-operation.vala
-engine/app/conversation-monitor/app-impl-conversation.vala
 engine/app/conversation-monitor/app-local-load-operation.vala
 engine/app/conversation-monitor/app-local-search-operation.vala
 engine/app/conversation-monitor/app-remove-operation.vala
 engine/app/conversation-monitor/app-reseed-operation.vala
 engine/app/conversation-monitor/app-terminate-operation.vala
+
+engine/app/email-store/app-async-folder-operation.vala
+engine/app/email-store/app-copy-operation.vala
+engine/app/email-store/app-fetch-operation.vala
+engine/app/email-store/app-list-operation.vala
+engine/app/email-store/app-mark-operation.vala
 
 engine/common/common-message-data.vala
 
@@ -84,7 +90,6 @@ engine/imap/imap.vala
 engine/imap/imap-error.vala
 engine/imap/api/imap-account.vala
 engine/imap/api/imap-email-flags.vala
-engine/imap/api/imap-email-identifier.vala
 engine/imap/api/imap-email-properties.vala
 engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
@@ -191,6 +196,7 @@ engine/imap-engine/imap-engine-replay-queue.vala
 engine/imap-engine/imap-engine-send-replay-operation.vala
 engine/imap-engine/gmail/imap-engine-gmail-account.vala
 engine/imap-engine/gmail/imap-engine-gmail-folder.vala
+engine/imap-engine/gmail/imap-engine-gmail-search-folder.vala
 engine/imap-engine/other/imap-engine-other-account.vala
 engine/imap-engine/other/imap-engine-other-folder.vala
 engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
@@ -204,6 +210,7 @@ engine/imap-engine/replay-ops/imap-engine-move-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
 engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
+engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 

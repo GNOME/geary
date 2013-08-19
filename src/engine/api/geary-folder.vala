@@ -236,7 +236,13 @@ public interface Geary.Folder : BaseObject {
      * of Fields.
      */
     public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
-
+    
+    /**
+     * Fired when one or more emails have been discovered (added) to the Folder, but not necessarily
+     * appended (i.e. old email pulled down due to user request or background fetching).
+     */
+    public signal void email_discovered(Gee.Collection<Geary.EmailIdentifier> ids);
+    
     /**
     * Fired when the {@link SpecialFolderType} has changed.
     *
@@ -264,6 +270,8 @@ public interface Geary.Folder : BaseObject {
         Geary.EmailFlags> flag_map);
     
     protected abstract void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    protected abstract void notify_email_discovered(Gee.Collection<Geary.EmailIdentifier> ids);
     
     protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);

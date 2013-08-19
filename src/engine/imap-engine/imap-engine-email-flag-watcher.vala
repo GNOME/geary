@@ -108,15 +108,14 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             total += list_local.size;
             
-            // Get all email identifiers in the local folder; also, update the low and count arguments
+            // find the lowest for the next iteration
+            lowest = Geary.EmailIdentifier.sort_emails(list_local).first().id;
+            
+            // Get all email identifiers in the local folder mapped to their EmailFlags
             Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map = new Gee.HashMap<
                 Geary.EmailIdentifier, Geary.EmailFlags>();
-            foreach (Geary.Email e in list_local) {
-                if (lowest == null || e.id.compare_to(lowest) < 0)
-                    lowest = e.id;
-                
+            foreach (Geary.Email e in list_local)
                 local_map.set(e.id, e.email_flags);
-            }
             
             // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
             // and the latest to be gotten from the server (updating the cache in the process)

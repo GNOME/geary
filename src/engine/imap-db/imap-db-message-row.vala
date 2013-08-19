@@ -97,7 +97,7 @@ private class Geary.ImapDB.MessageRow {
         }
     }
     
-    public Geary.Email to_email(Geary.EmailIdentifier id) throws Error {
+    public Geary.Email to_email(ImapDB.EmailIdentifier id) throws Error {
         // Important to set something in the Email object if the field bit is set ... for example,
         // if the caller expects to see a DATE field, that field is set in the Email's bitmask,
         // even if the Date object is null

@@ -52,6 +52,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 folder.email_appended.connect(on_folder_email_appended);
                 folder.email_removed.connect(on_folder_email_removed);
                 folder.email_locally_complete.connect(on_folder_email_locally_complete);
+                folder.email_discovered.connect(on_folder_email_discovered);
+                folder.email_flags_changed.connect(on_folder_email_flags_changed);
             }
         }
         if (unavailable != null) {
@@ -59,6 +61,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 folder.email_appended.disconnect(on_folder_email_appended);
                 folder.email_removed.disconnect(on_folder_email_removed);
                 folder.email_locally_complete.disconnect(on_folder_email_locally_complete);
+                folder.email_discovered.disconnect(on_folder_email_discovered);
+                folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
             }
         }
     }
@@ -74,6 +78,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private void on_folder_email_locally_complete(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids) {
         notify_email_locally_complete(folder, ids);
+    }
+    
+    private void on_folder_email_discovered(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_discovered(folder, ids);
+    }
+    
+    private void on_folder_email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
+        notify_email_flags_changed(folder, flag_map);
     }
     
     private void check_open() throws EngineError {
@@ -171,6 +185,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
     protected abstract GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder);
+    
+    // Subclasses with specific SearchFolder implementations should override
+    // this to return the correct subclass.
+    internal virtual SearchFolder new_search_folder() {
+        return new SearchFolder(this);
+    }
     
     private GenericFolder build_folder(ImapDB.Folder local_folder) {
         return Geary.Collection.get_first(build_folders(new Collection.SingleItem<ImapDB.Folder>(local_folder)));
@@ -507,6 +527,24 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         notify_email_sent(rfc822);
     }
     
+    private ImapDB.EmailIdentifier check_id(Geary.EmailIdentifier id) throws EngineError {
+        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
+        if (imapdb_id == null)
+            throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not from ImapDB folder", id.to_string());
+        
+        return imapdb_id;
+    }
+    
+    private Gee.Collection<ImapDB.EmailIdentifier> check_ids(Gee.Collection<Geary.EmailIdentifier> ids)
+        throws EngineError {
+        foreach (Geary.EmailIdentifier id in ids) {
+            if (!(id is ImapDB.EmailIdentifier))
+                throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not from ImapDB folder", id.to_string());
+        }
+        
+        return (Gee.Collection<ImapDB.EmailIdentifier>) ids;
+    }
+    
     public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error {
@@ -516,14 +554,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
-        return yield local.fetch_email_async(email_id, required_fields, cancellable);
-    }
-    
-    public override async Geary.EmailIdentifier? folder_email_id_to_search_async(
-        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
-        Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error {
-        return yield local.folder_email_id_to_search_async(
-            folder_path, id, return_folder_path, cancellable);
+        return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
     }
     
     public override async Gee.Collection<Geary.Email>? local_search_async(string query,
@@ -542,7 +573,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     public override async Gee.Collection<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
-        return yield local.get_search_matches_async(previous_prepared_search_query, ids, cancellable);
+        return yield local.get_search_matches_async(previous_prepared_search_query, check_ids(ids),
+            cancellable);
+    }
+    
+    public override async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        // TODO: also handle other types of EmailIdentifiers, not just ImapDB.
+        return yield local.get_containing_folders_async(check_ids(ids), cancellable);
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {

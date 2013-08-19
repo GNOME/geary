@@ -29,7 +29,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             this.ordering = ordering;
             this.message = message;
             
-            outbox_id = new SmtpOutboxEmailIdentifier(ordering, root);
+            outbox_id = new SmtpOutboxEmailIdentifier(id, ordering);
         }
     }
     
@@ -282,11 +282,12 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     }
     
     public override async Gee.List<Geary.Email>? list_email_by_id_async(
-        Geary.EmailIdentifier? initial_id, int count, Geary.Email.Field required_fields,
+        Geary.EmailIdentifier? _initial_id, int count, Geary.Email.Field required_fields,
         Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
         check_open();
         
-        if (initial_id != null && !(initial_id is SmtpOutboxEmailIdentifier)) {
+        SmtpOutboxEmailIdentifier? initial_id = _initial_id as SmtpOutboxEmailIdentifier;
+        if (_initial_id != null && initial_id == null) {
             throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not for Outbox",
                 initial_id.to_string());
         }

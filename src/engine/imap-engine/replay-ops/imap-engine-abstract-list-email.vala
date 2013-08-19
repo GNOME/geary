@@ -43,8 +43,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 // if remote email doesn't fulfills all required fields, fetch full and return that
                 // TODO: Need a sparse ID fetch in ImapDB.Folder to do this all at once
                 if (!email.fields.fulfills(required_fields)) {
-                    email = yield owner.local_folder.fetch_email_async(email.id, required_fields,
-                        ImapDB.Folder.ListFlags.NONE, cancellable);
+                    email = yield owner.local_folder.fetch_email_async((ImapDB.EmailIdentifier) email.id,
+                        required_fields, ImapDB.Folder.ListFlags.NONE, cancellable);
                     list[ctr] = email;
                 }
             }
@@ -130,7 +130,13 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             if (email_ids.size == 0)
                 continue;
             
-            Imap.MessageSet msg_set = new Imap.MessageSet.email_id_collection(email_ids);
+            Gee.Set<Imap.UID>? uids = yield owner.local_folder.get_uids_async(
+                (Gee.Collection<ImapDB.EmailIdentifier>) email_ids, ImapDB.Folder.ListFlags.NONE,
+                cancellable);
+            if (uids == null || uids.size == 0)
+                continue;
+            
+            Imap.MessageSet msg_set = new Imap.MessageSet.uid_sparse(uids.to_array());
             RemoteBatchOperation remote_op = new RemoteBatchOperation(owner, msg_set, unfulfilled_fields,
                 required_fields);
             batch.add(remote_op);
@@ -166,9 +172,125 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         
         // signal
         if (created_ids.size > 0)
-            owner.notify_local_expansion(created_ids);
+            owner.notify_email_discovered(created_ids);
         
         return ReplayOperation.Status.COMPLETED;
+    }
+    
+    protected async Trillian is_fully_expanded_async() throws Error {
+        int remote_count;
+        owner.get_remote_counts(out remote_count, null);
+        
+        // if unknown (unconnected), say so
+        if (remote_count < 0)
+            return Trillian.UNKNOWN;
+        
+        // include marked for removed in the count in case this is being called while a removal
+        // is in process, in which case don't want to expand vector this moment because the
+        // vector is in flux
+        int local_count_with_marked = yield owner.local_folder.get_email_count_async(
+            ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+        
+        return Trillian.from_boolean(local_count_with_marked >= remote_count);
+    }
+    
+    // Adds everything in the expansion to the unfulfilled set with required_fields plus ImapDB's
+    // field requirements
+    protected async void expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
+        // watch out for situations where the entire folder is represented locally (i.e. no
+        // expansion necessary)
+        int remote_count = owner.get_remote_counts(null, null);
+        if (remote_count < 0)
+            return;
+        
+        // include marked for removed in the count in case this is being called while a removal
+        // is in process, in which case don't want to expand vector this moment because the
+        // vector is in flux
+        int local_count = yield owner.local_folder.get_email_count_async(
+            ImapDB.Folder.ListFlags.NONE, cancellable);
+        
+        // determine low and high position for expansion ... default in most code paths for high
+        // is the SequenceNumber just below the lowest known message, unless no local messages
+        // are present
+        Imap.SequenceNumber? low_pos = null;
+        Imap.SequenceNumber? high_pos = null;
+        if (local_count > 0)
+            high_pos = new Imap.SequenceNumber(Numeric.int_floor(remote_count - local_count, 1));
+        
+        if (flags.is_oldest_to_newest()) {
+            if (initial_uid == null) {
+                // if oldest to newest and initial-id is null, then start at the bottom
+                low_pos = new Imap.SequenceNumber(1);
+            } else {
+                Gee.Map<Imap.UID, Imap.SequenceNumber>? map = yield owner.remote_folder.uid_to_position_async(
+                    new Imap.MessageSet.uid(initial_uid), cancellable);
+                if (map == null || map.size == 0 || !map.has_key(initial_uid)) {
+                    debug("%s: Unable to expand vector for initial_uid=%s: unable to convert to position",
+                        to_string(), initial_uid.to_string());
+                    
+                    return;
+                }
+                
+                low_pos = map.get(initial_uid);
+            }
+        } else {
+            // newest to oldest
+            //
+            // if initial_id is null or no local earliest UID, then vector expansion is simple:
+            // merely count backwards from the top of the vector
+            if (initial_uid == null || local_count == 0) {
+                low_pos = new Imap.SequenceNumber(Numeric.int_floor((remote_count - count) + 1, 1));
+                
+                // don't set high_pos, leave null to use symbolic "highest" in MessageSet
+                high_pos = null;
+            } else {
+                // not so simple; need to determine the *remote* position of the earliest local
+                // UID and count backward from that; if no UIDs present, then it's as if no initial_id
+                // is specified.
+                //
+                // low position: count backwards; note that it's possible this will overshoot and
+                // pull in more email than technically required, but without a round-trip to the
+                // server to determine the position number of a particular UID, this makes sense
+                assert(high_pos != null);
+                low_pos = new Imap.SequenceNumber(
+                    Numeric.int_floor((high_pos.value - count) + 1, 1));
+            }
+        }
+        
+        // low_pos must be defined by this point
+        assert(low_pos != null);
+        
+        if (high_pos != null && low_pos.value > high_pos.value) {
+            debug("%s: Aborting vector expansion, low_pos=%s > high_pos=%s", owner.to_string(),
+                low_pos.to_string(), high_pos.to_string());
+            
+            return;
+        }
+        
+        Imap.MessageSet msg_set;
+        int actual_count = -1;
+        if (high_pos != null) {
+            msg_set = new Imap.MessageSet.range_by_first_last(low_pos, high_pos);
+            actual_count = (high_pos.value - low_pos.value) + 1;
+        } else {
+            msg_set = new Imap.MessageSet.range_to_highest(low_pos);
+        }
+        
+        debug("%s: Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%d",
+            owner.to_string(), msg_set.to_string(),
+            (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count);
+        
+        Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
+            Geary.Email.Field.NONE, cancellable);
+        if (list != null) {
+            // add all the new email to the unfulfilled list, which ensures (when replay_remote_async
+            // is called) that the fields are downloaded and added to the database
+            foreach (Geary.Email email in list)
+                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS, email.id);
+        }
+        
+        debug("%s: Vector expansion completed (%d new email)", owner.to_string(),
+            (list != null) ? list.size : 0);
     }
     
     public override async void backout_local_async() throws Error {

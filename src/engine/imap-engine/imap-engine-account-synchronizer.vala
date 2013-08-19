@@ -296,7 +296,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         try {
             yield folder.open_async(Folder.OpenFlags.FAST_OPEN, bg_cancellable);
-            yield folder.wait_for_open_async(bg_cancellable);
         } catch (Error err) {
             // don't need to close folder; if either calls throws an error, the folder is not open
             if (err is IOError.CANCELLED)
@@ -385,6 +384,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
                 folder.to_string(), oldest_local.to_string(), epoch.to_string());
         }
+        
+        // wait for the folder to be fully opened to give the email prefetcher a chance to start up
+        yield folder.wait_for_open_async(bg_cancellable);
         
         // always give email prefetcher time to finish its work
         debug("Waiting for email prefetcher to complete %s...", folder.to_string());

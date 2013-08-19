@@ -40,7 +40,7 @@ public class Geary.DBus.Database : Object {
     
     // Finds the conversation and returns the path.  If the conversation does not have
     // a path, it will be assigned one.
-    public ObjectPath get_conversation_path(Geary.Conversation c, Geary.Folder folder) {
+    public ObjectPath get_conversation_path(Geary.App.Conversation c, Geary.Folder folder) {
          ObjectPath? path = c.get_data(DBUS_PATH_PROP);
         
         if (path == null) {

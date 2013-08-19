@@ -9,7 +9,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     private Gee.List<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>();
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
-    private Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
+    private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
     private Cancellable? cancellable;
     
     public MarkEmail(GenericFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
@@ -34,12 +34,15 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         // reapply the wrong flags): should get the original flags and the new flags in the same
         // operation as the marking procedure, so original flags and reported flags are correct
         original_flags = yield engine.local_folder.get_email_flags_async(to_mark, cancellable);
-        yield engine.local_folder.mark_email_async(to_mark, flags_to_add, flags_to_remove,
+        if (original_flags == null || original_flags.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
+        yield engine.local_folder.mark_email_async(original_flags.keys, flags_to_add, flags_to_remove,
             cancellable);
         
         // Notify using flags from DB.
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? map = yield engine.local_folder.get_email_flags_async(
-            to_mark, cancellable);
+            original_flags.keys, cancellable);
         if (map != null && map.size > 0)
             engine.notify_email_flags_changed(map);
         
@@ -48,13 +51,17 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     
     public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
         EmailIdentifier id, Imap.EmailFlags? flags) {
-        if (!to_mark.contains(id))
+        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
+        if (imapdb_id == null)
+            return true;
+        
+        if (!original_flags.has_key(imapdb_id))
             return true;
         
         switch (op) {
             case ReplayOperation.WritebehindOperation.REMOVE:
                 // don't bother updating on server
-                to_mark.remove(id);
+                original_flags.unset(imapdb_id);
                 
                 return true;
             
@@ -78,10 +85,11 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         // potentially empty due to writebehind operation
-        if (to_mark.size == 0)
+        if (original_flags.size == 0)
             return ReplayOperation.Status.COMPLETED;
         
-        yield engine.remote_folder.mark_email_async(new Imap.MessageSet.email_id_collection(to_mark),
+        yield engine.remote_folder.mark_email_async(
+            new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(original_flags.keys).to_array()),
             flags_to_add, flags_to_remove, cancellable);
         
         return ReplayOperation.Status.COMPLETED;

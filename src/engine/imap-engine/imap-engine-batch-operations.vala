@@ -11,6 +11,7 @@
  * Note that this operation always returns null.  The result of Geary.Sqlite.Folder.create_email_async()
  * is stored in the created property.
  */
+
 private class Geary.ImapEngine.CreateLocalEmailOperation : Geary.Nonblocking.BatchOperation {
     public ImapDB.Folder folder { get; private set; }
     public Gee.Collection<Geary.Email> emails { get; private set; }
@@ -38,7 +39,8 @@ private class Geary.ImapEngine.CreateLocalEmailOperation : Geary.Nonblocking.Bat
                 merged.set(email, email);
             } else {
                 try {
-                    Geary.Email merged_email = yield folder.fetch_email_async(email.id, required_fields,
+                    Geary.Email merged_email = yield folder.fetch_email_async(
+                        (ImapDB.EmailIdentifier) email.id, required_fields,
                         ImapDB.Folder.ListFlags.NONE, cancellable);
                     merged.set(email, merged_email);
                 } catch (Error err) {
@@ -58,6 +60,7 @@ private class Geary.ImapEngine.CreateLocalEmailOperation : Geary.Nonblocking.Bat
  * Note that this operation always returns null, as Geary.Sqlite.Folder.remove_email_async() has no
  * returned value.
  */
+
 private class Geary.ImapEngine.RemoveLocalEmailOperation : Geary.Nonblocking.BatchOperation {
     public ImapDB.Folder folder { get; private set; }
     public Gee.Collection<Geary.EmailIdentifier> email_ids { get; private set; }
@@ -68,7 +71,7 @@ private class Geary.ImapEngine.RemoveLocalEmailOperation : Geary.Nonblocking.Bat
     }
     
     public override async Object? execute_async(Cancellable? cancellable) throws Error {
-        yield folder.remove_email_async(email_ids, cancellable);
+        yield folder.detach_multiple_emails_async((Gee.Collection<ImapDB.EmailIdentifier>) email_ids, cancellable);
         
         return null;
     }

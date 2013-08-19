@@ -38,10 +38,6 @@ public class Geary.Imap.MessageSet : BaseObject {
         is_uid = true;
     }
     
-    public MessageSet.email_id(Geary.EmailIdentifier email_id) {
-        MessageSet.uid(((Geary.Imap.EmailIdentifier) email_id).uid);
-    }
-    
     public MessageSet.range_by_count(SequenceNumber low_seq_num, int count) {
         assert(low_seq_num.value > 0);
         assert(count > 0);
@@ -98,13 +94,6 @@ public class Geary.Imap.MessageSet : BaseObject {
     
     public MessageSet.uid_sparse(UID[] msg_uids) {
         value = build_sparse_range(uid_array_to_int64(msg_uids));
-        is_uid = true;
-    }
-    
-    public MessageSet.email_id_collection(Gee.Collection<Geary.EmailIdentifier> email_ids) {
-        assert(email_ids.size > 0);
-        
-        value = build_sparse_range(email_id_collection_to_int64(email_ids));
         is_uid = true;
     }
     
@@ -224,14 +213,6 @@ public class Geary.Imap.MessageSet : BaseObject {
         int64[] ret = new int64[0];
         foreach (UID uid in msg_uids)
             ret += uid.value;
-        
-        return ret;
-    }
-    
-    private static int64[] email_id_collection_to_int64(Gee.Collection<Geary.EmailIdentifier> email_ids) {
-        int64[] ret = new int64[0];
-        foreach (Geary.EmailIdentifier email_id in email_ids)
-            ret += ((Geary.Imap.EmailIdentifier) email_id).uid.value;
         
         return ret;
     }

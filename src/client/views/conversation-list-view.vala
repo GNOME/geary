@@ -13,27 +13,26 @@ public class ConversationListView : Gtk.TreeView {
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
     private bool reset_adjustment = false;
-    private Gee.Set<Geary.Conversation> selected = new Gee.HashSet<Geary.Conversation>();
+    private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private ConversationListStore conversation_list_store;
     private Geary.App.ConversationMonitor? conversation_monitor;
-    private Gee.Set<Geary.Conversation>? current_visible_conversations = null;
+    private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gtk.Menu? context_menu = null;
     
-    // Signal for conversations that have been single clicked or otherwise selected.
-    public signal void conversations_selected(Gee.Set<Geary.Conversation> selected);
+    public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
     
     // Signal for when a conversation has been double-clicked, or selected and enter is pressed.
-    public signal void conversation_activated(Geary.Conversation activated);
+    public signal void conversation_activated(Geary.App.Conversation activated);
     
     public virtual signal void load_more() {
         enable_load_more = false;
     }
     
-    public signal void mark_conversation(Geary.Conversation conversation,
+    public signal void mark_conversation(Geary.App.Conversation conversation,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
-    public signal void visible_conversations_changed(Gee.Set<Geary.Conversation> visible);
+    public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
     
     public ConversationListView(ConversationListStore conversation_list_store) {
         this.conversation_list_store = conversation_list_store;
@@ -101,7 +100,7 @@ public class ConversationListView : Gtk.TreeView {
             select_first_conversation();
     }
     
-    private void on_conversation_removed(Geary.Conversation conversation) {
+    private void on_conversation_removed(Geary.App.Conversation conversation) {
         if (!GearyApplication.instance.config.autoselect)
             unselect_all();
     }
@@ -149,7 +148,7 @@ public class ConversationListView : Gtk.TreeView {
             (event.state & Gdk.ModifierType.CONTROL_MASK) == 0 &&
             event.type == Gdk.EventType.BUTTON_PRESS && cell_x < 25 && cell_y < 25) {
             
-            Geary.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
+            Geary.App.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.FLAGGED);
             if (conversation.is_flagged()) {
@@ -161,7 +160,7 @@ public class ConversationListView : Gtk.TreeView {
         }
         
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
-            Geary.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
+            Geary.App.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
             
             string?[] action_names = {};
             action_names += GearyController.ACTION_DELETE_MESSAGE;
@@ -272,22 +271,22 @@ public class ConversationListView : Gtk.TreeView {
         }
         
         // Conversations are selected, so collect them and signal if different
-        Gee.HashSet<Geary.Conversation> new_selected = new Gee.HashSet<Geary.Conversation>();
+        Gee.HashSet<Geary.App.Conversation> new_selected = new Gee.HashSet<Geary.App.Conversation>();
         foreach (Gtk.TreePath path in paths) {
-            Geary.Conversation? conversation = conversation_list_store.get_conversation_at_path(path);
+            Geary.App.Conversation? conversation = conversation_list_store.get_conversation_at_path(path);
             if (conversation != null)
                 new_selected.add(conversation);
         }
         
         // only notify if different than what was previously reported
-        if (!Geary.Collection.are_sets_equal<Geary.Conversation>(selected, new_selected)) {
+        if (!Geary.Collection.are_sets_equal<Geary.App.Conversation>(selected, new_selected)) {
             selected = new_selected;
             conversations_selected(selected.read_only_view);
         }
     }
     
-    public Gee.Set<Geary.Conversation> get_visible_conversations() {
-        Gee.HashSet<Geary.Conversation> visible_conversations = new Gee.HashSet<Geary.Conversation>();
+    public Gee.Set<Geary.App.Conversation> get_visible_conversations() {
+        Gee.HashSet<Geary.App.Conversation> visible_conversations = new Gee.HashSet<Geary.App.Conversation>();
         
         Gtk.TreePath start_path;
         Gtk.TreePath end_path;
@@ -295,7 +294,7 @@ public class ConversationListView : Gtk.TreeView {
             return visible_conversations;
         
         while (start_path.compare(end_path) <= 0) {
-            Geary.Conversation? conversation = conversation_list_store.get_conversation_at_path(start_path);
+            Geary.App.Conversation? conversation = conversation_list_store.get_conversation_at_path(start_path);
             if (conversation != null)
                 visible_conversations.add(conversation);
             
@@ -307,9 +306,10 @@ public class ConversationListView : Gtk.TreeView {
     
     // Always returns false, so it can be used as a one-time SourceFunc
     private bool update_visible_conversations() {
-        Gee.Set<Geary.Conversation> visible_conversations = get_visible_conversations();
+        Gee.Set<Geary.App.Conversation> visible_conversations = get_visible_conversations();
         if (current_visible_conversations != null
-            && Geary.Collection.are_sets_equal<Geary.Conversation>(current_visible_conversations, visible_conversations)) {
+            && Geary.Collection.are_sets_equal<Geary.App.Conversation>(
+            current_visible_conversations, visible_conversations)) {
             return false;
         }
         
@@ -331,7 +331,7 @@ public class ConversationListView : Gtk.TreeView {
         }
     }
 
-    public void select_conversation(Geary.Conversation conversation) {
+    public void select_conversation(Geary.App.Conversation conversation) {
         Gtk.TreePath path = conversation_list_store.get_path_for_conversation(conversation);
         if (path != null)
             set_cursor(path, null, false);
@@ -361,7 +361,7 @@ public class ConversationListView : Gtk.TreeView {
     }
     
     private void on_row_activated(Gtk.TreePath path) {
-        Geary.Conversation? c = conversation_list_store.get_conversation_at_path(path);
+        Geary.App.Conversation? c = conversation_list_store.get_conversation_at_path(path);
         if (c != null)
             conversation_activated(c);
     }

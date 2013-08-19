@@ -26,7 +26,7 @@ public class Geary.SearchFolderProperties : Geary.FolderProperties {
  * Special folder type used to query and display search results.
  */
 
-public class Geary.SearchFolder : Geary.AbstractLocalFolder {
+public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport.Remove {
     // Max number of emails that can ever be in the folder.
     public static const int MAX_RESULT_EMAILS = 1000;
     
@@ -70,6 +70,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.email_locally_complete.connect(on_email_locally_complete);
+        account.email_removed.connect(on_account_email_removed);
         
         clear_search_results();
         
@@ -81,6 +82,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
     ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);;
         account.email_locally_complete.disconnect(on_email_locally_complete);
+        account.email_removed.disconnect(on_account_email_removed);
     }
     
     private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
@@ -94,30 +96,14 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         }
     }
     
-    private async Gee.ArrayList<Geary.EmailIdentifier> folder_ids_to_search_async(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> folder_ids, Cancellable? cancellable) throws Error {
-        Gee.ArrayList<Geary.EmailIdentifier> local_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.EmailIdentifier folder_id in folder_ids) {
-            // TODO: parallelize.
-            Geary.EmailIdentifier? local_id = yield account.folder_email_id_to_search_async(
-                folder.path, folder_id, path, cancellable);
-            if (local_id != null)
-                local_ids.add(local_id);
-        }
-        return local_ids;
-    }
-    
     private async void append_new_email_async(string query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        Gee.ArrayList<Geary.EmailIdentifier> local_ids = yield folder_ids_to_search_async(
-            folder, ids, cancellable);
-        
         int result_mutex_token = yield result_mutex.claim_async();
         Error? error = null;
         try {
             Gee.Collection<Geary.Email>? results = yield account.local_search_async(
                 query, Geary.Email.Field.PROPERTIES, false, path, MAX_RESULT_EMAILS, 0,
-                exclude_folders, local_ids, cancellable);
+                exclude_folders, ids, cancellable);
             
             if (results != null) {
                 Gee.HashMap<Geary.EmailIdentifier, Geary.Email> to_add
@@ -157,6 +143,67 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         Gee.Collection<Geary.EmailIdentifier> ids) {
         if (search_query != null)
             append_new_email_async.begin(search_query, folder, ids, null, on_append_new_email_complete);
+    }
+    
+    private async void handle_removed_email_async(string query, Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        int result_mutex_token = yield result_mutex.claim_async();
+        Error? error = null;
+        try {
+            Gee.HashMap<Geary.EmailIdentifier, Geary.Email> relevant_ids
+                = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>();
+            foreach (Geary.EmailIdentifier id in ids) {
+                // TODO: maybe we need to have a way of accessing search
+                // results indexed by id?
+                foreach (Geary.Email email in search_results) {
+                    if (id.equal_to(email.id))
+                        relevant_ids.set(id, email);
+                }
+            }
+            
+            if (relevant_ids.size > 0) {
+                Gee.Collection<Geary.Email>? results = yield account.local_search_async(
+                    query, Geary.Email.Field.PROPERTIES, false, path, MAX_RESULT_EMAILS, 0,
+                    exclude_folders, relevant_ids.keys, cancellable);
+                
+                Gee.HashMap<Geary.EmailIdentifier, Geary.Email> to_remove
+                    = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>();
+                foreach (Geary.EmailIdentifier id in relevant_ids.keys) {
+                    if (results == null || !(relevant_ids.get(id) in results))
+                        to_remove.set(id, relevant_ids.get(id));
+                }
+                
+                if (to_remove.size > 0) {
+                    search_results.remove_all(to_remove.values);
+                    
+                    _properties.set_total(search_results.size);
+                    
+                    notify_email_removed(to_remove.keys);
+                    notify_email_count_changed(search_results.size, CountChangeReason.APPENDED);
+                }
+            }
+        } catch(Error e) {
+            error = e;
+        }
+        
+        result_mutex.release(ref result_mutex_token);
+        
+        if (error != null)
+            throw error;
+    }
+    
+    private void on_handle_removed_email_complete(Object? source, AsyncResult result) {
+        try {
+            handle_removed_email_async.end(result);
+        } catch(Error e) {
+            debug("Error removing removed email from search results: %s", e.message);
+        }
+    }
+    
+    private void on_account_email_removed(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        if (search_query != null)
+            handle_removed_email_async.begin(search_query, folder, ids, null, on_handle_removed_email_complete);
     }
     
     /**
@@ -332,6 +379,52 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder {
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
         return yield account.local_fetch_email_async(id, required_fields, cancellable);
+    }
+    
+    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
+        Cancellable? cancellable = null) throws Error {
+        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? ids_to_folders
+            = yield account.get_containing_folders_async(email_ids, cancellable);
+        if (ids_to_folders == null)
+            return;
+        
+        Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids
+            = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Geary.FolderPath>(ids_to_folders);
+        
+        foreach (Geary.FolderPath path in folders_to_ids.get_keys()) {
+            Geary.Folder folder = yield account.fetch_folder_async(path, cancellable);
+            Geary.FolderSupport.Remove? remove = folder as Geary.FolderSupport.Remove;
+            if (remove == null)
+                continue;
+            
+            Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
+            assert(ids.size > 0);
+            
+            debug("Search folder removing %d emails from %s", ids.size, folder.to_string());
+            
+            bool open = false;
+            try {
+                yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+                open = true;
+                
+                yield remove.remove_email_async(
+                    Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids), cancellable);
+                
+                yield folder.close_async(cancellable);
+                open = false;
+            } catch (Error e) {
+                debug("Error removing messages in %s: %s", folder.to_string(), e.message);
+                
+                if (open) {
+                    try {
+                        yield folder.close_async(cancellable);
+                        open = false;
+                    } catch (Error e) {
+                        debug("Error closing folder %s: %s", folder.to_string(), e.message);
+                    }
+                }
+            }
+        }
     }
     
     /**

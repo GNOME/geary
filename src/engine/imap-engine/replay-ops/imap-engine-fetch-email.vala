@@ -8,14 +8,15 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     public Email? email = null;
     
     private GenericFolder engine;
-    private EmailIdentifier id;
+    private ImapDB.EmailIdentifier id;
     private Email.Field required_fields;
     private Email.Field remaining_fields;
     private Folder.ListFlags flags;
     private Cancellable? cancellable;
+    private Imap.UID? uid = null;
     private bool writebehind_removed = false;
     
-    public FetchEmail(GenericFolder engine, EmailIdentifier id, Email.Field required_fields,
+    public FetchEmail(GenericFolder engine, ImapDB.EmailIdentifier id, Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
         base ("FetchEmail");
         
@@ -28,7 +29,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         // always fetch the required fields unless a modified list, in which case want to do exactly
         // what's required, no more and no less
         if (!flags.is_all_set(Folder.ListFlags.LOCAL_ONLY) && !flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
-            this.required_fields |= ImapDB.Folder.REQUIRED_FOR_DUPLICATE_DETECTION;
+            this.required_fields |= ImapDB.Folder.REQUIRED_FIELDS;
         
         remaining_fields = required_fields;
     }
@@ -65,6 +66,14 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         
         assert(remaining_fields != 0);
         
+        if (email != null)
+            uid = ((ImapDB.EmailIdentifier) email.id).uid;
+        else
+            uid = yield engine.local_folder.get_uid_async(id, ImapDB.Folder.ListFlags.NONE, cancellable);
+        
+        if (uid == null)
+            throw new EngineError.NOT_FOUND("Unable to find %s in %s", id.to_string(), engine.to_string());
+        
         return ReplayOperation.Status.CONTINUE;
     }
     
@@ -96,8 +105,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         // fetch only the remaining fields from the remote folder (if only pulling partial information,
         // will merge at end of this method)
         Gee.List<Geary.Email>? list = yield engine.remote_folder.list_email_async(
-            new Imap.MessageSet.email_id(id), remaining_fields, cancellable);
-        
+            new Imap.MessageSet.uid(uid), remaining_fields, cancellable);
         if (list == null || list.size != 1)
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());
         
@@ -111,7 +119,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         
         // true means created
         if (created_or_merged.get(email))
-            engine.notify_local_expansion(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
+            engine.notify_email_discovered(new Collection.SingleItem<Geary.EmailIdentifier>(email.id));
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now
         // be able to do all of that

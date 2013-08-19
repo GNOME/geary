@@ -7,7 +7,7 @@
 /**
  * SingleItem is a simple way of creating a one-item read-only Gee.Collection.
  */
-private class Geary.Collection.SingleItem<G> : Gee.AbstractCollection<G> {
+public class Geary.Collection.SingleItem<G> : Gee.AbstractCollection<G> {
     private class IteratorImpl<G> : BaseObject, Gee.Traversable<G>, Gee.Iterator<G> {
         public bool read_only { get { return true; } }
         public bool valid { get { return !done; } }

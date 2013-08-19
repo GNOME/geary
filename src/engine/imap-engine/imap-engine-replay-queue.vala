@@ -34,8 +34,6 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         }
     }
     
-    public string name { get; private set; }
-    
     public int local_count { get {
         return local_queue.size;
     } }
@@ -44,7 +42,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         return remote_queue.size;
     } }
     
-    private Nonblocking.ReportingSemaphore<bool> remote_reporting_semaphore;
+    private weak GenericFolder owner;
     private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
     private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
     
@@ -115,9 +113,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * each ReplayOperation waiting to perform a remote operation, cancelling it if the remote
      * folder is not ready.
      */
-    public ReplayQueue(string name, Nonblocking.ReportingSemaphore<bool> remote_reporting_semaphore) {
-        this.name = name;
-        this.remote_reporting_semaphore = remote_reporting_semaphore;
+    public ReplayQueue(GenericFolder owner) {
+        this.owner = owner;
         
         // fire off background queue processors
         do_replay_local_async.begin();
@@ -306,15 +303,17 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             bool is_close_op = op is ReplayClose;
             
             // wait until the remote folder is opened (or returns false, in which case closed)
-            bool folder_opened = false;
+            bool folder_opened = true;
             try {
-                if (yield remote_reporting_semaphore.wait_for_result_async())
-                    folder_opened = true;
-                else if (!is_close_op)
-                    debug("Folder %s closed or failed to open, remote replay queue closing", to_string());
+                yield owner.wait_for_open_async();
             } catch (Error remote_err) {
-                debug("Error for remote queue waiting for remote %s to open, remote queue closing: %s", to_string(),
-                    remote_err.message);
+                if (!is_close_op) {
+                    debug("Folder %s closed or failed to open, remote replay queue closing: %s",
+                        to_string(), remote_err.message);
+                }
+                
+                // didn't open
+                folder_opened = false;
                 
                 // fall through
             }
@@ -370,7 +369,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     }
     
     public string to_string() {
-        return name;
+        return "ReplayQueue:%s".printf(owner.to_string());
     }
 }
 

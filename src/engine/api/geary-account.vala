@@ -78,6 +78,18 @@ public interface Geary.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
+     * Fired when one or more emails have been discovered (added) to the Folder, but not necessarily
+     * appended (i.e. old email pulled down due to user request or background fetching).
+     */
+    public signal void email_discovered(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Fired when the supplied email flags have changed from any folder.
+     */
+    public signal void email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
+    
+    /**
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_opened();
@@ -124,8 +136,23 @@ public interface Geary.Account : BaseObject {
      */
     protected abstract void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
     
+    /**
+     * Signal notification method for subclasses to use.
+     */
     protected abstract void notify_email_locally_complete(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_email_discovered(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map);
     
     /**
      * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
@@ -245,15 +272,6 @@ public interface Geary.Account : BaseObject {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Return the given EmailIdentifier as a "search" EmailIdentifier that can
-     * be used in local_fetch_email_async().  Return null if the email id isn't
-     * in the local database.
-     */
-    public abstract async Geary.EmailIdentifier? folder_email_id_to_search_async(
-        Geary.FolderPath folder_path, Geary.EmailIdentifier id,
-        Geary.FolderPath? return_folder_path, Cancellable? cancellable = null) throws Error;
-    
-    /**
      * Performs a search with the given query string.  Optionally, a list of folders not to search
      * can be passed as well as a list of email identifiers to restrict the search to only those messages.
      * Returns a list of email objects with the requested fields.  If partial_ok is false,  mail
@@ -275,6 +293,16 @@ public interface Geary.Account : BaseObject {
      */
     public abstract async Gee.Collection<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Return a map of each passed-in email identifier to the set of folders
+     * that contain it.  If an email id doesn't appear in the resulting map,
+     * it isn't contained in any folders.  Return null if the resulting map
+     * would be empty.  Only throw database errors et al., not errors due to
+     * the email id not being found.
+     */
+    public abstract async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
     
     /**
      * Used only for debugging.  Should not be used for user-visible strings.

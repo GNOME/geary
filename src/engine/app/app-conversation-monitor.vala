@@ -266,7 +266,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return conversations.conversations;
     }
     
-    public Geary.Conversation? get_conversation_for_email(Geary.EmailIdentifier email_id) {
+    public Geary.App.Conversation? get_conversation_for_email(Geary.EmailIdentifier email_id) {
         return conversations.get_by_email_identifier(email_id);
     }
     
@@ -299,10 +299,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
-        folder.email_flags_changed.connect(on_folder_email_flags_changed);
         folder.email_count_changed.connect(on_folder_email_count_changed);
         folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
+        folder.account.email_flags_changed.connect(on_account_email_flags_changed);
         folder.account.email_locally_complete.connect(on_account_email_locally_complete);
         // TODO: handle removed email
         
@@ -313,10 +313,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
             
             folder.email_appended.disconnect(on_folder_email_appended);
             folder.email_removed.disconnect(on_folder_email_removed);
-            folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
             folder.email_count_changed.disconnect(on_folder_email_count_changed);
             folder.opened.disconnect(on_folder_opened);
             folder.closed.disconnect(on_folder_closed);
+            folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
             folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
             
             throw err;
@@ -366,10 +366,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         folder.email_appended.disconnect(on_folder_email_appended);
         folder.email_removed.disconnect(on_folder_email_removed);
-        folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
         folder.email_count_changed.disconnect(on_folder_email_count_changed);
         folder.opened.disconnect(on_folder_opened);
         folder.closed.disconnect(on_folder_closed);
+        folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
         folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
         
         Error? close_err = null;
@@ -442,7 +442,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
                 if (ancestors != null) {
                     foreach (RFC822.MessageID ancestor in ancestors) {
-                        if (conversations.has_message_id(ancestor, true)) {
+                        if (conversations.has_message_id(ancestor)) {
                             relevant_ids.add(email.id);
                             break;
                         }
@@ -463,13 +463,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             foreach (Geary.EmailIdentifier id in relevant_ids) {
                 // TODO: parallelize this.
                 try {
-                    Geary.EmailIdentifier? search_id = yield folder.account.folder_email_id_to_search_async(
-                        folder.path, id, null, cancellable);
-                    if (search_id != null) {
-                        Geary.Email email = yield folder.account.local_fetch_email_async(
-                            search_id, required_fields, cancellable);
-                        search_emails.add(email);
-                    }
+                    Geary.Email email = yield folder.account.local_fetch_email_async(id,
+                        required_fields, cancellable);
+                    search_emails.add(email);
                 } catch (Error e) {
                     debug("Error fetching out of folder message: %s", e.message);
                 }
@@ -498,7 +494,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private async void process_email_async(Gee.Collection<Geary.Email>? emails, ProcessJobContext job) {
         if (emails == null || emails.size == 0) {
-            process_email_complete(job);
+            yield process_email_complete_async(job);
             return;
         }
         
@@ -560,7 +556,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private async void expand_conversations_async(Gee.Set<RFC822.MessageID> needed_message_ids,
         ProcessJobContext job) {
         if (needed_message_ids.size == 0) {
-            process_email_complete(job);
+            yield process_email_complete_async(job);
             return;
         }
         
@@ -582,7 +578,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         } catch (Error err) {
             debug("Unable to search local mail for conversations: %s", err.message);
             
-            process_email_complete(job);
+            yield process_email_complete_async(job);
             return;
         }
         
@@ -608,20 +604,26 @@ public class Geary.App.ConversationMonitor : BaseObject {
             folder.to_string(), needed_message_ids.size, needed_messages.size);
     }
     
-    private void process_email_complete(ProcessJobContext job) {
-        Gee.Collection<Geary.Conversation> added;
-        Gee.MultiMap<Geary.Conversation, Geary.Email> appended;
-        Gee.Collection<Geary.Conversation> removed_due_to_merge;
-        conversations.add_all_emails(job.emails.values, this, folder.path, out added, out appended,
-            out removed_due_to_merge);
+    private async void process_email_complete_async(ProcessJobContext job) {
+        Gee.Collection<Geary.App.Conversation> added;
+        Gee.MultiMap<Geary.App.Conversation, Geary.Email> appended;
+        Gee.Collection<Conversation> removed_due_to_merge;
+        try {
+            yield conversations.add_all_emails_async(job.emails.values, this, folder.path, out added, out appended,
+                out removed_due_to_merge, null);
+        } catch (Error err) {
+            debug("Unable to add emails to conversation: %s", err.message);
+            
+            // fall-through
+        }
         
-        foreach (Geary.Conversation conversation in removed_due_to_merge)
+        foreach (Conversation conversation in removed_due_to_merge)
             notify_conversation_removed(conversation);
         
         if (added.size > 0)
             notify_conversations_added(added);
         
-        foreach (Geary.Conversation conversation in appended.get_keys())
+        foreach (Geary.App.Conversation conversation in appended.get_keys())
             notify_conversation_appended(conversation, appended.get(conversation));
         
         if (job.inside_scan)
@@ -653,9 +655,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         debug("%d messages(s) removed to %s, trimming/removing conversations...", removed_ids.size,
             folder.to_string());
         
-        Gee.Collection<Geary.Conversation> removed;
-        Gee.MultiMap<Geary.Conversation, Geary.Email> trimmed;
-        conversations.remove_all_emails_by_identifier(removed_ids, out removed, out trimmed);
+        Gee.Collection<Geary.App.Conversation> removed;
+        Gee.MultiMap<Geary.App.Conversation, Geary.Email> trimmed;
+        yield conversations.remove_emails_and_check_in_folder(removed_ids, folder.account,
+            folder.path, out removed, out trimmed, null);
         
         foreach (Conversation conversation in trimmed.get_keys())
             notify_conversation_trimmed(conversation, trimmed.get(conversation));
@@ -688,7 +691,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         yield external_load_by_sparse_id(folder, appended_ids, Geary.Folder.ListFlags.NONE, null);
     }
     
-    private void on_folder_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
+    private void on_account_email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
         foreach (Geary.EmailIdentifier id in map.keys) {
             Conversation? conversation = conversations.get_by_email_identifier(id);
             if (conversation == null)
@@ -711,9 +715,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private Geary.EmailIdentifier? get_lowest_email_id() {
         Geary.EmailIdentifier? earliest_id = null;
-        foreach (Geary.Conversation conversation in conversations.conversations) {
+        foreach (Geary.App.Conversation conversation in conversations.conversations) {
             Geary.EmailIdentifier? id = conversation.get_lowest_email_id();
-            if (id != null && (earliest_id == null || id.compare_to(earliest_id) < 0))
+            if (id != null && (earliest_id == null || id.natural_sort_comparator(earliest_id) < 0))
                 earliest_id = id;
         }
         
