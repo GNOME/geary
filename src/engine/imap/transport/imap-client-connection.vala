@@ -135,7 +135,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
         Logging.debug(Logging.Flag.NETWORK, "[%s] in idle: %s", to_string(), idling.to_string());
         
         // fire the Event every time the IDLE state changes
-        debug("[%s] Notifying of IDLE state change to %s", to_string(), idling.to_string());
         idle_notifier.blind_notify();
     }
     
