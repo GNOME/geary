@@ -54,14 +54,14 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
             local_ids, required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
         
         // Build list of local email
-        Gee.Map<Geary.EmailIdentifier, Geary.Email> map = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>();
+        Gee.Map<ImapDB.EmailIdentifier, Geary.Email> map = new Gee.HashMap<ImapDB.EmailIdentifier, Geary.Email>();
         if (local_list != null) {
             foreach (Geary.Email email in local_list)
-                map.set(email.id, email);
+                map.set((ImapDB.EmailIdentifier) email.id, email);
         }
         
         // Convert into fulfilled and unfulfilled email for the base class to complete
-        foreach (Geary.EmailIdentifier id in map.keys) {
+        foreach (ImapDB.EmailIdentifier id in map.keys) {
             Geary.Email? email = map.get(id);
             if (email == null)
                 unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS, id);

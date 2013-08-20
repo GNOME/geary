@@ -34,7 +34,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
             assert(map != null);
             
             // walk list of *requested* IDs to ensure that unknown are considering unfulfilled
-            foreach (Geary.EmailIdentifier id in ids) {
+            foreach (ImapDB.EmailIdentifier id in ids) {
                 Geary.Email? email = map.get(id);
             
                 // if completely unknown, make sure duplicate detection fields are included; otherwise,

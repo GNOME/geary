@@ -52,10 +52,12 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                     }
                 }
                 
-                if (email.fields.fulfills(required_fields))
+                if (email.fields.fulfills(required_fields)) {
                     fulfilled.add(email);
-                else
-                    unfulfilled.set(required_fields.clear(email.fields), email.id);
+                } else {
+                    unfulfilled.set(required_fields.clear(email.fields),
+                        (ImapDB.EmailIdentifier) email.id);
+                }
             }
         }
         

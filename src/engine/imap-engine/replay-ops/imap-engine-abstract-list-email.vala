@@ -59,8 +59,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     protected weak EmailCallback? cb;
     protected Cancellable? cancellable;
     protected Folder.ListFlags flags;
-    protected Gee.HashMultiMap<Geary.Email.Field, Geary.EmailIdentifier> unfulfilled = new Gee.HashMultiMap<
-        Geary.Email.Field, Geary.EmailIdentifier>();
+    protected Gee.HashMultiMap<Geary.Email.Field, ImapDB.EmailIdentifier> unfulfilled
+        = new Gee.HashMultiMap<Geary.Email.Field, ImapDB.EmailIdentifier>();
     
     public AbstractListEmail(string name, GenericFolder owner, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
@@ -102,7 +102,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 do {
                     removed = false;
                     foreach (Geary.Email.Field field in unfulfilled.get_keys()) {
-                        removed = unfulfilled.remove(field, id);
+                        removed = unfulfilled.remove(field, (ImapDB.EmailIdentifier) id);
                         if (removed)
                             break;
                     }
@@ -126,14 +126,30 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         // in results, pulling out the entire email
         Nonblocking.Batch batch = new Nonblocking.Batch();
         foreach (Geary.Email.Field unfulfilled_fields in unfulfilled.get_keys()) {
-            Gee.Collection<EmailIdentifier> email_ids = unfulfilled.get(unfulfilled_fields);
+            Gee.Collection<ImapDB.EmailIdentifier> email_ids = unfulfilled.get(unfulfilled_fields);
             if (email_ids.size == 0)
                 continue;
             
-            Gee.Set<Imap.UID>? uids = yield owner.local_folder.get_uids_async(
-                (Gee.Collection<ImapDB.EmailIdentifier>) email_ids, ImapDB.Folder.ListFlags.NONE,
-                cancellable);
-            if (uids == null || uids.size == 0)
+            // If we just became aware of these messages, we won't have their
+            // ID recorded in the database, so we assume we can just use the
+            // UID as seen in the EmailIdentifier.
+            Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
+            Gee.HashSet<ImapDB.EmailIdentifier> need_uids = new Gee.HashSet<ImapDB.EmailIdentifier>();
+            foreach (Geary.ImapDB.EmailIdentifier id in email_ids) {
+                if (id.message_id == Db.INVALID_ROWID) {
+                    assert(id.uid != null);
+                    uids.add(id.uid);
+                } else {
+                    need_uids.add(id);
+                }
+            }
+            
+            Gee.Set<Imap.UID>? got_uids = yield owner.local_folder.get_uids_async(
+                need_uids, ImapDB.Folder.ListFlags.NONE, cancellable);
+            if (got_uids != null)
+                uids.add_all(got_uids);
+            
+            if (uids.size == 0)
                 continue;
             
             Imap.MessageSet msg_set = new Imap.MessageSet.uid_sparse(uids.to_array());
@@ -285,8 +301,10 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         if (list != null) {
             // add all the new email to the unfulfilled list, which ensures (when replay_remote_async
             // is called) that the fields are downloaded and added to the database
-            foreach (Geary.Email email in list)
-                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS, email.id);
+            foreach (Geary.Email email in list) {
+                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS,
+                    (ImapDB.EmailIdentifier) email.id);
+            }
         }
         
         debug("%s: Vector expansion completed (%d new email)", owner.to_string(),
