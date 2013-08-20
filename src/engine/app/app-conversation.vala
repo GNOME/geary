@@ -5,10 +5,35 @@
  */
 
 public class Geary.App.Conversation : BaseObject {
+    /**
+     * Specify the ordering of {@link Email} returned by various accessors.
+     *
+     * Note that sorting in {@link Conversation} is done by the RFC822 Date: header (i.e.
+     * {@link Email.date}) and not the date received (i.e. {@link EmailProperties.date_received}).
+     */
     public enum Ordering {
         NONE,
         DATE_ASCENDING,
         DATE_DESCENDING,
+    }
+    
+    /**
+     * Specify the location of the {@link Email} in relation to the {@link Folder} being monitored
+     * by the {@link Converation}'s {@link ConversationMonitor}.
+     *
+     * IN_FOLDER represents Email that is found in the Folder the ConversationMonitor is
+     * monitoring.  OUT_OF_FOLDER means the Email is located elsewhere in the {@link Account}.
+     *
+     * Some methods honor IN_FOLDER_OUT_OF_FOLDER and OUT_OF_FOLDER_IN_FOLDER.  These represent
+     * preferences for finding an Email.  The first (IN_FOLDER / OUT_OF_FOLDER) is searched.  If
+     * an Email is not found in that location, the other criteria is used.
+     */
+    public enum Location {
+        IN_FOLDER,
+        OUT_OF_FOLDER,
+        IN_FOLDER_OUT_OF_FOLDER,
+        OUT_OF_FOLDER_IN_FOLDER,
+        ANYWHERE
     }
     
     private static int next_convnum = 0;
@@ -28,7 +53,7 @@ public class Geary.App.Conversation : BaseObject {
         Geary.Email.compare_date_descending);
     
     // by storing all paths for each EmailIdentifier, can lookup without blocking
-    Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> path_map = new Gee.HashMultiMap<
+    private Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> path_map = new Gee.HashMultiMap<
         Geary.EmailIdentifier, Geary.FolderPath>();
     
     /**
@@ -98,8 +123,13 @@ public class Geary.App.Conversation : BaseObject {
     
     /**
      * Returns all the email in the conversation sorted according to the specifier.
+     *
+     * {@link Location.IN_FOLDER} and {@link Location.OUT_OF_FOLDER} are the
+     * only preferences honored; the others ({@link Location.IN_FOLDER_OUT_OF_FOLDER},
+     * {@link Location.IN_FOLDER_OUT_OF_FOLDER}, and {@link Location.ANYWHERE}
+     * are all treated as ANYWHERE.
      */
-    public Gee.List<Geary.Email> get_emails(Ordering ordering, bool only_in_current_folder = false) {
+    public Gee.List<Geary.Email> get_emails(Ordering ordering, Location location = Location.ANYWHERE) {
         Gee.List<Geary.Email> list;
         switch (ordering) {
             case Ordering.DATE_ASCENDING:
@@ -111,19 +141,34 @@ public class Geary.App.Conversation : BaseObject {
             break;
             
             case Ordering.NONE:
-            default:
                 list = Collection.to_array_list<Email>(emails.values);
             break;
+            
+            default:
+                assert_not_reached();
         }
         
-        if (!only_in_current_folder)
-            return list;
-        
-        // remove emails not in current folder
-        Gee.Iterator<Geary.Email> iter = list.iterator();
-        while (iter.next()) {
-            if (!is_in_current_folder(iter.get().id))
-                iter.remove();
+        switch (location) {
+            case Location.IN_FOLDER:
+                Collection.remove_if<Email>(list, (email) => {
+                    return !is_in_current_folder(email.id);
+                });
+            break;
+            
+            case Location.OUT_OF_FOLDER:
+                Collection.remove_if<Email>(list, (email) => {
+                    return is_in_current_folder(email.id);
+                });
+            break;
+            
+            case Location.IN_FOLDER_OUT_OF_FOLDER:
+            case Location.OUT_OF_FOLDER_IN_FOLDER:
+            case Location.ANYWHERE:
+                // let the list pass untouched
+            break;
+            
+            default:
+                assert_not_reached();
         }
         
         return list;
@@ -238,66 +283,60 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     /**
-     * Returns true if this Conversation's earliest (first sent) email is earlier than
-     * the supplied Conversation's earliest email.  An empty Conversation is defined as being
-     * earlier than a non-empty conversation.  Comparing two empty Conversations or two Conversations
-     * with the same earliest date is undefined.
-     */
-    public bool is_earlier(Conversation other) {
-        Email? this_earliest = get_earliest_email();
-        Email? other_earliest = other.get_earliest_email();
-        
-        if (this_earliest == null)
-            return true;
-        
-        // this_earliest != null
-        if (other_earliest == null)
-            return false;
-        
-        return this_earliest.date.value.compare(other_earliest.date.value) < 0;
-    }
-    
-    /**
-     * Returns true if this Conversation's latest (most recently sent) email is more recent than
-     * the supplied Conversation's latest email.  An empty Conversation is defined as being
-     * earlier than a non-empty conversation.  Comparing two empty Conversations or two
-     * Conversations with the same latest date is undefined.
-     */
-    public bool is_later(Conversation other) {
-        Email? this_latest = get_latest_email();
-        Email? other_latest = other.get_latest_email();
-        
-        if (this_latest == null)
-            return (other_latest != null);
-        
-        // this_latest != null
-        if (other_latest == null)
-            return true;
-        
-        return this_latest.date.value.compare(other_latest.date.value) > 0;
-    }
-    
-    /**
      * Returns the earliest (first sent) email in the Conversation.
+     *
+     * Note that sorting in {@link Conversation} is done by the RFC822 Date: header (i.e.
+     * {@link Email.date}) and not the date received (i.e. {@link EmailProperties.date_received}).
      */
-    public Geary.Email? get_earliest_email(bool only_in_current_folder = false) {
-        return get_single_email(Ordering.DATE_ASCENDING, only_in_current_folder);
+    public Geary.Email? get_earliest_email(Location location) {
+        return get_single_email(Ordering.DATE_ASCENDING, location);
     }
     
     /**
      * Returns the latest (most recently sent) email in the Conversation.
+     *
+     * Note that sorting in {@link Conversation} is done by the RFC822 Date: header (i.e.
+     * {@link Email.date}) and not the date received (i.e. {@link EmailProperties.date_received}).
      */
-    public Geary.Email? get_latest_email(bool only_in_current_folder = false) {
-        return get_single_email(Ordering.DATE_DESCENDING, only_in_current_folder);
+    public Geary.Email? get_latest_email(Location location) {
+        return get_single_email(Ordering.DATE_DESCENDING, location);
     }
     
-    private Geary.Email? get_single_email(Ordering ordering, bool only_in_current_folder) {
-        return Geary.Collection.get_first<Geary.Email>(get_emails(ordering, only_in_current_folder));
+    private Geary.Email? get_single_email(Ordering ordering, Location location) {
+        // note that the location-ordering preferences are treated as ANYWHERE by get_emails()
+        Gee.List<Geary.Email> list = get_emails(ordering, location);
+        if (list.size == 0)
+            return null;
+        
+        // Because IN_FOLDER_OUT_OF_FOLDER and OUT_OF_FOLDER_IN_FOLDER are treated as ANYWHERE,
+        // have to do our own filtering
+        switch (location) {
+            case Location.IN_FOLDER:
+            case Location.OUT_OF_FOLDER:
+            case Location.ANYWHERE:
+                return Collection.get_first<Email>(list);
+            
+            case Location.IN_FOLDER_OUT_OF_FOLDER:
+                Geary.Email? found = Collection.find_first<Email>(list, (email) => {
+                    return is_in_current_folder(email.id);
+                });
+                
+                return (found != null) ? found : list.first();
+            
+            case Location.OUT_OF_FOLDER_IN_FOLDER:
+                Geary.Email? found = Collection.find_first<Email>(list, (email) => {
+                    return !is_in_current_folder(email.id);
+                });
+                
+                return (found != null) ? found : list.first();
+            
+            default:
+                assert_not_reached();
+        }
     }
     
     /**
-     * Return the EmailIdentifier with the lowest value.  Ignore Geary.ImapDB.
-     * EmailIdentifiers, because they aren't useful to order in this sense.
+     * Return the EmailIdentifier with the lowest value.
      */
     public Geary.EmailIdentifier? get_lowest_email_id() {
         return lowest_id;

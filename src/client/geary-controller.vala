@@ -879,7 +879,7 @@ public class GearyController : Geary.BaseObject {
             return;
         
         // TODO: Determine how to map between conversations and drafts correctly.
-        on_edit_draft(activated.get_latest_email(true));
+        on_edit_draft(activated.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER));
     }
     
     private void on_edit_draft(Geary.Email draft) {
@@ -1069,7 +1069,7 @@ public class GearyController : Geary.BaseObject {
         Geary.App.Conversation conversation, bool preview_message_only,
         Gee.ArrayList<Geary.EmailIdentifier> add_to) {
         if (preview_message_only) {
-            Geary.Email? preview = conversation.get_latest_email();
+            Geary.Email? preview = conversation.get_latest_email(Geary.App.Conversation.Location.ANYWHERE);
             if (preview != null)
                 add_to.add(preview.id);
         } else {

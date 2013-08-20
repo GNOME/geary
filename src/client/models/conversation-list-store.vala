@@ -229,12 +229,13 @@ public class ConversationListStore : Gtk.ListStore {
                 }
             }
             
-            // if all are read, use newest in-folder message
-            if (need_preview == null)
-                need_preview = conversation.get_latest_email(true);
-            
-            if (need_preview == null)
-                continue;
+            // if all are read, use newest in-folder message, then newest out-of-folder if not
+            // present
+            if (need_preview == null) {
+                need_preview = conversation.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+                if (need_preview == null)
+                    continue;
+            }
             
             Geary.Email? current_preview = get_preview_for_conversation(conversation);
             
@@ -287,7 +288,7 @@ public class ConversationListStore : Gtk.ListStore {
             return;
         }
         
-        Geary.Email? last_email = conversation.get_latest_email();
+        Geary.Email? last_email = conversation.get_latest_email(Geary.App.Conversation.Location.ANYWHERE);
         if (last_email == null) {
             debug("Cannot refresh conversation: last email is null");
             
@@ -369,7 +370,7 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private bool add_conversation(Geary.App.Conversation conversation) {
-        Geary.Email? last_email = conversation.get_latest_email();
+        Geary.Email? last_email = conversation.get_latest_email(Geary.App.Conversation.Location.ANYWHERE);
         if (last_email == null) {
             debug("Cannot add conversation: last email is null");
             

@@ -5,8 +5,8 @@
  */
 
 public int compare_conversation_ascending(Geary.App.Conversation a, Geary.App.Conversation b) {
-    Geary.Email? a_latest = a.get_latest_email(true);
-    Geary.Email? b_latest = b.get_latest_email(true);
+    Geary.Email? a_latest = a.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+    Geary.Email? b_latest = b.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
     
     if (a_latest == null)
         return (b_latest == null) ? 0 : -1;

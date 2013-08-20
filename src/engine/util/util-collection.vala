@@ -24,6 +24,21 @@ public G? get_first<G>(Gee.Collection<G> c) {
     return iter.next() ? iter.get() : null;
 }
 
+/**
+ * Returns the first element in the Collection that passes the Predicte function.
+ *
+ * The Collection is walked in Iterator order.
+ */
+public G? find_first<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
+    Gee.Iterator<G> iter = c.iterator();
+    while (iter.next()) {
+        if (pred(iter.get()))
+            return iter.get();
+    }
+    
+    return null;
+}
+
 public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
     if (a.size != b.size)
         return false;
@@ -37,14 +52,18 @@ public bool are_sets_equal<G>(Gee.Set<G> a, Gee.Set<G> b) {
 }
 
 /**
- * Removes all elements from the Collection that do not pass the Predicate function.
+ * Removes all elements from the Collection that do pass the Predicate function.
+ *
+ * Note that this modifies the supplied Collection.
  */
-public void filtered_remove<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
+public Gee.Collection<G> remove_if<G>(Gee.Collection<G> c, owned Gee.Predicate<G> pred) {
     Gee.Iterator<G> iter = c.iterator();
     while (iter.next()) {
-        if (!pred(iter.get()))
+        if (pred(iter.get()))
             iter.remove();
     }
+    
+    return c;
 }
 
 /**

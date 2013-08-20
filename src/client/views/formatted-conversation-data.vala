@@ -114,8 +114,8 @@ public class FormattedConversationData : Geary.BaseObject {
     }
     
     public bool update_date_string() {
-        // get latest email *in folder* for the conversation's date
-        Geary.Email? latest = conversation.get_latest_email(true);
+        // get latest email *in folder* for the conversation's date, fall back on out-of-folder
+        Geary.Email? latest = conversation.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
         if (latest == null || latest.properties == null)
             return false;
         
