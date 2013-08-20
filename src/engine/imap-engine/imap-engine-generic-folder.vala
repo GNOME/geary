@@ -176,8 +176,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.Collection<Geary.EmailIdentifier> all_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.EmailIdentifier> all_locally_appended_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         Gee.Collection<Geary.EmailIdentifier> all_removed_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> all_flags_changed = new Gee.HashMap<Geary.EmailIdentifier,
-            Geary.EmailFlags>();
+        Gee.Map<Imap.UID, Geary.EmailFlags> all_flags_changed = new Gee.HashMap<Imap.UID, Geary.EmailFlags>();
+        Gee.Map<Imap.UID, Geary.EmailIdentifier> uid_to_email_id_map
+            = new Gee.HashMap<Imap.UID, Geary.EmailIdentifier>();
         
         // to match all flags and find all removed interior to the local store's vector of messages, start from
         // local earliest message and work upwards
@@ -284,7 +285,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                             if (replay_queue.query_local_writebehind_operation(ReplayOperation.WritebehindOperation.UPDATE_FLAGS,
                                 remote_email.id, (Imap.EmailFlags) remote_email.email_flags)) {
                                 to_create_or_merge.add(remote_email);
-                                all_flags_changed.set(remote_email.id, remote_email.email_flags);
+                                
+                                // We can't keep a map of EmailId => flags, because sometimes the EmailId
+                                // changes its hash value (see ImapDB.EmailIdentifier.promote_with_message_id).
+                                // Instead, we index by UID (which doesn't change during this function), and
+                                // rebuild the map of EmailId => flags later.
+                                all_flags_changed.set(((ImapDB.EmailIdentifier) remote_email.id).uid,
+                                    remote_email.email_flags);
+                                uid_to_email_id_map.set(((ImapDB.EmailIdentifier) remote_email.id).uid,
+                                    remote_email.id);
                                 
                                 Logging.debug(Logging.Flag.FOLDER_NORMALIZATION, "%s: merging remote ID %s",
                                     to_string(), remote_email.id.to_string());
@@ -454,8 +463,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // notify flag changes
         if (all_flags_changed.size > 0) {
-            debug("Notifying of %d changed flags since %s last seen", all_flags_changed.size, to_string());
-            notify_email_flags_changed(all_flags_changed);
+            Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> changed_flags
+                = new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+            foreach (Imap.UID uid in all_flags_changed.keys)
+                changed_flags.set(uid_to_email_id_map.get(uid), all_flags_changed.get(uid));
+            
+            debug("Notifying of %d changed flags since %s last seen", changed_flags.size, to_string());
+            notify_email_flags_changed(changed_flags);
         }
         
         debug("Completed normalize_folder %s", to_string());
