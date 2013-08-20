@@ -104,7 +104,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private Serializer? ser = null;
     private Deserializer? des = null;
     private Geary.Nonblocking.Mutex send_mutex = new Geary.Nonblocking.Mutex();
-    private Geary.Nonblocking.Spinlock synchronized_notifier = new Geary.Nonblocking.Spinlock();
+    private Geary.Nonblocking.Semaphore synchronized_notifier = new Geary.Nonblocking.Semaphore();
+    private Geary.Nonblocking.Event idle_notifier = new Geary.Nonblocking.Event();
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;
@@ -112,6 +113,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>();
     private Tag? posted_synchronization_tag = null;
     private StatusResponse? synchronization_status_response = null;
+    private bool waiting_for_idle_to_synchronize = false;
     private uint timeout_id = 0;
     private uint timeout_cmd_count = 0;
     
@@ -131,6 +133,10 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     public virtual signal void in_idle(bool idling) {
         Logging.debug(Logging.Flag.NETWORK, "[%s] in idle: %s", to_string(), idling.to_string());
+        
+        // fire the Event every time the IDLE state changes
+        debug("[%s] Notifying of IDLE state change to %s", to_string(), idling.to_string());
+        idle_notifier.blind_notify();
     }
     
     public virtual signal void received_status_response(StatusResponse status_response) {
@@ -193,6 +199,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             
             new Geary.State.Mapping(State.IDLING, Event.SEND, on_idle_send),
             new Geary.State.Mapping(State.IDLING, Event.SEND_IDLE, on_no_proceed),
+            new Geary.State.Mapping(State.IDLING, Event.SYNCHRONIZE, on_idle_synchronize),
             new Geary.State.Mapping(State.IDLING, Event.RECVD_STATUS_RESPONSE, on_idle_status_response),
             new Geary.State.Mapping(State.IDLING, Event.RECVD_SERVER_DATA, on_server_data),
             new Geary.State.Mapping(State.IDLING, Event.RECVD_CONTINUATION_RESPONSE, on_idling_continuation),
@@ -200,6 +207,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             
             new Geary.State.Mapping(State.IDLE, Event.SEND, on_idle_send),
             new Geary.State.Mapping(State.IDLE, Event.SEND_IDLE, on_no_proceed),
+            new Geary.State.Mapping(State.IDLE, Event.SYNCHRONIZE, on_idle_synchronize),
             new Geary.State.Mapping(State.IDLE, Event.RECVD_STATUS_RESPONSE, on_idle_status_response),
             new Geary.State.Mapping(State.IDLE, Event.RECVD_SERVER_DATA, on_server_data),
             new Geary.State.Mapping(State.IDLE, Event.RECVD_CONTINUATION_RESPONSE, on_idle_continuation),
@@ -213,7 +221,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             new Geary.State.Mapping(State.DEIDLING, Event.RECVD_CONTINUATION_RESPONSE, on_idling_continuation),
             new Geary.State.Mapping(State.DEIDLING, Event.DISCONNECTED, on_disconnected),
             
-            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.SEND, on_no_proceed),
+            new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.SEND, on_proceed),
             new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.SEND_IDLE, on_no_proceed),
             new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.RECVD_STATUS_RESPONSE,
                 on_deidling_synchronizing_status_response),
@@ -222,7 +230,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 on_synchronize_continuation),
             new Geary.State.Mapping(State.DEIDLING_SYNCHRONIZING, Event.DISCONNECTED, on_disconnected),
             
-            new Geary.State.Mapping(State.SYNCHRONIZING, Event.SEND, on_no_proceed),
+            new Geary.State.Mapping(State.SYNCHRONIZING, Event.SEND, on_proceed),
             new Geary.State.Mapping(State.SYNCHRONIZING, Event.SEND_IDLE, on_no_proceed),
             new Geary.State.Mapping(State.SYNCHRONIZING, Event.RECVD_STATUS_RESPONSE,
                 on_synchronize_status_response),
@@ -643,9 +651,23 @@ public class Geary.Imap.ClientConnection : BaseObject {
                     return;
                 }
                 
+                // the expectation that the send_async() command which enqueued the data buffers
+                // requiring synchronization closed the IDLE first, but it's possible the response
+                // has not been received from the server yet, so wait now ... even possible the
+                // connection is still in the IDLING state, so wait for IDLING -> IDLE -> SYNCHRONIZING
+                while (is_in_idle(true)) {
+                    debug("[%s] Waiting to exit IDLE for synchronization...", to_string());
+                    yield idle_notifier.wait_async();
+                    debug("[%s] Finished waiting to exit IDLE for synchronization", to_string());
+                }
+                
                 // wait for synchronization point to be reached
                 debug("[%s] Synchronizing...", to_string());
                 yield synchronized_notifier.wait_async();
+                
+                // since can be set before reaching wait_async() (due to waiting for IDLE to
+                // exit), need to manually reset for next time (can't use auto-reset)
+                synchronized_notifier.reset();
                 
                 // watch for the synchronization request to be thwarted
                 if (synchronization_status_response != null) {
@@ -855,6 +877,17 @@ public class Geary.Imap.ClientConnection : BaseObject {
         return do_proceed(State.SYNCHRONIZING, user);
     }
     
+    private uint on_idle_synchronize(uint state, uint event, void *user) {
+        // technically this could be accomplished by introducing an IDLE_SYNCHRONZING (and probably
+        // an IDLING_SYNCHRONIZING) state to indicate that flush_async() is waiting for the FSM
+        // to transition from IDLING/IDLE to SYNCHRONIZING so it can send a large buffer, but
+        // that introduces a lot of complication for a rather quick state used infrequently; this
+        // simple flag does the trick (see on_idle_status_response for how it's used and cleared)
+        waiting_for_idle_to_synchronize = true;
+        
+        return do_proceed(state, user);
+    }
+    
     private uint on_deidling_synchronize(uint state, uint event, void *user) {
         return do_proceed(State.DEIDLING_SYNCHRONIZING, user);
     }
@@ -948,6 +981,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
         if (next == State.CONNECTED && idle_when_quiet)
             reschedule_flush_timeout();
         
+        // if flush_async() is waiting for a synchronization point and deidling back to CONNECTED,
+        // go to SYNCHRONIZING so it can push its buffer to the server
+        if (waiting_for_idle_to_synchronize && next == State.CONNECTED) {
+            next = State.SYNCHRONIZING;
+            waiting_for_idle_to_synchronize = false;
+        }
+        
         return next;
     }
     
@@ -1010,7 +1050,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
     
     private uint on_bad_transition(uint state, uint event, void *user) {
-        debug("[%s] Bad cx state transition %s", to_string(), fsm.get_event_issued_string(state, event));
+        warning("[%s] Bad cx state transition %s", to_string(), fsm.get_event_issued_string(state, event));
         
         return on_no_proceed(state, event, user);
     }
