@@ -495,9 +495,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
     }
     
-    private async Gee.List<Geary.Email>? list_email_in_chunks_async(Gee.List<LocationIdentifier> ids,
+    private async Gee.List<Geary.Email>? list_email_in_chunks_async(Gee.List<LocationIdentifier>? ids,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
-        if (ids.size == 0)
+        if (ids == null || ids.size == 0)
             return null;
         
         int length_rounded_up = Numeric.int_round_up(ids.size, LIST_EMAIL_CHUNK_COUNT);
