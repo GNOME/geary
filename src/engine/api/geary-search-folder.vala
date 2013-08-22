@@ -335,6 +335,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
             initial_index = ids.length - 1;
         
         Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
+        Error? fetch_err = null;
         if (initial_index >= 0) {
             int increment = flags.is_oldest_to_newest() ? -1 : 1;
             i = initial_index;
@@ -346,13 +347,21 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
                 try {
                     results.add(yield fetch_email_async(ids[i], required_fields, flags, cancellable));
                 } catch (Error err) {
-                    if (!(err is EngineError.NOT_FOUND))
-                        throw err;
+                    // Don't let missing or incomplete messages stop the list operation, which has
+                    // different symantics from fetch
+                    if (!(err is EngineError.NOT_FOUND) && !(err is EngineError.INCOMPLETE_MESSAGE)) {
+                        fetch_err = err;
+                        
+                        break;
+                    }
                 }
             }
         }
         
         result_mutex.release(ref result_mutex_token);
+        
+        if (fetch_err != null)
+            throw fetch_err;
         
         return (results.size == 0 ? null : results);
     }
