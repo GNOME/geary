@@ -404,8 +404,8 @@ private class Geary.ImapDB.Account : BaseObject {
         return exists;
     }
     
-    public async Geary.ImapDB.Folder fetch_folder_async(Geary.FolderPath path,
-        Cancellable? cancellable = null) throws Error {
+    public async Geary.ImapDB.Folder fetch_folder_async(Geary.FolderPath path, Cancellable? cancellable)
+        throws Error {
         check_open();
         
         // check references table first
@@ -908,8 +908,6 @@ private class Geary.ImapDB.Account : BaseObject {
     // set to Db.INVALID_ROWID.
     private bool do_fetch_folder_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 folder_id,
         Cancellable? cancellable) throws Error {
-        check_open();
-        
         int length = path.get_path_length();
         if (length < 0)
             throw new EngineError.BAD_PARAMETERS("Invalid path %s", path.to_string());

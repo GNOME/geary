@@ -15,10 +15,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             return Status.CONTINUE;
         }
         
-        public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-            EmailIdentifier id, Imap.EmailFlags? flags) {
-            // whatever, no problem, do what you will
-            return true;
+        public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         }
         
         public override async ReplayOperation.Status replay_remote_async() throws Error {
@@ -150,21 +147,12 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * changes that need to be synchronized on the client.  If this change is written before the
      * enqueued replay operations execute, the potential exists to be unsynchronized.
      *
-     * This call gives all enqueued remote replay operations a chance to cancel or update their
-     * own state due to a writebehind operation.  See
-     * ReplayOperation.query_local_writebehind_operation() for more information.
+     * This call gives all enqueued remote replay operations a chance to update their own state.
+     * See ReplayOperation.notify_remote_removed_during_normalization() for more information.
      */
-    public bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        Geary.EmailIdentifier id, Imap.EmailFlags? flags) {
-        // Although any replay operation can cancel the writebehind operation, give all a chance to
-        // see it as it may affect their internal state
-        bool proceed = true;
-        foreach (ReplayOperation replay_op in remote_queue.get_all()) {
-            if (!replay_op.query_local_writebehind_operation(op, id, flags))
-                proceed = false;
-        }
-        
-        return proceed;
+    public void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        foreach (ReplayOperation replay_op in remote_queue.get_all())
+            replay_op.notify_remote_removed_during_normalization(ids);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {

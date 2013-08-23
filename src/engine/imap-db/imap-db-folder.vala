@@ -548,6 +548,41 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return email;
     }
     
+    public async Gee.SortedSet<Imap.UID>? list_uids_by_range_async(Imap.UID first_uid, Imap.UID last_uid,
+        Cancellable? cancellable) throws Error {
+        // order correctly
+        Imap.UID start, end;
+        if (first_uid.compare_to(last_uid) < 0) {
+            start = first_uid;
+            end = last_uid;
+        } else {
+            start = last_uid;
+            end = first_uid;
+        }
+        
+        Gee.SortedSet<Imap.UID> uids = new Gee.TreeSet<Imap.UID>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT ordering
+                FROM MessageLocationTable
+                WHERE folder_id = ? AND ordering >= ? AND ordering <= ?
+            """);
+            stmt.bind_rowid(0, folder_id);
+            stmt.bind_int64(1, start.value);
+            stmt.bind_int64(2, end.value);
+            
+            Db.Result result = stmt.exec(cancellable);
+            while (!result.finished) {
+                uids.add(new Imap.UID(result.int64_at(0)));
+                result.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return (uids.size > 0) ? uids : null;
+    }
+    
     // pos is 1-based.  This method does not respect messages marked for removal.
     public async ImapDB.EmailIdentifier? get_id_at_async(int pos, Cancellable? cancellable) throws Error {
         assert(pos >= 1);
@@ -623,6 +658,23 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
         
         return id;
+    }
+    
+    public async Gee.Set<ImapDB.EmailIdentifier> get_ids_async(Gee.Collection<Imap.UID> uids,
+        Cancellable? cancellable) throws Error {
+        Gee.Set<ImapDB.EmailIdentifier> ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            foreach (Imap.UID uid in uids) {
+                LocationIdentifier? location = do_get_location_for_uid(cx, uid, ListFlags.NONE,
+                    cancellable);
+                if (location != null)
+                    ids.add(location.email_id);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return (ids.size > 0) ? ids : null;
     }
     
     // This does not respect messages marked for removal.
@@ -1055,8 +1107,23 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         // if found, merge, and associate if necessary
         if (location != null) {
-            do_merge_email(cx, location, email, out pre_fields, out post_fields,
-                out updated_contacts, ref unread_count_change, !associated, cancellable);
+            if (!associated)
+                do_associate_with_folder(cx, location.message_id, location.uid, cancellable);
+            
+            // If the email came from the Imap layer, we need to fill in the id.
+            ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
+            if (email_id.message_id == Db.INVALID_ROWID)
+                email_id.promote_with_message_id(location.message_id);
+            
+            // special-case updating flags, which happens often and should only write to the DB
+            // if necessary
+            if (email.fields != Geary.Email.Field.FLAGS) {
+                do_merge_email(cx, location, email, out pre_fields, out post_fields,
+                    out updated_contacts, ref unread_count_change, cancellable);
+            } else {
+                do_merge_email_flags(cx, location, email, out pre_fields, out post_fields,
+                    out updated_contacts, ref unread_count_change, cancellable);
+            }
             
             // return false to indicate a merge
             return false;
@@ -1481,23 +1548,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
         
         if (new_fields.is_any_set(Geary.Email.Field.FLAGS)) {
-            // Fetch existing flags.
+            // Fetch existing flags to update unread count
             Geary.EmailFlags? old_flags = do_get_email_flags_single(cx, row.id, cancellable);
             Geary.EmailFlags new_flags = new Geary.Imap.EmailFlags(
                     Geary.Imap.MessageFlags.deserialize(row.email_flags));
             
-            if (old_flags != null) {
-                // Update unread count if needed.
-                if (old_flags.contains(Geary.EmailFlags.UNREAD) && !new_flags.contains(
-                    Geary.EmailFlags.UNREAD))
-                    unread_count_change--;
-                else if (!old_flags.contains(Geary.EmailFlags.UNREAD) && new_flags.contains(
-                    Geary.EmailFlags.UNREAD))
-                    unread_count_change++;
-            } else if (new_flags.contains(Geary.EmailFlags.UNREAD)) {
-                // No previous flags.
+            if (old_flags != null && (old_flags.is_unread() != new_flags.is_unread()))
+                unread_count_change += new_flags.is_unread() ? 1 : -1;
+            else if (new_flags.is_unread())
                 unread_count_change++;
-            }
             
             Db.Statement stmt = cx.prepare(
                 "UPDATE MessageTable SET flags=? WHERE id=?");
@@ -1590,24 +1649,45 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
     }
     
+    // This *replaces* the stored flags, it does not OR them ... this is simply a fast-path over
+    // do_merge_email(), as updating FLAGS happens often and doesn't require a lot of extra work
+    private void do_merge_email_flags(Db.Connection cx, LocationIdentifier location, Geary.Email email,
+        out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
+        out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
+        Cancellable? cancellable) throws Error {
+        assert(email.fields == Geary.Email.Field.FLAGS);
+        
+        // no contacts were harmed in the production of this email
+        updated_contacts = new Gee.ArrayList<Contact>();
+        
+        // fetch MessageRow and its fields, note that the fields now include FLAGS if they didn't
+        // already
+        MessageRow row = do_fetch_message_row(cx, location.message_id, Geary.Email.Field.FLAGS,
+            out pre_fields, cancellable);
+        post_fields = pre_fields;
+        
+        // compare flags for (a) any change at all and (b) unread changes
+        Geary.Email row_email = row.to_email(location.email_id);
+        
+        if (row_email.email_flags != null && row_email.email_flags.equal_to(email.email_flags))
+            return;
+        
+        if (row_email.email_flags.is_unread() != email.email_flags.is_unread())
+            unread_count_change += email.email_flags.is_unread() ? 1 : -1;
+        
+        // write them out to the message row
+        Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<ImapDB.EmailIdentifier,
+            Geary.EmailFlags>();
+        map.set((ImapDB.EmailIdentifier) email.id, email.email_flags);
+        
+        do_set_email_flags(cx, map, cancellable);
+        post_fields |= Geary.Email.Field.FLAGS;
+    }
+    
     private void do_merge_email(Db.Connection cx, LocationIdentifier location, Geary.Email email,
         out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
         out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
-        bool associate_with_folder, Cancellable? cancellable) throws Error {
-        // If the email came from the Imap layer, we need to fill in the id.
-        ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-        if (email_id.message_id == Db.INVALID_ROWID)
-            email_id.promote_with_message_id(location.message_id);
-
-        int new_unread_count = 0;
-        
-        if (associate_with_folder) {
-            // Note: no check is performed here to prevent double-adds.  The caller of this method
-            // is responsible for only setting associate_with_folder if required.
-            do_associate_with_folder(cx, location.message_id, location.uid, cancellable);
-            unread_count_change++;
-        }
-        
+        Cancellable? cancellable) throws Error {
         // Default to an empty list, in case we never call do_merge_message_row.
         updated_contacts = new Gee.LinkedList<Contact>();
         
@@ -1627,6 +1707,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         do_add_attachments(cx, combined_email, location.message_id, cancellable);
         
         // Merge in any fields in the submitted email that aren't already in the database or are mutable
+        int new_unread_count = 0;
         if (((fetched_fields & email.fields) != email.fields) ||
             email.fields.is_any_set(Geary.Email.MUTABLE_FIELDS)) {
             Geary.Email.Field new_fields;

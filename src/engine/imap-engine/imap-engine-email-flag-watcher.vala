@@ -5,17 +5,19 @@
  */
 
 /**
- * Because IMAP doesn't offer a standard mechanism for notifications of email flags changing,
- * have to poll for changes, annoyingly.  This class performs this task by monitoring the supplied
+ * Monitor an open {@link ImapEngine.GenericFolder} for changes to {@link EmailFlags}.
+ *
+ * Because IMAP doesn't offer a standard mechanism for server notifications of email flags changing,
+ * have to poll for changes.  This class performs this task by monitoring the supplied
  * folder for its "opened" and "closed" signals and periodically polling for changes.
  *
  * Note that EmailFlagWatcher doesn't maintain a reference to the Geary.Folder it's watching.
  */
+
 private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     public const int DEFAULT_FLAG_WATCH_SEC = 3 * 60;
     
     private const int PULL_CHUNK_COUNT = 100;
-    private const int MAX_EMAIL_WATCHED = 1000;
     
     public bool enabled { get; set; default = true; }
     
@@ -51,7 +53,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
         
         cancellable = new Cancellable();
         if (watch_id == 0)
-            watch_id = Timeout.add_seconds(seconds, on_flag_watch);
+            watch_id = Idle.add(on_opened_update_flags);
     }
     
     private void on_closed(Geary.Folder.CloseReason close_reason) {
@@ -64,6 +66,17 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             Source.remove(watch_id);
         
         watch_id = 0;
+    }
+    
+    private bool on_opened_update_flags() {
+        if (enabled)
+            flag_watch_async.begin();
+        
+        // this callback was immediately called due to open, schedule next ones for here on out
+        // on a timer
+        watch_id = Timeout.add_seconds(seconds, on_flag_watch);
+        
+        return false;
     }
     
     private bool on_flag_watch() {
@@ -100,7 +113,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
         
         Geary.EmailIdentifier? lowest = null;
         int total = 0;
-        do {
+        for (;;) {
             Gee.List<Geary.Email>? list_local = yield folder.list_email_by_id_async(lowest,
                 PULL_CHUNK_COUNT, Geary.Email.Field.FLAGS, Geary.Folder.ListFlags.LOCAL_ONLY, cancellable);
             if (list_local == null || list_local.is_empty)
@@ -139,7 +152,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
             
             if (!cancellable.is_cancelled() && changed_map.size > 0)
                 email_flags_changed(changed_map);
-        } while (total < MAX_EMAIL_WATCHED);
+        }
         
         Logging.debug(Logging.Flag.PERIODIC, "do_flag_watch_async: completed %s, %d messages updates",
             folder.to_string(), total);

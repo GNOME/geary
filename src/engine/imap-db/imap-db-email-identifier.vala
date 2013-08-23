@@ -37,6 +37,10 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
         this.message_id = message_id;
     }
     
+    public bool has_uid() {
+        return (uid != null) && uid.is_valid();
+    }
+    
     public override int natural_sort_comparator(Geary.EmailIdentifier o) {
         ImapDB.EmailIdentifier? other = o as ImapDB.EmailIdentifier;
         if (other == null)

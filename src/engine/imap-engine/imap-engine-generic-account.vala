@@ -433,12 +433,28 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 }
             }
             
-            // always update, openable or not; update UIDs if already open, otherwise will keep
+            // always update, openable or not; update UIDs if remote opened, otherwise will keep
             // signalling that it's changed (because the only time UIDNEXT/UIDValidity is updated
-            // is when the folder is first opened)
+            // is when the remote folder is first opened)
             try {
-                yield local.update_folder_status_async(remote_folder,
-                    generic_folder.get_open_state() != Geary.Folder.OpenState.CLOSED, cancellable);
+                bool update_uid_info;
+                switch (generic_folder.get_open_state()) {
+                    case Folder.OpenState.REMOTE:
+                    case Folder.OpenState.BOTH:
+                        update_uid_info = true;
+                    break;
+                    
+                    case Folder.OpenState.LOCAL:
+                    case Folder.OpenState.OPENING:
+                    case Folder.OpenState.CLOSED:
+                        update_uid_info = false;
+                    break;
+                    
+                    default:
+                        assert_not_reached();
+                }
+                
+                yield local.update_folder_status_async(remote_folder, update_uid_info, cancellable);
             } catch (Error update_error) {
                 debug("Unable to update local folder %s with remote properties: %s",
                     remote_folder.to_string(), update_error.message);

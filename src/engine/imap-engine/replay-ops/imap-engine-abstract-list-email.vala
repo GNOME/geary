@@ -75,44 +75,29 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         this.flags = flags;
     }
     
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        // don't need to check if id is present here, all paths deal with this possibility
-        // correctly
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // remove email already picked up from local store ... for email reported via the
+        // callback, too late
+        if (accumulator != null) {
+            Collection.remove_if<Geary.Email>(accumulator, (email) => {
+                return ids.contains((ImapDB.EmailIdentifier) email.id);
+            });
+        }
         
-        switch (op) {
-            case ReplayOperation.WritebehindOperation.REMOVE:
-                // remove email already picked up from local store ... for email reported via the
-                // callback, too late
-                if (accumulator != null) {
-                    Gee.HashSet<Geary.Email> wb_removed = new Gee.HashSet<Geary.Email>();
-                    foreach (Geary.Email email in accumulator) {
-                        if (email.id.equal_to(id))
-                            wb_removed.add(email);
-                    }
-                    
-                    accumulator.remove_all(wb_removed);
+        // remove from unfulfilled list, as there's nothing to fetch from the server
+        // this funky little loop ensures that all mentions of the EmailIdentifier in
+        // the unfulfilled MultiMap are removed, but must restart loop because removing
+        // within a foreach invalidates the Iterator
+        foreach (Geary.EmailIdentifier id in ids) {
+            bool removed = false;
+            do {
+                removed = false;
+                foreach (Geary.Email.Field field in unfulfilled.get_keys()) {
+                    removed = unfulfilled.remove(field, (ImapDB.EmailIdentifier) id);
+                    if (removed)
+                        break;
                 }
-                
-                // remove from unfulfilled list, as there's nothing to fetch from the server
-                // this funky little loop ensures that all mentions of the EmailIdentifier in
-                // the unfulfilled MultiMap are removed, but must restart loop because removing
-                // within a foreach invalidates the Iterator
-                bool removed = false;
-                do {
-                    removed = false;
-                    foreach (Geary.Email.Field field in unfulfilled.get_keys()) {
-                        removed = unfulfilled.remove(field, (ImapDB.EmailIdentifier) id);
-                        if (removed)
-                            break;
-                    }
-                } while (removed);
-                
-                return true;
-            
-            default:
-                // ignored
-                return true;
+            } while (removed);
         }
     }
     

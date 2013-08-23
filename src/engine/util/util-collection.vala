@@ -83,6 +83,14 @@ public void multi_map_set_all<K, V>(Gee.MultiMap<K, V> dest, K key, Gee.Collecti
 }
 
 /**
+ * Removes all keys from the Map.
+ */
+public void map_unset_all_keys<K, V>(Gee.Map<K, V> map, Gee.Collection<K> keys) {
+    foreach (K key in keys)
+        map.unset(key);
+}
+
+/**
  * Return a MultiMap of value => key of the input map's key => values.
  */
 public Gee.MultiMap<V, K> reverse_multi_map<K, V>(Gee.MultiMap<K, V> map) {

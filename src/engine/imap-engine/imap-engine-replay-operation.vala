@@ -32,12 +32,6 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
         CONTINUE
     }
     
-    public enum WritebehindOperation {
-        CREATE,
-        REMOVE,
-        UPDATE_FLAGS
-    }
-    
     private static int next_opnum = 0;
     
     public string name { get; set; }
@@ -71,24 +65,16 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
      * See Scope for conditions where this method will be called.
      *
      * This method is called only when the ReplayOperation is blocked waiting to execute a remote
-     * command and an exterior operation is going to occur that may alter the state on the local
-     * database (i.e. altering state behind the execution of this operation's replay_local_async()).
-     * This primarily happens during folder normalization (initial synchronization with the server
+     * command and its discovered that the supplied email(s) are no longer on the server.
+     * This happens during folder normalization (initial synchronization with the server
      * when a folder is opened) where ReplayOperations are allowed to execute locally and enqueue
-     * for remote operation in preparation for the folder to open.  (There may be other
-     * circumstances in the future where this method may be called.)
+     * for remote operation in preparation for the folder to fully open.
      *
-     * The method should examine the supplied operation and return true if it's okay to proceed
-     * (and modifying its own operation to reflect the change that will occur before it's allowed to
-     * proceed, or merely not performing any operation in replay_remote_async()) or false if the
-     * supplied operation should *not* execute so that this ReplayOperation's command may execute
-     * shortly.
-     *
-     * flags will only be non-null when op is UPDATE_FLAGS.  In that case, if this method returns
-     * true, it may also modify the EmailFlags.  Those flags will be written to the local store.
+     * The ReplayOperation should remove any reference to the emails so not to attempt operation
+     * on the server.  If it's discovered in replay_remote_async() that there are no more operations
+     * to perform, it should simply exit without contacting the server.
      */
-    public abstract bool query_local_writebehind_operation(WritebehindOperation op, EmailIdentifier id,
-        Imap.EmailFlags? flags);
+    public abstract void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids);
     
     /**
      * See Scope for conditions where this method will be called.

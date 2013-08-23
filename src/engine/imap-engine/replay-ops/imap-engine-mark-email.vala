@@ -49,38 +49,9 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
-        if (imapdb_id == null)
-            return true;
-        
-        if (!original_flags.has_key(imapdb_id))
-            return true;
-        
-        switch (op) {
-            case ReplayOperation.WritebehindOperation.REMOVE:
-                // don't bother updating on server
-                original_flags.unset(imapdb_id);
-                
-                return true;
-            
-            case ReplayOperation.WritebehindOperation.UPDATE_FLAGS:
-                // user's mark operation takes precedence over server's, update supplied flags
-                // and continue
-                if (flags_to_add != null && flags != null)
-                    flags.add_all(flags_to_add);
-                
-                if (flags_to_remove != null && flags != null)
-                    flags.remove_all(flags_to_remove);
-                
-                return true;
-            
-            case ReplayOperation.WritebehindOperation.CREATE:
-            default:
-                // not interested in other operations
-                return true;
-        }
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // don't bother updating on server or backing out locally
+        Collection.map_unset_all_keys<ImapDB.EmailIdentifier, Geary.EmailFlags>(original_flags, ids);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {

@@ -45,38 +45,19 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
-        if (imapdb_id == null)
-            return true;
-        
-        if (!removed_ids.contains(imapdb_id))
-            return true;
-        
-        switch (op) {
-            case ReplayOperation.WritebehindOperation.CREATE:
-                // don't allow for the message to be created, it will be removed on the server by
-                // this operation
-                return false;
-            
-            case ReplayOperation.WritebehindOperation.REMOVE:
-                // removed locally, to be removed remotely, don't bother writing locally
-                return false;
-            
-            default:
-                // ignored
-                return true;
-        }
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        removed_ids.remove_all(ids);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
         // that the signal has already been fired.
-        yield engine.remote_folder.remove_email_async(
-            new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(removed_ids).to_array()),
-            cancellable);
+        if (removed_ids.size > 0) {
+            yield engine.remote_folder.remove_email_async(
+                new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(removed_ids).to_array()),
+                cancellable);
+        }
         
         return ReplayOperation.Status.COMPLETED;
     }

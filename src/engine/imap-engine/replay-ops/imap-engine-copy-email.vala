@@ -30,22 +30,14 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
-        if (imapdb_id == null)
-            return true;
-        
-        // only interested in messages going away (i.e. can't be copied) ...
-        // note that this method operates exactly the same way whether the EmailIdentifer is in
-        // the to_copy list or not.
-        if (op == ReplayOperation.WritebehindOperation.REMOVE)
-            to_copy.remove(imapdb_id);
-        
-        return true;
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        to_copy.remove_all(ids);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
+        if (to_copy.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
         Gee.Set<Imap.UID>? uids = yield engine.local_folder.get_uids_async(to_copy,
             ImapDB.Folder.ListFlags.NONE, cancellable);
         

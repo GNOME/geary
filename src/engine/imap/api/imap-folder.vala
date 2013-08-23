@@ -324,6 +324,25 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
+    // Utility method for listing a UID range
+    public async Gee.SortedSet<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
+        throws Error {
+        Gee.List<Geary.Email>? list = yield list_email_async(msg_set, Geary.Email.Field.NONE,
+            cancellable);
+        if (list == null || list.size == 0)
+            return null;
+        
+        Gee.SortedSet<Imap.UID> uids = new Gee.TreeSet<Imap.UID>();
+        foreach (Geary.Email email in list) {
+            Imap.UID? uid = ((ImapDB.EmailIdentifier) email.id).uid;
+            assert(uid != null);
+            
+            uids.add(uid);
+        }
+        
+        return uids;
+    }
+    
     // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
     public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable) throws Error {
@@ -335,8 +354,10 @@ private class Geary.Imap.Folder : BaseObject {
         
         // if not a UID FETCH, request UIDs for all messages so their EmailIdentifier can be
         // created without going back to the database (assuming the messages have already been
-        // pulled down, not a guarantee)
-        if (!msg_set.is_uid)
+        // pulled down, not a guarantee); if request is for NONE, that guarantees that the
+        // EmailIdentifier will be set, and so fetch UIDs (which looks funny but works when
+        // listing a range for contents: UID FETCH x:y UID)
+        if (!msg_set.is_uid || fields == Geary.Email.Field.NONE)
             cmds.add(new FetchCommand.data_type(msg_set, FetchDataType.UID));
         
         // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have

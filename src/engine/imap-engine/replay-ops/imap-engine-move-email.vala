@@ -46,36 +46,18 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         
         return ReplayOperation.Status.CONTINUE;
     }
-
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        ImapDB.EmailIdentifier? imapdb_id = id as ImapDB.EmailIdentifier;
-        if (imapdb_id == null)
-            return true;
-        
-        if (!moved_ids.contains(imapdb_id))
-            return true;
-        
-        switch (op) {
-            case ReplayOperation.WritebehindOperation.CREATE:
-                // don't allow for it to be created, it's already been marked for removal
-                return false;
-            
-            case ReplayOperation.WritebehindOperation.REMOVE:
-            case ReplayOperation.WritebehindOperation.UPDATE_FLAGS:
-                // don't bother, already removed
-                return false;
-            
-            default:
-                // ignored
-                return true;
-        }
+    
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // don't bother updating on server or backing out locally
+        moved_ids.remove_all(ids);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        yield engine.remote_folder.move_email_async(
-            new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(moved_ids).to_array()),
-            destination, cancellable);
+        if (moved_ids.size > 0) {
+            yield engine.remote_folder.move_email_async(
+                new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(moved_ids).to_array()),
+                destination, cancellable);
+        }
         
         return ReplayOperation.Status.COMPLETED;
     }

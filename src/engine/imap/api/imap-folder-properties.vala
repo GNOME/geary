@@ -109,12 +109,18 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
             return true;
         }
         
+        // UIDVALIDITY changes indicate the entire folder's contents have potentially altered and
+        // the client needs to reset its local vector
+        if (uid_validity != null && other.uid_validity != null && !uid_validity.equal_to(other.uid_validity)) {
+            debug("%s FolderProperties changed: UIDVALIDITY=%s other.UIDVALIDITY=%s", name,
+                uid_validity.to_string(), other.uid_validity.to_string());
+            
+            return true;
+        }
+        
         // Gmail includes Chat messages in STATUS results but not in SELECT/EXAMINE
         // results, so message count comparison has to be from the same origin ... use SELECT/EXAMINE
         // first, as it's more authoritative in many ways
-        //
-        // TODO: If this continues to work, it might be worthwhile to change the result of this
-        // method to boolean
         if (select_examine_messages >= 0 && other.select_examine_messages >= 0) {
             int diff = select_examine_messages - other.select_examine_messages;
             if (diff != 0) {

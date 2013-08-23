@@ -58,12 +58,7 @@ public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.Mes
     }
     
     public virtual int compare_to(Geary.Imap.UID other) {
-        if (value < other.value)
-            return -1;
-        else if (value > other.value)
-            return 1;
-        else
-            return 0;
+        return (int) (value - other.value).clamp(-1, 1);
     }
     
     public string serialize() {

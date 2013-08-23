@@ -14,7 +14,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     private Folder.ListFlags flags;
     private Cancellable? cancellable;
     private Imap.UID? uid = null;
-    private bool writebehind_removed = false;
+    private bool remote_removed = false;
     
     public FetchEmail(GenericFolder engine, ImapDB.EmailIdentifier id, Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
@@ -77,28 +77,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        if (!this.id.equal_to(id))
-            return true;
-        
-        switch (op) {
-            case ReplayOperation.WritebehindOperation.REMOVE:
-                writebehind_removed = true;
-                
-                return true;
-            
-            case ReplayOperation.WritebehindOperation.CREATE:
-            default:
-                // still need to do the full fetch for CREATE, since it's unknown (currently) what
-                // fields are available locally; otherwise, ignored
-                return true;
-        }
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        remote_removed = ids.contains(id);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (writebehind_removed) {
-            throw new EngineError.NOT_FOUND("Unable to fetch %s in %s (removed with writebehind)",
+        if (remote_removed) {
+            throw new EngineError.NOT_FOUND("Unable to fetch %s in %s (removed from remote)",
                 id.to_string(), engine.to_string());
         }
         

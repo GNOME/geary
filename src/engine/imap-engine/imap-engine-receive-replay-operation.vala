@@ -9,11 +9,8 @@ private abstract class Geary.ImapEngine.ReceiveReplayOperation : Geary.ImapEngin
         base (name, ReplayOperation.Scope.LOCAL_ONLY);
     }
     
-    public override bool query_local_writebehind_operation(ReplayOperation.WritebehindOperation op,
-        EmailIdentifier id, Imap.EmailFlags? flags) {
-        debug("Warning: ReceiveReplayOperation.query_local_writebehind_operation() called");
-        
-        return true;
+    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        debug("Warning: ReceiveReplayOperation.notify_remote_removed_during_normalization() called");
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {

@@ -67,6 +67,13 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
         return ReplayOperation.Status.CONTINUE;
     }
     
+    public override void notify_remote_removed_during_normalization(
+        Gee.Collection<ImapDB.EmailIdentifier> removed_ids) {
+        ids.remove_all(removed_ids);
+        
+        base.notify_remote_removed_during_normalization(removed_ids);
+    }
+    
     public override async void backout_local_async() throws Error {
         // R/O, nothing to backout
     }
