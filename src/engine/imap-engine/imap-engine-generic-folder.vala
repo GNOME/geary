@@ -6,8 +6,7 @@
 
 private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.FolderSupport.Copy,
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
-    internal const int REMOTE_FETCH_CHUNK_COUNT = 50;
-    private const int NORMALIZATION_CHUNK_COUNT = 5000;
+    private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
     
     public override Account account { get { return _account; } }
     
@@ -41,6 +40,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private Nonblocking.ReportingSemaphore<bool>? remote_semaphore = null;
     private ReplayQueue? replay_queue = null;
     private int remote_count = -1;
+    private uint open_remote_timer_id = 0;
     
     public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
@@ -366,10 +366,42 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // In particular, EmailStore will open and close lots of folders, causing a lot of
         // connection setup and teardown
         
+        // However, want to eventually open, otherwise if there's no user interaction (i.e. a
+        // second account Inbox they don't manipulate), no remote connection will ever be made,
+        // meaning that folder normalization never happens and unsolicited notifications never
+        // arrive
+        start_remote_open_timer();
+        
         return true;
     }
     
+    private void start_remote_open_timer() {
+        if (open_remote_timer_id != 0)
+            Source.remove(open_remote_timer_id);
+        
+        open_remote_timer_id = Timeout.add_seconds(FORCE_OPEN_REMOTE_TIMEOUT_SEC, on_open_remote_timeout);
+    }
+    
+    private void cancel_remote_open_timer() {
+        if (open_remote_timer_id == 0)
+            return;
+        
+        Source.remove(open_remote_timer_id);
+        open_remote_timer_id = 0;
+    }
+    
+    private bool on_open_remote_timeout() {
+        open_remote_timer_id = 0;
+        
+        // remote was not forced open due to caller, so open now
+        wait_for_open_async.begin();
+        
+        return false;
+    }
+    
     private async void open_remote_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable) {
+        cancel_remote_open_timer();
+        
         // watch for folder closing before this call got a chance to execute
         if (open_count == 0)
             return;
@@ -477,6 +509,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Cancellable? cancellable) {
         // force closed
         open_count = 0;
+        
+        cancel_remote_open_timer();
         
         // Notify all callers waiting for the remote folder that it's not coming available
         Imap.Folder? closing_remote_folder = remote_folder;
