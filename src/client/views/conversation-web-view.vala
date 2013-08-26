@@ -142,12 +142,12 @@ public class ConversationWebView : WebKit.WebView {
         assert(container != null);
         
         // Load the icons.
-        set_icon_src("#email_template .menu .icon", "go-down");
-        set_icon_src("#email_template .starred .icon", "starred");
-        set_icon_src("#email_template .unstarred .icon", "non-starred-grey");
-        set_icon_src("#email_template .attachment.icon", "mail-attachment");
-        set_icon_src("#email_template .close_show_images", "gtk-close");
-        set_icon_src("#link_warning_template .close_link_warning", "gtk-close");
+        set_icon_src("#email_template .menu .icon", "go-down-symbolic");
+        set_icon_src("#email_template .starred .icon", "star-symbolic");
+        set_icon_src("#email_template .unstarred .icon", "unstarred-symbolic");
+        set_icon_src("#email_template .attachment.icon", "mail-attachment-symbolic");
+        set_icon_src("#email_template .close_show_images", "close-symbolic");
+        set_icon_src("#link_warning_template .close_link_warning", "close-symbolic");
     }
     
     private void load_user_style() {
@@ -201,20 +201,16 @@ public class ConversationWebView : WebKit.WebView {
     
     private void set_icon_src(string selector, string icon_name) {
         try {
-            // Load the icon.
-            string icon_filename = IconFactory.instance.lookup_icon(icon_name, 16).get_filename();
-            uint8[] icon_content;
-            FileUtils.get_data(icon_filename, out icon_content);
-            
-            // Fetch its mime type.
-            bool uncertain_content_type;
-            string icon_mimetype = ContentType.get_mime_type(ContentType.guess(icon_filename,
-                icon_content, out uncertain_content_type));
+            // Load icon.
+            uint8[] icon_content = null;
+            Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic_colored(icon_name, 16);
+            if (pixbuf != null)
+                pixbuf.save_to_buffer(out icon_content, "png"); // Load as PNG.
             
             // Then set the source to a data url.
             WebKit.DOM.HTMLImageElement img = Util.DOM.select(get_dom_document(), selector)
                 as WebKit.DOM.HTMLImageElement;
-            set_data_url(img, icon_mimetype, icon_content);
+            set_data_url(img, "image/png", icon_content);
         } catch (Error error) {
             warning("Failed to load icon '%s': %s", icon_name, error.message);
         }

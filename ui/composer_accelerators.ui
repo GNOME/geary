@@ -27,5 +27,13 @@
     <accelerator action="color" name="color" />
     <accelerator action="insertlink" />
     
+    <accelerator action="font_small" />
+    <accelerator action="font_medium" />
+    <accelerator action="font_large" />
+    
+    <accelerator action="font_sans" />
+    <accelerator action="font_serif" />
+    <accelerator action="font_monospace" />
+    
     <accelerator action="close" />
 </ui>

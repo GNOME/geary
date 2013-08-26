@@ -6,6 +6,8 @@
 
 // Stores formatted data for a message.
 public class FormattedConversationData : Geary.BaseObject {
+    public const string UNREAD_BG_COLOR = "#888888";
+    
     private const string ME = _("Me");
     
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
@@ -322,17 +324,21 @@ public class FormattedConversationData : Geary.BaseObject {
             FormattedConversationData.preview_height = preview_height;
             FormattedConversationData.cell_height = y + preview_height;
         } else {
-            // Flagged indicator.
-            Gdk.Pixbuf icon = is_flagged ? IconFactory.instance.starred : IconFactory.instance.unstarred;
-            Gdk.cairo_set_source_pixbuf(ctx, icon, cell_area.x + LINE_SPACING, cell_area.y + LINE_SPACING);
-            ctx.paint();
+            int unread_y = GearyApplication.instance.config.display_preview ?
+                cell_area.y + LINE_SPACING * 2 : cell_area.y + LINE_SPACING;
             
             // Unread indicator.
-            if (is_unread) {
-                Gdk.cairo_set_source_pixbuf(ctx, IconFactory.instance.unread, cell_area.x + LINE_SPACING,
-                    cell_area.y + (cell_area.height / 2) + LINE_SPACING);
-                ctx.paint();
-            }
+            Gdk.Pixbuf read_icon = is_unread ? IconFactory.instance.unread_colored
+                : IconFactory.instance.read_colored;
+            Gdk.cairo_set_source_pixbuf(ctx, read_icon, cell_area.x + LINE_SPACING, unread_y);
+            ctx.paint();
+            
+            // Starred indicator.
+            Gdk.Pixbuf starred_icon = is_flagged ? IconFactory.instance.starred_colored
+                : IconFactory.instance.unstarred_colored;
+            Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, cell_area.y +
+                (cell_area.height / 2) + LINE_SPACING);
+            ctx.paint();
         }
     }
     
@@ -384,8 +390,8 @@ public class FormattedConversationData : Geary.BaseObject {
             return 0;
         
         string mails = 
-            "<span background='#888888' foreground='white' font='%d' weight='bold'> %d </span>"
-            .printf(FONT_SIZE_MESSAGE_COUNT, num_emails);
+            "<span background='%s' foreground='white' font='%d' weight='bold'> %d </span>"
+            .printf(UNREAD_BG_COLOR, FONT_SIZE_MESSAGE_COUNT, num_emails);
         
         Pango.Layout layout_num = widget.create_pango_layout(null);
         layout_num.set_markup(mails, -1);

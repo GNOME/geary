@@ -5,116 +5,87 @@
  */
 
 // Draws the main toolbar.
-public class MainToolbar : Gtk.Box {
+public class MainToolbar : PillToolbar {
     private const string ICON_CLEAR_NAME = "edit-clear-symbolic";
     private const string DEFAULT_SEARCH_TEXT = _("Search");
     
-    private Gtk.Toolbar toolbar;
-    public FolderMenu copy_folder_menu { get; private set; }
-    public FolderMenu move_folder_menu { get; private set; }
+    public FolderMenu copy_folder_menu { get; private set; default = new FolderMenu(); }
+    public FolderMenu move_folder_menu { get; private set; default = new FolderMenu(); }
     public string search_text { get { return search_entry.text; } }
     
-    private GtkUtil.ToggleToolbarDropdown mark_menu_dropdown;
-    private GtkUtil.ToggleToolbarDropdown app_menu_dropdown;
-    private Gtk.ToolItem search_container;
-    private Gtk.Entry search_entry;
+    private Gtk.ToolItem search_container = new Gtk.ToolItem();
+    private Gtk.Entry search_entry = new Gtk.Entry();
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
     private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
     
     public signal void search_text_changed(string search_text);
     
     public MainToolbar() {
-        Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
-        
+        base(GearyApplication.instance.actions);
         GearyApplication.instance.controller.account_selected.connect(on_account_changed);
         
-        Gtk.Builder builder = GearyApplication.instance.create_builder("toolbar.glade");
-        toolbar = builder.get_object("toolbar") as Gtk.Toolbar;
-
-        // Setup each of the normal toolbar buttons.
-        set_toolbutton_action(builder, GearyController.ACTION_NEW_MESSAGE);
-        set_toolbutton_action(builder, GearyController.ACTION_REPLY_TO_MESSAGE);
-        set_toolbutton_action(builder, GearyController.ACTION_REPLY_ALL_MESSAGE);
-        set_toolbutton_action(builder, GearyController.ACTION_FORWARD_MESSAGE);
-        set_toolbutton_action(builder, GearyController.ACTION_DELETE_MESSAGE, true);
-
-        // Setup the folder menus (move/copy).
-        
-        Gtk.ToggleToolButton copy_toggle_button = set_toolbutton_action(builder,
-            GearyController.ACTION_COPY_MENU) as Gtk.ToggleToolButton;
-        copy_folder_menu = new FolderMenu(
-            IconFactory.instance.get_custom_icon("tag-new", IconFactory.ICON_TOOLBAR),
-            Gtk.IconSize.LARGE_TOOLBAR, null, null);
-        copy_folder_menu.attach(copy_toggle_button);
-        
-        Gtk.ToggleToolButton move_toggle_button = set_toolbutton_action(builder,
-            GearyController.ACTION_MOVE_MENU) as Gtk.ToggleToolButton;
-        move_folder_menu = new FolderMenu(
-            IconFactory.instance.get_custom_icon("mail-move", IconFactory.ICON_TOOLBAR),
-            Gtk.IconSize.LARGE_TOOLBAR, null, null);
-        move_folder_menu.attach(move_toggle_button);
-        
-        // Assemble mark menu button.
+        // Assemble mark menu.
         GearyApplication.instance.load_ui_file("toolbar_mark_menu.ui");
-        Gtk.Menu mark_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu")
-            as Gtk.Menu;
-        Gtk.Menu mark_proxy_menu = (Gtk.Menu) GearyApplication.instance.ui_manager
-            .get_widget("/ui/ToolbarMarkMenuProxy");
-        Gtk.ToggleToolButton mark_menu_button = set_toolbutton_action(builder,
-            GearyController.ACTION_MARK_AS_MENU) as Gtk.ToggleToolButton;
-        mark_menu_dropdown = new GtkUtil.ToggleToolbarDropdown(
-            IconFactory.instance.get_custom_icon("edit-mark", IconFactory.ICON_TOOLBAR),
-            Gtk.IconSize.LARGE_TOOLBAR, mark_menu, mark_proxy_menu);
-        mark_menu_dropdown.attach(mark_menu_button);
-        
-        // Ensure that shortcut keys are drawn in the mark menu
+        Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
         mark_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
+        // Setup the application menu.
+        GearyApplication.instance.load_ui_file("toolbar_menu.ui");
+        Gtk.Menu application_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu");
+        application_menu.foreach(GtkUtil.show_menuitem_accel_labels);
+        
+        // Toolbar setup.
+        orientation = Gtk.Orientation.HORIZONTAL;
+        get_style_context().add_class(Gtk.STYLE_CLASS_MENUBAR); // Drag window via toolbar.
+        Gee.List<Gtk.Button> insert = new Gee.ArrayList<Gtk.Button>();
+        
+        // Compose.
+        insert.add(create_toolbar_button("text-editor-symbolic", GearyController.ACTION_NEW_MESSAGE));
+        add(create_pill_buttons(insert, false));
+        
+        // Reply buttons
+        insert.clear();
+        insert.add(create_toolbar_button("reply-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
+        insert.add(create_toolbar_button("reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
+        insert.add(create_toolbar_button("forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
+        add(create_pill_buttons(insert));
+        
+        // Mark, copy, move.
+        insert.clear();
+        insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
+        insert.add(create_menu_button("tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
+        insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
+        add(create_pill_buttons(insert));
+        
+        // Archive/delete button.
+        // For this button, the controller sets the tooltip and icon depending on the context.
+        insert.clear();
+        insert.add(create_toolbar_button("", GearyController.ACTION_DELETE_MESSAGE));
+        add(create_pill_buttons(insert));
+        
+        // Spacer.
+        add(create_spacer());
+        
         // Search bar.
-        search_container = (Gtk.ToolItem) builder.get_object("search_container");
-        search_entry = (Gtk.Entry) builder.get_object("search_entry");
+        search_entry.width_chars = 32;
+        search_entry.primary_icon_name = "edit-find-symbolic";
+        search_entry.secondary_icon_name = "edit-clear-symbolic";
+        search_entry.secondary_icon_activatable = true;
+        search_entry.secondary_icon_sensitive = true;
         search_entry.changed.connect(on_search_entry_changed);
         search_entry.icon_release.connect(on_search_entry_icon_release);
         search_entry.key_press_event.connect(on_search_key_press);
         on_search_entry_changed(); // set initial state
         search_entry.has_focus = true;
+        search_container.add(search_entry);
+        add(search_container);
         
-        // Setup the application menu.
-        GearyApplication.instance.load_ui_file("toolbar_menu.ui");
-        Gtk.Menu application_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu")
-            as Gtk.Menu;
+        // Application button.
+        insert.clear();
+        insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
+        add(create_pill_buttons(insert));
         
-        // Ensure that shortcut keys are drawn in the gear menu
-        application_menu.foreach(GtkUtil.show_menuitem_accel_labels);
-        
-        Gtk.Menu application_proxy_menu = GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenuProxy")
-            as Gtk.Menu;
-        Gtk.ToggleToolButton app_menu_button = set_toolbutton_action(builder, GearyController.ACTION_GEAR_MENU)
-            as Gtk.ToggleToolButton;
-        app_menu_dropdown = new GtkUtil.ToggleToolbarDropdown(
-            IconFactory.instance.get_theme_icon("application-menu"), Gtk.IconSize.LARGE_TOOLBAR,
-            application_menu, application_proxy_menu);
-        app_menu_dropdown.show_arrow = false;
-        app_menu_dropdown.attach(app_menu_button);
-        
-        toolbar.get_style_context().add_class("primary-toolbar");
-        
-        search_upgrade_progress_bar.show_text = true;
-        search_upgrade_progress_bar.margin_top = search_upgrade_progress_bar.margin_bottom = 3;
-        
-        add(toolbar);
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
-    }
-    
-    private Gtk.ToolButton set_toolbutton_action(Gtk.Builder builder, string action,
-        bool use_action_appearance = false) {
-        Gtk.ToolButton button = builder.get_object(action) as Gtk.ToolButton;
-        
-        // Must manually set use_action_appearance to false until Glade re-adds this feature.
-        // See this ticket: https://bugzilla.gnome.org/show_bug.cgi?id=694407#c11
-        button.use_action_appearance = use_action_appearance;
-        button.set_related_action(GearyApplication.instance.actions.get_action(action));
-        return button;
     }
     
     public void set_search_text(string text) {

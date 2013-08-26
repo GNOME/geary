@@ -46,34 +46,34 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     public override Icon? get_sidebar_icon() {
         switch (folder.special_folder_type) {
             case Geary.SpecialFolderType.NONE:
-                return IconFactory.instance.get_custom_icon("tag", IconFactory.ICON_SIDEBAR);
+                return IconFactory.instance.get_custom_icon("tag-symbolic", IconFactory.ICON_SIDEBAR);
             
             case Geary.SpecialFolderType.INBOX:
-                return new ThemedIcon("mail-inbox");
+                return new ThemedIcon("inbox-symbolic");
             
             case Geary.SpecialFolderType.DRAFTS:
-                return new ThemedIcon("accessories-text-editor");
+                return new ThemedIcon("accessories-text-editor-symbolic");
             
             case Geary.SpecialFolderType.SENT:
-                return new ThemedIcon("mail-sent");
+                return new ThemedIcon("sent-symbolic");
             
             case Geary.SpecialFolderType.FLAGGED:
-                return new ThemedIcon("starred");
+                return new ThemedIcon("star-symbolic");
             
             case Geary.SpecialFolderType.IMPORTANT:
-                return new ThemedIcon("task-due");
+                return new ThemedIcon("task-due-symbolic");
             
             case Geary.SpecialFolderType.ALL_MAIL:
-                return IconFactory.instance.get_custom_icon("mail-archive", IconFactory.ICON_SIDEBAR);
+                return IconFactory.instance.get_custom_icon("archive-symbolic", IconFactory.ICON_SIDEBAR);
             
             case Geary.SpecialFolderType.SPAM:
-                return new ThemedIcon("mail-mark-junk");
+                return new ThemedIcon("spam-symbolic");
             
             case Geary.SpecialFolderType.TRASH:
-                return new ThemedIcon("user-trash");
+                return new ThemedIcon("user-trash-symbolic");
             
             case Geary.SpecialFolderType.OUTBOX:
-                return new ThemedIcon("mail-outbox");
+                return new ThemedIcon("outbox-symbolic");
             
             default:
                 assert_not_reached();

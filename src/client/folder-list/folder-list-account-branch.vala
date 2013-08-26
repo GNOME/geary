@@ -7,7 +7,6 @@
 // A branch that holds all the folders for a particular account.
 public class FolderList.AccountBranch : Sidebar.Branch {
     public Geary.Account account { get; private set; }
-    public SpecialGrouping uncommon_special_group { get; private set; }
     public SpecialGrouping user_folder_group { get; private set; }
     public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
     
@@ -16,15 +15,12 @@ public class FolderList.AccountBranch : Sidebar.Branch {
             Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
         
         this.account = account;
-        uncommon_special_group = new SpecialGrouping(1, _("More"),
-            new ThemedIcon("folder-open"), new ThemedIcon("folder"));
         user_folder_group = new SpecialGrouping(2, "",
-            IconFactory.instance.get_custom_icon("tags", IconFactory.ICON_SIDEBAR));
+            IconFactory.instance.get_custom_icon("tag-symbolic", IconFactory.ICON_SIDEBAR));
         folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
         
         account.information.notify["nickname"].connect(on_nicknamed_changed);
         
-        graft(get_root(), uncommon_special_group, special_folder_comparator);
         graft(get_root(), user_folder_group);
     }
     
@@ -84,20 +80,8 @@ public class FolderList.AccountBranch : Sidebar.Branch {
             if (special_folder_type == Geary.SpecialFolderType.SEARCH)
                 return; // Don't show search folder under the account.
             
-            switch (special_folder_type) {
-                // These special folders go in the root of the account.
-                case Geary.SpecialFolderType.INBOX:
-                case Geary.SpecialFolderType.FLAGGED:
-                case Geary.SpecialFolderType.IMPORTANT:
-                case Geary.SpecialFolderType.ALL_MAIL:
-                    graft_point = get_root();
-                break;
-                
-                // Others go in the "More" grouping.
-                default:
-                    graft_point = uncommon_special_group;
-                break;
-            }
+            // Special folders go in the root of the account.
+            graft_point = get_root();
         } else if (folder.path.get_parent() == null) {
             // Top-level folders get put in our special user folders group.
             graft_point = user_folder_group;

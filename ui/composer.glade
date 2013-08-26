@@ -59,8 +59,8 @@
     </child>
     <child>
       <object class="GtkAction" id="insertlink">
-        <property name="label" translatable="yes">Lin_k</property>
-        <property name="icon_name">insert-link</property>
+        <property name="tooltip" translatable="yes">Link (Ctrl+L)</property>
+        <property name="icon_name">insert-link-symbolic</property>
       </object>
       <accelerator key="l" modifiers="GDK_CONTROL_MASK"/>
     </child>
@@ -72,28 +72,28 @@
     </child>
     <child>
       <object class="GtkAction" id="menu">
-        <property name="label" translatable="yes">Menu</property>
-        <property name="icon_name">go-down</property>
+        <property name="tooltip" translatable="yes">More options</property>
+        <property name="icon_name">go-down-symbolic</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="indent">
-        <property name="label" translatable="yes">Quote text</property>
-        <property name="icon_name">format-indent-more</property>
+        <property name="tooltip" translatable="yes">Quote text  (Ctrl+])</property>
+        <property name="icon_name">format-indent-more-symbolic</property>
       </object>
       <accelerator key="bracketright" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="outdent">
-        <property name="label" translatable="yes">Unquote text</property>
-        <property name="icon_name">format-indent-less</property>
+        <property name="tooltip" translatable="yes">Unquote text (Ctrl+[)</property>
+        <property name="icon_name">format-indent-less-symbolic</property>
       </object>
       <accelerator key="bracketleft" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="removeformat">
-        <property name="label" translatable="yes">Remove formatting</property>
-        <property name="icon_name">format-text-none</property>
+        <property name="tooltip" translatable="yes">Remove formatting (Ctrl+Space)</property>
+        <property name="icon_name">format-text-remove-symbolic</property>
       </object>
       <accelerator key="space" modifiers="GDK_CONTROL_MASK"/>
     </child>
@@ -110,25 +110,29 @@
     </child>
     <child>
       <object class="GtkToggleAction" id="bold">
-        <property name="icon_name">format-text-bold</property>
+        <property name="tooltip" translatable="yes">Bold (Ctrl+B)</property>
+        <property name="icon_name">format-text-bold-symbolic</property>
       </object>
       <accelerator key="b" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkToggleAction" id="italic">
-        <property name="icon_name">format-text-italic</property>
+        <property name="tooltip" translatable="yes">Italic (Ctrl+I)</property>
+        <property name="icon_name">format-text-italic-symbolic</property>
       </object>
       <accelerator key="i" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkToggleAction" id="underline">
-        <property name="icon_name">format-text-underline</property>
+        <property name="tooltip" translatable="yes">Underline (Ctrl+U)</property>
+        <property name="icon_name">format-text-underline-symbolic</property>
       </object>
       <accelerator key="u" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkToggleAction" id="strikethrough">
-        <property name="icon_name">format-text-strikethrough</property>
+        <property name="tooltip" translatable="yes">Strikethrough (Ctrl+K)</property>
+        <property name="icon_name">format-text-strikethrough-symbolic</property>
       </object>
       <accelerator key="k" modifiers="GDK_CONTROL_MASK"/>
     </child>
@@ -142,11 +146,42 @@
       <object class="GtkAction" id="close"/>
       <accelerator key="w" modifiers="GDK_CONTROL_MASK"/>
     </child>
-  </object>
-  <object class="GtkArrow" id="menu arrow">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="arrow_type">down</property>
+    <child>
+      <object class="GtkAction" id="font_large">
+        <property name="label" translatable="yes">Large</property>
+        <property name="short_label" translatable="yes">Large</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="font_medium">
+        <property name="label" translatable="yes">Medium</property>
+        <property name="short_label" translatable="yes">Medium</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="font_small">
+        <property name="label" translatable="yes">Small</property>
+        <property name="short_label" translatable="yes">Small</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="font_sans">
+        <property name="label" translatable="yes">Sans Serif</property>
+        <property name="short_label" translatable="yes">Sans Serif</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="font_serif">
+        <property name="label" translatable="yes">Serif</property>
+        <property name="short_label" translatable="yes">Serif</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="font_monospace">
+        <property name="label" translatable="yes">Fixed width</property>
+        <property name="short_label" translatable="yes">Fixed width</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="composer">
     <property name="visible">True</property>
@@ -415,170 +450,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkToolbar" id="compose_toolbar">
+      <object class="GtkAlignment" id="toolbar area">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="toolbar_style">icons</property>
-        <property name="icon_size">2</property>
         <child>
-          <object class="GtkToggleToolButton" id="bold button">
-            <property name="related_action">bold</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Toggle bold text">Bold (Ctrl+B)</property>
-            <property name="label" translatable="yes">Bold</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleToolButton" id="italic button">
-            <property name="related_action">italic</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Toggle italic text">Italic (Ctrl+I)</property>
-            <property name="label" translatable="yes">Italic</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleToolButton" id="underline button">
-            <property name="related_action">underline</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Toggle underlined text">Underline (Ctrl+U)</property>
-            <property name="label" translatable="yes">Underline</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleToolButton" id="strikethrough button">
-            <property name="related_action">strikethrough</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Toggle strikethrough text">Strikethrough (Ctrl+K)</property>
-            <property name="label" translatable="yes">Strikethrough</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparatorToolItem" id="toolbar separator 1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolButton" id="indent button">
-            <property name="related_action">indent</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Adds a quote level">Quote text (Ctrl+])</property>
-            <property name="label" translatable="yes">Quote text</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolButton" id="outdent button">
-            <property name="related_action">outdent</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Removes a quote level">Unquote text (Ctrl+[)</property>
-            <property name="label" translatable="yes">Unquote text</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparatorToolItem" id="toolbar separator 2">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolButton" id="link button">
-            <property name="related_action">insertlink</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Add an HTML link">Link (Ctrl+L)</property>
-            <property name="label" translatable="yes">Link</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolButton" id="remove format button">
-            <property name="related_action">removeformat</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Resets formatting to the default style">Remove formatting (Ctrl+Space)</property>
-            <property name="label" translatable="yes">Remove formatting</property>
-            <property name="use_underline">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolItem" id="filler">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToggleToolButton" id="menu button">
-            <property name="use_action_appearance">False</property>
-            <property name="related_action">menu</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes" comments="Various options for formatting text">Formatting Menu</property>
-            <property name="label" translatable="yes">Menu</property>
-            <property name="use_underline">True</property>
-            <property name="icon_widget">menu arrow</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="homogeneous">True</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
       <packing>

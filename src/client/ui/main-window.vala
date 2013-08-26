@@ -103,27 +103,37 @@ public class MainWindow : Gtk.Window {
         folder_list_scrolled.set_size_request(FOLDER_LIST_WIDTH, -1);
         folder_list_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         folder_list_scrolled.add(folder_list);
+        Gtk.Frame folder_frame = new Gtk.Frame(null);
+        folder_frame.shadow_type = Gtk.ShadowType.IN;
+        folder_frame.add(folder_list_scrolled);
         
         // message list
         conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
         conversation_list_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         conversation_list_scrolled.add(conversation_list_view);
+        Gtk.Frame conversation_frame = new Gtk.Frame(null);
+        conversation_frame.shadow_type = Gtk.ShadowType.IN;
+        conversation_frame.add(conversation_list_scrolled);
         
         // Three-pane display.
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         Gtk.Statusbar status_bar = new Gtk.Statusbar();
         status_bar.add(spinner);
-        status_bar_box.pack_start(folder_list_scrolled);
+        status_bar_box.pack_start(folder_frame);
         status_bar_box.pack_start(status_bar, false, false, 0);
         
 #if !HAVE_LIBGRANITE
         folder_paned.get_style_context().add_class("sidebar-pane-separator");
 #endif
         
+        Gtk.Frame viewer_frame = new Gtk.Frame(null);
+        viewer_frame.shadow_type = Gtk.ShadowType.IN;
+        viewer_frame.add(conversation_viewer);
+        
          // Message list left of message viewer.
-        conversations_paned.pack1(conversation_list_scrolled, false, false);
-        conversations_paned.pack2(conversation_viewer, true, true);
+        conversations_paned.pack1(conversation_frame, false, false);
+        conversations_paned.pack2(viewer_frame, true, true);
         
         // Folder list to the left of everything.
         folder_paned.pack1(status_bar_box, false, false);

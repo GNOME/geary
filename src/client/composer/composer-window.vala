@@ -13,34 +13,34 @@ public class ComposerWindow : Gtk.Window {
         FORWARD
     }
     
+    public const string ACTION_UNDO = "undo";
+    public const string ACTION_REDO = "redo";
+    public const string ACTION_CUT = "cut";
+    public const string ACTION_COPY = "copy";
+    public const string ACTION_COPY_LINK = "copy link";
+    public const string ACTION_PASTE = "paste";
+    public const string ACTION_PASTE_FORMAT = "paste with formatting";
+    public const string ACTION_BOLD = "bold";
+    public const string ACTION_ITALIC = "italic";
+    public const string ACTION_UNDERLINE = "underline";
+    public const string ACTION_STRIKETHROUGH = "strikethrough";
+    public const string ACTION_REMOVE_FORMAT = "removeformat";
+    public const string ACTION_INDENT = "indent";
+    public const string ACTION_OUTDENT = "outdent";
+    public const string ACTION_JUSTIFY_LEFT = "justifyleft";
+    public const string ACTION_JUSTIFY_RIGHT = "justifyright";
+    public const string ACTION_JUSTIFY_CENTER = "justifycenter";
+    public const string ACTION_JUSTIFY_FULL = "justifyfull";
+    public const string ACTION_MENU = "menu";
+    public const string ACTION_COLOR = "color";
+    public const string ACTION_INSERT_LINK = "insertlink";
+    public const string ACTION_COMPOSE_AS_HTML = "compose as html";
+    public const string ACTION_CLOSE = "close";
+    
     private const string DEFAULT_TITLE = _("New Message");
     private const string DRAFT_SAVED_TEXT = _("Saved");
     private const string DRAFT_SAVING_TEXT = _("Saving draft...");
     private const string DRAFT_ERROR_TEXT = _("Error saving draft");
-    
-    private const string ACTION_UNDO = "undo";
-    private const string ACTION_REDO = "redo";
-    private const string ACTION_CUT = "cut";
-    private const string ACTION_COPY = "copy";
-    private const string ACTION_COPY_LINK = "copy link";
-    private const string ACTION_PASTE = "paste";
-    private const string ACTION_PASTE_FORMAT = "paste with formatting";
-    private const string ACTION_BOLD = "bold";
-    private const string ACTION_ITALIC = "italic";
-    private const string ACTION_UNDERLINE = "underline";
-    private const string ACTION_STRIKETHROUGH = "strikethrough";
-    private const string ACTION_REMOVE_FORMAT = "removeformat";
-    private const string ACTION_INDENT = "indent";
-    private const string ACTION_OUTDENT = "outdent";
-    private const string ACTION_JUSTIFY_LEFT = "justifyleft";
-    private const string ACTION_JUSTIFY_RIGHT = "justifyright";
-    private const string ACTION_JUSTIFY_CENTER = "justifycenter";
-    private const string ACTION_JUSTIFY_FULL = "justifyfull";
-    private const string ACTION_MENU = "menu";
-    private const string ACTION_COLOR = "color";
-    private const string ACTION_INSERT_LINK = "insertlink";
-    private const string ACTION_COMPOSE_AS_HTML = "compose as html";
-    private const string ACTION_CLOSE = "close";
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -150,7 +150,6 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Entry subject_entry;
     private Gtk.Button close_button;
     private Gtk.Button send_button;
-    private Gtk.ToggleToolButton menu_button;
     private Gtk.Label message_overlay_label;
     private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
@@ -162,14 +161,16 @@ public class ComposerWindow : Gtk.Window {
     private Gtk.Widget visible_on_attachment_drag_over_child;
     private Gtk.Label draft_save_label;
     
-    private Gtk.Menu menu_html;
-    private Gtk.Menu menu_plain;
+    private Gtk.Menu menu = new Gtk.Menu();
     private Gtk.RadioMenuItem font_small;
     private Gtk.RadioMenuItem font_medium;
     private Gtk.RadioMenuItem font_large;
     private Gtk.RadioMenuItem font_sans;
     private Gtk.RadioMenuItem font_serif;
     private Gtk.RadioMenuItem font_monospace;
+    private Gtk.MenuItem color_item;
+    private Gtk.MenuItem html_item;
+    private Gtk.MenuItem html_item2;
     
     private Gtk.ActionGroup actions;
     private string? hover_url = null;
@@ -260,7 +261,9 @@ public class ComposerWindow : Gtk.Window {
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
         
-        Gtk.Toolbar compose_toolbar = (Gtk.Toolbar) builder.get_object("compose_toolbar");
+        ComposerToolbar composer_toolbar = new ComposerToolbar(actions, menu);
+        Gtk.Alignment toolbar_area = (Gtk.Alignment) builder.get_object("toolbar area");
+        toolbar_area.add(composer_toolbar);
         
         actions.get_action(ACTION_UNDO).activate.connect(on_action);
         actions.get_action(ACTION_REDO).activate.connect(on_action);
@@ -287,7 +290,6 @@ public class ComposerWindow : Gtk.Window {
         actions.get_action(ACTION_JUSTIFY_CENTER).activate.connect(on_formatting_action);
         actions.get_action(ACTION_JUSTIFY_FULL).activate.connect(on_formatting_action);
         
-        actions.get_action(ACTION_MENU).activate.connect(on_open_menu);
         actions.get_action(ACTION_COLOR).activate.connect(on_select_color);
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
@@ -383,52 +385,35 @@ public class ComposerWindow : Gtk.Window {
         
         GearyApplication.instance.config.spell_check_changed.connect(on_spell_check_changed);
         
-        menu_button = builder.get_object("menu button") as Gtk.ToggleToolButton;
-        
-        // Build menu
-        menu_html = new Gtk.Menu();
-        menu_html.deactivate.connect(on_deactivate_menu);
-        menu_html.attach_to_widget(menu_button, null);
-        
-        font_sans = new Gtk.RadioMenuItem.with_label(new SList<Gtk.RadioMenuItem>(),
-            _("Sans Serif"));
+        // Font family menu items.
+        font_sans = new Gtk.RadioMenuItem(new SList<Gtk.RadioMenuItem>());
         font_sans.activate.connect(on_font_sans);
-        menu_html.append(font_sans);
-        font_serif = new Gtk.RadioMenuItem.with_label_from_widget(font_sans, _("Serif"));
+        font_sans.related_action = ui.get_action("ui/font_sans");
+        font_serif = new Gtk.RadioMenuItem.from_widget(font_sans);
         font_serif.activate.connect(on_font_serif);
-        menu_html.append(font_serif);
-        font_monospace = new Gtk.RadioMenuItem.with_label_from_widget(font_sans,
-            _("Fixed width"));
+        font_serif.related_action = ui.get_action("ui/font_serif");
+        font_monospace = new Gtk.RadioMenuItem.from_widget(font_sans);
+        font_monospace.related_action = ui.get_action("ui/font_monospace");
         font_monospace.activate.connect(on_font_monospace);
-        menu_html.append(font_monospace);
-        menu_html.append(new Gtk.SeparatorMenuItem());
         
-        font_small = new Gtk.RadioMenuItem.with_label(new SList<Gtk.RadioMenuItem>(), _("Small"));
+        // Font size menu items.
+        font_small = new Gtk.RadioMenuItem(new SList<Gtk.RadioMenuItem>());
+        font_small.related_action = ui.get_action("ui/font_small");
         font_small.activate.connect(on_font_size_small);
-        menu_html.append(font_small);
-        font_medium = new Gtk.RadioMenuItem.with_label_from_widget(font_small, _("Medium"));
+        font_medium = new Gtk.RadioMenuItem.from_widget(font_small);
+        font_medium.related_action = ui.get_action("ui/font_medium");
         font_medium.activate.connect(on_font_size_medium);
-        menu_html.append(font_medium);
-        font_large = new Gtk.RadioMenuItem.with_label_from_widget(font_small, _("Large"));
+        font_large = new Gtk.RadioMenuItem.from_widget(font_small);
+        font_large.related_action = ui.get_action("ui/font_large");
         font_large.activate.connect(on_font_size_large);
-        menu_html.append(font_large);
-        menu_html.append(new Gtk.SeparatorMenuItem());
         
-        Gtk.MenuItem color_item = new Gtk.MenuItem();
+        color_item = new Gtk.MenuItem();
         color_item.related_action = ui.get_action("ui/color");
-        menu_html.append(color_item);
-        menu_html.append(new Gtk.SeparatorMenuItem());
-        Gtk.MenuItem html_item = new Gtk.CheckMenuItem();
+        html_item = new Gtk.CheckMenuItem();
         html_item.related_action = ui.get_action("ui/htmlcompose");
-        menu_html.append(html_item);
         
-        menu_plain = new Gtk.Menu();
-        menu_plain.deactivate.connect(on_deactivate_menu);
-        menu_plain.attach_to_widget(menu_button, null);
-        
-        Gtk.MenuItem html_item2 = new Gtk.CheckMenuItem();
+        html_item2 = new Gtk.CheckMenuItem();
         html_item2.related_action = ui.get_action("ui/htmlcompose");
-        menu_plain.append(html_item2);
         
         WebKit.WebSettings s = new WebKit.WebSettings();
         s.enable_spell_checking = GearyApplication.instance.config.spell_check;
@@ -451,7 +436,7 @@ public class ComposerWindow : Gtk.Window {
         List<Gtk.Widget> chain = new List<Gtk.Widget>();
         chain.append(hidden_on_attachment_drag_over);
         chain.append(message_area);
-        chain.append(compose_toolbar);
+        chain.append(composer_toolbar);
         chain.append(attachments_box);
         chain.append(button_area);
         box.set_focus_chain(chain);
@@ -855,7 +840,7 @@ public class ComposerWindow : Gtk.Window {
             a.sensitive = false;
         
         // Disable buttons.
-        close_button.sensitive = send_button.sensitive = menu_button.sensitive = 
+        close_button.sensitive = send_button.sensitive = 
             add_attachment_button.sensitive = pending_attachments_button.sensitive = false;
         
         // Disable editable widgets.
@@ -1166,6 +1151,7 @@ public class ComposerWindow : Gtk.Window {
         WebKit.DOM.DOMTokenList body_classes = editor.get_dom_document().body.get_class_list();
         if (!compose_as_html) {
             toggle_toolbar_buttons(false);
+            build_plaintext_menu();
             try {
                 body_classes.add("plain");
             } catch (Error error) {
@@ -1173,6 +1159,7 @@ public class ComposerWindow : Gtk.Window {
             }
         } else {
             toggle_toolbar_buttons(true);
+            build_html_menu();
             try {
                 body_classes.remove("plain");
             } catch (Error error) {
@@ -1183,33 +1170,39 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void toggle_toolbar_buttons(bool show) {
-        string[] buttons = {"bold button", "italic button", "underline button",
-            "strikethrough button", "toolbar separator 1", "toolbar separator 2",
-            "link button", "remove format button"};
-        foreach (string button in buttons) {
-            Gtk.Widget widget = (Gtk.Widget) builder.get_object(button);
-            if (show)
-                widget.show();
-            else
-                widget.hide();
-        }
+        actions.get_action(ACTION_BOLD).visible =
+            actions.get_action(ACTION_ITALIC).visible =
+            actions.get_action(ACTION_UNDERLINE).visible =
+            actions.get_action(ACTION_STRIKETHROUGH).visible =
+            actions.get_action(ACTION_INSERT_LINK).visible =
+            actions.get_action(ACTION_REMOVE_FORMAT).visible = show;
     }
     
-    private void on_open_menu() {
-        if (!menu_button.active)
-            return;
+    private void build_plaintext_menu() {
+        GtkUtil.clear_menu(menu);
         
-        if (compose_as_html) {
-            menu_html.show_all();
-            menu_html.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
-        } else {
-            menu_plain.show_all();
-            menu_plain.popup(null, null, GtkUtil.menu_popup_relative, 0, 0);
-        }
+        menu.append(html_item2);
+        menu.show_all();
     }
     
-    private void on_deactivate_menu() {
-        menu_button.active = false;
+    private void build_html_menu() {
+        GtkUtil.clear_menu(menu);
+        
+        menu.append(font_sans);
+        menu.append(font_serif);
+        menu.append(font_monospace);
+        menu.append(new Gtk.SeparatorMenuItem());
+        
+        menu.append(font_small);
+        menu.append(font_medium);
+        menu.append(font_large);
+        menu.append(new Gtk.SeparatorMenuItem());
+        
+        menu.append(color_item);
+        menu.append(new Gtk.SeparatorMenuItem());
+        
+        menu.append(html_item);
+        menu.show_all(); // Call this or only menu items associated with actions will be displayed.
     }
     
     private void on_font_sans() {

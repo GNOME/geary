@@ -1,36 +1,27 @@
 set(ICONS_DEST share/geary/icons)
 
 set(ICON_FILES
-    application-menu.svg
+    archive-symbolic.svg
+    close-symbolic.svg
+    document-symbolic.svg
     edit-symbolic.svg
-    mail-inbox.png
-    mail-outbox.svg
-    mail-sent.png
-    non-starred-grey.png
-    starred.png
-)
-
-set(ICON_FILES_16
-    16x16/format-text-none.svg
-    16x16/mail-archive.svg
-    16x16/tag.svg
-    16x16/tag-new.svg
-    16x16/tags.svg
-)
-
-set(ICON_FILES_24
-    24x24/format-text-none.svg
-    24x24/edit-mark.svg
-    24x24/mail-archive.svg
-    24x24/mail-move.svg
-    24x24/tag.svg
-    24x24/tag-new.svg
+    format-text-remove-symbolic.svg
+    forward-symbolic.svg
+    inbox-symbolic.svg
+    marker-symbolic.svg
+    outbox-symbolic.svg
+    read-symbolic.svg
+    reply-all-symbolic.svg
+    reply-symbolic.svg
+    sent-symbolic.svg
+    spam-symbolic.svg
+    star-symbolic.svg
+    tag-symbolic.svg
+    unread-symbolic.svg
+    unstarred-symbolic.svg
 )
 
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
-
-install(FILES ${ICON_FILES_16} DESTINATION ${ICONS_DEST}/16x16)
-install(FILES ${ICON_FILES_24} DESTINATION ${ICONS_DEST}/24x24)
 
 # Application icon goes in theme directory
 install(FILES "16x16/geary.svg" DESTINATION share/icons/hicolor/16x16/apps)
