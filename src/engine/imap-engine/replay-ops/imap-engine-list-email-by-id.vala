@@ -52,27 +52,11 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                     }
                 }
                 
-                if (email.fields.fulfills(required_fields)) {
+                if (email.fields.fulfills(required_fields))
                     fulfilled.add(email);
-                } else {
-                    unfulfilled.set(required_fields.clear(email.fields),
-                        (ImapDB.EmailIdentifier) email.id);
-                }
+                else
+                    add_unfulfilled_fields(uid, required_fields.clear(email.fields));
             }
-        }
-        
-        // If INCLUDING_ID specified, verify that the initial_id was found; if not, then want to
-        // get it from the remote (this will force a vector expansion, if required)
-        if (flags.is_including_id()) {
-            if (initial_id != null && initial_uid == null) {
-                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS,
-                    initial_id);
-            }
-        } else {
-            // the initial uid should have been found if at least one Email was returned from the
-            // local list
-            if (list != null && list.size > 0)
-                assert(initial_uid != null);
         }
         
         // report fulfilled items
@@ -94,7 +78,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
             // fetching 'count' fulfilled items and no unfulfilled items means listing is done
             // this is true for both oldest-to-newest, newest-to-oldest, whether or not they have
             // an initial_id
-            finished = (unfulfilled.size == 0 && fulfilled_count >= count);
+            finished = (get_unfulfilled_count() == 0 && fulfilled_count >= count);
         } else {
             // count == int.MAX
             // This sentinel means "get everything from this point", so this has different meanings
@@ -105,7 +89,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                 finished = (is_fully_expanded == Trillian.TRUE);
             } else {
                 // for oldest-to-newest, finished if no unfulfilled items
-                finished = (unfulfilled.size == 0);
+                finished = (get_unfulfilled_count() == 0);
             }
         }
         
@@ -141,18 +125,23 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                 } else if (initial_id != null) {
                     // finite count, expansion required if initial not found *or* not enough
                     // items were pulled in
-                    expansion_required = (initial_uid == null) || (fulfilled_count + unfulfilled.size < count);
+                    expansion_required = (initial_uid == null) || (fulfilled_count + get_unfulfilled_count() < count);
                 } else {
                     // initial_id == null
                     // finite count, expansion required if not enough found
-                    expansion_required = (fulfilled_count + unfulfilled.size < count);
+                    expansion_required = (fulfilled_count + get_unfulfilled_count() < count);
                 }
             }
         }
         
         // If the vector is too short, expand it now
-        if (expansion_required)
-            yield expand_vector_async(initial_uid, count);
+        if (expansion_required) {
+            Gee.List<Imap.UID>? uids = yield expand_vector_async(initial_uid, count);
+            if (uids != null) {
+                // add required_fields as well as basic required fields for new email
+                add_many_unfulfilled_fields(uids, required_fields);
+            }
+        }
         
         // Even after expansion it's possible for the local_list_count + unfulfilled to be less
         // than count if the folder has fewer messages or the user is requesting a span near

@@ -59,8 +59,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     protected weak EmailCallback? cb;
     protected Cancellable? cancellable;
     protected Folder.ListFlags flags;
-    protected Gee.HashMultiMap<Geary.Email.Field, ImapDB.EmailIdentifier> unfulfilled
-        = new Gee.HashMultiMap<Geary.Email.Field, ImapDB.EmailIdentifier>();
+    
+    private Gee.HashMap<Imap.UID, Geary.Email.Field> unfulfilled = new Gee.HashMap<Imap.UID, Geary.Email.Field>();
     
     public AbstractListEmail(string name, GenericFolder owner, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
@@ -75,6 +75,28 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         this.flags = flags;
     }
     
+    protected void add_unfulfilled_fields(Imap.UID? uid, Geary.Email.Field unfulfilled_fields) {
+        assert(uid != null);
+        assert(uid.is_valid());
+        
+        if (!unfulfilled.has_key(uid))
+            unfulfilled.set(uid, unfulfilled_fields);
+        else
+            unfulfilled.set(uid, unfulfilled.get(uid) | unfulfilled_fields);
+    }
+    
+    protected void add_many_unfulfilled_fields(Gee.Collection<Imap.UID>? uids,
+        Geary.Email.Field unfulfilled_fields) {
+        if (uids != null) {
+            foreach (Imap.UID uid in uids)
+                add_unfulfilled_fields(uid, unfulfilled_fields);
+        }
+    }
+    
+    protected int get_unfulfilled_count() {
+        return unfulfilled.size;
+    }
+    
     public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // remove email already picked up from local store ... for email reported via the
         // callback, too late
@@ -84,20 +106,12 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             });
         }
         
-        // remove from unfulfilled list, as there's nothing to fetch from the server
-        // this funky little loop ensures that all mentions of the EmailIdentifier in
-        // the unfulfilled MultiMap are removed, but must restart loop because removing
-        // within a foreach invalidates the Iterator
-        foreach (Geary.EmailIdentifier id in ids) {
-            bool removed = false;
-            do {
-                removed = false;
-                foreach (Geary.Email.Field field in unfulfilled.get_keys()) {
-                    removed = unfulfilled.remove(field, (ImapDB.EmailIdentifier) id);
-                    if (removed)
-                        break;
-                }
-            } while (removed);
+        // remove from unfulfilled list, as there's now nothing to fetch from the server
+        // NOTE: Requires UID to work; this *should* always work, as the EmailIdentifier should
+        // be originating from the database, not the Imap.Folder layer
+        foreach (ImapDB.EmailIdentifier id in ids) {
+            if (id.has_uid())
+                unfulfilled.unset(id.uid);
         }
     }
     
@@ -107,38 +121,23 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         if (unfulfilled.size == 0)
             return ReplayOperation.Status.COMPLETED;
         
+        // convert UID -> needed fields mapping to needed fields -> UIDs, as they can be grouped
+        // and submitted at same time
+        Gee.HashMultiMap<Geary.Email.Field, Imap.UID> reverse_unfulfilled = new Gee.HashMultiMap<
+            Geary.Email.Field, Imap.UID>();
+        foreach (Imap.UID uid in unfulfilled.keys)
+            reverse_unfulfilled.set(unfulfilled.get(uid), uid);
+        
         // schedule operations to remote for each set of email with unfulfilled fields and merge
         // in results, pulling out the entire email
         Nonblocking.Batch batch = new Nonblocking.Batch();
-        foreach (Geary.Email.Field unfulfilled_fields in unfulfilled.get_keys()) {
-            Gee.Collection<ImapDB.EmailIdentifier> email_ids = unfulfilled.get(unfulfilled_fields);
-            if (email_ids.size == 0)
+        foreach (Geary.Email.Field unfulfilled_fields in reverse_unfulfilled.get_keys()) {
+            Gee.Collection<Imap.UID> unfulfilled_uids = reverse_unfulfilled.get(unfulfilled_fields);
+            if (unfulfilled_uids.size == 0)
                 continue;
             
-            // If we just became aware of these messages, we won't have their
-            // ID recorded in the database, so we assume we can just use the
-            // UID as seen in the EmailIdentifier.
-            Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
-            Gee.HashSet<ImapDB.EmailIdentifier> need_uids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-            foreach (Geary.ImapDB.EmailIdentifier id in email_ids) {
-                if (id.message_id == Db.INVALID_ROWID) {
-                    assert(id.uid != null);
-                    uids.add(id.uid);
-                } else {
-                    need_uids.add(id);
-                }
-            }
-            
-            Gee.Set<Imap.UID>? got_uids = yield owner.local_folder.get_uids_async(
-                need_uids, ImapDB.Folder.ListFlags.NONE, cancellable);
-            if (got_uids != null)
-                uids.add_all(got_uids);
-            
-            if (uids.size == 0)
-                continue;
-            
-            Imap.MessageSet msg_set = new Imap.MessageSet.uid_sparse(uids.to_array());
-            RemoteBatchOperation remote_op = new RemoteBatchOperation(owner, msg_set, unfulfilled_fields,
+            RemoteBatchOperation remote_op = new RemoteBatchOperation(owner,
+                new Imap.MessageSet.uid_sparse(unfulfilled_uids.to_array()), unfulfilled_fields,
                 required_fields);
             batch.add(remote_op);
         }
@@ -195,14 +194,14 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         return Trillian.from_boolean(local_count_with_marked >= remote_count);
     }
     
-    // Adds everything in the expansion to the unfulfilled set with required_fields plus ImapDB's
-    // field requirements
-    protected async void expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
+    // Adds everything in the expansion to the unfulfilled set with ImapDB's field requirements ...
+    // UIDs are returned if anything else needs to be added to them
+    protected async Gee.List<Imap.UID>? expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
         // watch out for situations where the entire folder is represented locally (i.e. no
         // expansion necessary)
         int remote_count = owner.get_remote_counts(null, null);
         if (remote_count < 0)
-            return;
+            return null;
         
         // include marked for removed in the count in case this is being called while a removal
         // is in process, in which case don't want to expand vector this moment because the
@@ -229,7 +228,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                     debug("%s: Unable to expand vector for initial_uid=%s: unable to convert to position",
                         to_string(), initial_uid.to_string());
                     
-                    return;
+                    return null;
                 }
                 
                 low_pos = map.get(initial_uid);
@@ -265,7 +264,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             debug("%s: Aborting vector expansion, low_pos=%s > high_pos=%s", owner.to_string(),
                 low_pos.to_string(), high_pos.to_string());
             
-            return;
+            return null;
         }
         
         Imap.MessageSet msg_set;
@@ -283,17 +282,22 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         
         Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
             Geary.Email.Field.NONE, cancellable);
+        
+        Gee.List<Imap.UID> uids = new Gee.ArrayList<Imap.UID>();
         if (list != null) {
             // add all the new email to the unfulfilled list, which ensures (when replay_remote_async
             // is called) that the fields are downloaded and added to the database
             foreach (Geary.Email email in list) {
-                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS,
-                    (ImapDB.EmailIdentifier) email.id);
+                Imap.UID uid = ((ImapDB.EmailIdentifier) email.id).uid;
+                uids.add(uid);
+                add_unfulfilled_fields(uid, ImapDB.Folder.REQUIRED_FIELDS);
             }
         }
         
         debug("%s: Vector expansion completed (%d new email)", owner.to_string(),
             (list != null) ? list.size : 0);
+        
+        return uids;
     }
     
     public override async void backout_local_async() throws Error {

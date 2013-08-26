@@ -17,8 +17,9 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (flags.is_force_update()) {
-            foreach (ImapDB.EmailIdentifier id in ids)
-                unfulfilled.set(required_fields, id);
+            Gee.Set<Imap.UID>? uids = yield owner.local_folder.get_uids_async(ids, ImapDB.Folder.ListFlags.NONE,
+                cancellable);
+            add_many_unfulfilled_fields(uids, required_fields);
             
             return ReplayOperation.Status.CONTINUE;
         }
@@ -36,16 +37,22 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
             // walk list of *requested* IDs to ensure that unknown are considering unfulfilled
             foreach (ImapDB.EmailIdentifier id in ids) {
                 Geary.Email? email = map.get(id);
-            
+                
+                // if non-null, then the local_folder should've supplied a UID; if null, then
+                // it's simply not present in the local folder (since PARTIAL_OK is spec'd), so
+                // we have no way of referring to it on the server
+                if (email == null)
+                    continue;
+                
                 // if completely unknown, make sure duplicate detection fields are included; otherwise,
                 // if known, then they were pulled down during folder normalization and during
                 // vector expansion
-                if (email == null)
-                    unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS, id);
-                else if (!email.fields.fulfills(required_fields))
-                    unfulfilled.set(required_fields.clear(email.fields), id);
-                else
+                if (!email.fields.fulfills(required_fields)) {
+                    add_unfulfilled_fields(((ImapDB.EmailIdentifier) email.id).uid,
+                        required_fields.clear(email.fields));
+                } else {
                     fulfilled.add(email);
+                }
             }
         }
         
@@ -57,7 +64,7 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
                 cb(fulfilled, null);
         }
         
-        if (flags.is_local_only() || unfulfilled.size == 0) {
+        if (flags.is_local_only() || get_unfulfilled_count() == 0) {
             if (cb != null)
                 cb(null, null);
             

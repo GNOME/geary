@@ -64,9 +64,9 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
         foreach (ImapDB.EmailIdentifier id in map.keys) {
             Geary.Email? email = map.get(id);
             if (email == null)
-                unfulfilled.set(required_fields | ImapDB.Folder.REQUIRED_FIELDS, id);
+                add_unfulfilled_fields(id.uid, required_fields | ImapDB.Folder.REQUIRED_FIELDS);
             else if (!email.fields.fulfills(required_fields))
-                unfulfilled.set(required_fields.clear(email.fields), id);
+                add_unfulfilled_fields(id.uid, required_fields.clear(email.fields));
             else
                 accumulator.add(email);
         }
