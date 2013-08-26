@@ -699,7 +699,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_rowid(0, folder_id);
             
             Db.Result results = stmt.exec(cancellable);
-            if (!results.finished)
+            // MIN and MAX return NULL if the result set being examined is zero-length
+            if (!results.finished && !results.is_null_at(0))
                 id = new ImapDB.EmailIdentifier(results.rowid_at(1), new Imap.UID(results.int64_at(0)));
             
             return Db.TransactionOutcome.DONE;

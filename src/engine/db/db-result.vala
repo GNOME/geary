@@ -46,6 +46,18 @@ public class Geary.Db.Result : Geary.Db.Context {
     /**
      * column is zero-based.
      */
+    public bool is_null_at(int column) throws DatabaseError {
+        verify_at(column);
+        
+        bool is_null = statement.stmt.column_type(column) == Sqlite.NULL;
+        log("is_null_at(%d) -> %s", column, is_null.to_string());
+        
+        return is_null;
+    }
+    
+    /**
+     * column is zero-based.
+     */
     public double double_at(int column) throws DatabaseError {
         verify_at(column);
         
@@ -146,6 +158,14 @@ public class Geary.Db.Result : Geary.Db.Context {
         int count = statement.get_column_count();
         if (column >= count)
             throw new DatabaseError.LIMITS("column %d >= %d", column, count);
+    }
+    
+    /**
+     * name is the name of the column in the result set.  See Statement.get_column_index() for name
+     * matching rules.
+     */
+    public bool is_null_for(string name) throws DatabaseError {
+        return is_null_at(convert_for(name));
     }
     
     /**
