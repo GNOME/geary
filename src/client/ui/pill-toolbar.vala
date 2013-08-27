@@ -23,7 +23,10 @@ public class PillToolbar : Gtk.Toolbar {
         b.image.margin = get_icon_margin();
         
         if (!Geary.String.is_empty(b.related_action.label))
-            b.image.margin_right += 4;
+            if (b.get_direction() == Gtk.TextDirection.RTL)
+                b.image.margin_left += 4;
+            else
+                b.image.margin_right += 4;
     }
     
     /**
@@ -59,10 +62,11 @@ public class PillToolbar : Gtk.Toolbar {
     
     /**
      * Given a list of buttons, creates a "pill-style" tool item that can be appended to this
-     * toolbar.  Optionally adds a spacer to the left.
+     * toolbar.  Optionally adds spacers "before" and "after" the buttons (those terms depending
+     * on Gtk.TextDirection)
      */
     public Gtk.ToolItem create_pill_buttons(Gee.Collection<Gtk.Button> buttons,
-        bool left_spacer = true, bool right_spacer = false) {
+        bool before_spacer = true, bool after_spacer = false) {
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         
         if (buttons.size > 1) {
@@ -76,8 +80,12 @@ public class PillToolbar : Gtk.Toolbar {
             
             // Place the right spacer on the button itself.  This way if the button is not displayed,
             // the spacer will not appear.
-            if (i == buttons.size - 1 && right_spacer)
-                button.set_margin_right(12);
+            if (i == buttons.size - 1 && after_spacer) {
+                if (button.get_direction() == Gtk.TextDirection.RTL)
+                    button.set_margin_left(12);
+                else
+                    button.set_margin_right(12);
+            }
             
             i++;
         }
@@ -85,8 +93,12 @@ public class PillToolbar : Gtk.Toolbar {
         Gtk.ToolItem tool_item = new Gtk.ToolItem();
         tool_item.add(box);
         
-        if (left_spacer)
-            box.set_margin_left(12);
+        if (before_spacer) {
+            if (box.get_direction() == Gtk.TextDirection.RTL)
+                box.set_margin_right(12);
+            else
+                box.set_margin_left(12);
+        }
         
         return tool_item;
     }
