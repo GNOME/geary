@@ -74,6 +74,31 @@ private class Geary.ImapDB.Account : BaseObject {
             throw err;
         }
         
+        // have seen cases where multiple "Inbox" folders are created in the root with different
+        // case names, leading to trouble ... this clears out all Inboxes that don't match our
+        // "canonical" name
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT id, name
+                FROM FolderTable
+                WHERE parent_id IS NULL
+            """);
+            
+            Db.Result results = stmt.exec(cancellable);
+            while (!results.finished) {
+                string name = results.string_for("name");
+                if (Imap.MailboxSpecifier.is_inbox_name(name)
+                    && !Imap.MailboxSpecifier.is_canonical_inbox_name(name)) {
+                    debug("%s: Removing duplicate INBOX \"%s\"", this.name, name);
+                    do_delete_folder(cx, results.rowid_for("id"), cancellable);
+                }
+                
+                results.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
         Geary.Account account;
         try {
             account = Geary.Engine.instance.get_account_instance(account_information);
@@ -337,9 +362,19 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 string basename = result.string_for("name");
+                
+                // ignore anything that's not canonical Inbox
+                if (parent == null
+                    && Imap.MailboxSpecifier.is_inbox_name(basename)
+                    && !Imap.MailboxSpecifier.is_canonical_inbox_name(basename)) {
+                    result.next(cancellable);
+                    
+                    continue;
+                }
+                
                 Geary.FolderPath path = (parent != null)
                     ? parent.get_child(basename)
-                    : new Geary.FolderRoot(basename, "/", Geary.Imap.Folder.CASE_SENSITIVE);
+                    : new Imap.FolderRoot(basename, "/");
                 
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties(
                     result.int_for("last_seen_total"), result.int_for("unread_count"), 0,
@@ -901,7 +936,26 @@ private class Geary.ImapDB.Account : BaseObject {
     
     //
     // Transaction helper methods
-    // 
+    //
+    
+    private void do_delete_folder(Db.Connection cx, int64 folder_id, Cancellable? cancellable)
+        throws Error {
+        Db.Statement msg_loc_stmt = cx.prepare("""
+            DELETE FROM MessageLocationTable
+            WHERE folder_id = ?
+        """);
+        msg_loc_stmt.bind_rowid(0, folder_id);
+        
+        msg_loc_stmt.exec(cancellable);
+        
+        Db.Statement folder_stmt = cx.prepare("""
+            DELETE FROM FolderTable
+            WHERE id = ?
+        """);
+        folder_stmt.bind_rowid(0, folder_id);
+        
+        folder_stmt.exec(cancellable);
+    }
     
     // If the FolderPath has no parent, returns true and folder_id will be set to Db.INVALID_ROWID.
     // If cannot create path or there is a logical problem traversing it, returns false with folder_id
@@ -1088,7 +1142,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         if (parent_id <= 0)
-            return new Geary.FolderRoot(name, null, Geary.Imap.Folder.CASE_SENSITIVE);
+            return new Imap.FolderRoot(name, null);
         
         Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
         return (parent_path == null ? null : parent_path.get_child(name));

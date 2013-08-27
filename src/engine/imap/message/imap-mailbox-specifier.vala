@@ -15,7 +15,7 @@
 public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpecifier>, Gee.Comparable<MailboxSpecifier> {
     // all references to Inbox are converted to this string, purely for sanity sake when dealing
     // with Inbox's case issues
-    public const string NORMALIZED_INBOX_NAME = "INBOX";
+    public const string CANONICAL_INBOX_NAME = "INBOX";
     
     /**
      * An instance of an Inbox MailboxSpecifier.
@@ -26,7 +26,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     private static MailboxSpecifier? _inbox = null;
     public static MailboxSpecifier inbox {
         get {
-            return (_inbox != null) ? _inbox : _inbox = new MailboxSpecifier(NORMALIZED_INBOX_NAME);
+            return (_inbox != null) ? _inbox : _inbox = new MailboxSpecifier(CANONICAL_INBOX_NAME);
         }
     }
     
@@ -52,8 +52,40 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         init(param.decode());
     }
     
+    /**
+     * Returns true if the {@link Geary.FolderPath} points to the IMAP Inbox.
+     */
     public static bool folder_path_is_inbox(FolderPath path) {
-        return path.is_root() && path.basename.up() == NORMALIZED_INBOX_NAME;
+        return path.is_root() && is_inbox_name(path.basename);
+    }
+    
+    /**
+     * Returns true if the string is the name of the IMAP Inbox.
+     *
+     * This accounts for IMAP's Inbox name being case-insensitive.  This is only for comparing
+     * folder basenames; this does not account for path delimiters.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-5.1]]
+     *
+     * @see is_canonical_inbox_name
+     */
+    public static bool is_inbox_name(string name) {
+        return name.up() == CANONICAL_INBOX_NAME;
+    }
+    
+    /**
+     * Returns true if the string is the ''canonical'' name of the IMAP Inbox.
+     *
+     * For sanity reasons, the Geary engine uses {@link CANONICAL_INBOX_NAME} as the "canonical"
+     * IMAP Inbox name.  This verifies that the string is truly canonical, i.e. a case-sensitive
+     * comparison is made.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-5.1]]
+     *
+     * @see is_inbox_name
+     */
+    public static bool is_canonical_inbox_name(string name) {
+        return name == CANONICAL_INBOX_NAME;
     }
     
     /**
@@ -75,7 +107,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     
     private void init(string decoded) {
         name = decoded;
-        is_inbox = name.down() == "inbox";
+        is_inbox = is_inbox_name(decoded);
     }
     
     /**
@@ -103,7 +135,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     
     public FolderPath to_folder_path(string? delim = null) {
         Gee.List<string> list = to_list(delim);
-        FolderPath path = new FolderRoot(list[0], delim, !is_inbox);
+        FolderPath path = new Imap.FolderRoot(list[0], delim);
         for (int ctr = 1; ctr < list.size; ctr++)
             path = path.get_child(list[ctr]);
         

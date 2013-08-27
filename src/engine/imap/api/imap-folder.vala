@@ -5,8 +5,6 @@
  */
 
 private class Geary.Imap.Folder : BaseObject {
-    public const bool CASE_SENSITIVE = true;
-    
     private const Geary.Email.Field BASIC_FETCH_FIELDS = Email.Field.ENVELOPE | Email.Field.DATE
         | Email.Field.ORIGINATORS | Email.Field.RECEIVERS | Email.Field.REFERENCES
         | Email.Field.SUBJECT | Email.Field.HEADER;

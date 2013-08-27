@@ -22,22 +22,31 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      */
     public string basename { get; private set; }
     
+    /**
+     * Whether this path is lexiographically case-sensitive.
+     *
+     * This has implications, as {@link FolderPath} is Comparable and Hashable.
+     */
+    public bool case_sensitive { get; private set; }
+    
     private Gee.List<Geary.FolderPath>? path = null;
     private string? fullpath = null;
     private string? fullpath_separator = null;
     private uint stored_hash = uint.MAX;
     
-    protected FolderPath(string basename) {
+    protected FolderPath(string basename, bool case_sensitive) {
         assert(this is FolderRoot);
         
         this.basename = basename;
+        this.case_sensitive = case_sensitive;
     }
     
-    private FolderPath.child(Gee.List<Geary.FolderPath> path, string basename) {
+    private FolderPath.child(Gee.List<Geary.FolderPath> path, string basename, bool case_sensitive) {
         assert(path[0] is FolderRoot);
         
         this.path = path;
         this.basename = basename;
+        this.case_sensitive = case_sensitive;
     }
     
     /**
@@ -125,15 +134,19 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     
     /**
      * Creates a {@link FolderPath} object that is a child of this folder.
+     *
+     * {@link Trillian.TRUE} and {@link Trillian.FALSE} force case-sensitivity.
+     * {@link Trillian.UNKNOWN} indicates to use {@link FolderRoot.default_case_sensitivity}.
      */
-    public Geary.FolderPath get_child(string basename) {
+    public Geary.FolderPath get_child(string basename, Trillian child_case_sensitive = Trillian.UNKNOWN) {
         // Build the child's path, which is this node's path plus this node
         Gee.List<FolderPath> child_path = new Gee.ArrayList<FolderPath>();
         if (path != null)
             child_path.add_all(path);
         child_path.add(this);
         
-        return new FolderPath.child(child_path, basename);
+        return new FolderPath.child(child_path, basename,
+            child_case_sensitive.to_boolean(get_root().default_case_sensitivity));
     }
     
     /**
@@ -204,8 +217,8 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         return fullpath;
     }
     
-    private uint get_basename_hash(bool cs) {
-        return cs ? str_hash(basename) : str_hash(basename.down());
+    private uint get_basename_hash() {
+        return case_sensitive ? str_hash(basename) : str_hash(basename.down());
     }
     
     /**
@@ -218,7 +231,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * length.
      *
      * Note that the {@link FolderRoot.default_separator} has no bearing on comparisons, although
-     * {@link FolderRoot.case_sensitive} does.
+     * {@link FolderPath.case_sensitive} does.
      *
      * Returns -1 if this path is lexiographically before the other, 1 if its after, and 0 if they
      * are equal.
@@ -235,7 +248,16 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         // if paths exist, do comparison of each parent in order
         int min = int.min(this_list.size, other_list.size);
         for (int ctr = 0; ctr < min; ctr++) {
-            int result = this_list[ctr].casefold().collate(other_list[ctr].casefold());
+            string this_element = this_list[ctr];
+            string other_element = other_list[ctr];
+            
+            // if either case-sensitive, then comparison is CS
+            if (!get_folder_at(ctr).case_sensitive && !other.get_folder_at(ctr).case_sensitive) {
+                this_element = this_element.casefold();
+                other_element = other_element.casefold();
+            }
+            
+            int result = this_element.collate(other_element);
             if (result != 0)
                 return result;
         }
@@ -249,28 +271,25 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * {@inheritDoc}
      *
      * As with {@link compare_to}, the {@link FolderRoot.default_separator} has no bearing on the
-     * hash, although {@link FolderRoot.case_sensitive} does.
+     * hash, although {@link FolderPath.case_sensitive} does.
      */
     public uint hash() {
         if (stored_hash != uint.MAX)
             return stored_hash;
         
-        bool cs = get_root().case_sensitive;
-        
         // always one element in path
-        uint calc = get_folder_at(0).get_basename_hash(cs);
+        stored_hash = get_folder_at(0).get_basename_hash();
         
         int path_length = get_path_length();
         for (int ctr = 1; ctr < path_length; ctr++)
-            calc ^= get_folder_at(ctr).get_basename_hash(cs);
-        
-        stored_hash = calc;
+            stored_hash ^= get_folder_at(ctr).get_basename_hash();
         
         return stored_hash;
     }
     
-    private bool is_basename_equal(string cmp, bool cs) {
-        return cs ? (basename == cmp) : (basename.down() == cmp.down());
+    private bool is_basename_equal(string cmp, bool other_cs) {
+        // case-sensitive comparison if either is sensitive
+        return (other_cs || case_sensitive) ? (basename == cmp) : (basename.down() == cmp.down());
     }
     
     /**
@@ -281,14 +300,12 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         if (other.get_path_length() != path_length)
             return false;
         
-        bool cs = get_root().case_sensitive;
-        if (other.get_root().case_sensitive != cs) {
-            message("Comparing %s and %s with different case sensitivities", to_string(),
-                other.to_string());
-        }
-        
         for (int ctr = 0; ctr < path_length; ctr++) {
-            if (!get_folder_at(ctr).is_basename_equal(other.get_folder_at(ctr).basename, cs))
+            // this should never return null as length is already checked
+            FolderPath? other_folder = other.get_folder_at(ctr);
+            assert(other_folder != null);
+            
+            if (!get_folder_at(ctr).is_basename_equal(other_folder.basename, other_folder.case_sensitive))
                 return false;
         }
         
@@ -312,8 +329,11 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
  * A {@link FolderPath} can only be created by starting with a FolderRoot and adding children
  * via {@link FolderPath.get_child}.  Because all FolderPaths hold references to their parents,
  * this element can be retrieved with {@link FolderPath.get_root}.
+ *
+ * Since each email system may have different requirements for its paths, this is an abstract
+ * class.
  */
-public class Geary.FolderRoot : Geary.FolderPath {
+public abstract class Geary.FolderRoot : Geary.FolderPath {
     /**
      * The default separator (delimiter) for this path.
      *
@@ -323,18 +343,21 @@ public class Geary.FolderRoot : Geary.FolderPath {
      * constructor will result in this property being null.
      */
     public string? default_separator { get; private set; }
-    /**
-     * Whether this path is lexiographically case-sensitive.
-     *
-     * This has implications, as {@link FolderPath} is Comparable and Hashable.
-     */
-    public bool case_sensitive { get; private set; }
     
-    public FolderRoot(string basename, string? default_separator, bool case_sensitive) {
-        base (basename);
+    /**
+     * The default case sensitivity of each element in the {@link FolderPath}.
+     *
+     * @see FolderRoot.case_sensitive
+     * @see FolderRoot.get_child
+     */
+    public bool default_case_sensitivity { get; private set; }
+    
+    protected FolderRoot(string basename, string? default_separator, bool case_sensitive,
+        bool default_case_sensitivity) {
+        base (basename, case_sensitive);
         
         this.default_separator = !String.is_empty(default_separator) ? default_separator : null;
-        this.case_sensitive;
+        this.default_case_sensitivity = default_case_sensitivity;
     }
 }
 

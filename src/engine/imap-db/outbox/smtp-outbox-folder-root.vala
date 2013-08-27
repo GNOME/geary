@@ -8,7 +8,7 @@ private class Geary.SmtpOutboxFolderRoot : Geary.FolderRoot {
     public const string MAGIC_BASENAME = "$GearyOutbox$";
     
     public SmtpOutboxFolderRoot() {
-        base(MAGIC_BASENAME, null, false);
+        base(MAGIC_BASENAME, null, false, false);
     }
 }
 

@@ -172,19 +172,15 @@ private class Geary.Imap.Account : BaseObject {
     
     private async MailboxInformation fetch_mailbox_async(FolderPath path, Cancellable? cancellable)
         throws Error {
-        Geary.FolderPath? processed = normalize_inbox(path);
-        if (processed == null)
-            throw new ImapError.INVALID("Invalid path %s", path.to_string());
-        
         ClientSession session = yield claim_session_async(cancellable);
         bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         StatusResponse response = yield send_command_async(
-            new ListCommand(new MailboxSpecifier.from_folder_path(processed, null), can_xlist),
+            new ListCommand(new MailboxSpecifier.from_folder_path(path, null), can_xlist),
             list_results, null, cancellable);
         
-        throw_fetch_error(response, processed, list_results.size);
+        throw_fetch_error(response, path, list_results.size);
         
         return list_results[0];
     }
@@ -193,16 +189,12 @@ private class Geary.Imap.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.FolderPath? processed = normalize_inbox(path);
-        if (processed == null)
-            throw new ImapError.INVALID("Invalid path %s", path.to_string());
-        
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         StatusResponse response = yield send_command_async(
-            new StatusCommand(new MailboxSpecifier.from_folder_path(processed, null), StatusDataType.all()),
+            new StatusCommand(new MailboxSpecifier.from_folder_path(path, null), StatusDataType.all()),
             null, status_results, cancellable);
         
-        throw_fetch_error(response, processed, status_results.size);
+        throw_fetch_error(response, path, status_results.size);
         
         return status_results[0];
     }
@@ -226,9 +218,7 @@ private class Geary.Imap.Account : BaseObject {
         throws Error {
         check_open();
         
-        Geary.FolderPath? processed = normalize_inbox(parent);
-        
-        Gee.List<MailboxInformation>? child_info = yield list_children_async(processed, cancellable);
+        Gee.List<MailboxInformation>? child_info = yield list_children_async(parent, cancellable);
         if (child_info == null || child_info.size == 0)
             return null;
         
@@ -294,20 +284,18 @@ private class Geary.Imap.Account : BaseObject {
     
     private async Gee.List<MailboxInformation>? list_children_async(FolderPath? parent, Cancellable? cancellable)
         throws Error {
-        Geary.FolderPath? processed = normalize_inbox(parent);
-        
         ClientSession session = yield claim_session_async(cancellable);
         bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
         
         ListCommand cmd;
-        if (processed == null) {
+        if (parent == null) {
             cmd = new ListCommand.wildcarded("", new MailboxSpecifier("%"), can_xlist);
         } else {
-            string? specifier = processed.get_fullpath(null);
-            string? delim = processed.get_root().default_separator;
+            string? specifier = parent.get_fullpath(null);
+            string? delim = parent.get_root().default_separator;
             if (specifier == null || delim == null) {
                 throw new ImapError.INVALID("Unable to list children of %s: no delimiter specified",
-                    processed.to_string());
+                    parent.to_string());
             }
             
             specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
@@ -319,15 +307,15 @@ private class Geary.Imap.Account : BaseObject {
         StatusResponse response = yield send_command_async(cmd, list_results, null, cancellable);
         
         if (response.status != Status.OK)
-            throw_not_found(processed ?? parent);
+            throw_not_found(parent);
         
         // See note at ListCommand about some servers returning the parent's name alongside their
         // children ... this filters this out
-        if (processed != null) {
+        if (parent != null) {
             Gee.Iterator<MailboxInformation> iter = list_results.iterator();
             while (iter.next()) {
-                FolderPath list_path = iter.get().mailbox.to_folder_path(processed.get_root().default_separator);
-                if (list_path.equal_to(processed)) {
+                FolderPath list_path = iter.get().mailbox.to_folder_path(parent.get_root().default_separator);
+                if (list_path.equal_to(parent)) {
                     debug("Removing parent from LIST results: %s", list_path.to_string());
                     iter.remove();
                 }
@@ -385,30 +373,6 @@ private class Geary.Imap.Account : BaseObject {
     private void throw_not_found(Geary.FolderPath? path) throws EngineError {
         throw new EngineError.NOT_FOUND("Folder %s not found on %s",
             (path != null) ? path.to_string() : "root", session_mgr.to_string());
-    }
-    
-    // This method ensures that INBOX is dealt with in a consistent fashion throughout the
-    // application.  In IMAP, INBOX is case-insensitive (although there is no specification on
-    // sensitivity of other folders) and must always be recognized as such.  Thus, this method
-    // converts all mention of INBOX (or Inbox, or inbox, or InBoX) into a standard string.
-    private static Geary.FolderPath? normalize_inbox(Geary.FolderPath? path) {
-        if (path == null)
-            return null;
-        
-        FolderRoot root = path.get_root();
-        if (root.basename.up() != Imap.MailboxSpecifier.NORMALIZED_INBOX_NAME)
-            return path;
-        
-        // create new FolderPath with normalized INBOX at its root
-        FolderPath new_path = new Geary.FolderRoot(Imap.MailboxSpecifier.NORMALIZED_INBOX_NAME,
-            root.default_separator, root.case_sensitive);
-        
-        // copy in children starting at 1 (zero is INBOX)
-        Gee.List<string> basenames = path.as_list();
-        for (int ctr = 1; ctr < basenames.size; ctr++)
-            new_path = new_path.get_child(basenames[ctr]);
-        
-        return new_path;
     }
     
     private void on_login_failed() {

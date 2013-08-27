@@ -45,10 +45,8 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             
             path_type_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(), SpecialFolderType.INBOX);
             
-            Geary.FolderPath gmail_root = new Geary.FolderRoot(GMAIL_FOLDER, null,
-                Imap.Folder.CASE_SENSITIVE);
-            Geary.FolderPath googlemail_root = new Geary.FolderRoot(GOOGLEMAIL_FOLDER, null,
-                Imap.Folder.CASE_SENSITIVE);
+            Geary.FolderPath gmail_root = new Imap.FolderRoot(GMAIL_FOLDER, null);
+            Geary.FolderPath googlemail_root = new Imap.FolderRoot(GOOGLEMAIL_FOLDER, null);
             
             path_type_map.set(gmail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);
             path_type_map.set(googlemail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);

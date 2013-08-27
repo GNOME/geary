@@ -93,6 +93,7 @@ engine/imap/api/imap-email-flags.vala
 engine/imap/api/imap-email-properties.vala
 engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
+engine/imap/api/imap-folder-root.vala
 engine/imap/command/imap-append-command.vala
 engine/imap/command/imap-capability-command.vala
 engine/imap/command/imap-close-command.vala
