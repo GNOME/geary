@@ -94,7 +94,7 @@ hr {
     color: black;
     font-size: small;
     box-shadow: 0 3px 11px rgba(0,0,0,1);
-    display: inline-block;
+    display: block;
     word-wrap: break-word;
     width: 100%;
     box-sizing:border-box;
@@ -304,6 +304,10 @@ body:not(.nohide) .email.hide .header_container .avatar {
     }
     body:not(.nohide) .email.compressed + .email {
         margin-top: -1px;
+    }
+    body:not(.nohide) .compressed .email_container {
+        overflow: hidden;
+        display: none
     }
     body:not(.nohide) .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed + .compressed {
         display:none;
