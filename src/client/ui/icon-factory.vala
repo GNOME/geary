@@ -59,7 +59,7 @@ public class IconFactory {
         unstarred = load("unstarred-symbolic", STAR_ICON_SIZE);
         
         Gdk.RGBA gray_color = Gdk.RGBA();
-        gray_color.parse(FormattedConversationData.UNREAD_BG_COLOR);
+        gray_color.parse(CountBadge.UNREAD_BG_COLOR);
         
         // Load pre-colored symbolic icons here.
         read_colored = load_symbolic_colored("read-symbolic", UNREAD_ICON_SIZE, gray_color);

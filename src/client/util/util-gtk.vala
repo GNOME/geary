@@ -97,4 +97,15 @@ public void clear_menu(Gtk.Menu menu) {
         menu.remove(child);
 }
 
+/**
+ * Given an HTML-style color spec, parses the color and sets it to the source RGB of the Cairo context.
+ * (Borrowed from Shotwell.)
+ */
+void set_source_color_from_string(Cairo.Context ctx, string spec) {
+    Gdk.RGBA rgba = Gdk.RGBA();
+    if (!rgba.parse(spec))
+        error("Can't parse color %s", spec);
+    ctx.set_source_rgb(rgba.red, rgba.green, rgba.blue);
+}
+
 }

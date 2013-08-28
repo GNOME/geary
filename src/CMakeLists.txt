@@ -338,6 +338,7 @@ client/sidebar/sidebar-count-cell-renderer.vala
 client/sidebar/sidebar-entry.vala
 client/sidebar/sidebar-tree.vala
 
+client/ui/count-badge.vala
 client/ui/folder-menu.vala
 client/ui/icon-factory.vala
 client/ui/main-toolbar.vala

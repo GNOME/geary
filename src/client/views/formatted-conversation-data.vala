@@ -6,12 +6,10 @@
 
 // Stores formatted data for a message.
 public class FormattedConversationData : Geary.BaseObject {
-    public const string UNREAD_BG_COLOR = "#888888";
+    public const int LINE_SPACING = 6;
     
     private const string ME = _("Me");
-    
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
-    private const int LINE_SPACING = 6;
     private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
     private const double DIM_TEXT_AMOUNT = 0.25;
     
@@ -19,7 +17,6 @@ public class FormattedConversationData : Geary.BaseObject {
     private const int FONT_SIZE_SUBJECT = 9;
     private const int FONT_SIZE_FROM = 11;
     private const int FONT_SIZE_PREVIEW = 8;
-    private const int FONT_SIZE_MESSAGE_COUNT = 8;
     
     private class ParticipantDisplay : Geary.BaseObject, Gee.Hashable<ParticipantDisplay> {
         public string key;
@@ -93,6 +90,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private Geary.App.Conversation? conversation = null;
     private string? account_owner_email = null;
     private bool use_to = true;
+    private CountBadge count_badge = new CountBadge(2);
     
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
@@ -300,21 +298,28 @@ public class FormattedConversationData : Geary.BaseObject {
         // If we are displaying a preview then the message counter goes on the same line as the
         // preview, otherwise it is with the subject.
         int preview_height = 0;
+        
+        // Setup counter badge.
+        count_badge.count = num_emails;
+        int counter_width = count_badge.get_width(widget) + LINE_SPACING;
+        int counter_x = cell_area != null ? cell_area.width - cell_area.x - counter_width +
+            (LINE_SPACING / 2) : 0;
+        
         if (GearyApplication.instance.config.display_preview) {
             // Subject field.
             render_subject(widget, cell_area, ctx, y, selected);
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
             
             // Number of e-mails field.
-            int counter_width = render_counter(widget, cell_area, ctx, y, selected);
+            count_badge.render(widget, ctx, counter_x, y, selected);
             
             // Body preview.
             ink_rect = render_preview(widget, cell_area, ctx, y, selected, counter_width);
             preview_height = ink_rect.height + ink_rect.y + LINE_SPACING;
         } else {
             // Number of e-mails field.
-            int counter_width = render_counter(widget, cell_area, ctx, y, selected);
-
+            count_badge.render(widget, ctx, counter_x, y, selected);
+            
             // Subject field.
             render_subject(widget, cell_area, ctx, y, selected, counter_width);
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
@@ -382,31 +387,6 @@ public class FormattedConversationData : Geary.BaseObject {
             Pango.cairo_show_layout(ctx, layout_from);
         }
         return ink_rect;
-    }
-    
-    private int render_counter(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx, int y,
-        bool selected) {
-        if (num_emails <= 1)
-            return 0;
-        
-        string mails = 
-            "<span background='%s' foreground='white' font='%d' weight='bold'> %d </span>"
-            .printf(UNREAD_BG_COLOR, FONT_SIZE_MESSAGE_COUNT, num_emails);
-        
-        Pango.Layout layout_num = widget.create_pango_layout(null);
-        layout_num.set_markup(mails, -1);
-        layout_num.set_alignment(Pango.Alignment.RIGHT);
-
-        Pango.Rectangle? ink_rect;
-        Pango.Rectangle? logical_rect;
-        layout_num.get_pixel_extents(out ink_rect, out logical_rect);
-        if (ctx != null && cell_area != null) {
-            ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - 
-                LINE_SPACING, y);
-            Pango.cairo_show_layout(ctx, layout_num);
-        }
-        
-        return ink_rect.width + (LINE_SPACING * 3);
     }
     
     private void render_subject(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx,
