@@ -324,7 +324,16 @@ public class FormattedConversationData : Geary.BaseObject {
             render_subject(widget, cell_area, ctx, y, selected, counter_width);
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
         }
-
+        
+       // Draw separator line.
+       if (ctx != null && cell_area != null) {
+           ctx.set_line_width(1.0);
+           GtkUtil.set_source_color_from_string(ctx, CountBadge.UNREAD_BG_COLOR);
+           ctx.move_to(cell_area.x - 1, cell_area.y + cell_area.height);
+           ctx.line_to(cell_area.x + cell_area.width + 1, cell_area.y + cell_area.height);
+           ctx.stroke();
+       }
+        
         if (recalc_dims) {
             FormattedConversationData.preview_height = preview_height;
             FormattedConversationData.cell_height = y + preview_height;

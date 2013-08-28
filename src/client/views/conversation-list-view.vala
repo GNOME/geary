@@ -40,7 +40,6 @@ public class ConversationListView : Gtk.TreeView {
         
         set_show_expanders(false);
         set_headers_visible(false);
-        enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
         
         append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
             new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
