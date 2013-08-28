@@ -44,7 +44,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     }
     
     public override Icon? get_sidebar_icon() {
-        return new ThemedIcon("search");
+        return new ThemedIcon("edit-find-symbolic");
     }
     
     public override string to_string() {
