@@ -758,10 +758,8 @@ public class ComposerWindow : Gtk.Window {
     
     // Sends the current message.
     private void on_send() {
-        if (should_send()) {
+        if (should_send())
             on_send_async.begin();
-            destroy();
-        }
     }
     
     // Used internally by on_send()
@@ -776,6 +774,7 @@ public class ComposerWindow : Gtk.Window {
         }
         
         yield delete_draft_async();
+        destroy(); // Only close window after draft is deleted; this closes the drafts folder.
     }
     
     // Returns the drafts folder for the current From account.
