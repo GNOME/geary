@@ -76,6 +76,7 @@ public class GearyController : Geary.BaseObject {
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
+    private Cancellable cancellable_context_dependent_buttons = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
@@ -997,6 +998,13 @@ public class GearyController : Geary.BaseObject {
         old_cancellable.cancel();
     }
     
+    private void cancel_context_dependent_buttons() {
+        Cancellable old_cancellable = cancellable_context_dependent_buttons;
+        cancellable_context_dependent_buttons = new Cancellable();
+        
+        old_cancellable.cancel();
+    }
+    
     // We need to include the second parameter, or valac doesn't recognize the function as matching
     // YorbaApplication.exiting's signature.
     private bool on_application_exiting(YorbaApplication sender, bool panicked) {
@@ -1632,7 +1640,8 @@ public class GearyController : Geary.BaseObject {
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive =
             (current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive);
         
-        enable_context_dependent_buttons_async.begin(true, null);
+        cancel_context_dependent_buttons();
+        enable_context_dependent_buttons_async.begin(true, cancellable_context_dependent_buttons);
     }
 
     // Enables or disables the message buttons on the toolbar.
@@ -1652,7 +1661,8 @@ public class GearyController : Geary.BaseObject {
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
             && ((current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive));
         
-        enable_context_dependent_buttons_async.begin(sensitive, null);
+        cancel_context_dependent_buttons();
+        enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
     }
     
     private async void enable_context_dependent_buttons_async(bool sensitive, Cancellable? cancellable) {
@@ -1666,6 +1676,10 @@ public class GearyController : Geary.BaseObject {
             debug("Error checking for what operations are supported in the selected conversations: %s",
                 e.message);
         }
+        
+        // Exit here if the user has cancelled.
+        if (cancellable != null && cancellable.is_cancelled())
+            return;
         
         Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
         if (selected_operations != null)
