@@ -9,6 +9,7 @@ public class GearyController : Geary.BaseObject {
     // Named actions.
     public const string ACTION_HELP = "GearyHelp";
     public const string ACTION_ABOUT = "GearyAbout";
+    public const string ACTION_DONATE = "GearyDonate";
     public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
     public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
@@ -248,6 +249,10 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry about = { ACTION_ABOUT, Stock._ABOUT, TRANSLATABLE, null, null, on_about };
         about.label = _("_About");
         entries += about;
+        
+        Gtk.ActionEntry donate = { ACTION_DONATE, null, TRANSLATABLE, null, null, on_donate };
+        donate.label = _("_Donate");
+        entries += donate;
         
         Gtk.ActionEntry quit = { ACTION_QUIT, Stock._QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
         quit.label = _("_Quit");
@@ -1047,6 +1052,14 @@ public class GearyController : Geary.BaseObject {
             /// For example: Yamada Taro <yamada.taro@example.com>
             "translator-credits", _("translator-credits")
         );
+    }
+    
+    private void on_donate() {
+        try {
+            Gtk.show_uri(null, GearyApplication.DONATE, Gdk.CURRENT_TIME);
+        } catch (Error error) {
+            debug("Error opening donate page: %s", error.message);
+        }
     }
     
     // this signal does not necessarily indicate that the application previously didn't have

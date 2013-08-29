@@ -18,6 +18,7 @@ public class GearyApplication : YorbaApplication {
     public const string WEBSITE = "http://www.yorba.org";
     public const string WEBSITE_LABEL = _("Visit the Yorba web site");
     public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
+    public const string DONATE = "http://www.yorba.org/about/donate";
     
     // These strings must match corresponding strings in desktop/geary.desktop *exactly* and be
     // internationalizable
