@@ -869,7 +869,7 @@ public class ConversationViewer : Gtk.Box {
         }
         
         if (hover_url != null) {
-            if (Geary.RFC822.MailboxAddress.is_valid_address(hover_url)) {
+            if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
                 // Add a menu item for copying the address.
                 Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
                 item.activate.connect(on_copy_email_address);
