@@ -47,8 +47,8 @@ public class GearyController : Geary.BaseObject {
     private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (Delete, Backspace, A)");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-symbolic";
     
-    private const string MARK_AS_SPAM_LABEL = _("Mark as s_pam");
-    private const string MARK_AS_NOT_SPAM_LABEL = _("Mark as not s_pam");
+    private const string MARK_AS_SPAM_LABEL = _("Mark as S_pam");
+    private const string MARK_AS_NOT_SPAM_LABEL = _("Mark as not S_pam");
     
     private const string MARK_MESSAGE_MENU_TOOLTIP_SINGLE = _("Mark conversation");
     private const string MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
@@ -261,13 +261,13 @@ public class GearyController : Geary.BaseObject {
 
         Gtk.ActionEntry mark_read = { ACTION_MARK_AS_READ, "mail-mark-read", TRANSLATABLE, "<Ctrl>I",
             null, on_mark_as_read };
-        mark_read.label = _("Mark as _read");
+        mark_read.label = _("Mark as _Read");
         entries += mark_read;
         add_accelerator("<Shift>I", ACTION_MARK_AS_READ);
 
         Gtk.ActionEntry mark_unread = { ACTION_MARK_AS_UNREAD, "mail-mark-unread", TRANSLATABLE,
             "<Ctrl>U", null, on_mark_as_unread };
-        mark_unread.label = _("Mark as _unread");
+        mark_unread.label = _("Mark as _Unread");
         entries += mark_unread;
         add_accelerator("<Shift>U", ACTION_MARK_AS_UNREAD);
         
