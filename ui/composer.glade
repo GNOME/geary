@@ -575,7 +575,7 @@
             <property name="layout_style">start</property>
             <child>
               <object class="GtkButton" id="Close">
-                <property name="label">_Close</property>
+                <property name="label" translatable="yes">_Close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

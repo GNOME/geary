@@ -98,7 +98,7 @@
             <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
-            <property name="placeholder_text">Password</property>
+            <property name="placeholder_text" translatable="yes">Password</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -195,7 +195,7 @@
             <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
-            <property name="placeholder_text">First Last</property>
+            <property name="placeholder_text" translatable="yes">First Last</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -250,7 +250,7 @@
             <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
-            <property name="placeholder_text">Work, Home, etc.</property>
+            <property name="placeholder_text" translatable="yes">Work, Home, etc.</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -489,7 +489,7 @@
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="placeholder_text">SMTP username</property>
+                <property name="placeholder_text" translatable="yes">SMTP username</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -505,7 +505,7 @@
                 <property name="visibility">False</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="placeholder_text">SMTP password</property>
+                <property name="placeholder_text" translatable="yes">SMTP password</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -554,7 +554,7 @@
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="placeholder_text">IMAP username</property>
+                <property name="placeholder_text" translatable="yes">IMAP username</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -570,7 +570,7 @@
                 <property name="visibility">False</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="placeholder_text">IMAP password</property>
+                <property name="placeholder_text" translatable="yes">IMAP password</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
