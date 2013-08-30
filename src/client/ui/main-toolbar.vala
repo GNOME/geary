@@ -60,7 +60,7 @@ public class MainToolbar : PillToolbar {
         // Archive/delete button.
         // For this button, the controller sets the tooltip and icon depending on the context.
         insert.clear();
-        insert.add(create_toolbar_button("", GearyController.ACTION_DELETE_MESSAGE));
+        insert.add(create_toolbar_button("", GearyController.ACTION_DELETE_MESSAGE, true));
         add(create_pill_buttons(insert));
         
         // Spacer.

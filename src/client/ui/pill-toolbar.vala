@@ -14,7 +14,8 @@ public class PillToolbar : Gtk.Toolbar {
         action_group = toolbar_action_group;
     }
     
-    private void setup_button(Gtk.Button b, string? icon_name, string action_name) {
+    private void setup_button(Gtk.Button b, string? icon_name, string action_name,
+        bool show_label = false) {
         b.related_action = action_group.get_action(action_name);
         b.tooltip_text = b.related_action.tooltip;
         b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
@@ -22,7 +23,10 @@ public class PillToolbar : Gtk.Toolbar {
         b.always_show_image = true;
         b.image.margin = get_icon_margin();
         
-        if (!Geary.String.is_empty(b.related_action.label))
+        if (!show_label)
+            b.label = "";
+        
+        if (show_label && !Geary.String.is_empty(b.related_action.label))
             if (b.get_direction() == Gtk.TextDirection.RTL)
                 b.image.margin_left += 4;
             else
@@ -32,9 +36,9 @@ public class PillToolbar : Gtk.Toolbar {
     /**
      * Given an icon and action, creates a button that triggers the action.
      */
-    public Gtk.Button create_toolbar_button(string? icon_name, string action_name) {
+    public Gtk.Button create_toolbar_button(string? icon_name, string action_name, bool show_label = false) {
         Gtk.Button b = new Gtk.Button();
-        setup_button(b, icon_name, action_name);
+        setup_button(b, icon_name, action_name, show_label);
         
         return b;
     }
