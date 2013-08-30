@@ -6,8 +6,23 @@
 
 public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     public int size { get { return queue.size; } }
+    
     public bool allow_duplicates { get; set; default = true; }
+    
     public bool requeue_duplicate { get; set; default = false; }
+    
+    private bool _is_paused = false;
+    public bool is_paused {
+        get { return _is_paused; }
+        
+        set {
+            // if no longer paused, wake up any waiting recipients
+            if (_is_paused && !value)
+                spinlock.blind_notify();
+            
+            _is_paused = value;
+        }
+    }
     
     private Gee.Queue<G> queue;
     private Nonblocking.Spinlock spinlock = new Nonblocking.Spinlock();
@@ -31,7 +46,8 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
         if (!queue.offer(msg))
             return false;
         
-        spinlock.blind_notify();
+        if (!is_paused)
+            spinlock.blind_notify();
         
         return true;
     }
@@ -73,7 +89,7 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     
     public async G recv_async(Cancellable? cancellable = null) throws Error {
         for (;;) {
-            if (queue.size > 0)
+            if (queue.size > 0 && !is_paused)
                 return queue.poll();
             
             yield spinlock.wait_async(cancellable);

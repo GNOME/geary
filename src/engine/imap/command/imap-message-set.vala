@@ -228,7 +228,7 @@ public class Geary.Imap.MessageSet : BaseObject {
     }
     
     public string to_string() {
-        return "%s:%s".printf(is_uid ? "UID" : "pos", value);
+        return "%s::%s".printf(is_uid ? "UID" : "pos", value);
     }
 }
 

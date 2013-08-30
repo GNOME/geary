@@ -659,6 +659,7 @@ class ImapConsole : Gtk.Window {
 void main(string[] args) {
     Gtk.init(ref args);
     
+    Geary.Logging.init();
     Geary.Logging.enable_flags(Geary.Logging.Flag.NETWORK);
     Geary.Logging.log_to(stdout);
     

@@ -291,7 +291,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (removed_ids != null && removed_ids.size > 0) {
             // there may be operations pending on the remote queue for these removed emails; notify
             // operations that the email has shuffled off this mortal coil
-            replay_queue.notify_remote_removed_during_normalization(removed_ids);
+            replay_queue.notify_remote_removed_ids(removed_ids);
             
             // notify subscribers about emails that have been removed
             debug("%s: Notifying of %d removed emails since last opened", to_string(), removed_ids.size);
@@ -577,9 +577,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         notify_email_locally_complete(email_ids);
     }
     
-    private void on_remote_appended(int total) {
-        debug("on_remote_appended: total=%d", total);
-        replay_queue.schedule(new ReplayAppend(this, total));
+    private void on_remote_appended(int new_remote_count) {
+        debug("%s on_remote_appended: new_remote_count=%d", to_string(), new_remote_count);
+        
+        // from the new remote total and the old remote total, glean the SequenceNumbers of the
+        // new email(s)
+        Gee.List<Imap.SequenceNumber> positions = new Gee.ArrayList<Imap.SequenceNumber>();
+        for (int pos = remote_count + 1; pos <= new_remote_count; pos++)
+            positions.add(new Imap.SequenceNumber(pos));
+        
+        if (positions.size > 0)
+            replay_queue.schedule_server_notification(new ReplayAppend(this, positions));
     }
     
     // Need to prefetch at least an EmailIdentifier (and duplicate detection fields) to create a
@@ -589,37 +597,35 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     // which is exactly what we want.
     //
     // This MUST only be called from ReplayAppend.
-    internal async void do_replay_appended_messages(int new_remote_count) {
-        debug("do_replay_appended_messages %s: remote_count=%d new_remote_count=%d", to_string(),
-            remote_count, new_remote_count);
+    internal async void do_replay_appended_messages(Gee.List<Imap.SequenceNumber> remote_positions) {
+        StringBuilder positions_builder = new StringBuilder("( ");
+        foreach (Imap.SequenceNumber remote_position in remote_positions)
+            positions_builder.append_printf("%s ", remote_position.to_string());
+        positions_builder.append(")");
         
-        if (new_remote_count == remote_count) {
-            debug("do_replay_appended_messages %s: no messages appended", to_string());
-            
+        debug("%s do_replay_appended_message: remote_count=%d remote_positions=%s", to_string(),
+            remote_count, positions_builder.str);
+        
+        if (remote_positions.size == 0)
             return;
-        }
         
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
-        
         try {
             // If remote doesn't fully open, then don't fire signal, as we'll be unable to
             // normalize the folder
             if (!yield remote_semaphore.wait_for_result_async(null)) {
-                debug("do_replay_appended_messages: remote never opened for %s", to_string());
+                debug("%s do_replay_appended_message: remote never opened", to_string());
                 
                 return;
             }
             
-            // normalize starting at the message *after* the highest position of the local store,
-            // which has now changed
-            Imap.MessageSet msg_set = new Imap.MessageSet.range_by_first_last(
-                new Imap.SequenceNumber(remote_count + 1), new Imap.SequenceNumber(new_remote_count));
+            Imap.MessageSet msg_set = new Imap.MessageSet.sparse(remote_positions.to_array());
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
                 ImapDB.Folder.REQUIRED_FIELDS, null);
             if (list != null && list.size > 0) {
-                debug("do_replay_appended_messages: %d new messages from %s in %s", list.size,
-                    msg_set.to_string(), to_string());
+                debug("%s do_replay_appended_message: %d new messages in %s", to_string(),
+                    list.size, msg_set.to_string());
                 
                 // need to report both if it was created (not known before) and appended (which
                 // could mean created or simply a known email associated with this folder)
@@ -628,30 +634,35 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 foreach (Geary.Email email in created_or_merged.keys) {
                     // true means created
                     if (created_or_merged.get(email)) {
+                        debug("%s do_replay_appended_message: appended email ID %s added",
+                            to_string(), email.id.to_string());
+                        
                         created.add(email.id);
                     } else {
-                        debug("do_replay_appended_messages: appended email ID %s already known in account, now associated with %s...",
-                            email.id.to_string(), to_string());
+                        debug("%s do_replay_appended_message: appended email ID %s associated",
+                            to_string(), email.id.to_string());
                     }
                     
                     appended.add(email.id);
                 }
             } else {
-                debug("do_replay_appended_messages: no new messages in %s in %s", msg_set.to_string(),
-                    to_string());
+                debug("%s do_replay_appended_message: no new messages in %s", to_string(),
+                    msg_set.to_string());
             }
         } catch (Error err) {
-            debug("Unable to normalize local store of newly appended messages to %s: %s",
+            debug("%s do_replay_appended_message: Unable to process: %s",
                 to_string(), err.message);
         }
         
         // save new remote count internally and in local store
-        bool changed = (remote_count != new_remote_count);
-        remote_count = new_remote_count;
+        // NOTE: use remote_positions size, not created/appended, as the former is a true indication
+        // of the count on the server
+        remote_count += remote_positions.size;
         try {
             yield local_folder.update_remote_selected_message_count(remote_count, null);
-        } catch (Error update_err) {
-            debug("Unable to save appended remote count for %s: %s", to_string(), update_err.message);
+        } catch (Error err) {
+            debug("%s do_replay_appended_message: Unable to save appended remote count %d: %s",
+                to_string(), remote_count, err.message);
         }
         
         if (appended.size > 0)
@@ -662,24 +673,32 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             notify_email_discovered(created);
         }
         
-        if (changed)
-            notify_email_count_changed(remote_count, CountChangeReason.APPENDED);
+        notify_email_count_changed(remote_count, CountChangeReason.APPENDED);
         
-        debug("do_replay_appended_messages: completed for %s", to_string());
+        debug("%s do_replay_appended_message: completed remote_count=%d", to_string(), remote_count);
     }
     
-    private void on_remote_removed(int pos, int total) {
-        debug("on_remote_removed: position=%d total=%d", pos, total);
-        replay_queue.schedule(new ReplayRemoval(this, pos, total));
+    private void on_remote_removed(Imap.SequenceNumber position, int new_remote_count) {
+        debug("%s on_remote_removed: position=%s new_remote_count=%d", to_string(), position.to_string(),
+            new_remote_count);
+        
+        // notify of removal to all pending replay operations
+        replay_queue.notify_remote_removed_position(position);
+        
+        replay_queue.schedule_server_notification(new ReplayRemoval(this, position));
     }
     
     // This MUST only be called from ReplayRemoval.
-    internal async void do_replay_remove_message(int remote_position, int new_remote_count) {
-        debug("do_replay_remove_message: remote_position=%d remote_count=%d new_remote_count=%d",
-            remote_position, remote_count, new_remote_count);
+    internal async void do_replay_removed_message(Imap.SequenceNumber remote_position) {
+        debug("%s do_replay_removed_message: remote_position=%d remote_count=%d",
+            to_string(), remote_position.value, remote_count);
         
-        assert(remote_position >= 1);
-        assert(new_remote_count >= 0);
+        if (!remote_position.is_valid()) {
+            debug("%s do_replay_removed_message: ignoring, invalid remote position or count",
+                to_string());
+            
+            return;
+        }
         
         int local_count = -1;
         int local_position = -1;
@@ -688,39 +707,44 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         try {
             // need total count, including those marked for removal, to accurately calculate position
             // from server's point of view, not client's
-            local_count = yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE,
-                null);
-            local_position = remote_position - (remote_count - local_count);
+            local_count = yield local_folder.get_email_count_async(
+                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
+            local_position = remote_position.value - (remote_count - local_count);
             
             // zero or negative means the message exists beyond the local vector's range, so
             // nothing to do there
             if (local_position > 0) {
-                debug("do_replay_remove_message: local_count=%d local_position=%d", local_count, local_position);
+                debug("%s do_replay_removed_message: local_count=%d local_position=%d", to_string(),
+                    local_count, local_position);
                 
                 owned_id = yield local_folder.get_id_at_async(local_position, null);
             } else {
-                debug("do_replay_remove_message: message not stored locally (local_count=%d local_position=%d)",
-                    local_count, local_position);
+                debug("%s do_replay_removed_message: message not stored locally (local_count=%d local_position=%d)",
+                    to_string(), local_count, local_position);
             }
         } catch (Error err) {
-            debug("Unable to determine ID of removed message #%d from %s: %s", remote_position,
-                to_string(), err.message);
+            debug("%s do_replay_removed_message: unable to determine ID of removed message %s: %s",
+                to_string(), remote_position.to_string(), err.message);
         }
         
         bool marked = false;
         if (owned_id != null) {
-            debug("do_replay_remove_message: removing from local store Email ID %s", owned_id.to_string());
+            debug("%s do_replay_removed_message: detaching from local store Email ID %s", to_string(),
+                owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
                 yield local_folder.detach_single_email_async(owned_id, out marked, null);
-            } catch (Error err2) {
-                debug("Unable to remove message #%d from %s: %s", remote_position, to_string(),
-                    err2.message);
+            } catch (Error err) {
+                debug("%s do_replay_removed_message: unable to remove message #%s: %s", to_string(),
+                    remote_position.to_string(), err.message);
             }
+            
+            // Notify queued replay operations that the email has been removed (by EmailIdentifier)
+            replay_queue.notify_remote_removed_ids(new Collection.SingleItem<ImapDB.EmailIdentifier>(owned_id));
         } else {
-            debug("do_replay_remove_message: remote_position=%d unknown in local store "
-                + "(remote_count=%d new_remote_count=%d local_position=%d local_count=%d)",
-                remote_position, remote_count, new_remote_count, local_position, local_count);
+            debug("%s do_replay_removed_message: remote_position=%d unknown in local store "
+                + "(remote_count=%d local_position=%d local_count=%d)",
+                to_string(), remote_position.value, remote_count, local_position, local_count);
         }
         
         // for debugging
@@ -728,29 +752,36 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         try {
             new_local_count = yield local_folder.get_email_count_async(
                 ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
-        } catch (Error new_count_err) {
-            debug("Error fetching new local count for %s: %s", to_string(), new_count_err.message);
+        } catch (Error err) {
+            debug("%s do_replay_removed_message: error fetching new local count: %s", to_string(),
+                err.message);
         }
         
+        // something to note at this point: the ExpungeEmail operation marks messages as removed,
+        // then signals they're removed and reports an adjusted count in its replay_local_async().
+        // remote_count is *not* updated, which is why it's safe to do that here without worry.
+        // similarly, signals are only fired here if marked, so the same EmailIdentifier isn't
+        // reported twice
+        
         // save new remote count internally and in local store
-        bool changed = (remote_count != new_remote_count);
-        remote_count = new_remote_count;
+        remote_count = Numeric.int_floor(remote_count - 1, 0);
         try {
             yield local_folder.update_remote_selected_message_count(remote_count, null);
-        } catch (Error update_err) {
-            debug("Unable to save removed remote count for %s: %s", to_string(), update_err.message);
+        } catch (Error err) {
+            debug("%s do_replay_removed_message: unable to save removed remote count: %s", to_string(),
+                err.message);
         }
         
         // notify of change
         if (!marked && owned_id != null)
             notify_email_removed(new Collection.SingleItem<Geary.EmailIdentifier>(owned_id));
         
-        if (!marked && changed)
+        if (!marked)
             notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
         
-        debug("do_replay_remove_message: completed for %s "
+        debug("%s do_replay_remove_message: completed "
             + "(remote_count=%d local_count=%d starting local_count=%d remote_position=%d local_position=%d marked=%s)",
-            to_string(), remote_count, new_local_count, local_count, remote_position, local_position,
+            to_string(), remote_count, new_local_count, local_count, remote_position.value, local_position,
             marked.to_string());
     }
     

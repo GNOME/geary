@@ -9,10 +9,6 @@ private abstract class Geary.ImapEngine.ReceiveReplayOperation : Geary.ImapEngin
         base (name, ReplayOperation.Scope.LOCAL_ONLY);
     }
     
-    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        debug("Warning: ReceiveReplayOperation.notify_remote_removed_during_normalization() called");
-    }
-    
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         debug("Warning: ReceiveReplayOperation.replay_remote_async() called");
         

@@ -6,25 +6,32 @@
 
 private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReceiveReplayOperation {
     public GenericFolder owner;
-    public int position;
-    public int new_remote_count;
+    public Imap.SequenceNumber position;
     
-    public ReplayRemoval(GenericFolder owner, int position, int new_remote_count) {
+    public ReplayRemoval(GenericFolder owner, Imap.SequenceNumber position) {
         base ("Removal");
         
         this.owner = owner;
         this.position = position;
-        this.new_remote_count = new_remote_count;
+    }
+    
+    public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
+        // although using positional addressing, don't update state; EXPUNGEs that happen after
+        // other EXPUNGEs have no affect on those ahead of it
+    }
+    
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // this operation deals only in positional addressing
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        yield owner.do_replay_remove_message(position, new_remote_count);
+        yield owner.do_replay_removed_message(position);
         
         return ReplayOperation.Status.COMPLETED;
     }
     
     public override string describe_state() {
-        return "position=%d new_remote_count=%d".printf(position, new_remote_count);
+        return "position=%s".printf(position.to_string());
     }
 }
 

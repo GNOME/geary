@@ -6,23 +6,44 @@
 
 private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOperation {
     public GenericFolder owner;
-    public int new_remote_count;
+    public Gee.List<Imap.SequenceNumber> positions;
     
-    public ReplayAppend(GenericFolder owner, int new_remote_count) {
+    public ReplayAppend(GenericFolder owner, Gee.List<Imap.SequenceNumber> positions) {
         base ("Append");
         
         this.owner = owner;
-        this.new_remote_count = new_remote_count;
+        this.positions = positions;
+    }
+    
+    public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
+        Gee.List<Imap.SequenceNumber> new_positions = new Gee.ArrayList<Imap.SequenceNumber>();
+        foreach (Imap.SequenceNumber? position in positions) {
+            Imap.SequenceNumber old_position = position;
+            
+            // adjust depending on relation to removed message
+            position = position.shift_for_removed(removed);
+            if (position != null)
+                new_positions.add(position);
+            
+            debug("%s: ReplayAppend remote unsolicited remove: %s -> %s", owner.to_string(),
+                old_position.to_string(), (position != null) ? position.to_string() : "(null)");
+        }
+        
+        positions = new_positions;
+    }
+    
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
     
     public override async ReplayOperation.Status replay_local_async() {
-        yield owner.do_replay_appended_messages(new_remote_count);
+        if (positions.size > 0)
+            yield owner.do_replay_appended_messages(positions);
         
         return ReplayOperation.Status.COMPLETED;
     }
     
     public override string describe_state() {
-        return "new_remote_count=%d".printf(new_remote_count);
+        return "positions.size=%d".printf(positions.size);
     }
 }
 

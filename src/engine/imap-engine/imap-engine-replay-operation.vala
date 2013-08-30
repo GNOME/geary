@@ -7,15 +7,13 @@
 private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     /**
      * Scope specifies what type of operations (remote, local, or both) are needed by this operation.
+     *
      * What methods are made on the operation depends on the returned Scope:
      *
      * LOCAL_AND_REMOTE: replay_local_async() is called.  If that method returns COMPLETED,
      *   no further calls are made.  If it returns CONTINUE, replay_remote_async() is called.
-     *   query_local_writebehind_operation() may be called before replay_remote_async().
      * LOCAL_ONLY: replay_local_async() only.  replay_remote_async() will never be called.
-     *   query_local_writebehind_operation() will never be called.
      * REMOTE_ONLY: replay_remote_async() only.  replay_local_async() will never be called.
-     *   query_local_writebehind_operation() may be called before replay_remote_async().
      *
      * See the various replay methods for how backout_local_async() may be called depending on
      * this field and those methods' return values.
@@ -50,6 +48,37 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     }
     
     /**
+     * Notify the operation that a message has been removed by position (SequenceNumber).
+     *
+     * This notification can be invoked any time before replay_remote_async() is called.
+     *
+     * Since the unsolicited server notification is positionally addressed, this only applies to
+     * operations that use positional addressing.  Use Imap.SequenceNumber.shift_for_removed() for
+     * foolproof adjustment.
+     *
+     * This won't be called while replay_local_async() or replay_remote_async() are executing.
+     */
+    public abstract void notify_remote_removed_position(Imap.SequenceNumber removed);
+    
+    /**
+     * Notify the operation that a message has been removed by position (SequenceNumber).
+     *
+     * This method is called only when the ReplayOperation is blocked waiting to execute and it's
+     * discovered that the supplied email(s) are no longer on the server.
+     *
+     * This happens during folder normalization (initial synchronization with the server
+     * when a folder is opened) where ReplayOperations are allowed to execute locally and enqueue
+     * for remote operation in preparation for the folder to fully open.
+     *
+     * The ReplayOperation should remove any reference to the emails so not to attempt operation
+     * on the server.  If it's discovered in replay_remote_async() that there are no more operations
+     * to perform, it should simply exit without contacting the server.
+     *
+     * This won't be called while replay_local_async() or replay_remote_async() are executing.
+     */
+    public abstract void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids);
+    
+    /**
      * See Scope for conditions where this method will be called.
      *
      * Returns:
@@ -60,21 +89,6 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
      *      well.  This is treated as COMPLETED if get_scope() returns LOCAL_ONLY.
      */
     public abstract async Status replay_local_async() throws Error;
-    
-    /**
-     * See Scope for conditions where this method will be called.
-     *
-     * This method is called only when the ReplayOperation is blocked waiting to execute a remote
-     * command and its discovered that the supplied email(s) are no longer on the server.
-     * This happens during folder normalization (initial synchronization with the server
-     * when a folder is opened) where ReplayOperations are allowed to execute locally and enqueue
-     * for remote operation in preparation for the folder to fully open.
-     *
-     * The ReplayOperation should remove any reference to the emails so not to attempt operation
-     * on the server.  If it's discovered in replay_remote_async() that there are no more operations
-     * to perform, it should simply exit without contacting the server.
-     */
-    public abstract void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids);
     
     /**
      * See Scope for conditions where this method will be called.

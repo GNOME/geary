@@ -12,5 +12,9 @@ private abstract class Geary.ImapEngine.SendReplayOperation : Geary.ImapEngine.R
     public SendReplayOperation.only_remote(string name) {
         base (name, ReplayOperation.Scope.REMOTE_ONLY);
     }
+    
+    public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
+        // we've worked very hard to keep positional addressing out of the SendReplayOperations
+    }
 }
 

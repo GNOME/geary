@@ -77,7 +77,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         remote_removed = ids.contains(id);
     }
     

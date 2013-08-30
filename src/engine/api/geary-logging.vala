@@ -37,6 +37,7 @@ public enum Flag {
 private int init_count = 0;
 private Flag logging_flags = Flag.NONE;
 private unowned FileStream? stream = null;
+private Timer? entry_timer = null;
 
 /**
  * Must be called before ''any'' call to the Logging namespace.
@@ -47,6 +48,8 @@ private unowned FileStream? stream = null;
 public void init() {
     if (init_count++ != 0)
         return;
+    
+    entry_timer = new Timer();
     
     log_to(null);
 }
@@ -142,7 +145,10 @@ private void on_log(string prefix, LogLevelFlags log_levels, string message) {
         return;
     
     Time tm = Time.local(time_t());
-    stream.printf("%s %02d:%02d:%02d %s\n", prefix, tm.hour, tm.minute, tm.second, message);
+    stream.printf("%s %02d:%02d:%02d %lf %s\n", prefix, tm.hour, tm.minute, tm.second,
+        entry_timer.elapsed(), message);
+    
+    entry_timer.start();
 }
 
 }

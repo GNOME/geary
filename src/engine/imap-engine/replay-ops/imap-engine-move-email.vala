@@ -47,7 +47,7 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // don't bother updating on server or backing out locally
         moved_ids.remove_all(ids);
     }

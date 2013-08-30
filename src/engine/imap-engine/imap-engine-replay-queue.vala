@@ -5,17 +5,24 @@
  */
 
 private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
+    // this value is high because delays between back-to-back unsolicited notifications have been
+    // see as high as 250ms
+    private const int NOTIFICATION_QUEUE_WAIT_MSEC = 500;
+    
     private class ReplayClose : ReplayOperation {
         public ReplayClose() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
             base ("Close", ReplayOperation.Scope.LOCAL_AND_REMOTE);
         }
         
-        public override async ReplayOperation.Status replay_local_async() throws Error {
-            return Status.CONTINUE;
+        public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
         }
         
-        public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        }
+        
+        public override async ReplayOperation.Status replay_local_async() throws Error {
+            return Status.CONTINUE;
         }
         
         public override async ReplayOperation.Status replay_remote_async() throws Error {
@@ -42,6 +49,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private weak GenericFolder owner;
     private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
     private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
+    private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
+    private Scheduler.Scheduled? notification_timer = null;
     
     private bool is_closed = false;
     
@@ -118,12 +127,17 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         do_replay_remote_async.begin();
     }
     
+    ~ReplayQueue() {
+        if (notification_timer != null)
+            notification_timer.cancel();
+    }
+    
     /**
      * Returns false if the operation was not schedule (queue already closed).
      */
     public bool schedule(ReplayOperation op) {
         if (is_closed) {
-            debug("Unable to scheduled replay operation %s on %s: replay queue closed", op.to_string(),
+            debug("Unable to schedule replay operation %s on %s: replay queue closed", op.to_string(),
                 to_string());
             
             return false;
@@ -141,18 +155,94 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     }
     
     /**
-     * This is used by the folder normalization routine to handle a situation where replay
-     * operations have performed local work (and notified the client of changes) and are enqueued
-     * waiting to perform the same operation on the server.  In normalization, the server reports
-     * changes that need to be synchronized on the client.  If this change is written before the
-     * enqueued replay operations execute, the potential exists to be unsynchronized.
+     * Schedules a ReplayOperation created due to a server notification.
      *
-     * This call gives all enqueued remote replay operations a chance to update their own state.
-     * See ReplayOperation.notify_remote_removed_during_normalization() for more information.
+     * All unsolicited server data uses positional addressing, so it's possible for an EXISTS
+     * (append) to arrive followed by one or more EXPUNGEs (removes), meaning that the first
+     * append's position has shifted downward.  Without a pause, Geary will immediately issue a
+     * FETCH on that position, which no longer exists on the server.
+     *
+     * There is no signal in IMAP for the server to say "no more notifications arriving", hence a
+     * timer must be used.
+     *
+     * Server notifications can arrive with significant time lapses between then (i.e.
+     * up to 250ms) and back-to-back EXPUNGEs and EXISTs have serious affects on positional
+     * addressing, ReplayQueue will store them for a period of time without adding them to the
+     * queues.  When they stop arriving, it will enqueue them in order for processing.
+     *
+     * In particular, notify_remote_removed_position() should be called ''before'' adding the
+     * ReplayRemoval operation, otherwise its own notification method will be called (making it
+     * look like it was removed twice).
+     *
+     * Returns false if the operation was not schedule (queue already closed).
      */
-    public void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        foreach (ReplayOperation replay_op in remote_queue.get_all())
-            replay_op.notify_remote_removed_during_normalization(ids);
+    public bool schedule_server_notification(ReplayOperation op) {
+        if (is_closed) {
+            debug("Unable to schedule notification operation %s on %s: replay queue closed", op.to_string(),
+                to_string());
+            
+            return false;
+        }
+        
+        notification_queue.add(op);
+        
+        // reschedule timeout every time new operation is added
+        if (notification_timer != null)
+            notification_timer.cancel();
+        
+        notification_timer = Scheduler.after_msec(NOTIFICATION_QUEUE_WAIT_MSEC, on_notification_timeout);
+        
+        return true;
+    }
+    
+    private bool on_notification_timeout() {
+        debug("%s: Scheduling %d held server notification operations", owner.to_string(),
+            notification_queue.size);
+        
+        // no new operations in timeout span, add them all to the "real" queue
+        foreach (ReplayOperation notification_op in notification_queue)
+            schedule(notification_op);
+        
+        notification_queue.clear();
+        
+        return false;
+    }
+    
+    /**
+     * This call gives all enqueued remote replay operations a chance to update their own state
+     * due to a message being removed due to an unsolicited notification from the server)
+     *
+     * @see ReplayOperation.notify_remote_removed_position
+     */
+    public void notify_remote_removed_position(Imap.SequenceNumber pos) {
+        notify_remote_removed_position_collection(notification_queue, pos);
+        notify_remote_removed_position_collection(local_queue.get_all(), pos);
+        notify_remote_removed_position_collection(remote_queue.get_all(), pos);
+    }
+    
+    private void notify_remote_removed_position_collection(Gee.Collection<ReplayOperation> replay_ops,
+        Imap.SequenceNumber pos) {
+        foreach (ReplayOperation replay_op in replay_ops)
+            replay_op.notify_remote_removed_position(pos);
+    }
+    
+    /**
+     * This call gives all enqueued remote replay operations a chance to update their own state
+     * due to a message being removed (either during normalization or an unsolicited notification
+     * from the server)
+     *
+     * @see ReplayOperation.notify_remote_removed_ids
+     */
+    public void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        notify_remote_removed_ids_collection(notification_queue, ids);
+        notify_remote_removed_ids_collection(local_queue.get_all(), ids);
+        notify_remote_removed_ids_collection(remote_queue.get_all(), ids);
+    }
+    
+    private void notify_remote_removed_ids_collection(Gee.Collection<ReplayOperation> replay_ops,
+        Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        foreach (ReplayOperation replay_op in replay_ops)
+            replay_op.notify_remote_removed_ids(ids);
     }
     
     public async void close_async(Cancellable? cancellable = null) throws Error {
@@ -160,6 +250,12 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             return;
         
         closing();
+        
+        // cancel timeout and flush what's available
+        if (notification_timer != null)
+            notification_timer.cancel();
+        
+        on_notification_timeout();
         
         // flush a ReplayClose operation down the pipe so all enqueued operations complete
         ReplayClose? close_op = new ReplayClose();

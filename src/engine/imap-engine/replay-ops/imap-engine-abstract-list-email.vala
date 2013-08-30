@@ -97,7 +97,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         return unfulfilled.size;
     }
     
-    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // remove email already picked up from local store ... for email reported via the
         // callback, too late
         if (accumulator != null) {

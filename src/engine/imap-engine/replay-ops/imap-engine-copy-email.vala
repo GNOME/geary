@@ -30,7 +30,7 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
-    public override void notify_remote_removed_during_normalization(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         to_copy.remove_all(ids);
     }
     

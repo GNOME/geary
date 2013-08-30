@@ -36,7 +36,7 @@ private class Geary.Imap.Folder : BaseObject {
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-7.4.1]]
      */
-    public signal void expunge(int position);
+    public signal void expunge(SequenceNumber position);
     
     /**
      * A (potentially unsolicited) response from the server.
@@ -53,7 +53,7 @@ private class Geary.Imap.Folder : BaseObject {
     /**
      * Fabricated from the IMAP signals and state obtained at open_async().
      */
-    public signal void removed(int pos, int total);
+    public signal void removed(SequenceNumber pos, int total);
     
     /**
      * Note that close_async() still needs to be called after this signal is fired.
@@ -170,8 +170,8 @@ private class Geary.Imap.Folder : BaseObject {
         if (!is_open)
             return;
         
-        expunge(pos.value);
-        removed(pos.value, properties.select_examine_messages);
+        expunge(pos);
+        removed(pos, properties.select_examine_messages);
     }
     
     private void on_fetch(FetchedData fetched_data) {
