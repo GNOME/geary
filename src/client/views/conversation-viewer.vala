@@ -1289,7 +1289,29 @@ public class ConversationViewer : Gtk.Box {
         mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(message.id), flags, null);
         mark_manual_read(message.id);
     }
-
+    
+    private void on_mark_unread_from_here(Geary.Email message) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+        
+        Gee.Iterator<Geary.Email>? iter = messages.iterator_at(message);
+        if (iter == null) {
+            warning("Email not found in message list");
+            
+            return;
+        }
+        
+        // Build a list of IDs to mark.
+        Gee.ArrayList<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>();
+        to_mark.add(message.id);
+        while (iter.next())
+            to_mark.add(iter.get().id);
+        
+        mark_messages(to_mark, flags, null);
+        foreach(Geary.EmailIdentifier id in to_mark)
+            mark_manual_read(id);
+    }
+    
     // Use this when an email has been marked read through manual (user) intervention
     public void mark_manual_read(Geary.EmailIdentifier id) {
         if (email_to_element.has_key(id)) {
@@ -1397,6 +1419,13 @@ public class ConversationViewer : Gtk.Box {
             Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
             mark_unread_item.activate.connect(() => on_mark_unread_message(email));
             menu.append(mark_unread_item);
+            
+            if (messages.size > 1 && messages.last() != email) {
+                Gtk.MenuItem mark_unread_from_here_item = new Gtk.MenuItem.with_mnemonic(
+                    _("Mark Unread From _Here"));
+                mark_unread_from_here_item.activate.connect(() => on_mark_unread_from_here(email));
+                menu.append(mark_unread_from_here_item);
+            }
         }
         
         // Print a message.
