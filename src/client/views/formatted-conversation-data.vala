@@ -262,13 +262,13 @@ public class FormattedConversationData : Geary.BaseObject {
     }
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
-        Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
-        render_internal(widget, cell_area, ctx, (flags & Gtk.CellRendererState.SELECTED) != 0);
+        Gdk.Rectangle cell_area, Gtk.CellRendererState flags, bool hover_select) {
+        render_internal(widget, cell_area, ctx, flags, false, hover_select);
     }
     
     // Call this on style changes.
     public void calculate_sizes(Gtk.Widget widget) {
-        render_internal(widget, null, null, false, true);
+        render_internal(widget, null, null, 0, true);
     }
     
     // Must call calculate_sizes() first.
@@ -284,9 +284,12 @@ public class FormattedConversationData : Geary.BaseObject {
     
     // Can be used for rendering or calculating height.
     private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area = null, 
-        Cairo.Context? ctx = null, bool selected, bool recalc_dims = false) {
-        
+        Cairo.Context? ctx = null, Gtk.CellRendererState flags, bool recalc_dims = false,
+        bool hover_select = false) {
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
+        
+        bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
+        bool hover = (flags & Gtk.CellRendererState.PRELIT) != 0 || (selected && hover_select);
         
         // Date field.
         Pango.Rectangle ink_rect = render_date(widget, cell_area, ctx, y, selected);
@@ -325,14 +328,14 @@ public class FormattedConversationData : Geary.BaseObject {
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
         }
         
-       // Draw separator line.
-       if (ctx != null && cell_area != null) {
-           ctx.set_line_width(1.0);
-           GtkUtil.set_source_color_from_string(ctx, CountBadge.UNREAD_BG_COLOR);
-           ctx.move_to(cell_area.x - 1, cell_area.y + cell_area.height);
-           ctx.line_to(cell_area.x + cell_area.width + 1, cell_area.y + cell_area.height);
-           ctx.stroke();
-       }
+        // Draw separator line.
+        if (ctx != null && cell_area != null) {
+            ctx.set_line_width(1.0);
+            GtkUtil.set_source_color_from_string(ctx, CountBadge.UNREAD_BG_COLOR);
+            ctx.move_to(cell_area.x - 1, cell_area.y + cell_area.height);
+            ctx.line_to(cell_area.x + cell_area.width + 1, cell_area.y + cell_area.height);
+            ctx.stroke();
+        }
         
         if (recalc_dims) {
             FormattedConversationData.preview_height = preview_height;
@@ -342,17 +345,21 @@ public class FormattedConversationData : Geary.BaseObject {
                 cell_area.y + LINE_SPACING * 2 : cell_area.y + LINE_SPACING;
             
             // Unread indicator.
-            Gdk.Pixbuf read_icon = is_unread ? IconFactory.instance.unread_colored
-                : IconFactory.instance.read_colored;
-            Gdk.cairo_set_source_pixbuf(ctx, read_icon, cell_area.x + LINE_SPACING, unread_y);
-            ctx.paint();
+            if (is_unread || hover) {
+                Gdk.Pixbuf read_icon = is_unread ? IconFactory.instance.unread_colored
+                    : IconFactory.instance.read_colored;
+                Gdk.cairo_set_source_pixbuf(ctx, read_icon, cell_area.x + LINE_SPACING, unread_y);
+                ctx.paint();
+            }
             
             // Starred indicator.
-            Gdk.Pixbuf starred_icon = is_flagged ? IconFactory.instance.starred_colored
-                : IconFactory.instance.unstarred_colored;
-            Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, cell_area.y +
-                (cell_area.height / 2) + LINE_SPACING);
-            ctx.paint();
+            if (is_flagged || hover) {
+                Gdk.Pixbuf starred_icon = is_flagged ? IconFactory.instance.starred_colored
+                    : IconFactory.instance.unstarred_colored;
+                Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, cell_area.y +
+                    (cell_area.height / 2) + LINE_SPACING);
+                ctx.paint();
+            }
         }
     }
     

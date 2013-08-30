@@ -6,6 +6,7 @@
 
 public class ConversationListCellRenderer : Gtk.CellRenderer {
     private static FormattedConversationData? example_data = null;
+    private static bool hover_selected = false;
     
     // Mail message data.
     public FormattedConversationData data { get; set; }
@@ -24,7 +25,7 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
     public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
         Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
         if (data != null)
-            data.render(ctx, widget, background_area, cell_area, flags);
+            data.render(ctx, widget, background_area, cell_area, flags, hover_selected);
     }
     
     // Recalculates size when the style changed.
@@ -35,6 +36,11 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
         }
         
         example_data.calculate_sizes(widget);
+    }
+    
+    // Shows hover effect on all selected cells.
+    public static void set_hover_selected(bool hover) {
+        hover_selected = hover;
     }
 }
 

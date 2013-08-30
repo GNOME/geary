@@ -69,6 +69,10 @@ public class ConversationListView : Gtk.TreeView {
         GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
+        
+        // Watch for mouse events.
+        motion_notify_event.connect(on_motion_notify_event);
+        leave_notify_event.connect(on_leave_notify_event);
     }
     
     private void on_conversation_monitor_changed() {
@@ -398,6 +402,32 @@ public class ConversationListView : Gtk.TreeView {
         Geary.App.Conversation? c = conversation_list_store.get_conversation_at_path(path);
         if (c != null)
             conversation_activated(c);
+    }
+    
+    // Enable/disable hover effect on all selected cells.
+    private void set_hover_selected(bool hover) {
+        ConversationListCellRenderer.set_hover_selected(hover);
+        queue_draw();
+    }
+    
+    private bool on_motion_notify_event(Gdk.EventMotion event) {
+        if (get_selected_path() == null)
+            return false;
+        
+        Gtk.TreePath? path = null;
+        int cell_x, cell_y;
+        get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
+        
+        set_hover_selected(path != null && get_selection().path_is_selected(path));
+        
+        return false;
+    }
+    
+    private bool on_leave_notify_event() {
+        if (get_selected_path() != null)
+            set_hover_selected(false);
+        
+        return false;
     }
 }
 
