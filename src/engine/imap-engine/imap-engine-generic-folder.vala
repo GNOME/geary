@@ -157,12 +157,26 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         assert(local_earliest_id.has_uid());
         assert(local_latest_id.has_uid());
         
+        // if any messages are still marked for removal from last time, that means the EXPUNGE
+        // never arrived from the server, in which case the folder is "dirty" and needs a full
+        // normalization
+        int remove_markers = yield local_folder.get_marked_for_remove_count_async(cancellable);
+        bool is_dirty = (remove_markers != 0);
+        
+        if (is_dirty)
+            debug("%s: %d remove markers found, folder is dirty", to_string(), remove_markers);
+        
         // if UIDNEXT has changed, that indicates messages have been appended (and possibly removed)
         int64 uidnext_diff = remote_properties.uid_next.value - local_properties.uid_next.value;
         
+        int local_message_count = (local_properties.select_examine_messages >= 0)
+            ? local_properties.select_examine_messages : 0;
+        int remote_message_count = (remote_properties.select_examine_messages >= 0)
+            ? remote_properties.select_examine_messages : 0;
+        
         // if UIDNEXT is the same as last time AND the total count of email is the same, then
         // nothing has been added or removed
-        if (uidnext_diff == 0 && local_properties.email_total == remote_properties.email_total) {
+        if (!is_dirty && uidnext_diff == 0 && local_message_count == remote_message_count) {
             debug("%s: No messages added/removed since last opened, normalization completed", to_string());
             
             return true;
@@ -180,7 +194,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // (Also, this cannot fail; if this situation exists, then it cannot by definition indicate another
         // situation, esp. messages being removed.)
         Imap.UID first_uid;
-        if (uidnext_diff == (remote_properties.select_examine_messages - local_properties.select_examine_messages)) {
+        if (!is_dirty && uidnext_diff == (remote_message_count - local_message_count)) {
             first_uid = local_latest_id.uid.next();
             
             debug("%s: Messages only appended (local/remote UIDNEXT=%s/%s total=%d/%d diff=%s), gathering mail UIDs %s:%s",
@@ -199,7 +213,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // get all the UIDs in said range from the local store, sorted; convert to non-null
         // for ease of use later
         Gee.SortedSet<Imap.UID>? local_uids = yield local_folder.list_uids_by_range_async(
-            first_uid, last_uid, cancellable);
+            first_uid, last_uid, true, cancellable);
         if (local_uids == null)
             local_uids = new Gee.TreeSet<Imap.UID>();
         
@@ -232,6 +246,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             else
                 discovered_uids.add(remote_uid);
         }
+        
+        debug("%s: changes since last seen: removed=%d appended=%d discovered=%d", to_string(),
+            removed_uids.size, appended_uids.size, discovered_uids.size);
         
         // fetch from the server the local store's required flags for all appended/inserted messages
         // (which is simply equal to all remaining remote UIDs)
@@ -277,11 +294,19 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // Convert removed UIDs into EmailIdentifiers and detach immediately
         Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
         if (removed_uids.size > 0) {
-            removed_ids = yield local_folder.get_ids_async(removed_uids, cancellable);
-            yield local_folder.detach_multiple_emails_async(removed_ids, cancellable);
+            removed_ids = yield local_folder.get_ids_async(removed_uids,
+                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+            if (removed_ids != null && removed_ids.size > 0) {
+                yield local_folder.detach_multiple_emails_async(removed_ids, cancellable);
+            }
         }
         
         check_open("normalize_folders (removed emails)");
+        
+        // remove any extant remove markers, as everything is accounted for now
+        yield local_folder.clear_remove_markers_async(cancellable);
+        
+        check_open("normalize_folders (clear remove markers)");
         
         //
         // now normalized
@@ -355,9 +380,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // start the replay queue
         replay_queue = new ReplayQueue(this);
-        
-        // reset state in the local (database) folder
-        local_folder.reset();
         
         // do NOT open the remote side here; wait for the ReplayQueue to require a remote connection
         // or wait_for_open_async() to be called ... this allows for fast local-only operations
@@ -538,9 +560,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // while opening and remote_folder was yet unassigned ... also, need to call this every
         // time, even if remote was not fully opened, as some callers rely on order of signals
         notify_closed(remote_reason);
-        
-        // close local store (reset its state)
-        local_folder.reset();
         
         // see above note for why this must be called every time
         notify_closed(local_reason);
@@ -921,7 +940,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         check_ids("list_local_email_fields_async", ids);
         
         return yield local_folder.list_email_fields_by_id_async(
-            (Gee.Collection<Geary.ImapDB.EmailIdentifier>) ids, cancellable);
+            (Gee.Collection<Geary.ImapDB.EmailIdentifier>) ids, ImapDB.Folder.ListFlags.NONE, cancellable);
     }
     
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,

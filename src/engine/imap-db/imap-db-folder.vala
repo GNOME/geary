@@ -59,11 +59,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         public int64 message_id;
         public Imap.UID uid;
         public ImapDB.EmailIdentifier email_id;
+        public bool marked_removed;
         
-        public LocationIdentifier(int64 message_id, Imap.UID uid) {
+        public LocationIdentifier(int64 message_id, Imap.UID uid, bool marked_removed) {
             this.message_id = message_id;
             this.uid = uid;
-            this.email_id = new ImapDB.EmailIdentifier(message_id, uid);
+            email_id = new ImapDB.EmailIdentifier(message_id, uid);
+            this.marked_removed = marked_removed;
         }
     }
     
@@ -75,7 +77,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private string account_owner_email;
     private int64 folder_id;
     private Geary.Imap.FolderProperties properties;
-    private Gee.HashSet<Imap.UID> marked_removed = new Gee.HashSet<Imap.UID>();
     
     /**
      * Fired after one or more emails have been fetched with all Fields, and
@@ -111,49 +112,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     
     internal void set_properties(Geary.Imap.FolderProperties properties) {
         this.properties = properties;
-    }
-    
-    // Should be called whenever the main Geary.Folder interface is opened or closed
-    public void reset(){
-        lock (marked_removed) {
-            marked_removed.clear();
-        }
-        
-        // TODO: Wait for all I/O to complete before exiting
-    }
-    
-    // Returns true if the EmailIdentifier was marked before being removed
-    private bool unmark_removed(Imap.UID uid) {
-        lock (marked_removed) {
-            return marked_removed.remove(uid);
-        }
-    }
-    
-    private void mark_unmark_removed(Gee.Collection<Imap.UID> uids, bool mark) {
-        lock (marked_removed) {
-            if (mark)
-                marked_removed.add_all(uids);
-            else
-                marked_removed.remove_all(uids);
-        }
-    }
-    
-    private void clear_marked_removed() {
-        lock (marked_removed) {
-            marked_removed.clear();
-        }
-    }
-    
-    private bool is_marked_removed(Imap.UID uid) {
-        lock (marked_removed) {
-            return marked_removed.contains(uid);
-        }
-    }
-    
-    private int get_marked_removed_count() {
-        lock (marked_removed) {
-            return marked_removed.size;
-        }
     }
     
     public async int get_email_count_async(ListFlags flags, Cancellable? cancellable) throws Error {
@@ -275,8 +233,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // convert initial_id into UID to start walking the list
             Imap.UID? start_uid = null;
             if (initial_id != null) {
+                // use INCLUDE_MARKED_FOR_REMOVE because this is a ranged list ...
+                // do_results_to_location() will deal with removing EmailIdentifiers if necessary
                 LocationIdentifier? location = do_get_location_for_id(cx, initial_id,
-                    ListFlags.NONE, cancellable);
+                    ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
                 if (location == null)
                     return Db.TransactionOutcome.DONE;
                 
@@ -296,7 +256,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
             
             StringBuilder sql = new StringBuilder("""
-                SELECT MessageLocationTable.message_id, ordering
+                SELECT MessageLocationTable.message_id, ordering, remove_marker
                 FROM MessageLocationTable
             """);
             if (only_incomplete) {
@@ -348,15 +308,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // database ... first, gather locations of all emails in database
         Gee.List<LocationIdentifier>? locations = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            LocationIdentifier? start_location = do_get_location_for_id(cx, start_id, ListFlags.NONE,
-                cancellable);
+            // use INCLUDE_MARKED_FOR_REMOVE because this is a ranged list ...
+            // do_results_to_location() will deal with removing EmailIdentifiers if necessary
+            LocationIdentifier? start_location = do_get_location_for_id(cx, start_id,
+                ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             if (start_location == null)
                 return Db.TransactionOutcome.DONE;
             
             Imap.UID start_uid = start_location.uid;
             
-            LocationIdentifier? end_location = do_get_location_for_id(cx, end_id, ListFlags.NONE,
-                cancellable);
+            // see note above about INCLUDE_MARKED_FOR_REMOVE
+            LocationIdentifier? end_location = do_get_location_for_id(cx, end_id,
+                ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             if (end_location == null)
                 return Db.TransactionOutcome.DONE;
             
@@ -371,7 +334,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 return Db.TransactionOutcome.DONE;
             
             Db.Statement stmt = cx.prepare("""
-                SELECT message_id, ordering
+                SELECT message_id, ordering, remove_marker
                 FROM MessageLocationTable
                 WHERE folder_id = ? AND ordering >= ? AND ordering <= ?
             """);
@@ -412,7 +375,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.List<LocationIdentifier>? locations = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             StringBuilder sql = new StringBuilder("""
-                SELECT MessageLocationTable.message_id, ordering
+                SELECT MessageLocationTable.message_id, ordering, remove_marker
                 FROM MessageLocationTable
             """);
             
@@ -453,7 +416,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.List<LocationIdentifier> locations = new Gee.ArrayList<LocationIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             StringBuilder sql = new StringBuilder("""
-                SELECT MessageLocationTable.message_id, ordering
+                SELECT MessageLocationTable.message_id, ordering, remove_marker
                 FROM MessageLocationTable
             """);
             
@@ -548,8 +511,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return email;
     }
     
+    // Note that this does INCLUDES messages marked for removal
     public async Gee.SortedSet<Imap.UID>? list_uids_by_range_async(Imap.UID first_uid, Imap.UID last_uid,
-        Cancellable? cancellable) throws Error {
+        bool include_marked_for_removal, Cancellable? cancellable) throws Error {
         // order correctly
         Imap.UID start, end;
         if (first_uid.compare_to(last_uid) < 0) {
@@ -563,7 +527,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.SortedSet<Imap.UID> uids = new Gee.TreeSet<Imap.UID>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare("""
-                SELECT ordering
+                SELECT ordering, remove_marker
                 FROM MessageLocationTable
                 WHERE folder_id = ? AND ordering >= ? AND ordering <= ?
             """);
@@ -573,7 +537,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
-                uids.add(new Imap.UID(result.int64_at(0)));
+                if (include_marked_for_removal || !result.bool_at(1))
+                    uids.add(new Imap.UID(result.int64_at(0)));
+                
                 result.next(cancellable);
             }
             
@@ -645,11 +611,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
     
     // Returns null if the UID is not found in this Folder.
-    public async ImapDB.EmailIdentifier? get_id_async(Imap.UID uid, Cancellable? cancellable)
-        throws Error {
+    public async ImapDB.EmailIdentifier? get_id_async(Imap.UID uid, ListFlags flags,
+        Cancellable? cancellable) throws Error {
         ImapDB.EmailIdentifier? id = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            LocationIdentifier? location = do_get_location_for_uid(cx, uid, ListFlags.NONE,
+            LocationIdentifier? location = do_get_location_for_uid(cx, uid, flags,
                 cancellable);
             if (location != null)
                 id = location.email_id;
@@ -660,12 +626,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return id;
     }
     
-    public async Gee.Set<ImapDB.EmailIdentifier> get_ids_async(Gee.Collection<Imap.UID> uids,
-        Cancellable? cancellable) throws Error {
+    public async Gee.Set<ImapDB.EmailIdentifier>? get_ids_async(Gee.Collection<Imap.UID> uids,
+        ListFlags flags, Cancellable? cancellable) throws Error {
         Gee.Set<ImapDB.EmailIdentifier> ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (Imap.UID uid in uids) {
-                LocationIdentifier? location = do_get_location_for_uid(cx, uid, ListFlags.NONE,
+                LocationIdentifier? location = do_get_location_for_uid(cx, uid, flags,
                     cancellable);
                 if (location != null)
                     ids.add(location.email_id);
@@ -724,8 +690,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // remove one at a time, gather UIDs
             Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
             foreach (ImapDB.EmailIdentifier id in ids) {
-                LocationIdentifier? location = do_get_location_for_id(cx, id, ListFlags.NONE,
-                    cancellable);
+                LocationIdentifier? location = do_get_location_for_id(cx, id,
+                    ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
                 if (location == null)
                     continue;
                 
@@ -737,9 +703,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 uids.add(location.uid);
             }
             
-            // Remove any that may have been marked removed
-            mark_unmark_removed(uids, false);
-            
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
     }
@@ -749,8 +712,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             Db.Statement stmt = cx.prepare(
                 "DELETE FROM MessageLocationTable WHERE folder_id=?");
             stmt.bind_rowid(0, folder_id);
-            
-            clear_marked_removed();
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
@@ -882,7 +843,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 was_unread = true;
             }
             
-            internal_is_marked = unmark_removed(location.uid);
+            internal_is_marked = location.marked_removed;
             
             do_remove_association_with_folder(cx, location, cancellable);
             
@@ -905,18 +866,19 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.Collection<ImapDB.EmailIdentifier> ids, bool mark_removed, Cancellable? cancellable)
         throws Error {
         Gee.Set<ImapDB.EmailIdentifier> removed_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
             foreach (ImapDB.EmailIdentifier id in ids) {
-                LocationIdentifier? location = do_get_location_for_id(cx, id, ListFlags.NONE,
-                    cancellable);
+                LocationIdentifier? location = do_get_location_for_id(cx, id,
+                    ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
                 if (location != null) {
                     uids.add(location.uid);
                     removed_ids.add(location.email_id);
                 }
             }
             
-            mark_unmark_removed(uids, mark_removed);
+            if (uids.size > 0)
+                do_mark_unmark_removed(cx, uids, mark_removed, cancellable);
             
             return Db.TransactionOutcome.DONE;
         }, cancellable);
@@ -924,8 +886,39 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return (removed_ids.size > 0) ? removed_ids : null;
     }
     
+    // Returns the number of messages marked for removal in this folder
+    public async int get_marked_for_remove_count_async(Cancellable? cancellable) throws Error {
+        int count = 0;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            count = do_get_marked_removed_count(cx, cancellable);
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return count;
+    }
+    
+    // Clears all remove markers from the folder
+    public async void clear_remove_markers_async(Cancellable? cancellable) throws Error {
+        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                UPDATE MessageLocationTable
+                SET remove_marker=?
+                WHERE folder_id=? AND remove_marker <> ?
+            """);
+            stmt.bind_bool(0, false);
+            stmt.bind_rowid(1, folder_id);
+            stmt.bind_bool(2, false);
+            
+            stmt.exec(cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+    }
+    
     public async Gee.Map<ImapDB.EmailIdentifier, Geary.Email.Field>? list_email_fields_by_id_async(
-        Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.Collection<ImapDB.EmailIdentifier> ids, ListFlags flags, Cancellable? cancellable)
+        throws Error {
         if (ids.size == 0)
             return null;
         
@@ -945,7 +938,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     "SELECT fields FROM MessageTable WHERE id = ?");
                 
                 foreach (ImapDB.EmailIdentifier id in list) {
-                    LocationIdentifier? location_id = do_get_location_for_id(cx, id, ListFlags.NONE,
+                    LocationIdentifier? location_id = do_get_location_for_id(cx, id, flags,
                         cancellable);
                     if (location_id == null)
                         continue;
@@ -987,9 +980,38 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (results.finished)
             return 0;
         
-        int marked = !flags.include_marked_for_remove() ? get_marked_removed_count() : 0;
+        int marked = !flags.include_marked_for_remove() ? do_get_marked_removed_count(cx, cancellable) : 0;
         
         return Numeric.int_floor(results.int_at(0) - marked, 0);
+    }
+    
+    private int do_get_marked_removed_count(Db.Connection cx, Cancellable? cancellable) throws Error {
+        Db.Statement stmt = cx.prepare(
+            "SELECT COUNT(*) FROM MessageLocationTable WHERE folder_id=? AND remove_marker <> ?");
+        stmt.bind_rowid(0, folder_id);
+        stmt.bind_bool(1, false);
+        
+        Db.Result results = stmt.exec(cancellable);
+        
+        return !results.finished ? results.int_at(0) : 0;
+    }
+    
+    private void do_mark_unmark_removed(Db.Connection cx, Gee.Collection<Imap.UID> uids,
+        bool mark_removed, Cancellable? cancellable) throws Error {
+        // prepare Statement for reuse
+        Db.Statement stmt = cx.prepare(
+            "UPDATE MessageLocationTable SET remove_marker=? WHERE folder_id=? AND ordering=?");
+        stmt.bind_bool(0, mark_removed);
+        stmt.bind_rowid(1, folder_id);
+        
+        foreach (Imap.UID uid in uids) {
+            stmt.bind_int64(2, uid.value);
+            
+            stmt.exec(cancellable);
+            
+            // keep folder_id and mark_removed, replace UID each iteration
+            stmt.reset(Db.ResetScope.SAVE_BINDINGS);
+        }
     }
     
     // Returns message_id if duplicate found, associated set to true if message is already associated
@@ -1008,7 +1030,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // See if it already exists; first by UID (which is only guaranteed to
         // be unique in a folder, not account-wide)
         if (email_id.uid != null)
-            location = do_get_location_for_uid(cx, email_id.uid, ListFlags.NONE, cancellable);
+            location = do_get_location_for_uid(cx, email_id.uid, ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                cancellable);
         
         if (location != null) {
             associated = true;
@@ -1056,17 +1079,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
         
         Db.Statement search_stmt = cx.prepare(
-            "SELECT ordering FROM MessageLocationTable WHERE message_id=? AND folder_id=?");
+            "SELECT ordering, remove_marker FROM MessageLocationTable WHERE message_id=? AND folder_id=?");
         search_stmt.bind_rowid(0, message_id);
         search_stmt.bind_rowid(1, folder_id);
         
         Db.Result search_results = search_stmt.exec(cancellable);
         if (!search_results.finished) {
             associated = true;
-            location = new LocationIdentifier(message_id, new Imap.UID(search_results.int64_at(0)));
+            location = new LocationIdentifier(message_id, new Imap.UID(search_results.int64_at(0)),
+                search_results.bool_at(1));
         } else {
             assert(email_id.uid != null);
-            location = new LocationIdentifier(message_id, email_id.uid);
+            location = new LocationIdentifier(message_id, email_id.uid, false);
         }
         
         return location;
@@ -1278,7 +1302,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     
     private Geary.Email do_location_to_email(Db.Connection cx, LocationIdentifier location,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
-        if (!flags.include_marked_for_remove() && is_marked_removed(location.uid)) {
+        if (!flags.include_marked_for_remove() && location.marked_removed) {
             throw new EngineError.NOT_FOUND("Message %s marked as removed in %s",
                 location.email_id.to_string(), to_string());
         }
@@ -1871,7 +1895,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         update_stmt.exec(cancellable);
     }
     
-    // Db.Result must include columns for "message_id" and "ordering" from the MessageLocationTable
+    // Db.Result must include columns for "message_id", "ordering", and "remove_marker" from the
+    // MessageLocationTable
     private Gee.List<LocationIdentifier> do_results_to_locations(Db.Result results,
         ListFlags flags, Cancellable? cancellable) throws Error {
         Gee.List<LocationIdentifier> locations = new Gee.ArrayList<LocationIdentifier>();
@@ -1881,8 +1906,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         do {
             LocationIdentifier location = new LocationIdentifier(results.rowid_for("message_id"),
-                new Imap.UID(results.int64_for("ordering")));
-            if (!flags.include_marked_for_remove() && is_marked_removed(location.uid))
+                new Imap.UID(results.int64_for("ordering")), results.bool_for("remove_marker"));
+            if (!flags.include_marked_for_remove() && location.marked_removed)
                 continue;
             
             locations.add(location);
@@ -1894,7 +1919,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private LocationIdentifier? do_get_location_for_id(Db.Connection cx, ImapDB.EmailIdentifier id,
         ListFlags flags, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("""
-            SELECT ordering
+            SELECT ordering, remove_marker
             FROM MessageLocationTable
             WHERE folder_id = ? AND message_id = ?
         """);
@@ -1905,20 +1930,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (result.finished)
             return null;
         
-        Imap.UID uid = new Imap.UID(result.int64_at(0));
-        if (!flags.include_marked_for_remove() && is_marked_removed(uid))
-            return null;
+        LocationIdentifier location = new LocationIdentifier(id.message_id,
+            new Imap.UID(result.int64_at(0)), result.bool_at(1));
         
-        return new LocationIdentifier(id.message_id, uid);
+        return (!flags.include_marked_for_remove() && location.marked_removed) ? null : location;
     }
     
     private LocationIdentifier? do_get_location_for_uid(Db.Connection cx, Imap.UID uid,
         ListFlags flags, Cancellable? cancellable) throws Error {
-        if (!flags.include_marked_for_remove() && is_marked_removed(uid))
-            return null;
-        
         Db.Statement stmt = cx.prepare("""
-            SELECT message_id
+            SELECT message_id, remove_marker
             FROM MessageLocationTable
             WHERE folder_id = ? AND ordering = ?
         """);
@@ -1929,7 +1950,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (result.finished)
             return null;
         
-        return new LocationIdentifier(result.rowid_at(0), uid);
+        LocationIdentifier location = new LocationIdentifier(result.rowid_at(0), uid, result.bool_at(1));
+        
+        return (!flags.include_marked_for_remove() && location.marked_removed) ? null : location;
     }
 }
 

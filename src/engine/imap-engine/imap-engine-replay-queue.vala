@@ -196,6 +196,9 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     }
     
     private bool on_notification_timeout() {
+        if (notification_queue.size == 0)
+            return false;
+        
         debug("%s: Scheduling %d held server notification operations", owner.to_string(),
             notification_queue.size);
         

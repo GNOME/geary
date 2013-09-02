@@ -34,7 +34,7 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
         
         // if the earliest UID is not in the local store, then need to expand vector to it
         Geary.EmailIdentifier? first_id = yield owner.local_folder.get_id_async(uids.first(),
-            cancellable);
+            ImapDB.Folder.ListFlags.NONE, cancellable);
         if (first_id == null)
             yield expand_vector_async(uids.first(), 1);
         
@@ -45,7 +45,8 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
             // to the database yet)
             //
             // TODO: We need a sparse version of this to scoop them up all at once
-            ImapDB.EmailIdentifier? id = yield owner.local_folder.get_id_async(uid, cancellable);
+            ImapDB.EmailIdentifier? id = yield owner.local_folder.get_id_async(uid,
+                ImapDB.Folder.ListFlags.NONE, cancellable);
             if (id != null)
                 local_ids.add(id);
         }
