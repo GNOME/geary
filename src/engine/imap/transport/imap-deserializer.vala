@@ -217,7 +217,7 @@ public class Geary.Imap.Deserializer : BaseObject {
      *
      * Subscribe to the various signals before starting to ensure that all responses are trapped.
      */
-    public async void start_async(int priority = GLib.Priority.DEFAULT) throws Error {
+    public async void start_async(int priority = GLib.Priority.DEFAULT_IDLE) throws Error {
         if (cancellable != null)
             throw new EngineError.ALREADY_OPEN("Deserializer already open");
         

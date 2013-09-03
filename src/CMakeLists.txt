@@ -227,6 +227,7 @@ engine/memory/memory-unowned-string-buffer.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
+engine/nonblocking/nonblocking-concurrent.vala
 engine/nonblocking/nonblocking-counting-semaphore.vala
 engine/nonblocking/nonblocking-error.vala
 engine/nonblocking/nonblocking-mailbox.vala

@@ -512,7 +512,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
     
     // Note that this does INCLUDES messages marked for removal
-    public async Gee.SortedSet<Imap.UID>? list_uids_by_range_async(Imap.UID first_uid, Imap.UID last_uid,
+    // TODO: Let the user request a SortedSet, or have them provide the Set to add to
+    public async Gee.Set<Imap.UID>? list_uids_by_range_async(Imap.UID first_uid, Imap.UID last_uid,
         bool include_marked_for_removal, Cancellable? cancellable) throws Error {
         // order correctly
         Imap.UID start, end;
@@ -524,7 +525,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             end = first_uid;
         }
         
-        Gee.SortedSet<Imap.UID> uids = new Gee.TreeSet<Imap.UID>();
+        Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare("""
                 SELECT ordering, remove_marker

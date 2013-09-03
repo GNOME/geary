@@ -323,22 +323,28 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     // Utility method for listing a UID range
-    public async Gee.SortedSet<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
+    // TODO: Offer parameter so a SortedSet could be returned (or, the caller must supply the Set)
+    public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
         throws Error {
-        Gee.List<Geary.Email>? list = yield list_email_async(msg_set, Geary.Email.Field.NONE,
+        FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataType.UID);
+        
+        Gee.HashMap<SequenceNumber, FetchedData>? fetched;
+        yield exec_commands_async(new Collection.SingleItem<Command>(cmd), out fetched, null,
             cancellable);
-        if (list == null || list.size == 0)
+        if (fetched == null || fetched.size == 0)
             return null;
         
-        Gee.SortedSet<Imap.UID> uids = new Gee.TreeSet<Imap.UID>();
-        foreach (Geary.Email email in list) {
-            Imap.UID? uid = ((ImapDB.EmailIdentifier) email.id).uid;
-            assert(uid != null);
-            
-            uids.add(uid);
-        }
+        // Because the number of UIDs can be immense, do hashing in the background
+        Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
+        yield Nonblocking.Concurrent.global.schedule_async(() => {
+            foreach (FetchedData fetched_data in fetched.values) {
+                Imap.UID? uid = fetched_data.data_map.get(FetchDataType.UID) as Imap.UID;
+                if (uid != null)
+                    uids.add(uid);
+            }
+        }, cancellable);
         
-        return uids;
+        return (uids.size > 0) ? uids : null;
     }
     
     // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
@@ -435,37 +441,40 @@ private class Geary.Imap.Folder : BaseObject {
             return null;
         
         // Convert fetched data into Geary.Email objects
+        // because this could be for a lot of email, do in a background thread
         Gee.List<Geary.Email> email_list = new Gee.ArrayList<Geary.Email>();
-        foreach (SequenceNumber seq_num in fetched.keys) {
-            FetchedData fetched_data = fetched.get(seq_num);
-            
-            // the UID should either have been fetched (if using positional addressing) or should
-            // have come back with the response (if using UID addressing)
-            UID? uid = fetched_data.data_map.get(FetchDataType.UID) as UID;
-            if (uid == null) {
-                message("Unable to list message #%s on %s: No UID returned from server",
-                    seq_num.to_string(), to_string());
+        yield Nonblocking.Concurrent.global.schedule_async(() => {
+            foreach (SequenceNumber seq_num in fetched.keys) {
+                FetchedData fetched_data = fetched.get(seq_num);
                 
-                continue;
-            }
-            
-            try {
-                Geary.Email email = fetched_data_to_email(uid, fetched_data, fields,
-                    partial_header_identifier, body_identifier, preview_identifier,
-                    preview_charset_identifier);
-                if (!email.fields.fulfills(fields)) {
-                    message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
-                        fields.clear(email.fields).to_list_string(), fetched_data.to_string());
+                // the UID should either have been fetched (if using positional addressing) or should
+                // have come back with the response (if using UID addressing)
+                UID? uid = fetched_data.data_map.get(FetchDataType.UID) as UID;
+                if (uid == null) {
+                    message("Unable to list message #%s on %s: No UID returned from server",
+                        seq_num.to_string(), to_string());
                     
                     continue;
                 }
                 
-                email_list.add(email);
-            } catch (Error err) {
-                debug("%s: Unable to convert email for %s %s: %s", to_string(), uid.to_string(),
-                    fetched_data.to_string(), err.message);
+                try {
+                    Geary.Email email = fetched_data_to_email(to_string(), uid, fetched_data, fields,
+                        partial_header_identifier, body_identifier, preview_identifier,
+                        preview_charset_identifier);
+                    if (!email.fields.fulfills(fields)) {
+                        message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
+                            fields.clear(email.fields).to_list_string(), fetched_data.to_string());
+                        
+                        continue;
+                    }
+                    
+                    email_list.add(email);
+                } catch (Error err) {
+                    debug("%s: Unable to convert email for %s %s: %s", to_string(), uid.to_string(),
+                        fetched_data.to_string(), err.message);
+                }
             }
-        }
+        }, cancellable);
         
         return (email_list.size > 0) ? email_list : null;
     }
@@ -660,10 +669,10 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
-    private Geary.Email fetched_data_to_email(UID uid, FetchedData fetched_data, Geary.Email.Field required_fields,
+    private static Geary.Email fetched_data_to_email(string folder_name, UID uid,
+        FetchedData fetched_data, Geary.Email.Field required_fields,
         FetchBodyDataIdentifier? partial_header_identifier, FetchBodyDataIdentifier? body_identifier,
-        FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier)
-        throws Error {
+        FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier) throws Error {
         // note the use of INVALID_ROWID, as the rowid for this email (if one is present in the
         // database) is unknown at this time; this means ImapDB *must* create a new EmailIdentifier
         // for this email after create/merge is completed
@@ -731,10 +740,10 @@ private class Geary.Imap.Folder : BaseObject {
         // if the header was requested, convert its fields now
         bool has_partial_header = fetched_data.body_data_map.has_key(partial_header_identifier);
         if (partial_header_identifier != null && !has_partial_header) {
-            message("[%s] No partial header identifier \"%s\" found:", to_string(),
+            message("[%s] No partial header identifier \"%s\" found:", folder_name,
                 partial_header_identifier.to_string());
             foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                message("[%s] has %s", to_string(), id.to_string());
+                message("[%s] has %s", folder_name, id.to_string());
         } else if (partial_header_identifier != null && has_partial_header) {
             RFC822.Header headers = new RFC822.Header(
                 fetched_data.body_data_map.get(partial_header_identifier));
@@ -832,10 +841,10 @@ private class Geary.Imap.Folder : BaseObject {
                 email.set_message_body(new Geary.RFC822.Text(
                     fetched_data.body_data_map.get(body_identifier)));
             } else {
-                message("[%s] No body identifier \"%s\" found", to_string(),
+                message("[%s] No body identifier \"%s\" found", folder_name,
                     body_identifier.to_string());
                 foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", to_string(), id.to_string());
+                    message("[%s] has %s", folder_name, id.to_string());
             }
         }
         
@@ -849,10 +858,10 @@ private class Geary.Imap.Folder : BaseObject {
                     fetched_data.body_data_map.get(preview_identifier),
                     fetched_data.body_data_map.get(preview_charset_identifier)));
             } else {
-                message("[%s] No preview identifiers \"%s\" and \"%s\" found", to_string(),
+                message("[%s] No preview identifiers \"%s\" and \"%s\" found", folder_name,
                     preview_identifier.to_string(), preview_charset_identifier.to_string());
                 foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", to_string(), id.to_string());
+                    message("[%s] has %s", folder_name, id.to_string());
             }
         }
         
@@ -893,7 +902,7 @@ private class Geary.Imap.Folder : BaseObject {
         return null;
     }
     
-    private bool required_but_not_set(Geary.Email.Field check, Geary.Email.Field users_fields, Geary.Email email) {
+    private static bool required_but_not_set(Geary.Email.Field check, Geary.Email.Field users_fields, Geary.Email email) {
         return users_fields.require(check) ? !email.fields.is_all_set(check) : false;
     }
     

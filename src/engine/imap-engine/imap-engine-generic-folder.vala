@@ -212,40 +212,48 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // get all the UIDs in said range from the local store, sorted; convert to non-null
         // for ease of use later
-        Gee.SortedSet<Imap.UID>? local_uids = yield local_folder.list_uids_by_range_async(
+        Gee.Set<Imap.UID>? local_uids = yield local_folder.list_uids_by_range_async(
             first_uid, last_uid, true, cancellable);
         if (local_uids == null)
-            local_uids = new Gee.TreeSet<Imap.UID>();
+            local_uids = Gee.Set.empty<Imap.UID>();
         
         check_open("normalize_folders (list local)");
         
         // Do the same on the remote ... make non-null for ease of use later
-        Gee.SortedSet<Imap.UID>? remote_uids = yield remote_folder.list_uids_async(
+        Gee.Set<Imap.UID>? remote_uids = yield remote_folder.list_uids_async(
             new Imap.MessageSet.uid_range(first_uid, last_uid), cancellable);
         if (remote_uids == null)
-            remote_uids = new Gee.TreeSet<Imap.UID>();
+            local_uids = Gee.Set.empty<Imap.UID>();
         
         check_open("normalize_folders (list remote)");
         
-        // walk local UIDs looking for UIDs no longer on remote, removing those that are available
-        // make the next pass that much shorter
-        Gee.HashSet<Imap.UID> removed_uids = new Gee.HashSet<Imap.UID>();
-        foreach (Imap.UID local_uid in local_uids) {
-            // if in local but not remote, consider removed from remote
-            if (!remote_uids.remove(local_uid))
-                removed_uids.add(local_uid);
-        }
+        debug("%s: Loaded local (%d) and remote (%d) UIDs, normalizing...", to_string(),
+            local_uids.size, remote_uids.size);
         
-        // everything remaining in remote has been added since folder last seen ... whether they're
-        // discovered (inserted) or appended depends on the highest local UID
+        Gee.HashSet<Imap.UID> removed_uids = new Gee.HashSet<Imap.UID>();
         Gee.HashSet<Imap.UID> appended_uids = new Gee.HashSet<Imap.UID>();
         Gee.HashSet<Imap.UID> discovered_uids = new Gee.HashSet<Imap.UID>();
-        foreach (Imap.UID remote_uid in remote_uids) {
-            if (remote_uid.compare_to(local_latest_id.uid) > 0)
-                appended_uids.add(remote_uid);
-            else
-                discovered_uids.add(remote_uid);
-        }
+        
+        // Because the number of UIDs being processed can be immense in large folders, process
+        // in a background thread
+        yield Nonblocking.Concurrent.global.schedule_async(() => {
+            // walk local UIDs looking for UIDs no longer on remote, removing those that are available
+            // make the next pass that much shorter
+            foreach (Imap.UID local_uid in local_uids) {
+                // if in local but not remote, consider removed from remote
+                if (!remote_uids.remove(local_uid))
+                    removed_uids.add(local_uid);
+            }
+            
+            // everything remaining in remote has been added since folder last seen ... whether they're
+            // discovered (inserted) or appended depends on the highest local UID
+            foreach (Imap.UID remote_uid in remote_uids) {
+                if (remote_uid.compare_to(local_latest_id.uid) > 0)
+                    appended_uids.add(remote_uid);
+                else
+                    discovered_uids.add(remote_uid);
+            }
+        }, cancellable);
         
         debug("%s: changes since last seen: removed=%d appended=%d discovered=%d", to_string(),
             removed_uids.size, appended_uids.size, discovered_uids.size);
@@ -272,21 +280,27 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 to_create, cancellable);
             assert(created_or_merged != null);
             
-            foreach (Email email in created_or_merged.keys) {
-                ImapDB.EmailIdentifier id = (ImapDB.EmailIdentifier) email.id;
-                bool created = created_or_merged.get(email);
-                
-                // report all appended email, but separate out email never seen before (created)
-                // as locally-appended
-                if (appended_uids.contains(id.uid)) {
-                    appended_ids.add(id);
+            // it's possible a large number of messages have come in, so process them in the
+            // background
+            yield Nonblocking.Concurrent.global.schedule_async(() => {
+                foreach (Email email in created_or_merged.keys) {
+                    ImapDB.EmailIdentifier id = (ImapDB.EmailIdentifier) email.id;
+                    bool created = created_or_merged.get(email);
                     
-                    if (created)
-                        locally_appended_ids.add(id);
-                } else if (discovered_uids.contains(id.uid) && created) {
-                    discovered_ids.add(id);
+                    // report all appended email, but separate out email never seen before (created)
+                    // as locally-appended
+                    if (appended_uids.contains(id.uid)) {
+                        appended_ids.add(id);
+                        
+                        if (created)
+                            locally_appended_ids.add(id);
+                    } else if (discovered_uids.contains(id.uid) && created) {
+                        discovered_ids.add(id);
+                    }
                 }
-            }
+            }, cancellable);
+            
+            debug("%s: Finished creating/merging %d emails", to_string(), created_or_merged.size);
         }
         
         check_open("normalize_folders (created/merged appended/discovered emails)");
