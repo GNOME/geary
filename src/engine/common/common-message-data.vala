@@ -66,21 +66,16 @@ public abstract class Geary.MessageData.IntMessageData : AbstractMessageData,
     Gee.Hashable<IntMessageData> {
     public int value { get; private set; }
     
-    private uint stored_hash = uint.MAX;
-    
     public IntMessageData(int value) {
         this.value = value;
     }
     
     public virtual bool equal_to(IntMessageData other) {
-        if (this == other)
-            return true;
-        
         return (value == other.value);
     }
     
     public virtual uint hash() {
-        return (stored_hash != uint.MAX) ? stored_hash : (stored_hash = int_hash(value));
+        return value;
     }
     
     public override string to_string() {
