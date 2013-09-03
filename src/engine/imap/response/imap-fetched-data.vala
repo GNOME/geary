@@ -19,23 +19,18 @@ public class Geary.Imap.FetchedData : Object {
     public SequenceNumber seq_num { get; private set; }
     
     /**
-     * A Map of {@link FetchDataType}s to their {@link Imap.MessageData} for this email.
+     * A Map of {@link FetchDataSpecifier}s to their {@link Imap.MessageData} for this email.
      *
-     * MessageData should be cast to their appropriate class depending on their FetchDataType.
+     * MessageData should be cast to their appropriate class depending on their FetchDataSpecifier.
      */
-    public Gee.Map<FetchDataType, MessageData> data_map { get; private set;
-        default = new Gee.HashMap<FetchDataType, MessageData>(); }
+    public Gee.Map<FetchDataSpecifier, MessageData> data_map { get; private set;
+        default = new Gee.HashMap<FetchDataSpecifier, MessageData>(); }
     
     /**
-     * List of {@link FetchBodyDataType} responses.
-     *
-     * Unfortunately, FetchBodyDataType currently doesn't offer a deserialize method, which is
-     * necessary to propertly index or map the buffers with what they represently uniquely.  For
-     * now, these buffers are indexed with {@link FetchBodyDataIdentifier}s.  This means the results
-     * can only be accessed against the original request's identifier.
+     * List of {@link FetchBodyDataSpecifier} responses.
      */
-    public Gee.Map<FetchBodyDataIdentifier, Memory.Buffer> body_data_map { get; private set;
-        default = new Gee.HashMap<FetchBodyDataIdentifier, Memory.Buffer>(); }
+    public Gee.Map<FetchBodyDataSpecifier, Memory.Buffer> body_data_map { get; private set;
+        default = new Gee.HashMap<FetchBodyDataSpecifier, Memory.Buffer>(); }
     
     public FetchedData(SequenceNumber seq_num) {
         this.seq_num = seq_num;
@@ -65,18 +60,18 @@ public class Geary.Imap.FetchedData : Object {
             // watch for truncated lists, which indicate an empty return value
             bool has_value = (ctr < (list.size - 1));
             
-            if (FetchBodyDataType.is_fetch_body(data_item_param)) {
+            if (FetchBodyDataSpecifier.is_fetch_body_data_specifier(data_item_param)) {
                 // "fake" the identifier by merely dropping in the StringParameter wholesale ...
                 // this works because FetchBodyDataIdentifier does case-insensitive comparisons ...
                 // other munging may be required if this isn't sufficient
-                FetchBodyDataIdentifier identifer = new FetchBodyDataIdentifier.from_parameter(data_item_param);
+                FetchBodyDataSpecifier specifier = FetchBodyDataSpecifier.deserialize_response(data_item_param);
                 
                 if (has_value)
-                    fetched_data.body_data_map.set(identifer, list.get_as_empty_buffer(ctr + 1));
+                    fetched_data.body_data_map.set(specifier, list.get_as_empty_buffer(ctr + 1));
                 else
-                    fetched_data.body_data_map.set(identifer, Memory.EmptyBuffer.instance);
+                    fetched_data.body_data_map.set(specifier, Memory.EmptyBuffer.instance);
             } else {
-                FetchDataType data_item = FetchDataType.decode(data_item_param.value);
+                FetchDataSpecifier data_item = FetchDataSpecifier.decode(data_item_param.value);
                 FetchDataDecoder? decoder = data_item.get_decoder();
                 if (decoder == null) {
                     debug("Unable to decode fetch response for \"%s\": No decoder available",
@@ -111,11 +106,11 @@ public class Geary.Imap.FetchedData : Object {
             return null;
         
         FetchedData combined = new FetchedData(seq_num);
-        Collection.map_set_all<FetchDataType, MessageData>(combined.data_map, data_map);
-        Collection.map_set_all<FetchDataType, MessageData>(combined.data_map, other.data_map);
-        Collection.map_set_all<FetchBodyDataIdentifier, Memory.Buffer>(combined.body_data_map,
+        Collection.map_set_all<FetchDataSpecifier, MessageData>(combined.data_map, data_map);
+        Collection.map_set_all<FetchDataSpecifier, MessageData>(combined.data_map, other.data_map);
+        Collection.map_set_all<FetchBodyDataSpecifier, Memory.Buffer>(combined.body_data_map,
             body_data_map);
-        Collection.map_set_all<FetchBodyDataIdentifier, Memory.Buffer>(combined.body_data_map,
+        Collection.map_set_all<FetchBodyDataSpecifier, Memory.Buffer>(combined.body_data_map,
             other.body_data_map);
         
         return combined;
@@ -126,11 +121,11 @@ public class Geary.Imap.FetchedData : Object {
         
         builder.append_printf("[%s] ", seq_num.to_string());
         
-        foreach (FetchDataType data_type in data_map.keys)
+        foreach (FetchDataSpecifier data_type in data_map.keys)
             builder.append_printf("%s=%s ", data_type.to_string(), data_map.get(data_type).to_string());
         
-        foreach (FetchBodyDataIdentifier identifier in body_data_map.keys)
-            builder.append_printf("%s=%lu ", identifier.to_string(), body_data_map.get(identifier).size);
+        foreach (FetchBodyDataSpecifier specifier in body_data_map.keys)
+            builder.append_printf("%s=%lu ", specifier.to_string(), body_data_map.get(specifier).size);
         
         return builder.str;
     }

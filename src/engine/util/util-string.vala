@@ -67,10 +67,6 @@ public bool stri_equal(string a, string b) {
     return str_equal(a.down(), b.down());
 }
 
-public bool equals_ci(string a, string b) {
-    return a.down() == b.down();
-}
-
 public bool nullable_stri_equal(string? a, string? b) {
     if (a == null)
         return (b == null);
@@ -80,6 +76,23 @@ public bool nullable_stri_equal(string? a, string? b) {
         return false;
     
     return stri_equal(a, b);
+}
+
+/**
+ * Returns true if the string contains only whitespace and at least one numeric character.
+ */
+public bool is_numeric(string str) {
+    bool numeric_found = false;
+    unichar ch;
+    int index = 0;
+    while (str.get_next_char(ref index, out ch)) {
+        if (ch.isdigit())
+            numeric_found = true;
+        else if (!ch.isspace())
+            return false;
+    }
+    
+    return numeric_found;
 }
 
 /**

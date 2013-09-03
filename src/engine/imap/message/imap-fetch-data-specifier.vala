@@ -16,7 +16,7 @@
  * @see FetchBodyDataType
  */
 
-public enum Geary.Imap.FetchDataType {
+public enum Geary.Imap.FetchDataSpecifier {
     UID,
     FLAGS,
     INTERNALDATE,
@@ -82,7 +82,7 @@ public enum Geary.Imap.FetchDataType {
      *
      * @throws ImapError.PARSE_ERROR if not a recognized value.
      */
-    public static FetchDataType decode(string value) throws ImapError {
+    public static FetchDataSpecifier decode(string value) throws ImapError {
         switch (value.down()) {
             case "uid":
                 return UID;
@@ -140,7 +140,7 @@ public enum Geary.Imap.FetchDataType {
      *
      * @see decode
      */
-    public static FetchDataType from_parameter(StringParameter strparam) throws ImapError {
+    public static FetchDataSpecifier from_parameter(StringParameter strparam) throws ImapError {
         return decode(strparam.value);
     }
     

@@ -173,7 +173,12 @@ private class Geary.Imap.Account : BaseObject {
     private async MailboxInformation fetch_mailbox_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         ClientSession session = yield claim_session_async(cancellable);
+        
+        // USE XLIST *unless* listing INBOX, as Imap.FolderPath always refers to it as "INBOX"
+        // but some servers (Freemail) only respond to the translated name with XLIST
         bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
+        if (MailboxSpecifier.folder_path_is_inbox(path))
+            can_xlist = false;
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         StatusResponse response = yield send_command_async(

@@ -446,9 +446,9 @@ class ImapConsole : Gtk.Window {
             ? new Geary.Imap.MessageSet.custom(args[0])
             : new Geary.Imap.MessageSet.uid_custom(args[0]);
         
-        Gee.ArrayList<Geary.Imap.FetchDataType> data_items = new Gee.ArrayList<Geary.Imap.FetchDataType>();
+        Gee.ArrayList<Geary.Imap.FetchDataSpecifier> data_items = new Gee.ArrayList<Geary.Imap.FetchDataSpecifier>();
         for (int ctr = 1; ctr < args.length; ctr++) {
-            Geary.Imap.FetchDataType data_type = Geary.Imap.FetchDataType.decode(args[ctr]);
+            Geary.Imap.FetchDataSpecifier data_type = Geary.Imap.FetchDataSpecifier.decode(args[ctr]);
             data_items.add(data_type);
         }
         
@@ -460,10 +460,10 @@ class ImapConsole : Gtk.Window {
         
         status("Fetching fields %s".printf(args[0]));
         
-        Geary.Imap.FetchBodyDataType fields = new Geary.Imap.FetchBodyDataType(
-            Geary.Imap.FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, args[1:args.length]);
+        Geary.Imap.FetchBodyDataSpecifier fields = new Geary.Imap.FetchBodyDataSpecifier(
+            Geary.Imap.FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS, null, -1, -1, args[1:args.length]);
             
-        Gee.List<Geary.Imap.FetchBodyDataType> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataType>();
+        Gee.List<Geary.Imap.FetchBodyDataSpecifier> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataSpecifier>();
         list.add(fields);
         
         cx.send_async.begin(new Geary.Imap.FetchCommand(
@@ -564,11 +564,11 @@ class ImapConsole : Gtk.Window {
         
         status("Preview %s".printf(args[0]));
         
-        Geary.Imap.FetchBodyDataType preview_data_type = new Geary.Imap.FetchBodyDataType.peek(
-            Geary.Imap.FetchBodyDataType.SectionPart.NONE, { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES,
+        Geary.Imap.FetchBodyDataSpecifier preview_data_type = new Geary.Imap.FetchBodyDataSpecifier.peek(
+            Geary.Imap.FetchBodyDataSpecifier.SectionPart.NONE, { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES,
             null);
         
-        Gee.ArrayList<Geary.Imap.FetchBodyDataType> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataType>();
+        Gee.ArrayList<Geary.Imap.FetchBodyDataSpecifier> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataSpecifier>();
         list.add(preview_data_type);
         
         cx.send_async.begin(new Geary.Imap.FetchCommand(

@@ -326,7 +326,7 @@ private class Geary.Imap.Folder : BaseObject {
     // TODO: Offer parameter so a SortedSet could be returned (or, the caller must supply the Set)
     public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
         throws Error {
-        FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataType.UID);
+        FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID);
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;
         yield exec_commands_async(new Collection.SingleItem<Command>(cmd), out fetched, null,
@@ -338,7 +338,7 @@ private class Geary.Imap.Folder : BaseObject {
         Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
         yield Nonblocking.Concurrent.global.schedule_async(() => {
             foreach (FetchedData fetched_data in fetched.values) {
-                Imap.UID? uid = fetched_data.data_map.get(FetchDataType.UID) as Imap.UID;
+                Imap.UID? uid = fetched_data.data_map.get(FetchDataSpecifier.UID) as Imap.UID;
                 if (uid != null)
                     uids.add(uid);
             }
@@ -362,74 +362,60 @@ private class Geary.Imap.Folder : BaseObject {
         // EmailIdentifier will be set, and so fetch UIDs (which looks funny but works when
         // listing a range for contents: UID FETCH x:y UID)
         if (!msg_set.is_uid || fields == Geary.Email.Field.NONE)
-            cmds.add(new FetchCommand.data_type(msg_set, FetchDataType.UID));
+            cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
         
         // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have
         // exhibited bugs or return NO when too many FETCH data types are combined on a single
         // command)
-        FetchBodyDataIdentifier? partial_header_identifier = null;
+        FetchBodyDataSpecifier? header_specifier = null;
         if (fields.requires_any(BASIC_FETCH_FIELDS)) {
-            Gee.List<FetchDataType> data_types = new Gee.ArrayList<FetchDataType>();
-            FetchBodyDataType? header_body_type;
-            fields_to_fetch_data_types(fields, data_types, out header_body_type);
+            Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
+            fields_to_fetch_data_types(fields, data_types, out header_specifier);
             
             // Add all simple data types as one FETCH command
             if (data_types.size > 0)
                 cmds.add(new FetchCommand(msg_set, data_types, null));
             
             // Add all body data types as separate FETCH command
-            Gee.List<FetchBodyDataType>? body_data_types = null;
-            if (header_body_type != null) {
-                body_data_types = new Gee.ArrayList<FetchBodyDataType>();
-                body_data_types.add(header_body_type);
-                
-                // save identifier for later decoding
-                partial_header_identifier = header_body_type.get_identifier();
-                
-                cmds.add(new FetchCommand(msg_set, null, body_data_types));
-            }
+            if (header_specifier != null)
+                cmds.add(new FetchCommand.body_data_type(msg_set, header_specifier));
         }
         
         // RFC822 BODY is a separate command
-        FetchBodyDataIdentifier? body_identifier = null;
+        FetchBodyDataSpecifier? body_specifier = null;
         if (fields.require(Email.Field.BODY)) {
-            FetchBodyDataType body = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.TEXT,
+            body_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.TEXT,
                 null, -1, -1, null);
             
-            // save identifier for later retrieval from responses
-            body_identifier = body.get_identifier();
-            
-            cmds.add(new FetchCommand.body_data_type(msg_set, body));
+            cmds.add(new FetchCommand.body_data_type(msg_set, body_specifier));
         }
         
         // PREVIEW requires two separate commands
-        FetchBodyDataIdentifier? preview_identifier = null;
-        FetchBodyDataIdentifier? preview_charset_identifier = null;
+        FetchBodyDataSpecifier? preview_specifier = null;
+        FetchBodyDataSpecifier? preview_charset_specifier = null;
         if (fields.require(Email.Field.PREVIEW)) {
             // Get the preview text (the initial MAX_PREVIEW_BYTES of the first MIME section
-            FetchBodyDataType preview = new FetchBodyDataType.peek(FetchBodyDataType.SectionPart.NONE,
+            preview_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.NONE,
                 { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES, null);
-            preview_identifier = preview.get_identifier();
-            cmds.add(new FetchCommand.body_data_type(msg_set, preview));
+            cmds.add(new FetchCommand.body_data_type(msg_set, preview_specifier));
             
             // Also get the character set to properly decode it
-            FetchBodyDataType preview_charset = new FetchBodyDataType.peek(
-                FetchBodyDataType.SectionPart.MIME, { 1 }, -1, -1, null);
-            preview_charset_identifier = preview_charset.get_identifier();
-            cmds.add(new FetchCommand.body_data_type(msg_set, preview_charset));
+            preview_charset_specifier = new FetchBodyDataSpecifier.peek(
+                FetchBodyDataSpecifier.SectionPart.MIME, { 1 }, -1, -1, null);
+            cmds.add(new FetchCommand.body_data_type(msg_set, preview_charset_specifier));
         }
         
         // PROPERTIES and FLAGS are a separate command
         if (fields.requires_any(Email.Field.PROPERTIES | Email.Field.FLAGS)) {
-            Gee.List<FetchDataType> data_types = new Gee.ArrayList<FetchDataType>();
+            Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
             
             if (fields.require(Geary.Email.Field.PROPERTIES)) {
-                data_types.add(FetchDataType.INTERNALDATE);
-                data_types.add(FetchDataType.RFC822_SIZE);
+                data_types.add(FetchDataSpecifier.INTERNALDATE);
+                data_types.add(FetchDataSpecifier.RFC822_SIZE);
             }
             
             if (fields.require(Geary.Email.Field.FLAGS))
-                data_types.add(FetchDataType.FLAGS);
+                data_types.add(FetchDataSpecifier.FLAGS);
             
             cmds.add(new FetchCommand(msg_set, data_types, null));
         }
@@ -449,7 +435,7 @@ private class Geary.Imap.Folder : BaseObject {
                 
                 // the UID should either have been fetched (if using positional addressing) or should
                 // have come back with the response (if using UID addressing)
-                UID? uid = fetched_data.data_map.get(FetchDataType.UID) as UID;
+                UID? uid = fetched_data.data_map.get(FetchDataSpecifier.UID) as UID;
                 if (uid == null) {
                     message("Unable to list message #%s on %s: No UID returned from server",
                         seq_num.to_string(), to_string());
@@ -459,8 +445,7 @@ private class Geary.Imap.Folder : BaseObject {
                 
                 try {
                     Geary.Email email = fetched_data_to_email(to_string(), uid, fetched_data, fields,
-                        partial_header_identifier, body_identifier, preview_identifier,
-                        preview_charset_identifier);
+                        header_specifier, body_specifier, preview_specifier, preview_charset_specifier);
                     if (!email.fields.fulfills(fields)) {
                         message("%s: %s missing=%s fetched=%s", to_string(), email.id.to_string(),
                             fields.clear(email.fields).to_list_string(), fetched_data.to_string());
@@ -487,7 +472,7 @@ private class Geary.Imap.Folder : BaseObject {
         assert(msg_set.is_uid);
         
         Gee.List<Command> cmds = new Gee.ArrayList<Command>();
-        cmds.add(new FetchCommand.data_type(msg_set, FetchDataType.UID));
+        cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;
         yield exec_commands_async(cmds, out fetched, null, cancellable);
@@ -497,7 +482,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         Gee.Map<UID, SequenceNumber> map = new Gee.HashMap<UID, SequenceNumber>();
         foreach (SequenceNumber seq_num in fetched.keys)
-            map.set((UID) fetched.get(seq_num).data_map.get(FetchDataType.UID), seq_num);
+            map.set((UID) fetched.get(seq_num).data_map.get(FetchDataSpecifier.UID), seq_num);
         
         return map;
     }
@@ -596,7 +581,7 @@ private class Geary.Imap.Folder : BaseObject {
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated
     // as well
     private void fields_to_fetch_data_types(Geary.Email.Field fields,
-        Gee.List<FetchDataType> data_types_list, out FetchBodyDataType? header_body_type) {
+        Gee.List<FetchDataSpecifier> data_types_list, out FetchBodyDataSpecifier? header_specifier) {
         // pack all the needed headers into a single FetchBodyDataType
         string[] field_names = new string[0];
         
@@ -606,7 +591,7 @@ private class Geary.Imap.Folder : BaseObject {
         // to add References because IMAP ENVELOPE doesn't return them for some reason (but does
         // return Message-ID and In-Reply-To)
         if (fields.is_all_set(Geary.Email.Field.ENVELOPE)) {
-            data_types_list.add(FetchDataType.ENVELOPE);
+            data_types_list.add(FetchDataSpecifier.ENVELOPE);
             field_names += "References";
             
             // remove those flags and process any remaining
@@ -644,7 +629,7 @@ private class Geary.Imap.Folder : BaseObject {
                 case Geary.Email.Field.HEADER:
                     // TODO: If the entire header is being pulled, then no need to pull down partial
                     // headers; simply get them all and decode what is needed directly
-                    data_types_list.add(FetchDataType.RFC822_HEADER);
+                    data_types_list.add(FetchDataSpecifier.RFC822_HEADER);
                 break;
                 
                 case Geary.Email.Field.NONE:
@@ -662,17 +647,17 @@ private class Geary.Imap.Folder : BaseObject {
         
         // convert field names into single FetchBodyDataType object
         if (field_names.length > 0) {
-            header_body_type = new FetchBodyDataType.peek(
-                FetchBodyDataType.SectionPart.HEADER_FIELDS, null, -1, -1, field_names);
+            header_specifier = new FetchBodyDataSpecifier.peek(
+                FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS, null, -1, -1, field_names);
         } else {
-            header_body_type = null;
+            header_specifier = null;
         }
     }
     
     private static Geary.Email fetched_data_to_email(string folder_name, UID uid,
         FetchedData fetched_data, Geary.Email.Field required_fields,
-        FetchBodyDataIdentifier? partial_header_identifier, FetchBodyDataIdentifier? body_identifier,
-        FetchBodyDataIdentifier? preview_identifier, FetchBodyDataIdentifier? preview_charset_identifier) throws Error {
+        FetchBodyDataSpecifier? header_specifier, FetchBodyDataSpecifier? body_specifier,
+        FetchBodyDataSpecifier? preview_specifier, FetchBodyDataSpecifier? preview_charset_specifier) throws Error {
         // note the use of INVALID_ROWID, as the rowid for this email (if one is present in the
         // database) is unknown at this time; this means ImapDB *must* create a new EmailIdentifier
         // for this email after create/merge is completed
@@ -688,13 +673,13 @@ private class Geary.Imap.Folder : BaseObject {
         RFC822.MessageIDList? references = null;
         
         // loop through all available FetchDataTypes and gather converted data
-        foreach (FetchDataType data_type in fetched_data.data_map.keys) {
+        foreach (FetchDataSpecifier data_type in fetched_data.data_map.keys) {
             MessageData? data = fetched_data.data_map.get(data_type);
             if (data == null)
                 continue;
             
             switch (data_type) {
-                case FetchDataType.ENVELOPE:
+                case FetchDataSpecifier.ENVELOPE:
                     Envelope envelope = (Envelope) data;
                     
                     email.set_send_date(envelope.sent);
@@ -707,23 +692,23 @@ private class Geary.Imap.Folder : BaseObject {
                     in_reply_to = envelope.in_reply_to;
                 break;
                 
-                case FetchDataType.RFC822_HEADER:
+                case FetchDataSpecifier.RFC822_HEADER:
                     email.set_message_header((RFC822.Header) data);
                 break;
                 
-                case FetchDataType.RFC822_TEXT:
+                case FetchDataSpecifier.RFC822_TEXT:
                     email.set_message_body((RFC822.Text) data);
                 break;
                 
-                case FetchDataType.RFC822_SIZE:
+                case FetchDataSpecifier.RFC822_SIZE:
                     rfc822_size = (RFC822.Size) data;
                 break;
                 
-                case FetchDataType.FLAGS:
+                case FetchDataSpecifier.FLAGS:
                     email.set_flags(new Imap.EmailFlags((MessageFlags) data));
                 break;
                 
-                case FetchDataType.INTERNALDATE:
+                case FetchDataSpecifier.INTERNALDATE:
                     internaldate = (InternalDate) data;
                 break;
                 
@@ -738,15 +723,15 @@ private class Geary.Imap.Folder : BaseObject {
             email.set_email_properties(new Geary.Imap.EmailProperties(internaldate, rfc822_size));
         
         // if the header was requested, convert its fields now
-        bool has_partial_header = fetched_data.body_data_map.has_key(partial_header_identifier);
-        if (partial_header_identifier != null && !has_partial_header) {
-            message("[%s] No partial header identifier \"%s\" found:", folder_name,
-                partial_header_identifier.to_string());
-            foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                message("[%s] has %s", folder_name, id.to_string());
-        } else if (partial_header_identifier != null && has_partial_header) {
+        bool has_header_specifier = fetched_data.body_data_map.has_key(header_specifier);
+        if (header_specifier != null && !has_header_specifier) {
+            message("[%s] No header specifier \"%s\" found:", folder_name,
+                header_specifier.to_string());
+            foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
+                message("[%s] has %s", folder_name, specifier.to_string());
+        } else if (header_specifier != null && has_header_specifier) {
             RFC822.Header headers = new RFC822.Header(
-                fetched_data.body_data_map.get(partial_header_identifier));
+                fetched_data.body_data_map.get(header_specifier));
             
             // DATE
             if (required_but_not_set(Geary.Email.Field.DATE, required_fields, email)) {
@@ -836,32 +821,32 @@ private class Geary.Imap.Folder : BaseObject {
             email.set_full_references(message_id, in_reply_to, references);
         
         // if body was requested, get it now
-        if (body_identifier != null) {
-            if (fetched_data.body_data_map.has_key(body_identifier)) {
+        if (body_specifier != null) {
+            if (fetched_data.body_data_map.has_key(body_specifier)) {
                 email.set_message_body(new Geary.RFC822.Text(
-                    fetched_data.body_data_map.get(body_identifier)));
+                    fetched_data.body_data_map.get(body_specifier)));
             } else {
-                message("[%s] No body identifier \"%s\" found", folder_name,
-                    body_identifier.to_string());
-                foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", folder_name, id.to_string());
+                message("[%s] No body specifier \"%s\" found", folder_name,
+                    body_specifier.to_string());
+                foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
+                    message("[%s] has %s", folder_name, specifier.to_string());
             }
         }
         
         // if preview was requested, get it now ... both identifiers must be supplied if one is
-        if (preview_identifier != null || preview_charset_identifier != null) {
-            assert(preview_identifier != null && preview_charset_identifier != null);
+        if (preview_specifier != null || preview_charset_specifier != null) {
+            assert(preview_specifier != null && preview_charset_specifier != null);
             
-            if (fetched_data.body_data_map.has_key(preview_identifier)
-                && fetched_data.body_data_map.has_key(preview_charset_identifier)) {
+            if (fetched_data.body_data_map.has_key(preview_specifier)
+                && fetched_data.body_data_map.has_key(preview_charset_specifier)) {
                 email.set_message_preview(new RFC822.PreviewText.with_header(
-                    fetched_data.body_data_map.get(preview_identifier),
-                    fetched_data.body_data_map.get(preview_charset_identifier)));
+                    fetched_data.body_data_map.get(preview_specifier),
+                    fetched_data.body_data_map.get(preview_charset_specifier)));
             } else {
-                message("[%s] No preview identifiers \"%s\" and \"%s\" found", folder_name,
-                    preview_identifier.to_string(), preview_charset_identifier.to_string());
-                foreach (FetchBodyDataIdentifier id in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", folder_name, id.to_string());
+                message("[%s] No preview specifiers \"%s\" and \"%s\" found", folder_name,
+                    preview_specifier.to_string(), preview_charset_specifier.to_string());
+                foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
+                    message("[%s] has %s", folder_name, specifier.to_string());
             }
         }
         

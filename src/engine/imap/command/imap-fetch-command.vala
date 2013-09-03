@@ -21,8 +21,8 @@ public class Geary.Imap.FetchCommand : Command {
     public const string NAME = "fetch";
     public const string UID_NAME = "uid fetch";
     
-    public FetchCommand(MessageSet msg_set, Gee.List<FetchDataType>? data_items,
-        Gee.List<FetchBodyDataType>? body_data_items) {
+    public FetchCommand(MessageSet msg_set, Gee.List<FetchDataSpecifier>? data_items,
+        Gee.List<FetchBodyDataSpecifier>? body_data_items) {
         base (msg_set.is_uid ? UID_NAME : NAME);
         
         add(msg_set.to_parameter());
@@ -39,12 +39,12 @@ public class Geary.Imap.FetchCommand : Command {
             ListParameter list = new ListParameter();
             
             if (data_items_length > 0) {
-                foreach (FetchDataType data_item in data_items)
+                foreach (FetchDataSpecifier data_item in data_items)
                     list.add(data_item.to_parameter());
             }
             
             if (body_items_length > 0) {
-                foreach (FetchBodyDataType body_item in body_data_items)
+                foreach (FetchBodyDataSpecifier body_item in body_data_items)
                     list.add(body_item.to_request_parameter());
             }
             
@@ -52,18 +52,18 @@ public class Geary.Imap.FetchCommand : Command {
         }
     }
     
-    public FetchCommand.data_type(MessageSet msg_set, FetchDataType data_type) {
+    public FetchCommand.data_type(MessageSet msg_set, FetchDataSpecifier data_type) {
         base (msg_set.is_uid ? UID_NAME : NAME);
         
         add(msg_set.to_parameter());
         add(data_type.to_parameter());
     }
     
-    public FetchCommand.body_data_type(MessageSet msg_set, FetchBodyDataType body_data_type) {
+    public FetchCommand.body_data_type(MessageSet msg_set, FetchBodyDataSpecifier body_data_specifier) {
         base (msg_set.is_uid ? UID_NAME : NAME);
         
         add(msg_set.to_parameter());
-        add(body_data_type.to_request_parameter());
+        add(body_data_specifier.to_request_parameter());
     }
 }
 

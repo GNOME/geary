@@ -17,9 +17,9 @@
  */
 
 public abstract class Geary.Imap.FetchDataDecoder : BaseObject {
-    public FetchDataType data_item { get; private set; }
+    public FetchDataSpecifier data_item { get; private set; }
     
-    public FetchDataDecoder(FetchDataType data_item) {
+    public FetchDataDecoder(FetchDataSpecifier data_item) {
         this.data_item = data_item;
     }
     
@@ -81,7 +81,7 @@ public abstract class Geary.Imap.FetchDataDecoder : BaseObject {
 
 public class Geary.Imap.UIDDecoder : Geary.Imap.FetchDataDecoder {
     public UIDDecoder() {
-        base (FetchDataType.UID);
+        base (FetchDataSpecifier.UID);
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
@@ -91,7 +91,7 @@ public class Geary.Imap.UIDDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.MessageFlagsDecoder : Geary.Imap.FetchDataDecoder {
     public MessageFlagsDecoder() {
-        base (FetchDataType.FLAGS);
+        base (FetchDataSpecifier.FLAGS);
     }
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
@@ -105,7 +105,7 @@ public class Geary.Imap.MessageFlagsDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.InternalDateDecoder : Geary.Imap.FetchDataDecoder {
     public InternalDateDecoder() {
-        base (FetchDataType.INTERNALDATE);
+        base (FetchDataSpecifier.INTERNALDATE);
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
@@ -115,7 +115,7 @@ public class Geary.Imap.InternalDateDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.RFC822SizeDecoder : Geary.Imap.FetchDataDecoder {
     public RFC822SizeDecoder() {
-        base (FetchDataType.RFC822_SIZE);
+        base (FetchDataSpecifier.RFC822_SIZE);
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
@@ -125,7 +125,7 @@ public class Geary.Imap.RFC822SizeDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
     public EnvelopeDecoder() {
-        base (FetchDataType.ENVELOPE);
+        base (FetchDataSpecifier.ENVELOPE);
     }
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
@@ -180,7 +180,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.RFC822HeaderDecoder : Geary.Imap.FetchDataDecoder {
     public RFC822HeaderDecoder() {
-        base (FetchDataType.RFC822_HEADER);
+        base (FetchDataSpecifier.RFC822_HEADER);
     }
     
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
@@ -190,7 +190,7 @@ public class Geary.Imap.RFC822HeaderDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.RFC822TextDecoder : Geary.Imap.FetchDataDecoder {
     public RFC822TextDecoder() {
-        base (FetchDataType.RFC822_TEXT);
+        base (FetchDataSpecifier.RFC822_TEXT);
     }
     
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
@@ -204,7 +204,7 @@ public class Geary.Imap.RFC822TextDecoder : Geary.Imap.FetchDataDecoder {
 
 public class Geary.Imap.RFC822FullDecoder : Geary.Imap.FetchDataDecoder {
     public RFC822FullDecoder() {
-        base (FetchDataType.RFC822);
+        base (FetchDataSpecifier.RFC822);
     }
     
     protected override MessageData decode_literal(LiteralParameter literalp) throws ImapError {
