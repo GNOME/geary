@@ -66,8 +66,11 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
         
         bool first_char = true;
         int index = 0;
-        unichar ch;
-        while (str.get_next_char(ref index, out ch)) {
+        for (;;) {
+            char ch = str[index++];
+            if (ch == String.EOS)
+                break;
+            
             if (first_char && ch == '-') {
                 is_negative = true;
                 first_char = false;

@@ -340,8 +340,11 @@ public class Geary.Imap.Deserializer : BaseObject {
         assert(get_mode() == Mode.LINE);
         
         int index = 0;
-        unichar ch;
-        while (line.get_next_char(ref index, out ch)) {
+        for (;;) {
+            char ch = line[index++];
+            if (ch == String.EOS)
+                break;
+            
             if (fsm.issue(Event.CHAR, &ch) == State.FAILED) {
                 deserialize_failure();
                 
@@ -414,18 +417,18 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     // Case-insensitive compare
-    private bool has_current_string_prefix(string prefix) {
+    private bool is_current_string_ci(string cmp) {
         if (current_string == null || String.is_empty(current_string.str))
             return false;
         
-        return current_string.str.down().has_prefix(prefix);
+        return String.stri_equal(current_string.str, cmp);
     }
     
-    private void append_to_string(unichar ch) {
+    private void append_to_string(char ch) {
         if (current_string == null)
             current_string = new StringBuilder();
         
-        current_string.append_unichar(ch);
+        current_string.append_c(ch);
     }
     
     private void save_string_parameter(bool quoted) {
@@ -515,7 +518,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     private uint on_first_param_char(uint state, uint event, void *user) {
         // look for opening characters to special parameter formats, otherwise jump to atom
         // handler (i.e. don't drop this character in the case of atoms)
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         switch (ch) {
             case '[':
                 // open response code
@@ -548,7 +551,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_tag_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // drop if not allowed for tags (allowing for continuations and watching for spaces, which
         // indicate a change of state)
@@ -568,12 +571,12 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_atom_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // The partial body fetch results ("BODY[section]" or "BODY[section]<partial>" and their
         // .peek variants) offer so many exceptions to the decoding process they're given their own
         // state
-        if (ch == '[' && (has_current_string_prefix("body") || has_current_string_prefix("body.peek"))) {
+        if (ch == '[' && (is_current_string_ci("body") || is_current_string_ci("body.peek"))) {
             append_to_string(ch);
             
             return State.PARTIAL_BODY_ATOM;
@@ -615,7 +618,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_system_flag_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // see note in on_atom_char for why/how this works
         char terminator = get_current_context_terminator();
@@ -658,7 +661,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_quoted_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // drop anything above 0x7F, NUL, CR, and LF
         if (ch > 0x7F || ch == '\0' || ch == '\r' || ch == '\n')
@@ -681,7 +684,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_quoted_escape_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // only two accepted escaped characters: double-quote and backslash
         // everything else dropped on the floor
@@ -696,7 +699,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_partial_body_atom_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // decoding the partial body parameter ("BODY[section]" et al.) is simply to locate the
         // terminating space after the closing square bracket or closing angle bracket
@@ -721,7 +724,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_partial_body_atom_terminating_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // anything but a space indicates the atom is continuing, therefore return to prior state
         if (ch != ' ')
@@ -733,7 +736,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private uint on_literal_char(uint state, uint event, void *user) {
-        unichar ch = *((unichar *) user);
+        char ch = *((char *) user);
         
         // if close-bracket, end of literal length field -- next event must be EOL
         if (ch == '}') {

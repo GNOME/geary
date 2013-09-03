@@ -6,11 +6,11 @@
 
 namespace Geary.Imap.DataFormat {
 
-private const unichar[] ATOM_SPECIALS = {
+private const char[] ATOM_SPECIALS = {
     '(', ')', '{', ' ', '%', '*', '"'
 };
 
-private const unichar[] TAG_SPECIALS = {
+private const char[] TAG_SPECIALS = {
     '(', ')', '{', '%', '\"', '\\', '+'
 };
 
@@ -20,7 +20,7 @@ public enum Quoting {
     UNALLOWED
 }
 
-private bool is_special_char(unichar ch, unichar[] ar, string? exceptions) {
+private bool is_special_char(char ch, char[] ar, string? exceptions) {
     if (ch > 0x7F || ch.iscntrl())
         return true;
     
@@ -35,7 +35,7 @@ private bool is_special_char(unichar ch, unichar[] ar, string? exceptions) {
  * indicates that the backslash cannot be used in an atom, they *are* used for message flags and
  * thus must be special cased by the caller.
  */
-public inline bool is_atom_special(unichar ch, string? exceptions = null) {
+public inline bool is_atom_special(char ch, string? exceptions = null) {
     return is_special_char(ch, ATOM_SPECIALS, exceptions);
 }
 
@@ -44,7 +44,7 @@ public inline bool is_atom_special(unichar ch, string? exceptions = null) {
  * star character is allowed, although technically only correct in the context of a status response;
  * it's the responsibility of the caller to catch this.
  */
-public bool is_tag_special(unichar ch, string? exceptions = null) {
+public bool is_tag_special(char ch, string? exceptions = null) {
     return is_special_char(ch, TAG_SPECIALS, exceptions);
 }
 
@@ -57,15 +57,17 @@ public Quoting is_quoting_required(string str) {
         return Quoting.REQUIRED;
     
     int index = 0;
-    unichar ch;
-    while (str.get_next_char(ref index, out ch)) {
+    for (;;) {
+        char ch = str[index++];
+        if (ch == String.EOS)
+            break;
+        
         if (ch > 0x7F)
             return Quoting.UNALLOWED;
         
         switch (ch) {
             case '\n':
             case '\r':
-            case '\0':
                 return Quoting.UNALLOWED;
             
             default:
@@ -89,29 +91,31 @@ public Quoting convert_to_quoted(string str, out string quoted) {
     
     StringBuilder builder = new StringBuilder("\"");
     int index = 0;
-    unichar ch;
-    while (str.get_next_char(ref index, out ch)) {
+    for (;;) {
+        char ch = str[index++];
+        if (ch == String.EOS)
+            break;
+        
         if (ch > 0x7F)
             return Quoting.UNALLOWED;
         
         switch (ch) {
             case '\n':
             case '\r':
-            case '\0':
                 return Quoting.UNALLOWED;
             
             case '"':
             case '\\':
                 requirement = Quoting.REQUIRED;
                 builder.append_c('\\');
-                builder.append_unichar(ch);
+                builder.append_c(ch);
             break;
             
             default:
                 if (is_atom_special(ch))
                     requirement = Quoting.REQUIRED;
                 
-                builder.append_unichar(ch);
+                builder.append_c(ch);
             break;
         }
     }

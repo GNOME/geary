@@ -74,8 +74,11 @@ public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
             return true;
         
         int index = 0;
-        unichar ch;
-        while (stringp.value.get_next_char(ref index, out ch)) {
+        for (;;) {
+            char ch = stringp.value[index++];
+            if (ch == String.EOS)
+                break;
+            
             if (DataFormat.is_tag_special(ch))
                 return false;
         }
