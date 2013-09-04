@@ -7,7 +7,7 @@
 private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     // this value is high because delays between back-to-back unsolicited notifications have been
     // see as high as 250ms
-    private const int NOTIFICATION_QUEUE_WAIT_MSEC = 500;
+    private const int NOTIFICATION_QUEUE_WAIT_MSEC = 1000;
     
     private class ReplayClose : ReplayOperation {
         public ReplayClose() {
