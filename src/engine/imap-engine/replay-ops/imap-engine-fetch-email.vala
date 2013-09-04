@@ -34,6 +34,10 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         remaining_fields = required_fields;
     }
     
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        remote_removed = ids.contains(id);
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         // If forcing an update, skip local operation and go direct to replay_remote()
         if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))
@@ -75,10 +79,6 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             throw new EngineError.NOT_FOUND("Unable to find %s in %s", id.to_string(), engine.to_string());
         
         return ReplayOperation.Status.CONTINUE;
-    }
-    
-    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        remote_removed = ids.contains(id);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {

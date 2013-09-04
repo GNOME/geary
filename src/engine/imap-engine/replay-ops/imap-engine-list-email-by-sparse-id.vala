@@ -15,6 +15,12 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
         this.ids.add_all(ids);
     }
     
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> removed_ids) {
+        ids.remove_all(removed_ids);
+        
+        base.notify_remote_removed_ids(removed_ids);
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (flags.is_force_update()) {
             Gee.Set<Imap.UID>? uids = yield owner.local_folder.get_uids_async(ids, ImapDB.Folder.ListFlags.NONE,
@@ -72,12 +78,6 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
         }
         
         return ReplayOperation.Status.CONTINUE;
-    }
-    
-    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> removed_ids) {
-        ids.remove_all(removed_ids);
-        
-        base.notify_remote_removed_ids(removed_ids);
     }
     
     public override async void backout_local_async() throws Error {

@@ -21,6 +21,10 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         this.cancellable = cancellable;
     }
 
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        to_copy.remove_all(ids);
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_copy.size == 0)
             return ReplayOperation.Status.COMPLETED;
@@ -28,10 +32,6 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         // The local DB will be updated when the remote folder is opened and we see a new message
         // existing there.
         return ReplayOperation.Status.CONTINUE;
-    }
-    
-    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        to_copy.remove_all(ids);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {

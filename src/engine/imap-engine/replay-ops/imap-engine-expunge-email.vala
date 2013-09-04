@@ -21,6 +21,11 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
         this.cancellable = cancellable;
     }
     
+    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        if (removed_ids != null)
+            removed_ids.remove_all(ids);
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_remove.size <= 0)
             return ReplayOperation.Status.COMPLETED;
@@ -43,10 +48,6 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
             Geary.Folder.CountChangeReason.REMOVED);
         
         return ReplayOperation.Status.CONTINUE;
-    }
-    
-    public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        removed_ids.remove_all(ids);
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
