@@ -101,28 +101,6 @@ public class ConversationListStore : Gtk.ListStore {
         email_store = (current_folder == null ? null : new Geary.App.EmailStore(current_folder.account));
     }
     
-    public Geary.EmailIdentifier? get_lowest_email_id() {
-        Gtk.TreeIter iter;
-        if (!get_iter_first(out iter))
-            return null;
-        
-        Geary.EmailIdentifier? lowest_id = null;
-        do {
-            Geary.App.Conversation? conversation = get_conversation_at_iter(iter);
-            if (conversation == null)
-                continue;
-            
-            Geary.EmailIdentifier? conversation_lowest = conversation.get_lowest_email_id();
-            if (conversation_lowest == null)
-                continue;
-            
-            if (lowest_id == null || conversation_lowest.natural_sort_comparator(lowest_id) < 0)
-                lowest_id = conversation_lowest;
-        } while (iter_next(ref iter));
-        
-        return lowest_id;
-    }
-    
     public Geary.App.Conversation? get_conversation_at_path(Gtk.TreePath path) {
         Gtk.TreeIter iter;
         if (!get_iter(out iter, path))

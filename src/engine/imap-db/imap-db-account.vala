@@ -668,22 +668,35 @@ private class Geary.ImapDB.Account : BaseObject {
         return sql.str;
     }
     
-    public async Gee.Collection<Geary.Email>? search_async(string prepared_query,
-        Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
+    public async Gee.Collection<Geary.EmailIdentifier>? search_async(string prepared_query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
-        Gee.Collection<Geary.Email> search_results = new Gee.HashSet<Geary.Email>();
+        Gee.ArrayList<ImapDB.SearchEmailIdentifier> search_results
+            = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
         
         string? search_ids_sql = get_search_ids_sql(search_ids);
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             string blacklisted_ids_sql = do_get_blacklisted_message_ids_sql(
                 folder_blacklist, cx, cancellable);
             
+            // Every mutation of this query we could think of has been tried,
+            // and this version was found to minimize running time.  We
+            // discovered that just doing a JOIN between the MessageTable and
+            // MessageSearchTable was causing a full table scan to order the
+            // results.  When it's written this way, and we force SQLite to use
+            // the correct index (not sure why it can't figure it out on its
+            // own), it cuts the running time roughly in half of how it was
+            // before.  The short version is: modify with extreme caution.  See
+            // <http://redmine.yorba.org/issues/7372>.
             string sql = """
-                SELECT id
-                FROM MessageSearchTable
-                JOIN MessageTable USING (id)
-                WHERE MessageSearchTable MATCH ?
+                SELECT id, internaldate_time_t
+                FROM MessageTable
+                INDEXED BY MessageTableInternalDateTimeTIndex
+                WHERE id IN (
+                    SELECT id
+                    FROM MessageSearchTable
+                    WHERE MessageSearchTable MATCH ?
+                )
             """;
             if (blacklisted_ids_sql != "")
                 sql += " AND id NOT IN (%s)".printf(blacklisted_ids_sql);
@@ -702,15 +715,10 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 id = result.int64_at(0);
-                Geary.Email.Field db_fields;
-                MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
-                    cx, id, requested_fields, out db_fields, cancellable);
-                    
-                if (partial_ok || row.fields.fulfills(requested_fields)) {
-                    Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
-                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
-                    search_results.add(email);
-                }
+                int64 internaldate_time_t = result.int64_at(1);
+                DateTime? internaldate = (internaldate_time_t == -1
+                    ? null : new DateTime.from_unix_local(internaldate_time_t));
+                search_results.add(new ImapDB.SearchEmailIdentifier(id, internaldate));
                 
                 result.next(cancellable);
             }

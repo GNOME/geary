@@ -71,20 +71,19 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     }
     
     /**
-     * Remove messages matching the given predicate.  Return the number of
-     * removed messages.
+     * Remove messages matching the given predicate.  Return the removed messages.
      */
-    public int remove_matching(owned Gee.Predicate<G> predicate) {
-        int count = 0;
+    public Gee.Collection<G> remove_matching(owned Gee.Predicate<G> predicate) {
+        Gee.ArrayList<G> removed = new Gee.ArrayList<G>();
         // Iterate over a copy so we can modify the original.
         foreach (G msg in queue.to_array()) {
             if (predicate(msg)) {
                 queue.remove(msg);
-                ++count;
+                removed.add(msg);
             }
         }
         
-        return count;
+        return removed;
     }
     
     public async G recv_async(Cancellable? cancellable = null) throws Error {

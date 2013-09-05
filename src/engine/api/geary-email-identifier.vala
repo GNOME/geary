@@ -18,23 +18,19 @@
 
 public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
     // Warning: only change this if you know what you are doing.
-    protected int64 unique;
+    protected string unique;
     
-    protected EmailIdentifier(int64 unique) {
+    protected EmailIdentifier(string unique) {
         this.unique = unique;
     }
     
     public virtual uint hash() {
-        return Collection.int64_hash(unique) ^ get_type().name().hash();
+        return unique.hash();
     }
     
     public virtual bool equal_to(Geary.EmailIdentifier other) {
         if (this == other)
             return true;
-        
-        // catch different subtypes
-        if (get_type() != other.get_type())
-            return false;
         
         return unique == other.unique;
     }
@@ -49,11 +45,7 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
         if (this == other)
             return 0;
         
-        int cmp = strcmp(get_type().name(), other.get_type().name());
-        if (cmp != 0)
-            return cmp;
-        
-        return (int) (unique - other.unique).clamp(-1, 1);
+        return strcmp(unique, other.unique);
     }
     
     /**

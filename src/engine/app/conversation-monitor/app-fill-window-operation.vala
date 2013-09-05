@@ -5,7 +5,7 @@
  */
 
 private class Geary.App.FillWindowOperation : ConversationOperation {
-    private bool is_insert;
+    public bool is_insert { get; internal set; }
     
     public FillWindowOperation(ConversationMonitor monitor, bool is_insert) {
         base(monitor);

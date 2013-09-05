@@ -29,6 +29,10 @@ private class Geary.App.ConversationSet : BaseObject {
         return email_id_map.size;
     }
     
+    public Gee.Collection<Geary.EmailIdentifier> get_email_identifiers() {
+        return email_id_map.keys;
+    }
+    
     public bool contains(Conversation conversation) {
         return _conversations.contains(conversation);
     }
@@ -367,7 +371,7 @@ private class Geary.App.ConversationSet : BaseObject {
      * Check a set of emails using check_conversation_in_folder_async(), return
      * the set of emails that were removed due to not being in the folder.
      */
-    public async Gee.Collection<Conversation> check_conversations_in_folder(
+    public async Gee.Collection<Conversation> check_conversations_in_folder_async(
         Gee.Collection<Conversation> conversations, Geary.Account account,
         Geary.FolderPath required_folder_path, Cancellable? cancellable) {
         Gee.ArrayList<Conversation> evaporated = new Gee.ArrayList<Conversation>();
@@ -386,7 +390,7 @@ private class Geary.App.ConversationSet : BaseObject {
         return evaporated;
     }
     
-    public async void remove_emails_and_check_in_folder(
+    public async void remove_emails_and_check_in_folder_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Account account,
         Geary.FolderPath required_folder_path, out Gee.Collection<Conversation> removed,
         out Gee.MultiMap<Conversation, Geary.Email> trimmed, Cancellable? cancellable) {
@@ -398,7 +402,7 @@ private class Geary.App.ConversationSet : BaseObject {
         Gee.MultiMap<Conversation, Geary.Email> initial_trimmed;
         remove_all_emails_by_identifier(ids, out initial_removed, out initial_trimmed);
         
-        Gee.Collection<Conversation> evaporated = yield check_conversations_in_folder(
+        Gee.Collection<Conversation> evaporated = yield check_conversations_in_folder_async(
             initial_trimmed.get_keys(), account, required_folder_path, cancellable);
         
         _removed.add_all(initial_removed);

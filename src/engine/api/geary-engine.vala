@@ -296,17 +296,17 @@ public class Geary.Engine : BaseObject {
         Geary.Account account;
         switch (account_information.service_provider) {
             case ServiceProvider.GMAIL:
-                account = new ImapEngine.GmailAccount("Gmail account %s".printf(account_information.email),
+                account = new ImapEngine.GmailAccount("Gmail:%s".printf(account_information.email),
                     account_information, remote_account, local_account);
             break;
             
             case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount("Yahoo account %s".printf(account_information.email),
+                account = new ImapEngine.YahooAccount("Yahoo:%s".printf(account_information.email),
                     account_information, remote_account, local_account);
             break;
             
             case ServiceProvider.OTHER:
-                account = new ImapEngine.OtherAccount("Other account %s".printf(account_information.email),
+                account = new ImapEngine.OtherAccount("Other:%s".printf(account_information.email),
                     account_information, remote_account, local_account);
             break;
             

@@ -274,16 +274,12 @@ public interface Geary.Account : BaseObject {
     /**
      * Performs a search with the given query string.  Optionally, a list of folders not to search
      * can be passed as well as a list of email identifiers to restrict the search to only those messages.
-     * Returns a list of email objects with the requested fields.  If partial_ok is false,  mail
-     * will only be returned if it includes all requested fields.  The
-     * email_id_folder_path is used as the path when creating EmailIdentifiers.
-     * The list is ordered descending by Geary.EmailProperties.date_received,
-     * and is limited to a maximum number of results and starting offset, so
-     * you can walk the table.  limit can be negative to mean "no limit" but
+     * Returns a list of EmailIdentifiers, or null if there are no results.
+     * The list is limited to a maximum number of results and starting offset,
+     * so you can walk the table.  limit can be negative to mean "no limit" but
      * offset must not be negative.
      */
-    public abstract async Gee.Collection<Geary.Email>? local_search_async(string query,
-        Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
+    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     

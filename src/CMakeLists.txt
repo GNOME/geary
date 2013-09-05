@@ -172,6 +172,7 @@ engine/imap-db/imap-db-email-identifier.vala
 engine/imap-db/imap-db-folder.vala
 engine/imap-db/imap-db-message-addresses.vala
 engine/imap-db/imap-db-message-row.vala
+engine/imap-db/imap-db-search-email-identifier.vala
 engine/imap-db/outbox/smtp-outbox-email-identifier.vala
 engine/imap-db/outbox/smtp-outbox-email-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder.vala

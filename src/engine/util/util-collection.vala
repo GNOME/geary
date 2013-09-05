@@ -13,6 +13,14 @@ public Gee.ArrayList<G> to_array_list<G>(Gee.Collection<G> c) {
     return list;
 }
 
+public Gee.HashMap<Key, Value> to_hash_map<Key, Value>(
+    Gee.Collection<Value> c, Gee.MapFunc<Key, Value> key_selector) {
+    Gee.HashMap<Key, Value> map = new Gee.HashMap<Key, Value>();
+    foreach (Value v in c)
+        map.set(key_selector(v), v);
+    return map;
+}
+
 public void add_all_array<G>(Gee.Collection<G> c, G[] ar) {
     foreach (G g in ar)
         c.add(g);

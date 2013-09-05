@@ -606,6 +606,31 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         remote_semaphore.notify_result(false, null);
     }
     
+    public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
+        Cancellable? cancellable = null) throws Error {
+        low = null;
+        high = null;
+        
+        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? map
+            = yield account.get_containing_folders_async(ids, cancellable);
+        
+        if (map != null) {
+            Gee.ArrayList<Geary.EmailIdentifier> in_folder = new Gee.ArrayList<Geary.EmailIdentifier>();
+            foreach (Geary.EmailIdentifier id in map.get_keys()) {
+                if (path in map.get(id))
+                    in_folder.add(id);
+            }
+            
+            if (in_folder.size > 0) {
+                Gee.SortedSet<Geary.EmailIdentifier> sorted = Geary.EmailIdentifier.sort(in_folder);
+                
+                low = sorted.first();
+                high = sorted.last();
+            }
+        }
+    }
+    
     private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
         notify_email_locally_complete(email_ids);
     }

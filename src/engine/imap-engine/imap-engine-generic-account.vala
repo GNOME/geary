@@ -555,8 +555,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
     }
     
-    public override async Gee.Collection<Geary.Email>? local_search_async(string query,
-        Geary.Email.Field requested_fields, bool partial_ok, Geary.FolderPath? email_id_folder_path,
+    public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         if (offset < 0)
@@ -565,8 +564,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         previous_prepared_search_query = local.prepare_search_query(query);
         
         return yield local.search_async(previous_prepared_search_query,
-            requested_fields, partial_ok, email_id_folder_path, limit, offset,
-            folder_blacklist, search_ids, cancellable);
+            limit, offset, folder_blacklist, search_ids, cancellable);
     }
     
     public override async Gee.Collection<string>? get_search_matches_async(

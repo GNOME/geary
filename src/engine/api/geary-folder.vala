@@ -349,6 +349,15 @@ public interface Geary.Folder : BaseObject {
     public abstract async void close_async(Cancellable? cancellable = null) throws Error;
     
     /**
+     * Find the lowest- and highest-ordered {@link EmailIdentifier}s in the
+     * folder, among the given set of EmailIdentifiers that may or may not be
+     * in the folder.  If none of the given set are in the folder, return null.
+     */
+    public abstract async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
+        Cancellable? cancellable = null) throws Error;
+    
+    /**
      * List emails from the {@link Folder} starting at a particular location within the vector
      * and moving either direction along the mail stack.
      *

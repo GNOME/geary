@@ -20,8 +20,25 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
     
     public void add(ConversationOperation op) {
         // There should only ever be one FillWindowOperation at a time.
-        if (op is FillWindowOperation)
-            mailbox.remove_matching((o) => { return (o is FillWindowOperation); });
+        FillWindowOperation? fill_op = op as FillWindowOperation;
+        if (fill_op != null) {
+            Gee.Collection<ConversationOperation> removed
+                = mailbox.remove_matching(o => o is FillWindowOperation);
+            
+            // If there were any "insert" fill window ops, preserve that flag,
+            // as otherwise we might miss some data.
+            if (!fill_op.is_insert) {
+                foreach (ConversationOperation removed_op in removed) {
+                    FillWindowOperation? removed_fill = removed_op as FillWindowOperation;
+                    assert(removed_fill != null);
+                    
+                    if (removed_fill.is_insert) {
+                        fill_op.is_insert = true;
+                        break;
+                    }
+                }
+            }
+        }
         
         mailbox.send(op);
     }

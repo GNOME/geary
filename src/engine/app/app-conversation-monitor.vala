@@ -34,7 +34,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     public int min_window_count { get { return _min_window_count; }
         set {
             _min_window_count = value;
-            operation_queue.add(new FillWindowOperation(this, avoid_email_id_comparisons));
+            operation_queue.add(new FillWindowOperation(this, false));
         }
     }
     
@@ -50,12 +50,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private bool reseed_notified = false;
     private int _min_window_count = 0;
     private ConversationOperationQueue operation_queue = new ConversationOperationQueue();
-    // TODO: this hack is a quick way to solve the problem of id-based loads
-    // not working for the SearchFolder because its EmailIdentifiers are just
-    // row ids.  Really, the solution is to make all EmailIdentifiers ordered.
-    // If true, this treats all fill-window operations as inserts, which means
-    // the whole list gets reloaded.
-    private bool avoid_email_id_comparisons = false;
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
@@ -196,10 +190,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         _min_window_count = min_window_count;
         
         folder.account.information.notify["imap-credentials"].connect(on_imap_credentials_notified);
-        
-        // See the definition of this field; basically if it's the search
-        // folder, we can't do any id-based loading.  This is a hack.
-        avoid_email_id_comparisons = (folder is Geary.SearchFolder);
     }
     
     ~ConversationMonitor() {
@@ -295,7 +285,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // the reseed has to wait until the folder's remote is opened (handled in on_folder_opened)
         if (reseed_now)
             operation_queue.add(new ReseedOperation(this, "already opened"));
-        operation_queue.add(new FillWindowOperation(this, avoid_email_id_comparisons));
+        operation_queue.add(new FillWindowOperation(this, false));
         
         folder.email_appended.connect(on_folder_email_appended);
         folder.email_removed.connect(on_folder_email_removed);
@@ -636,7 +626,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private void on_folder_email_removed(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
         operation_queue.add(new RemoveOperation(this, removed_ids));
-        operation_queue.add(new FillWindowOperation(this, avoid_email_id_comparisons));
+        operation_queue.add(new FillWindowOperation(this, false));
     }
     
     private void on_account_email_locally_complete(Geary.Folder folder,
@@ -657,7 +647,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         Gee.Collection<Geary.App.Conversation> removed;
         Gee.MultiMap<Geary.App.Conversation, Geary.Email> trimmed;
-        yield conversations.remove_emails_and_check_in_folder(removed_ids, folder.account,
+        yield conversations.remove_emails_and_check_in_folder_async(removed_ids, folder.account,
             folder.path, out removed, out trimmed, null);
         
         foreach (Conversation conversation in trimmed.get_keys())
@@ -713,20 +703,20 @@ public class Geary.App.ConversationMonitor : BaseObject {
             operation_queue.add(new FillWindowOperation(this, true));
     }
     
-    private Geary.EmailIdentifier? get_lowest_email_id() {
+    private async Geary.EmailIdentifier? get_lowest_email_id_async(Cancellable? cancellable) {
         Geary.EmailIdentifier? earliest_id = null;
-        foreach (Geary.App.Conversation conversation in conversations.conversations) {
-            Geary.EmailIdentifier? id = conversation.get_lowest_email_id();
-            if (id != null && (earliest_id == null || id.natural_sort_comparator(earliest_id) < 0))
-                earliest_id = id;
+        try {
+            yield folder.find_boundaries_async(conversations.get_email_identifiers(),
+                out earliest_id, null, cancellable);
+        } catch (Error e) {
+            debug("Error finding earliest email identifier: %s", e.message);
         }
         
         return earliest_id;
     }
     
     internal async void reseed_async(string why) {
-        Geary.EmailIdentifier? earliest_id = get_lowest_email_id();
-        
+        Geary.EmailIdentifier? earliest_id = yield get_lowest_email_id_async(null);
         try {
             if (earliest_id != null) {
                 debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
@@ -862,7 +852,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         int initial_message_count = conversations.get_email_count();
         
-        Geary.EmailIdentifier? low_id = get_lowest_email_id();
+        Geary.EmailIdentifier? low_id = yield get_lowest_email_id_async(null);
         if (low_id != null && !is_insert) {
             // Load at least as many messages as remianing conversations.
             int num_to_load = min_window_count - conversations.size;

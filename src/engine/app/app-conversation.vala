@@ -43,7 +43,6 @@ public class Geary.App.Conversation : BaseObject {
     private int convnum;
     private weak Geary.App.ConversationMonitor? owner;
     private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>();
-    private Geary.EmailIdentifier? lowest_id;
     
     // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
     // the number of times they're accessed makes it worth it
@@ -74,7 +73,6 @@ public class Geary.App.Conversation : BaseObject {
     public Conversation(Geary.App.ConversationMonitor owner) {
         convnum = next_convnum++;
         this.owner = owner;
-        lowest_id = null;
         
         owner.email_flags_changed.connect(on_email_flags_changed);
         owner.folder.account.email_discovered.connect(on_email_discovered);
@@ -226,8 +224,6 @@ public class Geary.App.Conversation : BaseObject {
         foreach (Geary.FolderPath path in known_paths)
             path_map.set(email.id, path);
         
-        check_lowest_id(email.id);
-        
         appended(email);
         
         return true;
@@ -251,10 +247,6 @@ public class Geary.App.Conversation : BaseObject {
                     removed_message_ids.add(ancestor_id);
             }
         }
-        
-        lowest_id = null;
-        foreach (Email e in emails.values)
-            check_lowest_id(e.id);
         
         trimmed(email);
         
@@ -335,13 +327,6 @@ public class Geary.App.Conversation : BaseObject {
         }
     }
     
-    /**
-     * Return the EmailIdentifier with the lowest value.
-     */
-    public Geary.EmailIdentifier? get_lowest_email_id() {
-        return lowest_id;
-    }
-    
     private bool check_flag(Geary.NamedFlag flag, bool contains) {
         foreach (Geary.Email email in get_emails(Ordering.NONE)) {
             if (email.email_flags != null && email.email_flags.contains(flag) == contains)
@@ -357,11 +342,6 @@ public class Geary.App.Conversation : BaseObject {
 
     private bool is_missing_flag(Geary.NamedFlag flag) {
         return check_flag(flag, false);
-    }
-    
-    private void check_lowest_id(EmailIdentifier id) {
-        if (lowest_id == null || id.natural_sort_comparator(lowest_id) < 0)
-            lowest_id = id;
     }
     
     private void on_email_flags_changed(Conversation conversation, Geary.Email email) {
