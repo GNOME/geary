@@ -1307,7 +1307,7 @@ public class GearyController : Geary.BaseObject {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open \"%s\"?").printf(attachment.filename),
                 _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Stock._OPEN, Stock._CANCEL, _("Don't _ask me again"), false);
+                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don't _ask me again"), false);
             if (ask_to_open.run() != Gtk.ResponseType.OK)
                 return;
             

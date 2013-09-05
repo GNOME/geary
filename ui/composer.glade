@@ -4,35 +4,35 @@
   <object class="GtkActionGroup" id="compose actions">
     <child>
       <object class="GtkAction" id="undo">
-        <property name="label" translatable="yes">Undo</property>
+        <property name="label" translatable="yes">_Undo</property>
         <property name="icon_name">undo</property>
       </object>
       <accelerator key="z" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="redo">
-        <property name="label" translatable="yes">Redo</property>
+        <property name="label" translatable="yes">_Redo</property>
         <property name="icon_name">redo</property>
       </object>
       <accelerator key="z" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="cut">
-        <property name="label" translatable="yes">Cut</property>
+        <property name="label" translatable="yes">Cu_t</property>
         <property name="icon_name">edit-cut</property>
       </object>
       <accelerator key="x" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="copy">
-        <property name="label" translatable="yes">Copy</property>
+        <property name="label" translatable="yes">_Copy</property>
         <property name="icon_name">edit-copy</property>
       </object>
       <accelerator key="c" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="paste">
-        <property name="label" translatable="yes">Paste</property>
+        <property name="label" translatable="yes">_Paste</property>
         <property name="icon_name">edit-paste</property>
       </object>
       <accelerator key="v" modifiers="GDK_CONTROL_MASK"/>
@@ -99,13 +99,13 @@
     </child>
     <child>
       <object class="GtkAction" id="paste with formatting">
-        <property name="label" translatable="yes" context="Clipboard paste with rich text">Paste _with formatting</property>
+        <property name="label" translatable="yes" context="Clipboard paste with rich text">Paste _With Formatting</property>
       </object>
       <accelerator key="v" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="copy link">
-        <property name="label" translatable="yes">Copy _link</property>
+        <property name="label" translatable="yes">Copy _Link</property>
       </object>
     </child>
     <child>
@@ -138,7 +138,7 @@
     </child>
     <child>
       <object class="GtkToggleAction" id="compose as html">
-        <property name="label" translatable="yes">Rich Text</property>
+        <property name="label" translatable="yes">_Rich Text</property>
         <property name="icon_name">text-html</property>
       </object>
     </child>
@@ -148,37 +148,37 @@
     </child>
     <child>
       <object class="GtkAction" id="font_large">
-        <property name="label" translatable="yes">Large</property>
+        <property name="label" translatable="yes">Lar_ge</property>
         <property name="short_label" translatable="yes">Large</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="font_medium">
-        <property name="label" translatable="yes">Medium</property>
+        <property name="label" translatable="yes">_Medium</property>
         <property name="short_label" translatable="yes">Medium</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="font_small">
-        <property name="label" translatable="yes">Small</property>
+        <property name="label" translatable="yes">_Small</property>
         <property name="short_label" translatable="yes">Small</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="font_sans">
-        <property name="label" translatable="yes">Sans Serif</property>
+        <property name="label" translatable="yes">S_ans Serif</property>
         <property name="short_label" translatable="yes">Sans Serif</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="font_serif">
-        <property name="label" translatable="yes">Serif</property>
+        <property name="label" translatable="yes">S_erif</property>
         <property name="short_label" translatable="yes">Serif</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="font_monospace">
-        <property name="label" translatable="yes">Fixed Width</property>
+        <property name="label" translatable="yes">_Fixed Width</property>
         <property name="short_label" translatable="yes">Fixed Width</property>
       </object>
     </child>

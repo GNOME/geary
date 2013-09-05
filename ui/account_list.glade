@@ -68,8 +68,7 @@
             <property name="related_action">add_account</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Add an account</property>
-            <property name="label" translatable="yes">toolbutton1</property>
+            <property name="tooltip_text" translatable="yes">Add account</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -82,8 +81,7 @@
             <property name="related_action">edit_account</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="tooltip_text" translatable="yes">Edit an account</property>
-            <property name="label" translatable="yes">toolbutton1</property>
+            <property name="tooltip_text" translatable="yes">Edit account</property>
             <property name="use_underline">True</property>
           </object>
           <packing>
@@ -96,7 +94,7 @@
             <property name="related_action">delete_account</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">toolbutton1</property>
+            <property name="tooltip_text" translatable="yes">Remove account</property>
             <property name="use_underline">True</property>
           </object>
           <packing>

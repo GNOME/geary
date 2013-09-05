@@ -39,8 +39,8 @@ public class ComposerWindow : Gtk.Window {
     
     private const string DEFAULT_TITLE = _("New Message");
     private const string DRAFT_SAVED_TEXT = _("Saved");
-    private const string DRAFT_SAVING_TEXT = _("Saving draft...");
-    private const string DRAFT_ERROR_TEXT = _("Error saving draft");
+    private const string DRAFT_SAVING_TEXT = _("Saving");
+    private const string DRAFT_ERROR_TEXT = _("Error saving");
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
