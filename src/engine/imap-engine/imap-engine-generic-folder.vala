@@ -548,6 +548,21 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         cancel_remote_open_timer();
         
+        // Close the replay queues; if a "natural" close, flush pending operations so everything
+        // gets a chance to run; if forced close, drop everything outstanding
+        try {
+            if (replay_queue != null) {
+                debug("Closing replay queue for %s... (flush_pending=%s)", to_string(),
+                    (!remote_reason.is_error()).to_string());
+                yield replay_queue.close_async(!remote_reason.is_error());
+                debug("Closed replay queue for %s", to_string());
+            }
+        } catch (Error replay_queue_err) {
+            debug("Error closing %s replay queue: %s", to_string(), replay_queue_err.message);
+        }
+        
+        replay_queue = null;
+        
         // Notify all callers waiting for the remote folder that it's not coming available
         Imap.Folder? closing_remote_folder = remote_folder;
         try {
@@ -556,13 +571,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("close_internal_async: Unable to fire remote semaphore: %s", err.message);
         }
         
+        // disconnect signals; note that there's no yield between clearing the remote folder and
+        // this, so they can't sneak in
         if (closing_remote_folder != null) {
             closing_remote_folder.appended.disconnect(on_remote_appended);
             closing_remote_folder.removed.disconnect(on_remote_removed);
             closing_remote_folder.disconnected.disconnect(on_remote_disconnected);
             
-            // to avoid keeping the caller waiting while the remote end closes, close it in the
-            // background
+            // to avoid keeping the caller waiting while the remote end closes (i.e. drops the
+            // connection or performs an IMAP CLOSE operation), close it in the background
             //
             // TODO: Problem with this is that we cannot effectively signal or report a close error,
             // because by the time this operation completes the folder is considered closed.  That
@@ -578,19 +595,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // see above note for why this must be called every time
         notify_closed(local_reason);
         
-        // Close the replay queues *after* the folder has been closed (in case any final upcalls
-        // come and can be handled)
-        try {
-            if (replay_queue != null) {
-                debug("Closing replay queue for %s...", to_string());
-                yield replay_queue.close_async();
-                debug("Closed replay queue for %s", to_string());
-            }
-        } catch (Error replay_queue_err) {
-            debug("Error closing %s replay queue: %s", to_string(), replay_queue_err.message);
-        }
-        
-        replay_queue = null;
         remote_opened = false;
         
         notify_closed(CloseReason.FOLDER_CLOSED);

@@ -96,11 +96,12 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     }
     
     /**
+     * Returns a read-only version of the mailbox queue that can be iterated in queue-order.
+     *
      * Since the queue could potentially alter when the main loop runs, it's important to only
      * examine the queue when not allowing other operations to process.
      *
-     * This returns a read-only list in queue-order.  Altering will not affect the queue.  Use
-     * revoke() to remove enqueued operations.
+     * Altering will not affect the actual queue.  Use {@link revoke} to remove enqueued operations.
      */
     public Gee.Collection<G> get_all() {
         return queue.read_only_view;

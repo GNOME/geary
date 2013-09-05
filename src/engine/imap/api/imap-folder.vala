@@ -129,21 +129,23 @@ private class Geary.Imap.Folder : BaseObject {
         if (session == null)
             return;
         
-        session.exists.disconnect(on_exists);
-        session.expunge.disconnect(on_expunge);
-        session.fetch.disconnect(on_fetch);
-        session.recent.disconnect(on_recent);
-        session.search.disconnect(on_search);
-        session.status_response_received.disconnect(on_status_response);
-        session.disconnected.disconnect(on_disconnected);
+        // set this.session to null before yielding to ClientSessionManager
+        ClientSession release_session = session;
+        session = null;
+        
+        release_session.exists.disconnect(on_exists);
+        release_session.expunge.disconnect(on_expunge);
+        release_session.fetch.disconnect(on_fetch);
+        release_session.recent.disconnect(on_recent);
+        release_session.search.disconnect(on_search);
+        release_session.status_response_received.disconnect(on_status_response);
+        release_session.disconnected.disconnect(on_disconnected);
         
         try {
-            yield session_mgr.release_session_async(session, cancellable);
+            yield session_mgr.release_session_async(release_session, cancellable);
         } catch (Error err) {
             debug("Unable to release session %s: %s", session.to_string(), err.message);
         }
-        
-        session = null;
     }
     
     private void on_exists(int total) {
@@ -254,7 +256,7 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     private void check_open() throws Error {
-        if (!is_open)
+        if (!is_open || session == null)
             throw new EngineError.OPEN_REQUIRED("Imap.Folder %s not open", to_string());
     }
     
@@ -267,6 +269,10 @@ private class Geary.Imap.Folder : BaseObject {
         // execute commands with mutex locked
         Error? err = null;
         try {
+            // check open after acquiring mutex, so that if an error is thrown it's caught and
+            // mutex can be closed
+            check_open();
+            
             responses = yield session.send_multiple_commands_async(cmds, cancellable);
         } catch (Error store_fetch_err) {
             err = store_fetch_err;
@@ -326,6 +332,8 @@ private class Geary.Imap.Folder : BaseObject {
     // TODO: Offer parameter so a SortedSet could be returned (or, the caller must supply the Set)
     public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
         throws Error {
+        check_open();
+        
         FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID);
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;

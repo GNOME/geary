@@ -9,10 +9,10 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     // see as high as 250ms
     private const int NOTIFICATION_QUEUE_WAIT_MSEC = 1000;
     
-    private class ReplayClose : ReplayOperation {
-        public ReplayClose() {
+    private class CloseReplayQueue : ReplayOperation {
+        public CloseReplayQueue() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
-            base ("Close", ReplayOperation.Scope.LOCAL_AND_REMOTE);
+            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE);
         }
         
         public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
@@ -136,7 +136,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * Returns false if the operation was not schedule (queue already closed).
      */
     public bool schedule(ReplayOperation op) {
-        if (is_closed) {
+        // ReplayClose is allowed past the velvet ropes even as the hoi palloi is turned away
+        if (is_closed && !(op is CloseReplayQueue)) {
             debug("Unable to schedule replay operation %s on %s: replay queue closed", op.to_string(),
                 to_string());
             
@@ -248,30 +249,72 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             replay_op.notify_remote_removed_ids(ids);
     }
     
-    public async void close_async(Cancellable? cancellable = null) throws Error {
+    /**
+     * Closes the {@link ReplayQueue}.
+     *
+     * If flush_pending is false, outstanding operations are cancelled.  If a {@link ReplayOperation}
+     * has executed locally and is waiting to execute remotely, it will be backed out.
+     *
+     * Otherwise, all outstanding operations are permitted to execute, but no new ones may be
+     * scheduled.
+     *
+     * A ReplayQueue cannot be re-opened.
+     */
+    public async void close_async(bool flush_pending, Cancellable? cancellable = null) throws Error {
         if (is_closed)
             return;
         
-        closing();
-        
-        // cancel timeout and flush what's available
+        // cancel notification queue timeout
         if (notification_timer != null)
             notification_timer.cancel();
         
-        on_notification_timeout();
+        // piggyback on the notification timer callback to flush notification operations
+        if (flush_pending)
+            on_notification_timeout();
         
-        // flush a ReplayClose operation down the pipe so all enqueued operations complete
-        ReplayClose? close_op = new ReplayClose();
-        if (!schedule(close_op))
-            close_op = null;
-        
-        // mark as closed *after* scheduling, otherwise schedule() will fail
+        // mark as closed now to prevent further scheduling ... ReplayClose gets special
+        // consideration in schedule()
         is_closed = true;
         
-        if (close_op != null)
-            yield close_op.wait_for_ready_async(cancellable);
+        closing();
+        
+        // if not flushing pending, clear out all waiting operations, backing out any that need to
+        // be backed out
+        if (!flush_pending)
+            yield clear_pending_async(cancellable);
+        
+        // flush a ReplayClose operation down the pipe so all working operations complete
+        CloseReplayQueue close_op = new CloseReplayQueue();
+        bool scheduled = schedule(close_op);
+        assert(scheduled);
+        
+        yield close_op.wait_for_ready_async(cancellable);
         
         closed();
+    }
+    
+    private async void clear_pending_async(Cancellable? cancellable) {
+        // note that this merely clears the queue; disabling the timer is performed in close_async
+        notification_queue.clear();
+        
+        // clear the local queue; nothing more to do there
+        local_queue.clear();
+        
+        // have to backout elements that have executed locally but not remotely
+        // clear the remote queue before backing out, otherwise the queue might proceed while
+        // yielding
+        Gee.List<ReplayOperation> remote_list = new Gee.ArrayList<ReplayOperation>();
+        remote_list.add_all(remote_queue.get_all());
+        
+        remote_queue.clear();
+        
+        foreach (ReplayOperation op in remote_list) {
+            try {
+                yield op.backout_local_async();
+            } catch (Error err) {
+                debug("Error backing out operation %s: %s", op.to_string(), err.message);
+            }
+        }
     }
     
     private async void do_replay_local_async() {
@@ -288,7 +331,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             }
             
             // If this is a Close operation, shut down the queue after processing it
-            if (op is ReplayClose)
+            if (op is CloseReplayQueue)
                 queue_running = false;
             
             bool local_execute = false;
@@ -387,7 +430,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             
             // ReplayClose means this queue (and the folder) are closing, so handle errors a little
             // differently
-            bool is_close_op = op is ReplayClose;
+            bool is_close_op = op is CloseReplayQueue;
             
             // wait until the remote folder is opened (or returns false, in which case closed)
             bool folder_opened = true;
