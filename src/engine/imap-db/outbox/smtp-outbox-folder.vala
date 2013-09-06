@@ -296,6 +296,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             list.add(row.outbox_id);
             
             notify_email_appended(list);
+            notify_email_locally_appended(list);
             notify_email_count_changed(email_count, CountChangeReason.APPENDED);
         }
         

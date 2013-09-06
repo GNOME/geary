@@ -195,14 +195,41 @@ public interface Geary.Folder : BaseObject {
     /**
      * Fired when previously unknown messages have been appended to the list of email in the folder.
      *
-     * This is similar to {@link email_appended}, but that signal
-     * lists ''all'' messages appended to the folder.  email_locally_appended only reports email that
-     * have not been seen prior.  Hence, an email that is removed from the folder and returned
-     * later will not be listed here (unless it was removed from the local store in the meantime).
+     * This is similar to {@link email_appended}, but that signal lists ''all'' messages appended
+     * to the folder.  email_locally_appended only reports email that have not been downloaded
+     * prior to the database (and not removed permanently since).  Hence, an email that is removed
+     * from the folder and returned later will not be listed here (unless it was removed from the
+     * local store in the meantime).
      *
      * @see email_appended
      */
     public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Fired when email has been inserted into the list of messages in the folder.
+     *
+     * The {@link EmailIdentifier} for all inserted messages is supplied as a signal parameter.
+     * Inserted messages are not added to the "top" of the vector of messages, but rather into
+     * the middle or beginning.  This can happen for a number of reasons.  Newly received messages
+     * are appended.
+     *
+     * @see email_locally_inserted
+     */
+    public signal void email_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Fired when previously unknown messages have been appended to the list of email in the folder.
+     *
+     * This is similar to {@link email_inserted}, but that signal lists ''all'' messages inserted
+     * to the folder.  email_locally_inserted only reports email that have not been downloaded
+     * prior to the database (and not removed permanently since).  Hence, an email that is removed
+     * from the folder and returned later will not be listed here (unless it was removed from the
+     * local store in the meantime).
+     *
+     * @see email_inserted
+     * @see email_locally_inserted
+     */
+    public signal void email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * Fired when email has been removed (deleted or moved) from the folder.
@@ -238,12 +265,6 @@ public interface Geary.Folder : BaseObject {
     public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
-     * Fired when one or more emails have been discovered (added) to the Folder, but not necessarily
-     * appended (i.e. old email pulled down due to user request or background fetching).
-     */
-    public signal void email_discovered(Gee.Collection<Geary.EmailIdentifier> ids);
-    
-    /**
     * Fired when the {@link SpecialFolderType} has changed.
     *
     * This will usually happen when the local object has been updated with data discovered from the
@@ -262,6 +283,10 @@ public interface Geary.Folder : BaseObject {
     
     protected abstract void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     
+    protected abstract void notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    protected abstract void notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
+    
     protected abstract void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
     
     protected abstract void notify_email_count_changed(int new_count, CountChangeReason reason);
@@ -270,8 +295,6 @@ public interface Geary.Folder : BaseObject {
         Geary.EmailFlags> flag_map);
     
     protected abstract void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
-    
-    protected abstract void notify_email_discovered(Gee.Collection<Geary.EmailIdentifier> ids);
     
     protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);

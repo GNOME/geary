@@ -35,6 +35,10 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
         email_appended(folder, ids);
     }
     
+    protected virtual void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_inserted(folder, ids);
+    }
+    
     protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_removed(folder, ids);
     }

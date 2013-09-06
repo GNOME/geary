@@ -66,6 +66,13 @@ public interface Geary.Account : BaseObject {
     public signal void email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
+     * Fired when emails are inserted to a folder in this account.
+     *
+     * @see Folder.email_inserted
+     */
+    public signal void email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
      * Fired when emails are removed from a folder in this account.
      */
     public signal void email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
@@ -130,6 +137,11 @@ public interface Geary.Account : BaseObject {
      * Signal notification method for subclasses to use.
      */
     protected abstract void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Signal notification method for subclasses to use.
+     */
+    protected abstract void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * Signal notification method for subclasses to use.

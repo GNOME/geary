@@ -232,7 +232,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         Gee.HashSet<Imap.UID> removed_uids = new Gee.HashSet<Imap.UID>();
         Gee.HashSet<Imap.UID> appended_uids = new Gee.HashSet<Imap.UID>();
-        Gee.HashSet<Imap.UID> discovered_uids = new Gee.HashSet<Imap.UID>();
+        Gee.HashSet<Imap.UID> inserted_uids = new Gee.HashSet<Imap.UID>();
         
         // Because the number of UIDs being processed can be immense in large folders, process
         // in a background thread
@@ -251,12 +251,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 if (remote_uid.compare_to(local_latest_id.uid) > 0)
                     appended_uids.add(remote_uid);
                 else
-                    discovered_uids.add(remote_uid);
+                    inserted_uids.add(remote_uid);
             }
         }, cancellable);
         
-        debug("%s: changes since last seen: removed=%d appended=%d discovered=%d", to_string(),
-            removed_uids.size, appended_uids.size, discovered_uids.size);
+        debug("%s: changes since last seen: removed=%d appended=%d inserted=%d", to_string(),
+            removed_uids.size, appended_uids.size, inserted_uids.size);
         
         // fetch from the server the local store's required flags for all appended/inserted messages
         // (which is simply equal to all remaining remote UIDs)
@@ -274,7 +274,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // store new messages and add IDs to the appended/discovered EmailIdentifier buckets
         Gee.Set<ImapDB.EmailIdentifier> appended_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         Gee.Set<ImapDB.EmailIdentifier> locally_appended_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-        Gee.Set<ImapDB.EmailIdentifier> discovered_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
+        Gee.Set<ImapDB.EmailIdentifier> inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
+        Gee.Set<ImapDB.EmailIdentifier> locally_inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         if (to_create != null && to_create.size > 0) {
             Gee.Map<Email, bool>? created_or_merged = yield local_folder.create_or_merge_email_async(
                 to_create, cancellable);
@@ -294,8 +295,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                         
                         if (created)
                             locally_appended_ids.add(id);
-                    } else if (discovered_uids.contains(id.uid) && created) {
-                        discovered_ids.add(id);
+                    } else if (inserted_uids.contains(id.uid)) {
+                        inserted_ids.add(id);
+                        
+                        if (created)
+                            locally_inserted_ids.add(id);
                     }
                 }
             }, cancellable);
@@ -303,7 +307,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("%s: Finished creating/merging %d emails", to_string(), created_or_merged.size);
         }
         
-        check_open("normalize_folders (created/merged appended/discovered emails)");
+        check_open("normalize_folders (created/merged appended/inserted emails)");
         
         // Convert removed UIDs into EmailIdentifiers and detach immediately
         Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
@@ -327,6 +331,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // notify subscribers of changes
         //
         
+        Folder.CountChangeReason count_change_reason = Folder.CountChangeReason.NONE;
+        
         if (removed_ids != null && removed_ids.size > 0) {
             // there may be operations pending on the remote queue for these removed emails; notify
             // operations that the email has shuffled off this mortal coil
@@ -335,20 +341,34 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // notify subscribers about emails that have been removed
             debug("%s: Notifying of %d removed emails since last opened", to_string(), removed_ids.size);
             notify_email_removed(removed_ids);
+            
+            count_change_reason |= Folder.CountChangeReason.REMOVED;
         }
         
-        // notify local discovered (i.e. emails that are in the interior of the vector not seen
-        // before -- this can happen during vector expansion when the app crashes or closes before
-        // writing out everything)
-        if (discovered_ids.size > 0) {
-            debug("%s: Notifying of %d discovered emails since last opened", to_string(), discovered_ids.size);
-            notify_email_discovered(discovered_ids);
+        // notify inserted (new email located somewhere inside the local vector)
+        if (inserted_ids.size > 0) {
+            debug("%s: Notifying of %d inserted emails since last opened", to_string(), inserted_ids.size);
+            notify_email_inserted(inserted_ids);
+            
+            count_change_reason |= Folder.CountChangeReason.INSERTED;
+        }
+        
+        // notify inserted (new email located somewhere inside the local vector that had to be
+        // created, i.e. no portion was stored locally)
+        if (locally_inserted_ids.size > 0) {
+            debug("%s: Notifying of %d locally inserted emails since last opened", to_string(),
+                locally_inserted_ids.size);
+            notify_email_locally_inserted(locally_inserted_ids);
+            
+            count_change_reason |= Folder.CountChangeReason.INSERTED;
         }
         
         // notify appended (new email added since the folder was last opened)
         if (appended_ids.size > 0) {
             debug("%s: Notifying of %d appended emails since last opened", to_string(), appended_ids.size);
             notify_email_appended(appended_ids);
+            
+            count_change_reason |= Folder.CountChangeReason.APPENDED;
         }
         
         // notify locally appended (new email never seen before added since the folder was last
@@ -357,6 +377,14 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("%s: Notifying of %d locally appended emails since last opened", to_string(),
                 locally_appended_ids.size);
             notify_email_locally_appended(locally_appended_ids);
+            
+            count_change_reason |= Folder.CountChangeReason.APPENDED;
+        }
+        
+        if (count_change_reason != Folder.CountChangeReason.NONE) {
+            debug("%s: Notifying of %Xh count change reason (%d remote messages)", to_string(),
+                count_change_reason, remote_message_count);
+            notify_email_count_changed(remote_message_count, count_change_reason);
         }
         
         debug("%s: Completed normalize_folder", to_string());
@@ -730,10 +758,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (appended.size > 0)
             notify_email_appended(appended);
         
-        if (created.size > 0) {
+        if (created.size > 0)
             notify_email_locally_appended(created);
-            notify_email_discovered(created);
-        }
         
         notify_email_count_changed(remote_count, CountChangeReason.APPENDED);
         

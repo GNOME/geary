@@ -66,8 +66,8 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
     public override async void backout_local_async() throws Error {
         yield engine.local_folder.mark_removed_async(moved_ids, false, cancellable);
         
-        engine.notify_email_appended(moved_ids);
-        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.APPENDED);
+        engine.notify_email_inserted(moved_ids);
+        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.INSERTED);
     }
 
     public override string describe_state() {

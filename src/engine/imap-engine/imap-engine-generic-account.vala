@@ -49,45 +49,22 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         base.notify_folders_available_unavailable(available, unavailable);
         if (available != null) {
             foreach (Geary.Folder folder in available) {
-                folder.email_appended.connect(on_folder_email_appended);
-                folder.email_removed.connect(on_folder_email_removed);
-                folder.email_locally_complete.connect(on_folder_email_locally_complete);
-                folder.email_discovered.connect(on_folder_email_discovered);
-                folder.email_flags_changed.connect(on_folder_email_flags_changed);
+                folder.email_appended.connect(notify_email_appended);
+                folder.email_inserted.connect(notify_email_inserted);
+                folder.email_removed.connect(notify_email_removed);
+                folder.email_locally_complete.connect(notify_email_locally_complete);
+                folder.email_flags_changed.connect(notify_email_flags_changed);
             }
         }
         if (unavailable != null) {
             foreach (Geary.Folder folder in unavailable) {
-                folder.email_appended.disconnect(on_folder_email_appended);
-                folder.email_removed.disconnect(on_folder_email_removed);
-                folder.email_locally_complete.disconnect(on_folder_email_locally_complete);
-                folder.email_discovered.disconnect(on_folder_email_discovered);
-                folder.email_flags_changed.disconnect(on_folder_email_flags_changed);
+                folder.email_appended.disconnect(notify_email_appended);
+                folder.email_inserted.disconnect(notify_email_inserted);
+                folder.email_removed.disconnect(notify_email_removed);
+                folder.email_locally_complete.disconnect(notify_email_locally_complete);
+                folder.email_flags_changed.disconnect(notify_email_flags_changed);
             }
         }
-    }
-    
-    private void on_folder_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        notify_email_appended(folder, ids);
-    }
-    
-    private void on_folder_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        notify_email_removed(folder, ids);
-    }
-    
-    private void on_folder_email_locally_complete(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        notify_email_locally_complete(folder, ids);
-    }
-    
-    private void on_folder_email_discovered(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        notify_email_discovered(folder, ids);
-    }
-    
-    private void on_folder_email_flags_changed(Geary.Folder folder,
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
-        notify_email_flags_changed(folder, flag_map);
     }
     
     private void check_open() throws EngineError {

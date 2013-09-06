@@ -30,8 +30,12 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
         email_locally_appended(ids);
     }
     
-    internal virtual void notify_email_discovered(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_discovered(ids);
+    internal virtual void notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_inserted(ids);
+    }
+    
+    internal virtual void notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_inserted(ids);
     }
     
     internal virtual void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids) {
