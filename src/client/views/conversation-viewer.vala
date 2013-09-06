@@ -158,6 +158,7 @@ public class ConversationViewer : Gtk.Box {
         
         GearyApplication.instance.controller.conversations_selected.connect(on_conversations_selected);
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
+        GearyApplication.instance.controller.conversation_count_changed.connect(on_conversation_count_changed);
         
         web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
@@ -214,8 +215,8 @@ public class ConversationViewer : Gtk.Box {
         return "message_%s".printf(id.to_string());
     }
     
-    private void show_multiple_selected(uint selected_count) {
-        // Remove any messages and hide the message container, then show the counter.
+    private void show_special_message(string msg) {
+        // Remove any messages and hide the message container, then show the special message.
         clear(current_folder, current_account_information);
         set_mode(DisplayMode.MULTISELECT);
         
@@ -223,17 +224,30 @@ public class ConversationViewer : Gtk.Box {
             // Update the counter's count.
             WebKit.DOM.HTMLElement counter =
                 web_view.get_dom_document().get_element_by_id("selection_counter") as WebKit.DOM.HTMLElement;
-            if (selected_count == 0) {
-                counter.set_inner_html(_("No conversations selected."));
-            } else {
-                counter.set_inner_html(_("%u conversations selected.").printf(selected_count));
-            }
+            counter.set_inner_html(msg);
         } catch (Error e) {
             debug("Error updating counter: %s", e.message);
         }
     }
     
+    private void hide_special_message() {
+        if (display_mode != DisplayMode.MULTISELECT)
+            return;
+        
+        clear(current_folder, current_account_information);
+        set_mode(DisplayMode.NONE);
+    }
+    
+    private void show_multiple_selected(uint selected_count) {
+        if (selected_count == 0)
+            show_special_message(_("No conversations selected."));
+        else
+            show_special_message(_("%u conversations selected.").printf(selected_count));
+    }
+    
     private void on_folder_selected(Geary.Folder? folder) {
+        hide_special_message();
+        
         current_folder = folder;
         email_store = (current_folder == null ? null : new Geary.App.EmailStore(current_folder.account));
         fsm.issue(SearchEvent.RESET);
@@ -249,6 +263,15 @@ public class ConversationViewer : Gtk.Box {
         } else {
             web_view.allow_collapsing(true);
         }
+    }
+    
+    private void on_conversation_count_changed(int count) {
+        if (count != 0)
+            hide_special_message();
+        else if (current_folder is Geary.SearchFolder)
+            show_special_message(_("No search results found."));
+        else
+            show_special_message(_("No conversations in folder."));
     }
     
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation>? conversations,

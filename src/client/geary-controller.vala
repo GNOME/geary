@@ -116,6 +116,11 @@ public class GearyController : Geary.BaseObject {
         Geary.Folder? current_folder);
     
     /**
+     * Fired when the number of conversations changes.
+     */
+    public signal void conversation_count_changed(int count);
+    
+    /**
      * Fired when the search text is changed according to the controller.  This accounts
      * for a brief typmatic delay.
      */
@@ -811,6 +816,10 @@ public class GearyController : Geary.BaseObject {
         
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.seed_completed.connect(on_seed_completed);
+        current_conversations.seed_completed.connect(on_conversation_count_changed);
+        current_conversations.scan_completed.connect(on_conversation_count_changed);
+        current_conversations.conversations_added.connect(on_conversation_count_changed);
+        current_conversations.conversation_removed.connect(on_conversation_count_changed);
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
@@ -829,6 +838,11 @@ public class GearyController : Geary.BaseObject {
             debug("Not enough messages, loading more for folder %s", current_folder.to_string());
             on_load_more();
         }
+    }
+    
+    private void on_conversation_count_changed() {
+        if (current_conversations != null)
+            conversation_count_changed(current_conversations.get_conversation_count());
     }
     
     private void on_notification_bubble_invoked(Geary.Folder? folder, Geary.Email? email) {
