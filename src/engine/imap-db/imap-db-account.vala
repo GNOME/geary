@@ -618,7 +618,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 if (s == "")
                     continue;
                 
-                s = s + "*";
+                s = "\"" + s + "*\"";
             }
             
             if (in_quote && quotes % 2 != 0)
