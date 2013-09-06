@@ -8,7 +8,7 @@ private class Geary.SmtpOutboxEmailIdentifier : Geary.EmailIdentifier {
     public int64 ordering { get; private set; }
     
     public SmtpOutboxEmailIdentifier(int64 message_id, int64 ordering) {
-        base ("%s:%lld".printf(get_type().name(), message_id));
+        base ("SmtpOutboxEmailIdentifer:%s".printf(message_id.to_string()));
         
         this.ordering = ordering;
     }
