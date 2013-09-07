@@ -215,7 +215,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.Set<Imap.UID>? local_uids = yield local_folder.list_uids_by_range_async(
             first_uid, last_uid, true, cancellable);
         if (local_uids == null)
-            local_uids = Gee.Set.empty<Imap.UID>();
+            local_uids = new Gee.HashSet<Imap.UID>();
         
         check_open("normalize_folders (list local)");
         
@@ -223,7 +223,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.Set<Imap.UID>? remote_uids = yield remote_folder.list_uids_async(
             new Imap.MessageSet.uid_range(first_uid, last_uid), cancellable);
         if (remote_uids == null)
-            local_uids = Gee.Set.empty<Imap.UID>();
+            remote_uids = new Gee.HashSet<Imap.UID>();
         
         check_open("normalize_folders (list remote)");
         
