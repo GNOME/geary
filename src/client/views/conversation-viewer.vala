@@ -826,7 +826,7 @@ public class ConversationViewer : Gtk.Box {
             return null;
          
         try {
-            return email.get_attachment(int64.parse(element.get_attribute("data-attachment-id")));
+            return email.get_attachment(element.get_attribute("data-attachment-id"));
         } catch (Geary.EngineError err) {
             return null;
         }
@@ -1260,7 +1260,7 @@ public class ConversationViewer : Gtk.Box {
     }
 
     private void on_attachment_clicked_self(WebKit.DOM.Element element) {
-        int64 attachment_id = int64.parse(element.get_attribute("data-attachment-id"));
+        string attachment_id = element.get_attribute("data-attachment-id");
         Geary.Email? email = get_email_from_element(element);
         if (email == null)
             return;
@@ -1754,18 +1754,17 @@ public class ConversationViewer : Gtk.Box {
                 }
                 // Generate the attachment table.
                 WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
-                string filename = Geary.String.is_empty_or_whitespace(attachment.filename) ?
-                    _("none") : attachment.filename;
+                string filename = !attachment.has_supplied_filename ? _("none") : attachment.file.get_basename();
                 Util.DOM.select(attachment_table, ".info .filename")
                     .set_inner_text(filename);
                 Util.DOM.select(attachment_table, ".info .filesize")
                     .set_inner_text(Files.get_filesize_as_string(attachment.filesize));
-                attachment_table.set_attribute("data-attachment-id", "%s".printf(attachment.id.to_string()));
+                attachment_table.set_attribute("data-attachment-id", attachment.id);
 
                 // Set the image preview and insert it into the container.
                 WebKit.DOM.HTMLImageElement img =
                     Util.DOM.select(attachment_table, ".preview img") as WebKit.DOM.HTMLImageElement;
-                web_view.set_image_src(img, attachment.mime_type, attachment.filepath, ATTACHMENT_PREVIEW_SIZE);
+                web_view.set_image_src(img, attachment.mime_type, attachment.file.get_path(), ATTACHMENT_PREVIEW_SIZE);
                 attachment_container.append_child(attachment_table);
             }
 

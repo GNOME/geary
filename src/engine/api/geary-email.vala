@@ -253,7 +253,7 @@ public class Geary.Email : BaseObject {
     public string get_searchable_attachment_list() {
         StringBuilder search = new StringBuilder();
         foreach (Geary.Attachment attachment in attachments) {
-            search.append(attachment.filename);
+            search.append(attachment.file.get_basename());
             search.append("\n");
         }
         return search.str;
@@ -279,7 +279,7 @@ public class Geary.Email : BaseObject {
      * Requires the REQUIRED_FOR_MESSAGE fields be present; else
      * EngineError.INCOMPLETE_MESSAGE is thrown.
      */
-    public Geary.Attachment? get_attachment(int64 attachment_id) throws EngineError {
+    public Geary.Attachment? get_attachment(string attachment_id) throws EngineError {
         if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
             throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
 

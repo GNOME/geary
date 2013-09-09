@@ -1329,7 +1329,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     internal static Geary.Email do_add_attachments(Db.Connection cx, Geary.Email email,
         int64 message_id, Cancellable? cancellable = null) throws Error {
         // Add attachments if available
-        if (email.fields.fulfills(Geary.Attachment.REQUIRED_FIELDS)) {
+        if (email.fields.fulfills(ImapDB.Attachment.REQUIRED_FIELDS)) {
             Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id,
                 cancellable);
             if (attachments != null)
@@ -1772,9 +1772,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
         do {
-            list.add(new Geary.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
+            list.add(new ImapDB.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
                 results.string_at(2), results.int64_at(3), message_id, results.rowid_at(0),
-                Attachment.Disposition.from_int(results.int_at(4))));
+                Geary.Attachment.Disposition.from_int(results.int_at(4))));
         } while (results.next(cancellable));
         
         return list;
@@ -1814,12 +1814,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_string(1, filename);
             stmt.bind_string(2, mime_type);
             stmt.bind_uint(3, filesize);
-            stmt.bind_int(4, Attachment.Disposition.from_string(disposition));
+            stmt.bind_int(4, Geary.Attachment.Disposition.from_string(disposition));
             
             int64 attachment_id = stmt.exec_insert(cancellable);
             
-            File saved_file = File.new_for_path(Attachment.get_path(db.db_file.get_parent(), message_id,
-                attachment_id, filename));
+            File saved_file = ImapDB.Attachment.generate_file(db.db_file.get_parent(), message_id,
+                attachment_id, filename);
             
             debug("Saving attachment to %s", saved_file.get_path());
             

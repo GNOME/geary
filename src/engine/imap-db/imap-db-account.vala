@@ -58,7 +58,7 @@ private class Geary.ImapDB.Account : BaseObject {
     public static void get_imap_db_storage_locations(File user_data_dir, out File db_file,
         out File attachments_dir) {
         db_file = ImapDB.Database.get_db_file(user_data_dir);
-        attachments_dir = Geary.Attachment.get_attachments_dir(user_data_dir);
+        attachments_dir = ImapDB.Attachment.get_attachments_dir(user_data_dir);
     }
     
     public async void open_async(File user_data_dir, File schema_dir, Cancellable? cancellable)

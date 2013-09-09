@@ -4,9 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Attachment : BaseObject {
-    public const Email.Field REQUIRED_FIELDS = Email.REQUIRED_FOR_MESSAGE;
-    
+/**
+ * An attachment that was a part of an {@link Email}.
+ *
+ * @see Email.get_attachment
+ */
+
+public abstract class Geary.Attachment : BaseObject {
     // NOTE: These values are persisted on disk and should not be modified unless you know what
     // you're doing.
     public enum Disposition {
@@ -43,36 +47,52 @@ public class Geary.Attachment : BaseObject {
         }
     }
     
-    public string? filename { get; private set; }
-    public string filepath { get; private set; }
+    /**
+     * An identifier that can be used to locate the {@link Attachment} in an {@link Email}.
+     *
+     * @see Email.get_attachment
+     */
+    public string id { get; private set; }
+    
+    /**
+     * Returns true if the originating {@link Email} supplied a filename for the {@link Attachment}.
+     *
+     * Since all files must have a name, one is supplied for the Attachment by Geary if this is
+     * false.  This is merely to indicate how the filename should be displayed, since Geary's will
+     * be an untranslated "none".
+     */
+    public bool has_supplied_filename { get; private set; }
+    
+    /**
+     * The on-disk File of the {@link Attachment}.
+     */
+    public File file { get; private set; }
+    
+    /**
+     * The MIME type of the {@link Attachment}.
+     */
     public string mime_type { get; private set; }
+    
+    /**
+     * The file size (in bytes) if the {@link file}.
+     */
     public int64 filesize { get; private set; }
-    public int64 id { get; private set; }
+    
+    /**
+     * The {@link Disposition} of the attachment, as specified by the {@link Email}.
+     *
+     * See [[https://tools.ietf.org/html/rfc2183]]
+     */
     public Disposition disposition { get; private set; }
     
-    // TODO: Move some of this into ImapDB.Attachment
-    internal Attachment(File data_dir, string? filename, string mime_type, int64 filesize,
-        int64 message_id, int64 attachment_id, Disposition disposition) {
-
-        this.filename = filename;
+    protected Attachment(string id, File file, bool has_supplied_filename, string mime_type, int64 filesize,
+        Disposition disposition) {
+        this.id = id;
+        this.file = file;
+        this.has_supplied_filename = has_supplied_filename;
         this.mime_type = mime_type;
         this.filesize = filesize;
-        this.filepath = get_path(data_dir, message_id, attachment_id, filename);
-        this.id = attachment_id;
         this.disposition = disposition;
-    }
-    
-    // TODO: Move this into ImapDB.Attachment
-    internal static string get_path(File data_dir, int64 message_id, int64 attachment_id,
-        string? filename) {
-        // "none" should not be translated, or the user will be unable to retrieve their
-        // attachments with no filenames after changing their language.
-        return "%s/attachments/%s/%s/%s".printf(data_dir.get_path(), message_id.to_string(),
-            attachment_id.to_string(), filename ?? "none");
-    }
-    
-    internal static File get_attachments_dir(File data_dir) {
-        return data_dir.get_child("attachments");
     }
 }
 

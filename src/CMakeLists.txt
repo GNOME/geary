@@ -166,6 +166,7 @@ engine/imap/transport/imap-deserializer.vala
 engine/imap/transport/imap-serializer.vala
 
 engine/imap-db/imap-db-account.vala
+engine/imap-db/imap-db-attachment.vala
 engine/imap-db/imap-db-contact.vala
 engine/imap-db/imap-db-database.vala
 engine/imap-db/imap-db-email-identifier.vala

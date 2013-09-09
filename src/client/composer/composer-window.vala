@@ -904,12 +904,8 @@ public class ComposerWindow : Gtk.Window {
     
     private void check_pending_attachments() {
         if (pending_attachments != null) {
-            Gee.Set<string> filenames = new Gee.HashSet<string>();
-            foreach (File file in attachment_files)
-                filenames.add(file.get_path());
-            
             foreach (Geary.Attachment attachment in pending_attachments) {
-                if (!filenames.contains(attachment.filepath)) {
+                if (!attachment_files.contains(attachment.file)) {
                     pending_attachments_button.show();
                     return;
                 }
@@ -990,11 +986,8 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void add_attachments(Gee.List<Geary.Attachment> attachments, bool alert_errors = true) {
-        foreach(Geary.Attachment attachment in attachments) {
-            File? attachment_file = File.new_for_path(attachment.filepath);
-            if (attachment_file != null)
-                add_attachment(attachment_file, alert_errors);
-        }
+        foreach(Geary.Attachment attachment in attachments)
+            add_attachment(attachment.file, alert_errors);
     }
     
     private void remove_attachment(File file, Gtk.Box box) {

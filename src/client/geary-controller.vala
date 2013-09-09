@@ -1392,7 +1392,7 @@ public class GearyController : Geary.BaseObject {
     private void on_open_attachment(Geary.Attachment attachment) {
         if (GearyApplication.instance.config.ask_open_attachment) {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
-                _("Are you sure you want to open \"%s\"?").printf(attachment.filename),
+                _("Are you sure you want to open \"%s\"?").printf(attachment.file.get_basename()),
                 _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
                 Stock._OPEN_BUTTON, Stock._CANCEL, _("Don't _ask me again"), false);
             if (ask_to_open.run() != Gtk.ResponseType.OK)
@@ -1402,7 +1402,7 @@ public class GearyController : Geary.BaseObject {
             GearyApplication.instance.config.ask_open_attachment = !ask_to_open.is_checked;
         }
         
-        open_uri("file://" + attachment.filepath);
+        open_uri(attachment.file.get_uri());
     }
     
     private bool do_overwrite_confirmation(File to_overwrite) {
@@ -1434,7 +1434,7 @@ public class GearyController : Geary.BaseObject {
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
         if (attachments.size == 1) {
-            dialog.set_current_name(attachments[0].filename);
+            dialog.set_current_name(attachments[0].file.get_basename());
             dialog.set_do_overwrite_confirmation(true);
             // use custom overwrite confirmation so it looks consistent whether one or many
             // attachments are being saved
@@ -1458,8 +1458,8 @@ public class GearyController : Geary.BaseObject {
         
         // Save each one, checking for overwrite only if multiple attachments are being written
         foreach (Geary.Attachment attachment in attachments) {
-            File source_file = File.new_for_path(attachment.filepath);
-            File dest_file = (attachments.size == 1) ? destination : destination.get_child(attachment.filename);
+            File source_file = attachment.file;
+            File dest_file = (attachments.size == 1) ? destination : destination.get_child(attachment.file.get_basename());
             
             if (attachments.size > 1 && dest_file.query_exists() && !do_overwrite_confirmation(dest_file))
                 return;
