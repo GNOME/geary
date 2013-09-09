@@ -468,11 +468,14 @@ public class Geary.RFC822.Message : BaseObject {
         if (part == null)
             return false;
         
+        // Stop processing if the part is an attachment
         string? disposition = part.get_disposition();
         if (disposition != null && disposition.down() == "attachment")
             return false;
         
-        // Handle inline text parts
+        /* Handle text parts that are not attachments
+         * They may have inline disposition, or they may have no disposition specified
+         */
         GMime.ContentType content_type = part.get_content_type();
         if (content_type.get_media_type() == "text") {
             if (content_type.get_media_subtype() == text_subtype) {
@@ -483,6 +486,10 @@ public class Geary.RFC822.Message : BaseObject {
             // We were the wrong kind of text part
             return false;
         }
+        
+        // If images have no disposition, they are handled elsewhere; see #7299
+        if (disposition == null)
+            return false;
         
         // Hand off to the replacer for processing
         if (replacer == null)
