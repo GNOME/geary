@@ -297,10 +297,11 @@ private class Geary.App.ConversationSet : BaseObject {
         removed_conversation = false;
         
         Conversation? conversation = email_id_map.get(id);
-        if (conversation == null) {
-            debug("Removed email %s not found in conversation set", id.to_string());
+        // This can happen when the conversation monitor only goes back a few
+        // emails, but something old gets removed.  It's especially likely when
+        // changing search terms in the search folder.
+        if (conversation == null)
             return null;
-        }
         
         Geary.Email? email = conversation.get_email_by_id(id);
         if (email == null)

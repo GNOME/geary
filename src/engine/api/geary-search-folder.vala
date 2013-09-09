@@ -122,7 +122,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         
         Error? error = null;
         try {
-            yield do_search_async(query, ids, cancellable);
+            yield do_search_async(query, ids, null, cancellable);
         } catch(Error e) {
             error = e;
         }
@@ -153,14 +153,17 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         
         Error? error = null;
         try {
-            Gee.ArrayList<Geary.EmailIdentifier> relevant_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+            Gee.ArrayList<ImapDB.SearchEmailIdentifier> relevant_ids
+                = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
             foreach (Geary.EmailIdentifier id in ids) {
-                if (id in (Gee.Collection<Geary.EmailIdentifier>) search_results)
-                    relevant_ids.add(id);
+                ImapDB.SearchEmailIdentifier? search_id
+                    = ImapDB.SearchEmailIdentifier.collection_get_email_identifier(search_results, id);
+                if (search_id != null)
+                    relevant_ids.add(search_id);
             }
             
             if (relevant_ids.size > 0)
-                yield do_search_async(query, relevant_ids, cancellable);
+                yield do_search_async(query, null, relevant_ids, cancellable);
         } catch(Error e) {
             error = e;
         }
@@ -220,7 +223,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         
         Error? error = null;
         try {
-            yield do_search_async(query, null, cancellable);
+            yield do_search_async(query, null, null, cancellable);
         } catch(Error e) {
             error = e;
         }
@@ -235,34 +238,43 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     }
     
     // NOTE: you must call this ONLY after locking result_mutex_token.
-    // If search_ids is null, the results of this search are considered to be
-    // the full new set.  If non-null, the results are considered to be a delta
-    // and are added or subtracted from the full set.
-    private async void do_search_async(string query, Gee.Collection<Geary.EmailIdentifier>? search_ids,
-        Cancellable? cancellable) throws Error {
+    // If both *_ids parameters are null, the results of this search are
+    // considered to be the full new set.  If non-null, the results are
+    // considered to be a delta and are added or subtracted from the full set.
+    // add_ids are new ids to search for, remove_ids are ids in our result set
+    // that will be removed if this search doesn't turn them up.
+    private async void do_search_async(string query, Gee.Collection<Geary.EmailIdentifier>? add_ids,
+        Gee.Collection<ImapDB.SearchEmailIdentifier>? remove_ids, Cancellable? cancellable) throws Error {
+        // There are three cases here: 1) replace full result set, where the
+        // *_ids parameters are both null, 2) add to result set, where just
+        // remove_ids is null, and 3) remove from result set, where just
+        // add_ids is null.  We can't add and remove at the same time.
+        assert(add_ids == null || remove_ids == null);
+        
         // TODO: don't limit this to MAX_RESULT_EMAILS.  Instead, we could be
         // smarter about only fetching the search results in list_email_async()
         // etc., but this leads to some more complications when redoing the
         // search.
         Gee.ArrayList<ImapDB.SearchEmailIdentifier> results
             = ImapDB.SearchEmailIdentifier.array_list_from_results(yield account.local_search_async(
-            query, MAX_RESULT_EMAILS, 0, exclude_folders, search_ids, cancellable));
+            query, MAX_RESULT_EMAILS, 0, exclude_folders, add_ids ?? remove_ids, cancellable));
         
         Gee.ArrayList<ImapDB.SearchEmailIdentifier> added
             = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
-        Gee.ArrayList<Geary.EmailIdentifier> removed
+        Gee.ArrayList<ImapDB.SearchEmailIdentifier> removed
             = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
         
-        Gee.Collection<Geary.EmailIdentifier> potentially_removed_ids
-            = (search_ids == null ? search_results : search_ids);
-        
-        foreach (ImapDB.SearchEmailIdentifier id in results) {
-            if (!(id in search_results))
-                added.add(id);
+        if (remove_ids == null) {
+            foreach (ImapDB.SearchEmailIdentifier id in results) {
+                if (!(id in search_results))
+                    added.add(id);
+            }
         }
-        foreach (Geary.EmailIdentifier id in potentially_removed_ids) {
-            if (!(id in (Gee.Collection<Geary.EmailIdentifier>) results))
-                removed.add(id);
+        if (add_ids == null) {
+            foreach (ImapDB.SearchEmailIdentifier id in remove_ids ?? search_results) {
+                if (!(id in results))
+                    removed.add(id);
+            }
         }
         
         bool first_results = search_results.size == 0;
