@@ -90,7 +90,51 @@ public class Geary.Db.Database : Geary.Db.Context {
             warning("SQLite not thread-safe: asynchronous queries will not be available");
         }
         
+        if ((flags & DatabaseFlags.CHECK_CORRUPTION) != 0)
+            check_for_corruption(flags, cancellable);
+        
         is_open = true;
+    }
+    
+    private void check_for_corruption(DatabaseFlags flags, Cancellable? cancellable) throws Error {
+        // if the file exists, open a connection and test for corruption by creating a dummy table,
+        // adding a row, selecting the row, then dropping the table ... can only do this for
+        // read-write databases, however
+        //
+        // TODO: "PRAGMA integrity_check" would be useful here, but it can take a while to execute.
+        // Also can be performed on read-only databases.
+        //
+        // TODO: Allow the caller to specify the name of the test table, so we're not clobbering
+        // theirs (however improbable it is to name a table "CorruptionCheckTable")
+        bool exists = db_file.query_exists(cancellable);
+        if (exists && (flags & DatabaseFlags.READ_ONLY) == 0) {
+            Connection cx = new Connection(this, Sqlite.OPEN_READWRITE, cancellable);
+            
+            try {
+                // drop existing test table (in case created in prior failed open)
+                cx.exec("DROP TABLE IF EXISTS CorruptionCheckTable");
+                
+                // create dummy table with a "subtantial" column
+                cx.exec("CREATE TABLE CorruptionCheckTable (text_col TEXT)");
+                
+                // insert row
+                cx.exec("INSERT INTO CorruptionCheckTable (text_col) VALUES ('xyzzy')");
+                
+                // select row
+                cx.exec("SELECT * FROM CorruptionCheckTable");
+                
+                // drop table
+                cx.exec("DROP TABLE CorruptionCheckTable");
+            } catch (Error err) {
+                throw new DatabaseError.CORRUPT("Possible integrity problem discovered in %s: %s",
+                    db_file.get_path(), err.message);
+            }
+        } else if (!exists && (flags & DatabaseFlags.CREATE_FILE) == 0) {
+            // file doesn't exist and no flag to create it ... that's bad too, might as well
+            // let them know now
+            throw new DatabaseError.CORRUPT("Database file %s not found and no CREATE_FILE flag",
+                db_file.get_path());
+        }
     }
     
     /**
@@ -126,7 +170,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         return internal_open_connection(false, cancellable);
     }
     
-    private Connection internal_open_connection(bool master, Cancellable? cancellable = null) throws Error {
+    private Connection internal_open_connection(bool master, Cancellable? cancellable) throws Error {
         check_open();
         
         int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0 ? Sqlite.OPEN_READONLY
@@ -150,7 +194,7 @@ public class Geary.Db.Database : Geary.Db.Context {
      */
     public Connection get_master_connection() throws Error {
         if (master_connection == null)
-            master_connection = internal_open_connection(true);
+            master_connection = internal_open_connection(true, null);
         
         return master_connection;
     }

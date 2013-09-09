@@ -80,6 +80,8 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     
     public abstract bool is_open();
     
+    public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
+    
     public abstract Gee.Collection<Geary.Folder> list_matching_folders(
         Geary.FolderPath? parent) throws Error;
     

@@ -26,6 +26,10 @@ abstract class AlertDialog : Object {
             dialog.add_button(ok_button, Gtk.ResponseType.OK);
     }
     
+    public void use_secondary_markup(bool markup) {
+        dialog.secondary_use_markup = markup;
+    }
+    
     public Gtk.Box get_message_area() {
         return (Gtk.Box) dialog.get_message_area();
     }

@@ -82,7 +82,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (!information.imap_credentials.is_complete())
             yield information.fetch_passwords_async(Geary.CredentialsMediator.ServiceFlag.IMAP);
         
-        yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"), cancellable);
+        try {
+            yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"),
+                cancellable);
+        } catch (Error err) {
+            // convert database-open errors
+            if (err is DatabaseError.CORRUPT)
+                throw new EngineError.CORRUPT("%s", err.message);
+            else if (err is DatabaseError.ACCESS)
+                throw new EngineError.PERMISSIONS("%s", err.message);
+            else
+                throw err;
+        }
         
         // outbox is now available
         local.outbox.report_problem.connect(notify_report_problem);
@@ -153,6 +164,31 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     public override bool is_open() {
         return open;
+    }
+    
+    public override async void rebuild_async(Cancellable? cancellable = null) throws Error {
+        if (open)
+            throw new EngineError.ALREADY_OPEN("Account cannot be open during rebuild");
+        
+        message("%s: Rebuilding account local data", to_string());
+        
+        // get all the storage locations associated with this Account
+        File db_file;
+        File attachments_dir;
+        ImapDB.Account.get_imap_db_storage_locations(information.settings_dir, out db_file,
+            out attachments_dir);
+        
+        if (yield Files.query_exists_async(db_file, cancellable)) {
+            message("%s: Deleting database file %s...", to_string(), db_file.get_path());
+            yield db_file.delete_async(Priority.DEFAULT, cancellable);
+        }
+        
+        if (yield Files.query_exists_async(attachments_dir, cancellable)) {
+            message("%s: Deleting attachments directory %s...", to_string(), attachments_dir.get_path());
+            yield Files.recursive_delete_async(attachments_dir, cancellable);
+        }
+        
+        message("%s: Rebuild complete", to_string());
     }
     
     // Subclasses should implement this to return their flavor of a GenericFolder with the

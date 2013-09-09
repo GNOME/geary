@@ -12,8 +12,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     
     public Database(File db_dir, File schema_dir, ProgressMonitor upgrade_monitor,
         string account_owner_email) {
-        base (db_dir.get_child(DB_FILENAME), schema_dir, upgrade_monitor);
+        base (get_db_file(db_dir), schema_dir, upgrade_monitor);
         this.account_owner_email = account_owner_email;
+    }
+    
+    public static File get_db_file(File db_dir) {
+        return db_dir.get_child(DB_FILENAME);
     }
     
     public override void open(Db.DatabaseFlags flags, Db.PrepareConnection? prepare_cb,

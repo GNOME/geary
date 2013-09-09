@@ -27,7 +27,8 @@ public enum DatabaseFlags {
     NONE = 0,
     CREATE_DIRECTORY,
     CREATE_FILE,
-    READ_ONLY
+    READ_ONLY,
+    CHECK_CORRUPTION
 }
 
 public enum ResetScope {
@@ -118,16 +119,18 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
         case Sqlite.LOCKED:
             throw new DatabaseError.BUSY(msg);
         
+        case Sqlite.IOERR:
         case Sqlite.PERM:
         case Sqlite.READONLY:
-        case Sqlite.IOERR:
-        case Sqlite.CORRUPT:
         case Sqlite.CANTOPEN:
         case Sqlite.NOLFS:
         case Sqlite.AUTH:
+            throw new DatabaseError.ACCESS(msg);
+        
+        case Sqlite.CORRUPT:
         case Sqlite.FORMAT:
         case Sqlite.NOTADB:
-            throw new DatabaseError.BACKING(msg);
+            throw new DatabaseError.CORRUPT(msg);
         
         case Sqlite.NOMEM:
             throw new DatabaseError.MEMORY(msg);

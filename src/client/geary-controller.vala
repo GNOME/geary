@@ -591,15 +591,26 @@ public class GearyController : Geary.BaseObject {
     public async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         
-        try {
-            account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
-            yield account.open_async(cancellable);
-        } catch (Error open_err) {
-            // TODO: Better error reporting to user
-            debug("Unable to open account %s: %s", account.to_string(), open_err.message);
-            
-            GearyApplication.instance.panic();
-        }
+        bool retry = false;
+        do {
+            try {
+                account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
+                yield account.open_async(cancellable);
+                retry = false;
+            } catch (Error open_err) {
+                debug("Unable to open account %s: %s", account.to_string(), open_err.message);
+                
+                if (open_err is Geary.EngineError.CORRUPT)
+                    retry = yield account_database_error_async(account);
+                else if (open_err is Geary.EngineError.PERMISSIONS)
+                    yield account_database_perms_async(account);
+                else
+                    yield account_general_error_async(account);
+                
+                if (!retry)
+                    return;
+            }
+        } while (retry);
         
         email_stores.set(account, new Geary.App.EmailStore(account));
         inbox_cancellables.set(account, new Cancellable());
@@ -608,6 +619,68 @@ public class GearyController : Geary.BaseObject {
         
         main_window.folder_list.set_user_folders_root_name(account, _("Labels"));
         display_main_window_if_ready();
+    }
+    
+    // Returns true if the caller should try opening the account again
+    private async bool account_database_error_async(Geary.Account account) {
+        bool retry = true;
+        
+        // give the user two options: reset the Account local store, or exit Geary.  A third
+        // could be done to leave the Account in an unopened state, but we don't currently
+        // have provisions for that.
+        AlertDialog dialog = new QuestionDialog(main_window,
+            _("Unable to open the database for %s").printf(account.information.email),
+            _("There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n\n%s\n\nGeary can rebuild the database and re-synchronize with the server or exit.\n\nRebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>")
+                .printf(account.information.settings_dir.get_path()),
+            _("_Rebuild"), _("E_xit"));
+        dialog.use_secondary_markup(true);
+        switch (dialog.run()) {
+            case Gtk.ResponseType.OK:
+                // don't use Cancellable because we don't want to interrupt this process
+                try {
+                    yield account.rebuild_async();
+                } catch (Error err) {
+                    dialog = new ErrorDialog(main_window,
+                        _("Unable to rebuild database for \"%s\"").printf(account.information.email),
+                        _("Error during rebuild:\n\n%s").printf(err.message));
+                    dialog.run();
+                    
+                    retry = false;
+                }
+            break;
+            
+            default:
+                retry = false;
+            break;
+        }
+        
+        if (!retry)
+            GearyApplication.instance.exit(1);
+        
+        return retry;
+    }
+    
+    private async void account_database_perms_async(Geary.Account account) {
+        // some other problem opening the account ... as with other flow path, can't run
+        // Geary today with an account in unopened state, so have to exit
+        ErrorDialog dialog = new ErrorDialog(main_window,
+            _("Unable to open %s").printf(account.information.email),
+            _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
+                .printf(account.information.settings_dir.get_path()));
+        dialog.run();
+        
+        GearyApplication.instance.exit(1);
+    }
+    
+    private async void account_general_error_async(Geary.Account account) {
+        // some other problem opening the account ... as with other flow path, can't run
+        // Geary today with an account in unopened state, so have to exit
+        ErrorDialog dialog = new ErrorDialog(main_window,
+            _("Unable to open %s").printf(account.information.email),
+            _("There was an error opening the local account. This is probably due to connectivity issues.\n\nPlease check your network connection and restart Geary."));
+        dialog.run();
+        
+        GearyApplication.instance.exit(1);
     }
     
     public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {

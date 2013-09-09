@@ -15,6 +15,8 @@ public errordomain Geary.EngineError {
     SERVER_UNAVAILABLE,
     ALREADY_CLOSED,
     CLOSE_REQUIRED,
+    CORRUPT,
+    PERMISSIONS,
     UNSUPPORTED
 }
 

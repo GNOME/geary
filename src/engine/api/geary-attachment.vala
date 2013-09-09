@@ -50,6 +50,7 @@ public class Geary.Attachment : BaseObject {
     public int64 id { get; private set; }
     public Disposition disposition { get; private set; }
     
+    // TODO: Move some of this into ImapDB.Attachment
     internal Attachment(File data_dir, string? filename, string mime_type, int64 filesize,
         int64 message_id, int64 attachment_id, Disposition disposition) {
 
@@ -61,12 +62,17 @@ public class Geary.Attachment : BaseObject {
         this.disposition = disposition;
     }
     
+    // TODO: Move this into ImapDB.Attachment
     internal static string get_path(File data_dir, int64 message_id, int64 attachment_id,
         string? filename) {
         // "none" should not be translated, or the user will be unable to retrieve their
         // attachments with no filenames after changing their language.
         return "%s/attachments/%s/%s/%s".printf(data_dir.get_path(), message_id.to_string(),
             attachment_id.to_string(), filename ?? "none");
+    }
+    
+    internal static File get_attachments_dir(File data_dir) {
+        return data_dir.get_child("attachments");
     }
 }
 

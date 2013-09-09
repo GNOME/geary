@@ -55,6 +55,12 @@ private class Geary.ImapDB.Account : BaseObject {
             throw new EngineError.OPEN_REQUIRED("Database not open");
     }
     
+    public static void get_imap_db_storage_locations(File user_data_dir, out File db_file,
+        out File attachments_dir) {
+        db_file = ImapDB.Database.get_db_file(user_data_dir);
+        attachments_dir = Geary.Attachment.get_attachments_dir(user_data_dir);
+    }
+    
     public async void open_async(File user_data_dir, File schema_dir, Cancellable? cancellable)
         throws Error {
         if (db != null)
@@ -63,8 +69,9 @@ private class Geary.ImapDB.Account : BaseObject {
         db = new ImapDB.Database(user_data_dir, schema_dir, upgrade_monitor, account_information.email);
         
         try {
-            db.open(Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE, null,
-                cancellable);
+            db.open(
+                Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE | Db.DatabaseFlags.CHECK_CORRUPTION,
+                null, cancellable);
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             
@@ -77,27 +84,36 @@ private class Geary.ImapDB.Account : BaseObject {
         // have seen cases where multiple "Inbox" folders are created in the root with different
         // case names, leading to trouble ... this clears out all Inboxes that don't match our
         // "canonical" name
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            Db.Statement stmt = cx.prepare("""
-                SELECT id, name
-                FROM FolderTable
-                WHERE parent_id IS NULL
-            """);
-            
-            Db.Result results = stmt.exec(cancellable);
-            while (!results.finished) {
-                string name = results.string_for("name");
-                if (Imap.MailboxSpecifier.is_inbox_name(name)
-                    && !Imap.MailboxSpecifier.is_canonical_inbox_name(name)) {
-                    debug("%s: Removing duplicate INBOX \"%s\"", this.name, name);
-                    do_delete_folder(cx, results.rowid_for("id"), cancellable);
+        try {
+            yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT id, name
+                    FROM FolderTable
+                    WHERE parent_id IS NULL
+                """);
+                
+                Db.Result results = stmt.exec(cancellable);
+                while (!results.finished) {
+                    string name = results.string_for("name");
+                    if (Imap.MailboxSpecifier.is_inbox_name(name)
+                        && !Imap.MailboxSpecifier.is_canonical_inbox_name(name)) {
+                        debug("%s: Removing duplicate INBOX \"%s\"", this.name, name);
+                        do_delete_folder(cx, results.rowid_for("id"), cancellable);
+                    }
+                    
+                    results.next(cancellable);
                 }
                 
-                results.next(cancellable);
-            }
+                return Db.TransactionOutcome.COMMIT;
+            }, cancellable);
+        } catch (Error err) {
+            debug("Error trimming duplicate INBOX from database: %s", err.message);
             
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
+            // drop database to indicate closed
+            db = null;
+            
+            throw err;
+        }
         
         Geary.Account account;
         try {
