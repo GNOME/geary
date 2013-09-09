@@ -15,6 +15,7 @@ public errordomain Geary.DatabaseError {
     INTERRUPT,
     LIMITS,
     TYPESPEC,
-    FINISHED
+    FINISHED,
+    SCHEMA_VERSION
 }
 

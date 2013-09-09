@@ -604,6 +604,8 @@ public class GearyController : Geary.BaseObject {
                     retry = yield account_database_error_async(account);
                 else if (open_err is Geary.EngineError.PERMISSIONS)
                     yield account_database_perms_async(account);
+                else if (open_err is Geary.EngineError.VERSION)
+                    yield account_database_version_async(account);
                 else
                     yield account_general_error_async(account);
                 
@@ -664,9 +666,18 @@ public class GearyController : Geary.BaseObject {
         // some other problem opening the account ... as with other flow path, can't run
         // Geary today with an account in unopened state, so have to exit
         ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open %s").printf(account.information.email),
+            _("Unable to open local mailbox for %s").printf(account.information.email),
             _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
                 .printf(account.information.settings_dir.get_path()));
+        dialog.run();
+        
+        GearyApplication.instance.exit(1);
+    }
+    
+    private async void account_database_version_async(Geary.Account account) {
+        ErrorDialog dialog = new ErrorDialog(main_window,
+            _("Unable to open local mailbox for %s").printf(account.information.email),
+            _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be \"rolled back\" to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
         dialog.run();
         
         GearyApplication.instance.exit(1);
@@ -676,7 +687,7 @@ public class GearyController : Geary.BaseObject {
         // some other problem opening the account ... as with other flow path, can't run
         // Geary today with an account in unopened state, so have to exit
         ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open %s").printf(account.information.email),
+            _("Unable to open local mailbox for %s").printf(account.information.email),
             _("There was an error opening the local account. This is probably due to connectivity issues.\n\nPlease check your network connection and restart Geary."));
         dialog.run();
         

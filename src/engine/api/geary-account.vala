@@ -183,7 +183,12 @@ public interface Geary.Account : BaseObject {
     }
     
     /**
+     * Opens the {@link Account} and makes it and its {@link Folder}s available for use.
      *
+     * @throws EngineError.CORRUPT if the local store is corrupt or unusable
+     * @throws EngineError.PERMISSIONS if the local store is inaccessible
+     * @throws EngineError.VERSION if the local store was created or updated for a different
+     *         version of Geary.
      */
     public abstract async void open_async(Cancellable? cancellable = null) throws Error;
     

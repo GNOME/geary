@@ -17,6 +17,7 @@ public errordomain Geary.EngineError {
     CLOSE_REQUIRED,
     CORRUPT,
     PERMISSIONS,
+    VERSION,
     UNSUPPORTED
 }
 

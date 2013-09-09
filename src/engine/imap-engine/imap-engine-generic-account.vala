@@ -91,6 +91,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 throw new EngineError.CORRUPT("%s", err.message);
             else if (err is DatabaseError.ACCESS)
                 throw new EngineError.PERMISSIONS("%s", err.message);
+            else if (err is DatabaseError.SCHEMA_VERSION)
+                throw new EngineError.VERSION("%s", err.message);
             else
                 throw err;
         }
