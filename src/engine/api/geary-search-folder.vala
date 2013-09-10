@@ -277,8 +277,6 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
             }
         }
         
-        bool first_results = search_results.size == 0;
-        
         search_results.remove_all(removed);
         search_results.add_all(added);
         
@@ -291,13 +289,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         
         Geary.Folder.CountChangeReason reason = CountChangeReason.NONE;
         if (added.size > 0) {
-            // We do a little optimization here.  In the case we can trivially
-            // determine nothing was added "in the middle" of an existing
-            // result set, we say the results were appended rather than
-            // inserted because appends are handled more gracefully in the
-            // conversation monitor.
-            reason |= (first_results ? Geary.Folder.CountChangeReason.APPENDED
-                : Geary.Folder.CountChangeReason.INSERTED);
+            // TODO: we'd like to be able to use APPENDED here when applicable,
+            // but because of the potential to append a thousand results at
+            // once and the ConversationMonitor's inability to handle that
+            // gracefully (#7464), we always use INSERTED for now.
+            notify_email_inserted(added);
+            reason |= Geary.Folder.CountChangeReason.INSERTED;
         }
         if (removed.size > 0) {
             notify_email_removed(removed);

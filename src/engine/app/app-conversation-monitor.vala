@@ -288,8 +288,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         operation_queue.add(new FillWindowOperation(this, false));
         
         folder.email_appended.connect(on_folder_email_appended);
+        folder.email_inserted.connect(on_folder_email_inserted);
         folder.email_removed.connect(on_folder_email_removed);
-        folder.email_count_changed.connect(on_folder_email_count_changed);
         folder.opened.connect(on_folder_opened);
         folder.closed.connect(on_folder_closed);
         folder.account.email_flags_changed.connect(on_account_email_flags_changed);
@@ -302,8 +302,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             is_monitoring = false;
             
             folder.email_appended.disconnect(on_folder_email_appended);
+            folder.email_inserted.disconnect(on_folder_email_inserted);
             folder.email_removed.disconnect(on_folder_email_removed);
-            folder.email_count_changed.disconnect(on_folder_email_count_changed);
             folder.opened.disconnect(on_folder_opened);
             folder.closed.disconnect(on_folder_closed);
             folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
@@ -355,8 +355,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         is_monitoring = false;
         
         folder.email_appended.disconnect(on_folder_email_appended);
+        folder.email_inserted.disconnect(on_folder_email_inserted);
         folder.email_removed.disconnect(on_folder_email_removed);
-        folder.email_count_changed.disconnect(on_folder_email_count_changed);
         folder.opened.disconnect(on_folder_opened);
         folder.closed.disconnect(on_folder_closed);
         folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
@@ -624,6 +624,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         operation_queue.add(new AppendOperation(this, appended_ids));
     }
     
+    private void on_folder_email_inserted(Gee.Collection<Geary.EmailIdentifier> inserted_ids) {
+        operation_queue.add(new FillWindowOperation(this, true));
+    }
+    
     private void on_folder_email_removed(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
         operation_queue.add(new RemoveOperation(this, removed_ids));
         operation_queue.add(new FillWindowOperation(this, false));
@@ -695,12 +699,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             email.set_flags(map.get(id));
             notify_email_flags_changed(conversation, email);
         }
-    }
-    
-    private void on_folder_email_count_changed(int new_count, Geary.Folder.CountChangeReason reason) {
-        // Only trap INSERTED here because append/remove is handled above.
-        if ((reason & Geary.Folder.CountChangeReason.INSERTED) != 0)
-            operation_queue.add(new FillWindowOperation(this, true));
     }
     
     private async Geary.EmailIdentifier? get_lowest_email_id_async(Cancellable? cancellable) {
