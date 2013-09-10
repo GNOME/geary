@@ -203,6 +203,7 @@ engine/imap-engine/other/imap-engine-other-account.vala
 engine/imap-engine/other/imap-engine-other-folder.vala
 engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-copy-email.vala
+engine/imap-engine/replay-ops/imap-engine-create-email.vala
 engine/imap-engine/replay-ops/imap-engine-expunge-email.vala
 engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala

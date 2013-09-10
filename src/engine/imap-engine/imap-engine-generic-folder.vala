@@ -1156,29 +1156,31 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (id != null)
             check_id("create_email_async", id);
         
-        // TODO: Move this into a ReplayQueue operation
-        yield wait_for_open_async(cancellable);
-        
-        // use IMAP APPEND command on remote folders, which doesn't require opening a folder
-        Geary.EmailIdentifier? ret = yield remote_folder.create_email_async(rfc822, flags,
-            date_received, cancellable);
-        if (ret != null) {
-            // TODO: need to prevent gaps that may occur here
-            Geary.Email created = new Geary.Email(ret);
-            Gee.Map<Geary.Email, bool> results = yield local_folder.create_or_merge_email_async(
-                new Collection.SingleItem<Geary.Email>(created), cancellable);
-            if (results.size > 0)
-                ret = Collection.get_first<Geary.Email>(results.keys).id;
+        Error? cancel_error = null;
+        Geary.EmailIdentifier? ret = null;
+        try {
+            CreateEmail create = new CreateEmail(this, rfc822, flags, date_received, cancellable);
+            replay_queue.schedule(create);
+            yield create.wait_for_ready_async(cancellable);
+            
+            ret = create.created_id;
+        } catch (Error e) {
+            if (e is IOError.CANCELLED)
+                cancel_error = e;
             else
-                ret = null;
+                throw e;
         }
         
         // Remove old message.
         if (id != null) {
             Geary.FolderSupport.Remove? remove_folder = this as Geary.FolderSupport.Remove;
             if (remove_folder != null)
-                yield remove_folder.remove_single_email_async(id, cancellable);
+                yield remove_folder.remove_single_email_async(id, null);
         }
+        
+        // If the user cancelled the operation, throw the error here.
+        if (cancel_error != null)
+            throw cancel_error;
         
         return ret;
     }

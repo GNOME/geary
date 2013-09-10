@@ -862,8 +862,11 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
+    // This method does not take a cancellable; there is currently no way to tell if an email was
+    // created or not if exec_commands_async() is cancelled during the append.  For atomicity's sake,
+    // callers need to remove the returned email ID if a cancel occurred.
     public async Geary.EmailIdentifier? create_email_async(RFC822.Message message, Geary.EmailFlags? flags,
-        DateTime? date_received, Cancellable? cancellable) throws Error {
+        DateTime? date_received) throws Error {
         check_open();
         
         MessageFlags? msg_flags = null;
@@ -880,7 +883,7 @@ private class Geary.Imap.Folder : BaseObject {
             msg_flags, internaldate, message.get_network_buffer(false));
         
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(
-            new Collection.SingleItem<AppendCommand>(cmd), null, null, cancellable);
+            new Collection.SingleItem<AppendCommand>(cmd), null, null, null);
         
         // Grab the response and parse out the UID, if available.
         StatusResponse response = responses.get(cmd);
