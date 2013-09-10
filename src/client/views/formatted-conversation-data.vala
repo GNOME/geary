@@ -268,7 +268,7 @@ public class FormattedConversationData : Geary.BaseObject {
     
     // Call this on style changes.
     public void calculate_sizes(Gtk.Widget widget) {
-        render_internal(widget, null, null, 0, true);
+        render_internal(widget, null, null, 0, true, false);
     }
     
     // Must call calculate_sizes() first.
@@ -283,9 +283,9 @@ public class FormattedConversationData : Geary.BaseObject {
     }
     
     // Can be used for rendering or calculating height.
-    private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area = null, 
-        Cairo.Context? ctx = null, Gtk.CellRendererState flags, bool recalc_dims = false,
-        bool hover_select = false) {
+    private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area, 
+        Cairo.Context? ctx, Gtk.CellRendererState flags, bool recalc_dims,
+        bool hover_select) {
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
         
         bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
