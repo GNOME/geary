@@ -603,9 +603,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     private async void process_email_complete_async(ProcessJobContext job) {
-        Gee.Collection<Geary.App.Conversation> added;
-        Gee.MultiMap<Geary.App.Conversation, Geary.Email> appended;
-        Gee.Collection<Conversation> removed_due_to_merge;
+        Gee.Collection<Geary.App.Conversation>? added = null;
+        Gee.MultiMap<Geary.App.Conversation, Geary.Email>? appended = null;
+        Gee.Collection<Conversation>? removed_due_to_merge = null;
         try {
             yield conversations.add_all_emails_async(job.emails.values, this, folder.path, out added, out appended,
                 out removed_due_to_merge, null);
@@ -615,14 +615,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // fall-through
         }
         
-        foreach (Conversation conversation in removed_due_to_merge)
-            notify_conversation_removed(conversation);
+        if (removed_due_to_merge != null) {
+            foreach (Conversation conversation in removed_due_to_merge)
+                notify_conversation_removed(conversation);
+        }
         
-        if (added.size > 0)
+        if (added != null && added.size > 0)
             notify_conversations_added(added);
         
-        foreach (Geary.App.Conversation conversation in appended.get_keys())
-            notify_conversation_appended(conversation, appended.get(conversation));
+        if (appended != null) {
+            foreach (Geary.App.Conversation conversation in appended.get_keys())
+                notify_conversation_appended(conversation, appended.get(conversation));
+        }
         
         if (job.inside_scan)
             notify_scan_completed();

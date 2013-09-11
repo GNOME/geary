@@ -101,6 +101,25 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         high = outbox_high;
     }
     
+    public async void add_to_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> map, Cancellable? cancellable) throws Error {
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+            foreach (Geary.EmailIdentifier id in ids) {
+                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                if (outbox_id == null)
+                    continue;
+                
+                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
+                if (row == null)
+                    continue;
+                
+                map.set(id, path);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+    }
+    
     // Used solely for debugging, hence "(no subject)" not marked for translation
     private static string message_subject(RFC822.Message message) {
         return (message.subject != null && !String.is_empty(message.subject.to_string()))
@@ -290,15 +309,12 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         // immediately add to outbox queue for delivery
         outbox_queue.send(row);
         
-        // notify only if opened
-        if (is_open()) {
-            Gee.List<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
-            list.add(row.outbox_id);
-            
-            notify_email_appended(list);
-            notify_email_locally_appended(list);
-            notify_email_count_changed(email_count, CountChangeReason.APPENDED);
-        }
+        Gee.List<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
+        list.add(row.outbox_id);
+        
+        notify_email_appended(list);
+        notify_email_locally_appended(list);
+        notify_email_count_changed(email_count, CountChangeReason.APPENDED);
         
         return row.outbox_id;
     }
@@ -339,7 +355,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             } else {
                 stmt = cx.prepare(
                     "SELECT id, ordering, message FROM SmtpOutboxTable ORDER BY ordering %s LIMIT ?".printf(dir));
-                stmt.bind_int(1, count);
+                stmt.bind_int(0, count);
             }
             
             Db.Result results = stmt.exec(cancellable);
@@ -474,11 +490,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         if (removed.size == 0)
             return false;
         
-        // notify only if opened
-        if (is_open()) {
-            notify_email_removed(removed);
-            notify_email_count_changed(final_count, CountChangeReason.REMOVED);
-        }
+        notify_email_removed(removed);
+        notify_email_count_changed(final_count, CountChangeReason.REMOVED);
         
         return true;
     }

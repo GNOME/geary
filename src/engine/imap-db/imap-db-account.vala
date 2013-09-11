@@ -867,21 +867,28 @@ private class Geary.ImapDB.Account : BaseObject {
      * would be empty.  Only throw database errors et al., not errors due to
      * the email id not being found.
      */
-    public async Gee.MultiMap<Geary.ImapDB.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
-        Gee.Collection<Geary.ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        Gee.HashMultiMap<Geary.ImapDB.EmailIdentifier, Geary.FolderPath> map
-            = new Gee.HashMultiMap<Geary.ImapDB.EmailIdentifier, Geary.FolderPath>();
+    public async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> map
+            = new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-            foreach (Geary.ImapDB.EmailIdentifier id in ids) {
-                Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id.message_id, cancellable);
+            foreach (Geary.EmailIdentifier id in ids) {
+                ImapDB.EmailIdentifier? imap_db_id = id as ImapDB.EmailIdentifier;
+                if (imap_db_id == null)
+                    continue;
+                
+                Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(
+                    cx, imap_db_id.message_id, cancellable);
                 if (folders != null) {
-                    Geary.Collection.multi_map_set_all<Geary.ImapDB.EmailIdentifier,
+                    Geary.Collection.multi_map_set_all<Geary.EmailIdentifier,
                         Geary.FolderPath>(map, id, folders);
                 }
             }
             
             return Db.TransactionOutcome.DONE;
         }, cancellable);
+        
+        yield outbox.add_to_containing_folders_async(ids, map, cancellable);
         
         return (map.size == 0 ? null : map);
     }
