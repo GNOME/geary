@@ -289,7 +289,8 @@ public interface Geary.Account : BaseObject {
      */
     public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error;
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * Return a single email fulfilling the required fields.  The email to pull

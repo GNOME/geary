@@ -819,9 +819,12 @@ public class ComposerWindow : Gtk.Window {
         draft_save_label.label = DRAFT_SAVING_TEXT;
         draft_save_timeout_id = 0;
         
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.DRAFT);
+        
         try {
             draft_id = yield drafts_folder.create_email_async(new Geary.RFC822.Message.from_composed_email(
-                get_composed_email()), new Geary.EmailFlags(), null, draft_id, cancellable);
+                get_composed_email()), flags, null, draft_id, null);
             
             draft_save_label.label = DRAFT_SAVED_TEXT;
         } catch (Error e) {

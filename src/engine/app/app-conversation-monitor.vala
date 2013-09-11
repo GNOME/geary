@@ -543,6 +543,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return blacklist;
     }
     
+    private Geary.EmailFlags get_search_flag_blacklist() {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.DRAFT);
+        
+        return flags;
+    }
+    
     private async void expand_conversations_async(Gee.Set<RFC822.MessageID> needed_message_ids,
         ProcessJobContext job) {
         if (needed_message_ids.size == 0) {
@@ -555,12 +562,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
             folder.to_string(), needed_message_ids.size);
         
         Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_blacklist();
+        Geary.EmailFlags flag_blacklist = get_search_flag_blacklist();
         
         // execute all the local search operations at once
         Nonblocking.Batch batch = new Nonblocking.Batch();
         foreach (RFC822.MessageID message_id in needed_message_ids) {
             batch.add(new LocalSearchOperation(folder.account, message_id, required_fields,
-                folder_blacklist));
+                folder_blacklist, flag_blacklist));
         }
         
         try {

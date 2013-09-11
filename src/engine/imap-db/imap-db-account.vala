@@ -553,9 +553,13 @@ private class Geary.ImapDB.Account : BaseObject {
     
     public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Cancellable? cancellable = null) throws Error {
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Cancellable? cancellable = null) throws Error {
         Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
             = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
+        
+        if (flag_blacklist != null)
+            requested_fields = requested_fields | Geary.Email.Field.FLAGS;
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id = ? OR in_reply_to = ?");
@@ -590,6 +594,11 @@ private class Geary.ImapDB.Account : BaseObject {
                             }
                         }
                     }
+                    
+                    // Check for blacklisted flags.
+                    if (flag_blacklist != null && email.email_flags != null &&
+                        email.email_flags.contains_any(flag_blacklist))
+                        messages.remove_all(email);
                 }
                 
                 result.next(cancellable);

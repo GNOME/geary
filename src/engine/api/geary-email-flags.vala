@@ -27,6 +27,10 @@ public class Geary.EmailFlags : Geary.NamedFlags {
         return new NamedFlag("LOADREMOTEIMAGES");
     } }
     
+    public static NamedFlag DRAFT { owned get {
+        return new NamedFlag("DRAFT");
+    } }
+    
     public EmailFlags() {
     }
     
@@ -41,6 +45,10 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     
     public inline bool load_remote_images() {
         return contains(LOAD_REMOTE_IMAGES);
+    }
+    
+    public inline bool is_draft() {
+        return contains(DRAFT);
     }
 }
 

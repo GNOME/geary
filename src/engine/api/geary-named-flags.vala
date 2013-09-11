@@ -33,6 +33,14 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
         return list.contains(flag);
     }
     
+    public bool contains_any(NamedFlags flags) {
+        foreach(NamedFlag nf in list)
+            if (flags.contains(nf))
+                return true;
+        
+        return false;
+    }
+    
     public Gee.Set<NamedFlag> get_all() {
         return list.read_only_view;
     }

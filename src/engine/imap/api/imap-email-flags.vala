@@ -18,6 +18,9 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
         
         if (flags.contains(MessageFlag.LOAD_REMOTE_IMAGES))
             add(LOAD_REMOTE_IMAGES);
+        
+        if (flags.contains(MessageFlag.DRAFT))
+            add(DRAFT);
     }
     
     /**
@@ -30,12 +33,22 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
         if (imap_flags != null)
             return imap_flags;
         
-        Gee.ArrayList<MessageFlag> msg_flags = new Gee.ArrayList<MessageFlag>();
-        foreach (Geary.NamedFlag named_flag in api_flags.get_all())
-            msg_flags.add(new MessageFlag(named_flag.name));
+        Gee.List<MessageFlag> msg_flags_add;
+        Gee.List<MessageFlag> msg_flags_remove;
+        Geary.Imap.MessageFlag.from_email_flags(api_flags, null, out msg_flags_add,
+            out msg_flags_remove);
         
+        Gee.ArrayList<MessageFlag> msg_flags = new Gee.ArrayList<MessageFlag>();
+        
+        foreach(MessageFlag mf in msg_flags_add)
+            msg_flags.add(mf);
+        
+        // This is a special case, since it's read and seen are opposites.
         if (!api_flags.is_unread())
             msg_flags.add(MessageFlag.SEEN);
+        
+        foreach(MessageFlag mf in msg_flags_remove)
+            msg_flags.remove(mf);
         
         return new Imap.EmailFlags(new MessageFlags(msg_flags));
     }
@@ -50,6 +63,9 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
             
             if (flag.equal_to(LOAD_REMOTE_IMAGES))
                 message_flags.add(MessageFlag.LOAD_REMOTE_IMAGES);
+            
+            if (flag.equal_to(DRAFT))
+                message_flags.add(MessageFlag.DRAFT);
         }
         
         base.notify_added(added);
@@ -65,6 +81,9 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
             
             if (flag.equal_to(LOAD_REMOTE_IMAGES))
                 message_flags.remove(MessageFlag.LOAD_REMOTE_IMAGES);
+            
+            if (flag.equal_to(DRAFT))
+                message_flags.remove(MessageFlag.DRAFT);
         }
         
         base.notify_removed(removed);

@@ -113,6 +113,8 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
                 msg_flags_add.add(MessageFlag.FLAGGED);
             if (email_flags_add.contains(Geary.EmailFlags.LOAD_REMOTE_IMAGES))
                 msg_flags_add.add(MessageFlag.LOAD_REMOTE_IMAGES);
+            if (email_flags_add.contains(Geary.EmailFlags.DRAFT))
+                msg_flags_add.add(MessageFlag.DRAFT);
         }
 
         if (email_flags_remove != null) {
@@ -122,6 +124,8 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
                 msg_flags_remove.add(MessageFlag.FLAGGED);
             if (email_flags_remove.contains(Geary.EmailFlags.LOAD_REMOTE_IMAGES))
                 msg_flags_remove.add(MessageFlag.LOAD_REMOTE_IMAGES);
+            if (email_flags_remove.contains(Geary.EmailFlags.DRAFT))
+                msg_flags_remove.add(MessageFlag.DRAFT);
         }
     }
     
