@@ -975,7 +975,10 @@ public class ComposerWindow : Gtk.Window {
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
         attachments_box.pack_start(box);
         
-        Gtk.Label label = new Gtk.Label(attachment_file.get_basename());
+        /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
+        string label_text = _("%s (%s)").printf(attachment_file.get_basename(),
+            Files.get_filesize_as_string(attachment_file_info.get_size()));
+        Gtk.Label label = new Gtk.Label(label_text);
         box.pack_start(label);
         label.halign = Gtk.Align.START;
         label.xpad = 4;
