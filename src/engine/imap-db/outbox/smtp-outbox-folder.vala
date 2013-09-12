@@ -59,6 +59,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     private Geary.Smtp.ClientSession smtp;
     private Nonblocking.Mailbox<OutboxRow> outbox_queue = new Nonblocking.Mailbox<OutboxRow>();
     private SmtpOutboxFolderProperties _properties = new SmtpOutboxFolderProperties(0, 0);
+    private int64 next_ordering = 0;
     
     public signal void report_problem(Geary.Account.Problem problem, Error? err);
     
@@ -167,6 +168,12 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             OutboxRow row;
             try {
                 row = yield outbox_queue.recv_async();
+                
+                // Ignore messages that have since been deleted.
+                if (!yield ordering_exists_async(row.ordering, null)) {
+                    debug("Dropping deleted outbox message %s", row.outbox_id.to_string());
+                    continue;
+                }
             } catch (Error wait_err) {
                 debug("Outbox postman queue error: %s", wait_err.message);
                 
@@ -274,23 +281,24 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         int email_count = 0;
         OutboxRow? row = null;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
+            int64 ordering = do_get_next_ordering(cx, cancellable);
+            
             // save in database ready for SMTP, but without dot-stuffing
             Db.Statement stmt = cx.prepare(
-                "INSERT INTO SmtpOutboxTable (message, ordering)"
-                + "VALUES (?, (SELECT COALESCE(MAX(ordering), 0) + 1 FROM SmtpOutboxTable))");
+                "INSERT INTO SmtpOutboxTable (message, ordering) VALUES (?, ?)");
             stmt.bind_string_buffer(0, rfc822.get_network_buffer(false));
+            stmt.bind_int64(1, ordering);
             
             int64 id = stmt.exec_insert(cancellable);
             
-            stmt = cx.prepare("SELECT ordering, message FROM SmtpOutboxTable WHERE id=?");
+            stmt = cx.prepare("SELECT message FROM SmtpOutboxTable WHERE id=?");
             stmt.bind_rowid(0, id);
             
             // This has got to work; Db should throw an exception if the INSERT failed
             Db.Result results = stmt.exec(cancellable);
             assert(!results.finished);
             
-            int64 ordering = results.int64_at(0);
-            Memory.Buffer message = results.string_buffer_at(1);
+            Memory.Buffer message = results.string_buffer_at(0);
             
             int position = do_get_position_by_ordering(cx, ordering, cancellable);
             
@@ -478,6 +486,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 if (outbox_id == null)
                     throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
                 
+                // Even though we discard the new value here, this check must
+                // occur before any insert/delete on the table, to ensure we
+                // never reuse an ordering value while Geary is running.
+                do_get_next_ordering(cx, cancellable);
+                
                 if (do_remove_email(cx, outbox_id, cancellable))
                     removed.add(outbox_id);
             }
@@ -548,9 +561,40 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             throw smtp_err;
     }
     
+    private async bool ordering_exists_async(int64 ordering, Cancellable? cancellable) throws Error {
+        bool exists = false;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "SELECT 1 FROM SmtpOutboxTable WHERE ordering=?");
+            stmt.bind_int64(0, ordering);
+            
+            exists = !stmt.exec(cancellable).finished;
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return exists;
+    }
+    
     //
     // Transaction helper methods
     //
+    
+    private int64 do_get_next_ordering(Db.Connection cx, Cancellable? cancellable) throws Error {
+        lock (next_ordering) {
+            if (next_ordering == 0) {
+                Db.Statement stmt = cx.prepare("SELECT COALESCE(MAX(ordering), 0) + 1 FROM SmtpOutboxTable");
+                
+                Db.Result result = stmt.exec(cancellable);
+                if (!result.finished)
+                    next_ordering = result.int64_at(0);
+                
+                assert(next_ordering > 0);
+            }
+            
+            return next_ordering++;
+        }
+    }
     
     private int do_get_email_count(Db.Connection cx, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT COUNT(*) FROM SmtpOutboxTable");
