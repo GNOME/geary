@@ -23,7 +23,7 @@ public class ConversationViewer : Gtk.Box {
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string SPINNER_ID = "spinner";
-    private const string REPLACED_IMAGE_CLASS = "replaced_inline_image";
+    private const string DATA_IMAGE_CLASS = "data_inline_image";
     
     private enum SearchState {
         // Search/find states.
@@ -94,7 +94,7 @@ public class ConversationViewer : Gtk.Box {
     public signal void save_attachments(Gee.List<Geary.Attachment> attachment);
     
     // Fired when the user wants to save an image buffer to disk
-    public signal void save_buffer_to_file(string filename, Geary.Memory.Buffer buffer);
+    public signal void save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer);
     
     // Fired when the user clicks the edit draft button.
     public signal void edit_draft(Geary.Email message);
@@ -563,7 +563,7 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
-        bind_event(web_view, "." + REPLACED_IMAGE_CLASS, "contextmenu", (Callback) on_replaced_image_menu, this);
+        bind_event(web_view, "." + DATA_IMAGE_CLASS, "contextmenu", (Callback) on_data_image_menu, this);
         bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
         bind_event(web_view, ".remote_images .show_from", "click", (Callback) on_show_images_from, this);
         bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
@@ -693,46 +693,7 @@ public class ConversationViewer : Gtk.Box {
             return null;
         
         return "<img alt=\"%s\" class=\"%s\" src=\"%s\" />".printf(
-            filename, REPLACED_IMAGE_CLASS, assemble_replaced_image_uri(mimetype, buffer));
-    }
-    
-    private static string assemble_replaced_image_uri(string mimetype, Geary.Memory.Buffer buffer) {
-        // attempt to use UnownedBytesBuffer to avoid memcpying a potentially huge buffer only to
-        // free it when the encoding operation is completed
-        string base64;
-        Geary.Memory.UnownedBytesBuffer? unowned_bytes = buffer as Geary.Memory.UnownedBytesBuffer;
-        if (unowned_bytes != null)
-            base64 = Base64.encode(unowned_bytes.to_unowned_uint8_array());
-        else
-            base64 = Base64.encode(buffer.get_uint8_array());
-        
-        return "data:%s;base64,%s".printf(mimetype, base64);
-    }
-    
-    // Turns the data: URI created by assemble_replaced_image_uri() back into its components.  The
-    // returned buffer is decoded.
-    //
-    // TODO: return mimetype
-    private static bool dissasemble_replaced_image_uri(string uri, out Geary.Memory.Buffer? buffer) {
-        buffer = null;
-        
-        if (!uri.has_prefix("data:"))
-            return false;
-        
-        // count from semicolon past encoding type specifier
-        int start_index = uri.index_of(";");
-        if (start_index <= 0)
-            return false;
-        start_index += "base64,".length;
-        
-        // avoid a memory copy of the substring by manually calculating the start address
-        uint8[] bytes = Base64.decode((string) (((char *) uri) + start_index));
-        
-        // transfer ownership of the byte array directly to the Buffer; this prevents an
-        // unnecessary copy
-        buffer = new Geary.Memory.ByteBuffer.take((owned) bytes, bytes.length);
-        
-        return true;
+            filename, DATA_IMAGE_CLASS, assemble_data_uri(mimetype, buffer));
     }
     
     private void unhide_last_email() {
@@ -1328,17 +1289,17 @@ public class ConversationViewer : Gtk.Box {
             conversation_viewer.show_attachment_menu(email, attachment);
     }
     
-    private static void on_replaced_image_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
+    private static void on_data_image_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
         ConversationViewer conversation_viewer) {
         event.stop_propagation();
         
         Geary.Memory.Buffer? buffer;
-        if (!dissasemble_replaced_image_uri(element.get_attribute("src"), out buffer))
+        if (!dissasemble_data_uri(element.get_attribute("src"), out buffer))
             return;
         
-        string filename = element.get_attribute("alt");
+        string? filename = element.get_attribute("alt");
         
-        if (buffer != null && buffer.size > 0 && !Geary.String.is_empty(filename))
+        if (buffer != null && buffer.size > 0)
             conversation_viewer.show_replaced_image_menu(filename, buffer);
     }
     
@@ -1448,7 +1409,7 @@ public class ConversationViewer : Gtk.Box {
         return menu;
     }
     
-    private void show_replaced_image_menu(string filename, Geary.Memory.Buffer buffer) {
+    private void show_replaced_image_menu(string? filename, Geary.Memory.Buffer buffer) {
         image_menu = new Gtk.Menu();
         image_menu.selection_done.connect(() => {
             image_menu = null;
@@ -1634,16 +1595,27 @@ public class ConversationViewer : Gtk.Box {
                     continue;
                 } else if (src.has_prefix("cid:")) {
                     string mime_id = src.substring(4);
+                    
+                    string? filename = message.get_content_filename_by_mime_id(mime_id);
                     Geary.Memory.Buffer image_content = message.get_content_by_mime_id(mime_id);
-                    uint8[] image_data = image_content.get_uint8_array();
-
+                    Geary.Memory.UnownedBytesBuffer? unowned_buffer =
+                        image_content as Geary.Memory.UnownedBytesBuffer;
+                    
                     // Get the content type.
-                    bool uncertain_content_type;
-                    string mimetype = ContentType.get_mime_type(ContentType.guess(null, image_data,
-                        out uncertain_content_type));
-
-                    // Then set the source to a data url.
-                    web_view.set_data_url(img, mimetype, image_data);
+                    string guess;
+                    if (unowned_buffer != null)
+                        guess = ContentType.guess(null, unowned_buffer.to_unowned_uint8_array(), null);
+                    else
+                        guess = ContentType.guess(null, image_content.get_uint8_array(), null);
+                        
+                    string mimetype = ContentType.get_mime_type(guess);
+                    
+                    // Replace the SRC to a data URIm the class to a known label for the popup menu,
+                    // and the ALT to its filename, if supplied
+                    img.set_attribute("src", assemble_data_uri(mimetype, image_content));
+                    img.set_attribute("class", DATA_IMAGE_CLASS);
+                    if (!Geary.String.is_empty(filename))
+                        img.set_attribute("alt", filename);
                 } else if (!src.has_prefix("data:")) {
                     remote_images = true;
                 }
@@ -1838,7 +1810,8 @@ public class ConversationViewer : Gtk.Box {
                 // Set the image preview and insert it into the container.
                 WebKit.DOM.HTMLImageElement img =
                     Util.DOM.select(attachment_table, ".preview img") as WebKit.DOM.HTMLImageElement;
-                web_view.set_image_src(img, attachment.mime_type, attachment.file.get_path(), ATTACHMENT_PREVIEW_SIZE);
+                web_view.set_attachment_src(img, attachment.mime_type, attachment.file.get_path(),
+                    ATTACHMENT_PREVIEW_SIZE);
                 attachment_container.append_child(attachment_table);
             }
 

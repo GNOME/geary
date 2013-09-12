@@ -5,6 +5,13 @@
  */
 
 public class Geary.RFC822.Message : BaseObject {
+    /**
+     * This delegate is an optional parameter to the body constructers that allows callers
+     * to process arbitrary non-text, inline MIME parts.
+     */
+    public delegate string? InlinePartReplacer(string filename, string mimetype,
+        Geary.Memory.Buffer buffer);
+    
     private const string DEFAULT_ENCODING = "UTF8";
     
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
@@ -420,13 +427,6 @@ public class Geary.RFC822.Message : BaseObject {
     }
     
     /**
-     * This delegate is an optional parameter to the body constructers that allows callers
-     * to process arbitrary non-text, inline MIME parts.
-     */
-    public delegate string? InlinePartReplacer(string filename, string mimetype,
-        Geary.Memory.Buffer buffer);
-        
-    /**
      * This method is the main utility method used by the other body constructors. It calls itself
      * recursively via the last argument ("node").
      * 
@@ -605,13 +605,20 @@ public class Geary.RFC822.Message : BaseObject {
     
     public Memory.Buffer get_content_by_mime_id(string mime_id) throws RFC822Error {
         GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
-        if (part == null) {
-            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with content-id %s",
-                mime_id);
-        }
+        if (part == null)
+            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with Content-ID %s", mime_id);
+        
         return mime_part_to_memory_buffer(part);
     }
-
+    
+    public string? get_content_filename_by_mime_id(string mime_id) throws RFC822Error {
+        GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
+        if (part == null)
+            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with Content-ID %s", mime_id);
+        
+        return part.get_filename();
+    }
+    
     private GMime.Part? find_mime_part_by_mime_id(GMime.Object root, string mime_id) {
         // If this is a multipart container, check each of its children.
         if (root is GMime.Multipart) {

@@ -1492,12 +1492,13 @@ public class GearyController : Geary.BaseObject {
         }
     }
     
-    private void on_save_buffer_to_file(string filename, Geary.Memory.Buffer buffer) {
+    private void on_save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer) {
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, Gtk.FileChooserAction.SAVE,
             Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
-        dialog.set_current_name(filename);
+        if (!Geary.String.is_empty(filename))
+            dialog.set_current_name(filename);
         dialog.set_do_overwrite_confirmation(true);
         dialog.confirm_overwrite.connect(on_confirm_overwrite);
         dialog.set_create_folders(true);

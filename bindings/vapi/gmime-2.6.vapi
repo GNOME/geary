@@ -804,19 +804,19 @@ namespace GMime {
 		[CCode (cname = "g_mime_part_get_best_content_encoding")]
 		public GMime.ContentEncoding get_best_content_encoding (GMime.EncodingConstraint constraint);
 		[CCode (cname = "g_mime_part_get_content_description")]
-		public unowned string get_content_description ();
+		public unowned string? get_content_description ();
 		[CCode (cname = "g_mime_part_get_content_encoding")]
 		public GMime.ContentEncoding get_content_encoding ();
 		[CCode (cname = "g_mime_part_get_content_id")]
-		public unowned string get_content_id ();
+		public unowned string? get_content_id ();
 		[CCode (cname = "g_mime_part_get_content_location")]
-		public unowned string get_content_location ();
+		public unowned string? get_content_location ();
 		[CCode (cname = "g_mime_part_get_content_md5")]
-		public unowned string get_content_md5 ();
+		public unowned string? get_content_md5 ();
 		[CCode (cname = "g_mime_part_get_content_object")]
-		public unowned GMime.DataWrapper get_content_object ();
+		public unowned GMime.DataWrapper? get_content_object ();
 		[CCode (cname = "g_mime_part_get_filename")]
-		public unowned string get_filename ();
+		public unowned string? get_filename ();
 		[CCode (cname = "g_mime_part_set_content_description")]
 		public void set_content_description (string description);
 		[CCode (cname = "g_mime_part_set_content_encoding")]

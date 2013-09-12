@@ -400,3 +400,50 @@ public string resolve_nesting(string text, string[] values) {
     }
 }
 
+// Returns a URI suitable for an IMG SRC attribute (or elsewhere, potentially) that is the
+// memory buffer unpacked into a Base-64 encoded data: URI
+public string assemble_data_uri(string mimetype, Geary.Memory.Buffer buffer) {
+    // attempt to use UnownedBytesBuffer to avoid memcpying a potentially huge buffer only to
+    // free it when the encoding operation is completed
+    string base64;
+    Geary.Memory.UnownedBytesBuffer? unowned_bytes = buffer as Geary.Memory.UnownedBytesBuffer;
+    if (unowned_bytes != null)
+        base64 = Base64.encode(unowned_bytes.to_unowned_uint8_array());
+    else
+        base64 = Base64.encode(buffer.get_uint8_array());
+    
+    return "data:%s;base64,%s".printf(mimetype, base64);
+}
+
+// Turns the data: URI created by assemble_data_uri() back into its components.  The returned
+// buffer is decoded.
+//
+// TODO: Return mimetype
+public bool dissasemble_data_uri(string uri, out Geary.Memory.Buffer? buffer) {
+    buffer = null;
+    
+    if (!uri.has_prefix("data:"))
+        return false;
+    
+    // count from semicolon past encoding type specifier
+    int start_index = uri.index_of(";");
+    if (start_index <= 0)
+        return false;
+    
+    // watch for string termination to avoid overflow
+    int base64_len = "base64,".length;
+    for (int ctr = 0; ctr < base64_len; ctr++) {
+        if (uri[start_index++] == Geary.String.EOS)
+            return false;
+    }
+    
+    // avoid a memory copy of the substring by manually calculating the start address
+    uint8[] bytes = Base64.decode((string) (((char *) uri) + start_index));
+    
+    // transfer ownership of the byte array directly to the Buffer; this prevents an
+    // unnecessary copy
+    buffer = new Geary.Memory.ByteBuffer.take((owned) bytes, bytes.length);
+    
+    return true;
+}
+

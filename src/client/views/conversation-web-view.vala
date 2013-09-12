@@ -202,21 +202,27 @@ public class ConversationWebView : WebKit.WebView {
     private void set_icon_src(string selector, string icon_name) {
         try {
             // Load icon.
-            uint8[] icon_content = null;
+            uint8[]? icon_content = null;
             Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic_colored(icon_name, 16);
             if (pixbuf != null)
                 pixbuf.save_to_buffer(out icon_content, "png"); // Load as PNG.
             
+            if (icon_content == null || icon_content.length == 0)
+                return;
+            
+            Geary.Memory.ByteBuffer buffer = new Geary.Memory.ByteBuffer.take((owned) icon_content,
+                icon_content.length);
+            
             // Then set the source to a data url.
             WebKit.DOM.HTMLImageElement img = Util.DOM.select(get_dom_document(), selector)
                 as WebKit.DOM.HTMLImageElement;
-            set_data_url(img, "image/png", icon_content);
+            img.set_attribute("src", assemble_data_uri("image/png", buffer));
         } catch (Error error) {
             warning("Failed to load icon '%s': %s", icon_name, error.message);
         }
     }
     
-    public void set_image_src(WebKit.DOM.HTMLImageElement img, string mime_type, string filename,
+    public void set_attachment_src(WebKit.DOM.HTMLImageElement img, string mime_type, string filename,
         int maxwidth, int maxheight = -1) {
         if( maxheight == -1 ){
             maxheight = maxwidth;
@@ -248,15 +254,12 @@ public class ConversationWebView : WebKit.WebView {
             }
             
             // Then set the source to a data url.
-            set_data_url(img, icon_mime_type, content);
+            Geary.Memory.Buffer buffer = new Geary.Memory.ByteBuffer.take((owned) content,
+                content.length);
+            img.set_attribute("src", assemble_data_uri(icon_mime_type, buffer));
         } catch (Error error) {
             warning("Failed to load image '%s': %s", filename, error.message);
         }
-    }
-    
-    public void set_data_url(WebKit.DOM.HTMLImageElement img, string mime_type, uint8[] content)
-        throws Error {
-        img.set_attribute("src", "data:%s;base64,%s".printf(mime_type, Base64.encode(content)));
     }
     
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
