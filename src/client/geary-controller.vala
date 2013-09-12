@@ -443,7 +443,8 @@ public class GearyController : Geary.BaseObject {
     // Returns null if we are done validating, or the revised account information if we should retry.
     private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
         Cancellable? cancellable = null) {
-        Geary.Engine.ValidationResult result = yield validate_async(account_information, true, cancellable);
+        Geary.Engine.ValidationResult result = yield validate_async(account_information,
+            Geary.Engine.ValidationOption.CHECK_CONNECTIONS, cancellable);
         if (result == Geary.Engine.ValidationResult.OK)
             return null;
         
@@ -466,12 +467,12 @@ public class GearyController : Geary.BaseObject {
     // Attempts to validate and add an account.  Returns a result code indicating
     // success or one or more errors.
     public async Geary.Engine.ValidationResult validate_async(
-        Geary.AccountInformation account_information, bool validate_connection,
+        Geary.AccountInformation account_information, Geary.Engine.ValidationOption options,
         Cancellable? cancellable = null) {
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
         try {
             result = yield Geary.Engine.instance.validate_account_information_async(account_information,
-                validate_connection, cancellable);
+                options, cancellable);
         } catch (Error err) {
             debug("Error validating account: %s", err.message);
             GearyApplication.instance.exit(-1); // Fatal error

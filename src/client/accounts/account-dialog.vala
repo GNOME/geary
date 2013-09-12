@@ -163,6 +163,11 @@ public class AccountDialog : Gtk.Dialog {
         // Show the busy spinner.
         spinner_pane.present();
         
+        // determine if editing an existing Account or adding a new one
+        Geary.Engine.ValidationOption options = (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT)
+            ? Geary.Engine.ValidationOption.UPDATING_EXISTING
+            : Geary.Engine.ValidationOption.NONE;
+        
         // For account edits, we only need to validate the connection if the credentials have changed.
         bool validate_connection = true;
         if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy()) {
@@ -174,8 +179,11 @@ public class AccountDialog : Gtk.Dialog {
             }
         }
         
+        if (validate_connection)
+            options |= Geary.Engine.ValidationOption.CHECK_CONNECTIONS;
+        
         // Validate account.
-        GearyApplication.instance.controller.validate_async.begin(info, validate_connection, null,
+        GearyApplication.instance.controller.validate_async.begin(info, options, null,
             on_save_add_or_edit_completed);
     }
     

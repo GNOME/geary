@@ -6,9 +6,21 @@
 
 public class Geary.Engine : BaseObject {
     [Flags]
+    public enum ValidationOption {
+        NONE = 0,
+        CHECK_CONNECTIONS,
+        UPDATING_EXISTING;
+        
+        public inline bool is_all_set(ValidationOption options) {
+            return (options & this) == options;
+        }
+    }
+    
+    [Flags]
     public enum ValidationResult {
         OK = 0,
         INVALID_NICKNAME,
+        EMAIL_EXISTS,
         IMAP_CONNECTION_FAILED,
         IMAP_CREDENTIALS_INVALID,
         SMTP_CONNECTION_FAILED,
@@ -208,18 +220,23 @@ public class Geary.Engine : BaseObject {
      * we check if we can connect to the endpoints and authenticate using the supplied credentials.
      */
     public async ValidationResult validate_account_information_async(AccountInformation account,
-        bool validate_connection = true, Cancellable? cancellable = null) throws Error {
+        ValidationOption options, Cancellable? cancellable = null) throws Error {
         check_opened();
+        
         ValidationResult error_code = ValidationResult.OK;
         
-        // Make sure the account nickname is not in use.
+        // Make sure the account nickname and email is not in use.
         foreach (AccountInformation a in get_accounts().values) {
             if (account.email != a.email && Geary.String.stri_equal(account.nickname, a.nickname))
                 error_code |= ValidationResult.INVALID_NICKNAME;
+            
+            // if creating a new Account, don't allow an existing email address
+            if (!options.is_all_set(ValidationOption.UPDATING_EXISTING) && account.email == a.email)
+                error_code |= ValidationResult.EMAIL_EXISTS;
         }
         
         // If we don't need to validate the connection, exit out here.
-        if (!validate_connection)
+        if (!options.is_all_set(ValidationOption.CHECK_CONNECTIONS))
             return error_code;
         
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state

@@ -392,7 +392,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 error("[%s] ClientSession ref dropped while still active", to_string());
         }
         
-        debug("DTOR: ClientSession");
+        debug("DTOR: ClientSession %s", to_string());
     }
     
     public MailboxSpecifier? get_current_mailbox() {
