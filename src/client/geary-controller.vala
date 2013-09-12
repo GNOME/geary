@@ -186,6 +186,7 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.mark_messages.connect(on_conversation_viewer_mark_messages);
         main_window.conversation_viewer.open_attachment.connect(on_open_attachment);
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
+        main_window.conversation_viewer.save_buffer_to_file.connect(on_save_buffer_to_file);
         main_window.conversation_viewer.edit_draft.connect(on_edit_draft);
         
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
@@ -1486,11 +1487,57 @@ public class GearyController : Geary.BaseObject {
         try {
             ((File) source).copy_async.end(result);
         } catch (Error error) {
-            warning("Failed to copy attachment %s to destination: %s", ((File) source).get_path(),
+            message("Failed to copy attachment %s to destination: %s", ((File) source).get_path(),
                 error.message);
         }
     }
-
+    
+    private void on_save_buffer_to_file(string filename, Geary.Memory.Buffer buffer) {
+        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, Gtk.FileChooserAction.SAVE,
+            Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
+        if (last_save_directory != null)
+            dialog.set_current_folder(last_save_directory.get_path());
+        dialog.set_current_name(filename);
+        dialog.set_do_overwrite_confirmation(true);
+        dialog.confirm_overwrite.connect(on_confirm_overwrite);
+        dialog.set_create_folders(true);
+        dialog.set_local_only(false);
+        
+        bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
+        string? accepted_filename = dialog.get_filename();
+        
+        dialog.destroy();
+        
+        if (!accepted || Geary.String.is_empty(accepted_filename))
+            return;
+        
+        File destination = File.new_for_path(accepted_filename);
+        
+        // Proceeding, save this as last destination directory
+        last_save_directory = destination.get_parent();
+        
+        debug("Saving buffer to %s", destination.get_path());
+        
+        // Create the file where the image will be saved and get the output stream.
+        try {
+            FileOutputStream outs = destination.replace(null, false, FileCreateFlags.REPLACE_DESTINATION,
+                null);
+            outs.splice_async.begin(buffer.get_input_stream(),
+                OutputStreamSpliceFlags.CLOSE_SOURCE | OutputStreamSpliceFlags.CLOSE_TARGET,
+                Priority.DEFAULT, null, on_save_buffer_to_file_completed);
+        } catch (Error err) {
+            message("Unable to save buffer to \"%s\": %s", filename, err.message);
+        }
+    }
+    
+    private void on_save_buffer_to_file_completed(Object? source, AsyncResult result) {
+        try {
+            ((FileOutputStream) source).splice_async.end(result);
+        } catch (Error err) {
+            message("Failed to save buffer to file: %s", err.message);
+        }
+    }
+    
     // Opens a link in an external browser.
     private void open_uri(string _link) {
         string link = _link;
