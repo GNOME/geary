@@ -33,6 +33,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
+    public const string ACTION_SEARCH = "GearySearch";
     
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
@@ -365,6 +366,12 @@ public class GearyController : Geary.BaseObject {
             null, on_zoom_normal };
         entries += zoom_normal;
         add_accelerator("0", ACTION_ZOOM_NORMAL);
+        
+        // Can't use the Action's "natural" accelerator because this Action is not tied to any
+        // widget
+        Gtk.ActionEntry search = { ACTION_SEARCH, null, null, null, null, on_search };
+        entries += search;
+        add_accelerator("<Ctrl>S", ACTION_SEARCH);
         
         return entries;
     }
@@ -1758,7 +1765,11 @@ public class GearyController : Geary.BaseObject {
     private void on_zoom_normal() {
         main_window.conversation_viewer.web_view.zoom_level = 1.0f;
     }
-
+    
+    private void on_search() {
+        main_window.main_toolbar.give_search_focus();
+    }
+    
     private void on_sent(Geary.RFC822.Message rfc822) {
         NotificationBubble.play_sound("message-sent-email");
     }

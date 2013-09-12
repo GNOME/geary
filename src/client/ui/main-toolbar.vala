@@ -72,6 +72,7 @@ public class MainToolbar : PillToolbar {
         search_entry.secondary_icon_name = "edit-clear-symbolic";
         search_entry.secondary_icon_activatable = true;
         search_entry.secondary_icon_sensitive = true;
+        search_entry.tooltip_text = _("Search all mail in account for keywords (Ctrl+S)");
         search_entry.changed.connect(on_search_entry_changed);
         search_entry.icon_release.connect(on_search_entry_icon_release);
         search_entry.key_press_event.connect(on_search_key_press);
@@ -90,6 +91,10 @@ public class MainToolbar : PillToolbar {
     
     public void set_search_text(string text) {
         search_entry.text = text;
+    }
+    
+    public void give_search_focus() {
+        search_entry.grab_focus();
     }
     
     public void set_search_placeholder_text(string placeholder) {
