@@ -508,6 +508,7 @@ set(VALAC_OPTIONS
     --enable-checking
     --debug
     --fatal-warnings
+    --enable-deprecated
     ${EXTRA_VALA_OPTIONS}
 )
 
