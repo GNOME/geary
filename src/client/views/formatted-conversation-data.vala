@@ -103,7 +103,7 @@ public class FormattedConversationData : Geary.BaseObject {
         
         // Load preview-related data.
         update_date_string();
-        this.subject = get_clean_subject_as_string(preview);
+        this.subject = EmailUtil.strip_subject_prefixes(preview);
         this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
         this.preview = preview;
         
@@ -245,20 +245,6 @@ public class FormattedConversationData : Geary.BaseObject {
         builder.append("</span>");
         
         return builder.str;
-    }
-    
-    public string get_clean_subject_as_string(Geary.Email email) {
-        string subject_string = email.get_subject_as_string();
-        try {
-            Regex subject_regex = new Regex("^(?i:Re:\\s*)+");
-            subject_string = subject_regex.replace(subject_string, -1, 0, "");
-        } catch (RegexError e) {
-            debug("Failed to clean up subject line \"%s\": %s", subject_string, e.message);
-        }
-        
-        subject_string = Geary.String.reduce_whitespace(subject_string);
-        
-        return !Geary.String.is_empty(subject_string) ? subject_string : _("(no subject)");
     }
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 

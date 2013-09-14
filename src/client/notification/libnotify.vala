@@ -101,10 +101,10 @@ public class Libnotify : Geary.BaseObject {
         string body;
         int count = monitor.get_new_message_count(folder);
         if (count <= 1) {
-            body = email.get_subject_as_string();
+            body = EmailUtil.strip_subject_prefixes(email);
         } else {
             body = ngettext("%s\n(%d new message for %s)", "%s\n(%d new messages for %s)", count).printf(
-                email.get_subject_as_string(), count, folder.account.information.email);
+                EmailUtil.strip_subject_prefixes(email), count, folder.account.information.email);
         }
         
         // get the avatar

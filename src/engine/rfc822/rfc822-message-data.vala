@@ -215,6 +215,38 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
     }
     
     /**
+     * Returns the Subject: line stripped of reply and forwarding prefixes.
+     *
+     * Strips ''all'' prefixes, meaning "Re: Fwd: Soup's on!" will return "Soup's on!"
+     *
+     * Returns an empty string if the Subject: line is empty (or is empty after stripping prefixes).
+     */
+    public string strip_prefixes() {
+        string subject_base = original;
+        bool changed = false;
+        do {
+            string stripped;
+            try {
+                Regex re_regex = new Regex("^(?i:Re:\\s*)+");
+                stripped = re_regex.replace(subject_base, -1, 0, "");
+                
+                Regex fwd_regex = new Regex("^(?i:Fwd:\\s*)+");
+                stripped = fwd_regex.replace(stripped, -1, 0, "");
+            } catch (RegexError e) {
+                debug("Failed to clean up subject line \"%s\": %s", original, e.message);
+                
+                break;
+            }
+            
+            changed = (stripped != subject_base);
+            if (changed)
+                subject_base = stripped;
+        } while (changed);
+        
+        return String.reduce_whitespace(subject_base);
+    }
+    
+    /**
      * See Geary.MessageData.SearchableMessageData.
      */
     public string to_searchable_string() {

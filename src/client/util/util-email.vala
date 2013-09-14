@@ -22,3 +22,13 @@ public int compare_conversation_descending(Geary.App.Conversation a, Geary.App.C
     return compare_conversation_ascending(b, a);
 }
 
+namespace EmailUtil {
+
+public string strip_subject_prefixes(Geary.Email email) {
+    string? cleaned = (email.subject != null) ? email.subject.strip_prefixes() : null;
+    
+    return !Geary.String.is_empty(cleaned) ? cleaned : _("(no subject)");
+}
+
+}
+

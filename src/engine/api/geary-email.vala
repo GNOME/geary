@@ -319,10 +319,6 @@ public class Geary.Email : BaseObject {
     public string get_preview_as_string() {
         return (preview != null) ? preview.buffer.to_string() : "";
     }
-
-    public string get_subject_as_string() {
-        return (subject != null) ? subject.value : "";
-    }
     
     /**
      * Returns the primary originator of an email, which is defined as the first mailbox address
