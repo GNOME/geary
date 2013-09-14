@@ -87,7 +87,7 @@ public class GearyController : Geary.BaseObject {
     private NewMessagesMonitor? new_messages_monitor = null;
     private NewMessagesIndicator? new_messages_indicator = null;
     private UnityLauncher? unity_launcher = null;
-    private NotificationBubble? notification_bubble = null;
+    private Libnotify? libnotify = null;
     private uint select_folder_timeout_id = 0;
     private Geary.Folder? folder_to_select = null;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
@@ -202,8 +202,8 @@ public class GearyController : Geary.BaseObject {
         unity_launcher = new UnityLauncher(new_messages_monitor);
         
         // libnotify
-        notification_bubble = new NotificationBubble(new_messages_monitor);
-        notification_bubble.invoked.connect(on_notification_bubble_invoked);
+        libnotify = new Libnotify(new_messages_monitor);
+        libnotify.invoked.connect(on_libnotify_invoked);
         
         // This is fired after the accounts are ready.
         Geary.Engine.instance.opened.connect(on_engine_opened);
@@ -938,7 +938,7 @@ public class GearyController : Geary.BaseObject {
             conversation_count_changed(current_conversations.get_conversation_count());
     }
     
-    private void on_notification_bubble_invoked(Geary.Folder? folder, Geary.Email? email) {
+    private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
         new_messages_monitor.clear_all_new_messages();
         
         if (folder == null || email == null)
@@ -1772,7 +1772,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_sent(Geary.RFC822.Message rfc822) {
-        NotificationBubble.play_sound("message-sent-email");
+        Libnotify.play_sound("message-sent-email");
     }
     
     private void on_link_selected(string link) {

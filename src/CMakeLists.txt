@@ -329,9 +329,9 @@ client/folder-list/folder-list-special-grouping.vala
 client/models/conversation-list-store.vala
 
 client/notification/libmessagingmenu.vala
+client/notification/libnotify.vala
 client/notification/new-messages-indicator.vala
 client/notification/new-messages-monitor.vala
-client/notification/notification-bubble.vala
 client/notification/null-indicator.vala
 client/notification/unity-launcher.vala
 

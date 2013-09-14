@@ -28,7 +28,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
     }
     
     public Geary.Email.Field required_fields { get; private set; default = Geary.Email.Field.FLAGS; }
-    public int total_count { get; private set; default = 0; }
+    public int total_new_messages { get; private set; default = 0; }
     public Geary.Folder? last_new_message_folder { get; private set; default = null; }
     public Geary.Email? last_new_message { get; private set; default = null; }
     
@@ -41,18 +41,15 @@ public class NewMessagesMonitor : Geary.BaseObject {
     public signal void folder_removed(Geary.Folder folder);
     
     /**
-     * Fired when the monitor finds new messages on a folder.  The count
-     * argument is the updated count of new messages in that folder, not the
-     * number of messages just added.
+     * Fired when the monitor finds new messages on a folder.
      */
-    public signal void new_messages_arrived(Geary.Folder folder, int count);
+    public signal void new_messages_arrived(Geary.Folder folder, int total, int added);
     
     /**
      * Fired when the monitor clears the "new" status of some messages in the
-     * folder.  The count argument is the updated count of new messages in that
-     * folder, not the number of messages just retired.
+     * folder.
      */
-    public signal void new_messages_retired(Geary.Folder folder, int count);
+    public signal void new_messages_retired(Geary.Folder folder, int total);
     
     public NewMessagesMonitor(ShouldNotifyNewMessages? should_notify_new_messages) {
         _should_notify_new_messages = should_notify_new_messages;
@@ -82,7 +79,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
         folder.email_flags_changed.disconnect(on_email_flags_changed);
         folder.email_removed.disconnect(on_email_removed);
         
-        total_count -= folder_information.get(folder).count;
+        total_new_messages -= folder_information.get(folder).count;
         
         folder_information.unset(folder);
         
@@ -153,6 +150,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
     }
     
     private void new_messages(MonitorInformation info, Gee.Collection<Geary.Email> emails) {
+        int appended_count = 0;
         foreach (Geary.Email email in emails) {
             if (!email.fields.fulfills(required_fields)) {
                 debug("Warning: new message %s (%Xh) does not fulfill NewMessagesMonitor required fields of %Xh",
@@ -169,25 +167,28 @@ public class NewMessagesMonitor : Geary.BaseObject {
             last_new_message = email;
             
             info.new_ids.add(email.id);
+            appended_count++;
         }
         
-        update_count(info, true);
+        update_count(info, true, appended_count);
     }
     
     private void retire_new_messages(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> email_ids) {
         MonitorInformation info = folder_information.get(folder);
         
+        int removed_count = 0;
         foreach (Geary.EmailIdentifier email_id in email_ids) {
             if (last_new_message != null && last_new_message.id.equal_to(email_id)) {
                 last_new_message_folder = null;
                 last_new_message = null;
             }
             
-            info.new_ids.remove(email_id);
+            if (info.new_ids.remove(email_id))
+                removed_count++;
         }
         
-        update_count(info, false);
+        update_count(info, false, removed_count);
     }
     
     public void clear_new_messages(Geary.Folder folder) {
@@ -198,7 +199,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
         last_new_message_folder = null;
         last_new_message = null;
         
-        update_count(info, false);
+        update_count(info, false, 0);
     }
     
     public void clear_all_new_messages() {
@@ -206,7 +207,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
             clear_new_messages(folder);
     }
     
-    private void update_count(MonitorInformation info, bool arrived) {
+    private void update_count(MonitorInformation info, bool arrived, int delta) {
         int new_size = info.new_ids.size;
         
         // Documentation for "notify" signal seems to suggest that it's possible for the signal to
@@ -215,11 +216,11 @@ public class NewMessagesMonitor : Geary.BaseObject {
         if (info.count == new_size)
             return;
         
-        total_count += new_size - info.count;
+        total_new_messages += new_size - info.count;
         info.count = new_size;
         
         if (arrived)
-            new_messages_arrived(info.folder, info.count);
+            new_messages_arrived(info.folder, info.count, delta);
         else
             new_messages_retired(info.folder, info.count);
     }
