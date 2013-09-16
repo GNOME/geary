@@ -1628,11 +1628,11 @@ public class GearyController : Geary.BaseObject {
             Geary.Email? full = null;
             if (referred != null) {
                 try {
-                    full = yield current_folder.fetch_email_async(referred.id,
-                        Geary.ComposedEmail.REQUIRED_REPLY_FIELDS, Geary.Folder.ListFlags.NONE,
-                        cancellable_folder);
+                    full = yield email_stores.get(current_folder.account).fetch_email_async(
+                        referred.id, Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
+                        Geary.Folder.ListFlags.NONE, cancellable_folder);
                 } catch (Error e) {
-                    warning("Could not load full message: %s", e.message);
+                    message("Could not load full message: %s", e.message);
                 }
             }
             
