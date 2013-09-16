@@ -222,7 +222,7 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
      * Returns an empty string if the Subject: line is empty (or is empty after stripping prefixes).
      */
     public string strip_prefixes() {
-        string subject_base = original;
+        string subject_base = value;
         bool changed = false;
         do {
             string stripped;
@@ -233,7 +233,7 @@ public class Geary.RFC822.Subject : Geary.MessageData.StringMessageData,
                 Regex fwd_regex = new Regex("^(?i:Fwd:\\s*)+");
                 stripped = fwd_regex.replace(stripped, -1, 0, "");
             } catch (RegexError e) {
-                debug("Failed to clean up subject line \"%s\": %s", original, e.message);
+                debug("Failed to clean up subject line \"%s\": %s", value, e.message);
                 
                 break;
             }
