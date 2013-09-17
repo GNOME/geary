@@ -767,6 +767,8 @@ public class ComposerWindow : Gtk.Window {
     private async void on_send_async() {
         cancellable_save_draft.cancel();
         
+        hide();
+        
         linkify_document(editor.get_dom_document());
         
         // Perform send.
