@@ -251,15 +251,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 // deal with exclusive searches
                 if (!including_id) {
                     if (oldest_to_newest)
-                        start_uid = start_uid.next();
+                        start_uid = start_uid.next(false);
                     else
-                        start_uid = start_uid.previous();
+                        start_uid = start_uid.previous(false);
                 }
             } else if (oldest_to_newest) {
                 start_uid = new Imap.UID(Imap.UID.MIN);
             } else {
                 start_uid = new Imap.UID(Imap.UID.MAX);
             }
+            
+            if (!start_uid.is_valid())
+                return Db.TransactionOutcome.DONE;
             
             StringBuilder sql = new StringBuilder("""
                 SELECT MessageLocationTable.message_id, ordering, remove_marker
@@ -332,11 +335,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             Imap.UID end_uid = end_location.uid;
             
             if (!including_id) {
-                start_uid = start_uid.next();
-                end_uid = end_uid.previous();
+                start_uid = start_uid.next(false);
+                end_uid = end_uid.previous(false);
             }
             
-            if (start_uid.compare_to(end_uid) > 0)
+            if (!start_uid.is_valid() || !end_uid.is_valid() || start_uid.compare_to(end_uid) > 0)
                 return Db.TransactionOutcome.DONE;
             
             Db.Statement stmt = cx.prepare("""
@@ -369,11 +372,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Imap.UID end_uid = end;
         
         if (!including_id) {
-            start_uid = start_uid.next();
-            end_uid = end_uid.previous();
+            start_uid = start_uid.next(false);
+            end_uid = end_uid.previous(false);
         }
         
-        if (start_uid.compare_to(end_uid) > 0)
+        if (!start_uid.is_valid() || !end_uid.is_valid() || start_uid.compare_to(end_uid) > 0)
             return null;
             
         // Break up work so all reading isn't done in single transaction that locks up the

@@ -497,7 +497,7 @@ public class AddEditPage : Gtk.Box {
                     return false;
             break;
             
-            // GMAIL and YAHOO
+            // GMAIL, YAHOO, and OUTLOOK
             default:
                 if (Geary.String.is_empty_or_whitespace(nickname) ||
                     Geary.String.is_empty_or_whitespace(email_address) ||

@@ -134,6 +134,30 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
         return _xlist_important;
     } }
     
+    private static MailboxAttribute? _special_use_all = null;
+    public static MailboxAttribute SPECIAL_FOLDER_ALL { get {
+        return (_special_use_all != null) ? _special_use_all
+            : _special_use_all = new MailboxAttribute("\\All");
+    } }
+    
+    private static MailboxAttribute? _special_use_archive = null;
+    public static MailboxAttribute SPECIAL_FOLDER_ARCHIVE { get {
+        return (_special_use_archive != null) ? _special_use_archive
+            : _special_use_archive = new MailboxAttribute("\\Archive");
+    } }
+    
+    private static MailboxAttribute? _special_use_flagged = null;
+    public static MailboxAttribute SPECIAL_FOLDER_FLAGGED { get {
+        return (_special_use_flagged != null) ? _special_use_flagged
+            : _special_use_flagged = new MailboxAttribute("\\Flagged");
+    } }
+    
+    private static MailboxAttribute? _special_use_junk = null;
+    public static MailboxAttribute SPECIAL_FOLDER_JUNK { get {
+        return (_special_use_junk != null) ? _special_use_junk
+            : _special_use_junk = new MailboxAttribute("\\Junk");
+    } }
+    
     public MailboxAttribute(string value) {
         base (value);
     }
@@ -155,6 +179,10 @@ public class Geary.Imap.MailboxAttribute : Geary.Imap.Flag {
         to_init = SPECIAL_FOLDER_SPAM;
         to_init = SPECIAL_FOLDER_STARRED;
         to_init = SPECIAL_FOLDER_TRASH;
+        to_init = SPECIAL_FOLDER_ALL;
+        to_init = SPECIAL_FOLDER_ARCHIVE;
+        to_init = SPECIAL_FOLDER_FLAGGED;
+        to_init = SPECIAL_FOLDER_JUNK;
     }
 }
 

@@ -506,7 +506,7 @@ private class Geary.Imap.Folder : BaseObject {
         StoreCommand store_cmd = new StoreCommand(msg_set, flags, true, false);
         cmds.add(store_cmd);
         
-        if (session.capabilities.has_capability(Capabilities.UIDPLUS))
+        if (msg_set.is_uid && session.capabilities.supports_uidplus())
             cmds.add(new ExpungeCommand.uid(msg_set));
         else
             cmds.add(new ExpungeCommand());
@@ -564,7 +564,7 @@ private class Geary.Imap.Folder : BaseObject {
         flags.add(MessageFlag.DELETED);
         cmds.add(new StoreCommand(msg_set, flags, true, false));
         
-        if (msg_set.is_uid)
+        if (msg_set.is_uid && session.capabilities.supports_uidplus())
             cmds.add(new ExpungeCommand.uid(msg_set));
         else
             cmds.add(new ExpungeCommand());

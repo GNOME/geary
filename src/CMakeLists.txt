@@ -201,6 +201,8 @@ engine/imap-engine/gmail/imap-engine-gmail-folder.vala
 engine/imap-engine/gmail/imap-engine-gmail-search-folder.vala
 engine/imap-engine/other/imap-engine-other-account.vala
 engine/imap-engine/other/imap-engine-other-folder.vala
+engine/imap-engine/outlook/imap-engine-outlook-account.vala
+engine/imap-engine/outlook/imap-engine-outlook-folder.vala
 engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 engine/imap-engine/replay-ops/imap-engine-create-email.vala

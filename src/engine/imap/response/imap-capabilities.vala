@@ -35,5 +35,23 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     public override string to_string() {
         return "#%d: %s".printf(revision, base.to_string());
     }
+    
+    /**
+     * Indicates the {@link ClientSession} reported support for IDLE.
+     *
+     * See [[https://tools.ietf.org/html/rfc2177]]
+     */
+    public bool supports_idle() {
+        return has_capability(IDLE);
+    }
+    
+    /**
+     * Indicates the {@link ClientSession} reported support for UIDPLUS.
+     *
+     * See [[https://tools.ietf.org/html/rfc4315]]
+     */
+    public bool supports_uidplus() {
+        return has_capability(UIDPLUS);
+    }
 }
 

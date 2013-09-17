@@ -15,7 +15,8 @@ public enum Geary.SpecialFolderType {
     ALL_MAIL,
     SPAM,
     TRASH,
-    OUTBOX;
+    OUTBOX,
+    ARCHIVE;
     
     public unowned string get_display_name() {
         switch (this) {
@@ -48,6 +49,9 @@ public enum Geary.SpecialFolderType {
             
             case SEARCH:
                 return _("Search");
+            
+            case ARCHIVE:
+                return _("Archive");
             
             case NONE:
             default:

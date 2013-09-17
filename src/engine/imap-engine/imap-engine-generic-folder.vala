@@ -184,7 +184,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // a full normalize works from the highest possible UID on the remote and work down to the lowest UID on
         // the local; this covers all messages appended since last seen as well as any removed
-        Imap.UID last_uid = remote_properties.uid_next.previous();
+        Imap.UID last_uid = remote_properties.uid_next.previous(true);
         
         // if the difference in UIDNEXT values equals the difference in message count, then only
         // an append could have happened, so only pull in the new messages ... note that this is not foolproof,
@@ -195,7 +195,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // situation, esp. messages being removed.)
         Imap.UID first_uid;
         if (!is_dirty && uidnext_diff == (remote_message_count - local_message_count)) {
-            first_uid = local_latest_id.uid.next();
+            first_uid = local_latest_id.uid.next(true);
             
             debug("%s: Messages only appended (local/remote UIDNEXT=%s/%s total=%d/%d diff=%s), gathering mail UIDs %s:%s",
                 to_string(), local_properties.uid_next.to_string(), remote_properties.uid_next.to_string(),
@@ -1142,7 +1142,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             }
             
             criteria.and(Imap.SearchCriterion.message_set(
-                new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), before_uid.previous())));
+                new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), before_uid.previous(true))));
         }
         
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();

@@ -322,6 +322,11 @@ public class Geary.Engine : BaseObject {
                     account_information, remote_account, local_account);
             break;
             
+            case ServiceProvider.OUTLOOK:
+                account = new ImapEngine.OutlookAccount("Outlook:%s".printf(account_information.email),
+                    account_information, remote_account, local_account);
+            break;
+            
             case ServiceProvider.OTHER:
                 account = new ImapEngine.OtherAccount("Other:%s".printf(account_information.email),
                     account_information, remote_account, local_account);

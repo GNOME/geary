@@ -21,13 +21,21 @@ public class Geary.AccountInformation : BaseObject {
     private const string IMAP_PORT = "imap_port";
     private const string IMAP_SSL = "imap_ssl";
     private const string IMAP_STARTTLS = "imap_starttls";
-    private const string IMAP_PIPELINE = "imap_pipeline";
     private const string SMTP_HOST = "smtp_host";
     private const string SMTP_PORT = "smtp_port";
     private const string SMTP_SSL = "smtp_ssl";
     private const string SMTP_STARTTLS = "smtp_starttls";
     private const string SMTP_NOAUTH = "smtp_noauth";
-
+    
+    //
+    // "Retired" keys
+    //
+    
+    /*
+     * key: "imap_pipeline"
+     * value: bool
+     */
+    
     public const string SETTINGS_FILENAME = "geary.ini";
     public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
     
@@ -42,7 +50,6 @@ public class Geary.AccountInformation : BaseObject {
     public string nickname { get; set; }
     public string email { get; set; }
     public Geary.ServiceProvider service_provider { get; set; }
-    public bool imap_server_pipeline { get; set; default = true; }
     public int prefetch_period_days { get; set; }
     
     // Order for display purposes.
@@ -98,8 +105,6 @@ public class Geary.AccountInformation : BaseObject {
             if (ordinal >= default_ordinal)
                 default_ordinal = ordinal + 1;
             
-            imap_server_pipeline = get_bool_value(key_file, GROUP, IMAP_PIPELINE, true);
-
             if (service_provider == ServiceProvider.OTHER) {
                 default_imap_server_host = get_string_value(key_file, GROUP, IMAP_HOST);
                 default_imap_server_port = get_uint16_value(key_file, GROUP, IMAP_PORT,
@@ -120,11 +125,6 @@ public class Geary.AccountInformation : BaseObject {
                 }
             }
         }
-        
-        // currently IMAP pipelining is *always* turned off with generic servers; see
-        // http://redmine.yorba.org/issues/5224
-        if (service_provider == Geary.ServiceProvider.OTHER)
-            imap_server_pipeline = false;
     }
     
     // Copies all data from the "from" object into this one.
@@ -133,7 +133,6 @@ public class Geary.AccountInformation : BaseObject {
         nickname = from.nickname;
         email = from.email;
         service_provider = from.service_provider;
-        imap_server_pipeline = from.imap_server_pipeline;
         prefetch_period_days = from.prefetch_period_days;
         ordinal = from.ordinal;
         default_imap_server_host = from.default_imap_server_host;
@@ -313,6 +312,9 @@ public class Geary.AccountInformation : BaseObject {
             case ServiceProvider.YAHOO:
                 return ImapEngine.YahooAccount.IMAP_ENDPOINT;
             
+            case ServiceProvider.OUTLOOK:
+                return ImapEngine.OutlookAccount.IMAP_ENDPOINT;
+            
             case ServiceProvider.OTHER:
                 Endpoint.Flags imap_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
                 if (default_imap_server_ssl)
@@ -335,6 +337,9 @@ public class Geary.AccountInformation : BaseObject {
             
             case ServiceProvider.YAHOO:
                 return ImapEngine.YahooAccount.SMTP_ENDPOINT;
+            
+            case ServiceProvider.OUTLOOK:
+                return ImapEngine.OutlookAccount.SMTP_ENDPOINT;
             
             case ServiceProvider.OTHER:
                 Endpoint.Flags smtp_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
@@ -421,8 +426,6 @@ public class Geary.AccountInformation : BaseObject {
         key_file.set_boolean(GROUP, SMTP_REMEMBER_PASSWORD_KEY, smtp_remember_password);
         key_file.set_integer(GROUP, PREFETCH_PERIOD_DAYS_KEY, prefetch_period_days);
         
-        key_file.set_boolean(GROUP, IMAP_PIPELINE, imap_server_pipeline);
-
         if (service_provider == ServiceProvider.OTHER) {
             key_file.set_value(GROUP, IMAP_HOST, default_imap_server_host);
             key_file.set_integer(GROUP, IMAP_PORT, default_imap_server_port);

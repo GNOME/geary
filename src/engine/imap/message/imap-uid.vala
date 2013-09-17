@@ -32,29 +32,33 @@ public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.Mes
     }
     
     /**
-     * Returns a valid UID, which means returning MIN or MAX if the value is out of range (either
-     * direction) or MAX if this value is already MAX.
+     * Returns the UID logically next (or after) this one.
+     *
+     * If clamped this always returns a valid UID, which means returning MIN or MAX if
+     * the value is out of range (either direction) or MAX if this value is already MAX.
+     *
+     * Otherwise, it may return an invalid UID and should be verified before using.
+     *
+     * @see previous
+     * @see is_valid
      */
-    public UID next() {
-        if (value < MIN)
-            return new UID(MIN);
-        else if (value > MAX)
-            return new UID(MAX);
-        else
-            return new UID(Numeric.int64_ceiling(value + 1, MAX));
+    public UID next(bool clamped) {
+        return clamped ? new UID((value + 1).clamp(MIN, MAX)) : new UID(value + 1);
     }
     
     /**
-     * Returns a valid UID, which means returning MIN or MAX if the value is out of range (either
-     * direction) or MIN if this value is already MIN.
+     * Returns the UID logically previous (or before) this one.
+     *
+     * If clamped this always returns a valid UID, which means returning MIN or MAX if
+     * the value is out of range (either direction) or MIN if this value is already MIN.
+     *
+     * Otherwise, it may return a UID where {@link is_valid} returns false.
+     *
+     * @see next
+     * @see is_valid
      */
-    public UID previous() {
-        if (value < MIN)
-            return new UID(MIN);
-        else if (value > MAX)
-            return new UID(MAX);
-        else
-            return new UID(Numeric.int64_floor(value - 1, MIN));
+    public UID previous(bool clamped) {
+        return clamped ? new UID((value - 1).clamp(MIN, MAX)) : new UID(value - 1);
     }
     
     public virtual int compare_to(Geary.Imap.UID other) {
