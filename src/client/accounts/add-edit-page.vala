@@ -18,7 +18,7 @@ public class AddEditPage : Gtk.Box {
     }
     
     public string nickname {
-        get { return entry_nickname.text; }
+        get { return (mode == PageMode.WELCOME) ? email_address : entry_nickname.text; }
         set { entry_nickname.text = value; }
     }
     
@@ -569,9 +569,6 @@ public class AddEditPage : Gtk.Box {
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
         storage_container.visible = mode == PageMode.EDIT;
-        
-        if (mode == PageMode.WELCOME)
-            nickname = Geary.AccountInformation.DEFAULT_NICKNAME;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.

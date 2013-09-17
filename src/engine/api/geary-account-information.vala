@@ -27,7 +27,6 @@ public class Geary.AccountInformation : BaseObject {
     private const string SMTP_NOAUTH = "smtp_noauth";
 
     public const string SETTINGS_FILENAME = "geary.ini";
-    public const string DEFAULT_NICKNAME = _("Default");
     public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
     
     public static int default_ordinal = 0;
@@ -83,7 +82,7 @@ public class Geary.AccountInformation : BaseObject {
             // It's no big deal if we couldn't load the key file -- just means we give you the defaults.
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
-            nickname = get_string_value(key_file, GROUP, NICKNAME_KEY, DEFAULT_NICKNAME);
+            nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
             imap_credentials.user = get_string_value(key_file, GROUP, IMAP_USERNAME_KEY, email);
             imap_remember_password = get_bool_value(key_file, GROUP, IMAP_REMEMBER_PASSWORD_KEY, true);
             smtp_credentials.user = get_string_value(key_file, GROUP, SMTP_USERNAME_KEY, email);
