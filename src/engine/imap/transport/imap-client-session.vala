@@ -90,7 +90,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     private enum State {
         // canonical IMAP session states
-        DISCONNECTED,
+        UNCONNECTED,
         NOAUTH,
         AUTHORIZED,
         SELECTED,
@@ -144,7 +144,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     private static Geary.State.MachineDescriptor machine_desc = new Geary.State.MachineDescriptor(
-        "Geary.Imap.ClientSession", State.DISCONNECTED, State.COUNT, Event.COUNT,
+        "Geary.Imap.ClientSession", State.UNCONNECTED, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
     
     /**
@@ -234,13 +234,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         this.imap_endpoint = imap_endpoint;
         
         Geary.State.Mapping[] mappings = {
-            new Geary.State.Mapping(State.DISCONNECTED, Event.CONNECT, on_connect),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.LOGIN, on_early_command),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.SEND_CMD, on_early_command),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.SELECT, on_early_command),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.CLOSE_MAILBOX, on_early_command),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.LOGOUT, on_early_command),
-            new Geary.State.Mapping(State.DISCONNECTED, Event.DISCONNECT, Geary.State.nop),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.CONNECT, on_connect),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.LOGIN, on_early_command),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.SEND_CMD, on_early_command),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.SELECT, on_early_command),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.CLOSE_MAILBOX, on_early_command),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.LOGOUT, on_early_command),
+            new Geary.State.Mapping(State.UNCONNECTED, Event.DISCONNECT, Geary.State.nop),
             
             new Geary.State.Mapping(State.CONNECTING, Event.CONNECT, on_already_connected),
             new Geary.State.Mapping(State.CONNECTING, Event.LOGIN, on_early_command),
@@ -383,7 +383,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     ~ClientSession() {
         switch (fsm.get_state()) {
-            case State.DISCONNECTED:
+            case State.UNCONNECTED:
             case State.BROKEN:
                 // no problem-o
             break;
@@ -407,7 +407,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         current_mailbox = null;
         
         switch (fsm.get_state()) {
-            case State.DISCONNECTED:
+            case State.UNCONNECTED:
             case State.LOGGED_OUT:
             case State.LOGGING_OUT:
             case State.DISCONNECTING:
@@ -999,7 +999,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 // expect to go away (see on_recv_disconnecting_status)
                 fsm.do_post_transition(() => { disconnected(DisconnectReason.REMOTE_ERROR); });
                 
-                return State.DISCONNECTED;
+                return State.BROKEN;
             
             default:
                 debug("[%s] Received error from server: %s", to_string(), status_response.to_string());
@@ -1016,7 +1016,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             case Status.BYE:
                 fsm.do_post_transition(() => { disconnected(DisconnectReason.REMOTE_CLOSE); });
                 
-                return State.DISCONNECTED;
+                return State.BROKEN;
         }
         
         return state;
@@ -1250,7 +1250,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             disconnected(DisconnectReason.LOCAL_CLOSE);
         });
         
-        // although we could go to the DISCONNECTED state, that implies the object can be reused ...
+        // although we could go to the UNCONNECTED state, that implies the object can be reused ...
         // while possible, that requires all state (not just the FSM) be reset at this point, and
         // it just seems simpler and less buggy to require the user to discard this object and
         // instantiate a new one

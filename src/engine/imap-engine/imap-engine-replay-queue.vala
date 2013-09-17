@@ -49,6 +49,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private weak GenericFolder owner;
     private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
     private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
+    private bool local_op_active = false;
+    private bool remote_op_active = false;
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
     private Scheduler.Scheduled? notification_timer = null;
     
@@ -148,11 +150,11 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         // in order), it's *vital* that even REMOTE_ONLY operations go through the local queue,
         // only being scheduled on the remote queue *after* local operations ahead of it have
         // completed; thus, no need for get_scope() to be called here.
-        local_queue.send(op);
+        bool is_scheduled = local_queue.send(op);
+        if (is_scheduled)
+            scheduled(op);
         
-        scheduled(op);
-        
-        return true;
+        return is_scheduled;
     }
     
     /**
@@ -204,8 +206,12 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             notification_queue.size);
         
         // no new operations in timeout span, add them all to the "real" queue
-        foreach (ReplayOperation notification_op in notification_queue)
-            schedule(notification_op);
+        foreach (ReplayOperation notification_op in notification_queue) {
+            if (!schedule(notification_op)) {
+                debug("Unable to schedule notification operation %s on %s", notification_op.to_string(),
+                    to_string());
+            }
+        }
         
         notification_queue.clear();
         
@@ -285,8 +291,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         
         // flush a ReplayClose operation down the pipe so all working operations complete
         CloseReplayQueue close_op = new CloseReplayQueue();
-        bool scheduled = schedule(close_op);
-        assert(scheduled);
+        bool is_scheduled = schedule(close_op);
+        assert(is_scheduled);
         
         yield close_op.wait_for_ready_async(cancellable);
         
@@ -329,6 +335,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 
                 break;
             }
+            
+            local_op_active = true;
             
             // If this is a Close operation, shut down the queue after processing it
             if (op is CloseReplayQueue)
@@ -393,7 +401,10 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             }
             
             if (remote_enqueue) {
-                remote_queue.send(op);
+                if (!remote_queue.send(op)) {
+                    debug("Unable to enqueue operation %s for %s remote operation", op.to_string(),
+                        to_string());
+                }
             } else {
                 // all code paths to this point should have notified ready if not enqueuing for
                 // next stage
@@ -409,12 +420,15 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 else
                     failed(op);
             }
+            
+            local_op_active = false;
         }
         
-        Logging.debug(Logging.Flag.REPLAY, "ReplayQueue.do_replay_local_async %s exiting", to_string());
+        debug("ReplayQueue.do_replay_local_async %s exiting", to_string());
     }
     
     private async void do_replay_remote_async() {
+        bool folder_opened = true;
         bool queue_running = true;
         while (queue_running) {
             // wait for the next operation ... do this *before* waiting for remote
@@ -428,34 +442,33 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 break;
             }
             
+            remote_op_active = true;
+            
             // ReplayClose means this queue (and the folder) are closing, so handle errors a little
             // differently
             bool is_close_op = op is CloseReplayQueue;
+            if (is_close_op)
+                queue_running = false;
             
-            // wait until the remote folder is opened (or returns false, in which case closed)
-            bool folder_opened = true;
+            // wait until the remote folder is opened (or throws an exception, in which case closed)
             try {
-                yield owner.wait_for_open_async();
+                if (!is_close_op && folder_opened)
+                    yield owner.wait_for_open_async();
             } catch (Error remote_err) {
-                if (!is_close_op) {
-                    debug("Folder %s closed or failed to open, remote replay queue closing: %s",
-                        to_string(), remote_err.message);
-                }
+                debug("Folder %s closed or failed to open, remote replay queue closing: %s",
+                    to_string(), remote_err.message);
                 
-                // didn't open
+                // not open
                 folder_opened = false;
                 
                 // fall through
             }
             
-            if (is_close_op)
-                queue_running = false;
-            
             remotely_executing(op);
             
             ReplayOperation.Status status = ReplayOperation.Status.FAILED;
             Error? remote_err = null;
-            if (folder_opened) {
+            if (folder_opened || is_close_op) {
                 try {
                     status = yield op.replay_remote_async();
                 } catch (Error replay_err) {
@@ -493,13 +506,17 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 completed(op);
             else
                 failed(op);
+            
+            remote_op_active = false;
         }
         
-        Logging.debug(Logging.Flag.REPLAY, "ReplayQueue.do_replay_remote_async %s exiting", to_string());
+        debug("ReplayQueue.do_replay_remote_async %s exiting", to_string());
     }
     
     public string to_string() {
-        return "ReplayQueue:%s".printf(owner.to_string());
+        return "ReplayQueue:%s (notification=%d local=%d local_active=%s remote=%d remote_active=%s)".printf(
+            owner.to_string(), notification_queue.size, local_queue.size, local_op_active.to_string(),
+            remote_queue.size, remote_op_active.to_string());
     }
 }
 

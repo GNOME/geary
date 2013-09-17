@@ -147,7 +147,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private void schedule_new_authorized_session() {
         pending_sessions++;
         
-        create_new_authorized_session.begin(null, on_created_new_authorized_session);
+        create_new_authorized_session.begin(false, null, on_created_new_authorized_session);
     }
     
     private void on_created_new_authorized_session(Object? source, AsyncResult result) {
@@ -164,8 +164,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
     }
     
-    // This should only be called when sessions_mutex is locked.
-    private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
+    // The locked parameter indicates if this is called while the sessions_mutex is locked
+    private async ClientSession create_new_authorized_session(bool locked, Cancellable? cancellable)
+        throws Error {
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
         
@@ -173,14 +174,21 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
-        locked_add_session(new_session);
+        if (locked)
+            locked_add_session(new_session);
+        else
+            yield unlocked_add_session_async(new_session);
         
         try {
             yield new_session.connect_async(cancellable);
         } catch (Error err) {
             debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
-            bool removed = locked_remove_session(new_session);
+            bool removed;
+            if (locked)
+                removed = locked_remove_session(new_session);
+            else
+                removed = yield unlocked_remove_session_async(new_session);
             assert(removed);
             
             throw err;
@@ -200,7 +208,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                     new_session.to_string(), disconnect_err.message);
             }
             
-            bool removed = locked_remove_session(new_session);
+            bool removed;
+            if (locked)
+                removed = locked_remove_session(new_session);
+            else
+                removed = yield unlocked_remove_session_async(new_session);
             assert(removed);
             
             throw err;
@@ -238,7 +250,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         Error? err = null;
         try {
             if (found_session == null)
-                found_session = yield create_new_authorized_session(cancellable);
+                found_session = yield create_new_authorized_session(true, cancellable);
         } catch (Error create_err) {
             debug("Error creating session: %s", create_err.message);
             err = create_err;
@@ -374,6 +386,12 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         session.login_failed.connect(on_login_failed);
     }
     
+    private async void unlocked_add_session_async(ClientSession session) throws Error {
+        int token = yield sessions_mutex.claim_async();
+        locked_add_session(session);
+        sessions_mutex.release(ref token);
+    }
+    
     // Only call with sessions mutex locked
     private bool locked_remove_session(ClientSession session) {
         bool removed = sessions.remove(session);
@@ -383,6 +401,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
         
         reserved_sessions.remove(session);
+        
+        return removed;
+    }
+    
+    private async bool unlocked_remove_session_async(ClientSession session) throws Error {
+        int token = yield sessions_mutex.claim_async();
+        bool removed = locked_remove_session(session);
+        sessions_mutex.release(ref token);
         
         return removed;
     }
