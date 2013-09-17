@@ -6,6 +6,9 @@
 
 // Page for adding or editing an account.
 public class AddEditPage : Gtk.Box {
+    /// Placeholder text indicating that the user should type their first name and last name
+    private const string REAL_NAME_PLACEHOLDER = _("First Last");
+    
     public enum PageMode {
         WELCOME,
         ADD,
@@ -187,6 +190,7 @@ public class AddEditPage : Gtk.Box {
             _("Welcome to Geary."), _("Enter your account information to get started.")));
         
         entry_real_name = (Gtk.Entry) builder.get_object("entry: real_name");
+        entry_real_name.placeholder_text = REAL_NAME_PLACEHOLDER;
         label_nickname = (Gtk.Label) builder.get_object("label: nickname");
         entry_nickname = (Gtk.Entry) builder.get_object("entry: nickname");
         combo_service =  (Gtk.ComboBoxText) builder.get_object("combo: service");
