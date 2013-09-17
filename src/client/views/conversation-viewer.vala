@@ -509,8 +509,8 @@ public class ConversationViewer : Gtk.Box {
                         <input type="button" value="%s" class="show_images" />
                         <input type="button" value="%s" class="show_from" />""".printf(
                         remote_images_bar.get_inner_html(),
-                        _("This message contains remote images."), _("Show images"),
-                        _("Always show from sender")));
+                        _("This message contains remote images."), _("Show Images"),
+                        _("Always Show From Sender")));
                 } catch (Error error) {
                     warning("Error showing remote images bar: %s", error.message);
                 }
