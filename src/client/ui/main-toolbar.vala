@@ -17,6 +17,7 @@ public class MainToolbar : PillToolbar {
     private Gtk.Entry search_entry = new Gtk.Entry();
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
     private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
+    private Geary.Account? current_account = null;
     
     public signal void search_text_changed(string search_text);
     
@@ -140,6 +141,10 @@ public class MainToolbar : PillToolbar {
             search_upgrade_progress_monitor = null;
         }
         
+        if (current_account != null)
+            current_account.information.notify[Geary.AccountInformation.PROP_NICKNAME].disconnect(
+                on_nickname_changed);
+        
         if (account != null) {
             search_upgrade_progress_monitor = account.search_upgrade_monitor;
             search_upgrade_progress_bar.set_progress_monitor(search_upgrade_progress_monitor);
@@ -148,12 +153,21 @@ public class MainToolbar : PillToolbar {
             search_upgrade_progress_monitor.finish.connect(on_search_upgrade_finished);
             if (search_upgrade_progress_monitor.is_in_progress)
                 on_search_upgrade_start(); // Remove search box, we're already in progress.
+            
+            account.information.notify[Geary.AccountInformation.PROP_NICKNAME].connect(
+                on_nickname_changed);
         }
         
-        search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
+        current_account = account;
         
-        set_search_placeholder_text(account == null || GearyApplication.instance.controller.get_num_accounts() == 1 ?
-             DEFAULT_SEARCH_TEXT : _("Search %s account").printf(account.information.nickname));
+        search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
+        on_nickname_changed(); // Set new account name.
+    }
+    
+    private void on_nickname_changed() {
+        set_search_placeholder_text(current_account == null ||
+            GearyApplication.instance.controller.get_num_accounts() == 1 ? DEFAULT_SEARCH_TEXT :
+            _("Search %s account").printf(current_account.information.nickname));
     }
 }
 

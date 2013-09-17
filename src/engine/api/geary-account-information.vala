@@ -5,6 +5,8 @@
  */
 
 public class Geary.AccountInformation : BaseObject {
+    public const string PROP_NICKNAME = "nickname"; // Name of nickname property.
+    
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string NICKNAME_KEY = "nickname";
