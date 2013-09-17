@@ -29,8 +29,6 @@ private class Geary.Imap.Account : BaseObject {
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
     
-    public signal void email_sent(Geary.RFC822.Message rfc822);
-    
     public signal void login_failed(Geary.Credentials cred);
     
     public Account(Geary.AccountInformation account_information) {

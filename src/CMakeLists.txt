@@ -351,6 +351,7 @@ client/ui/main-window.vala
 client/ui/monitored-progress-bar.vala
 client/ui/monitored-spinner.vala
 client/ui/pill-toolbar.vala
+client/ui/status-bar.vala
 client/ui/stock.vala
 
 client/util/util-date.vala

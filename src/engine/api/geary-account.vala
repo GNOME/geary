@@ -10,7 +10,8 @@ public interface Geary.Account : BaseObject {
         SEND_EMAIL_LOGIN_FAILED,
         HOST_UNREACHABLE,
         NETWORK_UNAVAILABLE,
-        DATABASE_FAILURE
+        DATABASE_FAILURE,
+        EMAIL_DELIVERY_FAILURE,
     }
     
     public abstract Geary.AccountInformation information { get; protected set; }
@@ -18,6 +19,7 @@ public interface Geary.Account : BaseObject {
     public abstract Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
     public abstract Geary.ProgressMonitor db_upgrade_monitor { get; protected set; }
     public abstract Geary.ProgressMonitor opening_monitor { get; protected set; }
+    public abstract Geary.ProgressMonitor sending_monitor { get; protected set; }
     
     public signal void opened();
     

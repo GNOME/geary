@@ -27,6 +27,8 @@ private class Geary.ImapDB.Account : BaseObject {
         }
     }
     
+    public signal void email_sent(Geary.RFC822.Message rfc822);
+    
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
     public SearchFolder? search_folder { get; private set; default = null; }
@@ -35,6 +37,8 @@ private class Geary.ImapDB.Account : BaseObject {
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
         ProgressType.DB_UPGRADE); }
+    public SimpleProgressMonitor sending_monitor { get; private set;
+        default = new SimpleProgressMonitor(ProgressType.ACTIVITY); }
     
     private string name;
     private AccountInformation account_information;
@@ -134,7 +138,8 @@ private class Geary.ImapDB.Account : BaseObject {
         initialize_contacts(cancellable);
         
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
-        outbox = new SmtpOutboxFolder(db, account);
+        outbox = new SmtpOutboxFolder(db, account, sending_monitor);
+        outbox.email_sent.connect(on_outbox_email_sent);
         
         // Search folder
         search_folder = ((ImapEngine.GenericAccount) account).new_search_folder();
@@ -154,8 +159,13 @@ private class Geary.ImapDB.Account : BaseObject {
         background_cancellable.cancel();
         background_cancellable = null;
         
+        outbox.email_sent.disconnect(on_outbox_email_sent);
         outbox = null;
         search_folder = null;
+    }
+    
+    private void on_outbox_email_sent(Geary.RFC822.Message rfc822) {
+        email_sent(rfc822);
     }
     
     public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)

@@ -7,12 +7,14 @@
 public class MainWindow : Gtk.Window {
     private const int MESSAGE_LIST_WIDTH = 250;
     private const int FOLDER_LIST_WIDTH = 100;
+    private const int STATUS_BAR_HEIGHT = 18;
     
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
+    public StatusBar status_bar { get; private set; default = new StatusBar(); }
     
     public int window_width { get; set; }
     public int window_height { get; set; }
@@ -118,7 +120,9 @@ public class MainWindow : Gtk.Window {
         
         // Three-pane display.
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-        Gtk.Statusbar status_bar = new Gtk.Statusbar();
+        status_bar.set_size_request(-1, STATUS_BAR_HEIGHT);
+        status_bar.set_border_width(2);
+        spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         status_bar.add(spinner);
         status_bar_box.pack_start(folder_frame);
         status_bar_box.pack_start(status_bar, false, false, 0);
@@ -179,16 +183,18 @@ public class MainWindow : Gtk.Window {
     private void on_account_available(Geary.AccountInformation account) {
         try {
             progress_monitor.add(Geary.Engine.instance.get_account_instance(account).opening_monitor);
+            progress_monitor.add(Geary.Engine.instance.get_account_instance(account).sending_monitor);
         } catch (Error e) {
-            debug("Could not access account opening progress monitor: %s", e.message);
+            debug("Could not access account progress monitors: %s", e.message);
         }
     }
     
     private void on_account_unavailable(Geary.AccountInformation account) {
         try {
             progress_monitor.remove(Geary.Engine.instance.get_account_instance(account).opening_monitor);
+            progress_monitor.remove(Geary.Engine.instance.get_account_instance(account).sending_monitor);
         } catch (Error e) {
-            debug("Could not access account opening progress monitor: %s", e.message);
+            debug("Could not access account progress monitors: %s", e.message);
         }
     }
 }

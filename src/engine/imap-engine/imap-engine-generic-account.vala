@@ -29,11 +29,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         this.local = local;
         
         this.remote.login_failed.connect(on_login_failed);
-        this.remote.email_sent.connect(on_email_sent);
+        this.local.email_sent.connect(on_email_sent);
         
         search_upgrade_monitor = local.search_index_monitor;
         db_upgrade_monitor = local.upgrade_monitor;
         opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
+        sending_monitor = local.sending_monitor;
         
         if (outbox_path == null) {
             outbox_path = new SmtpOutboxFolderRoot();

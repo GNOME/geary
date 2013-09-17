@@ -13,6 +13,7 @@ public class Libnotify : Geary.BaseObject {
     
     private NewMessagesMonitor monitor;
     private Notify.Notification? current_notification = null;
+    private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
     private Geary.Email? email = null;
     private unowned List<string> caps;
@@ -75,7 +76,7 @@ public class Libnotify : Geary.BaseObject {
                 body, total);
         }
         
-        issue_notification(folder.account.information.email, body, null);
+        issue_current_notification(folder.account.information.email, body, null);
     }
     
     private async void notify_one_message_async(Geary.Folder folder, Geary.Email email,
@@ -128,10 +129,10 @@ public class Libnotify : Geary.BaseObject {
             ins = null;
         }
         
-        issue_notification(primary.get_short_address(), body, avatar);
+        issue_current_notification(primary.get_short_address(), body, avatar);
     }
     
-    private void issue_notification(string summary, string body, Gdk.Pixbuf? icon) {
+    private void issue_current_notification(string summary, string body, Gdk.Pixbuf? icon) {
         // only one outstanding notification at a time
         if (current_notification != null) {
             try {
@@ -143,32 +144,42 @@ public class Libnotify : Geary.BaseObject {
             current_notification = null;
         }
         
+        current_notification = issue_notification("email.arrived", summary, body, icon, "message-new_email");
+        
+    }
+    
+    private Notify.Notification issue_notification(string category, string summary,
+        string body, Gdk.Pixbuf? icon, string? sound) {
         // Avoid constructor due to ABI change
-        current_notification = (Notify.Notification) GLib.Object.new(
+        Notify.Notification notification = (Notify.Notification) GLib.Object.new(
             typeof (Notify.Notification),
             "icon-name", "geary",
             "summary", GLib.Environment.get_application_name());
-        current_notification.set_hint_string("desktop-entry", "geary");
+        notification.set_hint_string("desktop-entry", "geary");
         if (caps.find_custom("actions", GLib.strcmp) != null)
-            current_notification.add_action("default", _("Open"), on_default_action);
+            notification.add_action("default", _("Open"), on_default_action);
         
-        current_notification.set_category("email.arrived");
-        current_notification.set("summary", summary);
-        current_notification.set("body", body);
+        notification.set_category(category);
+        notification.set("summary", summary);
+        notification.set("body", body);
         
         if (icon != null)
-            current_notification.set_image_from_pixbuf(icon);
+            notification.set_image_from_pixbuf(icon);
         
-        if (caps.find("sound") != null)
-            current_notification.set_hint_string("sound-name", "message-new-email");
-        else
-            play_sound("message-new-email");
+        if (sound != null) {
+            if (caps.find("sound") != null)
+                notification.set_hint_string("sound-name", sound);
+            else
+                play_sound(sound);
+        }
         
         try {
-            current_notification.show();
+            notification.show();
         } catch (Error err) {
             message("Unable to show notification: %s", err.message);
         }
+        
+        return notification;
     }
     
     public static void play_sound(string sound) {
@@ -177,6 +188,29 @@ public class Libnotify : Geary.BaseObject {
         
         init_sound();
         sound_context.play(0, Canberra.PROP_EVENT_ID, sound);
+    }
+    
+    public void set_error_notification(string summary, string body) {
+        // Only one error at a time, guys.  (This means subsequent errors will
+        // be dropped.  Since this is only used for one thing now, that's ok,
+        // but it means in the future, a more robust system will be needed.)
+        if (error_notification != null)
+            return;
+        
+        error_notification = issue_notification("email", summary, body,
+            IconFactory.instance.application_icon, null);
+    }
+    
+    public void clear_error_notification() {
+        if (error_notification != null) {
+            try {
+                error_notification.close();
+            } catch (Error err) {
+                debug("Unable to close libnotify error notification: %s", err.message);
+            }
+            
+            error_notification = null;
+        }
     }
 }
 

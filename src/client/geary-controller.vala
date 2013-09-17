@@ -396,11 +396,13 @@ public class GearyController : Geary.BaseObject {
     
     private void open_account(Geary.Account account) {
         account.report_problem.connect(on_report_problem);
+        account.email_removed.connect(on_account_email_removed);
         connect_account_async.begin(account, cancellable_open_account);
     }
     
     private void close_account(Geary.Account account) {
         account.report_problem.disconnect(on_report_problem);
+        account.email_removed.disconnect(on_account_email_removed);
         disconnect_account_async.begin(account);
     }
     
@@ -581,9 +583,59 @@ public class GearyController : Geary.BaseObject {
                 close_account(account);
             break;
             
+            case Geary.Account.Problem.EMAIL_DELIVERY_FAILURE:
+                handle_send_failure();
+            break;
+            
             default:
                 assert_not_reached();
         }
+    }
+    
+    private void handle_send_failure() {
+        bool activate_message = false;
+        try {
+            // Due to a timing hole where it's possible to delete a message
+            // from the outbox after the SMTP queue has picked it up and is
+            // in the process of sending it, we only want to display a message
+            // telling the user there's a problem if there are any other
+            // messages waiting to be sent on any account.
+            foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
+                Geary.Account account = Geary.Engine.instance.get_account_instance(info);
+                if (account.is_open()) {
+                    Geary.Folder? outbox = account.get_special_folder(Geary.SpecialFolderType.OUTBOX);
+                    if (outbox != null && outbox.properties.email_total > 0) {
+                        activate_message = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Error e) {
+            debug("Error determining whether any outbox has messages: %s", e.message);
+            activate_message = true;
+        }
+        
+        if (activate_message) {
+            if (!main_window.status_bar.is_message_active(StatusBar.Message.OUTBOX_SEND_FAILURE))
+                main_window.status_bar.activate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
+            libnotify.set_error_notification(_("Error sending email"),
+                _("Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder."));
+        }
+    }
+    
+    private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        if (folder.special_folder_type == Geary.SpecialFolderType.OUTBOX) {
+            main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
+            libnotify.clear_error_notification();
+        }
+    }
+    
+    private void on_sending_started() {
+        main_window.status_bar.activate_message(StatusBar.Message.OUTBOX_SENDING);
+    }
+    
+    private void on_sending_finished() {
+        main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SENDING);
     }
     
     // Removes an existing account.
@@ -599,6 +651,8 @@ public class GearyController : Geary.BaseObject {
     
     public async void connect_account_async(Geary.Account account, Cancellable? cancellable = null) {
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
+        account.sending_monitor.start.connect(on_sending_started);
+        account.sending_monitor.finish.connect(on_sending_finished);
         
         bool retry = false;
         do {
@@ -712,6 +766,8 @@ public class GearyController : Geary.BaseObject {
             cancel_folder();
         
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
+        account.sending_monitor.start.disconnect(on_sending_started);
+        account.sending_monitor.finish.disconnect(on_sending_finished);
         
         if (main_window.conversation_list_store.account_owner_email == account.information.email)
             main_window.conversation_list_store.account_owner_email = null;

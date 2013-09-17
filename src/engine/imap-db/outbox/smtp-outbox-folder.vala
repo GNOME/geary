@@ -56,18 +56,21 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     
     private ImapDB.Database db;
     private weak Account _account;
+    private Geary.ProgressMonitor sending_monitor;
     private Geary.Smtp.ClientSession smtp;
     private Nonblocking.Mailbox<OutboxRow> outbox_queue = new Nonblocking.Mailbox<OutboxRow>();
     private SmtpOutboxFolderProperties _properties = new SmtpOutboxFolderProperties(0, 0);
     private int64 next_ordering = 0;
     
     public signal void report_problem(Geary.Account.Problem problem, Error? err);
+    public signal void email_sent(Geary.RFC822.Message rfc822);
     
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
-    public SmtpOutboxFolder(ImapDB.Database db, Account account) {
+    public SmtpOutboxFolder(ImapDB.Database db, Account account, Geary.ProgressMonitor sending_monitor) {
         this.db = db;
         _account = account;
+        this.sending_monitor = sending_monitor;
         
         smtp = new Geary.Smtp.ClientSession(_account.information.get_smtp_endpoint());
         
@@ -219,6 +222,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                     
                     if (report)
                         report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, send_err);
+                } else {
+                    report_problem(Geary.Account.Problem.EMAIL_DELIVERY_FAILURE, send_err);
                 }
                 
                 if (should_nap) {
@@ -241,14 +246,6 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 yield internal_remove_email_async(list, null);
             } catch (Error rm_err) {
                 debug("Outbox postman: Unable to remove row from database: %s", rm_err.message);
-            }
-            
-            // update properties
-            try {
-                _properties.set_total(yield get_email_count_async(null));
-            } catch (Error err) {
-                debug("Outbox postman: Unable to fetch updated email count for properties: %s",
-                    err.message);
             }
             
             // If we got this far the send was successful, so reset the send retry interval.
@@ -503,6 +500,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         if (removed.size == 0)
             return false;
         
+        _properties.set_total(final_count);
+        
         notify_email_removed(removed);
         notify_email_count_changed(final_count, CountChangeReason.REMOVED);
         
@@ -531,8 +530,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     
     private async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
-        Error? smtp_err = null;
+        sending_monitor.notify_start();
         
+        Error? smtp_err = null;
         try {
             yield smtp.login_async(_account.information.smtp_credentials, cancellable);
         } catch (Error login_err) {
@@ -557,8 +557,12 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             debug("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
         }
         
+        sending_monitor.notify_finish();
+        
         if (smtp_err != null)
             throw smtp_err;
+        
+        email_sent(rfc822);
     }
     
     private async bool ordering_exists_async(int64 ordering, Cancellable? cancellable) throws Error {
