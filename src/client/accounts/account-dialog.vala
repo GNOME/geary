@@ -70,6 +70,9 @@ public class AccountDialog : Gtk.Dialog {
     
     private void on_close() {
         hide();
+        
+        // Go back to default page.
+        account_list_pane.present();
     }
     
     private void on_add_account() {
