@@ -547,7 +547,7 @@ OPTIONS
 )
 
 add_executable(geary ${GEARY_VALA_C})
-target_link_libraries(geary ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+target_link_libraries(geary m ${DEPS_LIBRARIES} gthread-2.0 geary-static)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(
     TARGET

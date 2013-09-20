@@ -24,6 +24,7 @@ public class ConversationViewer : Gtk.Box {
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string SPINNER_ID = "spinner";
     private const string DATA_IMAGE_CLASS = "data_inline_image";
+    private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
     
     private enum SearchState {
         // Search/find states.
@@ -688,8 +689,71 @@ public class ConversationViewer : Gtk.Box {
         if (!(mimetype in INLINE_MIME_TYPES))
             return null;
         
+        // Even if the image doesn't need to be rotated, there's a win here: by reducing the size
+        // of the image at load time, it reduces the amount of work that has to be done to insert
+        // it into the HTML and then decoded and displayed for the user ... note that we currently
+        // have the doucment set up to reduce the size of the image to fit in the viewport, and a
+        // scaled load-and-deode is always faster than load followed by scale.
+        Geary.Memory.Buffer rotated_image = buffer;
+        try {
+            Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
+            loader.size_prepared.connect(on_inline_image_size_prepared);
+            
+            Geary.Memory.UnownedBytesBuffer? unowned_buffer = buffer as Geary.Memory.UnownedBytesBuffer;
+            if (unowned_buffer != null)
+                loader.write(unowned_buffer.to_unowned_uint8_array());
+            else
+                loader.write(buffer.get_uint8_array());
+            loader.close();
+            
+            Gdk.Pixbuf? pixbuf = loader.get_pixbuf();
+            if (pixbuf != null) {
+                pixbuf = pixbuf.apply_embedded_orientation();
+                
+                // trade-off here between how long it takes to compress the data and how long it
+                // takes to turn it into Base-64 (coupled with how long it takes WebKit to then
+                // Base-64 decode and uncompress it)
+                uint8[] image_data;
+                pixbuf.save_to_buffer(out image_data, "png", "compression", "5");
+                
+                rotated_image = new Geary.Memory.ByteBuffer.take((owned) image_data, image_data.length);
+            }
+        } catch (Error err) {
+            debug("Unable to load and rotate image %s for display: %s", filename, err.message);
+        }
+        
         return "<img alt=\"%s\" class=\"%s\" src=\"%s\" />".printf(
-            filename, DATA_IMAGE_CLASS, assemble_data_uri(mimetype, buffer));
+            filename, DATA_IMAGE_CLASS, assemble_data_uri(mimetype, rotated_image));
+    }
+    
+    // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
+    // this allows us to load the image scaled down, for better performance when manipulating and
+    // writing the data URI for WebKit
+    private static void on_inline_image_size_prepared(Gdk.PixbufLoader loader, int width, int height) {
+        // easier to use as local variable than have the const listed everywhere in the code
+        // IN ALL SCREAMING CAPS
+        int scale = MAX_INLINE_IMAGE_MAJOR_DIM;
+        
+        // Borrowed liberally from Shotwell's Dimensions.get_scaled() method
+        
+        // check for existing fit
+        if (width <= scale && height <= scale)
+            return;
+        
+        int adj_width, adj_height;
+        if ((width - scale) > (height - scale)) {
+            double aspect = (double) scale / (double) width;
+            
+            adj_width = scale;
+            adj_height = (int) Math.round((double) height * aspect);
+        } else {
+            double aspect = (double) scale / (double) height;
+            
+            adj_width = (int) Math.round((double) width * aspect);
+            adj_height = scale;
+        }
+        
+        loader.set_size(adj_width, adj_height);
     }
     
     private void unhide_last_email() {
