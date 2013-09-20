@@ -105,7 +105,7 @@ public class Libnotify : Geary.BaseObject {
             body = EmailUtil.strip_subject_prefixes(email);
         } else {
             body = ngettext("%s\n(%d other new message for %s)", "%s\n(%d other new messages for %s)", count - 1).printf(
-                EmailUtil.strip_subject_prefixes(email), count, folder.account.information.email);
+                EmailUtil.strip_subject_prefixes(email), count - 1, folder.account.information.email);
         }
         
         // get the avatar
