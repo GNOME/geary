@@ -590,7 +590,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
                     Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
                     
-                    Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, cancellable);
+                    Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, true, cancellable);
                     if (folders == null) {
                         if (folder_blacklist == null || !folder_blacklist.contains(null))
                             messages.set(email, null);
@@ -899,7 +899,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     continue;
                 
                 Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(
-                    cx, imap_db_id.message_id, cancellable);
+                    cx, imap_db_id.message_id, false, cancellable);
                 if (folders != null) {
                     Geary.Collection.multi_map_set_all<Geary.EmailIdentifier,
                         Geary.FolderPath>(map, id, folders);
@@ -1125,32 +1125,29 @@ private class Geary.ImapDB.Account : BaseObject {
             folder_blacklist, cx, out blacklist_folderless, cancellable);
         
         StringBuilder sql = new StringBuilder();
-        if (blacklisted_ids.size > 0 || blacklist_folderless) {
-            if (blacklist_folderless) {
-                // We select out of the MessageTable and join on the location
-                // table so we can recognize emails that aren't in any folders.
-                // This is slightly more complicated than the case below, where
-                // we can just select directly out of the location table.
-                sql.append("""
-                    SELECT m.id
-                    FROM MessageTable m
-                    LEFT JOIN MessageLocationTable l ON l.message_id = m.id
-                    WHERE folder_id IS NULL
-                """);
-                if (blacklisted_ids.size > 0) {
-                    sql.append(" OR folder_id IN (");
-                    sql_append_ids(sql, blacklisted_ids);
-                    sql.append(")");
-                }
-            } else {
-                sql.append("""
+        if (blacklisted_ids.size > 0) {
+            sql.append("""
+                SELECT message_id
+                FROM MessageLocationTable
+                WHERE remove_marker = 0
+                    AND folder_id IN (
+            """);
+            sql_append_ids(sql, blacklisted_ids);
+            sql.append(")");
+            
+            if (blacklist_folderless)
+                sql.append(" UNION ");
+        }
+        if (blacklist_folderless) {
+            sql.append("""
+                SELECT id
+                FROM MessageTable
+                WHERE id NOT IN (
                     SELECT message_id
                     FROM MessageLocationTable
-                    WHERE folder_id IN (
-                """);
-                sql_append_ids(sql, blacklisted_ids);
-                sql.append(")");
-            }
+                    WHERE remove_marker = 0
+                )
+            """);
         }
         
         return sql.str;
@@ -1159,8 +1156,11 @@ private class Geary.ImapDB.Account : BaseObject {
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
     private static Gee.Set<Geary.FolderPath>? do_find_email_folders(Db.Connection cx, int64 message_id,
-        Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare("SELECT folder_id FROM MessageLocationTable WHERE message_id=?");
+        bool include_removed, Cancellable? cancellable) throws Error {
+        string sql = "SELECT folder_id FROM MessageLocationTable WHERE message_id=?";
+        if (!include_removed)
+            sql += " AND remove_marker=0";
+        Db.Statement stmt = cx.prepare(sql);
         stmt.bind_int64(0, message_id);
         Db.Result result = stmt.exec(cancellable);
         
@@ -1290,7 +1290,8 @@ private class Geary.ImapDB.Account : BaseObject {
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (ImapDB.EmailIdentifier id in unread_status.keys) {
-                Gee.Set<Geary.FolderPath>? paths = do_find_email_folders(cx, id.message_id, cancellable);
+                Gee.Set<Geary.FolderPath>? paths = do_find_email_folders(
+                    cx, id.message_id, true, cancellable);
                 if (paths == null)
                     continue;
                 
