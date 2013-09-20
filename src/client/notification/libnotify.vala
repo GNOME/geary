@@ -104,7 +104,7 @@ public class Libnotify : Geary.BaseObject {
         if (count <= 1) {
             body = EmailUtil.strip_subject_prefixes(email);
         } else {
-            body = ngettext("%s\n(%d new message for %s)", "%s\n(%d new messages for %s)", count).printf(
+            body = ngettext("%s\n(%d other new message for %s)", "%s\n(%d other new messages for %s)", count - 1).printf(
                 EmailUtil.strip_subject_prefixes(email), count, folder.account.information.email);
         }
         
