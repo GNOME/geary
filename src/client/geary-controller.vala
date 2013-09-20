@@ -519,8 +519,15 @@ public class GearyController : Geary.BaseObject {
     private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         Geary.AccountInformation? new_info = old_info;
-        if (login_dialog == null)
-            login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
+        if (login_dialog == null) {
+            // Create here so we know GTK is initialized.
+            login_dialog = new LoginDialog();
+        } else if (!login_dialog.get_visible()) {
+            // If the dialog has been dismissed, exit here.
+            GearyApplication.instance.exit();
+            
+            return null;
+        }
         
         if (new_info != null)
             login_dialog.set_account_information(new_info, result);
@@ -550,9 +557,6 @@ public class GearyController : Geary.BaseObject {
             
             break;
         }
-        
-        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-            Geary.CredentialsMediator.ServiceFlag.SMTP, new_info);
         
         return new_info;
     }
