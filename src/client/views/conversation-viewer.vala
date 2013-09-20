@@ -109,6 +109,9 @@ public class ConversationViewer : Gtk.Box {
     // Current conversation, or null if none.
     public Geary.App.Conversation? current_conversation = null;
     
+    // Overlay consisting of a label in front of a webpage
+    private Gtk.Overlay message_overlay;
+    
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
     
@@ -176,15 +179,8 @@ public class ConversationViewer : Gtk.Box {
         conversation_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         conversation_viewer_scrolled.add(web_view);
         
-        Gtk.Overlay message_overlay = new Gtk.Overlay();
+        message_overlay = new Gtk.Overlay();
         message_overlay.add(conversation_viewer_scrolled);
-        
-        message_overlay_label = new Gtk.Label(null);
-        message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
-        message_overlay_label.halign = Gtk.Align.START;
-        message_overlay_label.valign = Gtk.Align.END;
-        message_overlay.add_overlay(message_overlay_label);
-        
         pack_start(message_overlay);
         
         conversation_find_bar = new ConversationFindBar(web_view);
@@ -1822,11 +1818,32 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
+    private void build_message_overlay_label(string? url) {
+        message_overlay_label = new Gtk.Label(url);
+        message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
+        message_overlay_label.halign = Gtk.Align.START;
+        message_overlay_label.valign = Gtk.Align.END;
+        message_overlay.add_overlay(message_overlay_label);
+    }
+    
     private void on_hovering_over_link(string? title, string? url) {
         // Copy the link the user is hovering over.  Note that when the user mouses-out, 
         // this signal is called again with null for both parameters.
-        hover_url = url != null ? Uri.unescape_string(url) : null;
-        message_overlay_label.label = hover_url;
+        if (message_overlay_label == null) {
+            if (url == null)
+                return;
+            build_message_overlay_label(Uri.unescape_string(url));
+            message_overlay_label.show();
+            return;
+        }
+        
+        if (url == null) {
+            message_overlay_label.hide();
+            message_overlay_label.label = null;
+        } else {
+            message_overlay_label.show();
+            message_overlay_label.label = Uri.unescape_string(url);
+        }
     }
     
     private void on_copy_text() {
