@@ -1829,6 +1829,8 @@ public class ConversationViewer : Gtk.Box {
     private void on_hovering_over_link(string? title, string? url) {
         // Copy the link the user is hovering over.  Note that when the user mouses-out, 
         // this signal is called again with null for both parameters.
+        hover_url = url != null ? Uri.unescape_string(url) : null;
+        
         if (message_overlay_label == null) {
             if (url == null)
                 return;
