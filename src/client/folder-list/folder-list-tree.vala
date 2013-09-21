@@ -197,9 +197,11 @@ public class FolderList.Tree : Sidebar.Tree {
     
     public void set_search(Geary.SearchFolder search_folder) {
         if (search_branch != null && has_branch(search_branch)) {
-            // We already have a search folder.  If it's the same one, do nothing.  If it's a new
-            // search folder, remove the old one and continue.
+            // We already have a search folder.  If it's the same one, just
+            // select it.  If it's a new search folder, remove the old one and
+            // continue.
             if (search_folder == search_branch.get_search_folder()) {
+                place_cursor(search_branch.get_root(), false);
                 return;
             } else {
                 remove_search();

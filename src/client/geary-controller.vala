@@ -597,8 +597,15 @@ public class GearyController : Geary.BaseObject {
     private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         Geary.AccountInformation? new_info = old_info;
-        if (login_dialog == null)
-            login_dialog = new LoginDialog(); // Create here so we know GTK is initialized.
+        if (login_dialog == null) {
+            // Create here so we know GTK is initialized.
+            login_dialog = new LoginDialog();
+        } else if (!login_dialog.get_visible()) {
+            // If the dialog has been dismissed, exit here.
+            GearyApplication.instance.exit();
+            
+            return null;
+        }
         
         if (new_info != null)
             login_dialog.set_account_information(new_info, result);
@@ -628,9 +635,6 @@ public class GearyController : Geary.BaseObject {
             
             break;
         }
-        
-        do_update_stored_passwords_async.begin(Geary.CredentialsMediator.ServiceFlag.IMAP |
-            Geary.CredentialsMediator.ServiceFlag.SMTP, new_info);
         
         return new_info;
     }
@@ -840,8 +844,10 @@ public class GearyController : Geary.BaseObject {
         
         previous_non_search_folder = null;
         main_window.main_toolbar.set_search_text(""); // Reset search.
-        if (current_account == account)
+        if (current_account == account) {
             cancel_folder();
+            switch_to_first_inbox(); // Switch folder.
+        }
         
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         account.sending_monitor.start.disconnect(on_sending_started);
@@ -2072,6 +2078,33 @@ public class GearyController : Geary.BaseObject {
      */
     public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
         return selected_conversations.read_only_view;
+    }
+    
+    // Find the first inbox we know about and switch to it.
+    private void switch_to_first_inbox() {
+        try {
+            if (Geary.Engine.instance.get_accounts().values.size == 0)
+                return; // No account!
+            
+            // Look through our accounts, grab the first inbox we can find.
+            Geary.Folder? first_inbox = null;
+            
+            foreach(Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
+                first_inbox = get_account_instance(info).get_special_folder(Geary.SpecialFolderType.INBOX);
+                
+                if (first_inbox != null)
+                    break;
+            }
+            
+            if (first_inbox == null)
+                return;
+            
+            // Attempt the selection.  Try the inboxes branch first.
+            if (!main_window.folder_list.select_inbox(first_inbox.account))
+                main_window.folder_list.select_folder(first_inbox);
+        } catch (Error e) {
+            debug("Could not locate inbox: %s", e.message);
+        }
     }
 }
 
