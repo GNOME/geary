@@ -198,7 +198,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     
     // Adds everything in the expansion to the unfulfilled set with ImapDB's field requirements ...
     // UIDs are returned if anything else needs to be added to them
-    protected async Gee.List<Imap.UID>? expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
+    protected async Gee.Set<Imap.UID>? expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
         // watch out for situations where the entire folder is represented locally (i.e. no
         // expansion necessary)
         int remote_count = owner.get_remote_counts(null, null);
@@ -209,7 +209,11 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         // is in process, in which case don't want to expand vector this moment because the
         // vector is in flux
         int local_count = yield owner.local_folder.get_email_count_async(
-            ImapDB.Folder.ListFlags.NONE, cancellable);
+            ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+        
+        // watch out for attempts to expand vector when it's expanded as far as it will go
+        if (local_count >= remote_count)
+            return null;
         
         // determine low and high position for expansion ... default in most code paths for high
         // is the SequenceNumber just below the lowest known message, unless no local messages
@@ -278,28 +282,40 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             msg_set = new Imap.MessageSet.range_to_highest(low_pos);
         }
         
-        debug("%s: Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%d",
+        debug("%s: Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%d local_count=%d remote_count=%d oldest_to_newest=%s",
             owner.to_string(), msg_set.to_string(),
-            (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count);
+            (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count,
+            local_count, remote_count, flags.is_oldest_to_newest().to_string());
         
         Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
             Geary.Email.Field.NONE, cancellable);
         
-        Gee.List<Imap.UID> uids = new Gee.ArrayList<Imap.UID>();
+        Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
         if (list != null) {
             // add all the new email to the unfulfilled list, which ensures (when replay_remote_async
             // is called) that the fields are downloaded and added to the database
-            foreach (Geary.Email email in list) {
-                Imap.UID uid = ((ImapDB.EmailIdentifier) email.id).uid;
-                uids.add(uid);
-                add_unfulfilled_fields(uid, ImapDB.Folder.REQUIRED_FIELDS);
+            foreach (Geary.Email email in list)
+                uids.add(((ImapDB.EmailIdentifier) email.id).uid);
+            
+            // remove any already stored locally
+            Gee.Collection<ImapDB.EmailIdentifier>? ids =
+                yield owner.local_folder.get_ids_async(uids, ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                    cancellable);
+            if (ids != null && ids.size > 0) {
+                foreach (ImapDB.EmailIdentifier id in ids) {
+                    assert(id.has_uid());
+                    uids.remove(id.uid);
+                }
             }
+            
+            // for the remainder (not in local store), fetch the required fields
+            add_many_unfulfilled_fields(uids, ImapDB.Folder.REQUIRED_FIELDS);
         }
         
         debug("%s: Vector expansion completed (%d new email)", owner.to_string(),
-            (list != null) ? list.size : 0);
+            (uids != null) ? uids.size : 0);
         
-        return uids;
+        return uids != null && uids.size > 0 ? uids : null;
     }
     
     public override async void backout_local_async() throws Error {

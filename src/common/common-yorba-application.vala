@@ -58,6 +58,9 @@ public abstract class YorbaApplication {
      *
      * To cancel an exit, a callback should return YorbaApplication.cancel_exit(). To procede with
      * an exit, a callback should return true.
+     *
+     * It's best to only use this signal as a way to cancel an exit() call.  To initiate shutdown
+     * processes, override shutdown_async().
      */
     public virtual signal bool exiting(bool panicked) {
         return true;
@@ -151,8 +154,8 @@ public abstract class YorbaApplication {
             return;
         
         this.exitcode = exitcode;
-        
         exiting_fired = true;
+        
         if (!exiting(false)) {
             exiting_fired = false;
             this.exitcode = 0;
@@ -160,6 +163,10 @@ public abstract class YorbaApplication {
             return;
         }
         
+        shutdown_async.begin(on_shutdown_completed);
+    }
+    
+    private void on_shutdown_completed() {
         if (Gtk.main_level() > 0)
             Gtk.main_quit();
         else
@@ -174,6 +181,17 @@ public abstract class YorbaApplication {
         Signal.stop_emission_by_name(this, "exiting");
         return false;
     }
+    
+    /**
+     * Called in the context of exit() if the "exiting" signal returned true.
+     *
+     * This can be used to shutdown the application properly.  When it completes, the application
+     * will actually exit.
+     *
+     * Do not use this method to prevent (or stop) exiting; when this is called, there's no going
+     * back.  Use the "exiting" signal for that.
+     */
+    protected abstract async void shutdown_async();
     
     // This call will fire "exiting" only if it's not already been fired and halt the application
     // in its tracks.

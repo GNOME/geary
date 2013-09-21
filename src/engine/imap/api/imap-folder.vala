@@ -495,6 +495,8 @@ private class Geary.Imap.Folder : BaseObject {
         return map;
     }
     
+    // The caller is required to track removed messages until they're reported as removed by the
+    // server via the "expunge" signal
     public async void remove_email_async(MessageSet msg_set, Cancellable? cancellable) throws Error {
         check_open();
         
@@ -506,12 +508,21 @@ private class Geary.Imap.Folder : BaseObject {
         StoreCommand store_cmd = new StoreCommand(msg_set, flags, true, false);
         cmds.add(store_cmd);
         
+        // only EXPUNGE if can do a UID EXPUNGE; this is because a straight-up EXPUNGE can be
+        // quite expensive on the server (seeing response times of 10s - 15s on Outlook.com) ...
+        // it's up to the caller to track "removed" messages until the "expunge" signal is
+        // fired in return
         if (msg_set.is_uid && session.capabilities.supports_uidplus())
             cmds.add(new ExpungeCommand.uid(msg_set));
-        else
-            cmds.add(new ExpungeCommand());
         
         yield exec_commands_async(cmds, null, null, cancellable);
+    }
+    
+    public async void expunge_async(Cancellable? cancellable) throws Error {
+        check_open();
+        
+        yield exec_commands_async(new Collection.SingleItem<Command>(new ExpungeCommand()), null,
+            null, cancellable);
     }
     
     public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
@@ -548,6 +559,9 @@ private class Geary.Imap.Folder : BaseObject {
         yield exec_commands_async(cmds, null, null, cancellable);
     }
     
+    // The caller is required to track removed messages until they're reported as removed by the
+    // server via the "expunge" signal ... (move implies remove)
+    //
     // TODO: Support MOVE extension
     public async void move_email_async(MessageSet msg_set, Geary.FolderPath destination,
         Cancellable? cancellable) throws Error {
@@ -564,10 +578,12 @@ private class Geary.Imap.Folder : BaseObject {
         flags.add(MessageFlag.DELETED);
         cmds.add(new StoreCommand(msg_set, flags, true, false));
         
+        // only EXPUNGE if can do a UID EXPUNGE; this is because a straight-up EXPUNGE can be
+        // quite expensive on the server (seeing response times of 10s - 15s on Outlook.com) ...
+        // it's up to the caller to track "removed" messages until the "expunge" signal is
+        // fired in return
         if (msg_set.is_uid && session.capabilities.supports_uidplus())
             cmds.add(new ExpungeCommand.uid(msg_set));
-        else
-            cmds.add(new ExpungeCommand());
         
         yield exec_commands_async(cmds, null, null, cancellable);
     }

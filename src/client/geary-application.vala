@@ -105,17 +105,20 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         return Args.parse(args);
     }
     
-    public override bool exiting(bool panicked) {
-        controller.close();
-        Date.terminate();
+    protected override async void shutdown_async() {
+        yield controller.close_async();
         
+        Date.terminate();
+    }
+    
+    public override bool exiting(bool panicked) {
         return true;
     }
     
     public override void activate(string[] args) {
         do_activate_async.begin(args);
     }
-
+    
     // Without owned on the args parameter, vala won't bother to keep the array
     // around until the open_async() call completes, leading to crashes.  This
     // way, this method gets its own long-lived copy.

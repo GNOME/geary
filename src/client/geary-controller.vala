@@ -218,18 +218,96 @@ public class GearyController : Geary.BaseObject {
                 create_account();
             }
         } catch (Error e) {
-            error("Error opening Geary.Engine instance: %s", e.message);
+            error("Error opening Geary.Engine: %s", e.message);
+        }
+    }
+    
+    private async void force_folder_closed_async(Geary.Folder folder) {
+        while (folder.get_open_state() != Geary.Folder.OpenState.CLOSED) {
+            debug("Attempting to close %s...", folder.to_string());
+            try {
+                yield folder.close_async();
+            } catch (Error err) {
+                debug("Error closing folder %s: %s", folder.to_string(), err.message);
+                
+                break;
+            }
         }
     }
     
     /**
      * Stops the controller and shuts down Geary.
      */
-    public void close() {
+    public async void close_async() {
         main_window.destroy();
         main_window = null;
+        
         current_account = null;
         account_selected(null);
+        
+        Geary.Engine.instance.account_available.disconnect(on_account_available);
+        Geary.Engine.instance.account_unavailable.disconnect(on_account_unavailable);
+        Geary.Engine.instance.opened.disconnect(on_engine_opened);
+        
+        // close the current conversation monitor
+        if (current_conversations != null) {
+            debug("CLOSING CONVS");
+            try {
+                yield current_conversations.stop_monitoring_async(false, null);
+            } catch (Error err) {
+                debug("Error closing current conversation %s: %s", current_folder.to_string(),
+                    err.message);
+            }
+            
+            current_conversations = null;
+        }
+        
+        // close all Inboxes (which are held open from cradle to grave)
+        debug("CLOSING INBOXES %d", inboxes.size);
+        foreach (Geary.Folder inbox in inboxes.values) {
+            if (current_folder == inbox)
+                current_folder = null;
+            
+            yield force_folder_closed_async(inbox);
+        }
+        inboxes.clear();
+        
+        if (current_folder != null) {
+            debug("CLOSING CURR FOLDER");
+            
+            yield force_folder_closed_async(current_folder);
+            current_folder = null;
+        }
+        
+        // close all the Accounts
+        Gee.Map<string, Geary.AccountInformation>? accounts = null;
+        try {
+            accounts = Geary.Engine.instance.get_accounts();
+        } catch (Error err) {
+            debug("Unable to get accounts list for closing: %s", err.message);
+        }
+        
+        if (accounts != null) {
+            debug("CLOSING ACCOUNTS %d", accounts.size);
+            foreach (string account_name in accounts.keys) {
+                Geary.AccountInformation account_information = accounts.get(account_name);
+                try {
+                    Geary.Account? account = Geary.Engine.instance.get_account_instance(account_information);
+                    if (account != null)
+                        yield account.close_async();
+                } catch (Error err) {
+                    debug("Error closing account %s: %s", account_name, err.message);
+                }
+            }
+        }
+        
+        // Shut down Geary
+        debug("CLOSING GEARY");
+        try {
+            yield Geary.Engine.instance.close_async();
+        } catch (Error err) {
+            debug("Error closing Geary.Engine: %s", err.message);
+        }
     }
     
     private void add_accelerator(string accelerator, string action) {

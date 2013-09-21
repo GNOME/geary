@@ -160,11 +160,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // if any messages are still marked for removal from last time, that means the EXPUNGE
         // never arrived from the server, in which case the folder is "dirty" and needs a full
         // normalization
-        int remove_markers = yield local_folder.get_marked_for_remove_count_async(cancellable);
-        bool is_dirty = (remove_markers != 0);
+        Gee.Set<Imap.UID>? marked_uids = yield local_folder.get_marked_uids_async(cancellable);
+        bool is_dirty = (marked_uids != null && marked_uids.size > 0);
         
         if (is_dirty)
-            debug("%s: %d remove markers found, folder is dirty", to_string(), remove_markers);
+            debug("%s: %d remove markers found, folder is dirty", to_string(), marked_uids.size);
         
         // if UIDNEXT has changed, that indicates messages have been appended (and possibly removed)
         int64 uidnext_diff = remote_properties.uid_next.value - local_properties.uid_next.value;
@@ -252,6 +252,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                     appended_uids.add(remote_uid);
                 else
                     inserted_uids.add(remote_uid);
+            }
+            
+            // the UIDs marked for removal are going to be re-inserted into the vector once they're
+            // cleared, so add them here as well
+            if (marked_uids != null) {
+                foreach (Imap.UID uid in marked_uids) {
+                    if (!appended_uids.contains(uid))
+                        inserted_uids.add(uid);
+                }
             }
         }, cancellable);
         
@@ -393,12 +402,20 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
-        if (open_count == 0 || remote_semaphore == null)
+        yield internal_wait_for_open_async(true, cancellable);
+    }
+    
+    // This version is used by ReplayQueue so it can issue final commands while the Folder is
+    // closing... the regular wait_for_open_async() should throw an Error if called while closing,
+    // hence the disparity
+    internal async void internal_wait_for_open_async(bool check_open, Cancellable? cancellable)
+        throws Error {
+        if ((check_open && open_count == 0) || remote_semaphore == null)
             throw new EngineError.OPEN_REQUIRED("wait_for_open_async() can only be called after open_async()");
         
         // if remote has not yet been opened, do it now ... this bool can go true only once after
         // an open_async, it's reset at close time
-        if (!remote_opened) {
+        if (!remote_opened && open_count > 0) {
             debug("wait_for_open_async %s: opening remote on demand...", to_string());
             
             remote_opened = true;
@@ -553,6 +570,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     public override async void close_async(Cancellable? cancellable = null) throws Error {
+        debug("CLOSE %s: open_count=%d", to_string(), open_count);
+        
         if (open_count == 0 || --open_count > 0)
             return;
         
@@ -563,7 +582,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     }
     
     // NOTE: This bypasses open_count and forces the Folder closed.
-    private async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
+    internal async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
         Cancellable? cancellable) {
         // force closed
         open_count = 0;
@@ -585,6 +604,23 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Imap.Folder? closing_remote_folder = null;
         if (!flush_pending)
             closing_remote_folder = clear_remote_folder();
+        
+        // if the user closes the Folder and then shuts down the app immediately, the CLOSE
+        // command (below) may not have an opportunity to execute, leaving messages marked for
+        // deletion but not expunged still on the server ... this ensures that they're expunged,
+        // although it can mean a CLOSE takes more time than we'd like (i.e. Outlook.com)
+        if (flush_pending && replay_queue != null) {
+            // need to schedule and wait for it to finish, as EXPUNGE may generate more upcalls
+            // in response
+            ReplayOperation op = new ExpungeFolder(this, cancellable);
+            replay_queue.schedule(op);
+            
+            try {
+                yield op.wait_for_ready_async(cancellable);
+            } catch (Error err) {
+                debug("Error for closing EXPUNGE of %s: %s", to_string(), err.message);
+            }
+        }
         
         // Close the replay queues; if a "clean" close, flush pending operations so everything
         // gets a chance to run; if forced close, drop everything outstanding
@@ -653,6 +689,22 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         return old_remote_folder;
     }
+    
+    /*
+    private async void background_close_remote_async(Imap.Folder folder) {
+        try {
+            // issue a CLOSE, which implicitly EXPUNGEs everything marked for deletion
+            yield folder.close_async(null);
+            
+            // if CLOSE succeeded, remove all local messages marked for removal ... this ensures they
+            // don't briefly appear as available the next time the user does a local list, only to
+            // have them removed when the folder normalization completes
+            yield local_folder.detach_all_marked_emails_async(null);
+        } catch (Error err) {
+            debug("Error background closing remote folder for %s: %s", to_string(), err.message);
+        }
+    }
+    */
     
     public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
         out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
@@ -891,25 +943,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
         debug("on_remote_disconnected: reason=%s", reason.to_string());
+        
         replay_queue.schedule(new ReplayDisconnect(this, reason));
-    }
-    
-    internal async void do_replay_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
-        debug("do_replay_remote_disconnected reason=%s", reason.to_string());
-        
-        Geary.Folder.CloseReason folder_reason = reason.is_error()
-            ? Geary.Folder.CloseReason.REMOTE_ERROR : Geary.Folder.CloseReason.REMOTE_CLOSE;
-        
-        // because close_internal_async() issues ReceiveReplayQueue.close_async() (which cannot
-        // be called from within a ReceiveReplayOperation), schedule the close rather than
-        // yield for it ... can't simply call the async .begin variant because, depending on
-        // the situation, it may not yield until it attempts to close the ReceiveReplayQueue,
-        // which is the problem we're attempting to work around
-        Idle.add(() => {
-            close_internal_async.begin(CloseReason.LOCAL_CLOSE, folder_reason, null);
-            
-            return false;
-        });
     }
     
     //
@@ -1058,11 +1093,11 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         check_open("expunge_email_async");
         check_ids("expunge_email_async", email_ids);
         
-        ExpungeEmail expunge = new ExpungeEmail(this, (Gee.List<ImapDB.EmailIdentifier>) email_ids,
+        RemoveEmail remove = new RemoveEmail(this, (Gee.List<ImapDB.EmailIdentifier>) email_ids,
             cancellable);
-        replay_queue.schedule(expunge);
+        replay_queue.schedule(remove);
         
-        yield expunge.wait_for_ready_async(cancellable);
+        yield remove.wait_for_ready_async(cancellable);
     }
     
     private void check_open(string method) throws EngineError {
