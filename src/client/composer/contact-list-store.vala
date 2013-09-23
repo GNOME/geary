@@ -11,13 +11,13 @@ public class ContactListStore : Gtk.ListStore {
     public enum Column {
         CONTACT_OBJECT,
         CONTACT_MARKUP_NAME,
-        LAST_KEY;
+        PRIOR_KEYS;
         
         public static Type[] get_types() {
             return {
                 typeof (Geary.Contact), // CONTACT_OBJECT
                 typeof (string),        // CONTACT_MARKUP_NAME
-                typeof (string)         // LAST_KEY
+                typeof (Gee.HashSet)    // PRIOR_KEYS
             };
         }
     }
@@ -59,19 +59,18 @@ public class ContactListStore : Gtk.ListStore {
     // Highlighted result should be Markup.escaped for presentation to the user
     public void set_highlighted_result(Gtk.TreeIter iter, string highlighted_result,
         string current_address_key) {
-        // get the last key for this row for comparison
-        GLib.Value last_key_value;
-        get_value(iter, Column.LAST_KEY, out last_key_value);
-        string? last_key = last_key_value.get_string();
+        // get the previous keys for this row for comparison
+        GLib.Value prior_keys_value;
+        get_value(iter, Column.PRIOR_KEYS, out prior_keys_value);
+        Gee.HashSet<string> prior_keys = (Gee.HashSet<string>) prior_keys_value.get_object();
         
         // Changing a row in the list store causes Gtk.EntryCompletion to re-evaluate
         // completion_match_func for that row. Thus we need to make sure the key has
         // actually changed before settings the highlighting--otherwise we will cause
         // an infinite loop.
-        if (current_address_key != last_key) {
-            set(iter,
-                Column.CONTACT_MARKUP_NAME, highlighted_result,
-                Column.LAST_KEY, current_address_key, -1);
+        if (!(current_address_key in prior_keys)) {
+            prior_keys.add(current_address_key);
+            set(iter, Column.CONTACT_MARKUP_NAME, highlighted_result, -1);
         }
     }
     
@@ -85,7 +84,7 @@ public class ContactListStore : Gtk.ListStore {
         set(iter,
             Column.CONTACT_OBJECT, contact,
             Column.CONTACT_MARKUP_NAME, Markup.escape_text(full_address),
-            Column.LAST_KEY, "");
+            Column.PRIOR_KEYS, new Gee.HashSet<string>());
     }
     
     private void update_contact(Geary.Contact updated_contact) {
