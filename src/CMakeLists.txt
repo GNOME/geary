@@ -206,12 +206,12 @@ engine/imap-engine/outlook/imap-engine-outlook-folder.vala
 engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 engine/imap-engine/replay-ops/imap-engine-create-email.vala
-engine/imap-engine/replay-ops/imap-engine-expunge-email.vala
 engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
 engine/imap-engine/replay-ops/imap-engine-mark-email.vala
 engine/imap-engine/replay-ops/imap-engine-move-email.vala
+engine/imap-engine/replay-ops/imap-engine-remove-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
 engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala

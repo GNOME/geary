@@ -730,9 +730,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 "DELETE FROM MessageLocationTable WHERE folder_id=?");
             stmt.bind_rowid(0, folder_id);
             
+            stmt.exec(cancellable);
+            
             Db.Statement update_stmt = cx.prepare(
                 "UPDATE FolderTable SET unread_count = 0 WHERE id=?");
             update_stmt.bind_rowid(0, folder_id);
+            
             update_stmt.exec(cancellable);
             
             return Db.TransactionOutcome.COMMIT;
@@ -940,6 +943,30 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
         
         return count;
+    }
+    
+    public async Gee.Set<Imap.UID>? get_marked_uids_async(Cancellable? cancellable) throws Error {
+        Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT ordering
+                FROM MessageLocationTable
+                WHERE folder_id=? AND remove_marker<>?
+            """);
+            stmt.bind_rowid(0, folder_id);
+            stmt.bind_bool(1, false);
+            
+            Db.Result results = stmt.exec(cancellable);
+            while (!results.finished) {
+                uids.add(new Imap.UID(results.int64_at(0)));
+                
+                results.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return uids.size > 0 ? uids : null;
     }
     
     // Clears all remove markers from the folder

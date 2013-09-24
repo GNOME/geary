@@ -506,6 +506,13 @@ private class Geary.Imap.Folder : BaseObject {
         StoreCommand store_cmd = new StoreCommand(msg_set, flags, true, false);
         cmds.add(store_cmd);
         
+        // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
+        // for us).  See:
+        // http://redmine.yorba.org/issues/7532
+        //
+        // However, current client implementation doesn't properly close INBOX when application
+        // shuts down, which means deleted messages return at application start.  See:
+        // http://redmine.yorba.org/issues/6865
         if (msg_set.is_uid && session.capabilities.supports_uidplus())
             cmds.add(new ExpungeCommand.uid(msg_set));
         else
@@ -564,6 +571,13 @@ private class Geary.Imap.Folder : BaseObject {
         flags.add(MessageFlag.DELETED);
         cmds.add(new StoreCommand(msg_set, flags, true, false));
         
+        // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
+        // for us).  See:
+        // http://redmine.yorba.org/issues/7532
+        //
+        // However, current client implementation doesn't properly close INBOX when application
+        // shuts down, which means deleted messages return at application start.  See:
+        // http://redmine.yorba.org/issues/6865
         if (msg_set.is_uid && session.capabilities.supports_uidplus())
             cmds.add(new ExpungeCommand.uid(msg_set));
         else

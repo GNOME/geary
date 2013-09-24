@@ -4,16 +4,16 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperation {
+private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperation {
     private GenericFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_remove = new Gee.ArrayList<ImapDB.EmailIdentifier>();
     private Cancellable? cancellable;
     private Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
     private int original_count = 0;
     
-    public ExpungeEmail(GenericFolder engine, Gee.List<ImapDB.EmailIdentifier> to_remove,
+    public RemoveEmail(GenericFolder engine, Gee.List<ImapDB.EmailIdentifier> to_remove,
         Cancellable? cancellable = null) {
-        base("ExpungeEmail");
+        base("RemoveEmail");
         
         this.engine = engine;
         
@@ -27,6 +27,7 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
+        // if performing a full expunge, need to move on to replay_remote_async() for that
         if (to_remove.size <= 0)
             return ReplayOperation.Status.COMPLETED;
         
@@ -64,9 +65,11 @@ private class Geary.ImapEngine.ExpungeEmail : Geary.ImapEngine.SendReplayOperati
     }
     
     public override async void backout_local_async() throws Error {
-        yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);
+        if (removed_ids != null && removed_ids.size > 0) {
+            yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);
+            engine.notify_email_inserted(removed_ids);
+        }
         
-        engine.notify_email_inserted(removed_ids);
         engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.INSERTED);
     }
     

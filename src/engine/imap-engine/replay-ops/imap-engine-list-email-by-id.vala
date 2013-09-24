@@ -136,7 +136,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         
         // If the vector is too short, expand it now
         if (expansion_required) {
-            Gee.List<Imap.UID>? uids = yield expand_vector_async(initial_uid, count);
+            Gee.Set<Imap.UID>? uids = yield expand_vector_async(initial_uid, count);
             if (uids != null) {
                 // add required_fields as well as basic required fields for new email
                 add_many_unfulfilled_fields(uids, required_fields);

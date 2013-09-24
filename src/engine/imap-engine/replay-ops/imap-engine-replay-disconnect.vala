@@ -22,7 +22,19 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReceiveReplay
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        yield owner.do_replay_remote_disconnected(reason);
+        debug("%s ReplayDisconnect reason=%s", owner.to_string(), reason.to_string());
+        
+        Geary.Folder.CloseReason remote_reason = reason.is_error()
+            ? Geary.Folder.CloseReason.REMOTE_ERROR : Geary.Folder.CloseReason.REMOTE_CLOSE;
+        
+        // because close_internal_async() may schedule a ReplayOperation before its first yield,
+        // that means a ReplayOperation is scheduling a ReplayOperation, which isn't something
+        // we want to encourage, so use the Idle queue to schedule close_internal_async
+        Idle.add(() => {
+            owner.close_internal_async.begin(Geary.Folder.CloseReason.LOCAL_CLOSE, remote_reason, null);
+            
+            return false;
+        });
         
         return ReplayOperation.Status.COMPLETED;
     }
