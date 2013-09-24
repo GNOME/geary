@@ -567,6 +567,8 @@ private class Geary.ImapDB.Account : BaseObject {
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
         Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
             = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
         
@@ -717,6 +719,8 @@ private class Geary.ImapDB.Account : BaseObject {
     public async Gee.Collection<Geary.EmailIdentifier>? search_async(string prepared_query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Gee.ArrayList<ImapDB.SearchEmailIdentifier> search_results
             = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
         
@@ -777,6 +781,8 @@ private class Geary.ImapDB.Account : BaseObject {
     
     public async Gee.Collection<string>? get_search_matches_async(string prepared_query,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Gee.Set<string> search_matches = new Gee.HashSet<string>();
         
         // Create a question mark for each ID.
@@ -829,6 +835,8 @@ private class Geary.ImapDB.Account : BaseObject {
     
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
         Geary.Email? email = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             // TODO: once we have a way of deleting messages, we won't be able
@@ -890,6 +898,8 @@ private class Geary.ImapDB.Account : BaseObject {
      */
     public async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        check_open();
+        
         Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> map
             = new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
