@@ -609,7 +609,8 @@ public class ComposerWindow : Gtk.Window {
         return true;
     }
     
-    public Geary.ComposedEmail get_composed_email(DateTime? date_override = null) {
+    public Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
+        bool only_html = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(),
             new Geary.RFC822.MailboxAddresses.from_rfc822_string(from)
@@ -635,9 +636,10 @@ public class ComposerWindow : Gtk.Window {
         
         email.attachment_files.add_all(attachment_files);
         
-        if (compose_as_html)
+        if (compose_as_html || only_html)
             email.body_html = get_html();
-        email.body_text = get_text();
+        if (!only_html)
+            email.body_text = get_text();
 
         // User-Agent
         email.mailer = GearyApplication.PRGNAME + "/" + GearyApplication.VERSION;
@@ -825,8 +827,10 @@ public class ComposerWindow : Gtk.Window {
         flags.add(Geary.EmailFlags.DRAFT);
         
         try {
+            // only save HTML drafts to avoid resetting the DOM (which happens when converting the
+            // HTML to flowed text)
             draft_id = yield drafts_folder.create_email_async(new Geary.RFC822.Message.from_composed_email(
-                get_composed_email()), flags, null, draft_id, null);
+                get_composed_email(null, true)), flags, null, draft_id, null);
             
             draft_save_label.label = DRAFT_SAVED_TEXT;
         } catch (Error e) {
