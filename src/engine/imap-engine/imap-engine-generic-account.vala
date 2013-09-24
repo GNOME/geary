@@ -20,6 +20,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private bool in_refresh_enumerate = false;
     private Cancellable refresh_cancellable = new Cancellable();
     private string previous_prepared_search_query = "";
+    private bool awaiting_credentials = false;
     
     public GenericAccount(string name, Geary.AccountInformation information, Imap.Account remote,
         ImapDB.Account local) {
@@ -596,12 +597,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private void on_login_failed(Geary.Credentials? credentials) {
-        do_login_failed_async.begin(credentials);
+        if (awaiting_credentials)
+            return; // We're already asking for the password.
+        
+        awaiting_credentials = true;
+        do_login_failed_async.begin(credentials, () => { awaiting_credentials = false; });
     }
     
     private async void do_login_failed_async(Geary.Credentials? credentials) {
         try {
-            if (yield information.fetch_passwords_async(CredentialsMediator.ServiceFlag.IMAP))
+            if (yield information.fetch_passwords_async(CredentialsMediator.ServiceFlag.IMAP, true))
                 return;
         } catch (Error e) {
             debug("Error prompting for IMAP password: %s", e.message);

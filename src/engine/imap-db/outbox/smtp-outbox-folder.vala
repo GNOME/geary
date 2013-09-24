@@ -214,7 +214,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                     
                     try {
                         if (yield _account.information.fetch_passwords_async(
-                            CredentialsMediator.ServiceFlag.SMTP))
+                            CredentialsMediator.ServiceFlag.SMTP, true))
                             report = false;
                     } catch (Error e) {
                         debug("Error prompting for IMAP password: %s", e.message);

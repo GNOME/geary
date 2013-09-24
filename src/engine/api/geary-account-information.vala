@@ -157,8 +157,28 @@ public class Geary.AccountInformation : BaseObject {
      * true if all passwords were retrieved from the key store or the user
      * proceeded normally if/when prompted, false if the user tried to cancel
      * the prompt.
+     *
+     * If force_request is set to true, a prompt will appear regardless.
      */
-    public async bool fetch_passwords_async(CredentialsMediator.ServiceFlag services) throws Error {
+    public async bool fetch_passwords_async(CredentialsMediator.ServiceFlag services,
+        bool force_request = false) throws Error {
+        if (force_request) {
+            // Delete the current password(s).
+            if (services.has_imap()) {
+                yield Geary.Engine.instance.authentication_mediator.clear_password_async(
+                    CredentialsMediator.Service.IMAP, email);
+                
+                if (imap_credentials != null)
+                    imap_credentials.pass = null;
+            } else if (services.has_smtp()) {
+                yield Geary.Engine.instance.authentication_mediator.clear_password_async(
+                    CredentialsMediator.Service.SMTP, email);
+                
+                if (smtp_credentials != null)
+                    smtp_credentials.pass = null;
+            }
+        }
+        
         // Only call get_passwords on anything that hasn't been set
         // (incorrectly) previously.
         CredentialsMediator.ServiceFlag get_services = 0;
