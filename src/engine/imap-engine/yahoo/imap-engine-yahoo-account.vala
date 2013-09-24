@@ -57,6 +57,14 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
                 return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
             
+            case SpecialFolderType.TRASH:
+                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
+            case SpecialFolderType.DRAFTS:
+                return new GenericDraftsFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
             default:
                 return new YahooFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
