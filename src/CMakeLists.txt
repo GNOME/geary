@@ -434,6 +434,17 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
+if (NO_FATAL_WARNINGS)
+    message(STATUS "Vala fatal warnings: OFF")
+else ()
+    message(STATUS "Vala fatal warnings: ON")
+    
+    set (EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        --fatal-warnings
+    )
+endif ()
+
 set(TARGET_GLIB 2.32)
 
 pkg_check_modules(DEPS REQUIRED
@@ -512,7 +523,6 @@ set(VALAC_OPTIONS
     --thread
     --enable-checking
     --debug
-    --fatal-warnings
     --enable-deprecated
     ${EXTRA_VALA_OPTIONS}
 )

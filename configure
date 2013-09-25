@@ -19,7 +19,9 @@ configure_help() {
 	  --prefix=PREFIX       Prepend PREFIX to program installation paths.
 	                        [$DEFAULT_PREFIX]
 	  --debug               Build for debugging.
-
+	
+	  --disable-fatal-warnings
+	                        Disable Vala fatal warnings when compiling.
 	  --enable-ref-tracking
 	                        Enable reference tracking which is dumped to stdout when the program exits.
 	  --disable-schemas-compile
@@ -68,6 +70,10 @@ do
         
         --debug)
                             CMDLINE="${CMDLINE} -DDEBUG=ON"
+                            ;;
+        
+        --disable-fatal-warnings)
+                            CMDLINE="${CMDLINE} -DNO_FATAL_WARNINGS=ON"
                             ;;
         
         --enable-ref-tracking)
