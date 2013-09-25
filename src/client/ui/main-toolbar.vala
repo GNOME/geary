@@ -82,6 +82,17 @@ public class MainToolbar : PillToolbar {
         search_container.add(search_entry);
         add(search_container);
         
+        // Search upgrade progress bar.
+        search_upgrade_progress_bar.margin_top = 3;
+        search_upgrade_progress_bar.margin_bottom = 3;
+        search_upgrade_progress_bar.show_text = true;
+        
+        // Set the progress bar's width to match the search entry's width.
+        int minimum_width = 0;
+        int natural_width = 0;
+        search_entry.get_preferred_width(out minimum_width, out natural_width);
+        search_upgrade_progress_bar.width_request = minimum_width;
+        
         // Application button.
         insert.clear();
         insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
