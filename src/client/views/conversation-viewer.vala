@@ -378,15 +378,21 @@ public class ConversationViewer : Gtk.Box {
             ids.add(email.id);
         
         try {
-            // Request a list of search terms.
-            Gee.Collection<string>? search_keywords = yield search_folder.get_search_matches_async(
+            Gee.Collection<string>? search_matches = yield search_folder.get_search_matches_async(
                 ids, cancellable_fetch);
             
-            // Highlight the search terms.
-            if (search_keywords != null) {
-                foreach(string keyword in search_keywords)
-                    web_view.mark_text_matches(keyword, false, 0);
-            }
+            // Webkit's highlighting is ... weird.  In order to actually see
+            // all the highlighting you're applying, it seems necessary to
+            // start with the shortest string and work up.  If you don't, it
+            // seems that shorter strings will overwrite longer ones, and
+            // you're left with incomplete highlighting.
+            Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
+            if (search_matches != null)
+                ordered_matches.add_all(search_matches);
+            ordered_matches.sort((a, b) => a.length - b.length);
+            
+            foreach(string match in ordered_matches)
+                web_view.mark_text_matches(match, false, 0);
         } catch (Error e) {
             debug("Error highlighting search results: %s", e.message);
         }
