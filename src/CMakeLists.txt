@@ -619,30 +619,6 @@ add_custom_command(
         ${CMAKE_COMMAND} -E copy geary-mailer ${CMAKE_BINARY_DIR}/
 )
 
-# DBus Service
-#################################################
-vala_precompile(DBUS_VALA_C gearyd
-    ${DBUSSERVICE_SRC}
-PACKAGES
-    ${DBUSSERVICE_PACKAGES}
-    ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-OPTIONS
-    ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
-)
-
-add_executable(gearyd ${DBUS_VALA_C})
-target_link_libraries(gearyd ${DEPS_LIBRARIES} gthread-2.0 geary-static)
-add_custom_command(
-    TARGET
-        gearyd
-    POST_BUILD
-    COMMAND 
-        ${CMAKE_COMMAND} -E copy gearyd ${CMAKE_BINARY_DIR}/
-)
-
 # Valadoc
 #################################################
 foreach(pkg ${ENGINE_PACKAGES})
@@ -667,7 +643,6 @@ set_property(
         geary
         geary-console
         geary-mailer
-        gearyd
 )
 
 add_subdirectory(sqlite3-unicodesn)

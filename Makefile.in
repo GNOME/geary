@@ -3,7 +3,7 @@
 # Copyright 2012-2013 Yorba Foundation
 
 BUILD_DIR := build
-BINARIES := geary gearyd geary-console geary-mailer
+BINARIES := geary geary-console geary-mailer
 
 BUILD_BINARIES := $(addprefix $(BUILD_DIR)/,$(BINARIES))
 
