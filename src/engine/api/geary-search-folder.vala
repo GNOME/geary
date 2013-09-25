@@ -435,7 +435,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         if (search_query == null)
             return null;
-        return yield account.get_search_matches_async(ids, cancellable);
+        return yield account.get_search_matches_async(search_query, ids, cancellable);
     }
     
     private void exclude_folder(Geary.Folder folder) {

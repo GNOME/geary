@@ -317,10 +317,9 @@ public interface Geary.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Given a list of mail IDs, returns a list of words that match for the
-     * last run local_search_async() query.
+     * Given a list of mail IDs, returns a list of words that match the given query string.
      */
-    public abstract async Gee.Collection<string>? get_search_matches_async(
+    public abstract async Gee.Collection<string>? get_search_matches_async(string query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
     
     /**

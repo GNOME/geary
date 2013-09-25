@@ -779,7 +779,24 @@ private class Geary.ImapDB.Account : BaseObject {
         return (search_results.size == 0 ? null : search_results);
     }
     
-    public async Gee.Collection<string>? get_search_matches_async(string prepared_query,
+    // This applies a fudge-factor set of matches when the database results
+    // aren't entirely satisfactory, such as when you search for an email
+    // address and the database tokenizes out the @ and ., etc.  It's not meant
+    // to be comprehensive, just a little extra highlighting applied to make
+    // the results look a little closer to what you typed.
+    private void add_literal_matches(string raw_query, Gee.Set<string> search_matches) {
+        foreach (string word in raw_query.split(" ")) {
+            if (word.has_suffix("\""))
+                word = word.substring(0, word.length - 1);
+            if (word.has_prefix("\""))
+                word = word.substring(1);
+            
+            if (!String.is_empty_or_whitespace(word))
+                search_matches.add(word);
+        }
+    }
+    
+    public async Gee.Collection<string>? get_search_matches_async(string raw_query, string prepared_query,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         check_open();
         
@@ -829,6 +846,8 @@ private class Geary.ImapDB.Account : BaseObject {
             
             return Db.TransactionOutcome.DONE;
         }, cancellable);
+        
+        add_literal_matches(raw_query, search_matches);
         
         return (search_matches.size == 0 ? null : search_matches);
     }
