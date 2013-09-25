@@ -91,7 +91,7 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     }
     
     public override int startup() {
-        exec_dir = (File.new_for_path(Environment.find_program_in_path(args[0]))).get_parent();
+        exec_dir = (File.new_for_path(Posix.realpath(Environment.find_program_in_path(args[0])))).get_parent();
         
         Geary.Logging.init();
         Configuration.init(is_installed(), GSETTINGS_DIR);
