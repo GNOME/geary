@@ -113,21 +113,22 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         if (addresses.size < 1)
             return empty_addresses;
         
-        int characters_seen_so_far = 0;
+        int bytes_seen_so_far = 0;
         current_address_index = addresses.size - 1;
         for (int i = 0; i < addresses.size; i++) {
-            int token_chars = addresses[i].char_count() + delimiter.char_count();
-            if ((characters_seen_so_far + token_chars) > cursor_position) {
+            int cursor_offset = addresses[i].index_of_nth_char(cursor_position);
+            int token_bytes = addresses[i].length + delimiter.length;
+            if ((bytes_seen_so_far + token_bytes) > cursor_offset) {
                 current_address_index = i;
                 current_address_key = addresses[i]
-                    .substring(0, cursor_position - characters_seen_so_far)
+                    .substring(0, cursor_offset - bytes_seen_so_far)
                     .strip().normalize().casefold();
                 
                 current_address_remainder = addresses[i]
-                    .substring(cursor_position - characters_seen_so_far).strip();
+                    .substring(cursor_offset - bytes_seen_so_far).strip();
                 break;
             }
-            characters_seen_so_far += token_chars;
+            bytes_seen_so_far += token_bytes;
         }
         
         return addresses;
@@ -176,8 +177,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         try {
             string escaped_needle = Regex.escape_string(needle.normalize());
             Regex regex = new Regex("\\b" + escaped_needle, RegexCompileFlags.CASELESS);
-            if (regex.match(haystack)) {
-                highlighted_result = regex.replace_eval(haystack, -1, 0, 0, eval_callback);
+            string haystack_normalized = haystack.normalize();
+            if (regex.match(haystack_normalized)) {
+                highlighted_result = regex.replace_eval(haystack_normalized, -1, 0, 0, eval_callback);
                 matched = true;
             }
         } catch (RegexError err) {
