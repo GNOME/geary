@@ -441,7 +441,7 @@ pkg_check_modules(DEPS REQUIRED
     glib-2.0>=${TARGET_GLIB}.0
     gio-2.0>=2.28.0
     gtk+-3.0>=3.6.0
-    gee-0.8>=0.8.0
+    gee-0.8>=0.8.5
     unique-3.0>=3.0.0
     libnotify>=0.7.5
     libcanberra>=0.28

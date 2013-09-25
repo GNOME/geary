@@ -135,18 +135,4 @@ public static uint hash_memory(void *ptr, size_t bytes) {
     return hash;
 }
 
-/**
- * This *must* be used in place of Gee,TreeSet until the fix for this bug is widely distributed:
- * [[https://bugzilla.gnome.org/show_bug.cgi?id=695045]]
- */
-public class FixedTreeSet<G> : Gee.TreeSet<G> {
-    public FixedTreeSet(owned GLib.CompareDataFunc<G>? compare_func = null) {
-        base ( (owned) compare_func);
-    }
-    
-    ~FixedTreeSet() {
-        clear();
-    }
-}
-
 }

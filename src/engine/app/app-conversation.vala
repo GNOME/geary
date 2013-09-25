@@ -46,9 +46,9 @@ public class Geary.App.Conversation : BaseObject {
     
     // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
     // the number of times they're accessed makes it worth it
-    private Gee.SortedSet<Email> date_ascending = new Collection.FixedTreeSet<Email>(
+    private Gee.SortedSet<Email> date_ascending = new Gee.TreeSet<Email>(
         Geary.Email.compare_date_ascending);
-    private Gee.SortedSet<Email> date_descending = new Collection.FixedTreeSet<Email>(
+    private Gee.SortedSet<Email> date_descending = new Gee.TreeSet<Email>(
         Geary.Email.compare_date_descending);
     
     // by storing all paths for each EmailIdentifier, can lookup without blocking

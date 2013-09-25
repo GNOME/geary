@@ -192,8 +192,7 @@ public class ConversationListStore : Gtk.ListStore {
         
         // sort the conversations so the previews are fetched from the newest to the oldest, matching
         // the user experience
-        Gee.TreeSet<Geary.App.Conversation> sorted_conversations
-            = new Geary.Collection.FixedTreeSet<Geary.App.Conversation>(
+        Gee.TreeSet<Geary.App.Conversation> sorted_conversations = new Gee.TreeSet<Geary.App.Conversation>(
             compare_conversation_descending);
         sorted_conversations.add_all(conversation_monitor.get_conversations());
         foreach (Geary.App.Conversation conversation in sorted_conversations) {

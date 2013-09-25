@@ -102,7 +102,7 @@ public class ConversationViewer : Gtk.Box {
     
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Geary.Collection.FixedTreeSet<Geary.Email>(Geary.Email.compare_date_ascending); }
+        new Gee.TreeSet<Geary.Email>(Geary.Email.compare_date_ascending); }
     
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }

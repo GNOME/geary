@@ -26,7 +26,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     private unowned ImapEngine.GenericFolder folder;
     private int start_delay_sec;
     private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
-    private Gee.TreeSet<Geary.Email> prefetch_emails = new Collection.FixedTreeSet<Geary.Email>(
+    private Gee.TreeSet<Geary.Email> prefetch_emails = new Gee.TreeSet<Geary.Email>(
         Email.compare_date_received_descending);
     private uint schedule_id = 0;
     private Cancellable cancellable = new Cancellable();
@@ -169,7 +169,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     private async void do_prefetch_batch_async() throws Error {
         // snarf up all requested Emails for this round
         Gee.TreeSet<Geary.Email> emails = prefetch_emails;
-        prefetch_emails = new Collection.FixedTreeSet<Geary.Email>(Email.compare_date_received_descending);
+        prefetch_emails = new Gee.TreeSet<Geary.Email>(Email.compare_date_received_descending);
         
         if (emails.size == 0)
             return;
