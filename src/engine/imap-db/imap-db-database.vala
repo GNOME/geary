@@ -83,6 +83,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 13:
                 post_upgrade_populate_additional_attachments();
             break;
+            
+            case 14:
+                post_upgrade_expand_page_size();
+            break;
         }
     }
     
@@ -268,6 +272,31 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             });
         } catch (Error e) {
             debug("Error populating old inline attachments during upgrade to database schema 13: %s",
+                e.message);
+        }
+    }
+    
+    // Version 14.
+    private void post_upgrade_expand_page_size() {
+        try {
+            // When the MessageSearchTable is first touched, SQLite seems to
+            // read the whole table into memory (or an awful lot of data,
+            // either way).  This was causing slowness when Geary first started
+            // and checked for any messages not yet in the search table.  With
+            // the database's page_size set to 4096, the reads seem to happen
+            // about 2 orders of magnitude quicker, probably because 4096
+            // matches the default filesystem block size and/or Linux's default
+            // memory page size.  With this set, the full read into memory is
+            // barely noticeable even on slow machines.
+            
+            // NOTE: these can't be in the .sql file itself because they must
+            // be back to back, outside of a transaction.
+            exec("""
+                PRAGMA page_size = 4096;
+                VACUUM;
+            """);
+        } catch (Error e) {
+            debug("Error bumping page_size or vacuuming database; performance may be degraded: %s",
                 e.message);
         }
     }
