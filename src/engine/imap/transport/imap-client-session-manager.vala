@@ -6,6 +6,7 @@
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
     public const int DEFAULT_MIN_POOL_SIZE = 2;
+    private const int AUTHORIZED_SESSION_ERROR_RETRY_TIMEOUT_MSEC = 1000;
     
     public bool is_open { get; private set; default = false; }
     
@@ -49,6 +50,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
     private bool authentication_failed = false;
+    private uint authorized_session_error_retry_timeout_id = 0;
     
     public signal void login_failed();
     
@@ -159,9 +161,21 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             debug("Unable to create authorized session to %s: %s",
                 account_information.get_imap_endpoint().to_string(), err.message);
             
-            // try again
-            adjust_session_pool.begin();
+            // try again after a slight delay
+            if (authorized_session_error_retry_timeout_id != 0)
+                Source.remove(authorized_session_error_retry_timeout_id);
+            authorized_session_error_retry_timeout_id
+                = Timeout.add(AUTHORIZED_SESSION_ERROR_RETRY_TIMEOUT_MSEC,
+                on_authorized_session_error_retry_timeout);
         }
+    }
+    
+    private bool on_authorized_session_error_retry_timeout() {
+        authorized_session_error_retry_timeout_id = 0;
+        
+        adjust_session_pool.begin();
+        
+        return false;
     }
     
     // The locked parameter indicates if this is called while the sessions_mutex is locked
