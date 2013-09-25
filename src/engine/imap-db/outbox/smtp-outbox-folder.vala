@@ -183,6 +183,19 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 break;
             }
             
+            // Get SMTP password if we haven't loaded it yet and the account needs credentials.
+            // If the account needs a password but it's not set or incorrect in the keyring, we'll
+            // prompt below after getting an AUTHENTICATION_FAILED error.
+            if (_account.information.smtp_credentials != null &&
+                !_account.information.smtp_credentials.is_complete()) {
+                try {
+                    yield _account.information.get_passwords_async(
+                        CredentialsMediator.ServiceFlag.SMTP);
+                } catch (Error e) {
+                    debug("SMTP password fetch error: %s", e.message);
+                }
+            }
+            
             // Convert row into RFC822 message suitable for sending or framing
             RFC822.Message message;
             try {
@@ -212,6 +225,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                     // Retry immediately (bug 6387)
                     should_nap = false;
                     
+                    // At this point we may already have a password in memory -- but it's incorrect.
+                    // Delete the current password, prompt the user for a new one, and try again.
                     try {
                         if (yield _account.information.fetch_passwords_async(
                             CredentialsMediator.ServiceFlag.SMTP, true))
