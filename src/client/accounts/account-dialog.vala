@@ -24,6 +24,7 @@ public class AccountDialog : Gtk.Dialog {
         get_content_area().margin_right = MARGIN;
         
         // Add pages to notebook.
+        // Important!  Add the pane to show_all() below.
         account_list_pane = new AccountDialogAccountListPane(notebook);
         add_edit_pane = new AccountDialogAddEditPane(notebook);
         spinner_pane = new AccountDialogSpinnerPane(notebook);
@@ -62,6 +63,19 @@ public class AccountDialog : Gtk.Dialog {
         }
         account_dialog.show_all();
         account_dialog.present();
+    }
+    
+    // This is a hack to allow key events in this window.  Gtk.Notebook will attempt to propagate
+    // key events to Widgets which have not yet been realized; by forcing them to realize here,
+    // we can avoid assertions and allow the Escape key to close the dialog.
+    public override void show_all() {
+        base.show_all();
+        
+        add_edit_pane.present();
+        spinner_pane.present();
+        remove_confirm_pane.present();
+        remove_fail_pane.present();
+        account_list_pane.present();
     }
     
     private bool on_delete() {
