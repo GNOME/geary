@@ -75,7 +75,7 @@ private class Geary.ImapDB.Account : BaseObject {
         try {
             db.open(
                 Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE | Db.DatabaseFlags.CHECK_CORRUPTION,
-                null, cancellable);
+                cancellable);
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             

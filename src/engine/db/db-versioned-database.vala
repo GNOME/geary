@@ -5,20 +5,50 @@
  */
 
 public class Geary.Db.VersionedDatabase : Geary.Db.Database {
-    public File schema_dir { get; private set; }
-    public ProgressMonitor upgrade_monitor { get; private set; }
+    public delegate void WorkCallback();
     
-    public VersionedDatabase(File db_file, File schema_dir, ProgressMonitor upgrade_monitor) {
+    public File schema_dir { get; private set; }
+    
+    public VersionedDatabase(File db_file, File schema_dir) {
         base (db_file);
         
         this.schema_dir = schema_dir;
-        this.upgrade_monitor = upgrade_monitor;
     }
     
+    /**
+     * Called by {@link open} if a schema upgrade is required and beginning.
+     *
+     * If called by {@link open_background}, this will be called in the context of a background
+     * thread.
+     */
+    protected virtual void starting_upgrade(int current_version) {
+    }
+    
+    /**
+     * Called by {@link open} just before performing a schema upgrade step.
+     *
+     * If called by {@link open_background}, this will be called in the context of a background
+     * thread.
+     */
     protected virtual void pre_upgrade(int version) {
     }
-
+    
+    /**
+     * Called by {@link open} just after performing a schema upgrade step.
+     *
+     * If called by {@link open_background}, this will be called in the context of a background
+     * thread.
+     */
     protected virtual void post_upgrade(int version) {
+    }
+    
+    /**
+     * Called by {@link open} if a schema upgrade was required and has now completed.
+     *
+     * If called by {@link open_background}, this will be called in the context of a background
+     * thread.
+     */
+    protected virtual void completed_upgrade(int final_version) {
     }
     
     private File get_schema_file(int db_version) {
@@ -61,15 +91,16 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         }
         
         // Go through all the version scripts in the schema directory and apply each of them.
+        bool started = false;
         for (;;) {
             File upgrade_script = get_schema_file(++db_version);
             if (!upgrade_script.query_exists(cancellable))
                 break;
             
-            if (!upgrade_monitor.is_in_progress)
-                upgrade_monitor.notify_start();
-            
-            pump_event_loop();
+            if (!started) {
+                starting_upgrade(db_version);
+                started = true;
+            }
             
             pre_upgrade(db_version);
             
@@ -89,18 +120,62 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
                 throw err;
             }
             
-            pump_event_loop();
-            
             post_upgrade(db_version);
         }
         
-        if (upgrade_monitor.is_in_progress)
-            upgrade_monitor.notify_finish();
+        if (started)
+            completed_upgrade(db_version);
     }
     
-    protected void pump_event_loop() {
-        while (Gtk.events_pending())
-            Gtk.main_iteration();
+    /**
+     * Opens the database in a background thread so foreground work can be performed while updating.
+     *
+     * Since {@link open} may take a considerable amount of time for a {@link VersionedDatabase},
+     * background_open() can be used to perform that work in a thread while the calling thread
+     * "pumps" a {@link WorkCallback} every work_cb_msec milliseconds.  In general, this is
+     * designed for allowing an event queue to execute tasks or update a progress monitor of some
+     * kind.
+     *
+     * Note that the database is not opened while the callback is executing and so it should not
+     * call into the database (unless it's a call safe to use prior to open).
+     *
+     * If work_cb_sec is zero or less, WorkCallback is called continuously, which may or may not be
+     * desired.
+     *
+     * @see open
+     */
+    public void open_background(DatabaseFlags flags, PrepareConnection? prepare_cb,
+        WorkCallback work_cb, int work_cb_msec, Cancellable? cancellable = null) throws Error {
+        // use a SpinWaiter to safely wait for the thread to exit while occassionally calling the
+        // WorkCallback (which can not abort in current impl.) to do foreground work.
+        Synchronization.SpinWaiter waiter = new Synchronization.SpinWaiter(work_cb_msec, () => {
+            work_cb();
+            
+            // continue (never abort)
+            return true;
+        });
+        
+        // do the open in a background thread
+        Error? thread_err = null;
+        Thread<bool> thread = new Thread<bool>.try("Geary.Db.VersionedDatabase.open()", () => {
+            try {
+                open(flags, prepare_cb, cancellable);
+            } catch (Error err) {
+                thread_err = err;
+            }
+            
+            // notify the foreground waiter we're done
+            waiter.notify();
+            
+            return true;
+        });
+        
+        // wait until thread is completed and then dispose of it
+        waiter.wait();
+        thread = null;
+        
+        if (thread_err != null)
+            throw thread_err;
     }
 }
 

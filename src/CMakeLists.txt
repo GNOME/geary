@@ -284,6 +284,7 @@ engine/util/util-scheduler.vala
 engine/util/util-single-item.vala
 engine/util/util-stream.vala
 engine/util/util-string.vala
+engine/util/util-synchronization.vala
 engine/util/util-trillian.vala
 )
 

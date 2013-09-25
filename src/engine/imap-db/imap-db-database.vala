@@ -8,11 +8,16 @@ extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const string DB_FILENAME = "geary.db";
+    private const int OPEN_PUMP_EVENT_LOOP_MSEC = 100;
+    
+    private ProgressMonitor upgrade_monitor;
     private string account_owner_email;
     
     public Database(File db_dir, File schema_dir, ProgressMonitor upgrade_monitor,
         string account_owner_email) {
-        base (get_db_file(db_dir), schema_dir, upgrade_monitor);
+        base (get_db_file(db_dir), schema_dir);
+        
+        this.upgrade_monitor = upgrade_monitor;
         this.account_owner_email = account_owner_email;
     }
     
@@ -20,14 +25,41 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         return db_dir.get_child(DB_FILENAME);
     }
     
-    public override void open(Db.DatabaseFlags flags, Db.PrepareConnection? prepare_cb,
-        Cancellable? cancellable = null) throws Error {
-        // have to do it this way because delegates don't play well with the ternary or nullable
-        // operators
-        if (prepare_cb != null)
-            base.open(flags, prepare_cb, cancellable);
-        else
-            base.open(flags, on_prepare_database_connection, cancellable);
+    /**
+     * Opens the ImapDB database.
+     *
+     * This should only be done from the main thread, as it is designed to pump the event loop
+     * while the database is being opened and updated.
+     */
+    public new void open(Db.DatabaseFlags flags, Cancellable? cancellable) throws Error {
+        open_background(flags, on_prepare_database_connection, pump_event_loop,
+            OPEN_PUMP_EVENT_LOOP_MSEC, cancellable);
+    }
+    
+    private void pump_event_loop() {
+        while (MainContext.default().pending())
+            MainContext.default().iteration(true);
+    }
+    
+    protected override void starting_upgrade(int current_version) {
+        // can't call the ProgressMonitor directly, as it's hooked up to signals that expect to be
+        // called in the foreground thread, so use the Idle loop for this
+        Idle.add(() => {
+            if (!upgrade_monitor.is_in_progress)
+                upgrade_monitor.notify_start();
+            
+            return false;
+        });
+    }
+    
+    protected override void completed_upgrade(int final_version) {
+        // see starting_upgrade() for explanation why this is done in Idle loop
+        Idle.add(() => {
+            if (upgrade_monitor.is_in_progress)
+                upgrade_monitor.notify_finish();
+            
+            return false;
+        });
     }
     
     protected override void post_upgrade(int version) {
@@ -63,7 +95,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     new MessageAddresses.from_result(account_owner_email, result);
                 foreach (Contact contact in message_addresses.contacts) {
                     do_update_contact(get_master_connection(), contact, null);
-                    pump_event_loop();
                 }
                 
                 result.next();
@@ -93,8 +124,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 }
                 
                 select.next();
-                
-                pump_event_loop();
             }
         } catch (Error e) {
             debug("Error decoding folder names during upgrade to database schema 6: %s", e.message);
@@ -187,8 +216,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     }
                     
                     select.next();
-                    
-                    pump_event_loop();
                 }
                 
                 return Db.TransactionOutcome.COMMIT;
@@ -229,7 +256,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     }
                     
                     select.next();
-                    pump_event_loop();
                 }
                 
                 // additionally, because this schema change (and code changes as well) introduces
