@@ -226,7 +226,21 @@ public class ConversationViewer : Gtk.Box {
             // Update the counter's count.
             WebKit.DOM.HTMLElement counter =
                 web_view.get_dom_document().get_element_by_id("selection_counter") as WebKit.DOM.HTMLElement;
-            counter.set_inner_html(msg);
+            WebKit.DOM.HTMLElement message_box =
+                web_view.get_dom_document().get_element_by_id("special_message_container") as WebKit.DOM.HTMLElement;
+            
+            WebKit.DOM.HTMLElement message = Util.DOM.select(message_box, "#message");
+            message.set_inner_html(msg);
+            
+            File icon_file =
+                GearyApplication.instance.get_resource_directory().get_child("icons").get_child("help-info-symbolic.png");
+            Geary.Memory.FileBuffer icon_buffer = new Geary.Memory.FileBuffer(icon_file, true);
+            
+            WebKit.DOM.HTMLImageElement img = Util.DOM.select(message_box, "#icon") as WebKit.DOM.HTMLImageElement;
+            img.set_attribute("src", assemble_data_uri("image/png", icon_buffer));
+            
+            counter.set_attribute("style", "display:none");
+            message_box.set_attribute("style", "display:block");
         } catch (Error e) {
             debug("Error updating counter: %s", e.message);
         }
@@ -238,6 +252,14 @@ public class ConversationViewer : Gtk.Box {
         
         clear(current_folder, current_account_information);
         set_mode(DisplayMode.NONE);
+        
+        try {
+            WebKit.DOM.HTMLElement message_box =
+                web_view.get_dom_document().get_element_by_id("special_message_container") as WebKit.DOM.HTMLElement;
+            message_box.set_attribute("style", "display:none");
+        } catch (Error e) {
+            debug("Error hiding special message box: %s", e.message);
+        }
     }
     
     private void show_multiple_selected(uint selected_count) {

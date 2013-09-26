@@ -669,3 +669,23 @@ License: http://cssload.net/en/terms_of_use
 
 /* /Spinner */
 
+.special_message {
+    color:#6e6e6e;
+    font-size:larger;
+    display:none;
+    word-wrap:break-word;
+    width:350px;
+    height:200px;
+    box-sizing:border-box;
+    padding-top:40px;
+    margin:0 auto;
+}
+
+.special_message #icon {
+    float:left;
+    margin:10px;
+}
+
+.special_message #message {
+    margin-top:25px;
+}
