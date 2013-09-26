@@ -1854,7 +1854,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
         do {
             list.add(new ImapDB.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
-                results.string_at(2), results.int64_at(3), message_id, results.rowid_at(0),
+                results.nonnull_string_at(2), results.int64_at(3), message_id, results.rowid_at(0),
                 Geary.Attachment.Disposition.from_int(results.int_at(4))));
         } while (results.next(cancellable));
         

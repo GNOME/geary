@@ -331,7 +331,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = statement.exec(cancellable);
             while (!result.finished) {
                 try {
-                    Contact contact = new Contact(result.string_at(0), result.string_at(1),
+                    Contact contact = new Contact(result.nonnull_string_at(0), result.string_at(1),
                         result.int_at(2), result.string_at(3), ContactFlags.deserialize(result.string_at(4)));
                     contacts.add(contact);
                 } catch (Geary.DatabaseError err) {
@@ -823,7 +823,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 // Build a list of search offsets.
-                string[] offset_array = result.string_at(0).split(" ");
+                string[] offset_array = result.nonnull_string_at(0).split(" ");
                 Gee.ArrayList<SearchOffset> all_offsets = new Gee.ArrayList<SearchOffset>();
                 int j = 0;
                 while (true) {
@@ -837,7 +837,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 // Iterate over the offset list, scrape strings from the database, and push
                 // the results into our return set.
                 foreach(SearchOffset offset in all_offsets) {
-                    string text = result.string_at(offset.column + 1);
+                    string text = result.nonnull_string_at(offset.column + 1);
                     search_matches.add(text[offset.byte_offset : offset.byte_offset + offset.size].down());
                 }
                 
@@ -1222,7 +1222,7 @@ private class Geary.ImapDB.Account : BaseObject {
             return null;
         
         int64 parent_id = result.int64_at(0);
-        string name = result.string_at(1);
+        string name = result.nonnull_string_at(1);
         
         // Here too, one level of loop detection is better than nothing.
         if (folder_id == parent_id) {

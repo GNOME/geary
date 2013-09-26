@@ -170,7 +170,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * in SQLite, however, includes 1 and 0, so an integer may be mistaken as a boolean.
      */
     public bool get_pragma_bool(string name) throws Error {
-        string response = query("PRAGMA %s".printf(name)).string_at(0);
+        string response = query("PRAGMA %s".printf(name)).nonnull_string_at(0);
         switch (response.down()) {
             case "1":
             case "yes":
@@ -221,7 +221,7 @@ public class Geary.Db.Connection : Geary.Db.Context {
      * Returns the result of a PRAGMA as a string.  See [[http://www.sqlite.org/pragma.html]]
      */
     public string get_pragma_string(string name) throws Error {
-        return query("PRAGMA %s".printf(name)).string_at(0);
+        return query("PRAGMA %s".printf(name)).nonnull_string_at(0);
     }
     
     /**

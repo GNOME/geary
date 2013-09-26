@@ -144,7 +144,7 @@ private void on_log(string prefix, LogLevelFlags log_levels, string message) {
     if (stream == null)
         return;
     
-    Time tm = Time.local(time_t());
+    GLib.Time tm = GLib.Time.local(time_t());
     stream.printf("%s %02d:%02d:%02d %lf %s\n", prefix, tm.hour, tm.minute, tm.second,
         entry_timer.elapsed(), message);
     

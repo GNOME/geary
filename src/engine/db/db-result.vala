@@ -126,14 +126,31 @@ public class Geary.Db.Result : Geary.Db.Context {
     
     /**
      * column is zero-based.
+     *
+     * Returns a null string if the element is NULL.
+     *
+     * @see nonnull_string_at
      */
-    public unowned string string_at(int column) throws DatabaseError {
+    public unowned string? string_at(int column) throws DatabaseError {
         verify_at(column);
         
-        unowned string s = statement.stmt.column_text(column);
-        log("string_at(%d) -> %s", column, s);
+        unowned string? s = statement.stmt.column_text(column);
+        log("string_at(%d) -> %s", column, (s != null) ? s : "(null)");
         
         return s;
+    }
+    
+    /**
+     * column is zero-based.
+     *
+     * Returns an empty string if the element is NULL.
+     *
+     * @see string_at
+     */
+    public unowned string nonnull_string_at(int column) throws DatabaseError {
+        unowned string? s = string_at(column);
+        
+        return (s != null) ? s : "";
     }
     
     /**
@@ -143,7 +160,7 @@ public class Geary.Db.Result : Geary.Db.Context {
         // Memory.StringBuffer is not entirely suited for this, as it can result in extra copies
         // internally ... GrowableBuffer is better for large blocks
         Memory.GrowableBuffer buffer = new Memory.GrowableBuffer();
-        buffer.append(string_at(column).data);
+        buffer.append(nonnull_string_at(column).data);
         
         return buffer;
     }
@@ -231,9 +248,25 @@ public class Geary.Db.Result : Geary.Db.Context {
     /**
      * name is the name of the column in the result set.  See Statement.get_column_index() for name
      * matching rules.
+     *
+     * Returns a null string if the element is NULL.
+     *
+     * @see nonnull_string_for
      */
-    public unowned string string_for(string name) throws DatabaseError {
+    public unowned string? string_for(string name) throws DatabaseError {
         return string_at(convert_for(name));
+    }
+    
+    /**
+     * name is the name of the column in the result set.  See Statement.get_column_index() for name
+     * matching rules.
+     *
+     * Returns an empty string if the element is NULL.
+     *
+     * @see string_for
+     */
+    public unowned string nonnull_string_for(string name) throws DatabaseError {
+        return nonnull_string_at(convert_for(name));
     }
     
     /**

@@ -109,7 +109,7 @@ public class Geary.Imap.InternalDateDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
-        return new InternalDate(stringp.value);
+        return InternalDate.decode(stringp.value);
     }
 }
 

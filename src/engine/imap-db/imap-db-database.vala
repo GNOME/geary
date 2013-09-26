@@ -87,6 +87,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 14:
                 post_upgrade_expand_page_size();
             break;
+            
+            case 15:
+                post_upgrade_fix_localized_internaldates();
+            break;
         }
     }
     
@@ -114,7 +118,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             Db.Result select = query("SELECT id, name FROM FolderTable");
             while (!select.finished) {
                 int64 id = select.int64_at(0);
-                string encoded_name = select.string_at(1);
+                string encoded_name = select.nonnull_string_at(1);
                 
                 try {
                     string canonical_name = Geary.ImapUtf7.imap_utf7_to_utf8(encoded_name);
@@ -207,7 +211,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     
                     try {
                         time_t as_time_t = (internaldate != null ?
-                            new Geary.Imap.InternalDate(internaldate).as_time_t : -1);
+                            Geary.Imap.InternalDate.decode(internaldate).as_time_t : -1);
                         
                         Db.Statement update = cx.prepare(
                             "UPDATE MessageTable SET internaldate_time_t=? WHERE id=?");
@@ -298,6 +302,65 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         } catch (Error e) {
             debug("Error bumping page_size or vacuuming database; performance may be degraded: %s",
                 e.message);
+        }
+    }
+    
+    // Version 15
+    private void post_upgrade_fix_localized_internaldates() {
+        try {
+            exec_transaction(Db.TransactionType.RW, (cx) => {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT id, internaldate, fields
+                    FROM MessageTable
+                """);
+                
+                Gee.HashMap<int64?, Geary.Email.Field> invalid_ids = new Gee.HashMap<
+                    int64?, Geary.Email.Field>();
+                
+                Db.Result results = stmt.exec();
+                while (!results.finished) {
+                    string? internaldate = results.string_at(1);
+                    
+                    try {
+                        if (!String.is_empty(internaldate))
+                            Imap.InternalDate.decode(internaldate);
+                    } catch (Error err) {
+                        int64 invalid_id = results.rowid_at(0);
+                        
+                        debug("Invalid INTERNALDATE \"%s\" found at row %s in %s: %s",
+                            internaldate != null ? internaldate : "(null)",
+                            invalid_id.to_string(), db_file.get_path(), err.message);
+                        invalid_ids.set(invalid_id, (Geary.Email.Field) results.int_at(2));
+                    }
+                    
+                    results.next();
+                }
+                
+                // used prepared statement for iterating over list
+                stmt = cx.prepare("""
+                    UPDATE MessageTable
+                    SET fields=?, internaldate=?, internaldate_time_t=?, rfc822_size=?
+                    WHERE id=?
+                """);
+                stmt.bind_null(1);
+                stmt.bind_null(2);
+                stmt.bind_null(3);
+                
+                foreach (int64 invalid_id in invalid_ids.keys) {
+                    stmt.bind_int(0, invalid_ids.get(invalid_id).clear(Geary.Email.Field.PROPERTIES));
+                    stmt.bind_rowid(4, invalid_id);
+                    
+                    stmt.exec();
+                    
+                    // reuse statment, overwrite invalid_id, fields only
+                    stmt.reset(Db.ResetScope.SAVE_BINDINGS);
+                }
+                
+                return Db.TransactionOutcome.COMMIT;
+            });
+        } catch (Error err) {
+            debug("Error fixing INTERNALDATES during upgrade to schema 15 for %s: %s",
+                db_file.get_path(), err.message);
         }
     }
     

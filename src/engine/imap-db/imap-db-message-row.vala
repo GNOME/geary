@@ -154,7 +154,7 @@ private class Geary.ImapDB.MessageRow {
         
         Imap.InternalDate? constructed = null;
         try {
-            constructed = new Imap.InternalDate(internaldate);
+            constructed = Imap.InternalDate.decode(internaldate);
         } catch (Error err) {
             debug("Unable to construct internaldate object from \"%s\": %s", internaldate,
                 err.message);
