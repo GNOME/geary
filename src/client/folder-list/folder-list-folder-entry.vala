@@ -44,9 +44,11 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override Icon? get_sidebar_icon() {
+        bool rtl = Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL;
+        
         switch (folder.special_folder_type) {
             case Geary.SpecialFolderType.NONE:
-                return IconFactory.instance.get_custom_icon("tag-symbolic", IconFactory.ICON_SIDEBAR);
+                return IconFactory.instance.get_custom_icon(rtl ? "tag-rtl-symbolic" : "tag-symbolic", IconFactory.ICON_SIDEBAR);
             
             case Geary.SpecialFolderType.INBOX:
                 return new ThemedIcon("inbox-symbolic");
@@ -55,7 +57,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return new ThemedIcon("accessories-text-editor-symbolic");
             
             case Geary.SpecialFolderType.SENT:
-                return new ThemedIcon("sent-symbolic");
+                return new ThemedIcon(rtl ? "sent-rtl-symbolic" : "sent-symbolic");
             
             case Geary.SpecialFolderType.FLAGGED:
                 return new ThemedIcon("star-symbolic");
@@ -67,7 +69,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return IconFactory.instance.get_custom_icon("archive-symbolic", IconFactory.ICON_SIDEBAR);
             
             case Geary.SpecialFolderType.SPAM:
-                return new ThemedIcon("spam-symbolic");
+                return new ThemedIcon(rtl ? "spam-rtl-symbolic" : "spam-symbolic");
             
             case Geary.SpecialFolderType.TRASH:
                 return new ThemedIcon("user-trash-symbolic");

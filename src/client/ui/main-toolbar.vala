@@ -25,6 +25,8 @@ public class MainToolbar : PillToolbar {
         base(GearyApplication.instance.actions);
         GearyApplication.instance.controller.account_selected.connect(on_account_changed);
         
+        bool rtl = get_direction() == Gtk.TextDirection.RTL;
+        
         // Assemble mark menu.
         GearyApplication.instance.load_ui_file("toolbar_mark_menu.ui");
         Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
@@ -46,15 +48,15 @@ public class MainToolbar : PillToolbar {
         
         // Reply buttons
         insert.clear();
-        insert.add(create_toolbar_button("reply-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
-        insert.add(create_toolbar_button("reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
-        insert.add(create_toolbar_button("forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
+        insert.add(create_toolbar_button(rtl ? "reply-rtl-symbolic" : "reply-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
+        insert.add(create_toolbar_button(rtl ? "reply-all-rtl-symbolic" : "reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
+        insert.add(create_toolbar_button(rtl ? "forward-rtl-symbolic" : "forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
         add(create_pill_buttons(insert));
         
         // Mark, copy, move.
         insert.clear();
         insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
-        insert.add(create_menu_button("tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
+        insert.add(create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
         insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
         add(create_pill_buttons(insert));
         
