@@ -1893,7 +1893,39 @@ public class ConversationViewer : Gtk.Box {
         message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
         message_overlay_label.halign = Gtk.Align.START;
         message_overlay_label.valign = Gtk.Align.END;
+        message_overlay_label.realize.connect(on_message_overlay_label_realize);
         message_overlay.add_overlay(message_overlay_label);
+    }
+    
+    // This ensures the overlay's background color matches the background color of the
+    // main window
+    private void update_message_overlay_label_style() {
+        Gtk.Window main_window = GearyApplication.instance.controller.main_window;
+        Gdk.RGBA window_background = main_window.get_style_context()
+            .get_background_color(Gtk.StateFlags.NORMAL);
+        Gdk.RGBA label_background = message_overlay_label.get_style_context()
+            .get_background_color(Gtk.StateFlags.NORMAL);
+        
+        // To prevent an event loop situation, only update the background if it actually changed.
+        if (label_background == window_background)
+            return;
+        
+        message_overlay_label.get_style_context().changed.disconnect(
+            on_message_overlay_label_style_changed);
+        
+        message_overlay_label.override_background_color(Gtk.StateFlags.NORMAL, window_background);
+        
+        message_overlay_label.get_style_context().changed.connect(
+            on_message_overlay_label_style_changed);
+    }
+    
+    private void on_message_overlay_label_realize() {
+        update_message_overlay_label_style();
+    }
+    
+    private void on_message_overlay_label_style_changed() {
+        // The Gtk theme has probably changed - update the label background.
+        update_message_overlay_label_style();
     }
     
     private void on_hovering_over_link(string? title, string? url) {
