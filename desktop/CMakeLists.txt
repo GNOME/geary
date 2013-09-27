@@ -2,6 +2,8 @@
 # Build and install geary.desktop
 #
 
+install(FILES geary.appdata.xml DESTINATION share/appdata)
+
 include (FindIntltool)
 include (FindDesktopFileValidate)
 if (INTLTOOL_MERGE_FOUND)
