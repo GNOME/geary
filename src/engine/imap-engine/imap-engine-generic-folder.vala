@@ -160,11 +160,23 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // if any messages are still marked for removal from last time, that means the EXPUNGE
         // never arrived from the server, in which case the folder is "dirty" and needs a full
         // normalization
-        Gee.Set<Imap.UID>? marked_uids = yield local_folder.get_marked_uids_async(cancellable);
-        bool is_dirty = (marked_uids != null && marked_uids.size > 0);
+        Gee.Set<ImapDB.EmailIdentifier>? already_marked_ids = yield local_folder.get_marked_ids_async(
+            cancellable);
+        
+        // however, there may be enqueue ReplayOperations waiting to remove messages on the server
+        // that marked some or all of those messages
+        Gee.HashSet<ImapDB.EmailIdentifier> to_be_removed = new Gee.HashSet<ImapDB.EmailIdentifier>();
+        replay_queue.get_ids_to_be_remote_removed(to_be_removed);
+        
+        // don't consider those already marked as "already marked" if they were not leftover from
+        // the last open of this folder
+        if (already_marked_ids != null)
+            already_marked_ids.remove_all(to_be_removed);
+        
+        bool is_dirty = (already_marked_ids != null && already_marked_ids.size > 0);
         
         if (is_dirty)
-            debug("%s: %d remove markers found, folder is dirty", to_string(), marked_uids.size);
+            debug("%s: %d remove markers found, folder is dirty", to_string(), already_marked_ids.size);
         
         // if UIDNEXT has changed, that indicates messages have been appended (and possibly removed)
         int64 uidnext_diff = remote_properties.uid_next.value - local_properties.uid_next.value;
@@ -256,10 +268,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             
             // the UIDs marked for removal are going to be re-inserted into the vector once they're
             // cleared, so add them here as well
-            if (marked_uids != null) {
-                foreach (Imap.UID uid in marked_uids) {
-                    if (!appended_uids.contains(uid))
-                        inserted_uids.add(uid);
+            if (already_marked_ids != null) {
+                foreach (ImapDB.EmailIdentifier id in already_marked_ids) {
+                    assert(id.has_uid());
+                    
+                    if (!appended_uids.contains(id.uid))
+                        inserted_uids.add(id.uid);
                 }
             }
         }, cancellable);
@@ -330,8 +344,9 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         check_open("normalize_folders (removed emails)");
         
-        // remove any extant remove markers, as everything is accounted for now
-        yield local_folder.clear_remove_markers_async(cancellable);
+        // remove any extant remove markers, as everything is accounted for now, except for those
+        // waiting to be removed in the queue
+        yield local_folder.clear_remove_markers_async(to_be_removed, cancellable);
         
         check_open("normalize_folders (clear remove markers)");
         

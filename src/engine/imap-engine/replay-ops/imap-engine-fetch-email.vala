@@ -38,6 +38,9 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         remote_removed = ids.contains(id);
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         // If forcing an update, skip local operation and go direct to replay_remote()
         if (flags.is_all_set(Folder.ListFlags.FORCE_UPDATE))

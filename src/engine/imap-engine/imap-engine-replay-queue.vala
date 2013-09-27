@@ -21,6 +21,9 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         }
         
+        public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        }
+        
         public override async ReplayOperation.Status replay_local_async() throws Error {
             return Status.CONTINUE;
         }
@@ -49,8 +52,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private weak GenericFolder owner;
     private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
     private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
-    private bool local_op_active = false;
-    private bool remote_op_active = false;
+    private ReplayOperation? local_op_active = null;
+    private ReplayOperation? remote_op_active = null;
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
     private Scheduler.Scheduled? notification_timer = null;
     
@@ -225,15 +228,18 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * @see ReplayOperation.notify_remote_removed_position
      */
     public void notify_remote_removed_position(Imap.SequenceNumber pos) {
-        notify_remote_removed_position_collection(notification_queue, pos);
-        notify_remote_removed_position_collection(local_queue.get_all(), pos);
-        notify_remote_removed_position_collection(remote_queue.get_all(), pos);
+        notify_remote_removed_position_collection(notification_queue, null, pos);
+        notify_remote_removed_position_collection(local_queue.get_all(), local_op_active, pos);
+        notify_remote_removed_position_collection(remote_queue.get_all(), remote_op_active, pos);
     }
     
     private void notify_remote_removed_position_collection(Gee.Collection<ReplayOperation> replay_ops,
-        Imap.SequenceNumber pos) {
+        ReplayOperation? active, Imap.SequenceNumber pos) {
         foreach (ReplayOperation replay_op in replay_ops)
             replay_op.notify_remote_removed_position(pos);
+        
+        if (active != null)
+            active.notify_remote_removed_position(pos);
     }
     
     /**
@@ -244,15 +250,30 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * @see ReplayOperation.notify_remote_removed_ids
      */
     public void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
-        notify_remote_removed_ids_collection(notification_queue, ids);
-        notify_remote_removed_ids_collection(local_queue.get_all(), ids);
-        notify_remote_removed_ids_collection(remote_queue.get_all(), ids);
+        notify_remote_removed_ids_collection(notification_queue, null, ids);
+        notify_remote_removed_ids_collection(local_queue.get_all(), local_op_active, ids);
+        notify_remote_removed_ids_collection(remote_queue.get_all(), remote_op_active, ids);
     }
     
     private void notify_remote_removed_ids_collection(Gee.Collection<ReplayOperation> replay_ops,
-        Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        ReplayOperation? active, Gee.Collection<ImapDB.EmailIdentifier> ids) {
         foreach (ReplayOperation replay_op in replay_ops)
             replay_op.notify_remote_removed_ids(ids);
+        
+        if (active != null)
+            active.notify_remote_removed_ids(ids);
+    }
+    
+    /**
+     * Returns all ImapDb.EmailIdentifiers for enqueued ReplayOperations waiting for
+     * replay_remote_async() that are planning to be removed on the server.
+     */
+    public void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        foreach (ReplayOperation replay_op in remote_queue.get_all())
+            replay_op.get_ids_to_be_remote_removed(ids);
+        
+        if (remote_op_active != null)
+            remote_op_active.get_ids_to_be_remote_removed(ids);
     }
     
     /**
@@ -336,7 +357,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 break;
             }
             
-            local_op_active = true;
+            local_op_active = op;
             
             // If this is a Close operation, shut down the queue after processing it
             if (op is CloseReplayQueue)
@@ -421,7 +442,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                     failed(op);
             }
             
-            local_op_active = false;
+            local_op_active = null;
         }
         
         debug("ReplayQueue.do_replay_local_async %s exiting", to_string());
@@ -442,7 +463,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 break;
             }
             
-            remote_op_active = true;
+            remote_op_active = op;
             
             // ReplayClose means this queue (and the folder) are closing, so handle errors a little
             // differently
@@ -507,7 +528,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             else
                 failed(op);
             
-            remote_op_active = false;
+            remote_op_active = null;
         }
         
         debug("ReplayQueue.do_replay_remote_async %s exiting", to_string());
@@ -515,8 +536,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     
     public string to_string() {
         return "ReplayQueue:%s (notification=%d local=%d local_active=%s remote=%d remote_active=%s)".printf(
-            owner.to_string(), notification_queue.size, local_queue.size, local_op_active.to_string(),
-            remote_queue.size, remote_op_active.to_string());
+            owner.to_string(), notification_queue.size, local_queue.size, (local_op_active != null).to_string(),
+            remote_queue.size, (remote_op_active != null).to_string());
     }
 }
 

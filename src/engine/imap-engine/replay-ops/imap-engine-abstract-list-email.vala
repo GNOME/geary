@@ -115,6 +115,9 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         }
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    }
+    
     // Child class should execute its own calls *before* calling this base method
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         // only deal with unfulfilled email, child class must deal with everything else

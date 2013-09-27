@@ -862,6 +862,26 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         int initial_message_count = conversations.get_email_count();
         
+        // only do local-load if the Folder isn't completely opened, otherwise this operation
+        // will block other (more important) operations while it waits for the folder to
+        // remote-open
+        Folder.ListFlags flags;
+        switch (folder.get_open_state()) {
+            case Folder.OpenState.CLOSED:
+            case Folder.OpenState.LOCAL:
+            case Folder.OpenState.OPENING:
+                flags = Folder.ListFlags.LOCAL_ONLY;
+            break;
+            
+            case Folder.OpenState.BOTH:
+            case Folder.OpenState.REMOTE:
+                flags = Folder.ListFlags.NONE;
+            break;
+            
+            default:
+                assert_not_reached();
+        }
+        
         Geary.EmailIdentifier? low_id = yield get_lowest_email_id_async(null);
         if (low_id != null && !is_insert) {
             // Load at least as many messages as remianing conversations.
@@ -870,8 +890,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 num_to_load = WINDOW_FILL_MESSAGE_COUNT;
             
             try {
-                yield load_by_id_async(low_id, num_to_load,
-                    Geary.Folder.ListFlags.NONE, cancellable_monitor);
+                yield load_by_id_async(low_id, num_to_load, flags, cancellable_monitor);
             } catch(Error e) {
                 debug("Error filling conversation window: %s", e.message);
             }
@@ -879,7 +898,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
             try {
-                yield load_by_id_async(null, min_window_count, Folder.ListFlags.NONE, cancellable_monitor);
+                yield load_by_id_async(null, min_window_count, flags, cancellable_monitor);
             } catch(Error e) {
                 debug("Error filling conversation window: %s", e.message);
             }

@@ -24,6 +24,10 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReceiveReplayOpe
         // this operation deals only in positional addressing
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        // this ReplayOperation doesn't do remote removes, it reacts to them
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         yield owner.do_replay_removed_message(position);
         

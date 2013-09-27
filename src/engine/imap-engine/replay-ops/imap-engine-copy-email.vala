@@ -25,6 +25,9 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         to_copy.remove_all(ids);
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_copy.size == 0)
             return ReplayOperation.Status.COMPLETED;

@@ -32,6 +32,9 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    }
+    
     public override async void backout_local_async() throws Error {
     }
     

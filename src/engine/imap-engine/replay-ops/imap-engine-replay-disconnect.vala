@@ -21,6 +21,9 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReceiveReplay
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    }
+    
     public override async ReplayOperation.Status replay_local_async() throws Error {
         debug("%s ReplayDisconnect reason=%s", owner.to_string(), reason.to_string());
         

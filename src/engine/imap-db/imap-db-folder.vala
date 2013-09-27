@@ -945,11 +945,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return count;
     }
     
-    public async Gee.Set<Imap.UID>? get_marked_uids_async(Cancellable? cancellable) throws Error {
-        Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
+    public async Gee.Set<ImapDB.EmailIdentifier>? get_marked_ids_async(Cancellable? cancellable)
+        throws Error {
+        Gee.Set<ImapDB.EmailIdentifier> ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare("""
-                SELECT ordering
+                SELECT message_id, ordering
                 FROM MessageLocationTable
                 WHERE folder_id=? AND remove_marker<>?
             """);
@@ -958,7 +959,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             Db.Result results = stmt.exec(cancellable);
             while (!results.finished) {
-                uids.add(new Imap.UID(results.int64_at(0)));
+                ids.add(new ImapDB.EmailIdentifier(results.rowid_at(0), new Imap.UID(results.int64_at(1))));
                 
                 results.next(cancellable);
             }
@@ -966,17 +967,34 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
-        return uids.size > 0 ? uids : null;
+        return ids.size > 0 ? ids : null;
     }
     
-    // Clears all remove markers from the folder
-    public async void clear_remove_markers_async(Cancellable? cancellable) throws Error {
+    // Clears all remove markers from the folder except those in the exceptions Collection
+    public async void clear_remove_markers_async(Gee.Collection<ImapDB.EmailIdentifier>? exceptions,
+        Cancellable? cancellable) throws Error {
         yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
-            Db.Statement stmt = cx.prepare("""
+            StringBuilder sql = new StringBuilder();
+            sql.append("""
                 UPDATE MessageLocationTable
                 SET remove_marker=?
                 WHERE folder_id=? AND remove_marker <> ?
             """);
+            
+            if (exceptions != null && exceptions.size > 0) {
+                sql.append("""
+                    AND message_id NOT IN (
+                """);
+                Gee.Iterator<ImapDB.EmailIdentifier> iter = exceptions.iterator();
+                while (iter.next()) {
+                    sql.append(iter.get().message_id.to_string());
+                    if (iter.has_next())
+                        sql.append(", ");
+                }
+                sql.append(")");
+            }
+            
+            Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_bool(0, false);
             stmt.bind_rowid(1, folder_id);
             stmt.bind_bool(2, false);

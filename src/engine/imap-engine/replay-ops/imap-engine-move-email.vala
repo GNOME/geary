@@ -53,6 +53,11 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         return ReplayOperation.Status.CONTINUE;
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        if (moved_ids != null)
+            ids.add_all(moved_ids);
+    }
+    
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         if (moved_ids.size > 0) {
             yield engine.remote_folder.move_email_async(

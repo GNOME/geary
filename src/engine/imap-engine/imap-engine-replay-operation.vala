@@ -79,6 +79,20 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     public abstract void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids);
     
     /**
+     * Add to the Collection EmailIdentifiers that will be removed in replay_remote_async().
+     *
+     * This is called when the ReplayOperation is still waiting to run replay_remote_async().
+     * If it has any EmailIdentifiers it plans on removing from the server's folder, it should
+     * add them to the supplied Collection.
+     *
+     * This is called during folder normalization when it's necessary to know which remove markers
+     * in the local folder are set due to current user interaction or were left over from the last
+     * invocation (i.e. the Folder closed before the server could notify the engine that they were
+     * removed).
+     */
+    public abstract void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids);
+    
+    /**
      * See Scope for conditions where this method will be called.
      *
      * Returns:

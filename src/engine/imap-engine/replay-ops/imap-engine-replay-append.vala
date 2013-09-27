@@ -35,6 +35,9 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOper
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+    }
+    
     public override async ReplayOperation.Status replay_local_async() {
         if (positions.size > 0)
             yield owner.do_replay_appended_messages(positions);

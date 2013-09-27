@@ -51,6 +51,11 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
         return ReplayOperation.Status.CONTINUE;
     }
     
+    public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
+        if (removed_ids != null)
+            ids.add_all(removed_ids);
+    }
+    
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
@@ -74,7 +79,8 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     }
     
     public override string describe_state() {
-        return "to_remove=%d".printf(to_remove.size);
+        return "to_remove=%d removed_ids=%d".printf(to_remove.size,
+            (removed_ids != null) ? removed_ids.size : 0);
     }
 }
 
