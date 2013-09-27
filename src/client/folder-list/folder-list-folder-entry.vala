@@ -119,6 +119,10 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override int get_count() {
-        return folder.properties.email_unread;
+        if (folder.special_folder_type == Geary.SpecialFolderType.DRAFTS ||
+            folder.special_folder_type == Geary.SpecialFolderType.OUTBOX)
+            return folder.properties.email_total;
+        else
+            return folder.properties.email_unread;
     }
 }
