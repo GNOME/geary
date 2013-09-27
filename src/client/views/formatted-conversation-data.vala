@@ -272,6 +272,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area, 
         Cairo.Context? ctx, Gtk.CellRendererState flags, bool recalc_dims,
         bool hover_select) {
+        bool display_preview = GearyApplication.instance.config.display_preview;
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
         
         bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
@@ -294,7 +295,7 @@ public class FormattedConversationData : Geary.BaseObject {
         int counter_x = cell_area != null ? cell_area.width - cell_area.x - counter_width +
             (LINE_SPACING / 2) : 0;
         
-        if (GearyApplication.instance.config.display_preview) {
+        if (display_preview) {
             // Subject field.
             render_subject(widget, cell_area, ctx, y, selected);
             y += ink_rect.height + ink_rect.y + LINE_SPACING;
@@ -327,8 +328,8 @@ public class FormattedConversationData : Geary.BaseObject {
             FormattedConversationData.preview_height = preview_height;
             FormattedConversationData.cell_height = y + preview_height;
         } else {
-            int unread_y = GearyApplication.instance.config.display_preview ?
-                cell_area.y + LINE_SPACING * 2 : cell_area.y + LINE_SPACING;
+            int unread_y = display_preview ? cell_area.y + LINE_SPACING * 2 : cell_area.y +
+                LINE_SPACING;
             
             // Unread indicator.
             if (is_unread || hover) {
@@ -340,10 +341,11 @@ public class FormattedConversationData : Geary.BaseObject {
             
             // Starred indicator.
             if (is_flagged || hover) {
+                int star_y = cell_area.y + (cell_area.height / 2) + (display_preview ? LINE_SPACING : 0);
+                
                 Gdk.Pixbuf starred_icon = is_flagged ? IconFactory.instance.starred_colored
                     : IconFactory.instance.unstarred_colored;
-                Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, cell_area.y +
-                    (cell_area.height / 2) + LINE_SPACING);
+                Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, star_y);
                 ctx.paint();
             }
         }

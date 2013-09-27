@@ -159,7 +159,7 @@ public class ConversationListView : Gtk.TreeView {
                 star_clicked = cell_x < 25 && cell_y >= 40 && cell_y <= 62;
             } else {
                 read_clicked = cell_x < 25 && cell_y >= 8 && cell_y <= 22;
-                star_clicked = cell_x < 25 && cell_y >= 30 && cell_y <= 48;
+                star_clicked = cell_x < 25 && cell_y >= 28 && cell_y <= 43;
             }
             
             // Get the current conversation.  If it's selected, we'll apply the mark operation to
