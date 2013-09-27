@@ -197,10 +197,11 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
 }
 
 public string pretty_print(DateTime datetime, ClockFormat clock_format) {
+    DateTime to_local = datetime.to_local();
     DateTime now = new DateTime.now_local();
-    TimeSpan diff = now.difference(datetime);
+    TimeSpan diff = now.difference(to_local);
     
-    return pretty_print_coarse(as_coarse_date(datetime, now, diff), clock_format, datetime, diff);
+    return pretty_print_coarse(as_coarse_date(to_local, now, diff), clock_format, to_local, diff);
 }
 
 public string pretty_print_verbose(DateTime datetime, ClockFormat clock_format) {
