@@ -12,6 +12,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     
     private ProgressMonitor upgrade_monitor;
     private string account_owner_email;
+    private bool new_db = false;
     
     public Database(File db_dir, File schema_dir, ProgressMonitor upgrade_monitor,
         string account_owner_email) {
@@ -41,11 +42,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             MainContext.default().iteration(true);
     }
     
-    protected override void starting_upgrade(int current_version) {
+    protected override void starting_upgrade(int current_version, bool new_db) {
+        this.new_db = new_db;
         // can't call the ProgressMonitor directly, as it's hooked up to signals that expect to be
         // called in the foreground thread, so use the Idle loop for this
         Idle.add(() => {
-            if (!upgrade_monitor.is_in_progress)
+            if (!new_db && !upgrade_monitor.is_in_progress)
                 upgrade_monitor.notify_start();
             
             return false;
@@ -55,7 +57,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     protected override void completed_upgrade(int final_version) {
         // see starting_upgrade() for explanation why this is done in Idle loop
         Idle.add(() => {
-            if (upgrade_monitor.is_in_progress)
+            if (!new_db && upgrade_monitor.is_in_progress)
                 upgrade_monitor.notify_finish();
             
             return false;

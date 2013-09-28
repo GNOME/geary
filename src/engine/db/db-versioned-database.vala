@@ -20,8 +20,10 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
      *
      * If called by {@link open_background}, this will be called in the context of a background
      * thread.
+     *
+     * If new_db is set to true, the database is being created from scratch.
      */
-    protected virtual void starting_upgrade(int current_version) {
+    protected virtual void starting_upgrade(int current_version, bool new_db) {
     }
     
     /**
@@ -73,6 +75,9 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         debug("VersionedDatabase.upgrade: current database schema for %s: %d", db_file.get_path(),
             db_version);
         
+        // If the DB doesn't exist yet, the version number will be negative.
+        bool new_db = db_version < 0;
+        
         // Initialize new database to version 1 (note the preincrement in the loop below)
         if (db_version < 0)
             db_version = 0;
@@ -98,7 +103,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
                 break;
             
             if (!started) {
-                starting_upgrade(db_version);
+                starting_upgrade(db_version, new_db);
                 started = true;
             }
             
