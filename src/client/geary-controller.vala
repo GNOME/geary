@@ -1484,7 +1484,13 @@ public class GearyController : Geary.BaseObject {
             GearyApplication.instance.config.ask_open_attachment = !ask_to_open.is_checked;
         }
         
-        open_uri(attachment.file.get_uri());
+        // Open the attachment if we know what to do with it.
+        if (!open_uri(attachment.file.get_uri())) {
+            // Failing that, trigger a save dialog.
+            Gee.List<Geary.Attachment> attachment_list = new Gee.ArrayList<Geary.Attachment>();
+            attachment_list.add(attachment);
+            on_save_attachments(attachment_list);
+        }
     }
     
     private bool do_overwrite_confirmation(File to_overwrite) {
@@ -1610,18 +1616,21 @@ public class GearyController : Geary.BaseObject {
     }
     
     // Opens a link in an external browser.
-    private void open_uri(string _link) {
+    private bool open_uri(string _link) {
         string link = _link;
         
         // Support web URLs that ommit the protocol.
         if (!link.contains(":"))
             link = "http://" + link;
         
+        bool ret = false;
         try {
-            Gtk.show_uri(main_window.get_screen(), link, Gdk.CURRENT_TIME);
+            ret = Gtk.show_uri(main_window.get_screen(), link, Gdk.CURRENT_TIME);
         } catch (Error err) {
             debug("Unable to open URL. %s", err.message);
         }
+        
+        return ret;
     }
     
     private bool close_composition_windows() {
