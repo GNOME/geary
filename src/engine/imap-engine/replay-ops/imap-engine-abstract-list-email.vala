@@ -246,9 +246,9 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             // newest to oldest
             //
             // if initial_id is null or no local earliest UID, then vector expansion is simple:
-            // merely count backwards from the top of the vector
+            // merely count backwards from the top of the locally available vector
             if (initial_uid == null || local_count == 0) {
-                low_pos = new Imap.SequenceNumber(Numeric.int_floor((remote_count - count) + 1, 1));
+                low_pos = new Imap.SequenceNumber(Numeric.int_floor((remote_count - local_count) - count, 1));
                 
                 // don't set high_pos, leave null to use symbolic "highest" in MessageSet
                 high_pos = null;
