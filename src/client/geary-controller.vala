@@ -1532,12 +1532,14 @@ public class GearyController : Geary.BaseObject {
         dialog.set_local_only(false);
         
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
-        File destination = File.new_for_path(dialog.get_filename());
+        string? filename = dialog.get_filename();
         
         dialog.destroy();
         
-        if (!accepted)
+        if (!accepted || Geary.String.is_empty(filename))
             return;
+        
+        File destination = File.new_for_path(filename);
         
         // Proceeding, save this as last destination directory
         last_save_directory = (attachments.size == 1) ? destination.get_parent() : destination;
