@@ -49,15 +49,7 @@ public class ConversationFindBar : Gtk.Layout {
         entry.buffer.deleted_text.connect(on_entry_buffer_deleted_text);
         entry.activate.connect(on_entry_activate);
         
-        try {
-            Gtk.CssProvider style_provider = new Gtk.CssProvider();
-            style_provider.load_from_data(entry_not_found_style, -1);
-            
-            Gtk.StyleContext style_context = entry.get_style_context();
-            style_context.add_provider(style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-        } catch (Error e) {
-            warning("Could not load built-in style for find bar entry: %s", e.message);
-        }
+        GtkUtil.apply_style(entry, entry_not_found_style);
         
         result_label = (Gtk.Label) builder.get_object("label: result");
         update_result_label();
