@@ -384,7 +384,7 @@ public class FormattedConversationData : Geary.BaseObject {
         layout_from.set_markup(from_markup, -1);
         layout_from.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
-            layout_from.set_width((cell_area.width - ink_rect.width - ink_rect.x - LINE_SPACING -
+            layout_from.set_width((cell_area.width - ink_rect.width - ink_rect.x - (LINE_SPACING * 3) -
                 TEXT_LEFT)
             * Pango.SCALE);
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
@@ -431,7 +431,7 @@ public class FormattedConversationData : Geary.BaseObject {
         layout_preview.set_wrap(Pango.WrapMode.WORD);
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
-            layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width) * Pango.SCALE);
+            layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width - LINE_SPACING) * Pango.SCALE);
             layout_preview.set_height(preview_height * Pango.SCALE);
             
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
