@@ -17,6 +17,16 @@ public class FolderMenu : Gtk.Menu {
     }
     
     public void add_folder(Geary.Folder folder) {
+        // don't allow multiples and don't allow folders that can't be opened (that means they
+        // support almost no operations and have no content)
+        if (folder_list.contains(folder) || folder.properties.is_openable.is_impossible())
+            return;
+        
+        // also don't allow local-only or virtual folders, which also have a limited set of
+        // operations
+        if (folder.properties.is_local_only || folder.properties.is_virtual)
+            return;
+        
         folder_list.add(folder);
         folder_list.sort(folder_sort);
         

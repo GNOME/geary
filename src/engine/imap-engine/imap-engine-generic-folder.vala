@@ -31,7 +31,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     internal EmailFlagWatcher email_flag_watcher;
     
     private weak GenericAccount _account;
-    private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties();
+    private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties(
+        false, false);
     private Imap.Account remote;
     private ImapDB.Account local;
     private Folder.OpenFlags open_flags = OpenFlags.NONE;

@@ -66,7 +66,8 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         UID? uid_next, MailboxAttributes attrs) {
         // give the base class a zero email_unread, as the notion of "unknown" doesn't exist in
         // its contract
-        base (messages, email_unread, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
+        base (messages, email_unread, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN, false,
+            false);
         
         select_examine_messages = messages;
         status_messages = -1;
@@ -80,7 +81,8 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     }
     
     public FolderProperties.status(StatusData status, MailboxAttributes attrs) {
-        base (status.messages, status.unseen, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN);
+        base (status.messages, status.unseen, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN,
+            false, false);
         
         select_examine_messages = -1;
         status_messages = status.messages;

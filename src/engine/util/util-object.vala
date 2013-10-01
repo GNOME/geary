@@ -24,8 +24,10 @@ public Gee.List<Binding>? mirror_properties(Object source, Object dest, BindingF
     
     // Create all bindings.
     Gee.List<Binding> bindings = new Gee.ArrayList<Binding>();
-    foreach(ParamSpec ps in source_properties)
-        bindings.add(source.bind_property(ps.name, dest, ps.name, flags));
+    foreach(ParamSpec ps in source_properties) {
+        if ((ps.flags & ParamFlags.WRITABLE) != 0)
+            bindings.add(source.bind_property(ps.name, dest, ps.name, flags));
+    }
     
     return bindings.size > 0 ? bindings : null;
 }
