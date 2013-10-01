@@ -500,7 +500,7 @@ public class Geary.RFC822.Message : BaseObject {
         if (replaced_part != null)
             body = replaced_part;
         
-        return false;
+        return (replaced_part != null);
     }
     
     public string? get_html_body(InlinePartReplacer? replacer = null) throws RFC822Error {
