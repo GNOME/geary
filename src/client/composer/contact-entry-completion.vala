@@ -96,12 +96,13 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         if (entry == null)
             return empty_addresses;
         
-        int cursor_position = entry.cursor_position;
-        if (cursor_position < 0)
-            return empty_addresses;
-        
         string? original_text = entry.get_text();
         if (original_text == null)
+            return empty_addresses;
+        
+        int cursor_position = entry.cursor_position;
+        int cursor_offset = original_text.index_of_nth_char(cursor_position);
+        if (cursor_offset < 0)
             return empty_addresses;
         
         Gee.List<string> addresses = new Gee.ArrayList<string>();
@@ -116,7 +117,6 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         int bytes_seen_so_far = 0;
         current_address_index = addresses.size - 1;
         for (int i = 0; i < addresses.size; i++) {
-            int cursor_offset = addresses[i].index_of_nth_char(cursor_position);
             int token_bytes = addresses[i].length + delimiter.length;
             if ((bytes_seen_so_far + token_bytes) > cursor_offset) {
                 current_address_index = i;
