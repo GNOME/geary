@@ -678,7 +678,7 @@ public class Geary.RFC822.Message : BaseObject {
                     GMime.ContentEncoding.BINARY);  // Equivalent to no encoding
                 GMime.Part part = new GMime.Part.with_type("message", "rfc822");
                 part.set_content_object(data);
-                part.set_filename(message.get_subject() + ".eml");
+                part.set_filename((message.get_subject() ?? _("(no subject)")) + ".eml");
                 attachments.add(part);
             }
             
