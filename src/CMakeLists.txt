@@ -461,7 +461,7 @@ pkg_check_modules(DEPS REQUIRED
     gmime-2.6>=2.6.0
     libsecret-1>=0.11
     webkitgtk-3.0>=1.10.0
-    webkitgtk-3.0<=1.10.2
+    webkitgtk-3.0<=2.0.4
     libxml-2.0>=2.7.8
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
