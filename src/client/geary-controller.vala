@@ -96,6 +96,7 @@ public class GearyController : Geary.BaseObject {
     private uint search_timeout_id = 0;
     private LoginDialog? login_dialog = null;
     private UpgradeDialog upgrade_dialog;
+    private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWindow> waiting_to_close = new Gee.ArrayList<ComposerWindow>();
@@ -942,6 +943,14 @@ public class GearyController : Geary.BaseObject {
         if (current_account != folder.account) {
             current_account = folder.account;
             account_selected(current_account);
+            
+            // If we were waiting for an account to be selected before issuing mailtos, do that now.
+            if (pending_mailtos.size > 0) {
+                foreach(string mailto in pending_mailtos)
+                    compose_mailto(mailto);
+                
+                pending_mailtos.clear();
+            }
         }
         
         folder_selected(current_folder);
@@ -1943,6 +1952,13 @@ public class GearyController : Geary.BaseObject {
     }
     
     public void compose_mailto(string mailto) {
+        if (current_account == null) {
+            // Schedule the send for after we have an account open.
+            pending_mailtos.add(mailto);
+            
+            return;
+        }
+        
         create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE, null, mailto);
     }
     
