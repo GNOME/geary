@@ -1821,17 +1821,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (email.fields == Geary.Email.Field.NONE)
             return;
         
-        // Build the combined email from the merge, which will be used to save the attachments
-        Geary.Email combined_email = row.to_email(location.email_id);
-        do_add_attachments(cx, combined_email, location.message_id, cancellable);
-        
         // Merge in any fields in the submitted email that aren't already in the database or are mutable
         int new_unread_count = 0;
         if (((fetched_fields & email.fields) != email.fields) ||
             email.fields.is_any_set(Geary.Email.MUTABLE_FIELDS)) {
-            Geary.Email.Field new_fields;
-            do_merge_message_row(cx, row, out new_fields, out updated_contacts,
-                ref new_unread_count, cancellable);
+            // Build the combined email from the merge, which will be used to save the attachments
+            Geary.Email combined_email = row.to_email(location.email_id);
             
             // Update attachments if not already in the database
             if (!fetched_fields.fulfills(Attachment.REQUIRED_FIELDS)
@@ -1839,6 +1834,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 do_save_attachments(cx, location.message_id, combined_email.get_message().get_attachments(),
                     cancellable);
             }
+            
+            // Must add attachments to the email object after they're saved to
+            // the database.
+            do_add_attachments(cx, combined_email, location.message_id, cancellable);
+            
+            Geary.Email.Field new_fields;
+            do_merge_message_row(cx, row, out new_fields, out updated_contacts,
+                ref new_unread_count, cancellable);
             
             if (do_check_for_message_search_row(cx, location.message_id, cancellable))
                 do_merge_email_in_search_table(cx, location.message_id, new_fields, combined_email, cancellable);
