@@ -1909,8 +1909,11 @@ public class GearyController : Geary.BaseObject {
         Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
         try {
             if (current_folder != null) {
-                selected_operations = yield email_stores.get(current_folder.account)
-                    .get_supported_operations_async(get_selected_email_ids(false), cancellable);
+                Geary.App.EmailStore? store = email_stores.get(current_folder.account);
+                if (store != null) {
+                    selected_operations = yield store
+                        .get_supported_operations_async(get_selected_email_ids(false), cancellable);
+                }
             }
         } catch (Error e) {
             debug("Error checking for what operations are supported in the selected conversations: %s",
