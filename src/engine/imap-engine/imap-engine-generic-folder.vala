@@ -1198,16 +1198,20 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 throw e;
         }
         
+        Geary.FolderSupport.Remove? remove_folder = this as Geary.FolderSupport.Remove;
+        
         // Remove old message.
-        if (id != null) {
-            Geary.FolderSupport.Remove? remove_folder = this as Geary.FolderSupport.Remove;
-            if (remove_folder != null)
-                yield remove_folder.remove_single_email_async(id, null);
-        }
+        if (id != null && remove_folder != null)
+            yield remove_folder.remove_single_email_async(id, null);
         
         // If the user cancelled the operation, throw the error here.
         if (cancel_error != null)
             throw cancel_error;
+        
+        // If the caller cancelled during the remove operation, delete the newly created message to
+        // safely back out.
+        if (cancellable != null && cancellable.is_cancelled() && ret != null && remove_folder != null)
+            yield remove_folder.remove_single_email_async(ret, null);
         
         return ret;
     }

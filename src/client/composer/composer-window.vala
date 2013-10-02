@@ -188,6 +188,7 @@ public class ComposerWindow : Gtk.Window {
     private uint draft_save_timeout_id = 0;
     private Cancellable cancellable_drafts = new Cancellable();
     private Cancellable cancellable_save_draft = new Cancellable();
+    private bool in_draft_save = false;
     
     private WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
@@ -817,7 +818,11 @@ public class ComposerWindow : Gtk.Window {
     // Save to the draft folder, if available.
     // Note that drafts are NOT "linkified."
     private bool save_draft() {
-        save_async.begin(cancellable_save_draft);
+        if (in_draft_save)
+            return false;
+        
+        in_draft_save = true;
+        save_async.begin(cancellable_save_draft, () => { in_draft_save = false; });
         
         return false;
     }
@@ -836,7 +841,7 @@ public class ComposerWindow : Gtk.Window {
             // only save HTML drafts to avoid resetting the DOM (which happens when converting the
             // HTML to flowed text)
             draft_id = yield drafts_folder.create_email_async(new Geary.RFC822.Message.from_composed_email(
-                get_composed_email(null, true)), flags, null, draft_id, null);
+                get_composed_email(null, true)), flags, null, draft_id, cancellable);
             
             draft_save_label.label = DRAFT_SAVED_TEXT;
         } catch (Error e) {
@@ -885,7 +890,7 @@ public class ComposerWindow : Gtk.Window {
         destroy();
     }
     
-    private async void delete_draft_async(Cancellable? cancellable = null) {
+    private async void delete_draft_async() {
         if (drafts_folder == null || draft_id == null)
             return;
         
