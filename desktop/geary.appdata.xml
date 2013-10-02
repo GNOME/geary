@@ -3,6 +3,7 @@
 <application>
 <id type="desktop">geary.desktop</id>
 <licence>CC0</licence>
+<summary>Lightweight email client</summary>
 <description>
 <p>
 Geary is a new email application for GNOME designed to let you manage your email
