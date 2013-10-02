@@ -1,0 +1,45 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="accounts">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="archive"/>
+    </info>
+	<title>Accounts</title>
+	
+	<section>
+	<title>Adding accounts</title>
+	
+	<p>The first time you start Geary, you will be prompted to add an email account.  On this screen,
+	select if your account is Gmail, Yahoo, Outlook.com, or other.  For other account types, you will
+	need to enter your IMAP and SMTP login settings manually.</p>
+	
+	<p>Additional accounts can be added from the Accounts dialog.  Click Accounts in the Gear menu
+	(or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to open the Accounts dialog.  To add an account, click the + button.</p>
+	
+	</section>
+	
+	<section>
+	<title>Editing existing accounts</title>
+	
+	<p>From the Accounts dialog, select an account and click the pencil icon to change various settings.
+	Please note that Geary cannot change server settings on an existing account.  If you need to
+	change your IMAP or SMTP server, you will need to delete the account and re-add it.</p>
+	
+	<p>To change the order that accounts are displayed in the folder list, drag the accounts in the
+	Accounts dialog to the desired order.</p>
+	
+	</section>
+	
+	<section>
+	<title>Removing accounts</title>
+	
+	<p>To delete an account, open the Accounts dialog, select the account, and press the - button.
+	Geary will delete all information associated with the account.</p>
+	
+	</section>
+	
+</page>
+

@@ -4,8 +4,6 @@
 
     <info>
         <link type="guide" xref="index#bug"/>
-        
-        <link type="next" xref="limits" />
     </info>
    <title>Think you've found a bug?</title>
    <p>If you suspect you've found a bug in Geary, follow these steps to report it:</p>

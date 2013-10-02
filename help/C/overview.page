@@ -9,7 +9,7 @@
 
 <p>Geary is a lightweight email reader for the <link href="http://gnome.org">GNOME</link> desktop.
 It works with mail servers that
-support the IMAP protocol, including popular services such as Gmail and Yahoo Mail.</p>
+support the IMAP protocol, including popular services such as Gmail, Yahoo Mail, and Outlook.com.</p>
 
 	<p>Geary groups mail messages into <em>conversations</em>.  A conversation contains all
 	messages in a single thread of discussion.</p>

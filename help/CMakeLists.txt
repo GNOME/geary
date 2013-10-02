@@ -1,6 +1,7 @@
 set(HELP_DEST share/gnome/help/geary/C)
 
 set(HELP_FILES
+    C/accounts.page
     C/archive.page
     C/bugs.page
     C/index.page
@@ -8,6 +9,7 @@ set(HELP_FILES
     C/limits.page
     C/overview.page
     C/preferences.page
+    C/search.page
     C/shortcuts.page
     C/star.page
     C/write.page

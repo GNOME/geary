@@ -12,17 +12,17 @@
 	<title>Star messages</title>
 	<p>You can star messages to indicate that they're important to you.
 	To mark a conversation with a star, click its star icon in the conversation list. You can star an individual message by clicking the star at the upper right of the message itself.</p>
-	<p>Starred messages appear in the Starred folder in the folder list.</p>
+	<p>With Gmail accounts, starred messages appear in the Starred folder in the folder list.</p>
 	</section>
 	<section>
 	<title>Mark messages as read or unread</title>
 	<p>Geary marks messages as read automatically as you read them.
-	To mark one or more conversations as unread, select the conversations(s), then select
-	<gui>Mark as Unread</gui> from the <gui>Mark</gui> menu on the toolbar.  To mark an
-	individual message as unread, select <gui>Mark as Unread</gui> from the message menu
-	at the upper right of the message.</p>
+	To manually toggle a conversation as read or unread, click the circle icon in the conversation list.</p>
 	
-	<p>To mark an individual message as read, you may select <gui>Mark as Read</gui> from the dropdown menu .</p>
+	<p>Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on the toolbar can
+	be used to toggle the read status of the selected conversation(s).</p>
+	
+	<p>To mark an individual message as read, select <gui>Mark as Read</gui> from the dropdown menu.</p>
 	
 	</section>
 </page>

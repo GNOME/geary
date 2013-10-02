@@ -5,22 +5,46 @@
     <info>
         <link type="guide" xref="index#overview"/>
         
-        <link type="next" xref="shortcuts"/>
     </info>
 	<title>Write a message</title>
+	
+	<section>
 	<p>To compose a new message in Geary, press the <gui>New Message</gui> button
 	on the toolbar.</p>
 	
 	<p>To reply to a message, open the message menu in the upper right corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui>. You can also reply to the last message in a conversation via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons on the toolbar. </p>
 	
+	</section>
+	
+	<section>
+	<title>Features</title>
+	
 	<p>Geary's email composer lets you adjust the font, size and color of text. You can also insert hyperlinks into messages.</p>
+	
+	<p>Geary can also send plain text messages.  In the drop-down menu, check or uncheck "Rich Text"
+	to toggle between plain text and rich text mode.</p>
 	
 	<p>You can attach a file to a message you're writing in either of these ways:</p>
 	<list>
-	<item><p>Press the <gui>Attach a file</gui>	button at the lower left
+	<item><p>Press the <gui>Attach File</gui>	button at the lower left
 	of the composer window, then select a file to attach.</p></item>
 	<item><p>Drag the file from the Nautilus file manager to the composer window, and drop it
 	either on the text fields at the top of the window or on the toolbar at the bottom.</p></item>
 	</list>
+	
+	</section>
+	<section>
+	<title>Drafts</title>
+	
+	<p>For mail servers that support drafts, Geary will automatically save the message as you type.
+	If you close the composer without sending, Geary will prompt you to keep the draft or to discard it.</p>
+	
+	<p>To edit an existing draft, select the Drafts folder in the folder list, select the message,
+	and click "Edit Draft" in the message viewer.</p>
+	
+	<p>Geary deletes the draft when you send the message.</p>
+	
+	</section>
+	
 </page>
 

@@ -1,0 +1,23 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="search">
+
+    <info>
+        <link type="guide" xref="index#overview"/>
+        
+        <link type="next" xref="star"/>
+    </info>
+	<title>Search</title>
+	
+	<p>Geary supports a per-account full text search.  To start a search, select a folder associated
+	with the account you'd like to search against.  Then click the search box in the toolbar (or
+	press <keyseq><key>Ctrl</key><key>S</key></keyseq>) and start typing.  Results will appear after a brief delay.</p>
+	
+	<p>The full text search includes email text, email addresses (to, from, and cc), subject lines and
+	attachment filenames.</p>
+	
+	<p>Keywords that match your search are highlighted the message view.  Geary will match different
+	forms of the same word, for example searching for "walk" will also match "walking" and "walked."</p>
+	
+</page>
+

@@ -5,7 +5,7 @@
     <info>
         <link type="guide" xref="index#overview"/>
         
-        <link type="next" xref="star" />
+        <link type="next" xref="search" />
     </info>
    <title>Preferences</title>
 	<p>To set preferences in Geary, click the gear menu at the upper right
@@ -21,7 +21,7 @@
 	an adjacent message.</p>
 	</item>
 	<item>
-	<title><gui>Display message preview</gui></title>
+	<title><gui>Display conversation preview</gui></title>
 	<p>Enables message previews in the conversation list. Previews show
 	the first few lines of each message. </p>
 	</item>

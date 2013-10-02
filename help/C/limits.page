@@ -9,7 +9,7 @@
     </info>
     
     <title>Limitations</title>
-    <p>Geary is still in early development. Geary supports IMAP and has been tested with Gmail, Yahoo and the free Dovecot mail server. Geary may not yet work well with other IMAP servers.  Additionally, Geary is still missing search and numerous other features.</p>
+    <p>Geary is still in early development. Geary supports IMAP and has been tested with Gmail, Yahoo, and the free Dovecot mail server.  Experimental support for Outlook.com is provided.  Geary may not yet work well with some IMAP servers.  At this time Geary is still missing numerous features including offline mode.</p>
     
     <p>To learn more about the features we're working on and the future of Geary, please visit Geary's <link href="http://redmine.yorba.org/projects/geary/wiki">Redmine page</link>.</p>
   
