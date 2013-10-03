@@ -1,3 +1,19 @@
+geary (0.4.0-1~raring1) raring; urgency=low
+
+  * Per-account full text search
+  * Automatic save to draft
+  * Refreshed user interface
+  * Per-folder unread email count
+  * Experimental support for Outlook.com
+  * Enhanced "show external images" preference
+  * Find bar for locating text within a conversation (Ctrl+F)
+  * Improved handling of attachments
+  * Malicious link checker
+  * Passwords stored with libsecret instead of GNOME Keyring
+  * Hundreds of bugs fixed and small improvements
+
+ -- Eric Gregory <eric@yorba.org>  Thu, 03 Oct 2013 15:06:36 -0700
+
 geary (0.3.1-1~raring1) raring; urgency=low
 
   * Reduced CPU and memory footprint
