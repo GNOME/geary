@@ -4,17 +4,19 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-#   <alperen@elhan.org>, 2012.
-#   <ferhattnctn66@gmail.com>, 2012.
-# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012.
+# alperenelhan <alperen@elhan.org>, 2012
+# Baris Ata <brsata@gmail.com>, 2013
+# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012
+# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.3\n"
+"Project-Id-Version: geary-0.4\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-02-27 00:48+0000\n"
-"Last-Translator: Ferhat Tunctan <ferhattnctn66@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2013-09-20 19:28+0000\n"
+"Last-Translator: yorbajim <jim@yorba.org>\n"
+"Language-Team: Turkish (http://www.transifex.com/projects/p/geary/language/"
+"tr/)\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,7 +25,7 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:641
 msgid "        &#8226; Connection error.\n"
-msgstr ""
+msgstr "&#8226; Bağlantı hatası.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:624
 msgid "        &#8226; Email address already added to Geary.\n"
@@ -31,27 +33,27 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:628
 msgid "        &#8226; IMAP connection error.\n"
-msgstr ""
+msgstr "&#8226; IMAP bağlantı hatası.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:631
 msgid "        &#8226; IMAP username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226; IMAP kullanıcı adı veya parola hatalı.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
 msgid "        &#8226; Invalid account nickname.\n"
-msgstr ""
+msgstr "&#8226; Geçersiz hesap takma adı.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:634
 msgid "        &#8226; SMTP connection error.\n"
-msgstr ""
+msgstr "&#8226; SMTP bağlantı hatası.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:637
 msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226; SMTP kullanıcı adı veya parola hatalı.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:645
 msgid "        &#8226; Username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226; Kullanıcı adı veya parola hatalı.\n"
 
 #: ../../src/client/views/conversation-viewer.vala:1203
 msgid " (Invalid?)"
@@ -60,27 +62,27 @@ msgstr ""
 #: ../../src/client/composer/composer-window.vala:972
 #, c-format
 msgid "\"%s\" already attached for delivery."
-msgstr ""
+msgstr "\"%s\" gönderim için zaten eklendi."
 
 #: ../../src/client/composer/composer-window.vala:937
 #, c-format
 msgid "\"%s\" could not be found."
-msgstr ""
+msgstr "\"%s\" bulunamadı."
 
 #: ../../src/client/composer/composer-window.vala:965
 #, c-format
 msgid "\"%s\" could not be opened for reading."
-msgstr ""
+msgstr "\"%s\" okuma için açılamadı."
 
 #: ../../src/client/composer/composer-window.vala:944
 #, c-format
 msgid "\"%s\" is a folder."
-msgstr ""
+msgstr "\"%s\" bir klasör."
 
 #: ../../src/client/composer/composer-window.vala:951
 #, c-format
 msgid "\"%s\" is an empty file."
-msgstr ""
+msgstr "\"%s\" boş bir dosya."
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -127,11 +129,11 @@ msgid "%b %-e"
 msgstr "%b %-e"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:30
-#, fuzzy, c-format
+#, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] "%d yeni mesaj"
-msgstr[1] "%d yeni mesaj"
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../../src/client/notification/libnotify.vala:72
 #, c-format
@@ -187,15 +189,15 @@ msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #: ../../src/client/notification/libnotify.vala:107
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s\n"
 "(%d other new message for %s)"
 msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
-msgstr[0] "%d yeni mesaj"
-msgstr[1] "%d yeni mesaj"
+msgstr[0] ""
+msgstr[1] ""
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../../src/client/composer/composer-window.vala:981
@@ -211,7 +213,7 @@ msgstr ""
 #: ../../src/client/notification/libmessagingmenu.vala:75
 #, c-format
 msgid "%s - New Messages"
-msgstr ""
+msgstr "%s - Yeni İleti"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
@@ -221,19 +223,19 @@ msgid "%s wrote:"
 msgstr "%s yazdı:"
 
 #: ../../src/client/notification/libnotify.vala:75
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] "%d yeni mesaj"
-msgstr[1] "%d yeni mesaj"
+msgstr[0] ""
+msgstr[1] ""
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:43
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %s"
-msgstr "%s, 'de"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:246
 #, c-format
@@ -243,7 +245,7 @@ msgstr "%u konuşmalar seçildi."
 #: ../../src/client/views/conversation-viewer.vala:743
 #, c-format
 msgid "%u read messages"
-msgstr ""
+msgstr "%u okunmuş ileti"
 
 #. / Date format for dates within a different year, i.e. 02/04/10
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -262,39 +264,43 @@ msgstr "---------- Yönlendirilen ileti ----------"
 
 #: ../../src/client/accounts/add-edit-page.vala:211
 msgid "1 month back"
-msgstr ""
+msgstr "1 ay öncesinden"
 
 #: ../../src/client/accounts/add-edit-page.vala:214
 msgid "1 year back"
-msgstr ""
+msgstr "1 yıl öncesinden"
 
 #: ../../src/client/accounts/add-edit-page.vala:210
 msgid "2 weeks back"
-msgstr ""
+msgstr "2 hafta öncesinden"
 
 #: ../../src/client/accounts/add-edit-page.vala:212
 msgid "3 months back"
-msgstr ""
+msgstr "3 ay öncesinden"
 
 #: ../../src/client/accounts/add-edit-page.vala:213
 msgid "6 months back"
-msgstr ""
+msgstr "6 ay öncesinden"
 
 #: ../../ui/remove_confirm.glade:43
 msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
 "account?</span> "
 msgstr ""
+"<span weight=\"bold\" size=\"larger\">Bu hesabı kaldırmak istediğinizden "
+"emin misiniz?</span> "
 
 #: ../../ui/account_cannot_remove.glade:40
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-msgstr ""
+msgstr "<span weight=\"bold\" size=\"larger\">Hesap kaldırılamadı</span> "
 
 #: ../../ui/account_cannot_remove.glade:56
 msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
+"Bu hesapla bağlantılı bir ileti penceresi açık. İletiyi gönderip veya iptal "
+"edip yeniden deneyin."
 
 #: ../../src/client/geary-controller.vala:1491
 #, c-format
@@ -305,7 +311,7 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:245
 msgid "A_ccounts"
-msgstr ""
+msgstr "Hesaplar"
 
 #: ../../src/client/geary-controller.vala:1227
 #, c-format
@@ -314,7 +320,7 @@ msgstr "%s hakında"
 
 #: ../../src/client/accounts/account-dialog.vala:21
 msgid "Accounts"
-msgstr ""
+msgstr "Hesaplar"
 
 #: ../../ui/account_list.glade:71
 msgid "Add account"
@@ -326,11 +332,11 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:57
 msgid "Add label to conversation"
-msgstr ""
+msgstr "Konuşmayı etiketle"
 
 #: ../../src/client/geary-controller.vala:58
 msgid "Add label to conversations"
-msgstr ""
+msgstr "Konuşmaya etiket ekle"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:39
 msgid "All Mail"
@@ -341,6 +347,8 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
+"Bu hesapla ilişkili tüm letiler bilgisayarınızdan kaldırılacak. Bu işlem "
+"sunucudaki iletilerinizi etkilemeyecek."
 
 #: ../../src/client/geary-args.vala:24
 msgid "Allow inspection of WebView"
@@ -351,17 +359,16 @@ msgid "Always Show From Sender"
 msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:54
-#, fuzzy
 msgid "Archive"
-msgstr "_Arşiv"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:48
 msgid "Archive conversation (Delete, Backspace, A)"
-msgstr ""
+msgstr "Konuşmayı arşivle (Delete, Backspace, A)"
 
 #: ../../src/client/geary-controller.vala:49
 msgid "Archive conversations (Delete, Backspace, A)"
-msgstr ""
+msgstr "Konuşmaları arşivle (Delete, Backspace, A)"
 
 #: ../../src/client/geary-controller.vala:1477
 #, c-format
@@ -382,7 +389,7 @@ msgstr "Bcc:"
 
 #: ../../ui/composer.glade:113
 msgid "Bold (Ctrl+B)"
-msgstr ""
+msgstr "Kalın (Ctrl+B)"
 
 #: ../../ui/composer.glade:69
 msgid "C_olor"
@@ -397,9 +404,9 @@ msgid "Cc:"
 msgstr "Cc:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:223
-#, fuzzy, c-format
+#, c-format
 msgid "Cc: %s\n"
-msgstr "Kime: %s\n"
+msgstr ""
 
 #: ../../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -414,9 +421,8 @@ msgid "Compose Message"
 msgstr "İleti oluştur"
 
 #: ../../src/client/geary-controller.vala:313
-#, fuzzy
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "İleti oluştur"
+msgstr ""
 
 #: ../../ui/preferences.glade:117
 msgid "Composer"
@@ -432,7 +438,7 @@ msgstr "Kopyala _Bağlantı"
 
 #: ../../src/client/geary-application.vala:17
 msgid "Copyright 2011-2013 Yorba Foundation"
-msgstr ""
+msgstr "Telif Hakkı 2011-2013 Yorba Foundation"
 
 #: ../../ui/composer.glade:21
 msgid "Cu_t"
@@ -449,11 +455,11 @@ msgstr "Tarih: %s\n"
 
 #: ../../src/client/geary-controller.vala:43
 msgid "Delete conversation (Delete, Backspace, A)"
-msgstr ""
+msgstr "Konuşmayı sil (Delete, Backspace, A)"
 
 #: ../../src/client/geary-controller.vala:44
 msgid "Delete conversations (Delete, Backspace, A)"
-msgstr ""
+msgstr "Konuşmaları sil (Delete, Backspace, A)"
 
 #: ../../src/client/geary-args.vala:25
 msgid "Display program version"
@@ -464,9 +470,8 @@ msgid "Do you want to discard the unsaved message?"
 msgstr "Kaydedilmemiş iletiyi iptal etmek istiyor musunuz?"
 
 #: ../../src/client/composer/composer-window.vala:666
-#, fuzzy
 msgid "Do you want to discard this message?"
-msgstr "Kaydedilmemiş iletiyi iptal etmek istiyor musunuz?"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1479
 msgid "Don't _ask me again"
@@ -481,18 +486,16 @@ msgid "Drop files here"
 msgstr "Dosyaları buraya bırak"
 
 #: ../../ui/login.glade:115
-#, fuzzy
 msgid "E_mail address:"
-msgstr "_Eposta adresi:"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:704
 msgid "E_xit"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:533
-#, fuzzy
 msgid "Edit Draft"
-msgstr "Taslaklar"
+msgstr ""
 
 #: ../../ui/account_list.glade:84
 msgid "Edit account"
@@ -500,7 +503,7 @@ msgstr ""
 
 #: ../../ui/remove_confirm.glade:94
 msgid "Email address:"
-msgstr ""
+msgstr "E-posta adresi:"
 
 #: ../../src/client/geary-application.vala:28
 msgid "Email;E-mail;Mail;"
@@ -542,7 +545,7 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:216
 msgid "Everything"
-msgstr ""
+msgstr "Herşey"
 
 #: ../../src/client/views/conversation-viewer.vala:1897
 msgid "Failed to open default text editor."
@@ -559,9 +562,8 @@ msgid "First Last"
 msgstr ""
 
 #: ../../ui/composer.glade:182
-#, fuzzy
 msgid "Fixed Width"
-msgstr "Sabit genişlik"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:329
 msgid "Forward (Ctrl+L, F)"
@@ -604,22 +606,20 @@ msgid "IMAP Credentials"
 msgstr "IMAP Referansı"
 
 #: ../../ui/login.glade:572
-#, fuzzy
 msgid "IMAP password"
-msgstr "Şifre:"
+msgstr ""
 
 #: ../../ui/login.glade:286 ../../ui/password-dialog.glade:334
 msgid "IMAP settings"
 msgstr "IMAP ayarları"
 
 #: ../../ui/login.glade:556
-#, fuzzy
 msgid "IMAP username"
-msgstr "Kullanıcı adı:"
+msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
-msgstr ""
+msgstr "Önemli"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
@@ -627,7 +627,7 @@ msgstr "Gelen Kutusu"
 
 #: ../../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr ""
+msgstr "Gelen Kutusu"
 
 #: ../../src/client/ui/main-toolbar.vala:163
 #, c-format
@@ -636,7 +636,7 @@ msgstr ""
 
 #: ../../ui/composer.glade:120
 msgid "Italic (Ctrl+I)"
-msgstr ""
+msgstr "İtalik (Ctrl+I)"
 
 #: ../../src/client/util/util-files.vala:28
 msgctxt "Abbreviation for kilobyte"
@@ -657,7 +657,7 @@ msgstr "Büyük"
 
 #: ../../ui/composer.glade:62
 msgid "Link (Ctrl+L)"
-msgstr ""
+msgstr "Bağlantı (Ctrl+L)"
 
 #. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
@@ -683,9 +683,8 @@ msgid "Log network activity"
 msgstr "Ağ etkinliğini kayda al"
 
 #: ../../src/client/geary-args.vala:12
-#, fuzzy
 msgid "Log network deserialization"
-msgstr "Ağ serileştirmeyi kayda al"
+msgstr ""
 
 #. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
@@ -711,33 +710,29 @@ msgid "Mark Unread From _Here"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:52
-#, fuzzy
 msgid "Mark as S_pam"
-msgstr "Okundu _olarak işaretle"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:277
-#, fuzzy
 msgid "Mark as _Read"
-msgstr "Okundu _olarak işaretle"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:283
-#, fuzzy
 msgid "Mark as _Unread"
-msgstr "Okunmadı _olarak işaretle"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:53
-#, fuzzy
 msgid "Mark as not S_pam"
-msgstr "Okundu _olarak işaretle"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:55
 #: ../../src/client/geary-controller.vala:269
 msgid "Mark conversation"
-msgstr ""
+msgstr "Konuşmayı işaretle"
 
 #: ../../src/client/geary-controller.vala:56
 msgid "Mark conversations"
-msgstr ""
+msgstr "Konuşmaları işaretle"
 
 #: ../../src/client/views/formatted-conversation-data.vala:11
 msgid "Me"
@@ -754,11 +749,11 @@ msgstr ""
 #: ../../src/client/geary-controller.vala:59
 #: ../../src/client/geary-controller.vala:308
 msgid "Move conversation"
-msgstr ""
+msgstr "Daha fazla konuşma"
 
 #: ../../src/client/geary-controller.vala:60
 msgid "Move conversations"
-msgstr ""
+msgstr "Daha fazla konuşma"
 
 #: ../../ui/login.glade:176
 msgid "N_ame:"
@@ -766,7 +761,7 @@ msgstr "İ_sim:"
 
 #: ../../ui/login.glade:230
 msgid "N_ickname:"
-msgstr ""
+msgstr "Takma Ad:"
 
 #: ../../src/client/composer/composer-window.vala:40
 msgid "New Message"
@@ -774,16 +769,15 @@ msgstr "Yeni İleti"
 
 #: ../../ui/remove_confirm.glade:80
 msgid "Nickname:"
-msgstr ""
+msgstr "Takma Ad:"
 
 #: ../../ui/login.glade:661
 msgid "No authentication re_quired"
-msgstr ""
+msgstr "Kimlik doğrulama ge_rekli değil"
 
 #: ../../src/client/views/conversation-viewer.vala:275
-#, fuzzy
 msgid "No conversations in folder."
-msgstr "Hiçbir görüşme seçilmedi."
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:244
 msgid "No conversations selected."
@@ -810,16 +804,16 @@ msgstr ""
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
 #: ../../src/engine/rfc822/rfc822-utils.vala:171
-#, fuzzy, c-format
+#, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr "%s yazdı:"
+msgstr ""
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
 #: ../../src/engine/rfc822/rfc822-utils.vala:184
-#, fuzzy, c-format
+#, c-format
 msgid "On %s:"
-msgstr "%s, 'de"
+msgstr ""
 
 #: ../../src/client/notification/libnotify.vala:160
 msgid "Open"
@@ -850,18 +844,16 @@ msgid "Pass_word:"
 msgstr "Şif_re:"
 
 #: ../../ui/login.glade:101
-#, fuzzy
 msgid "Password"
-msgstr "Şifre:"
+msgstr ""
 
 #: ../../ui/password-dialog.glade:196
 msgid "Password:"
 msgstr "Şifre:"
 
 #: ../../ui/composer.glade:102
-#, fuzzy
 msgid "Paste _With Formatting"
-msgstr "Biçimlendirme_yle yapıştır"
+msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
@@ -873,7 +865,7 @@ msgstr "Lütfen yorumlarınızı,  önerilerinizi ve hataları bildirin:"
 
 #: ../../ui/account_spinner.glade:41
 msgid "Please wait while Geary validates your account."
-msgstr ""
+msgstr "Lütfen Geary hesabınızı doğrulayana kadar bekleyin."
 
 #: ../../ui/login.glade:421
 msgid "Por_t:"
@@ -888,9 +880,8 @@ msgid "Quote text  (Ctrl+])"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:322
-#, fuzzy
 msgid "R_eply All"
-msgstr "Hepsini Yanıtla"
+msgstr ""
 
 #: ../../ui/preferences.glade:55
 msgid "Reading"
@@ -901,14 +892,12 @@ msgid "Real name:"
 msgstr "Gerçek isim:"
 
 #: ../../src/client/accounts/add-edit-page.vala:590
-#, fuzzy
 msgid "Remem_ber password"
-msgstr "Şifreyi ha_tırla"
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:583
-#, fuzzy
 msgid "Remem_ber passwords"
-msgstr "Şifreleri ha_tırla"
+msgstr ""
 
 #: ../../ui/account_list.glade:97
 msgid "Remove account"
@@ -916,7 +905,7 @@ msgstr ""
 
 #: ../../ui/composer.glade:95
 msgid "Remove formatting (Ctrl+Space)"
-msgstr ""
+msgstr "Biçimlendirmeyi kaldır (Ctrl+Boşluk)"
 
 #: ../../src/client/geary-controller.vala:318
 msgid "Reply (Ctrl+R, R)"
@@ -935,22 +924,20 @@ msgid "SMTP Credentials"
 msgstr "SMTP Referansı"
 
 #: ../../ui/login.glade:507
-#, fuzzy
 msgid "SMTP password"
-msgstr "Şifre:"
+msgstr ""
 
 #: ../../ui/login.glade:439 ../../ui/password-dialog.glade:437
 msgid "SMTP settings"
 msgstr "SMTP ayarları"
 
 #: ../../ui/login.glade:491
-#, fuzzy
 msgid "SMTP username"
-msgstr "Kullanıcı adı:"
+msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:124
 msgid "SSL"
-msgstr ""
+msgstr "SSL"
 
 #: ../../ui/password-dialog.glade:382 ../../ui/password-dialog.glade:485
 msgid "SSL/TLS encryption:"
@@ -958,22 +945,19 @@ msgstr "SSL/TLS şifrelemesi:"
 
 #: ../../src/client/dialogs/password-dialog.vala:126
 msgid "STARTTLS"
-msgstr ""
+msgstr "STARTTLS"
 
 #: ../../ui/composer.glade:169
-#, fuzzy
 msgid "S_ans Serif"
-msgstr "Sans Serif"
+msgstr ""
 
 #: ../../ui/composer.glade:175
-#, fuzzy
 msgid "S_erif"
-msgstr "Serif"
+msgstr ""
 
 #: ../../ui/login.glade:160
-#, fuzzy
 msgid "S_ervice:"
-msgstr "Hizmet:"
+msgstr ""
 
 #: ../../ui/composer.glade:170
 msgid "Sans Serif"
@@ -1019,7 +1003,7 @@ msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:1243
 msgid "Select Color"
-msgstr ""
+msgstr "Renk Seç"
 
 #: ../../src/client/ui/stock.vala:32
 #: ../../src/client/views/conversation-viewer.vala:916
@@ -1027,9 +1011,8 @@ msgid "Select _All"
 msgstr "Hepsini _Seç"
 
 #: ../../src/client/views/conversation-viewer.vala:910
-#, fuzzy
 msgid "Select _Message"
-msgstr "Yeni İleti"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:27
 msgid "Send and receive email"
@@ -1077,9 +1060,8 @@ msgid "Service:"
 msgstr "Hizmet:"
 
 #: ../../src/client/views/conversation-viewer.vala:508
-#, fuzzy
 msgid "Show Images"
-msgstr "_Resimleri Göster"
+msgstr ""
 
 #: ../../ui/preferences.glade:193
 msgid "Show _notifications for new mail"
@@ -1099,11 +1081,11 @@ msgstr "Yıldız İşaretli"
 
 #: ../../ui/login.glade:761
 msgid "Storage"
-msgstr ""
+msgstr "Depolama"
 
 #: ../../ui/composer.glade:134
 msgid "Strikethrough (Ctrl+K)"
-msgstr ""
+msgstr "Üstü Çizili (Ctrl+K)"
 
 #: ../../src/client/views/conversation-viewer.vala:617
 msgid "Subject:"
@@ -1112,7 +1094,7 @@ msgstr "Konu:"
 #: ../../src/engine/rfc822/rfc822-utils.vala:216
 #, c-format
 msgid "Subject: %s\n"
-msgstr ""
+msgstr "Konu: %s\n"
 
 #: ../../src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
@@ -1175,9 +1157,8 @@ msgid "This link appears to go to"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:508
-#, fuzzy
 msgid "This message contains remote images."
-msgstr "Bu ileti resimler içeriyor. Bunları göstermek istiyor musunuz?"
+msgstr ""
 
 #: ../../ui/composer.glade:435
 msgid "To add them as attachments"
@@ -1207,9 +1188,9 @@ msgstr "Eposta sunucusuna giriş yapılamıyor"
 #: ../../src/client/geary-controller.vala:736
 #: ../../src/client/geary-controller.vala:746
 #: ../../src/client/geary-controller.vala:757
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to open local mailbox for %s"
-msgstr "Eposta sunucusuna giriş yapılamıyor"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:701
 #, c-format
@@ -1223,11 +1204,11 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:619
 msgid "Unable to validate:\n"
-msgstr ""
+msgstr "Doğrulanamadı:\n"
 
 #: ../../ui/composer.glade:127
 msgid "Underline (Ctrl+U)"
-msgstr ""
+msgstr "Altı Çizili (Ctrl+U)"
 
 #: ../../ui/composer.glade:88
 msgid "Unquote text (Ctrl+[)"
@@ -1289,7 +1270,7 @@ msgstr "_Hakkında"
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 #: ../../src/client/ui/stock.vala:22
 msgid "_Add"
-msgstr ""
+msgstr "_Ekle"
 
 #: ../../src/client/geary-controller.vala:47
 msgid "_Archive"
@@ -1301,7 +1282,7 @@ msgstr "_Ekle"
 
 #: ../../ui/composer.glade:525
 msgid "_Attach File"
-msgstr ""
+msgstr "Dosya Ekle"
 
 #: ../../ui/preferences.glade:69
 msgid "_Automatically select next message"
@@ -1336,9 +1317,8 @@ msgid "_Discard"
 msgstr ""
 
 #: ../../ui/preferences.glade:90
-#, fuzzy
 msgid "_Display conversation preview"
-msgstr "İleti önizlemesini _göster"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:262
 msgid "_Donate"
@@ -1346,12 +1326,11 @@ msgstr ""
 
 #: ../../ui/login.glade:782
 msgid "_Download mail:"
-msgstr ""
+msgstr "_E-posta indir:"
 
 #: ../../ui/composer.glade:181
-#, fuzzy
 msgid "_Fixed Width"
-msgstr "Sabit genişlik"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:328
 #: ../../src/client/views/conversation-viewer.vala:1457
@@ -1400,9 +1379,8 @@ msgid "_Mark as..."
 msgstr "_... olarak işaretle"
 
 #: ../../ui/composer.glade:157
-#, fuzzy
 msgid "_Medium"
-msgstr "Orta"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:309
 msgid "_Move"
@@ -1413,9 +1391,8 @@ msgid "_OK"
 msgstr ""
 
 #: ../../src/client/ui/stock.vala:26
-#, fuzzy
 msgid "_Open"
-msgstr "Aç"
+msgstr ""
 
 #: ../../ui/login.glade:131 ../../ui/login.glade:539
 #: ../../ui/password-dialog.glade:85
@@ -1454,11 +1431,11 @@ msgstr ""
 
 #: ../../ui/password-dialog.glade:561
 msgid "_Remember passwords"
-msgstr ""
+msgstr "Şifreleri hatırla"
 
 #: ../../src/client/ui/stock.vala:30
 msgid "_Remove"
-msgstr ""
+msgstr "_Kaldır"
 
 #: ../../src/client/geary-controller.vala:1496
 msgid "_Replace"
@@ -1480,25 +1457,23 @@ msgstr "_Sağ"
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 #: ../../src/client/ui/stock.vala:31
 msgid "_Save"
-msgstr ""
+msgstr "_Kaydet"
 
 #: ../../src/client/views/conversation-viewer.vala:1395
 msgid "_Save As..."
 msgstr "_... Olarak Kaydet"
 
 #: ../../src/client/views/conversation-viewer.vala:1414
-#, fuzzy
 msgid "_Save Image As..."
-msgstr "_... Olarak Kaydet"
+msgstr ""
 
 #: ../../ui/composer.glade:594
 msgid "_Send"
 msgstr "_Gönder"
 
 #: ../../ui/composer.glade:163
-#, fuzzy
 msgid "_Small"
-msgstr "Küçük"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:289
 msgid "_Star"
@@ -1546,69 +1521,3 @@ msgid "translator-credits"
 msgstr ""
 "Ferhat TUNÇTAN <ferhattnctn19@yahoo.com.tr>\n"
 "Yunus Burak TUNÇTAN <buraktunctan@hotmail.com>"
-
-#~ msgid "Bold"
-#~ msgstr "Kalın"
-
-#~ msgid "Color"
-#~ msgstr "Renk"
-
-#~ msgid "Copy _link"
-#~ msgstr "Bağlantıyı _kopyala"
-
-#~ msgid "Delete"
-#~ msgstr "Sil"
-
-#~ msgid "Font"
-#~ msgstr "Yazı Tipi"
-
-#~ msgid "Font size"
-#~ msgstr "Yazı Tipi büyüklüğü"
-
-#~ msgid "Fonts"
-#~ msgstr "Yazı Tipleri"
-
-#~ msgid "Forward"
-#~ msgstr "Yönlendir"
-
-#~ msgid "Indent"
-#~ msgstr "Paragrafbaşı"
-
-#~ msgid "Italic"
-#~ msgstr "Eğik"
-
-#~ msgid "Label as"
-#~ msgstr "Olarak etiketle"
-
-#~ msgid "Lin_k"
-#~ msgstr "Bağ_lantı"
-
-#~ msgid "Link"
-#~ msgstr "Bağlantı"
-
-#~ msgid "Mark"
-#~ msgstr "İşaretle"
-
-#~ msgid "Menu"
-#~ msgstr "Menü"
-
-#~ msgid "Move to"
-#~ msgstr "Taşı"
-
-#~ msgid "Remove formatting"
-#~ msgstr "Biçimlendirmeyi kaldır"
-
-#~ msgid "Strikethrough"
-#~ msgstr "Ortası çizili"
-
-#~ msgid "Un-indent"
-#~ msgstr "Girintisiz"
-
-#~ msgid "Underline"
-#~ msgstr "Altı çizili"
-
-#~ msgid "_New Message"
-#~ msgstr "_Yeni İleti"
-
-#~ msgid "_Service:"
-#~ msgstr "_Hizmet:"

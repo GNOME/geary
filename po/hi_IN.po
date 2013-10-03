@@ -4,15 +4,16 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Gaurav Pareek <gaurav.conetfun@gmail.com>, 2013.
+# grvrulz <gaurav.conetfun@gmail.com>, 2013
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.3\n"
+"Project-Id-Version: geary-0.4\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-02-28 09:00+0000\n"
-"Last-Translator: grvrulz <gaurav.conetfun@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2013-09-20 19:28+0000\n"
+"Last-Translator: yorbajim <jim@yorba.org>\n"
+"Language-Team: Hindi (India) (http://www.transifex.com/projects/p/geary/"
+"language/hi_IN/)\n"
 "Language: hi_IN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -125,11 +126,11 @@ msgid "%b %-e"
 msgstr ""
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:30
-#, fuzzy, c-format
+#, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] "%d नया संदेश"
-msgstr[1] "%d नए संदेश"
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../../src/client/notification/libnotify.vala:72
 #, c-format
@@ -145,11 +146,11 @@ msgstr ""
 
 #. / Label displaying number of unread email messages in a folder
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:37
-#, fuzzy, c-format
+#, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
-msgstr[0] "%d बिना पढ़ा संदेश"
-msgstr[1] "%d बिना पढ़े संदेश"
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../../src/client/util/util-date.vala:170
 #, c-format
@@ -185,15 +186,15 @@ msgid "%l:%M %P"
 msgstr ""
 
 #: ../../src/client/notification/libnotify.vala:107
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s\n"
 "(%d other new message for %s)"
 msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
-msgstr[0] "%d नया संदेश"
-msgstr[1] "%d नए संदेश"
+msgstr[0] ""
+msgstr[1] ""
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../../src/client/composer/composer-window.vala:981
@@ -219,11 +220,11 @@ msgid "%s wrote:"
 msgstr ""
 
 #: ../../src/client/notification/libnotify.vala:75
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] "%d नया संदेश"
-msgstr[1] "%d नए संदेश"
+msgstr[0] ""
+msgstr[1] ""
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
@@ -315,9 +316,8 @@ msgid "Accounts"
 msgstr "खाते"
 
 #: ../../ui/account_list.glade:71
-#, fuzzy
 msgid "Add account"
-msgstr "नया खाता जोड़ें"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:304
 msgid "Add label"
@@ -395,9 +395,9 @@ msgid "Cc:"
 msgstr ""
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:223
-#, fuzzy, c-format
+#, c-format
 msgid "Cc: %s\n"
-msgstr "विषय: %s\n"
+msgstr ""
 
 #: ../../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -412,9 +412,8 @@ msgid "Compose Message"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:313
-#, fuzzy
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "नया वार्तालाप शुरू करें (Ctrl+N, N)"
+msgstr ""
 
 #: ../../ui/preferences.glade:117
 msgid "Composer"
@@ -478,9 +477,8 @@ msgid "Drop files here"
 msgstr ""
 
 #: ../../ui/login.glade:115
-#, fuzzy
 msgid "E_mail address:"
-msgstr "ईमेल एड्रेस:"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:704
 msgid "E_xit"
@@ -491,18 +489,16 @@ msgid "Edit Draft"
 msgstr ""
 
 #: ../../ui/account_list.glade:84
-#, fuzzy
 msgid "Edit account"
-msgstr "खाते में परिवर्तन करें"
+msgstr ""
 
 #: ../../ui/remove_confirm.glade:94
 msgid "Email address:"
 msgstr "ईमेल एड्रेस:"
 
 #: ../../src/client/geary-application.vala:28
-#, fuzzy
 msgid "Email;E-mail;Mail;"
-msgstr "ईमेल;ई-मेल;मेल;"
+msgstr ""
 
 #: ../../ui/preferences.glade:131
 msgid "Enable _spell checking"
@@ -625,9 +621,9 @@ msgid "Inboxes"
 msgstr "इनबौक्स"
 
 #: ../../src/client/ui/main-toolbar.vala:163
-#, fuzzy, c-format
+#, c-format
 msgid "Indexing %s account"
-msgstr "खाते में परिवर्तन करें"
+msgstr ""
 
 #: ../../ui/composer.glade:120
 msgid "Italic (Ctrl+I)"
@@ -738,9 +734,8 @@ msgid "Medium"
 msgstr ""
 
 #: ../../ui/composer.glade:75
-#, fuzzy
 msgid "More options"
-msgstr "वार्तालपों का स्थान परिवर्तन करें"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:59
 #: ../../src/client/geary-controller.vala:308
@@ -772,9 +767,8 @@ msgid "No authentication re_quired"
 msgstr "प्रमाणीकरण की आवश्यकता नहीं"
 
 #: ../../src/client/views/conversation-viewer.vala:275
-#, fuzzy
 msgid "No conversations in folder."
-msgstr "वार्तालपों का स्थान परिवर्तन करें"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:244
 msgid "No conversations selected."
@@ -877,9 +871,8 @@ msgid "Quote text  (Ctrl+])"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:322
-#, fuzzy
 msgid "R_eply All"
-msgstr "सभी को उत्तर दें"
+msgstr ""
 
 #: ../../ui/preferences.glade:55
 msgid "Reading"
@@ -890,14 +883,12 @@ msgid "Real name:"
 msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:590
-#, fuzzy
 msgid "Remem_ber password"
-msgstr "_पासवर्ड याद रखें"
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:583
-#, fuzzy
 msgid "Remem_ber passwords"
-msgstr "_पासवर्ड याद रखें"
+msgstr ""
 
 #: ../../ui/account_list.glade:97
 msgid "Remove account"
@@ -1019,24 +1010,20 @@ msgid "Send and receive email"
 msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:747
-#, fuzzy
 msgid "Send message with an empty body?"
-msgstr "क्या आप बिना विषय का ख़ाली संदेश भेजना चाहते हैं?"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:743
-#, fuzzy
 msgid "Send message with an empty subject and body?"
-msgstr "क्या आप बिना विषय का ख़ाली संदेश भेजना चाहते हैं?"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:745
-#, fuzzy
 msgid "Send message with an empty subject?"
-msgstr "क्या आप बिना विषय का ख़ाली संदेश भेजना चाहते हैं?"
+msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:749
-#, fuzzy
 msgid "Send message without an attachment?"
-msgstr "क्या आप बिना विषय का ख़ाली संदेश भेजना चाहते हैं?"
+msgstr ""
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../../src/client/ui/status-bar.vala:25
@@ -1518,19 +1505,3 @@ msgstr ""
 #: ../../src/client/geary-controller.vala:1230
 msgid "translator-credits"
 msgstr ""
-
-#~ msgid "More"
-#~ msgstr "और अधिक "
-
-#~ msgid "Reply"
-#~ msgstr "उत्तर दें"
-
-#~ msgid ""
-#~ "Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-#~ msgstr "वार्तालाप के अन्तिम संदेश में सभी लोगों को उत्तर दें (Ctrl+Shift+R, Shift+R)"
-
-#~ msgid "Reply to last message in conversation (Ctrl+R, R)"
-#~ msgstr "वार्तालाप के अन्तिम संदेश का उत्तर दें (Ctrl+R, R)"
-
-#~ msgid "Send copy of last message in conversation (Ctrl+L, F)"
-#~ msgstr "वार्तालाप के अन्तिम संदेश की प्रति भेजें (Ctrl+L, F)"

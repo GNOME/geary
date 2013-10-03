@@ -4,15 +4,16 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# ప్రవీణ్ ఇళ్ళ <mail2ipn@gmail.com>, 2012.
+# ప్రవీణ్ ఇళ్ళ <mail2ipn@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.3\n"
+"Project-Id-Version: geary-0.4\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-02-27 00:48+0000\n"
+"PO-Revision-Date: 2013-09-20 19:28+0000\n"
 "Last-Translator: yorbajim <jim@yorba.org>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: Telugu (http://www.transifex.com/projects/p/geary/language/"
+"te/)\n"
 "Language: te\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -125,11 +126,11 @@ msgid "%b %-e"
 msgstr "%b %-e"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:30
-#, fuzzy, c-format
+#, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] "కొత్త సందేశం"
-msgstr[1] "కొత్త సందేశం"
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../../src/client/notification/libnotify.vala:72
 #, c-format
@@ -347,9 +348,8 @@ msgid "Always Show From Sender"
 msgstr ""
 
 #: ../../src/engine/api/geary-special-folder-type.vala:54
-#, fuzzy
 msgid "Archive"
-msgstr "కవిలె (_A)"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:48
 msgid "Archive conversation (Delete, Backspace, A)"
@@ -391,9 +391,9 @@ msgid "Cc:"
 msgstr "సిసి:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:223
-#, fuzzy, c-format
+#, c-format
 msgid "Cc: %s\n"
-msgstr "వీరికి: %s\n"
+msgstr ""
 
 #: ../../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -408,9 +408,8 @@ msgid "Compose Message"
 msgstr "సందేశాన్ని సృష్టించండి"
 
 #: ../../src/client/geary-controller.vala:313
-#, fuzzy
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "సందేశాన్ని సృష్టించండి"
+msgstr ""
 
 #: ../../ui/preferences.glade:117
 msgid "Composer"
@@ -474,18 +473,16 @@ msgid "Drop files here"
 msgstr "దస్త్రాలను ఇక్కడ పడవేయండి"
 
 #: ../../ui/login.glade:115
-#, fuzzy
 msgid "E_mail address:"
-msgstr "వేగు చిరునామా (_E):"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:704
 msgid "E_xit"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:533
-#, fuzzy
 msgid "Edit Draft"
-msgstr "చిత్తులు"
+msgstr ""
 
 #: ../../ui/account_list.glade:84
 msgid "Edit account"
@@ -552,9 +549,8 @@ msgid "First Last"
 msgstr ""
 
 #: ../../ui/composer.glade:182
-#, fuzzy
 msgid "Fixed Width"
-msgstr "స్థిర వెడల్పు"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:329
 msgid "Forward (Ctrl+L, F)"
@@ -701,24 +697,20 @@ msgid "Mark Unread From _Here"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:52
-#, fuzzy
 msgid "Mark as S_pam"
-msgstr "చదివినదిగా గుర్తుపెట్టు (_r)"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:277
-#, fuzzy
 msgid "Mark as _Read"
-msgstr "చదివినదిగా గుర్తుపెట్టు (_r)"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:283
-#, fuzzy
 msgid "Mark as _Unread"
-msgstr "చదవనిదిగా గుర్తుపెట్టు (_u)"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:53
-#, fuzzy
 msgid "Mark as not S_pam"
-msgstr "చదివినదిగా గుర్తుపెట్టు (_r)"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:55
 #: ../../src/client/geary-controller.vala:269
@@ -875,9 +867,8 @@ msgid "Quote text  (Ctrl+])"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:322
-#, fuzzy
 msgid "R_eply All"
-msgstr "ప్రతిస్పందించు (_R)"
+msgstr ""
 
 #: ../../ui/preferences.glade:55
 msgid "Reading"
@@ -1007,9 +998,8 @@ msgid "Select _All"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:910
-#, fuzzy
 msgid "Select _Message"
-msgstr "కొత్త సందేశం"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:27
 msgid "Send and receive email"
@@ -1057,9 +1047,8 @@ msgid "Service:"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:508
-#, fuzzy
 msgid "Show Images"
-msgstr "బొమ్మలను చూపించు (_S)"
+msgstr ""
 
 #: ../../ui/preferences.glade:193
 msgid "Show _notifications for new mail"
@@ -1310,9 +1299,8 @@ msgid "_Discard"
 msgstr ""
 
 #: ../../ui/preferences.glade:90
-#, fuzzy
 msgid "_Display conversation preview"
-msgstr "కార్యక్రమం రూపాంతరాన్ని ప్రదర్శించు"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:262
 msgid "_Donate"
@@ -1323,9 +1311,8 @@ msgid "_Download mail:"
 msgstr ""
 
 #: ../../ui/composer.glade:181
-#, fuzzy
 msgid "_Fixed Width"
-msgstr "స్థిర వెడల్పు"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:328
 #: ../../src/client/views/conversation-viewer.vala:1457
@@ -1374,9 +1361,8 @@ msgid "_Mark as..."
 msgstr "ఇలా గుర్తుపెట్టు...(_M)"
 
 #: ../../ui/composer.glade:157
-#, fuzzy
 msgid "_Medium"
-msgstr "మాధ్యమం"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:309
 msgid "_Move"
@@ -1387,9 +1373,8 @@ msgid "_OK"
 msgstr ""
 
 #: ../../src/client/ui/stock.vala:26
-#, fuzzy
 msgid "_Open"
-msgstr "తెరువు"
+msgstr ""
 
 #: ../../ui/login.glade:131 ../../ui/login.glade:539
 #: ../../ui/password-dialog.glade:85
@@ -1461,9 +1446,8 @@ msgid "_Save As..."
 msgstr "ఇలా భద్రపరుచు...(_S)"
 
 #: ../../src/client/views/conversation-viewer.vala:1414
-#, fuzzy
 msgid "_Save Image As..."
-msgstr "ఇలా భద్రపరుచు...(_S)"
+msgstr ""
 
 #: ../../ui/composer.glade:594
 msgid "_Send"
@@ -1517,45 +1501,3 @@ msgstr ""
 #: ../../src/client/geary-controller.vala:1230
 msgid "translator-credits"
 msgstr "Praveen Illa <mail2ipn@gmail.com>, 2012."
-
-#~ msgid "Bold"
-#~ msgstr "బొద్దు"
-
-#~ msgid "Color"
-#~ msgstr "రంగు"
-
-#~ msgid "Delete"
-#~ msgstr "తొలగించు"
-
-#~ msgid "Font"
-#~ msgstr "ఖతి"
-
-#~ msgid "Font size"
-#~ msgstr "ఖతి పరిమాణం"
-
-#~ msgid "Fonts"
-#~ msgstr "ఖతులు"
-
-#~ msgid "Italic"
-#~ msgstr "ఏటవాలు"
-
-#~ msgid "Label as"
-#~ msgstr "ఇలా నామాంకం"
-
-#~ msgid "Lin_k"
-#~ msgstr "లంకె (_k)"
-
-#~ msgid "Link"
-#~ msgstr "లంకె"
-
-#~ msgid "Mark"
-#~ msgstr "గుర్తు"
-
-#~ msgid "Strikethrough"
-#~ msgstr "కొట్టివేత"
-
-#~ msgid "Underline"
-#~ msgstr "క్రీగీత"
-
-#~ msgid "_New Message"
-#~ msgstr "కొత్త సందేశం (_N)"

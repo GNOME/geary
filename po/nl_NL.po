@@ -4,20 +4,22 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Bas Duineveld <basduineveld@gmail.com>, 2012.
-# Heimen Stoffels <vistausss@gmail.com>, 2012.
-# Henk-Jan Sleijster <henk-jan@sleijster.nl>, 2013.
-#   <hyperhoax@riseup.net>, 2012.
-#   <peter@peternijssen.nl>, 2012.
-#  <pizzamartijn@gmail.com>, 2013.
+# Bas Duineveld <basduineveld@gmail.com>, 2012-2013
+# Heimen Stoffels <vistausss@gmail.com>, 2012
+# HenkJan85 <henk-jan@sleijster.nl>, 2013
+# r1k996 <hyperhoax@riseup.net>, 2012
+# Peter Nijssen <peter@peternijssen.nl>, 2012
+# Martijn Braam <pizzamartijn@gmail.com>, 2013
+# renearts <renearts@gmail.com>, 2013
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.3\n"
+"Project-Id-Version: geary-0.4\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-03-21 13:22+0000\n"
-"Last-Translator: Bas Duineveld <basduineveld@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2013-09-25 19:50+0000\n"
+"Last-Translator: renearts <renearts@gmail.com>\n"
+"Language-Team: Dutch (Netherlands) (http://www.transifex.com/projects/p/"
+"geary/language/nl_NL/)\n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,7 +32,7 @@ msgstr "        &#8226; Verbindingsfout.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:624
 msgid "        &#8226; Email address already added to Geary.\n"
-msgstr ""
+msgstr "&#8226; E-mailadres is al aan Geary toegevoegd.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:628
 msgid "        &#8226; IMAP connection error.\n"
@@ -58,7 +60,7 @@ msgstr "        &#8226; Gebruikersnaam of wachtwoord onjuist.\n"
 
 #: ../../src/client/views/conversation-viewer.vala:1203
 msgid " (Invalid?)"
-msgstr ""
+msgstr "(Ongeldig?)"
 
 #: ../../src/client/composer/composer-window.vala:972
 #, c-format
@@ -90,7 +92,7 @@ msgstr "\"%s\" is een leeg bestand."
 #: ../../src/client/util/util-date.vala:182
 #, c-format
 msgid "%A"
-msgstr ""
+msgstr "%A"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -130,11 +132,11 @@ msgid "%b %-e"
 msgstr "%-e %b"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:30
-#, fuzzy, c-format
+#, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] "%d nieuw bericht"
-msgstr[1] "%d nieuwe berichten"
+msgstr[0] "%d bericht"
+msgstr[1] "%d berichten"
 
 #: ../../src/client/notification/libnotify.vala:72
 #, c-format
@@ -146,35 +148,35 @@ msgstr[1] "%d nieuwe berichten"
 #: ../../src/client/folder-list/folder-list-search-branch.vala:43
 #, c-format
 msgid "%d results"
-msgstr ""
+msgstr "%d resultaten"
 
 #. / Label displaying number of unread email messages in a folder
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:37
-#, fuzzy, c-format
+#, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
-msgstr[0] "%d ongelezen bericht"
-msgstr[1] "%d ongelezen berichten"
+msgstr[0] "%d ongelezen"
+msgstr[1] "%d ongelezen"
 
 #: ../../src/client/util/util-date.vala:170
 #, c-format
 msgid "%dh ago"
-msgstr ""
+msgstr "%d uur geleden"
 
 #: ../../src/client/util/util-date.vala:167
 #, c-format
 msgid "%dm ago"
-msgstr ""
+msgstr "%d minuten geleden"
 
 #: ../../src/client/views/conversation-find-bar.vala:222
 #, c-format
 msgid "%i matches"
-msgstr ""
+msgstr "%i overeenkomsten"
 
 #: ../../src/client/views/conversation-find-bar.vala:224
 #, c-format
 msgid "%i matches (wrapped)"
-msgstr ""
+msgstr "%i overeenkomsten (voortgezet vanaf begin)"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -190,21 +192,25 @@ msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #: ../../src/client/notification/libnotify.vala:107
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s\n"
 "(%d other new message for %s)"
 msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
-msgstr[0] "%d nieuw bericht"
-msgstr[1] "%d nieuwe berichten"
+msgstr[0] ""
+"%s\n"
+"(%d ander nieuw bericht voor %s)"
+msgstr[1] ""
+"%s\n"
+"(%d andere nieuwe berichten voor %s)"
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../../src/client/composer/composer-window.vala:981
-#, fuzzy, c-format
+#, c-format
 msgid "%s (%s)"
-msgstr "%s (%d)"
+msgstr "%s (%s)"
 
 #: ../../src/client/views/conversation-web-view.vala:289
 #, c-format
@@ -224,19 +230,19 @@ msgid "%s wrote:"
 msgstr "%s schreef:"
 
 #: ../../src/client/notification/libnotify.vala:75
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] "%d nieuw bericht"
-msgstr[1] "%d nieuwe berichten"
+msgstr[0] "%s, totaal %d nieuw bericht"
+msgstr[1] "%s, totaal %d nieuwe berichten"
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:43
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %s"
-msgstr "Op %s, "
+msgstr "%s, %s"
 
 #: ../../src/client/views/conversation-viewer.vala:246
 #, c-format
@@ -323,13 +329,12 @@ msgid "Accounts"
 msgstr "Accounts"
 
 #: ../../ui/account_list.glade:71
-#, fuzzy
 msgid "Add account"
-msgstr "Een account toevoegen"
+msgstr "Account toevoegen"
 
 #: ../../src/client/geary-controller.vala:304
 msgid "Add label"
-msgstr ""
+msgstr "Label toevoegen"
 
 #: ../../src/client/geary-controller.vala:57
 msgid "Add label to conversation"
@@ -357,12 +362,11 @@ msgstr "Inspectie van WebView toestaan"
 
 #: ../../src/client/views/conversation-viewer.vala:509
 msgid "Always Show From Sender"
-msgstr ""
+msgstr "Laat altijd van deze verzender zien"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:54
-#, fuzzy
 msgid "Archive"
-msgstr "_Archiveren"
+msgstr "Archiveren"
 
 #: ../../src/client/geary-controller.vala:48
 msgid "Archive conversation (Delete, Backspace, A)"
@@ -406,9 +410,9 @@ msgid "Cc:"
 msgstr "Cc:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:223
-#, fuzzy, c-format
+#, c-format
 msgid "Cc: %s\n"
-msgstr "Aan: %s\n"
+msgstr "Cc: %s\n"
 
 #: ../../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -423,9 +427,8 @@ msgid "Compose Message"
 msgstr "Bericht opstellen"
 
 #: ../../src/client/geary-controller.vala:313
-#, fuzzy
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "Nieuwe conversatie beginnen (Ctrl+N, N)"
+msgstr "Nieuw bericht opstellen (Ctrl+N, N)"
 
 #: ../../ui/preferences.glade:117
 msgid "Composer"
@@ -445,7 +448,7 @@ msgstr "Copyright 2011-2013 Yorba Foundation"
 
 #: ../../ui/composer.glade:21
 msgid "Cu_t"
-msgstr ""
+msgstr "_Knippen"
 
 #: ../../src/client/views/conversation-viewer.vala:620
 msgid "Date:"
@@ -473,9 +476,8 @@ msgid "Do you want to discard the unsaved message?"
 msgstr "Wilt u het onopgeslagen bericht verwerpen?"
 
 #: ../../src/client/composer/composer-window.vala:666
-#, fuzzy
 msgid "Do you want to discard this message?"
-msgstr "Wilt u het onopgeslagen bericht verwerpen?"
+msgstr "Wilt u dit bericht verwerpen?"
 
 #: ../../src/client/geary-controller.vala:1479
 msgid "Don't _ask me again"
@@ -490,30 +492,26 @@ msgid "Drop files here"
 msgstr "Bestanden hierheen slepen"
 
 #: ../../ui/login.glade:115
-#, fuzzy
 msgid "E_mail address:"
-msgstr "E-mailadres:"
+msgstr "_E-mail adres:"
 
 #: ../../src/client/geary-controller.vala:704
 msgid "E_xit"
-msgstr ""
+msgstr "_Afsluiten"
 
 #: ../../src/client/views/conversation-viewer.vala:533
-#, fuzzy
 msgid "Edit Draft"
-msgstr "Concepten"
+msgstr "Concept bewerken"
 
 #: ../../ui/account_list.glade:84
-#, fuzzy
 msgid "Edit account"
-msgstr "Een account bewerken"
+msgstr "Account bewerken"
 
 #: ../../ui/remove_confirm.glade:94
 msgid "Email address:"
 msgstr "E-mailadres:"
 
 #: ../../src/client/geary-application.vala:28
-#, fuzzy
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;"
 
@@ -540,16 +538,19 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"Opnieuw opbouwen mislukt:\n"
+"\n"
+"%s"
 
 #: ../../src/client/composer/composer-window.vala:43
 msgid "Error saving"
-msgstr ""
+msgstr "Opslaan mislukt"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
 #: ../../src/client/geary-controller.vala:625
 #: ../../src/client/ui/status-bar.vala:28
 msgid "Error sending email"
-msgstr ""
+msgstr "E-mail verzenden mislukt"
 
 #: ../../src/client/accounts/add-edit-page.vala:216
 msgid "Everything"
@@ -567,17 +568,15 @@ msgstr "Interpreteren van commandlineopties mislukt: %s\n"
 #. / Placeholder text indicating that the user should type their first name and last name
 #: ../../src/client/accounts/add-edit-page.vala:10
 msgid "First Last"
-msgstr ""
+msgstr "Eerste Laatse"
 
 #: ../../ui/composer.glade:182
-#, fuzzy
 msgid "Fixed Width"
 msgstr "Vaste breedte"
 
 #: ../../src/client/geary-controller.vala:329
-#, fuzzy
 msgid "Forward (Ctrl+L, F)"
-msgstr "Vet (Ctrl+B)"
+msgstr "Doorsturen (Ctrl+L, F)"
 
 #: ../../src/client/views/conversation-viewer.vala:605
 msgid "From:"
@@ -602,10 +601,12 @@ msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
 msgstr ""
+"Er is een fout opgetreden bij het verzenden van een email. Als het probleem "
+"blijft bestaan, verwijder dan handmatig de email in het Postvak Uit."
 
 #: ../../ui/password-dialog.glade:315
 msgid "General"
-msgstr ""
+msgstr "Algemeen"
 
 #: ../../src/engine/api/geary-service-provider.vala:52
 msgid "Gmail"
@@ -616,18 +617,16 @@ msgid "IMAP Credentials"
 msgstr "IMAP-inloggegevens"
 
 #: ../../ui/login.glade:572
-#, fuzzy
 msgid "IMAP password"
-msgstr "Wachtwoord:"
+msgstr "IMAP wachtwoord"
 
 #: ../../ui/login.glade:286 ../../ui/password-dialog.glade:334
 msgid "IMAP settings"
 msgstr "IMAP-instellingen"
 
 #: ../../ui/login.glade:556
-#, fuzzy
 msgid "IMAP username"
-msgstr "Gebruikersnaam:"
+msgstr "IMAP gebruikersnaam"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
@@ -642,9 +641,9 @@ msgid "Inboxes"
 msgstr "Postvakken IN"
 
 #: ../../src/client/ui/main-toolbar.vala:163
-#, fuzzy, c-format
+#, c-format
 msgid "Indexing %s account"
-msgstr "Een account bewerken"
+msgstr "Bezig met indexeren van %s account"
 
 #: ../../ui/composer.glade:120
 msgid "Italic (Ctrl+I)"
@@ -661,7 +660,7 @@ msgstr "Labels"
 
 #: ../../ui/composer.glade:151
 msgid "Lar_ge"
-msgstr ""
+msgstr "_Groot"
 
 #: ../../ui/composer.glade:152
 msgid "Large"
@@ -695,9 +694,8 @@ msgid "Log network activity"
 msgstr "Netwerkactiviteit loggen"
 
 #: ../../src/client/geary-args.vala:12
-#, fuzzy
 msgid "Log network deserialization"
-msgstr "Netwerkserialisatie loggen"
+msgstr "Log netwerk deserialisatie"
 
 #. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
@@ -720,25 +718,21 @@ msgstr "E-mailprogramma"
 
 #: ../../src/client/views/conversation-viewer.vala:1479
 msgid "Mark Unread From _Here"
-msgstr ""
+msgstr "Markeer als Ongelezen vanaf _hier"
 
 #: ../../src/client/geary-controller.vala:52
-#, fuzzy
 msgid "Mark as S_pam"
-msgstr "Als s_pam markeren"
+msgstr "Markeer als S_pam"
 
 #: ../../src/client/geary-controller.vala:277
-#, fuzzy
 msgid "Mark as _Read"
-msgstr "Als _gelezen markeren"
+msgstr "Markeer als _gelezen"
 
 #: ../../src/client/geary-controller.vala:283
-#, fuzzy
 msgid "Mark as _Unread"
-msgstr "Als _ongelezen markeren"
+msgstr "Markeer als _ongelezen"
 
 #: ../../src/client/geary-controller.vala:53
-#, fuzzy
 msgid "Mark as not S_pam"
 msgstr "S_pammarkering opheffen"
 
@@ -760,9 +754,8 @@ msgid "Medium"
 msgstr "Middel"
 
 #: ../../ui/composer.glade:75
-#, fuzzy
 msgid "More options"
-msgstr "Conversaties verplaatsen"
+msgstr "Meer opties"
 
 #: ../../src/client/geary-controller.vala:59
 #: ../../src/client/geary-controller.vala:308
@@ -794,9 +787,8 @@ msgid "No authentication re_quired"
 msgstr "Geen authenticatie ve_reist"
 
 #: ../../src/client/views/conversation-viewer.vala:275
-#, fuzzy
 msgid "No conversations in folder."
-msgstr "Geen conversaties geselecteerd."
+msgstr "Geen conversaties in map."
 
 #: ../../src/client/views/conversation-viewer.vala:244
 msgid "No conversations selected."
@@ -804,7 +796,7 @@ msgstr "Geen conversaties geselecteerd."
 
 #: ../../src/client/views/conversation-viewer.vala:273
 msgid "No search results found."
-msgstr ""
+msgstr "Geen zoekresultaten gevonden."
 
 #: ../../src/client/dialogs/password-dialog.vala:128
 #: ../../src/engine/api/geary-special-folder-type.vala:58
@@ -817,22 +809,22 @@ msgstr "Meldingen"
 
 #: ../../src/client/util/util-date.vala:164
 msgid "Now"
-msgstr ""
+msgstr "Nu"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
 #: ../../src/engine/rfc822/rfc822-utils.vala:171
-#, fuzzy, c-format
+#, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr "%s schreef:"
+msgstr "Op %1$s, schreef %2$s:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
 #: ../../src/engine/rfc822/rfc822-utils.vala:184
-#, fuzzy, c-format
+#, c-format
 msgid "On %s:"
-msgstr "Op %s, "
+msgstr "Op %s:"
 
 #: ../../src/client/notification/libnotify.vala:160
 msgid "Open"
@@ -848,7 +840,7 @@ msgstr "Postvak UIT"
 
 #: ../../src/engine/api/geary-service-provider.vala:58
 msgid "Outlook.com"
-msgstr ""
+msgstr "Outlook.com"
 
 #: ../../src/client/geary-args.vala:10
 msgid "Output debugging information"
@@ -863,18 +855,16 @@ msgid "Pass_word:"
 msgstr "Wa_chtwoord:"
 
 #: ../../ui/login.glade:101
-#, fuzzy
 msgid "Password"
-msgstr "Wachtwoord:"
+msgstr "Wachtwoord"
 
 #: ../../ui/password-dialog.glade:196
 msgid "Password:"
 msgstr "Wachtwoord:"
 
 #: ../../ui/composer.glade:102
-#, fuzzy
 msgid "Paste _With Formatting"
-msgstr "Plakken _met opmaak"
+msgstr "Plakken met _formattering"
 
 #: ../../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your email password"
@@ -897,12 +887,10 @@ msgid "Port:"
 msgstr "Poort:"
 
 #: ../../ui/composer.glade:81
-#, fuzzy
 msgid "Quote text  (Ctrl+])"
-msgstr "Insprong vergroten (Ctrl+])"
+msgstr "Quote tekst (Ctrl+])"
 
 #: ../../src/client/geary-controller.vala:322
-#, fuzzy
 msgid "R_eply All"
 msgstr "Allen beantwoorden"
 
@@ -915,31 +903,28 @@ msgid "Real name:"
 msgstr "Volledige naam:"
 
 #: ../../src/client/accounts/add-edit-page.vala:590
-#, fuzzy
 msgid "Remem_ber password"
 msgstr "Wachtwoord _onthouden"
 
 #: ../../src/client/accounts/add-edit-page.vala:583
-#, fuzzy
 msgid "Remem_ber passwords"
 msgstr "_Wachtwoorden onthouden"
 
 #: ../../ui/account_list.glade:97
 msgid "Remove account"
-msgstr ""
+msgstr "Account verwijderen"
 
 #: ../../ui/composer.glade:95
 msgid "Remove formatting (Ctrl+Space)"
 msgstr "Opmaak verwijderen (Ctrl+Space)"
 
 #: ../../src/client/geary-controller.vala:318
-#, fuzzy
 msgid "Reply (Ctrl+R, R)"
-msgstr "Kleur (Ctrl+R)"
+msgstr "Beantwoorden (Ctrl+R, R)"
 
 #: ../../src/client/geary-controller.vala:323
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-msgstr ""
+msgstr "Allen beantwoorden (Ctrl+Shift+R, Shift+R)"
 
 #: ../../src/client/views/conversation-viewer.vala:1452
 msgid "Reply to _All"
@@ -950,18 +935,16 @@ msgid "SMTP Credentials"
 msgstr "SMTP-inloggegevens"
 
 #: ../../ui/login.glade:507
-#, fuzzy
 msgid "SMTP password"
-msgstr "Wachtwoord:"
+msgstr "SMTP wachtwoord"
 
 #: ../../ui/login.glade:439 ../../ui/password-dialog.glade:437
 msgid "SMTP settings"
 msgstr "SMTP-instellingen"
 
 #: ../../ui/login.glade:491
-#, fuzzy
 msgid "SMTP username"
-msgstr "Gebruikersnaam:"
+msgstr "SMTP gebruikersnaam"
 
 #: ../../src/client/dialogs/password-dialog.vala:124
 msgid "SSL"
@@ -976,19 +959,16 @@ msgid "STARTTLS"
 msgstr "STARTTLS"
 
 #: ../../ui/composer.glade:169
-#, fuzzy
 msgid "S_ans Serif"
-msgstr "Schreefloos"
+msgstr "_Schreefloos"
 
 #: ../../ui/composer.glade:175
-#, fuzzy
 msgid "S_erif"
-msgstr "Met schreef"
+msgstr "_Met schreef"
 
 #: ../../ui/login.glade:160
-#, fuzzy
 msgid "S_ervice:"
-msgstr "Dienst:"
+msgstr "_Service:"
 
 #: ../../ui/composer.glade:170
 msgid "Sans Serif"
@@ -1005,13 +985,12 @@ msgid "Save All A_ttachments..."
 msgstr "Alle _bijlagen opslaan"
 
 #: ../../src/client/composer/composer-window.vala:41
-#, fuzzy
 msgid "Saved"
-msgstr "_Opslaan"
+msgstr "Opgeslagen"
 
 #: ../../src/client/composer/composer-window.vala:42
 msgid "Saving"
-msgstr ""
+msgstr "Bezig met opslaan"
 
 #: ../../ui/login.glade:304
 msgid "Se_rver:"
@@ -1021,17 +1000,17 @@ msgstr "_Server:"
 #: ../../src/client/ui/main-toolbar.vala:10
 #: ../../src/engine/api/geary-special-folder-type.vala:51
 msgid "Search"
-msgstr ""
+msgstr "Zoeken"
 
 #: ../../src/client/folder-list/folder-list-search-branch.vala:39
 #: ../../src/client/ui/main-toolbar.vala:170
 #, c-format
 msgid "Search %s account"
-msgstr ""
+msgstr "%s-account doorzoeken"
 
 #: ../../src/client/ui/main-toolbar.vala:76
 msgid "Search all mail in account for keywords (Ctrl+S)"
-msgstr ""
+msgstr "Trefwoorden zoeken in alle berichten account (Ctrl+S)"
 
 #: ../../src/client/composer/composer-window.vala:1243
 msgid "Select Color"
@@ -1043,38 +1022,33 @@ msgid "Select _All"
 msgstr "_Alles selecteren"
 
 #: ../../src/client/views/conversation-viewer.vala:910
-#, fuzzy
 msgid "Select _Message"
-msgstr "Nieuw bericht"
+msgstr "Selecteer _bericht"
 
 #: ../../src/client/geary-application.vala:27
 msgid "Send and receive email"
 msgstr "E-mail verzenden en ontvangen"
 
 #: ../../src/client/composer/composer-window.vala:747
-#, fuzzy
 msgid "Send message with an empty body?"
-msgstr "Bericht versturen zonder onderwerp en/of tekst?"
+msgstr "Bericht zonder inhoud verzenden?"
 
 #: ../../src/client/composer/composer-window.vala:743
-#, fuzzy
 msgid "Send message with an empty subject and body?"
-msgstr "Bericht versturen zonder onderwerp en/of tekst?"
+msgstr "Bericht zonder onderwerp en inhoud verzenden?"
 
 #: ../../src/client/composer/composer-window.vala:745
-#, fuzzy
 msgid "Send message with an empty subject?"
-msgstr "Bericht versturen zonder onderwerp en/of tekst?"
+msgstr "Bericht zonder onderwerp verzenden?"
 
 #: ../../src/client/composer/composer-window.vala:749
-#, fuzzy
 msgid "Send message without an attachment?"
-msgstr "Bericht versturen zonder onderwerp en/of tekst?"
+msgstr "Bericht zonder bijlage verzenden?"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../../src/client/ui/status-bar.vala:25
 msgid "Sending..."
-msgstr ""
+msgstr "Verzenden..."
 
 #: ../../src/engine/api/geary-special-folder-type.vala:30
 msgid "Sent Mail"
@@ -1097,9 +1071,8 @@ msgid "Service:"
 msgstr "Dienst:"
 
 #: ../../src/client/views/conversation-viewer.vala:508
-#, fuzzy
 msgid "Show Images"
-msgstr "_Afbeeldingen weergeven"
+msgstr "Afbeeldingen tonen"
 
 #: ../../ui/preferences.glade:193
 msgid "Show _notifications for new mail"
@@ -1153,6 +1126,11 @@ msgid ""
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
+"Het versienummer van de lokale e-maildatabase is opgemaakt voor een nieuwere "
+"versie van Geary. Het is helaas niet mogelijk de database \"terug te zetten"
+"\" zodat hij met deze versie van Geary werkt.\n"
+"\n"
+"Installeer de nieuwste versie van Geary en probeer het opnieuw."
 
 #: ../../src/client/geary-controller.vala:758
 msgid ""
@@ -1161,6 +1139,10 @@ msgid ""
 "\n"
 "Please check your network connection and restart Geary."
 msgstr ""
+"Er is een fout opgetreden bij het openen van het lokale account. Dit wordt "
+"waarschijnlijk veroorzaakt door verbindingsproblemen. ⏎\n"
+"⏎\n"
+"Controleer uw netwerkverbinding en herstart Geary."
 
 #: ../../src/client/geary-controller.vala:737
 #, c-format
@@ -1173,6 +1155,14 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"Er is een fout opgetreden bij het openen van de lokale mail database van dit "
+"account. Dit wordt waarschijnlijk veroorzaakt door een probleem met de "
+"bestandsrechten. ⏎\n"
+"⏎\n"
+"Controleer of u voldoende lees/schrijfrechten hebt voor alle bestanden in "
+"deze map:⏎\n"
+"⏎\n"
+"%s"
 
 #: ../../src/client/geary-controller.vala:702
 #, c-format
@@ -1187,15 +1177,25 @@ msgid ""
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
+"Er is een fout opgetreden bij het openen van de lokale mail database van dit "
+"account. Waarschijnlijk wordt dit veroorzaakt door een beschadiging van het "
+"databasebestand in de map: ⏎\n"
+"⏎\n"
+"%s⏎\n"
+"⏎\n"
+"Geary kan de database opnieuw bouwen en hersynchroniseren met de server of "
+"afsluiten.⏎\n"
+"⏎\n"
+"Het opnieuw bouwen van de database verwijdert alle lokale email en bijlagen. "
+"<b>Mail op de server zal niet worden aangetast.</b>"
 
 #: ../../src/client/views/conversation-viewer.vala:1147
 msgid "This link appears to go to"
-msgstr ""
+msgstr "Deze koppeling lijkt te leiden naar"
 
 #: ../../src/client/views/conversation-viewer.vala:508
-#, fuzzy
 msgid "This message contains remote images."
-msgstr "Dit bericht bevat afbeeldingen. Wilt u deze weergeven?"
+msgstr "Dit bericht bevat externe afbeeldingen."
 
 #: ../../ui/composer.glade:435
 msgid "To add them as attachments"
@@ -1225,19 +1225,19 @@ msgstr "Inloggen op e-mailserver mislukt"
 #: ../../src/client/geary-controller.vala:736
 #: ../../src/client/geary-controller.vala:746
 #: ../../src/client/geary-controller.vala:757
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to open local mailbox for %s"
-msgstr "Inloggen op e-mailserver mislukt"
+msgstr "De lokale mailbox van %s kan niet geopend worden"
 
 #: ../../src/client/geary-controller.vala:701
 #, c-format
 msgid "Unable to open the database for %s"
-msgstr ""
+msgstr "De lokale database van %s kan niet geopend worden"
 
 #: ../../src/client/geary-controller.vala:713
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
-msgstr ""
+msgstr "De lokale database van \"%s\" kan niet opnieuw gebouwd worden"
 
 #: ../../src/client/accounts/add-edit-page.vala:619
 msgid "Unable to validate:\n"
@@ -1248,9 +1248,8 @@ msgid "Underline (Ctrl+U)"
 msgstr "Onderstrepen (Ctrl+U)"
 
 #: ../../ui/composer.glade:88
-#, fuzzy
 msgid "Unquote text (Ctrl+[)"
-msgstr "Insprong verkleinen (Ctrl+[)"
+msgstr "Unquote tekst (Ctrl+[)"
 
 #: ../../src/client/geary-args.vala:65
 #, c-format
@@ -1276,7 +1275,7 @@ msgstr "Welkom bij Geary."
 
 #: ../../ui/login.glade:252
 msgid "Work, Home, etc."
-msgstr ""
+msgstr "Werk, Thuis, etc."
 
 #: ../../src/engine/api/geary-service-provider.vala:55
 msgid "Yahoo! Mail"
@@ -1284,7 +1283,7 @@ msgstr "Yahoo! Mail"
 
 #: ../../src/client/util/util-date.vala:177
 msgid "Yesterday"
-msgstr ""
+msgstr "Gisteren"
 
 #: ../../src/client/geary-controller.vala:552
 msgid ""
@@ -1336,7 +1335,7 @@ msgstr "_Midden"
 
 #: ../../src/client/ui/stock.vala:23
 msgid "_Close"
-msgstr ""
+msgstr "_Sluiten"
 
 #: ../../src/client/views/conversation-viewer.vala:889
 msgid "_Copy"
@@ -1352,25 +1351,23 @@ msgstr "_Details"
 
 #: ../../src/client/ui/stock.vala:24
 msgid "_Discard"
-msgstr ""
+msgstr "_Annuleren"
 
 #: ../../ui/preferences.glade:90
-#, fuzzy
 msgid "_Display conversation preview"
 msgstr "_Berichtvoorbeeld weergeven"
 
 #: ../../src/client/geary-controller.vala:262
 msgid "_Donate"
-msgstr ""
+msgstr "_Doneren"
 
 #: ../../ui/login.glade:782
 msgid "_Download mail:"
 msgstr "Berichten _downloaden:"
 
 #: ../../ui/composer.glade:181
-#, fuzzy
 msgid "_Fixed Width"
-msgstr "Vaste breedte"
+msgstr "_Vaste breedte"
 
 #: ../../src/client/geary-controller.vala:328
 #: ../../src/client/views/conversation-viewer.vala:1457
@@ -1384,7 +1381,7 @@ msgstr "_Help"
 
 #: ../../ui/composer.glade:542
 msgid "_Include Original Attachments"
-msgstr ""
+msgstr "_Originele bijlagen toevoegen"
 
 #: ../../src/client/views/conversation-viewer.vala:922
 msgid "_Inspect"
@@ -1396,7 +1393,7 @@ msgstr "_Uitlijnen"
 
 #: ../../src/client/ui/stock.vala:33
 msgid "_Keep"
-msgstr ""
+msgstr "_Behouden"
 
 #: ../../src/client/geary-controller.vala:305
 msgid "_Label"
@@ -1419,9 +1416,8 @@ msgid "_Mark as..."
 msgstr "_Markeren als..."
 
 #: ../../ui/composer.glade:157
-#, fuzzy
 msgid "_Medium"
-msgstr "Middel"
+msgstr "_Middel"
 
 #: ../../src/client/geary-controller.vala:309
 msgid "_Move"
@@ -1429,12 +1425,11 @@ msgstr "_Verplaatsen"
 
 #: ../../src/client/ui/stock.vala:18
 msgid "_OK"
-msgstr ""
+msgstr "_OK"
 
 #: ../../src/client/ui/stock.vala:26
-#, fuzzy
 msgid "_Open"
-msgstr "Openen"
+msgstr "_Openen"
 
 #: ../../ui/login.glade:131 ../../ui/login.glade:539
 #: ../../ui/password-dialog.glade:85
@@ -1443,7 +1438,7 @@ msgstr "_Wachtwoord:"
 
 #: ../../ui/composer.glade:35
 msgid "_Paste"
-msgstr ""
+msgstr "_Plakken"
 
 #: ../../ui/preferences.glade:172
 msgid "_Play notification sounds"
@@ -1456,7 +1451,7 @@ msgstr "_Voorkeuren"
 
 #: ../../src/client/ui/stock.vala:28
 msgid "_Print..."
-msgstr ""
+msgstr "_Afdrukken..."
 
 #: ../../src/client/geary-controller.vala:266
 #: ../../src/client/ui/stock.vala:29
@@ -1465,11 +1460,11 @@ msgstr "_Afsluiten"
 
 #: ../../src/client/geary-controller.vala:704
 msgid "_Rebuild"
-msgstr ""
+msgstr "_Opnieuw bouwen"
 
 #: ../../ui/composer.glade:14
 msgid "_Redo"
-msgstr ""
+msgstr "_Opnieuw"
 
 #: ../../ui/password-dialog.glade:561
 msgid "_Remember passwords"
@@ -1489,9 +1484,8 @@ msgid "_Reply"
 msgstr "_Beantwoorden"
 
 #: ../../ui/composer.glade:141
-#, fuzzy
 msgid "_Rich Text"
-msgstr "Tekst met opmaak"
+msgstr "Opgemaakte tekst"
 
 #: ../../ui/composer.glade:47
 msgid "_Right"
@@ -1507,18 +1501,16 @@ msgid "_Save As..."
 msgstr "_Opslaan als..."
 
 #: ../../src/client/views/conversation-viewer.vala:1414
-#, fuzzy
 msgid "_Save Image As..."
-msgstr "_Opslaan als..."
+msgstr "_Afbeelding Opslaan Als"
 
 #: ../../ui/composer.glade:594
 msgid "_Send"
 msgstr "_Verzenden"
 
 #: ../../ui/composer.glade:163
-#, fuzzy
 msgid "_Small"
-msgstr "Klein"
+msgstr "_Klein"
 
 #: ../../src/client/geary-controller.vala:289
 msgid "_Star"
@@ -1526,7 +1518,7 @@ msgstr "_Ster toevoegen"
 
 #: ../../ui/composer.glade:7
 msgid "_Undo"
-msgstr ""
+msgstr "O_ngedaan maken"
 
 #: ../../ui/login.glade:522
 msgid "_Username:"
@@ -1539,11 +1531,11 @@ msgstr "_Bron weergeven"
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
 #: ../../src/client/composer/composer-window.vala:90
 msgid "attach|enclosed|enclosing|cover letter"
-msgstr ""
+msgstr "toevoegen | toegevoegd | bijlage | bijgevoegd"
 
 #: ../../src/client/views/conversation-viewer.vala:1148
 msgid "but actually goes to"
-msgstr ""
+msgstr "maar gaat daadwerkelijk naar"
 
 #: ../../src/client/util/util-files.vala:16
 msgid "bytes"
@@ -1557,109 +1549,10 @@ msgstr "geen"
 
 #: ../../src/client/views/conversation-find-bar.vala:226
 msgid "not found"
-msgstr ""
+msgstr "niet gevonden"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
 #: ../../src/client/geary-controller.vala:1230
 msgid "translator-credits"
 msgstr "Bas Duineveld <basduineveld@gmail.com>"
-
-#~ msgid "Bold"
-#~ msgstr "Vet"
-
-#~ msgid "Color"
-#~ msgstr "Kleur"
-
-#~ msgid "Copy _link"
-#~ msgstr "Koppe_ling kopiëren"
-
-#~ msgid "Default"
-#~ msgstr "Standaard"
-
-#~ msgid "Delete"
-#~ msgstr "Verwijderen"
-
-#~ msgid "Font"
-#~ msgstr "Lettertype"
-
-#~ msgid "Font size"
-#~ msgstr "Lettergrootte"
-
-#~ msgid "Fonts"
-#~ msgstr "Lettertype"
-
-#~ msgid "Forward"
-#~ msgstr "Doorsturen"
-
-#~ msgid "Indent"
-#~ msgstr "Insprong vergroten"
-
-#~ msgid "Italic"
-#~ msgstr "Cursief"
-
-#~ msgid "Label as"
-#~ msgstr "Labelen als"
-
-#~ msgid "Lin_k"
-#~ msgstr "_Koppeling"
-
-#~ msgid "Link"
-#~ msgstr "Koppeling toevoegen"
-
-#~ msgid "Mark"
-#~ msgstr "Markeren"
-
-#~ msgid "Menu"
-#~ msgstr "Menu"
-
-#~ msgid "More"
-#~ msgstr "Meer"
-
-#~ msgid "Move to"
-#~ msgstr "Verplaatsen naar"
-
-#~ msgid "Re_member passwords"
-#~ msgstr "Wachtwoorden _onthouden"
-
-#~ msgid "Remove formatting"
-#~ msgstr "Opmaak verwijderen"
-
-#~ msgid "Reply"
-#~ msgstr "Beantwoorden"
-
-#~ msgid "Reply _all"
-#~ msgstr "_Allen beantwoorden"
-
-#~ msgid ""
-#~ "Reply to everyone in last message of conversation (Ctrl+Shift+R, Shift+R)"
-#~ msgstr ""
-#~ "Antwoorden aan iedereen in laatste bericht in conversatie (Ctrl+Shift+R, "
-#~ "Shift+R)"
-
-#~ msgid "Reply to last message in conversation (Ctrl+R, R)"
-#~ msgstr "Antwoorden op laatste bericht in conversatie (Ctrl+R, R)"
-
-#~ msgid "Send copy of last message in conversation (Ctrl+L, F)"
-#~ msgstr "Kopie versturen van laatste bericht in conversatie (Ctrl+L, F)"
-
-#~ msgid "Strikethrough"
-#~ msgstr "Doorstrepen"
-
-#~ msgid "Un-indent"
-#~ msgstr "Insprong verkleinen"
-
-#~ msgid "Underline"
-#~ msgstr "Onderstrepen"
-
-#~ msgid "_Email address:"
-#~ msgstr "_E-mailadres:"
-
-#~ msgid "_New Message"
-#~ msgstr "_Nieuw bericht"
-
-#~ msgid "_Service:"
-#~ msgstr "_Dienst"
-
-#~ msgid "toolbutton1"
-#~ msgstr "toolbutton1"

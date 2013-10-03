@@ -4,15 +4,16 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-#   <mazezamte@gmail.com>, 2012.
+# igorpan <mazezamte@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.3\n"
+"Project-Id-Version: geary-0.4\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-02-27 00:48+0000\n"
-"Last-Translator: <mazezamte@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2013-09-20 19:28+0000\n"
+"Last-Translator: yorbajim <jim@yorba.org>\n"
+"Language-Team: Serbian (http://www.transifex.com/projects/p/geary/language/"
+"sr/)\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -126,12 +127,12 @@ msgid "%b %-e"
 msgstr "%b %-e"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:30
-#, fuzzy, c-format
+#, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] "%d нова порука"
-msgstr[1] "%d нове поруке"
-msgstr[2] "%d нових порука"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #: ../../src/client/notification/libnotify.vala:72
 #, c-format
@@ -189,16 +190,16 @@ msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #: ../../src/client/notification/libnotify.vala:107
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s\n"
 "(%d other new message for %s)"
 msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
-msgstr[0] "%d нова порука"
-msgstr[1] "%d нове поруке"
-msgstr[2] "%d нових порука"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../../src/client/composer/composer-window.vala:981
@@ -224,20 +225,20 @@ msgid "%s wrote:"
 msgstr "%s је написао/ла:"
 
 #: ../../src/client/notification/libnotify.vala:75
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] "%d нова порука"
-msgstr[1] "%d нове поруке"
-msgstr[2] "%d нових порука"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:43
-#, fuzzy, c-format
+#, c-format
 msgid "%s, %s"
-msgstr "На %s,"
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:246
 #, c-format
@@ -398,9 +399,9 @@ msgid "Cc:"
 msgstr "Cc:"
 
 #: ../../src/engine/rfc822/rfc822-utils.vala:223
-#, fuzzy, c-format
+#, c-format
 msgid "Cc: %s\n"
-msgstr "Коме: %s \n"
+msgstr ""
 
 #: ../../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -415,9 +416,8 @@ msgid "Compose Message"
 msgstr "Састави Поруку"
 
 #: ../../src/client/geary-controller.vala:313
-#, fuzzy
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "Састави Поруку"
+msgstr ""
 
 #: ../../ui/preferences.glade:117
 msgid "Composer"
@@ -465,9 +465,8 @@ msgid "Do you want to discard the unsaved message?"
 msgstr "Да ли желите да одбаците несачувану поруку?"
 
 #: ../../src/client/composer/composer-window.vala:666
-#, fuzzy
 msgid "Do you want to discard this message?"
-msgstr "Да ли желите да одбаците несачувану поруку?"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:1479
 msgid "Don't _ask me again"
@@ -482,18 +481,16 @@ msgid "Drop files here"
 msgstr ""
 
 #: ../../ui/login.glade:115
-#, fuzzy
 msgid "E_mail address:"
-msgstr "Умножи Е-адресу"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:704
 msgid "E_xit"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:533
-#, fuzzy
 msgid "Edit Draft"
-msgstr "Недовршене"
+msgstr ""
 
 #: ../../ui/account_list.glade:84
 msgid "Edit account"
@@ -560,9 +557,8 @@ msgid "First Last"
 msgstr ""
 
 #: ../../ui/composer.glade:182
-#, fuzzy
 msgid "Fixed Width"
-msgstr "Фиксна ширина"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:329
 msgid "Forward (Ctrl+L, F)"
@@ -682,9 +678,8 @@ msgid "Log network activity"
 msgstr "Бележи мрежну активност"
 
 #: ../../src/client/geary-args.vala:12
-#, fuzzy
 msgid "Log network deserialization"
-msgstr "Бележи серијализацију мреже"
+msgstr ""
 
 #. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
@@ -710,24 +705,20 @@ msgid "Mark Unread From _Here"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:52
-#, fuzzy
 msgid "Mark as S_pam"
-msgstr "Означи као прочитано"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:277
-#, fuzzy
 msgid "Mark as _Read"
-msgstr "Означи као прочитано"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:283
-#, fuzzy
 msgid "Mark as _Unread"
-msgstr "Означи као непрочитано"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:53
-#, fuzzy
 msgid "Mark as not S_pam"
-msgstr "Означи као прочитано"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:55
 #: ../../src/client/geary-controller.vala:269
@@ -780,9 +771,8 @@ msgid "No authentication re_quired"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:275
-#, fuzzy
 msgid "No conversations in folder."
-msgstr "Нема изабраних разговора."
+msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:244
 msgid "No conversations selected."
@@ -809,16 +799,16 @@ msgstr ""
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
 #: ../../src/engine/rfc822/rfc822-utils.vala:171
-#, fuzzy, c-format
+#, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr "%s је написао/ла:"
+msgstr ""
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
 #: ../../src/engine/rfc822/rfc822-utils.vala:184
-#, fuzzy, c-format
+#, c-format
 msgid "On %s:"
-msgstr "На %s,"
+msgstr ""
 
 #: ../../src/client/notification/libnotify.vala:160
 msgid "Open"
@@ -885,9 +875,8 @@ msgid "Quote text  (Ctrl+])"
 msgstr ""
 
 #: ../../src/client/geary-controller.vala:322
-#, fuzzy
 msgid "R_eply All"
-msgstr "Одговори Свима"
+msgstr ""
 
 #: ../../ui/preferences.glade:55
 msgid "Reading"
@@ -898,14 +887,12 @@ msgid "Real name:"
 msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:590
-#, fuzzy
 msgid "Remem_ber password"
-msgstr "Запамти лозинку"
+msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:583
-#, fuzzy
 msgid "Remem_ber passwords"
-msgstr "Запамти лозинке"
+msgstr ""
 
 #: ../../ui/account_list.glade:97
 msgid "Remove account"
@@ -956,14 +943,12 @@ msgid "STARTTLS"
 msgstr ""
 
 #: ../../ui/composer.glade:169
-#, fuzzy
 msgid "S_ans Serif"
-msgstr "Sans Serif"
+msgstr ""
 
 #: ../../ui/composer.glade:175
-#, fuzzy
 msgid "S_erif"
-msgstr "Serif"
+msgstr ""
 
 #: ../../ui/login.glade:160
 msgid "S_ervice:"
@@ -1022,9 +1007,8 @@ msgid "Select _All"
 msgstr "Изабери Све"
 
 #: ../../src/client/views/conversation-viewer.vala:910
-#, fuzzy
 msgid "Select _Message"
-msgstr "Нова Порука"
+msgstr ""
 
 #: ../../src/client/geary-application.vala:27
 msgid "Send and receive email"
@@ -1169,9 +1153,8 @@ msgid "This link appears to go to"
 msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:508
-#, fuzzy
 msgid "This message contains remote images."
-msgstr "Ова порука садржи слике. Желите ли да их прикажем?"
+msgstr ""
 
 #: ../../ui/composer.glade:435
 msgid "To add them as attachments"
@@ -1327,9 +1310,8 @@ msgid "_Discard"
 msgstr ""
 
 #: ../../ui/preferences.glade:90
-#, fuzzy
 msgid "_Display conversation preview"
-msgstr "Прикажи верзију програма"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:262
 msgid "_Donate"
@@ -1340,9 +1322,8 @@ msgid "_Download mail:"
 msgstr ""
 
 #: ../../ui/composer.glade:181
-#, fuzzy
 msgid "_Fixed Width"
-msgstr "Фиксна ширина"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:328
 #: ../../src/client/views/conversation-viewer.vala:1457
@@ -1391,9 +1372,8 @@ msgid "_Mark as..."
 msgstr ""
 
 #: ../../ui/composer.glade:157
-#, fuzzy
 msgid "_Medium"
-msgstr "Средњи"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:309
 msgid "_Move"
@@ -1404,9 +1384,8 @@ msgid "_OK"
 msgstr ""
 
 #: ../../src/client/ui/stock.vala:26
-#, fuzzy
 msgid "_Open"
-msgstr "Отвори"
+msgstr ""
 
 #: ../../ui/login.glade:131 ../../ui/login.glade:539
 #: ../../ui/password-dialog.glade:85
@@ -1486,9 +1465,8 @@ msgid "_Send"
 msgstr ""
 
 #: ../../ui/composer.glade:163
-#, fuzzy
 msgid "_Small"
-msgstr "Мали"
+msgstr ""
 
 #: ../../src/client/geary-controller.vala:289
 msgid "_Star"
@@ -1534,12 +1512,3 @@ msgstr ""
 #: ../../src/client/geary-controller.vala:1230
 msgid "translator-credits"
 msgstr ""
-
-#~ msgid "Label as"
-#~ msgstr "Означи као"
-
-#~ msgid "Mark"
-#~ msgstr "Означи"
-
-#~ msgid "Move to"
-#~ msgstr "Помери у"

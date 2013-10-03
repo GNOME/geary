@@ -4,12 +4,14 @@ set(TRANSLATED
     ca
     ca_ES
     cs
+    da
     de
     el_GR
     en_CA
     en_GB
     eo
     es
+    es_419
     es_ES
     et
     fi
@@ -23,6 +25,7 @@ set(TRANSLATED
     it
     ja_JP
     km_KH
+    ms_MY
     nb
     nl_NL
     pl
