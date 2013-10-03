@@ -1522,7 +1522,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         Db.Result results = fetch_stmt.exec(cancellable);
         
-        if (results.finished)
+        if (results.finished || results.is_null_at(0))
             return null;
         
         return new Geary.Imap.EmailFlags(Geary.Imap.MessageFlags.deserialize(results.string_at(0)));
