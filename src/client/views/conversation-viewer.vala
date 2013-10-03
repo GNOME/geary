@@ -655,7 +655,7 @@ public class ConversationViewer : Gtk.Box {
         string body_text = "";
         remote_images = false;
         try {
-            body_text = message.get_body(true, inline_image_replacer);
+            body_text = message.get_body(true, inline_image_replacer) ?? "";
             body_text = insert_html_markup(body_text, message, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
