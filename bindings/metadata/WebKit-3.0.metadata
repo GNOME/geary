@@ -1,6 +1,8 @@
 DOM* parent="WebKit.DOM" name="DOM(.+)"
 
 DOMEventTarget.add_event_listener skip=false
+DOMEventTarget.add_event_listener.handler closure=-1
+DOMEventTarget.add_event_listener.user_data closure=-1
 DOMEventTarget.remove_event_listener skip=false
 
 WebView.entering_fullscreen#signal name="entering_fullscreen_signal"
