@@ -784,7 +784,7 @@ public class ComposerWindow : Gtk.Window {
         try {
             yield account.send_email_async(get_composed_email());
         } catch (Error e) {
-            warning("Error sending email: %s", e.message);
+            GLib.message("Error sending email: %s", e.message);
         }
         
         yield delete_draft_async();
@@ -845,7 +845,7 @@ public class ComposerWindow : Gtk.Window {
             
             draft_save_label.label = DRAFT_SAVED_TEXT;
         } catch (Error e) {
-            warning("Error saving draft: %s", e.message);
+            GLib.message("Error saving draft: %s", e.message);
             draft_save_label.label = DRAFT_ERROR_TEXT;
         }
     }
@@ -896,7 +896,7 @@ public class ComposerWindow : Gtk.Window {
         
         Geary.FolderSupport.Remove? removable_drafts = drafts_folder as Geary.FolderSupport.Remove;
         if (removable_drafts == null) {
-            warning("Draft folder does not support remove.\n");
+            debug("Draft folder does not support remove.\n");
             
             return;
         }
@@ -904,7 +904,7 @@ public class ComposerWindow : Gtk.Window {
         try {
             yield removable_drafts.remove_single_email_async(draft_id);
         } catch (Error e) {
-            warning("Unable to delete draft: %s", e.message);
+            debug("Unable to delete draft: %s", e.message);
         }
     }
     
@@ -1276,7 +1276,7 @@ public class ComposerWindow : Gtk.Window {
                 element.set_attribute("type", "cite");
             }
         } catch (Error error) {
-            warning("Error removing blockquote style: %s", error.message);
+            debug("Error removing blockquote style: %s", error.message);
         }
     }
     
@@ -1291,7 +1291,7 @@ public class ComposerWindow : Gtk.Window {
                     "margin: 0 0 0 40px; padding: 0px; border:none;");
             }
         } catch (Error error) {
-            warning("Error protecting blockquotes: %s", error.message);
+            debug("Error protecting blockquotes: %s", error.message);
         }
     }
     
