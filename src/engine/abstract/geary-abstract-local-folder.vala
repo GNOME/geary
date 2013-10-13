@@ -25,7 +25,7 @@ public abstract class Geary.AbstractLocalFolder : Geary.AbstractFolder {
     
     public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
         if (open_count == 0)
-            throw new EngineError.OPEN_REQUIRED("%s not open".printf(get_display_name()));
+            throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
     
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
