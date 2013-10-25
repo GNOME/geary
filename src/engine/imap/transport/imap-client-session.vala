@@ -481,6 +481,10 @@ public class Geary.Imap.ClientSession : BaseObject {
      * call, depending on the results of the connection greeting from the server.  However,
      * command should only be transmitted (login, initiate session, etc.) after this call has
      * completed.
+     *
+     * If the connection fails (if this call throws an Error) the ClientSession will be disconnected,
+     * even if the error was from the server (that is, not a network problem).  The
+     * {@link ClientSession} should be discarded.
      */
     public async void connect_async(Cancellable? cancellable = null) throws Error {
         MachineParams params = new MachineParams(null);
@@ -514,9 +518,19 @@ public class Geary.Imap.ClientSession : BaseObject {
         // cancel the timeout, if it's not already fired
         timeout.cancel();
         
-        // if session was denied or timeout, throw the Error
-        if (connect_err != null)
+        // if session was denied or timeout, ensure the session is disconnected and throw the
+        // original Error ... connect_async shouldn't leave the session in a LOGGED_OUT state,
+        // but completely disconnected if unsuccessful
+        if (connect_err != null) {
+            try {
+                yield disconnect_async(cancellable);
+            } catch (Error err) {
+                debug("[%s] Error disconnecting after a failed connect attempt: %s", to_string(),
+                    err.message);
+            }
+            
             throw connect_err;
+        }
     }
     
     private bool on_greeting_timeout() {
