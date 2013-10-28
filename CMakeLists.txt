@@ -52,6 +52,7 @@ endif ()
 find_package(PkgConfig)
 pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
 pkg_check_modules(LIBMESSAGINGMENU QUIET messaging-menu>=12.10.2)
+pkg_check_modules(WEBKITGTK22X QUIET webkitgtk-3.0>=2.2.0)
 
 # intl
 include(Gettext)
