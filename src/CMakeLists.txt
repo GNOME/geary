@@ -435,6 +435,29 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
+if (WEBKITGTK22X_FOUND)
+    message(STATUS "Targeting WebKitGTK 2.2.x")
+    SET(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        webkitgtk-3.0>=2.2.0
+    )
+    
+    SET(WEBKITGTK_METADATA_DIR
+        webkitgtk-2.2
+    )
+else ()
+    message(STATUS "Targeting WebKitGTK 1.10.0 to 2.0.4")
+    SET(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        webkitgtk-3.0>=1.10.0
+        webkitgtk-3.0<=2.0.4
+    )
+    
+    SET(WEBKITGTK_METADATA_DIR
+        webkitgtk-2.0
+    )
+endif ()
+
 if (NO_FATAL_WARNINGS)
     message(STATUS "Vala fatal warnings: OFF")
 else ()
@@ -460,8 +483,6 @@ pkg_check_modules(DEPS REQUIRED
     sqlite3>=3.7.4
     gmime-2.6>=2.6.0
     libsecret-1>=0.11
-    webkitgtk-3.0>=1.10.0
-    webkitgtk-3.0<=2.0.4
     libxml-2.0>=2.7.8
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -520,6 +541,7 @@ add_definitions(${CFLAGS})
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
+    --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata/${WEBKITGTK_METADATA_DIR}
     --target-glib=${TARGET_GLIB}
     --thread
     --enable-checking
