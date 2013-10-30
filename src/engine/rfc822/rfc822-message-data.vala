@@ -137,7 +137,7 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
 
 public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,
     Gee.Hashable<Geary.RFC822.Date> {
-    public string original { get; private set; }
+    public string? original { get; private set; }
     public DateTime value { get; private set; }
     public time_t as_time_t { get; private set; }
     
@@ -150,11 +150,14 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
         original = iso8601;
     }
     
+    public Date.from_date_time(DateTime datetime) {
+        original = null;
+        value = datetime;
+        as_time_t = Time.datetime_to_time_t(datetime);
+    }
+    
     public virtual bool equal_to(Geary.RFC822.Date other) {
-        if (this == other)
-            return true;
-        
-        return value.equal(other.value);
+        return (this != other) ? value.equal(other.value) : true;
     }
     
     /**
@@ -169,7 +172,7 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
     }
     
     public override string to_string() {
-        return original;
+        return original ?? value.to_string();
     }
 }
 

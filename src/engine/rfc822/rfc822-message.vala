@@ -79,6 +79,8 @@ public class Geary.RFC822.Message : BaseObject {
         // Required headers
         assert(email.from.size > 0);
         sender = email.from[0];
+        date = new RFC822.Date.from_date_time(email.date);
+        
         message.set_sender(sender.to_rfc822_string());
         message.set_date((time_t) email.date.to_unix(),
             (int) (email.date.get_utc_offset() / TimeSpan.HOUR));
