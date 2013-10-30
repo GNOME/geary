@@ -479,8 +479,8 @@ public class Geary.RFC822.Message : BaseObject {
          * They may have inline disposition, or they may have no disposition specified
          */
         GMime.ContentType content_type = part.get_content_type();
-        if (content_type.get_media_type() == "text") {
-            if (content_type.get_media_subtype() == text_subtype) {
+        if (String.stri_equal(content_type.get_media_type(), "text")) {
+            if (String.stri_equal(content_type.get_media_subtype(), text_subtype)) {
                 body = mime_part_to_memory_buffer(part, true, to_html).to_string();
                 return true;
             }
