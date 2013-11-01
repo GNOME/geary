@@ -25,6 +25,9 @@ class ImapConsole : Gtk.Window {
     private uint statusbar_msg_id = 0;
     
     private Geary.Imap.ClientConnection? cx = null;
+    private Gee.HashMap<Geary.Imap.Tag, Geary.Imap.StatusResponse> status_responses = new Gee.HashMap<
+        Geary.Imap.Tag, Geary.Imap.StatusResponse>();
+    private Geary.Nonblocking.Event recvd_response_event = new Geary.Nonblocking.Event();
     
     public ImapConsole() {
         title = "IMAP Console";
@@ -148,6 +151,10 @@ class ImapConsole : Gtk.Window {
                     
                     case "disconnect":
                         disconnect_cmd(cmd, args);
+                    break;
+                    
+                    case "starttls":
+                        starttls(cmd, args);
                     break;
                     
                     case "login":
@@ -345,6 +352,34 @@ class ImapConsole : Gtk.Window {
             cx.received_bad_response.disconnect(on_received_bad_response);
             
             cx = null;
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+    
+    private void starttls(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 0, "");
+        
+        status("Starting TLS...");
+        do_starttls_async.begin(on_do_starttls_async_completed);
+    }
+    
+    private async void do_starttls_async() throws Error {
+        Geary.Imap.StarttlsCommand cmd = new Geary.Imap.StarttlsCommand();
+        yield cx.send_async(cmd, null);
+        
+        Geary.Imap.StatusResponse response = yield wait_for_response_async(cmd.tag);
+        if (response.status == Geary.Imap.Status.OK) {
+            yield cx.starttls_async(null);
+            status("STARTTLS completed");
+        } else {
+            status("STARTTLS denied: %s".printf(response.to_string()));
+        }
+    }
+    
+    private void on_do_starttls_async_completed(Object? source, AsyncResult result) {
+        try {
+            do_starttls_async.end(result);
         } catch (Error err) {
             exception(err);
         }
@@ -633,6 +668,21 @@ class ImapConsole : Gtk.Window {
         append_to_console("[R] ");
         append_to_console(status_response.to_string());
         append_to_console("\n");
+        
+        // TODO: This means that responses will grow without bounds without some process of
+        // timing-out old unharvested responses
+        status_responses.set(status_response.tag, status_response);
+        recvd_response_event.blind_notify();
+    }
+    
+    private async Geary.Imap.StatusResponse wait_for_response_async(Geary.Imap.Tag tag) throws Error {
+        for (;;) {
+            Geary.Imap.StatusResponse? response = status_responses.get(tag);
+            if (response != null)
+                return response;
+            
+            yield recvd_response_event.wait_async();
+        }
     }
     
     private void on_received_server_data(Geary.Imap.ServerData server_data) {
