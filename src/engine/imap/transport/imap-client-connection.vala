@@ -425,7 +425,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
         assert(des == null);
         
         // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
-        ser = new Serializer(to_string(), new BufferedOutputStream(ios.output_stream));
+        BufferedOutputStream buffered_outs = new BufferedOutputStream(ios.output_stream);
+        buffered_outs.set_close_base_stream(false);
+        ser = new Serializer(to_string(), buffered_outs);
         des = new Deserializer(to_string(), ios.input_stream);
         
         des.parameters_ready.connect(on_parameters_ready);
