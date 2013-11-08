@@ -19,6 +19,20 @@ public class Geary.Imap.ListCommand : Command {
     public const string NAME = "list";
     public const string XLIST_NAME = "xlist";
     
+    /**
+     * LIST a particular mailbox by {@link MailboxSpecifier}.
+     *
+     * MailboxSpecifier may contain a wildcard ("%" or "*"), but since the reference field of the
+     * LIST command will be empty, it will be listing from the root.
+     *
+     * Note that IceWarp has an issue where it returns a different MailboxSpecifier for the Spam
+     * folder using this variant.  That is:
+     *
+     * LIST "" % -> "Spam"
+     * LIST "" "Spam" -> "~spam"
+     *
+     * See http://redmine.yorba.org/issues/7624 for more information.
+     */
     public ListCommand(MailboxSpecifier mailbox, bool use_xlist) {
         base (use_xlist ? XLIST_NAME : NAME, { "" });
         

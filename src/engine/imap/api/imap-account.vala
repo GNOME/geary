@@ -26,6 +26,8 @@ private class Geary.Imap.Account : BaseObject {
     private ClientSession? account_session = null;
     private Nonblocking.Mutex account_session_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
+    private Gee.HashMap<FolderPath, MailboxInformation> path_to_mailbox = new Gee.HashMap<
+        FolderPath, MailboxInformation>();
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
     
@@ -141,23 +143,20 @@ private class Geary.Imap.Account : BaseObject {
     }
     
     public async bool folder_exists_async(FolderPath path, Cancellable? cancellable) throws Error {
-        try {
-            yield fetch_mailbox_async(path, cancellable);
-            
-            return true;
-        } catch (Error err) {
-            if (err is IOError.CANCELLED)
-                throw err;
-            
-            return false;
-        }
+        return path_to_mailbox.contains(path);
     }
     
     public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
         
-        MailboxInformation mailbox_info = yield fetch_mailbox_async(path, cancellable);
+        // if not in map, use list_children_async to add it (if it exists)
+        if (!path_to_mailbox.contains(path))
+            yield list_children_async(path.get_parent(), cancellable);
+        
+        MailboxInformation? mailbox_info = path_to_mailbox.get(path);
+        if (mailbox_info == null)
+            throw_not_found(path);
         
         if (!mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
             StatusData status = yield fetch_status_async(path, cancellable);
@@ -166,26 +165,6 @@ private class Geary.Imap.Account : BaseObject {
         } else {
             return new Imap.Folder.unselectable(session_mgr, mailbox_info);
         }
-    }
-    
-    private async MailboxInformation fetch_mailbox_async(FolderPath path, Cancellable? cancellable)
-        throws Error {
-        ClientSession session = yield claim_session_async(cancellable);
-        
-        // USE XLIST *unless* listing INBOX, as Imap.FolderPath always refers to it as "INBOX"
-        // but some servers (Freemail) only respond to the translated name with XLIST
-        bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
-        if (MailboxSpecifier.folder_path_is_inbox(path))
-            can_xlist = false;
-        
-        Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
-        StatusResponse response = yield send_command_async(
-            new ListCommand(new MailboxSpecifier.from_folder_path(path, null), can_xlist),
-            list_results, null, cancellable);
-        
-        throw_fetch_error(response, path, list_results.size);
-        
-        return list_results[0];
     }
     
     private async StatusData fetch_status_async(FolderPath path, Cancellable? cancellable)
@@ -323,6 +302,14 @@ private class Geary.Imap.Account : BaseObject {
                     iter.remove();
                 }
             }
+        }
+        
+        // stash all MailboxInformation by path
+        // TODO: remove any MailboxInformation for this parent that is not found (i.e. has been
+        // removed on the server)
+        foreach (MailboxInformation mailbox_info in list_results) {
+            FolderPath path = mailbox_info.mailbox.to_folder_path(mailbox_info.delim);
+            path_to_mailbox.set(path, mailbox_info);
         }
         
         return (list_results.size > 0) ? list_results : null;
