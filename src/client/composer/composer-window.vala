@@ -269,6 +269,14 @@ public class ComposerWindow : Gtk.Window {
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
         
+        if (get_direction () == Gtk.TextDirection.RTL) {
+            actions.get_action(ACTION_INDENT).icon_name = "format-indent-more-rtl-symbolic";
+            actions.get_action(ACTION_OUTDENT).icon_name = "format-indent-less-rtl-symbolic";
+        } else {
+            actions.get_action(ACTION_INDENT).icon_name = "format-indent-more-symbolic";
+            actions.get_action(ACTION_OUTDENT).icon_name = "format-indent-less-symbolic";
+        }
+        
         ComposerToolbar composer_toolbar = new ComposerToolbar(actions, menu);
         Gtk.Alignment toolbar_area = (Gtk.Alignment) builder.get_object("toolbar area");
         toolbar_area.add(composer_toolbar);
