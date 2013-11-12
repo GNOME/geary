@@ -1,3 +1,15 @@
+Geary 0.4.1 - 11 November 2013
+------------------------------
+
+  * Compile-time support for WebKitGTK 2.2
+  * Fixes IMAP STARTTLS failure to connect bug
+  * Works around LIST bug in IceWarp IMAP servers (crasher)
+  * Solves crash when IMAP connect fails due to timeout
+  * CamelCased MIME types now handled properly (prevents blank emails)
+  * Adds missing RTL icons
+  * New translations
+
+
 Geary 0.4.0 - 3 October 2013
 ------------------------------
 

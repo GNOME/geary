@@ -1,3 +1,15 @@
+geary (0.4.1-1~raring1) raring; urgency=low
+
+  * Compile-time support for WebKitGTK 2.2
+  * Fixes IMAP STARTTLS failure to connect bug
+  * Works around LIST bug in IceWarp IMAP servers (crasher)
+  * Solves crash when IMAP connect fails due to timeout
+  * CamelCased MIME types now handled properly (prevents blank emails)
+  * Adds missing RTL icons
+  * New translations
+
+ -- Jim Nelson <jim@yorba.org>  Mon, 11 Nov 2013 17:00:03 -0800
+
 geary (0.4.0-1~raring1) raring; urgency=low
 
   * Per-account full text search
