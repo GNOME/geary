@@ -21,11 +21,11 @@
 # zacol <zacol1@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4\n"
+"Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-09-23 19:20+0000\n"
-"Last-Translator: Piotrek290 <piotrek290@gmail.com>\n"
+"PO-Revision-Date: 2013-10-20 08:50+0000\n"
+"Last-Translator: Piotr Sokół <psokol@jabster.pl>\n"
 "Language-Team: Polish (http://www.transifex.com/projects/p/geary/language/"
 "pl/)\n"
 "Language: pl\n"
@@ -498,7 +498,7 @@ msgstr "Szkice"
 
 #: ../../ui/composer.glade:419
 msgid "Drop files here"
-msgstr "Upuść tutaj pliki"
+msgstr "Proszę upuścić tutaj pliki,"
 
 #: ../../ui/login.glade:115
 msgid "E_mail address:"
@@ -732,7 +732,7 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:52
 msgid "Mark as S_pam"
-msgstr ""
+msgstr "Oznacz jako _niechciana"
 
 #: ../../src/client/geary-controller.vala:277
 msgid "Mark as _Read"
@@ -898,7 +898,7 @@ msgstr "Port:"
 
 #: ../../ui/composer.glade:81
 msgid "Quote text  (Ctrl+])"
-msgstr "Cytuj tekst (Ctrl+])"
+msgstr "Oznacza cytat (Ctrl+])"
 
 #: ../../src/client/geary-controller.vala:322
 msgid "R_eply All"
@@ -914,11 +914,11 @@ msgstr "Rzeczywista nazwa:"
 
 #: ../../src/client/accounts/add-edit-page.vala:590
 msgid "Remem_ber password"
-msgstr "Zapamiętaj hasło"
+msgstr "_Zapamiętanie hasła"
 
 #: ../../src/client/accounts/add-edit-page.vala:583
 msgid "Remem_ber passwords"
-msgstr "Zapamiętaj hasła"
+msgstr "_Zapamiętanie hasła"
 
 #: ../../ui/account_list.glade:97
 msgid "Remove account"
@@ -1189,7 +1189,7 @@ msgstr "Ta wiadomość zawiera zewnętrzne obrazy."
 
 #: ../../ui/composer.glade:435
 msgid "To add them as attachments"
-msgstr "Aby dodać je jako załączniki"
+msgstr "aby dodać je jako załączniki."
 
 #: ../../src/client/views/conversation-viewer.vala:608
 msgid "To:"
@@ -1239,7 +1239,7 @@ msgstr "Podkreśla tekst (Ctrl+U)"
 
 #: ../../ui/composer.glade:88
 msgid "Unquote text (Ctrl+[)"
-msgstr "Usuń cytat (Ctrl+[)"
+msgstr "Usuwa cytat (Ctrl+[)"
 
 #: ../../src/client/geary-args.vala:65
 #, c-format
@@ -1287,7 +1287,7 @@ msgstr ""
 
 #: ../../src/client/geary-controller.vala:551
 msgid "Your settings are insecure"
-msgstr "Twoje ustawienia nie są bezpieczne"
+msgstr "Ustawienia konta nie są bezpieczne"
 
 #: ../../src/client/geary-controller.vala:258
 #: ../../src/client/ui/stock.vala:21
@@ -1321,7 +1321,7 @@ msgstr "_Anuluj"
 
 #: ../../ui/composer.glade:52
 msgid "_Center"
-msgstr "Wycentrowany"
+msgstr "Wyś_rodkowany"
 
 #: ../../src/client/ui/stock.vala:23
 msgid "_Close"
@@ -1379,7 +1379,7 @@ msgstr "Z_badaj"
 
 #: ../../ui/composer.glade:57
 msgid "_Justify"
-msgstr "Wyjustowany"
+msgstr "Wyj_ustowany"
 
 #: ../../src/client/ui/stock.vala:33
 msgid "_Keep"

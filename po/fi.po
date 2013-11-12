@@ -7,10 +7,10 @@
 # Jiri Grönroos <jiri.gronroos@iki.fi>, 2012-2013
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4\n"
+"Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-09-25 11:37+0000\n"
+"PO-Revision-Date: 2013-10-24 18:30+0000\n"
 "Last-Translator: Jiri Grönroos <jiri.gronroos@iki.fi>\n"
 "Language-Team: Finnish (http://www.transifex.com/projects/p/geary/language/"
 "fi/)\n"
@@ -92,20 +92,20 @@ msgstr ""
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:91
 msgid "%B %-e, %Y %-H:%M"
-msgstr ""
+msgstr "%-e. %Bta %Y, %-H:%M"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:88
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr ""
+msgstr "%-e. %Bta %Y, %-l:%M %P"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:94
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr ""
+msgstr "%-e. %Bta %Y, %-l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -123,7 +123,7 @@ msgstr ""
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../../src/client/util/util-date.vala:78
 msgid "%b %-e"
-msgstr ""
+msgstr "%-e. %b"
 
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:30
 #, c-format
@@ -194,7 +194,11 @@ msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
 msgstr[0] ""
+"%s\n"
+"(%d muu uusi viesti tilille %s)"
 msgstr[1] ""
+"%s\n"
+"(%d muuta uutta viestiä tilille %s)"
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../../src/client/composer/composer-window.vala:981
@@ -232,7 +236,7 @@ msgstr[1] "%s, %d uutta viestiä yhteensä"
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:43
 #, c-format
 msgid "%s, %s"
-msgstr ""
+msgstr "%s, %s"
 
 #: ../../src/client/views/conversation-viewer.vala:246
 #, c-format
@@ -544,7 +548,7 @@ msgstr "Virhe sähköpostia lähettäessä"
 
 #: ../../src/client/accounts/add-edit-page.vala:216
 msgid "Everything"
-msgstr ""
+msgstr "Kaikki"
 
 #: ../../src/client/views/conversation-viewer.vala:1897
 msgid "Failed to open default text editor."
@@ -591,6 +595,8 @@ msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
 msgstr ""
+"Geary kohtasi virheen viestiä lähettäessä. Jos ongelma toistuu, poista käsin "
+"kyseinen viesti Lähtevät-kansiosta."
 
 #: ../../ui/password-dialog.glade:315
 msgid "General"
@@ -706,7 +712,7 @@ msgstr "Sähköpostisovellus"
 
 #: ../../src/client/views/conversation-viewer.vala:1479
 msgid "Mark Unread From _Here"
-msgstr ""
+msgstr "Merkitse lukemattomaksi tästä e_delleen"
 
 #: ../../src/client/geary-controller.vala:52
 msgid "Mark as S_pam"
@@ -998,7 +1004,7 @@ msgstr "Etsi tililtä %s"
 
 #: ../../src/client/ui/main-toolbar.vala:76
 msgid "Search all mail in account for keywords (Ctrl+S)"
-msgstr ""
+msgstr "Etsi hakusanoilla kaikista tilin sähköpostiviesteistä (Ctrl+S)"
 
 #: ../../src/client/composer/composer-window.vala:1243
 msgid "Select Color"
@@ -1080,7 +1086,7 @@ msgstr "Tähdelliset"
 
 #: ../../ui/login.glade:761
 msgid "Storage"
-msgstr ""
+msgstr "Varastointi"
 
 #: ../../ui/composer.glade:134
 msgid "Strikethrough (Ctrl+K)"
@@ -1124,6 +1130,10 @@ msgid ""
 "\n"
 "Please check your network connection and restart Geary."
 msgstr ""
+"Paikallista tiliä avattaessa tapahtui virhe. Se johtuu luultavasti verkko-"
+"ongelmista.\n"
+"\n"
+"Tarkista yhteyden tila ja käynnistä Geary uudelleen."
 
 #: ../../src/client/geary-controller.vala:737
 #, c-format
@@ -1136,6 +1146,13 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"Tämän tilin paikallista viestitietokantaa avattaessa tapahtui virhe. Se "
+"johtuu mitä luultavimmin puutteellisista käyttöoikeuksista.\n"
+"\n"
+"Varmista, että sinulla on luku- ja kirjoitusoikeus kaikkiin tiedostoihin "
+"seuraavassa kansiossa:\n"
+"\n"
+"%s"
 
 #: ../../src/client/geary-controller.vala:702
 #, c-format
@@ -1153,7 +1170,7 @@ msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:1147
 msgid "This link appears to go to"
-msgstr ""
+msgstr "Tämä linkki vaikuttaa johtavan kohteeseen"
 
 #: ../../src/client/views/conversation-viewer.vala:508
 msgid "This message contains remote images."
@@ -1325,7 +1342,7 @@ msgstr "La_hjoita"
 
 #: ../../ui/login.glade:782
 msgid "_Download mail:"
-msgstr "_Lataa sähköposti:"
+msgstr "_Lataa sähköposti ajalta:"
 
 #: ../../ui/composer.glade:181
 msgid "_Fixed Width"
@@ -1498,7 +1515,7 @@ msgstr ""
 
 #: ../../src/client/views/conversation-viewer.vala:1148
 msgid "but actually goes to"
-msgstr ""
+msgstr "mutta viekin kohteeseen"
 
 #: ../../src/client/util/util-files.vala:16
 msgid "bytes"
