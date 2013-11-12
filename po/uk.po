@@ -5,14 +5,15 @@
 #
 # Translators:
 # kosivantsov <kos.ivantsov@gmail.com>, 2012
+# furyruf <ruffian.ua@gmail.com>, 2013
 # sp4rr0w <sasha.anpilov@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4\n"
+"Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-09-20 19:28+0000\n"
-"Last-Translator: yorbajim <jim@yorba.org>\n"
+"PO-Revision-Date: 2013-10-30 14:00+0000\n"
+"Last-Translator: furyruf <ruffian.ua@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/projects/p/geary/language/"
 "uk/)\n"
 "Language: uk\n"
@@ -24,7 +25,7 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:641
 msgid "        &#8226; Connection error.\n"
-msgstr ""
+msgstr "&#8226;Помилка з'єднання.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:624
 msgid "        &#8226; Email address already added to Geary.\n"
@@ -32,15 +33,15 @@ msgstr ""
 
 #: ../../src/client/accounts/add-edit-page.vala:628
 msgid "        &#8226; IMAP connection error.\n"
-msgstr ""
+msgstr "&#8226;Помилка з'єднання IMAP.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:631
 msgid "        &#8226; IMAP username or password incorrect.\n"
-msgstr ""
+msgstr "&#8226;Некоректне ім'я користувача або пароль IMAP.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:621
 msgid "        &#8226; Invalid account nickname.\n"
-msgstr ""
+msgstr "&#8226; Некоректне ім'я користувача.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:634
 msgid "        &#8226; SMTP connection error.\n"
@@ -934,7 +935,7 @@ msgstr ""
 
 #: ../../src/client/dialogs/password-dialog.vala:124
 msgid "SSL"
-msgstr ""
+msgstr "SSL"
 
 #: ../../ui/password-dialog.glade:382 ../../ui/password-dialog.glade:485
 msgid "SSL/TLS encryption:"
@@ -1001,7 +1002,7 @@ msgstr ""
 
 #: ../../src/client/composer/composer-window.vala:1243
 msgid "Select Color"
-msgstr ""
+msgstr "Вибрати колір"
 
 #: ../../src/client/ui/stock.vala:32
 #: ../../src/client/views/conversation-viewer.vala:916
@@ -1092,7 +1093,7 @@ msgstr "Тема:"
 #: ../../src/engine/rfc822/rfc822-utils.vala:216
 #, c-format
 msgid "Subject: %s\n"
-msgstr ""
+msgstr "Тема: %s\n"
 
 #: ../../src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
@@ -1266,7 +1267,7 @@ msgstr "_Про"
 #: ../../src/client/accounts/account-dialog-add-edit-pane.vala:48
 #: ../../src/client/ui/stock.vala:22
 msgid "_Add"
-msgstr ""
+msgstr "_Додати"
 
 #: ../../src/client/geary-controller.vala:47
 msgid "_Archive"

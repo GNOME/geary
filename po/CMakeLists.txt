@@ -14,6 +14,8 @@ set(TRANSLATED
     es_419
     es_ES
     et
+    eu
+    fa
     fi
     fr
     gl
@@ -25,6 +27,7 @@ set(TRANSLATED
     it
     ja_JP
     km_KH
+    lt
     ms_MY
     nb
     nl_NL

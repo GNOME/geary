@@ -5,17 +5,19 @@
 #
 # Translators:
 # alexanderstyre <lessneurope@yandex.com>, 2013
+# Daniel Sandman <revoltism@gmail.com>, 2013
+# sinkensabe <davka442@gmail.com>, 2013
 # honajnahoj <honajnahoj@gmail.com>, 2013
 # joachimj <joachim.j@gmail.com>, 2013
 # joachimj <joachim.j@gmail.com>, 2013
 # TommyBrunn <tommy.brunn@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4\n"
+"Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-09-20 19:28+0000\n"
-"Last-Translator: yorbajim <jim@yorba.org>\n"
+"PO-Revision-Date: 2013-11-05 16:40+0000\n"
+"Last-Translator: sinkensabe <davka442@gmail.com>\n"
 "Language-Team: Swedish (http://www.transifex.com/projects/p/geary/language/"
 "sv/)\n"
 "Language: sv\n"
@@ -30,7 +32,7 @@ msgstr "&#8226; Anslutningsfel.⏎\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:624
 msgid "        &#8226; Email address already added to Geary.\n"
-msgstr ""
+msgstr "&#8226; E-postadress redan tillagd i Geary.⏎\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:628
 msgid "        &#8226; IMAP connection error.\n"
@@ -58,7 +60,7 @@ msgstr "&#8226; Felaktigt användarnamn eller lösenord.⏎\n"
 
 #: ../../src/client/views/conversation-viewer.vala:1203
 msgid " (Invalid?)"
-msgstr ""
+msgstr "(Ogiltig?)"
 
 #: ../../src/client/composer/composer-window.vala:972
 #, c-format
@@ -90,7 +92,7 @@ msgstr "\"%s\" är en tom fil."
 #: ../../src/client/util/util-date.vala:182
 #, c-format
 msgid "%A"
-msgstr ""
+msgstr "%A"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -133,8 +135,8 @@ msgstr "%b %-e"
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d meddelande"
+msgstr[1] "%d meddelanden"
 
 #: ../../src/client/notification/libnotify.vala:72
 #, c-format
@@ -146,35 +148,35 @@ msgstr[1] "%d nya meddelanden"
 #: ../../src/client/folder-list/folder-list-search-branch.vala:43
 #, c-format
 msgid "%d results"
-msgstr ""
+msgstr "%d resultat"
 
 #. / Label displaying number of unread email messages in a folder
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:37
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d oläst"
+msgstr[1] "%d olästa"
 
 #: ../../src/client/util/util-date.vala:170
 #, c-format
 msgid "%dh ago"
-msgstr ""
+msgstr "%dh sedan"
 
 #: ../../src/client/util/util-date.vala:167
 #, c-format
 msgid "%dm ago"
-msgstr ""
+msgstr "%dm sedan"
 
 #: ../../src/client/views/conversation-find-bar.vala:222
 #, c-format
 msgid "%i matches"
-msgstr ""
+msgstr "%i träffar"
 
 #: ../../src/client/views/conversation-find-bar.vala:224
 #, c-format
 msgid "%i matches (wrapped)"
-msgstr ""
+msgstr "%i träffar (hopslaget)"
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -198,13 +200,17 @@ msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
 msgstr[0] ""
+"%s⏎\n"
+"(%d annat nytt meddelande för %s)"
 msgstr[1] ""
+"%s⏎\n"
+"(%d andra nya meddelanden för %s)"
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../../src/client/composer/composer-window.vala:981
 #, c-format
 msgid "%s (%s)"
-msgstr ""
+msgstr "%s (%s)"
 
 #: ../../src/client/views/conversation-web-view.vala:289
 #, c-format
@@ -236,7 +242,7 @@ msgstr[1] ""
 #: ../../src/client/folder-list/folder-list-folder-entry.vala:43
 #, c-format
 msgid "%s, %s"
-msgstr ""
+msgstr "%s, %s"
 
 #: ../../src/client/views/conversation-viewer.vala:246
 #, c-format
@@ -355,7 +361,7 @@ msgstr "Tillåt inspektion av WebView"
 
 #: ../../src/client/views/conversation-viewer.vala:509
 msgid "Always Show From Sender"
-msgstr ""
+msgstr "Visa alltid från avsändare"
 
 #: ../../src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"

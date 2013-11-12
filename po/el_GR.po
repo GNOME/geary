@@ -5,11 +5,11 @@
 #
 # Translators:
 # George Petsagourakis <petsagouris@gmail.com>, 2013
-# ioza1964 <ioza1964@yahoo.gr>, 2012
+# ioza1964 <izamboukas@gmail.com>, 2012
 # Petros Dias <petrosdias@gmail.com>, 2012
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4\n"
+"Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
 "PO-Revision-Date: 2013-09-23 19:10+0000\n"
