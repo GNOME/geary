@@ -222,8 +222,8 @@ public class ConversationWebView : WebKit.WebView {
         }
     }
     
-    public void set_attachment_src(WebKit.DOM.HTMLImageElement img, string mime_type, string filename,
-        int maxwidth, int maxheight = -1) {
+    public void set_attachment_src(WebKit.DOM.HTMLImageElement img, Geary.Mime.ContentType content_type,
+        string filename, int maxwidth, int maxheight = -1) {
         if( maxheight == -1 ){
             maxheight = maxwidth;
         }
@@ -231,9 +231,9 @@ public class ConversationWebView : WebKit.WebView {
         try {
             // If the file is an image, use it. Otherwise get the icon for this mime_type.
             uint8[] content;
-            string content_type = ContentType.from_mime_type(mime_type);
-            string icon_mime_type = mime_type;
-            if (mime_type.has_prefix("image/")) {
+            string gio_content_type = ContentType.from_mime_type(content_type.get_mime_type());
+            string icon_mime_type = content_type.get_mime_type();
+            if (content_type.has_media_type("image")) {
                 // Get a thumbnail for the image.
                 // TODO Generate and save the thumbnail when extracting the attachments rather than
                 // when showing them in the viewer.
@@ -245,7 +245,7 @@ public class ConversationWebView : WebKit.WebView {
                 icon_mime_type = "image/png";
             } else {
                 // Load the icon for this mime type.
-                ThemedIcon icon = ContentType.get_icon(content_type) as ThemedIcon;
+                ThemedIcon icon = ContentType.get_icon(gio_content_type) as ThemedIcon;
                 string icon_filename = IconFactory.instance.lookup_icon(icon.names[0], maxwidth)
                     .get_filename();
                 FileUtils.get_data(icon_filename, out content);

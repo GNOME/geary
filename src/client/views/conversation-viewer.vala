@@ -15,8 +15,16 @@ public class ConversationViewer : Gtk.Box {
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
     
-    public const string INLINE_MIME_TYPES =
-        "image/png image/gif image/jpeg image/pjpeg image/bmp image/x-icon image/x-xbitmap image/x-xbm";
+    private const string[] INLINE_MIME_TYPES = {
+        "image/png",
+        "image/gif",
+        "image/jpeg",
+        "image/pjpeg",
+        "image/bmp",
+        "image/x-icon",
+        "image/x-xbitmap",
+        "image/x-xbm"
+    };
     
     private const int ATTACHMENT_PREVIEW_SIZE = 50;
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
@@ -691,9 +699,26 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private static string? inline_image_replacer(string filename, string mimetype, Geary.Memory.Buffer buffer) {
-        if (!(mimetype in INLINE_MIME_TYPES))
+    private static bool is_content_type_supported_inline(Geary.Mime.ContentType content_type) {
+        foreach (string mime_type in INLINE_MIME_TYPES) {
+            try {
+                if (content_type.is_mime_type(mime_type))
+                    return true;
+            } catch (Error err) {
+                debug("Unable to compare MIME type %s: %s", mime_type, err.message);
+            }
+        }
+        
+        return false;
+    }
+    
+    private static string? inline_image_replacer(string filename, Geary.Mime.ContentType? content_type,
+        Geary.Mime.ContentDisposition? disposition, Geary.Memory.Buffer buffer) {
+        if (content_type == null || !is_content_type_supported_inline(content_type)) {
+            debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
+            
             return null;
+        }
         
         // Even if the image doesn't need to be rotated, there's a win here: by reducing the size
         // of the image at load time, it reduces the amount of work that has to be done to insert
@@ -729,7 +754,7 @@ public class ConversationViewer : Gtk.Box {
         }
         
         return "<img alt=\"%s\" class=\"%s\" src=\"%s\" />".printf(
-            filename, DATA_IMAGE_CLASS, assemble_data_uri(mimetype, rotated_image));
+            filename, DATA_IMAGE_CLASS, assemble_data_uri(content_type.get_mime_type(), rotated_image));
     }
     
     // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
@@ -1809,12 +1834,12 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private static bool should_show_attachment(Geary.Attachment attachment) {
-        switch (attachment.disposition) {
-            case Geary.Attachment.Disposition.ATTACHMENT:
+        switch (attachment.content_disposition.disposition_type) {
+            case Geary.Mime.DispositionType.ATTACHMENT:
                 return true;
             
-            case Geary.Attachment.Disposition.INLINE:
-                return !(attachment.mime_type in INLINE_MIME_TYPES);
+            case Geary.Mime.DispositionType.INLINE:
+                return !is_content_type_supported_inline(attachment.content_type);
             
             default:
                 assert_not_reached();
@@ -1876,7 +1901,7 @@ public class ConversationViewer : Gtk.Box {
                 // Set the image preview and insert it into the container.
                 WebKit.DOM.HTMLImageElement img =
                     Util.DOM.select(attachment_table, ".preview img") as WebKit.DOM.HTMLImageElement;
-                web_view.set_attachment_src(img, attachment.mime_type, attachment.file.get_path(),
+                web_view.set_attachment_src(img, attachment.content_type, attachment.file.get_path(),
                     ATTACHMENT_PREVIEW_SIZE);
                 attachment_container.append_child(attachment_table);
             }

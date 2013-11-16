@@ -682,13 +682,13 @@ namespace GMime {
 		[CCode (cname = "g_mime_object_encode")]
 		public virtual void encode (GMime.EncodingConstraint constraint);
 		[CCode (cname = "g_mime_object_get_content_disposition")]
-		public unowned GMime.ContentDisposition get_content_disposition ();
+		public unowned GMime.ContentDisposition? get_content_disposition ();
 		[CCode (cname = "g_mime_object_get_content_disposition_parameter")]
 		public unowned string get_content_disposition_parameter (string attribute);
 		[CCode (cname = "g_mime_object_get_content_id")]
 		public unowned string get_content_id ();
 		[CCode (cname = "g_mime_object_get_content_type")]
-		public unowned GMime.ContentType get_content_type ();
+		public unowned GMime.ContentType? get_content_type ();
 		[CCode (cname = "g_mime_object_get_content_type_parameter")]
 		public unowned string? get_content_type_parameter (string name);
 		[CCode (cname = "g_mime_object_get_disposition")]

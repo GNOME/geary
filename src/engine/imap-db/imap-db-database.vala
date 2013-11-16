@@ -256,9 +256,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     try {
                         Geary.RFC822.Message message = new Geary.RFC822.Message.from_parts(
                             new RFC822.Header(header), new RFC822.Text(body));
-                        Geary.Attachment.Disposition? target_disposition = null;
+                        Mime.DispositionType target_disposition = Mime.DispositionType.UNSPECIFIED;
                         if (message.get_sub_messages().is_empty)
-                            target_disposition = Geary.Attachment.Disposition.INLINE;
+                            target_disposition = Mime.DispositionType.INLINE;
                         Geary.ImapDB.Folder.do_save_attachments_db(cx, id,
                             message.get_attachments(target_disposition), this, null);
                     } catch (Error e) {

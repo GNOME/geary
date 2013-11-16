@@ -330,9 +330,13 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
         GMime.Part? part = parser.construct_part() as GMime.Part;
         if (part != null) {
-            is_html = (part.get_content_type().to_string() == "text/html");
+            Mime.ContentType? content_type = null;
+            if (part.get_content_type() != null) {
+                content_type = new Mime.ContentType.from_gmime(part.get_content_type());
+                is_html = content_type.is_type("text", "html");
+                charset = content_type.params.get_value("charset");
+            }
             
-            charset = part.get_content_type_parameter("charset");
             encoding = part.get_header("Content-Transfer-Encoding");
         }
         

@@ -9,8 +9,8 @@ public class Geary.RFC822.Message : BaseObject {
      * This delegate is an optional parameter to the body constructers that allows callers
      * to process arbitrary non-text, inline MIME parts.
      */
-    public delegate string? InlinePartReplacer(string filename, string mimetype,
-        Geary.Memory.Buffer buffer);
+    public delegate string? InlinePartReplacer(string filename, Mime.ContentType? content_type,
+        Mime.ContentDisposition? disposition, Geary.Memory.Buffer buffer);
     
     private const string DEFAULT_ENCODING = "UTF8";
     
@@ -470,35 +470,41 @@ public class Geary.RFC822.Message : BaseObject {
         if (part == null)
             return false;
         
+        Mime.ContentDisposition? disposition = null;
+        if (part.get_content_disposition() != null)
+            disposition = new Mime.ContentDisposition.from_gmime(part.get_content_disposition());
+        
         // Stop processing if the part is an attachment
-        string? disposition = part.get_disposition();
-        if (disposition != null && disposition.down() == "attachment")
+        if (disposition != null && disposition.disposition_type == Mime.DispositionType.ATTACHMENT)
             return false;
         
         /* Handle text parts that are not attachments
          * They may have inline disposition, or they may have no disposition specified
          */
-        GMime.ContentType content_type = part.get_content_type();
-        if (String.stri_equal(content_type.get_media_type(), "text")) {
-            if (String.stri_equal(content_type.get_media_subtype(), text_subtype)) {
-                body = mime_part_to_memory_buffer(part, true, to_html).to_string();
-                return true;
+        Mime.ContentType? content_type = null;
+        if (part.get_content_type() != null) {
+            content_type = new Mime.ContentType.from_gmime(part.get_content_type());
+            if (content_type.has_media_type("text")) {
+                if (content_type.has_media_subtype(text_subtype)) {
+                    body = mime_part_to_memory_buffer(part, true, to_html).to_string();
+                    return true;
+                }
+                
+                // We were the wrong kind of text part
+                return false;
             }
-            
-            // We were the wrong kind of text part
-            return false;
         }
         
         // If images have no disposition, they are handled elsewhere; see #7299
-        if (disposition == null)
+        if (disposition == null || disposition.disposition_type == Mime.DispositionType.UNSPECIFIED)
             return false;
         
-        // Hand off to the replacer for processing
         if (replacer == null)
             return false;
         
-        string? replaced_part = replacer(RFC822.Utils.get_attachment_filename(part), content_type.to_string(),
-            mime_part_to_memory_buffer(part));
+        // Hand off to the replacer for processing
+        string? replaced_part = replacer(RFC822.Utils.get_attachment_filename(part), content_type,
+            disposition, mime_part_to_memory_buffer(part));
         if (replaced_part != null)
             body = replaced_part;
         
@@ -642,16 +648,16 @@ public class Geary.RFC822.Message : BaseObject {
         return null;
     }
     
-    internal Gee.List<GMime.Part> get_attachments(Geary.Attachment.Disposition? disposition = null)
-        throws RFC822Error {
-        // A null disposition means "return all Mime parts recognized by Geary.Attachment.Disposition"
+    // UNSPECIFIED disposition means "return all Mime parts"
+    internal Gee.List<GMime.Part> get_attachments(
+        Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED) throws RFC822Error {
         Gee.List<GMime.Part> attachments = new Gee.ArrayList<GMime.Part>();
         get_attachments_recursively(attachments, message.get_mime_part(), disposition);
         return attachments;
     }
     
     private void get_attachments_recursively(Gee.List<GMime.Part> attachments, GMime.Object root,
-        Geary.Attachment.Disposition? requested_disposition) throws RFC822Error {
+        Mime.DispositionType requested_disposition) throws RFC822Error {
         // If this is a multipart container, dive into each of its children.
         GMime.Multipart? multipart = root as GMime.Multipart;
         if (multipart != null) {
@@ -666,14 +672,15 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.MessagePart? messagepart = root as GMime.MessagePart;
         if (messagepart != null) {
             GMime.Message message = messagepart.get_message();
-            Geary.Attachment.Disposition? disposition = Geary.Attachment.Disposition.from_string(
-                root.get_disposition());
-            if (disposition == null) {
+            bool is_unknown;
+            Mime.DispositionType disposition = Mime.DispositionType.deserialize(root.get_disposition(),
+                out is_unknown);
+            if (disposition == Mime.DispositionType.UNSPECIFIED || is_unknown) {
                 // This is often the case, and we'll treat these as attached
-                disposition = Geary.Attachment.Disposition.ATTACHMENT;
+                disposition = Mime.DispositionType.ATTACHMENT;
             }
             
-            if (requested_disposition == null || disposition == requested_disposition) {
+            if (requested_disposition == Mime.DispositionType.UNSPECIFIED || disposition == requested_disposition) {
                 GMime.Stream stream = new GMime.StreamMem();
                 message.write_to_stream(stream);
                 GMime.DataWrapper data = new GMime.DataWrapper.with_stream(stream,
@@ -695,32 +702,24 @@ public class Geary.RFC822.Message : BaseObject {
             return;
         }
         
-        Geary.Attachment.Disposition? part_disposition = Geary.Attachment.Disposition.from_string(
-            part.get_disposition());
-        if (part_disposition == null) {
-            // The part disposition was unknown to Geary.Attachment.Disposition
+        Mime.DispositionType part_disposition = Mime.DispositionType.deserialize(part.get_disposition(),
+            null);
+        if (part_disposition == Mime.DispositionType.UNSPECIFIED)
             return;
-        }
         
-        GMime.ContentType content_type = part.get_content_type();
-        if (part_disposition == Geary.Attachment.Disposition.INLINE &&
-            content_type.get_media_type().down() == "text") {
-            string subtype = content_type.get_media_subtype().down();
-            if (subtype == "html" || subtype == "plain") {
-                // These are part of the body.
+        if (part.get_content_type() != null) {
+            Mime.ContentType content_type = new Mime.ContentType.from_gmime(part.get_content_type());
+            if (part_disposition == Mime.DispositionType.INLINE
+                && content_type.has_media_type("text")
+                && (content_type.has_media_subtype("html") || content_type.has_media_subtype("plain"))) {
+                // these are part of the body
                 return;
             }
         }
         
-        if (requested_disposition == null) {
-            // Return any attachment whose disposition is recognized by Geary.Attachment.Disposition
+        // Catch remaining disposition-type matches
+        if (requested_disposition == Mime.DispositionType.UNSPECIFIED || part_disposition == requested_disposition)
             attachments.add(part);
-            return;
-        }
-        
-        if (part_disposition == requested_disposition) {
-            attachments.add(part);
-        }
     }
     
     public Gee.List<Geary.RFC822.Message> get_sub_messages() {
@@ -766,11 +765,14 @@ public class Geary.RFC822.Message : BaseObject {
     
     private Memory.Buffer mime_part_to_memory_buffer(GMime.Part part,
         bool to_utf8 = false, bool to_html = false) throws RFC822Error {
-
+        Mime.ContentType? content_type = null;
+        if (part.get_content_type() != null)
+            content_type = new Mime.ContentType.from_gmime(part.get_content_type());
+        
         GMime.DataWrapper? wrapper = part.get_content_object();
         if (wrapper == null) {
             throw new RFC822Error.INVALID("Could not get the content wrapper for content-type %s",
-                part.get_content_type().to_string());
+                content_type.to_string());
         }
         
         ByteArray byte_array = new ByteArray();
@@ -780,17 +782,17 @@ public class Geary.RFC822.Message : BaseObject {
         // Convert encoding to UTF-8.
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         if (to_utf8) {
-            string? charset = part.get_content_type_parameter("charset");
+            string? charset = (content_type != null) ? content_type.params.get_value("charset") : null;
             if (String.is_empty(charset))
                 charset = DEFAULT_ENCODING;
             stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
         }
-        string format = part.get_content_type_parameter("format") ?? "";
-        bool flowed = (format.down() == "flowed");
-        string delsp_par = part.get_content_type_parameter("DelSp") ?? "no";
-        bool delsp = (delsp_par.down() == "yes");
+        
+        bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
+        bool delsp = (content_type != null) ? content_type.params.has_value_ci("DelSp", "yes") : false;
         if (flowed)
             stream_filter.add(new Geary.RFC822.FilterFlowed(to_html, delsp));
+        
         if (to_html) {
             if (!flowed)
                 stream_filter.add(new Geary.RFC822.FilterPlain());

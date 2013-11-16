@@ -229,6 +229,13 @@ engine/memory/memory-unowned-byte-array-buffer.vala
 engine/memory/memory-unowned-bytes-buffer.vala
 engine/memory/memory-unowned-string-buffer.vala
 
+engine/mime/mime-content-disposition.vala
+engine/mime/mime-content-parameters.vala
+engine/mime/mime-content-type.vala
+engine/mime/mime-data-format.vala
+engine/mime/mime-disposition-type.vala
+engine/mime/mime-error.vala
+
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-concurrent.vala

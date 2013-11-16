@@ -1874,9 +1874,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
         do {
+            Mime.ContentDisposition disposition = new Mime.ContentDisposition.simple(
+                Mime.DispositionType.from_int(results.int_at(4)));
             list.add(new ImapDB.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
-                results.nonnull_string_at(2), results.int64_at(3), message_id, results.rowid_at(0),
-                Geary.Attachment.Disposition.from_int(results.int_at(4))));
+                Mime.ContentType.deserialize(results.nonnull_string_at(2)), results.int64_at(3),
+                message_id, results.rowid_at(0), disposition));
         } while (results.next(cancellable));
         
         return list;
@@ -1907,6 +1909,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 attachment_data.write_to_stream(stream); // data is null if it's 0 bytes
             uint filesize = byte_array.len;
             
+            // convert into DispositionType enum, which is stored as int
+            // (legacy code stored UNSPECIFIED as NULL, which is zero, which is ATTACHMENT, so preserve
+            // this behavior)
+            Mime.DispositionType disposition_type = Mime.DispositionType.deserialize(disposition,
+                null);
+            if (disposition_type == Mime.DispositionType.UNSPECIFIED)
+                disposition_type = Mime.DispositionType.ATTACHMENT;
+            
             // Insert it into the database.
             Db.Statement stmt = cx.prepare("""
                 INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize, disposition)
@@ -1916,7 +1926,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_string(1, filename);
             stmt.bind_string(2, mime_type);
             stmt.bind_uint(3, filesize);
-            stmt.bind_int(4, Geary.Attachment.Disposition.from_string(disposition));
+            stmt.bind_int(4, disposition_type);
             
             int64 attachment_id = stmt.exec_insert(cancellable);
             
