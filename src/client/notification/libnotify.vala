@@ -16,7 +16,7 @@ public class Libnotify : Geary.BaseObject {
     private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
     private Geary.Email? email = null;
-    private unowned List<string> caps;
+    private List<string> caps;
 
     public signal void invoked(Geary.Folder? folder, Geary.Email? email);
     

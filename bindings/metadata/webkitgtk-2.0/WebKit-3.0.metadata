@@ -9,3 +9,8 @@ WebView.leaving_fullscreen#signal name="leaving_fullscreen_signal"
 WebView.move_cursor#virtual_method name="leaving_fullscreen_method"
 WebSettings.enable_default_context_menu#property deprecated=false
 
+DOMNode.dispatch_event type="void"
+DOMWebKitNamedFlow.dispatch_event type="void"
+DOMDOMApplicationCache.dispatch_event type="void"
+DOMDOMWindow.dispatch_event type="void"
+
