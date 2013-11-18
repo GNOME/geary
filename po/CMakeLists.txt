@@ -2,7 +2,6 @@
 set(TRANSLATED
     ar
     ca
-    ca_ES
     cs
     da
     de
@@ -11,8 +10,6 @@ set(TRANSLATED
     en_GB
     eo
     es
-    es_419
-    es_ES
     et
     eu
     fa
@@ -20,22 +17,21 @@ set(TRANSLATED
     fr
     gl
     he
-    hi_IN
+    hi
     hr
-    hu_HU
+    hu
     id
     it
-    ja_JP
-    km_KH
+    ja
+    km
     lt
-    ms_MY
+    ms
     nb
-    nl_NL
+    nl
     pl
     pt
     pt_BR
     ro
-    ro_RO
     ru
     sk
     sl
