@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+  <name xml:lang="en">geary</name>
+  <shortdesc xml:lang="en">email client</shortdesc>
+  <homepage rdf:resource="http://www.yorba.org/projects/geary/" />
+  <mailing-list rdf:resource="https://mail.gnome.org/mailman/listinfo/geary-list" />
+  <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=geary" />
+  <category rdf:resource="http://api.gnome.org/doap-extensions#desktop" />
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Jim Nelson</foaf:name>
+      <foaf:mbox rdf:resource="mailto:jim@yorba.org" />
+      <gnome:userid>jnelson</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Charles Lindsay</foaf:name>
+      <foaf:mbox rdf:resource="mailto:chaz@yorba.org" />
+      <gnome:userid>clindsay</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+
+</Project>
