@@ -6,7 +6,7 @@
          xmlns="http://usefulinc.com/ns/doap#">
 
   <name xml:lang="en">geary</name>
-  <shortdesc xml:lang="en">email client</shortdesc>
+  <shortdesc xml:lang="en">Email client</shortdesc>
   <homepage rdf:resource="http://www.yorba.org/projects/geary/" />
   <mailing-list rdf:resource="https://mail.gnome.org/mailman/listinfo/geary-list" />
   <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=geary" />
