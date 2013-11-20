@@ -1,3 +1,9 @@
+geary (0.4.2-1~raring1) raring; urgency=low
+
+  * Compile with Vala 0.22.1
+
+ -- Jim Nelson <jim@yorba.org>  Wed, 20 Nov 2013 13:06:44 -0800
+
 geary (0.4.1-1~raring1) raring; urgency=low
 
   * Compile-time support for WebKitGTK 2.2
