@@ -5,7 +5,7 @@ set(TRANSLATED
     cs
     da
     de
-    el_GR
+    el
     en_CA
     en_GB
     eo
