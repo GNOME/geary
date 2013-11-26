@@ -4,10 +4,8 @@
 /.stamp
 build/
 /geary
-/gearyd
 /geary-mailer
 /geary-console
-/geary-db-test
 *.xz
 *.swp
 bindings/vapi/gmime-2.6/gmime-2.6.gi

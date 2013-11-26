@@ -1,13 +1,6 @@
 # Geary build script
 # Copyright 2011-2013 Yorba Foundation
 
-set(COMMON_SRC
-common/common-arrays.vala
-common/common-async.vala
-common/common-international.vala
-common/common-yorba-application.vala
-)
-
 set(ENGINE_SRC
 engine/abstract/geary-abstract-account.vala
 engine/abstract/geary-abstract-folder.vala
@@ -297,12 +290,12 @@ engine/util/util-trillian.vala
 )
 
 set(CLIENT_SRC
-client/geary-application.vala
-client/geary-args.vala
-client/geary-config.vala
-client/geary-controller.vala
-client/main.vala
-client/secret-mediator.vala
+client/application/geary-application.vala
+client/application/geary-args.vala
+client/application/geary-config.vala
+client/application/geary-controller.vala
+client/application/main.vala
+client/application/secret-mediator.vala
 
 client/accounts/account-dialog.vala
 client/accounts/account-dialog-account-list-pane.vala
@@ -315,12 +308,32 @@ client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
 
+client/components/conversation-find-bar.vala
+client/components/count-badge.vala
+client/components/folder-menu.vala
+client/components/icon-factory.vala
+client/components/main-toolbar.vala
+client/components/main-window.vala
+client/components/monitored-progress-bar.vala
+client/components/monitored-spinner.vala
+client/components/pill-toolbar.vala
+client/components/status-bar.vala
+client/components/stock.vala
+
 client/composer/composer-toolbar.vala
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
 client/composer/email-entry.vala
 client/composer/webview-edit-fixer.vala
+
+client/conversation-list/conversation-list-cell-renderer.vala
+client/conversation-list/conversation-list-store.vala
+client/conversation-list/conversation-list-view.vala
+client/conversation-list/formatted-conversation-data.vala
+
+client/conversation-viewer/conversation-viewer.vala
+client/conversation-viewer/conversation-web-view.vala
 
 client/dialogs/alert-dialog.vala
 client/dialogs/attachment-dialog.vala
@@ -337,8 +350,6 @@ client/folder-list/folder-list-inbox-folder-entry.vala
 client/folder-list/folder-list-search-branch.vala
 client/folder-list/folder-list-special-grouping.vala
 
-client/models/conversation-list-store.vala
-
 client/notification/libmessagingmenu.vala
 client/notification/libnotify.vala
 client/notification/new-messages-indicator.vala
@@ -352,30 +363,14 @@ client/sidebar/sidebar-count-cell-renderer.vala
 client/sidebar/sidebar-entry.vala
 client/sidebar/sidebar-tree.vala
 
-client/ui/count-badge.vala
-client/ui/folder-menu.vala
-client/ui/icon-factory.vala
-client/ui/main-toolbar.vala
-client/ui/main-window.vala
-client/ui/monitored-progress-bar.vala
-client/ui/monitored-spinner.vala
-client/ui/pill-toolbar.vala
-client/ui/status-bar.vala
-client/ui/stock.vala
-
 client/util/util-date.vala
 client/util/util-email.vala
 client/util/util-files.vala
 client/util/util-gravatar.vala
 client/util/util-gtk.vala
+client/util/util-international.vala
 client/util/util-webkit.vala
-
-client/views/formatted-conversation-data.vala
-client/views/conversation-find-bar.vala
-client/views/conversation-list-cell-renderer.vala
-client/views/conversation-list-view.vala
-client/views/conversation-viewer.vala
-client/views/conversation-web-view.vala
+client/util/util-yorba-application.vala
 )
 
 set(CONSOLE_SRC
@@ -561,7 +556,6 @@ set(VALAC_OPTIONS
 #################################################
 vala_precompile(ENGINE_VALA_C geary-static
     ${ENGINE_SRC}
-    ${COMMON_SRC}
 PACKAGES
     ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
@@ -607,7 +601,7 @@ add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
 
 IF (XGETTEXT_FOUND)
     MESSAGE("Creating POT file")
-    GETTEXT_CREATE_POT(${GETTEXT_PACKAGE}.pot OPTION ${XGETTEXT_OPTIONS} SRC ${CLIENT_SRC} ${ENGINE_SRC} ${COMMON_SRC} GLADE ${GLADE_FILES})
+    GETTEXT_CREATE_POT(${GETTEXT_PACKAGE}.pot OPTION ${XGETTEXT_OPTIONS} SRC ${CLIENT_SRC} ${ENGINE_SRC} GLADE ${GLADE_FILES})
 ELSE ()
     message(STATUS "xgettext not found")
 ENDIF()
