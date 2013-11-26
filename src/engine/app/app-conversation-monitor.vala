@@ -44,9 +44,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
     private Cancellable? cancellable_monitor = null;
-    private bool retry_connection = false;
-    private int64 last_retry_time = 0;
-    private uint retry_id = 0;
     private bool reseed_notified = false;
     private int _min_window_count = 0;
     private ConversationOperationQueue operation_queue = new ConversationOperationQueue();
@@ -188,8 +185,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS;
         _min_window_count = min_window_count;
-        
-        folder.account.information.notify["imap-credentials"].connect(on_imap_credentials_notified);
     }
     
     ~ConversationMonitor() {
@@ -198,8 +193,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         // Manually detach all the weak refs in the Conversation objects
         conversations.clear_owners();
-        
-        folder.account.information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
     }
     
     protected virtual void notify_monitoring_started() {
@@ -291,7 +284,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.email_inserted.connect(on_folder_email_inserted);
         folder.email_removed.connect(on_folder_email_removed);
         folder.opened.connect(on_folder_opened);
-        folder.closed.connect(on_folder_closed);
         folder.account.email_flags_changed.connect(on_account_email_flags_changed);
         folder.account.email_locally_complete.connect(on_account_email_locally_complete);
         // TODO: handle removed email
@@ -305,7 +297,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             folder.email_inserted.disconnect(on_folder_email_inserted);
             folder.email_removed.disconnect(on_folder_email_removed);
             folder.opened.disconnect(on_folder_opened);
-            folder.closed.disconnect(on_folder_closed);
             folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
             folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
             
@@ -343,9 +334,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private async void stop_monitoring_internal_async(bool close_folder, bool retrying,
         Cancellable? cancellable) throws Error {
-        // always unschedule, as Timeout will hold a reference to this object
-        unschedule_retry();
-        
         if (!is_monitoring)
             return;
         
@@ -358,7 +346,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.email_inserted.disconnect(on_folder_email_inserted);
         folder.email_removed.disconnect(on_folder_email_removed);
         folder.opened.disconnect(on_folder_opened);
-        folder.closed.disconnect(on_folder_closed);
         folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
         folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
         
@@ -753,104 +740,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // once remote is open, reseed with messages from the earliest ID to the latest
         if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
             operation_queue.add(new ReseedOperation(this, state.to_string()));
-    }
-    
-    private void on_folder_closed(Folder.CloseReason reason) {
-        debug("Folder %s close reason %s", folder.to_string(), reason.to_string());
-        
-        // watch for errors; these indicate a retry should occur
-        if (reason.is_error() && reestablish_connections)
-            retry_connection = true;
-        
-        // wait for the folder to be completely closed before retrying
-        if (reason != Folder.CloseReason.FOLDER_CLOSED)
-            return;
-        
-        if (!retry_connection) {
-            debug("Folder %s closed normally, not reestablishing connection", folder.to_string());
-            
-            stop_monitoring_internal_async.begin(false, false, null);
-            
-            return;
-        }
-        
-        // reset
-        retry_connection = false;
-        
-        debug("Folder %s closed due to error, reestablishing connection to continue monitoring conversations",
-            folder.to_string());
-        
-        schedule_retry();
-    }
-    
-    private async void do_restart_monitoring_async() {
-        last_retry_time = get_monotonic_time();
-        
-        try {
-            debug("Restarting conversation monitoring of folder %s, stopping previous monitoring...",
-                folder.to_string());
-            yield stop_monitoring_internal_async(false, true, null);
-        } catch (Error stop_err) {
-            debug("Error closing folder %s while reestablishing connection: %s", folder.to_string(),
-                stop_err.message);
-        }
-        
-        // TODO: Get smarter about this, especially since this might be an authentication error
-        // and not a hard error
-        debug("Restarting conversation monitoring of folder %s...", folder.to_string());
-        try {
-            if (!yield start_monitoring_async(cancellable_monitor))
-                debug("Unable to restart monitoring of %s: already monitoring", folder.to_string());
-            else
-                debug("Reestablished connection to %s, continuing to monitor conversations",
-                    folder.to_string());
-        } catch (Error start_err) {
-            debug("Unable to reestablish connection to %s, retrying in %d seconds: %s", folder.to_string(),
-                RETRY_CONNECTION_SEC, start_err.message);
-            
-            schedule_retry();
-        }
-    }
-    
-    // If we've got a pending retry and the folder's account's password is
-    // updated, cancel the pending retry and retry now.  This prevents the user
-    // waiting while nothing happens after they type in their password.
-    private void on_imap_credentials_notified() {
-        if (retry_id == 0)
-            return;
-        unschedule_retry();
-        do_restart_monitoring_async.begin();
-    }
-    
-    private void schedule_retry() {
-        if (retry_id != 0)
-            return;
-        
-        // Number of us in the future we can schedule a retry, so we have a
-        // minimum of RETRY_CONNECTION_SEC s between retries.
-        int64 next_retry_time = RETRY_CONNECTION_SEC * 1000000 - (get_monotonic_time() - last_retry_time);
-        
-        // If it's been enough time since last retry we can retry immediately
-        // (note we schedule on ms, translated from us).
-        if (next_retry_time <= 0)
-            do_restart_monitoring_async.begin();
-        else
-            retry_id = Timeout.add((uint) (next_retry_time / 1000), on_delayed_retry);
-    }
-    
-    private void unschedule_retry() {
-        if (retry_id != 0) {
-            Source.remove(retry_id);
-            retry_id = 0;
-        }
-    }
-    
-    private bool on_delayed_retry() {
-        retry_id = 0;
-        
-        do_restart_monitoring_async.begin();
-        
-        return false;
     }
     
     /**

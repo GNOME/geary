@@ -335,7 +335,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGING_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.LOGOUT, Geary.State.nop),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_recv_disconnecting_status),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_dropped_response),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_ERROR, on_disconnected),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_ERROR, on_send_error),
@@ -347,7 +347,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGED_OUT, Event.CLOSE_MAILBOX, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.LOGOUT, on_late_command),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.DISCONNECT, on_disconnect),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_recv_disconnecting_status),
+            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_dropped_response),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_COMPLETION, on_dropped_response),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_ERROR, on_disconnected),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.SEND_ERROR, on_send_error),
@@ -574,22 +574,21 @@ public class Geary.Imap.ClientSession : BaseObject {
     private void drop_connection() {
         unschedule_keepalive();
         
-        if (cx == null)
-            return;
-        
-        cx.connected.disconnect(on_network_connected);
-        cx.disconnected.disconnect(on_network_disconnected);
-        cx.sent_command.disconnect(on_network_sent_command);
-        cx.send_failure.disconnect(on_network_send_error);
-        cx.received_status_response.disconnect(on_received_status_response);
-        cx.received_server_data.disconnect(on_received_server_data);
-        cx.received_bytes.disconnect(on_received_bytes);
-        cx.received_bad_response.disconnect(on_received_bad_response);
-        cx.recv_closed.disconnect(on_received_closed);
-        cx.receive_failure.disconnect(on_network_receive_failure);
-        cx.deserialize_failure.disconnect(on_network_receive_failure);
-        
-        cx = null;
+        if (cx != null) {
+            cx.connected.disconnect(on_network_connected);
+            cx.disconnected.disconnect(on_network_disconnected);
+            cx.sent_command.disconnect(on_network_sent_command);
+            cx.send_failure.disconnect(on_network_send_error);
+            cx.received_status_response.disconnect(on_received_status_response);
+            cx.received_server_data.disconnect(on_received_server_data);
+            cx.received_bytes.disconnect(on_received_bytes);
+            cx.received_bad_response.disconnect(on_received_bad_response);
+            cx.recv_closed.disconnect(on_received_closed);
+            cx.receive_failure.disconnect(on_network_receive_failure);
+            cx.deserialize_failure.disconnect(on_network_receive_failure);
+            
+            cx = null;
+        }
         
         // if there are any outstanding commands waiting for responses, wake them up now
         if (waiting_for_completion.size > 0) {
@@ -901,15 +900,12 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     private void on_keepalive_completed(Object? source, AsyncResult result) {
-        StatusResponse response;
         try {
-            response = send_command_async.end(result);
+            StatusResponse response = send_command_async.end(result);
             Logging.debug(Logging.Flag.PERIODIC, "[%s] Keepalive result: %s", to_string(),
                 response.to_string());
         } catch (Error err) {
             debug("[%s] Keepalive error: %s", to_string(), err.message);
-            
-            return;
         }
     }
     
@@ -1014,28 +1010,12 @@ public class Geary.Imap.ClientSession : BaseObject {
             break;
             
             case Status.BYE:
-                // this is REMOTE_ERROR because it occurs in a state where the client didn't
-                // expect to go away (see on_recv_disconnecting_status)
-                fsm.do_post_transition(() => { disconnected(DisconnectReason.REMOTE_ERROR); });
-                
-                return State.BROKEN;
+                debug("[%s] Received BYE from server: %s", to_string(), status_response.to_string());
+            break;
             
             default:
                 debug("[%s] Received error from server: %s", to_string(), status_response.to_string());
             break;
-        }
-        
-        return state;
-    }
-    
-    private uint on_recv_disconnecting_status(uint state, uint event, void *user, Object? object) {
-        StatusResponse status_response = (StatusResponse) object;
-        
-        switch (status_response.status) {
-            case Status.BYE:
-                fsm.do_post_transition(() => { disconnected(DisconnectReason.REMOTE_CLOSE); });
-                
-                return State.BROKEN;
         }
         
         return state;

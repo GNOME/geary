@@ -443,6 +443,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         this.open_flags = open_flags;
+        
+        open_internal(cancellable);
+        
+        return true;
+    }
+    
+    private void open_internal(Cancellable? cancellable) {
         remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
         // start the replay queue
@@ -460,8 +467,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         // meaning that folder normalization never happens and unsolicited notifications never
         // arrive
         start_remote_open_timer();
-        
-        return true;
     }
     
     private void start_remote_open_timer() {
@@ -590,9 +595,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     // NOTE: This bypasses open_count and forces the Folder closed.
     internal async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
         Cancellable? cancellable) {
-        // force closed
-        open_count = 0;
-        
         cancel_remote_open_timer();
         
         // only flushing pending ReplayOperations if this is a "clean" close, not forced due to
@@ -640,6 +642,21 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             closing_remote_folder.close_async.begin(cancellable);
         }
         
+        remote_opened = false;
+        
+        // reestablish connection (which requires renormalizing the remote with the local) if
+        // close was in error
+        if (remote_reason.is_error()) {
+            debug("Reestablishing broken connect to %s", to_string());
+            
+            open_internal(null);
+            
+            return;
+        }
+        
+        // forced closed one way or another
+        open_count = 0;
+        
         // use remote_reason even if remote_folder was null; it could be that the error occurred
         // while opening and remote_folder was yet unassigned ... also, need to call this every
         // time, even if remote was not fully opened, as some callers rely on order of signals
@@ -647,8 +664,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // see above note for why this must be called every time
         notify_closed(local_reason);
-        
-        remote_opened = false;
         
         notify_closed(CloseReason.FOLDER_CLOSED);
         
