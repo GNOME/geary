@@ -164,10 +164,10 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
             return _("Now");
         
         case CoarseDate.MINUTES:
-            return _("%dm ago").printf(diff / TimeSpan.MINUTE);
+            return ngettext("%dm ago", "%dm ago", (ulong) (diff / TimeSpan.MINUTE)).printf(diff / TimeSpan.MINUTE);
         
         case CoarseDate.HOURS:
-            return _("%dh ago").printf(diff / TimeSpan.HOUR);
+            return ngettext("%dh ago", "%dh ago", (ulong) (diff / TimeSpan.HOUR)).printf(diff / TimeSpan.HOUR);
         
         case CoarseDate.TODAY:
             fmt = xlat_pretty_dates[clock_format.to_index()];
