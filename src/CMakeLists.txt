@@ -185,10 +185,6 @@ engine/imap-engine/imap-engine-generic-drafts-folder.vala
 engine/imap-engine/imap-engine-generic-folder.vala
 engine/imap-engine/imap-engine-generic-sent-mail-folder.vala
 engine/imap-engine/imap-engine-generic-trash-folder.vala
-engine/imap-engine/imap-engine-receive-replay-operation.vala
-engine/imap-engine/imap-engine-replay-operation.vala
-engine/imap-engine/imap-engine-replay-queue.vala
-engine/imap-engine/imap-engine-send-replay-operation.vala
 engine/imap-engine/gmail/imap-engine-gmail-account.vala
 engine/imap-engine/gmail/imap-engine-gmail-folder.vala
 engine/imap-engine/gmail/imap-engine-gmail-search-folder.vala
@@ -204,10 +200,14 @@ engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
 engine/imap-engine/replay-ops/imap-engine-mark-email.vala
 engine/imap-engine/replay-ops/imap-engine-move-email.vala
+engine/imap-engine/replay-ops/imap-engine-receive-replay-operation.vala
 engine/imap-engine/replay-ops/imap-engine-remove-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
 engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
+engine/imap-engine/replay-ops/imap-engine-replay-operation.vala
+engine/imap-engine/replay-ops/imap-engine-replay-queue.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
+engine/imap-engine/replay-ops/imap-engine-send-replay-operation.vala
 engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
