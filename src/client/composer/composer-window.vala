@@ -1576,6 +1576,8 @@ public class ComposerWindow : Gtk.Window {
         
         // Style toggle buttons.
         WebKit.DOM.DOMWindow window = editor.get_dom_document().get_default_view();
+        actions.get_action(ACTION_REMOVE_FORMAT).sensitive = !window.get_selection().is_collapsed;
+        
         WebKit.DOM.Element? active = window.get_selection().focus_node as WebKit.DOM.Element;
         if (active == null && window.get_selection().focus_node != null)
             active = window.get_selection().focus_node.get_parent_element();
