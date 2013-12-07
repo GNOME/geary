@@ -9,10 +9,12 @@ extern const string _VERSION;
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
 extern const string _SOURCE_ROOT_DIR;
+extern const string GETTEXT_PACKAGE;
 
-public class GearyApplication : YorbaApplication {
+public class GearyApplication : Gtk.Application {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
+    public const string APP_ID = "org.yorba.geary";
     public const string DESCRIPTION = DESKTOP_GENERIC_NAME;
     public const string COPYRIGHT = _("Copyright 2011-2013 Yorba Foundation");
     public const string WEBSITE = "http://www.yorba.org";
@@ -44,28 +46,47 @@ public class GearyApplication : YorbaApplication {
     };
     
     public const string LICENSE = """
-Geary is free software; you can redistribute it and/or modify it under the 
-terms of the GNU Lesser General Public License as published by the Free 
-Software Foundation; either version 2.1 of the License, or (at your option) 
+Geary is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 2.1 of the License, or (at your option)
 any later version.
 
-Geary is distributed in the hope that it will be useful, but WITHOUT 
+Geary is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for 
+FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
 more details.
 
-You should have received a copy of the GNU Lesser General Public License 
-along with Geary; if not, write to the Free Software Foundation, Inc., 
+You should have received a copy of the GNU Lesser General Public License
+along with Geary; if not, write to the Free Software Foundation, Inc.,
 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 """;
     
-    public static GearyApplication instance { 
+    private static const string ACTION_ENTRY_COMPOSE = "compose";
+    
+    public static const ActionEntry[] action_entries = {
+        {ACTION_ENTRY_COMPOSE, activate_compose, "s"},
+    };
+    
+    public static GearyApplication instance {
         get { return _instance; }
-        private set { 
+        private set {
             // Ensure singleton behavior.
             assert (_instance == null);
             _instance = value;
         }
+    }
+    
+    /**
+     * Signal that is activated when 'exit' is called, but before the application actually exits.
+     *
+     * To cancel an exit, a callback should return GearyApplication.cancel_exit(). To procede with
+     * an exit, a callback should return true.
+     */
+    public virtual signal bool exiting(bool panicked) {
+        controller.close();
+        Date.terminate();
+        
+        return true;
     }
     
     public GearyController controller { get; private set; default = new GearyController(); }
@@ -82,50 +103,84 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     
     private static GearyApplication _instance = null;
     
+    private string bin;
     private File exec_dir;
     
+    private bool exiting_fired = false;
+    private int exitcode = 0;
+    
     public GearyApplication() {
-        base (NAME, PRGNAME, "org.yorba.geary");
+        Object(application_id: APP_ID);
         
         _instance = this;
     }
     
-    public override int startup() {
-        exec_dir = (File.new_for_path(Posix.realpath(Environment.find_program_in_path(args[0])))).get_parent();
+    // Application.run() calls this as an entry point.
+    public override bool local_command_line(ref unowned string[] args, out int exit_status) {
+        bin = args[0];
+        exec_dir = (File.new_for_path(Posix.realpath(Environment.find_program_in_path(bin)))).get_parent();
         
-        Geary.Logging.init();
-        Configuration.init(is_installed(), GSETTINGS_DIR);
-        Date.init();
-        WebKit.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        try {
+            register();
+        } catch (Error e) {
+            error("Error registering GearyApplication: %s", e.message);
+        }
         
-        int ec = base.startup();
-        if (ec != 0)
-            return ec;
+        Args.parse(args);
         
-        return Args.parse(args);
-    }
-    
-    public override bool exiting(bool panicked) {
-        controller.close();
-        Date.terminate();
+        activate();
+        foreach (unowned string arg in args) {
+            if (arg != null && arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
+                activate_action(ACTION_ENTRY_COMPOSE, new Variant.string(arg));
+        }
         
+        exit_status = 0;
         return true;
     }
     
-    public override void activate(string[] args) {
-        do_activate_async.begin(args);
+    public override void startup() {
+        Configuration.init(is_installed(), GSETTINGS_DIR);
+        
+        Environment.set_application_name(NAME);
+        Environment.set_prgname(PRGNAME);
+        International.init(GETTEXT_PACKAGE, bin);
+        
+        Geary.Logging.init();
+        Date.init();
+        WebKit.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        
+        base.startup();
+        
+        add_action_entries(action_entries, this);
     }
-
-    // Without owned on the args parameter, vala won't bother to keep the array
-    // around until the open_async() call completes, leading to crashes.  This
-    // way, this method gets its own long-lived copy.
-    private async void do_activate_async(owned string[] args) {
-        // If Geary is already running, show the main window and return.
-        if (controller != null && controller.main_window != null) {
-            controller.main_window.present();
-            handle_args(args);
+    
+    public override void activate() {
+        base.activate();
+        
+        if (!present())
+            create_async.begin();
+    }
+    
+    public void activate_compose(SimpleAction action, Variant? param) {
+        if (param == null)
             return;
-        }
+        
+        compose(param.get_string());
+    }
+    
+    public bool present() {
+        if (controller == null || controller.main_window == null)
+            return false;
+        
+        controller.main_window.present();
+        return true;
+    }
+    
+    private async void create_async() {
+        // Manually keep the main loop around for the duration of this call.
+        // Without this, the main loop will exit as soon as we hit the yield
+        // below, before we create the main window.
+        hold();
         
         // do *after* parsing args, as they dicate where logging is sent to, if anywhere, and only
         // after activate (which means this is only logged for the one user-visible instance, not
@@ -133,10 +188,18 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
             exec_dir.get_path(), is_installed().to_string());
         
-        config = new Configuration();
+        config = new Configuration(APP_ID);
         yield controller.open_async();
         
-        handle_args(args);
+        release();
+    }
+    
+    public bool compose(string mailto) {
+        if (controller == null)
+            return false;
+        
+        controller.compose_mailto(mailto);
+        return true;
     }
     
     // NOTE: This assert()'s if the Gtk.Action is not present in the default action group
@@ -241,12 +304,45 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         load_ui_file_for_manager(ui_manager, ui_filename);
     }
     
-    private void handle_args(string[] args) {
-        foreach(string arg in args) {
-            if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-                controller.compose_mailto(arg);
-            }
+    // This call will fire "exiting" only if it's not already been fired.
+    public void exit(int exitcode = 0) {
+        if (exiting_fired)
+            return;
+        
+        this.exitcode = exitcode;
+        
+        exiting_fired = true;
+        if (!exiting(false)) {
+            exiting_fired = false;
+            this.exitcode = 0;
+            
+            return;
         }
+        
+        if (Gtk.main_level() > 0)
+            Gtk.main_quit();
+        else
+            Posix.exit(exitcode);
+    }
+    
+    /**
+     * A callback for GearyApplication.exiting should return cancel_exit() to prevent the
+     * application from exiting.
+     */
+    public bool cancel_exit() {
+        Signal.stop_emission_by_name(this, "exiting");
+        return false;
+    }
+    
+    // This call will fire "exiting" only if it's not already been fired and halt the application
+    // in its tracks.
+    public void panic() {
+        if (!exiting_fired) {
+            exiting_fired = true;
+            exiting(true);
+        }
+        
+        Posix.exit(1);
     }
 }
 

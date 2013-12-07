@@ -370,7 +370,6 @@ client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala
 client/util/util-webkit.vala
-client/util/util-yorba-application.vala
 )
 
 set(CONSOLE_SRC
@@ -479,7 +478,6 @@ pkg_check_modules(DEPS REQUIRED
     gio-2.0>=2.28.0
     gtk+-3.0>=3.6.0
     gee-0.8>=0.8.5
-    unique-3.0>=3.0.0
     libnotify>=0.7.5
     libcanberra>=0.28
     sqlite3>=3.7.4
@@ -490,7 +488,7 @@ pkg_check_modules(DEPS REQUIRED
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3 libxml-2.0
+    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
 )
 
 set(CLIENT_PACKAGES

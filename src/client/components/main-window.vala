@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class MainWindow : Gtk.Window {
+public class MainWindow : Gtk.ApplicationWindow {
     private const int MESSAGE_LIST_WIDTH = 250;
     private const int FOLDER_LIST_WIDTH = 100;
     private const int STATUS_BAR_HEIGHT = 18;
@@ -28,7 +28,9 @@ public class MainWindow : Gtk.Window {
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
     private Geary.ProgressMonitor? conversation_monitor_progress = null;
     
-    public MainWindow() {
+    public MainWindow(GearyApplication application) {
+        Object(application: application);
+        
         title = GearyApplication.NAME;
         
         conversation_list_view = new ConversationListView(conversation_list_store);

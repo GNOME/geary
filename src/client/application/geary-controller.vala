@@ -161,7 +161,7 @@ public class GearyController : Geary.BaseObject {
         upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
         
         // Create the main window (must be done after creating actions.)
-        main_window = new MainWindow();
+        main_window = new MainWindow(GearyApplication.instance);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
         
         enable_message_buttons(false);
@@ -1184,8 +1184,8 @@ public class GearyController : Geary.BaseObject {
     }
     
     // We need to include the second parameter, or valac doesn't recognize the function as matching
-    // YorbaApplication.exiting's signature.
-    private bool on_application_exiting(YorbaApplication sender, bool panicked) {
+    // GearyApplication.exiting's signature.
+    private bool on_application_exiting(GearyApplication sender, bool panicked) {
         if (close_composition_windows())
             return true;
         
