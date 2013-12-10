@@ -68,6 +68,12 @@ do
                             CMDLINE="${CMDLINE} -DCMAKE_INSTALL_PREFIX=${value}"
                             ;;
         
+# ignored for autotools compatibility
+        --bindir | --libdir | --sbindir |--datadir | --localstatedir | --includedir) ;;
+        --infodir | --sysconfdir |  --mandir | --libexecdir) ;;
+        --build | --host | --target) ;;
+        --disable-silent-rules | --disable-static ) ;;
+        
         --debug)
                             CMDLINE="${CMDLINE} -DDEBUG=ON"
                             ;;
