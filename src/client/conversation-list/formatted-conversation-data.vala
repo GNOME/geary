@@ -264,7 +264,10 @@ public class FormattedConversationData : Geary.BaseObject {
         
         x_offset = 0;
         y_offset = 0;
-        width = 0;
+        // set width to 1 (rather than 0) to work around certain themes that cause the
+        // conversation list to be shown as "squished":
+        // https://bugzilla.gnome.org/show_bug.cgi?id=713954
+        width = 1;
         height = cell_height;
     }
     
