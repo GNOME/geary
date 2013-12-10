@@ -21,7 +21,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-09-25 21:20+0000\n"
+"PO-Revision-Date: 2013-12-07 10:42+0100\n"
 "Last-Translator: Federico Bruni <fedelogy@gmail.com>\n"
 "Language-Team: Italian (http://www.transifex.com/projects/p/geary/language/"
 "it/)\n"
@@ -30,6 +30,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:641
 msgid "        &#8226; Connection error.\n"
@@ -57,15 +58,11 @@ msgstr "&#8226; Errore di connessione a SMTP.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:637
 msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr ""
-"&#8226; Nome utente o password SMTP errati.\n"
-"\n"
+msgstr "       &#8226; Nome utente o password SMTP errati.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:645
 msgid "        &#8226; Username or password incorrect.\n"
-msgstr ""
-"&#8226; Nome utente o password errati.\n"
-"\n"
+msgstr "       &#8226; Nome utente o password errati.\n"
 
 #: ../../src/client/views/conversation-viewer.vala:1203
 msgid " (Invalid?)"
@@ -526,7 +523,7 @@ msgstr "Email;E-mail;Mail;"
 
 #: ../../ui/preferences.glade:131
 msgid "Enable _spell checking"
-msgstr "Abilita_controllo ortografico"
+msgstr "Abilita _controllo ortografico"
 
 #: ../../ui/login.glade:588
 msgid "Encr_yption:"
@@ -1565,4 +1562,4 @@ msgstr "non trovato"
 #. / For example: Yamada Taro <yamada.taro@example.com>
 #: ../../src/client/geary-controller.vala:1230
 msgid "translator-credits"
-msgstr "traduttori-crediti"
+msgstr "Daniele Napolitano"
