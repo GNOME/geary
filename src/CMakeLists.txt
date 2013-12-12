@@ -438,8 +438,19 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
-if (WEBKITGTK22X_FOUND)
-    message(STATUS "Targeting WebKitGTK 2.2.x")
+if (WEBKITGTK110X_FOUND)
+    message(STATUS "Targeting WebKitGTK 1.10")
+    SET(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        webkitgtk-3.0>=1.10.0
+        webkitgtk-3.0<=1.10.2
+    )
+    
+    SET(WEBKITGTK_METADATA_DIR
+        webkitgtk-1.10
+    )
+elseif (WEBKITGTK22X_FOUND)
+    message(STATUS "Targeting WebKitGTK 2.2")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
         webkitgtk-3.0>=2.2.0
@@ -449,10 +460,10 @@ if (WEBKITGTK22X_FOUND)
         webkitgtk-2.2
     )
 else ()
-    message(STATUS "Targeting WebKitGTK 1.10.0 to 2.0.4")
+    message(STATUS "Targeting WebKitGTK 2.0")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=1.10.0
+        webkitgtk-3.0>=2.0.0
         webkitgtk-3.0<=2.0.4
     )
     
