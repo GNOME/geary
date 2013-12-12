@@ -13,7 +13,4 @@ DOMNode.dispatch_event type="void"
 DOMWebKitNamedFlow.dispatch_event type="void"
 DOMDOMApplicationCache.dispatch_event type="void"
 DOMDOMWindow.dispatch_event type="void"
-DOMTextTrackCue.dispatch_event type="void"
-DOMTextTrack.dispatch_event type="void"
-DOMTextTrackList.dispatch_event type="void"
 
