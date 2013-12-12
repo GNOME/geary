@@ -1,3 +1,10 @@
+geary (0.4.3-1~raring1) raring; urgency=low
+
+  * Fix "squished" conversation list when used with certain themes
+  * Compile-time support for WebKitGTK 2.0
+
+ -- Jim Nelson <jim@yorba.org>  Thu, 12 Dec 2013 15:00:34 -0800
+
 geary (0.4.2-1~raring1) raring; urgency=low
 
   * Compile with Vala 0.22.1
