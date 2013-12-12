@@ -94,6 +94,9 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
     public Gtk.ActionGroup actions {
         get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
     }
+    public Gee.Collection<Geary.ActionAdapter> action_adapters {
+        get; private set; default = new Gee.ArrayList<Geary.ActionAdapter>();
+    }
     
     public Gtk.UIManager ui_manager {
         get; private set; default = new Gtk.UIManager();
@@ -289,11 +292,14 @@ along with Geary; if not, write to the Free Software Foundation, Inc.,
         }
     }
     
+    public File get_ui_file(string filename) {
+        return get_resource_directory().get_child("ui").get_child(filename);
+    }
+    
     // Loads a UI file (in the ui directory) into the specified UI manager.
     public void load_ui_file_for_manager(Gtk.UIManager ui, string ui_filename) {
         try {
-            ui.add_ui_from_file(get_resource_directory().get_child("ui").get_child(
-                ui_filename).get_path());
+            ui.add_ui_from_file(get_ui_file(ui_filename).get_path());
         } catch(GLib.Error error) {
             warning("Unable to create Gtk.UIManager: %s".printf(error.message));
         }

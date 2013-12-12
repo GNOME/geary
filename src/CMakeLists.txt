@@ -290,6 +290,7 @@ engine/util/util-trillian.vala
 )
 
 set(CLIENT_SRC
+client/application/geary-action-adapter.vala
 client/application/geary-application.vala
 client/application/geary-args.vala
 client/application/geary-config.vala

@@ -1,0 +1,40 @@
+<interface>
+    <menu id='app-menu'>
+        <section>
+            <item>
+                <attribute name='label' translatable='yes'>A_ccounts</attribute>
+                <attribute name='action'>app.GearyAccounts</attribute>
+                <attribute name='accel'>&lt;Primary&gt;M</attribute>
+            </item>
+            <item>
+                <attribute name='label' translatable='yes'>_Preferences</attribute>
+                <attribute name='action'>app.GearyPreferences</attribute>
+                <attribute name='accel'>&lt;Primary&gt;E</attribute>
+            </item>
+        </section>
+        <section>
+            <item>
+                <attribute name='label' translatable='yes'>_Donate</attribute>
+                <attribute name='action'>app.GearyDonate</attribute>
+            </item>
+        </section>
+        <section>
+            <item>
+                <attribute name='label' translatable='yes'>_Help</attribute>
+                <attribute name='action'>app.GearyHelp</attribute>
+                <attribute name='accel'>F1</attribute>
+            </item>
+            <item>
+                <attribute name='label' translatable='yes'>_About</attribute>
+                <attribute name='action'>app.GearyAbout</attribute>
+            </item>
+        </section>
+        <section>
+            <item>
+                <attribute name='label' translatable='yes'>_Quit</attribute>
+                <attribute name='action'>app.GearyQuit</attribute>
+                <attribute name='accel'>&lt;Primary&gt;Q</attribute>
+            </item>
+        </section>
+    </menu>
+</interface>
