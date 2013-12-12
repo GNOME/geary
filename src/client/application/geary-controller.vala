@@ -2003,11 +2003,9 @@ public class GearyController : Geary.BaseObject {
     
     // Returns a list of composer windows for an account, or null if none.
     public Gee.List<ComposerWindow>? get_composer_windows_for_account(Geary.AccountInformation account) {
-        Gee.List<ComposerWindow> ret = new Gee.LinkedList<ComposerWindow>();
-        foreach (ComposerWindow cw in composer_windows) {
-            if (cw.account.information == account)
-                ret.add(cw);
-        }
+        Gee.LinkedList<ComposerWindow> ret = Geary.traverse<ComposerWindow>(composer_windows)
+            .filter(w => w.account.information == account)
+            .to_linked_list();
         
         return ret.size >= 1 ? ret : null;
     }

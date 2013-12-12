@@ -241,16 +241,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         throws Error {
         check_open();
         
-        Gee.ArrayList<Geary.Folder> matches = new Gee.ArrayList<Geary.Folder>();
-        
-        foreach(FolderPath path in folder_map.keys) {
-            FolderPath? path_parent = path.get_parent();
-            if ((parent == null && path_parent == null) ||
-                (parent != null && path_parent != null && path_parent.equal_to(parent))) {
-                matches.add(folder_map.get(path));
-            }
-        }
-        return matches;
+        return Geary.traverse<FolderPath>(folder_map.keys)
+            .filter(p => {
+                FolderPath? path_parent = p.get_parent();
+                return ((parent == null && path_parent == null) ||
+                    (parent != null && path_parent != null && path_parent.equal_to(parent)));
+            })
+            .map<Geary.Folder>(p => folder_map.get(p))
+            .to_array_list();
     }
 
     public override Gee.Collection<Geary.Folder> list_folders() throws Error {
@@ -316,9 +314,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         existing_list.add_all(build_folders(local_children.values));
         existing_list.add_all(local_only.values);
         
-        Gee.HashMap<FolderPath, Geary.Folder> existing_folders = new Gee.HashMap<FolderPath, Geary.Folder>();
-        foreach (Geary.Folder folder in existing_list)
-            existing_folders.set(folder.path, folder);
+        Gee.HashMap<FolderPath, Geary.Folder> existing_folders
+            = Geary.traverse<Geary.Folder>(existing_list).to_hash_map<FolderPath>(f => f.path);
         
         // get all remote (server) folder paths
         Gee.HashMap<FolderPath, Imap.Folder> remote_folders = yield enumerate_remote_folders_async(null,
@@ -467,18 +464,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
         
         // If path in remote but not local, need to add it
-        Gee.List<Imap.Folder>? to_add = new Gee.ArrayList<Imap.Folder>();
-        foreach (Imap.Folder remote_folder in remote_folders.values) {
-            if (!existing_folders.has_key(remote_folder.path))
-                to_add.add(remote_folder);
-        }
+        Gee.ArrayList<Imap.Folder> to_add = Geary.traverse<Imap.Folder>(remote_folders.values)
+            .filter(f => !existing_folders.has_key(f.path))
+            .to_array_list();
         
         // If path in local but not remote (and isn't local-only, i.e. the Outbox), need to remove it
-        Gee.List<Geary.Folder>? to_remove = new Gee.ArrayList<Geary.Folder>();
-        foreach (Geary.FolderPath existing_path in existing_folders.keys) {
-            if (!remote_folders.has_key(existing_path) && !local_only.has_key(existing_path))
-                to_remove.add(existing_folders.get(existing_path));
-        }
+        Gee.ArrayList<Geary.Folder> to_remove
+            = Geary.traverse<Gee.Map.Entry<FolderPath, Imap.Folder>>(existing_folders)
+            .filter(e => !remote_folders.has_key(e.key) && !local_only.has_key(e.key))
+            .map<Geary.Folder>(e => (Geary.Folder) e.value)
+            .to_array_list();
         
         // For folders to add, clone them and their properties locally
         foreach (Geary.Imap.Folder remote_folder in to_add) {

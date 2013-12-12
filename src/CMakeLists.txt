@@ -277,6 +277,7 @@ engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
+engine/util/util-iterable.vala
 engine/util/util-numeric.vala
 engine/util/util-object.vala
 engine/util/util-reference-semantics.vala

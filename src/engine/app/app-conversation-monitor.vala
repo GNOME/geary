@@ -417,14 +417,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             Gee.HashSet<Geary.EmailIdentifier> relevant_ids = new Gee.HashSet<Geary.EmailIdentifier>();
             foreach (Geary.Email email in emails) {
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-                if (ancestors != null) {
-                    foreach (RFC822.MessageID ancestor in ancestors) {
-                        if (conversations.has_message_id(ancestor)) {
-                            relevant_ids.add(email.id);
-                            break;
-                        }
-                    }
-                }
+                if (ancestors != null &&
+                    Geary.traverse<RFC822.MessageID>(ancestors).any(id => conversations.has_message_id(id)))
+                    relevant_ids.add(email.id);
             }
             
             debug("%d external emails are relevant to current conversations", relevant_ids.size);
@@ -485,10 +480,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
                 if (ancestors != null) {
-                    foreach (RFC822.MessageID ancestor in ancestors) {
-                        if (!new_message_ids.contains(ancestor))
-                            new_message_ids.add(ancestor);
-                    }
+                    Geary.traverse<RFC822.MessageID>(ancestors)
+                        .filter(id => !new_message_ids.contains(id))
+                        .add_all_to(new_message_ids);
                 }
             }
         }
@@ -573,10 +567,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         foreach (int id in batch.get_ids()) {
             LocalSearchOperation op = (LocalSearchOperation) batch.get_operation(id);
             if (op.emails != null) {
-                foreach (Geary.Email email in op.emails.get_keys()) {
-                    if (!needed_messages.has_key(email.id))
-                        needed_messages.set(email.id, email);
-                }
+                Geary.traverse<Geary.Email>(op.emails.get_keys())
+                    .filter(e => !needed_messages.has_key(e.id))
+                    .add_all_to_map<Geary.EmailIdentifier>(needed_messages, e => e.id);
             }
         }
         
