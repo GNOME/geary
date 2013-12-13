@@ -239,6 +239,17 @@ engine/nonblocking/nonblocking-mutex.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 
+engine/persistance/persistance.vala
+engine/persistance/persistance-activator.vala
+engine/persistance/persistance-data-flavor.vala
+engine/persistance/persistance-data-flavor-deserializer.vala
+engine/persistance/persistance-data-flavor-serializer.vala
+engine/persistance/persistance-deserializer.vala
+engine/persistance/persistance-flavor-keyfile.vala
+engine/persistance/persistance-serializable.vala
+engine/persistance/persistance-serialized-type.vala
+engine/persistance/persistance-serializer.vala
+
 engine/rfc822/rfc822.vala
 engine/rfc822/rfc822-error.vala
 engine/rfc822/rfc822-gmime-filter-flowed.vala
