@@ -144,14 +144,8 @@ public class GearyController : Geary.BaseObject {
         IconFactory.instance.init();
         
         // Setup actions.
-        GearyApplication.instance.actions.add_actions(create_actions(), this);
-        GearyApplication.instance.actions.add_toggle_actions(create_toggle_actions(), this);
-        GearyApplication.instance.ui_manager.insert_action_group(
-            GearyApplication.instance.actions, 0);
+        setup_actions();
         GearyApplication.instance.load_ui_file("accelerators.ui");
-        
-        // some actions need a little extra help
-        prepare_actions();
         
         // Listen for attempts to close the application.
         GearyApplication.instance.exiting.connect(on_application_exiting);
@@ -161,7 +155,7 @@ public class GearyController : Geary.BaseObject {
         upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
         
         // Create the main window (must be done after creating actions.)
-        main_window = new MainWindow();
+        main_window = new MainWindow(GearyApplication.instance);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
         
         enable_message_buttons(false);
@@ -387,12 +381,61 @@ public class GearyController : Geary.BaseObject {
         return entries;
     }
     
-    private void prepare_actions() {
-        GearyApplication.instance.get_action(ACTION_NEW_MESSAGE).is_important = true;
-        GearyApplication.instance.get_action(ACTION_REPLY_TO_MESSAGE).is_important = true;
-        GearyApplication.instance.get_action(ACTION_REPLY_ALL_MESSAGE).is_important = true;
-        GearyApplication.instance.get_action(ACTION_FORWARD_MESSAGE).is_important = true;
-        GearyApplication.instance.get_action(ACTION_DELETE_MESSAGE).is_important = true;
+    private void setup_actions() {
+        const string[] important_actions = {
+            ACTION_NEW_MESSAGE,
+            ACTION_REPLY_TO_MESSAGE,
+            ACTION_REPLY_ALL_MESSAGE,
+            ACTION_FORWARD_MESSAGE,
+            ACTION_DELETE_MESSAGE,
+        };
+        const string[] exported_actions = {
+            ACTION_ACCOUNTS,
+            ACTION_PREFERENCES,
+            ACTION_DONATE,
+            ACTION_HELP,
+            ACTION_ABOUT,
+            ACTION_QUIT,
+        };
+        
+        Gtk.ActionGroup action_group = GearyApplication.instance.actions;
+        
+        Gtk.ActionEntry[] action_entries = create_actions();
+        action_group.add_actions(action_entries, this);
+        foreach (Gtk.ActionEntry e in action_entries) {
+            Gtk.Action action = action_group.get_action(e.name);
+            assert(action != null);
+            
+            if (e.name in important_actions)
+                action.is_important = true;
+            GearyApplication.instance.action_adapters.add(new Geary.ActionAdapter(action));
+        }
+        
+        Gtk.ToggleActionEntry[] toggle_action_entries = create_toggle_actions();
+        action_group.add_toggle_actions(toggle_action_entries, this);
+        
+        foreach (Geary.ActionAdapter a in GearyApplication.instance.action_adapters) {
+            if (a.action.name in exported_actions)
+                GearyApplication.instance.add_action(a.action);
+        }
+        GearyApplication.instance.ui_manager.insert_action_group(action_group, 0);
+        
+        Gtk.Builder builder = new Gtk.Builder();
+        try {
+            builder.add_from_file(
+                GearyApplication.instance.get_ui_file("app_menu.interface").get_path());
+        } catch (Error e) {
+            error("Unable to parse app_menu.interface: %s", e.message);
+        }
+        MenuModel menu = (MenuModel) builder.get_object("app-menu");
+        
+        // We'd *like* to always export an app menu and just let the shell
+        // decide whether to display it or not.  Unfortunately Mint (Cinnamon,
+        // I believe) and maybe others will insert a menu bar for your
+        // application, even if you didn't have one otherwise, if you export
+        // the app menu.  So, we only export it if the shell claims to show it.
+        if (Gtk.Settings.get_default().gtk_shell_shows_app_menu)
+            GearyApplication.instance.set_app_menu(menu);
     }
     
     private void open_account(Geary.Account account) {
@@ -1184,8 +1227,8 @@ public class GearyController : Geary.BaseObject {
     }
     
     // We need to include the second parameter, or valac doesn't recognize the function as matching
-    // YorbaApplication.exiting's signature.
-    private bool on_application_exiting(YorbaApplication sender, bool panicked) {
+    // GearyApplication.exiting's signature.
+    private bool on_application_exiting(GearyApplication sender, bool panicked) {
         if (close_composition_windows())
             return true;
         
@@ -1967,11 +2010,9 @@ public class GearyController : Geary.BaseObject {
     
     // Returns a list of composer windows for an account, or null if none.
     public Gee.List<ComposerWindow>? get_composer_windows_for_account(Geary.AccountInformation account) {
-        Gee.List<ComposerWindow> ret = new Gee.LinkedList<ComposerWindow>();
-        foreach (ComposerWindow cw in composer_windows) {
-            if (cw.account.information == account)
-                ret.add(cw);
-        }
+        Gee.LinkedList<ComposerWindow> ret = Geary.traverse<ComposerWindow>(composer_windows)
+            .filter(w => w.account.information == account)
+            .to_linked_list();
         
         return ret.size >= 1 ? ret : null;
     }

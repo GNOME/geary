@@ -115,9 +115,9 @@ public class Configuration {
     }
     
     // Creates a configuration object.
-    public Configuration() {
+    public Configuration(string schema_id) {
         // Start GSettings.
-        settings = new Settings("org.yorba.geary");
+        settings = new Settings(schema_id);
         gnome_interface = new Settings("org.gnome.desktop.interface");
         foreach(string schema in GLib.Settings.list_schemas()) {
             if (schema == "com.canonical.indicator.datetime") {

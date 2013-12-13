@@ -2070,19 +2070,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     
     private int do_get_unread_count_for_ids(Db.Connection cx,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        int unread_count = 0;
-        
         // Fetch flags for each email and update this folder's unread count.
         // (Note that this only flags for emails which have NOT been marked for removal
         // are included.)
         Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? flag_map = do_get_email_flags(cx,
             ids, cancellable);
-        if (flag_map != null) {
-            foreach (Geary.EmailFlags flags in flag_map.values)
-                unread_count += flags.is_unread() ? 1 : 0;
-        }
+        if (flag_map != null)
+            return Geary.traverse<Geary.EmailFlags>(flag_map.values).count_matching(f => f.is_unread());
         
-        return unread_count;
+        return 0;
     }
 }
 

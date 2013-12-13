@@ -96,10 +96,12 @@ public class MainToolbar : PillToolbar {
         search_entry.get_preferred_width(out minimum_width, out natural_width);
         search_upgrade_progress_bar.width_request = minimum_width;
         
-        // Application button.
-        insert.clear();
-        insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
-        add(create_pill_buttons(insert));
+        // Application button.  If we exported an app menu, we don't need this.
+        if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
+            insert.clear();
+            insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
+            add(create_pill_buttons(insert));
+        }
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
     }

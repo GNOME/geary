@@ -34,11 +34,7 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
     }
     
     public bool contains_any(NamedFlags flags) {
-        foreach(NamedFlag nf in list)
-            if (flags.contains(nf))
-                return true;
-        
-        return false;
+        return Geary.traverse<NamedFlag>(list).any(f => flags.contains(f));
     }
     
     public Gee.Set<NamedFlag> get_all() {
@@ -53,11 +49,9 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
     }
     
     public virtual void add_all(NamedFlags flags) {
-        Gee.ArrayList<NamedFlag> added = new Gee.ArrayList<NamedFlag>();
-        foreach (NamedFlag flag in flags.get_all()) {
-            if (!list.contains(flag))
-                added.add(flag);
-        }
+        Gee.ArrayList<NamedFlag> added = Geary.traverse<NamedFlag>(flags.get_all())
+            .filter(f => !list.contains(f))
+            .to_array_list();
         
         list.add_all(added);
         notify_added(added);
@@ -72,11 +66,9 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
     }
     
     public virtual bool remove_all(NamedFlags flags) {
-        Gee.ArrayList<NamedFlag> removed = new Gee.ArrayList<NamedFlag>();
-        foreach (NamedFlag flag in flags.get_all()) {
-            if (list.contains(flag))
-                removed.add(flag);
-        }
+        Gee.ArrayList<NamedFlag> removed = Geary.traverse<NamedFlag>(flags.get_all())
+            .filter(f => list.contains(f))
+            .to_array_list();
         
         list.remove_all(removed);
         notify_removed(removed);
@@ -91,12 +83,7 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
         if (list.size != other.list.size)
             return false;
         
-        foreach (NamedFlag flag in list) {
-            if (!other.contains(flag))
-                return false;
-        }
-        
-        return true;
+        return Geary.traverse<NamedFlag>(list).all(f => other.contains(f));
     }
     
     public uint hash() {

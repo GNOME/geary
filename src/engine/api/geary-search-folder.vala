@@ -88,11 +88,10 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
         Gee.Collection<Geary.Folder>? unavailable) {
         if (available != null) {
-            foreach (Geary.Folder folder in available) {
-                // Exclude it from searching if it's got the right special type.
-                if (folder.special_folder_type in exclude_types)
-                    exclude_folder(folder);
-            }
+            // Exclude it from searching if it's got the right special type.
+            foreach(Geary.Folder folder in Geary.traverse<Geary.Folder>(available)
+                .filter(f => f.special_folder_type in exclude_types))
+                exclude_folder(folder);
         }
     }
     
@@ -101,14 +100,12 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         Cancellable? cancellable = null) throws Error {
         low = null;
         high = null;
-        Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder
-            = new Gee.TreeSet<ImapDB.SearchEmailIdentifier>();
-        foreach (Geary.EmailIdentifier id in ids) {
-            ImapDB.SearchEmailIdentifier? search_id = id as ImapDB.SearchEmailIdentifier;
-            // This shouldn't require a result_mutex lock since there's no yield.
-            if (search_id != null && search_id in search_results)
-                in_folder.add(search_id);
-        }
+        
+        // This shouldn't require a result_mutex lock since there's no yield.
+        Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder = Geary.traverse<Geary.EmailIdentifier>(ids)
+            .cast_object<ImapDB.SearchEmailIdentifier>()
+            .filter(id => id in search_results)
+            .to_tree_set();
         
         if (in_folder.size > 0) {
             low = in_folder.first();
@@ -154,13 +151,10 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         Error? error = null;
         try {
             Gee.ArrayList<ImapDB.SearchEmailIdentifier> relevant_ids
-                = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
-            foreach (Geary.EmailIdentifier id in ids) {
-                ImapDB.SearchEmailIdentifier? search_id
-                    = ImapDB.SearchEmailIdentifier.collection_get_email_identifier(search_results, id);
-                if (search_id != null)
-                    relevant_ids.add(search_id);
-            }
+                = Geary.traverse<Geary.EmailIdentifier>(ids)
+                .map_nonnull<ImapDB.SearchEmailIdentifier>(
+                    id => ImapDB.SearchEmailIdentifier.collection_get_email_identifier(search_results, id))
+                .to_array_list();
             
             if (relevant_ids.size > 0)
                 yield do_search_async(query, null, relevant_ids, cancellable);
@@ -259,22 +253,20 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
             = ImapDB.SearchEmailIdentifier.array_list_from_results(yield account.local_search_async(
             query, MAX_RESULT_EMAILS, 0, exclude_folders, add_ids ?? remove_ids, cancellable));
         
-        Gee.ArrayList<ImapDB.SearchEmailIdentifier> added
-            = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
-        Gee.ArrayList<ImapDB.SearchEmailIdentifier> removed
-            = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
+        Gee.List<ImapDB.SearchEmailIdentifier> added
+            = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
+        Gee.List<ImapDB.SearchEmailIdentifier> removed
+            = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
         
         if (remove_ids == null) {
-            foreach (ImapDB.SearchEmailIdentifier id in results) {
-                if (!(id in search_results))
-                    added.add(id);
-            }
+            added = Geary.traverse<ImapDB.SearchEmailIdentifier>(results)
+                .filter(id => !(id in search_results))
+                .to_array_list();
         }
         if (add_ids == null) {
-            foreach (ImapDB.SearchEmailIdentifier id in remove_ids ?? search_results) {
-                if (!(id in results))
-                    removed.add(id);
-            }
+            removed = Geary.traverse<ImapDB.SearchEmailIdentifier>(remove_ids ?? search_results)
+                .filter(id => !(id in results))
+                .to_array_list();
         }
         
         search_results.remove_all(removed);

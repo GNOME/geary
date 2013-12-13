@@ -288,6 +288,7 @@ engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
+engine/util/util-iterable.vala
 engine/util/util-numeric.vala
 engine/util/util-object.vala
 engine/util/util-reference-semantics.vala
@@ -301,6 +302,7 @@ engine/util/util-trillian.vala
 )
 
 set(CLIENT_SRC
+client/application/geary-action-adapter.vala
 client/application/geary-application.vala
 client/application/geary-args.vala
 client/application/geary-config.vala
@@ -381,7 +383,6 @@ client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala
 client/util/util-webkit.vala
-client/util/util-yorba-application.vala
 )
 
 set(CONSOLE_SRC
@@ -404,7 +405,7 @@ dbusservice/main.vala
 # Vala
 find_package(Vala REQUIRED)
 include(ValaVersion)
-ensure_vala_version("0.20.1" MINIMUM)
+ensure_vala_version("0.22.1" MINIMUM)
 include(ValaPrecompile)
 
 # Packages
@@ -448,8 +449,19 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
-if (WEBKITGTK22X_FOUND)
-    message(STATUS "Targeting WebKitGTK 2.2.x")
+if (WEBKITGTK110X_FOUND)
+    message(STATUS "Targeting WebKitGTK 1.10")
+    SET(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        webkitgtk-3.0>=1.10.0
+        webkitgtk-3.0<=1.10.2
+    )
+    
+    SET(WEBKITGTK_METADATA_DIR
+        webkitgtk-1.10
+    )
+elseif (WEBKITGTK22X_FOUND)
+    message(STATUS "Targeting WebKitGTK 2.2")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
         webkitgtk-3.0>=2.2.0
@@ -459,10 +471,10 @@ if (WEBKITGTK22X_FOUND)
         webkitgtk-2.2
     )
 else ()
-    message(STATUS "Targeting WebKitGTK 1.10.0 to 2.0.4")
+    message(STATUS "Targeting WebKitGTK 2.0")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=1.10.0
+        webkitgtk-3.0>=2.0.0
         webkitgtk-3.0<=2.0.4
     )
     
@@ -490,7 +502,6 @@ pkg_check_modules(DEPS REQUIRED
     gio-2.0>=2.28.0
     gtk+-3.0>=3.6.0
     gee-0.8>=0.8.5
-    unique-3.0>=3.0.0
     libnotify>=0.7.5
     libcanberra>=0.28
     sqlite3>=3.7.4
@@ -501,7 +512,7 @@ pkg_check_modules(DEPS REQUIRED
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 unique-3.0 posix sqlite3 libxml-2.0
+    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
 )
 
 set(CLIENT_PACKAGES

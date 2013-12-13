@@ -55,12 +55,7 @@ public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, 
         if (other.size != size)
             return false;
         
-        foreach (Flag flag in list) {
-            if (!other.contains(flag))
-                return false;
-        }
-        
-        return true;
+        return Geary.traverse<Flag>(list).all(f => other.contains(f));
     }
     
     public override string to_string() {

@@ -64,18 +64,14 @@ private class Geary.App.ConversationSet : BaseObject {
     // the ancestors of the supplied Email ... if more than one, then add_email() should not be
     // called
     private Gee.Set<Conversation> get_associated_conversations(Geary.Email email) {
-        Gee.Set<Conversation> associated = new Gee.HashSet<Conversation>();
-        
         Gee.Set<Geary.RFC822.MessageID>? ancestors = email.get_ancestors();
         if (ancestors != null) {
-            foreach (Geary.RFC822.MessageID ancestor in ancestors) {
-                Conversation conversation = logical_message_id_map.get(ancestor);
-                if (conversation != null)
-                    associated.add(conversation);
-            }
+            return Geary.traverse<Geary.RFC822.MessageID>(ancestors)
+                .map_nonnull<Conversation>(a => logical_message_id_map.get(a))
+                .to_hash_set();
         }
         
-        return associated;
+        return Gee.Set.empty<Conversation>();
     }
     
     /**

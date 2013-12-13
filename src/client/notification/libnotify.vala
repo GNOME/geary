@@ -57,7 +57,7 @@ public class Libnotify : Geary.BaseObject {
     
     private void on_default_action(Notify.Notification notification, string action) {
         invoked(folder, email);
-        GearyApplication.instance.activate(new string[0]);
+        GearyApplication.instance.activate();
     }
     
     private void notify_new_mail(Geary.Folder folder, int added) {
