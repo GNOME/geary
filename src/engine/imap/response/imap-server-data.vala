@@ -153,7 +153,11 @@ public class Geary.Imap.ServerData : ServerResponse {
         
         Gee.List<int> results = new Gee.ArrayList<int>();
         for (int ctr = 2; ctr < size; ctr++) {
-            results.add(get_as_string(ctr).as_int(0));
+            // can't directly return the result from as_int() into results as a Vala bug causes a
+            // build policy violation for uncast int -> pointer on 64-bit architectures:
+            // https://bugzilla.gnome.org/show_bug.cgi?id=720437
+            int result = get_as_string(ctr).as_int(0);
+            results.add(result);
         }
         
         return results;
