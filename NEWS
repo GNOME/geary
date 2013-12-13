@@ -1,3 +1,11 @@
+Geary 0.5.0 - 12 December 2013
+------------------------------
+
+  * Port to GtkApplication
+  * Use app menu instead of gear button menu, where available
+  * Miscellaneous bugfixes
+
+
 Geary 0.4.3 - 12 December 2013
 ------------------------------
 
