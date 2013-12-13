@@ -428,7 +428,14 @@ public class GearyController : Geary.BaseObject {
             error("Unable to parse app_menu.interface: %s", e.message);
         }
         MenuModel menu = (MenuModel) builder.get_object("app-menu");
-        GearyApplication.instance.set_app_menu(menu);
+        
+        // We'd *like* to always export an app menu and just let the shell
+        // decide whether to display it or not.  Unfortunately Mint (Cinnamon,
+        // I believe) and maybe others will insert a menu bar for your
+        // application, even if you didn't have one otherwise, if you export
+        // the app menu.  So, we only export it if the shell claims to show it.
+        if (Gtk.Settings.get_default().gtk_shell_shows_app_menu)
+            GearyApplication.instance.set_app_menu(menu);
     }
     
     private void open_account(Geary.Account account) {
