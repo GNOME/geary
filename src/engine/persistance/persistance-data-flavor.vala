@@ -23,6 +23,9 @@ public interface Geary.Persistance.DataFlavor : BaseObject {
      */
     internal abstract DataFlavorSerializer create_serializer(Serializable sobj);
     
+    /**
+     * Create a new {@link DataFlavorDeserializer} to generate a {@link Serializable} object.
+     */
     internal abstract DataFlavorDeserializer create_deserializer(Geary.Memory.Buffer buffer) throws Error;
 }
 

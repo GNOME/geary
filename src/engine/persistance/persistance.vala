@@ -19,14 +19,14 @@ namespace Geary.Persistance {
 private bool is_serializable(ParamSpec param_spec, bool warn) {
     if ((param_spec.flags & ParamFlags.READWRITE) == 0) {
         if (warn) {
-            debug("WARNING: %s type %s not read/write, cannot be serialized", param_spec.name,
+            debug("%s type %s not read/write, cannot be serialized", param_spec.name,
                 param_spec.value_type.name());
         }
         
         return false;
     } else if ((param_spec.flags & ParamFlags.CONSTRUCT_ONLY) != 0) {
         if (warn) {
-            debug("WARNING: %s type %s is construct-only, cannot be serialized", param_spec.name,
+            debug("%s type %s is construct-only, cannot be serialized", param_spec.name,
                 param_spec.value_type.name());
         }
         

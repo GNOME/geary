@@ -245,6 +245,7 @@ engine/persistance/persistance-data-flavor.vala
 engine/persistance/persistance-data-flavor-deserializer.vala
 engine/persistance/persistance-data-flavor-serializer.vala
 engine/persistance/persistance-deserializer.vala
+engine/persistance/persistance-error.vala
 engine/persistance/persistance-flavor-keyfile.vala
 engine/persistance/persistance-serializable.vala
 engine/persistance/persistance-serialized-type.vala

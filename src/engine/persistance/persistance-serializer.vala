@@ -21,6 +21,12 @@
 public class Geary.Persistance.Serializer : BaseObject {
     private DataFlavor flavor;
     
+    /**
+     * Fired during serialization when a property is encountered that {@link Serializer} cannot
+     * serialize and the object itself does not manually serialize.
+     */
+    public signal void unsupported_property(Serializable sobj, string prop_name);
+    
     public Serializer(DataFlavor flavor) {
         this.flavor = flavor;
     }
@@ -60,11 +66,9 @@ public class Geary.Persistance.Serializer : BaseObject {
             } else if (param_spec.value_type == typeof(string)) {
                 serializer.set_utf8(param_spec.name, (string) value);
             } else if (!sobj.serialize_property(param_spec.name, serializer)) {
-                debug("WARNING: %s type %s not supported by Serializer", param_spec.name,
-                    param_spec.value_type.name());
+                unsupported_property(sobj, param_spec.name);
             }
         }
     }
 }
-
 

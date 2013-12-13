@@ -24,7 +24,7 @@ public interface Geary.Persistance.Serializable : Object {
      *
      * If the properties of the implementing class changes, this value should be incremented.
      */
-    public abstract int serialize_version();
+    public abstract int interface_version();
     
     /**
      * Manual serialization of a property.
@@ -32,9 +32,30 @@ public interface Geary.Persistance.Serializable : Object {
      * If {@link Serializer} is incapable of serializing a property, this method is called.
      * The object must either manually serialize the property (use name to determine which) and
      * return true, or return false.
+     *
+     * In particular, although {@link DataFlavorSerializer} offers methods to serialize integer
+     * and string arrays, Serializer is ''unable'' to automatically determine the type of those
+     * properties due to limitations of GType, and so the Serializable object must do those itself.
      */
-    public abstract bool serialize_property(string name, DataFlavorSerializer serializer) throws Error;
+    public virtual bool serialize_property(string name, DataFlavorSerializer serializer) throws Error {
+        return false;
+    }
     
-    public abstract bool deserialize_property(string name, DataFlavorDeserializer deserializer) throws Error;
+    /**
+     * Manual deserialization of a property.
+     *
+     * {@link Deserializer} gives the {@link Serializable} object a chance to manually deserialize
+     * a property before it attempts to do it automatically.
+     *
+     * If {@link Serializer} is incapable of serializing a property, this method is called.
+     * The object must either manually serialize the property (use name to determine which) and
+     * return true, or return false.  Integer and string arrays in particular must be deserialized
+     * manually.
+     *
+     * @see serialize_property
+     */
+    public virtual bool deserialize_property(string name, DataFlavorDeserializer deserializer) throws Error {
+        return false;
+    }
 }
 
