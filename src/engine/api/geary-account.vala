@@ -305,21 +305,21 @@ public interface Geary.Account : BaseObject {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Performs a search with the given query string.  Optionally, a list of folders not to search
+     * Performs a search with the given query.  Optionally, a list of folders not to search
      * can be passed as well as a list of email identifiers to restrict the search to only those messages.
      * Returns a list of EmailIdentifiers, or null if there are no results.
      * The list is limited to a maximum number of results and starting offset,
      * so you can walk the table.  limit can be negative to mean "no limit" but
      * offset must not be negative.
      */
-    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(string query,
+    public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Given a list of mail IDs, returns a list of words that match the given query string.
+     * Given a list of mail IDs, returns a list of words that match for the query.
      */
-    public abstract async Gee.Collection<string>? get_search_matches_async(string query,
+    public abstract async Gee.Collection<string>? get_search_matches_async(Geary.SearchQuery query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
     
     /**

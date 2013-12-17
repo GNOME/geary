@@ -624,29 +624,76 @@ private class Geary.ImapDB.Account : BaseObject {
         return (messages.size == 0 ? null : messages);
     }
     
-    public string prepare_search_query(string raw_query) {
-        // Two goals here:
-        //   1) append an * after every term so it becomes a prefix search
-        //      (see <https://www.sqlite.org/fts3.html#section_3>), and
-        //   2) strip out common words/operators that might get interpreted as
-        //      search operators.
+    private string? extract_field_from_token(string[] parts, ref string token) {
+        // Map of user-supplied search field names to column names.
+        Gee.HashMap<string, string> field_names = new Gee.HashMap<string, string>();
+        /// Can be typed in the search box like attachment:file.txt to find
+        /// messages with attachments with a particular name.
+        field_names.set(_("attachment"), "attachment");
+        /// Can be typed in the search box like bcc:johndoe@example.com to find
+        /// messages bcc'd to a particular person.
+        field_names.set(_("bcc"), "bcc");
+        /// Can be typed in the search box like body:word to find the word only
+        /// if it occurs in the body of a message.
+        field_names.set(_("body"), "body");
+        /// Can be typed in the search box like cc:johndoe@example.com to find
+        /// messages cc'd to a particular person.
+        field_names.set(_("cc"), "cc");
+        /// Can be typed in the search box like from:johndoe@example.com to
+        /// find messages from a particular sender.
+        field_names.set(_("from"), "from_field");
+        /// Can be typed in the search box like subject:word to find the word
+        /// only if it occurs in the subject of a message.
+        field_names.set(_("subject"), "subject");
+        /// Can be typed in the search box like to:johndoe@example.com to find
+        /// messages received by a particular person.
+        field_names.set(_("to"), "receivers");
+        
+        // If they stopped at "field:", treat it as if they hadn't typed the :
+        if (Geary.String.is_empty_or_whitespace(parts[1])) {
+            token = parts[0];
+            return null;
+        }
+        
+        string key = parts[0].down();
+        if (key in field_names.keys) {
+            token = parts[1];
+            return field_names.get(key);
+        }
+        
+        return null;
+    }
+    
+    private void prepare_search_query(Geary.SearchQuery query) {
+        if (query.parsed)
+            return;
+        
+        // A few goals here:
+        //   1) Append an * after every term so it becomes a prefix search
+        //      (see <https://www.sqlite.org/fts3.html#section_3>)
+        //   2) Strip out common words/operators that might get interpreted as
+        //      search operators
+        //   3) Parse each word into a list of which field it applies to, so
+        //      you can do "to:johndoe@example.com thing" (quotes excluded)
+        //      to find messages to John containing the word thing
         // We ignore everything inside quotes to give the user a way to
         // override our algorithm here.  The idea is to offer one search query
         // syntax for Geary that we can use locally and via IMAP, etc.
         
-        string quote_balanced = raw_query;
-        if (Geary.String.count_char(raw_query, '"') % 2 != 0) {
+        string quote_balanced = query.raw;
+        if (Geary.String.count_char(query.raw, '"') % 2 != 0) {
             // Remove the last quote if it's not balanced.  This has the
             // benefit of showing decent results as you type a quoted phrase.
-            int last_quote = raw_query.last_index_of_char('"');
+            int last_quote = query.raw.last_index_of_char('"');
             assert(last_quote >= 0);
-            quote_balanced = raw_query.splice(last_quote, last_quote + 1, " ");
+            quote_balanced = query.raw.splice(last_quote, last_quote + 1, " ");
         }
         
-        string[] words = quote_balanced.split_set(" \t\r\n:()%*\\");
+        string[] words = quote_balanced.split_set(" \t\r\n()%*\\");
         bool in_quote = false;
-        StringBuilder prepared_query = new StringBuilder();
         foreach (string s in words) {
+            string? field = null;
+            
             s = s.strip();
             
             int quotes = Geary.String.count_char(s, '"');
@@ -655,7 +702,12 @@ private class Geary.ImapDB.Account : BaseObject {
                 --quotes;
             }
             
-            if (!in_quote) {
+            if (in_quote) {
+                // HACK: this helps prevent a syntax error when the user types
+                // something like from:"somebody".  If we ever properly support
+                // quotes after : we can get rid of this.
+                s = s.replace(":", " ");
+            } else {
                 string lower = s.down();
                 if (lower == "" || lower == "and" || lower == "or" || lower == "not" || lower == "near"
                     || lower.has_prefix("near/"))
@@ -667,24 +719,61 @@ private class Geary.ImapDB.Account : BaseObject {
                 if (s == "")
                     continue;
                 
+                // TODO: support quotes after :
+                string[] parts = s.split(":", 2);
+                if (parts.length > 1)
+                    field = extract_field_from_token(parts, ref s);
+                
                 s = "\"" + s + "*\"";
             }
             
             if (in_quote && quotes % 2 != 0)
                 in_quote = false;
             
-            prepared_query.append(s);
-            prepared_query.append(" ");
+            query.add_token(field, s);
         }
         
         assert(!in_quote);
         
-        return prepared_query.str.strip();
+        query.parsed = true;
+    }
+    
+    // Return a map of column -> phrase, to use as WHERE column MATCH 'phrase'.
+    private Gee.HashMap<string, string> get_query_phrases(Geary.SearchQuery query) {
+        prepare_search_query(query);
+        
+        Gee.HashMap<string, string> phrases = new Gee.HashMap<string, string>();
+        foreach (string? field in query.get_fields()) {
+            string? phrase = null;
+            Gee.List<string>? tokens = query.get_tokens(field);
+            if (tokens != null)
+                phrase = string.joinv(" ", tokens.to_array()).strip();
+            
+            if (!Geary.String.is_empty(phrase))
+                phrases.set((field == null ? "MessageSearchTable" : field), phrase);
+        }
+        return phrases;
+    }
+    
+    private void sql_add_query_phrases(StringBuilder sql, Gee.HashMap<string, string> query_phrases) {
+        foreach (string field in query_phrases.keys)
+            sql.append(" AND %s MATCH ?".printf(field));
+    }
+    
+    private int sql_bind_query_phrases(Db.Statement stmt, int start_index,
+        Gee.HashMap<string, string> query_phrases) throws Geary.DatabaseError {
+        int i = start_index;
+        // This relies on the keys being returned in the same order every time
+        // from the same map.  It might not be guaranteed, but I feel pretty
+        // confident it'll work unless you change the map in between.
+        foreach (string field in query_phrases.keys)
+            stmt.bind_string(i++, query_phrases.get(field));
+        return i - start_index;
     }
     
     // Append each id in the collection to the StringBuilder, in a format
     // suitable for use in an SQL statement IN (...) clause.
-    private void sql_append_ids(StringBuilder s, Gee.Collection<int64?> ids) {
+    private void sql_append_ids(StringBuilder s, Gee.Iterable<int64?> ids) {
         bool first = true;
         foreach (int64? id in ids) {
             assert(id != null);
@@ -716,10 +805,14 @@ private class Geary.ImapDB.Account : BaseObject {
         return sql.str;
     }
     
-    public async Gee.Collection<Geary.EmailIdentifier>? search_async(string prepared_query,
+    public async Gee.Collection<Geary.EmailIdentifier>? search_async(Geary.SearchQuery query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
         check_open();
+        
+        Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
+        if (query_phrases.size == 0)
+            return null;
         
         Gee.ArrayList<ImapDB.SearchEmailIdentifier> search_results
             = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
@@ -738,28 +831,32 @@ private class Geary.ImapDB.Account : BaseObject {
             // own), it cuts the running time roughly in half of how it was
             // before.  The short version is: modify with extreme caution.  See
             // <http://redmine.yorba.org/issues/7372>.
-            string sql = """
+            StringBuilder sql = new StringBuilder();
+            sql.append("""
                 SELECT id, internaldate_time_t
                 FROM MessageTable
                 INDEXED BY MessageTableInternalDateTimeTIndex
                 WHERE id IN (
                     SELECT id
                     FROM MessageSearchTable
-                    WHERE MessageSearchTable MATCH ?
-                )
-            """;
+                    WHERE 1=1
+            """);
+            sql_add_query_phrases(sql, query_phrases);
+            sql.append(")");
+            
             if (blacklisted_ids_sql != "")
-                sql += " AND id NOT IN (%s)".printf(blacklisted_ids_sql);
+                sql.append(" AND id NOT IN (%s)".printf(blacklisted_ids_sql));
             if (!Geary.String.is_empty(search_ids_sql))
-                sql += " AND id IN (%s)".printf(search_ids_sql);
-            sql += " ORDER BY internaldate_time_t DESC";
+                sql.append(" AND id IN (%s)".printf(search_ids_sql));
+            sql.append(" ORDER BY internaldate_time_t DESC");
             if (limit > 0)
-                sql += " LIMIT ? OFFSET ?";
-            Db.Statement stmt = cx.prepare(sql);
-            stmt.bind_string(0, prepared_query);
+                sql.append(" LIMIT ? OFFSET ?");
+            
+            Db.Statement stmt = cx.prepare(sql.str);
+            int bind_index = sql_bind_query_phrases(stmt, 0, query_phrases);
             if (limit > 0) {
-                stmt.bind_int(1, limit);
-                stmt.bind_int(2, offset);
+                stmt.bind_int(bind_index++, limit);
+                stmt.bind_int(bind_index++, offset);
             }
             
             Db.Result result = stmt.exec(cancellable);
@@ -796,29 +893,30 @@ private class Geary.ImapDB.Account : BaseObject {
         }
     }
     
-    public async Gee.Collection<string>? get_search_matches_async(string raw_query, string prepared_query,
+    public async Gee.Collection<string>? get_search_matches_async(Geary.SearchQuery query,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         check_open();
         
+        Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
+        if (query_phrases.size == 0)
+            return null;
+        
         Gee.Set<string> search_matches = new Gee.HashSet<string>();
         
-        // Create a question mark for each ID.
-        string id_string = "";
-        for(int i = 0; i < ids.size; i++) {
-            id_string += "?";
-            if (i != ids.size - 1)
-                id_string += ", ";
-        }
-        
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("SELECT offsets(MessageSearchTable), * FROM MessageSearchTable " +
-                "WHERE MessageSearchTable MATCH ? AND id IN (%s)".printf(id_string));
+            StringBuilder sql = new StringBuilder();
+            sql.append("""
+                SELECT offsets(MessageSearchTable), *
+                FROM MessageSearchTable
+                WHERE id IN (
+            """);
+            sql_append_ids(sql,
+                Geary.traverse<ImapDB.EmailIdentifier>(ids).map<int64?>(id => id.message_id).to_gee_iterable());
+            sql.append(")");
+            sql_add_query_phrases(sql, query_phrases);
             
-            // Bind query and IDs.
-            int i = 0;
-            stmt.bind_string(i++, prepared_query);
-            foreach(ImapDB.EmailIdentifier id in ids)
-                stmt.bind_rowid(i++, id.message_id);
+            Db.Statement stmt = cx.prepare(sql.str);
+            sql_bind_query_phrases(stmt, 0, query_phrases);
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
@@ -847,7 +945,7 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
-        add_literal_matches(raw_query, search_matches);
+        add_literal_matches(query.raw, search_matches);
         
         return (search_matches.size == 0 ? null : search_matches);
     }

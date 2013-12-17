@@ -55,7 +55,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         Geary.SpecialFolderType.TRASH,
         // Orphan emails (without a folder) are also excluded; see ctor.
     };
-    private string? search_query = null;
+    private Geary.SearchQuery? search_query = null;
     private Gee.TreeSet<ImapDB.SearchEmailIdentifier> search_results;
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
@@ -113,7 +113,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         }
     }
     
-    private async void append_new_email_async(string query, Geary.Folder folder,
+    private async void append_new_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
         
@@ -144,7 +144,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
             append_new_email_async.begin(search_query, folder, ids, null, on_append_new_email_complete);
     }
     
-    private async void handle_removed_email_async(string query, Geary.Folder folder,
+    private async void handle_removed_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
         
@@ -213,19 +213,21 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     }
     
     private async void set_search_query_async(string query, Cancellable? cancellable = null) throws Error {
+        Geary.SearchQuery search_query = new Geary.SearchQuery(query);
+        
         int result_mutex_token = yield result_mutex.claim_async();
         
         Error? error = null;
         try {
-            yield do_search_async(query, null, null, cancellable);
+            yield do_search_async(search_query, null, null, cancellable);
         } catch(Error e) {
             error = e;
         }
         
         result_mutex.release(ref result_mutex_token);
         
-        search_query = query;
-        search_query_changed(query);
+        this.search_query = search_query;
+        search_query_changed(search_query.raw);
         
         if (error != null)
             throw error;
@@ -237,7 +239,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     // considered to be a delta and are added or subtracted from the full set.
     // add_ids are new ids to search for, remove_ids are ids in our result set
     // that will be removed if this search doesn't turn them up.
-    private async void do_search_async(string query, Gee.Collection<Geary.EmailIdentifier>? add_ids,
+    private async void do_search_async(Geary.SearchQuery query, Gee.Collection<Geary.EmailIdentifier>? add_ids,
         Gee.Collection<ImapDB.SearchEmailIdentifier>? remove_ids, Cancellable? cancellable) throws Error {
         // There are three cases here: 1) replace full result set, where the
         // *_ids parameters are both null, 2) add to result set, where just

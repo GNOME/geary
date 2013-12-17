@@ -5,6 +5,9 @@
  */
 
 namespace Geary {
+    /**
+     * Take a Gee object and return a Geary.Iterable for convenience.
+     */
     public Geary.Iterable<G> traverse<G>(Gee.Iterable<G> i) {
         return new Geary.Iterable<G>(i.iterator());
     }
@@ -21,6 +24,31 @@ namespace Geary {
  */
 
 public class Geary.Iterable<G> : BaseObject {
+    /**
+     * A private class that lets us take a Geary.Iterable and convert it back
+     * into a Gee.Iterable.
+     */
+    private class GeeIterable<G> : Gee.Traversable<G>, Gee.Iterable<G>, BaseObject {
+        private Gee.Iterator<G> i;
+        
+        public GeeIterable(Gee.Iterator<G> iterator) {
+            i = iterator;
+        }
+        
+        public Gee.Iterator<G> iterator() {
+            return i;
+        }
+        
+        // Unfortunately necessary for Gee.Traversable.
+        public virtual bool @foreach(Gee.ForallFunc<G> f) {
+            foreach (G g in this) {
+                if (!f(g))
+                    return false;
+            }
+            return true;
+        }
+    }
+
     private Gee.Iterator<G> i;
     
     public Iterable(Gee.Iterator<G> iterator) {
@@ -98,6 +126,14 @@ public class Geary.Iterable<G> : BaseObject {
                 count++;
         }
         return count;
+    }
+    
+    /**
+     * The resulting Gee.Iterable comes with the same caveat that you may only
+     * iterate over it once.
+     */
+    public Gee.Iterable<G> to_gee_iterable() {
+        return new GeeIterable<G>(i);
     }
     
     public Gee.Collection<G> add_all_to(Gee.Collection<G> c) {
