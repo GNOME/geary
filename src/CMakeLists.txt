@@ -398,6 +398,14 @@ include(ValaVersion)
 ensure_vala_version("0.22.1" MINIMUM)
 include(ValaPrecompile)
 
+# Vapigen
+find_program(VAPIGEN vapigen)
+if (VAPIGEN STREQUAL "VAPIGEN-NOTFOUND")
+    message(FATAL_ERROR "vapigen must be installed to build Geary.")
+else ()
+    message(STATUS "Found vapigen: " ${VAPIGEN})
+endif ()
+
 # Packages
 if (LIBMESSAGINGMENU_FOUND)
     message(STATUS "Unity messaging menu support: ON")
@@ -439,28 +447,32 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
-if (WEBKITGTK110X_FOUND)
-    message(STATUS "Targeting WebKitGTK 1.10")
+if (WEBKITGTK24X_FOUND)
+    message(STATUS "Targeting WebKitGTK 2.4")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=1.10.0
-        webkitgtk-3.0<=1.10.2
+        webkitgtk-3.0>=2.3.0
     )
     
     SET(WEBKITGTK_METADATA_DIR
-        webkitgtk-1.10
+        webkitgtk-2.4
     )
+	
+	SET(WEBKITGTK_CUSTOM_VALA
+		webkitgtk-2.4/WebKit-3.0-custom.vala
+	)
 elseif (WEBKITGTK22X_FOUND)
     message(STATUS "Targeting WebKitGTK 2.2")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
         webkitgtk-3.0>=2.2.0
+        webkitgtk-3.0<=2.2.100
     )
     
     SET(WEBKITGTK_METADATA_DIR
         webkitgtk-2.2
     )
-else ()
+elseif (WEBKITGTK20X_FOUND)
     message(STATUS "Targeting WebKitGTK 2.0")
     SET(EXTRA_CLIENT_PKG_CONFIG
         ${EXTRA_CLIENT_PKG_CONFIG}
@@ -471,6 +483,19 @@ else ()
     SET(WEBKITGTK_METADATA_DIR
         webkitgtk-2.0
     )
+elseif (WEBKITGTK110X_FOUND)
+    message(STATUS "Targeting WebKitGTK 1.10")
+    SET(EXTRA_CLIENT_PKG_CONFIG
+        ${EXTRA_CLIENT_PKG_CONFIG}
+        webkitgtk-3.0>=1.10.0
+        webkitgtk-3.0<=1.10.2
+    )
+    
+    SET(WEBKITGTK_METADATA_DIR
+        webkitgtk-1.10
+    )
+else ()
+    message(FATAL_ERROR "WebKitGTK not installed / unknown version detected")
 endif ()
 
 if (NO_FATAL_WARNINGS)
@@ -505,8 +530,10 @@ set(ENGINE_PACKAGES
     glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
 )
 
+# webkitgtk-3.0 is listed as a custom VAPI (below) to ensure it's treated as a dependency and
+# built before compilation
 set(CLIENT_PACKAGES
-    gtk+-3.0 libsecret-1 WebKit-3.0 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -580,6 +607,17 @@ OPTIONS
 add_library(geary-static STATIC ${ENGINE_VALA_C})
 target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn gthread-2.0)
 
+# WebKitGTK VAPI generation
+#################################################
+add_custom_command(
+    OUTPUT
+        ${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi
+    WORKING_DIRECTORY
+        ${CMAKE_SOURCE_DIR}/bindings/metadata
+    COMMAND
+        vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `pkg-config --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
+)
+
 # Geary client app
 #################################################
 vala_precompile(GEARY_VALA_C geary
@@ -589,6 +627,7 @@ PACKAGES
     ${ENGINE_PACKAGES}
 CUSTOM_VAPIS
     "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
+    "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
     --vapidir=${CMAKE_BINARY_DIR}/src

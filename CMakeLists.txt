@@ -52,8 +52,13 @@ endif ()
 find_package(PkgConfig)
 pkg_check_modules(LIBUNITY QUIET unity>=5.12.0)
 pkg_check_modules(LIBMESSAGINGMENU QUIET messaging-menu>=12.10.2)
-pkg_check_modules(WEBKITGTK110X QUIET webkitgtk-3.0<=1.10.2)
-pkg_check_modules(WEBKITGTK22X QUIET webkitgtk-3.0>=2.2.0)
+
+# CMake's range-checking syntax doesn't allow for a bare less-than, so using
+# improbably high version numbers to indicate maximum
+pkg_check_modules(WEBKITGTK24X QUIET webkitgtk-3.0>=2.3.0)
+pkg_check_modules(WEBKITGTK22X QUIET webkitgtk-3.0>=2.2.0 webkitgtk-3.0<=2.2.100)
+pkg_check_modules(WEBKITGTK20X QUIET webkitgtk-3.0>=2.0.0 webkitgtk-3.0<=2.0.100)
+pkg_check_modules(WEBKITGTK110X QUIET webkitgtk-3.0>=1.10.0 webkitgtk-3.0<=1.10.2)
 
 # intl
 include(Gettext)

@@ -22,3 +22,5 @@ DOMWebKitNamedFlow.dispatch_event type="void"
 DOMDOMApplicationCache.dispatch_event type="void"
 DOMDOMWindow.dispatch_event type="void"
 
+WebFrame.get_global_context skip
+

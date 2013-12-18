@@ -1,0 +1,14 @@
+DOM* parent="WebKit.DOM" name="DOM(.+)"
+
+DOMEventTarget.add_event_listener skip=true
+DOMEventTarget.add_event_listener_with_closure skip=true
+DOMEventTarget.remove_event_listener skip=true
+DOMEventTarget.remove_event_listener_with_closure skip=true
+
+WebView.entering_fullscreen#signal name="entering_fullscreen_signal"
+WebView.leaving_fullscreen#signal name="leaving_fullscreen_signal"
+
+WebView.move_cursor#virtual_method name="leaving_fullscreen_method"
+WebSettings.enable_default_context_menu#property deprecated=false
+
+WebFrame.get_global_context skip
