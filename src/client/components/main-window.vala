@@ -128,6 +128,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         status_bar.add(spinner);
         status_bar_box.pack_start(folder_frame);
         status_bar_box.pack_start(status_bar, false, false, 0);
+        status_bar_box.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
         
 #if !HAVE_LIBGRANITE
         folder_paned.get_style_context().add_class("sidebar-pane-separator");
