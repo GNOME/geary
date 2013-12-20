@@ -24,8 +24,9 @@ public class GearyApplication : Gtk.Application {
     
     // These strings must match corresponding strings in desktop/geary.desktop *exactly* and be
     // internationalizable
-    public const string DESKTOP_NAME = _("Geary Mail");
+    public const string DESKTOP_NAME = _("Geary");
     public const string DESKTOP_GENERIC_NAME = _("Mail Client");
+    public const string DESKTOP_GNOME_FULLNAME = _("Geary Mail");
     public const string DESKTOP_COMMENT = _("Send and receive email");
     public const string DESKTOP_KEYWORDS = _("Email;E-mail;Mail;");
     public const string DESKTOP_COMPOSE_NAME = _("Compose Message");

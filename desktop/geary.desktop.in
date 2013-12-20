@@ -1,6 +1,7 @@
 [Desktop Entry]
-_Name=Geary Mail
+_Name=Geary
 _GenericName=Mail Client
+_X-GNOME-FullName=Geary Mail
 _Comment=Send and receive email
 _Keywords=Email;E-mail;Mail;
 Icon=geary
