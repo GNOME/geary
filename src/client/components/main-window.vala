@@ -134,7 +134,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 #endif
         
         Gtk.Frame viewer_frame = new Gtk.Frame(null);
-        viewer_frame.shadow_type = Gtk.ShadowType.IN;
+        viewer_frame.shadow_type = Gtk.ShadowType.NONE;
         viewer_frame.add(conversation_viewer);
         
          // Message list left of message viewer.
