@@ -1272,7 +1272,7 @@ public class GearyController : Geary.BaseObject {
             "comments", GearyApplication.DESCRIPTION,
             "authors", GearyApplication.AUTHORS,
             "copyright", GearyApplication.COPYRIGHT,
-            "license", GearyApplication.LICENSE,
+            "license-type", Gtk.License.LGPL_2_1,
             "version", GearyApplication.VERSION,
             "website", GearyApplication.WEBSITE,
             "website-label", GearyApplication.WEBSITE_LABEL,
