@@ -399,7 +399,8 @@ public class ComposerWindow : Gtk.Window {
         editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         
-        GearyApplication.instance.config.spell_check_changed.connect(on_spell_check_changed);
+        GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
+            on_spell_check_changed);
         
         // Font family menu items.
         font_sans = new Gtk.RadioMenuItem(new SList<Gtk.RadioMenuItem>());

@@ -66,7 +66,8 @@ public class ConversationListView : Gtk.TreeView {
         Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
         
-        GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
+        GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
+            on_display_preview_changed);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
         

@@ -40,11 +40,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         // the value in dconf changes *immediately*, and stays saved
         // in the event of a crash.
         Configuration config = GearyApplication.instance.config;
-        config.bind(Configuration.FOLDER_LIST_PANE_POSITION_NAME, folder_paned, "position");
-        config.bind(Configuration.MESSAGES_PANE_POSITION_NAME, conversations_paned, "position");
-        config.bind(Configuration.WINDOW_WIDTH_NAME, this, "window-width");
-        config.bind(Configuration.WINDOW_HEIGHT_NAME, this, "window-height");
-        config.bind(Configuration.WINDOW_MAXIMIZE_NAME, this, "window-maximized");
+        config.bind(Configuration.FOLDER_LIST_PANE_POSITION_KEY, folder_paned, "position");
+        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, conversations_paned, "position");
+        config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
+        config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
+        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         

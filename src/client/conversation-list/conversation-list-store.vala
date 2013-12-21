@@ -57,7 +57,8 @@ public class ConversationListStore : Gtk.ListStore {
         set_default_sort_func(sort_by_date);
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
         
-        GearyApplication.instance.config.display_preview_changed.connect(on_display_preview_changed);
+        GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
+            on_display_preview_changed);
         update_id = Timeout.add_seconds_full(Priority.LOW, 60, update_date_strings);
         
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
