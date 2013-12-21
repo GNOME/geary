@@ -7,8 +7,6 @@
 public class AccountDialog : Gtk.Dialog {
     private const int MARGIN = 12;
     
-    private static AccountDialog? account_dialog = null;
-    
     private Gtk.Notebook notebook = new Gtk.Notebook();
     private AccountDialogAccountListPane account_list_pane;
     private AccountDialogAddEditPane add_edit_pane;
@@ -16,9 +14,11 @@ public class AccountDialog : Gtk.Dialog {
     private AccountDialogRemoveConfirmPane remove_confirm_pane;
     private AccountDialogRemoveFailPane remove_fail_pane;
     
-    private AccountDialog() {
+    public AccountDialog(Gtk.Window parent) {
         set_size_request(450, -1); // Sets min size.
         title = _("Accounts");
+        set_transient_for(parent);
+        set_modal(true);
         get_content_area().margin_top = MARGIN;
         get_content_area().margin_left = MARGIN;
         get_content_area().margin_right = MARGIN;
@@ -42,8 +42,6 @@ public class AccountDialog : Gtk.Dialog {
         remove_confirm_pane.ok.connect(on_delete_account_confirmed);
         remove_confirm_pane.cancel.connect(on_cancel_back_to_list);
         remove_fail_pane.ok.connect(on_cancel_back_to_list);
-        delete_event.connect(on_delete);
-        response.connect(on_close);
         
         // Set default page.
         account_list_pane.present();
@@ -55,14 +53,6 @@ public class AccountDialog : Gtk.Dialog {
         set_default_response(Gtk.ResponseType.OK);
         
         notebook.show_all(); // Required due to longstanding Gtk.Notebook bug
-    }
-    
-    public static void show_instance() {
-        if (account_dialog == null) {
-            account_dialog = new AccountDialog();
-        }
-        account_dialog.show_all();
-        account_dialog.present();
     }
     
     // This is a hack to allow key events in this window.  Gtk.Notebook will attempt to propagate
@@ -78,15 +68,8 @@ public class AccountDialog : Gtk.Dialog {
         account_list_pane.present();
     }
     
-    private bool on_delete() {
-        return hide_on_delete();
-    }
-    
     private void on_close() {
-        hide();
-        
-        // Go back to default page.
-        account_list_pane.present();
+        response(Gtk.ResponseType.CLOSE);
     }
     
     private void on_add_account() {

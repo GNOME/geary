@@ -5,8 +5,6 @@
  */
 
 public class PreferencesDialog : Object {
-    private static PreferencesDialog? preferences_dialog = null;
-    
     private Gtk.Dialog dialog;
     private Gtk.CheckButton autoselect;
     private Gtk.CheckButton display_preview;
@@ -16,12 +14,16 @@ public class PreferencesDialog : Object {
     private Gtk.Button close_button;
     private Configuration config;
     
-    private PreferencesDialog(Configuration config) {
-        this.config = config;
+    public PreferencesDialog(Gtk.Window parent) {
+        this.config = GearyApplication.instance.config;
+        
         Gtk.Builder builder = GearyApplication.instance.create_builder("preferences.glade");
         
         // Get all of the dialog elements.
         dialog = builder.get_object("dialog") as Gtk.Dialog;
+        dialog.set_transient_for(parent);
+        dialog.set_modal(true);
+        
         autoselect = builder.get_object("autoselect") as Gtk.CheckButton;
         display_preview = builder.get_object("display_preview") as Gtk.CheckButton;
         spell_check = builder.get_object("spell_check") as Gtk.CheckButton;
@@ -29,7 +31,11 @@ public class PreferencesDialog : Object {
         show_notifications = builder.get_object("show_notifications") as Gtk.CheckButton;
         close_button = builder.get_object("close_button") as Gtk.Button;
         
-        populate_preference_options();
+        autoselect.active = config.autoselect;
+        display_preview.active = config.display_preview;
+        spell_check.active = config.spell_check;
+        play_sounds.active = config.play_sounds;
+        show_notifications.active = config.show_notifications;
         
         // Connect to element signals.
         autoselect.toggled.connect(on_autoselect_toggled);
@@ -37,34 +43,12 @@ public class PreferencesDialog : Object {
         spell_check.toggled.connect(on_spell_check_toggled);
         play_sounds.toggled.connect(on_play_sounds_toggled);
         show_notifications.toggled.connect(on_show_notifications_toggled);
-        
-        dialog.delete_event.connect(on_delete);
-        dialog.response.connect(on_close);
     }
     
-    public void populate_preference_options() {
-        autoselect.active = config.autoselect;
-        display_preview.active = config.display_preview;
-        spell_check.active = config.spell_check;
-        play_sounds.active = config.play_sounds;
-        show_notifications.active = config.show_notifications;    
-    }
-    
-    public static void show_instance() {
-        if (preferences_dialog == null) 
-            preferences_dialog = new PreferencesDialog(GearyApplication.instance.config);
-        
-        preferences_dialog.populate_preference_options();
-        preferences_dialog.dialog.show_all();
-        preferences_dialog.dialog.present();
-    }
-    
-    private bool on_delete() {
-        return dialog.hide_on_delete(); //prevent widgets from getting destroyed
-    }
-    
-    private void on_close() {
-        dialog.hide();
+    public void run() {
+        dialog.show_all();
+        dialog.run();
+        dialog.destroy();
     }
     
     private void on_autoselect_toggled() {

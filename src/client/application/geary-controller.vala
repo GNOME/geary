@@ -1298,11 +1298,15 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_accounts() {
-        AccountDialog.show_instance();
+        AccountDialog dialog = new AccountDialog(main_window);
+        dialog.show_all();
+        dialog.run();
+        dialog.destroy();
     }
     
     private void on_preferences() {
-        PreferencesDialog.show_instance();
+        PreferencesDialog dialog = new PreferencesDialog(main_window);
+        dialog.run();
     }
     
     private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
