@@ -15,7 +15,7 @@ public class MainToolbar : PillToolbar {
     public string search_text { get { return search_entry.text; } }
     
     private Gtk.ToolItem search_container = new Gtk.ToolItem();
-    private Gtk.Entry search_entry = new Gtk.Entry();
+    private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
     private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
     private Geary.Account? current_account = null;
@@ -72,13 +72,8 @@ public class MainToolbar : PillToolbar {
         
         // Search bar.
         search_entry.width_chars = 32;
-        search_entry.primary_icon_name = "edit-find-symbolic";
-        search_entry.secondary_icon_name = rtl ? "edit-clear-rtl-symbolic" : "edit-clear-symbolic";
-        search_entry.secondary_icon_activatable = true;
-        search_entry.secondary_icon_sensitive = true;
         search_entry.tooltip_text = _("Search all mail in account for keywords (Ctrl+S)");
         search_entry.changed.connect(on_search_entry_changed);
-        search_entry.icon_release.connect(on_search_entry_icon_release);
         search_entry.key_press_event.connect(on_search_key_press);
         on_search_entry_changed(); // set initial state
         search_entry.has_focus = true;
@@ -123,11 +118,6 @@ public class MainToolbar : PillToolbar {
         // Enable/disable clear button.
         search_entry.secondary_icon_name = search_entry.text != "" ?
             (get_direction() == Gtk.TextDirection.RTL ? ICON_CLEAR_RTL_NAME : ICON_CLEAR_NAME) : null;
-    }
-    
-    private void on_search_entry_icon_release(Gtk.EntryIconPosition icon_pos, Gdk.Event event) {
-        if (icon_pos == Gtk.EntryIconPosition.SECONDARY)
-            search_entry.text = "";
     }
     
     private bool on_search_key_press(Gdk.EventKey event) {
