@@ -135,6 +135,10 @@ public class MainToolbar : PillToolbar {
         if (Gdk.keyval_name(event.keyval) == "Escape")
             search_entry.text = "";
         
+        // Force search if user hits enter.
+        if (Gdk.keyval_name(event.keyval) == "Return")
+            on_search_entry_changed();
+        
         return false;
     }
     
