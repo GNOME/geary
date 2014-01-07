@@ -15,6 +15,8 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
     public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
     public const string ACTION_FORWARD_MESSAGE = "GearyForwardMessage";
+    public const string ACTION_ARCHIVE_MESSAGE = "GearyArchiveMessage";
+    public const string ACTION_TRASH_MESSAGE = "GearyTrashMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
     public const string ACTION_FIND_IN_CONVERSATION = "GearyFindInConversation";
     public const string ACTION_FIND_NEXT_IN_CONVERSATION = "GearyFindNextInConversation";
@@ -40,13 +42,18 @@ public class GearyController : Geary.BaseObject {
     public const int MIN_CONVERSATION_COUNT = 50;
     
     private const string DELETE_MESSAGE_LABEL = _("_Delete");
-    private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Delete, Backspace, A)");
-    private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Delete, Backspace, A)");
-    private const string DELETE_MESSAGE_ICON_NAME = "user-trash-symbolic";
+    private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
+    private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
+    private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
+    
+    private const string TRASH_MESSAGE_LABEL = _("_Trash");
+    private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to trash (Delete, Backspace)");
+    private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to trash (Delete, Backspace)");
+    private const string TRASH_MESSAGE_ICON_NAME = "user-trash-symbolic";
     
     private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
-    private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (Delete, Backspace, A)");
-    private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (Delete, Backspace, A)");
+    private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (A)");
+    private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-symbolic";
     
     private const string MARK_AS_SPAM_LABEL = _("Mark as S_pam");
@@ -156,6 +163,7 @@ public class GearyController : Geary.BaseObject {
         
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(GearyApplication.instance);
+        main_window.on_shift_key.connect(on_shift_key);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
         
         enable_message_buttons(false);
@@ -338,14 +346,24 @@ public class GearyController : Geary.BaseObject {
             null, null, "<Shift><Ctrl>G", null, on_find_previous_in_conversation_action };
         entries += find_previous_in_conversation;
         
-        // although this action changes according to Geary.Folder capabilities, set to Archive
+        Gtk.ActionEntry archive_message = { ACTION_ARCHIVE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
+            ARCHIVE_MESSAGE_LABEL, "A", null, on_archive_message };
+        archive_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP_SINGLE;
+        entries += archive_message;
+        
+        // although this action changes according to the account's capabilities, set to Delete
         // until they're known so the "translatable" string doesn't first appear
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
-            ARCHIVE_MESSAGE_LABEL, "A", null, on_delete_message };
-        delete_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP_SINGLE;
+        Gtk.ActionEntry trash_message = { ACTION_TRASH_MESSAGE, TRASH_MESSAGE_ICON_NAME,
+            TRASH_MESSAGE_LABEL, "Delete", null, on_trash_message };
+        trash_message.tooltip = TRASH_MESSAGE_TOOLTIP_SINGLE;
+        entries += trash_message;
+        add_accelerator("BackSpace", ACTION_TRASH_MESSAGE);
+        
+        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, DELETE_MESSAGE_ICON_NAME,
+            DELETE_MESSAGE_LABEL, "<Shift>Delete", null, on_delete_message };
+        delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
-        add_accelerator("Delete", ACTION_DELETE_MESSAGE);
-        add_accelerator("BackSpace", ACTION_DELETE_MESSAGE);
+        add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);
 
         Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>equal",
             null, on_zoom_in };
@@ -387,6 +405,8 @@ public class GearyController : Geary.BaseObject {
             ACTION_REPLY_TO_MESSAGE,
             ACTION_REPLY_ALL_MESSAGE,
             ACTION_FORWARD_MESSAGE,
+            ACTION_ARCHIVE_MESSAGE,
+            ACTION_TRASH_MESSAGE,
             ACTION_DELETE_MESSAGE,
         };
         const string[] exported_actions = {
@@ -908,16 +928,9 @@ public class GearyController : Geary.BaseObject {
     // by other utility methods
     private void update_ui() {
         update_tooltips();
-        Gtk.Action delete_message = GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE);
-        if (current_folder is Geary.FolderSupport.Archive) {
-            delete_message.label = ARCHIVE_MESSAGE_LABEL;
-            delete_message.icon_name = ARCHIVE_MESSAGE_ICON_NAME;
-        } else {
-            // even if not Geary.FolderSupportsrRemove, use delete icons and label, although they
-            // may be insensitive the entire time
-            delete_message.label = DELETE_MESSAGE_LABEL;
-            delete_message.icon_name = DELETE_MESSAGE_ICON_NAME;
-        }
+        main_window.main_toolbar.update_trash_buttons(
+            current_folder_supports_trash() || !(current_folder is Geary.FolderSupport.Remove),
+            current_account.can_support_archive);
     }
     
     private void on_folder_selected(Geary.Folder? folder) {
@@ -1289,6 +1302,12 @@ public class GearyController : Geary.BaseObject {
         } catch (Error error) {
             debug("Error opening donate page: %s", error.message);
         }
+    }
+    
+    private void on_shift_key(bool pressed) {
+        main_window.main_toolbar.update_trash_buttons(
+            (!pressed && current_folder_supports_trash()) || !(current_folder is Geary.FolderSupport.Remove),
+            current_account.can_support_archive);
     }
     
     // this signal does not necessarily indicate that the application previously didn't have
@@ -1833,54 +1852,96 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.find(false);
     }
     
-    // This method is used for both removing and archive a message; currently Geary only supports
-    // one or the other in a folder
-    private void on_delete_message() {
-        // Prevent deletes of the same conversation from repeating.
-        if (main_window.conversation_viewer.current_conversation != null
-            && main_window.conversation_viewer.current_conversation == last_deleted_conversation) {
-            debug("not archiving/deleting, viewed conversation is last deleted conversation");
-            
-            return;
-        }
-        
-        // There should always be at least one conversation selected here, otherwise the archive
-        // button is disabled, but better safe than segfaulted.
-        last_deleted_conversation = selected_conversations.size > 0
-            ? Geary.Collection.get_first<Geary.App.Conversation>(selected_conversations) : null;
-        
-        // If the user clicked the toolbar button, we want to move focus back to the message list.
-        main_window.conversation_list_view.grab_focus();
-        
-        delete_messages.begin(get_selected_email_ids(false), cancellable_folder, on_delete_messages_completed);
+    private void on_archive_message() {
+        archive_or_delete_selection_async.begin(true, false, cancellable_folder,
+            on_archive_or_delete_selection_finished);
     }
     
-    // This method is used for both removing and archive a message; currently Geary only supports
-    // one or the other in a folder.  This will try archiving first, then remove.
-    private async void delete_messages(Gee.List<Geary.EmailIdentifier> ids, Cancellable? cancellable)
-        throws Error {
-        Geary.FolderSupport.Archive? supports_archive = current_folder as Geary.FolderSupport.Archive;
-        if (supports_archive != null) {
-            yield supports_archive.archive_email_async(ids, cancellable);
-            
+    private void on_trash_message() {
+        archive_or_delete_selection_async.begin(false, true, cancellable_folder,
+            on_archive_or_delete_selection_finished);
+    }
+    
+    private void on_delete_message() {
+        archive_or_delete_selection_async.begin(false, false, cancellable_folder,
+            on_archive_or_delete_selection_finished);
+    }
+    
+    private bool current_folder_supports_trash(out Geary.FolderSupport.Move? move = null,
+        out Geary.FolderPath? trash_path = null) {
+        try {
+            if (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
+                && !current_folder.properties.is_local_only && current_account != null) {
+                Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
+                Geary.Folder? trash_folder = current_account.get_special_folder(Geary.SpecialFolderType.TRASH);
+                if (supports_move != null && trash_folder != null) {
+                    move = supports_move;
+                    trash_path = trash_folder.path;
+                    return true;
+                }
+            }
+        } catch (Error e) {
+            debug("Error finding trash folder: %s", e.message);
+        }
+        
+        move = null;
+        trash_path = null;
+        return false;
+    }
+    
+    private async void archive_or_delete_selection_async(bool archive, bool trash,
+        Cancellable? cancellable) throws Error {
+        if (main_window.conversation_viewer.current_conversation != null
+            && main_window.conversation_viewer.current_conversation == last_deleted_conversation) {
+            debug("Not archiving/trashing/deleting; viewed conversation is last deleted conversation");
             return;
         }
+        
+        last_deleted_conversation = selected_conversations.size > 0
+            ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
+        
+        // Return focus to the conversation list from the clicked toolbar button.
+        main_window.conversation_list_view.grab_focus();
+        
+        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        if (archive) {
+            debug("Archiving selected messages");
+            
+            Geary.FolderSupport.Archive? supports_archive = current_folder as Geary.FolderSupport.Archive;
+            if (supports_archive == null)
+                debug("Folder %s doesn't support archive", current_folder.to_string());
+            else
+                yield supports_archive.archive_email_async(ids, cancellable);
+            return;
+        }
+        
+        if (trash) {
+            debug("Trashing selected messages");
+            
+            Geary.FolderPath? trash_path;
+            Geary.FolderSupport.Move? supports_move;
+            if (!current_folder_supports_trash(out supports_move, out trash_path))
+                debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
+                    current_folder.to_string(), current_account.to_string());
+            else
+                yield supports_move.move_email_async(ids, trash_path, cancellable);
+            return;
+        }
+        
+        debug("Deleting selected messages");
         
         Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
-        if (supports_remove != null) {
+        if (supports_remove == null)
+            debug("Folder %s doesn't support remove", current_folder.to_string());
+        else
             yield supports_remove.remove_email_async(ids, cancellable);
-            
-            return;
-        }
-        
-        debug("Folder %s supports neither remove nor archive", current_folder.to_string());
     }
-
-    private void on_delete_messages_completed(Object? source, AsyncResult result) {
+    
+    private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
         try {
-            delete_messages.end(result);
-        } catch (Error err) {
-            debug("Error, unable to delete messages: %s", err.message);
+            archive_or_delete_selection_async.end(result);
+        } catch (Error e) {
+            debug("Unable to archive/trash/delete messages: %s", e.message);
         }
     }
     
@@ -1924,8 +1985,12 @@ public class GearyController : Geary.BaseObject {
         // Mutliple message buttons.
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
             (current_folder is Geary.FolderSupport.Move);
+        GearyApplication.instance.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive =
+            (current_folder is Geary.FolderSupport.Archive);
+        GearyApplication.instance.actions.get_action(ACTION_TRASH_MESSAGE).sensitive =
+            current_folder_supports_trash();
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive =
-            (current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive);
+            (current_folder is Geary.FolderSupport.Remove);
         
         cancel_context_dependent_buttons();
         enable_context_dependent_buttons_async.begin(true, cancellable_context_dependent_buttons);
@@ -1945,8 +2010,12 @@ public class GearyController : Geary.BaseObject {
         GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = respond_sensitive;
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
             sensitive && (current_folder is Geary.FolderSupport.Move);
+        GearyApplication.instance.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive = sensitive
+            && (current_folder is Geary.FolderSupport.Archive);
+        GearyApplication.instance.actions.get_action(ACTION_TRASH_MESSAGE).sensitive = sensitive
+            && current_folder_supports_trash();
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
-            && ((current_folder is Geary.FolderSupport.Remove) || (current_folder is Geary.FolderSupport.Archive));
+            && (current_folder is Geary.FolderSupport.Remove);
         
         cancel_context_dependent_buttons();
         enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
@@ -1992,13 +2061,12 @@ public class GearyController : Geary.BaseObject {
         GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).tooltip = single ?
             MOVE_MESSAGE_TOOLTIP_SINGLE : MOVE_MESSAGE_TOOLTIP_MULTIPLE;
         
-        if (current_folder is Geary.FolderSupport.Archive) {
-            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
-                ARCHIVE_MESSAGE_TOOLTIP_SINGLE : ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE;
-        } else {
-            GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
-                DELETE_MESSAGE_TOOLTIP_SINGLE : DELETE_MESSAGE_TOOLTIP_MULTIPLE;
-        }
+        GearyApplication.instance.actions.get_action(ACTION_ARCHIVE_MESSAGE).tooltip = single ?
+            ARCHIVE_MESSAGE_TOOLTIP_SINGLE : ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE;
+        GearyApplication.instance.actions.get_action(ACTION_TRASH_MESSAGE).tooltip = single ?
+            TRASH_MESSAGE_TOOLTIP_SINGLE : TRASH_MESSAGE_TOOLTIP_MULTIPLE;
+        GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
+            DELETE_MESSAGE_TOOLTIP_SINGLE : DELETE_MESSAGE_TOOLTIP_MULTIPLE;
     }
     
     public void compose_mailto(string mailto) {

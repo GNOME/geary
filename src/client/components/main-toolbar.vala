@@ -13,7 +13,10 @@ public class MainToolbar : PillToolbar {
     public FolderMenu copy_folder_menu { get; private set; default = new FolderMenu(); }
     public FolderMenu move_folder_menu { get; private set; default = new FolderMenu(); }
     public string search_text { get { return search_entry.text; } }
+    public bool search_entry_has_focus { get { return search_entry.has_focus; } }
     
+    private Gtk.Button archive_button;
+    private Gtk.Button trash_buttons[2];
     private Gtk.ToolItem search_container = new Gtk.ToolItem();
     private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
@@ -61,11 +64,17 @@ public class MainToolbar : PillToolbar {
         insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
         add(create_pill_buttons(insert));
         
-        // Archive/delete button.
-        // For this button, the controller sets the tooltip and icon depending on the context.
+        // The toolbar looks bad when you hide one of a pair of pill buttons.
+        // Unfortunately, this means we have to have one pair for archive/trash
+        // and one single button for just trash, for when the archive button is
+        // hidden.
         insert.clear();
-        insert.add(create_toolbar_button("", GearyController.ACTION_DELETE_MESSAGE, true));
+        insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
+        insert.add(trash_buttons[0] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
         add(create_pill_buttons(insert));
+        insert.clear();
+        insert.add(trash_buttons[1] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
+        add(create_pill_buttons(insert, false));
         
         // Spacer.
         add(create_spacer());
@@ -99,6 +108,28 @@ public class MainToolbar : PillToolbar {
         }
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
+    }
+    
+    private void show_archive_button(bool show) {
+        if (show) {
+            archive_button.show();
+            trash_buttons[0].show();
+            trash_buttons[1].hide();
+        } else {
+            archive_button.hide();
+            trash_buttons[0].hide();
+            trash_buttons[1].show();
+        }
+    }
+    
+    /// Updates the trash button as trash or delete, and shows or hides the archive button.
+    public void update_trash_buttons(bool trash, bool archive) {
+        string action_name = (trash ? GearyController.ACTION_TRASH_MESSAGE
+            : GearyController.ACTION_DELETE_MESSAGE);
+        foreach (Gtk.Button b in trash_buttons)
+            setup_button(b, null, action_name, true);
+        
+        show_archive_button(archive);
     }
     
     public void set_search_text(string text) {

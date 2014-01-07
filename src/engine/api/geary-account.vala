@@ -21,6 +21,14 @@ public interface Geary.Account : BaseObject {
     public abstract Geary.ProgressMonitor opening_monitor { get; protected set; }
     public abstract Geary.ProgressMonitor sending_monitor { get; protected set; }
     
+    /**
+     * HACK: for now, only certain account types support folders with
+     * FolderSupport.Archive.  It's useful to know whether an account supports
+     * archive because the button is hidden for accounts that will never
+     * support it.
+     */
+    public abstract bool can_support_archive { get; protected set; }
+    
     public signal void opened();
     
     public signal void closed();

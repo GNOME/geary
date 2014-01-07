@@ -11,11 +11,14 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
     
+    public virtual bool can_support_archive { get; protected set; }
+    
     private string name;
     
-    public AbstractAccount(string name, AccountInformation information) {
+    public AbstractAccount(string name, AccountInformation information, bool can_support_archive) {
         this.name = name;
         this.information = information;
+        this.can_support_archive = can_support_archive;
     }
     
     protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,

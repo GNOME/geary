@@ -14,7 +14,7 @@ public class PillToolbar : Gtk.Toolbar {
         action_group = toolbar_action_group;
     }
     
-    private void setup_button(Gtk.Button b, string? icon_name, string action_name,
+    protected void setup_button(Gtk.Button b, string? icon_name, string action_name,
         bool show_label = false) {
         b.related_action = action_group.get_action(action_name);
         b.tooltip_text = b.related_action.tooltip;

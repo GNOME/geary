@@ -9,6 +9,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     private const int FOLDER_LIST_WIDTH = 100;
     private const int STATUS_BAR_HEIGHT = 18;
     
+    /// Fired when the shift key is pressed or released.
+    public signal void on_shift_key(bool pressed);
+    
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
@@ -35,6 +38,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         conversation_list_view = new ConversationListView(conversation_list_store);
         
+        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
+        
         // This code both loads AND saves the pane positions with live
         // updating. This is more resilient against crashes because
         // the value in dconf changes *immediately*, and stays saved
@@ -57,6 +62,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         delete_event.connect(on_delete_event);
         key_press_event.connect(on_key_press_event);
+        key_release_event.connect(on_key_release_event);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
         Geary.Engine.instance.account_available.connect(on_account_available);
@@ -66,12 +72,15 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
     
     public override void show_all() {
-        set_default_size(GearyApplication.instance.config.window_width, 
+        set_default_size(GearyApplication.instance.config.window_width,
             GearyApplication.instance.config.window_height);
         if (GearyApplication.instance.config.window_maximize)
             maximize();
         
         base.show_all();
+        
+        // Some buttons need to be hidden, so we have to do this after we show everything.
+        main_toolbar.update_trash_buttons(true, true);
     }
     
     private bool on_delete_event() {
@@ -149,8 +158,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
-        
-        this.key_press_event.connect(on_key_press_event);
     }
     
     // Returns true when there's a conversation list scrollbar visible, i.e. the list is tall
@@ -161,8 +168,23 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
     
     private bool on_key_press_event(Gdk.EventKey event) {
+        if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
+            && (event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && !main_toolbar.search_entry_has_focus)
+            on_shift_key(true);
+        
         // Check whether the focused widget wants to handle it, if not let the accelerators kick in
         // via the default handling
+        return propagate_key_event(event);
+    }
+    
+    private bool on_key_release_event(Gdk.EventKey event) {
+        // FIXME: it's possible the user will press two shift keys.  We want
+        // the shift key to report as released when they release ALL of them.
+        // There doesn't seem to be an easy way to do this in Gdk.
+        if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
+            && !main_toolbar.search_entry_has_focus)
+            on_shift_key(false);
+        
         return propagate_key_event(event);
     }
     
