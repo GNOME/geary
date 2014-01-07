@@ -747,7 +747,9 @@ public class ConversationViewer : Gtk.Box {
                 uint8[] image_data;
                 pixbuf.save_to_buffer(out image_data, "png", "compression", "5");
                 
-                rotated_image = new Geary.Memory.ByteBuffer.take((owned) image_data, image_data.length);
+                // Save length before transferring ownership (which frees the array)
+                int image_length = image_data.length;
+                rotated_image = new Geary.Memory.ByteBuffer.take((owned) image_data, image_length);
             }
         } catch (Error err) {
             debug("Unable to load and rotate image %s for display: %s", filename, err.message);

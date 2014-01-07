@@ -210,8 +210,10 @@ public class ConversationWebView : WebKit.WebView {
             if (icon_content == null || icon_content.length == 0)
                 return;
             
+            // Save length before transferring ownership (which frees the array)
+            int icon_length = icon_content.length;
             Geary.Memory.ByteBuffer buffer = new Geary.Memory.ByteBuffer.take((owned) icon_content,
-                icon_content.length);
+                icon_length);
             
             // Then set the source to a data url.
             WebKit.DOM.HTMLImageElement img = Util.DOM.select(get_dom_document(), selector)
@@ -254,8 +256,10 @@ public class ConversationWebView : WebKit.WebView {
             }
             
             // Then set the source to a data url.
+            // Save length before transferring ownership (which frees the array)
+            int content_length = content.length;
             Geary.Memory.Buffer buffer = new Geary.Memory.ByteBuffer.take((owned) content,
-                content.length);
+                content_length);
             img.set_attribute("src", assemble_data_uri(icon_mime_type, buffer));
         } catch (Error error) {
             warning("Failed to load image '%s': %s", filename, error.message);

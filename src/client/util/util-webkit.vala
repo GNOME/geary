@@ -438,8 +438,9 @@ public bool dissasemble_data_uri(string uri, out Geary.Memory.Buffer? buffer) {
     uint8[] bytes = Base64.decode((string) (((char *) uri) + start_index));
     
     // transfer ownership of the byte array directly to the Buffer; this prevents an
-    // unnecessary copy
-    buffer = new Geary.Memory.ByteBuffer.take((owned) bytes, bytes.length);
+    // unnecessary copy ... save length before transferring ownership (which frees the array)
+    int bytes_length = bytes.length;
+    buffer = new Geary.Memory.ByteBuffer.take((owned) bytes, bytes_length);
     
     return true;
 }
