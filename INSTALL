@@ -18,6 +18,7 @@
 
     Building Geary requires Vala 0.22.1 or higher with a full GObject
     introspection repository, intltool, cmake, and desktop-file-validate.
+    Vala's vapigen must be installed as well.
 
     The developer packages and headers for the following libraries are also
     required when building Geary:
@@ -62,7 +63,7 @@
         $ sudo yum install gobject-introspection-devel intltool cmake \
             desktop-file-utils libcanberra-devel libgee-devel glib2-devel \
             gmime-devel gtk3-devel libnotify-devel sqlite-devel unique3-devel \
-            webkitgtk3-devel libsecret-devel libxml2-devel
+            webkitgtk3-devel libsecret-devel libxml2-devel vala-tools
 
 
   * Installing dependencies on Ubuntu
