@@ -1252,6 +1252,8 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public const int ENABLE_RFC2047_WORKAROUNDS;
 	[CCode (cheader_filename = "gmime/gmime.h")]
+	public const int ENABLE_USE_ONLY_USER_CHARSETS;
+	[CCode (cheader_filename = "gmime/gmime.h")]
 	public const int FILTER_ENRICHED_IS_RICHTEXT;
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public const int FILTER_HTML_CITE;
@@ -1346,9 +1348,9 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_decode_8bit")]
 	public static string utils_decode_8bit (string text, size_t len);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_decode_message_id")]
-	public static unowned string utils_decode_message_id (string message_id);
+	public static string utils_decode_message_id (string message_id);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_generate_message_id")]
-	public static unowned string utils_generate_message_id (string fqdn);
+	public static string utils_generate_message_id (string fqdn);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_decode_date")]
 	public static time_t utils_header_decode_date (string str, out unowned int? tz_offset);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_decode_phrase")]
@@ -1356,25 +1358,25 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_decode_text")]
 	public static string utils_header_decode_text (string text);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_encode_phrase")]
-	public static unowned string utils_header_encode_phrase (string phrase);
+	public static string utils_header_encode_phrase (string phrase);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_encode_text")]
-	public static unowned string utils_header_encode_text (string text);
+	public static string utils_header_encode_text (string text);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_fold")]
-	public static unowned string utils_header_fold (string str);
+	public static string utils_header_fold (string header);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_format_date")]
-	public static unowned string utils_header_format_date (ulong date, int tz_offset);
+	public static string utils_header_format_date (ulong date, int tz_offset);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_printf")]
-	public static unowned string utils_header_printf (string format);
+	public static string utils_header_printf (string format);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_quote_string")]
-	public static unowned string utils_quote_string (string str);
+	public static string utils_quote_string (string str);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_structured_header_fold")]
-	public static unowned string utils_structured_header_fold (string str);
+	public static string utils_structured_header_fold (string header);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_text_is_8bit")]
 	public static bool utils_text_is_8bit (uint text, size_t len);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_unquote_string")]
 	public static void utils_unquote_string (string str);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_unstructured_header_fold")]
-	public static unowned string utils_unstructured_header_fold (string str);
+	public static string utils_unstructured_header_fold (string header);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_ydecode_step")]
 	public static size_t ydecode_step (uint inbuf, size_t inlen, uint outbuf, int state, uint32 pcrc, uint32 crc);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_yencode_close")]
