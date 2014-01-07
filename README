@@ -1,40 +1,39 @@
 
     Geary Email Client
     ------------------
-    
+
   * Introduction
-    
+
     Geary is an email client built for the GNOME desktop environment.  It
     allows you to read and send email with a simple, modern interface.
-    
+
     Visit http://www.yorba.org/geary to read about the current state of
     Geary's development and to make sure you're running the latest version.
-    
+
 
   * Installation & Licensing
-    
+
     Please consult the INSTALL and COPYING files for more information.
-    
+
 
   * Quick Start
-    
+
     The first time Geary is launched, it will prompt for your account
     information.  Note that your email password is stored securely in the
     Gnome Keyring.
-    
+
     Geary will then begin downloading messages in your inbox and other
     folders.
-    
+
   * Contacting Yorba
-    
+
     Yorba:                      http://www.yorba.org
     Geary wiki:                 https://wiki.gnome.org/Apps/Geary
-    
-    We also encourage you to join the Geary mailing list.  Send an email
-    with a subject: line of "subscribe" (no quotes) to
-    geary-request@lists.yorba.org.
-    
-    
-    
+
+    We also encourage you to join the Geary mailing list.  See
+    https://mail.gnome.org/mailman/listinfo/geary-list for details.
+
+
+
     Copyright 2012-2013 Yorba Foundation
 

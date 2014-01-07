@@ -1,24 +1,122 @@
 
-    Geary Installation
-    ------------------
+    Building & Installing Geary
+    ---------------------------
 
-    To build and install Geary, type the following commands:
+  * Building
 
-    $ ./configure
-    $ make
-    $ make install
+    To build Geary, run the following commands:
 
-    * By default, Geary will install under /usr/local.  The configure script
-      can customize the prefix directory.  Run ./configure --help for
-      instructions and other installation options.
-  
-    * You may need to execute "make install" as root (i.e. sudo make install)
-      if installing to system directories.
+        $ ./configure
+        $ make
 
-    * If you wish to try Geary before installing it, you may execute it
-      directly from its build directory.  Note that certain desktop integration
-      (such as being listed in an application menu) requires full installation.
+    By default, Geary will install under /usr/local.  The configure script can
+    customize the prefix directory.  Run ./configure --help for instructions
+    and other installation options.
+
+
+  * Dependencies
+
+    Building Geary requires Vala 0.22.1 or higher with a full GObject
+    introspection repository, intltool, cmake, and desktop-file-validate.
+
+    The developer packages and headers for the following libraries are also
+    required when building Geary:
+
+      * canberra
+      * gee-0.8
+      * gio-2.0
+      * glib-2.0
+      * gmime-2.6
+      * gtk+-3.0
+      * libsecret-1
+      * libxml-2.0
+      * notify
+      * sqlite3
+      * webkitgtk-3.0
+      * messaging-menu (optional; enables support for Ubuntu Unity messaging
+        menu)
+      * unity (optional; enables support for Ubuntu Unity launcher)
+
+    Most of these are standard libraries available from major distros' package
+    repositories.
+
+    Geary requires WebKitGTK-3 1.10 or higher.  However, it will not build with
+    WebKitGTK-3 versions 2.1.1 to 2.1.90.0.  See
+    <https://bugzilla.gnome.org/show_bug.cgi?id=713168> for details.
+
+
+  * Installing dependencies on Fedora
+
+    Fedora 20 ships with the correct version of Vala.  Install it by running
+    this command:
+
+        $ sudo yum install vala
+
+    In Fedora versions prior to 20, you must install Vala from source.
+    Download and install the tarball from
+    <https://wiki.gnome.org/Projects/Vala/Release>.
+
+    You can install the rest of the build dependencies for Geary in any version
+    of Fedora by running this command:
+
+        $ sudo yum install gobject-introspection-devel intltool cmake \
+            desktop-file-utils libcanberra-devel libgee-devel glib2-devel \
+            gmime-devel gtk3-devel libnotify-devel sqlite-devel unique3-devel \
+            webkitgtk3-devel libsecret-devel libxml2-devel
+
+
+  * Installing dependencies on Ubuntu
+
+    Ubuntu 14.04 ships the correct version of Vala.  In Ubuntu versions prior
+    to 14.04, you must add the Vala PPA first by running these commands:
+
+        $ sudo add-apt-repository ppa:vala-team/ppa
+        $ sudo apt-get update
+
+    You can install the build dependencies for Geary in Ubuntu by running this
+    command:
+
+        $ sudo apt-get install valac-0.20 libgirepository1.0-dev intltool \
+            cmake desktop-file-utils libcanberra-dev libgee-0.8-dev \
+            libglib2.0-dev libgmime-2.6-dev libgtk-3-dev libsecret-1-dev \
+            libxml2-dev libnotify-dev libsqlite3-dev libunique-3.0-dev \
+            libwebkitgtk-3.0-dev libmessaging-menu-dev libunity-dev
+
+    You should check that you are using the right version of valac by running:
+
+        $ valac --version
+        Vala 0.22.1
+
+    If it reports anything less than 0.22.1, select the correct version when
+    running:
+
+        $ sudo update-alternatives --config valac
+
+    Note that Ubuntu 12.04 does not have all the dependencies to build Geary.
+    See <https://wiki.gnome.org/Apps/Geary/BuildingOnUbuntu12.04> for details
+    and instructions.
+
+
+  * Running
+
+    If you wish to try Geary before installing it, you may execute it directly
+    from its build directory:
+
+        $ ./geary
+
+    Note that certain desktop integration (such as being listed in an
+    application menu) requires full installation.
+
+
+  * Installing
+
+    After Geary has built, run the following command to install it:
+
+        $ sudo make install
+
+    To uninstall, run:
+
+        $ sudo make uninstall
 
 
     Copyright 2012-2013 Yorba Foundation
-
