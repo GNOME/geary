@@ -33,6 +33,11 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
             if (mbox_addr == null)
                 continue;
             
+            if (!mbox_addr.get_addr().contains("@")) {
+                debug("Dropping invalid address \"%s\"", mbox_addr.to_string(false));
+                continue;
+            }
+            
             addrs.add(new MailboxAddress(mbox_addr.get_name(), mbox_addr.get_addr()));
         }
     }

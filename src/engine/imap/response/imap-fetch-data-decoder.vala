@@ -155,12 +155,19 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             (message_id != null) ? new Geary.RFC822.MessageID(message_id.value) : null);
     }
     
-    // TODO: This doesn't handle group lists (see Johnson, p.268) -- this will throw an
-    // ImapError.TYPE_ERROR if this occurs.
-    private Geary.RFC822.MailboxAddresses? parse_addresses(ListParameter listp) throws ImapError {
+    // TODO: This doesn't handle group lists (see Johnson, p.268 and
+    // http://tools.ietf.org/html/rfc3501#section-7.4.2
+    private Geary.RFC822.MailboxAddresses parse_addresses(ListParameter listp) throws ImapError {
         Gee.List<Geary.RFC822.MailboxAddress> list = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
         for (int ctr = 0; ctr < listp.size; ctr++) {
             ListParameter fields = listp.get_as_empty_list(ctr);
+            
+            // watch for group lists, which are not currently supported
+            if (fields.get_as_nullable_string(3) == null) {
+                debug("Dropping group list \"%s\"", fields.to_string());
+                continue;
+            }
+            
             StringParameter? name = fields.get_as_nullable_string(0);
             StringParameter? source_route = fields.get_as_nullable_string(1);
             StringParameter mailbox = fields.get_as_empty_string(2);

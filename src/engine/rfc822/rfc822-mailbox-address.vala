@@ -23,6 +23,11 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         if (atsign > 0) {
             mailbox = address.slice(0, atsign);
             domain = address.slice(atsign + 1, address.length);
+        } else {
+            debug("Bogus name \"%s\" address \"%s\"", name, address);
+            //breakpoint();
+            mailbox = "";
+            domain = "";
         }
     }
     
@@ -32,7 +37,10 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         this.mailbox = mailbox;
         this.domain = domain;
         
-        address = "%s@%s".printf(mailbox, domain);
+        if (!String.is_empty(mailbox) && !String.is_empty(domain))
+            address = "%s@%s".printf(mailbox, domain);
+        else
+            debug("Bogus IMAP name mailbox %s domain %s", mailbox, domain);
     }
 
     // Borrowed liberally from GMime's internal _internet_address_decode_name() function.
