@@ -746,8 +746,17 @@ private class Geary.ImapDB.Account : BaseObject {
         foreach (string? field in query.get_fields()) {
             string? phrase = null;
             Gee.List<string>? tokens = query.get_tokens(field);
-            if (tokens != null)
-                phrase = string.joinv(" ", tokens.to_array()).strip();
+            if (tokens != null) {
+                string[] array = tokens.to_array();
+                // HACK: work around a bug in vala where it's not null-terminating
+                // arrays created from generic-typed functions (Gee.Collection.to_array)
+                // before passing them off to g_strjoinv.  Simply making a copy to a
+                // local proper string array adds the null for us.
+                string[] copy = new string[array.length];
+                for (int i = 0; i < array.length; ++i)
+                    copy[i] = array[i];
+                phrase = string.joinv(" ", copy).strip();
+            }
             
             if (!Geary.String.is_empty(phrase))
                 phrases.set((field == null ? "MessageSearchTable" : field), phrase);
