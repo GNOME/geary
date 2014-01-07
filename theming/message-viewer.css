@@ -203,7 +203,7 @@ body:not(.nohide) .email.hide .header_container .avatar {
     margin-right: -0.67em;
 }
 
-.email .data_inline_image {
+.email .replaced_inline_image {
     max-width: 100%;
     display: block;
     margin-top: 1em;

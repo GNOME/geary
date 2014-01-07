@@ -31,6 +31,7 @@ public class ConversationViewer : Gtk.Box {
     private const string MESSAGE_CONTAINER_ID = "message_container";
     private const string SELECTION_COUNTER_ID = "multiple_messages";
     private const string SPINNER_ID = "spinner";
+    private const string REPLACED_IMAGE_CLASS = "replaced_inline_image";
     private const string DATA_IMAGE_CLASS = "data_inline_image";
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
     
@@ -755,8 +756,9 @@ public class ConversationViewer : Gtk.Box {
             debug("Unable to load and rotate image %s for display: %s", filename, err.message);
         }
         
-        return "<img alt=\"%s\" class=\"%s\" src=\"%s\" />".printf(
-            filename, DATA_IMAGE_CLASS, assemble_data_uri(content_type.get_mime_type(), rotated_image));
+        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" />".printf(
+            filename, DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
+            assemble_data_uri(content_type.get_mime_type(), rotated_image));
     }
     
     // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
