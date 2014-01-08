@@ -28,7 +28,15 @@
   	</tr>
   	<tr>
   		<td><p>Archive</p></td>
-  		<td><p> <key>A</key> or <key>Delete</key> or <key>Backspace</key></p></td>
+  		<td><p> <key>A</key></p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Trash</p></td>
+  		<td><p> <key>Delete</key> or <key>Backspace</key></p></td>
+  	</tr>
+  	<tr>
+  		<td><p>Delete</p></td>
+  		<td><p> <keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</key><key>Backspace</key></keyseq></p></td>
   	</tr>
   	<tr>
   	    <td><p>Star</p></td>
