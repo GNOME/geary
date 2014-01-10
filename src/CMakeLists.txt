@@ -650,13 +650,6 @@ add_custom_command(
 include(GSettings)
 add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
 
-IF (XGETTEXT_FOUND)
-    MESSAGE("Creating POT file")
-    GETTEXT_CREATE_POT(${GETTEXT_PACKAGE}.pot OPTION ${XGETTEXT_OPTIONS} SRC ${CLIENT_SRC} ${ENGINE_SRC} GLADE ${GLADE_FILES})
-ELSE ()
-    message(STATUS "xgettext not found")
-ENDIF()
-
 # Console app
 #################################################
 vala_precompile(CONSOLE_VALA_C geary-console

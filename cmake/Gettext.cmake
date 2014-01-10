@@ -76,66 +76,8 @@ IF(NOT DEFINED XGETTEXT_OPTIONS)
 ENDIF(NOT DEFINED XGETTEXT_OPTIONS)
 
 IF(XGETTEXT_FOUND)
-    MACRO(GETTEXT_CREATE_POT _potFile _pot_options )
-	SET(_xgettext_options_list)
-	SET(_src_list)
-	SET(_src_list_abs)
-	SET(_glade_list)
-	SET(_glade_list_abs)
-	SET(_stage "SRC")
-	FOREACH(_pot_option ${_pot_options} ${ARGN})
-		IF(_pot_option STREQUAL "OPTION")
-			SET(_stage "OPTION")
-		ELSEIF(_pot_option STREQUAL "SRC")
-			SET(_stage "SRC")
-		ELSEIF(_pot_option STREQUAL "GLADE")
-			SET(_stage "GLADE")
-		ELSE(_pot_option STREQUAL "OPTION")
-			IF(_stage STREQUAL "OPTION")
-				SET(_xgettext_options_list ${_xgettext_options_list} ${_pot_option})
-			ELSEIF(_stage STREQUAL "GLADE")
-				FILE(RELATIVE_PATH _relFile ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/${_pot_option})
-				GET_FILENAME_COMPONENT(_absFile ${_pot_option} ABSOLUTE)
-				SET(_glade_list ${_glade_list} ${_relFile})
-				SET(_glade_list_abs ${_glade_list_abs} ${_absFile})
-			ELSEIF(_stage STREQUAL "SRC")
-				FILE(RELATIVE_PATH _relFile ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${_pot_option})
-				GET_FILENAME_COMPONENT(_absFile ${_pot_option} ABSOLUTE)
-				SET(_src_list ${_src_list} ${_relFile})
-				SET(_src_list_abs ${_src_list_abs} ${_absFile})
-			ENDIF(_stage STREQUAL "OPTION")
-		ENDIF(_pot_option STREQUAL "OPTION")
-	ENDFOREACH(_pot_option ${_pot_options} ${ARGN})
-
-	IF (_xgettext_options_list)
-	    SET(_xgettext_options ${_xgettext_options_list})
-	ELSE(_xgettext_options_list)
-	    SET(_xgettext_options ${XGETTEXT_OPTIONS})
-	ENDIF(_xgettext_options_list)
-
-	#MESSAGE("${XGETTEXT_EXECUTABLE} ${_xgettext_options_list} -o ${_potFile} ${_src_list}")
-	ADD_CUSTOM_COMMAND(OUTPUT pot_file
-	    COMMAND ${XGETTEXT_EXECUTABLE} ${_xgettext_options} -o ${_potFile} ${_src_list}
-	    DEPENDS ${_src_list_abs} ${GLADE_FILES}
-	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	    )
-
-	ADD_CUSTOM_TARGET(pot_file
-	    COMMAND ${XGETTEXT_EXECUTABLE} ${_xgettext_options_list} -o _source.pot ${_src_list}
-	    COMMAND ${XGETTEXT_EXECUTABLE} --language=Glade --omit-header -o _glade.pot ${_glade_list}
-	    COMMAND ${GETTEXT_MSGCAT_EXECUTABLE} -o ${_potFile} --use-first _source.pot _glade.pot
-	    DEPENDS ${_src_list_abs}
-	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	    COMMENT "Extract translatable messages to ${_potFile}"
-	    )
-    ENDMACRO(GETTEXT_CREATE_POT _potFile _pot_options)
-
-
-    MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstLang)
+    MACRO(GETTEXT_CREATE_TRANSLATIONS _firstLang)
 	SET(_gmoFiles)
-	GET_FILENAME_COMPONENT(_potBasename ${_potFile} NAME_WE)
-	GET_FILENAME_COMPONENT(_absPotFile ${_potFile} ABSOLUTE)
-
 	SET(_addToAll)
 	SET(_is_comment FALSE)
 
@@ -156,13 +98,12 @@ IF(XGETTEXT_FOUND)
 		#MESSAGE("_absFile=${_absFile} _abs_PATH=${_abs_PATH} _lang=${_lang} curr_bin=${CMAKE_CURRENT_BINARY_DIR}")
 		ADD_CUSTOM_COMMAND(
 		    OUTPUT ${_gmoFile}
-		    COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none -s ${_absFile} ${_absPotFile}
 		    COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${_gmoFile} ${_absFile}
-		    DEPENDS ${_absPotFile} ${_absFile}
+		    DEPENDS ${_absFile}
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		    )
 
-		INSTALL(FILES ${_gmoFile} DESTINATION share/locale/${_lang}/LC_MESSAGES RENAME ${_potBasename}.mo)
+                INSTALL(FILES ${_gmoFile} DESTINATION share/locale/${_lang}/LC_MESSAGES RENAME ${GETTEXT_PACKAGE}.mo)
 		SET(_gmoFiles ${_gmoFiles} ${_gmoFile})
 	    ENDIF()
 	ENDFOREACH (_currentLang )
