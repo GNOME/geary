@@ -293,10 +293,10 @@ public class Geary.RFC822.Message : BaseObject {
     public string get_preview() {
         string? preview = null;
         try {
-            preview = get_text_body(false);
+            preview = get_text_body(false, null);
         } catch (Error e) {
             try {
-                preview = Geary.HTML.remove_html_tags(get_html_body());
+                preview = Geary.HTML.remove_html_tags(get_html_body(null));
             } catch (Error error) {
                 debug("Could not generate message preview: %s\n and: %s", e.message, error.message);
             }
@@ -440,7 +440,8 @@ public class Geary.RFC822.Message : BaseObject {
      * Returns: a bool indicating whether a text part with the desired text_subtype was found
      */
     private bool construct_body_from_mime_parts(ref string? body, InlinePartReplacer? replacer,
-        string text_subtype, bool to_html = false, GMime.Object? node = null) throws RFC822Error {
+        string text_subtype, bool allow_only_replaced, bool to_html, GMime.Object? node)
+        throws RFC822Error {
         if (node == null) {
             node = message.get_mime_part();
         }
@@ -455,7 +456,7 @@ public class Geary.RFC822.Message : BaseObject {
                 GMime.Object child = multipart.get_part(i);
                 string? child_body = null;
                 found_text_subtype |= construct_body_from_mime_parts(ref child_body, replacer,
-                    text_subtype, to_html, child);
+                    text_subtype, allow_only_replaced, to_html, child);
                 if (child_body != null)
                     builder.append(child_body);
             }
@@ -508,31 +509,74 @@ public class Geary.RFC822.Message : BaseObject {
         if (replaced_part != null)
             body = replaced_part;
         
-        return (replaced_part != null);
+        return allow_only_replaced && (replaced_part != null);
     }
     
-    public string? get_html_body(InlinePartReplacer? replacer = null) throws RFC822Error {
+    /**
+     * A front-end to construct_body_from_mime_parts() that converts its output parameters into
+     * something that front-facing methods want to return.
+     *
+     * The allow_only_replaced flag indicates if it's allowable for the method to return only the
+     * InlinePartReplacer's returned text.  In other words, if only an inline MIME section is found
+     * but no portion of text_subtype, allow_only_replaced indicates if the InlinePartReplacer's
+     * returned text constitutes a "body".
+     */
+    private string? internal_get_body(bool allow_only_replaced, string text_subtype, bool to_html,
+        InlinePartReplacer? replacer) throws RFC822Error {
         string? body = null;
-        if (!construct_body_from_mime_parts(ref body, replacer, "html"))
-            throw new RFC822Error.NOT_FOUND("Could not find any \"text/html\" parts");
+        if (!construct_body_from_mime_parts(ref body, replacer, text_subtype, allow_only_replaced,
+            to_html, null)) {
+            throw new RFC822Error.NOT_FOUND("Could not find any \"text/%s\" parts", text_subtype);
+        }
+        
         return body;
     }
     
-    public string? get_text_body(bool convert_to_html = true, InlinePartReplacer? replacer = null) throws RFC822Error {
-        string? body = null;
-        if (!construct_body_from_mime_parts(ref body, replacer, "plain", convert_to_html))
-            throw new RFC822Error.NOT_FOUND("Could not find any \"text/plain\" parts");
-        return body;
+    /**
+     * Returns the HTML portion of the message body, if present.
+     *
+     * Throws {@link RFC822Error.NOT_FOUND} if an HTML body is not present.
+     */
+    private string? get_html_body(InlinePartReplacer? replacer) throws RFC822Error {
+        return internal_get_body(true, "html", false, replacer);
     }
     
-    // Returns a body of the email as HTML.  The "html_format" flag tells it whether to try for a
-    // HTML format body or plain text body first.  But if it doesn't find that one, it'll return
-    // the other.
+    /**
+     * Returns the plaintext portion of the message body, if present.
+     *
+     * The convert_to_html flag indicates if the plaintext body should be converted into HTML.
+     * Note that the InlinePartReplacer's output is not converted; it's up to the caller to know
+     * what format to return when invoked.
+     *
+     * Throws {@link RFC822Error.NOT_FOUND} if a plaintext body is not present.
+     */
+    private string? get_text_body(bool convert_to_html, InlinePartReplacer? replacer) throws RFC822Error {
+        return internal_get_body(true, "plain", convert_to_html, replacer);
+    }
+    
+    /**
+     * Returns a body of the email as HTML.
+     *
+     * The html_format flag indicates whether to use the HTML portion of the message body or to
+     * convert the plaintext portion into HTML.  If the requested portion is not present, the
+     * method will fallback and attempt to return the other (converted to HTML, if necessary).
+     * It is possible for html_format to be false and this method to return HTML (if plaintext
+     * is unavailable).  Consider using {@link get_html_body} or {@link get_text_body} if finer
+     * control is desired.
+     *
+     * Note that the InlinePartReplacer's output is never converted and should return HTML.
+     *
+     * Throws {@link RFC822Error.NOT_FOUND if neither format is available.
+     */
     public string? get_body(bool html_format, InlinePartReplacer? replacer = null) throws RFC822Error {
         try {
-            return html_format ? get_html_body(replacer) : get_text_body(true, replacer);
-        } catch (Error error) {
-            return html_format ? get_text_body(true, replacer) : get_html_body(replacer);
+            return html_format
+                ? internal_get_body(false, "html", false, replacer)
+                : internal_get_body(false, "plain", true, replacer);
+        } catch (Error err) {
+            return html_format
+                ? internal_get_body(true, "plain", true, replacer)
+                : internal_get_body(true, "html", false, replacer);
         }
     }
     
@@ -547,11 +591,11 @@ public class Geary.RFC822.Message : BaseObject {
         string? body = null;
         bool html = false;
         try {
-            body = get_html_body();
+            body = get_html_body(null);
             html = true;
         } catch (Error e) {
             try {
-                body = get_text_body(false);
+                body = get_text_body(false, null);
             } catch (Error e) {
                 // Ignore.
             }
