@@ -40,7 +40,8 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     }
     
     public override string? get_sidebar_tooltip() {
-        return _("%d results").printf(folder.properties.email_total);
+        int total = folder.properties.email_total;
+        return ngettext("%d result", "%d results", total).printf(total);
     }
     
     public override Icon? get_sidebar_icon() {
