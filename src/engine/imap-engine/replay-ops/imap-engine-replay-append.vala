@@ -6,12 +6,14 @@
 
 private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOperation {
     public GenericFolder owner;
+    public int remote_count;
     public Gee.List<Imap.SequenceNumber> positions;
     
-    public ReplayAppend(GenericFolder owner, Gee.List<Imap.SequenceNumber> positions) {
+    public ReplayAppend(GenericFolder owner, int remote_count, Gee.List<Imap.SequenceNumber> positions) {
         base ("Append");
         
         this.owner = owner;
+        this.remote_count = remote_count;
         this.positions = positions;
     }
     
@@ -30,6 +32,9 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOper
         }
         
         positions = new_positions;
+        
+        // DON'T update remote_count, it is intended to report the remote count at the time the
+        // appended messages arrived
     }
     
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
@@ -40,13 +45,13 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOper
     
     public override async ReplayOperation.Status replay_local_async() {
         if (positions.size > 0)
-            yield owner.do_replay_appended_messages(positions);
+            yield owner.do_replay_appended_messages(remote_count, positions);
         
         return ReplayOperation.Status.COMPLETED;
     }
     
     public override string describe_state() {
-        return "positions.size=%d".printf(positions.size);
+        return "remote_count=%d positions.size=%d".printf(remote_count, positions.size);
     }
 }
 

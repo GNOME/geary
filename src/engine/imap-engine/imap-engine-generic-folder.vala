@@ -723,17 +723,25 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         notify_email_locally_complete(email_ids);
     }
     
-    private void on_remote_appended(int new_remote_count) {
-        debug("%s on_remote_appended: new_remote_count=%d", to_string(), new_remote_count);
+    private void on_remote_appended(int reported_remote_count) {
+        debug("%s on_remote_appended: remote_count=%d reported_remote_count=%d", to_string(), remote_count,
+            reported_remote_count);
+        
+        if (reported_remote_count < 0)
+            return;
         
         // from the new remote total and the old remote total, glean the SequenceNumbers of the
         // new email(s)
         Gee.List<Imap.SequenceNumber> positions = new Gee.ArrayList<Imap.SequenceNumber>();
-        for (int pos = remote_count + 1; pos <= new_remote_count; pos++)
+        for (int pos = remote_count + 1; pos <= reported_remote_count; pos++)
             positions.add(new Imap.SequenceNumber(pos));
         
+        // store the remote count NOW, as further appended messages could arrive before the
+        // ReplayAppend executes
+        remote_count = reported_remote_count;
+        
         if (positions.size > 0)
-            replay_queue.schedule_server_notification(new ReplayAppend(this, positions));
+            replay_queue.schedule_server_notification(new ReplayAppend(this, reported_remote_count, positions));
     }
     
     // Need to prefetch at least an EmailIdentifier (and duplicate detection fields) to create a
@@ -743,14 +751,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     // which is exactly what we want.
     //
     // This MUST only be called from ReplayAppend.
-    internal async void do_replay_appended_messages(Gee.List<Imap.SequenceNumber> remote_positions) {
+    internal async void do_replay_appended_messages(int reported_remote_count,
+        Gee.List<Imap.SequenceNumber> remote_positions) {
         StringBuilder positions_builder = new StringBuilder("( ");
         foreach (Imap.SequenceNumber remote_position in remote_positions)
             positions_builder.append_printf("%s ", remote_position.to_string());
         positions_builder.append(")");
         
-        debug("%s do_replay_appended_message: remote_count=%d remote_positions=%s", to_string(),
-            remote_count, positions_builder.str);
+        debug("%s do_replay_appended_message: current remote_count=%d reported_remote_count=%d remote_positions=%s",
+            to_string(), remote_count, reported_remote_count, positions_builder.str);
         
         if (remote_positions.size == 0)
             return;
@@ -800,15 +809,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 to_string(), err.message);
         }
         
-        // save new remote count internally and in local store
-        // NOTE: use remote_positions size, not created/appended, as the former is a true indication
-        // of the count on the server
-        remote_count += remote_positions.size;
+        // store the reported count, *not* the current count (which is updated outside the of
+        // the queue) to ensure that updates happen serially and reflect committed local changes
         try {
-            yield local_folder.update_remote_selected_message_count(remote_count, null);
+            yield local_folder.update_remote_selected_message_count(reported_remote_count, null);
         } catch (Error err) {
             debug("%s do_replay_appended_message: Unable to save appended remote count %d: %s",
-                to_string(), remote_count, err.message);
+                to_string(), reported_remote_count, err.message);
         }
         
         if (appended.size > 0)
@@ -817,25 +824,39 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (created.size > 0)
             notify_email_locally_appended(created);
         
-        notify_email_count_changed(remote_count, CountChangeReason.APPENDED);
+        notify_email_count_changed(reported_remote_count, CountChangeReason.APPENDED);
         
-        debug("%s do_replay_appended_message: completed remote_count=%d", to_string(), remote_count);
+        debug("%s do_replay_appended_message: completed, current remote_count=%d reported_remote_count=%d",
+            to_string(), remote_count, reported_remote_count);
     }
     
-    private void on_remote_removed(Imap.SequenceNumber position, int new_remote_count) {
-        debug("%s on_remote_removed: position=%s new_remote_count=%d", to_string(), position.to_string(),
-            new_remote_count);
+    private void on_remote_removed(Imap.SequenceNumber position, int reported_remote_count) {
+        debug("%s on_remote_removed: remote_count=%d position=%s reported_remote_count=%d", to_string(),
+            remote_count, position.to_string(), reported_remote_count);
+        
+        if (reported_remote_count < 0)
+            return;
         
         // notify of removal to all pending replay operations
         replay_queue.notify_remote_removed_position(position);
         
-        replay_queue.schedule_server_notification(new ReplayRemoval(this, position));
+        // update remote count NOW, as further appended and removed messages can arrive before
+        // ReplayRemoval executes
+        //
+        // something to note at this point: the ExpungeEmail operation marks messages as removed,
+        // then signals they're removed and reports an adjusted count in its replay_local_async().
+        // remote_count is *not* updated, which is why it's safe to do that here without worry.
+        // similarly, signals are only fired here if marked, so the same EmailIdentifier isn't
+        // reported twice
+        remote_count = reported_remote_count;
+        
+        replay_queue.schedule_server_notification(new ReplayRemoval(this, reported_remote_count, position));
     }
     
     // This MUST only be called from ReplayRemoval.
-    internal async void do_replay_removed_message(Imap.SequenceNumber remote_position) {
-        debug("%s do_replay_removed_message: remote_position=%d remote_count=%d",
-            to_string(), remote_position.value, remote_count);
+    internal async void do_replay_removed_message(int reported_remote_count, Imap.SequenceNumber remote_position) {
+        debug("%s do_replay_removed_message: current remote_count=%d remote_position=%d reported_remote_count=%d",
+            to_string(), remote_count, remote_position.value, reported_remote_count);
         
         if (!remote_position.is_valid()) {
             debug("%s do_replay_removed_message: ignoring, invalid remote position or count",
@@ -853,7 +874,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // from server's point of view, not client's
             local_count = yield local_folder.get_email_count_async(
                 ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
-            local_position = remote_position.value - (remote_count - local_count);
+            local_position = remote_position.value - (reported_remote_count + 1 - local_count);
             
             // zero or negative means the message exists beyond the local vector's range, so
             // nothing to do there
@@ -887,8 +908,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             replay_queue.notify_remote_removed_ids(new Collection.SingleItem<ImapDB.EmailIdentifier>(owned_id));
         } else {
             debug("%s do_replay_removed_message: remote_position=%d unknown in local store "
-                + "(remote_count=%d local_position=%d local_count=%d)",
-                to_string(), remote_position.value, remote_count, local_position, local_count);
+                + "(reported_remote_count=%d local_position=%d local_count=%d)",
+                to_string(), remote_position.value, reported_remote_count, local_position, local_count);
         }
         
         // for debugging
@@ -901,16 +922,10 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 err.message);
         }
         
-        // something to note at this point: the ExpungeEmail operation marks messages as removed,
-        // then signals they're removed and reports an adjusted count in its replay_local_async().
-        // remote_count is *not* updated, which is why it's safe to do that here without worry.
-        // similarly, signals are only fired here if marked, so the same EmailIdentifier isn't
-        // reported twice
-        
-        // save new remote count internally and in local store
-        remote_count = Numeric.int_floor(remote_count - 1, 0);
+        // as with on_remote_appended(), only update in local store inside a queue operation, to
+        // ensure serial commits
         try {
-            yield local_folder.update_remote_selected_message_count(remote_count, null);
+            yield local_folder.update_remote_selected_message_count(reported_remote_count, null);
         } catch (Error err) {
             debug("%s do_replay_removed_message: unable to save removed remote count: %s", to_string(),
                 err.message);
@@ -921,12 +936,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             notify_email_removed(new Collection.SingleItem<Geary.EmailIdentifier>(owned_id));
         
         if (!marked)
-            notify_email_count_changed(remote_count, CountChangeReason.REMOVED);
+            notify_email_count_changed(reported_remote_count, CountChangeReason.REMOVED);
         
-        debug("%s do_replay_remove_message: completed "
-            + "(remote_count=%d local_count=%d starting local_count=%d remote_position=%d local_position=%d marked=%s)",
-            to_string(), remote_count, new_local_count, local_count, remote_position.value, local_position,
-            marked.to_string());
+        debug("%s do_replay_remove_message: completed, current remote_count=%d "
+            + "(reported_remote_count=%d local_count=%d starting local_count=%d remote_position=%d local_position=%d marked=%s)",
+            to_string(), remote_count, reported_remote_count, new_local_count, local_count, remote_position.value,
+            local_position, marked.to_string());
     }
     
     private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
