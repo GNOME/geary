@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-12 19:49+0100\n"
-"PO-Revision-Date: 2014-01-12 19:50+0100\n"
+"POT-Creation-Date: 2014-01-13 20:43+0100\n"
+"PO-Revision-Date: 2014-01-13 20:44+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -369,7 +369,7 @@ msgstr "Utwórz nową wiadomość (Ctrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:320
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1546
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1549
 msgid "_Reply"
 msgstr "_Odpowiedz"
 
@@ -387,7 +387,7 @@ msgstr "Odpowiedz wszystkim (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:331
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1559
 msgid "_Forward"
 msgstr "_Przekaż"
 
@@ -595,13 +595,19 @@ msgstr "_Zastąp"
 
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
-msgid "%i matches"
-msgstr "Pasujące: %i"
+msgid "%i match"
+msgid_plural "%i matches"
+msgstr[0] "%i dopasowanie"
+msgstr[1] "%i dopasowania"
+msgstr[2] "%i dopasowań"
 
 #: ../src/client/components/conversation-find-bar.vala:216
 #, c-format
-msgid "%i matches (wrapped)"
-msgstr "Pasujące: %i (od początku)"
+msgid "%i match (wrapped)"
+msgid_plural "%i matches (wrapped)"
+msgstr[0] "%i dopasowanie (od początku)"
+msgstr[1] "%i dopasowania (od początku)"
+msgstr[2] "%i dopasowań (od początku)"
 
 #: ../src/client/components/conversation-find-bar.vala:218
 msgid "not found"
@@ -668,7 +674,7 @@ msgstr "_Usuń"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1018
 msgid "Select _All"
 msgstr "Zaznacz _wszystko"
 
@@ -773,122 +779,128 @@ msgstr "Brak zaznaczonych wątków."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:256
 #, c-format
-msgid "%u conversations selected."
-msgstr "Zaznaczonych wątków: %u"
+msgid "%u conversation selected."
+msgid_plural "%u conversations selected."
+msgstr[0] "%u zaznaczony wątek."
+msgstr[1] "%u zaznaczone wątki."
+msgstr[2] "%u zaznaczonych wątków."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:283
+#: ../src/client/conversation-viewer/conversation-viewer.vala:285
 msgid "No search results found."
 msgstr "Nie odnaleziono wyników."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:285
+#: ../src/client/conversation-viewer/conversation-viewer.vala:287
 msgid "No conversations in folder."
 msgstr "Brak wątków w katalogu."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:526
 msgid "This message contains remote images."
 msgstr "Ta wiadomość zawiera zewnętrzne obrazy."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:526
 msgid "Show Images"
 msgstr "Wyświetl obrazy"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:525
+#: ../src/client/conversation-viewer/conversation-viewer.vala:527
 msgid "Always Show From Sender"
 msgstr "Zawsze wyświetlaj od nadawcy"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:549
+#: ../src/client/conversation-viewer/conversation-viewer.vala:551
 msgid "Edit Draft"
 msgstr "Modyfikuj szkic"
 
 #. Geary account mail will be sent from
-#: ../src/client/conversation-viewer/conversation-viewer.vala:621
+#: ../src/client/conversation-viewer/conversation-viewer.vala:623
 #: ../ui/composer.glade.h:41
 msgid "From:"
 msgstr "Od:"
 
 #. Address(es) e-mail is to be sent to
-#: ../src/client/conversation-viewer/conversation-viewer.vala:624
+#: ../src/client/conversation-viewer/conversation-viewer.vala:626
 #: ../ui/composer.glade.h:36
 msgid "To:"
 msgstr "Do:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:627
+#: ../src/client/conversation-viewer/conversation-viewer.vala:629
 #: ../ui/composer.glade.h:37
 msgid "Cc:"
 msgstr "Do wiadomości:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:630
+#: ../src/client/conversation-viewer/conversation-viewer.vala:632
 #: ../ui/composer.glade.h:39
 msgid "Bcc:"
 msgstr "Ukryty do wiadomości:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
+#: ../src/client/conversation-viewer/conversation-viewer.vala:635
 #: ../ui/composer.glade.h:38
 msgid "Subject:"
 msgstr "Temat:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:636
+#: ../src/client/conversation-viewer/conversation-viewer.vala:638
 msgid "Date:"
 msgstr "Data:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:842
+#: ../src/client/conversation-viewer/conversation-viewer.vala:845
 #, c-format
-msgid "%u read messages"
-msgstr "Przeczytane wiadomości: %u"
+msgid "%u read message"
+msgid_plural "%u read messages"
+msgstr[0] "%u przeczytana wiadomość"
+msgstr[1] "%u przeczytane wiadomości"
+msgstr[2] "%u przeczytanych wiadomości"
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:988
+#: ../src/client/conversation-viewer/conversation-viewer.vala:991
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "S_kopiuj"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:996
+#: ../src/client/conversation-viewer/conversation-viewer.vala:999
 msgid "Copy _Email Address"
 msgstr "Skopiuj adres _e-mail"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1001
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1004
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Skopiuj _odnośnik"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1009
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1012
 msgid "Select _Message"
 msgstr "Zaznacz _wiadomość"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1024
 msgid "_Inspect"
 msgstr "Z_badaj"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1246
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1249
 msgid "This link appears to go to"
 msgstr "Ten odnośnik wydaje się prowadzić do"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1247
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1250
 msgid "but actually goes to"
 msgstr ", ale tak naprawdę prowadzi do"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1302
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
 msgid " (Invalid?)"
 msgstr " (Nieprawidłowy?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1494
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1497
 msgid "_Save As..."
 msgstr "Zapisz j_ako..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1499
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1502
 msgid "Save All A_ttachments..."
 msgstr "Zapisz wszystkie _załączniki..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1513
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1516
 msgid "_Save Image As..."
 msgstr "Zapisz _obraz jako..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1539
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Zapisz _załącznik..."
@@ -896,37 +908,37 @@ msgstr[1] "Zapisz wszystkie _załączniki..."
 msgstr[2] "Zapisz wszystkie _załączniki..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1551
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1554
 msgid "Reply to _All"
 msgstr "Odpowiedz _wszystkim"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1568
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1571
 msgid "_Mark as Read"
 msgstr "Oznacz jako p_rzeczytane"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1575
 msgid "_Mark as Unread"
 msgstr "Oznacz jako _nieprzeczytane"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1578
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1581
 msgid "Mark Unread From _Here"
 msgstr "Oznacz jako nieprzeczytane od tego _miejsca"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1593
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
 msgid "_View Source"
 msgstr "_Wyświetl źródło"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1898
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1901
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "brak"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2031
 msgid "Failed to open default text editor."
 msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 
