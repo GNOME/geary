@@ -5,7 +5,7 @@ DOC_ID = geary
 DOC_PAGES = \
 	accounts.page \
 	archive.page \
-	bugs.page
+	bugs.page \
 	index.page \
 	label.page \
 	limits.page \
