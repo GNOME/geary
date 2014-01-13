@@ -43,7 +43,7 @@ msgstr "Αποστολή και λήψη ηλεκτρονικού ταχυδρο
 
 #: ../desktop/geary.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "μήνυμα;ηλεκτρονικό ταχυδρομείο;αλληλογραφία"
+msgstr "μήνυμα;ηλεκτρονικό ταχυδρομείο;αλληλογραφία;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
