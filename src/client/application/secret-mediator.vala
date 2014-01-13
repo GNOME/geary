@@ -65,12 +65,12 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         Geary.AccountInformation account_information,
         out string? imap_password, out string? smtp_password,
         out bool imap_remember_password, out bool smtp_remember_password) throws Error {
-        bool first_try = !account_information.imap_credentials.is_complete() ||
-            (account_information.smtp_credentials != null &&
-            !account_information.smtp_credentials.is_complete());
+        // Our dialog doesn't support asking for both at once, even though this
+        // API would indicate it does.  We need to revamp the API.
+        assert(!services.has_imap() || !services.has_smtp());
         
-        PasswordDialog password_dialog = new PasswordDialog(account_information, first_try,
-            services);
+        PasswordDialog password_dialog = new PasswordDialog(services.has_smtp(),
+            account_information, services);
         
         if (!password_dialog.run()) {
             imap_password = null;
@@ -82,10 +82,17 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         
         // password_dialog.password should never be null at this point. It will only be null when
         // password_dialog.run() returns false, in which case we have already returned.
-        imap_password = password_dialog.imap_password;
-        smtp_password = password_dialog.smtp_password;
-        imap_remember_password = password_dialog.remember_password;
-        smtp_remember_password = password_dialog.remember_password;
+        if (services.has_smtp()) {
+            imap_password = null;
+            imap_remember_password = false;
+            smtp_password = password_dialog.password;
+            smtp_remember_password = password_dialog.remember_password;
+        } else {
+            imap_password = password_dialog.password;
+            imap_remember_password = password_dialog.remember_password;
+            smtp_password = null;
+            smtp_remember_password = false;
+        }
         return true;
     }
 }
