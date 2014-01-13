@@ -47,7 +47,7 @@ msgstr "Envoyer et recevoir des courriels"
 
 #: ../desktop/geary.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "Email;E-mail;Messagerie;Courriels"
+msgstr "Email;E-mail;Messagerie;Courriels;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
