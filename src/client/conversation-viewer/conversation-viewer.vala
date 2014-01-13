@@ -250,10 +250,12 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private void show_multiple_selected(uint selected_count) {
-        if (selected_count == 0)
+        if (selected_count == 0) {
             show_special_message(_("No conversations selected."));
-        else
-            show_special_message(_("%u conversations selected.").printf(selected_count));
+        } else {
+            show_special_message(ngettext("%u conversation selected.", "%u conversations selected.",
+                selected_count).printf(selected_count));
+        }
     }
     
     private void on_folder_selected(Geary.Folder? folder) {
@@ -839,7 +841,8 @@ public class ConversationViewer : Gtk.Box {
                         WebKit.DOM.HTMLElement span =
                             first_compressed.first_element_child.first_element_child
                             as WebKit.DOM.HTMLElement;
-                        span.set_inner_html(_("%u read messages").printf(compress_count));
+                        span.set_inner_html(
+                            ngettext("%u read message", "%u read messages", compress_count).printf(compress_count));
                         // We need to set the display to get an accurate offset_height
                         span.set_attribute("style", "display:inline-block;");
                         span.set_attribute("style", "display:inline-block; top:%ipx".printf(

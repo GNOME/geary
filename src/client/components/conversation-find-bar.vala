@@ -211,9 +211,9 @@ public class ConversationFindBar : Gtk.Layout {
         
         if (matches > 0) {
             if (!wrapped)
-                content += _("%i matches").printf(matches);
+                content += ngettext("%i match", "%i matches", matches).printf(matches);
             else
-                content += _("%i matches (wrapped)").printf(matches);
+                content += ngettext("%i match (wrapped)", "%i matches (wrapped)", matches).printf(matches);
         } else {
             content += _("not found");
         }
