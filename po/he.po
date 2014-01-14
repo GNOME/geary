@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-11 21:03+0200\n"
-"PO-Revision-Date: 2014-01-11 21:03+0200\n"
+"POT-Creation-Date: 2014-01-14 07:47+0200\n"
+"PO-Revision-Date: 2014-01-14 07:51+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -364,7 +364,7 @@ msgstr "יצירת הודעה חדשה (Ctrl+מ, מ)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:320
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1546
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1549
 msgid "_Reply"
 msgstr "לה_שיב"
 
@@ -382,7 +382,7 @@ msgstr "להשיב לכולם (Ctrl+Shift+ר, Shift+ר)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:331
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1559
 msgid "_Forward"
 msgstr "ה_עברה"
 
@@ -578,13 +578,19 @@ msgstr "ה_חלפה"
 
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
-msgid "%i matches"
-msgstr "%i התאמות"
+msgid "%i match"
+msgid_plural "%i matches"
+msgstr[0] "התאמה אחת"
+msgstr[1] "%i התאמות"
+msgstr[2] "שתי התאמות"
 
 #: ../src/client/components/conversation-find-bar.vala:216
 #, c-format
-msgid "%i matches (wrapped)"
-msgstr "%i התאמות (גולש)"
+msgid "%i match (wrapped)"
+msgid_plural "%i matches (wrapped)"
+msgstr[0] "התאמה אחת (גולש)"
+msgstr[1] "%i התאמות (גולש)"
+msgstr[2] "שתי התאמות (גולש)"
 
 #: ../src/client/components/conversation-find-bar.vala:218
 msgid "not found"
@@ -649,7 +655,7 @@ msgstr "_הסרה"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1018
 msgid "Select _All"
 msgstr "בחירת ה_כול"
 
@@ -751,122 +757,128 @@ msgstr "לא נבחרה אף תכתובת."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:256
 #, c-format
-msgid "%u conversations selected."
-msgstr "נבחרו %u  תכתובות."
+msgid "%u conversation selected."
+msgid_plural "%u conversations selected."
+msgstr[0] "נבחרה תכתובת אחת."
+msgstr[1] "נבחרו %u תכתובות."
+msgstr[2] "נבחרו שתי תכתובות."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:283
+#: ../src/client/conversation-viewer/conversation-viewer.vala:285
 msgid "No search results found."
 msgstr "לא מצאו תוצאות בחיפוש."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:285
+#: ../src/client/conversation-viewer/conversation-viewer.vala:287
 msgid "No conversations in folder."
 msgstr "אין תכתובות בתיקייה."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:526
 msgid "This message contains remote images."
 msgstr "הודעה זו מכילה תמונות מרוחקות."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:526
 msgid "Show Images"
 msgstr "הצגת תמונות"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:525
+#: ../src/client/conversation-viewer/conversation-viewer.vala:527
 msgid "Always Show From Sender"
 msgstr "תמיד להציג את השולח"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:549
+#: ../src/client/conversation-viewer/conversation-viewer.vala:551
 msgid "Edit Draft"
 msgstr "עריכת טיוטה"
 
 #. Geary account mail will be sent from
-#: ../src/client/conversation-viewer/conversation-viewer.vala:621
+#: ../src/client/conversation-viewer/conversation-viewer.vala:623
 #: ../ui/composer.glade.h:41
 msgid "From:"
 msgstr "מאת:"
 
 #. Address(es) e-mail is to be sent to
-#: ../src/client/conversation-viewer/conversation-viewer.vala:624
+#: ../src/client/conversation-viewer/conversation-viewer.vala:626
 #: ../ui/composer.glade.h:36
 msgid "To:"
 msgstr "אל:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:627
+#: ../src/client/conversation-viewer/conversation-viewer.vala:629
 #: ../ui/composer.glade.h:37
 msgid "Cc:"
 msgstr "עותק:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:630
+#: ../src/client/conversation-viewer/conversation-viewer.vala:632
 #: ../ui/composer.glade.h:39
 msgid "Bcc:"
 msgstr "עותק מוסתר:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
+#: ../src/client/conversation-viewer/conversation-viewer.vala:635
 #: ../ui/composer.glade.h:38
 msgid "Subject:"
 msgstr "נושא:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:636
+#: ../src/client/conversation-viewer/conversation-viewer.vala:638
 msgid "Date:"
 msgstr "תאריך:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:842
+#: ../src/client/conversation-viewer/conversation-viewer.vala:845
 #, c-format
-msgid "%u read messages"
-msgstr "%u הודעות שנקראו"
+msgid "%u read message"
+msgid_plural "%u read messages"
+msgstr[0] "הודעה אחת שנקראה"
+msgstr[1] "%u הודעות שנקראו"
+msgstr[2] "שתי הודעות שנקראו"
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:988
+#: ../src/client/conversation-viewer/conversation-viewer.vala:991
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "ה_עתקה"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:996
+#: ../src/client/conversation-viewer/conversation-viewer.vala:999
 msgid "Copy _Email Address"
 msgstr "העתקת כתובת _דוא״ל"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1001
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1004
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "ה_עתקת קישור"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1009
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1012
 msgid "Select _Message"
 msgstr "_בחירת הודעה"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1024
 msgid "_Inspect"
 msgstr "_בחינה"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1246
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1249
 msgid "This link appears to go to"
 msgstr "הקישור מראה לאן ללכת"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1247
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1250
 msgid "but actually goes to"
 msgstr "אך למעשה הולך ל־"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1302
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
 msgid " (Invalid?)"
 msgstr " (לא חוקי?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1494
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1497
 msgid "_Save As..."
 msgstr "_שמירה בשם…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1499
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1502
 msgid "Save All A_ttachments..."
 msgstr "שמירת _כל הקבצים המצורפים…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1513
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1516
 msgid "_Save Image As..."
 msgstr "שמירת _תמונה בשם…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1539
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "שמירת ה_קובץ המצורף…"
@@ -874,37 +886,37 @@ msgstr[1] "שמירת הק_בצים המצורפים…"
 msgstr[2] "שמירת הק_בצים המצורפים…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1551
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1554
 msgid "Reply to _All"
 msgstr "להשיב ל_כולם"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1568
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1571
 msgid "_Mark as Read"
 msgstr "סימון כ_נקרא"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1575
 msgid "_Mark as Unread"
 msgstr "סימון כ_לא נקרא"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1578
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1581
 msgid "Mark Unread From _Here"
 msgstr "סימון כלא נקרא מ_כאן"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1593
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
 msgid "_View Source"
 msgstr "צפייה ב_מקור"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1898
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1901
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "ללא שם"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2031
 msgid "Failed to open default text editor."
 msgstr "פתיחת עורך הטקסט נכשלה."
 
@@ -925,25 +937,8 @@ msgstr "_צירוף"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your email password"
-msgstr "נא להזין את ססמת הדוא״ל שלך"
-
-#: ../src/client/dialogs/password-dialog.vala:17
-msgid "Unable to login to email server"
-msgstr "לא ניתן להתחבר לשרת הדוא״ל"
-
-#: ../src/client/dialogs/password-dialog.vala:124
-msgid "SSL"
-msgstr "SSL"
-
-#: ../src/client/dialogs/password-dialog.vala:126 ../ui/login.glade.h:26
-msgid "STARTTLS"
-msgstr "STARTTLS"
-
-#: ../src/client/dialogs/password-dialog.vala:128
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
-msgid "None"
-msgstr "כלום"
+msgid "Please enter your password"
+msgstr "נא להזין את הססמה שלך"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:30
@@ -1192,6 +1187,10 @@ msgstr "בהמתנה לשליחה"
 #: ../src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
 msgstr "ארכיון"
+
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
+msgid "None"
+msgstr "כלום"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
@@ -1496,7 +1495,7 @@ msgstr "ססמה"
 msgid "E_mail address:"
 msgstr "כתובת _דוא״ל:"
 
-#: ../ui/login.glade.h:3 ../ui/password-dialog.glade.h:2
+#: ../ui/login.glade.h:3
 msgid "_Password:"
 msgstr "_ססמה:"
 
@@ -1516,7 +1515,7 @@ msgstr "_כינוי:"
 msgid "Work, Home, etc."
 msgstr "עבודה, בית וכו׳"
 
-#: ../ui/login.glade.h:9 ../ui/password-dialog.glade.h:9
+#: ../ui/login.glade.h:9
 msgid "IMAP settings"
 msgstr "הגדרות IMAP"
 
@@ -1536,7 +1535,7 @@ msgstr "ש_רת:"
 msgid "Por_t:"
 msgstr "_פתחה:"
 
-#: ../ui/login.glade.h:14 ../ui/password-dialog.glade.h:13
+#: ../ui/login.glade.h:14
 msgid "SMTP settings"
 msgstr "הגדרות SMTP"
 
@@ -1580,6 +1579,10 @@ msgstr "ה_צפנה:"
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
+#: ../ui/login.glade.h:26
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
 #: ../ui/login.glade.h:27
 msgid "No authentication re_quired"
 msgstr "לא נדרש אי_מות"
@@ -1593,52 +1596,20 @@ msgid "_Download mail:"
 msgstr "הורדת _דוא״ל"
 
 #: ../ui/password-dialog.glade.h:1
+msgid "SMTP Credentials"
+msgstr "נתוני אימות SMTP"
+
+#: ../ui/password-dialog.glade.h:2
 msgid "Username:"
 msgstr "שם משתמש:"
 
 #: ../ui/password-dialog.glade.h:3
-msgid "IMAP Credentials"
-msgstr "נתוני אימות IMAP"
-
-#: ../ui/password-dialog.glade.h:4
-msgid "SMTP Credentials"
-msgstr "נתוני אימות SMTP"
-
-#: ../ui/password-dialog.glade.h:5
 msgid "Password:"
 msgstr "ססמה:"
 
-#: ../ui/password-dialog.glade.h:6
-msgid "Service:"
-msgstr "שרות:"
-
-#: ../ui/password-dialog.glade.h:7
-msgid "Real name:"
-msgstr "שם אמתי:"
-
-#: ../ui/password-dialog.glade.h:8
-msgid "General"
-msgstr "כללי"
-
-#: ../ui/password-dialog.glade.h:10
-msgid "Server:"
-msgstr "שרת:"
-
-#: ../ui/password-dialog.glade.h:11
-msgid "Port:"
-msgstr "פתחה:"
-
-#: ../ui/password-dialog.glade.h:12
-msgid "SSL/TLS encryption:"
-msgstr "הצפנת SSL/TLS :"
-
-#: ../ui/password-dialog.glade.h:14
-msgid "_Details"
-msgstr "_פרטים"
-
-#: ../ui/password-dialog.glade.h:15
-msgid "_Remember passwords"
-msgstr "_זכירת ססמאות"
+#: ../ui/password-dialog.glade.h:4
+msgid "_Remember password"
+msgstr "שמירת ה_ססמה"
 
 #: ../ui/preferences.glade.h:2
 msgid "Reading"
@@ -1699,6 +1670,36 @@ msgstr "כתובת דוא״ל:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary upgrade in progress."
 msgstr "‏Geary בתהליך שדרוג."
+
+#~ msgid "Unable to login to email server"
+#~ msgstr "לא ניתן להתחבר לשרת הדוא״ל"
+
+#~ msgid "SSL"
+#~ msgstr "SSL"
+
+#~ msgid "IMAP Credentials"
+#~ msgstr "נתוני אימות IMAP"
+
+#~ msgid "Service:"
+#~ msgstr "שרות:"
+
+#~ msgid "Real name:"
+#~ msgstr "שם אמתי:"
+
+#~ msgid "General"
+#~ msgstr "כללי"
+
+#~ msgid "Server:"
+#~ msgstr "שרת:"
+
+#~ msgid "Port:"
+#~ msgstr "פתחה:"
+
+#~ msgid "SSL/TLS encryption:"
+#~ msgstr "הצפנת SSL/TLS :"
+
+#~ msgid "_Details"
+#~ msgstr "_פרטים"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "תיוק שיחה בארכיון (Delete, Backspace, ש)"
