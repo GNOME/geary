@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-13 20:43+0100\n"
-"PO-Revision-Date: 2014-01-13 20:44+0100\n"
+"POT-Creation-Date: 2014-01-15 00:44+0100\n"
+"PO-Revision-Date: 2014-01-15 00:45+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -959,25 +959,8 @@ msgstr "_Załącz"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your email password"
-msgstr "Proszę wprowadzić hasło konta e-mail"
-
-#: ../src/client/dialogs/password-dialog.vala:17
-msgid "Unable to login to email server"
-msgstr "Nie można zalogować się do serwera e-mail"
-
-#: ../src/client/dialogs/password-dialog.vala:124
-msgid "SSL"
-msgstr "SSL"
-
-#: ../src/client/dialogs/password-dialog.vala:126 ../ui/login.glade.h:26
-msgid "STARTTLS"
-msgstr "STARTTLS"
-
-#: ../src/client/dialogs/password-dialog.vala:128
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
-msgid "None"
-msgstr "Brak"
+msgid "Please enter your password"
+msgstr "Proszę wprowadzić hasło"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:30
@@ -1226,6 +1209,10 @@ msgstr "Nadane"
 #: ../src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
 msgstr "Archiwum"
+
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
+msgid "None"
+msgstr "Brak"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
@@ -1532,7 +1519,7 @@ msgstr "Hasło"
 msgid "E_mail address:"
 msgstr "Adres e-_mail:"
 
-#: ../ui/login.glade.h:3 ../ui/password-dialog.glade.h:2
+#: ../ui/login.glade.h:3
 msgid "_Password:"
 msgstr "_Hasło:"
 
@@ -1552,7 +1539,7 @@ msgstr "_Etykieta:"
 msgid "Work, Home, etc."
 msgstr "Praca, dom itp."
 
-#: ../ui/login.glade.h:9 ../ui/password-dialog.glade.h:9
+#: ../ui/login.glade.h:9
 msgid "IMAP settings"
 msgstr "Ustawienia IMAP"
 
@@ -1572,7 +1559,7 @@ msgstr "S_erwer:"
 msgid "Por_t:"
 msgstr "P_ort:"
 
-#: ../ui/login.glade.h:14 ../ui/password-dialog.glade.h:13
+#: ../ui/login.glade.h:14
 msgid "SMTP settings"
 msgstr "Ustawienia SMTP"
 
@@ -1616,6 +1603,10 @@ msgstr "S_zyfrowanie:"
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
+#: ../ui/login.glade.h:26
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
 #: ../ui/login.glade.h:27
 msgid "No authentication re_quired"
 msgstr "Bez _wymagania uwierzytelniania"
@@ -1629,52 +1620,20 @@ msgid "_Download mail:"
 msgstr "_Pobieranie wiadomości z okresu:"
 
 #: ../ui/password-dialog.glade.h:1
+msgid "SMTP Credentials"
+msgstr "Dane logowania SMTP"
+
+#: ../ui/password-dialog.glade.h:2
 msgid "Username:"
 msgstr "Nazwa użytkownika:"
 
 #: ../ui/password-dialog.glade.h:3
-msgid "IMAP Credentials"
-msgstr "Dane logowania IMAP"
-
-#: ../ui/password-dialog.glade.h:4
-msgid "SMTP Credentials"
-msgstr "Dane logowania SMTP"
-
-#: ../ui/password-dialog.glade.h:5
 msgid "Password:"
 msgstr "Hasło:"
 
-#: ../ui/password-dialog.glade.h:6
-msgid "Service:"
-msgstr "Usługa:"
-
-#: ../ui/password-dialog.glade.h:7
-msgid "Real name:"
-msgstr "Rzeczywista nazwa:"
-
-#: ../ui/password-dialog.glade.h:8
-msgid "General"
-msgstr "Ogólne"
-
-#: ../ui/password-dialog.glade.h:10
-msgid "Server:"
-msgstr "Serwer:"
-
-#: ../ui/password-dialog.glade.h:11
-msgid "Port:"
-msgstr "Port:"
-
-#: ../ui/password-dialog.glade.h:12
-msgid "SSL/TLS encryption:"
-msgstr "Szyfrowanie SSL/TLS"
-
-#: ../ui/password-dialog.glade.h:14
-msgid "_Details"
-msgstr "_Szczegóły"
-
-#: ../ui/password-dialog.glade.h:15
-msgid "_Remember passwords"
-msgstr "_Zapamiętywanie haseł"
+#: ../ui/password-dialog.glade.h:4
+msgid "_Remember password"
+msgstr "_Zapamiętanie hasła"
 
 #: ../ui/preferences.glade.h:2
 msgid "Reading"
