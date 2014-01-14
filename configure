@@ -5,6 +5,8 @@
 # This software is licensed under the GNU LGPL (version 2.1 or later).
 # See the COPYING file in this distribution. 
 
+srcdir=$(cd $(dirname $0) && pwd)
+
 DEFAULT_PREFIX="/usr/local"
 
 PREFIX=$DEFAULT_PREFIX
@@ -136,39 +138,41 @@ then
     exit 1
 fi
 
+using_srcdir_ne_builddir=false
 # Simple check to verify this script is running in the root of the source tree
-if ! [ -e Makefile.in ]
+if [ -e Makefile.in ]
 then
-    printf "configure script must be executed in source directory (Makefile.in not found).\n"
-    exit 1
+    using_srcdir_ne_builddir=true
+    # Remove existing Makefile so it's not left around if configure fails
+    rm -f Makefile
+
+    # Remove the build folder to force Cmake to update its cache.
+    rm -fr build
+
+     if ! mkdir -p build
+     then
+         printf "Unable to create build directory.\n"
+         exit 1
+     fi
+
+     cd build
 fi
 
-# Remove existing Makefile so it's not left around if configure fails
-rm -f Makefile
-
-# Remove the build folder to force Cmake to update its cache.
-rm -fr build
-
-if ! mkdir -p build
-then
-    printf "Unable to create build directory.\n"
-    exit 1
-fi
-
-cd build
-
-if ! cmake $CMDLINE ..
+if ! (cmake $CMDLINE ${srcdir})
 then
     printf "Unable to prepare build directory.\n"
     exit 1
 fi
 
-cd ..
-
-if ! cp -f Makefile.in Makefile
+if ${using_srcdir_ne_builddir}
 then
-    printf "Unable to prepare Makefile.\n"
-    exit 1
+    cd ..
+
+    if ! cp -f ${srcdir}/Makefile.in Makefile
+    then
+        printf "Unable to prepare Makefile.\n"
+        exit 1
+    fi
 fi
 
 printf "Configured.  Type 'make' to build, 'make install' to install.\n"
