@@ -321,6 +321,7 @@ client/components/monitored-progress-bar.vala
 client/components/monitored-spinner.vala
 client/components/pill-toolbar.vala
 client/components/status-bar.vala
+client/components/status-icon.vala
 client/components/stock.vala
 
 client/composer/composer-toolbar.vala

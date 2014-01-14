@@ -72,6 +72,7 @@ public class GearyController : Geary.BaseObject {
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
     
     public MainWindow main_window { get; private set; }
+    public StatusIcon status_icon { get; private set; }
     
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
     
@@ -170,6 +171,9 @@ public class GearyController : Geary.BaseObject {
         
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
+        
+        // Create the status icon        
+        status_icon = new StatusIcon();
         
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);

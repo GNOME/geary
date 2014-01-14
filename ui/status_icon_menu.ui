@@ -1,0 +1,5 @@
+<ui>
+    <popup name="StatusIconMenu">
+        <menuitem name="Quit" action="GearyQuit" />
+    </popup>
+</ui>
