@@ -18,7 +18,22 @@ private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
         else
             type = local_folder.get_properties().attrs.get_special_folder_type();
         
-        return new OtherFolder(this, remote_account, local_account, local_folder, type);
+        switch (type) {
+            case SpecialFolderType.SENT:
+                return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
+                    type);
+            
+            case SpecialFolderType.TRASH:
+                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
+                    type);
+            
+            case SpecialFolderType.DRAFTS:
+                return new GenericDraftsFolder(this, remote_account, local_account, local_folder,
+                    type);
+            
+            default:
+                return new OtherFolder(this, remote_account, local_account, local_folder, type);
+        }
     }
 }
 
