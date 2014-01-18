@@ -12,9 +12,10 @@
  * that a Geary.Account implementation would need (in particular, {@link Geary.ImapEngine.Account}
  * and makes them into simple async calls.
  *
- * Geary.Imap.Account does __no__ management of the {@link Imap.Folder} objects it returns.  Thus,
- * calling a fetch or list operation several times in a row will return separate Folder objects
- * each time.  It is up to the higher layers of the stack to manage these objects.
+ * Geary.Imap.Account manages the {@link Imap.Folder} objects it returns, but only in the sense
+ * that it will not create new instances repeatedly.  Otherwise, it does not refresh or update the
+ * Imap.Folders themselves (such as update their {@link Imap.StatusData} periodically).
+ * That's the responsibility of the higher layers of the stack.
  */
 
 private class Geary.Imap.Account : BaseObject {
@@ -28,6 +29,7 @@ private class Geary.Imap.Account : BaseObject {
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.HashMap<FolderPath, MailboxInformation> path_to_mailbox = new Gee.HashMap<
         FolderPath, MailboxInformation>();
+    private Gee.HashMap<FolderPath, Imap.Folder> folders = new Gee.HashMap<FolderPath, Imap.Folder>();
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
     
@@ -143,28 +145,38 @@ private class Geary.Imap.Account : BaseObject {
     }
     
     public async bool folder_exists_async(FolderPath path, Cancellable? cancellable) throws Error {
-        return path_to_mailbox.contains(path);
+        return path_to_mailbox.has_key(path);
     }
     
     public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
         
+        if (folders.has_key(path))
+            return folders.get(path);
+        
         // if not in map, use list_children_async to add it (if it exists)
-        if (!path_to_mailbox.contains(path))
+        if (!path_to_mailbox.has_key(path)) {
+            debug("Listing children to find %s", path.to_string());
             yield list_children_async(path.get_parent(), cancellable);
+        }
         
         MailboxInformation? mailbox_info = path_to_mailbox.get(path);
         if (mailbox_info == null)
             throw_not_found(path);
         
+        Imap.Folder folder;
         if (!mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
             StatusData status = yield fetch_status_async(path, cancellable);
             
-            return new Imap.Folder(session_mgr, status, mailbox_info);
+            folder = new Imap.Folder(session_mgr, status, mailbox_info);
         } else {
-            return new Imap.Folder.unselectable(session_mgr, mailbox_info);
+            folder = new Imap.Folder.unselectable(session_mgr, mailbox_info);
         }
+        
+        folders.set(path, folder);
+        
+        return folder;
     }
     
     private async StatusData fetch_status_async(FolderPath path, Cancellable? cancellable)
@@ -211,8 +223,18 @@ private class Geary.Imap.Account : BaseObject {
         Gee.Map<StatusCommand, MailboxSpecifier> cmd_map = new Gee.HashMap<
             StatusCommand, MailboxSpecifier>();
         foreach (MailboxInformation mailbox_info in child_info) {
+            // if already have an Imap.Folder for this mailbox, use that
+            if (folders.has_key(mailbox_info.path)) {
+                child_folders.add(folders.get(mailbox_info.path));
+                
+                continue;
+            }
+            
+            // if new mailbox is unselectable, don't bother doing a STATUS command
             if (mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
-                child_folders.add(new Imap.Folder.unselectable(session_mgr, mailbox_info));
+                Imap.Folder folder = new Imap.Folder.unselectable(session_mgr, mailbox_info);
+                folders.set(folder.path, folder);
+                child_folders.add(folder);
                 
                 continue;
             }
@@ -255,7 +277,10 @@ private class Geary.Imap.Account : BaseObject {
             }
             
             status_results.remove(found_status);
-            child_folders.add(new Imap.Folder(session_mgr, found_status, mailbox_info));
+            
+            Imap.Folder folder = new Imap.Folder(session_mgr, found_status, mailbox_info);
+            folders.set(folder.path, folder);
+            child_folders.add(folder);
         }
         
         if (status_results.size > 0)
@@ -307,10 +332,8 @@ private class Geary.Imap.Account : BaseObject {
         // stash all MailboxInformation by path
         // TODO: remove any MailboxInformation for this parent that is not found (i.e. has been
         // removed on the server)
-        foreach (MailboxInformation mailbox_info in list_results) {
-            FolderPath path = mailbox_info.mailbox.to_folder_path(mailbox_info.delim);
-            path_to_mailbox.set(path, mailbox_info);
-        }
+        foreach (MailboxInformation mailbox_info in list_results)
+            path_to_mailbox.set(mailbox_info.path, mailbox_info);
         
         return (list_results.size > 0) ? list_results : null;
     }

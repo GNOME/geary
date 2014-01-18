@@ -65,7 +65,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         this.session_mgr = session_mgr;
         this.info = info;
-        path = info.mailbox.to_folder_path(info.delim);
+        path = info.path;
         
         properties = new Imap.FolderProperties.status(status, info.attrs);
     }
@@ -73,7 +73,7 @@ private class Geary.Imap.Folder : BaseObject {
     internal Folder.unselectable(ClientSessionManager session_mgr, MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
-        path = info.mailbox.to_folder_path(info.delim);
+        path = info.path;
         
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }

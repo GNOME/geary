@@ -66,7 +66,7 @@ public class GearyController : Geary.BaseObject {
     private const string MOVE_MESSAGE_TOOLTIP_SINGLE = _("Move conversation");
     private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
     
-    private const int SELECT_FOLDER_TIMEOUT_MSEC = 100;
+    private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
     private const int SEARCH_TIMEOUT_MSEC = 100;
     
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
@@ -96,6 +96,7 @@ public class GearyController : Geary.BaseObject {
     private UnityLauncher? unity_launcher = null;
     private Libnotify? libnotify = null;
     private uint select_folder_timeout_id = 0;
+    private int64 next_folder_select_allowed_usec = 0;
     private Geary.Folder? folder_to_select = null;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
@@ -945,30 +946,43 @@ public class GearyController : Geary.BaseObject {
             return;
         }
         
-        // To prevent the user from selecting folders too quickly, we actually
-        // schedule the action to happen after a timeout instead of acting
-        // directly.  If the user selects another folder during the timeout,
-        // we nix the original timeout and start a new one.
-        if (select_folder_timeout_id != 0)
-            Source.remove(select_folder_timeout_id);
         folder_to_select = folder;
-        select_folder_timeout_id = Timeout.add(SELECT_FOLDER_TIMEOUT_MSEC, on_select_folder_timeout);
+        
+        // To prevent the user from selecting folders too quickly, we prevent additional selection
+        // changes to occur until after a timeout has expired from the last one
+        int64 now = get_monotonic_time();
+        int64 diff = now - next_folder_select_allowed_usec;
+        if (diff < SELECT_FOLDER_TIMEOUT_USEC) {
+            // only start timeout if another timeout is not running ... this means the user can
+            // click madly and will see the last clicked-on folder 100ms after the first one was
+            // clicked on
+            if (select_folder_timeout_id == 0)
+                select_folder_timeout_id = Timeout.add((uint) (diff / 1000), on_select_folder_timeout);
+        } else {
+            do_select_folder.begin(folder_to_select, on_select_folder_completed);
+            folder_to_select = null;
+            
+            next_folder_select_allowed_usec = now + SELECT_FOLDER_TIMEOUT_USEC;
+        }
     }
     
     private bool on_select_folder_timeout() {
-        assert(folder_to_select != null);
-        
         select_folder_timeout_id = 0;
+        next_folder_select_allowed_usec = 0;
         
-        do_select_folder.begin(folder_to_select, on_select_folder_completed);
+        if (folder_to_select != null)
+            do_select_folder.begin(folder_to_select, on_select_folder_completed);
         
         folder_to_select = null;
+        
         return false;
     }
     
     private async void do_select_folder(Geary.Folder folder) throws Error {
         if (folder == current_folder)
             return;
+        
+        debug("Switching to %s...", folder.to_string());
         
         cancel_folder();
         
@@ -991,9 +1005,6 @@ public class GearyController : Geary.BaseObject {
         } else if (current_folder != null && !current_is_inbox) {
             yield current_folder.close_async();
         }
-        
-        if (folder != null)
-            debug("switching to %s", folder.to_string());
         
         current_folder = folder;
         if (current_account != folder.account) {
@@ -1026,7 +1037,7 @@ public class GearyController : Geary.BaseObject {
         
         update_ui();
         
-        current_conversations = new Geary.App.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NONE,
+        current_conversations = new Geary.App.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NO_DELAY,
             ConversationListStore.REQUIRED_FIELDS, MIN_CONVERSATION_COUNT);
         
         if (inboxes.values.contains(current_folder)) {
@@ -1045,6 +1056,8 @@ public class GearyController : Geary.BaseObject {
             yield current_conversations.start_monitoring_async(conversation_cancellable);
         
         select_folder_mutex.release(ref mutex_token);
+        
+        debug("Switched to %s", folder.to_string());
     }
     
     private void on_scan_error(Error err) {

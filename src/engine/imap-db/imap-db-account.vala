@@ -5,6 +5,8 @@
  */
 
 private class Geary.ImapDB.Account : BaseObject {
+    private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 30;
+    
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         
@@ -132,8 +134,13 @@ private class Geary.ImapDB.Account : BaseObject {
         
         background_cancellable = new Cancellable();
         
-        // Kick off a background update of the search table.
-        populate_search_table_async.begin(background_cancellable);
+        // Kick off a background update of the search table, but since the database is getting
+        // hammered at startup, wait a bit before starting the update
+        Timeout.add_seconds(POPULATE_SEARCH_TABLE_DELAY_SEC, () => {
+            populate_search_table_async.begin(background_cancellable);
+            
+            return false;
+        });
         
         initialize_contacts(cancellable);
         

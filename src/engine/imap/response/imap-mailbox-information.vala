@@ -30,10 +30,19 @@ public class Geary.Imap.MailboxInformation : Object {
      */
     public MailboxAttributes attrs { get; private set; }
     
+    /**
+     * The {@link Geary.FolderPath} for the mailbox.
+     *
+     * This is constructed from the supplied {@link mailbox} and {@link delim} returned from the
+     * server.
+     */
+    public Geary.FolderPath path { get; private set; }
+    
     public MailboxInformation(MailboxSpecifier mailbox, string? delim, MailboxAttributes attrs) {
         this.mailbox = mailbox;
         this.delim = delim;
         this.attrs = attrs;
+        path = mailbox.to_folder_path(delim);
     }
     
     /**

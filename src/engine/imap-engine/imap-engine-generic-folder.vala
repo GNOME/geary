@@ -437,6 +437,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
         if (open_count++ > 0) {
+            // even if opened or opening, respect the NO_DELAY flag
+            if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
+                cancel_remote_open_timer();
+                wait_for_open_async.begin();
+            }
+            
             debug("Not opening %s: already open (open_count=%d)", to_string(), open_count);
             
             return false;
@@ -444,29 +450,32 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         this.open_flags = open_flags;
         
-        open_internal(cancellable);
+        open_internal(open_flags, cancellable);
         
         return true;
     }
     
-    private void open_internal(Cancellable? cancellable) {
+    private void open_internal(Folder.OpenFlags open_flags, Cancellable? cancellable) {
         remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
         // start the replay queue
         replay_queue = new ReplayQueue(this);
         
-        // do NOT open the remote side here; wait for the ReplayQueue to require a remote connection
-        // or wait_for_open_async() to be called ... this allows for fast local-only operations
-        // to occur, local-only either because (a) the folder has all the information required
-        // (for a list or fetch operation), or (b) the operation was de facto local-only.
-        // In particular, EmailStore will open and close lots of folders, causing a lot of
-        // connection setup and teardown
-        
+        // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
+        // require a remote connection or wait_for_open_async() to be called ... this allows for
+        // fast local-only operations to occur, local-only either because (a) the folder has all
+        // the information required (for a list or fetch operation), or (b) the operation was de
+        // facto local-only.  In particular, EmailStore will open and close lots of folders,
+        // causing a lot of connection setup and teardown
+        //
         // However, want to eventually open, otherwise if there's no user interaction (i.e. a
         // second account Inbox they don't manipulate), no remote connection will ever be made,
         // meaning that folder normalization never happens and unsolicited notifications never
         // arrive
-        start_remote_open_timer();
+        if (open_flags.is_all_set(OpenFlags.NO_DELAY))
+            wait_for_open_async.begin();
+        else
+            start_remote_open_timer();
     }
     
     private void start_remote_open_timer() {
@@ -649,7 +658,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (remote_reason.is_error()) {
             debug("Reestablishing broken connect to %s", to_string());
             
-            open_internal(null);
+            open_internal(OpenFlags.NO_DELAY, null);
             
             return;
         }

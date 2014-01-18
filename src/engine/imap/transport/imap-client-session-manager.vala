@@ -5,7 +5,7 @@
  */
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
-    public const int DEFAULT_MIN_POOL_SIZE = 2;
+    public const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int AUTHORIZED_SESSION_ERROR_RETRY_TIMEOUT_MSEC = 1000;
     
     public bool is_open { get; private set; default = false; }

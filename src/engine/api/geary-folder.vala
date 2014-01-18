@@ -67,7 +67,13 @@ public interface Geary.Folder : BaseObject {
          * the messages (such as their flags or other metadata) may not be up-to-date
          * when the folder opens.  Not all folders will support this flag.
          */
-        FAST_OPEN;
+        FAST_OPEN,
+        /**
+         * Do not delay opening a connection to the server.
+         *
+         * @see open_async
+         */
+        NO_DELAY;
         
         public bool is_any_set(OpenFlags flags) {
             return (this & flags) != 0;
@@ -320,6 +326,12 @@ public interface Geary.Folder : BaseObject {
      * indicating how open it really is.  In general, a Folder's local store will open immediately
      * while it may take time (if ever) for the remote state to open.  Thus, it's possible for
      * the "opened" signal to fire some time *after* this method completes.
+     *
+     * {@link OpenFlags.NO_DELAY} may be passed to force an immediate opening of the remote folder.
+     * This still will not occur in the context of the open_async call, but will initiate the
+     * connection immediately.  Use this only when it's known that remote calls or remote
+     * notifications to the Folder are imminent or monitoring the Folder is vital (such as with the
+     * Inbox).
      *
      * However, even if the method returns before the Folder's OpenState is BOTH, this Folder is
      * ready for operation if this method returns without error.  The messages the folder returns

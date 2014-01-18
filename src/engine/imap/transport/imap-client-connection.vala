@@ -30,7 +30,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
      */
     public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 15;
     
-    private const int FLUSH_TIMEOUT_MSEC = 100;
+    private const int FLUSH_TIMEOUT_MSEC = 10;
     
     private enum State {
         UNCONNECTED,

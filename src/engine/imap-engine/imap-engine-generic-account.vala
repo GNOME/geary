@@ -304,24 +304,26 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private async void enumerate_folders_async(Cancellable? cancellable) throws Error {
         check_open();
         
-        // get all local folders
-        Gee.HashMap<FolderPath, ImapDB.Folder> local_children = yield enumerate_local_folders_async(null,
-            cancellable);
+        // enumerate local folders first
+        Gee.HashMap<FolderPath, ImapDB.Folder> local_folders = yield enumerate_local_folders_async(
+            null, cancellable);
         
         // convert to a list of Geary.Folder ... build_folder() also reports new folders, so this
-        // gets the word out quickly
+        // gets the word out quickly (local_only folders have already been reported)
         Gee.Collection<Geary.Folder> existing_list = new Gee.ArrayList<Geary.Folder>();
-        existing_list.add_all(build_folders(local_children.values));
+        existing_list.add_all(build_folders(local_folders.values));
         existing_list.add_all(local_only.values);
         
+        // build a map of all existing folders
         Gee.HashMap<FolderPath, Geary.Folder> existing_folders
             = Geary.traverse<Geary.Folder>(existing_list).to_hash_map<FolderPath>(f => f.path);
         
-        // get all remote (server) folder paths
-        Gee.HashMap<FolderPath, Imap.Folder> remote_folders = yield enumerate_remote_folders_async(null,
-            cancellable);
+        // now that all local have been enumerated and reported (this is important to assist
+        // startup of the UI), enumerate the remote folders
+        Gee.HashMap<FolderPath, Imap.Folder>? remote_folders = yield enumerate_remote_folders_async(
+            null, cancellable);
         
-        // combine the two and make sure everything is up-to-date
+        // pair the local and remote folders and make sure everything is up-to-date
         yield update_folders_async(existing_folders, remote_folders, cancellable);
     }
     
