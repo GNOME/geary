@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-01-10 22:17+0000\n"
-"PO-Revision-Date: 2014-01-12 11:08+0100\n"
+"POT-Creation-Date: 2014-01-13 21:59+0000\n"
+"PO-Revision-Date: 2014-01-19 16:19+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -361,7 +361,7 @@ msgstr "Napsat novou zprávu (Ctrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:320
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1546
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1549
 msgid "_Reply"
 msgstr "_Odpovědět"
 
@@ -379,7 +379,7 @@ msgstr "Odpovědět všem (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:331
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1559
 msgid "_Forward"
 msgstr "_Přeposlat"
 
@@ -580,13 +580,19 @@ msgstr "Nah_radit"
 
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
-msgid "%i matches"
-msgstr "%i shody"
+msgid "%i match"
+msgid_plural "%i matches"
+msgstr[0] "%i shoda"
+msgstr[1] "%i shody"
+msgstr[2] "%i shod"
 
 #: ../src/client/components/conversation-find-bar.vala:216
 #, c-format
-msgid "%i matches (wrapped)"
-msgstr "%i shody (s přechodem přes okraj)"
+msgid "%i match (wrapped)"
+msgid_plural "%i matches (wrapped)"
+msgstr[0] "%i shoda (s přechodem přes okraj)"
+msgstr[1] "%i shody (s přechodem přes okraj)"
+msgstr[2] "%i shod (s přechodem přes okraj)"
 
 #: ../src/client/components/conversation-find-bar.vala:218
 msgid "not found"
@@ -652,7 +658,7 @@ msgstr "_Odstranit"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1018
 msgid "Select _All"
 msgstr "Vybrat _vše"
 
@@ -754,122 +760,128 @@ msgstr "Nebyla vybrána žádná konverzace."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:256
 #, c-format
-msgid "%u conversations selected."
-msgstr "%u vybraných konverzací."
+msgid "%u conversation selected."
+msgid_plural "%u conversations selected."
+msgstr[0] "%u vybraná konverzace."
+msgstr[1] "%u vybrané konverzace."
+msgstr[2] "%u vybraných konverzací."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:283
+#: ../src/client/conversation-viewer/conversation-viewer.vala:285
 msgid "No search results found."
 msgstr "Žádné výsledky vyhledávání."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:285
+#: ../src/client/conversation-viewer/conversation-viewer.vala:287
 msgid "No conversations in folder."
 msgstr "Žádná konverzace ve složce."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:526
 msgid "This message contains remote images."
 msgstr "Tato zpráva obsahuje vzdálené obrázky. "
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:526
 msgid "Show Images"
 msgstr "Zobrazit obrázky"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:525
+#: ../src/client/conversation-viewer/conversation-viewer.vala:527
 msgid "Always Show From Sender"
 msgstr "Vždy zobrazovat Od odesílatele"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:549
+#: ../src/client/conversation-viewer/conversation-viewer.vala:551
 msgid "Edit Draft"
 msgstr "Upravit koncept"
 
 #. Geary account mail will be sent from
-#: ../src/client/conversation-viewer/conversation-viewer.vala:621
+#: ../src/client/conversation-viewer/conversation-viewer.vala:623
 #: ../ui/composer.glade.h:41
 msgid "From:"
 msgstr "Od:"
 
 #. Address(es) e-mail is to be sent to
-#: ../src/client/conversation-viewer/conversation-viewer.vala:624
+#: ../src/client/conversation-viewer/conversation-viewer.vala:626
 #: ../ui/composer.glade.h:36
 msgid "To:"
 msgstr "Komu:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:627
+#: ../src/client/conversation-viewer/conversation-viewer.vala:629
 #: ../ui/composer.glade.h:37
 msgid "Cc:"
 msgstr "Kopie:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:630
+#: ../src/client/conversation-viewer/conversation-viewer.vala:632
 #: ../ui/composer.glade.h:39
 msgid "Bcc:"
 msgstr "Skrytá kopie:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
+#: ../src/client/conversation-viewer/conversation-viewer.vala:635
 #: ../ui/composer.glade.h:38
 msgid "Subject:"
 msgstr "Předmět:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:636
+#: ../src/client/conversation-viewer/conversation-viewer.vala:638
 msgid "Date:"
 msgstr "Datum:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:842
+#: ../src/client/conversation-viewer/conversation-viewer.vala:845
 #, c-format
-msgid "%u read messages"
-msgstr "%u přečtených zpráv"
+msgid "%u read message"
+msgid_plural "%u read messages"
+msgstr[0] "%u přečtená zpráva"
+msgstr[1] "%u přečtené zprávy"
+msgstr[2] "%u přečtených zpráv"
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:988
+#: ../src/client/conversation-viewer/conversation-viewer.vala:991
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Kopírovat"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:996
+#: ../src/client/conversation-viewer/conversation-viewer.vala:999
 msgid "Copy _Email Address"
 msgstr "Kopírovat _e-mailovou adresu"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1001
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1004
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Kopírovat _odkaz"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1009
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1012
 msgid "Select _Message"
 msgstr "Vybrat _zprávu"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1024
 msgid "_Inspect"
 msgstr "_Kontrolovat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1246
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1249
 msgid "This link appears to go to"
 msgstr "Tento odkaz vypadá, že míří na"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1247
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1250
 msgid "but actually goes to"
 msgstr "ale ve skutečnosti jde na"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1302
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
 msgid " (Invalid?)"
 msgstr " (neplatný?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1494
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1497
 msgid "_Save As..."
 msgstr "_Uložit jako…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1499
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1502
 msgid "Save All A_ttachments..."
 msgstr "Uložit všechny pří_lohy…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1513
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1516
 msgid "_Save Image As..."
 msgstr "_Uložit obrázek jako…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1539
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Uložit pří_lohu…"
@@ -877,37 +889,37 @@ msgstr[1] "Uložit pří_lohy…"
 msgstr[2] "Uložit pří_lohy…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1551
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1554
 msgid "Reply to _All"
 msgstr "Odpovědět _všem"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1568
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1571
 msgid "_Mark as Read"
 msgstr "_Označit jako přečtené"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1575
 msgid "_Mark as Unread"
 msgstr "_Označit jako nepřečtené"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1578
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1581
 msgid "Mark Unread From _Here"
 msgstr "Označit jako nepřečtené z_de"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1593
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
 msgid "_View Source"
 msgstr "_Zobrazit zdroj"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1898
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1901
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "žádný"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2031
 msgid "Failed to open default text editor."
 msgstr "Nepodařilo se otevřít výchozí textový editor."
 
@@ -928,25 +940,8 @@ msgstr "_Příloha"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your email password"
-msgstr "Vložte prosím heslo svého e-mailu"
-
-#: ../src/client/dialogs/password-dialog.vala:17
-msgid "Unable to login to email server"
-msgstr "Nelze se přihlásit k poštovnímu serveru"
-
-#: ../src/client/dialogs/password-dialog.vala:124
-msgid "SSL"
-msgstr "SSL"
-
-#: ../src/client/dialogs/password-dialog.vala:126 ../ui/login.glade.h:26
-msgid "STARTTLS"
-msgstr "STARTTLS"
-
-#: ../src/client/dialogs/password-dialog.vala:128
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
-msgid "None"
-msgstr "Žádný"
+msgid "Please enter your password"
+msgstr "Zadejte prosím své heslo"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:30
@@ -1195,6 +1190,10 @@ msgstr "K odeslání"
 #: ../src/engine/api/geary-special-folder-type.vala:54
 msgid "Archive"
 msgstr "Archiv"
+
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
+msgid "None"
+msgstr "Žádný"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
@@ -1501,7 +1500,7 @@ msgstr "Heslo"
 msgid "E_mail address:"
 msgstr "E-_mailová adresa:"
 
-#: ../ui/login.glade.h:3 ../ui/password-dialog.glade.h:2
+#: ../ui/login.glade.h:3
 msgid "_Password:"
 msgstr "_Heslo:"
 
@@ -1521,7 +1520,7 @@ msgstr "Přez_dívka:"
 msgid "Work, Home, etc."
 msgstr "Do práce, domů, atd."
 
-#: ../ui/login.glade.h:9 ../ui/password-dialog.glade.h:9
+#: ../ui/login.glade.h:9
 msgid "IMAP settings"
 msgstr "Nastavení IMAP"
 
@@ -1541,7 +1540,7 @@ msgstr "Ser_ver:"
 msgid "Por_t:"
 msgstr "Por_t:"
 
-#: ../ui/login.glade.h:14 ../ui/password-dialog.glade.h:13
+#: ../ui/login.glade.h:14
 msgid "SMTP settings"
 msgstr "Nastavení SMTP"
 
@@ -1585,6 +1584,10 @@ msgstr "Šifrová_ní:"
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
+#: ../ui/login.glade.h:26
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
 #: ../ui/login.glade.h:27
 msgid "No authentication re_quired"
 msgstr "Ne_vyžaduje ověření"
@@ -1598,52 +1601,20 @@ msgid "_Download mail:"
 msgstr "_Stáhnout e-mail:"
 
 #: ../ui/password-dialog.glade.h:1
+msgid "SMTP Credentials"
+msgstr "Přihlašovací údaje SMTP"
+
+#: ../ui/password-dialog.glade.h:2
 msgid "Username:"
 msgstr "Uživatelské jméno:"
 
 #: ../ui/password-dialog.glade.h:3
-msgid "IMAP Credentials"
-msgstr "Přihlašovací údaje IMAP"
-
-#: ../ui/password-dialog.glade.h:4
-msgid "SMTP Credentials"
-msgstr "Přihlašovací údaje SMTP"
-
-#: ../ui/password-dialog.glade.h:5
 msgid "Password:"
 msgstr "Heslo:"
 
-#: ../ui/password-dialog.glade.h:6
-msgid "Service:"
-msgstr "Služba:"
-
-#: ../ui/password-dialog.glade.h:7
-msgid "Real name:"
-msgstr "Skutečné jméno:"
-
-#: ../ui/password-dialog.glade.h:8
-msgid "General"
-msgstr "Obecné"
-
-#: ../ui/password-dialog.glade.h:10
-msgid "Server:"
-msgstr "Server:"
-
-#: ../ui/password-dialog.glade.h:11
-msgid "Port:"
-msgstr "Port:"
-
-#: ../ui/password-dialog.glade.h:12
-msgid "SSL/TLS encryption:"
-msgstr "Šifrování SSL/TLS:"
-
-#: ../ui/password-dialog.glade.h:14
-msgid "_Details"
-msgstr "Po_drobnosti"
-
-#: ../ui/password-dialog.glade.h:15
-msgid "_Remember passwords"
-msgstr "_Pamatovat si hesla"
+#: ../ui/password-dialog.glade.h:4
+msgid "_Remember password"
+msgstr "_Pamatovat si heslo"
 
 #: ../ui/preferences.glade.h:2
 msgid "Reading"
