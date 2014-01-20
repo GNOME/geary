@@ -172,5 +172,22 @@ public class IconFactory {
         // Default: missing image icon.
         return get_missing_icon(size, flags);
     }
+    
+    public Gdk.Pixbuf? load_symbolic(string icon_name, int size, Gtk.StyleContext style,
+        Gtk.IconLookupFlags flags = 0) {
+        Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
+        
+        // Attempt to load as a symbolic icon.
+        if (icon_info != null) {
+            try {
+                return icon_info.load_symbolic_for_context(style);
+            } catch (Error e) {
+                message("Couldn't load icon: %s", e.message);
+            }
+        }
+        
+        // Default: missing image icon.
+        return get_missing_icon(size, flags);
+    }
 }
 

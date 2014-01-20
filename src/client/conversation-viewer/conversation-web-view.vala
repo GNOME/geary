@@ -203,7 +203,7 @@ public class ConversationWebView : WebKit.WebView {
         try {
             // Load icon.
             uint8[]? icon_content = null;
-            Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic_colored(icon_name, 16);
+            Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic(icon_name, 16, get_style_context());
             if (pixbuf != null)
                 pixbuf.save_to_buffer(out icon_content, "png"); // Load as PNG.
             
