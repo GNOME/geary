@@ -7,36 +7,30 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-01-13 08:36+0000\n"
-"PO-Revision-Date: 2014-01-13 09:55+0100\n"
+"POT-Creation-Date: 2014-01-18 00:43+0000\n"
+"PO-Revision-Date: 2014-01-20 10:06+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "X-Generator: Gtranslator 2.91.5\n"
 
-#. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
-msgctxt "_"
-msgid "translator-credits"
-msgstr "Daniel Mustieles <daniel.mustieles@gmail.com>, 2014"
-
-#. (itstool) path: page/title
-#: C/write.page:9
+#: C/write.page:9(title)
 msgid "Write a message"
 msgstr "Redactar un mensaje"
 
-#. (itstool) path: section/p
-#: C/write.page:12
+#: C/write.page:12(p)
 msgid ""
 "To compose a new message in Geary, press the <gui>New Message</gui> button "
 "on the toolbar."
 msgstr ""
+"Para redactar un mensaje nuevo en Geary, pulse el botón <gui>Mensaje nuevo</"
+"gui> de la barra de herramientas."
 
-#. (itstool) path: section/p
-#: C/write.page:15
+#: C/write.page:15(p)
 msgid ""
 "To reply to a message, open the message menu in the upper right corner of "
 "the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
@@ -44,202 +38,356 @@ msgid ""
 "via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
 "on the toolbar."
 msgstr ""
+"Para responder a un mensaje, abra el menú del mensaje en la esquina superior "
+"derecha de este, y seleccione <gui>Responder</gui>, <gui>Responder a todos</"
+"gui> o <gui>Reenviar</gui>. También puede responder al último mensaje de una "
+"conversación usando los botones <gui>Responder</gui>, <gui>Responder a "
+"todos</gui> o <gui>Reenviar</gui> de la barra de herramientas."
 
-#. (itstool) path: section/title
-#: C/write.page:20
+#: C/write.page:20(title)
 msgid "Features"
-msgstr ""
+msgstr "Características"
 
-#. (itstool) path: section/p
-#: C/write.page:22
+#: C/write.page:22(p)
 msgid ""
 "Geary's email composer lets you adjust the font, size and color of text. You "
 "can also insert hyperlinks into messages."
 msgstr ""
+"El editor de mensajes de Geary le permite ajustar el tipo de letra, el "
+"tamaño y el color del texto. También puede insertar hiperenlaces en los "
+"mensajes."
 
-#. (itstool) path: section/p
-#: C/write.page:24
+#: C/write.page:24(p)
 msgid ""
 "Geary can also send plain text messages. In the drop-down menu, check or "
 "uncheck \"Rich Text\" to toggle between plain text and rich text mode."
 msgstr ""
+"Geary también puede enviar mensajes de texto sencillo. En el menú "
+"desplegable, marque o desmarque «Texto enriquecido» para cambiar entre los "
+"modos de texto sencillo y texto con formato."
 
-#. (itstool) path: section/p
-#: C/write.page:27
+#: C/write.page:27(p)
 msgid ""
 "You can attach a file to a message you're writing in either of these ways:"
 msgstr ""
+"Puede adjuntar un archivo a un mensaje que esté redactando de las siguientes "
+"maneras:"
 
-#. (itstool) path: item/p
-#: C/write.page:29
+#: C/write.page:29(p)
 msgid ""
 "Press the <gui>Attach File</gui> button at the lower left of the composer "
 "window, then select a file to attach."
 msgstr ""
+"Pulse en el botón <gui>Adjuntar un archivo</gui> en la esquina inferior "
+"izquierda de la ventana del editor, y seleccione el archivo que quiere "
+"adjuntar."
 
-#. (itstool) path: item/p
-#: C/write.page:31
+#: C/write.page:31(p)
 msgid ""
 "Drag the file from the Nautilus file manager to the composer window, and "
 "drop it either on the text fields at the top of the window or on the toolbar "
 "at the bottom."
 msgstr ""
+"Arrastre el archivo desde el gestor de archivos Nautilus hasta la ventana "
+"del editor, y suéltelo en los campos de texto en la parte superior de la "
+"ventana o en la barra de herramientas inferior."
 
-#. (itstool) path: section/title
-#: C/write.page:37
+#: C/write.page:37(title)
 msgid "Drafts"
-msgstr ""
+msgstr "Borradores"
 
-#. (itstool) path: section/p
-#: C/write.page:39
+#: C/write.page:39(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
 "prompt you to keep the draft or to discard it."
 msgstr ""
+"Si está usando un servidor de correo que admite borradores, Geary guardará "
+"automáticamente el mensaje a medida que lo escribe. Si cierra la ventana del "
+"editor sin enviarlo, Geary le preguntará si quiere mantener o descartar el "
+"borrador."
 
-#. (itstool) path: section/p
-#: C/write.page:42
+#: C/write.page:42(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
 msgstr ""
+"Para editar un borrador existente, seleccione la carpeta Borradores de la "
+"lista de carpetas, elija el mensaje y pulse en «Editar el borrador» en el "
+"visor de mensajes."
 
-#. (itstool) path: section/p
-#: C/write.page:45
+#: C/write.page:45(p)
 msgid "Geary deletes the draft when you send the message."
-msgstr ""
+msgstr "Geary eliminará el borrador cuando envíe el mensaje."
 
-#. (itstool) path: page/title
-#: C/bugs.page:8
-msgid "Think you've found a bug?"
-msgstr ""
+#: C/star.page:10(title)
+msgid "Star a message or mark it as read/unread"
+msgstr "Destacar un mensaje o marcarlo como leído o no leído"
 
-#. (itstool) path: page/p
-#: C/bugs.page:9
+#: C/star.page:12(title)
+msgid "Star messages"
+msgstr "Destacar mensajes"
+
+#: C/star.page:13(p)
 msgid ""
-"If you suspect you've found a bug in Geary, follow these steps to report it:"
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
 msgstr ""
+"Puede destacar mensajes para indicar que son importantes para usted. Para "
+"marcar la conversación con una estrella, pulse en el icono de la estrella "
+"ubicado en la lista de conversaciones. Puede destacar un solo mensaje "
+"pulsando en la estrella ubicada en la esquina superior derecha de cada "
+"mensaje."
 
-#. (itstool) path: item/p
-#: C/bugs.page:11
+#: C/star.page:15(p)
 msgid ""
-"Search Geary's Redmine<link href=\"http://redmine.yorba.org/projects/geary/"
-"issues\"> issue tracker </link>to see if someone else has reported the bug."
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
 msgstr ""
+"Si la cuenta es de Gmail, los mensajes destacados aparecen en la carpeta "
+"Destacados de la lista de carpetas."
 
-#. (itstool) path: item/p
-#: C/bugs.page:12
+#: C/star.page:18(title)
+msgid "Mark messages as read or unread"
+msgstr "Marcar mensajes como leídos o no leídos"
+
+#: C/star.page:19(p)
 msgid ""
-"Don't see your bug listed? Congratulations! You've found a new bug. To "
-"create an bug report, create an account on Redmine and create a new issue. "
-"Be as specific as you can and describe the steps to reproduce it. Don't "
-"forget to include details about your operating system and what version of "
-"Geary you're running."
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
 msgstr ""
+"Geary marca los mensajes como leídos a medida que los lee. Para marcar "
+"manualmente una conversación como leída o no leída, pulse en el icono del "
+"círculo de la lista de conversaciones."
 
-#. (itstool) path: item/p
-#: C/bugs.page:13
+#: C/star.page:22(p)
 msgid ""
-"For general inquiries, please join the <link href=\"http://lists.yorba.org/"
-"cgi-bin/mailman/listinfo/geary\"> Geary mailing list</link>."
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
 msgstr ""
+"O bien, puede usar la opción <gui>Marcar como no leído</gui> en el menú "
+"<gui>Marcar</gui> de la barra de herramientas para cambiar el estado de "
+"lectura de la(s) conversación(es) seleccionada(s)."
 
-#. (itstool) path: page/title
-#: C/label.page:10
-msgid "Label or move a conversation"
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/label.page:12
-msgid "Label a conversation"
-msgstr ""
-
-#. (itstool) path: section/p
-#: C/label.page:13
+#: C/star.page:25(p)
 msgid ""
-"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
-"labels correspond to labels in Gmail, or ordinary folders in other mail "
-"services."
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr ""
+"Para marcar un solo mensaje como leído, seleccione <gui>Marcar como leído</"
+"gui> en el menú desplegable."
+
+#: C/shortcuts.page:11(title)
+msgid "Keyboard shortcuts"
+msgstr "Atajos de teclado"
+
+#: C/shortcuts.page:12(p)
+msgid "Geary has keyboard shortcuts for most common operations."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/label.page:15
+#: C/shortcuts.page:15(p)
+msgid "Compose a new message"
+msgstr ""
+
+#: C/shortcuts.page:15(p)
+msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
+msgstr ""
+
+#: C/shortcuts.page:18(p)
+msgid "Reply to sender"
+msgstr ""
+
+#: C/shortcuts.page:19(p)
+msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
+msgstr ""
+
+#: C/shortcuts.page:22(p)
+msgid "Reply to all"
+msgstr ""
+
+#: C/shortcuts.page:23(p)
 msgid ""
-"To label one or more conversations, first select the conversation(s), then "
-"do either of the following:"
+"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
+"<keyseq><key>Shift</key><key>R</key></keyseq>"
 msgstr ""
 
-#. (itstool) path: item/p
-#: C/label.page:18
+#: C/shortcuts.page:26(p)
+msgid "Forward"
+msgstr ""
+
+#: C/shortcuts.page:27(p)
+msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
+msgstr ""
+
+#: C/shortcuts.page:30(p)
+msgid "Archive"
+msgstr ""
+
+#: C/shortcuts.page:31(key)
+msgid "A"
+msgstr ""
+
+#: C/shortcuts.page:34(p)
+msgid "Trash"
+msgstr ""
+
+#: C/shortcuts.page:35(p)
+msgid "<key>Delete</key> or <key>Backspace</key>"
+msgstr ""
+
+#: C/shortcuts.page:38(p)
+msgid "Delete"
+msgstr ""
+
+#: C/shortcuts.page:39(p)
 msgid ""
-"Click the <gui>Label</gui> button on the toolbar and select a label from the "
-"resulting drop-down menu."
+"<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
+"key><key>Backspace</key></keyseq>"
 msgstr ""
 
-#. (itstool) path: item/p
-#: C/label.page:20
+#: C/shortcuts.page:42(p)
+msgid "Star"
+msgstr ""
+
+#: C/shortcuts.page:43(key) C/shortcuts.page:91(key)
+msgid "S"
+msgstr ""
+
+#: C/shortcuts.page:46(p)
+msgid "Unstar"
+msgstr ""
+
+#: C/shortcuts.page:47(key)
+msgid "D"
+msgstr ""
+
+#: C/shortcuts.page:50(p)
+msgid "Mark read"
+msgstr ""
+
+#: C/shortcuts.page:51(p)
 msgid ""
-"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
-"conversation list to the label in the sidebar."
+"<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
+"key><key>I</key></keyseq>"
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/label.page:25
-msgid "Move a conversation to a folder or label"
+#: C/shortcuts.page:54(p)
+msgid "Mark unread"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/label.page:26
+#: C/shortcuts.page:55(p)
 msgid ""
-"To move one or more conversations to a folder or label, first select the "
-"conversation(s), then do either of the following:"
+"<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
+"key><key>U</key></keyseq>"
 msgstr ""
 
-#. (itstool) path: item/p
-#: C/label.page:29
-msgid ""
-"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
-"from the resulting drop-down menu."
+#: C/shortcuts.page:58(p)
+msgid "Toggle spam"
 msgstr ""
 
-#. (itstool) path: item/p
-#: C/label.page:31
-msgid ""
-"Drag the conversation(s) from the conversation list to the folder or label "
-"in the sidebar."
+#: C/shortcuts.page:59(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr ""
 
-#. (itstool) path: page/title
-#: C/limits.page:11
-msgid "Limitations"
+#: C/shortcuts.page:62(p)
+msgid "Quit"
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/limits.page:12
-msgid ""
-"Geary is still in early development. Geary supports IMAP and has been tested "
-"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
-"for Outlook.com is provided. Geary may not yet work well with some IMAP "
-"servers. At this time Geary is still missing numerous features including "
-"offline mode."
+#: C/shortcuts.page:63(key) C/shortcuts.page:79(key) C/shortcuts.page:83(key)
+#: C/shortcuts.page:87(key) C/shortcuts.page:91(key) C/shortcuts.page:95(key)
+#: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
+msgid "Ctrl"
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/limits.page:14
-msgid ""
-"To learn more about the features we're working on and the future of Geary, "
-"please visit Geary's <link href=\"http://redmine.yorba.org/projects/geary/"
-"wiki\">Redmine page</link>."
+#: C/shortcuts.page:63(key)
+msgid "Q"
 msgstr ""
 
-#. (itstool) path: page/title
-#: C/search.page:10
+#: C/shortcuts.page:66(p)
+msgid "Zoom in"
+msgstr ""
+
+#: C/shortcuts.page:67(p)
+msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
+msgstr ""
+
+#: C/shortcuts.page:70(p)
+msgid "Zoom out"
+msgstr ""
+
+#: C/shortcuts.page:71(p)
+msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
+msgstr ""
+
+#: C/shortcuts.page:74(p)
+msgid "Reset zoom"
+msgstr ""
+
+#: C/shortcuts.page:75(p)
+msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
+msgstr ""
+
+#: C/shortcuts.page:78(p) C/preferences.page:10(title)
+msgid "Preferences"
+msgstr ""
+
+#: C/shortcuts.page:79(key)
+msgid "E"
+msgstr ""
+
+#: C/shortcuts.page:82(p) C/accounts.page:10(title)
+msgid "Accounts"
+msgstr ""
+
+#: C/shortcuts.page:83(key)
+msgid "M"
+msgstr ""
+
+#: C/shortcuts.page:86(p)
+msgid "Close composer window"
+msgstr ""
+
+#: C/shortcuts.page:87(key)
+msgid "W"
+msgstr ""
+
+#: C/shortcuts.page:90(p)
+msgid "Jump to search box"
+msgstr ""
+
+#: C/shortcuts.page:94(p)
+msgid "Find in current conversation"
+msgstr ""
+
+#: C/shortcuts.page:95(key)
+msgid "F"
+msgstr ""
+
+#: C/shortcuts.page:98(p)
+msgid "Find next in current conversation"
+msgstr ""
+
+#: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
+msgid "G"
+msgstr ""
+
+#: C/shortcuts.page:102(p)
+msgid "Find previous in current conversation"
+msgstr ""
+
+#: C/shortcuts.page:103(key)
+msgid "Shift"
+msgstr ""
+
+#: C/search.page:10(title)
 msgid "Search"
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/search.page:12
+#: C/search.page:12(p)
 msgid ""
 "Geary supports a per-account full text search. To start a search, select a "
 "folder associated with the account you'd like to search against. Then click "
@@ -247,28 +395,93 @@ msgid ""
 "keyseq>) and start typing. Results will appear after a brief delay."
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/search.page:16
+#: C/search.page:16(p)
 msgid ""
 "The full text search includes email text, email addresses (to, from, and "
 "cc), subject lines and attachment filenames."
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/search.page:19
+#: C/search.page:19(p)
 msgid ""
 "Keywords that match your search are highlighted the message view. Geary will "
 "match different forms of the same word, for example searching for \"walk\" "
 "will also match \"walking\" and \"walked.\""
 msgstr ""
 
-#. (itstool) path: page/title
-#: C/overview.page:8
+#: C/preferences.page:11(p)
+msgid ""
+"To set preferences in Geary, click the gear menu at the upper right of the "
+"toolbar and choose <gui>Preferences</gui>."
+msgstr ""
+
+#: C/preferences.page:15(title)
+msgid "Reading"
+msgstr ""
+
+#: C/preferences.page:18(gui)
+msgid "Automatically select next message"
+msgstr ""
+
+#: C/preferences.page:19(p)
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr ""
+
+#: C/preferences.page:24(gui)
+msgid "Display conversation preview"
+msgstr ""
+
+#: C/preferences.page:25(p)
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr ""
+
+#: C/preferences.page:32(title)
+msgid "Composer"
+msgstr ""
+
+#: C/preferences.page:35(gui)
+msgid "Enable spell checking"
+msgstr ""
+
+#: C/preferences.page:36(p)
+msgid ""
+"When set, Geary automatically spell checks a message as you write it, "
+"underlying each misspelled word in red."
+msgstr ""
+
+#: C/preferences.page:43(title)
+msgid "Notifications"
+msgstr ""
+
+#: C/preferences.page:46(gui)
+msgid "Play notification sounds"
+msgstr ""
+
+#: C/preferences.page:47(p)
+msgid "When set, Geary plays a sound whenever a new message arrives."
+msgstr ""
+
+#: C/preferences.page:50(gui)
+msgid "Show notifications for new mail"
+msgstr ""
+
+#: C/preferences.page:51(p)
+msgid ""
+"When set, Geary displays a <em>notification</em> each time a new message "
+"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
+"Shell, notifications appear at the bottom of the display. In Ubuntu Unity, "
+"notifications appear at the upper right of the display."
+msgstr ""
+
+#: C/overview.page:8(title)
 msgid "Overview"
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/overview.page:10
+#: C/overview.page:10(p)
 msgid ""
 "Geary is a lightweight email reader for the <link href=\"http://gnome.org"
 "\">GNOME</link> desktop. It works with mail servers that support the IMAP "
@@ -276,25 +489,21 @@ msgid ""
 "com."
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/overview.page:14
+#: C/overview.page:14(p)
 msgid ""
 "Geary groups mail messages into <em>conversations</em>. A conversation "
 "contains all messages in a single thread of discussion."
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/overview.page:17
+#: C/overview.page:17(p)
 msgid "The main Geary window is divided into several areas:"
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/overview.page:20
+#: C/overview.page:20(title)
 msgid "Folder list"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:21
+#: C/overview.page:21(p)
 msgid ""
 "The <em>folder list</em> at the left displays all <em>folders</em> and "
 "<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
@@ -302,28 +511,24 @@ msgid ""
 "web interface also uses this term; most other mail services do not.)"
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/overview.page:28
+#: C/overview.page:28(title)
 msgid "Conversation list"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:29
+#: C/overview.page:29(p)
 msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:31
+#: C/overview.page:31(p)
 msgid ""
 "Each sender's name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
 "of messages in the conversation."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:34
+#: C/overview.page:34(p)
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
@@ -332,8 +537,7 @@ msgid ""
 "automatically."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:36
+#: C/overview.page:36(p)
 msgid ""
 "Some commands in Geary can act on a group of conversations. To select "
 "multiple conversations, hold down the <key>Ctrl</key> key and click each "
@@ -342,432 +546,186 @@ msgid ""
 "last conversation."
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/overview.page:44
+#: C/overview.page:44(title)
 msgid "Message area"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:45
+#: C/overview.page:45(p)
 msgid ""
 "The <em>message area</em> displays all messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:47
+#: C/overview.page:47(p)
 msgid ""
 "At the upper right of each message, Geary displays a dropdown arrow that "
 "lets you open the <em>message menu</em> with commands that operate on the "
 "message."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:49
+#: C/overview.page:49(p)
 msgid ""
 "When you view a conversation, Geary collapses messages that you've already "
 "read. Click collapsed messages to expand them. Click an expanded message's "
 "header to collapse it."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/overview.page:50
+#: C/overview.page:50(p)
 msgid ""
 "Any attachments in a message appear at the bottom of the message. You can "
 "click an attachment to open it."
 msgstr ""
 
-#. (itstool) path: page/title
-#. (itstool) path: td/p
-#: C/preferences.page:10 C/shortcuts.page:78
-msgid "Preferences"
+#: C/limits.page:11(title)
+msgid "Limitations"
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/preferences.page:11
+#: C/limits.page:12(p)
 msgid ""
-"To set preferences in Geary, click the gear menu at the upper right of the "
-"toolbar and choose <gui>Preferences</gui>."
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/preferences.page:15
-msgid "Reading"
-msgstr ""
-
-#. (itstool) path: item/title
-#: C/preferences.page:18
-msgid "<gui>Automatically select next message</gui>"
-msgstr ""
-
-#. (itstool) path: item/p
-#: C/preferences.page:19
+#: C/limits.page:14(p)
 msgid ""
-"When this option is enabled, Geary automatically selects the latest message "
-"in a folder when you enter the folder. In addition, after archiving a "
-"message, Geary automatically selects an adjacent message."
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"http://redmine.yorba.org/projects/geary/"
+"wiki\">Redmine page</link>."
 msgstr ""
 
-#. (itstool) path: item/title
-#: C/preferences.page:24
-msgid "<gui>Display conversation preview</gui>"
+#: C/label.page:10(title)
+msgid "Label or move a conversation"
 msgstr ""
 
-#. (itstool) path: item/p
-#: C/preferences.page:25
+#: C/label.page:12(title)
+msgid "Label a conversation"
+msgstr ""
+
+#: C/label.page:13(p)
 msgid ""
-"Enables message previews in the conversation list. Previews show the first "
-"few lines of each message."
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/preferences.page:32
-msgid "Composer"
-msgstr ""
-
-#. (itstool) path: item/title
-#: C/preferences.page:35
-msgid "<gui>Enable spell checking</gui>"
-msgstr ""
-
-#. (itstool) path: item/p
-#: C/preferences.page:36
+#: C/label.page:15(p)
 msgid ""
-"When set, Geary automatically spell checks a message as you write it, "
-"underlying each misspelled word in red."
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/preferences.page:43
-msgid "Notifications"
-msgstr ""
-
-#. (itstool) path: item/title
-#: C/preferences.page:46
-msgid "<gui>Play notification sounds</gui>"
-msgstr ""
-
-#. (itstool) path: item/p
-#: C/preferences.page:47
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr ""
-
-#. (itstool) path: item/title
-#: C/preferences.page:50
-msgid "<gui>Show notifications for new mail</gui>"
-msgstr ""
-
-#. (itstool) path: item/p
-#: C/preferences.page:51
+#: C/label.page:18(p)
 msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display. In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
 msgstr ""
 
-#. (itstool) path: page/title
-#: C/shortcuts.page:11
-msgid "Keyboard shortcuts"
-msgstr ""
-
-#. (itstool) path: page/p
-#: C/shortcuts.page:12
-msgid "Geary has keyboard shortcuts for most common operations."
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:15
-msgid "Compose a new message"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:15
-msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:18
-msgid "Reply to sender"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:19
-msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:22
-msgid "Reply to all"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:23
+#: C/label.page:20(p)
 msgid ""
-"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
-"<keyseq><key>Shift</key><key>R</key></keyseq>"
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:26
-msgid "Forward"
+#: C/label.page:25(title)
+msgid "Move a conversation to a folder or label"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:27
-msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:30
-msgid "Archive"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:31
-msgid "<key>A</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:34
-msgid "Trash"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:35
-msgid "<key>Delete</key> or <key>Backspace</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:38
-msgid "Delete"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:39
+#: C/label.page:26(p)
 msgid ""
-"<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
-"key><key>Backspace</key></keyseq>"
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:42
-msgid "Star"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:43
-msgid "<key>S</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:46
-msgid "Unstar"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:47
-msgid "<key>D</key>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:50
-msgid "Mark read"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:51
+#: C/label.page:29(p)
 msgid ""
-"<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
-"key><key>I</key></keyseq>"
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:54
-msgid "Mark unread"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:55
+#: C/label.page:31(p)
 msgid ""
-"<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
-"key><key>U</key></keyseq>"
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:58
-msgid "Toggle spam"
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/index.page:5(None)
+msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:59
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+#: C/index.page:5(title)
+msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:62
-msgid "Quit"
+#: C/index.page:9(title)
+msgid "Introduction"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:63
-msgid "<keyseq><key>Ctrl</key><key>Q</key></keyseq>"
+#: C/index.page:13(title)
+msgid "Using Geary"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:66
-msgid "Zoom in"
+#: C/index.page:17(title)
+msgid "Bugs"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:67
-msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
+#: C/bugs.page:8(title)
+msgid "Think you've found a bug?"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:70
-msgid "Zoom out"
+#: C/bugs.page:9(p)
+msgid ""
+"If you suspect you've found a bug in Geary, follow these steps to report it:"
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:71
-msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
+#: C/bugs.page:11(p)
+msgid ""
+"Search Geary's Redmine<link href=\"http://redmine.yorba.org/projects/geary/"
+"issues\"> issue tracker </link>to see if someone else has reported the bug."
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:74
-msgid "Reset zoom"
+#: C/bugs.page:12(p)
+msgid ""
+"Don't see your bug listed? Congratulations! You've found a new bug. To "
+"create an bug report, create an account on Redmine and create a new issue. "
+"Be as specific as you can and describe the steps to reproduce it. Don't "
+"forget to include details about your operating system and what version of "
+"Geary you're running."
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:75
-msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
+#: C/bugs.page:13(p)
+msgid ""
+"For general inquiries, please join the <link href=\"http://lists.yorba.org/"
+"cgi-bin/mailman/listinfo/geary\"> Geary mailing list</link>."
 msgstr ""
 
-#. (itstool) path: td/p
-#: C/shortcuts.page:79
-msgid "<keyseq><key>Ctrl</key><key>E</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: td/p
-#. (itstool) path: page/title
-#: C/shortcuts.page:82 C/accounts.page:10
-msgid "Accounts"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:83
-msgid "<keyseq><key>Ctrl</key><key>M</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:86
-msgid "Close composer window"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:87
-msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:90
-msgid "Jump to search box"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:91
-msgid "<keyseq><key>Ctrl</key><key>S</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:94
-msgid "Find in current conversation"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:95
-msgid "<keyseq><key>Ctrl</key><key>F</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:98
-msgid "Find next in current conversation"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:99
-msgid "<keyseq><key>Ctrl</key><key>G</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:102
-msgid "Find previous in current conversation"
-msgstr ""
-
-#. (itstool) path: td/p
-#: C/shortcuts.page:103
-msgid "<keyseq><key>Ctrl</key><key>Shift</key><key>G</key></keyseq>"
-msgstr ""
-
-#. (itstool) path: page/title
-#: C/archive.page:10
+#: C/archive.page:10(title)
 msgid "Delete or archive a message"
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/archive.page:12
+#: C/archive.page:12(p)
 msgid ""
 "When you use Geary with a Gmail account, Geary lets you <em>archive</em> "
 "messages. The <gui>Archive</gui> toolbar button archives the selected "
 "conversation(s). Archived messages appear in the <gui>All Mail</gui> folder."
 msgstr ""
 
-#. (itstool) path: page/p
-#: C/archive.page:16
+#: C/archive.page:16(p)
 msgid ""
 "With other mail servers, you can delete but not archive messages. To delete "
 "one or more conversations, select them and press the <gui>Delete</gui> "
 "button on the toolbar."
 msgstr ""
 
-#. (itstool) path: media
-#. This is a reference to an external file such as an image or video. When
-#. the file changes, the md5 hash will change to let you know you need to
-#. update your localized copy. The msgstr is not used at all. Set it to
-#. whatever you like once you have updated your copy of the file.
-#: C/index.page:5
-msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
-msgstr ""
-
-#. (itstool) path: page/title
-#: C/index.page:5
-msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/index.page:9
-msgid "Introduction"
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/index.page:13
-msgid "Using Geary"
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/index.page:17
-msgid "Bugs"
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/accounts.page:13
+#: C/accounts.page:13(title)
 msgid "Adding accounts"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/accounts.page:15
+#: C/accounts.page:15(p)
 msgid ""
 "The first time you start Geary, you will be prompted to add an email "
 "account. On this screen, select if your account is Gmail, Yahoo, Outlook."
@@ -775,21 +733,18 @@ msgid ""
 "SMTP login settings manually."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/accounts.page:19
+#: C/accounts.page:19(p)
 msgid ""
 "Additional accounts can be added from the Accounts dialog. Click Accounts in "
 "the Gear menu (or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to "
 "open the Accounts dialog. To add an account, click the + button."
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/accounts.page:25
+#: C/accounts.page:25(title)
 msgid "Editing existing accounts"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/accounts.page:27
+#: C/accounts.page:27(p)
 msgid ""
 "From the Accounts dialog, select an account and click the pencil icon to "
 "change various settings. Please note that Geary cannot change server "
@@ -797,76 +752,27 @@ msgid ""
 "server, you will need to delete the account and re-add it."
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/accounts.page:31
+#: C/accounts.page:31(p)
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
 msgstr ""
 
-#. (itstool) path: section/title
-#: C/accounts.page:37
+#: C/accounts.page:37(title)
 msgid "Removing accounts"
 msgstr ""
 
-#. (itstool) path: section/p
-#: C/accounts.page:39
+#: C/accounts.page:39(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
 "account."
 msgstr ""
 
-#. (itstool) path: page/title
-#: C/star.page:10
-msgid "Star a message or mark it as read/unread"
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/star.page:12
-msgid "Star messages"
-msgstr ""
-
-#. (itstool) path: section/p
-#: C/star.page:13
-msgid ""
-"You can star messages to indicate that they're important to you. To mark a "
-"conversation with a star, click its star icon in the conversation list. You "
-"can star an individual message by clicking the star at the upper right of "
-"the message itself."
-msgstr ""
-
-#. (itstool) path: section/p
-#: C/star.page:15
-msgid ""
-"With Gmail accounts, starred messages appear in the Starred folder in the "
-"folder list."
-msgstr ""
-
-#. (itstool) path: section/title
-#: C/star.page:18
-msgid "Mark messages as read or unread"
-msgstr ""
-
-#. (itstool) path: section/p
-#: C/star.page:19
-msgid ""
-"Geary marks messages as read automatically as you read them. To manually "
-"toggle a conversation as read or unread, click the circle icon in the "
-"conversation list."
-msgstr ""
-
-#. (itstool) path: section/p
-#: C/star.page:22
-msgid ""
-"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
-"the toolbar can be used to toggle the read status of the selected "
-"conversation(s)."
-msgstr ""
-
-#. (itstool) path: section/p
-#: C/star.page:25
-msgid ""
-"To mark an individual message as read, select <gui>Mark as Read</gui> from "
-"the dropdown menu."
-msgstr ""
+#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
+#: C/index.page:0(None)
+#, fuzzy
+#| msgctxt "_"
+#| msgid "translator-credits"
+msgid "translator-credits"
+msgstr "Daniel Mustieles <daniel.mustieles@gmail.com>, 2014"
