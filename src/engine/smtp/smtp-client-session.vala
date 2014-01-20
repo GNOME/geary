@@ -104,11 +104,6 @@ public class Geary.Smtp.ClientSession {
             Response response = yield cx.authenticate_async(authenticator, cancellable);
             if (response.code.is_success_completed())
                 return authenticator;
-            
-            // syntax errors indicate the command was unknown or unimplemented, i.e. unavailable
-            // authentication type, so try again, otherwise treat as authentication failure
-            if (!response.code.is_syntax_error())
-                break;
         } while (auth_order.size > 0);
         
         throw new SmtpError.AUTHENTICATION_FAILED("Unable to authenticate with %s", to_string());
