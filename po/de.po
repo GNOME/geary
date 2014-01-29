@@ -24,8 +24,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://redmine.yorba.org/projects/geary\n"
 "POT-Creation-Date: 2013-09-20 12:16-0700\n"
-"PO-Revision-Date: 2013-10-03 14:30+0000\n"
-"Last-Translator: Angler <saabisto@gmx.de>\n"
+"PO-Revision-Date: 2014-01-29 11:08+0100\n"
+"Last-Translator: Olaf Leidinger <oleid@mescharet.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/geary/language/"
 "de/)\n"
 "Language: de\n"
@@ -33,6 +33,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.6.3\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:641
 msgid "        &#8226; Connection error.\n"
@@ -56,7 +57,7 @@ msgstr "&#8226; Ungültiger Konto-Nickname.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:634
 msgid "        &#8226; SMTP connection error.\n"
-msgstr "&#8226; IMAP-Verbindungsfehler.\n"
+msgstr "&#8226; SMTP-Verbindungsfehler.\n"
 
 #: ../../src/client/accounts/add-edit-page.vala:637
 msgid "        &#8226; SMTP username or password incorrect.\n"
