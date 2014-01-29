@@ -227,13 +227,6 @@ private class Geary.Imap.Account : BaseObject {
         Gee.Map<StatusCommand, MailboxSpecifier> cmd_map = new Gee.HashMap<
             StatusCommand, MailboxSpecifier>();
         foreach (MailboxInformation mailbox_info in child_info) {
-            // if already have an Imap.Folder for this mailbox, use that
-            if (folders.has_key(mailbox_info.path)) {
-                child_folders.add(folders.get(mailbox_info.path));
-                
-                continue;
-            }
-            
             // if new mailbox is unselectable, don't bother doing a STATUS command
             if (mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
                 Imap.Folder folder = new Imap.Folder.unselectable(session_mgr, mailbox_info);
@@ -286,8 +279,15 @@ private class Geary.Imap.Account : BaseObject {
             
             status_results.remove(found_status);
             
-            Imap.Folder folder = new Imap.Folder(session_mgr, found_status, mailbox_info);
-            folders.set(folder.path, folder);
+            // if already have an Imap.Folder for this mailbox, use that
+            Imap.Folder? folder = folders.get(mailbox_info.path);
+            if (folder != null) {
+                folder.properties.update_status(found_status);
+            } else {
+                folder = new Imap.Folder(session_mgr, found_status, mailbox_info);
+                folders.set(folder.path, folder);
+            }
+            
             child_folders.add(folder);
         }
         
