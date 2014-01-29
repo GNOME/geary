@@ -61,22 +61,7 @@ private class Geary.Imap.Account : BaseObject {
         if (!is_open)
             return;
         
-        int token = yield account_session_mutex.claim_async(cancellable);
-        
-        ClientSession? dropped = drop_session();
-        if (dropped != null) {
-            try {
-                yield session_mgr.release_session_async(dropped, cancellable);
-            } catch (Error err) {
-                // ignored
-            }
-        }
-        
-        try {
-            account_session_mutex.release(ref token);
-        } catch (Error err) {
-            // ignored
-        }
+        yield drop_session_async(cancellable);
         
         try {
             yield session_mgr.close_async(cancellable);
@@ -91,6 +76,10 @@ private class Geary.Imap.Account : BaseObject {
     // this is used by the various calls to put off claiming a session until needed (which
     // possibly is long enough for ClientSessionManager to get a few ready).
     private async ClientSession claim_session_async(Cancellable? cancellable) throws Error {
+        // check if available session is in good state
+        if (account_session != null && account_session.get_context(null) != ClientSession.Context.AUTHORIZED)
+            yield drop_session_async(cancellable);
+        
         int token = yield account_session_mutex.claim_async(cancellable);
         
         Error? err = null;
@@ -114,20 +103,35 @@ private class Geary.Imap.Account : BaseObject {
         return account_session;
     }
     
-    // Can be called locked or unlocked, but only unlocked if you know what you're doing -- i.e.
-    // not yielding.
-    private ClientSession? drop_session() {
-        if (account_session == null)
-            return null;
+    private async void drop_session_async(Cancellable? cancellable) {
+        int token;
+        try {
+            token = yield account_session_mutex.claim_async(cancellable);
+        } catch (Error err) {
+            debug("Unable to claim Imap.Account session mutex: %s", err.message);
+            
+            return;
+        }
         
-        account_session.list.disconnect(on_list_data);
-        account_session.status.disconnect(on_status_data);
-        account_session.disconnected.disconnect(on_disconnected);
+        if (account_session != null) {
+            try {
+                yield session_mgr.release_session_async(account_session, cancellable);
+            } catch (Error err) {
+                // ignored
+            }
+            
+            account_session.list.disconnect(on_list_data);
+            account_session.status.disconnect(on_status_data);
+            account_session.disconnected.disconnect(on_disconnected);
+            
+            account_session = null;
+        }
         
-        ClientSession dropped = account_session;
-        account_session = null;
-        
-        return dropped;
+        try {
+            account_session_mutex.release(ref token);
+        } catch (Error err) {
+            // ignored
+        }
     }
     
     private void on_list_data(MailboxInformation mailbox_info) {
@@ -141,7 +145,7 @@ private class Geary.Imap.Account : BaseObject {
     }
     
     private void on_disconnected() {
-        drop_session();
+        drop_session_async.begin(null);
     }
     
     public async bool folder_exists_async(FolderPath path, Cancellable? cancellable) throws Error {
