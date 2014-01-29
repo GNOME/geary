@@ -105,7 +105,10 @@ public class GearyApplication : Gtk.Application {
             error("Error registering GearyApplication: %s", e.message);
         }
         
-        Args.parse(args);
+        if (!Args.parse(args)) {
+            exit_status = 1;
+            return true;
+        }
         
         activate();
         foreach (unowned string arg in args) {

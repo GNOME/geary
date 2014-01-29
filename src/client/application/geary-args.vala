@@ -38,12 +38,13 @@ public bool log_folder_normalization = false;
 public bool inspector = false;
 public bool version = false;
 
-public int parse(string[] args) {
-    var context = new OptionContext("");
+public bool parse(string[] args) {
+    var context = new OptionContext("[%s...]".printf(Geary.ComposedEmail.MAILTO_SCHEME));
     context.set_help_enabled(true);
     context.add_main_entries(options, null);
-    context.add_group(Gtk.get_option_group(false));
-    context.set_description("%s\n\n%s\n\t%s\n".printf(
+    context.set_description("%s\n\n%s\n\n%s\n\t%s\n".printf(
+        // This gives a command-line hint on how to open new composer windows with mailto:
+        _("Use %s to open a new composer window").printf(Geary.ComposedEmail.MAILTO_SCHEME),
         GearyApplication.COPYRIGHT, _("Please report comments, suggestions and bugs to:"),
         GearyApplication.BUGREPORT));
     
@@ -52,8 +53,8 @@ public int parse(string[] args) {
     } catch (OptionError error) {
         // i18n: Command line arguments are invalid
         stdout.printf (_("Failed to parse command line options: %s\n"), error.message);
-        stdout.printf("\n%s", context.get_help(true, Gtk.get_option_group(false)));
-        return 1;
+        stdout.printf("\n%s", context.get_help(true, null));
+        return false;
     }
     
     // other than the OptionEntry command-line arguments, the only acceptable arguments are
@@ -63,16 +64,15 @@ public int parse(string[] args) {
         
         if (!arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
             stdout.printf(_("Unrecognized command line option \"%s\"\n").printf(arg));
-            stdout.printf("\n%s", context.get_help(true, Gtk.get_option_group(false)));
+            stdout.printf("\n%s", context.get_help(true, null));
             
-            return 1;
+            return false;
         }
     }
     
     if (version) {
         stdout.printf("%s %s\n", GearyApplication.PRGNAME, GearyApplication.VERSION);
-        
-        return 1;
+        Process.exit(0);
     }
     
     if (log_network)
@@ -102,7 +102,7 @@ public int parse(string[] args) {
     if (log_debug)
         Geary.Logging.log_to(stdout);
     
-    return 0;
+    return true;
 }
 
 }
