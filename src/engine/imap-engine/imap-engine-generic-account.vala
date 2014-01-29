@@ -360,8 +360,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         try {
             remote_children = yield remote.list_child_folders_async(parent, cancellable);
         } catch (Error err) {
-            // ignore everything but I/O errors
-            if (err is IOError)
+            // ignore everything but I/O and IMAP errors (cancellation is an IOError)
+            if (err is IOError || err is ImapError)
                 throw err;
         }
         

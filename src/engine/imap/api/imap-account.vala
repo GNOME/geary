@@ -244,6 +244,10 @@ private class Geary.Imap.Account : BaseObject {
                 mailbox_info.mailbox);
         }
         
+        // if no STATUS results are needed, bail out with what's been collected
+        if (cmd_map.size == 0)
+            return child_folders;
+        
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         Gee.Map<Command, StatusResponse> responses = yield send_multiple_async(cmd_map.keys,
             null, status_results, cancellable);
