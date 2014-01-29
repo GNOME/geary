@@ -34,6 +34,7 @@ public class ConversationViewer : Gtk.Box {
     private const string REPLACED_IMAGE_CLASS = "replaced_inline_image";
     private const string DATA_IMAGE_CLASS = "data_inline_image";
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
+    private const int QUOTE_SIZE_THRESHOLD = 120;
     
     private enum SearchState {
         // Search/find states.
@@ -558,6 +559,9 @@ public class ConversationViewer : Gtk.Box {
         Idle.add(() => {
             try {
                 div_message.get_class_list().add("animate");
+                // This will only affect any open emails.  Those in the hidden state will have
+                // their quotes set when they're opened.
+                unset_controllable_quotes(div_message);
             } catch (Error error) {
                 debug("Could not enable animation class: %s", error.message);
             }
@@ -1119,12 +1123,14 @@ public class ConversationViewer : Gtk.Box {
                 return;
             
             WebKit.DOM.DOMTokenList class_list = email_element.get_class_list();
-            if (class_list.contains("compressed"))
+            if (class_list.contains("compressed")) {
                 decompress_emails(email_element);
-            else if (class_list.contains("hide"))
+            } else if (class_list.contains("hide")) {
                 class_list.remove("hide");
-            else
+                unset_controllable_quotes(email_element);
+            } else {
                 class_list.add("hide");
+            }
         } catch (Error error) {
             warning("Error toggling message: %s", error.message);
         }
@@ -1614,34 +1620,23 @@ public class ConversationViewer : Gtk.Box {
 
     private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
         WebKit.DOM.HTMLDivElement quote_container = web_view.create_div();
-        quote_container.set_attribute("class", "quote_container");
-        quote_container.set_inner_html("%s%s%s".printf("<div class=\"shower\">[show]</div>",
-            "<div class=\"hider\">[hide]</div>", "<div class=\"quote\"></div>"));
+        quote_container.set_attribute("class", "quote_container controllable hide");
+        quote_container.set_inner_html(
+            """<div class="shower"><input type="button" value="▼        ▼        ▼" /></div>""" +
+            """<div class="hider"><input type="button" value="▲        ▲        ▲" /></div>""" +
+            """<div class="quote"></div>""");
         return quote_container;
     }
 
-    private string set_up_quotes(string text) {
-        try {
-            // Extract any quote containers from the signature block and make them controllable.
-            WebKit.DOM.HTMLElement container = web_view.create_div();
-            container.set_inner_html(text);
-            WebKit.DOM.NodeList quote_list = container.query_selector_all(".signature .quote_container");
-            for (int i = 0; i < quote_list.length; ++i) {
-                WebKit.DOM.Element quote = quote_list.item(i) as WebKit.DOM.Element;
-                quote.set_attribute("class", "quote_container controllable hide");
-                container.append_child(quote);
+    private void unset_controllable_quotes(WebKit.DOM.HTMLElement element) throws GLib.Error {
+        WebKit.DOM.NodeList quote_list = element.query_selector_all(".quote_container.controllable");
+        for (int i = 0; i < quote_list.length; ++i) {
+            WebKit.DOM.Element quote_container = quote_list.item(i) as WebKit.DOM.Element;
+            long scroll_height = quote_container.query_selector(".quote").scroll_height;
+            // If the message is hidden, scroll_height will be 0.
+            if (scroll_height > 0 && scroll_height < QUOTE_SIZE_THRESHOLD) {
+                quote_container.set_attribute("class", "quote_container");
             }
-            
-            // If there is only one quote container in the message, set it up as controllable.
-            quote_list = container.query_selector_all(".quote_container");
-            if (quote_list.length == 1) {
-                ((WebKit.DOM.Element) quote_list.item(0)).set_attribute("class",
-                    "quote_container controllable hide");
-            }
-            return container.get_inner_html();
-        } catch (Error error) {
-            debug("Error adjusting final quote block: %s", error.message);
-            return text;
         }
     }
     
@@ -1732,7 +1727,7 @@ public class ConversationViewer : Gtk.Box {
             }
 
             // Now return the whole message.
-            return set_up_quotes(container.get_inner_html());
+            return container.get_inner_html();
         } catch (Error e) {
             debug("Error modifying HTML message: %s", e.message);
             return text;
