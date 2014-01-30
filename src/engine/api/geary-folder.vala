@@ -282,6 +282,13 @@ public interface Geary.Folder : BaseObject {
     public signal void special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);
     
+    /**
+     * Fired when the Folder's display name has changed.
+     *
+     * @see get_display_name
+     */
+    public signal void display_name_changed();
+    
     protected abstract void notify_opened(OpenState state, int count);
     
     protected abstract void notify_open_failed(OpenFailed failure, Error? err);
@@ -307,6 +314,8 @@ public interface Geary.Folder : BaseObject {
     
     protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type);
+    
+    protected abstract void notify_display_name_changed();
     
     /**
      * Returns a name suitable for displaying to the user.

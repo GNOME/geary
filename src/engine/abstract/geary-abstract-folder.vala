@@ -7,6 +7,14 @@
 public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     
+    public abstract Geary.Account account { get; }
+    
+    public abstract Geary.FolderProperties properties { get; }
+    
+    public abstract Geary.FolderPath path { get; }
+    
+    public abstract Geary.SpecialFolderType special_folder_type { get; }
+    
     /*
      * notify_* methods for AbstractFolder are marked internal because the SendReplayOperations
      * need access to them to report changes as they occur.
@@ -60,15 +68,16 @@ public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
     internal virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type) {
         special_folder_type_changed(old_type, new_type);
+        
+        // in default implementation, this may also mean the display name changed; subclasses may
+        // override this behavior, but no way to detect this, so notify
+        if (special_folder_type != Geary.SpecialFolderType.NONE)
+            notify_display_name_changed();
     }
-
-    public abstract Geary.Account account { get; }
     
-    public abstract Geary.FolderProperties properties { get; }
-    
-    public abstract Geary.FolderPath path { get; }
-    
-    public abstract Geary.SpecialFolderType special_folder_type { get; }
+    internal virtual void notify_display_name_changed() {
+        display_name_changed();
+    }
     
     /**
      * Default is to display the basename of the Folder's path.

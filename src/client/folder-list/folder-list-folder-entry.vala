@@ -14,11 +14,13 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         has_new = false;
         folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(on_counts_changed);
         folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].connect(on_counts_changed);
+        folder.display_name_changed.connect(on_display_name_changed);
     }
     
     ~FolderEntry() {
         folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(on_counts_changed);
         folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].disconnect(on_counts_changed);
+        folder.display_name_changed.disconnect(on_display_name_changed);
     }
     
     public override string get_sidebar_name() {
@@ -116,6 +118,10 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     private void on_counts_changed() {
         sidebar_count_changed(get_count());
         sidebar_tooltip_changed(get_sidebar_tooltip());
+    }
+    
+    private void on_display_name_changed() {
+        sidebar_name_changed(folder.get_display_name());
     }
     
     public override int get_count() {
