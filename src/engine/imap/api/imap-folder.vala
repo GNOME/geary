@@ -337,7 +337,7 @@ private class Geary.Imap.Folder : BaseObject {
         FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID);
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;
-        yield exec_commands_async(new Collection.SingleItem<Command>(cmd), out fetched, null,
+        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), out fetched, null,
             cancellable);
         if (fetched == null || fetched.size == 0)
             return null;
@@ -550,9 +550,9 @@ private class Geary.Imap.Folder : BaseObject {
         
         CopyCommand cmd = new CopyCommand(msg_set,
             new MailboxSpecifier.from_folder_path(destination, null));
-        Gee.Collection<Command> cmds = new Collection.SingleItem<Command>(cmd);
         
-        yield exec_commands_async(cmds, null, null, cancellable);
+        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), null,
+            null, cancellable);
     }
     
     // TODO: Support MOVE extension
@@ -888,7 +888,7 @@ private class Geary.Imap.Folder : BaseObject {
             Imap.EmailFlags imap_flags = Imap.EmailFlags.from_api_email_flags(flags);
             msg_flags = imap_flags.message_flags;
         } else {
-            msg_flags = new MessageFlags(new Geary.Collection.SingleItem<MessageFlag>(MessageFlag.SEEN));
+            msg_flags = new MessageFlags(Geary.iterate<MessageFlag>(MessageFlag.SEEN).to_array_list());
         }
         
         InternalDate? internaldate = null;
@@ -899,7 +899,7 @@ private class Geary.Imap.Folder : BaseObject {
             msg_flags, internaldate, message.get_network_buffer(false));
         
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(
-            new Collection.SingleItem<AppendCommand>(cmd), null, null, null);
+            Geary.iterate<AppendCommand>(cmd).to_array_list(), null, null, null);
         
         // Grab the response and parse out the UID, if available.
         StatusResponse response = responses.get(cmd);

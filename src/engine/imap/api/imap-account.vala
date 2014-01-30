@@ -350,7 +350,7 @@ private class Geary.Imap.Account : BaseObject {
         Gee.List<MailboxInformation>? list_results, Gee.List<StatusData>? status_results,
         Cancellable? cancellable) throws Error {
         Gee.Map<Command, StatusResponse> responses = yield send_multiple_async(
-            new Geary.Collection.SingleItem<Command>(cmd), list_results, status_results,
+            Geary.iterate<Command>(cmd).to_array_list(), list_results, status_results,
             cancellable);
         
         assert(responses.size == 1);

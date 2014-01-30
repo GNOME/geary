@@ -65,7 +65,7 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
         // TODO: need to prevent gaps that may occur here
         Geary.Email created = new Geary.Email(created_id);
         Gee.Map<Geary.Email, bool> results = yield engine.local_folder.create_or_merge_email_async(
-            new Collection.SingleItem<Geary.Email>(created), cancellable);
+            Geary.iterate<Geary.Email>(created).to_array_list(), cancellable);
         if (results.size > 0)
             created_id = Collection.get_first<Geary.Email>(results.keys).id;
         else

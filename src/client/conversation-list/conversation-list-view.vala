@@ -170,7 +170,7 @@ public class ConversationListView : Gtk.TreeView {
             if (GearyApplication.instance.controller.get_selected_conversations().contains(conversation))
                 to_mark = GearyApplication.instance.controller.get_selected_conversations();
             else
-                to_mark = new Geary.Collection.SingleItem<Geary.App.Conversation>(conversation);
+                to_mark = Geary.iterate<Geary.App.Conversation>(conversation).to_array_list();
             
             if (read_clicked) {
                 // Read/unread.

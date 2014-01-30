@@ -80,7 +80,7 @@ public class Geary.App.EmailStore : BaseObject {
         Cancellable? cancellable = null) throws Error {
         FetchOperation op = new Geary.App.FetchOperation(required_fields, flags);
         yield do_folder_operation_async(op,
-            new Geary.Collection.SingleItem<Geary.EmailIdentifier>(email_id), cancellable);
+            Geary.iterate<Geary.EmailIdentifier>(email_id).to_array_list(), cancellable);
         
         if (op.result == null)
             throw new EngineError.NOT_FOUND("Couldn't fetch email ID %s", email_id.to_string());

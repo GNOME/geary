@@ -44,7 +44,7 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
     public virtual void add(NamedFlag flag) {
         if (!list.contains(flag)) {
             list.add(flag);
-            notify_added(new Collection.SingleItem<NamedFlag>(flag));
+            notify_added(Geary.iterate<NamedFlag>(flag).to_array_list());
         }
     }
     
@@ -60,7 +60,7 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
     public virtual bool remove(NamedFlag flag) {
         bool removed = list.remove(flag);
         if (removed)
-            notify_removed(new Collection.SingleItem<NamedFlag>(flag));
+            notify_removed(Geary.iterate<NamedFlag>(flag).to_array_list());
         
         return removed;
     }

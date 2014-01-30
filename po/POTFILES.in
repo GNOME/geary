@@ -337,7 +337,6 @@ src/engine/util/util-numeric.vala
 src/engine/util/util-object.vala
 src/engine/util/util-reference-semantics.vala
 src/engine/util/util-scheduler.vala
-src/engine/util/util-single-item.vala
 src/engine/util/util-stream.vala
 src/engine/util/util-string.vala
 src/engine/util/util-synchronization.vala

@@ -11,6 +11,22 @@ namespace Geary {
     public Geary.Iterable<G> traverse<G>(Gee.Iterable<G> i) {
         return new Geary.Iterable<G>(i.iterator());
     }
+    
+    /**
+     * Take some non-null items (all must be of type G) and return a
+     * Geary.Iterable for convenience.
+     */
+    public Geary.Iterable<G> iterate<G>(G g, ...) {
+        va_list args = va_list();
+        G arg = g;
+        
+        Gee.ArrayList<G> list = new Gee.ArrayList<G>();
+        do {
+            list.add(arg);
+        } while((arg = args.arg()) != null);
+        
+        return Geary.traverse<G>(list);
+    }
 }
 
 /**

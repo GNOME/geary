@@ -102,12 +102,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         assert(email != null);
         
         Gee.Map<Geary.Email, bool> created_or_merged =
-            yield engine.local_folder.create_or_merge_email_async(new Collection.SingleItem<Geary.Email>(email),
-                cancellable);
+            yield engine.local_folder.create_or_merge_email_async(
+                Geary.iterate<Geary.Email>(email).to_array_list(), cancellable);
         
         // true means created
         if (created_or_merged.get(email)) {
-            Gee.Collection<Geary.EmailIdentifier> ids = new Collection.SingleItem<Geary.EmailIdentifier>(email.id);
+            Gee.Collection<Geary.EmailIdentifier> ids
+                = Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list();
             engine.notify_email_inserted(ids);
             engine.notify_email_locally_inserted(ids);
         }

@@ -936,7 +936,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             }
             
             // Notify queued replay operations that the email has been removed (by EmailIdentifier)
-            replay_queue.notify_remote_removed_ids(new Collection.SingleItem<ImapDB.EmailIdentifier>(owned_id));
+            replay_queue.notify_remote_removed_ids(
+                Geary.iterate<ImapDB.EmailIdentifier>(owned_id).to_array_list());
         } else {
             debug("%s do_replay_removed_message: remote_position=%d unknown in local store "
                 + "(reported_remote_count=%d local_position=%d local_count=%d)",
@@ -964,7 +965,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // notify of change
         if (!marked && owned_id != null)
-            notify_email_removed(new Collection.SingleItem<Geary.EmailIdentifier>(owned_id));
+            notify_email_removed(Geary.iterate<Geary.EmailIdentifier>(owned_id).to_array_list());
         
         if (!marked)
             notify_email_count_changed(reported_remote_count, CountChangeReason.REMOVED);

@@ -209,7 +209,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private GenericFolder build_folder(ImapDB.Folder local_folder) {
-        return Geary.Collection.get_first(build_folders(new Collection.SingleItem<ImapDB.Folder>(local_folder)));
+        return Geary.Collection.get_first(build_folders(
+            Geary.iterate<ImapDB.Folder>(local_folder).to_array_list()));
     }
 
     private Gee.Collection<GenericFolder> build_folders(Gee.Collection<ImapDB.Folder> local_folders) {

@@ -876,8 +876,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
             
             // Check to see if message is unread (this only affects non-marked emails.)
-            if (do_get_unread_count_for_ids(cx, new Geary.Collection.SingleItem
-                <ImapDB.EmailIdentifier>(id), cancellable) > 0) {
+            if (do_get_unread_count_for_ids(cx,
+                Geary.iterate<ImapDB.EmailIdentifier>(id).to_array_list(), cancellable) > 0) {
                 do_add_to_unread_count(cx, -1, cancellable);
                 was_unread = true;
             }

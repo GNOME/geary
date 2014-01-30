@@ -25,6 +25,6 @@ private class Geary.App.FetchOperation : Geary.App.AsyncFolderOperation {
         
         result = yield folder.fetch_email_async(
             id, required_fields, flags, cancellable);
-        return new Geary.Collection.SingleItem<Geary.EmailIdentifier>(id);
+        return Geary.iterate<Geary.EmailIdentifier>(id).to_array_list();
     }
 }

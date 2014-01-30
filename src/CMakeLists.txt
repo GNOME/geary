@@ -284,7 +284,6 @@ engine/util/util-numeric.vala
 engine/util/util-object.vala
 engine/util/util-reference-semantics.vala
 engine/util/util-scheduler.vala
-engine/util/util-single-item.vala
 engine/util/util-stream.vala
 engine/util/util-string.vala
 engine/util/util-synchronization.vala

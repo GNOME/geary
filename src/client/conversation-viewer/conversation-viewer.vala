@@ -1216,8 +1216,7 @@ public class ConversationViewer : Gtk.Box {
             if (message != null && !message.load_remote_images().is_certain()) {
                 Geary.EmailFlags flags = new Geary.EmailFlags();
                 flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
-                mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(
-                    message.id), flags, null);
+                mark_messages(Geary.iterate<Geary.EmailIdentifier>(message.id).to_array_list(), flags, null);
             }
         }
     }
@@ -1431,14 +1430,14 @@ public class ConversationViewer : Gtk.Box {
     private void on_mark_read_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
-        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(message.id), null, flags);
+        mark_messages(Geary.iterate<Geary.EmailIdentifier>(message.id).to_array_list(), null, flags);
         mark_manual_read(message.id);
     }
 
     private void on_mark_unread_message(Geary.Email message) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
-        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(message.id), flags, null);
+        mark_messages(Geary.iterate<Geary.EmailIdentifier>(message.id).to_array_list(), flags, null);
         mark_manual_read(message.id);
     }
     
@@ -1488,13 +1487,13 @@ public class ConversationViewer : Gtk.Box {
     private void flag_message(Geary.Email email) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(email.id), flags, null);
+        mark_messages(Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list(), flags, null);
     }
 
     private void unflag_message(Geary.Email email) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_messages(new Geary.Collection.SingleItem<Geary.EmailIdentifier>(email.id), null, flags);
+        mark_messages(Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list(), null, flags);
     }
 
     private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
