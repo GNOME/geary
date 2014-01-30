@@ -336,8 +336,9 @@ public class FormattedConversationData : Geary.BaseObject {
             
             // Unread indicator.
             if (is_unread || hover) {
-                Gdk.Pixbuf read_icon = is_unread ? IconFactory.instance.unread_colored
-                    : IconFactory.instance.read_colored;
+                Gdk.Pixbuf read_icon = IconFactory.instance.load_symbolic(
+                    is_unread ? "unread-symbolic" : "read-symbolic",
+                    IconFactory.UNREAD_ICON_SIZE, widget.get_style_context());
                 Gdk.cairo_set_source_pixbuf(ctx, read_icon, cell_area.x + LINE_SPACING, unread_y);
                 ctx.paint();
             }
@@ -345,9 +346,9 @@ public class FormattedConversationData : Geary.BaseObject {
             // Starred indicator.
             if (is_flagged || hover) {
                 int star_y = cell_area.y + (cell_area.height / 2) + (display_preview ? LINE_SPACING : 0);
-                
-                Gdk.Pixbuf starred_icon = is_flagged ? IconFactory.instance.starred_colored
-                    : IconFactory.instance.unstarred_colored;
+                Gdk.Pixbuf starred_icon = IconFactory.instance.load_symbolic(
+                    is_flagged ? "starred-symbolic" : "unstarred-symbolic",
+                    IconFactory.STAR_ICON_SIZE, widget.get_style_context());
                 Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, star_y);
                 ctx.paint();
             }

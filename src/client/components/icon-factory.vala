@@ -25,16 +25,7 @@ public class IconFactory {
     public Gdk.Pixbuf application_icon { get; private set; }
     
     public const int UNREAD_ICON_SIZE = 16;
-    public Gdk.Pixbuf unread { get; private set; }
-    public Gdk.Pixbuf read { get; private set; }
-    public Gdk.Pixbuf unread_colored { get; private set; }
-    public Gdk.Pixbuf read_colored { get; private set; }
-    
     public const int STAR_ICON_SIZE = 16;
-    public Gdk.Pixbuf starred { get; private set; }
-    public Gdk.Pixbuf unstarred { get; private set; }
-    public Gdk.Pixbuf starred_colored { get; private set; }
-    public Gdk.Pixbuf unstarred_colored { get; private set; }
     
     private Gtk.IconTheme icon_theme { get; private set; }
     
@@ -53,19 +44,6 @@ public class IconFactory {
         
         // Load icons here.
         application_icon = load("geary", APPLICATION_ICON_SIZE);
-        unread = load("unread-symbolic", UNREAD_ICON_SIZE);
-        read = load("read-symbolic", UNREAD_ICON_SIZE);
-        starred = load("star-symbolic", STAR_ICON_SIZE);
-        unstarred = load("unstarred-symbolic", STAR_ICON_SIZE);
-        
-        Gdk.RGBA gray_color = Gdk.RGBA();
-        gray_color.parse(CountBadge.UNREAD_BG_COLOR);
-        
-        // Load pre-colored symbolic icons here.
-        read_colored = load_symbolic_colored("read-symbolic", UNREAD_ICON_SIZE, gray_color);
-        unread_colored = load_symbolic_colored("unread-symbolic", STAR_ICON_SIZE, gray_color);
-        starred_colored = load_symbolic_colored("star-symbolic", STAR_ICON_SIZE, gray_color);
-        unstarred_colored = load_symbolic_colored("unstarred-symbolic", STAR_ICON_SIZE, gray_color);
     }
     
     public void init() {
@@ -143,34 +121,6 @@ public class IconFactory {
         Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
         return icon_info != null ? icon_info.copy() :
             icon_theme.lookup_icon("document-symbolic", size, flags);
-    }
-    
-    /**
-     * Loads a symbolic icon into a pixbuf, where the color-key has been switched to the provided
-     * color, or black if no color is set.
-     */
-    public Gdk.Pixbuf? load_symbolic_colored(string icon_name, int size, Gdk.RGBA? color = null,
-        Gtk.IconLookupFlags flags = 0) {
-        Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
-        
-        // Default to black if no color provided.
-        if (color == null) {
-            color = Gdk.RGBA();
-            color.red = color.green = color.blue = 0.0;
-            color.alpha = 1.0;
-        }
-        
-        // Attempt to load as a symbolic icon.
-        if (icon_info != null) {
-            try {
-                return icon_info.load_symbolic(color);
-            } catch (Error e) {
-                warning("Couldn't load icon: %s", e.message);
-            }
-        }
-        
-        // Default: missing image icon.
-        return get_missing_icon(size, flags);
     }
     
     public Gdk.Pixbuf? load_symbolic(string icon_name, int size, Gtk.StyleContext style,
