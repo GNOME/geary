@@ -24,8 +24,8 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     
     public signal void close();
     
-    public AccountDialogAccountListPane(Gtk.Notebook notebook) {
-        base(notebook);
+    public AccountDialogAccountListPane(Gtk.Stack stack) {
+        base(stack);
         Gtk.Builder builder = GearyApplication.instance.create_builder("account_list.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
         Gtk.ActionGroup actions = (Gtk.ActionGroup) builder.get_object("account list actions");

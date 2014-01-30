@@ -5,20 +5,19 @@
  */
 
 // Base class for account dialog panes.
-// Could be factored into a generic "NotebookPage" class if needed.
+// Could be factored into a generic "StackPage" class if needed.
 public class AccountDialogPane : Gtk.Box {
-    private int page_number;
-    private weak Gtk.Notebook parent_notebook;
+    private weak Gtk.Stack parent_stack;
     
-    public class AccountDialogPane(Gtk.Notebook parent_notebook) {
+    public class AccountDialogPane(Gtk.Stack parent_stack) {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
         
-        this.parent_notebook = parent_notebook;
-        page_number = parent_notebook.append_page(this, null);
+        this.parent_stack = parent_stack;
+        parent_stack.add(this);
     }
     
     public virtual void present() {
-        parent_notebook.set_current_page(page_number);
+        parent_stack.set_visible_child(this);
     }
 }
 

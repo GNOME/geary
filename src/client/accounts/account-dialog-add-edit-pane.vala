@@ -17,8 +17,8 @@ public class AccountDialogAddEditPane : AccountDialogPane {
     
     public signal void size_changed();
     
-    public AccountDialogAddEditPane(Gtk.Notebook notebook) {
-        base(notebook);
+    public AccountDialogAddEditPane(Gtk.Stack stack) {
+        base(stack);
         
         button_box.set_layout(Gtk.ButtonBoxStyle.END);
         button_box.expand = false;

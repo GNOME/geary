@@ -7,7 +7,7 @@
 public class AccountDialog : Gtk.Dialog {
     private const int MARGIN = 12;
     
-    private Gtk.Notebook notebook = new Gtk.Notebook();
+    private Gtk.Stack stack = new Gtk.Stack();
     private AccountDialogAccountListPane account_list_pane;
     private AccountDialogAddEditPane add_edit_pane;
     private AccountDialogSpinnerPane spinner_pane;
@@ -23,13 +23,12 @@ public class AccountDialog : Gtk.Dialog {
         get_content_area().margin_left = MARGIN;
         get_content_area().margin_right = MARGIN;
         
-        // Add pages to notebook.
-        // Important!  Add the pane to show_all() below.
-        account_list_pane = new AccountDialogAccountListPane(notebook);
-        add_edit_pane = new AccountDialogAddEditPane(notebook);
-        spinner_pane = new AccountDialogSpinnerPane(notebook);
-        remove_confirm_pane = new AccountDialogRemoveConfirmPane(notebook);
-        remove_fail_pane = new AccountDialogRemoveFailPane(notebook);
+        // Add pages to stack.
+        account_list_pane = new AccountDialogAccountListPane(stack);
+        add_edit_pane = new AccountDialogAddEditPane(stack);
+        spinner_pane = new AccountDialogSpinnerPane(stack);
+        remove_confirm_pane = new AccountDialogRemoveConfirmPane(stack);
+        remove_fail_pane = new AccountDialogRemoveFailPane(stack);
         
         // Connect signals from pages.
         account_list_pane.close.connect(on_close);
@@ -46,26 +45,10 @@ public class AccountDialog : Gtk.Dialog {
         // Set default page.
         account_list_pane.present();
         
-        notebook.show_border = false;
-        notebook.show_tabs = false;
-        get_content_area().pack_start(notebook, true, true, 0);
+        get_content_area().pack_start(stack, true, true, 0);
         
         set_default_response(Gtk.ResponseType.OK);
         
-        notebook.show_all(); // Required due to longstanding Gtk.Notebook bug
-    }
-    
-    // This is a hack to allow key events in this window.  Gtk.Notebook will attempt to propagate
-    // key events to Widgets which have not yet been realized; by forcing them to realize here,
-    // we can avoid assertions and allow the Escape key to close the dialog.
-    public override void show_all() {
-        base.show_all();
-        
-        add_edit_pane.present();
-        spinner_pane.present();
-        remove_confirm_pane.present();
-        remove_fail_pane.present();
-        account_list_pane.present();
     }
     
     private void on_close() {

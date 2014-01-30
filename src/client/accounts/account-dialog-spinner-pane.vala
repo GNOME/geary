@@ -6,8 +6,8 @@
 
 // Lets user know that account removal cannot be completed..
 public class AccountDialogSpinnerPane : AccountDialogPane {
-    public AccountDialogSpinnerPane(Gtk.Notebook notebook) {
-        base(notebook);
+    public AccountDialogSpinnerPane(Gtk.Stack stack) {
+        base(stack);
         
         pack_end(new AccountSpinnerPage());
     }

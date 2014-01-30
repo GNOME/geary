@@ -8,8 +8,8 @@
 public class AccountDialogRemoveFailPane : AccountDialogPane {
     public signal void ok();
     
-    public AccountDialogRemoveFailPane(Gtk.Notebook notebook) {
-        base(notebook);
+    public AccountDialogRemoveFailPane(Gtk.Stack stack) {
+        base(stack);
         
         Gtk.Builder builder = GearyApplication.instance.create_builder("account_cannot_remove.glade");
         pack_end((Gtk.Box) builder.get_object("container"));

@@ -14,8 +14,8 @@ public class AccountDialogRemoveConfirmPane : AccountDialogPane {
     
     public signal void cancel();
     
-    public AccountDialogRemoveConfirmPane(Gtk.Notebook notebook) {
-        base(notebook);
+    public AccountDialogRemoveConfirmPane(Gtk.Stack stack) {
+        base(stack);
         
         Gtk.Builder builder = GearyApplication.instance.create_builder("remove_confirm.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
