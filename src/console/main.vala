@@ -443,7 +443,7 @@ class ImapConsole : Gtk.Window {
         
         status("Listing...");
         cx.send_async.begin(new Geary.Imap.ListCommand.wildcarded(args[0],
-            new Geary.Imap.MailboxSpecifier(args[1]), (cmd.down() == "xlist")), null, on_list);
+            new Geary.Imap.MailboxSpecifier(args[1]), (cmd.down() == "xlist"), null), null, on_list);
     }
     
     private void on_list(Object? source, AsyncResult result) {

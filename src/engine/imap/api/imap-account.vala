@@ -302,9 +302,16 @@ private class Geary.Imap.Account : BaseObject {
         ClientSession session = yield claim_session_async(cancellable);
         bool can_xlist = session.capabilities.has_capability(Capabilities.XLIST);
         
+        // Request SPECIAL-USE if available and not using XLIST
+        ListReturnParameter? return_param = null;
+        if (session.capabilities.supports_special_use() && !can_xlist) {
+            return_param = new ListReturnParameter();
+            return_param.add_special_use();
+        }
+        
         ListCommand cmd;
         if (parent == null) {
-            cmd = new ListCommand.wildcarded("", new MailboxSpecifier("%"), can_xlist);
+            cmd = new ListCommand.wildcarded("", new MailboxSpecifier("%"), can_xlist, return_param);
         } else {
             string? specifier = parent.get_fullpath(null);
             string? delim = parent.get_root().default_separator;
@@ -315,7 +322,7 @@ private class Geary.Imap.Account : BaseObject {
             
             specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
             
-            cmd = new ListCommand(new MailboxSpecifier(specifier), can_xlist);
+            cmd = new ListCommand(new MailboxSpecifier(specifier), can_xlist, return_param);
         }
         
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();

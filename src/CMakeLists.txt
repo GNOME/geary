@@ -100,6 +100,7 @@ engine/imap/command/imap-fetch-command.vala
 engine/imap/command/imap-id-command.vala
 engine/imap/command/imap-idle-command.vala
 engine/imap/command/imap-list-command.vala
+engine/imap/command/imap-list-return-parameter.vala
 engine/imap/command/imap-login-command.vala
 engine/imap/command/imap-logout-command.vala
 engine/imap/command/imap-message-set.vala

@@ -11,6 +11,7 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     public const string COMPRESS = "COMPRESS";
     public const string DEFLATE_SETTING = "DEFLATE";
     public const string UIDPLUS = "UIDPLUS";
+    public const string SPECIAL_USE = "SPECIAL-USE";
     
     public const string NAME_SEPARATOR = "=";
     public const string? VALUE_SEPARATOR = null;
@@ -52,6 +53,15 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
      */
     public bool supports_uidplus() {
         return has_capability(UIDPLUS);
+    }
+    
+    /**
+     * Indicates the {@link ClientSession{ reported support for SPECIAL-USE.
+     *
+     * See [[https://tools.ietf.org/html/rfc6154]]
+     */
+    public bool supports_special_use() {
+        return has_capability(SPECIAL_USE);
     }
 }
 
