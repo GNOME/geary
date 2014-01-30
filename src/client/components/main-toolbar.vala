@@ -17,7 +17,6 @@ public class MainToolbar : PillToolbar {
     
     private Gtk.Button archive_button;
     private Gtk.Button trash_buttons[2];
-    private Gtk.ToolItem search_container = new Gtk.ToolItem();
     private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
     private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
@@ -42,27 +41,25 @@ public class MainToolbar : PillToolbar {
         application_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
         // Toolbar setup.
-        orientation = Gtk.Orientation.HORIZONTAL;
-        get_style_context().add_class(Gtk.STYLE_CLASS_MENUBAR); // Drag window via toolbar.
         Gee.List<Gtk.Button> insert = new Gee.ArrayList<Gtk.Button>();
         
         // Compose.
         insert.add(create_toolbar_button("text-editor-symbolic", GearyController.ACTION_NEW_MESSAGE));
-        add(create_pill_buttons(insert, false));
+        add_start(create_pill_buttons(insert, false));
         
         // Reply buttons
         insert.clear();
         insert.add(create_toolbar_button(rtl ? "reply-rtl-symbolic" : "reply-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
         insert.add(create_toolbar_button(rtl ? "reply-all-rtl-symbolic" : "reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
         insert.add(create_toolbar_button(rtl ? "forward-rtl-symbolic" : "forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
-        add(create_pill_buttons(insert));
+        add_start(create_pill_buttons(insert));
         
         // Mark, copy, move.
         insert.clear();
         insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
         insert.add(create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
         insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
-        add(create_pill_buttons(insert));
+        add_start(create_pill_buttons(insert));
         
         // The toolbar looks bad when you hide one of a pair of pill buttons.
         // Unfortunately, this means we have to have one pair for archive/trash
@@ -71,13 +68,10 @@ public class MainToolbar : PillToolbar {
         insert.clear();
         insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
         insert.add(trash_buttons[0] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        add(create_pill_buttons(insert));
+        add_start(create_pill_buttons(insert));
         insert.clear();
         insert.add(trash_buttons[1] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        add(create_pill_buttons(insert, false));
-        
-        // Spacer.
-        add(create_spacer());
+        add_start(create_pill_buttons(insert, false));
         
         // Search bar.
         search_entry.width_chars = 32;
@@ -86,8 +80,7 @@ public class MainToolbar : PillToolbar {
         search_entry.key_press_event.connect(on_search_key_press);
         on_search_entry_changed(); // set initial state
         search_entry.has_focus = true;
-        search_container.add(search_entry);
-        add(search_container);
+        add_end(search_entry);
         
         // Search upgrade progress bar.
         search_upgrade_progress_bar.margin_top = 3;
@@ -104,7 +97,7 @@ public class MainToolbar : PillToolbar {
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
             insert.clear();
             insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
-            add(create_pill_buttons(insert));
+            add_end(create_pill_buttons(insert));
         }
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
@@ -164,14 +157,13 @@ public class MainToolbar : PillToolbar {
     }
     
     private void on_search_upgrade_start() {
-        search_container.remove(search_container.get_child());
-        search_container.add(search_upgrade_progress_bar);
+        search_entry.hide();
         search_upgrade_progress_bar.show();
     }
     
     private void on_search_upgrade_finished() {
-        search_container.remove(search_container.get_child());
-        search_container.add(search_entry);
+        search_entry.show();
+        search_upgrade_progress_bar.hide();
     }
     
     private void on_account_changed(Geary.Account? account) {
@@ -183,9 +175,10 @@ public class MainToolbar : PillToolbar {
             search_upgrade_progress_monitor = null;
         }
         
-        if (current_account != null)
+        if (current_account != null) {
             current_account.information.notify[Geary.AccountInformation.PROP_NICKNAME].disconnect(
                 on_nickname_changed);
+        }
         
         if (account != null) {
             search_upgrade_progress_monitor = account.search_upgrade_monitor;
@@ -198,11 +191,12 @@ public class MainToolbar : PillToolbar {
             
             account.information.notify[Geary.AccountInformation.PROP_NICKNAME].connect(
                 on_nickname_changed);
+            
+            search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
         }
         
         current_account = account;
         
-        search_upgrade_progress_bar.text = _("Indexing %s account").printf(account.information.nickname);
         on_nickname_changed(); // Set new account name.
     }
     

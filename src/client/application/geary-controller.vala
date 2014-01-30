@@ -960,6 +960,7 @@ public class GearyController : Geary.BaseObject {
         if (folder == null) {
             current_folder = null;
             main_window.conversation_list_store.clear();
+            main_window.main_toolbar.subtitle = null;
             folder_selected(null);
             
             return;

@@ -7,11 +7,22 @@
 /**
  * Class for creating a Nautilus-style "pill" toolbar.  Use only as directed.
  */
-public class PillToolbar : Gtk.Toolbar {
+public class PillToolbar : Gtk.HeaderBar {
     private Gtk.ActionGroup action_group;
+    private Gtk.SizeGroup size = new Gtk.SizeGroup(Gtk.SizeGroupMode.VERTICAL);
     
     public PillToolbar(Gtk.ActionGroup toolbar_action_group) {
         action_group = toolbar_action_group;
+    }
+    
+    public void add_start(Gtk.Widget *widget) {
+        pack_start(widget);
+        size.add_widget(widget);
+    }
+    
+    public void add_end(Gtk.Widget *widget) {
+        pack_end(widget);
+        size.add_widget(widget);
     }
     
     protected void setup_button(Gtk.Button b, string? icon_name, string action_name,
@@ -22,16 +33,9 @@ public class PillToolbar : Gtk.Toolbar {
         b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
             b.related_action.icon_name, Gtk.IconSize.MENU);
         b.always_show_image = true;
-        b.image.margin = get_icon_margin();
         
         if (!show_label)
             b.label = null;
-        
-        if (show_label && !Geary.String.is_empty(b.related_action.label))
-            if (b.get_direction() == Gtk.TextDirection.RTL)
-                b.image.margin_left += 4;
-            else
-                b.image.margin_right += 4;
     }
     
     /**
@@ -70,65 +74,21 @@ public class PillToolbar : Gtk.Toolbar {
      * toolbar.  Optionally adds spacers "before" and "after" the buttons (those terms depending
      * on Gtk.TextDirection)
      */
-    public Gtk.ToolItem create_pill_buttons(Gee.Collection<Gtk.Button> buttons,
+    public Gtk.Box create_pill_buttons(Gee.Collection<Gtk.Button> buttons,
         bool before_spacer = true, bool after_spacer = false) {
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        box.valign = Gtk.Align.CENTER;
+        box.halign = Gtk.Align.CENTER;
         
         if (buttons.size > 1) {
             box.get_style_context().add_class(Gtk.STYLE_CLASS_RAISED);
             box.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED);
         }
         
-        int i = 0;
-        foreach(Gtk.Button button in buttons) {
+        foreach(Gtk.Button button in buttons)
             box.add(button);
-            
-            // Place the right spacer on the button itself.  This way if the button is not displayed,
-            // the spacer will not appear.
-            if (i == buttons.size - 1 && after_spacer) {
-                if (button.get_direction() == Gtk.TextDirection.RTL)
-                    button.set_margin_left(12);
-                else
-                    button.set_margin_right(12);
-            }
-            
-            i++;
-        }
-        
-        Gtk.ToolItem tool_item = new Gtk.ToolItem();
-        tool_item.add(box);
-        
-        if (before_spacer) {
-            if (box.get_direction() == Gtk.TextDirection.RTL)
-                box.set_margin_right(12);
-            else
-                box.set_margin_left(12);
-        }
-        
-        return tool_item;
-    }
-    
-    /**
--     * Computes the margin for each icon (shamelessly stolen from Nautilus.)
--     */
-    private int get_icon_margin() {
-        Gtk.IconSize toolbar_size = get_icon_size();
-        int toolbar_size_px, menu_size_px;
-        
-        Gtk.icon_size_lookup(Gtk.IconSize.MENU, out menu_size_px, null);
-        Gtk.icon_size_lookup(toolbar_size, out toolbar_size_px, null);
-        
-        return Geary.Numeric.int_floor((int) ((toolbar_size_px - menu_size_px) / 2.0), 0);
-    }
-    
-    /**
-     * Returns an expandable spacer item.
-     */
-    public Gtk.ToolItem create_spacer() {
-        Gtk.ToolItem spacer = new Gtk.ToolItem();
-        spacer.set_expand(true);
-        
-        return spacer;
+                
+        return box;
     }
 }
 
