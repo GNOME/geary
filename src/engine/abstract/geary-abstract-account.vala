@@ -100,12 +100,8 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
         Cancellable? cancellable = null) throws Error;
     
     public virtual Geary.Folder? get_special_folder(Geary.SpecialFolderType special) throws Error {
-        foreach (Folder folder in list_folders()) {
-            if (folder.special_folder_type == special)
-                return folder;
-        }
-        
-        return null;
+        return Geary.traverse<Geary.Folder>(list_folders())
+            .first_matching(f => f.special_folder_type == special);
     }
     
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)

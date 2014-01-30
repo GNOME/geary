@@ -125,6 +125,14 @@ hr {
     -webkit-transition: border-color 3s ease;
     -webkit-transition: box-shadow 3s ease;
 }
+
+.email .email_warning {
+    display: none;
+    padding: 1em;
+    background-color: #fcc;
+    text-align: center;
+}
+
 .email_box {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -256,6 +264,7 @@ body:not(.nohide) .email.hide .header_container .avatar {
     body:not(.nohide) .email.hide .email {
         display: none;
     }
+    .email:not(.hide) .email_warning.show,
     body:not(.nohide) .email.hide .header_container .preview {
         display: block;
     }

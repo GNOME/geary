@@ -887,6 +887,8 @@ private class Geary.Imap.Folder : BaseObject {
         if (flags != null) {
             Imap.EmailFlags imap_flags = Imap.EmailFlags.from_api_email_flags(flags);
             msg_flags = imap_flags.message_flags;
+        } else {
+            msg_flags = new MessageFlags(new Geary.Collection.SingleItem<MessageFlag>(MessageFlag.SEEN));
         }
         
         InternalDate? internaldate = null;

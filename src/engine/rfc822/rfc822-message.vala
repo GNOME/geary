@@ -17,9 +17,9 @@ public class Geary.RFC822.Message : BaseObject {
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
     private const string HEADER_REFERENCES = "References";
     private const string HEADER_MAILER = "X-Mailer";
+    private const string HEADER_BCC = "Bcc";
     
-    // Internal note: If a field is added here, it *must* be set in Message.from_parts(),
-    // Message.without_bcc(), and stock_from_gmime().
+    // Internal note: If a field is added here, it *must* be set in stock_from_gmime().
     public RFC822.MailboxAddress? sender { get; private set; default = null; }
     public RFC822.MailboxAddresses? from { get; private set; default = null; }
     public RFC822.MailboxAddresses? to { get; private set; default = null; }
@@ -33,12 +33,23 @@ public class Geary.RFC822.Message : BaseObject {
     
     private GMime.Message message;
     
+    // Since GMime.Message does a bad job of separating the headers and body (GMime.Message.get_body()
+    // returns the full message, headers and all), we keep a buffer around that points to the body
+    // part from the source.  This is only needed by get_email().  Unfortunately, we can't always
+    // set these easily, so sometimes get_email() won't work.
+    private Memory.Buffer? body_buffer = null;
+    private size_t? body_offset = null;
+    
     public Message(Full full) throws RFC822Error {
         GMime.Parser parser = new GMime.Parser.with_stream(Utils.create_stream_mem(full.buffer));
         
         message = parser.construct_message();
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
+        
+        // See the declaration of these fields for why we do this.
+        body_buffer = full.buffer;
+        body_offset = (size_t) parser.get_headers_end();
         
         stock_from_gmime();
     }
@@ -70,10 +81,13 @@ public class Geary.RFC822.Message : BaseObject {
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
         
+        body_buffer = body.buffer;
+        body_offset = 0;
+        
         stock_from_gmime();
     }
 
-    public Message.from_composed_email(Geary.ComposedEmail email) {
+    public Message.from_composed_email(Geary.ComposedEmail email, string? message_id) {
         message = new GMime.Message(true);
         
         // Required headers
@@ -84,6 +98,8 @@ public class Geary.RFC822.Message : BaseObject {
         message.set_sender(sender.to_rfc822_string());
         message.set_date((time_t) email.date.to_unix(),
             (int) (email.date.get_utc_offset() / TimeSpan.HOUR));
+        if (message_id != null)
+            message.set_message_id(message_id);
         
         // Optional headers
         if (email.to != null) {
@@ -182,51 +198,21 @@ public class Geary.RFC822.Message : BaseObject {
     // Makes a copy of the given message without the BCC fields. This is used for sending the email
     // without sending the BCC headers to all recipients.
     public Message.without_bcc(Message email) {
-        message = new GMime.Message(true);
-        
-        // Required headers.
-        sender = email.sender;
-        message.set_sender(email.message.get_sender());
-        
-        date = email.date;
-        message.set_date_as_string(email.date.to_string());
-        
-        // Optional headers.
-        if (email.to != null) {
-            to = email.to;
-            foreach (RFC822.MailboxAddress mailbox in email.to)
-                message.add_recipient(GMime.RecipientType.TO, mailbox.name, mailbox.address);
-        }
-
-        if (email.cc != null) {
-            cc = email.cc;
-            foreach (RFC822.MailboxAddress mailbox in email.cc)
-                message.add_recipient(GMime.RecipientType.CC, mailbox.name, mailbox.address);
-        }
-
-        if (email.in_reply_to != null) {
-            in_reply_to = email.in_reply_to;
-            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to.value);
-        }
-
-        if (email.references != null) {
-            references = email.references;
-            message.set_header(HEADER_REFERENCES, email.references.to_rfc822_string());
-        }
-
-        if (email.subject != null) {
-            subject = email.subject;
-            message.set_subject(email.subject.value);
-        }
-
-        // User-Agent
-        if (!Geary.String.is_empty(email.mailer)) {
-            mailer = email.mailer;
-            message.set_header(HEADER_MAILER, email.mailer);
+        // GMime doesn't make it easy to get a copy of the body of a message.  It's easy to
+        // make a new message and add in all the headers, but calling set_mime_part() with
+        // the existing one's get_mime_part() result yields a double Content-Type header in
+        // the *original* message.  Clearly the objects aren't meant to be used like that.
+        // Barring any better way to clone a message, which I couldn't find by looking at
+        // the docs, we just dump out the old message to a buffer and read it back in to
+        // create the new object.  Kinda sucks, but our hands are tied.
+        try {
+            this.from_buffer (email.message_to_memory_buffer(false, false));
+        } catch (Error e) {
+            error("Error creating a memory buffer from a message: %s", e.message);
         }
         
-        // Setup body depending on what MIME components were filled out.
-        message.set_mime_part(email.message.get_mime_part());
+        message.remove_header(HEADER_BCC);
+        bcc = null;
     }
     
     private GMime.Object? coalesce_parts(Gee.List<GMime.Object> parts, string subtype) {
@@ -271,7 +257,16 @@ public class Geary.RFC822.Message : BaseObject {
         return part;
     }
     
+    /**
+     * Construct a Geary.Email from a Message.  NOTE: this requires you to have created
+     * the Message in such a way that its body_buffer and body_offset fields will be filled
+     * out.  See the various constructors for details.  (Otherwise, we don't have a way
+     * to get the body part directly, because of GMime's shortcomings.)
+     */
     public Geary.Email get_email(Geary.EmailIdentifier id) throws Error {
+        assert(body_buffer != null);
+        assert(body_offset != null);
+        
         Geary.Email email = new Geary.Email(id);
         
         email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
@@ -281,8 +276,8 @@ public class Geary.RFC822.Message : BaseObject {
         email.set_receivers(to, cc, bcc);
         email.set_full_references(null, in_reply_to, references);
         email.set_message_subject(subject);
-        email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.StringBuffer(
-            message.get_body().to_string())));
+        email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.OffsetBuffer(
+            body_buffer, body_offset)));
         email.set_message_preview(new Geary.RFC822.PreviewText.from_string(get_preview()));
         
         return email;

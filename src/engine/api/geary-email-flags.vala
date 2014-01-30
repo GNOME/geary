@@ -31,6 +31,13 @@ public class Geary.EmailFlags : Geary.NamedFlags {
         return new NamedFlag("DRAFT");
     } }
     
+    /// Signifies a message in our outbox that has been sent but we're still
+    /// keeping around for other purposes, i.e. pushing up to Sent Mail.
+    public static NamedFlag OUTBOX_SENT { owned get {
+        // This shouldn't ever touch the wire, so make it invalid IMAP.
+        return new NamedFlag(" OUTBOX SENT ");
+    } }
+    
     public EmailFlags() {
     }
     
@@ -49,6 +56,10 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     
     public inline bool is_draft() {
         return contains(DRAFT);
+    }
+    
+    public inline bool is_outbox_sent() {
+        return contains(OUTBOX_SENT);
     }
 }
 

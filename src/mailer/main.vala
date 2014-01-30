@@ -29,7 +29,7 @@ async void main_async() throws Error {
             composed_email.body_text = contents;
         }
         
-        Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email);
+        Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
         stdout.printf("\n\n%s\n\n", msg.to_string());
         
         yield session.send_email_async(msg.sender, msg);

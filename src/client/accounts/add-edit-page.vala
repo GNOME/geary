@@ -50,6 +50,11 @@ public class AddEditPage : Gtk.Box {
         set { check_remember_password.active = value; }
     }
     
+    public bool save_sent_mail {
+        get { return check_save_sent_mail.active; }
+        set { check_save_sent_mail.active = value; }
+    }
+    
     public string smtp_username {
         get { return entry_smtp_username.text; }
         set { entry_smtp_username.text = value; }
@@ -139,6 +144,7 @@ public class AddEditPage : Gtk.Box {
     private Gtk.Entry entry_nickname;
     private Gtk.ComboBoxText combo_service;
     private Gtk.CheckButton check_remember_password;
+    private Gtk.CheckButton check_save_sent_mail;
     
     private Gtk.Alignment other_info;
     
@@ -198,6 +204,7 @@ public class AddEditPage : Gtk.Box {
         label_password = (Gtk.Label) builder.get_object("label: password");
         entry_password = (Gtk.Entry) builder.get_object("entry: password");
         check_remember_password = (Gtk.CheckButton) builder.get_object("check: remember_password");
+        check_save_sent_mail = (Gtk.CheckButton) builder.get_object("check: save_sent_mail");
         
         label_error = (Gtk.Label) builder.get_object("label: error");
         
@@ -242,6 +249,7 @@ public class AddEditPage : Gtk.Box {
         entry_real_name.changed.connect(on_changed);
         entry_nickname.changed.connect(on_changed);
         check_remember_password.toggled.connect(on_changed);
+        check_save_sent_mail.toggled.connect(on_changed);
         combo_service.changed.connect(on_changed);
         entry_imap_host.changed.connect(on_changed);
         entry_imap_port.changed.connect(on_changed);
@@ -280,6 +288,8 @@ public class AddEditPage : Gtk.Box {
             info.smtp_credentials != null ? info.smtp_credentials.user : null,
             info.smtp_credentials != null ? info.smtp_credentials.pass : null,
             info.service_provider,
+            info.save_sent_mail,
+            info.allow_save_sent_mail(),
             info.default_imap_server_host,
             info.default_imap_server_port,
             info.default_imap_server_ssl,
@@ -304,6 +314,8 @@ public class AddEditPage : Gtk.Box {
         string? initial_smtp_username = null,
         string? initial_smtp_password = null,
         int initial_service_provider = Geary.ServiceProvider.GMAIL,
+        bool initial_save_sent_mail = true,
+        bool allow_save_sent_mail = true,
         string? initial_default_imap_host = null,
         uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
         bool initial_default_imap_ssl = true,
@@ -322,6 +334,8 @@ public class AddEditPage : Gtk.Box {
         email_address = initial_email ?? "";
         password = initial_imap_password != null ? initial_imap_password : "";
         remember_password = initial_remember_password;
+        save_sent_mail = initial_save_sent_mail;
+        check_save_sent_mail.sensitive = allow_save_sent_mail;
         set_service_provider((Geary.ServiceProvider) initial_service_provider);
         combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
         combo_smtp_encryption.active = Encryption.NONE;
@@ -538,6 +552,7 @@ public class AddEditPage : Gtk.Box {
         account_information.imap_remember_password = remember_password;
         account_information.smtp_remember_password = remember_password;
         account_information.service_provider = get_service_provider();
+        account_information.save_sent_mail = save_sent_mail;
         account_information.default_imap_server_host = imap_host;
         account_information.default_imap_server_port = imap_port;
         account_information.default_imap_server_ssl = imap_ssl;
@@ -573,6 +588,7 @@ public class AddEditPage : Gtk.Box {
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
         storage_container.visible = mode == PageMode.EDIT;
+        check_save_sent_mail.visible = mode != PageMode.WELCOME;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.

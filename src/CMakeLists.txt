@@ -218,6 +218,7 @@ engine/memory/memory-byte-buffer.vala
 engine/memory/memory-empty-buffer.vala
 engine/memory/memory-file-buffer.vala
 engine/memory/memory-growable-buffer.vala
+engine/memory/memory-offset-buffer.vala
 engine/memory/memory-string-buffer.vala
 engine/memory/memory-unowned-byte-array-buffer.vala
 engine/memory/memory-unowned-bytes-buffer.vala

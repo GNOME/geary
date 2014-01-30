@@ -653,7 +653,11 @@ public class GearyController : Geary.BaseObject {
             break;
             
             case Geary.Account.Problem.EMAIL_DELIVERY_FAILURE:
-                handle_send_failure();
+                handle_outbox_failure(StatusBar.Message.OUTBOX_SEND_FAILURE);
+            break;
+            
+            case Geary.Account.Problem.SAVE_SENT_MAIL_FAILED:
+                handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
             break;
             
             default:
@@ -661,7 +665,7 @@ public class GearyController : Geary.BaseObject {
         }
     }
     
-    private void handle_send_failure() {
+    private void handle_outbox_failure(StatusBar.Message message) {
         bool activate_message = false;
         try {
             // Due to a timing hole where it's possible to delete a message
@@ -685,16 +689,29 @@ public class GearyController : Geary.BaseObject {
         }
         
         if (activate_message) {
-            if (!main_window.status_bar.is_message_active(StatusBar.Message.OUTBOX_SEND_FAILURE))
-                main_window.status_bar.activate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
-            libnotify.set_error_notification(_("Error sending email"),
-                _("Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder."));
+            if (!main_window.status_bar.is_message_active(message))
+                main_window.status_bar.activate_message(message);
+            switch (message) {
+                case StatusBar.Message.OUTBOX_SEND_FAILURE:
+                    libnotify.set_error_notification(_("Error sending email"),
+                        _("Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder."));
+                break;
+                
+                case StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED:
+                    libnotify.set_error_notification(_("Error saving sent mail"),
+                        _("Geary encountered an error saving a sent message to Sent Mail.  The message will stay in your Outbox folder until you delete it."));
+                break;
+                
+                default:
+                    assert_not_reached();
+            }
         }
     }
     
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         if (folder.special_folder_type == Geary.SpecialFolderType.OUTBOX) {
             main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
+            main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
             libnotify.clear_error_notification();
         }
     }

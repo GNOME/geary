@@ -16,7 +16,8 @@
 public class StatusBar : Gtk.Statusbar {
     public enum Message {
         OUTBOX_SENDING,
-        OUTBOX_SEND_FAILURE;
+        OUTBOX_SEND_FAILURE,
+        OUTBOX_SAVE_SENT_MAIL_FAILED;
         
         internal string get_text() {
             switch (this) {
@@ -26,6 +27,10 @@ public class StatusBar : Gtk.Statusbar {
                 case Message.OUTBOX_SEND_FAILURE:
                     /// Displayed in the space-limited status bar when a message fails to be sent due to error.
                     return _("Error sending email");
+                case Message.OUTBOX_SAVE_SENT_MAIL_FAILED:
+                    // Displayed in the space-limited status bar when a message fails to be uploaded
+                    // to Sent Mail after being sent.
+                    return _("Error saving sent mail");
                 default:
                     assert_not_reached();
             }
@@ -36,6 +41,8 @@ public class StatusBar : Gtk.Statusbar {
                 case Message.OUTBOX_SENDING:
                     return Context.OUTBOX;
                 case Message.OUTBOX_SEND_FAILURE:
+                    return Context.OUTBOX;
+                case Message.OUTBOX_SAVE_SENT_MAIL_FAILED:
                     return Context.OUTBOX;
                 default:
                     assert_not_reached();

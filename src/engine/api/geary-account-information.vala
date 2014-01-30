@@ -26,6 +26,7 @@ public class Geary.AccountInformation : BaseObject {
     private const string SMTP_SSL = "smtp_ssl";
     private const string SMTP_STARTTLS = "smtp_starttls";
     private const string SMTP_NOAUTH = "smtp_noauth";
+    private const string SAVE_SENT_MAIL_KEY = "save_sent_mail";
     
     //
     // "Retired" keys
@@ -52,6 +53,20 @@ public class Geary.AccountInformation : BaseObject {
     public Geary.ServiceProvider service_provider { get; set; }
     public int prefetch_period_days { get; set; }
     
+    /**
+     * Whether the user has requested that sent mail be saved.  Note that Geary
+     * will only actively push sent mail when this AND allow_save_sent_mail()
+     * are both true.
+     */
+    public bool save_sent_mail {
+        // If we aren't allowed to save sent mail due to account type, we want
+        // to return true here on the assumption that the account will save
+        // sent mail for us, and thus the user can't disable sent mail from
+        // being saved.
+        get { return (allow_save_sent_mail() ? _save_sent_mail : true); }
+        set { _save_sent_mail = value; }
+    }
+    
     // Order for display purposes.
     public int ordinal { get; set; }
     
@@ -70,6 +85,8 @@ public class Geary.AccountInformation : BaseObject {
     public bool imap_remember_password { get; set; default = true; }
     public Geary.Credentials? smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool smtp_remember_password { get; set; default = true; }
+    
+    private bool _save_sent_mail = true;
     
     // Used to create temporary AccountInformation objects.  (Note that these cannot be saved.)
     public AccountInformation.temp_copy(AccountInformation copy) {
@@ -100,6 +117,7 @@ public class Geary.AccountInformation : BaseObject {
                 SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
             prefetch_period_days = get_int_value(key_file, GROUP, PREFETCH_PERIOD_DAYS_KEY,
                 DEFAULT_PREFETCH_PERIOD_DAYS);
+            save_sent_mail = get_bool_value(key_file, GROUP, SAVE_SENT_MAIL_KEY, true);
             ordinal = get_int_value(key_file, GROUP, ORDINAL_KEY, default_ordinal++);
             
             if (ordinal >= default_ordinal)
@@ -134,6 +152,7 @@ public class Geary.AccountInformation : BaseObject {
         email = from.email;
         service_provider = from.service_provider;
         prefetch_period_days = from.prefetch_period_days;
+        save_sent_mail = from.save_sent_mail;
         ordinal = from.ordinal;
         default_imap_server_host = from.default_imap_server_host;
         default_imap_server_port = from.default_imap_server_port;
@@ -148,6 +167,17 @@ public class Geary.AccountInformation : BaseObject {
         imap_remember_password = from.imap_remember_password;
         smtp_credentials = from.smtp_credentials;
         smtp_remember_password = from.smtp_remember_password;
+    }
+    
+    /**
+     * Return whether this account allows setting the save_sent_mail option.
+     * If not, save_sent_mail will always be true and setting it will be
+     * ignored.
+     */
+    public bool allow_save_sent_mail() {
+        // We should never push mail to Gmail, since its servers automatically
+        // push sent mail to the sent mail folder.
+        return service_provider != ServiceProvider.GMAIL;
     }
     
     /**
@@ -445,6 +475,7 @@ public class Geary.AccountInformation : BaseObject {
             key_file.set_value(GROUP, SMTP_USERNAME_KEY, smtp_credentials.user);
         key_file.set_boolean(GROUP, SMTP_REMEMBER_PASSWORD_KEY, smtp_remember_password);
         key_file.set_integer(GROUP, PREFETCH_PERIOD_DAYS_KEY, prefetch_period_days);
+        key_file.set_boolean(GROUP, SAVE_SENT_MAIL_KEY, save_sent_mail);
         
         if (service_provider == ServiceProvider.OTHER) {
             key_file.set_value(GROUP, IMAP_HOST, default_imap_server_host);

@@ -12,6 +12,7 @@ public interface Geary.Account : BaseObject {
         NETWORK_UNAVAILABLE,
         DATABASE_FAILURE,
         EMAIL_DELIVERY_FAILURE,
+        SAVE_SENT_MAIL_FAILED,
     }
     
     public abstract Geary.AccountInformation information { get; protected set; }

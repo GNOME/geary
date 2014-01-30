@@ -850,7 +850,7 @@ public class ComposerWindow : Gtk.Window {
             // only save HTML drafts to avoid resetting the DOM (which happens when converting the
             // HTML to flowed text)
             draft_id = yield drafts_folder.create_email_async(new Geary.RFC822.Message.from_composed_email(
-                get_composed_email(null, true)), flags, null, draft_id, cancellable);
+                get_composed_email(null, true), null), flags, null, draft_id, cancellable);
             
             draft_save_label.label = DRAFT_SAVED_TEXT;
         } catch (Error e) {

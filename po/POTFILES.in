@@ -277,6 +277,7 @@ src/engine/memory/memory-byte-buffer.vala
 src/engine/memory/memory-empty-buffer.vala
 src/engine/memory/memory-file-buffer.vala
 src/engine/memory/memory-growable-buffer.vala
+src/engine/memory/memory-offset-buffer.vala
 src/engine/memory/memory-string-buffer.vala
 src/engine/memory/memory-unowned-byte-array-buffer.vala
 src/engine/memory/memory-unowned-bytes-buffer.vala

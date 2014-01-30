@@ -593,6 +593,7 @@ public class ConversationViewer : Gtk.Box {
         // <div id="$MESSAGE_ID" class="email">
         //     <div class="geary_spacer"></div>
         //     <div class="email_container">
+        //         <div class="email_warning"></div>
         //         <div class="button_bar">
         //             <div class="starred button"><img class="icon" /></div>
         //             <div class="unstarred button"><img class="icon" /></div>
@@ -967,6 +968,18 @@ public class ConversationViewer : Gtk.Box {
             Util.DOM.toggle_class(class_list, "starred", flags.is_flagged());
         } catch (Error e) {
             warning("Failed to set classes on .email: %s", e.message);
+        }
+        
+        try {
+            WebKit.DOM.HTMLElement email_warning = Util.DOM.select(container, ".email_warning");
+            Util.DOM.toggle_class(email_warning.get_class_list(), "show", email.email_flags.is_outbox_sent());
+            if (email.email_flags.is_outbox_sent()) {
+                email_warning.set_inner_html(
+                    _("This message was sent successfully, but could not be saved to %s.").printf(
+                    Geary.SpecialFolderType.SENT.get_display_name()));
+            }
+        } catch (Error e) {
+            warning("Error showing outbox warning bar: %s", e.message);
         }
     }
 

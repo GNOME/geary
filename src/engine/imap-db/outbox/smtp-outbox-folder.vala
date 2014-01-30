@@ -17,10 +17,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         public int64 id;
         public int position;
         public int64 ordering;
+        public bool sent;
         public Memory.Buffer? message;
         public SmtpOutboxEmailIdentifier outbox_id;
         
-        public OutboxRow(int64 id, int position, int64 ordering, Memory.Buffer? message,
+        public OutboxRow(int64 id, int position, int64 ordering, bool sent, Memory.Buffer? message,
             SmtpOutboxFolderRoot root) {
             assert(position >= 1);
             
@@ -28,6 +29,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             this.position = position;
             this.ordering = ordering;
             this.message = message;
+            this.sent = sent;
             
             outbox_id = new SmtpOutboxEmailIdentifier(id, ordering);
         }
@@ -139,14 +141,18 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         try {
             Gee.ArrayList<OutboxRow> list = new Gee.ArrayList<OutboxRow>();
             yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-                Db.Statement stmt = cx.prepare(
-                    "SELECT id, ordering, message FROM SmtpOutboxTable ORDER BY ordering");
+                Db.Statement stmt = cx.prepare("""
+                    SELECT id, ordering, message
+                    FROM SmtpOutboxTable
+                    WHERE sent = 0
+                    ORDER BY ordering
+                """);
                 
                 Db.Result results = stmt.exec(cancellable);
                 int position = 1;
                 while (!results.finished) {
                     list.add(new OutboxRow(results.rowid_at(0), position++, results.int64_at(1),
-                        results.string_buffer_at(2), _path));
+                        false, results.string_buffer_at(2), _path));
                     results.next(cancellable);
                 }
                 
@@ -172,9 +178,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             try {
                 row = yield outbox_queue.recv_async();
                 
-                // Ignore messages that have since been deleted.
-                if (!yield ordering_exists_async(row.ordering, null)) {
-                    debug("Dropping deleted outbox message %s", row.outbox_id.to_string());
+                // Ignore messages that have since been sent.
+                if (!yield is_unsent_async(row.ordering, null)) {
+                    debug("Dropping sent outbox message %s", row.outbox_id.to_string());
                     continue;
                 }
             } catch (Error wait_err) {
@@ -232,7 +238,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                             CredentialsMediator.ServiceFlag.SMTP, true))
                             report = false;
                     } catch (Error e) {
-                        debug("Error prompting for IMAP password: %s", e.message);
+                        debug("Error prompting for SMTP password: %s", e.message);
                     }
                     
                     if (report)
@@ -251,20 +257,40 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 continue;
             }
             
+            // If we got this far the send was successful, so reset the send retry interval.
+            send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
+            
+            if (_account.information.allow_save_sent_mail() && _account.information.save_sent_mail) {
+                // First mark as sent, so if there's a problem pushing up to Sent Mail,
+                // we don't retry sending.
+                try {
+                    debug("Outbox postman: Marking %s as sent", row.outbox_id.to_string());
+                    yield mark_email_as_sent_async(row.outbox_id, null);
+                } catch (Error e) {
+                    debug("Outbox postman: Unable to mark row as sent: %s", e.message);
+                }
+                
+                try {
+                    debug("Outbox postman: Saving %s to sent mail", row.outbox_id.to_string());
+                    yield save_sent_mail_async(message, null);
+                } catch (Error e) {
+                    debug("Outbox postman: Error saving sent mail: %s", e.message);
+                    report_problem(Geary.Account.Problem.SAVE_SENT_MAIL_FAILED, e);
+                    
+                    continue;
+                }
+            }
+            
             // Remove from database ... can't use remove_email_async() because this runs even if
             // the outbox is closed as a Geary.Folder.
             try {
-                debug("Outbox postman: Removing \"%s\" (ID:%s) from database", message_subject(message),
-                    row.outbox_id.to_string());
+                debug("Outbox postman: Deleting row %s", row.outbox_id.to_string());
                 Gee.ArrayList<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
                 list.add(row.outbox_id);
                 yield internal_remove_email_async(list, null);
-            } catch (Error rm_err) {
-                debug("Outbox postman: Unable to remove row from database: %s", rm_err.message);
+            } catch (Error e) {
+                debug("Outbox postman: Unable to delete row: %s", e.message);
             }
-            
-            // If we got this far the send was successful, so reset the send retry interval.
-            send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
         }
         
         debug("Exiting outbox postman");
@@ -314,7 +340,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             
             int position = do_get_position_by_ordering(cx, ordering, cancellable);
             
-            row = new OutboxRow(id, position, ordering, message, _path);
+            row = new OutboxRow(id, position, ordering, false, message, _path);
             email_count = do_get_email_count(cx, cancellable);
             
             return Db.TransactionOutcome.COMMIT;
@@ -366,15 +392,23 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             
             Db.Statement stmt;
             if (initial_id != null) {
-                stmt = cx.prepare(
-                    "SELECT id, ordering, message FROM SmtpOutboxTable WHERE ordering >= ? "
-                    + "ORDER BY ordering %s LIMIT ?".printf(dir));
+                stmt = cx.prepare("""
+                    SELECT id, ordering, message, sent
+                    FROM SmtpOutboxTable
+                    WHERE ordering >= ?
+                    ORDER BY ordering %s
+                    LIMIT ?
+                """.printf(dir));
                 stmt.bind_int64(0,
                     flags.is_including_id() ? initial_id.ordering : initial_id.ordering + 1);
                 stmt.bind_int(1, count);
             } else {
-                stmt = cx.prepare(
-                    "SELECT id, ordering, message FROM SmtpOutboxTable ORDER BY ordering %s LIMIT ?".printf(dir));
+                stmt = cx.prepare("""
+                    SELECT id, ordering, message, sent
+                    FROM SmtpOutboxTable
+                    ORDER BY ordering %s
+                    LIMIT ?
+                """.printf(dir));
                 stmt.bind_int(0, count);
             }
             
@@ -392,7 +426,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 }
                 
                 list.add(row_to_email(new OutboxRow(results.rowid_at(0), position, ordering,
-                    results.string_buffer_at(2), _path)));
+                    results.bool_at(3), results.string_buffer_at(2), _path)));
                 position += flags.is_newest_to_oldest() ? -1 : 1;
                 assert(position >= 1);
             } while (results.next());
@@ -480,7 +514,24 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         return row_to_email(row);
     }
     
-    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids, 
+    private async void mark_email_as_sent_async(SmtpOutboxEmailIdentifier outbox_id,
+        Cancellable? cancellable = null) throws Error {
+        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
+            do_mark_email_as_sent(cx, outbox_id, cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.OUTBOX_SENT);
+        
+        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map
+            = new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+        changed_map.set(outbox_id, flags);
+        notify_email_flags_changed(changed_map);
+    }
+    
+    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
         check_open();
         
@@ -538,7 +589,10 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         Geary.Email email = message.get_email(row.outbox_id);
         // TODO: Determine message's total size (header + body) to store in Properties.
         email.set_email_properties(new SmtpOutboxEmailProperties(new DateTime.now_local(), -1));
-        email.set_flags(new Geary.EmailFlags());
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        if (row.sent)
+            flags.add(Geary.EmailFlags.OUTBOX_SENT);
+        email.set_flags(flags);
         
         return email;
     }
@@ -580,11 +634,40 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         email_sent(rfc822);
     }
     
-    private async bool ordering_exists_async(int64 ordering, Cancellable? cancellable) throws Error {
+    private async void save_sent_mail_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
+        throws Error {
+        Geary.Folder? sent_mail = _account.get_special_folder(Geary.SpecialFolderType.SENT);
+        Geary.FolderSupport.Create? create = sent_mail as Geary.FolderSupport.Create;
+        if (create == null)
+            throw new EngineError.NOT_FOUND("Save sent mail enabled, but no sent mail folder");
+        
+        bool open = false;
+        try {
+            yield create.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+            open = true;
+            
+            yield create.create_email_async(rfc822, null, null, null, cancellable);
+            
+            yield create.close_async(cancellable);
+            open = false;
+        } catch (Error e) {
+            if (open) {
+                try {
+                    yield create.close_async(cancellable);
+                    open = false;
+                } catch (Error e) {
+                    debug("Error closing folder %s: %s", create.to_string(), e.message);
+                }
+            }
+            throw e;
+        }
+    }
+    
+    private async bool is_unsent_async(int64 ordering, Cancellable? cancellable) throws Error {
         bool exists = false;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Statement stmt = cx.prepare(
-                "SELECT 1 FROM SmtpOutboxTable WHERE ordering=?");
+                "SELECT 1 FROM SmtpOutboxTable WHERE ordering=? AND sent = 0");
             stmt.bind_int64(0, ordering);
             
             exists = !stmt.exec(cancellable).finished;
@@ -642,8 +725,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     
     private OutboxRow? do_fetch_row_by_ordering(Db.Connection cx, int64 ordering, Cancellable? cancellable)
         throws Error {
-        Db.Statement stmt = cx.prepare(
-            "SELECT id, message FROM SmtpOutboxTable WHERE ordering=?");
+        Db.Statement stmt = cx.prepare("""
+            SELECT id, message, sent
+            FROM SmtpOutboxTable
+            WHERE ordering=?
+        """);
         stmt.bind_int64(0, ordering);
         
         Db.Result results = stmt.exec(cancellable);
@@ -654,7 +740,16 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         if (position < 1)
             return null;
         
-        return new OutboxRow(results.rowid_at(0), position, ordering, results.string_buffer_at(1), _path);
+        return new OutboxRow(results.rowid_at(0), position, ordering, results.bool_at(2),
+            results.string_buffer_at(1), _path);
+    }
+    
+    private void do_mark_email_as_sent(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)
+        throws Error {
+        Db.Statement stmt = cx.prepare("UPDATE SmtpOutboxTable SET sent = 1 WHERE ordering = ?");
+        stmt.bind_int64(0, id.ordering);
+        
+        stmt.exec(cancellable);
     }
     
     private bool do_remove_email(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)
