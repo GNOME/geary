@@ -17,19 +17,28 @@ async void main_async() throws Error {
     stdout.printf("%s\n", greeting.to_string());
     
     for (int ctr = 0; ctr < arg_count; ctr++) {
-        string subj_msg = "#%d".printf(ctr + 1);
-        composed_email.subject = subj_msg;
+        Geary.RFC822.Message msg;
         
-        if (Geary.String.is_empty(arg_file)) {
-            composed_email.body_text = subj_msg;
+        if (arg_full_file != null) {
+            debug("%s", arg_full_file);
+            msg = new Geary.RFC822.Message.from_buffer(new Geary.Memory.FileBuffer(
+                File.new_for_path(arg_full_file), true));
         } else {
-            string contents;
-            FileUtils.get_contents(arg_file, out contents);
+            string subj_msg = "#%d".printf(ctr + 1);
+            composed_email.subject = subj_msg;
             
-            composed_email.body_text = contents;
+            if (Geary.String.is_empty(arg_file)) {
+                composed_email.body_text = subj_msg;
+            } else {
+                string contents;
+                FileUtils.get_contents(arg_file, out contents);
+                
+                composed_email.body_text = contents;
+            }
+            
+            msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
         }
         
-        Geary.RFC822.Message msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
         stdout.printf("\n\n%s\n\n", msg.to_string());
         
         yield session.send_email_async(msg.sender, msg);
@@ -64,6 +73,7 @@ string arg_from;
 string arg_to;
 int arg_count = 1;
 string? arg_file = null;
+string? arg_full_file = null;
 const OptionEntry[] options = {
     { "debug",    0,    0,  OptionArg.NONE,     ref arg_debug,  "Output debugging information", null },
     { "host",   'h',    0,  OptionArg.STRING,   ref arg_hostname, "SMTP server host",   "<hostname-or-dotted-address>" },
@@ -74,8 +84,9 @@ const OptionEntry[] options = {
     { "pass",   'p',    0,  OptionArg.STRING,   ref arg_pass,   "SMTP server password", "<password>" },
     { "from",   'f',    0,  OptionArg.STRING,   ref arg_from,   "From (sender)",        "<email>" },
     { "to",     't',    0,  OptionArg.STRING,   ref arg_to,     "To (recipient)",       "<email>" },
-    { "count",  'c',    0,  OptionArg.INT,      ref arg_count,  "Number of emails to send", null },
-    { "file",   'i',    0,  OptionArg.STRING,   ref arg_file,   "File to send (must be RFC 822 ready!)", "<filename>"},
+    { "count",  'c',    0,  OptionArg.INT,      ref arg_count,  "Number of emails to send (not applied for file-full)", null },
+    { "file-body",'i',  0,  OptionArg.STRING,   ref arg_file,   "File to send as body (must be RFC 822 ready!)", "<filename>"},
+    { "file-full",0,    0,  OptionArg.STRING,   ref arg_full_file, "File to send as full message (headers and body, must be RFC822 ready!, --from and --to ignored)", "<filename>"},
     { null }
 };
 
@@ -101,10 +112,10 @@ int main(string[] args) {
     if (!arg_gmail && !verify_required(arg_hostname, "Hostname"))
         return 1;
     
-    if (!verify_required(arg_from, "From:"))
+    if (arg_full_file == null && !verify_required(arg_from, "From:"))
         return 1;
     
-    if (!verify_required(arg_to, "To:"))
+    if (arg_full_file == null && !verify_required(arg_to, "To:"))
         return 1;
     
     if (!verify_required(arg_user, "Username"))
@@ -130,15 +141,21 @@ int main(string[] args) {
     }
 
     stdout.printf("Enabling debug: %s\n", arg_debug.to_string());
-    if (arg_debug)
+    if (arg_debug) {
+        Geary.Logging.init();
         Geary.Logging.log_to(stdout);
-
+    }
+    
+    Geary.RFC822.init();
+    
     credentials = new Geary.Credentials(arg_user, arg_pass);
     
-    composed_email = new Geary.ComposedEmail(new DateTime.now_local(),
-        new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(null, arg_from)));
-    composed_email.to = new Geary.RFC822.MailboxAddresses.single(
-        new Geary.RFC822.MailboxAddress(null, arg_to));
+    if (arg_full_file == null) {
+        composed_email = new Geary.ComposedEmail(new DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(null, arg_from)));
+        composed_email.to = new Geary.RFC822.MailboxAddresses.single(
+            new Geary.RFC822.MailboxAddress(null, arg_to));
+    }
     
     main_loop = new MainLoop();
     
