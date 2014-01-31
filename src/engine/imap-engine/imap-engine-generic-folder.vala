@@ -661,7 +661,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // if remote reason is an error, then close_remote_folder_async() will be performing
         // reestablishment, so go no further
-        if (remote_reason.is_error())
+        if (remote_reason.is_error() && closing_remote_folder != null)
             return;
         
         // forced closed one way or another
