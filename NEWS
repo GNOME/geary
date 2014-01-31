@@ -1,3 +1,14 @@
+Geary 0.5.1 - 30 January 2014
+-----------------------------
+
+  * Ability to save sent mail
+  * Basic search operators
+  * Separate trash, archive, and delete operations
+  * Improved special folder handling for "Other" accounts
+  * Fixed some IMAP issues
+  * Speed improvements & miscellaneous bugfixes
+
+
 Geary 0.5.0 - 12 December 2013
 ------------------------------
 
