@@ -87,7 +87,7 @@ public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
     }
     
     public bool is_tagged() {
-        return (value != UNTAGGED_VALUE) && (value != CONTINUATION_VALUE);
+        return (value != UNTAGGED_VALUE) && (value != CONTINUATION_VALUE) && (value != UNASSIGNED_VALUE);
     }
     
     public bool is_continuation() {

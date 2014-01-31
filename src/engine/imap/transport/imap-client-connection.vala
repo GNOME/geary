@@ -116,6 +116,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private bool waiting_for_idle_to_synchronize = false;
     private uint timeout_id = 0;
     private uint timeout_cmd_count = 0;
+    private int outstanding_cmds = 0;
     
     public virtual signal void connected() {
         Logging.debug(Logging.Flag.NETWORK, "[%s] connected to %s", to_string(),
@@ -129,6 +130,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     public virtual signal void sent_command(Command cmd) {
         Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), cmd.to_string());
+        
+        // track outstanding Command count to force switching to IDLE only when nothing outstanding
+        outstanding_cmds++;
     }
     
     public virtual signal void in_idle(bool idling) {
@@ -140,6 +144,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     public virtual signal void received_status_response(StatusResponse status_response) {
         Logging.debug(Logging.Flag.NETWORK, "[%s R] %s", to_string(), status_response.to_string());
+        
+        // look for command completion, if no outstanding, schedule a flush timeout to switch to
+        // IDLE mode
+        if (status_response.is_completion) {
+            if (--outstanding_cmds == 0)
+                reschedule_flush_timeout();
+        }
     }
     
     public virtual signal void received_server_data(ServerData server_data) {
@@ -353,6 +364,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         cx = yield endpoint.connect_async(cancellable);
         ios = cx;
+        outstanding_cmds = 0;
         
         // issue CONNECTED event and fire signal because the moment the channels are hooked up,
         // data can start flowing
@@ -399,6 +411,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         
         // close the Serializer and Deserializer
         yield close_channels_async(cancellable);
+        outstanding_cmds = 0;
         
         // close the actual streams and the connection itself
         Error? close_err = null;
@@ -427,8 +440,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
         BufferedOutputStream buffered_outs = new BufferedOutputStream(ios.output_stream);
         buffered_outs.set_close_base_stream(false);
-        ser = new Serializer(to_string(), buffered_outs);
-        des = new Deserializer(to_string(), ios.input_stream);
+        
+        // Use ClientConnection cx_id for debugging aid with Serializer/Deserializer
+        string id = "%04d".printf(cx_id);
+        ser = new Serializer(id, buffered_outs);
+        des = new Deserializer(id, ios.input_stream);
         
         des.parameters_ready.connect(on_parameters_ready);
         des.bytes_received.connect(on_bytes_received);
@@ -691,8 +707,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
             synchronization_status_response = null;
             
             // as connection is "quiet" (haven't seen new command in n msec), go into IDLE state
-            // if (a) allowed by owner and (b) allowed by state machine
-            if (ser != null && idle_when_quiet && issue_conditional_event(Event.SEND_IDLE)) {
+            // if (a) allowed by owner, (b) allowed by state machine, and (c) no commands outstanding
+            if (ser != null && idle_when_quiet && outstanding_cmds == 0 && issue_conditional_event(Event.SEND_IDLE)) {
                 idle_cmd = new IdleCommand();
                 idle_cmd.assign_tag(generate_tag());
                 
@@ -951,6 +967,14 @@ public class Geary.Imap.ClientConnection : BaseObject {
         return do_proceed(State.DEIDLING, user);
     }
     
+    private void idle_status_response_post_transition(void *user, Object? object, Error? err) {
+        received_status_response((StatusResponse) object);
+        
+        // non-null use means "leaving idle"
+        if (user != null)
+            in_idle(false);
+    }
+    
     private uint on_idle_status_response(uint state, uint event, void *user, Object? object) {
         StatusResponse status_response = (StatusResponse) object;
         
@@ -974,8 +998,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // if leaving IDLE state for another)
         uint next = (posted_idle_tags.size == 0) ? State.CONNECTED : state;
         
-        if (state == State.IDLE && next != State.IDLE)
-            fsm.do_post_transition(signal_left_idle);
+        // need to always signal the StatusResponse, don't always signal about changing IDLE (this
+        // may've been signalled already when the DONE was transmitted)
+        //
+        // user pointer indicates if leaving idle.  playing with fire here...
+        fsm.do_post_transition(idle_status_response_post_transition,
+            (state == State.IDLE && next != State.IDLE) ? (void *) 1 : null,
+            status_response, null);
         
         // If leaving IDLE for CONNECTED but user has asked to stay in IDLE whenever quiet, reschedule
         // flush (which will automatically send IDLE command)
