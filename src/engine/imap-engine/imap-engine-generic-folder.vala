@@ -7,6 +7,8 @@
 private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.FolderSupport.Copy,
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
+    private const int DEFAULT_REESTABLISH_DELAY_MSEC = 10;
+    private const int MAX_REESTABLISH_DELAY_MSEC = 1000;
     
     public override Account account { get { return _account; } }
     
@@ -42,6 +44,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     private ReplayQueue? replay_queue = null;
     private int remote_count = -1;
     private uint open_remote_timer_id = 0;
+    private int reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
     
     public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
@@ -538,7 +541,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
                 notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, null);
                 
                 // schedule immediate close
-                close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, cancellable);
+                close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
+                    cancellable);
                 
                 return;
             }
@@ -546,11 +550,15 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             debug("Unable to open or prepare remote folder %s: %s", to_string(), open_err.message);
             notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, open_err);
             
-            // schedule immediate close
-            close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, cancellable);
+            // schedule immediate close and force reestablishment
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, true,
+                cancellable);
             
             return;
         }
+        
+        // open success, reset reestablishment delay
+        reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
         
         int count;
         try {
@@ -578,7 +586,8 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, notify_err);
             
             // schedule immediate close
-            close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR, cancellable);
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
+                cancellable);
             
             return;
         }
@@ -598,12 +607,13 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (remote_folder != null)
             _properties.remove(remote_folder.properties);
         
-        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, cancellable);
+        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
+            cancellable);
     }
     
     // NOTE: This bypasses open_count and forces the Folder closed.
     internal async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
-        Cancellable? cancellable) {
+        bool force_reestablish, Cancellable? cancellable) {
         cancel_remote_open_timer();
         
         // only flushing pending ReplayOperations if this is a "clean" close, not forced due to
@@ -641,7 +651,7 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         if (flush_pending)
             closing_remote_folder = clear_remote_folder();
         
-        if (closing_remote_folder != null) {
+        if (closing_remote_folder != null || force_reestablish) {
             // to avoid keeping the caller waiting while the remote end closes (i.e. drops the
             // connection or performs an IMAP CLOSE operation), close it in the background and
             // reestablish connection there, if necessary
@@ -654,18 +664,20 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
             // closed.  Also not a problem, as GenericAccount does that internally.  However, this
             // might be an issue if GenericAccount removes this folder due to a user command or
             // detection on the server, so this background op keeps a reference to the Folder
-            close_remote_folder_async.begin(this, closing_remote_folder, remote_reason);
+            close_remote_folder_async.begin(this, closing_remote_folder, remote_reason,
+                force_reestablish);
         }
         
         remote_opened = false;
         
         // if remote reason is an error, then close_remote_folder_async() will be performing
         // reestablishment, so go no further
-        if (remote_reason.is_error() && closing_remote_folder != null)
+        if ((remote_reason.is_error() && closing_remote_folder != null) || force_reestablish)
             return;
         
-        // forced closed one way or another
+        // forced closed one way or another, so reset state
         open_count = 0;
+        reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
         
         // use remote_reason even if remote_folder was null; it could be that the error occurred
         // while opening and remote_folder was yet unassigned ... also, need to call this every
@@ -706,11 +718,12 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
     
     // See note in close_async() for why this method is static and uses an owned ref
     private static async void close_remote_folder_async(owned GenericFolder folder,
-        owned Imap.Folder remote_folder, Folder.CloseReason remote_reason) {
+        owned Imap.Folder? remote_folder, Folder.CloseReason remote_reason, bool force_reestablish) {
         // force the remote closed; if due to a remote disconnect and plan on reopening, *still*
         // need to do this
         try {
-            yield remote_folder.close_async(null);
+            if (remote_folder != null)
+                yield remote_folder.close_async(null);
         } catch (Error err) {
             debug("Unable to close remote %s: %s", remote_folder.to_string(), err.message);
             
@@ -719,9 +732,17 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         
         // reestablish connection (which requires renormalizing the remote with the local) if
         // close was in error
-        if (remote_reason.is_error()) {
-            debug("Reestablishing broken connection to %s", folder.to_string());
-            folder.open_internal(OpenFlags.NO_DELAY, null);
+        if (remote_reason.is_error() || force_reestablish) {
+            debug("Reestablishing broken connection to %s in %dms", folder.to_string(),
+                folder.reestablish_delay_msec);
+            Timeout.add(folder.reestablish_delay_msec, () => {
+                folder.open_internal(OpenFlags.NO_DELAY, null);
+                
+                return false;
+            });
+            
+            folder.reestablish_delay_msec = (folder.reestablish_delay_msec * 2).clamp(
+                DEFAULT_REESTABLISH_DELAY_MSEC, MAX_REESTABLISH_DELAY_MSEC);
         }
     }
     
