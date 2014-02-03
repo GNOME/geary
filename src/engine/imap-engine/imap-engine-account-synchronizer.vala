@@ -306,10 +306,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             return true;
         }
         
-        // turn off the flag watcher whilst synchronizing, as that can cause addt'l load on the
-        // CPU
-        folder.email_flag_watcher.enabled = false;
-        
         try {
             yield sync_folder_async(folder, epoch, oldest_local, oldest_local_id);
         } catch (Error err) {
@@ -319,8 +315,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             debug("Error background syncing folder %s: %s", folder.to_string(), err.message);
             
             // fallthrough and close
-        } finally {
-            folder.email_flag_watcher.enabled = true;
         }
         
         try {
