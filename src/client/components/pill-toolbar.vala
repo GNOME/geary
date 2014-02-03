@@ -21,10 +21,9 @@ public class PillToolbar : Gtk.Toolbar {
         b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
             b.related_action.icon_name, Gtk.IconSize.MENU);
         b.always_show_image = true;
-        b.image.margin = get_icon_margin();
         
         if (!show_label)
-            b.label = "";
+            b.label = null;
         
         if (show_label && !Geary.String.is_empty(b.related_action.label))
             if (b.get_direction() == Gtk.TextDirection.RTL)
@@ -78,21 +77,8 @@ public class PillToolbar : Gtk.Toolbar {
             box.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED);
         }
         
-        int i = 0;
-        foreach(Gtk.Button button in buttons) {
+        foreach(Gtk.Button button in buttons)
             box.add(button);
-            
-            // Place the right spacer on the button itself.  This way if the button is not displayed,
-            // the spacer will not appear.
-            if (i == buttons.size - 1 && after_spacer) {
-                if (button.get_direction() == Gtk.TextDirection.RTL)
-                    button.set_margin_left(12);
-                else
-                    button.set_margin_right(12);
-            }
-            
-            i++;
-        }
         
         Gtk.ToolItem tool_item = new Gtk.ToolItem();
         tool_item.add(box);
@@ -105,19 +91,6 @@ public class PillToolbar : Gtk.Toolbar {
         }
         
         return tool_item;
-    }
-    
-    /**
-     * Computes the margin for each icon (shamelessly stolen from Nautilus.)
-     */
-    public int get_icon_margin() {
-        Gtk.IconSize toolbar_size = get_icon_size();
-        int toolbar_size_px, menu_size_px;
-        
-        Gtk.icon_size_lookup(Gtk.IconSize.MENU, out menu_size_px, null);
-        Gtk.icon_size_lookup(toolbar_size, out toolbar_size_px, null);
-        
-        return Geary.Numeric.int_floor((int) ((toolbar_size_px - menu_size_px) / 2.0), 0);
     }
     
     /**
