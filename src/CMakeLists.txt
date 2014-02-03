@@ -187,7 +187,6 @@ engine/imap-engine/imap-engine-generic-drafts-folder.vala
 engine/imap-engine/imap-engine-generic-folder.vala
 engine/imap-engine/imap-engine-generic-sent-mail-folder.vala
 engine/imap-engine/imap-engine-generic-trash-folder.vala
-engine/imap-engine/imap-engine-receive-replay-operation.vala
 engine/imap-engine/imap-engine-replay-operation.vala
 engine/imap-engine/imap-engine-replay-queue.vala
 engine/imap-engine/imap-engine-send-replay-operation.vala

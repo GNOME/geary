@@ -4,12 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReceiveReplayOperation {
+private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReplayOperation {
     public GenericFolder owner;
     public Imap.ClientSession.DisconnectReason reason;
     
     public ReplayDisconnect(GenericFolder owner, Imap.ClientSession.DisconnectReason reason) {
-        base ("Disconnect");
+        base ("Disconnect", Scope.LOCAL_ONLY);
         
         this.owner = owner;
         this.reason = reason;
@@ -40,6 +40,14 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReceiveReplay
             return false;
         });
         
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override async void backout_local_async() throws Error {
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
+        // shot not be called
         return ReplayOperation.Status.COMPLETED;
     }
     

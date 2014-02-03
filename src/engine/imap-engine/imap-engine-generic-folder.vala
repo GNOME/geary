@@ -819,14 +819,6 @@ private class Geary.ImapEngine.GenericFolder : Geary.AbstractFolder, Geary.Folde
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
         try {
-            // If remote doesn't fully open, then don't fire signal, as we'll be unable to
-            // normalize the folder
-            if (!yield remote_semaphore.wait_for_result_async(null)) {
-                debug("%s do_replay_appended_message: remote never opened", to_string());
-                
-                return;
-            }
-            
             Imap.MessageSet msg_set = new Imap.MessageSet.sparse(remote_positions.to_array());
             Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
                 ImapDB.Folder.REQUIRED_FIELDS, null);

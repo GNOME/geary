@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReceiveReplayOperation {
+private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation {
     public GenericFolder owner;
     public int remote_count;
     public Imap.SequenceNumber position;
     
     public ReplayRemoval(GenericFolder owner, int remote_count, Imap.SequenceNumber position) {
-        base ("Removal");
+        base ("Removal", Scope.LOCAL_ONLY);
         
         this.owner = owner;
         this.remote_count = remote_count;
@@ -33,6 +33,14 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReceiveReplayOpe
     public override async ReplayOperation.Status replay_local_async() throws Error {
         yield owner.do_replay_removed_message(remote_count, position);
         
+        return ReplayOperation.Status.COMPLETED;
+    }
+    
+    public override async void backout_local_async() throws Error {
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() throws Error {
+        // should not be called
         return ReplayOperation.Status.COMPLETED;
     }
     

@@ -4,13 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOperation {
+private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     public GenericFolder owner;
     public int remote_count;
     public Gee.List<Imap.SequenceNumber> positions;
     
     public ReplayAppend(GenericFolder owner, int remote_count, Gee.List<Imap.SequenceNumber> positions) {
-        base ("Append");
+        base ("Append", Scope.REMOTE_ONLY);
         
         this.owner = owner;
         this.remote_count = remote_count;
@@ -43,7 +43,14 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReceiveReplayOper
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
     
-    public override async ReplayOperation.Status replay_local_async() {
+    public override async ReplayOperation.Status replay_local_async() throws Error {
+        return ReplayOperation.Status.CONTINUE;
+    }
+    
+    public override async void backout_local_async() throws Error {
+    }
+    
+    public override async ReplayOperation.Status replay_remote_async() {
         if (positions.size > 0)
             yield owner.do_replay_appended_messages(remote_count, positions);
         
