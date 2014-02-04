@@ -78,12 +78,9 @@ public class PillToolbar : Gtk.Toolbar {
             box.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED);
         }
         
-        foreach(Gtk.Button button in buttons)
-            box.add(button);
-        
         int i = 0;
         foreach(Gtk.Button button in buttons) {
-             box.add(button);
+            box.add(button);
             
             // Place the right spacer on the button itself.  This way if the button is not displayed,
             // the spacer will not appear.
