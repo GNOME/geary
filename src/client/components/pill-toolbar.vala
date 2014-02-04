@@ -21,6 +21,7 @@ public class PillToolbar : Gtk.Toolbar {
         b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
             b.related_action.icon_name, Gtk.IconSize.MENU);
         b.always_show_image = true;
+        b.image.margin = get_icon_margin();
         
         if (!show_label)
             b.label = null;
@@ -91,6 +92,19 @@ public class PillToolbar : Gtk.Toolbar {
         }
         
         return tool_item;
+    }
+    
+    /**
+-     * Computes the margin for each icon (shamelessly stolen from Nautilus.)
+-     */
+    private int get_icon_margin() {
+        Gtk.IconSize toolbar_size = get_icon_size();
+        int toolbar_size_px, menu_size_px;
+        
+        Gtk.icon_size_lookup(Gtk.IconSize.MENU, out menu_size_px, null);
+        Gtk.icon_size_lookup(toolbar_size, out toolbar_size_px, null);
+        
+        return Geary.Numeric.int_floor((int) ((toolbar_size_px - menu_size_px) / 2.0), 0);
     }
     
     /**
