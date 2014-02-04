@@ -81,6 +81,22 @@ public class PillToolbar : Gtk.Toolbar {
         foreach(Gtk.Button button in buttons)
             box.add(button);
         
+        int i = 0;
+        foreach(Gtk.Button button in buttons) {
+             box.add(button);
+            
+            // Place the right spacer on the button itself.  This way if the button is not displayed,
+            // the spacer will not appear.
+            if (i == buttons.size - 1 && after_spacer) {
+                if (button.get_direction() == Gtk.TextDirection.RTL)
+                    button.set_margin_left(12);
+                else
+                    button.set_margin_right(12);
+            }
+            
+            i++;
+        }
+        
         Gtk.ToolItem tool_item = new Gtk.ToolItem();
         tool_item.add(box);
         
