@@ -1,5 +1,7 @@
 <ui>
     <accelerator action="GearyNewMessage" />
+    <accelerator action="GearyArchiveMessage" />
+    <accelerator action="GearyTrashMessage" />
     <accelerator action="GearyDeleteMessage" />
     <accelerator action="GearyReplyToMessage" />
     <accelerator action="GearyReplyAllMessage" />

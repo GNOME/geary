@@ -7,6 +7,8 @@
 // Primary controller object for Geary.
 public class GearyController : Geary.BaseObject {
     // Named actions.
+    //
+    // NOTE: Some actions with accelerators need to also be added to ui/accelerators.ui
     public const string ACTION_HELP = "GearyHelp";
     public const string ACTION_ABOUT = "GearyAbout";
     public const string ACTION_DONATE = "GearyDonate";
