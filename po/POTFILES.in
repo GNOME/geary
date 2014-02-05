@@ -200,7 +200,6 @@ src/engine/imap-engine/imap-engine-generic-drafts-folder.vala
 src/engine/imap-engine/imap-engine-generic-folder.vala
 src/engine/imap-engine/imap-engine-generic-sent-mail-folder.vala
 src/engine/imap-engine/imap-engine-generic-trash-folder.vala
-src/engine/imap-engine/imap-engine-receive-replay-operation.vala
 src/engine/imap-engine/imap-engine-replay-operation.vala
 src/engine/imap-engine/imap-engine-replay-queue.vala
 src/engine/imap-engine/imap-engine-send-replay-operation.vala
