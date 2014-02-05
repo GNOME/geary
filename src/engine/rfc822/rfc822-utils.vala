@@ -1,4 +1,4 @@
-/* Copyright 2011-2013 Yorba Foundation
+/* Copyright 2011-2014 Yorba Foundation
  * Portions copyright (C) 2000-2013 Jeffrey Stedfast
  *
  * This software is licensed under the GNU Lesser General Public License

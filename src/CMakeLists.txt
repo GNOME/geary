@@ -1,5 +1,5 @@
 # Geary build script
-# Copyright 2011-2013 Yorba Foundation
+# Copyright 2011-2014 Yorba Foundation
 
 set(ENGINE_SRC
 engine/abstract/geary-abstract-account.vala
