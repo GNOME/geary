@@ -19,8 +19,6 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     
     private const int PULL_CHUNK_COUNT = 100;
     
-    public bool enabled { get; set; default = true; }
-    
     private unowned Geary.Folder folder;
     private int seconds;
     private uint watch_id = 0;
@@ -69,8 +67,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     }
     
     private bool on_opened_update_flags() {
-        if (enabled)
-            flag_watch_async.begin();
+        flag_watch_async.begin();
         
         // this callback was immediately called due to open, schedule next ones for here on out
         // on a timer
@@ -80,11 +77,6 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     }
     
     private bool on_flag_watch() {
-        if (!enabled) {
-            // try again later
-            return true;
-        }
-        
         flag_watch_async.begin();
         
         watch_id = 0;
@@ -94,17 +86,22 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
     }
     
     private async void flag_watch_async() {
-        if (!in_flag_watch) {
+        // prevent reentrancy and don't run if folder is closed
+        if (!in_flag_watch && !cancellable.is_cancelled()) {
             in_flag_watch = true;
             try {
                 yield do_flag_watch_async();
             } catch (Error err) {
-                message("Flag watch error: %s", err.message);
+                if (!(err is IOError.CANCELLED))
+                    debug("%s flag watch error: %s", folder.to_string(), err.message);
+                else
+                    debug("%s flag watch cancelled", folder.to_string());
             }
             in_flag_watch = false;
         }
         
-        if (watch_id == 0)
+        // reschedule if not already, and if not cancelled (folder is closed)
+        if (watch_id == 0 && !cancellable.is_cancelled())
             watch_id = Timeout.add_seconds(seconds, on_flag_watch);
     }
     
