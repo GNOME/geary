@@ -11,7 +11,8 @@ public class FormattedConversationData : Geary.BaseObject {
     private const string ME = _("Me");
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
     private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
-    private const double DIM_TEXT_AMOUNT = 0.25;
+    private const double DIM_TEXT_AMOUNT = 0.05;
+    private const double DIM_PREVIEW_TEXT_AMOUNT = 0.25;
     
     private const int FONT_SIZE_DATE = 10;
     private const int FONT_SIZE_SUBJECT = 9;
@@ -141,10 +142,6 @@ public class FormattedConversationData : Geary.BaseObject {
         this.num_emails = 1;
     }
     
-    private uint16 gdk_to_pango(double gdk) {
-        return (uint16) (gdk.clamp(0.0, 1.0) * 65535.0);
-    }
-    
     private uint8 gdk_to_rgb(double gdk) {
         return (uint8) (gdk.clamp(0.0, 1.0) * 255.0);
     }
@@ -173,24 +170,6 @@ public class FormattedConversationData : Geary.BaseObject {
     
     private Gdk.RGBA get_foreground_rgba(Gtk.Widget widget, bool selected) {
         return widget.get_style_context().get_color(selected ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
-    }
-    
-    private Pango.Attribute get_pango_foreground_attr(Gtk.StyleContext style_cx, string name, Gdk.RGBA def) {
-        Gdk.RGBA color;
-        bool found = style_cx.lookup_color(name, out color);
-        if (!found)
-            color = def;
-        
-        return Pango.attr_foreground_new(gdk_to_pango(color.red), gdk_to_pango(color.blue), gdk_to_pango(color.green));
-    }
-    
-    private Pango.Attribute get_attr_fg_color(Gtk.Widget widget, bool selected) {
-        if (selected) {
-            Gdk.RGBA def = { 0.33, 0.33, 0.33, 0.1 };
-            return get_pango_foreground_attr(widget.get_style_context(), "selected_fg_color", def);
-        } else {
-            return Pango.attr_foreground_new(0x57, 0x57, 0x57);
-        }
     }
     
     private string get_participants_markup(Gtk.Widget widget, bool selected) {
@@ -399,17 +378,17 @@ public class FormattedConversationData : Geary.BaseObject {
     
     private void render_subject(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx,
         int y, bool selected, int counter_width = 0) {
-
+        string subject_markup = "<span foreground='%s'>%s</span>".printf(
+            rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
+            subject);
+        
         Pango.FontDescription font_subject = new Pango.FontDescription();
         font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
         if (is_unread)
             font_subject.set_weight(Pango.Weight.BOLD);
-        Pango.AttrList subject_list = new Pango.AttrList();
-        subject_list.insert(get_attr_fg_color(widget, selected));
         Pango.Layout layout_subject = widget.create_pango_layout(null);
-        layout_subject.set_attributes(subject_list);
         layout_subject.set_font_description(font_subject);
-        layout_subject.set_text(subject, -1);
+        layout_subject.set_markup(subject_markup, -1);
         if (cell_area != null)
             layout_subject.set_width((cell_area.width - TEXT_LEFT - counter_width) * Pango.SCALE);
         layout_subject.set_ellipsize(Pango.EllipsizeMode.END);
@@ -421,8 +400,9 @@ public class FormattedConversationData : Geary.BaseObject {
     
     private Pango.Rectangle render_preview(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, bool selected, int counter_width = 0) {
+        double dim = selected ? DIM_TEXT_AMOUNT : DIM_PREVIEW_TEXT_AMOUNT;
         string preview_markup = "<span foreground='%s'>%s</span>".printf(
-            rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
+            rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), dim)),
             Geary.String.is_empty(body) ? "" : Geary.HTML.escape_markup(body));
         
         Pango.FontDescription font_preview = new Pango.FontDescription();
