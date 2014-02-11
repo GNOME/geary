@@ -13,8 +13,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private Imap.Account remote;
     private ImapDB.Account local;
     private bool open = false;
-    private Gee.HashMap<FolderPath, GenericFolder> folder_map = new Gee.HashMap<
-        FolderPath, GenericFolder>();
+    private Gee.HashMap<FolderPath, MinimalFolder> folder_map = new Gee.HashMap<
+        FolderPath, MinimalFolder>();
     private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>();
     private uint refresh_folder_timeout_id = 0;
     private bool in_refresh_enumerate = false;
@@ -194,12 +194,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         message("%s: Rebuild complete", to_string());
     }
     
-    // Subclasses should implement this to return their flavor of a GenericFolder with the
+    // Subclasses should implement this to return their flavor of a MinimalFolder with the
     // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
     // set using either the properties from the local folder or its path.
     //
     // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
-    protected abstract GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected abstract MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder);
     
     // Subclasses with specific SearchFolder implementations should override
@@ -208,15 +208,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return new SearchFolder(this);
     }
     
-    private GenericFolder build_folder(ImapDB.Folder local_folder) {
+    private MinimalFolder build_folder(ImapDB.Folder local_folder) {
         return Geary.Collection.get_first(build_folders(
             Geary.iterate<ImapDB.Folder>(local_folder).to_array_list()));
     }
 
-    private Gee.Collection<GenericFolder> build_folders(Gee.Collection<ImapDB.Folder> local_folders) {
+    private Gee.Collection<MinimalFolder> build_folders(Gee.Collection<ImapDB.Folder> local_folders) {
         Gee.ArrayList<ImapDB.Folder> folders_to_build = new Gee.ArrayList<ImapDB.Folder>();
-        Gee.ArrayList<GenericFolder> built_folders = new Gee.ArrayList<GenericFolder>();
-        Gee.ArrayList<GenericFolder> return_folders = new Gee.ArrayList<GenericFolder>();
+        Gee.ArrayList<MinimalFolder> built_folders = new Gee.ArrayList<MinimalFolder>();
+        Gee.ArrayList<MinimalFolder> return_folders = new Gee.ArrayList<MinimalFolder>();
         
         foreach(ImapDB.Folder local_folder in local_folders) {
             if (folder_map.has_key(local_folder.get_path()))
@@ -226,7 +226,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         }
         
         foreach(ImapDB.Folder folder_to_build in folders_to_build) {
-            GenericFolder folder = new_folder(folder_to_build.get_path(), remote, local, folder_to_build);
+            MinimalFolder folder = new_folder(folder_to_build.get_path(), remote, local, folder_to_build);
             folder_map.set(folder.path, folder);
             built_folders.add(folder);
             return_folders.add(folder);
@@ -425,8 +425,138 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             yield local.clone_folder_async(remote_folder, cancellable);
         }
         
-        // Fetch the local account's version of the folder for the GenericFolder
+        // Fetch the local account's version of the folder for the MinimalFolder
         return build_folder((ImapDB.Folder) yield local.fetch_folder_async(path, cancellable));
+    }
+    
+    private Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> get_mailbox_search_names() {
+        Gee.HashMap<Geary.SpecialFolderType, string> mailbox_search_names
+            = new Gee.HashMap<Geary.SpecialFolderType, string>();
+        mailbox_search_names.set(Geary.SpecialFolderType.DRAFTS,
+            // List of folder names to match for Drafts, separated by |.  Please add localized common
+            // names for the Drafts folder, leaving in the English names as well.  The first in the list
+            // will be the default, so please add the most common localized name to the front.
+            _("Drafts | Draft"));
+        mailbox_search_names.set(Geary.SpecialFolderType.SENT,
+            // List of folder names to match for Sent Mail, separated by |.  Please add localized common
+            // names for the Sent Mail folder, leaving in the English names as well.  The first in the list
+            // will be the default, so please add the most common localized name to the front.
+            _("Sent | Sent Mail | Sent Email | Sent E-Mail"));
+        mailbox_search_names.set(Geary.SpecialFolderType.SPAM,
+            // List of folder names to match for Spam, separated by |.  Please add localized common
+            // names for the Spam folder, leaving in the English names as well.  The first in the list
+            // will be the default, so please add the most common localized name to the front.
+            _("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"));
+        mailbox_search_names.set(Geary.SpecialFolderType.TRASH,
+            // List of folder names to match for Trash, separated by |.  Please add localized common
+            // names for the Trash folder, leaving in the English names as well.  The first in the list
+            // will be the default, so please add the most common localized name to the front.
+            _("Trash | Rubbish | Rubbish Bin"));
+        
+        Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> compiled
+            = new Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>>();
+        
+        foreach (Geary.SpecialFolderType t in mailbox_search_names.keys) {
+            compiled.set(t, Geary.iterate_array<string>(mailbox_search_names.get(t).split("|"))
+                .map<string>(n => n.strip()).to_array_list());
+        }
+        
+        return compiled;
+    }
+    
+    private async Geary.Folder ensure_special_folder_async(Geary.SpecialFolderType special,
+        Cancellable? cancellable) throws Error {
+        Geary.Folder? folder = get_special_folder(special);
+        if (folder != null)
+            return folder;
+        
+        MinimalFolder? minimal_folder = null;
+        Geary.FolderPath? path = information.get_special_folder_path(special);
+        if (path != null) {
+            debug("Previously used %s for special folder %s", path.to_string(), special.to_string());
+        } else {
+            // This is the first time we're turning a non-special folder into a special one.
+            // After we do this, we'll record which one we picked in the account info.
+            
+            Gee.ArrayList<string> search_names = get_mailbox_search_names().get(special);
+            foreach (string search_name in search_names) {
+                Geary.FolderPath search_path = new Imap.FolderRoot(search_name, null);
+                foreach (Geary.FolderPath test_path in folder_map.keys) {
+                    if (test_path.compare_normalized_ci(search_path) == 0) {
+                        path = search_path;
+                        break;
+                    }
+                }
+                if (path != null)
+                    break;
+            }
+            if (path == null) {
+                foreach (string search_name in search_names) {
+                    Geary.FolderPath search_path = new Imap.FolderRoot(
+                        Imap.MailboxSpecifier.CANONICAL_INBOX_NAME, null).get_child(search_name);
+                    foreach (Geary.FolderPath test_path in folder_map.keys) {
+                        if (test_path.compare_normalized_ci(search_path) == 0) {
+                            path = search_path;
+                            break;
+                        }
+                    }
+                    if (path != null)
+                        break;
+                }
+            }
+            
+            if (path == null)
+                path = new Imap.FolderRoot(search_names[0], null);
+            
+            information.set_special_folder_path(special, path);
+            yield information.store_async(cancellable);
+        }
+        
+        if (path in folder_map.keys) {
+            debug("Promoting %s to special folder %s", path.to_string(), special.to_string());
+            
+            minimal_folder = folder_map.get(path);
+        } else {
+            debug("Creating %s to use as special folder %s", path.to_string(), special.to_string());
+            
+            // TODO: ignore error due to already existing.
+            yield remote.create_folder_async(path, cancellable);
+            minimal_folder = (MinimalFolder) yield fetch_folder_async(path, cancellable);
+        }
+        
+        minimal_folder.set_special_folder_type(special);
+        return minimal_folder;
+    }
+    
+    public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
+        Cancellable? cancellable) throws Error {
+        switch (special) {
+            case Geary.SpecialFolderType.DRAFTS:
+            case Geary.SpecialFolderType.SENT:
+            case Geary.SpecialFolderType.SPAM:
+            case Geary.SpecialFolderType.TRASH:
+            break;
+            
+            default:
+                throw new EngineError.BAD_PARAMETERS(
+                    "Invalid special folder type %s passed to get_required_special_folder_async",
+                    special.to_string());
+        }
+        
+        check_open();
+        
+        return yield ensure_special_folder_async(special, cancellable);
+    }
+    
+    private async void ensure_special_folders_async(Cancellable? cancellable) throws Error {
+        Geary.SpecialFolderType[] required = {
+            Geary.SpecialFolderType.DRAFTS,
+            Geary.SpecialFolderType.SENT,
+            Geary.SpecialFolderType.SPAM,
+            Geary.SpecialFolderType.TRASH,
+        };
+        foreach (Geary.SpecialFolderType special in required)
+            yield ensure_special_folder_async(special, cancellable);
     }
     
     private async void update_folders_async(Gee.Map<FolderPath, Geary.Folder> existing_folders,
@@ -434,17 +564,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         // update all remote folders properties in the local store and active in the system
         Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>();
         foreach (Imap.Folder remote_folder in remote_folders.values) {
-            GenericFolder? generic_folder = existing_folders.get(remote_folder.path)
-                as GenericFolder;
-            if (generic_folder == null)
+            MinimalFolder? minimal_folder = existing_folders.get(remote_folder.path)
+                as MinimalFolder;
+            if (minimal_folder == null)
                 continue;
             
             // only worry about alterations if the remote is openable
             if (remote_folder.properties.is_openable.is_possible()) {
-                ImapDB.Folder local_folder = generic_folder.local_folder;
+                ImapDB.Folder local_folder = minimal_folder.local_folder;
                 
                 if (remote_folder.properties.have_contents_changed(local_folder.get_properties(),
-                    generic_folder.to_string())) {
+                    minimal_folder.to_string())) {
                     altered_paths.add(remote_folder.path);
                 }
             }
@@ -462,8 +592,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             // (but only promote, not demote, since getting the special folder type via its
             // properties relies on the optional XLIST extension)
             // use this iteration to add discovered properties to map
-            if (generic_folder.special_folder_type == SpecialFolderType.NONE)
-                generic_folder.set_special_folder_type(remote_folder.properties.attrs.get_special_folder_type());
+            if (minimal_folder.special_folder_type == SpecialFolderType.NONE)
+                minimal_folder.set_special_folder_type(remote_folder.properties.attrs.get_special_folder_type());
         }
         
         // If path in remote but not local, need to add it
@@ -500,7 +630,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 debug("Unable to fetch local folder after cloning: %s", convert_err.message);
             }
         }
-        Gee.Collection<Geary.Folder> engine_added = new Gee.ArrayList<Geary.Folder>();
+        Gee.Collection<MinimalFolder> engine_added = new Gee.ArrayList<Geary.Folder>();
         engine_added.add_all(build_folders(folders_to_build));
         
         // TODO: Remove local folders no longer available remotely.
@@ -522,6 +652,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             
             if (altered.size > 0)
                 notify_folders_contents_altered(altered);
+        }
+        
+        try {
+            yield ensure_special_folders_async(cancellable);
+        } catch (Error e) {
+            warning("Unable to ensure special folders: %s", e.message);
         }
     }
     

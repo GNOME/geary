@@ -5,14 +5,14 @@
  */
 
 private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation {
-    private GenericFolder engine;
+    private MinimalFolder engine;
     private Gee.List<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>();
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
     private Cancellable? cancellable;
     
-    public MarkEmail(GenericFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
+    public MarkEmail(MinimalFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) {
         base("MarkEmail");

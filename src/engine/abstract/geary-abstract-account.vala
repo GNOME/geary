@@ -104,6 +104,9 @@ public abstract class Geary.AbstractAccount : BaseObject, Geary.Account {
             .first_matching(f => f.special_folder_type == special);
     }
     
+    public abstract async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
+        Cancellable? cancellable) throws Error;
+    
     public abstract async void send_email_async(Geary.ComposedEmail composed, Cancellable? cancellable = null)
         throws Error;
     

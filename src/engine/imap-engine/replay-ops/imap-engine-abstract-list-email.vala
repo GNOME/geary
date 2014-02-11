@@ -7,7 +7,7 @@
 private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.SendReplayOperation {
     private class RemoteBatchOperation : Nonblocking.BatchOperation {
         // IN
-        public GenericFolder owner;
+        public MinimalFolder owner;
         public Imap.MessageSet msg_set;
         public Geary.Email.Field unfulfilled_fields;
         public Geary.Email.Field required_fields;
@@ -15,7 +15,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         // OUT
         public Gee.Set<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
         
-        public RemoteBatchOperation(GenericFolder owner, Imap.MessageSet msg_set,
+        public RemoteBatchOperation(MinimalFolder owner, Imap.MessageSet msg_set,
             Geary.Email.Field unfulfilled_fields, Geary.Email.Field required_fields) {
             this.owner = owner;
             this.msg_set = msg_set;
@@ -53,7 +53,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         }
     }
     
-    protected GenericFolder owner;
+    protected MinimalFolder owner;
     protected Geary.Email.Field required_fields;
     protected Gee.List<Geary.Email>? accumulator = null;
     protected weak EmailCallback? cb;
@@ -62,7 +62,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     
     private Gee.HashMap<Imap.UID, Geary.Email.Field> unfulfilled = new Gee.HashMap<Imap.UID, Geary.Email.Field>();
     
-    public AbstractListEmail(string name, GenericFolder owner, Geary.Email.Field required_fields,
+    public AbstractListEmail(string name, MinimalFolder owner, Geary.Email.Field required_fields,
         Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
         Cancellable? cancellable) {
         base(name);

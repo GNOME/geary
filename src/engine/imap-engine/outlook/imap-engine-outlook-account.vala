@@ -36,7 +36,7 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
         base (name, account_information, false, remote, local);
     }
     
-    protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         // use the Folder's attributes to determine if it's a special folder type, unless it's
         // INBOX; that's determined by name
@@ -46,23 +46,10 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
         else
             special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
         
-        // generate properly-interfaced Folder depending on the special type
-        // Proper Drafts support depends on Outlook.com supporting UIDPLUS or us devising another
-        // mechanism to associate new messages with drafts-in-progress; see
-        // http://redmine.yorba.org/issues/7495
-        switch (special_folder_type) {
-            case SpecialFolderType.SENT:
-                return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            case SpecialFolderType.TRASH:
-                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            default:
-                return new OutlookFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-        }
+        if (special_folder_type == Geary.SpecialFolderType.DRAFTS)
+            return new OutlookDraftsFolder(this, remote_account, local_account, local_folder, special_folder_type);
+        
+        return new OutlookFolder(this, remote_account, local_account, local_folder, special_folder_type);
     }
 }
 

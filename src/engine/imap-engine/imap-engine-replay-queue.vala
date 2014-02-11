@@ -49,7 +49,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         return remote_queue.size;
     } }
     
-    private weak GenericFolder owner;
+    private weak MinimalFolder owner;
     private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
     private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
     private ReplayOperation? local_op_active = null;
@@ -124,7 +124,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * each ReplayOperation waiting to perform a remote operation, cancelling it if the remote
      * folder is not ready.
      */
-    public ReplayQueue(GenericFolder owner) {
+    public ReplayQueue(MinimalFolder owner) {
         this.owner = owner;
         
         // fire off background queue processors

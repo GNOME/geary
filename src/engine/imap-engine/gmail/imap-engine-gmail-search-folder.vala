@@ -21,7 +21,7 @@ public class Geary.ImapEngine.GmailSearchFolder : Geary.SearchFolder {
         Cancellable? cancellable = null) throws Error {
         Geary.Folder? trash_folder = null;
         try {
-            trash_folder = account.get_special_folder(Geary.SpecialFolderType.TRASH);
+            trash_folder = yield account.get_required_special_folder_async(Geary.SpecialFolderType.TRASH, cancellable);
         } catch (Error e) {
             debug("Error looking up trash folder in %s: %s", account.to_string(), e.message);
         }

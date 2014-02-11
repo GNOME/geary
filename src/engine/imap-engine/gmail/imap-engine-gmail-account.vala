@@ -71,7 +71,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         }
     }
     
-    protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         // although Gmail supports XLIST, this will be called on startup if the XLIST properties
         // for the folders hasn't been retrieved yet.  Once they've been retrieved and stored in
@@ -81,19 +81,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         
         switch (special_folder_type) {
             case SpecialFolderType.ALL_MAIL:
-                return new GenericAllMailFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            case SpecialFolderType.SENT:
-                return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            case SpecialFolderType.TRASH:
-                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            case SpecialFolderType.DRAFTS:
-                return new GenericDraftsFolder(this, remote_account, local_account, local_folder,
+                return new MinimalFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
             
             default:

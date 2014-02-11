@@ -636,10 +636,10 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     
     private async void save_sent_mail_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
-        Geary.Folder? sent_mail = _account.get_special_folder(Geary.SpecialFolderType.SENT);
-        Geary.FolderSupport.Create? create = sent_mail as Geary.FolderSupport.Create;
+        Geary.FolderSupport.Create? create = (yield _account.get_required_special_folder_async(
+            Geary.SpecialFolderType.SENT, cancellable)) as Geary.FolderSupport.Create;
         if (create == null)
-            throw new EngineError.NOT_FOUND("Save sent mail enabled, but no sent mail folder");
+            throw new EngineError.NOT_FOUND("Save sent mail enabled, but no writable sent mail folder");
         
         bool open = false;
         try {

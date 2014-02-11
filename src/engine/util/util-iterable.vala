@@ -27,6 +27,13 @@ namespace Geary {
         
         return Geary.traverse<G>(list);
     }
+    
+    /**
+     * Take an array of items and return a Geary.Iterable for convenience.
+     */
+    public Geary.Iterable<G> iterate_array<G>(G[] a) {
+        return Geary.traverse<G>(new Gee.ArrayList<G>.wrap(a));
+    }
 }
 
 /**

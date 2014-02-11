@@ -5,13 +5,13 @@
  */
 
 private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperation {
-    private GenericFolder engine;
+    private MinimalFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_remove = new Gee.ArrayList<ImapDB.EmailIdentifier>();
     private Cancellable? cancellable;
     private Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
     private int original_count = 0;
     
-    public RemoveEmail(GenericFolder engine, Gee.List<ImapDB.EmailIdentifier> to_remove,
+    public RemoveEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_remove,
         Cancellable? cancellable = null) {
         base("RemoveEmail");
         

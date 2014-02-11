@@ -5,12 +5,12 @@
  */
 
 private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation {
-    private GenericFolder engine;
+    private MinimalFolder engine;
     private Gee.HashSet<ImapDB.EmailIdentifier> to_copy = new Gee.HashSet<ImapDB.EmailIdentifier>();
     private Geary.FolderPath destination;
     private Cancellable? cancellable;
 
-    public CopyEmail(GenericFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy, 
+    public CopyEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy, 
         Geary.FolderPath destination, Cancellable? cancellable = null) {
         base("CopyEmail");
         

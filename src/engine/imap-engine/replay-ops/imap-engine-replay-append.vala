@@ -5,11 +5,11 @@
  */
 
 private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
-    public GenericFolder owner;
+    public MinimalFolder owner;
     public int remote_count;
     public Gee.List<Imap.SequenceNumber> positions;
     
-    public ReplayAppend(GenericFolder owner, int remote_count, Gee.List<Imap.SequenceNumber> positions) {
+    public ReplayAppend(MinimalFolder owner, int remote_count, Gee.List<Imap.SequenceNumber> positions) {
         base ("Append", Scope.REMOTE_ONLY);
         
         this.owner = owner;

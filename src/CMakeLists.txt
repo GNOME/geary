@@ -94,6 +94,7 @@ engine/imap/command/imap-close-command.vala
 engine/imap/command/imap-command.vala
 engine/imap/command/imap-compress-command.vala
 engine/imap/command/imap-copy-command.vala
+engine/imap/command/imap-create-command.vala
 engine/imap/command/imap-examine-command.vala
 engine/imap/command/imap-expunge-command.vala
 engine/imap/command/imap-fetch-command.vala
@@ -182,11 +183,8 @@ engine/imap-engine/imap-engine-contact-store.vala
 engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
 engine/imap-engine/imap-engine-generic-account.vala
-engine/imap-engine/imap-engine-generic-all-mail-folder.vala
-engine/imap-engine/imap-engine-generic-drafts-folder.vala
 engine/imap-engine/imap-engine-generic-folder.vala
-engine/imap-engine/imap-engine-generic-sent-mail-folder.vala
-engine/imap-engine/imap-engine-generic-trash-folder.vala
+engine/imap-engine/imap-engine-minimal-folder.vala
 engine/imap-engine/imap-engine-replay-operation.vala
 engine/imap-engine/imap-engine-replay-queue.vala
 engine/imap-engine/imap-engine-send-replay-operation.vala
@@ -197,6 +195,7 @@ engine/imap-engine/other/imap-engine-other-account.vala
 engine/imap-engine/other/imap-engine-other-folder.vala
 engine/imap-engine/outlook/imap-engine-outlook-account.vala
 engine/imap-engine/outlook/imap-engine-outlook-folder.vala
+engine/imap-engine/outlook/imap-engine-outlook-drafts-folder.vala
 engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 engine/imap-engine/replay-ops/imap-engine-create-email.vala

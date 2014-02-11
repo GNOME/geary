@@ -192,8 +192,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public string? get_fullpath(string? use_separator) {
         string? separator = use_separator ?? get_root().default_separator;
         
-        // no separator, no fullpath
-        if (separator == null)
+        if (separator == null && !is_root())
             return null;
         
         // use cached copy if the stars align
@@ -221,6 +220,50 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         return case_sensitive ? str_hash(basename) : str_hash(basename.down());
     }
     
+    private int compare_internal(Geary.FolderPath other, bool allow_case_sensitive, bool normalize) {
+        if (this == other)
+            return 0;
+        
+        // walk elements using as_list() as that includes the basename (whereas path does not),
+        // avoids the null problem, and makes comparisons straightforward
+        Gee.List<string> this_list = as_list();
+        Gee.List<string> other_list = other.as_list();
+        
+        // if paths exist, do comparison of each parent in order
+        int min = int.min(this_list.size, other_list.size);
+        for (int ctr = 0; ctr < min; ctr++) {
+            string this_element = this_list[ctr];
+            string other_element = other_list[ctr];
+            
+            if (normalize) {
+                this_element = this_element.normalize();
+                other_element = other_element.normalize();
+            }
+            if (!allow_case_sensitive
+                // if either case-sensitive, then comparison is CS
+                || (!get_folder_at(ctr).case_sensitive && !other.get_folder_at(ctr).case_sensitive)) {
+                this_element = this_element.casefold();
+                other_element = other_element.casefold();
+            }
+            
+            int result = this_element.collate(other_element);
+            if (result != 0)
+                return result;
+        }
+        
+        // paths up to the min element count are equal, shortest path is less-than, otherwise
+        // equal paths
+        return this_list.size - other_list.size;
+    }
+    
+    /**
+     * Does a Unicode-normalized, case insensitive match.  Useful for getting a rough idea if
+     * a folder matches a name, but shouldn't be used to determine strict equality.
+     */
+    public int compare_normalized_ci(Geary.FolderPath other) {
+        return compare_internal(other, false, true);
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -237,34 +280,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * are equal.
      */
     public int compare_to(Geary.FolderPath other) {
-        if (this == other)
-            return 0;
-        
-        // walk elements using as_list() as that includes the basename (whereas path does not),
-        // avoids the null problem, and makes comparisons straightforward
-        Gee.List<string> this_list = as_list();
-        Gee.List<string> other_list = other.as_list();
-        
-        // if paths exist, do comparison of each parent in order
-        int min = int.min(this_list.size, other_list.size);
-        for (int ctr = 0; ctr < min; ctr++) {
-            string this_element = this_list[ctr];
-            string other_element = other_list[ctr];
-            
-            // if either case-sensitive, then comparison is CS
-            if (!get_folder_at(ctr).case_sensitive && !other.get_folder_at(ctr).case_sensitive) {
-                this_element = this_element.casefold();
-                other_element = other_element.casefold();
-            }
-            
-            int result = this_element.collate(other_element);
-            if (result != 0)
-                return result;
-        }
-        
-        // paths up to the min element count are equal, shortest path is less-than, otherwise
-        // equal paths
-        return this_list.size - other_list.size;
+        return compare_internal(other, true, false);
     }
     
     /**

@@ -7,7 +7,7 @@
 private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation {
     public Email? email = null;
     
-    private GenericFolder engine;
+    private MinimalFolder engine;
     private ImapDB.EmailIdentifier id;
     private Email.Field required_fields;
     private Email.Field remaining_fields;
@@ -16,7 +16,7 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     private Imap.UID? uid = null;
     private bool remote_removed = false;
     
-    public FetchEmail(GenericFolder engine, ImapDB.EmailIdentifier id, Email.Field required_fields,
+    public FetchEmail(MinimalFolder engine, ImapDB.EmailIdentifier id, Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
         base ("FetchEmail");
         

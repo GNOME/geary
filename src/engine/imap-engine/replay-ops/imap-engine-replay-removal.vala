@@ -5,11 +5,11 @@
  */
 
 private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation {
-    public GenericFolder owner;
+    public MinimalFolder owner;
     public int remote_count;
     public Imap.SequenceNumber position;
     
-    public ReplayRemoval(GenericFolder owner, int remote_count, Imap.SequenceNumber position) {
+    public ReplayRemoval(MinimalFolder owner, int remote_count, Imap.SequenceNumber position) {
         base ("Removal", Scope.LOCAL_ONLY);
         
         this.owner = owner;

@@ -343,13 +343,8 @@ public class ComposerWindow : Gtk.Window {
                         debug("Error getting message body: %s", error.message);
                     }
                     
-                    try {
-                        Geary.Folder? draft_folder = account.get_special_folder(Geary.SpecialFolderType.DRAFTS);
-                        if (draft_folder != null && is_referred_draft)
-                            draft_id = referred.id;
-                    } catch (Error e) {
-                        debug("Error looking up special folder: %s", e.message);
-                    }
+                    if (is_referred_draft)
+                        draft_id = referred.id;
                     
                     add_attachments(referred.attachments);
                 break;
@@ -461,7 +456,7 @@ public class ComposerWindow : Gtk.Window {
         // If there's only one account, open the drafts folder.  If there's more than one account,
         // the drafts folder will be opened by on_from_changed().
         if (!from_multiple.visible)
-            open_drafts_folder.begin(cancellable_drafts);
+            open_drafts_folder_async.begin(cancellable_drafts);
     }
     
     public ComposerWindow.from_mailto(Geary.Account account, string mailto) {
@@ -801,11 +796,11 @@ public class ComposerWindow : Gtk.Window {
     }
     
     // Returns the drafts folder for the current From account.
-    private async void open_drafts_folder(Cancellable cancellable) throws Error {
-        yield close_drafts_folder(cancellable);
+    private async void open_drafts_folder_async(Cancellable cancellable) throws Error {
+        yield close_drafts_folder_async(cancellable);
         
-        Geary.FolderSupport.Create? folder = account.get_special_folder(Geary.SpecialFolderType.DRAFTS) 
-            as Geary.FolderSupport.Create;
+        Geary.FolderSupport.Create? folder = (yield account.get_required_special_folder_async(
+            Geary.SpecialFolderType.DRAFTS, cancellable)) as Geary.FolderSupport.Create;
         
         if (folder == null)
             return; // No drafts folder.
@@ -815,7 +810,7 @@ public class ComposerWindow : Gtk.Window {
         drafts_folder = folder;
     }
     
-    private async void close_drafts_folder(Cancellable? cancellable = null) throws Error {
+    private async void close_drafts_folder_async(Cancellable? cancellable = null) throws Error {
         if (drafts_folder == null)
             return;
         
@@ -1683,7 +1678,7 @@ public class ComposerWindow : Gtk.Window {
                     from = new_account_info.get_from().to_rfc822_string();
                     set_entry_completions();
                     
-                    open_drafts_folder.begin(cancellable_drafts);
+                    open_drafts_folder_async.begin(cancellable_drafts);
                 }
             } catch (Error e) {
                 debug("Error updating account in Composer: %s", e.message);
@@ -1705,7 +1700,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     public override void destroy() {
-        close_drafts_folder.begin();
+        close_drafts_folder_async.begin();
     }
 }
 

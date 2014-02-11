@@ -152,6 +152,18 @@ private class Geary.Imap.Account : BaseObject {
         return path_to_mailbox.has_key(path);
     }
     
+    public async void create_folder_async(FolderPath path, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        StatusResponse response = yield send_command_async(new CreateCommand(
+            new MailboxSpecifier.from_folder_path(path, null)), null, null, cancellable);
+        
+        if (response.status != Status.OK) {
+            throw new ImapError.SERVER_ERROR("Server reports error creating path %s: %s", path.to_string(),
+                response.to_string());
+        }
+    }
+    
     public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();

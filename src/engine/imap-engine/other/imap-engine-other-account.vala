@@ -10,7 +10,7 @@ private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
         base (name, account_information, false, remote, local);
     }
     
-    protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         SpecialFolderType type;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path))
@@ -18,22 +18,7 @@ private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
         else
             type = local_folder.get_properties().attrs.get_special_folder_type();
         
-        switch (type) {
-            case SpecialFolderType.SENT:
-                return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
-                    type);
-            
-            case SpecialFolderType.TRASH:
-                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
-                    type);
-            
-            case SpecialFolderType.DRAFTS:
-                return new GenericDraftsFolder(this, remote_account, local_account, local_folder,
-                    type);
-            
-            default:
-                return new OtherFolder(this, remote_account, local_account, local_folder, type);
-        }
+        return new OtherFolder(this, remote_account, local_account, local_folder, type);
     }
 }
 

@@ -48,27 +48,12 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
         }
     }
     
-    protected override GenericFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
+    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         SpecialFolderType special_folder_type = special_map.has_key(path) ? special_map.get(path)
             : Geary.SpecialFolderType.NONE;
-        switch (special_folder_type) {
-            case SpecialFolderType.SENT:
-                return new GenericSentMailFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            case SpecialFolderType.TRASH:
-                return new GenericTrashFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            case SpecialFolderType.DRAFTS:
-                return new GenericDraftsFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-            
-            default:
-                return new YahooFolder(this, remote_account, local_account, local_folder,
-                    special_folder_type);
-        }
+        return new YahooFolder(this, remote_account, local_account, local_folder,
+            special_folder_type);
     }
 }
 

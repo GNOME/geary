@@ -23,7 +23,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
     
-    private unowned ImapEngine.GenericFolder folder;
+    private unowned ImapEngine.MinimalFolder folder;
     private int start_delay_sec;
     private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
     private Gee.TreeSet<Geary.Email> prefetch_emails = new Gee.TreeSet<Geary.Email>(
@@ -31,7 +31,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     private uint schedule_id = 0;
     private Cancellable cancellable = new Cancellable();
     
-    public EmailPrefetcher(ImapEngine.GenericFolder folder, int start_delay_sec = PREFETCH_DELAY_SEC) {
+    public EmailPrefetcher(ImapEngine.MinimalFolder folder, int start_delay_sec = PREFETCH_DELAY_SEC) {
         assert(start_delay_sec > 0);
         
         this.folder = folder;

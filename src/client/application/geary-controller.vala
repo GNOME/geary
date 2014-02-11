@@ -1426,15 +1426,7 @@ public class GearyController : Geary.BaseObject {
         actions.get_action(ACTION_MARK_AS_STARRED).set_visible(unstarred_selected);
         actions.get_action(ACTION_MARK_AS_UNSTARRED).set_visible(starred_selected);
         
-        Geary.Folder? spam_folder = null;
-        try {
-            spam_folder = current_account.get_special_folder(Geary.SpecialFolderType.SPAM);
-        } catch (Error e) {
-            debug("Could not locate special spam folder: %s", e.message);
-        }
-        
-        if (spam_folder != null &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
+        if (current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
             current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
             if (current_folder.special_folder_type == Geary.SpecialFolderType.SPAM) {
                 // We're in the spam folder.
@@ -1446,7 +1438,7 @@ public class GearyController : Geary.BaseObject {
                 actions.get_action(ACTION_MARK_AS_SPAM).label = MARK_AS_SPAM_LABEL;
             }
         } else {
-            // No Spam folder, or we're in Drafts/Outbox, so gray-out the option.
+            // We're in Drafts/Outbox, so gray-out the option.
             actions.get_action(ACTION_MARK_AS_SPAM).sensitive = false;
             actions.get_action(ACTION_MARK_AS_SPAM).label = MARK_AS_SPAM_LABEL;
         }
@@ -1531,12 +1523,13 @@ public class GearyController : Geary.BaseObject {
         mark_email(get_selected_email_ids(false), null, flags);
     }
     
-    private void on_mark_as_spam() {
+    private async void mark_as_spam_async(Cancellable? cancellable) {
         Geary.Folder? destination_folder = null;
         if (current_folder.special_folder_type != Geary.SpecialFolderType.SPAM) {
             // Move to spam folder.
             try {
-                destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.SPAM);
+                destination_folder = yield current_account.get_required_special_folder_async(
+                    Geary.SpecialFolderType.SPAM, cancellable);
             } catch (Error e) {
                 debug("Error getting spam folder: %s", e.message);
             }
@@ -1551,6 +1544,10 @@ public class GearyController : Geary.BaseObject {
         
         if (destination_folder != null)
             on_move_conversation(destination_folder);
+    }
+    
+    private void on_mark_as_spam() {
+        mark_as_spam_async.begin(null);
     }
     
     private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
@@ -1902,26 +1899,10 @@ public class GearyController : Geary.BaseObject {
             on_archive_or_delete_selection_finished);
     }
     
-    private bool current_folder_supports_trash(out Geary.FolderSupport.Move? move = null,
-        out Geary.FolderPath? trash_path = null) {
-        try {
-            if (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
-                && !current_folder.properties.is_local_only && current_account != null) {
-                Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
-                Geary.Folder? trash_folder = current_account.get_special_folder(Geary.SpecialFolderType.TRASH);
-                if (supports_move != null && trash_folder != null) {
-                    move = supports_move;
-                    trash_path = trash_folder.path;
-                    return true;
-                }
-            }
-        } catch (Error e) {
-            debug("Error finding trash folder: %s", e.message);
-        }
-        
-        move = null;
-        trash_path = null;
-        return false;
+    private bool current_folder_supports_trash() {
+        return (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
+            && !current_folder.properties.is_local_only && current_account != null
+            && (current_folder as Geary.FolderSupport.Move) != null);
     }
     
     public bool confirm_delete(int num_messages) {
@@ -1963,13 +1944,18 @@ public class GearyController : Geary.BaseObject {
         if (trash) {
             debug("Trashing selected messages");
             
-            Geary.FolderPath? trash_path;
-            Geary.FolderSupport.Move? supports_move;
-            if (!current_folder_supports_trash(out supports_move, out trash_path))
-                debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
-                    current_folder.to_string(), current_account.to_string());
-            else
-                yield supports_move.move_email_async(ids, trash_path, cancellable);
+            if (current_folder_supports_trash()) {
+                Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
+                    Geary.SpecialFolderType.TRASH, cancellable)).path;
+                Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
+                if (supports_move != null) {
+                    yield supports_move.move_email_async(ids, trash_path, cancellable);
+                    return;
+                }
+            }
+            
+            debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
+                current_folder.to_string(), current_account.to_string());
             return;
         }
         
