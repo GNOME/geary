@@ -91,7 +91,7 @@ public class GearyController : Geary.BaseObject {
         = new Gee.HashMap<Geary.Account, Cancellable>();
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.App.Conversation? last_deleted_conversation = null;
-    private Gee.LinkedList<ComposerWindow> composer_windows = new Gee.LinkedList<ComposerWindow>();
+    private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
     private File? last_save_directory = null;
     private NewMessagesMonitor? new_messages_monitor = null;
     private NewMessagesIndicator? new_messages_indicator = null;
@@ -109,7 +109,7 @@ public class GearyController : Geary.BaseObject {
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     
     // List of windows we're waiting to close before Geary closes.
-    private Gee.List<ComposerWindow> waiting_to_close = new Gee.ArrayList<ComposerWindow>();
+    private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
     
     /**
      * Fired when the currently selected account has changed.
@@ -1153,7 +1153,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_edit_draft(Geary.Email draft) {
-        create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE, draft, null, true);
+        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, true);
     }
     
     private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
@@ -1761,11 +1761,11 @@ public class GearyController : Geary.BaseObject {
     }
     
     private bool close_composition_windows() {
-        Gee.List<ComposerWindow> composers_to_destroy = new Gee.ArrayList<ComposerWindow>();
+        Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
         bool quit_cancelled = false;
         
         // If there's composer windows open, give the user a chance to save or cancel.
-        foreach(ComposerWindow cw in composer_windows) {
+        foreach(ComposerWidget cw in composer_widgets) {
             // Check if we should close the window immediately, or if we need to wait.
             if (!cw.should_close()) {
                 if (cw.delayed_close) {
@@ -1788,7 +1788,7 @@ public class GearyController : Geary.BaseObject {
         }
         
         // Safely destroy windows.
-        foreach(ComposerWindow cw in composers_to_destroy)
+        foreach(ComposerWidget cw in composers_to_destroy)
             cw.destroy();
         
         // If we cancelled the quit we can bail here.
@@ -1809,19 +1809,19 @@ public class GearyController : Geary.BaseObject {
         return true;
     }
     
-    private void create_compose_window(ComposerWindow.ComposeType compose_type,
+    private void create_compose_widget(ComposerWidget.ComposeType compose_type,
         Geary.Email? referred = null, string? mailto = null, bool is_draft = false) {
-        create_compose_window_async.begin(compose_type, referred, mailto, is_draft);
+        create_compose_widget_async.begin(compose_type, referred, mailto, is_draft);
     }
     
-    private async void create_compose_window_async(ComposerWindow.ComposeType compose_type,
+    private async void create_compose_widget_async(ComposerWidget.ComposeType compose_type,
         Geary.Email? referred = null, string? mailto = null, bool is_draft = false) {
         if (current_account == null)
             return;
         
-        ComposerWindow window;
+        ComposerWidget widget;
         if (mailto != null) {
-            window = new ComposerWindow.from_mailto(current_account, mailto);
+            widget = new ComposerWidget.from_mailto(current_account, mailto);
         } else {
             Geary.Email? full = null;
             if (referred != null) {
@@ -1834,22 +1834,19 @@ public class GearyController : Geary.BaseObject {
                 }
             }
             
-            window = new ComposerWindow(current_account, compose_type, full, is_draft);
+            widget = new ComposerWidget(current_account, compose_type, full, is_draft);
         }
-        window.set_position(Gtk.WindowPosition.CENTER);
         
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.
-        composer_windows.add(window);
-        window.destroy.connect(on_composer_window_destroy);
-        
-        window.show_all();
+        composer_widgets.add(widget);
+        widget.destroy.connect(on_composer_widget_destroy);
     }
     
-    private void on_composer_window_destroy(Gtk.Widget sender) {
-        composer_windows.remove((ComposerWindow) sender);
+    private void on_composer_widget_destroy(Gtk.Widget sender) {
+        composer_widgets.remove((ComposerWidget) sender);
         
-        if (waiting_to_close.remove((ComposerWindow) sender)) {
+        if (waiting_to_close.remove((ComposerWidget) sender)) {
             // If we just removed the last window in the waiting to close list, it's time to exit!
             if (waiting_to_close.size == 0)
                 GearyApplication.instance.exit();
@@ -1857,11 +1854,11 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_new_message() {
-        create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE);
+        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE);
     }
     
     private void on_reply_to_message(Geary.Email message) {
-        create_compose_window(ComposerWindow.ComposeType.REPLY, message);
+        create_compose_widget(ComposerWidget.ComposeType.REPLY, message);
     }
     
     private void on_reply_to_message_action() {
@@ -1871,7 +1868,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_reply_all_message(Geary.Email message) {
-        create_compose_window(ComposerWindow.ComposeType.REPLY_ALL, message);
+        create_compose_widget(ComposerWidget.ComposeType.REPLY_ALL, message);
     }
     
     private void on_reply_all_message_action() {
@@ -1881,7 +1878,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_forward_message(Geary.Email message) {
-        create_compose_window(ComposerWindow.ComposeType.FORWARD, message);
+        create_compose_widget(ComposerWidget.ComposeType.FORWARD, message);
     }
     
     private void on_forward_message_action() {
@@ -2130,12 +2127,12 @@ public class GearyController : Geary.BaseObject {
             return;
         }
         
-        create_compose_window(ComposerWindow.ComposeType.NEW_MESSAGE, null, mailto);
+        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, mailto);
     }
     
     // Returns a list of composer windows for an account, or null if none.
-    public Gee.List<ComposerWindow>? get_composer_windows_for_account(Geary.AccountInformation account) {
-        Gee.LinkedList<ComposerWindow> ret = Geary.traverse<ComposerWindow>(composer_windows)
+    public Gee.List<ComposerWidget>? get_composer_widgets_for_account(Geary.AccountInformation account) {
+        Gee.LinkedList<ComposerWidget> ret = Geary.traverse<ComposerWidget>(composer_widgets)
             .filter(w => w.account.information == account)
             .to_linked_list();
         

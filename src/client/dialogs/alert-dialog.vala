@@ -4,10 +4,10 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-abstract class AlertDialog : Object {
+class AlertDialog : Object {
     private Gtk.MessageDialog dialog;
     
-    protected AlertDialog(Gtk.Window? parent, Gtk.MessageType message_type, string primary, string? secondary,
+    public AlertDialog(Gtk.Window? parent, Gtk.MessageType message_type, string primary, string? secondary,
         string? ok_button, string? cancel_button, string? tertiary_button,
         Gtk.ResponseType tertiary_response_type) {
         dialog = new Gtk.MessageDialog(parent, Gtk.DialogFlags.DESTROY_WITH_PARENT, message_type,

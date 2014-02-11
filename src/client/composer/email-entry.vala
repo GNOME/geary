@@ -11,10 +11,13 @@ public class EmailEntry : Gtk.Entry {
 
     // null or valid addresses
     public Geary.RFC822.MailboxAddresses? addresses { get; private set; default = null; }
+    
+    private weak ComposerWidget composer;
 
-    public EmailEntry() {
+    public EmailEntry(ComposerWidget composer) {
         changed.connect(on_changed);
         key_press_event.connect(on_key_press);
+        this.composer = composer;
     }
 
     private void on_changed() {
@@ -45,7 +48,7 @@ public class EmailEntry : Gtk.Entry {
     private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
         if (event.keyval == Gdk.Key.Tab) {
             ((ContactEntryCompletion) get_completion()).trigger_selection();
-            get_toplevel().child_focus(Gtk.DirectionType.TAB_FORWARD);
+            composer.child_focus(Gtk.DirectionType.TAB_FORWARD);
             return true;
         }
         

@@ -322,7 +322,10 @@ client/components/pill-toolbar.vala
 client/components/status-bar.vala
 client/components/stock.vala
 
+client/composer/composer-container.vala
+client/composer/composer-embed.vala
 client/composer/composer-toolbar.vala
+client/composer/composer-widget.vala
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala

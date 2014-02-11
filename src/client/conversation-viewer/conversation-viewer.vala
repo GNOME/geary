@@ -223,7 +223,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
-    private string get_div_id(Geary.EmailIdentifier id) {
+    public string get_div_id(Geary.EmailIdentifier id) {
         return "message_%s".printf(id.to_string());
     }
     
@@ -2153,6 +2153,11 @@ public class ConversationViewer : Gtk.Box {
     private bool in_drafts_folder() {
         return current_folder != null && current_folder.special_folder_type
             == Geary.SpecialFolderType.DRAFTS;
+    }
+    
+    // The Composer may need to adjust the mode back to conversation
+    public void show_conversation_div() {
+        set_mode(DisplayMode.CONVERSATION);
     }
 }
 

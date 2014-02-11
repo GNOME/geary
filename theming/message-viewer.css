@@ -88,7 +88,7 @@ hr {
     box-shadow: inset 0px 0px 1px rgba(0,0,0,0.05);
 }
 
-.email {
+.email, #composer_embed {
     border: 1px rgba(0,0,0,1) solid;
     background-color: white;/* recv-normal */
     color: black;
@@ -99,6 +99,30 @@ hr {
     width: 100%;
     box-sizing:border-box;
     margin-top: 16px;
+}
+
+#composer_embed {
+    position: absolute;
+    top: 0px; /* margin-top has impact here, despite absolute positioning (!?) */
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+}
+.email + #composer_embed {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    height: 600px;
+}
+/* For some reason, we can't absolutely position <embed>s or <object>s, so we wrap everything
+   it in a div and then tell the <embed> to take up all the available space. */
+#composer_embed > embed {
+    width: 100%;
+    height: 100%;
 }
 
 .email.sent {
@@ -117,7 +141,7 @@ hr {
 .email.starred .unstarred {
     display: none;
 }
-.email.read, #multiple_messages .email {
+.email.read, #multiple_messages .email, #composer_embed {
     border-color: rgba(0,0,0,0.4);
     box-shadow: 0 3px 11px rgba(0,0,0,0.21);
 }
@@ -553,6 +577,8 @@ body:not(.nohide) .quote_container.controllable.show > .hider {
     left: 0;
     right: 0;
     padding: 0 15px 15px;
+    box-sizing: border-box;
+    min-height: 100%;
 }
 #multiple_messages {
     display: none;
