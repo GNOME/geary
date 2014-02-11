@@ -38,7 +38,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         conversation_list_view = new ConversationListView(conversation_list_store);
         
-        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
+        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK
+            | Gdk.EventMask.FOCUS_CHANGE_MASK);
         
         // This code both loads AND saves the pane positions with live
         // updating. This is more resilient against crashes because
@@ -63,6 +64,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         delete_event.connect(on_delete_event);
         key_press_event.connect(on_key_press_event);
         key_release_event.connect(on_key_release_event);
+        focus_in_event.connect(on_focus_event);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
         Geary.Engine.instance.account_available.connect(on_account_available);
@@ -186,6 +188,11 @@ public class MainWindow : Gtk.ApplicationWindow {
             on_shift_key(false);
         
         return propagate_key_event(event);
+    }
+    
+    private bool on_focus_event() {
+        on_shift_key(false);
+        return false;
     }
     
     private void on_conversation_monitor_changed() {

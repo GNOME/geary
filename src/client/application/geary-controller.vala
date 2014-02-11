@@ -1337,9 +1337,12 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_shift_key(bool pressed) {
-        main_window.main_toolbar.update_trash_buttons(
-            (!pressed && current_folder_supports_trash()) || !(current_folder is Geary.FolderSupport.Remove),
-            current_account.can_support_archive);
+        if (main_window != null && main_window.main_toolbar != null
+            && current_account != null && current_folder != null) {
+            main_window.main_toolbar.update_trash_buttons(
+                (!pressed && current_folder_supports_trash()) || !(current_folder is Geary.FolderSupport.Remove),
+                current_account.can_support_archive);
+        }
     }
     
     // this signal does not necessarily indicate that the application previously didn't have
@@ -1921,6 +1924,16 @@ public class GearyController : Geary.BaseObject {
         return false;
     }
     
+    public bool confirm_delete(int num_messages) {
+        main_window.present();
+        AlertDialog dialog = new ConfirmationDialog(main_window, ngettext(
+            "Do you want to permanently delete this message?",
+            "Do you want to permanently delete these messages?", num_messages),
+            null, _("Delete"));
+        
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+    
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
         if (main_window.conversation_viewer.current_conversation != null
@@ -1963,10 +1976,14 @@ public class GearyController : Geary.BaseObject {
         debug("Deleting selected messages");
         
         Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
-        if (supports_remove == null)
+        if (supports_remove == null) {
             debug("Folder %s doesn't support remove", current_folder.to_string());
-        else
-            yield supports_remove.remove_email_async(ids, cancellable);
+        } else {
+            if (confirm_delete(ids.size))
+                yield supports_remove.remove_email_async(ids, cancellable);
+            else
+                last_deleted_conversation = null;
+        }
     }
     
     private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
