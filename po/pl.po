@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-05 19:37+0100\n"
-"PO-Revision-Date: 2014-02-05 19:38+0100\n"
+"POT-Creation-Date: 2014-02-11 14:44+0100\n"
+"PO-Revision-Date: 2014-02-11 14:45+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -582,12 +582,12 @@ msgstr ""
 "Piotr Drąg <piotrdrag@gmail.com>, 2014\n"
 "Aviary.pl <gnomepl@aviary.pl>, 2014"
 
-#: ../src/client/application/geary-controller.vala:1584
+#: ../src/client/application/geary-controller.vala:1587
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Na pewno otworzyć \"%s\"?"
 
-#: ../src/client/application/geary-controller.vala:1585
+#: ../src/client/application/geary-controller.vala:1588
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -595,24 +595,35 @@ msgstr ""
 "Załączniki po otwarciu mogą uszkodzić system. Należy otwierać załączniki "
 "pochodzące tylko z zaufanych źródeł."
 
-#: ../src/client/application/geary-controller.vala:1586
+#: ../src/client/application/geary-controller.vala:1589
 msgid "Don't _ask me again"
 msgstr "_Bez pytania ponownie"
 
-#: ../src/client/application/geary-controller.vala:1604
+#: ../src/client/application/geary-controller.vala:1607
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Plik o nazwie \"%s\" już istnieje. Zastąpić go?"
 
-#: ../src/client/application/geary-controller.vala:1606
+#: ../src/client/application/geary-controller.vala:1609
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Plik w \"%s\" już istnieje. Zastąpienie go nadpisze jego zawartość."
 
-#: ../src/client/application/geary-controller.vala:1609
+#: ../src/client/application/geary-controller.vala:1612
 msgid "_Replace"
 msgstr "_Zastąp"
+
+#: ../src/client/application/geary-controller.vala:1930
+msgid "Do you want to permanently delete this message?"
+msgid_plural "Do you want to permanently delete these messages?"
+msgstr[0] "Trwale usunąć tą wiadomość?"
+msgstr[1] "Trwale usunąć te wiadomości?"
+msgstr[2] "Trwale usunąć te wiadomości?"
+
+#: ../src/client/application/geary-controller.vala:1932
+msgid "Delete"
+msgstr "Usuń"
 
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
