@@ -126,22 +126,22 @@ public class AccountDialog : Gtk.Dialog {
             return;
         
         // Check for open composer windows.
-        bool composer_window_found = false;
-        Gee.List<ComposerWindow>? windows = 
-            GearyApplication.instance.controller.get_composer_windows_for_account(account);
+        bool composer_widget_found = false;
+        Gee.List<ComposerWidget>? widgets = 
+            GearyApplication.instance.controller.get_composer_widgets_for_account(account);
         
-        if (windows != null) {
-            foreach (ComposerWindow cw in windows) {
+        if (widgets != null) {
+            foreach (ComposerWidget cw in widgets) {
                 if (cw.account.information == account &&
-                    cw.compose_type != ComposerWindow.ComposeType.NEW_MESSAGE) {
-                    composer_window_found = true;
+                    cw.compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
+                    composer_widget_found = true;
                     
                     break;
                 }
             }
         }
         
-        if (composer_window_found) {
+        if (composer_widget_found) {
             // Warn user that account cannot be deleted until composer is closed.
             remove_fail_pane.present();
         } else {

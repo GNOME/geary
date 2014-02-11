@@ -4,8 +4,8 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Window for sending messages.
-public class ComposerWindow : Gtk.Window {
+// Widget for sending messages.
+public class ComposerWidget : Gtk.EventBox {
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -37,7 +37,6 @@ public class ComposerWindow : Gtk.Window {
     public const string ACTION_COMPOSE_AS_HTML = "compose as html";
     public const string ACTION_CLOSE = "close";
     
-    private const string DEFAULT_TITLE = _("New Message");
     private const string DRAFT_SAVED_TEXT = _("Saved");
     private const string DRAFT_SAVING_TEXT = _("Saving");
     private const string DRAFT_ERROR_TEXT = _("Error saving");
@@ -147,7 +146,7 @@ public class ComposerWindow : Gtk.Window {
     private EmailEntry to_entry;
     private EmailEntry cc_entry;
     private EmailEntry bcc_entry;
-    private Gtk.Entry subject_entry;
+    public Gtk.Entry subject_entry;
     private Gtk.Button close_button;
     private Gtk.Button send_button;
     private Gtk.Label message_overlay_label;
@@ -189,10 +188,13 @@ public class ComposerWindow : Gtk.Window {
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
     // garbage-collected.
     private WebViewEditFixer edit_fixer;
-    private Gtk.UIManager ui;
+    public Gtk.UIManager ui;
+    private ComposerContainer container {
+        get { return (ComposerContainer) parent; }
+    }
     
-    public ComposerWindow(Geary.Account account, ComposeType compose_type,
-        Geary.Email? referred = null, bool is_referred_draft = false) {
+    public ComposerWidget(Geary.Account account, ComposeType compose_type,
+        Geary.Email? referred = null, bool is_referred_draft = false, bool in_window = true) {
         this.account = account;
         this.compose_type = compose_type;
         
@@ -266,7 +268,6 @@ public class ComposerWindow : Gtk.Window {
         message_overlay_label.valign = Gtk.Align.END;
         message_overlay.add_overlay(message_overlay_label);
         
-        title = DEFAULT_TITLE;
         subject_entry.changed.connect(on_subject_changed);
         to_entry.changed.connect(validate_send_button);
         cc_entry.changed.connect(validate_send_button);
@@ -316,7 +317,6 @@ public class ComposerWindow : Gtk.Window {
         
         ui = new Gtk.UIManager();
         ui.insert_action_group(actions, 0);
-        add_accel_group(ui.get_accel_group());
         GearyApplication.instance.load_ui_file_for_manager(ui, "composer_accelerators.ui");
         
         add_extra_accelerators();
@@ -460,9 +460,12 @@ public class ComposerWindow : Gtk.Window {
         // the drafts folder will be opened by on_from_changed().
         if (!from_multiple.visible)
             open_drafts_folder_async.begin(cancellable_drafts);
+        
+        if (in_window)
+            new ComposerWindow(this);
     }
     
-    public ComposerWindow.from_mailto(Geary.Account account, string mailto) {
+    public ComposerWidget.from_mailto(Geary.Account account, string mailto) {
         this(account, ComposeType.NEW_MESSAGE);
         
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
@@ -662,7 +665,6 @@ public class ComposerWindow : Gtk.Window {
     }
     
     public override void show_all() {
-        set_default_size(680, 600);
         base.show_all();
         update_from_field();
     }
@@ -675,18 +677,18 @@ public class ComposerWindow : Gtk.Window {
     public bool should_close() {
         bool try_to_save = can_save();
         
-        present();
+        container.present();
         AlertDialog dialog;
         
         if (drafts_folder == null && try_to_save) {
-            dialog = new ConfirmationDialog(this,
+            dialog = new ConfirmationDialog(container.top_window,
                 _("Do you want to discard the unsaved message?"), null, Stock._DISCARD);
         } else if (try_to_save) {
-            dialog = new TernaryConfirmationDialog(this,
+            dialog = new TernaryConfirmationDialog(container.top_window,
                 _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD,
                 Gtk.ResponseType.CLOSE);
         } else {
-            dialog = new ConfirmationDialog(this,
+            dialog = new ConfirmationDialog(container.top_window,
                 _("Do you want to discard this message?"), null, Stock._DISCARD);
         }
         
@@ -776,7 +778,7 @@ public class ComposerWindow : Gtk.Window {
             confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {
-            ConfirmationDialog dialog = new ConfirmationDialog(this,
+            ConfirmationDialog dialog = new ConfirmationDialog(container.top_window,
                 confirmation, null, Stock._OK);
             if (dialog.run() != Gtk.ResponseType.OK)
                 return false;
@@ -943,7 +945,7 @@ public class ComposerWindow : Gtk.Window {
             // ComposerWindow, but as a GtkBin subclass a ComposerWindow can
             // only contain one widget at a time;
             // it already contains a widget of type GtkBox
-            dialog = new AttachmentDialog(this);
+            dialog = new AttachmentDialog(container.top_window);
         } while (!dialog.is_finished(add_attachment));
     }
     
@@ -964,7 +966,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void attachment_failed(string msg) {
-        ErrorDialog dialog = new ErrorDialog(this, _("Cannot add attachment"), msg);
+        ErrorDialog dialog = new ErrorDialog(container.top_window, _("Cannot add attachment"), msg);
         dialog.run();
     }
     
@@ -1057,9 +1059,6 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_subject_changed() {
-        title = Geary.String.is_empty(subject_entry.text.strip()) ? DEFAULT_TITLE :
-            subject_entry.text.strip();
-        
         reset_draft_timer();
     }
     
@@ -1086,17 +1085,17 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_cut() {
-        if (get_focus() == editor)
+        if (container.get_focus() == editor)
             editor.cut_clipboard();
-        else if (get_focus() is Gtk.Editable)
-            ((Gtk.Editable) get_focus()).cut_clipboard();
+        else if (container.get_focus() is Gtk.Editable)
+            ((Gtk.Editable) container.get_focus()).cut_clipboard();
     }
     
     private void on_copy() {
-        if (get_focus() == editor)
+        if (container.get_focus() == editor)
             editor.copy_clipboard();
-        else if (get_focus() is Gtk.Editable)
-            ((Gtk.Editable) get_focus()).copy_clipboard();
+        else if (container.get_focus() is Gtk.Editable)
+            ((Gtk.Editable) container.get_focus()).copy_clipboard();
     }
     
     private void on_copy_link() {
@@ -1168,14 +1167,14 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private void on_paste() {
-        if (get_focus() == editor)
+        if (container.get_focus() == editor)
             get_clipboard(Gdk.SELECTION_CLIPBOARD).request_text(on_clipboard_text_received);
-        else if (get_focus() is Gtk.Editable)
-            ((Gtk.Editable) get_focus()).paste_clipboard();
+        else if (container.get_focus() is Gtk.Editable)
+            ((Gtk.Editable) container.get_focus()).paste_clipboard();
     }
     
     private void on_paste_with_formatting() {
-        if (get_focus() == editor)
+        if (container.get_focus() == editor)
             editor.paste_clipboard();
     }
     
@@ -1281,7 +1280,8 @@ public class ComposerWindow : Gtk.Window {
     
     private void on_select_color() {
         if (compose_as_html) {
-            Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"), this);
+            Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"),
+                container.top_window);
             if (dialog.run() == Gtk.ResponseType.OK)
                 editor.get_dom_document().exec_command("forecolor", false, dialog.get_rgba().to_string());
             
@@ -1327,7 +1327,7 @@ public class ComposerWindow : Gtk.Window {
     }
     
     private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        ComposerWindow composer) {
+        ComposerWidget composer) {
         try {
             composer.editor.get_dom_document().get_default_view().get_selection().
                 select_all_children(element);
