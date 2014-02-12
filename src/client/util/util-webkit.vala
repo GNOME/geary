@@ -11,6 +11,10 @@ public const string URL_REGEX = "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|ww
 // Regex to determine if a URL has a known protocol.
 public const string PROTOCOL_REGEX = "^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):";
 
+// Private use unicode characters are used for quote tokens
+public const string QUOTE_START = "";
+public const string QUOTE_END = "";
+
 // TODO Move these other functions and variables into this namespace.
 namespace Util.DOM {
     public WebKit.DOM.HTMLElement? select(WebKit.DOM.Node node, string selector) {
@@ -290,6 +294,7 @@ public string decorate_quotes(string text) throws Error {
 
 // This will modify/reset the DOM
 public string html_to_flowed_text(WebKit.DOM.Document doc) {
+    string saved_doc = doc.get_body().get_inner_html();
     WebKit.DOM.NodeList blockquotes;
     try {
         blockquotes = doc.query_selector_all("blockquote");
@@ -299,19 +304,22 @@ public string html_to_flowed_text(WebKit.DOM.Document doc) {
     }
     
     int nbq = (int) blockquotes.length;
-    WebKit.DOM.Text[] tokens = new WebKit.DOM.Text[nbq];
     string[] bqtexts = new string[nbq];
     
-    // Get text of blockquotes and pull them out of DOM.  We need to get the text while they're
-    // still in the DOM to get newlines at appropriate places.  We go through the list of blockquotes
-    // from the end so that we get the innermost ones first.
+    // Get text of blockquotes and pull them out of DOM.  They are replaced with tokens deliminated
+    // with the characters QUOTE_START and QUOTE_END (from a unicode private use block).  We need to
+    // get the text while they're  still in the DOM to get newlines at appropriate places.  We go
+    // through the list of blockquotes from the end so that we get the innermost ones first.
     for (int i = nbq - 1; i >= 0; i--) {
-        WebKit.DOM.Node bq = blockquotes.item(i);
-        WebKit.DOM.Node parent = bq.get_parent_node();
-        bqtexts[i] = ((WebKit.DOM.HTMLElement) bq).get_inner_text();
-        tokens[i] = doc.create_text_node(@"$i");
+        WebKit.DOM.HTMLElement bq = (WebKit.DOM.HTMLElement) blockquotes.item(i);
+        bqtexts[i] = bq.get_inner_text();
+        if (bqtexts[i].substring(-1, 1) == "\n")
+            bqtexts[i] = bqtexts[i].slice(0, -1);
+        else
+            debug("Did not find expected newline at end of quote.");
+        
         try {
-            parent.replace_child(tokens[i], bq);
+            bq.set_inner_text(@"$QUOTE_START$i$QUOTE_END");
         } catch (Error error) {
             debug("Error manipulating DOM: %s", error.message);
         }
@@ -321,13 +329,10 @@ public string html_to_flowed_text(WebKit.DOM.Document doc) {
     string doctext = resolve_nesting(doc.get_body().get_inner_text(), bqtexts).replace("\xc2\xa0", " ");
     
     // Reassemble DOM
-    for (int i = 0; i < nbq; i++) {
-        WebKit.DOM.Node parent = tokens[i].get_parent_node();
-        try {
-            parent.replace_child(blockquotes.item(i), tokens[i]);
-        } catch (Error error) {
-            debug("Error manipulating DOM: %s", error.message);
-        }
+    try {
+        doc.get_body().set_inner_html(saved_doc);
+    } catch (Error error) {
+        debug("Error resetting DOM: %s", error.message);
     }
     
     // Wrap, space stuff, quote
@@ -374,7 +379,7 @@ public string quote_lines(string text) {
 
 public string resolve_nesting(string text, string[] values) {
     try {
-        GLib.Regex tokenregex = new GLib.Regex("(.?)([0-9]*)(?=(.?))");
+        GLib.Regex tokenregex = new GLib.Regex(@"(.?)$QUOTE_START([0-9]*)$QUOTE_END(?=(.?))");
         return tokenregex.replace_eval(text, -1, 0, 0, (info, res) => {
             int key = int.parse(info.fetch(2));
             string prev_char = info.fetch(1), next_char = info.fetch(3), insert_next = "";
