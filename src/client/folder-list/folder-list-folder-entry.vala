@@ -60,7 +60,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return new ThemedIcon(rtl ? "sent-rtl-symbolic" : "sent-symbolic");
             
             case Geary.SpecialFolderType.FLAGGED:
-                return new ThemedIcon("star-symbolic");
+                return new ThemedIcon("starred-symbolic");
             
             case Geary.SpecialFolderType.IMPORTANT:
                 return new ThemedIcon("task-due-symbolic");

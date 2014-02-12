@@ -11,7 +11,6 @@ set(ICON_FILES
     inbox-symbolic.svg
     marker-symbolic.svg
     outbox-symbolic.svg
-    read-symbolic.svg
     reply-all-symbolic.svg
     reply-all-rtl-symbolic.svg
     reply-symbolic.svg
@@ -20,11 +19,8 @@ set(ICON_FILES
     sent-rtl-symbolic.svg
     spam-symbolic.svg
     spam-rtl-symbolic.svg
-    star-symbolic.svg
     tag-symbolic.svg
     tag-rtl-symbolic.svg
-    unread-symbolic.svg
-    unstarred-symbolic.svg
 )
 
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
