@@ -194,6 +194,7 @@ body:not(.nohide) .email.hide .header_container .avatar {
     padding-top: 16px;
     overflow-x: auto;
     overflow-y: hidden;
+    position: relative;  /* in case anything inside is positioned */
 }
 
 .email .remote_images {
