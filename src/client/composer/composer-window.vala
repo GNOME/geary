@@ -36,9 +36,5 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
     public override bool delete_event(Gdk.EventAny event) {
         return !((ComposerWidget) get_child()).should_close();
     }
-    
-    public new void close() {
-        destroy();
-    }
 }
 
