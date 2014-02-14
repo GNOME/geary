@@ -338,7 +338,7 @@ public class FormattedConversationData : Geary.BaseObject {
         Cairo.Context? ctx, int y, bool selected) {
         string date_markup = "<span foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
-            date);
+            Geary.HTML.escape_markup(date));
         
         Pango.Rectangle? ink_rect;
         Pango.Rectangle? logical_rect;
@@ -380,7 +380,7 @@ public class FormattedConversationData : Geary.BaseObject {
         int y, bool selected, int counter_width = 0) {
         string subject_markup = "<span foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
-            subject);
+            Geary.HTML.escape_markup(subject));
         
         Pango.FontDescription font_subject = new Pango.FontDescription();
         font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
