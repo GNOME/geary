@@ -17,8 +17,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         bool rtl = Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL;
         
         this.account = account;
-        user_folder_group = new SpecialGrouping(2, "",
-            IconFactory.instance.get_custom_icon(rtl ? "tag-rtl-symbolic" : "tag-symbolic", IconFactory.ICON_SIDEBAR));
+        user_folder_group = new SpecialGrouping(2, "", rtl ? "tag-rtl-symbolic" : "tag-symbolic");
         folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
         
         account.information.notify["nickname"].connect(on_nicknamed_changed);

@@ -11,9 +11,9 @@ public class FolderList.SpecialGrouping : Sidebar.Grouping {
     // in the list.  If < 0, it comes before non-SpecialGroupings.
     public int position { get; private set; }
     
-    public SpecialGrouping(int position, string name, Icon? open_icon,
-        Icon? closed_icon = null, string? tooltip = null) {
-        base(name, open_icon, closed_icon, tooltip);
+    public SpecialGrouping(int position, string name, string? icon,
+        string? tooltip = null) {
+        base(name, icon, tooltip);
         
         this.position = position;
     }

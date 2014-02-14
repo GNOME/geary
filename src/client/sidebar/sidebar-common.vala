@@ -10,13 +10,11 @@ public class Sidebar.Grouping : Object, Sidebar.Entry, Sidebar.ExpandableEntry,
     
     private string name;
     private string? tooltip;
-    private Icon? open_icon;
-    private Icon? closed_icon;
+    private string? icon;
     
-    public Grouping(string name, Icon? open_icon, Icon? closed_icon = null, string? tooltip = null) {
+    public Grouping(string name, string? icon, string? tooltip = null) {
         this.name = name;
-        this.open_icon = open_icon;
-        this.closed_icon = closed_icon ?? open_icon;
+        this.icon = icon;
         this.tooltip = tooltip;
     }
     
@@ -37,16 +35,8 @@ public class Sidebar.Grouping : Object, Sidebar.Entry, Sidebar.ExpandableEntry,
         return tooltip;
     }
     
-    public Icon? get_sidebar_icon() {
-        return null;
-    }
-    
-    public Icon? get_sidebar_open_icon() {
-        return open_icon;
-    }
-    
-    public Icon? get_sidebar_closed_icon() {
-        return closed_icon;
+    public string? get_sidebar_icon() {
+        return icon;
     }
     
     public int get_count() {

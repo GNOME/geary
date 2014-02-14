@@ -44,8 +44,8 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
         return ngettext("%d result", "%d results", total).printf(total);
     }
     
-    public override Icon? get_sidebar_icon() {
-        return new ThemedIcon("edit-find-symbolic");
+    public override string? get_sidebar_icon() {
+        return "edit-find-symbolic";
     }
     
     public override string to_string() {
