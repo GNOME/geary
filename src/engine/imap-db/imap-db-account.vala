@@ -656,6 +656,11 @@ private class Geary.ImapDB.Account : BaseObject {
         /// messages received by a particular person.
         field_names.set(_("to"), "receivers");
         
+        // Fields we allow the token to be "me" as in from:me.
+        string[] addressable_fields = {
+            _("bcc"), _("cc"), _("from"), _("to"),
+        };
+        
         // If they stopped at "field:", treat it as if they hadn't typed the :
         if (Geary.String.is_empty_or_whitespace(parts[1])) {
             token = parts[0];
@@ -665,6 +670,12 @@ private class Geary.ImapDB.Account : BaseObject {
         string key = parts[0].down();
         if (key in field_names.keys) {
             token = parts[1];
+            if (key in addressable_fields) {
+                // "me" can be typed like from:me or cc:me, etc. as a shorthand
+                // to find mail to or from yourself in search.
+                if (token.down() == _("me"))
+                    token = account_information.email;
+            }
             return field_names.get(key);
         }
         
