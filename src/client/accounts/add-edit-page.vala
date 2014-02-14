@@ -219,6 +219,8 @@ public class AddEditPage : Gtk.Box {
         combo_storage_length.append("90", _("3 months back"));
         combo_storage_length.append("180", _("6 months back"));
         combo_storage_length.append("365", _("1 year back"));
+        combo_storage_length.append("730", _("2 years back"));
+        combo_storage_length.append("1461", _("4 years back"));
         combo_storage_length.append(".", "."); // Separator
         combo_storage_length.append("-1", _("Everything"));
         
