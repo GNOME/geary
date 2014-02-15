@@ -1,3 +1,14 @@
+Geary 0.5.2 - 14 February 2014
+------------------------------
+
+  * Improved recognition of special folders for "Other" accounts
+  * Prompt before permanently deleting messages
+  * Allow searching for "from:me" and the like
+  * Conversation viewer quoted text improvements
+  * UI and icon improvements
+  * Miscellaneous bugfixes
+
+
 Geary 0.5.1 - 30 January 2014
 -----------------------------
 
