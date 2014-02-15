@@ -93,6 +93,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 15:
                 post_upgrade_fix_localized_internaldates();
             break;
+            
+            case 18:
+                post_upgrade_populate_internal_date_time_t();
+            break;
         }
     }
     
@@ -202,7 +206,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         return "english";
     }
     
-    // Version 12.
+    // Versions 12 and 18.
     private void post_upgrade_populate_internal_date_time_t() {
         try {
             exec_transaction(Db.TransactionType.RW, (cx) => {
