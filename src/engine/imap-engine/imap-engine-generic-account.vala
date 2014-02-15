@@ -633,12 +633,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.Collection<MinimalFolder> engine_added = new Gee.ArrayList<Geary.Folder>();
         engine_added.add_all(build_folders(folders_to_build));
         
-        // TODO: Remove local folders no longer available remotely.
-        foreach (Geary.Folder folder in to_remove)
-            debug(@"Need to remove folder $folder");
+        notify_folders_available_unavailable(null, to_remove);
         
-        if (engine_added.size > 0)
-            notify_folders_added_removed(sort_by_path(engine_added), null);
+        Gee.ArrayList<Geary.Folder> engine_removed = new Gee.ArrayList<Geary.Folder>();
+        
+        // Sort by path length descending, so we always remove children first.
+        to_remove.sort((a, b) => b.path.get_path_length() - a.path.get_path_length());
+        foreach (Geary.Folder folder in to_remove) {
+            try {
+                debug("Locally deleting removed folder %s", folder.to_string());
+                
+                yield local.delete_folder_async(folder, cancellable);
+                engine_removed.add(folder);
+            } catch (Error e) {
+                debug("Unable to locally delete removed folder %s: %s", folder.to_string(), e.message);
+            }
+        }
+        
+        if (engine_added.size > 0 || engine_removed.size > 0)
+            notify_folders_added_removed(sort_by_path(engine_added), sort_by_path(engine_removed));
         
         // report all altered folders
         if (altered_paths.size > 0) {

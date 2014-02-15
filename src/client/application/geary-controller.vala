@@ -1230,10 +1230,21 @@ public class GearyController : Geary.BaseObject {
         
         if (unavailable != null) {
             foreach (Geary.Folder folder in unavailable) {
+                main_window.folder_list.remove_folder(folder);
+                if (folder.account == current_account) {
+                    if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))
+                        main_window.main_toolbar.copy_folder_menu.remove_folder(folder);
+                    if (main_window.main_toolbar.move_folder_menu.has_folder(folder))
+                        main_window.main_toolbar.move_folder_menu.remove_folder(folder);
+                }
+                
                 if (folder.special_folder_type == Geary.SpecialFolderType.INBOX &&
                     inboxes.has_key(folder.account)) {
+                    inboxes.unset(folder.account);
                     new_messages_monitor.remove_folder(folder);
                 }
+                
+                folder.special_folder_type_changed.disconnect(on_special_folder_type_changed);
             }
         }
     }

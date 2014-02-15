@@ -213,6 +213,29 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
     }
     
+    public async void delete_folder_async(Geary.Folder folder, Cancellable? cancellable)
+        throws Error {
+        check_open();
+        
+        Geary.FolderPath path = folder.path;
+        
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            int64 folder_id;
+            do_fetch_folder_id(cx, path, false, out folder_id, cancellable);
+            if (folder_id == Db.INVALID_ROWID)
+                return Db.TransactionOutcome.ROLLBACK;
+            
+            if (do_has_children(cx, folder_id, cancellable)) {
+                debug("Can't delete folder %s because it has children", folder.to_string());
+                return Db.TransactionOutcome.ROLLBACK;
+            }
+            
+            do_delete_folder(cx, folder_id, cancellable);
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+    }
+    
     /**
      * Only updates folder's STATUS message count, attributes, recent, and unseen; UIDVALIDITY and UIDNEXT
      * updated when the folder is SELECT/EXAMINED (see update_folder_select_examine_async()) unless
@@ -1243,6 +1266,13 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         return do_fetch_folder_id(cx, path.get_parent(), create, out parent_id, cancellable);
+    }
+    
+    private bool do_has_children(Db.Connection cx, int64 folder_id, Cancellable? cancellable) throws Error {
+        Db.Statement stmt = cx.prepare("SELECT 1 FROM FolderTable WHERE parent_id = ?");
+        stmt.bind_rowid(0, folder_id);
+        Db.Result result = stmt.exec(cancellable);
+        return !result.finished;
     }
     
     // Turn the collection of folder paths into actual folder ids.  As a
