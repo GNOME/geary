@@ -517,7 +517,7 @@ body:not(.nohide) .quote_container.controllable.show .quote {
     bottom: -7px;
     left: 0;
     right: 0;
-    padding: 0 20%;
+    padding: 0 8px;
     display: none;
 }
 .quote_container > .shower > input,
@@ -534,6 +534,10 @@ body:not(.nohide) .quote_container.controllable.show .quote {
 }
 body:not(.nohide) .quote_container.controllable {
     margin-bottom: 7px;
+    padding-bottom: 0;
+}
+body:not(.nohide) .quote_container.controllable.show {
+    padding-bottom: 12px;
 }
 body:not(.nohide) .quote_container.controllable > .shower {
     display: block;
