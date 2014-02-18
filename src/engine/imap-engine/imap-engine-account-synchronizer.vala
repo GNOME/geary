@@ -10,9 +10,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     public GenericAccount account { get; private set; }
     
-    private Nonblocking.Mailbox<GenericFolder> bg_queue = new Nonblocking.Mailbox<GenericFolder>(bg_queue_comparator);
-    private Gee.HashSet<GenericFolder> made_available = new Gee.HashSet<GenericFolder>();
-    private GenericFolder? current_folder = null;
+    private Nonblocking.Mailbox<MinimalFolder> bg_queue = new Nonblocking.Mailbox<MinimalFolder>(bg_queue_comparator);
+    private Gee.HashSet<MinimalFolder> made_available = new Gee.HashSet<MinimalFolder>();
+    private MinimalFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
     private Nonblocking.Semaphore stopped = new Nonblocking.Semaphore();
     private Gee.HashSet<FolderPath> unavailable_paths = new Gee.HashSet<FolderPath>();
@@ -125,29 +125,29 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     private void send_all(Gee.Collection<Folder> folders, bool reason_available) {
         foreach (Folder folder in folders) {
-            GenericFolder? generic_folder = folder as GenericFolder;
+            MinimalFolder? imap_folder = folder as MinimalFolder;
             
-            // only deal with ImapEngine.GenericFolders
-            if (generic_folder == null)
+            // only deal with ImapEngine.MinimalFolder
+            if (imap_folder == null)
                 continue;
             
             // don't requeue the currently processing folder
-            if (generic_folder != current_folder)
-                bg_queue.send(generic_folder);
+            if (imap_folder != current_folder)
+                bg_queue.send(imap_folder);
             
             // If adding because now available, make sure it's flagged as such, since there's an
             // additional check for available folders ... if not, remove from the map so it's
             // not treated as such, in case both of these come in back-to-back
-            if (reason_available && generic_folder != current_folder)
-                made_available.add(generic_folder);
+            if (reason_available && imap_folder != current_folder)
+                made_available.add(imap_folder);
             else
-                made_available.remove(generic_folder);
+                made_available.remove(imap_folder);
         }
     }
     
     private void revoke_all(Gee.Collection<Folder> folders) {
         foreach (Folder folder in folders) {
-            GenericFolder? generic_folder = folder as GenericFolder;
+            MinimalFolder? generic_folder = folder as MinimalFolder;
             if (generic_folder != null) {
                 bg_queue.revoke(generic_folder);
                 made_available.remove(generic_folder);
@@ -158,7 +158,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     // This is used to ensure that certain special folders get prioritized over others, so folders
     // important to the user (i.e. Inbox) and folders handy for pulling all mail (i.e. All Mail) go
     // first while less-used folders (Trash, Spam) are fetched last
-    private static int bg_queue_comparator(GenericFolder a, GenericFolder b) {
+    private static int bg_queue_comparator(MinimalFolder a, MinimalFolder b) {
         if (a == b)
             return 0;
         
@@ -204,7 +204,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     private async void process_queue_async() {
         for (;;) {
-            GenericFolder folder;
+            MinimalFolder folder;
             try {
                 folder = yield bg_queue.recv_async(bg_cancellable);
             } catch (Error err) {
@@ -247,7 +247,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     // Returns false if IOError.CANCELLED received
-    private async bool process_folder_async(GenericFolder folder, bool availability_check, DateTime epoch) {
+    private async bool process_folder_async(MinimalFolder folder, bool availability_check, DateTime epoch) {
         // get oldest local email and its time, as well as number of messages in local store
         DateTime? oldest_local = null;
         Geary.EmailIdentifier? oldest_local_id = null;
@@ -327,7 +327,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         return true;
     }
     
-    private async void sync_folder_async(GenericFolder folder, DateTime epoch, DateTime? oldest_local,
+    private async void sync_folder_async(MinimalFolder folder, DateTime epoch, DateTime? oldest_local,
         Geary.EmailIdentifier? oldest_local_id) throws Error {
         debug("Background sync'ing %s", folder.to_string());
         
