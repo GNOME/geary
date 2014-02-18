@@ -84,6 +84,11 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
                 return new MinimalFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
             
+            case SpecialFolderType.DRAFTS:
+            case SpecialFolderType.TRASH:
+                return new GenericFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
             default:
                 return new GmailFolder(this, remote_account, local_account, local_folder, special_folder_type);
         }
