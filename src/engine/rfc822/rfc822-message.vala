@@ -211,8 +211,21 @@ public class Geary.RFC822.Message : BaseObject {
             error("Error creating a memory buffer from a message: %s", e.message);
         }
         
+        // GMime also drops the ball for the *new* message.  When it comes out of the GMime
+        // Parser, its "mime part" somehow isn't realizing it has a Content-Type header
+        // already, so whenever you manipulate the headers, it adds a duplicate one.  This
+        // odd looking hack ensures that any header manipulation is done while the "mime
+        // part" is an empty object, and when we re-set the "mime part", there's only the
+        // one Content-Type header.  In other words, this hack prevents the duplicate
+        // header, somehow.
+        GMime.Object original_mime_part = message.get_mime_part();
+        GMime.Message empty = new GMime.Message(true);
+        message.set_mime_part(empty.get_mime_part());
+        
         message.remove_header(HEADER_BCC);
         bcc = null;
+        
+        message.set_mime_part(original_mime_part);
     }
     
     private GMime.Object? coalesce_parts(Gee.List<GMime.Object> parts, string subtype) {
