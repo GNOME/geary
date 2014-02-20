@@ -182,7 +182,7 @@ private class Geary.Imap.Account : BaseObject {
             throw_not_found(path);
         
         Imap.Folder folder;
-        if (!mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
+        if (!mailbox_info.attrs.is_no_select) {
             StatusData status = yield fetch_status_async(path, cancellable);
             
             folder = new Imap.Folder(session_mgr, status, mailbox_info);
@@ -240,7 +240,7 @@ private class Geary.Imap.Account : BaseObject {
             StatusCommand, MailboxSpecifier>();
         foreach (MailboxInformation mailbox_info in child_info) {
             // if new mailbox is unselectable, don't bother doing a STATUS command
-            if (mailbox_info.attrs.contains(MailboxAttribute.NO_SELECT)) {
+            if (mailbox_info.attrs.is_no_select) {
                 Imap.Folder folder = new Imap.Folder.unselectable(session_mgr, mailbox_info);
                 folders.set(folder.path, folder);
                 child_folders.add(folder);

@@ -166,7 +166,7 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
                 has_children = Trillian.FALSE;
         }
         
-        is_openable = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_SELECT));
+        is_openable = Trillian.from_boolean(!attrs.is_no_select);
     }
     
     /**
