@@ -12,7 +12,7 @@ internal void init() {
     if (init_count++ != 0)
         return;
     
-    GMime.init(0);
+    GMime.init(GMime.ENABLE_RFC2047_WORKAROUNDS);
 }
 
 }
