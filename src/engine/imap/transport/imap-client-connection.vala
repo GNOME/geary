@@ -32,6 +32,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
     
     private const int FLUSH_TIMEOUT_MSEC = 10;
     
+    // At least one server out there requires this to be in caps
+    private const string IDLE_DONE = "DONE";
+    
     private enum State {
         UNCONNECTED,
         CONNECTED,
@@ -951,8 +954,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         }
         
         try {
-            Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), "done");
-            ser.push_unquoted_string("done");
+            Logging.debug(Logging.Flag.NETWORK, "[%s S] %s", to_string(), IDLE_DONE);
+            ser.push_unquoted_string(IDLE_DONE);
             ser.push_eol();
         } catch (Error err) {
             debug("[%s] Unable to close IDLE: %s", to_string(), err.message);
