@@ -83,11 +83,6 @@ public class ComposerWindow : Gtk.Window {
         </style>
         </head><body id="message-body"></body></html>""";
     
-    private const string draft_save_label_style = """
-        .draft-save-label {
-            color: shade (@bg_color, 0.6);
-        }""";
-    
     private const int DRAFT_TIMEOUT_MSEC = 2000; // 2 seconds
     
     public const string ATTACHMENT_KEYWORDS_GENERIC = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
@@ -241,7 +236,7 @@ public class ComposerWindow : Gtk.Window {
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         draft_save_label = (Gtk.Label) builder.get_object("draft_save_label");
-        GtkUtil.apply_style(draft_save_label, draft_save_label_style);
+        draft_save_label.get_style_context().add_class("dim-label");
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
         // Can only happen after actions exits
         compose_as_html = GearyApplication.instance.config.compose_as_html;
