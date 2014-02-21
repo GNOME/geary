@@ -126,6 +126,9 @@ private class Geary.ImapDB.MessageAddresses : BaseObject {
     
     private void add_contact(Gee.Map<string, Contact> contacts_map, RFC822.MailboxAddress address,
         int importance) {
+        if (!address.is_valid())
+            return;
+        
         Contact contact = new Contact.from_rfc822_address(address, importance);
         Contact? old_contact = contacts_map[contact.normalized_email];
         if (old_contact == null || old_contact.highest_importance < contact.highest_importance)

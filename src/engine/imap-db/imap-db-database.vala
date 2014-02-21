@@ -97,6 +97,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 18:
                 post_upgrade_populate_internal_date_time_t();
             break;
+            
+            case 19:
+                post_upgrade_validate_contacts();
+            break;
         }
     }
     
@@ -367,6 +371,31 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         } catch (Error err) {
             debug("Error fixing INTERNALDATES during upgrade to schema 15 for %s: %s",
                 db_file.get_path(), err.message);
+        }
+    }
+    
+    // Version 19.
+    private void post_upgrade_validate_contacts() {
+        try {
+            exec_transaction(Db.TransactionType.RW, (cx) => {
+                Db.Result result = cx.query("SELECT id, email FROM ContactTable");
+                while (!result.finished) {
+                    string email = result.string_at(1);
+                    if (!RFC822.MailboxAddress.is_valid_address(email)) {
+                        int64 id = result.rowid_at(0);
+                        
+                        Db.Statement stmt = cx.prepare("DELETE FROM ContactTable WHERE id = ?");
+                        stmt.bind_rowid(0, id);
+                        stmt.exec();
+                    }
+                    
+                    result.next();
+                }
+                
+                return Db.TransactionOutcome.COMMIT;
+            });
+        } catch (Error err) {
+            debug("Error populating autocompletion table during upgrade to database schema 5");
         }
     }
     

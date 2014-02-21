@@ -1,0 +1,5 @@
+--
+-- Dummy database upgrade to validate contact email addresses.  See
+-- src/engine/imap-db/imap-db-database.vala in post_upgrade() for the code
+-- that runs the upgrade.
+--
