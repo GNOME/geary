@@ -94,15 +94,23 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
     
     public override bool configure_event(Gdk.EventConfigure event) {
-        // Get window dimensions.
-        window_maximized = ((get_window().get_state() & Gdk.WindowState.MAXIMIZED) != 0);
-        if (!window_maximized) {
+        // Get window state and dimensions.
+        // Note: A window move triggers this event with no changed values.
+        bool maximized = ((get_window().get_state() & Gdk.WindowState.MAXIMIZED) != 0);
+        // Writing the window_* variables triggers a dconf database update. Only write if
+        // the value has changed.
+        if(window_maximized != maximized)
+            window_maximized = maximized;
+
+        if (!maximized) {
+            // can't use properties as out variables
             int width, height;
             get_size(out width, out height);
             
-            // can't use properties as out variables
-            window_width = width;
-            window_height = height;
+            if(window_width != width)
+                window_width = width;
+            if(window_height != height)
+                window_height = height;
         }
         
         return base.configure_event(event);
