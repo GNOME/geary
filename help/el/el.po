@@ -1,0 +1,914 @@
+# Greek translation for geary.
+# Copyright (C) 2014 geary's COPYRIGHT HOLDER
+# This file is distributed under the same license as the geary package.
+# Dimitris Spingos <dmtrs32@gmail.com>, 2014.
+# Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>, 2014.
+msgid ""
+msgstr ""
+"Project-Id-Version: geary master\n"
+"POT-Creation-Date: 2014-02-16 18:06+0000\n"
+"PO-Revision-Date: 2014-02-15 17:49+0300\n"
+"Last-Translator: Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>\n"
+"Language-Team: www.gnome.gr\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+
+#: C/write.page:9(title)
+msgid "Write a message"
+msgstr "Συγγραφή μηνύματος"
+
+#: C/write.page:12(p)
+msgid ""
+"To compose a new message in Geary, press the <gui>New Message</gui> button "
+"on the toolbar."
+msgstr ""
+"Για να συνθέσετε ένα νέο μήνυμα στο Geary, πατήστε το πλήκτρο <gui>Νέο "
+"μήνυμα</gui> στην εργαλειοθήκη."
+
+#: C/write.page:15(p)
+msgid ""
+"To reply to a message, open the message menu in the upper right corner of "
+"the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>. You can also reply to the last message in a conversation "
+"via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
+"on the toolbar."
+msgstr ""
+"Για να απαντήσετε σε ένα μήνυμα, ανοίξτε το μενού μηνυμάτων στην πάνω δεξιά "
+"γωνία του μηνύματος και επιλέξτε <gui>Απάντηση</gui>, <gui>Απάντηση σε "
+"όλους</gui> ή <gui>Προώθηση</gui>. Μπορείτε επίσης να απαντήσετε στο "
+"τελευταίο μήνυμα σε μια συζήτηση μέσα από το <gui>Απάντηση</gui>, "
+"<gui>Απάντηση σε όλους</gui> ή τα πλήκτρα <gui>Προώθηση</gui> στην "
+"εργαλειοθήκη."
+
+#: C/write.page:20(title)
+msgid "Features"
+msgstr "Γνωρίσματα"
+
+#: C/write.page:22(p)
+msgid ""
+"Geary's email composer lets you adjust the font, size and color of text. You "
+"can also insert hyperlinks into messages."
+msgstr ""
+"Η σύνταξη μηνύματος στο Geary σας επιτρέπει να ρυθμίσετε τη γραμματοσειρά, "
+"το μέγεθος και το χρώμα του κειμένου. Μπορείτε επίσης να παρεμβάλετε "
+"υπερσυνδέσμους στα μηνύματα."
+
+#: C/write.page:24(p)
+msgid ""
+"Geary can also send plain text messages. In the drop-down menu, check or "
+"uncheck \"Rich Text\" to toggle between plain text and rich text mode."
+msgstr ""
+"Το Geary μπορεί επίσης να στείλει απλά μηνύματα κειμένου. Στο πτυσσόμενο "
+"μενού, σημειώστε ή αποεπιλέξτε \"Πλούσιο κείμενο\" για να εναλλάξετε μεταξύ "
+"κατάστασης απλού και πλούσιου κειμένου."
+
+#: C/write.page:27(p)
+msgid ""
+"You can attach a file to a message you're writing in either of these ways:"
+msgstr ""
+"Μπορείτε να επισυνάψετε ένα αρχείο σε ένα μήνυμα που γράφετε σε οποιονδήποτε "
+"από αυτούς τους τρόπους:"
+
+#: C/write.page:29(p)
+msgid ""
+"Press the <gui>Attach File</gui> button at the lower left of the composer "
+"window, then select a file to attach."
+msgstr ""
+"Πατήστε το πλήκτρο <gui>Επισύναψη αρχείου</gui> στα κάτω αριστερά του "
+"παραθύρου σύνταξης, έπειτα επιλέξτε ένα αρχείο για επισύναψη."
+
+#: C/write.page:31(p)
+msgid ""
+"Drag the file from the Nautilus file manager to the composer window, and "
+"drop it either on the text fields at the top of the window or on the toolbar "
+"at the bottom."
+msgstr ""
+"Μεταφέρτε το αρχείο από τον διαχειριστή αρχείων Ναυτίλο στο παράθυρο "
+"σύνταξης και αποθέστε το ή στο πεδίο κειμένου στην κορυφή του παραθύρου ή "
+"στην εργαλειοθήκη προς τα κάτω."
+
+#: C/write.page:37(title)
+msgid "Drafts"
+msgstr "Πρόχειρα"
+
+#: C/write.page:39(p)
+msgid ""
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type. If you close the composer without sending, Geary will "
+"prompt you to keep the draft or to discard it."
+msgstr ""
+"Για διακομιστές αλληλογραφίας που υποστηρίζουν πρόχειρα, το Geary θα "
+"αποθηκεύσει αυτόματα το μήνυμα καθώς πληκτρολογείτε. Αν κλείσετε τη σύνταξη "
+"χωρίς αποστολή, το Geary θα σας προτρέψει να κρατήσετε το πρόχειρο ή να το "
+"απορρίψετε."
+
+#: C/write.page:42(p)
+msgid ""
+"To edit an existing draft, select the Drafts folder in the folder list, "
+"select the message, and click \"Edit Draft\" in the message viewer."
+msgstr ""
+"Για να επεξεργαστείτε ένα υπάρχον πρόχειρο, επιλέξτε τον φάκελο προχείρων "
+"στον κατάλογο φακέλων, επιλέξτε το μήνυμα και πατήστε \"Επεξεργασία προχείρου"
+"\" στην προβολή μηνυμάτων."
+
+#: C/write.page:45(p)
+msgid "Geary deletes the draft when you send the message."
+msgstr "Το Geary διαγράφει το πρόχειρο όταν στέλνετε το μήνυμα."
+
+#: C/star.page:10(title)
+msgid "Star a message or mark it as read/unread"
+msgstr "Βάλτε αστέρια σε ένα μήνυμα ή σημειώστε το ως διαβασμένο/αδιάβαστο"
+
+#: C/star.page:12(title)
+msgid "Star messages"
+msgstr "Μηνύματα με αστέρια"
+
+#: C/star.page:13(p)
+msgid ""
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
+msgstr ""
+"Μπορείτε να βάλετε αστέρια στα μηνύματα για να δείξετε ότι είναι σημαντικά "
+"για σας. Για να σημειώσετε μια συζήτηση με αστέρι, πατήστε το εικονίδιο "
+"αστεριού της στον κατάλογο συζητήσεων. Μπορείτε να βάλετε αστέρια σε ένα "
+"μεμονωμένο μήνυμα πατώντας το αστέρι στα πάνω δεξιά του ίδιου του μηνύματος."
+
+#: C/star.page:15(p)
+msgid ""
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
+msgstr ""
+"Με λογαριασμούς Gmail, τα μηνύματα με αστέρια εμφανίζονται στον φάκελο με τα "
+"αστέρια στον κατάλογο φακέλων."
+
+#: C/star.page:18(title)
+msgid "Mark messages as read or unread"
+msgstr "Σημείωση μηνυμάτων ως διαβασμένα ή αδιάβαστα"
+
+#: C/star.page:19(p)
+msgid ""
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
+msgstr ""
+"Το Geary σημειώνει τα μηνύματα ως διαβασμένα αυτόματα καθώς τα διαβάζετε. "
+"Για χειροκίνητη εναλλαγή μιας συνομιλίας ως διαβασμένης ή αδιάβαστης, "
+"πατήστε το εικονίδιο κύκλου στον κατάλογο συνομιλιών."
+
+#: C/star.page:22(p)
+msgid ""
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
+msgstr ""
+"Εναλλακτικά, μπορεί να χρησιμοποιηθεί το <gui>Σημείωση ως αδιάβαστο</gui> "
+"στο μενού <gui>Σημείωση</gui> στην εργαλειοθήκη για να εναλλάξετε την "
+"κατάσταση ανάγνωσης των επιλεγμένων συνομιλιών."
+
+#: C/star.page:25(p)
+msgid ""
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr ""
+"Για να σημειώσετε ένα μεμονωμένο μήνυμα ως διαβασμένο, επιλέξτε "
+"<gui>Σημείωση ως διαβασμένο</gui> από το πτυσσόμενο μενού."
+
+#: C/shortcuts.page:11(title)
+msgid "Keyboard shortcuts"
+msgstr "Συντομεύσεις πληκτρολογίου"
+
+#: C/shortcuts.page:12(p)
+msgid "Geary has keyboard shortcuts for most common operations."
+msgstr ""
+"Το Geary έχει συντομεύσεις πληκτρολογίου για τις πιο συνηθισμένες "
+"λειτουργίες."
+
+#: C/shortcuts.page:15(p)
+msgid "Compose a new message"
+msgstr "Σύνταξη νέου μηνύματος"
+
+#: C/shortcuts.page:15(p)
+msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
+msgstr "<keyseq><key>Ctrl</key><key>N</key></keyseq> ή <key>N</key>"
+
+#: C/shortcuts.page:18(p)
+msgid "Reply to sender"
+msgstr "Απάντηση στον αποστολέα"
+
+#: C/shortcuts.page:19(p)
+msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
+msgstr "<keyseq><key>Ctrl</key><key>R</key></keyseq> ή <key>R</key>"
+
+#: C/shortcuts.page:22(p)
+msgid "Reply to all"
+msgstr "Απάντησε σε όλους"
+
+#: C/shortcuts.page:23(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
+"<keyseq><key>Shift</key><key>R</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> ή "
+"<keyseq><key>Shift</key><key>R</key></keyseq>"
+
+#: C/shortcuts.page:26(p)
+msgid "Forward"
+msgstr "Προώθηση"
+
+#: C/shortcuts.page:27(p)
+msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
+msgstr "<keyseq><key>Ctrl</key><key>L</key></keyseq> ή <key>F</key>"
+
+#: C/shortcuts.page:30(p)
+msgid "Archive"
+msgstr "Αρχειοθήκη"
+
+#: C/shortcuts.page:31(key)
+msgid "A"
+msgstr "A"
+
+#: C/shortcuts.page:34(p)
+msgid "Trash"
+msgstr "Απορρίμματα"
+
+#: C/shortcuts.page:35(p)
+msgid "<key>Delete</key> or <key>Backspace</key>"
+msgstr "<key>Delete</key> ή <key>Backspace</key>"
+
+#: C/shortcuts.page:38(p)
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: C/shortcuts.page:39(p)
+msgid ""
+"<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
+"key><key>Backspace</key></keyseq>"
+msgstr ""
+"<keyseq><key>Shift</key><key>Delete</key></keyseq> ή <keyseq><key>Shift</"
+"key><key>Backspace</key></keyseq>"
+
+#: C/shortcuts.page:42(p)
+msgid "Star"
+msgstr "Αστέρι"
+
+#: C/shortcuts.page:43(key) C/shortcuts.page:91(key)
+msgid "S"
+msgstr "S"
+
+#: C/shortcuts.page:46(p)
+msgid "Unstar"
+msgstr "Κατάργηση αστεριού"
+
+#: C/shortcuts.page:47(key)
+msgid "D"
+msgstr "D"
+
+#: C/shortcuts.page:50(p)
+msgid "Mark read"
+msgstr "Σημείωση ως διαβασμένου"
+
+#: C/shortcuts.page:51(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
+"key><key>I</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>I</key></keyseq> ή <keyseq><key>Shift</"
+"key><key>I</key></keyseq>"
+
+#: C/shortcuts.page:54(p)
+msgid "Mark unread"
+msgstr "Σημείωση ως αδιάβαστου"
+
+#: C/shortcuts.page:55(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
+"key><key>U</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>U</key></keyseq> ή <keyseq><key>Shift</"
+"key><key>U</key></keyseq>"
+
+#: C/shortcuts.page:58(p)
+msgid "Toggle spam"
+msgstr "Εναλλαγή οχλήσεων"
+
+#: C/shortcuts.page:59(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> ή <key>!</key>"
+
+#: C/shortcuts.page:62(p)
+msgid "Quit"
+msgstr "Έξοδος"
+
+#: C/shortcuts.page:63(key) C/shortcuts.page:79(key) C/shortcuts.page:83(key)
+#: C/shortcuts.page:87(key) C/shortcuts.page:91(key) C/shortcuts.page:95(key)
+#: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: C/shortcuts.page:63(key)
+msgid "Q"
+msgstr "Q"
+
+#: C/shortcuts.page:66(p)
+msgid "Zoom in"
+msgstr "Μεγέθυνση"
+
+#: C/shortcuts.page:67(p)
+msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
+msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> ή <key>=</key>"
+
+#: C/shortcuts.page:70(p)
+msgid "Zoom out"
+msgstr "Σμίκρυνση"
+
+#: C/shortcuts.page:71(p)
+msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
+msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> ή <key>-</key>"
+
+#: C/shortcuts.page:74(p)
+msgid "Reset zoom"
+msgstr "Επαναφορά εστίασης"
+
+#: C/shortcuts.page:75(p)
+msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
+msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> ή <key>0</key>"
+
+#: C/shortcuts.page:78(p) C/preferences.page:10(title)
+msgid "Preferences"
+msgstr "Προτιμήσεις"
+
+#: C/shortcuts.page:79(key)
+msgid "E"
+msgstr "E"
+
+#: C/shortcuts.page:82(p) C/accounts.page:10(title)
+msgid "Accounts"
+msgstr "Λογαριασμοί"
+
+#: C/shortcuts.page:83(key)
+msgid "M"
+msgstr "M"
+
+#: C/shortcuts.page:86(p)
+msgid "Close composer window"
+msgstr "Κλείσιμο παραθύρου σύνταξης"
+
+#: C/shortcuts.page:87(key)
+msgid "W"
+msgstr "W"
+
+#: C/shortcuts.page:90(p)
+msgid "Jump to search box"
+msgstr "Μετάβαση στο πλαίσιο αναζήτησης"
+
+#: C/shortcuts.page:94(p)
+msgid "Find in current conversation"
+msgstr "Εύρεση στην τρέχουσα συνομιλία"
+
+#: C/shortcuts.page:95(key)
+msgid "F"
+msgstr "F"
+
+#: C/shortcuts.page:98(p)
+msgid "Find next in current conversation"
+msgstr "Εύρεση επόμενου στην τρέχουσα συνομιλία"
+
+#: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
+msgid "G"
+msgstr "G"
+
+#: C/shortcuts.page:102(p)
+msgid "Find previous in current conversation"
+msgstr "Εύρεση προηγούμενου στην τρέχουσα συνομιλία"
+
+#: C/shortcuts.page:103(key)
+msgid "Shift"
+msgstr "Shift"
+
+#: C/search.page:10(title)
+msgid "Search"
+msgstr "Αναζήτηση"
+
+#: C/search.page:12(p)
+msgid ""
+"Geary supports a per-account full text search. To start a search, select a "
+"folder associated with the account you'd like to search against. Then click "
+"the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) and start typing. Results will appear after a brief delay."
+msgstr ""
+"Το Geary υποστηρίζει μια πλήρη αναζήτηση κειμένου ανά λογαριασμό. Για να "
+"αρχίσετε μια αναζήτηση, επιλέξτε έναν φάκελο που συσχετίζεται με τον "
+"λογαριασμό που θα θέλατε να αναζητήσετε. Έπειτα πατήστε στο πλαίσιο "
+"αναζήτησης στην εργαλειοθήκη (ή πατήστε <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) και αρχίστε να πληκτρολογείτε. Τα αποτελέσματα θα εμφανιστούν μετά "
+"από μια σύντομη καθυστέρηση."
+
+#: C/search.page:16(p)
+msgid ""
+"The full text search includes email text, email addresses (to, from, and "
+"cc), subject lines and attachment filenames."
+msgstr ""
+"Η πλήρης αναζήτηση κειμένου περιλαμβάνει κείμενο μηνύματος, διευθύνσεων "
+"αλληλογραφίας (πρός, από, και αντίγραφο), γραμμές θέματος και ονόματα "
+"αρχείων συνημμένων."
+
+#: C/search.page:19(p)
+msgid ""
+"Keywords that match your search are highlighted the message view. Geary will "
+"match different forms of the same word, for example searching for \"walk\" "
+"will also match \"walking\" and \"walked.\""
+msgstr ""
+"Οι λέξεις-κλειδιά που ταιριάζουν με την αναζήτησή σας επισημαίνονται στην "
+"προβολή μηνυμάτων. Το Geary θα ταιριάξει διαφορετικές μορφές της ίδιας "
+"λέξης, για παράδειγμα η αναζήτηση για \"ωραίος\" θα ταιριάξει επίσης \"ωραίο"
+"\" και \"ωραίοι\"."
+
+#: C/preferences.page:11(p)
+msgid ""
+"To set preferences in Geary, click the gear menu at the upper right of the "
+"toolbar and choose <gui>Preferences</gui>."
+msgstr ""
+"Για να ορίσετε τις προτιμήσεις στο Geary, πατήστε το μενού με το γρανάζι στα "
+"πάνω δεξιά της εργαλειοθήκης και επιλέξτε <gui>Προτιμήσεις</gui>."
+
+#: C/preferences.page:15(title)
+msgid "Reading"
+msgstr "Ανάγνωση"
+
+#: C/preferences.page:18(gui)
+msgid "Automatically select next message"
+msgstr "Αυτόματη επιλογή επόμενου μηνύματος"
+
+#: C/preferences.page:19(p)
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr ""
+"Όταν αυτή η επιλογή είναι ενεργή, το Geary επιλέγει αυτόματα το τελευταίο "
+"μήνυμα στον φάκελο όταν μπαίνετε στον φάκελο. Επιπλέον, μετά την "
+"αρχειοθέτηση ενός μηνύματος, το Geary επιλέγει αυτόματα ένα γειτονικό μήνυμα."
+
+#: C/preferences.page:24(gui)
+msgid "Display conversation preview"
+msgstr "Να εμφανίζεται η προεπισκόπηση συνομιλίας"
+
+#: C/preferences.page:25(p)
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr ""
+"Ενεργοποιεί τις προεπισκοπήσεις μηνυμάτων στον κατάλογο συνομιλιών. Οι "
+"προεπισκοπήσεις εμφανίζουν τις πρώτες λίγες γραμμές κάθε μηνύματος."
+
+#: C/preferences.page:32(title)
+msgid "Composer"
+msgstr "Σύνταξη"
+
+#: C/preferences.page:35(gui)
+msgid "Enable spell checking"
+msgstr "Ενεργοποίηση ορθογραφικού ελέγχου"
+
+#: C/preferences.page:36(p)
+msgid ""
+"When set, Geary automatically spell checks a message as you write it, "
+"underlying each misspelled word in red."
+msgstr ""
+"Αν οριστεί, το Geary ελέγχει αυτόματα ορθογραφικά ένα μήνυμα καθώς γράφετε, "
+"υπογραμμίζοντας κάθε ανορθόγραφη λέξη με κόκκινο."
+
+#: C/preferences.page:43(title)
+msgid "Notifications"
+msgstr "Ειδοποιήσεις"
+
+#: C/preferences.page:46(gui)
+msgid "Play notification sounds"
+msgstr "Αναπαραγωγή ήχων ειδοποίησης"
+
+#: C/preferences.page:47(p)
+msgid "When set, Geary plays a sound whenever a new message arrives."
+msgstr "Αν οριστεί, το Geary παίζει έναν ήχο όποτε φτάνει ένα νέο μήνυμα."
+
+#: C/preferences.page:50(gui)
+msgid "Show notifications for new mail"
+msgstr "Εμφάνιση ειδοποιήσεων για νέα μηνύματα"
+
+#: C/preferences.page:51(p)
+msgid ""
+"When set, Geary displays a <em>notification</em> each time a new message "
+"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
+"Shell, notifications appear at the bottom of the display. In Ubuntu Unity, "
+"notifications appear at the upper right of the display."
+msgstr ""
+"Αν οριστεί, το Geary εμφανίζει μια <em>ειδοποίηση</em> κάθε φορά που φτάνει "
+"ένα νέο μήνυμα. Οι ειδοποιήσεις εμφανίζονται με έναν τρόπο εξαρτημένου "
+"συστήματος. Στο κέλυφος GNOME, οι ειδοποιήσεις εμφανίζονται στο τέλος της "
+"οθόνης. Στο Ουμπούντου Unity, οι ειδοποιήσεις εμφανίζονται στα πάνω δεξιά "
+"της οθόνης."
+
+#: C/overview.page:8(title)
+msgid "Overview"
+msgstr "Επισκόπηση"
+
+#: C/overview.page:10(p)
+msgid ""
+"Geary is a lightweight email reader for the <link href=\"http://gnome.org"
+"\">GNOME</link> desktop. It works with mail servers that support the IMAP "
+"protocol, including popular services such as Gmail, Yahoo Mail, and Outlook."
+"com."
+msgstr ""
+"Το Geary είναι ένας ελαφρύς αναγνώστης αλληλογραφίας για την επιφάνεια "
+"εργασίας <link href=\"http://gnome.org\">GNOME</link>. Δουλεύει με "
+"διακομιστές αλληλογραφίας που υποστηρίζουν το πρωτόκολλο IMAP, "
+"συμπεριλαμβανομένων δημοφιλών υπηρεσιών όπως Gmail, Yahoo Mail και Outlook."
+"com."
+
+#: C/overview.page:14(p)
+msgid ""
+"Geary groups mail messages into <em>conversations</em>. A conversation "
+"contains all messages in a single thread of discussion."
+msgstr ""
+"Το Geary ομαδοποιεί τα μηνύματα αλληλογραφίας σε <em>συνομιλίες</em>. Μια "
+"συνομιλία περιέχει όλα τα μηνύματα σε ένα μοναδικό νήμα συζήτησης."
+
+#: C/overview.page:17(p)
+msgid "The main Geary window is divided into several areas:"
+msgstr "Το κυρίως παράθυρο του Geary διαιρείται σε αρκετές περιοχές:"
+
+#: C/overview.page:20(title)
+msgid "Folder list"
+msgstr "Κατάλογος φακέλων"
+
+#: C/overview.page:21(p)
+msgid ""
+"The <em>folder list</em> at the left displays all <em>folders</em> and "
+"<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
+"any folder that you have created to help organize your messages. (The Gmail "
+"web interface also uses this term; most other mail services do not.)"
+msgstr ""
+"Ο <em>κατάλογος φακέλων</em> στα αριστερά εμφανίζει όλους τους <em>φακέλους</"
+"em> και τις <em>ετικέτες</em> στον λογαριασμό αλληλογραφίας σας. Το Geary "
+"χρησιμοποιεί τον όρο <em>ετικέτα</em> για οποιονδήποτε φάκελο έχετε "
+"δημιουργήσει για να βοηθήσει την οργάνωση των μηνυμάτων σας. (Η διεπαφή "
+"ιστού Gmail χρησιμοποιεί επίσης αυτόν τον όρο· οι περισσότερες άλλες "
+"υπηρεσίες δεν τον χρησιμοποιούν.)"
+
+#: C/overview.page:28(title)
+msgid "Conversation list"
+msgstr "Κατάλογος συνομιλιών"
+
+#: C/overview.page:29(p)
+msgid ""
+"The <em>conversation list</em> displays a list of conversations in the "
+"selected folder. Newer conversations appear at the top."
+msgstr ""
+"Ο <em>κατάλογος συνομιλιών</em> εμφανίζει έναν κατάλογο συνομιλιών στον "
+"επιλεγμένο φάκελο. Οι νεότερες συνομιλίες εμφανίζονται στην κορυφή."
+
+#: C/overview.page:31(p)
+msgid ""
+"Each sender's name appears bold if there are unread messages from that "
+"sender. If a conversation has more than one message, Geary displays a count "
+"of messages in the conversation."
+msgstr ""
+"Κάθε όνομα αποστολέα εμφανίζεται έντονος αν υπάρχουν αδιάβαστα μηνύματα από "
+"αυτόν τον αποστολέα. Αν μια συνομιλία έχει περισσότερα από ένα μηνύματα, το "
+"Geary εμφανίζει ένα αριθμό μηνυμάτων στη συνομιλία."
+
+#: C/overview.page:34(p)
+msgid ""
+"Geary does not automatically download all messages in all of your mail "
+"folders. When you first visit your Inbox or any other folder, Geary "
+"downloads the 50 most recent messages in that folder. To see more messages, "
+"simply scroll down the conversation list and Geary will fetch more messages "
+"automatically."
+msgstr ""
+"Το Geary δεν μεταφορτώνει αυτόματα όλα τα μηνύματα σε όλους τους φακέλους "
+"αλληλογραφίας. Όταν πρωτοεπισκέπτεστε τα εισερχόμενα ή οποιονδήποτε άλλον "
+"φάκελο, το Geary μεταφορτώνει τα 50 πιο πρόσφατα μηνύματα σε αυτόν τον "
+"φάκελο. Για να δείτε περισσότερα μηνύματα, απλά κυλήστε προς τα κάτω τον "
+"κατάλογο συνομιλιών και το Geary θα προσκομίσει περισσότερα μηνύματα "
+"αυτόματα."
+
+#: C/overview.page:36(p)
+msgid ""
+"Some commands in Geary can act on a group of conversations. To select "
+"multiple conversations, hold down the <key>Ctrl</key> key and click each "
+"conversation in turn in the conversation list. Alternatively, click the "
+"first conversation in a range, then hold down <key>Shift</key> and click the "
+"last conversation."
+msgstr ""
+"Κάποιες εντολές στο Geary μπορούν να δράσουν σε μια ομάδα συνομιλιών. Για να "
+"επιλέξετε πολλές συνομιλίες, κρατήστε πατημένο το πλήκτρο <key>Ctrl</key> "
+"και πατήστε κάθε συνομιλία με τη σειρά της στον κατάλογο συνομιλιών. "
+"Εναλλακτικά, πατήστε την πρώτη συνομιλία σε μια περιοχή, έπειτα κρατήστε "
+"πατημένο το <key>Shift</key> και πατήστε την τελευταία συνομιλία."
+
+#: C/overview.page:44(title)
+msgid "Message area"
+msgstr "Περιοχή μηνυμάτων"
+
+#: C/overview.page:45(p)
+msgid ""
+"The <em>message area</em> displays all messages in the selected "
+"conversation, with the oldest message at the top."
+msgstr ""
+"Η <em>περιοχή μηνυμάτων</em> εμφανίζει όλα τα μηνύματα στην επιλεγμένη "
+"συνομιλία, με τα πιο παλιά μηνύματα στην κορυφή."
+
+#: C/overview.page:47(p)
+msgid ""
+"At the upper right of each message, Geary displays a dropdown arrow that "
+"lets you open the <em>message menu</em> with commands that operate on the "
+"message."
+msgstr ""
+"Στα πάνω δεξιά κάθε μηνύματος, το Geary εμφανίζει ένα πτυσσόμενο βέλος που "
+"σας επιτρέπει να ανοίξετε το <em>μενού μηνυμάτων</em> με εντολές που "
+"επιδρούν στο μήνυμα."
+
+#: C/overview.page:49(p)
+msgid ""
+"When you view a conversation, Geary collapses messages that you've already "
+"read. Click collapsed messages to expand them. Click an expanded message's "
+"header to collapse it."
+msgstr ""
+"Όταν προβάλετε μια συνομιλία, το Geary συμπτύσσει τα μηνύματα που έχετε ήδη "
+"διαβάσει. Πατήστε τα συνεπτυγμένα μηνύματα για να επεκτείνετε. Πατήστε την "
+"κεφαλίδα ενός επεκταμένου μηνύματος για να το συμπτύξετε."
+
+#: C/overview.page:50(p)
+msgid ""
+"Any attachments in a message appear at the bottom of the message. You can "
+"click an attachment to open it."
+msgstr ""
+"Όλα τα συνημμένα σε ένα μήνυμα εμφανίζονται στο τέλος του μηνύματος. "
+"Μπορείτε να πατήσετε ένα συνημμένο για να το ανοίξετε."
+
+#: C/limits.page:11(title)
+msgid "Limitations"
+msgstr "Περιορισμοί"
+
+#: C/limits.page:12(p)
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr ""
+"Το Geary είναι ακόμα στην πρώιμη ανάπτυξη. Το Geary υποστηρίζει IMAP και "
+"έχει δοκιμαστεί με Gmail, Yahoo και τον ελεύθερο διακομιστή αλληλογραφίας "
+"Dovecot. Πειραματική υποστήριξη παρέχεται για το Outlook.com. Το Geary "
+"ενδέχεται να μην δουλεύει ακόμα καλά με κάποιους διακομιστές IMAP. Αυτήν την "
+"περίοδο στο Geary λείπουν ακόμα πολυάριθμά γνωρίσματα συμπεριλαμβανόμενης "
+"της λειτουργίας χωρίς σύνδεση."
+
+#: C/limits.page:14(p)
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"http://redmine.yorba.org/projects/geary/"
+"wiki\">Redmine page</link>."
+msgstr ""
+"Για να μάθετε περισσότερα για τα γνωρίσματα στα οποία δουλεύουμε και το "
+"μέλλον του Geary, παρακαλούμε επισκεφτείτε τη <link href=\"http://redmine."
+"yorba.org/projects/geary/wiki\">σελίδα Redmine</link> του Geary."
+
+#: C/label.page:10(title)
+msgid "Label or move a conversation"
+msgstr "Ονομάστε ή μετακινήστε μια συνομιλία"
+
+#: C/label.page:12(title)
+msgid "Label a conversation"
+msgstr "Ονομάστε μια συνομιλία"
+
+#: C/label.page:13(p)
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr ""
+"Το Geary σας επιτρέπει να εφαρμόσετε μία ή περισσότερες <em>ετικέτες</em> "
+"για κάθε συνομιλία. Οι ετικέτες Geary αντιστοιχούν σε Gmail, ή σε κοινούς "
+"φακέλους σε άλλες υπηρεσίες αλληλογραφίας."
+
+#: C/label.page:15(p)
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr ""
+"Για να ονομάσετε μία ή περισσότερες συνομιλίες, επιλέξτε πρώτα τις "
+"συνομιλίες, έπειτα κάντε ένα από τα ακόλουθα:"
+
+#: C/label.page:18(p)
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
+msgstr ""
+"Πατήστε στο πλήκτρο <gui>ετικέτα</gui> στην εργαλειοθήκη και επιλέξτε μια "
+"ετικέτα από το τελικό πτυσσόμενο μενού."
+
+#: C/label.page:20(p)
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr ""
+"Κρατήστε πατημένο το πλήκτρο <key>Ctrl</key> και μεταφέρτε τις συνομιλίες "
+"από τον κατάλογο συνομιλιών στην ετικέτα στην πλευρική στήλη."
+
+#: C/label.page:25(title)
+msgid "Move a conversation to a folder or label"
+msgstr "Μετακίνηση μιας συνομιλίας σε έναν φάκελο ή ετικέτα"
+
+#: C/label.page:26(p)
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr ""
+"Για να μετακινήσετε μία ή περισσότερες συνομιλίες σε έναν φάκελο ή ετικέτα, "
+"επιλέξτε πρώτα τις συνομιλίες, έπειτα κάντε ένα από τα παρακάτω:"
+
+#: C/label.page:29(p)
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
+msgstr ""
+"Πατήστε στο πλήκτρο <gui>Μετακίνηση</gui> στην εργαλειοθήκη και επιλέξτε "
+"έναν φάκελο ή μια ετικέτα από το τελικό πτυσσόμενο μενού."
+
+#: C/label.page:31(p)
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr ""
+"Μεταφέρτε τις συνομιλίες από τον κατάλογο συνομιλιών στον φάκελο ή στην "
+"ετικέτα στην πλευρική στήλη."
+
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/index.page:5(None)
+msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
+msgstr "@@image: 'figures/geary.svg'· md5=18b50c9e10fe5256ae1cb12aaa3a7600"
+
+#: C/index.page:5(title)
+msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+
+#: C/index.page:9(title)
+msgid "Introduction"
+msgstr "Εισαγωγή"
+
+#: C/index.page:13(title)
+msgid "Using Geary"
+msgstr "Χρήση του Geary"
+
+#: C/index.page:17(title)
+msgid "Bugs"
+msgstr "Σφάλματα"
+
+#: C/bugs.page:8(title)
+msgid "Think you've found a bug?"
+msgstr "Νομίζετε ότι έχετε βρει ένα σφάλμα;"
+
+#: C/bugs.page:9(p)
+msgid ""
+"If you suspect you've found a bug in Geary, follow these steps to report it:"
+msgstr ""
+"Αν υποψιάζεστε ότι έχετε βρει ένα σφάλμα στο Geary, ακολουθήστε αυτά τα "
+"βήματα για να το αναφέρετε:"
+
+#: C/bugs.page:11(p)
+msgid ""
+"Search Geary's Redmine<link href=\"http://redmine.yorba.org/projects/geary/"
+"issues\"> issue tracker </link>to see if someone else has reported the bug."
+msgstr ""
+"Αναζητήστε το Redmine του Geary <link href=\"http://redmine.yorba.org/"
+"projects/geary/issues\">ανιχνευτής θεμάτων</link> για να δείτε αν κάποιος "
+"άλλος έχει αναφέρει το σφάλμα."
+
+#: C/bugs.page:12(p)
+msgid ""
+"Don't see your bug listed? Congratulations! You've found a new bug. To "
+"create an bug report, create an account on Redmine and create a new issue. "
+"Be as specific as you can and describe the steps to reproduce it. Don't "
+"forget to include details about your operating system and what version of "
+"Geary you're running."
+msgstr ""
+"Δεν βλέπετε το σφάλμα σας καταχωρισμένο; Συγχαρητήρια! Έχετε βρεί ένα νέο "
+"σφάλμα. Για να δημιουργήσετε μια αναφορά σφάλματος, δημιουργήστε έναν "
+"λογαριασμό στο Redmine και δημιουργήστε ένα νέο θέμα. Να είστε όσο "
+"περισσότερο συγκεκριμένοι μπορείτε και να περιγράψετε τα βήματα για την "
+"αναπαραγωγή του. Μην ξεχάσετ‎ε να συμπεριλάβετε λεπτομέρειες για το "
+"λειτουργικό σας σύστημα και ποια έκδοση του Geary τρέχετε."
+
+#: C/bugs.page:13(p)
+msgid ""
+"For general inquiries, please join the <link href=\"http://lists.yorba.org/"
+"cgi-bin/mailman/listinfo/geary\"> Geary mailing list</link>."
+msgstr ""
+"Για γενικές αναζητήσεις, παρακαλούμε συμμετάσχετε στον <link href=\"http://"
+"lists.yorba.org/cgi-bin/mailman/listinfo/geary\">κατάλογο αλληλογραφίας "
+"Geary</link>."
+
+#: C/archive.page:10(title)
+msgid "Delete or archive a message"
+msgstr "Διαγραφή ή αρχειοθέτηση μηνύματος"
+
+#: C/archive.page:12(p)
+msgid ""
+"When you use Geary with a Gmail account, Geary lets you <em>archive</em> "
+"messages. The <gui>Archive</gui> toolbar button archives the selected "
+"conversation(s). Archived messages appear in the <gui>All Mail</gui> folder."
+msgstr ""
+"Όταν χρησιμοποιείτε το Geary με έναν λογαριασμό Gmail, το Geary σας "
+"επιτρέπει να <em>αρχειοθετείτε</em> μηνύματα. Το πλήκτρο εργαλειοθήκης "
+"<gui>Αρχειοθήκη</gui> αρχειοθετεί τις επιλεγμένες συνομιλίες. Τα "
+"αρχειοθετημένα μηνύματα εμφανίζονται στον φάκελο <gui>Όλη η αλληλογραφία</"
+"gui>."
+
+#: C/archive.page:16(p)
+msgid ""
+"With other mail servers, you can delete but not archive messages. To delete "
+"one or more conversations, select them and press the <gui>Delete</gui> "
+"button on the toolbar."
+msgstr ""
+"Με άλλους διακομιστές αλληλογραφίας, μπορείτε να διαγράψετε αλλά όχι να "
+"αρχειοθετήσετε μηνύματα. Για να διαγράψετε μία ή περισσότερες συνομιλίες, "
+"επιλέξτε τες και πατήστε το πλήκτρο <gui>Διαγραφή</gui> στην εργαλειοθήκη."
+
+#: C/accounts.page:13(title)
+msgid "Adding accounts"
+msgstr "Προσθήκη λογαριασμών"
+
+#: C/accounts.page:15(p)
+msgid ""
+"The first time you start Geary, you will be prompted to add an email "
+"account. On this screen, select if your account is Gmail, Yahoo, Outlook."
+"com, or other. For other account types, you will need to enter your IMAP and "
+"SMTP login settings manually."
+msgstr ""
+"Την πρώτη φορά που ξεκινάτε το Geary, θα σας ζητηθεί να προσθέσετε έναν "
+"λογαριασμό αλληλογραφίας. Σε αυτήν την οθόνη, επιλέξτε αν ο λογαριασμός σας "
+"είναι Gmail, Yahoo, Outlook.com, ή άλλος. Για άλλους τύπους λογαριασμών, θα "
+"χρειαστεί να εισάγετε τις ρυθμίσεις σύνδεσης IMAP και SMTP χειροκίνητα."
+
+#: C/accounts.page:19(p)
+msgid ""
+"Additional accounts can be added from the Accounts dialog. Click Accounts in "
+"the Gear menu (or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to "
+"open the Accounts dialog. To add an account, click the + button."
+msgstr ""
+"Πρόσθετοι λογαριασμοί μπορούν να προστεθούν από τον διάλογο λογαριασμοί. "
+"Πατήστε λογαριασμοί στο μενού Gear (ή πατήστε <keyseq><key>Ctrl</key><key>M</"
+"key></keyseq>) για να ανοίξετε τον διάλογο λογαριασμοί. Για να προσθέσετε "
+"έναν λογαριασμό, πατήστε το πλήκτρο +."
+
+#: C/accounts.page:25(title)
+msgid "Editing existing accounts"
+msgstr "Επεξεργασία υπαρχόντων λογαριασμών"
+
+#: C/accounts.page:27(p)
+msgid ""
+"From the Accounts dialog, select an account and click the pencil icon to "
+"change various settings. Please note that Geary cannot change server "
+"settings on an existing account. If you need to change your IMAP or SMTP "
+"server, you will need to delete the account and re-add it."
+msgstr ""
+"Από τον διάλογο λογαριασμών, επιλέξτε έναν λογαριασμό και πατήστε το "
+"εικονίδιο μολυβιού για να αλλάξετε ποικίλες ρυθμίσεις. Παρακαλούμε σημειώστε "
+"ότι το Geary δεν μπορεί να αλλάξει τις ρυθμίσεις διακομιστή σε έναν "
+"υπάρχοντα λογαριασμό. Αν χρειαστείτε να αλλάξετε τον διακομιστή σας IMAP ή "
+"SMTP, θα χρειαστείτε να διαγράψετε τον λογαριασμό και να τον ξαναπροσθέσετε."
+
+#: C/accounts.page:31(p)
+msgid ""
+"To change the order that accounts are displayed in the folder list, drag the "
+"accounts in the Accounts dialog to the desired order."
+msgstr ""
+"Για να αλλάξετε τη σειρά που εμφανίζονται οι λογαριασμοί στον κατάλογο "
+"φακέλων, μεταφέρτε τους λογαριασμούς στον διάλογο λογαριασμών με την "
+"επιθυμητή σειρά."
+
+#: C/accounts.page:37(title)
+msgid "Removing accounts"
+msgstr "Αφαίρεση λογαριασμών"
+
+#: C/accounts.page:39(p)
+msgid ""
+"To delete an account, open the Accounts dialog, select the account, and "
+"press the - button. Geary will delete all information associated with the "
+"account."
+msgstr ""
+"Για να διαγράψετε έναν λογαριασμό, ανοίξτε τον διάλογο λογαριασμών, επιλέξτε "
+"τον λογαριασμό και πατήστε το πλήκτρο -. Το Geary θα διαγράψει όλες τις "
+"πληροφορίες που σχετίζονται με τον λογαριασμό."
+
+#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
+#: C/accounts.page:0(None)
+msgid "translator-credits"
+msgstr "Δημήτρης Σπίγγος <dmtrs32@gmail.com>, 2014"
