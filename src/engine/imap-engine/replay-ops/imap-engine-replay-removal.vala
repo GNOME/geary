@@ -10,7 +10,7 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
     public Imap.SequenceNumber position;
     
     public ReplayRemoval(MinimalFolder owner, int remote_count, Imap.SequenceNumber position) {
-        base ("Removal", Scope.LOCAL_ONLY);
+        base ("Removal", Scope.LOCAL_AND_REMOTE);
         
         this.owner = owner;
         this.remote_count = remote_count;
@@ -31,16 +31,17 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        yield owner.do_replay_removed_message(remote_count, position);
-        
-        return ReplayOperation.Status.COMPLETED;
+        // Although technically a local-only operation, must treat as remote to ensure it's
+        // processed in-order with ReplayAppend operations
+        return ReplayOperation.Status.CONTINUE;
     }
     
     public override async void backout_local_async() throws Error {
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        // should not be called
+        yield owner.do_replay_removed_message(remote_count, position);
+        
         return ReplayOperation.Status.COMPLETED;
     }
     
