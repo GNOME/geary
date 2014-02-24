@@ -139,5 +139,26 @@ public class IconFactory {
         // Default: missing image icon.
         return get_missing_icon(size, flags);
     }
+    
+    /**
+     * Loads a symbolic icon into a pixbuf, where the color-key has been switched to the provided
+     * color.
+     */
+    public Gdk.Pixbuf? load_symbolic_colored(string icon_name, int size, Gdk.RGBA color,
+        Gtk.IconLookupFlags flags = 0) {
+        Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
+        
+        // Attempt to load as a symbolic icon.
+        if (icon_info != null) {
+            try {
+                return icon_info.load_symbolic(color);
+            } catch (Error e) {
+                warning("Couldn't load icon: %s", e.message);
+            }
+        }
+       // Default: missing image icon.
+       return get_missing_icon(size, flags);
+    }
+    
 }
 

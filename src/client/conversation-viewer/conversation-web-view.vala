@@ -13,6 +13,7 @@ public class ConversationWebView : WebKit.WebView {
     private const string USER_CSS = "user-message.css";
     private const string STYLE_NAME = "STYLE";
     private const string PREVENT_HIDE_STYLE = "nohide";
+    private Gdk.RGBA conversation_icon_color;
     
     // HTML element that contains message DIVs.
     public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
@@ -141,6 +142,7 @@ public class ConversationWebView : WebKit.WebView {
         container = _container as WebKit.DOM.HTMLDivElement;
         assert(container != null);
         
+        conversation_icon_color.parse("#888888");
         // Load the icons.
         set_icon_src("#email_template .menu .icon", "go-down-symbolic");
         set_icon_src("#email_template .starred .icon", "starred-symbolic");
@@ -203,7 +205,8 @@ public class ConversationWebView : WebKit.WebView {
         try {
             // Load icon.
             uint8[]? icon_content = null;
-            Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic(icon_name, 16, get_style_context());
+            Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic_colored(icon_name, 16, 
+                conversation_icon_color);
             if (pixbuf != null)
                 pixbuf.save_to_buffer(out icon_content, "png"); // Load as PNG.
             
