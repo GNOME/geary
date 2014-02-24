@@ -232,7 +232,7 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
 }
 
 private string quote_body(Geary.Email email, bool use_quotes, bool html_format) {
-    string body_text = "";
+    string? body_text = "";
     
     try {
         body_text = email.get_message().get_body(html_format);
@@ -241,7 +241,7 @@ private string quote_body(Geary.Email email, bool use_quotes, bool html_format) 
     }
     
     // Wrap the whole thing in a blockquote.
-    if (use_quotes)
+    if (use_quotes && !String.is_empty(body_text))
         body_text = "<blockquote type=\"cite\">%s</blockquote>".printf(body_text);
     
     return body_text;
