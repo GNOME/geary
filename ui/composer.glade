@@ -211,7 +211,8 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">1</property>
                     <property name="xpad">6</property>
-                    <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">To:</property>
+                    <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">_To:</property>
+                    <property name="use_underline">True</property>
                     <property name="justify">right</property>
                     <property name="mnemonic_widget">to</property>
                   </object>
@@ -228,9 +229,10 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">1</property>
                     <property name="xpad">6</property>
-                    <property name="label" translatable="yes">Cc:</property>
+                    <property name="label" translatable="yes">_Cc:</property>
+                    <property name="use_underline">True</property>
                     <property name="justify">right</property>
-                    <property name="mnemonic_widget">cc</property>
+                    <property name="mnemonic_widget">to</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -286,7 +288,8 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">1</property>
                     <property name="xpad">6</property>
-                    <property name="label" translatable="yes">Subject:</property>
+                    <property name="label" translatable="yes">_Subject:</property>
+                    <property name="use_underline">True</property>
                     <property name="justify">right</property>
                     <property name="mnemonic_widget">subject</property>
                   </object>
@@ -303,9 +306,10 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">1</property>
                     <property name="xpad">6</property>
-                    <property name="label" translatable="yes">Bcc:</property>
+                    <property name="label" translatable="yes">_Bcc:</property>
+                    <property name="use_underline">True</property>
                     <property name="justify">right</property>
-                    <property name="mnemonic_widget">bcc</property>
+                    <property name="mnemonic_widget">to</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -587,7 +591,7 @@
             <property name="layout_style">start</property>
             <child>
               <object class="GtkButton" id="Close">
-                <property name="label" translatable="yes">_Close</property>
+                <property name="label" translatable="yes">C_lose</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

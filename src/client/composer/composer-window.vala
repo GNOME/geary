@@ -221,8 +221,6 @@ public class ComposerWindow : Gtk.Window {
         visible_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("visible_on_attachment_drag_over_child");
         visible_on_attachment_drag_over.remove(visible_on_attachment_drag_over_child);
         
-        // TODO: It would be nicer to set the completions inside the EmailEntry constructor. But in
-        // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
         from_label = (Gtk.Label) builder.get_object("from label");
         from_single = (Gtk.Label) builder.get_object("from_single");
         from_multiple = (Gtk.ComboBoxText) builder.get_object("from_multiple");
@@ -232,6 +230,16 @@ public class ComposerWindow : Gtk.Window {
         (builder.get_object("cc") as Gtk.EventBox).add(cc_entry);
         bcc_entry = new EmailEntry();
         (builder.get_object("bcc") as Gtk.EventBox).add(bcc_entry);
+        
+        Gtk.Label to_label = (Gtk.Label) builder.get_object("to label");
+        Gtk.Label cc_label = (Gtk.Label) builder.get_object("cc label");
+        Gtk.Label bcc_label = (Gtk.Label) builder.get_object("bcc label");
+        to_label.set_mnemonic_widget(to_entry);
+        cc_label.set_mnemonic_widget(cc_entry);
+        bcc_label.set_mnemonic_widget(bcc_entry);
+        
+        // TODO: It would be nicer to set the completions inside the EmailEntry constructor. But in
+        // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
         set_entry_completions();
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
@@ -1640,6 +1648,12 @@ public class ComposerWindow : Gtk.Window {
         
         if (compose_type == ComposeType.NEW_MESSAGE) {
             // For new messages, show the account combo-box.
+            from_label.set_use_underline(true);
+            from_label.set_mnemonic_widget(from_multiple);
+            // Composer label (with mnemonic underscore) for the account selector
+            // when choosing what address to send a message from.
+            from_label.set_text_with_mnemonic(_("_From:"));
+            
             from_multiple.visible = true;
             from_multiple.remove_all();
             foreach (Geary.AccountInformation a in accounts.values)
@@ -1651,6 +1665,11 @@ public class ComposerWindow : Gtk.Window {
                 from_multiple.set_active(0);
         } else {
             // For other types of messages, just show the from account.
+            from_label.set_use_underline(false);
+            // Composer label (without mnemonic underscore) for the account selector
+            // when choosing what address to send a message from.
+            from_label.set_text(_("From:"));
+            
             from_single.label = account.information.get_mailbox_address().get_full_address();
             from_single.visible = true;
         }
