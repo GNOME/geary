@@ -5,6 +5,8 @@
  */
 
 public abstract class Geary.AbstractFolder : BaseObject, Geary.Folder {
+    public Geary.ProgressMonitor opening_monitor { get; protected set; }
+    
     /*
      * notify_* methods for AbstractFolder are marked internal because the SendReplayOperations
      * need access to them to report changes as they occur.

@@ -145,6 +145,8 @@ public interface Geary.Folder : BaseObject {
     
     public abstract Geary.SpecialFolderType special_folder_type { get; }
     
+    public abstract Geary.ProgressMonitor opening_monitor { get; protected set; }
+    
     /**
      * Fired when the folder is successfully opened by a caller.
      *

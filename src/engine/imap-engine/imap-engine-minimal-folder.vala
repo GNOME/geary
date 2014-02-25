@@ -55,6 +55,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         _special_folder_type = special_folder_type;
         _properties.add(local_folder.get_properties());
         
+        opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
+        
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
         
@@ -512,6 +514,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         if (open_count == 0)
             return;
         
+        opening_monitor.notify_start();
+        
         Imap.Folder? opening_folder = null;
         try {
             debug("Fetching information for remote folder %s", to_string());
@@ -601,6 +605,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 cancellable);
             
             return;
+        } finally {
+            opening_monitor.notify_finish();
         }
         
         // open success, reset reestablishment delay

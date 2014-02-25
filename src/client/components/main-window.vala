@@ -30,6 +30,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     private MonitoredSpinner spinner = new MonitoredSpinner();
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
     private Geary.ProgressMonitor? conversation_monitor_progress = null;
+    private Geary.ProgressMonitor? folder_progress = null;
     
     public MainWindow(GearyApplication application) {
         Object(application: application);
@@ -67,6 +68,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         focus_in_event.connect(on_focus_event);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
+        GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
         
@@ -209,6 +211,18 @@ public class MainWindow : Gtk.ApplicationWindow {
         if (conversation_monitor != null) {
             conversation_monitor_progress = conversation_monitor.progress_monitor;
             progress_monitor.add(conversation_monitor_progress);
+        }
+    }
+    
+    private void on_folder_selected(Geary.Folder? folder) {
+        if (folder_progress != null) {
+            progress_monitor.remove(folder_progress);
+            folder_progress = null;
+        }
+        
+        if (folder != null) {
+            folder_progress = folder.opening_monitor;
+            progress_monitor.add(folder_progress);
         }
     }
     
