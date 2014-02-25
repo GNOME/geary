@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-15 21:23+0200\n"
-"PO-Revision-Date: 2014-02-15 21:24+0200\n"
+"POT-Creation-Date: 2014-02-25 22:16+0200\n"
+"PO-Revision-Date: 2014-02-25 22:17+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gnome.org>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -674,7 +674,7 @@ msgid "_Cancel"
 msgstr "_ביטול"
 
 #: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/composer.glade.h:46 ../ui/preferences.glade.h:1
+#: ../ui/preferences.glade.h:1
 msgid "_Close"
 msgstr "_סגירה"
 
@@ -721,72 +721,88 @@ msgid "Error saving"
 msgstr "שגיאת בשמירה"
 
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-window.vala:95
+#: ../src/client/composer/composer-window.vala:90
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr "מצורף|מכתב נלווה"
 
-#: ../src/client/composer/composer-window.vala:676
+#: ../src/client/composer/composer-window.vala:679
 msgid "Do you want to discard the unsaved message?"
 msgstr "האם למחוק את ההודעה שלא נשמרה?"
 
-#: ../src/client/composer/composer-window.vala:679
+#: ../src/client/composer/composer-window.vala:682
 msgid "Do you want to discard this message?"
 msgstr "האם למחוק הודעה זו?"
 
-#: ../src/client/composer/composer-window.vala:756
+#: ../src/client/composer/composer-window.vala:759
 msgid "Send message with an empty subject and body?"
 msgstr "האם לשלוח את ההודעה ללא כותרת ותוכן?"
 
-#: ../src/client/composer/composer-window.vala:758
+#: ../src/client/composer/composer-window.vala:761
 msgid "Send message with an empty subject?"
 msgstr "האם לשלוח את ההודעה ללא כותרת?"
 
-#: ../src/client/composer/composer-window.vala:760
+#: ../src/client/composer/composer-window.vala:763
 msgid "Send message with an empty body?"
 msgstr "האם לשלוח את ההודעה ללא תוכן?"
 
-#: ../src/client/composer/composer-window.vala:762
+#: ../src/client/composer/composer-window.vala:765
 msgid "Send message without an attachment?"
 msgstr "האם לשלוח את ההודעה ללא קובץ מצורף?"
 
-#: ../src/client/composer/composer-window.vala:945
+#: ../src/client/composer/composer-window.vala:948
 msgid "Cannot add attachment"
 msgstr "לא ניתן לצרף את הקובץ המבוקש"
 
-#: ../src/client/composer/composer-window.vala:956
+#: ../src/client/composer/composer-window.vala:959
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "‏„%s” לא נמצא."
 
-#: ../src/client/composer/composer-window.vala:963
+#: ../src/client/composer/composer-window.vala:966
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "‏„%s” היא תיקייה."
 
-#: ../src/client/composer/composer-window.vala:970
+#: ../src/client/composer/composer-window.vala:973
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "‏„%s” הוא קובץ ריק."
 
-#: ../src/client/composer/composer-window.vala:984
+#: ../src/client/composer/composer-window.vala:987
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "לא ניתן לפתוח את „%s” לקריאה."
 
-#: ../src/client/composer/composer-window.vala:991
+#: ../src/client/composer/composer-window.vala:994
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "‏„%s” כבר מצורף למכתב."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-window.vala:1000
+#: ../src/client/composer/composer-window.vala:1003
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-window.vala:1262
+#: ../src/client/composer/composer-window.vala:1265
 msgid "Select Color"
 msgstr "בחר צבע"
+
+#. Composer label (with mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#: ../src/client/composer/composer-window.vala:1655
+msgid "_From:"
+msgstr "_מאת:"
+
+#. For other types of messages, just show the from account.
+#. Composer label (without mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#. Geary account mail will be sent from
+#: ../src/client/composer/composer-window.vala:1671
+#: ../src/client/conversation-viewer/conversation-viewer.vala:628
+#: ../ui/composer.glade.h:41
+msgid "From:"
+msgstr "מאת:"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
@@ -828,30 +844,19 @@ msgstr "תמיד להציג תמונות משולח זה"
 msgid "Edit Draft"
 msgstr "עריכת טיוטה"
 
-#. Geary account mail will be sent from
-#: ../src/client/conversation-viewer/conversation-viewer.vala:628
-#: ../ui/composer.glade.h:41
-msgid "From:"
-msgstr "מאת:"
-
-#. Address(es) e-mail is to be sent to
 #: ../src/client/conversation-viewer/conversation-viewer.vala:631
-#: ../ui/composer.glade.h:36
 msgid "To:"
 msgstr "אל:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:634
-#: ../ui/composer.glade.h:37
 msgid "Cc:"
 msgstr "עותק:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:637
-#: ../ui/composer.glade.h:39
 msgid "Bcc:"
 msgstr "עותק מוסתר:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:640
-#: ../ui/composer.glade.h:38
 msgid "Subject:"
 msgstr "נושא:"
 
@@ -966,7 +971,7 @@ msgstr "ללא שם"
 msgid "Failed to open default text editor."
 msgstr "פתיחת עורך הטקסט נכשלה."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:293
+#: ../src/client/conversation-viewer/conversation-web-view.vala:296
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "‏%s - מפקח תכתובת"
@@ -1150,7 +1155,7 @@ msgid "%A"
 msgstr "‏%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:729
+#: ../src/engine/rfc822/rfc822-message.vala:742
 msgid "(no subject)"
 msgstr "(ללא נושא)"
 
@@ -1536,6 +1541,23 @@ msgstr "_רוחב קבוע"
 msgid "Fixed Width"
 msgstr "רוחב קבוע"
 
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:36
+msgid "_To:"
+msgstr "_אל:"
+
+#: ../ui/composer.glade.h:37
+msgid "_Cc:"
+msgstr "_עותק:"
+
+#: ../ui/composer.glade.h:38
+msgid "_Subject:"
+msgstr "_נושא:"
+
+#: ../ui/composer.glade.h:39
+msgid "_Bcc:"
+msgstr "עותק _מוסתר:"
+
 #: ../ui/composer.glade.h:42
 msgid "Drop files here"
 msgstr "יש לגרור קבצים לכאן"
@@ -1551,6 +1573,10 @@ msgstr "_צירוף קובץ"
 #: ../ui/composer.glade.h:45
 msgid "_Include Original Attachments"
 msgstr "_כולל קבצים מצורפים מקוריים"
+
+#: ../ui/composer.glade.h:46
+msgid "C_lose"
+msgstr "_סגירה"
 
 #: ../ui/composer.glade.h:47
 msgid "_Send"
