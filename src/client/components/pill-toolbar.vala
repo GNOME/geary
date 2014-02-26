@@ -18,6 +18,7 @@ public class PillToolbar : Gtk.Toolbar {
         bool show_label = false) {
         b.related_action = action_group.get_action(action_name);
         b.tooltip_text = b.related_action.tooltip;
+        b.related_action.notify["tooltip"].connect(() => { b.tooltip_text = b.related_action.tooltip; });
         b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
             b.related_action.icon_name, Gtk.IconSize.MENU);
         b.always_show_image = true;
