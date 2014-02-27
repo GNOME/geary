@@ -25,6 +25,7 @@ public class Geary.AccountInformation : BaseObject {
     private const string SMTP_PORT = "smtp_port";
     private const string SMTP_SSL = "smtp_ssl";
     private const string SMTP_STARTTLS = "smtp_starttls";
+    private const string SMTP_USE_IMAP_CREDENTIALS = "smtp_use_imap_credentials";
     private const string SMTP_NOAUTH = "smtp_noauth";
     private const string SAVE_SENT_MAIL_KEY = "save_sent_mail";
     private const string DRAFTS_FOLDER_KEY = "drafts_folder";
@@ -83,6 +84,7 @@ public class Geary.AccountInformation : BaseObject {
     public uint16 default_smtp_server_port  { get; set; }
     public bool default_smtp_server_ssl  { get; set; }
     public bool default_smtp_server_starttls { get; set; }
+    public bool default_smtp_use_imap_credentials { get; set; }
     public bool default_smtp_server_noauth { get; set; }
     
     public Geary.FolderPath? drafts_folder_path { get; set; default = null; }
@@ -144,11 +146,14 @@ public class Geary.AccountInformation : BaseObject {
                     Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
                 default_smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
                 default_smtp_server_starttls = get_bool_value(key_file, GROUP, SMTP_STARTTLS, false);
+                default_smtp_use_imap_credentials = get_bool_value(key_file, GROUP, SMTP_USE_IMAP_CREDENTIALS, false);
                 default_smtp_server_noauth = get_bool_value(key_file, GROUP, SMTP_NOAUTH, false);
                 
                 if (default_smtp_server_noauth) {
-                    // Make sure the SMTP credentials are unset.
                     smtp_credentials = null;
+                } else if (default_smtp_use_imap_credentials) {
+                    smtp_credentials.user = imap_credentials.user;
+                    smtp_credentials.pass = imap_credentials.pass;
                 }
             }
             
@@ -180,6 +185,7 @@ public class Geary.AccountInformation : BaseObject {
         default_smtp_server_port = from.default_smtp_server_port;
         default_smtp_server_ssl = from.default_smtp_server_ssl;
         default_smtp_server_starttls = from.default_smtp_server_starttls;
+        default_smtp_use_imap_credentials = from.default_smtp_use_imap_credentials;
         default_smtp_server_noauth = from.default_smtp_server_noauth;
         imap_credentials = from.imap_credentials;
         imap_remember_password = from.imap_remember_password;
@@ -586,6 +592,7 @@ public class Geary.AccountInformation : BaseObject {
             key_file.set_integer(GROUP, SMTP_PORT, default_smtp_server_port);
             key_file.set_boolean(GROUP, SMTP_SSL, default_smtp_server_ssl);
             key_file.set_boolean(GROUP, SMTP_STARTTLS, default_smtp_server_starttls);
+            key_file.set_boolean(GROUP, SMTP_USE_IMAP_CREDENTIALS, default_smtp_use_imap_credentials);
             key_file.set_boolean(GROUP, SMTP_NOAUTH, default_smtp_server_noauth);
         }
         
