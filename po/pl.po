@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-26 21:57+0100\n"
-"PO-Revision-Date: 2014-02-26 21:58+0100\n"
+"POT-Creation-Date: 2014-02-28 15:21+0100\n"
+"PO-Revision-Date: 2014-02-28 15:22+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -82,89 +82,89 @@ msgstr "Konta"
 msgid "First Last"
 msgstr "Imię Nazwisko"
 
-#: ../src/client/accounts/add-edit-page.vala:196
+#: ../src/client/accounts/add-edit-page.vala:202
 msgid "Welcome to Geary."
 msgstr "Witamy w programie Geary."
 
-#: ../src/client/accounts/add-edit-page.vala:196
+#: ../src/client/accounts/add-edit-page.vala:202
 msgid "Enter your account information to get started."
 msgstr "Proszę wprowadzić informacje o koncie, aby rozpocząć."
 
-#: ../src/client/accounts/add-edit-page.vala:217
+#: ../src/client/accounts/add-edit-page.vala:223
 msgid "2 weeks back"
 msgstr "ostatnich 2 tygodni"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:218
+#: ../src/client/accounts/add-edit-page.vala:224
 msgid "1 month back"
 msgstr "ostatniego miesiąca"
 
-#: ../src/client/accounts/add-edit-page.vala:219
+#: ../src/client/accounts/add-edit-page.vala:225
 msgid "3 months back"
 msgstr "ostatnich 3 miesięcy"
 
-#: ../src/client/accounts/add-edit-page.vala:220
+#: ../src/client/accounts/add-edit-page.vala:226
 msgid "6 months back"
 msgstr "ostatnich 6 miesięcy"
 
-#: ../src/client/accounts/add-edit-page.vala:221
+#: ../src/client/accounts/add-edit-page.vala:227
 msgid "1 year back"
 msgstr "ostatniego roku"
 
-#: ../src/client/accounts/add-edit-page.vala:222
+#: ../src/client/accounts/add-edit-page.vala:228
 msgid "2 years back"
 msgstr "ostatnich 2 lat"
 
-#: ../src/client/accounts/add-edit-page.vala:223
+#: ../src/client/accounts/add-edit-page.vala:229
 msgid "4 years back"
 msgstr "ostatnich 4 lat"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:225
+#: ../src/client/accounts/add-edit-page.vala:231
 msgid "Everything"
 msgstr "Wszystko"
 
-#: ../src/client/accounts/add-edit-page.vala:601
+#: ../src/client/accounts/add-edit-page.vala:630
 msgid "Remem_ber passwords"
 msgstr "_Zapamiętywanie haseł"
 
-#: ../src/client/accounts/add-edit-page.vala:608 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:637 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "_Zapamiętanie hasła"
 
-#: ../src/client/accounts/add-edit-page.vala:637
+#: ../src/client/accounts/add-edit-page.vala:671
 msgid "Unable to validate:\n"
 msgstr "Nie można sprawdzić:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:639
+#: ../src/client/accounts/add-edit-page.vala:673
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Nieprawidłowa etykieta konta.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:642
+#: ../src/client/accounts/add-edit-page.vala:676
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; Już dodano podany adres e-mail.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:646
+#: ../src/client/accounts/add-edit-page.vala:680
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; Błąd połączenia IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:649
+#: ../src/client/accounts/add-edit-page.vala:683
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:652
+#: ../src/client/accounts/add-edit-page.vala:686
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; Błąd połączenia SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:655
+#: ../src/client/accounts/add-edit-page.vala:689
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:659
+#: ../src/client/accounts/add-edit-page.vala:693
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Błąd połączenia.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:663
+#: ../src/client/accounts/add-edit-page.vala:697
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło.\n"
 
@@ -1156,7 +1156,7 @@ msgstr[0] "%d minuta temu"
 msgstr[1] "%d minuty temu"
 msgstr[2] "%d minut temu"
 
-#: ../src/client/util/util-date.vala:170
+#: ../src/client/util/util-date.vala:171
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
@@ -1164,13 +1164,13 @@ msgstr[0] "%d godzina temu"
 msgstr[1] "%d godziny temu"
 msgstr[2] "%d godzin temu"
 
-#: ../src/client/util/util-date.vala:177
+#: ../src/client/util/util-date.vala:178
 msgid "Yesterday"
 msgstr "Wczoraj"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:182
+#: ../src/client/util/util-date.vala:183
 #, c-format
 msgid "%A"
 msgstr "%A"
@@ -1734,10 +1734,14 @@ msgid "No authentication re_quired"
 msgstr "Bez _wymagania uwierzytelniania"
 
 #: ../ui/login.glade.h:29
+msgid "Use IMAP cre_dentials"
+msgstr "Używanie _danych logowania IMAP"
+
+#: ../ui/login.glade.h:30
 msgid "Storage"
 msgstr "Przechowywanie"
 
-#: ../ui/login.glade.h:30
+#: ../ui/login.glade.h:31
 msgid "_Download mail:"
 msgstr "_Pobieranie wiadomości z okresu:"
 
