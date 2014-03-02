@@ -1433,16 +1433,18 @@ public class ComposerWindow : Gtk.Window {
         GLib.List<weak Gtk.Widget> children = context_menu.get_children();
         foreach (weak Gtk.Widget child in children) {
             Gtk.MenuItem item = (Gtk.MenuItem) child;
-            WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
-            if (action == WebKit.ContextMenuAction.SPELLING_GUESS) {
-                suggestions = true;
-                continue;
+            if (item.is_sensitive()) {
+                WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
+                if (action == WebKit.ContextMenuAction.SPELLING_GUESS) {
+                    suggestions = true;
+                    continue;
+                }
+                
+                if (action == WebKit.ContextMenuAction.IGNORE_SPELLING)
+                    ignore_spelling = item;
+                else if (action == WebKit.ContextMenuAction.LEARN_SPELLING)
+                    learn_spelling = item;
             }
-            
-            if (action == WebKit.ContextMenuAction.IGNORE_SPELLING)
-                ignore_spelling = item;
-            else if (action == WebKit.ContextMenuAction.LEARN_SPELLING)
-                learn_spelling = item;
             context_menu.remove(child);
         }
         
