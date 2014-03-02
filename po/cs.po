@@ -4,8 +4,7 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# petr.simacek <petr.simacek@gmail.com>, 2012
-# petr.simacek <petr.simacek@gmail.com>, 2013
+# petr.simacek <petr.simacek@gmail.com>, 2012, 2013.
 # Marek Černocký <marek@manet.cz>, 2014.
 #
 msgid ""
@@ -13,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-02-25 20:02+0000\n"
-"PO-Revision-Date: 2014-02-27 12:15+0100\n"
+"POT-Creation-Date: 2014-02-27 20:29+0000\n"
+"PO-Revision-Date: 2014-03-02 16:02+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -75,89 +74,89 @@ msgstr "Účty"
 msgid "First Last"
 msgstr "První poslední"
 
-#: ../src/client/accounts/add-edit-page.vala:196
+#: ../src/client/accounts/add-edit-page.vala:202
 msgid "Welcome to Geary."
 msgstr "Vítejte v Geary."
 
-#: ../src/client/accounts/add-edit-page.vala:196
+#: ../src/client/accounts/add-edit-page.vala:202
 msgid "Enter your account information to get started."
 msgstr "Nejprve vyplňte informace o svém účtu."
 
-#: ../src/client/accounts/add-edit-page.vala:217
+#: ../src/client/accounts/add-edit-page.vala:223
 msgid "2 weeks back"
 msgstr "2 týdny nazpět"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:218
+#: ../src/client/accounts/add-edit-page.vala:224
 msgid "1 month back"
 msgstr "1 měsíc nazpět"
 
-#: ../src/client/accounts/add-edit-page.vala:219
+#: ../src/client/accounts/add-edit-page.vala:225
 msgid "3 months back"
 msgstr "3 měsíce nazpět"
 
-#: ../src/client/accounts/add-edit-page.vala:220
+#: ../src/client/accounts/add-edit-page.vala:226
 msgid "6 months back"
 msgstr "6 měsíců nazpět"
 
-#: ../src/client/accounts/add-edit-page.vala:221
+#: ../src/client/accounts/add-edit-page.vala:227
 msgid "1 year back"
 msgstr "1 rok nazpět"
 
-#: ../src/client/accounts/add-edit-page.vala:222
+#: ../src/client/accounts/add-edit-page.vala:228
 msgid "2 years back"
 msgstr "2 roky nazpět"
 
-#: ../src/client/accounts/add-edit-page.vala:223
+#: ../src/client/accounts/add-edit-page.vala:229
 msgid "4 years back"
 msgstr "4 roky nazpět"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:225
+#: ../src/client/accounts/add-edit-page.vala:231
 msgid "Everything"
 msgstr "Vše"
 
-#: ../src/client/accounts/add-edit-page.vala:601
+#: ../src/client/accounts/add-edit-page.vala:630
 msgid "Remem_ber passwords"
 msgstr "Pama_tovat si hesla"
 
-#: ../src/client/accounts/add-edit-page.vala:608 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:637 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "Pama_tovat si heslo"
 
-#: ../src/client/accounts/add-edit-page.vala:637
+#: ../src/client/accounts/add-edit-page.vala:671
 msgid "Unable to validate:\n"
 msgstr "Nelze ověřit:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:639
+#: ../src/client/accounts/add-edit-page.vala:673
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Neplatná přezdívka účtu.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:642
+#: ../src/client/accounts/add-edit-page.vala:676
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; E-mailová adresa už byla do Geary přidána.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:646
+#: ../src/client/accounts/add-edit-page.vala:680
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; Chyba připojení IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:649
+#: ../src/client/accounts/add-edit-page.vala:683
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; Nesprávné uživatelské jméno nebo heslo pro IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:652
+#: ../src/client/accounts/add-edit-page.vala:686
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; Chyba připojení SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:655
+#: ../src/client/accounts/add-edit-page.vala:689
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; Nesprávné uživatelské jméno nebo heslo pro SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:659
+#: ../src/client/accounts/add-edit-page.vala:693
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Chyba připojení.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:663
+#: ../src/client/accounts/add-edit-page.vala:697
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Nesprávné uživatelské jméno nebo heslo.\n"
 
@@ -1137,7 +1136,7 @@ msgstr[0] "Před %d m"
 msgstr[1] "Před %d m"
 msgstr[2] "Před %d m"
 
-#: ../src/client/util/util-date.vala:170
+#: ../src/client/util/util-date.vala:171
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
@@ -1145,13 +1144,13 @@ msgstr[0] "Před %d h"
 msgstr[1] "Před %d h"
 msgstr[2] "Před %d h"
 
-#: ../src/client/util/util-date.vala:177
+#: ../src/client/util/util-date.vala:178
 msgid "Yesterday"
 msgstr "Včera"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:182
+#: ../src/client/util/util-date.vala:183
 #, c-format
 msgid "%A"
 msgstr "%A"
@@ -1713,10 +1712,14 @@ msgid "No authentication re_quired"
 msgstr "Ne_vyžaduje ověření"
 
 #: ../ui/login.glade.h:29
+msgid "Use IMAP cre_dentials"
+msgstr "Použít přihlašovací ú_daje IMAP"
+
+#: ../ui/login.glade.h:30
 msgid "Storage"
 msgstr "Úložiště"
 
-#: ../ui/login.glade.h:30
+#: ../ui/login.glade.h:31
 msgid "_Download mail:"
 msgstr "_Stáhnout e-mail:"
 
