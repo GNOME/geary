@@ -520,7 +520,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         try {
             debug("Fetching information for remote folder %s", to_string());
             opening_folder = yield remote.fetch_folder_async(local_folder.get_path(),
-                cancellable);
+                null, cancellable);
             
             debug("Opening remote folder %s", opening_folder.to_string());
             yield opening_folder.open_async(cancellable);

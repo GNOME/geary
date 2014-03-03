@@ -164,12 +164,16 @@ private class Geary.Imap.Account : BaseObject {
         }
     }
     
-    public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable)
-        throws Error {
+    public async Imap.Folder fetch_folder_async(FolderPath path, out bool created,
+        Cancellable? cancellable) throws Error {
         check_open();
+        
+        created = false;
         
         if (folders.has_key(path))
             return folders.get(path);
+        
+        created = true;
         
         // if not in map, use list_children_async to add it (if it exists)
         if (!path_to_mailbox.has_key(path)) {
@@ -183,7 +187,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Imap.Folder folder;
         if (!mailbox_info.attrs.is_no_select) {
-            StatusData status = yield fetch_status_async(path, cancellable);
+            StatusData status = yield fetch_status_async(path, StatusDataType.all(), cancellable);
             
             folder = new Imap.Folder(session_mgr, status, mailbox_info);
         } else {
@@ -195,13 +199,27 @@ private class Geary.Imap.Account : BaseObject {
         return folder;
     }
     
-    private async StatusData fetch_status_async(FolderPath path, Cancellable? cancellable)
+    public async int fetch_unseen_count_async(FolderPath path, Cancellable? cancellable)
         throws Error {
+        check_open();
+        
+        MailboxInformation? mailbox_info = path_to_mailbox.get(path);
+        if (mailbox_info == null)
+            throw_not_found(path);
+        if (mailbox_info.attrs.is_no_select)
+            throw new EngineError.UNSUPPORTED("Can't fetch unseen count for unselectable folder %s", path);
+        
+        StatusData data = yield fetch_status_async(path, { StatusDataType.UNSEEN }, cancellable);
+        return data.unseen;
+    }
+    
+    private async StatusData fetch_status_async(FolderPath path, StatusDataType[] status_types,
+        Cancellable? cancellable) throws Error {
         check_open();
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         StatusResponse response = yield send_command_async(
-            new StatusCommand(new MailboxSpecifier.from_folder_path(path, null), StatusDataType.all()),
+            new StatusCommand(new MailboxSpecifier.from_folder_path(path, null), status_types),
             null, status_results, cancellable);
         
         throw_fetch_error(response, path, status_results.size);

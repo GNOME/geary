@@ -5,7 +5,8 @@
  */
 
 private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
-    private const int REFRESH_FOLDER_LIST_SEC = 4 * 60;
+    private const int REFRESH_FOLDER_LIST_SEC = 2 * 60;
+    private const int REFRESH_UNSEEN_SEC = 1;
     
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
@@ -16,6 +17,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     private Gee.HashMap<FolderPath, MinimalFolder> folder_map = new Gee.HashMap<
         FolderPath, MinimalFolder>();
     private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>();
+    private Gee.HashMap<FolderPath, uint> refresh_unseen_timeout_ids
+        = new Gee.HashMap<FolderPath, uint>();
+    private Gee.HashSet<Geary.Folder> in_refresh_unseen = new Gee.HashSet<Geary.Folder>();
     private uint refresh_folder_timeout_id = 0;
     private bool in_refresh_enumerate = false;
     private Cancellable refresh_cancellable = new Cancellable();
@@ -66,6 +70,27 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 folder.email_flags_changed.disconnect(notify_email_flags_changed);
             }
         }
+    }
+    
+    protected override void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        base.notify_email_appended(folder, ids);
+        reschedule_unseen_update(folder);
+    }
+    
+    protected override void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        base.notify_email_inserted(folder, ids);
+        reschedule_unseen_update(folder);
+    }
+    
+    protected override void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        base.notify_email_removed(folder, ids);
+        reschedule_unseen_update(folder);
+    }
+    
+    protected override void notify_email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
+        base.notify_email_flags_changed(folder, flag_map);
+        reschedule_unseen_update(folder);
     }
     
     private void check_open() throws EngineError {
@@ -261,6 +286,54 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return all_folders;
     }
     
+    private void reschedule_unseen_update(Geary.Folder folder) {
+        if (!folder_map.has_key(folder.path))
+            return;
+        
+        if (refresh_unseen_timeout_ids.get(folder.path) != 0)
+            Source.remove(refresh_unseen_timeout_ids.get(folder.path));
+        
+        refresh_unseen_timeout_ids.set(folder.path,
+            Timeout.add_seconds(REFRESH_UNSEEN_SEC, () => on_refresh_unseen(folder)));
+    }
+    
+    private bool on_refresh_unseen(Geary.Folder folder) {
+        // If we're in the process already, reschedule for later.
+        if (in_refresh_unseen.contains(folder))
+            return true;
+        
+        refresh_unseen_async.begin(folder, null, on_refresh_unseen_completed);
+        
+        refresh_unseen_timeout_ids.unset(folder.path);
+        return false;
+    }
+    
+    private void on_refresh_unseen_completed(Object? source, AsyncResult result) {
+        try {
+            refresh_unseen_async.end(result);
+        } catch (Error e) {
+            debug("Error refreshing unseen counts: %s", e.message);
+        }
+    }
+    
+    private async void refresh_unseen_async(Geary.Folder folder, Cancellable? cancellable) throws Error {
+        in_refresh_unseen.add(folder);
+        
+        debug("Refreshing unseen counts for %s", folder.to_string());
+        
+        bool folder_created;
+        Imap.Folder remote_folder = yield remote.fetch_folder_async(folder.path,
+            out folder_created, cancellable);
+        
+        if (!folder_created) {
+            int unseen_count = yield remote.fetch_unseen_count_async(folder.path, cancellable);
+            remote_folder.properties.set_status_unseen(unseen_count);
+            yield local.update_folder_status_async(remote_folder, false, cancellable);
+        }
+        
+        in_refresh_unseen.remove(folder);
+    }
+    
     private void reschedule_folder_refresh(bool immediate) {
         if (in_refresh_enumerate)
             return;
@@ -420,7 +493,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
                 continue;
             
             Imap.Folder remote_folder = (Imap.Folder) yield remote.fetch_folder_async(folder,
-                cancellable);
+                null, cancellable);
             
             yield local.clone_folder_async(remote_folder, cancellable);
         }
