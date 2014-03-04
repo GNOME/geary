@@ -5,9 +5,6 @@
  */
 
 private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
-    private const string GMAIL_FOLDER = "[Gmail]";
-    private const string GOOGLEMAIL_FOLDER = "[Google Mail]";
-    
     private static Geary.Endpoint? _imap_endpoint = null;
     public static Geary.Endpoint IMAP_ENDPOINT { get {
         if (_imap_endpoint == null) {
@@ -34,50 +31,18 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         return _smtp_endpoint;
     } }
     
-    private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? path_type_map = null;
-    
     public GmailAccount(string name, Geary.AccountInformation account_information,
         Imap.Account remote, ImapDB.Account local) {
         base (name, account_information, true, remote, local);
-        
-        if (path_type_map == null) {
-            path_type_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
-            
-            path_type_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(), SpecialFolderType.INBOX);
-            
-            Geary.FolderPath gmail_root = new Imap.FolderRoot(GMAIL_FOLDER, null);
-            Geary.FolderPath googlemail_root = new Imap.FolderRoot(GOOGLEMAIL_FOLDER, null);
-            
-            path_type_map.set(gmail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);
-            path_type_map.set(googlemail_root.get_child("Drafts"), SpecialFolderType.DRAFTS);
-            
-            path_type_map.set(gmail_root.get_child("Sent Mail"), SpecialFolderType.SENT);
-            path_type_map.set(googlemail_root.get_child("Sent Mail"), SpecialFolderType.SENT);
-            
-            path_type_map.set(gmail_root.get_child("Starred"), SpecialFolderType.FLAGGED);
-            path_type_map.set(googlemail_root.get_child("Starred"), SpecialFolderType.FLAGGED);
-            
-            path_type_map.set(gmail_root.get_child("Important"), SpecialFolderType.IMPORTANT);
-            path_type_map.set(googlemail_root.get_child("Important"), SpecialFolderType.IMPORTANT);
-            
-            path_type_map.set(gmail_root.get_child("All Mail"), SpecialFolderType.ALL_MAIL);
-            path_type_map.set(googlemail_root.get_child("All Mail"), SpecialFolderType.ALL_MAIL);
-            
-            path_type_map.set(gmail_root.get_child("Spam"), SpecialFolderType.SPAM);
-            path_type_map.set(googlemail_root.get_child("Spam"), SpecialFolderType.SPAM);
-            
-            path_type_map.set(gmail_root.get_child("Trash"), SpecialFolderType.TRASH);
-            path_type_map.set(googlemail_root.get_child("Trash"), SpecialFolderType.TRASH);
-        }
     }
     
     protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
-        // although Gmail supports XLIST, this will be called on startup if the XLIST properties
-        // for the folders hasn't been retrieved yet.  Once they've been retrieved and stored in
-        // the local database, this won't be called again
-        SpecialFolderType special_folder_type = path_type_map.has_key(path) ? path_type_map.get(path)
-            : SpecialFolderType.NONE;
+        SpecialFolderType special_folder_type;
+        if (Imap.MailboxSpecifier.folder_path_is_inbox(path))
+            special_folder_type = SpecialFolderType.INBOX;
+        else
+            special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
         
         switch (special_folder_type) {
             case SpecialFolderType.ALL_MAIL:
