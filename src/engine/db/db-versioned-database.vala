@@ -7,6 +7,8 @@
 public class Geary.Db.VersionedDatabase : Geary.Db.Database {
     public delegate void WorkCallback();
     
+    private static Mutex upgrade_mutex = new Mutex();
+    
     public File schema_dir { get; private set; }
     
     public VersionedDatabase(File db_file, File schema_dir) {
@@ -107,6 +109,14 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
                 started = true;
             }
             
+            // Since these upgrades run in a background thread, there's a possibility they
+            // can run in parallel.  That leads to Geary absolutely taking over the machine,
+            // with potentially several threads all doing heavy database manipulation at
+            // once.  So, we wrap this bit in a mutex lock so that only one database is
+            // updating at once.  It means overall it might take a bit longer, but it keeps
+            // things usable in the meantime.  See <https://bugzilla.gnome.org/show_bug.cgi?id=724475>.
+            upgrade_mutex.@lock();
+            
             pre_upgrade(db_version);
             
             check_cancelled("VersionedDatabase.open", cancellable);
@@ -121,11 +131,14 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
                 }, cancellable);
             } catch (Error err) {
                 warning("Error upgrading database to version %d: %s", db_version, err.message);
+                upgrade_mutex.unlock();
                 
                 throw err;
             }
             
             post_upgrade(db_version);
+            
+            upgrade_mutex.unlock();
         }
         
         if (started)
