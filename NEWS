@@ -1,3 +1,16 @@
+Geary 0.5.3 - 3 March 2014
+--------------------------
+
+  * Better styling of collapsed quotes
+  * "Use IMAP credentials" option in account creation dialog
+  * Fixed support for GMail drafts
+  * Fixed background synchronizer
+  * Fixed some unread count issues
+  * Fixed some IMAP issues
+  * Fixed theming issues
+  * Other miscellaneous bugfixes
+
+
 Geary 0.5.2 - 14 February 2014
 ------------------------------
 
