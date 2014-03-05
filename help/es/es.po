@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-01-18 00:43+0000\n"
-"PO-Revision-Date: 2014-01-20 10:06+0100\n"
+"POT-Creation-Date: 2014-03-04 02:17+0000\n"
+"PO-Revision-Date: 2014-03-05 14:14+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -187,205 +187,213 @@ msgstr "Atajos de teclado"
 
 #: C/shortcuts.page:12(p)
 msgid "Geary has keyboard shortcuts for most common operations."
-msgstr ""
+msgstr "Geary incluye atajos de teclado para las operaciones más comunes."
 
 #: C/shortcuts.page:15(p)
 msgid "Compose a new message"
-msgstr ""
+msgstr "Redactar un mensaje nuevo"
 
 #: C/shortcuts.page:15(p)
 msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>N</key></keyseq> o <key>N</key>"
 
 #: C/shortcuts.page:18(p)
 msgid "Reply to sender"
-msgstr ""
+msgstr "Responder al remitente"
 
 #: C/shortcuts.page:19(p)
 msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>R</key></keyseq> o <key>R</key>"
 
 #: C/shortcuts.page:22(p)
 msgid "Reply to all"
-msgstr ""
+msgstr "Responder a todos"
 
 #: C/shortcuts.page:23(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
 "<keyseq><key>Shift</key><key>R</key></keyseq>"
 msgstr ""
+"<keyseq><key>Ctrl</key><key>Mayús</key><key>R</key></keyseq> o "
+"<keyseq><key>Mayús</key><key>R</key></keyseq>"
 
 #: C/shortcuts.page:26(p)
 msgid "Forward"
-msgstr ""
+msgstr "Reenviar"
 
 #: C/shortcuts.page:27(p)
 msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>L</key></keyseq> o <key>F</key>"
 
 #: C/shortcuts.page:30(p)
 msgid "Archive"
-msgstr ""
+msgstr "Archivar"
 
 #: C/shortcuts.page:31(key)
 msgid "A"
-msgstr ""
+msgstr "A"
 
 #: C/shortcuts.page:34(p)
 msgid "Trash"
-msgstr ""
+msgstr "Enviar a la papelera"
 
 #: C/shortcuts.page:35(p)
 msgid "<key>Delete</key> or <key>Backspace</key>"
-msgstr ""
+msgstr "<key>Supr</key> o <key>Retroceso</key>"
 
 #: C/shortcuts.page:38(p)
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: C/shortcuts.page:39(p)
 msgid ""
 "<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
 "key><key>Backspace</key></keyseq>"
 msgstr ""
+"<keyseq><key>Mayús</key><key>Supr</key></keyseq> o <keyseq><key>Mayús</"
+"key><key>Retroceso</key></keyseq>"
 
 #: C/shortcuts.page:42(p)
 msgid "Star"
-msgstr ""
+msgstr "Destacar"
 
 #: C/shortcuts.page:43(key) C/shortcuts.page:91(key)
 msgid "S"
-msgstr ""
+msgstr "S"
 
 #: C/shortcuts.page:46(p)
 msgid "Unstar"
-msgstr ""
+msgstr "Quitar el destaque"
 
 #: C/shortcuts.page:47(key)
 msgid "D"
-msgstr ""
+msgstr "D"
 
 #: C/shortcuts.page:50(p)
 msgid "Mark read"
-msgstr ""
+msgstr "Marcar como leído"
 
 #: C/shortcuts.page:51(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
 "key><key>I</key></keyseq>"
 msgstr ""
+"<keyseq><key>Ctrl</key><key>I</key></keyseq> o <keyseq><key>Mayús</"
+"key><key>I</key></keyseq>"
 
 #: C/shortcuts.page:54(p)
 msgid "Mark unread"
-msgstr ""
+msgstr "Marcar como no leído"
 
 #: C/shortcuts.page:55(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
 "key><key>U</key></keyseq>"
 msgstr ""
+"<keyseq><key>Ctrl</key><key>U</key></keyseq> o <keyseq><key>Mayús</"
+"key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:58(p)
 msgid "Toggle spam"
-msgstr ""
+msgstr "Marcar o desmarcar como «spam»"
 
 #: C/shortcuts.page:59(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> o <key>!</key>"
 
 #: C/shortcuts.page:62(p)
 msgid "Quit"
-msgstr ""
+msgstr "Salir"
 
 #: C/shortcuts.page:63(key) C/shortcuts.page:79(key) C/shortcuts.page:83(key)
 #: C/shortcuts.page:87(key) C/shortcuts.page:91(key) C/shortcuts.page:95(key)
 #: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
 msgid "Ctrl"
-msgstr ""
+msgstr "Ctrl"
 
 #: C/shortcuts.page:63(key)
 msgid "Q"
-msgstr ""
+msgstr "Q"
 
 #: C/shortcuts.page:66(p)
 msgid "Zoom in"
-msgstr ""
+msgstr "Acercar"
 
 #: C/shortcuts.page:67(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> o <key>=</key>"
 
 #: C/shortcuts.page:70(p)
 msgid "Zoom out"
-msgstr ""
+msgstr "Alejar"
 
 #: C/shortcuts.page:71(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> o <key>-</key>"
 
 #: C/shortcuts.page:74(p)
 msgid "Reset zoom"
-msgstr ""
+msgstr "Restablecer la ampliación"
 
 #: C/shortcuts.page:75(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
-msgstr ""
+msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> o <key>0</key>"
 
 #: C/shortcuts.page:78(p) C/preferences.page:10(title)
 msgid "Preferences"
-msgstr ""
+msgstr "Preferencias"
 
 #: C/shortcuts.page:79(key)
 msgid "E"
-msgstr ""
+msgstr "E"
 
 #: C/shortcuts.page:82(p) C/accounts.page:10(title)
 msgid "Accounts"
-msgstr ""
+msgstr "Cuentas"
 
 #: C/shortcuts.page:83(key)
 msgid "M"
-msgstr ""
+msgstr "M"
 
 #: C/shortcuts.page:86(p)
 msgid "Close composer window"
-msgstr ""
+msgstr "Cerrar la ventana de redacción"
 
 #: C/shortcuts.page:87(key)
 msgid "W"
-msgstr ""
+msgstr "W"
 
 #: C/shortcuts.page:90(p)
 msgid "Jump to search box"
-msgstr ""
+msgstr "Enfocar el cuadro de búsqueda"
 
 #: C/shortcuts.page:94(p)
 msgid "Find in current conversation"
-msgstr ""
+msgstr "Buscar en la conversación actual"
 
 #: C/shortcuts.page:95(key)
 msgid "F"
-msgstr ""
+msgstr "F"
 
 #: C/shortcuts.page:98(p)
 msgid "Find next in current conversation"
-msgstr ""
+msgstr "Buscar la siguiente ocurrencia en la conversación"
 
 #: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
 msgid "G"
-msgstr ""
+msgstr "G"
 
 #: C/shortcuts.page:102(p)
 msgid "Find previous in current conversation"
-msgstr ""
+msgstr "Buscar la ocurrencia anterior en la conversación"
 
 #: C/shortcuts.page:103(key)
 msgid "Shift"
-msgstr ""
+msgstr "Mayús"
 
 #: C/search.page:10(title)
 msgid "Search"
-msgstr ""
+msgstr "Búsqueda"
 
 #: C/search.page:12(p)
 msgid ""
@@ -770,7 +778,7 @@ msgid ""
 msgstr ""
 
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
-#: C/index.page:0(None)
+#: C/accounts.page:0(None)
 #, fuzzy
 #| msgctxt "_"
 #| msgid "translator-credits"
