@@ -199,6 +199,15 @@ private class Geary.Imap.Account : BaseObject {
         return folder;
     }
     
+    internal void folders_removed(Gee.Collection<FolderPath> paths) {
+        foreach (FolderPath path in paths) {
+            if (path_to_mailbox.has_key(path))
+                path_to_mailbox.unset(path);
+            if (folders.has_key(path))
+                folders.unset(path);
+        }
+    }
+    
     public async int fetch_unseen_count_async(FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();

@@ -726,6 +726,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (engine_added.size > 0 || engine_removed.size > 0)
             notify_folders_added_removed(sort_by_path(engine_added), sort_by_path(engine_removed));
         
+        remote.folders_removed(Geary.traverse<Geary.Folder>(engine_removed)
+            .map<FolderPath>(f => f.path).to_array_list());
+        
         // report all altered folders
         if (altered_paths.size > 0) {
             Gee.ArrayList<Geary.Folder> altered = new Gee.ArrayList<Geary.Folder>();
