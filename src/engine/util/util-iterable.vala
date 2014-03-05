@@ -32,7 +32,7 @@ namespace Geary {
      * Take an array of items and return a Geary.Iterable for convenience.
      */
     public Geary.Iterable<G> iterate_array<G>(G[] a) {
-        return Geary.traverse<G>(new Gee.ArrayList<G>.wrap(a));
+        return Geary.traverse<G>(Geary.Collection.array_list_wrap<G>(a));
     }
 }
 

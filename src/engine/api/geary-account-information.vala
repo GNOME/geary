@@ -513,7 +513,7 @@ public class Geary.AccountInformation : BaseObject {
         try {
             string[] list = key_file.get_string_list(group, key);
             if (list.length > 0)
-                return new Gee.ArrayList<string>.wrap(list);
+                return Geary.Collection.array_list_wrap<string>(list);
         } catch(KeyFileError err) {
             // Ignore.
         }
