@@ -619,7 +619,7 @@ public class AddEditPage : Gtk.Box {
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
         storage_container.visible = mode == PageMode.EDIT;
-        check_save_sent_mail.visible = mode != PageMode.WELCOME;
+        check_save_sent_mail.visible = mode == PageMode.EDIT;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.
