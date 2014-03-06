@@ -44,7 +44,6 @@ public class ConversationListStore : Gtk.ListStore {
     private Geary.App.EmailStore? email_store = null;
     private Cancellable? cancellable_folder = null;
     private bool loading_local_only = true;
-    private int conversations_added_counter = 0;
     private Geary.Nonblocking.Mutex refresh_mutex = new Geary.Nonblocking.Mutex();
     private uint update_id = 0;
     
@@ -387,13 +386,7 @@ public class ConversationListStore : Gtk.ListStore {
             if (add_conversation(conversation))
                 added++;
         }
-        int stage = ++conversations_added_counter;
-        debug("Added %d/%d conversations. (stage=%d)", added, conversations.size, stage);
-        
-        while (Gtk.events_pending()) {
-            if (Gtk.main_iteration() || conversations_added_counter != stage)
-                return;
-        }
+        debug("Added %d/%d conversations.", added, conversations.size);
         
         conversations_added_finished();
     }

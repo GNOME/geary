@@ -119,6 +119,12 @@ public class ConversationListView : Gtk.TreeView {
         if (!reset_adjustment)
             return;
         
+        // Pump the loop to make sure the new conversations are taking up space
+        // in the window.  Without this, setting the adjustment here is a no-op
+        // because as far as it's concerned, it's already at the top.
+        while (Gtk.events_pending())
+            Gtk.main_iteration();
+        
         Gtk.Adjustment? adjustment = get_adjustment();
         if (adjustment == null)
             return;
