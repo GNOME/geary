@@ -1898,7 +1898,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         foreach (GMime.Part attachment in attachments) {
             string mime_type = attachment.get_content_type().to_string();
             string disposition = attachment.get_disposition();
-            string filename = RFC822.Utils.get_attachment_filename(attachment);
+            string filename = RFC822.Utils.get_clean_attachment_filename(attachment);
             
             // Convert the attachment content into a usable ByteArray.
             GMime.DataWrapper attachment_data = attachment.get_content_object();

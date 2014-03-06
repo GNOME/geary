@@ -320,12 +320,19 @@ public GMime.ContentEncoding get_best_content_encoding(GMime.Stream stream,
     return encoding;
 }
 
-public string get_attachment_filename(GMime.Part part) {
+public string get_clean_attachment_filename(GMime.Part part) {
     string? filename = part.get_filename();
     if (String.is_empty(filename)) {
         /// Placeholder filename for attachments with no filename.
         filename = _("none");
     }
+    
+    try {
+        filename = invalid_filename_character_re.replace_literal(filename, filename.length, 0, "_");
+    } catch (RegexError e) {
+        debug("Error sanitizing attachment filename: %s", e.message);
+    }
+    
     return filename;
 }
 

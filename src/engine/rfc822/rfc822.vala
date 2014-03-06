@@ -8,11 +8,19 @@ namespace Geary.RFC822 {
 
 private int init_count = 0;
 
+internal Regex? invalid_filename_character_re = null;
+
 internal void init() {
     if (init_count++ != 0)
         return;
     
     GMime.init(GMime.ENABLE_RFC2047_WORKAROUNDS);
+    
+    try {
+        invalid_filename_character_re = new Regex("[/\\0]");
+    } catch (RegexError e) {
+        assert_not_reached();
+    }
 }
 
 }

@@ -512,7 +512,7 @@ public class Geary.RFC822.Message : BaseObject {
             return false;
         
         // Hand off to the replacer for processing
-        string? replaced_part = replacer(RFC822.Utils.get_attachment_filename(part), content_type,
+        string? replaced_part = replacer(RFC822.Utils.get_clean_attachment_filename(part), content_type,
             disposition, mime_part_to_memory_buffer(part));
         if (replaced_part != null)
             body = replaced_part;
