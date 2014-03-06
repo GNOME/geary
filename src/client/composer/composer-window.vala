@@ -1555,6 +1555,9 @@ public class ComposerWindow : Gtk.Window {
     
     // Resets the draft save timeout.
     private void reset_draft_timer() {
+        if (!editor.can_undo())
+            return;
+        
         draft_save_label.label = "";
         if (draft_save_timeout_id != 0)
             Source.remove(draft_save_timeout_id);
