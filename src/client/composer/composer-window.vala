@@ -501,9 +501,9 @@ public class ComposerWindow : Gtk.Window {
                     Geary.Collection.get_first(headers.get("body"))));
             
             foreach (string attachment in headers.get("attach"))
-                add_attachment(File.new_for_uri(attachment));
+                add_attachment(File.new_for_path(attachment));
             foreach (string attachment in headers.get("attachment"))
-                add_attachment(File.new_for_uri(attachment));
+                add_attachment(File.new_for_path(attachment));
         }
     }
     
