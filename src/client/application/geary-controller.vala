@@ -1375,12 +1375,13 @@ public class GearyController : Geary.BaseObject {
     }
     
     private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
-        Geary.App.Conversation conversation, bool preview_message_only,
+        Geary.App.Conversation conversation, bool latest_only,
         Gee.ArrayList<Geary.EmailIdentifier> add_to) {
-        if (preview_message_only) {
-            Geary.Email? preview = conversation.get_latest_email(Geary.App.Conversation.Location.ANYWHERE);
-            if (preview != null)
-                add_to.add(preview.id);
+        if (latest_only) {
+            Geary.Email? latest = conversation.get_latest_email(
+                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+            if (latest != null)
+                add_to.add(latest.id);
         } else {
             add_to.add_all(conversation.get_email_ids());
         }
@@ -1389,20 +1390,20 @@ public class GearyController : Geary.BaseObject {
     }
     
     private Gee.Collection<Geary.EmailIdentifier> get_conversation_collection_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations, bool preview_message_only = false) {
+        Gee.Collection<Geary.App.Conversation> conversations, bool latest_only = false) {
         Gee.ArrayList<Geary.EmailIdentifier> ret = new Gee.ArrayList<Geary.EmailIdentifier>();
         
         foreach(Geary.App.Conversation c in conversations)
-            get_conversation_email_ids(c, preview_message_only, ret);
+            get_conversation_email_ids(c, latest_only, ret);
         
         return ret;
     }
     
     private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(
-        bool preview_messages_only) {
+        bool latest_only) {
         Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.App.Conversation conversation in selected_conversations)
-            get_conversation_email_ids(conversation, preview_messages_only, ids);
+            get_conversation_email_ids(conversation, latest_only, ids);
         return ids;
     }
     
@@ -1490,8 +1491,8 @@ public class GearyController : Geary.BaseObject {
     
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
-        bool only_mark_preview = false) {
-        mark_email(get_conversation_collection_email_ids(conversations, only_mark_preview),
+        bool latest_only = false) {
+        mark_email(get_conversation_collection_email_ids(conversations, latest_only),
             flags_to_add, flags_to_remove);
     }
     
@@ -1515,7 +1516,7 @@ public class GearyController : Geary.BaseObject {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
         
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
         mark_email(ids, flags, null);
         
         foreach (Geary.EmailIdentifier id in ids)
