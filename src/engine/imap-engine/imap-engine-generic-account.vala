@@ -394,11 +394,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         // now that all local have been enumerated and reported (this is important to assist
         // startup of the UI), enumerate the remote folders
+        bool remote_folders_suspect;
         Gee.HashMap<FolderPath, Imap.Folder>? remote_folders = yield enumerate_remote_folders_async(
-            null, cancellable);
+            null, out remote_folders_suspect, cancellable);
         
         // pair the local and remote folders and make sure everything is up-to-date
-        yield update_folders_async(existing_folders, remote_folders, cancellable);
+        yield update_folders_async(existing_folders, remote_folders, remote_folders_suspect, cancellable);
     }
     
     private async Gee.HashMap<FolderPath, ImapDB.Folder> enumerate_local_folders_async(
@@ -427,7 +428,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private async Gee.HashMap<FolderPath, Imap.Folder> enumerate_remote_folders_async(
-        Geary.FolderPath? parent, Cancellable? cancellable) throws Error {
+        Geary.FolderPath? parent, out bool results_suspect, Cancellable? cancellable) throws Error {
+        results_suspect = false;
         check_open();
         
         Gee.List<Imap.Folder>? remote_children = null;
@@ -437,6 +439,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             // ignore everything but I/O and IMAP errors (cancellation is an IOError)
             if (err is IOError || err is ImapError)
                 throw err;
+            debug("Ignoring error listing child folders of %s: %s",
+                (parent != null ? parent.to_string() : "root"), err.message);
+            results_suspect = true;
         }
         
         Gee.HashMap<FolderPath, Imap.Folder> result = new Gee.HashMap<FolderPath, Imap.Folder>();
@@ -444,8 +449,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             foreach (Imap.Folder remote_child in remote_children) {
                 result.set(remote_child.path, remote_child);
                 if (remote_child.properties.has_children.is_possible()) {
+                    bool recursive_results_suspect;
                     Collection.map_set_all<FolderPath, Imap.Folder>(result,
-                        yield enumerate_remote_folders_async(remote_child.path, cancellable));
+                        yield enumerate_remote_folders_async(
+                        remote_child.path, out recursive_results_suspect, cancellable));
+                    if (recursive_results_suspect)
+                        results_suspect = true;
                 }
             }
         }
@@ -633,7 +642,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private async void update_folders_async(Gee.Map<FolderPath, Geary.Folder> existing_folders,
-        Gee.Map<FolderPath, Imap.Folder> remote_folders, Cancellable? cancellable) {
+        Gee.Map<FolderPath, Imap.Folder> remote_folders, bool remote_folders_suspect, Cancellable? cancellable) {
         // update all remote folders properties in the local store and active in the system
         Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>();
         foreach (Imap.Folder remote_folder in remote_folders.values) {
@@ -706,20 +715,23 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         Gee.Collection<MinimalFolder> engine_added = new Gee.ArrayList<Geary.Folder>();
         engine_added.add_all(build_folders(folders_to_build));
         
-        notify_folders_available_unavailable(null, to_remove);
-        
         Gee.ArrayList<Geary.Folder> engine_removed = new Gee.ArrayList<Geary.Folder>();
-        
-        // Sort by path length descending, so we always remove children first.
-        to_remove.sort((a, b) => b.path.get_path_length() - a.path.get_path_length());
-        foreach (Geary.Folder folder in to_remove) {
-            try {
-                debug("Locally deleting removed folder %s", folder.to_string());
-                
-                yield local.delete_folder_async(folder, cancellable);
-                engine_removed.add(folder);
-            } catch (Error e) {
-                debug("Unable to locally delete removed folder %s: %s", folder.to_string(), e.message);
+        if (remote_folders_suspect) {
+            debug("Skipping removing folders due to prior errors");
+        } else {
+            notify_folders_available_unavailable(null, to_remove);
+            
+            // Sort by path length descending, so we always remove children first.
+            to_remove.sort((a, b) => b.path.get_path_length() - a.path.get_path_length());
+            foreach (Geary.Folder folder in to_remove) {
+                try {
+                    debug("Locally deleting removed folder %s", folder.to_string());
+                    
+                    yield local.delete_folder_async(folder, cancellable);
+                    engine_removed.add(folder);
+                } catch (Error e) {
+                    debug("Unable to locally delete removed folder %s: %s", folder.to_string(), e.message);
+                }
             }
         }
         
