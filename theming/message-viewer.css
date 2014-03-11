@@ -517,7 +517,6 @@ body:not(.nohide) .quote_container.controllable.show .quote {
     bottom: -7px;
     left: 0;
     right: 0;
-    padding: 0 8px;
     display: none;
 }
 .quote_container > .shower > input,
