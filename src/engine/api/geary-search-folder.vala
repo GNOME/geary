@@ -66,6 +66,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     public signal void search_query_changed(string? query);
     
     public SearchFolder(Account account) {
+        base();
+        
         _account = account;
         
         account.folders_available_unavailable.connect(on_folders_available_unavailable);

@@ -70,6 +70,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
     public SmtpOutboxFolder(ImapDB.Database db, Account account, Geary.ProgressMonitor sending_monitor) {
+        base();
+        
         this.db = db;
         _account = account;
         this.sending_monitor = sending_monitor;

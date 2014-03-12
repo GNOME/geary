@@ -10,6 +10,10 @@
 public abstract class Geary.AbstractLocalFolder : Geary.AbstractFolder {
     private int open_count = 0;
     
+    public AbstractLocalFolder() {
+        opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
+    }
+    
     public override Geary.Folder.OpenState get_open_state() {
         return open_count > 0 ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }
