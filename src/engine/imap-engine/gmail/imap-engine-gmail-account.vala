@@ -50,6 +50,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
                     special_folder_type);
             
             case SpecialFolderType.DRAFTS:
+            case SpecialFolderType.SPAM:
             case SpecialFolderType.TRASH:
                 return new GenericFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
