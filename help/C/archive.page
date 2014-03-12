@@ -13,9 +13,10 @@
 	The <gui>Archive</gui> toolbar button archives the selected conversation(s).
 	Archived messages appear in the <gui>All Mail</gui> folder.</p>
 
-    <p>With other mail servers, you can delete but not archive messages.  To delete
-    one or more conversations, select them and press the <gui>Delete</gui>
-    button on the toolbar.</p>
-    
+	<p>With other mail servers, you can trash or delete, but not archive, messages.  To move
+	one or more conversations to the <gui>Trash</gui> folder, select them and press the <gui>Trash</gui>
+	button on the toolbar.  To permanently delete the conversations, hold down <key>Shift</key> and press
+	the <gui>Delete</gui> button that appears in place of the <gui>Trash</gui> button.</p>
+
 </page>
 

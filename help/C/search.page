@@ -16,8 +16,46 @@
 	<p>The full text search includes email text, email addresses (to, from, and cc), subject lines and
 	attachment filenames.</p>
 	
-	<p>Keywords that match your search are highlighted the message view.  Geary will match different
+	<p>Keywords that match your search are highlighted in the message view.  Geary will match different
 	forms of the same word, for example searching for "walk" will also match "walking" and "walked."</p>
 	
+	<section>
+	<title>Search operators</title>
+	<p>Geary supports the following operators to limit the scope of searches:</p>
+	<table frame="all" rules="rows">
+	<tr>
+		<td><p><input>attachment:<var>filename</var></input></p></td>
+		<td><p>Finds messages with attachments whose name matches <var>filename</var>.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>bcc:<var>recipient</var></input></p></td>
+		<td><p>Finds messages where <var>recipient</var> matches the BCC header.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>body:<var>text</var></input></p></td>
+		<td><p>Finds messages whose body contains <var>text</var>.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>cc:<var>recipient</var></input></p></td>
+		<td><p>Finds messages where <var>recipient</var> matches the CC header.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>from:<var>sender</var></input></p></td>
+		<td><p>Finds messages where <var>sender</var> matches the From header.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>subject:<var>text</var></input></p></td>
+		<td><p>Finds messages whose subject contains <var>text</var>.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>to:<var>recipient</var></input></p></td>
+		<td><p>Finds messages where <var>sender</var> matches the To, CC, or BCC header.</p></td>
+	</tr>
+	</table>
+	
+	<p>As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</input>, and
+	<input>to</input> operators support <input>me</input> as their argument, which searches for the
+	account's email address in the appropriate context.</p>
+	</section>
 </page>
 

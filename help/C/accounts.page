@@ -16,9 +16,9 @@
 	select if your account is Gmail, Yahoo, Outlook.com, or other.  For other account types, you will
 	need to enter your IMAP and SMTP login settings manually.</p>
 	
-	<p>Additional accounts can be added from the Accounts dialog.  Click Accounts in the Gear menu
-	(or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to open the Accounts dialog.  To add an account, click the + button.</p>
-	
+	<p>Additional accounts can be added from the Accounts dialog.  Click Accounts in the application
+	menu or gear menu (or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to open the Accounts
+	dialog.  To add an account, click the + button.</p>
 	</section>
 	
 	<section>
@@ -30,6 +30,19 @@
 	
 	<p>To change the order that accounts are displayed in the folder list, drag the accounts in the
 	Accounts dialog to the desired order.</p>
+	
+	<p>There are some advanced options available when editing accounts:</p>
+	<list>
+	<item><p>The <gui>Save sent mail</gui> checkbox controls whether Geary will push successfully sent
+	messages up to the account's <gui>Sent Mail</gui> folder.  For Gmail accounts, this happens
+	automatically.  Yahoo and some other accounts can be configured to do this automatically as well.
+	For other accounts, if you disable this setting, you may be unable to view messages you've
+	sent.</p></item>
+	
+	<item><p>The <gui>Download mail</gui> drop-down allows you to configure how much mail Geary will keep
+	locally.  Geary can only use locally available mail when searching and forming
+	conversations.</p></item>
+	</list>
 	
 	</section>
 	

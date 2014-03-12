@@ -8,8 +8,15 @@
    <title>Think you've found a bug?</title>
    <p>If you suspect you've found a bug in Geary, follow these steps to report it:</p>
    <steps>
-   	<item><p>Search Geary's Redmine<link href="http://redmine.yorba.org/projects/geary/issues"> issue tracker </link>to see if someone else has reported the bug.</p></item>
-   	<item><p>Don't see your bug listed? Congratulations! You've found a new bug. To create an bug report, create an account on Redmine and create a new issue. Be as specific as you can and describe the steps to reproduce it. Don't forget to include details about your operating system and what version of Geary you're running.</p></item>
-   	<item><p>For general inquiries, please join the <link href="http://lists.yorba.org/cgi-bin/mailman/listinfo/geary"> Geary mailing list</link>.</p></item>
+	<item><p>Search Geary's <link href="https://bugzilla.gnome.org/browse.cgi?product=geary">bug
+	database</link> to see if someone else has reported the bug.</p></item>
+	<item><p>Don't see your bug listed? Congratulations! You've found a new bug. To create an bug report,
+	create an account on GNOME's Bugzilla and
+	<link href="https://bugzilla.gnome.org/enter_bug.cgi?product=geary">file a new bug</link>.  Be as
+	specific as you can and describe the steps to reproduce it. Don't forget to include details about
+	your operating system and what version of Geary you're running.</p></item>
+	<item><p>For general inquiries, please join the
+	<link href="https://mail.gnome.org/mailman/listinfo/geary-list"> Geary mailing
+	list</link>.</p></item>
    </steps>
 </page>

@@ -48,7 +48,9 @@ support the IMAP protocol, including popular services such as Gmail, Yahoo Mail,
     lets you open the <em>message menu</em> with commands that operate on the message.</p>
    	<p>When you view a conversation, Geary collapses messages that you've already read. Click collapsed messages to expand them. Click an expanded message's header to collapse it.</p>
     <p>Any attachments in a message appear at the bottom of the message.  You can click
-    an attachment to open it.</p>
+    an attachment to open it or right-click to save it.</p>
+    <p>Geary uses <link href="https://secure.gravatar.com/">Gravatar</link> to display an avatar for each
+    message's sender in its header.</p>
 
     </section>
 	
