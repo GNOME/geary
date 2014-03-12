@@ -131,6 +131,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             if (imap_folder == null)
                 continue;
             
+            // if considering folder not because it's available (i.e. because its contents changed),
+            // and the folder is open, don't process it; MinimalFolder will take care of changes as
+            // they occur, in order to remain synchronized
+            if (imap_folder.get_open_state() != Folder.OpenState.CLOSED)
+                continue;
+            
             // don't requeue the currently processing folder
             if (imap_folder != current_folder)
                 bg_queue.send(imap_folder);

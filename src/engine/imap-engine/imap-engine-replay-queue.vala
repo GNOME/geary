@@ -499,7 +499,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                     remote_err = replay_err;
                 }
             } else if (!is_close_op) {
-                remote_err = new EngineError.SERVER_UNAVAILABLE("Folder %s not available", to_string());
+                remote_err = new EngineError.SERVER_UNAVAILABLE("Folder %s not available", owner.to_string());
             }
             
             bool has_failed = !is_close_op && (status == ReplayOperation.Status.FAILED);

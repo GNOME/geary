@@ -158,7 +158,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             // algorithm) is determined at runtime.
             exec("""
                 CREATE VIRTUAL TABLE MessageSearchTable USING fts4(
-                    id INTEGER PRIMARY KEY,
                     body,
                     attachment,
                     subject,
@@ -394,8 +393,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 
                 return Db.TransactionOutcome.COMMIT;
             });
-        } catch (Error err) {
-            debug("Error populating autocompletion table during upgrade to database schema 5");
+        } catch (Error e) {
+            debug("Error fixing up contacts table: %s", e.message);
         }
     }
     

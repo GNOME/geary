@@ -887,7 +887,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 FROM MessageTable
                 INDEXED BY MessageTableInternalDateTimeTIndex
                 WHERE id IN (
-                    SELECT id
+                    SELECT docid
                     FROM MessageSearchTable
                     WHERE 1=1
             """);
@@ -958,7 +958,7 @@ private class Geary.ImapDB.Account : BaseObject {
             sql.append("""
                 SELECT offsets(MessageSearchTable), *
                 FROM MessageSearchTable
-                WHERE id IN (
+                WHERE docid IN (
             """);
             sql_append_ids(sql,
                 Geary.traverse<ImapDB.EmailIdentifier>(ids).map<int64?>(id => id.message_id).to_gee_iterable());
@@ -1126,7 +1126,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 SELECT id
                 FROM MessageTable
                 WHERE id NOT IN (
-                    SELECT id
+                    SELECT docid
                     FROM MessageSearchTable
                 )
                 LIMIT ?

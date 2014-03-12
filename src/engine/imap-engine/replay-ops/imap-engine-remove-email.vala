@@ -79,7 +79,7 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     }
     
     public override string describe_state() {
-        return "to_remove=%d removed_ids=%d".printf(to_remove.size,
+        return "to_remove.size=%d removed_ids.size=%d".printf(to_remove.size,
             (removed_ids != null) ? removed_ids.size : 0);
     }
 }
