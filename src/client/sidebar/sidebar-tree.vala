@@ -591,6 +591,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         entry.pruned(this);
         
         entry.sidebar_tooltip_changed.disconnect(on_sidebar_tooltip_changed);
+        entry.sidebar_name_changed.disconnect(on_sidebar_name_changed);
         entry.sidebar_count_changed.disconnect(on_sidebar_count_changed);
         
         Sidebar.EmphasizableEntry? emphasizable = entry as Sidebar.EmphasizableEntry;
