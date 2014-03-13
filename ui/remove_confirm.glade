@@ -19,7 +19,7 @@
         <property name="can_focus">False</property>
         <property name="yalign">0</property>
         <property name="pixel_size">60</property>
-        <property name="icon_name">dialog-warning</property>
+        <property name="icon_name">dialog-warning-symbolic</property>
         <property name="icon-size">6</property>
       </object>
       <packing>
