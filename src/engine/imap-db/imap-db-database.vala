@@ -47,6 +47,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         // can't call the ProgressMonitor directly, as it's hooked up to signals that expect to be
         // called in the foreground thread, so use the Idle loop for this
         Idle.add(() => {
+            // don't use upgrade_monitor for new databases, as the upgrade should be near-
+            // instantaneous.  Also, there's some issue with GTK when starting the progress
+            // monitor while GtkDialog's are in play:
+            // https://bugzilla.gnome.org/show_bug.cgi?id=726269
             if (!new_db && !upgrade_monitor.is_in_progress)
                 upgrade_monitor.notify_start();
             

@@ -77,8 +77,9 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         debug("VersionedDatabase.upgrade: current database schema for %s: %d", db_file.get_path(),
             db_version);
         
-        // If the DB doesn't exist yet, the version number will be negative.
-        bool new_db = db_version < 0;
+        // If the DB doesn't exist yet, the version number will be zero, but also treat negative
+        // values as new
+        bool new_db = db_version <= 0;
         
         // Initialize new database to version 1 (note the preincrement in the loop below)
         if (db_version < 0)

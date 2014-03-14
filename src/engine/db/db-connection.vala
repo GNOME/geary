@@ -232,7 +232,11 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
-     * See set_user_version_number().
+     * Returns the user_version number maintained by SQLite.
+     *
+     * A new database has a user version number of zero.
+     *
+     * @see set_user_version_number().
      */
     public int get_user_version_number() throws Error {
         return get_pragma_int(PRAGMA_USER_VERSION);
