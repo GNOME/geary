@@ -1423,7 +1423,13 @@ public class GearyController : Geary.BaseObject {
         foreach (Geary.App.Conversation conversation in selected_conversations) {
             if (conversation.is_unread())
                 unread_selected = true;
-            if (conversation.has_any_read_message())
+            
+            // Only check the messages that "Mark as Unread" would mark, so we
+            // don't add the menu option and have it not do anything.
+            Geary.Email? latest = conversation.get_latest_email(
+                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+            if (latest != null && latest.email_flags != null
+                && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
                 read_selected = true;
 
             if (conversation.is_flagged()) {
