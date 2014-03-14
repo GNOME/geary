@@ -406,7 +406,7 @@
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
                 <property name="width_chars">5</property>
-                <property name="text">465</property>
+                <property name="text">587</property>
                 <property name="invisible_char_set">True</property>
               </object>
               <packing>

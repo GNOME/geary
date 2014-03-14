@@ -334,7 +334,7 @@ public class AddEditPage : Gtk.Box {
         bool initial_default_imap_ssl = true,
         bool initial_default_imap_starttls = false,
         string? initial_default_smtp_host = null,
-        uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL,
+        uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
         bool initial_default_smtp_ssl = false,
         bool initial_default_smtp_starttls = true,
         bool initial_default_smtp_use_imap_credentials = false,
