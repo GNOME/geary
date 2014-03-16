@@ -4,15 +4,15 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Jiri Grönroos <jiri.gronroos+l10n@iki.fi>, 2012-2013, 2014.
+# Jiri Grönroos <jiri.gronroos+l10n@iki.fi>, 2012-2014.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-01-13 21:59+0000\n"
-"PO-Revision-Date: 2014-01-24 22:00+0200\n"
+"POT-Creation-Date: 2014-03-01 18:12+0000\n"
+"PO-Revision-Date: 2014-03-05 21:53+0200\n"
 "Last-Translator: Jiri Grönroos <jiri.gronroos+l10n@iki.fi>\n"
 "Language-Team: suomi <gnome-fi-laatu@lists.sourceforge.net>\n"
 "Language: fi\n"
@@ -23,7 +23,6 @@ msgstr ""
 "X-Generator: Gtranslator 2.91.6\n"
 
 #: ../desktop/geary.desktop.in.h:1
-#| msgid "Geary Mail"
 msgid "Geary"
 msgstr "Geary"
 
@@ -63,7 +62,7 @@ msgstr "_Lisää"
 msgid "Accounts"
 msgstr "Tilit"
 
-#. Copyright 2011-2013 Yorba Foundation
+#. Copyright 2011-2014 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -74,87 +73,98 @@ msgstr "Tilit"
 msgid "First Last"
 msgstr "Etunimi Sukunimi"
 
-#: ../src/client/accounts/add-edit-page.vala:190
+#: ../src/client/accounts/add-edit-page.vala:202
 msgid "Welcome to Geary."
 msgstr "Tervetuloa, käytössäsi on Geary."
 
-#: ../src/client/accounts/add-edit-page.vala:190
+#: ../src/client/accounts/add-edit-page.vala:202
 msgid "Enter your account information to get started."
 msgstr "Anna tilisi tiedot, jotta voit aloittaa käytön."
 
-#: ../src/client/accounts/add-edit-page.vala:210
+#: ../src/client/accounts/add-edit-page.vala:223
 msgid "2 weeks back"
 msgstr "2 viikkoa sitten"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:211
+#: ../src/client/accounts/add-edit-page.vala:224
 msgid "1 month back"
 msgstr "1 kuukausi sitten"
 
-#: ../src/client/accounts/add-edit-page.vala:212
+#: ../src/client/accounts/add-edit-page.vala:225
 msgid "3 months back"
 msgstr "3 kuukautta sitten"
 
-#: ../src/client/accounts/add-edit-page.vala:213
+#: ../src/client/accounts/add-edit-page.vala:226
 msgid "6 months back"
 msgstr "6 kuukautta sitten"
 
-#: ../src/client/accounts/add-edit-page.vala:214
+#: ../src/client/accounts/add-edit-page.vala:227
 msgid "1 year back"
 msgstr "1 vuosi sitten"
 
+#: ../src/client/accounts/add-edit-page.vala:228
+#| msgid "1 year back"
+msgid "2 years back"
+msgstr "2 vuotta sitten"
+
+#: ../src/client/accounts/add-edit-page.vala:229
+#| msgid "1 year back"
+msgid "4 years back"
+msgstr "4 vuotta sitten"
+
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:216
+#: ../src/client/accounts/add-edit-page.vala:231
 msgid "Everything"
 msgstr "Kaikki"
 
-#: ../src/client/accounts/add-edit-page.vala:583
+#: ../src/client/accounts/add-edit-page.vala:630
 msgid "Remem_ber passwords"
 msgstr "M_uista salasanat"
 
-#: ../src/client/accounts/add-edit-page.vala:590 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:637 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "_Muista salasana"
 
-#: ../src/client/accounts/add-edit-page.vala:619
+#: ../src/client/accounts/add-edit-page.vala:671
 msgid "Unable to validate:\n"
 msgstr "Tarkistaminen epäonnistui:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:621
+#: ../src/client/accounts/add-edit-page.vala:673
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Virheellinen tilin nimi.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:624
+#: ../src/client/accounts/add-edit-page.vala:676
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; Sähköpostiosoite on jo lisätty Gearyyn.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:628
+#: ../src/client/accounts/add-edit-page.vala:680
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; IMAP-yhteysvirhe.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:631
+#: ../src/client/accounts/add-edit-page.vala:683
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; IMAP-käyttäjätunnus tai -salasana on väärin.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:634
+#: ../src/client/accounts/add-edit-page.vala:686
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; SMTP-yhteysvirhe.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:637
+#: ../src/client/accounts/add-edit-page.vala:689
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; SMTP-käyttäjätunnus tai -salasana on väärin.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:641
+#: ../src/client/accounts/add-edit-page.vala:693
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Yhteysvirhe.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:645
+#: ../src/client/accounts/add-edit-page.vala:697
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Käyttäjätunnus tai salasana on väärin.\n"
 
 #: ../src/client/application/geary-application.vala:19
-msgid "Copyright 2011-2013 Yorba Foundation"
-msgstr "Tekijänoikeus 2011-2013 Yorba Foundation"
+#| msgid "Copyright 2011-2013 Yorba Foundation"
+msgid "Copyright 2011-2014 Yorba Foundation"
+msgstr "Tekijänoikeus 2011-2014 Yorba Foundation"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
@@ -209,195 +219,194 @@ msgstr ""
 msgid "Display program version"
 msgstr "Näytä sovelluksen versio"
 
+#. This gives a command-line hint on how to open new composer windows with mailto:
 #: ../src/client/application/geary-args.vala:47
+#, c-format
+msgid "Use %s to open a new composer window"
+msgstr ""
+
+#: ../src/client/application/geary-args.vala:48
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Kommentoi, ehdota uusia ideoita ja ilmoita vioista:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:55
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Komentorivivalintojen jäsennys epäonnistui: %s\n"
 
-#: ../src/client/application/geary-args.vala:65
+#: ../src/client/application/geary-args.vala:66
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Tunnistamaton komentorivivalinta \"%s\"\n"
 
-#: ../src/client/application/geary-controller.vala:44
+#: ../src/client/application/geary-controller.vala:46
 msgid "_Delete"
 msgstr "_Poista"
 
-#: ../src/client/application/geary-controller.vala:45
-#| msgid "Delete conversation (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:47
 msgid "Delete conversation (Shift+Delete)"
 msgstr "Poista keskustelu (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:46
-#| msgid "Delete conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:48
 msgid "Delete conversations (Shift+Delete)"
 msgstr "Poista keskustelut (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:49
-#| msgid "Trash"
+#: ../src/client/application/geary-controller.vala:51
 msgid "_Trash"
 msgstr "Siirr_ä roskakoriin"
 
-#: ../src/client/application/geary-controller.vala:50
-#| msgid "Archive conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:52
 msgid "Move conversation to trash (Delete, Backspace)"
 msgstr "Siirrä keskustelu roskakoriin (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:51
-#| msgid "Archive conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:53
 msgid "Move conversations to trash (Delete, Backspace)"
 msgstr "Siirrä keskustelut roskakoriin (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:54
+#: ../src/client/application/geary-controller.vala:56
 msgid "_Archive"
 msgstr "_Arkistoi"
 
-#: ../src/client/application/geary-controller.vala:55
-#| msgid "Move conversation"
+#: ../src/client/application/geary-controller.vala:57
 msgid "Archive conversation (A)"
 msgstr "Arkistoi keskustelu (A)"
 
-#: ../src/client/application/geary-controller.vala:56
-#| msgid "Move conversations"
+#: ../src/client/application/geary-controller.vala:58
 msgid "Archive conversations (A)"
 msgstr "Arkistoi keskustelut (A)"
 
-#: ../src/client/application/geary-controller.vala:59
+#: ../src/client/application/geary-controller.vala:61
 msgid "Mark as S_pam"
 msgstr "Me_rkitse roskapostiksi"
 
-#: ../src/client/application/geary-controller.vala:60
+#: ../src/client/application/geary-controller.vala:62
 msgid "Mark as not S_pam"
 msgstr "Poista _roskapostimerkintä"
 
-#: ../src/client/application/geary-controller.vala:62
-#: ../src/client/application/geary-controller.vala:272
+#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:275
 msgid "Mark conversation"
 msgstr "Merkitse keskustelu"
 
-#: ../src/client/application/geary-controller.vala:63
+#: ../src/client/application/geary-controller.vala:65
 msgid "Mark conversations"
 msgstr "Merkitse keskustelut"
 
-#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:66
 msgid "Add label to conversation"
 msgstr "Lisää tunniste keskusteluun"
 
-#: ../src/client/application/geary-controller.vala:65
+#: ../src/client/application/geary-controller.vala:67
 msgid "Add label to conversations"
 msgstr "Lisää tunniste keskusteluihin"
 
-#: ../src/client/application/geary-controller.vala:66
-#: ../src/client/application/geary-controller.vala:311
+#: ../src/client/application/geary-controller.vala:68
+#: ../src/client/application/geary-controller.vala:314
 msgid "Move conversation"
 msgstr "Siirrä keskustelu"
 
-#: ../src/client/application/geary-controller.vala:67
+#: ../src/client/application/geary-controller.vala:69
 msgid "Move conversations"
 msgstr "Siirrä keskustelut"
 
-#: ../src/client/application/geary-controller.vala:248
+#: ../src/client/application/geary-controller.vala:251
 msgid "A_ccounts"
 msgstr "_Tilit"
 
-#: ../src/client/application/geary-controller.vala:253
+#: ../src/client/application/geary-controller.vala:256
 #: ../src/client/components/stock.vala:27
 msgid "_Preferences"
 msgstr "_Asetukset"
 
-#: ../src/client/application/geary-controller.vala:257
+#: ../src/client/application/geary-controller.vala:260
 #: ../src/client/components/stock.vala:25
 msgid "_Help"
 msgstr "_Ohje"
 
-#: ../src/client/application/geary-controller.vala:261
+#: ../src/client/application/geary-controller.vala:264
 #: ../src/client/components/stock.vala:21
 msgid "_About"
 msgstr "_Tietoja"
 
-#: ../src/client/application/geary-controller.vala:265
+#: ../src/client/application/geary-controller.vala:268
 msgid "_Donate"
 msgstr "La_hjoita"
 
-#: ../src/client/application/geary-controller.vala:269
+#: ../src/client/application/geary-controller.vala:272
 #: ../src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "_Lopeta"
 
-#: ../src/client/application/geary-controller.vala:274
+#: ../src/client/application/geary-controller.vala:277
 msgid "_Mark as..."
 msgstr "_Merkitse..."
 
-#: ../src/client/application/geary-controller.vala:280
+#: ../src/client/application/geary-controller.vala:283
 msgid "Mark as _Read"
 msgstr "Merkitse _luetuksi"
 
-#: ../src/client/application/geary-controller.vala:286
+#: ../src/client/application/geary-controller.vala:289
 msgid "Mark as _Unread"
 msgstr "Merkitse l_ukemattomaksi"
 
-#: ../src/client/application/geary-controller.vala:292
+#: ../src/client/application/geary-controller.vala:295
 msgid "_Star"
 msgstr "_Merkitse tähdellä"
 
-#: ../src/client/application/geary-controller.vala:297
+#: ../src/client/application/geary-controller.vala:300
 msgid "U_nstar"
 msgstr "_Poista tähti"
 
-#: ../src/client/application/geary-controller.vala:307
+#: ../src/client/application/geary-controller.vala:310
 msgid "Add label"
 msgstr "Lisää tunniste"
 
-#: ../src/client/application/geary-controller.vala:308
+#: ../src/client/application/geary-controller.vala:311
 msgid "_Label"
 msgstr "_Tunniste"
 
-#: ../src/client/application/geary-controller.vala:312
+#: ../src/client/application/geary-controller.vala:315
 msgid "_Move"
 msgstr "_Siirrä"
 
-#: ../src/client/application/geary-controller.vala:316
+#: ../src/client/application/geary-controller.vala:319
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "Kirjoita uusi viesti (Ctrl+N, N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:320
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1549
+#: ../src/client/application/geary-controller.vala:323
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1567
 msgid "_Reply"
 msgstr "_Vastaa"
 
-#: ../src/client/application/geary-controller.vala:321
+#: ../src/client/application/geary-controller.vala:324
 msgid "Reply (Ctrl+R, R)"
 msgstr "Vastaa (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:325
+#: ../src/client/application/geary-controller.vala:328
 msgid "R_eply All"
 msgstr "_Vastaa kaikille"
 
-#: ../src/client/application/geary-controller.vala:326
+#: ../src/client/application/geary-controller.vala:329
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Vastaa kaikille (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:331
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1559
+#: ../src/client/application/geary-controller.vala:334
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1577
 msgid "_Forward"
 msgstr "_Lähetä edelleen"
 
-#: ../src/client/application/geary-controller.vala:332
+#: ../src/client/application/geary-controller.vala:335
 msgid "Forward (Ctrl+L, F)"
 msgstr "Lähetä edelleen (Ctrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:615
+#: ../src/client/application/geary-controller.vala:618
 msgid "Your settings are insecure"
 msgstr "Asetuksesi eivät ole turvalliset"
 
-#: ../src/client/application/geary-controller.vala:616
+#: ../src/client/application/geary-controller.vala:619
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -407,17 +416,17 @@ msgstr ""
 "SSL:ää tai TLS:ää. Tämä tarkoittaa, että käyttäjätunnuksesi ja salasanasi on "
 "mahdollista lukea verkkoliikenteestä. Haluatko varmasti sallia tämän?"
 
-#: ../src/client/application/geary-controller.vala:617
+#: ../src/client/application/geary-controller.vala:620
 msgid "Co_ntinue"
 msgstr "_Jatka"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:689
-#: ../src/client/components/status-bar.vala:28
+#: ../src/client/application/geary-controller.vala:698
+#: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Virhe sähköpostia lähettäessä"
 
-#: ../src/client/application/geary-controller.vala:690
+#: ../src/client/application/geary-controller.vala:699
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -425,19 +434,39 @@ msgstr ""
 "Geary kohtasi virheen viestiä lähettäessä. Jos ongelma toistuu, poista käsin "
 "kyseinen viesti Lähtevät-kansiosta."
 
-#: ../src/client/application/geary-controller.vala:753
+#. Displayed in the space-limited status bar when a message fails to be uploaded
+#. to Sent Mail after being sent.
+#: ../src/client/application/geary-controller.vala:703
+#: ../src/client/components/status-bar.vala:33
+#| msgid "Error sending email"
+msgid "Error saving sent mail"
+msgstr "Virhe lähetettyä postia tallennettaessa"
+
+#: ../src/client/application/geary-controller.vala:704
+#, fuzzy
+#| msgid ""
+#| "Geary encountered an error sending an email.  If the problem persists, "
+#| "please manually delete the email from your Outbox folder."
+msgid ""
+"Geary encountered an error saving a sent message to Sent Mail.  The message "
+"will stay in your Outbox folder until you delete it."
+msgstr ""
+"Geary kohtasi virheen viestiä lähettäessä. Jos ongelma toistuu, poista käsin "
+"kyseinen viesti Lähtevät-kansiosta."
+
+#: ../src/client/application/geary-controller.vala:773
 msgid "Labels"
 msgstr "Tunnisteet"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:765
+#: ../src/client/application/geary-controller.vala:785
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kohteen %s tietokannan avaaminen epäonnistui"
 
-#: ../src/client/application/geary-controller.vala:766
+#: ../src/client/application/geary-controller.vala:786
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -451,20 +480,20 @@ msgid ""
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
 
-#: ../src/client/application/geary-controller.vala:768
+#: ../src/client/application/geary-controller.vala:788
 msgid "_Rebuild"
 msgstr "Ra_kenna uudelleen"
 
-#: ../src/client/application/geary-controller.vala:768
+#: ../src/client/application/geary-controller.vala:788
 msgid "E_xit"
 msgstr "_Poistu"
 
-#: ../src/client/application/geary-controller.vala:777
+#: ../src/client/application/geary-controller.vala:797
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr ""
 
-#: ../src/client/application/geary-controller.vala:778
+#: ../src/client/application/geary-controller.vala:798
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -477,14 +506,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:800
-#: ../src/client/application/geary-controller.vala:810
-#: ../src/client/application/geary-controller.vala:821
+#: ../src/client/application/geary-controller.vala:820
+#: ../src/client/application/geary-controller.vala:830
+#: ../src/client/application/geary-controller.vala:841
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr ""
 
-#: ../src/client/application/geary-controller.vala:801
+#: ../src/client/application/geary-controller.vala:821
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -503,7 +532,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:811
+#: ../src/client/application/geary-controller.vala:831
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -512,7 +541,7 @@ msgid ""
 "Please install the latest version of Geary and try again."
 msgstr ""
 
-#: ../src/client/application/geary-controller.vala:822
+#: ../src/client/application/geary-controller.vala:842
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -524,23 +553,23 @@ msgstr ""
 "\n"
 "Tarkista yhteyden tila ja käynnistä Geary uudelleen."
 
-#: ../src/client/application/geary-controller.vala:1292
+#: ../src/client/application/geary-controller.vala:1335
 #, c-format
 msgid "About %s"
 msgstr "Tietoja %ssta"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1295
+#: ../src/client/application/geary-controller.vala:1338
 msgid "translator-credits"
 msgstr "Jiri Grönroos"
 
-#: ../src/client/application/geary-controller.vala:1552
+#: ../src/client/application/geary-controller.vala:1595
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Haluatko varmasti avata kohteen \"%s\"?"
 
-#: ../src/client/application/geary-controller.vala:1553
+#: ../src/client/application/geary-controller.vala:1596
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -548,16 +577,16 @@ msgstr ""
 "Liitetiedostot saattavat sisältää haitallista sisältöä.  Avaa liitteet "
 "ainoastaan, jos luotat niiden lähettäjään."
 
-#: ../src/client/application/geary-controller.vala:1554
+#: ../src/client/application/geary-controller.vala:1597
 msgid "Don't _ask me again"
 msgstr "_Älä kysy uudelleen"
 
-#: ../src/client/application/geary-controller.vala:1572
+#: ../src/client/application/geary-controller.vala:1615
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Tiedosto nimellä \"%s\" on jo olemassa.  Haluatko korvata sen?"
 
-#: ../src/client/application/geary-controller.vala:1574
+#: ../src/client/application/geary-controller.vala:1617
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
@@ -565,13 +594,24 @@ msgstr ""
 "Tiedosto on jo olemassa kohteessa \"%s\".  Tiedoston korvaaminen korvaa "
 "nykyisen tiedoston sisällön."
 
-#: ../src/client/application/geary-controller.vala:1577
+#: ../src/client/application/geary-controller.vala:1620
 msgid "_Replace"
 msgstr "_Korvaa"
 
+#: ../src/client/application/geary-controller.vala:1922
+#| msgid "Do you want to discard this message?"
+msgid "Do you want to permanently delete this message?"
+msgid_plural "Do you want to permanently delete these messages?"
+msgstr[0] "Haluatko poistaa tämän viestin pysyvästi?"
+msgstr[1] "Haluatko poistaa nämä viestit pysyvästi?"
+
+#: ../src/client/application/geary-controller.vala:1924
+#| msgid "_Delete"
+msgid "Delete"
+msgstr "Poista"
+
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
-#| msgid "%i matches"
 msgid "%i match"
 msgid_plural "%i matches"
 msgstr[0] "%i tulos"
@@ -579,7 +619,6 @@ msgstr[1] "%i tulosta"
 
 #: ../src/client/components/conversation-find-bar.vala:216
 #, c-format
-#| msgid "%i matches (wrapped)"
 msgid "%i match (wrapped)"
 msgid_plural "%i matches (wrapped)"
 msgstr[0] "%i tulos (yhteensä)"
@@ -613,7 +652,7 @@ msgid "Search %s account"
 msgstr "Etsi tililtä %s"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: ../src/client/components/status-bar.vala:25
+#: ../src/client/components/status-bar.vala:26
 msgid "Sending..."
 msgstr "Lähetetään..."
 
@@ -627,7 +666,7 @@ msgid "_Cancel"
 msgstr "_Peru"
 
 #: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/composer.glade.h:46 ../ui/preferences.glade.h:1
+#: ../ui/preferences.glade.h:1
 msgid "_Close"
 msgstr "_Sulje"
 
@@ -649,7 +688,7 @@ msgstr "_Poista"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1018
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1035
 msgid "Select _All"
 msgstr "Valitse _kaikki"
 
@@ -674,247 +713,258 @@ msgid "Error saving"
 msgstr "Virhe tallentaessa"
 
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-window.vala:95
+#: ../src/client/composer/composer-window.vala:90
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr ""
 "attach|enclosed|enclosing|cover letter|liite|tiedosto|liitteenä|liitetiedosto"
 
-#: ../src/client/composer/composer-window.vala:681
+#: ../src/client/composer/composer-window.vala:679
 msgid "Do you want to discard the unsaved message?"
 msgstr "Haluatko hylätä tallentamattoman viestin?"
 
-#: ../src/client/composer/composer-window.vala:684
+#: ../src/client/composer/composer-window.vala:682
 msgid "Do you want to discard this message?"
 msgstr "Haluatko hylätä tämän viestin?"
 
-#: ../src/client/composer/composer-window.vala:761
+#: ../src/client/composer/composer-window.vala:759
 msgid "Send message with an empty subject and body?"
 msgstr "Lähetetäänkö viesti ilman aihetta ja sisältöä?"
 
-#: ../src/client/composer/composer-window.vala:763
+#: ../src/client/composer/composer-window.vala:761
 msgid "Send message with an empty subject?"
 msgstr "Lähetetäänkö viesti ilman aihetta?"
 
-#: ../src/client/composer/composer-window.vala:765
+#: ../src/client/composer/composer-window.vala:763
 msgid "Send message with an empty body?"
 msgstr "Lähetetäänkö viesti ilman sisältöä?"
 
-#: ../src/client/composer/composer-window.vala:767
+#: ../src/client/composer/composer-window.vala:765
 msgid "Send message without an attachment?"
 msgstr "Lähetetäänkö viesti ilman liitettä?"
 
-#: ../src/client/composer/composer-window.vala:950
+#: ../src/client/composer/composer-window.vala:948
 msgid "Cannot add attachment"
 msgstr "Liitteen lisäys epäonnistui"
 
-#: ../src/client/composer/composer-window.vala:961
+#: ../src/client/composer/composer-window.vala:959
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Kohdetta \"%s\" ei löytynyt."
 
-#: ../src/client/composer/composer-window.vala:968
+#: ../src/client/composer/composer-window.vala:966
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "\"%s\" on kansio."
 
-#: ../src/client/composer/composer-window.vala:975
+#: ../src/client/composer/composer-window.vala:973
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "\"%s\" on tyhjä tiedosto."
 
-#: ../src/client/composer/composer-window.vala:989
+#: ../src/client/composer/composer-window.vala:987
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Kohteen \"%s\" avaus lukua varten epäonnistui."
 
-#: ../src/client/composer/composer-window.vala:996
+#: ../src/client/composer/composer-window.vala:994
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "\"%s\" on jo liitetty lähetystä varten."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-window.vala:1005
+#: ../src/client/composer/composer-window.vala:1003
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-window.vala:1267
+#: ../src/client/composer/composer-window.vala:1265
 msgid "Select Color"
 msgstr "Valitse väri"
+
+#. Composer label (with mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#: ../src/client/composer/composer-window.vala:1655
+#| msgid "From:"
+msgid "_From:"
+msgstr "_Lähettäjä:"
+
+#. For other types of messages, just show the from account.
+#. Composer label (without mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#. Geary account mail will be sent from
+#: ../src/client/composer/composer-window.vala:1671
+#: ../src/client/conversation-viewer/conversation-viewer.vala:628
+#: ../ui/composer.glade.h:41
+msgid "From:"
+msgstr "Lähettäjä:"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "Minä"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:254
+#: ../src/client/conversation-viewer/conversation-viewer.vala:255
 msgid "No conversations selected."
 msgstr "Keskusteluja ei ole valittu."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:256
+#: ../src/client/conversation-viewer/conversation-viewer.vala:257
 #, c-format
-#| msgid "%u conversations selected."
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u keskustelu valittu."
 msgstr[1] "%u keskustelua valittu."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:285
+#: ../src/client/conversation-viewer/conversation-viewer.vala:286
 msgid "No search results found."
 msgstr "Hakutuloksia ei löytynyt."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:287
+#: ../src/client/conversation-viewer/conversation-viewer.vala:288
 msgid "No conversations in folder."
 msgstr "Kansio ei sisällä keskusteluja."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:526
+#: ../src/client/conversation-viewer/conversation-viewer.vala:527
 msgid "This message contains remote images."
 msgstr "Tämä viesti sisältää etäkuvia."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:526
+#: ../src/client/conversation-viewer/conversation-viewer.vala:527
 msgid "Show Images"
 msgstr "Näytä kuvat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:527
+#: ../src/client/conversation-viewer/conversation-viewer.vala:528
 msgid "Always Show From Sender"
 msgstr "Näytä aina lähettäjältä"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:551
+#: ../src/client/conversation-viewer/conversation-viewer.vala:552
 msgid "Edit Draft"
 msgstr "Muokkaa luonnosta"
 
-#. Geary account mail will be sent from
-#: ../src/client/conversation-viewer/conversation-viewer.vala:623
-#: ../ui/composer.glade.h:41
-msgid "From:"
-msgstr "Lähettäjä:"
-
-#. Address(es) e-mail is to be sent to
-#: ../src/client/conversation-viewer/conversation-viewer.vala:626
-#: ../ui/composer.glade.h:36
+#: ../src/client/conversation-viewer/conversation-viewer.vala:631
 msgid "To:"
 msgstr "Vastaanottaja:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:629
-#: ../ui/composer.glade.h:37
+#: ../src/client/conversation-viewer/conversation-viewer.vala:634
 msgid "Cc:"
 msgstr "Kopio:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:632
-#: ../ui/composer.glade.h:39
+#: ../src/client/conversation-viewer/conversation-viewer.vala:637
 msgid "Bcc:"
 msgstr "Piilokopio:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:635
-#: ../ui/composer.glade.h:38
+#: ../src/client/conversation-viewer/conversation-viewer.vala:640
 msgid "Subject:"
 msgstr "Aihe:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:638
+#: ../src/client/conversation-viewer/conversation-viewer.vala:643
 msgid "Date:"
 msgstr "Päiväys:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:845
+#: ../src/client/conversation-viewer/conversation-viewer.vala:850
 #, c-format
-#| msgid "%u read messages"
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u luettu viesti"
 msgstr[1] "%u luettua viestiä"
 
+#: ../src/client/conversation-viewer/conversation-viewer.vala:982
+#, c-format
+msgid "This message was sent successfully, but could not be saved to %s."
+msgstr ""
+"Tämä viesti lähetettiin onnistuneesti, mutta sen tallennus kohteeseen %s "
+"epäonnistui."
+
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:991
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1008
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Kopioi"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:999
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1016
 msgid "Copy _Email Address"
 msgstr "Kopioi _sähköpostiosoite"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1004
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Kopioi _linkki"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1012
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1029
 msgid "Select _Message"
 msgstr "_Valitse viesti"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1024
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1041
 msgid "_Inspect"
 msgstr "T_utki"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1249
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1267
 msgid "This link appears to go to"
 msgstr "Tämä linkki vaikuttaa johtavan kohteeseen"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1250
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1268
 msgid "but actually goes to"
 msgstr "mutta viekin kohteeseen"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1323
 msgid " (Invalid?)"
 msgstr " (Virheellinen?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1497
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1515
 msgid "_Save As..."
 msgstr "_Tallenna nimellä..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1502
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1520
 msgid "Save All A_ttachments..."
 msgstr "_Tallenna kaikki liitteet"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1516
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1534
 msgid "_Save Image As..."
 msgstr "T_allenna kuva nimellä..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1539
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1557
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "_Tallenna liite"
 msgstr[1] "_Tallenna liitteet"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1554
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
 msgid "Reply to _All"
 msgstr "_Vastaa kaikille"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1571
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1589
 msgid "_Mark as Read"
 msgstr "_Merkitse luetuksi"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1575
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1593
 msgid "_Mark as Unread"
 msgstr "_Merkitse lukemattomaksi"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1581
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1599
 msgid "Mark Unread From _Here"
 msgstr "Merkitse lukemattomaksi tästä e_delleen"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1614
 msgid "_View Source"
 msgstr "Näytä lä_hde"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1901
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1908
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "ei mitään"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2031
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2038
 msgid "Failed to open default text editor."
 msgstr "Oletustekstimuokkaimen avaus epäonnistui."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:293
+#: ../src/client/conversation-viewer/conversation-web-view.vala:296
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr ""
@@ -931,7 +981,6 @@ msgstr "_Liitä"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-#| msgid "Please enter your email password"
 msgid "Please enter your password"
 msgstr "Anna salasana"
 
@@ -961,11 +1010,10 @@ msgstr "%s, %s"
 
 #: ../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr ""
+msgstr "Saapuneet"
 
 #: ../src/client/folder-list/folder-list-search-branch.vala:44
 #, c-format
-#| msgid "%d results"
 msgid "%d result"
 msgid_plural "%d results"
 msgstr[0] "%d tulos"
@@ -1066,33 +1114,31 @@ msgstr "Nyt"
 
 #: ../src/client/util/util-date.vala:167
 #, c-format
-#| msgid "%dm ago"
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%d min sitten"
 msgstr[1] "%d min sitten"
 
-#: ../src/client/util/util-date.vala:170
+#: ../src/client/util/util-date.vala:171
 #, c-format
-#| msgid "%dh ago"
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%d t sitten"
 msgstr[1] "%d t sitten"
 
-#: ../src/client/util/util-date.vala:177
+#: ../src/client/util/util-date.vala:178
 msgid "Yesterday"
 msgstr "Eilen"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:182
+#: ../src/client/util/util-date.vala:183
 #, c-format
 msgid "%A"
-msgstr ""
+msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:734
+#: ../src/engine/rfc822/rfc822-message.vala:742
 msgid "(no subject)"
 msgstr "(ei aihetta)"
 
@@ -1176,59 +1222,100 @@ msgstr "Lähetetyt"
 msgid "Archive"
 msgstr "Arkisto"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:25
 msgid "None"
 msgstr "Ei mitään"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
 #. / messages with attachments with a particular name.
-#: ../src/engine/imap-db/imap-db-account.vala:632
-#, fuzzy
+#: ../src/engine/imap-db/imap-db-account.vala:662
 #| msgid "Save A_ttachment..."
 #| msgid_plural "Save All A_ttachments..."
 msgid "attachment"
-msgstr "_Tallenna liite"
+msgstr "liite"
 
 #. / Can be typed in the search box like bcc:johndoe@example.com to find
 #. / messages bcc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:635
+#. Fields we allow the token to be "me" as in from:me.
+#: ../src/engine/imap-db/imap-db-account.vala:665
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "bcc"
-msgstr ""
+msgstr "piilokopio"
 
 #. / Can be typed in the search box like body:word to find the word only
 #. / if it occurs in the body of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:638
+#: ../src/engine/imap-db/imap-db-account.vala:668
 msgid "body"
-msgstr ""
+msgstr "sisältö"
 
 #. / Can be typed in the search box like cc:johndoe@example.com to find
 #. / messages cc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:641
-#, fuzzy
+#: ../src/engine/imap-db/imap-db-account.vala:671
+#: ../src/engine/imap-db/imap-db-account.vala:684
 #| msgid "Bcc:"
 msgid "cc"
-msgstr "Piilokopio:"
+msgstr "kopio"
 
 #. / Can be typed in the search box like from:johndoe@example.com to
 #. / find messages from a particular sender.
-#: ../src/engine/imap-db/imap-db-account.vala:644
+#: ../src/engine/imap-db/imap-db-account.vala:674
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "from"
-msgstr ""
+msgstr "lähettäjä"
 
 #. / Can be typed in the search box like subject:word to find the word
 #. / only if it occurs in the subject of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:647
-#, fuzzy
+#: ../src/engine/imap-db/imap-db-account.vala:677
 #| msgid "Subject:"
 msgid "subject"
-msgstr "Aihe:"
+msgstr "aihe"
 
 #. / Can be typed in the search box like to:johndoe@example.com to find
 #. / messages received by a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:650
+#: ../src/engine/imap-db/imap-db-account.vala:680
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "to"
+msgstr "vastaanottaja"
+
+#. "me" can be typed like from:me or cc:me, etc. as a shorthand
+#. to find mail to or from yourself in search.
+#: ../src/engine/imap-db/imap-db-account.vala:699
+msgid "me"
+msgstr "minä"
+
+#. List of folder names to match for Drafts, separated by |.  Please add localized common
+#. names for the Drafts folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:439
+#| msgid "Drafts"
+msgid "Drafts | Draft"
+msgstr "Luonnokset | Luonnos | Drafts | Draft"
+
+#. List of folder names to match for Sent Mail, separated by |.  Please add localized common
+#. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:444
+msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
+msgstr "Lähetetyt | Sent | Sent Mail | Sent Email | Sent E-Mail"
+
+#. List of folder names to match for Spam, separated by |.  Please add localized common
+#. names for the Spam folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:449
+msgid ""
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
+"| Bulk E-Mail"
 msgstr ""
+"Roskaposti | Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail "
+"| Bulk Email | Bulk E-Mail"
+
+#. List of folder names to match for Trash, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:454
+msgid "Trash | Rubbish | Rubbish Bin"
+msgstr "Roskakori | Trash | Rubbish | Rubbish Bin"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1373,7 +1460,6 @@ msgid "Remove formatting (Ctrl+Space)"
 msgstr "Poista muotoilu (Ctrl+Space)"
 
 #: ../ui/composer.glade.h:16
-#| msgid "Paste _With Formatting"
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
 msgstr "Lii_tä muotoilujen kera"
@@ -1446,6 +1532,25 @@ msgstr "_Tasalevyinen"
 msgid "Fixed Width"
 msgstr "Tasalevyinen"
 
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:36
+msgid "_To:"
+msgstr "_Vastaanottaja:"
+
+#: ../ui/composer.glade.h:37
+msgid "_Cc:"
+msgstr "_Kopio:"
+
+#: ../ui/composer.glade.h:38
+#| msgid "Subject:"
+msgid "_Subject:"
+msgstr "_Aihe:"
+
+#: ../ui/composer.glade.h:39
+#| msgid "Bcc:"
+msgid "_Bcc:"
+msgstr "_Piilokopio:"
+
 #: ../ui/composer.glade.h:42
 msgid "Drop files here"
 msgstr "Pudota tiedostot tähän"
@@ -1461,6 +1566,11 @@ msgstr "Liit_ä tiedosto"
 #: ../ui/composer.glade.h:45
 msgid "_Include Original Attachments"
 msgstr "_Sisällytä alkuperäiset liitteet"
+
+#: ../ui/composer.glade.h:46
+#| msgid "_Close"
+msgid "C_lose"
+msgstr "_Sulje"
 
 #: ../ui/composer.glade.h:47
 msgid "_Send"
@@ -1517,82 +1627,92 @@ msgid "Work, Home, etc."
 msgstr "Koti, työ tms."
 
 #: ../ui/login.glade.h:9
+#| msgid "Sent Mail"
+msgid "_Save sent mail"
+msgstr "_Tallenna lähetetyt viestit"
+
+#: ../ui/login.glade.h:10
 msgid "IMAP settings"
 msgstr "IMAP-asetukset"
 
-#: ../ui/login.glade.h:10
+#: ../ui/login.glade.h:11
 msgid "Se_rver:"
 msgstr "P_alvelin:"
 
-#: ../ui/login.glade.h:11
+#: ../ui/login.glade.h:12
 msgid "P_ort:"
 msgstr "P_ortti:"
 
-#: ../ui/login.glade.h:12
+#: ../ui/login.glade.h:13
 msgid "Ser_ver:"
 msgstr "Pal_velin:"
 
-#: ../ui/login.glade.h:13
+#: ../ui/login.glade.h:14
 msgid "Por_t:"
 msgstr "Portt_i:"
 
-#: ../ui/login.glade.h:14
+#: ../ui/login.glade.h:15
 msgid "SMTP settings"
 msgstr "SMTP-asetukset"
 
-#: ../ui/login.glade.h:15
+#: ../ui/login.glade.h:16
 msgid "User_name:"
 msgstr "_Käyttäjätunnus:"
 
-#: ../ui/login.glade.h:16
+#: ../ui/login.glade.h:17
 msgid "Pass_word:"
 msgstr "_Salasana:"
 
-#: ../ui/login.glade.h:17
+#: ../ui/login.glade.h:18
 msgid "SMTP username"
 msgstr "SMTP-käyttäjätunnus"
 
-#: ../ui/login.glade.h:18
+#: ../ui/login.glade.h:19
 msgid "SMTP password"
 msgstr "SMTP-salasana"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:20
 msgid "_Username:"
 msgstr "K_äyttäjätunnus:"
 
-#: ../ui/login.glade.h:20
+#: ../ui/login.glade.h:21
 msgid "IMAP username"
 msgstr "IMAP-käyttäjätunnus"
 
-#: ../ui/login.glade.h:21
+#: ../ui/login.glade.h:22
 msgid "IMAP password"
 msgstr "IMAP-salasana"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:23
 msgid "Encr_yption:"
 msgstr "Sala_us:"
 
-#: ../ui/login.glade.h:23
+#: ../ui/login.glade.h:24
 msgid "Encrypt_ion:"
 msgstr "Salau_s:"
 
-#: ../ui/login.glade.h:25
+#: ../ui/login.glade.h:26
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: ../ui/login.glade.h:26
+#: ../ui/login.glade.h:27
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:28
 msgid "No authentication re_quired"
 msgstr "Tunnistautumista ei _vaadita"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:29
+#| msgid "IMAP Credentials"
+msgid "Use IMAP cre_dentials"
+msgstr "Kä_ytä IMAP-tunnuksia"
+
+#: ../ui/login.glade.h:30
 msgid "Storage"
 msgstr "Varastointi"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:31
 msgid "_Download mail:"
 msgstr "_Lataa sähköposti ajalta:"
 
@@ -1609,7 +1729,6 @@ msgid "Password:"
 msgstr "Salasana:"
 
 #: ../ui/password-dialog.glade.h:4
-#| msgid "_Remember passwords"
 msgid "_Remember password"
 msgstr "_Muista salasana"
 
@@ -1678,9 +1797,6 @@ msgstr "Gearyn päivitys on meneillään."
 
 #~ msgid "General"
 #~ msgstr "Yleiset"
-
-#~ msgid "IMAP Credentials"
-#~ msgstr "IMAP-tunnukset"
 
 #~ msgid "Port:"
 #~ msgstr "Portti:"
