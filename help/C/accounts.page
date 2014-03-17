@@ -16,8 +16,11 @@
 	select if your account is Gmail, Yahoo, Outlook.com, or other.  For other account types, you will
 	need to enter your IMAP and SMTP login settings manually.</p>
 	
-	<p>Additional accounts can be added from the Accounts dialog.  Click Accounts in the application
-	menu or gear menu (or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to open the Accounts
+	<p>Additional accounts can be added from the Accounts dialog.  The <gui>Accounts</gui> option is
+	available in either Geary's application menu or the gear menu in the upper-right of the
+	toolbar.  (The location depends on the install desktop shell.  For GNOME Shell and Unity, the
+	application menu is available near the top-left corner of the screen.)  Alternately,
+	<keyseq><key>Ctrl</key><key>M</key></keyseq> will open the Accounts
 	dialog.  To add an account, click the + button.</p>
 	</section>
 	

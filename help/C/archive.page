@@ -18,5 +18,8 @@
 	button on the toolbar.  To permanently delete the conversations, hold down <key>Shift</key> and press
 	the <gui>Delete</gui> button that appears in place of the <gui>Trash</gui> button.</p>
 
+	<p>Delete is not available from every folder, such as Search.  Delete is also unavailable for Gmail.
+	For Gmail, <gui>Trash</gui> will move messages to the Trash folder on the server, where the user can
+	then manually delete them.  The server will automatically remove trashed messages after 30 days.</p>
 </page>
 

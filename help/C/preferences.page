@@ -8,8 +8,10 @@
         <link type="next" xref="search" />
     </info>
    <title>Preferences</title>
-	<p>To set preferences in Geary, open the application menu or click the gear menu at the upper right
-	of the toolbar and choose <gui>Preferences</gui>.</p>
+	<p>The <gui>Preferences</gui> option is available in either Geary's application menu or the
+	gear menu in the upper-right of the toolbar.  (The location depends on the install desktop
+	shell.  For GNOME Shell and Unity, the application menu is available near the top-left corner of
+	the screen.)</p>
 	
     <section>
 	<title>Reading</title>
