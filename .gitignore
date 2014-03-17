@@ -11,3 +11,5 @@ build/
 bindings/vapi/gmime-2.6/gmime-2.6.gi
 /valadoc
 /po/untitled.pot
+/help/*/*.page
+!/help/C/*.page
