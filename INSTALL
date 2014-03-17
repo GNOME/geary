@@ -17,8 +17,8 @@
   * Dependencies
 
     Building Geary requires Vala 0.22.1 or higher with a full GObject
-    introspection repository, intltool, cmake, and desktop-file-validate.
-    Vala's vapigen must be installed as well.
+    introspection repository, intltool, cmake, desktop-file-validate, and
+    xml2po.  Vala's vapigen must be installed as well.
 
     The developer packages and headers for the following libraries are also
     required when building Geary:
@@ -61,9 +61,10 @@
     of Fedora by running this command:
 
         $ sudo yum install gobject-introspection-devel intltool cmake \
-            desktop-file-utils libcanberra-devel libgee-devel glib2-devel \
-            gmime-devel gtk3-devel libnotify-devel sqlite-devel unique3-devel \
-            webkitgtk3-devel libsecret-devel libxml2-devel vala-tools
+            desktop-file-utils gnome-doc-utils libcanberra-devel libgee-devel \
+            glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
+            unique3-devel webkitgtk3-devel libsecret-devel libxml2-devel \
+            vala-tools
 
 
   * Installing dependencies on Ubuntu
@@ -78,10 +79,11 @@
     command:
 
         $ sudo apt-get install valac-0.20 libgirepository1.0-dev intltool \
-            cmake desktop-file-utils libcanberra-dev libgee-0.8-dev \
-            libglib2.0-dev libgmime-2.6-dev libgtk-3-dev libsecret-1-dev \
-            libxml2-dev libnotify-dev libsqlite3-dev libunique-3.0-dev \
-            libwebkitgtk-3.0-dev libmessaging-menu-dev libunity-dev
+            cmake desktop-file-utils gnome-doc-utils libcanberra-dev \
+            libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
+            libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \
+            libunique-3.0-dev libwebkitgtk-3.0-dev libmessaging-menu-dev \
+            libunity-dev
 
     You should check that you are using the right version of valac by running:
 
