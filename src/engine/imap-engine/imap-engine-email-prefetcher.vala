@@ -216,6 +216,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
             
             if (!keep_going)
                 break;
+            
+            yield Scheduler.sleep_ms_async(200);
         }
         
         // get any remaining
