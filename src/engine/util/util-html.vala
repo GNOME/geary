@@ -124,9 +124,8 @@ public string remove_html_tags(string input) {
         Regex style = new Regex("<style[^>]*?>[\\s\\S]*?<\\/style>", RegexCompileFlags.CASELESS);
         output = style.replace(output, -1, 0, "");
         
-        // Removes remaining tags. Based on this regex:
-        // http://osherove.com/blog/2003/5/13/strip-html-tags-from-a-string-using-regular-expressions.html
-        Regex tags = new Regex("<(.|\n)*?>", RegexCompileFlags.CASELESS);
+        // Removes remaining tags.
+        Regex tags = new Regex("<[^>]*>", RegexCompileFlags.CASELESS);
         return tags.replace(output, -1, 0, "");
     } catch (Error e) {
         debug("Error stripping HTML tags: %s", e.message);
