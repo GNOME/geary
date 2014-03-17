@@ -1,3 +1,11 @@
+Geary 0.6.0 - 17 March 2014
+---------------------------
+
+  * Cleaned up star/unstar and mark as read/unread functionality
+  * Added localized help docs to installed files
+  * Many bugfixes
+
+
 Geary 0.5.3 - 3 March 2014
 --------------------------
 

@@ -15,7 +15,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
 #
 set(GETTEXT_PACKAGE "geary")
 set(RELEASE_NAME "Lightweight email client for GNOME.")
-set(VERSION "0.5.3")
+set(VERSION "0.6.0")
 set(VERSION_INFO "Release")
 set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 

@@ -1,3 +1,13 @@
+geary (0.6.0-1~saucy1) saucy; urgency=low
+
+  * Basic search operators
+  * Save sent mail option
+  * Separate archive, trash, and delete actions
+  * Improved server support
+  * Many stability, speed, and interface improvements and bugfixes
+
+ -- Charles Lindsay <chaz@yorba.org>  Mon, 17 Mar 2014 13:41:15 -0700
+
 geary (0.4.3-1~raring1) raring; urgency=low
 
   * Fix "squished" conversation list when used with certain themes
