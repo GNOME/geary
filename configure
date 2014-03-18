@@ -34,6 +34,8 @@ configure_help() {
 	                        Disable checking for errors in generated desktop file.
 	  --disable-icon-update
 	                        Disable icon cache update.
+	  --disable-documentation
+	                        Disable generating and installing translated help documentation.
 
 	Some influential environment variables:
 	  PKG_CONFIG_PATH       Adds directories to pkg-config's search path.
@@ -103,6 +105,10 @@ do
 
         --disable-desktop-validate)
                             CMDLINE="${CMDLINE} -DDESKTOP_VALIDATE=OFF"
+                            ;;
+
+        --disable-documentation)
+                            CMDLINE="${CMDLINE} -DTRANSLATE_HELP=OFF"
                             ;;
         
         VALAC)              [ ! $value ] && abort $1

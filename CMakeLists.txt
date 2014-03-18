@@ -28,6 +28,7 @@ option(DEBUG "Build for debugging." OFF)
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
 option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
 option(DESKTOP_VALIDATE "Check generated desktop file for errors during build." ON)
+option(TRANSLATE_HELP "Generate and install translated help documentation." ON)
 
 if (DEBUG)
     message(STATUS "Debug build")
@@ -43,6 +44,10 @@ endif ()
 
 if (DESKTOP_VALIDATE)
     message(STATUS "Generated desktop file will be checked for errors")
+endif ()
+
+if (TRANSLATE_HELP)
+    message(STATUS "Help translations will be generated and installed")
 endif ()
 
 find_package(PkgConfig)

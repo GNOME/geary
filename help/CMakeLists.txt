@@ -29,12 +29,6 @@ endforeach()
 install(FILES ${HELP_SOURCE} DESTINATION ${HELP_DEST}/C)
 install(FILES C/figures/geary.svg DESTINATION ${HELP_DEST}/C/figures)
 
-
-FIND_PROGRAM(XML2PO_BIN xml2po)
-IF(NOT XML2PO_BIN)
-    MESSAGE(FATAL_ERROR "xml2po not found")
-ENDIF()
-
 # Hacked together from the similar macro in cmake/Gettext.cmake.
 MACRO(HELP_CREATE_TRANSLATIONS _firstLang)
     SET(_translatedPages)
@@ -78,4 +72,11 @@ MACRO(HELP_CREATE_TRANSLATIONS _firstLang)
     ENDIF()
 ENDMACRO()
 
-HELP_CREATE_TRANSLATIONS(ALL ${TRANSLATED} COMMENT "Translating help docs.")
+IF(TRANSLATE_HELP)
+    FIND_PROGRAM(XML2PO_BIN xml2po)
+    IF(NOT XML2PO_BIN)
+        MESSAGE(FATAL_ERROR "xml2po not found")
+    ENDIF()
+
+    HELP_CREATE_TRANSLATIONS(ALL ${TRANSLATED} COMMENT "Translating help docs.")
+ENDIF()
