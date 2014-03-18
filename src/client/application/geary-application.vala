@@ -19,7 +19,7 @@ public class GearyApplication : Gtk.Application {
     public const string COPYRIGHT = _("Copyright 2011-2014 Yorba Foundation");
     public const string WEBSITE = "http://www.yorba.org";
     public const string WEBSITE_LABEL = _("Visit the Yorba web site");
-    public const string BUGREPORT = "http://redmine.yorba.org/projects/geary/issues";
+    public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
     public const string DONATE = "http://www.yorba.org/about/donate";
     
     public const string VERSION = _VERSION;
