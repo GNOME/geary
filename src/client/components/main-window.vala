@@ -92,28 +92,32 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         return true;
     }
-    
+
+    // Fired on window resize, window move and possibly other events
+    // We want to save the window size for the next start
     public override bool configure_event(Gdk.EventConfigure event) {
-        // Get window state and dimensions.
-        // Note: A window move triggers this event with no changed values.
-        bool maximized = ((get_window().get_state() & Gdk.WindowState.MAXIMIZED) != 0);
-        // Writing the window_* variables triggers a dconf database update. Only write if
-        // the value has changed.
+
+        // Writing the window_* variables triggers a dconf database update.
+        // Only write if the value has changed.
+        if(window_width != event.width)
+            window_width = event.width;
+        if(window_height != event.height)
+            window_height = event.height;
+
+        return base.configure_event(event);
+    }
+
+    // Fired on [un]maximize and possibly other events
+    // We want to save the maximized state for the next start
+    public override bool window_state_event(Gdk.EventWindowState event) {
+        bool maximized = ((event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0);
+
+        // Writing the window_* variables triggers a dconf database update.
+        // Only write if the value has changed.
         if(window_maximized != maximized)
             window_maximized = maximized;
 
-        if (!maximized) {
-            // can't use properties as out variables
-            int width, height;
-            get_size(out width, out height);
-            
-            if(window_width != width)
-                window_width = width;
-            if(window_height != height)
-                window_height = height;
-        }
-        
-        return base.configure_event(event);
+        return base.window_state_event(event);
     }
     
     private void create_layout() {
