@@ -11,7 +11,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2014-02-27 20:29+0000\n"
-"PO-Revision-Date: 2014-03-22 08:42+0100\n"
+"PO-Revision-Date: 2014-03-22 08:45+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -105,16 +105,14 @@ msgid "1 year back"
 msgstr "1 leto nazaj"
 
 #: ../src/client/accounts/add-edit-page.vala:228
-#, fuzzy
 #| msgid "1 year back"
 msgid "2 years back"
-msgstr "ZADNJA STRAN OVITKA"
+msgstr "2 leti nazaj"
 
 #: ../src/client/accounts/add-edit-page.vala:229
-#, fuzzy
 #| msgid "1 year back"
 msgid "4 years back"
-msgstr "ZADNJA STRAN OVITKA"
+msgstr "4 leta nazaj"
 
 #. Separator
 #: ../src/client/accounts/add-edit-page.vala:231
@@ -166,10 +164,9 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "&#8226; Uporabniško ime ali geslo je napačno.\n"
 
 #: ../src/client/application/geary-application.vala:19
-#, fuzzy
 #| msgid "Copyright 2011-2013 Yorba Foundation"
 msgid "Copyright 2011-2014 Yorba Foundation"
-msgstr "Avtorske pravice © 2004-2011 Free Software Foundation, Inc."
+msgstr "Avtorske pravice © 2004-2014 Yorba Foundation"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
@@ -492,9 +489,8 @@ msgid ""
 msgstr ""
 
 #: ../src/client/application/geary-controller.vala:788
-#, fuzzy
 msgid "_Rebuild"
-msgstr "Ponovno izgradi mozaik"
+msgstr "Ponovno _izgradi"
 
 #: ../src/client/application/geary-controller.vala:788
 msgid "E_xit"
@@ -607,7 +603,6 @@ msgstr[2] "Želite zavreči to sporočilo?"
 msgstr[3] "Želite zavreči to sporočilo?"
 
 #: ../src/client/application/geary-controller.vala:1924
-#, fuzzy
 #| msgid "_Delete"
 msgid "Delete"
 msgstr "Izbriši"
@@ -633,7 +628,6 @@ msgstr[2] "%i zadetkov (celotno)"
 msgstr[3] "%i zadetkov (celotno)"
 
 #: ../src/client/components/conversation-find-bar.vala:218
-#, fuzzy
 msgid "not found"
 msgstr "Ni zadetkov"
 
@@ -1773,7 +1767,6 @@ msgid "Password:"
 msgstr "Geslo:"
 
 #: ../ui/password-dialog.glade.h:4
-#, fuzzy
 #| msgid "_Remember passwords"
 msgid "_Remember password"
 msgstr "_Zapomni si geslo"
