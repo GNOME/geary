@@ -67,6 +67,13 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(low.value > 0);
         assert(high.value > 0);
         
+        // corrent ordering
+        if (low.value > high.value) {
+            UID swap = low;
+            low = high;
+            high = swap;
+        }
+        
         if (low.equal_to(high))
             value = low.serialize();
         else

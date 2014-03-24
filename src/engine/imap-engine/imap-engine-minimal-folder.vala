@@ -103,6 +103,21 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         return (remote_count >= 0) ? remote_count : last_seen_remote_count;
     }
     
+    // used by normalize_folders() during the normalization process; should not be used elsewhere
+    private async void detach_all_emails_async(Cancellable? cancellable) throws Error {
+        Gee.List<Email>? all = yield local_folder.list_email_by_id_async(null, -1,
+            Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
+        
+        yield local_folder.detach_all_emails_async(cancellable);
+        
+        if (all != null && all.size > 0) {
+            Gee.List<EmailIdentifier> ids =
+                traverse<Email>(all).map<EmailIdentifier>((email) => email.id).to_array_list();
+            notify_email_removed(ids);
+            notify_email_count_changed(0, Folder.CountChangeReason.REMOVED);
+        }
+    }
+    
     private async bool normalize_folders(Geary.Imap.Folder remote_folder, Geary.Folder.OpenFlags open_flags,
         Cancellable? cancellable) throws Error {
         debug("%s: Begin normalizing remote and local folders", to_string());
@@ -139,7 +154,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 local_properties.uid_validity.value.to_string(),
                 remote_properties.uid_validity.value.to_string());
             
-            yield local_folder.detach_all_emails_async(cancellable);
+            yield detach_all_emails_async(cancellable);
             
             return true;
         }
@@ -184,6 +199,22 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         if (is_dirty)
             debug("%s: %d remove markers found, folder is dirty", to_string(), already_marked_ids.size);
         
+        // a full normalize works from the highest possible UID on the remote and work down to the lowest UID on
+        // the local; this covers all messages appended since last seen as well as any removed
+        Imap.UID last_uid = remote_properties.uid_next.previous(true);
+        
+        // if either local UID is out of range of the current highest UID, then something very wrong
+        // has occurred; the only recourse is to wipe all associations and start over
+        if (local_earliest_id.uid.compare_to(last_uid) > 0 || local_latest_id.uid.compare_to(last_uid) > 0) {
+            debug("%s: Local UID(s) higher than remote UIDNEXT, detaching all email: %s/%s remote=%s",
+                to_string(), local_earliest_id.uid.to_string(), local_latest_id.uid.to_string(),
+                last_uid.to_string());
+            
+            yield detach_all_emails_async(cancellable);
+            
+            return true;
+        }
+        
         // if UIDNEXT has changed, that indicates messages have been appended (and possibly removed)
         int64 uidnext_diff = remote_properties.uid_next.value - local_properties.uid_next.value;
         
@@ -199,10 +230,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             
             return true;
         }
-        
-        // a full normalize works from the highest possible UID on the remote and work down to the lowest UID on
-        // the local; this covers all messages appended since last seen as well as any removed
-        Imap.UID last_uid = remote_properties.uid_next.previous(true);
         
         // if the difference in UIDNEXT values equals the difference in message count, then only
         // an append could have happened, so only pull in the new messages ... note that this is not foolproof,

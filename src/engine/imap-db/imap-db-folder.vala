@@ -746,12 +746,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             stmt.exec(cancellable);
             
-            Db.Statement update_stmt = cx.prepare(
-                "UPDATE FolderTable SET unread_count = 0 WHERE id=?");
-            update_stmt.bind_rowid(0, folder_id);
-            
-            update_stmt.exec(cancellable);
-            
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
     }
