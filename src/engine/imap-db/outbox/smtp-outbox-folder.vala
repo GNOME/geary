@@ -547,9 +547,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         int final_count = 0;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
             foreach (Geary.EmailIdentifier id in email_ids) {
+                // ignore anything not belonging to the outbox, but also don't report it as removed
+                // either
                 SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
                 if (outbox_id == null)
-                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
+                    continue;
                 
                 // Even though we discard the new value here, this check must
                 // occur before any insert/delete on the table, to ensure we
