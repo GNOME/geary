@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-03-04 02:17+0000\n"
+"POT-Creation-Date: 2014-03-28 18:21+0000\n"
 "PO-Revision-Date: 2014-03-05 14:14+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
@@ -193,23 +193,23 @@ msgstr "Geary incluye atajos de teclado para las operaciones más comunes."
 msgid "Compose a new message"
 msgstr "Redactar un mensaje nuevo"
 
-#: C/shortcuts.page:15(p)
+#: C/shortcuts.page:16(p)
 msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
 msgstr "<keyseq><key>Ctrl</key><key>N</key></keyseq> o <key>N</key>"
 
-#: C/shortcuts.page:18(p)
+#: C/shortcuts.page:19(p)
 msgid "Reply to sender"
 msgstr "Responder al remitente"
 
-#: C/shortcuts.page:19(p)
+#: C/shortcuts.page:20(p)
 msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
 msgstr "<keyseq><key>Ctrl</key><key>R</key></keyseq> o <key>R</key>"
 
-#: C/shortcuts.page:22(p)
+#: C/shortcuts.page:23(p)
 msgid "Reply to all"
 msgstr "Responder a todos"
 
-#: C/shortcuts.page:23(p)
+#: C/shortcuts.page:24(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
 "<keyseq><key>Shift</key><key>R</key></keyseq>"
@@ -217,35 +217,35 @@ msgstr ""
 "<keyseq><key>Ctrl</key><key>Mayús</key><key>R</key></keyseq> o "
 "<keyseq><key>Mayús</key><key>R</key></keyseq>"
 
-#: C/shortcuts.page:26(p)
+#: C/shortcuts.page:27(p)
 msgid "Forward"
 msgstr "Reenviar"
 
-#: C/shortcuts.page:27(p)
+#: C/shortcuts.page:28(p)
 msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
 msgstr "<keyseq><key>Ctrl</key><key>L</key></keyseq> o <key>F</key>"
 
-#: C/shortcuts.page:30(p)
+#: C/shortcuts.page:31(p)
 msgid "Archive"
 msgstr "Archivar"
 
-#: C/shortcuts.page:31(key)
+#: C/shortcuts.page:32(key)
 msgid "A"
 msgstr "A"
 
-#: C/shortcuts.page:34(p)
+#: C/shortcuts.page:35(p)
 msgid "Trash"
 msgstr "Enviar a la papelera"
 
-#: C/shortcuts.page:35(p)
+#: C/shortcuts.page:36(p)
 msgid "<key>Delete</key> or <key>Backspace</key>"
 msgstr "<key>Supr</key> o <key>Retroceso</key>"
 
-#: C/shortcuts.page:38(p)
+#: C/shortcuts.page:39(p)
 msgid "Delete"
 msgstr "Eliminar"
 
-#: C/shortcuts.page:39(p)
+#: C/shortcuts.page:40(p)
 msgid ""
 "<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
 "key><key>Backspace</key></keyseq>"
@@ -253,27 +253,27 @@ msgstr ""
 "<keyseq><key>Mayús</key><key>Supr</key></keyseq> o <keyseq><key>Mayús</"
 "key><key>Retroceso</key></keyseq>"
 
-#: C/shortcuts.page:42(p)
+#: C/shortcuts.page:43(p)
 msgid "Star"
 msgstr "Destacar"
 
-#: C/shortcuts.page:43(key) C/shortcuts.page:91(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:92(key)
 msgid "S"
 msgstr "S"
 
-#: C/shortcuts.page:46(p)
+#: C/shortcuts.page:47(p)
 msgid "Unstar"
 msgstr "Quitar el destaque"
 
-#: C/shortcuts.page:47(key)
+#: C/shortcuts.page:48(key)
 msgid "D"
 msgstr "D"
 
-#: C/shortcuts.page:50(p)
+#: C/shortcuts.page:51(p)
 msgid "Mark read"
 msgstr "Marcar como leído"
 
-#: C/shortcuts.page:51(p)
+#: C/shortcuts.page:52(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
 "key><key>I</key></keyseq>"
@@ -281,11 +281,11 @@ msgstr ""
 "<keyseq><key>Ctrl</key><key>I</key></keyseq> o <keyseq><key>Mayús</"
 "key><key>I</key></keyseq>"
 
-#: C/shortcuts.page:54(p)
+#: C/shortcuts.page:55(p)
 msgid "Mark unread"
 msgstr "Marcar como no leído"
 
-#: C/shortcuts.page:55(p)
+#: C/shortcuts.page:56(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
 "key><key>U</key></keyseq>"
@@ -293,101 +293,101 @@ msgstr ""
 "<keyseq><key>Ctrl</key><key>U</key></keyseq> o <keyseq><key>Mayús</"
 "key><key>U</key></keyseq>"
 
-#: C/shortcuts.page:58(p)
+#: C/shortcuts.page:59(p)
 msgid "Toggle spam"
 msgstr "Marcar o desmarcar como «spam»"
 
-#: C/shortcuts.page:59(p)
+#: C/shortcuts.page:60(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> o <key>!</key>"
 
-#: C/shortcuts.page:62(p)
+#: C/shortcuts.page:63(p)
 msgid "Quit"
 msgstr "Salir"
 
-#: C/shortcuts.page:63(key) C/shortcuts.page:79(key) C/shortcuts.page:83(key)
-#: C/shortcuts.page:87(key) C/shortcuts.page:91(key) C/shortcuts.page:95(key)
-#: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
+#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
+#: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
+#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: C/shortcuts.page:63(key)
+#: C/shortcuts.page:64(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:66(p)
+#: C/shortcuts.page:67(p)
 msgid "Zoom in"
 msgstr "Acercar"
 
-#: C/shortcuts.page:67(p)
+#: C/shortcuts.page:68(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> o <key>=</key>"
 
-#: C/shortcuts.page:70(p)
+#: C/shortcuts.page:71(p)
 msgid "Zoom out"
 msgstr "Alejar"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:72(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> o <key>-</key>"
 
-#: C/shortcuts.page:74(p)
+#: C/shortcuts.page:75(p)
 msgid "Reset zoom"
 msgstr "Restablecer la ampliación"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:76(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> o <key>0</key>"
 
-#: C/shortcuts.page:78(p) C/preferences.page:10(title)
+#: C/shortcuts.page:79(p) C/preferences.page:10(title)
 msgid "Preferences"
 msgstr "Preferencias"
 
-#: C/shortcuts.page:79(key)
+#: C/shortcuts.page:80(key)
 msgid "E"
 msgstr "E"
 
-#: C/shortcuts.page:82(p) C/accounts.page:10(title)
+#: C/shortcuts.page:83(p) C/accounts.page:10(title)
 msgid "Accounts"
 msgstr "Cuentas"
 
-#: C/shortcuts.page:83(key)
+#: C/shortcuts.page:84(key)
 msgid "M"
 msgstr "M"
 
-#: C/shortcuts.page:86(p)
+#: C/shortcuts.page:87(p)
 msgid "Close composer window"
 msgstr "Cerrar la ventana de redacción"
 
-#: C/shortcuts.page:87(key)
+#: C/shortcuts.page:88(key)
 msgid "W"
 msgstr "W"
 
-#: C/shortcuts.page:90(p)
+#: C/shortcuts.page:91(p)
 msgid "Jump to search box"
 msgstr "Enfocar el cuadro de búsqueda"
 
-#: C/shortcuts.page:94(p)
+#: C/shortcuts.page:95(p)
 msgid "Find in current conversation"
 msgstr "Buscar en la conversación actual"
 
-#: C/shortcuts.page:95(key)
+#: C/shortcuts.page:96(key)
 msgid "F"
 msgstr "F"
 
-#: C/shortcuts.page:98(p)
+#: C/shortcuts.page:99(p)
 msgid "Find next in current conversation"
 msgstr "Buscar la siguiente ocurrencia en la conversación"
 
-#: C/shortcuts.page:99(key) C/shortcuts.page:103(key)
+#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
 msgid "G"
 msgstr "G"
 
-#: C/shortcuts.page:102(p)
+#: C/shortcuts.page:103(p)
 msgid "Find previous in current conversation"
 msgstr "Buscar la ocurrencia anterior en la conversación"
 
-#: C/shortcuts.page:103(key)
+#: C/shortcuts.page:104(key)
 msgid "Shift"
 msgstr "Mayús"
 
@@ -411,73 +411,164 @@ msgstr ""
 
 #: C/search.page:19(p)
 msgid ""
-"Keywords that match your search are highlighted the message view. Geary will "
-"match different forms of the same word, for example searching for \"walk\" "
-"will also match \"walking\" and \"walked.\""
+"Keywords that match your search are highlighted in the message view. Geary "
+"will match different forms of the same word, for example searching for \"walk"
+"\" will also match \"walking\" and \"walked.\""
+msgstr ""
+
+#: C/search.page:23(title)
+msgid "Search operators"
+msgstr "Operadores de búsqueda"
+
+#: C/search.page:24(p)
+msgid "Geary supports the following operators to limit the scope of searches:"
+msgstr "Geary admite los siguientes operadores para filtrar los resultados:"
+
+#: C/search.page:27(var)
+msgid "filename"
+msgstr ""
+
+#: C/search.page:27(input)
+msgid "attachment:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:28(p)
+msgid "Finds messages with attachments whose name matches <var>filename</var>."
+msgstr ""
+
+#: C/search.page:31(var) C/search.page:39(var) C/search.page:51(var)
+msgid "recipient"
+msgstr ""
+
+#: C/search.page:31(input)
+msgid "bcc:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:32(p)
+msgid "Finds messages where <var>recipient</var> matches the BCC header."
+msgstr ""
+
+#: C/search.page:35(var) C/search.page:47(var)
+msgid "text"
+msgstr ""
+
+#: C/search.page:35(input)
+msgid "body:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:36(p)
+msgid "Finds messages whose body contains <var>text</var>."
+msgstr ""
+
+#: C/search.page:39(input)
+msgid "cc:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:40(p)
+msgid "Finds messages where <var>recipient</var> matches the CC header."
+msgstr ""
+
+#: C/search.page:43(var)
+msgid "sender"
+msgstr ""
+
+#: C/search.page:43(input)
+msgid "from:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:44(p)
+msgid "Finds messages where <var>sender</var> matches the From header."
+msgstr ""
+
+#: C/search.page:47(input)
+msgid "subject:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:48(p)
+msgid "Finds messages whose subject contains <var>text</var>."
+msgstr ""
+
+#: C/search.page:51(input)
+msgid "to:<placeholder-1/>"
+msgstr ""
+
+#: C/search.page:52(p)
+msgid ""
+"Finds messages where <var>sender</var> matches the To, CC, or BCC header."
+msgstr ""
+
+#: C/search.page:56(p)
+msgid ""
+"As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
+"input>, and <input>to</input> operators support <input>me</input> as their "
+"argument, which searches for the account's email address in the appropriate "
+"context."
 msgstr ""
 
 #: C/preferences.page:11(p)
 msgid ""
-"To set preferences in Geary, click the gear menu at the upper right of the "
-"toolbar and choose <gui>Preferences</gui>."
+"The <gui>Preferences</gui> option is available in either Geary's application "
+"menu or the gear menu in the upper-right of the toolbar. (The location "
+"depends on the install desktop shell. For GNOME Shell and Unity, the "
+"application menu is available near the top-left corner of the screen.)"
 msgstr ""
 
-#: C/preferences.page:15(title)
+#: C/preferences.page:17(title)
 msgid "Reading"
 msgstr ""
 
-#: C/preferences.page:18(gui)
+#: C/preferences.page:20(gui)
 msgid "Automatically select next message"
 msgstr ""
 
-#: C/preferences.page:19(p)
+#: C/preferences.page:21(p)
 msgid ""
 "When this option is enabled, Geary automatically selects the latest message "
 "in a folder when you enter the folder. In addition, after archiving a "
 "message, Geary automatically selects an adjacent message."
 msgstr ""
 
-#: C/preferences.page:24(gui)
+#: C/preferences.page:26(gui)
 msgid "Display conversation preview"
 msgstr ""
 
-#: C/preferences.page:25(p)
+#: C/preferences.page:27(p)
 msgid ""
 "Enables message previews in the conversation list. Previews show the first "
 "few lines of each message."
 msgstr ""
 
-#: C/preferences.page:32(title)
+#: C/preferences.page:34(title)
 msgid "Composer"
 msgstr ""
 
-#: C/preferences.page:35(gui)
+#: C/preferences.page:37(gui)
 msgid "Enable spell checking"
-msgstr ""
+msgstr "Activar la corrección ortográfica"
 
-#: C/preferences.page:36(p)
+#: C/preferences.page:38(p)
 msgid ""
 "When set, Geary automatically spell checks a message as you write it, "
 "underlying each misspelled word in red."
 msgstr ""
 
-#: C/preferences.page:43(title)
+#: C/preferences.page:45(title)
 msgid "Notifications"
-msgstr ""
+msgstr "Notificaciones"
 
-#: C/preferences.page:46(gui)
+#: C/preferences.page:48(gui)
 msgid "Play notification sounds"
-msgstr ""
+msgstr "Reproducir sonidos de notificación"
 
-#: C/preferences.page:47(p)
+#: C/preferences.page:49(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr ""
 
-#: C/preferences.page:50(gui)
+#: C/preferences.page:52(gui)
 msgid "Show notifications for new mail"
-msgstr ""
+msgstr "Mostrar notificaciones de mensajes nuevos"
 
-#: C/preferences.page:51(p)
+#: C/preferences.page:53(p)
 msgid ""
 "When set, Geary displays a <em>notification</em> each time a new message "
 "arrives. Notifications are displayed in a system-dependent manner. On GNOME "
@@ -505,11 +596,11 @@ msgstr ""
 
 #: C/overview.page:17(p)
 msgid "The main Geary window is divided into several areas:"
-msgstr ""
+msgstr "La ventana principal de Geary se divide en varias áreas:"
 
 #: C/overview.page:20(title)
 msgid "Folder list"
-msgstr ""
+msgstr "Lista de carpetas"
 
 #: C/overview.page:21(p)
 msgid ""
@@ -521,7 +612,7 @@ msgstr ""
 
 #: C/overview.page:28(title)
 msgid "Conversation list"
-msgstr ""
+msgstr "Lista de conversaciones"
 
 #: C/overview.page:29(p)
 msgid ""
@@ -556,7 +647,7 @@ msgstr ""
 
 #: C/overview.page:44(title)
 msgid "Message area"
-msgstr ""
+msgstr "Área de mensajes"
 
 #: C/overview.page:45(p)
 msgid ""
@@ -581,12 +672,18 @@ msgstr ""
 #: C/overview.page:50(p)
 msgid ""
 "Any attachments in a message appear at the bottom of the message. You can "
-"click an attachment to open it."
+"click an attachment to open it or right-click to save it."
+msgstr ""
+
+#: C/overview.page:52(p)
+msgid ""
+"Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
+"display an avatar for each message's sender in its header."
 msgstr ""
 
 #: C/limits.page:11(title)
 msgid "Limitations"
-msgstr ""
+msgstr "Limitaciones"
 
 #: C/limits.page:12(p)
 msgid ""
@@ -600,17 +697,17 @@ msgstr ""
 #: C/limits.page:14(p)
 msgid ""
 "To learn more about the features we're working on and the future of Geary, "
-"please visit Geary's <link href=\"http://redmine.yorba.org/projects/geary/"
-"wiki\">Redmine page</link>."
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
 msgstr ""
 
 #: C/label.page:10(title)
 msgid "Label or move a conversation"
-msgstr ""
+msgstr "Etiquetar o mover una conversación"
 
 #: C/label.page:12(title)
 msgid "Label a conversation"
-msgstr ""
+msgstr "Etiquetar una conversación"
 
 #: C/label.page:13(p)
 msgid ""
@@ -671,15 +768,15 @@ msgstr ""
 
 #: C/index.page:9(title)
 msgid "Introduction"
-msgstr ""
+msgstr "Introducción"
 
 #: C/index.page:13(title)
 msgid "Using Geary"
-msgstr ""
+msgstr "Uso de Geary"
 
 #: C/index.page:17(title)
 msgid "Bugs"
-msgstr ""
+msgstr "Errores"
 
 #: C/bugs.page:8(title)
 msgid "Think you've found a bug?"
@@ -692,28 +789,30 @@ msgstr ""
 
 #: C/bugs.page:11(p)
 msgid ""
-"Search Geary's Redmine<link href=\"http://redmine.yorba.org/projects/geary/"
-"issues\"> issue tracker </link>to see if someone else has reported the bug."
-msgstr ""
-
-#: C/bugs.page:12(p)
-msgid ""
-"Don't see your bug listed? Congratulations! You've found a new bug. To "
-"create an bug report, create an account on Redmine and create a new issue. "
-"Be as specific as you can and describe the steps to reproduce it. Don't "
-"forget to include details about your operating system and what version of "
-"Geary you're running."
+"Search Geary's <link href=\"https://bugzilla.gnome.org/browse.cgi?"
+"product=geary\">bug database</link> to see if someone else has reported the "
+"bug."
 msgstr ""
 
 #: C/bugs.page:13(p)
 msgid ""
-"For general inquiries, please join the <link href=\"http://lists.yorba.org/"
-"cgi-bin/mailman/listinfo/geary\"> Geary mailing list</link>."
+"Don't see your bug listed? Congratulations! You've found a new bug. To "
+"create an bug report, create an account on GNOME's Bugzilla and <link href="
+"\"https://bugzilla.gnome.org/enter_bug.cgi?product=geary\">file a new bug</"
+"link>. Be as specific as you can and describe the steps to reproduce it. "
+"Don't forget to include details about your operating system and what version "
+"of Geary you're running."
+msgstr ""
+
+#: C/bugs.page:18(p)
+msgid ""
+"For general inquiries, please join the <link href=\"https://mail.gnome.org/"
+"mailman/listinfo/geary-list\"> Geary mailing list</link>."
 msgstr ""
 
 #: C/archive.page:10(title)
 msgid "Delete or archive a message"
-msgstr ""
+msgstr "Eliminar o archivar un mensaje"
 
 #: C/archive.page:12(p)
 msgid ""
@@ -724,14 +823,25 @@ msgstr ""
 
 #: C/archive.page:16(p)
 msgid ""
-"With other mail servers, you can delete but not archive messages. To delete "
-"one or more conversations, select them and press the <gui>Delete</gui> "
-"button on the toolbar."
+"With other mail servers, you can trash or delete, but not archive, messages. "
+"To move one or more conversations to the <gui>Trash</gui> folder, select "
+"them and press the <gui>Trash</gui> button on the toolbar. To permanently "
+"delete the conversations, hold down <key>Shift</key> and press the "
+"<gui>Delete</gui> button that appears in place of the <gui>Trash</gui> "
+"button."
+msgstr ""
+
+#: C/archive.page:21(p)
+msgid ""
+"Delete is not available from every folder, such as Search. Delete is also "
+"unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the "
+"Trash folder on the server, where the user can then manually delete them. "
+"The server will automatically remove trashed messages after 30 days."
 msgstr ""
 
 #: C/accounts.page:13(title)
 msgid "Adding accounts"
-msgstr ""
+msgstr "Añadir cuentas"
 
 #: C/accounts.page:15(p)
 msgid ""
@@ -743,16 +853,20 @@ msgstr ""
 
 #: C/accounts.page:19(p)
 msgid ""
-"Additional accounts can be added from the Accounts dialog. Click Accounts in "
-"the Gear menu (or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) to "
-"open the Accounts dialog. To add an account, click the + button."
+"Additional accounts can be added from the Accounts dialog. The "
+"<gui>Accounts</gui> option is available in either Geary's application menu "
+"or the gear menu in the upper-right of the toolbar. (The location depends on "
+"the install desktop shell. For GNOME Shell and Unity, the application menu "
+"is available near the top-left corner of the screen.) Alternately, "
+"<keyseq><key>Ctrl</key><key>M</key></keyseq> will open the Accounts dialog. "
+"To add an account, click the + button."
 msgstr ""
 
-#: C/accounts.page:25(title)
+#: C/accounts.page:28(title)
 msgid "Editing existing accounts"
 msgstr ""
 
-#: C/accounts.page:27(p)
+#: C/accounts.page:30(p)
 msgid ""
 "From the Accounts dialog, select an account and click the pencil icon to "
 "change various settings. Please note that Geary cannot change server "
@@ -760,17 +874,38 @@ msgid ""
 "server, you will need to delete the account and re-add it."
 msgstr ""
 
-#: C/accounts.page:31(p)
+#: C/accounts.page:34(p)
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
 msgstr ""
 
-#: C/accounts.page:37(title)
-msgid "Removing accounts"
+#: C/accounts.page:37(p)
+msgid "There are some advanced options available when editing accounts:"
 msgstr ""
 
 #: C/accounts.page:39(p)
+msgid ""
+"The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
+"successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
+"For Gmail accounts, this happens automatically. Yahoo and some other "
+"accounts can be configured to do this automatically as well. For other "
+"accounts, if you disable this setting, you may be unable to view messages "
+"you've sent."
+msgstr ""
+
+#: C/accounts.page:45(p)
+msgid ""
+"The <gui>Download mail</gui> drop-down allows you to configure how much mail "
+"Geary will keep locally. Geary can only use locally available mail when "
+"searching and forming conversations."
+msgstr ""
+
+#: C/accounts.page:53(title)
+msgid "Removing accounts"
+msgstr ""
+
+#: C/accounts.page:55(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
