@@ -24,6 +24,8 @@ configure_help() {
 	
 	  --disable-fatal-warnings
 	                        Disable Vala fatal warnings when compiling.
+	  --enable-unity
+	                        Enable Unity interface changes.
 	  --enable-ref-tracking
 	                        Enable reference tracking which is dumped to stdout when the program exits.
 	  --disable-schemas-compile
@@ -88,6 +90,10 @@ do
         
         --enable-ref-tracking)
                             CMDLINE="${CMDLINE} -DREF_TRACKING=ON"
+                            ;;
+        
+        --enable-unity)
+                            CMDLINE="${CMDLINE} -DENABLE_UNITY=ON"
                             ;;
         
         --disable-schemas-compile)

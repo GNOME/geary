@@ -579,6 +579,16 @@ else ()
     message(STATUS "Reference tracking: OFF")
 endif ()
 
+if (ENABLE_UNITY)
+    message(STATUS "Unity interface changes: ON")
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        --define=ENABLE_UNITY
+    )
+else ()
+    message(STATUS "Unity interface changes: OFF")
+endif ()
+
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})

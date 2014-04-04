@@ -73,12 +73,14 @@ public class MainWindow : Gtk.ApplicationWindow {
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
         
-        create_layout();
-        
         // Toolbar.
         main_toolbar = new MainToolbar();
+#if !ENABLE_UNITY
         main_toolbar.show_close_button = true;
         set_titlebar(main_toolbar);
+#endif
+        
+        create_layout();
     }
     
     public override void show_all() {
@@ -171,6 +173,9 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_paned.pack1(status_bar_box, false, false);
         folder_paned.pack2(conversations_paned, true, false);
         
+#if ENABLE_UNITY
+        main_layout.pack_start(main_toolbar, false, true, 0);
+#endif
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
