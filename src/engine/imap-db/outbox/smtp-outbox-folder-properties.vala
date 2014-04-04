@@ -6,7 +6,7 @@
 
 private class Geary.SmtpOutboxFolderProperties : Geary.FolderProperties {
     public SmtpOutboxFolderProperties(int total, int unread) {
-        base (total, unread, Trillian.FALSE, Trillian.FALSE, Trillian.TRUE, true, false);
+        base (total, unread, Trillian.FALSE, Trillian.FALSE, Trillian.TRUE, true, false, false);
     }
     
     public void set_total(int total) {
