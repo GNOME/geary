@@ -278,13 +278,25 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
         
         main_toolbar.title = current_folder.account.information.nickname;
-        if(current_folder.properties.email_unread > 0) {
-            /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
-            main_toolbar.subtitle = _("%s (%d)").printf(current_folder.get_display_name(),
-                current_folder.properties.email_unread);
-        } else {
-            main_toolbar.subtitle = current_folder.get_display_name();
+        
+        /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
+        // except for Drafts and Outbox, where we show total count
+        int count;
+        switch (current_folder.special_folder_type) {
+            case Geary.SpecialFolderType.DRAFTS:
+            case Geary.SpecialFolderType.OUTBOX:
+                count = current_folder.properties.email_total;
+            break;
+            
+            default:
+                count = current_folder.properties.email_unread;
+            break;
         }
+        
+        if (count > 0)
+            main_toolbar.subtitle = _("%s (%d)").printf(current_folder.get_display_name(), count);
+        else
+            main_toolbar.subtitle = current_folder.get_display_name();
     }
 }
 
