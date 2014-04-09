@@ -16,9 +16,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-17 21:00+0200\n"
-"PO-Revision-Date: 2014-03-17 21:07+0200\n"
-"Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
+"POT-Creation-Date: 2014-04-09 22:21+0300\n"
+"PO-Revision-Date: 2014-04-09 22:22+0300\n"
+"Last-Translator: Yosef Or Boczko <yoseforb@gnome.org>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -657,7 +657,7 @@ msgstr "מפתוּח חשבון %s"
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
-msgstr "מחפש בחשבון %s"
+msgstr "חיפוש בחשבון %s"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
@@ -725,72 +725,73 @@ msgstr "שגיאת בשמירה"
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr "מצורף|מכתב נלווה"
 
-#: ../src/client/composer/composer-window.vala:679
+#: ../src/client/composer/composer-window.vala:683
 msgid "Do you want to discard the unsaved message?"
 msgstr "האם למחוק את ההודעה שלא נשמרה?"
 
-#: ../src/client/composer/composer-window.vala:682
+#: ../src/client/composer/composer-window.vala:686
+#: ../src/client/composer/composer-window.vala:690
 msgid "Do you want to discard this message?"
 msgstr "האם למחוק הודעה זו?"
 
-#: ../src/client/composer/composer-window.vala:759
+#: ../src/client/composer/composer-window.vala:770
 msgid "Send message with an empty subject and body?"
 msgstr "האם לשלוח את ההודעה ללא כותרת ותוכן?"
 
-#: ../src/client/composer/composer-window.vala:761
+#: ../src/client/composer/composer-window.vala:772
 msgid "Send message with an empty subject?"
 msgstr "האם לשלוח את ההודעה ללא כותרת?"
 
-#: ../src/client/composer/composer-window.vala:763
+#: ../src/client/composer/composer-window.vala:774
 msgid "Send message with an empty body?"
 msgstr "האם לשלוח את ההודעה ללא תוכן?"
 
-#: ../src/client/composer/composer-window.vala:765
+#: ../src/client/composer/composer-window.vala:776
 msgid "Send message without an attachment?"
 msgstr "האם לשלוח את ההודעה ללא קובץ מצורף?"
 
-#: ../src/client/composer/composer-window.vala:948
+#: ../src/client/composer/composer-window.vala:967
 msgid "Cannot add attachment"
 msgstr "לא ניתן לצרף את הקובץ המבוקש"
 
-#: ../src/client/composer/composer-window.vala:959
+#: ../src/client/composer/composer-window.vala:978
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "‏„%s” לא נמצא."
 
-#: ../src/client/composer/composer-window.vala:966
+#: ../src/client/composer/composer-window.vala:985
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "‏„%s” היא תיקייה."
 
-#: ../src/client/composer/composer-window.vala:973
+#: ../src/client/composer/composer-window.vala:992
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "‏„%s” הוא קובץ ריק."
 
-#: ../src/client/composer/composer-window.vala:987
+#: ../src/client/composer/composer-window.vala:1006
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "לא ניתן לפתוח את „%s” לקריאה."
 
-#: ../src/client/composer/composer-window.vala:994
+#: ../src/client/composer/composer-window.vala:1013
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "‏„%s” כבר מצורף למכתב."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-window.vala:1003
+#: ../src/client/composer/composer-window.vala:1022
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-window.vala:1265
+#: ../src/client/composer/composer-window.vala:1284
 msgid "Select Color"
 msgstr "בחר צבע"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-window.vala:1660
+#: ../src/client/composer/composer-window.vala:1679
 msgid "_From:"
 msgstr "_מאת:"
 
@@ -798,7 +799,7 @@ msgstr "_מאת:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-window.vala:1676
+#: ../src/client/composer/composer-window.vala:1695
 #: ../src/client/conversation-viewer/conversation-viewer.vala:628
 #: ../ui/composer.glade.h:41
 msgid "From:"
