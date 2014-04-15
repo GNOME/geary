@@ -14,11 +14,9 @@
 private class Geary.ImapEngine.EmailPrefetcher : Object {
     public const int PREFETCH_DELAY_SEC = 1;
     
-    // Don't fetch FLAGS; those are fetched by the FlagWatcher and during normalization when a
-    // standard open_async() is invoked on the Folder
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
     private const int PREFETCH_IDS_CHUNKS = 500;
-    private const int PREFETCH_CHUNK_BYTES = 8 * 1024;
+    private const int PREFETCH_CHUNK_BYTES = 32 * 1024;
     
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
@@ -227,7 +225,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         debug("finished do_prefetch_batch_async %s end_total=%d", folder.to_string(), count);
     }
     
-    // Return true to continue, false to stop prefetching (cancelled)
+    // Return true to continue, false to stop prefetching (cancelled or not open)
     private async bool do_prefetch_email_async(Gee.Collection<Geary.EmailIdentifier> ids, int64 chunk_bytes) {
         debug("do_prefetch_email_async: %s prefetching %d emails (%sb)", folder.to_string(),
             ids.size, chunk_bytes.to_string());
@@ -236,11 +234,11 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
             yield folder.list_email_by_sparse_id_async(ids, PREFETCH_FIELDS, Folder.ListFlags.NONE,
                 cancellable);
         } catch (Error err) {
-            if (!(err is IOError.CANCELLED)) {
+            if (!(err is IOError.CANCELLED) && !(err is EngineError.OPEN_REQUIRED)) {
                 debug("Error prefetching %d emails for %s: %s", ids.size, folder.to_string(),
                     err.message);
             } else {
-                // only exit if cancelled; fetch_email_async() can error out on lots of things,
+                // only exit if cancelled or not open; fetch_email_async() can error out on lots of things,
                 // including mail that's been deleted, and that shouldn't stop the prefetcher
                 return false;
             }
