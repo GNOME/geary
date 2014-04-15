@@ -79,7 +79,7 @@ public class CountBadge : Geary.BaseObject {
             // Colorize our shape.
             GtkUtil.set_source_color_from_string(ctx, UNREAD_BG_COLOR);
             ctx.fill_preserve();
-            ctx.set_line_width(1.0);
+            ctx.set_line_width(2.0);
             ctx.stroke();
             
             // Center the text.
