@@ -1098,13 +1098,13 @@ private class Geary.ImapDB.Account : BaseObject {
             search_index_monitor.set_interval(0, total);
             search_index_monitor.notify_start();
             
-            while (!yield populate_search_table_batch_async(100, cancellable)) {
+            while (!yield populate_search_table_batch_async(50, cancellable)) {
                 // With multiple accounts, meaning multiple background threads
                 // doing such CPU- and disk-heavy work, this process can cause
                 // the main thread to slow to a crawl.  This delay means the
                 // update takes more time, but leaves the main thread nice and
                 // snappy the whole time.
-                yield Geary.Scheduler.sleep_ms_async(50);
+                yield Geary.Scheduler.sleep_ms_async(250);
             }
         } catch (Error e) {
             debug("Error populating %s search table: %s", account_information.email, e.message);
