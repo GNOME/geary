@@ -715,14 +715,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             do_add_to_unread_count(cx, -unread_count, cancellable);
             
             StringBuilder sql = new StringBuilder("""
-                DELETE FROM MessageLocationTable WHERE (
+                DELETE FROM MessageLocationTable WHERE message_id IN (
             """);
-            bool first = true;
-            foreach (LocationIdentifier location in locs) {
-                if (!first)
-                    sql.append(" OR ");
-                sql.append_printf(" message_id='%s' ", location.message_id.to_string());
-                first = false;
+            Gee.Iterator<LocationIdentifier> iter = locs.iterator();
+            while (iter.next()) {
+                sql.append_printf("%s", iter.get().message_id.to_string());
+                if (iter.has_next())
+                    sql.append(", ");
             }
             sql.append(") AND folder_id=?");
             
