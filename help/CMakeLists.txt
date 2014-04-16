@@ -17,6 +17,7 @@ set(HELP_FILES
 set(TRANSLATED
     el
     es
+    it
 )
 
 set(HELP_DEST share/gnome/help/geary)
