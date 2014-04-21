@@ -51,11 +51,11 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         
         // Alas, GMime.utils_header_decode_date() is too forgiving for our needs, so do it manually
         int day, year, hour, min, sec;
-        char mon[4];
-        char tz[6];
+        char mon[4] = { 0 };
+        char tz[6] = { 0 };
         int count = internaldate.scanf("%d-%3s-%d %d:%d:%d %5s", out day, mon, out year, out hour,
             out min, out sec, tz);
-        if (count != 7)
+        if (count != 6 && count != 7)
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": too few fields (%d)", internaldate, count);
         
         // check numerical ranges; this does not verify this is an actual date, DateTime will do
@@ -84,10 +84,14 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         
         // TODO: verify timezone
         
+        // if no timezone listed, ISO 8601 says to use local time, but that doesn't make sense with
+        // most IMAP servers which have no out-of-band mechanism to know the client's timezone, so
+        // assuming UTC
+        TimeZone timezone = (tz[0] != '\0') ? new TimeZone((string) tz) : new TimeZone.local();
+        
         // assemble into DateTime, which validates the time as well (this is why we want to keep
         // original around, for other reasons) ... month is 1-based in DateTime
-        DateTime datetime = new DateTime(new TimeZone((string) tz), year, month + 1, day, hour, min,
-            sec);
+        DateTime datetime = new DateTime(timezone, year, month + 1, day, hour, min, sec);
         
         return new InternalDate(internaldate, datetime);
     }
