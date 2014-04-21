@@ -4,6 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+// this is used internally to indicate a recoverable failure
+private errordomain Geary.Imap.FolderError {
+    RETRY
+}
+
 private class Geary.Imap.Folder : BaseObject {
     private const Geary.Email.Field BASIC_FETCH_FIELDS = Email.Field.ENVELOPE | Email.Field.DATE
         | Email.Field.ORIGINATORS | Email.Field.RECEIVERS | Email.Field.REFERENCES
@@ -16,6 +21,12 @@ private class Geary.Imap.Folder : BaseObject {
     public MessageFlags? permanent_flags { get; private set; default = null; }
     public Trillian readonly { get; private set; default = Trillian.UNKNOWN; }
     public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
+    /**
+     * Set to true when it's detected that the server doesn't allow a space between "header.fields"
+     * and the list of email headers to be requested via FETCH; see
+     * https://bugzilla.gnome.org/show_bug.cgi?id=714902
+     */
+    public bool imap_header_fields_hack { get; private set; default = false; }
     
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
@@ -263,6 +274,9 @@ private class Geary.Imap.Folder : BaseObject {
     }
     
     // All commands must executed inside the cmd_mutex; returns FETCH or STORE results
+    //
+    // FETCH commands can generate a FolderError.RETRY.  State will be updated to accomodate retry,
+    // but all Commands must be regenerated to ensure new state is reflected in requests.
     private async Gee.Map<Command, StatusResponse>? exec_commands_async(Gee.Collection<Command> cmds,
         out Gee.HashMap<SequenceNumber, FetchedData>? fetched,
         out Gee.TreeSet<Imap.UID>? search_results, Cancellable? cancellable) throws Error {
@@ -309,6 +323,34 @@ private class Geary.Imap.Folder : BaseObject {
         return responses;
     }
     
+    // HACK: See https://bugzilla.gnome.org/show_bug.cgi?id=714902
+    //
+    // Detect when a server has returned a BAD response to FETCH BODY[HEADER.FIELDS (HEADER-LIST)]
+    // due to space between HEADER.FIELDS and (HEADER-LIST)
+    private bool retry_bad_header_fields_response(Command cmd, StatusResponse response) {
+        if (response.status != Status.BAD)
+            return false;
+        
+        FetchCommand? fetch = cmd as FetchCommand;
+        if (fetch == null)
+            return false;
+        
+        foreach (FetchBodyDataSpecifier body_specifier in fetch.for_body_data_specifiers) {
+            switch (body_specifier.section_part) {
+                case FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS:
+                case FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS_NOT:
+                    // use value stored in specifier, not this folder's setting, as it's possible
+                    // the folder's setting was enabled after sending command but before response
+                    // returned
+                    if (body_specifier.request_header_fields_space)
+                        return true;
+                break;
+            }
+        }
+        
+        return false;
+    }
+    
     private void throw_on_failed_status(StatusResponse response, Command cmd) throws Error {
         assert(response.is_completion);
         
@@ -320,9 +362,23 @@ private class Geary.Imap.Folder : BaseObject {
                 throw new ImapError.SERVER_ERROR("Request %s failed on %s: %s", cmd.to_string(),
                     to_string(), response.to_string());
             
-            case Status.BAD:
+            case Status.BAD: {
+                // if a FetchBodyDataSpecifier is used to request for a header field BAD is returned,
+                // could be a specific formatting mistake some servers make of not allowing a space
+                // between the "header.fields" and list of email header names, i.e.
+                //
+                // "body[header.fields (references)]"
+                //
+                // If so, then enable a hack to work around this and retry the FETCH
+                if (retry_bad_header_fields_response(cmd, response)) {
+                    imap_header_fields_hack = true;
+                    
+                    throw new FolderError.RETRY("BAD response to header.fields FETCH BODY, retry with hack");
+                }
+                
                 throw new ImapError.INVALID("Bad request %s on %s: %s", cmd.to_string(),
                     to_string(), response.to_string());
+            }
             
             default:
                 throw new ImapError.NOT_SUPPORTED("Unknown response status to %s on %s: %s",
@@ -336,6 +392,8 @@ private class Geary.Imap.Folder : BaseObject {
         throws Error {
         check_open();
         
+        // TODO: exec_commands_async() can throw a RETRY error, but currently that doesn't affect
+        // this code path.  When it does, this will need to honor that error.
         FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID);
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;
@@ -357,11 +415,10 @@ private class Geary.Imap.Folder : BaseObject {
         return (uids.size > 0) ? uids : null;
     }
     
-    // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
-    public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
-        Cancellable? cancellable) throws Error {
-        check_open();
-        
+    private Gee.Collection<FetchCommand> assemble_list_commands(Imap.MessageSet msg_set,
+        Geary.Email.Field fields, out FetchBodyDataSpecifier? header_specifier,
+        out FetchBodyDataSpecifier? body_specifier, out FetchBodyDataSpecifier? preview_specifier,
+        out FetchBodyDataSpecifier? preview_charset_specifier) {
         // getting all the fields can require multiple FETCH commands (some servers don't handle
         // well putting every required data item into single command), so aggregate FetchCommands
         Gee.Collection<FetchCommand> cmds = new Gee.ArrayList<FetchCommand>();
@@ -377,7 +434,6 @@ private class Geary.Imap.Folder : BaseObject {
         // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have
         // exhibited bugs or return NO when too many FETCH data types are combined on a single
         // command)
-        FetchBodyDataSpecifier? header_specifier = null;
         if (fields.requires_any(BASIC_FETCH_FIELDS)) {
             Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
             fields_to_fetch_data_types(fields, data_types, out header_specifier);
@@ -389,20 +445,21 @@ private class Geary.Imap.Folder : BaseObject {
             // Add all body data types as separate FETCH command
             if (header_specifier != null)
                 cmds.add(new FetchCommand.body_data_type(msg_set, header_specifier));
+        } else {
+            header_specifier = null;
         }
         
         // RFC822 BODY is a separate command
-        FetchBodyDataSpecifier? body_specifier = null;
         if (fields.require(Email.Field.BODY)) {
             body_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.TEXT,
                 null, -1, -1, null);
             
             cmds.add(new FetchCommand.body_data_type(msg_set, body_specifier));
+        } else {
+            body_specifier = null;
         }
         
         // PREVIEW requires two separate commands
-        FetchBodyDataSpecifier? preview_specifier = null;
-        FetchBodyDataSpecifier? preview_charset_specifier = null;
         if (fields.require(Email.Field.PREVIEW)) {
             // Get the preview text (the initial MAX_PREVIEW_BYTES of the first MIME section
             preview_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.NONE,
@@ -413,6 +470,9 @@ private class Geary.Imap.Folder : BaseObject {
             preview_charset_specifier = new FetchBodyDataSpecifier.peek(
                 FetchBodyDataSpecifier.SectionPart.MIME, { 1 }, -1, -1, null);
             cmds.add(new FetchCommand.body_data_type(msg_set, preview_charset_specifier));
+        } else {
+            preview_specifier = null;
+            preview_charset_specifier = null;
         }
         
         // PROPERTIES and FLAGS are a separate command
@@ -430,9 +490,41 @@ private class Geary.Imap.Folder : BaseObject {
             cmds.add(new FetchCommand(msg_set, data_types, null));
         }
         
-        // Commands prepped, do the fetch and accumulate all the responses
-        Gee.HashMap<SequenceNumber, FetchedData>? fetched;
-        yield exec_commands_async(cmds, out fetched, null, cancellable);
+        return cmds;
+    }
+    
+    // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
+    public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        Gee.HashMap<SequenceNumber, FetchedData>? fetched = null;
+        FetchBodyDataSpecifier? header_specifier = null;
+        FetchBodyDataSpecifier? body_specifier = null;
+        FetchBodyDataSpecifier? preview_specifier = null;
+        FetchBodyDataSpecifier? preview_charset_specifier = null;
+        for (;;) {
+            Gee.Collection<FetchCommand> cmds = assemble_list_commands(msg_set, fields,
+                out header_specifier, out body_specifier, out preview_specifier,
+                out preview_charset_specifier);
+            if (cmds.size == 0) {
+                throw new ImapError.INVALID("No FETCH commands generate for list request %s %s",
+                    msg_set.to_string(), fields.to_list_string());
+            }
+            
+            // Commands prepped, do the fetch and accumulate all the responses
+            try {
+                yield exec_commands_async(cmds, out fetched, null, cancellable);
+            } catch (Error err) {
+                if (err is FolderError.RETRY)
+                    debug("Retryable server failure detected for %s: %s", to_string(), err.message);
+                
+                continue;
+            }
+            
+            break;
+        }
+        
         if (fetched == null || fetched.size == 0)
             return null;
         
@@ -673,6 +765,8 @@ private class Geary.Imap.Folder : BaseObject {
         if (field_names.length > 0) {
             header_specifier = new FetchBodyDataSpecifier.peek(
                 FetchBodyDataSpecifier.SectionPart.HEADER_FIELDS, null, -1, -1, field_names);
+            if (imap_header_fields_hack)
+                header_specifier.omit_request_header_fields_space();
         } else {
             header_specifier = null;
         }
