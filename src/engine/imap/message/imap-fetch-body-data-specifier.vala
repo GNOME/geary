@@ -104,7 +104,25 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         }
     }
     
-    private SectionPart section_part;
+    /**
+     * The {@link SectionPart} for this FETCH BODY specifier.
+     *
+     * This is exposed to detect a server bug; other fields in this object could be exposed as
+     * well in the future, if necessary.
+     */
+    public SectionPart section_part { get; private set; }
+    
+    /**
+     * When false, indicates that the FETCH BODY specifier is using a hack to operate with
+     * non-conformant servers.
+     *
+     * This is exposed to detect a server bug; other fields in this object could be exposed as
+     * well in the future, if necessary.
+     *
+     * @see omit_request_header_fields_space
+     */
+    public bool request_header_fields_space { get; private set; default = true; }
+    
     private int[]? part_number;
     private int subset_start;
     private int subset_count;
@@ -239,7 +257,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             return "";
         
         // note that the leading space is supplied here
-        StringBuilder builder = new StringBuilder(" (");
+        StringBuilder builder = new StringBuilder(request_header_fields_space ? " (" : "(");
         Gee.Iterator<string> iter = field_names.iterator();
         while (iter.next()) {
             builder.append(iter.get());
@@ -391,6 +409,25 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         
         return new FetchBodyDataSpecifier.response(section_part, part_number, subset_start,
             field_names);
+    }
+    
+    /**
+     * Omit the space between "header.fields" and the list of email headers.
+     *
+     * Some servers in the wild don't recognize the FETCH command if this space is present, and
+     * so this allows for it to be omitted when serializing the request.  This appears to be in
+     * violation of the IMAP specification, but these servers still exist.
+     *
+     * This should be used with care.  If enabled, a lot of servers will not accept the FETCH
+     * command for the same reason (unrecognized request).
+     *
+     * Once set, this cannot be cleared.  To do so, create a new {@link FetchBodyDataSpecifier}.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-6.4.5]]
+     * and [[https://bugzilla.gnome.org/show_bug.cgi?id=714902]]
+     */
+    public void omit_request_header_fields_space() {
+        request_header_fields_space = false;
     }
     
     /**
