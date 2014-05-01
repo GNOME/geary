@@ -516,10 +516,13 @@ private class Geary.Imap.Folder : BaseObject {
             try {
                 yield exec_commands_async(cmds, out fetched, null, cancellable);
             } catch (Error err) {
-                if (err is FolderError.RETRY)
+                if (err is FolderError.RETRY) {
                     debug("Retryable server failure detected for %s: %s", to_string(), err.message);
+                    
+                    continue;
+                }
                 
-                continue;
+                throw err;
             }
             
             break;
