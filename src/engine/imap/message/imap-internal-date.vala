@@ -84,9 +84,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         
         // TODO: verify timezone
         
-        // if no timezone listed, ISO 8601 says to use local time, but that doesn't make sense with
-        // most IMAP servers which have no out-of-band mechanism to know the client's timezone, so
-        // assuming UTC
+        // if no timezone listed, ISO 8601 says to use local time
         TimeZone timezone = (tz[0] != '\0') ? new TimeZone((string) tz) : new TimeZone.local();
         
         // assemble into DateTime, which validates the time as well (this is why we want to keep

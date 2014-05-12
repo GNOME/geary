@@ -156,19 +156,28 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
         as_time_t = Time.datetime_to_time_t(datetime);
     }
     
-    public virtual bool equal_to(Geary.RFC822.Date other) {
-        return (this != other) ? value.equal(other.value) : true;
-    }
-    
     /**
      * Returns the {@link Date} in ISO-8601 format.
      */
-    public virtual string serialize() {
+    public string to_iso_8601() {
         // Although GMime documents its conversion methods as requiring the tz offset in hours,
         // it appears the number is handed directly to the string (i.e. an offset of -7 becomes
         // "-0007", whereas we want "-0700").
         return GMime.utils_header_format_date(as_time_t,
             (int) (value.get_utc_offset() / TimeSpan.HOUR) * 100);
+    }
+    
+    /**
+     * Returns {@link Date} for transmission.
+     *
+     * @see to_iso_8601
+     */
+    public virtual string serialize() {
+        return to_iso_8601();
+    }
+    
+    public virtual bool equal_to(Geary.RFC822.Date other) {
+        return (this != other) ? value.equal(other.value) : true;
     }
     
     public virtual uint hash() {

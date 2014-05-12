@@ -1352,7 +1352,7 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_generate_message_id")]
 	public static string utils_generate_message_id (string fqdn);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_decode_date")]
-	public static time_t utils_header_decode_date (string str, out unowned int? tz_offset);
+	public static time_t utils_header_decode_date (string str, out int tz_offset);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_decode_phrase")]
 	public static string utils_header_decode_phrase (string phrase);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_header_decode_text")]
