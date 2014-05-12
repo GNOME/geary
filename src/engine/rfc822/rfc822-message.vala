@@ -96,8 +96,7 @@ public class Geary.RFC822.Message : BaseObject {
         date = new RFC822.Date.from_date_time(email.date);
         
         message.set_sender(sender.to_rfc822_string());
-        message.set_date((time_t) email.date.to_unix(),
-            (int) (email.date.get_utc_offset() / TimeSpan.HOUR));
+        message.set_date_as_string(date.serialize());
         if (message_id != null)
             message.set_message_id(message_id);
         

@@ -164,7 +164,11 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
      * Returns the {@link Date} in ISO-8601 format.
      */
     public virtual string serialize() {
-        return GMime.utils_header_format_date(as_time_t, 0);
+        // Although GMime documents its conversion methods as requiring the tz offset in hours,
+        // it appears the number is handed directly to the string (i.e. an offset of -7 becomes
+        // "-0007", whereas we want "-0700").
+        return GMime.utils_header_format_date(as_time_t,
+            (int) (value.get_utc_offset() / TimeSpan.HOUR) * 100);
     }
     
     public virtual uint hash() {
