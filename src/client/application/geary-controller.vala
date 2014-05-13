@@ -43,17 +43,14 @@ public class GearyController : Geary.BaseObject {
     
     public const int MIN_CONVERSATION_COUNT = 50;
     
-    private const string DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
     private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
     
-    private const string TRASH_MESSAGE_LABEL = _("_Trash");
     private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_ICON_NAME = "user-trash-symbolic";
     
-    private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
     private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (A)");
     private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-symbolic";
@@ -350,20 +347,20 @@ public class GearyController : Geary.BaseObject {
         entries += find_previous_in_conversation;
         
         Gtk.ActionEntry archive_message = { ACTION_ARCHIVE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
-            ARCHIVE_MESSAGE_LABEL, "A", null, on_archive_message };
+            null, "A", null, on_archive_message };
         archive_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP_SINGLE;
         entries += archive_message;
         
         // although this action changes according to the account's capabilities, set to Delete
         // until they're known so the "translatable" string doesn't first appear
         Gtk.ActionEntry trash_message = { ACTION_TRASH_MESSAGE, TRASH_MESSAGE_ICON_NAME,
-            TRASH_MESSAGE_LABEL, "Delete", null, on_trash_message };
+            null, "Delete", null, on_trash_message };
         trash_message.tooltip = TRASH_MESSAGE_TOOLTIP_SINGLE;
         entries += trash_message;
         add_accelerator("BackSpace", ACTION_TRASH_MESSAGE);
         
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, DELETE_MESSAGE_ICON_NAME,
-            DELETE_MESSAGE_LABEL, "<Shift>Delete", null, on_delete_message };
+            null, "<Shift>Delete", null, on_delete_message };
         delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
         add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);

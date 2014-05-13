@@ -68,13 +68,13 @@ public class MainToolbar : PillToolbar {
         insert.clear();
         insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
         insert.add(trash_buttons[0] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        add_start(create_pill_buttons(insert));
+        add_end(create_pill_buttons(insert));
         insert.clear();
         insert.add(trash_buttons[1] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        add_start(create_pill_buttons(insert, false));
+        add_end(create_pill_buttons(insert, false));
         
         // Search bar.
-        search_entry.width_chars = 32;
+        search_entry.width_chars = 28;
         search_entry.tooltip_text = _("Search all mail in account for keywords (Ctrl+S)");
         search_entry.changed.connect(on_search_entry_changed);
         search_entry.key_press_event.connect(on_search_key_press);

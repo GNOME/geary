@@ -32,6 +32,10 @@ public class PillToolbar : Gtk.HeaderBar {
         b.related_action.notify["tooltip"].connect(() => { b.tooltip_text = b.related_action.tooltip; });
         b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
             b.related_action.icon_name, Gtk.IconSize.MENU);
+        // Unity buttons are a bit tight
+#if ENABLE_UNITY
+        b.image.margin = b.image.margin + 4;
+#endif
         b.always_show_image = true;
         
         if (!show_label)
