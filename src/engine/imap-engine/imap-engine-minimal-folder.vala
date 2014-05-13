@@ -541,6 +541,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         if (open_count == 0)
             return;
         
+        // to ensure this isn't running when open_remote_async() is called again (due to a connection
+        // reestablishment), stop this monitoring from running *before* launching close_internal_async
+        // ... in essence, guard against reentrancy, which is possible
         opening_monitor.notify_start();
         
         Imap.Folder? opening_folder = null;
@@ -579,6 +582,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 } catch (Error err) {
                     debug("Error closing remote folder %s: %s", opening_folder.to_string(), err.message);
                 }
+                
+                // stop before starting the close
+                opening_monitor.notify_finish();
                 
                 // schedule immediate close
                 close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
@@ -627,14 +633,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 debug("Error closing remote folder %s: %s", opening_folder.to_string(), err.message);
             }
             
+            // stop before starting the close
+            opening_monitor.notify_finish();
+            
             // schedule immediate close and force reestablishment
             close_internal_async.begin(CloseReason.LOCAL_CLOSE, remote_reason, force_reestablishment,
                 cancellable);
             
             return;
-        } finally {
-            opening_monitor.notify_finish();
         }
+        
+        opening_monitor.notify_finish();
         
         // open success, reset reestablishment delay
         reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
