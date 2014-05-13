@@ -18,7 +18,6 @@ public class MainWindow : Gtk.ApplicationWindow {
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
-    public ComposerEmbed composer_embed { get; private set; }
     
     public int window_width { get; set; }
     public int window_height { get; set; }
@@ -39,7 +38,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         title = GearyApplication.NAME;
         
         conversation_list_view = new ConversationListView(conversation_list_store);
-        composer_embed = new ComposerEmbed(conversation_viewer);
         
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK
             | Gdk.EventMask.FOCUS_CHANGE_MASK);

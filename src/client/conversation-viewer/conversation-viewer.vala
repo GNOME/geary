@@ -117,6 +117,9 @@ public class ConversationViewer : Gtk.Box {
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
     
+    // The container to hold the inline composer.
+    public ComposerEmbed composer_embed { get; private set; }
+    
     // Current conversation, or null if none.
     public Geary.App.Conversation? current_conversation = null;
     
@@ -186,9 +189,15 @@ public class ConversationViewer : Gtk.Box {
 
         web_view.link_selected.connect((link) => { link_selected(link); });
         
+        Gtk.Overlay compose_overlay = new Gtk.Overlay();
+        compose_overlay.add(web_view);
+        composer_embed = new ComposerEmbed(this);
+        compose_overlay.add_overlay(composer_embed);
+        compose_overlay.get_child_position.connect(composer_embed.set_position);
+        
         Gtk.ScrolledWindow conversation_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        conversation_viewer_scrolled.add(web_view);
+        conversation_viewer_scrolled.add(compose_overlay);
         
         message_overlay = new Gtk.Overlay();
         message_overlay.add(conversation_viewer_scrolled);

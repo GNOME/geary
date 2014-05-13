@@ -204,7 +204,8 @@ public class ConversationListView : Gtk.TreeView {
         }
         
         if (!get_selection().path_is_selected(path) && !((MainWindow) GearyApplication.
-            instance.controller.main_window).composer_embed.abandon_existing_composition())
+            instance.controller.main_window).conversation_viewer.composer_embed.
+            abandon_existing_composition())
             return true;
         
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
@@ -388,7 +389,7 @@ public class ConversationListView : Gtk.TreeView {
     // Selects the first conversation, if nothing has been selected yet and we're not composing.
     public void select_first_conversation() {
         if (get_selected_path() == null && !((MainWindow) GearyApplication.instance.
-            controller.main_window).composer_embed.is_active) {
+            controller.main_window).conversation_viewer.composer_embed.is_active) {
             set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
         }
     }
