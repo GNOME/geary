@@ -111,6 +111,8 @@ public class GearyController : Geary.BaseObject {
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
     
+    public ComposerEmbed? inline_composer = null;
+    
     /**
      * Fired when the currently selected account has changed.
      */
@@ -1837,6 +1839,40 @@ public class GearyController : Geary.BaseObject {
         // an exit without losing their data.
         composer_widgets.add(widget);
         widget.destroy.connect(on_composer_widget_destroy);
+        
+        if (abandon_existing_composition(widget))
+            inline_composer = new ComposerEmbed(widget, main_window.conversation_viewer, referred);
+    }
+    
+    public bool abandon_existing_composition(ComposerWidget? new_composer = null) {
+        if (inline_composer == null)
+            return true;
+        
+        main_window.present();
+        AlertDialog dialog;
+        if (new_composer != null)
+            dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
+                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
+                Gtk.Stock.CANCEL, _("Open New Composition Window"), Gtk.ResponseType.YES);
+        else
+            dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
+                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
+                Gtk.Stock.CANCEL, _("Move Composition to New Window"), Gtk.ResponseType.YES);
+        Gtk.ResponseType response = dialog.run();
+        if (response == Gtk.ResponseType.OK) {
+            close();
+            return true;
+        }
+        if (new_composer != null) {
+            if (response == Gtk.ResponseType.YES)
+                new ComposerWindow(new_composer);
+            else
+                new_composer.destroy();
+        } else if (response == Gtk.ResponseType.YES) {
+            inline_composer.on_detach();
+            return true;
+        }
+        return false;
     }
     
     private void on_composer_widget_destroy(Gtk.Widget sender) {
