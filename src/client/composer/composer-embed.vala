@@ -109,7 +109,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     private void on_close() {
-        if (composer.should_close())
+        if (composer.should_close() == ComposerWidget.CloseStatus.DO_CLOSE)
             close();
     }
     
