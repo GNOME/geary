@@ -22,6 +22,9 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     public ComposerEmbed(ConversationViewer conversation_viewer) {
         Object(orientation: Gtk.Orientation.VERTICAL);
         this.conversation_viewer = conversation_viewer;
+        no_show_all = true;
+        halign = Gtk.Align.FILL;
+        valign = Gtk.Align.FILL;
         
         Gtk.Toolbar toolbar = new Gtk.Toolbar();
         toolbar.set_icon_size(Gtk.IconSize.MENU);
@@ -34,10 +37,10 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         toolbar.insert(detach, -1);
         toolbar.insert(close, -1);
         pack_start(toolbar, false, false);
+        toolbar.show_all();
         
         close.clicked.connect(on_close);
         detach.clicked.connect(on_detach);
-        conversation_viewer.web_view.create_plugin_widget.connect(on_plugin_requested);
     }
     
     public void new_composer(ComposerWidget new_composer, Geary.Email? referred) {
@@ -59,19 +62,17 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         
         try {
             conversation_viewer.show_conversation_div();
-            conversation_viewer.web_view.settings.enable_plugins = true;
             email_element.insert_adjacent_html("afterend",
-                @"<div id='$embed_id'><embed type='composer' /></div>");
+                @"<div id='$embed_id'></div>");
         } catch (Error error) {
             debug("Error creating embed element: %s", error.message);
             return;
-        } finally {
-            conversation_viewer.web_view.settings.enable_plugins = false;
         }
         pack_start(new_composer, true, true);
         new_composer.editor.focus_in_event.connect(on_focus_in);
         new_composer.editor.focus_out_event.connect(on_focus_out);
-        show_all();
+        new_composer.show_all();
+        show();
         present();
         this.composer = new_composer;
     }
@@ -128,8 +129,16 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         close();
     }
     
-    private Gtk.Widget on_plugin_requested() {
-        return this;
+    public bool set_position(Gtk.Widget widget, Gdk.Rectangle allocation) {
+        WebKit.DOM.Element embed = conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id);
+        if (embed == null)
+            return false;
+        
+        allocation.x = (int) embed.offset_left;
+        allocation.y = (int) embed.offset_top;
+        allocation.width = (int) embed.offset_width;
+        allocation.height = (int) embed.offset_height;
+        return true;
     }
     
     private bool on_focus_in() {
@@ -151,6 +160,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     private void close() {
+        hide();
         if (composer != null) {
             composer.editor.focus_in_event.disconnect(on_focus_in);
             composer.editor.focus_out_event.disconnect(on_focus_out);
