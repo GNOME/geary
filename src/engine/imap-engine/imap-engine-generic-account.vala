@@ -516,31 +516,37 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             = new Gee.HashMap<Geary.SpecialFolderType, string>();
         mailbox_search_names.set(Geary.SpecialFolderType.DRAFTS,
             // List of folder names to match for Drafts, separated by |.  Please add localized common
-            // names for the Drafts folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Drafts | Draft"));
+            // names for the Drafts folder.
+            "Drafts | Draft | " + _("Drafts | Draft"));
         mailbox_search_names.set(Geary.SpecialFolderType.SENT,
             // List of folder names to match for Sent Mail, separated by |.  Please add localized common
-            // names for the Sent Mail folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Sent | Sent Mail | Sent Email | Sent E-Mail"));
+            // names for the Sent Mail folder.
+            "Sent | Sent Mail | Sent Email | Sent E-Mail | " + _("Sent | Sent Mail | Sent Email | Sent E-Mail"));
         mailbox_search_names.set(Geary.SpecialFolderType.SPAM,
             // List of folder names to match for Spam, separated by |.  Please add localized common
-            // names for the Spam folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"));
+            // names for the Spam folder.
+            "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail | "
+            + _("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"));
         mailbox_search_names.set(Geary.SpecialFolderType.TRASH,
             // List of folder names to match for Trash, separated by |.  Please add localized common
-            // names for the Trash folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Trash | Rubbish | Rubbish Bin"));
+            // names for the Trash folder.
+            "Trash | Rubbish | Rubbish Bin | " + _("Trash | Rubbish | Rubbish Bin"));
         
         Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> compiled
             = new Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>>();
         
+        // prevent duplicates while ensuring order (hence a Set can't be used here) ... the cost of
+        // this could be avoided if done at startup; TODO
         foreach (Geary.SpecialFolderType t in mailbox_search_names.keys) {
-            compiled.set(t, Geary.iterate_array<string>(mailbox_search_names.get(t).split("|"))
-                .map<string>(n => n.strip()).to_array_list());
+            Gee.ArrayList<string> list = new Gee.ArrayList<string>();
+            
+            foreach (string name in mailbox_search_names.get(t).split("|")) {
+                name = name.strip();
+                if (!list.contains(name))
+                    list.add(name);
+            }
+            
+            compiled.set(t, list);
         }
         
         return compiled;
