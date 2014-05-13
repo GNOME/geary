@@ -13,6 +13,12 @@ public class ComposerWidget : Gtk.EventBox {
         FORWARD
     }
     
+    public enum CloseStatus {
+        DO_CLOSE,
+        PENDING_CLOSE,
+        CANCEL_CLOSE
+    }
+    
     public const string ACTION_UNDO = "undo";
     public const string ACTION_REDO = "redo";
     public const string ACTION_CUT = "cut";
@@ -129,9 +135,6 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
-    
-    // True if composer can't close immediately (i.e. it's saving a draft)
-    public bool delayed_close { get; private set; default = false; }
     
     private ContactListStore? contact_list_store = null;
     
@@ -674,7 +677,7 @@ public class ComposerWidget : Gtk.EventBox {
             && !drafts_folder.properties.create_never_returns_id && editor.can_undo());
     }
 
-    public bool should_close() {
+    public CloseStatus should_close() {
         bool try_to_save = can_save();
         
         container.present();
@@ -694,26 +697,26 @@ public class ComposerWidget : Gtk.EventBox {
         
         Gtk.ResponseType response = dialog.run();
         if (response == Gtk.ResponseType.CANCEL || response == Gtk.ResponseType.DELETE_EVENT) {
-            return false; // Cancel
+            return CloseStatus.CANCEL_CLOSE; // Cancel
         } else if (response == Gtk.ResponseType.OK) {
             if (try_to_save) {
                 save_and_exit.begin(); // Save
-                return false;
+                return CloseStatus.PENDING_CLOSE;
             } else {
-                return true;
+                return CloseStatus.DO_CLOSE;
             }
         } else {
             delete_and_exit.begin(); // Discard
-            return false;
+            return CloseStatus.PENDING_CLOSE;
         }
     }
     
     public override bool delete_event(Gdk.EventAny event) {
-        return !should_close();
+        return !(should_close() == CloseStatus.DO_CLOSE);
     }
     
     private void on_close() {
-        if (should_close())
+        if (should_close() == CloseStatus.DO_CLOSE)
             destroy();
     }
     
@@ -899,7 +902,6 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private async void save_and_exit() {
-        delayed_close = true;
         make_gui_insensitive();
         
         // Do the save.
@@ -909,7 +911,6 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private async void delete_and_exit() {
-        delayed_close = true;
         make_gui_insensitive();
         
         // Do the delete.

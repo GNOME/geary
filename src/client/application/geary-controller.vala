@@ -1767,24 +1767,20 @@ public class GearyController : Geary.BaseObject {
         // If there's composer windows open, give the user a chance to save or cancel.
         foreach(ComposerWidget cw in composer_widgets) {
             // Check if we should close the window immediately, or if we need to wait.
-            if (!cw.should_close()) {
-                if (cw.delayed_close) {
-                    // Window is currently busy saving.
-                    waiting_to_close.add(cw);
-                    
-                    continue;
-                } else {
-                    // User cancelled operation.
-                    quit_cancelled = true;
-                    
-                    break;
-                }
+            ComposerWidget.CloseStatus status = cw.should_close();
+            if (status == ComposerWidget.CloseStatus.PENDING_CLOSE) {
+                // Window is currently busy saving.
+                waiting_to_close.add(cw);
+            } else if (status == ComposerWidget.CloseStatus.CANCEL_CLOSE) {
+                // User cancelled operation.
+                quit_cancelled = true;
+                break;
+            } else if (status == ComposerWidget.CloseStatus.DO_CLOSE) {
+                // Hide any existing composer windows for the moment; actually deleting the windows
+                // will result in their removal from composer_windows, which could crash this loop.
+                composers_to_destroy.add(cw);
+                cw.hide();
             }
-            
-            // Hide any existing composer windows for the moment; actually deleting the windows
-            // will result in their removal from composer_windows, which could crash this loop.
-            composers_to_destroy.add(cw);
-            cw.hide();
         }
         
         // Safely destroy windows.
