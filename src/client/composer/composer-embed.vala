@@ -8,7 +8,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
     private static string embed_id = "composer_embed";
     
-    private ComposerWidget? composer = null;
+    private ComposerWidget composer;
     private ConversationViewer conversation_viewer;
     private Gee.Set<Geary.App.Conversation>? prev_selection = null;
     
@@ -19,10 +19,11 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         get { return composer != null; }
     }
     
-    public ComposerEmbed(ConversationViewer conversation_viewer) {
+    public ComposerEmbed(ComposerWidget composer, ConversationViewer conversation_viewer,
+        Geary.Email? referred) {
         Object(orientation: Gtk.Orientation.VERTICAL);
+        this.composer = composer;
         this.conversation_viewer = conversation_viewer;
-        no_show_all = true;
         halign = Gtk.Align.FILL;
         valign = Gtk.Align.FILL;
         
@@ -41,11 +42,6 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         
         close.clicked.connect(on_close);
         detach.clicked.connect(on_detach);
-    }
-    
-    public void new_composer(ComposerWidget new_composer, Geary.Email? referred) {
-        if (!abandon_existing_composition(new_composer))
-            return;
         
         WebKit.DOM.HTMLElement? email_element = null;
         if (referred != null)
@@ -68,44 +64,12 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
             debug("Error creating embed element: %s", error.message);
             return;
         }
-        pack_start(new_composer, true, true);
-        new_composer.editor.focus_in_event.connect(on_focus_in);
-        new_composer.editor.focus_out_event.connect(on_focus_out);
-        new_composer.show_all();
-        show();
+        pack_start(composer, true, true);
+        composer.editor.focus_in_event.connect(on_focus_in);
+        composer.editor.focus_out_event.connect(on_focus_out);
+        conversation_viewer.compose_overlay.add_overlay(this);
+        show_all();
         present();
-        this.composer = new_composer;
-    }
-    
-    public bool abandon_existing_composition(ComposerWidget? new_composer = null) {
-        if (composer == null)
-            return true;
-        
-        present();
-        AlertDialog dialog;
-        if (new_composer != null)
-            dialog = new AlertDialog(top_window, Gtk.MessageType.QUESTION,
-                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
-                Gtk.Stock.CANCEL, _("Open New Composition Window"), Gtk.ResponseType.YES);
-        else
-            dialog = new AlertDialog(top_window, Gtk.MessageType.QUESTION,
-                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
-                Gtk.Stock.CANCEL, _("Move Composition to New Window"), Gtk.ResponseType.YES);
-        Gtk.ResponseType response = dialog.run();
-        if (response == Gtk.ResponseType.OK) {
-            close();
-            return true;
-        }
-        if (new_composer != null) {
-            if (response == Gtk.ResponseType.YES)
-                new ComposerWindow(new_composer);
-            else
-                new_composer.destroy();
-        } else if (response == Gtk.ResponseType.YES) {
-            on_detach();
-            return true;
-        }
-        return false;
     }
     
     private void on_close() {
@@ -113,7 +77,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
             close();
     }
     
-    private void on_detach() {
+    public void on_detach() {
         if (composer.editor.has_focus)
             on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
@@ -129,7 +93,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         close();
     }
     
-    public bool set_position(Gtk.Widget widget, Gdk.Rectangle allocation) {
+    public bool set_position(ref Gdk.Rectangle allocation) {
         WebKit.DOM.Element embed = conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id);
         if (embed == null)
             return false;
@@ -160,6 +124,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     private void close() {
+        GearyApplication.instance.controller.inline_composer = null;
         hide();
         if (composer != null) {
             composer.editor.focus_in_event.disconnect(on_focus_in);

@@ -129,6 +129,9 @@ public class ConversationViewer : Gtk.Box {
     // Label for displaying overlay messages.
     private Gtk.Label message_overlay_label;
     
+    // Overlay containing any inline composers.
+    public Gtk.Overlay compose_overlay;
+    
     // Maps emails to their corresponding elements.
     private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
         Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
@@ -189,11 +192,10 @@ public class ConversationViewer : Gtk.Box {
 
         web_view.link_selected.connect((link) => { link_selected(link); });
         
-        Gtk.Overlay compose_overlay = new Gtk.Overlay();
+        compose_overlay = new Gtk.Overlay();
         compose_overlay.add(web_view);
-        composer_embed = new ComposerEmbed(this);
-        compose_overlay.add_overlay(composer_embed);
-        compose_overlay.get_child_position.connect(composer_embed.set_position);
+        compose_overlay.get_child_position.connect((widget, allocation) =>
+            { return ((ComposerEmbed) widget).set_position(ref allocation); } );
         
         Gtk.ScrolledWindow conversation_viewer_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_viewer_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
