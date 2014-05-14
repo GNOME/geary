@@ -9,6 +9,8 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
 
     private const string DEFAULT_TITLE = _("New Message");
     
+    private bool closing = false;
+    
     public ComposerWindow(ComposerWidget composer) {
         Object(type: Gtk.WindowType.TOPLEVEL);
         
@@ -33,8 +35,14 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         base.show_all();
     }
     
+    public new void close() {
+        closing = true;
+        base.close();
+    }
+    
     public override bool delete_event(Gdk.EventAny event) {
-        return !(((ComposerWidget) get_child()).should_close() == ComposerWidget.CloseStatus.DO_CLOSE);
+        return !(closing ||
+            ((ComposerWidget) get_child()).should_close() == ComposerWidget.CloseStatus.DO_CLOSE);
     }
     
     public void vanish() {
