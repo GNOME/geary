@@ -17,7 +17,8 @@ public interface Geary.Folder : BaseObject {
     
     public enum OpenFailed {
         LOCAL_FAILED,
-        REMOTE_FAILED
+        REMOTE_FAILED,
+        CANCELLED
     }
     
     /**

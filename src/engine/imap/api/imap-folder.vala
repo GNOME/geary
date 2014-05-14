@@ -108,12 +108,25 @@ private class Geary.Imap.Folder : BaseObject {
         
         properties.set_from_session_capabilities(session.capabilities);
         
-        StatusResponse response = yield session.select_async(
-            new MailboxSpecifier.from_folder_path(path, info.delim), cancellable);
-        if (response.status != Status.OK) {
-            yield release_session_async(cancellable);
+        StatusResponse? response = null;
+        Error? select_err = null;
+        try {
+            response = yield session.select_async(
+                new MailboxSpecifier.from_folder_path(path, info.delim), cancellable);
+        } catch (Error err) {
+            select_err = err;
+        }
+        
+        // if select_err is null, then response can not be null
+        if (select_err != null || response.status != Status.OK) {
+            // don't use user-supplied cancellable; it may be cancelled, and even if not, do not want
+            // to cancel this operation
+            yield release_session_async(null);
             
-            throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
+            if (select_err != null)
+                throw select_err;
+            else
+                throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
         }
         
         // if at end of SELECT command accepts_user_flags is still UNKKNOWN, treat as TRUE because,

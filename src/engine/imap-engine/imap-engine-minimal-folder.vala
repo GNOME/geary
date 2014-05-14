@@ -546,6 +546,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         // ... in essence, guard against reentrancy, which is possible
         opening_monitor.notify_start();
         
+        // following blocks of code are fairly tricky because if the remote open fails need to
+        // carefully back out and possibly retry
         Imap.Folder? opening_folder = null;
         try {
             debug("Fetching information for remote folder %s", to_string());
@@ -594,15 +596,21 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             }
         } catch (Error open_err) {
             bool hard_failure;
+            bool is_cancellation = false;
             if (open_err is ImapError || open_err is EngineError) {
-                if (open_err is ImapError.NOT_CONNECTED || open_err is ImapError.TIMED_OUT
-                    || open_err is EngineError.SERVER_UNAVAILABLE) {
-                    hard_failure = true;
-                } else {
-                    hard_failure = false;
-                }
+                // "hard" error in the sense of network conditions make connection impossible
+                // at the moment, "soft" error in the sense that some logical error prevented
+                // connect (like bad credentials)
+                hard_failure = open_err is ImapError.NOT_CONNECTED
+                    || open_err is ImapError.TIMED_OUT
+                    || open_err is ImapError.SERVER_ERROR
+                    || open_err is EngineError.SERVER_UNAVAILABLE;
+            } else if (open_err is IOError.CANCELLED) {
+                // user cancelled open, treat like soft error
+                hard_failure = false;
+                is_cancellation = true;
             } else {
-                // probably IOError, a hard failure
+                // a different IOError, a hard failure
                 hard_failure = true;
             }
             
@@ -619,7 +627,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 // soft failure, treat as failure to open
                 debug("Soft failure opening or preparing remote folder %s: %s", to_string(),
                     open_err.message);
-                notify_open_failed(Geary.Folder.OpenFailed.REMOTE_FAILED, open_err);
+                notify_open_failed(
+                    is_cancellation ? Folder.OpenFailed.CANCELLED : Folder.OpenFailed.REMOTE_FAILED,
+                    open_err);
                 
                 remote_reason = CloseReason.REMOTE_CLOSE;
                 force_reestablishment = false;
@@ -638,7 +648,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             
             // schedule immediate close and force reestablishment
             close_internal_async.begin(CloseReason.LOCAL_CLOSE, remote_reason, force_reestablishment,
-                cancellable);
+                null);
             
             return;
         }
