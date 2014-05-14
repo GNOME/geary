@@ -94,10 +94,10 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         if (embed == null)
             return false;
         
-        allocation.x = (int) embed.offset_left;
-        allocation.y = (int) embed.offset_top;
-        allocation.width = (int) embed.offset_width;
-        allocation.height = (int) embed.offset_height;
+        allocation.x = (int) (embed.offset_left + embed.client_left);
+        allocation.y = (int) (embed.offset_top + embed.client_top);
+        allocation.width = (int) embed.client_width;
+        allocation.height = (int) embed.client_height;
         return true;
     }
     
