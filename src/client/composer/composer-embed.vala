@@ -15,9 +15,6 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     public Gtk.Window top_window {
         get { return (Gtk.Window) get_toplevel(); }
     }
-    public bool is_active {
-        get { return composer != null; }
-    }
     
     public ComposerEmbed(ComposerWidget composer, ConversationViewer conversation_viewer,
         Geary.Email? referred) {
@@ -89,7 +86,6 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
         if (focus_win != null && focus_win == window)
             focus.grab_focus();
-        composer = null;
         close();
     }
     
@@ -123,16 +119,11 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         return top_window.get_focus();
     }
     
-    private void close() {
+    public void vanish() {
         GearyApplication.instance.controller.inline_composer = null;
         hide();
-        if (composer != null) {
-            composer.editor.focus_in_event.disconnect(on_focus_in);
-            composer.editor.focus_out_event.disconnect(on_focus_out);
-            remove(composer);
-            composer.destroy();
-            composer = null;
-        }
+        composer.editor.focus_in_event.disconnect(on_focus_in);
+        composer.editor.focus_out_event.disconnect(on_focus_out);
         
         WebKit.DOM.Element embed = conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id);
         try{
@@ -151,6 +142,12 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
                 conversation_list_view.select_conversations(prev_selection);
             prev_selection = null;
         }
+    }
+    
+    public void close() {
+        if (GearyApplication.instance.controller.inline_composer == this)
+            vanish();
+        conversation_viewer.compose_overlay.remove(this);
     }
 }
 

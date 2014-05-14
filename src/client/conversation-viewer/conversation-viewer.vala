@@ -117,9 +117,6 @@ public class ConversationViewer : Gtk.Box {
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
     
-    // The container to hold the inline composer.
-    public ComposerEmbed composer_embed { get; private set; }
-    
     // Current conversation, or null if none.
     public Geary.App.Conversation? current_conversation = null;
     
