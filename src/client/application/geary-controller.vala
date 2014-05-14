@@ -1850,6 +1850,7 @@ public class GearyController : Geary.BaseObject {
         
         main_window.present();
         AlertDialog dialog;
+        // TODO: Clean up when closing (like delete_and_exit) / offer save option.
         if (new_composer != null)
             dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
                 _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
@@ -1860,7 +1861,7 @@ public class GearyController : Geary.BaseObject {
                 Gtk.Stock.CANCEL, _("Move Composition to New Window"), Gtk.ResponseType.YES);
         Gtk.ResponseType response = dialog.run();
         if (response == Gtk.ResponseType.OK) {
-            close();
+            inline_composer.close();
             return true;
         }
         if (new_composer != null) {

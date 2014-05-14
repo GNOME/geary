@@ -463,6 +463,8 @@ public class ComposerWidget : Gtk.EventBox {
         // the drafts folder will be opened by on_from_changed().
         if (!from_multiple.visible)
             open_drafts_folder_async.begin(cancellable_drafts);
+        
+        destroy.connect(() => { close_drafts_folder_async.begin(); });
     }
     
     public ComposerWidget.from_mailto(Geary.Account account, string mailto) {
@@ -708,13 +710,9 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
-    public override bool delete_event(Gdk.EventAny event) {
-        return !(should_close() == CloseStatus.DO_CLOSE);
-    }
-    
     private void on_close() {
         if (should_close() == CloseStatus.DO_CLOSE)
-            destroy();
+            ((ComposerContainer) parent).close();
     }
     
     private bool email_contains_attachment_keywords() {
@@ -796,7 +794,7 @@ public class ComposerWidget : Gtk.EventBox {
     private async void on_send_async() {
         cancellable_save_draft.cancel();
         
-        hide();
+        ((ComposerEmbed) parent).vanish();
         
         linkify_document(editor.get_dom_document());
         
@@ -808,7 +806,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
         
         yield delete_draft_async();
-        destroy(); // Only close window after draft is deleted; this closes the drafts folder.
+        ((ComposerContainer) parent).close(); // Only close window after draft is deleted; this closes the drafts folder.
     }
     
     private void on_drafts_opened(Geary.Folder.OpenState open_state, int count) {
@@ -880,6 +878,10 @@ public class ComposerWidget : Gtk.EventBox {
     
     // Prevents user from editing anything.  Used while waiting for draft to save before exiting window.
     private void make_gui_insensitive() {
+        ((ComposerContainer) parent).vanish();
+        
+        // TODO: Is the rest of this necessary now?
+        
         // Halt draft timer.
         if (draft_save_timeout_id != 0)
             Source.remove(draft_save_timeout_id);
@@ -904,7 +906,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Do the save.
         yield save_async(null);
         
-        destroy();
+        ((ComposerContainer) parent).close();
     }
     
     private async void delete_and_exit() {
@@ -913,7 +915,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Do the delete.
         yield delete_draft_async();
         
-        destroy();
+        ((ComposerContainer) parent).close();
     }
     
     private async void delete_draft_async() {
@@ -1741,8 +1743,5 @@ public class ComposerWidget : Gtk.EventBox {
         bcc_entry.completion = new ContactEntryCompletion(contact_list_store);
     }
     
-    public override void destroy() {
-        close_drafts_folder_async.begin();
-    }
 }
 

@@ -9,4 +9,6 @@ public interface ComposerContainer {
     
     public abstract void present();
     public abstract unowned Gtk.Widget get_focus();
+    public abstract void vanish();
+    public abstract void close();
 }
