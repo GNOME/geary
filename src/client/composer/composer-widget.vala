@@ -876,28 +876,13 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
-    // Prevents user from editing anything.  Used while waiting for draft to save before exiting window.
+    // Used while waiting for draft to save before closing widget.
     private void make_gui_insensitive() {
         ((ComposerContainer) parent).vanish();
-        
-        // TODO: Is the rest of this necessary now?
         
         // Halt draft timer.
         if (draft_save_timeout_id != 0)
             Source.remove(draft_save_timeout_id);
-            
-        // Disable all actions.
-        List<weak Gtk.Action> actions = actions.list_actions();
-        foreach (Gtk.Action a in actions)
-            a.sensitive = false;
-        
-        // Disable buttons.
-        close_button.sensitive = send_button.sensitive = 
-            add_attachment_button.sensitive = pending_attachments_button.sensitive = false;
-        
-        // Disable editable widgets.
-        editor.sensitive = to_entry.sensitive = cc_entry.sensitive = bcc_entry.sensitive =
-            subject_entry.sensitive = from_multiple.sensitive = false;
     }
     
     private async void save_and_exit() {
