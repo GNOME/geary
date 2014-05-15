@@ -89,13 +89,13 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         close();
     }
     
-    public bool set_position(ref Gdk.Rectangle allocation) {
+    public bool set_position(ref Gdk.Rectangle allocation, double hscroll, double vscroll) {
         WebKit.DOM.Element embed = conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id);
         if (embed == null)
             return false;
         
-        allocation.x = (int) (embed.offset_left + embed.client_left);
-        allocation.y = (int) (embed.offset_top + embed.client_top);
+        allocation.x = (int) (embed.offset_left + embed.client_left) - (int) hscroll;
+        allocation.y = (int) (embed.offset_top + embed.client_top) - (int) vscroll;
         allocation.width = (int) embed.client_width;
         allocation.height = (int) embed.client_height;
         return true;
