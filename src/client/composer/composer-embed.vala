@@ -6,11 +6,10 @@
 
 public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
-    private static string embed_id = "composer_embed";
-    
     private ComposerWidget composer;
     private ConversationViewer conversation_viewer;
     private Gee.Set<Geary.App.Conversation>? prev_selection = null;
+    private string embed_id;
     
     public Gtk.Window top_window {
         get { return (Gtk.Window) get_toplevel(); }
@@ -41,9 +40,13 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         detach.clicked.connect(on_detach);
         
         WebKit.DOM.HTMLElement? email_element = null;
-        if (referred != null)
+        if (referred != null) {
             email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
                 conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
+            embed_id = referred.id.to_string() + "_reply";
+        } else {
+            embed_id = random_string(10);
+        }
         if (email_element == null) {
             ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
                 instance.controller.main_window).conversation_list_view;
@@ -56,7 +59,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         try {
             conversation_viewer.show_conversation_div();
             email_element.insert_adjacent_html("afterend",
-                @"<div id='$embed_id'></div>");
+                @"<div id='$embed_id' class='composer_embed'></div>");
         } catch (Error error) {
             debug("Error creating embed element: %s", error.message);
             return;
@@ -121,7 +124,6 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     public void vanish() {
-        GearyApplication.instance.controller.inline_composer = null;
         hide();
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
@@ -146,7 +148,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     public void close() {
-        if (GearyApplication.instance.controller.inline_composer == this)
+        if (visible)
             vanish();
         conversation_viewer.compose_overlay.remove(this);
     }

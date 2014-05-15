@@ -111,8 +111,6 @@ public class GearyController : Geary.BaseObject {
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
     
-    public ComposerEmbed? inline_composer = null;
-    
     /**
      * Fired when the currently selected account has changed.
      */
@@ -1817,6 +1815,9 @@ public class GearyController : Geary.BaseObject {
         if (current_account == null)
             return;
         
+        if (!should_create_new_composer(compose_type, referred))
+            return;
+        
         ComposerWidget widget;
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(current_account, mailto);
@@ -1840,39 +1841,49 @@ public class GearyController : Geary.BaseObject {
         composer_widgets.add(widget);
         widget.destroy.connect(on_composer_widget_destroy);
         
-        if (abandon_existing_composition(widget))
-            inline_composer = new ComposerEmbed(widget, main_window.conversation_viewer, referred);
+        new ComposerEmbed(widget, main_window.conversation_viewer, referred);
     }
     
-    public bool abandon_existing_composition(ComposerWidget? new_composer = null) {
-        if (inline_composer == null)
+    public bool should_create_new_composer(
+        ComposerWidget.ComposeType compose_type = ComposerWidget.ComposeType.NEW_MESSAGE,
+        Geary.Email? referred = null) {
+        if (!any_inline_composers())
             return true;
         
+        if (compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
+            foreach (ComposerWidget cw in composer_widgets) {
+                if (referred != null && referred.id.equal_to(cw.referred_id)) {
+                    cw.change_compose_type(compose_type);
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // TODO: Remove this in favor of automatically saving drafts
         main_window.present();
         AlertDialog dialog;
-        // TODO: Clean up when closing (like delete_and_exit) / offer save option.
-        if (new_composer != null)
-            dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
-                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
-                Gtk.Stock.CANCEL, _("Open New Composition Window"), Gtk.ResponseType.YES);
-        else
-            dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
-                _("Do you want to discard the existing composition?"), null, Gtk.Stock.DISCARD,
-                Gtk.Stock.CANCEL, _("Move Composition to New Window"), Gtk.ResponseType.YES);
+        dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
+            _("Closing inline composers."), null, Gtk.Stock.DISCARD, Gtk.Stock.CANCEL,
+            null, Gtk.ResponseType.NONE);
         Gtk.ResponseType response = dialog.run();
         if (response == Gtk.ResponseType.OK) {
-            inline_composer.close();
+            Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
+            foreach (ComposerWidget cw in composer_widgets) {
+                if (cw.inline)
+                    composers_to_destroy.add(cw);
+            }
+            foreach(ComposerWidget cw in composers_to_destroy)
+                ((ComposerContainer) cw.parent).close();
             return true;
         }
-        if (new_composer != null) {
-            if (response == Gtk.ResponseType.YES)
-                new ComposerWindow(new_composer);
-            else
-                new_composer.destroy();
-        } else if (response == Gtk.ResponseType.YES) {
-            inline_composer.on_detach();
-            return true;
-        }
+        return false;
+    }
+    
+    public bool any_inline_composers() {
+        foreach (ComposerWidget cw in composer_widgets)
+            if (cw.inline)
+                return true;
         return false;
     }
     
