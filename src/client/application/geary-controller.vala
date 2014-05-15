@@ -1781,13 +1781,13 @@ public class GearyController : Geary.BaseObject {
                 // Hide any existing composer windows for the moment; actually deleting the windows
                 // will result in their removal from composer_windows, which could crash this loop.
                 composers_to_destroy.add(cw);
-                cw.hide();
+                ((ComposerContainer) cw.parent).vanish();
             }
         }
         
         // Safely destroy windows.
         foreach(ComposerWidget cw in composers_to_destroy)
-            cw.destroy();
+            ((ComposerContainer) cw.parent).close();
         
         // If we cancelled the quit we can bail here.
         if (quit_cancelled) {
