@@ -712,7 +712,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     private void on_close() {
         if (should_close() == CloseStatus.DO_CLOSE)
-            ((ComposerContainer) parent).close();
+            container.close();
     }
     
     private bool email_contains_attachment_keywords() {
@@ -794,7 +794,7 @@ public class ComposerWidget : Gtk.EventBox {
     private async void on_send_async() {
         cancellable_save_draft.cancel();
         
-        ((ComposerEmbed) parent).vanish();
+        container.vanish();
         
         linkify_document(editor.get_dom_document());
         
@@ -806,7 +806,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
         
         yield delete_draft_async();
-        ((ComposerContainer) parent).close(); // Only close window after draft is deleted; this closes the drafts folder.
+        container.close(); // Only close window after draft is deleted; this closes the drafts folder.
     }
     
     private void on_drafts_opened(Geary.Folder.OpenState open_state, int count) {
@@ -878,7 +878,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     // Used while waiting for draft to save before closing widget.
     private void make_gui_insensitive() {
-        ((ComposerContainer) parent).vanish();
+        container.vanish();
         
         // Halt draft timer.
         if (draft_save_timeout_id != 0)
@@ -891,7 +891,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Do the save.
         yield save_async(null);
         
-        ((ComposerContainer) parent).close();
+        container.close();
     }
     
     private async void delete_and_exit() {
@@ -900,7 +900,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Do the delete.
         yield delete_draft_async();
         
-        ((ComposerContainer) parent).close();
+        container.close();
     }
     
     private async void delete_draft_async() {
