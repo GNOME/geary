@@ -1423,12 +1423,6 @@ public class ComposerWidget : Gtk.EventBox {
                     return true;
                 }
             break;
-            
-            case "Tab":
-                return child_focus(Gtk.DirectionType.TAB_FORWARD);
-            
-            case "ISO_Left_Tab":
-                return child_focus(Gtk.DirectionType.TAB_BACKWARD);
         }
         
         return base.key_press_event(event);
