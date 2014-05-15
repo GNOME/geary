@@ -71,20 +71,20 @@ private class Geary.Imap.Folder : BaseObject {
      */
     public signal void disconnected(ClientSession.DisconnectReason reason);
     
-    internal Folder(ClientSessionManager session_mgr, StatusData status, MailboxInformation info) {
+    internal Folder(FolderPath path, ClientSessionManager session_mgr, StatusData status, MailboxInformation info) {
         assert(status.mailbox.equal_to(info.mailbox));
         
         this.session_mgr = session_mgr;
         this.info = info;
-        path = info.path;
+        this.path = path;
         
         properties = new Imap.FolderProperties.status(status, info.attrs);
     }
     
-    internal Folder.unselectable(ClientSessionManager session_mgr, MailboxInformation info) {
+    internal Folder.unselectable(FolderPath path, ClientSessionManager session_mgr, MailboxInformation info) {
         this.session_mgr = session_mgr;
         this.info = info;
-        path = info.path;
+        this.path = path;
         
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }

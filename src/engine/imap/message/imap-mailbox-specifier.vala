@@ -133,9 +133,26 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         return path;
     }
     
-    public FolderPath to_folder_path(string? delim = null) {
+    /**
+     * Converts the {@link MailboxSpecifier} into a {@link FolderPath}.
+     *
+     * If the inbox_specifier is supplied, if the root element matches it, the canonical Inbox
+     * name is used in its place.  This is useful for XLIST where that command returns a translated
+     * name but the standard IMAP name ("INBOX") must be used in addressing its children.
+     */
+    public FolderPath to_folder_path(string? delim, MailboxSpecifier? inbox_specifier) {
+        // convert path to list of elements
         Gee.List<string> list = to_list(delim);
-        FolderPath path = new Imap.FolderRoot(list[0], delim);
+        
+        // if root element is same as supplied inbox specifier, use canonical inbox name, otherwise
+        // keep
+        FolderPath path;
+        if (inbox_specifier != null && list[0] == inbox_specifier.name)
+            path = new Imap.FolderRoot(CANONICAL_INBOX_NAME, delim);
+        else
+            path = new Imap.FolderRoot(list[0], delim);
+        
+        // walk down rest of elements adding as we go
         for (int ctr = 1; ctr < list.size; ctr++)
             path = path.get_child(list[ctr]);
         

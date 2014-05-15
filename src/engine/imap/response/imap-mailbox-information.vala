@@ -30,30 +30,25 @@ public class Geary.Imap.MailboxInformation : Object {
      */
     public MailboxAttributes attrs { get; private set; }
     
-    /**
-     * The {@link Geary.FolderPath} for the mailbox.
-     *
-     * This is constructed from the supplied {@link mailbox} and {@link delim} returned from the
-     * server.
-     */
-    public Geary.FolderPath path { get; private set; }
-    
     public MailboxInformation(MailboxSpecifier mailbox, string? delim, MailboxAttributes attrs) {
         this.mailbox = mailbox;
         this.delim = delim;
         this.attrs = attrs;
-        path = mailbox.to_folder_path(delim);
     }
     
     /**
      * Decodes {@link ServerData} into a MailboxInformation representation.
+     *
+     * If canonical_inbox is true, the {@link MailboxAttributes} are searched for the \Inbox flag.
+     * If found, {@link MailboxSpecifier.CANONICAL_INBOX_NAME} is used rather than the one returned
+     * by the server.
      *
      * The ServerData must be the response to a LIST or XLIST command.
      *
      * @see ListCommand
      * @see ServerData.get_list
      */
-    public static MailboxInformation decode(ServerData server_data) throws ImapError {
+    public static MailboxInformation decode(ServerData server_data, bool canonical_inbox) throws ImapError {
         StringParameter cmd = server_data.get_as_string(1);
         if (!cmd.equals_ci(ListCommand.NAME) && !cmd.equals_ci(ListCommand.XLIST_NAME))
             throw new ImapError.PARSE_ERROR("Not LIST or XLIST data: %s", server_data.to_string());
@@ -80,13 +75,24 @@ public class Geary.Imap.MailboxInformation : Object {
             server_data.get_as_string(4));
         
         // Set \Inbox to standard path
-        if (Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
+        if (canonical_inbox && Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
             return new MailboxInformation(MailboxSpecifier.inbox,
                 (delim != null) ? delim.nullable_value : null, attributes);
         } else {
             return new MailboxInformation(new MailboxSpecifier.from_parameter(mailbox),
                 (delim != null) ? delim.nullable_value : null, attributes);
         }
+    }
+    
+    /**
+     * The {@link Geary.FolderPath} for the {@link mailbox}.
+     *
+     * This is constructed from the supplied {@link mailbox} and {@link delim} returned from the
+     * server.  If the mailbox is the same as the supplied inbox_specifier, a canonical name for
+     * the Inbox is returned.
+     */
+    public Geary.FolderPath get_path(MailboxSpecifier? inbox_specifier) {
+        return mailbox.to_folder_path(delim, inbox_specifier);
     }
 }
 

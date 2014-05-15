@@ -32,6 +32,8 @@ private class Geary.Imap.Account : BaseObject {
     private Gee.HashMap<FolderPath, Imap.Folder> folders = new Gee.HashMap<FolderPath, Imap.Folder>();
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
+    private Gee.List<ServerData>? server_data_collector = null;
+    private Imap.MailboxSpecifier? inbox_specifier = null;
     
     public signal void login_failed(Geary.Credentials cred);
     
@@ -89,7 +91,14 @@ private class Geary.Imap.Account : BaseObject {
                 
                 account_session.list.connect(on_list_data);
                 account_session.status.connect(on_status_data);
+                account_session.server_data_received.connect(on_server_data_received);
                 account_session.disconnected.connect(on_disconnected);
+                
+                // Learn the magic XLIST <translated Inbox name> -> Inbox mapping
+                if (account_session.capabilities.has_capability(Imap.Capabilities.XLIST))
+                    yield determine_xlist_inbox(account_session, cancellable);
+                else
+                    inbox_specifier = MailboxSpecifier.inbox;
             } catch (Error claim_err) {
                 err = claim_err;
             }
@@ -97,10 +106,50 @@ private class Geary.Imap.Account : BaseObject {
         
         account_session_mutex.release(ref token);
         
-        if (err != null)
+        if (err != null) {
+            if (account_session != null)
+                yield drop_session_async(null);
+            
             throw err;
+        }
         
         return account_session;
+    }
+    
+    private async void determine_xlist_inbox(ClientSession session, Cancellable? cancellable) throws Error {
+        // can't use send_command_async() directly because this is called by claim_session_async(),
+        // which is called by send_command_async()
+        
+        int token = yield cmd_mutex.claim_async(cancellable);
+        
+        // clear for now
+        inbox_specifier = null;
+        
+        // collect server data directly for direct decoding
+        server_data_collector = new Gee.ArrayList<ServerData>();
+        
+        Error? throw_err = null;
+        try {
+            Imap.StatusResponse response = yield session.send_command_async(
+                new ListCommand(MailboxSpecifier.inbox, true, null), cancellable);
+            if (response.status == Imap.Status.OK && server_data_collector.size > 0)
+                inbox_specifier = MailboxInformation.decode(server_data_collector[0], false).mailbox;
+        } catch (Error err) {
+            throw_err = err;
+        }
+        
+        server_data_collector = null;
+        
+        // fall back on standard name
+        if (inbox_specifier == null)
+            inbox_specifier = MailboxSpecifier.inbox;
+        
+        debug("[%s] INBOX specifier: %s", to_string(), inbox_specifier.to_string());
+        
+        cmd_mutex.release(ref token);
+        
+        if (throw_err != null)
+            throw throw_err;
     }
     
     private async void drop_session_async(Cancellable? cancellable) {
@@ -122,6 +171,7 @@ private class Geary.Imap.Account : BaseObject {
             
             account_session.list.disconnect(on_list_data);
             account_session.status.disconnect(on_status_data);
+            account_session.server_data_received.disconnect(on_server_data_received);
             account_session.disconnected.disconnect(on_disconnected);
             
             account_session = null;
@@ -142,6 +192,11 @@ private class Geary.Imap.Account : BaseObject {
     private void on_status_data(StatusData status_data) {
         if (status_collector != null)
             status_collector.add(status_data);
+    }
+    
+    private void on_server_data_received(ServerData server_data) {
+        if (server_data_collector != null)
+            server_data_collector.add(server_data);
     }
     
     private void on_disconnected() {
@@ -185,13 +240,16 @@ private class Geary.Imap.Account : BaseObject {
         if (mailbox_info == null)
             throw_not_found(path);
         
+        // construct folder path for new folder, converting XLIST Inbox name to canonical INBOX
+        FolderPath folder_path = mailbox_info.get_path(inbox_specifier);
+        
         Imap.Folder folder;
         if (!mailbox_info.attrs.is_no_select) {
             StatusData status = yield fetch_status_async(path, StatusDataType.all(), cancellable);
             
-            folder = new Imap.Folder(session_mgr, status, mailbox_info);
+            folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info);
         } else {
-            folder = new Imap.Folder.unselectable(session_mgr, mailbox_info);
+            folder = new Imap.Folder.unselectable(folder_path, session_mgr, mailbox_info);
         }
         
         folders.set(path, folder);
@@ -268,7 +326,8 @@ private class Geary.Imap.Account : BaseObject {
         foreach (MailboxInformation mailbox_info in child_info) {
             // if new mailbox is unselectable, don't bother doing a STATUS command
             if (mailbox_info.attrs.is_no_select) {
-                Imap.Folder folder = new Imap.Folder.unselectable(session_mgr, mailbox_info);
+                Imap.Folder folder = new Imap.Folder.unselectable(mailbox_info.get_path(inbox_specifier),
+                    session_mgr, mailbox_info);
                 folders.set(folder.path, folder);
                 child_folders.add(folder);
                 
@@ -318,12 +377,14 @@ private class Geary.Imap.Account : BaseObject {
             
             status_results.remove(found_status);
             
+            FolderPath folder_path = mailbox_info.get_path(inbox_specifier);
+            
             // if already have an Imap.Folder for this mailbox, use that
-            Imap.Folder? folder = folders.get(mailbox_info.path);
+            Imap.Folder? folder = folders.get(folder_path);
             if (folder != null) {
                 folder.properties.update_status(found_status);
             } else {
-                folder = new Imap.Folder(session_mgr, found_status, mailbox_info);
+                folder = new Imap.Folder(folder_path, session_mgr, found_status, mailbox_info);
                 folders.set(folder.path, folder);
             }
             
@@ -375,7 +436,8 @@ private class Geary.Imap.Account : BaseObject {
         if (parent != null) {
             Gee.Iterator<MailboxInformation> iter = list_results.iterator();
             while (iter.next()) {
-                FolderPath list_path = iter.get().mailbox.to_folder_path(parent.get_root().default_separator);
+                FolderPath list_path = iter.get().mailbox.to_folder_path(parent.get_root().default_separator,
+                    inbox_specifier);
                 if (list_path.equal_to(parent)) {
                     debug("Removing parent from LIST results: %s", list_path.to_string());
                     iter.remove();
@@ -387,7 +449,7 @@ private class Geary.Imap.Account : BaseObject {
         // TODO: remove any MailboxInformation for this parent that is not found (i.e. has been
         // removed on the server)
         foreach (MailboxInformation mailbox_info in list_results)
-            path_to_mailbox.set(mailbox_info.path, mailbox_info);
+            path_to_mailbox.set(mailbox_info.get_path(inbox_specifier), mailbox_info);
         
         return (list_results.size > 0) ? list_results : null;
     }
