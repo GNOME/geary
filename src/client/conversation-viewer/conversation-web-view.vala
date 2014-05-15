@@ -49,15 +49,6 @@ public class ConversationWebView : WebKit.WebView {
         load_string(html_text, "text/html", "UTF8", "");
     }
     
-    private string random_string(int length) {
-        // No upper case letters, since request gets lower-cased.
-        string chars = "abcdefghijklmnopqrstuvwxyz";
-        char[] random = new char[length];
-        for (int i = 0; i < length; i++)
-            random[i] = chars[Random.int_range(0, chars.length)];
-        return (string) random;
-    }
-    
     public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
         // Disable tooltips from within WebKit itself.
         return false;

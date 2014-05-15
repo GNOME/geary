@@ -134,7 +134,13 @@ public class ComposerWidget : Gtk.EventBox {
         set { ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active = value; }
     }
     
+    public bool inline {
+        get { return parent is ComposerEmbed && visible; }
+    }
+    
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
+    
+    public Geary.EmailIdentifier? referred_id { get; private set; default = null; }
     
     private ContactListStore? contact_list_store = null;
     
@@ -329,6 +335,7 @@ public class ComposerWidget : Gtk.EventBox {
         from_multiple.changed.connect(on_from_changed);
         
         if (referred != null) {
+           this.referred_id = referred.id;
            switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
                     if (referred.to != null)
@@ -512,6 +519,16 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    private void set_focus() {
+        if (Geary.String.is_empty(to)) {
+            to_entry.grab_focus();
+        } else if (Geary.String.is_empty(subject)) {
+            subject_entry.grab_focus();
+        } else {
+            editor.grab_focus();
+        }
+    }
+    
     private void on_load_finished(WebKit.WebFrame frame) {
         WebKit.DOM.HTMLElement? body = editor.get_dom_document().get_element_by_id(
             BODY_ID) as WebKit.DOM.HTMLElement;
@@ -527,15 +544,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         protect_blockquote_styles();
         
-        // Set focus.
-        if (Geary.String.is_empty(to)) {
-            to_entry.grab_focus();
-        } else if (Geary.String.is_empty(subject)) {
-            subject_entry.grab_focus();
-        } else {
-            editor.grab_focus();
-            body.focus();
-        }
+        set_focus();
         
         // Ensure the editor is in correct mode re HTML
         on_compose_as_html();
@@ -669,6 +678,12 @@ public class ComposerWidget : Gtk.EventBox {
     public override void show_all() {
         base.show_all();
         update_from_field();
+    }
+    
+    // TODO: Make this actually do something
+    public void change_compose_type(ComposeType new_type) {
+        container.present();
+        set_focus();
     }
     
     private bool can_save() {
