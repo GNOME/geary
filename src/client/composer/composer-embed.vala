@@ -112,6 +112,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     }
     
     public void present() {
+        top_window.present();
         conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id).scroll_into_view(true);
     }
     
