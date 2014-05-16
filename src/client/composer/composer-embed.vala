@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ComposerEmbed : Gtk.Box, ComposerContainer {
+public class ComposerEmbed : Gtk.Bin, ComposerContainer {
     
     private ComposerWidget composer;
     private ConversationViewer conversation_viewer;
@@ -17,27 +17,11 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
     public ComposerEmbed(ComposerWidget composer, ConversationViewer conversation_viewer,
         Geary.Email? referred) {
-        Object(orientation: Gtk.Orientation.VERTICAL);
+        //Object(orientation: Gtk.Orientation.VERTICAL);
         this.composer = composer;
         this.conversation_viewer = conversation_viewer;
         halign = Gtk.Align.FILL;
         valign = Gtk.Align.FILL;
-        
-        Gtk.Toolbar toolbar = new Gtk.Toolbar();
-        toolbar.set_icon_size(Gtk.IconSize.MENU);
-        Gtk.ToolButton close = new Gtk.ToolButton.from_stock("gtk-close");
-        Gtk.ToolButton detach = new Gtk.ToolButton.from_stock("gtk-goto-top");
-        Gtk.SeparatorToolItem filler = new Gtk.SeparatorToolItem();
-        filler.set_expand(true);
-        filler.set_draw(false);
-        toolbar.insert(filler, -1);
-        toolbar.insert(detach, -1);
-        toolbar.insert(close, -1);
-        pack_start(toolbar, false, false);
-        toolbar.show_all();
-        
-        close.clicked.connect(on_close);
-        detach.clicked.connect(on_detach);
         
         WebKit.DOM.HTMLElement? email_element = null;
         if (referred != null) {
@@ -64,7 +48,8 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
             debug("Error creating embed element: %s", error.message);
             return;
         }
-        pack_start(composer, true, true);
+        //pack_start(composer, true, true);
+        add(composer);
         composer.editor.focus_in_event.connect(on_focus_in);
         composer.editor.focus_out_event.connect(on_focus_out);
         conversation_viewer.compose_overlay.add_overlay(this);
@@ -72,23 +57,16 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
         present();
     }
     
-    private void on_close() {
-        if (composer.should_close() == ComposerWidget.CloseStatus.DO_CLOSE)
-            close();
-    }
-    
     public void on_detach() {
+        composer.inline = false;
         if (composer.editor.has_focus)
             on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
-        Gtk.Widget focus = top_window.get_focus();
         
         remove(composer);
-        ComposerWindow window = new ComposerWindow(composer);
-        ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
-        if (focus_win != null && focus_win == window)
-            focus.grab_focus();
+        new ComposerWindow(composer);
+        composer.set_focus();
         close();
     }
     
@@ -125,6 +103,7 @@ public class ComposerEmbed : Gtk.Box, ComposerContainer {
     
     public void vanish() {
         hide();
+        composer.inline = false;
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
         
