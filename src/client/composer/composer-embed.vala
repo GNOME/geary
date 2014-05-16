@@ -53,7 +53,7 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
         composer.editor.focus_in_event.connect(on_focus_in);
         composer.editor.focus_out_event.connect(on_focus_out);
         conversation_viewer.compose_overlay.add_overlay(this);
-        show_all();
+        show();
         present();
     }
     
