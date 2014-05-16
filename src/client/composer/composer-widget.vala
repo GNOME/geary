@@ -160,6 +160,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.Button detach_button;
     private Gtk.Label message_overlay_label;
     private WebKit.DOM.Element? prev_selected_link = null;
+    private Gtk.Separator attachments_separator;
     private Gtk.Box attachments_box;
     private Gtk.Button add_attachment_button;
     private Gtk.Button pending_attachments_button;
@@ -230,6 +231,7 @@ public class ComposerWidget : Gtk.EventBox {
         add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
         pending_attachments_button = builder.get_object("add_pending_attachments") as Gtk.Button;
         pending_attachments_button.clicked.connect(on_pending_attachments_button_clicked);
+        attachments_separator = builder.get_object("separator") as Gtk.Separator;
         attachments_box = builder.get_object("attachments_box") as Gtk.Box;
         hidden_on_attachment_drag_over = (Gtk.Alignment) builder.get_object("hidden_on_attachment_drag_over");
         hidden_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("hidden_on_attachment_drag_over_child");
@@ -246,6 +248,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Set the visibilities later, after show_all is called on the widget.
         Idle.add(() => {
             inline_reply = (compose_type != ComposeType.NEW_MESSAGE);
+            show_attachments();
             return false;
         });
         
@@ -1054,7 +1057,7 @@ public class ComposerWidget : Gtk.EventBox {
         box.pack_start(remove_button, false, false);
         remove_button.clicked.connect(() => remove_attachment(attachment_file, box));
         
-        attachments_box.show_all();
+        show_attachments();
         
         check_pending_attachments();
         
@@ -1077,7 +1080,19 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         
+        show_attachments();
+        
         check_pending_attachments();
+    }
+    
+    private void show_attachments() {
+        if (attachment_files.size > 0 ) {
+            attachments_box.show_all();
+            attachments_separator.show();
+        } else {
+            attachments_box.hide();
+            attachments_separator.hide();
+        }
     }
     
     private void on_subject_changed() {
