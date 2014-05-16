@@ -1835,6 +1835,7 @@ public class GearyController : Geary.BaseObject {
             
             widget = new ComposerWidget(current_account, compose_type, full, is_draft);
         }
+        widget.show_all();
         
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.

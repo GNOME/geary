@@ -22,7 +22,7 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         composer.subject_entry.changed();
         
         add_accel_group(composer.ui.get_accel_group());
-        show_all();
+        show();
         set_position(Gtk.WindowPosition.CENTER);
     }
     
@@ -30,9 +30,9 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         get { return this; }
     }
     
-    public override void show_all() {
+    public override void show() {
         set_default_size(680, 600);
-        base.show_all();
+        base.show();
     }
     
     public new void close() {
