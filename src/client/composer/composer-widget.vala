@@ -134,9 +134,7 @@ public class ComposerWidget : Gtk.EventBox {
         set { ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active = value; }
     }
     
-    public bool inline {
-        get { return parent is ComposerEmbed && visible; }
-    }
+    public bool inline { get; set; default = true; }
     
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
@@ -158,6 +156,7 @@ public class ComposerWidget : Gtk.EventBox {
     public Gtk.Entry subject_entry;
     private Gtk.Button close_button;
     private Gtk.Button send_button;
+    private Gtk.Button detach_button;
     private Gtk.Label message_overlay_label;
     private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
@@ -221,6 +220,10 @@ public class ComposerWidget : Gtk.EventBox {
         close_button.clicked.connect(on_close);
         send_button = builder.get_object("Send") as Gtk.Button;
         send_button.clicked.connect(on_send);
+        detach_button = builder.get_object("Detach") as Gtk.Button;
+        detach_button.clicked.connect(on_detach);
+        bind_property("inline", detach_button, "visible",
+            BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
         add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
         add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
         pending_attachments_button = builder.get_object("add_pending_attachments") as Gtk.Button;
@@ -519,7 +522,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
-    private void set_focus() {
+    public void set_focus() {
         if (Geary.String.is_empty(to)) {
             to_entry.grab_focus();
         } else if (Geary.String.is_empty(subject)) {
@@ -728,6 +731,11 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_close() {
         if (should_close() == CloseStatus.DO_CLOSE)
             container.close();
+    }
+    
+    private void on_detach() {
+        if (parent is ComposerEmbed)
+            ((ComposerEmbed) parent).on_detach();
     }
     
     private bool email_contains_attachment_keywords() {
