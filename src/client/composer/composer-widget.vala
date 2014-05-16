@@ -135,6 +135,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     public bool inline { get; set; default = true; }
+    public bool inline_reply { get; set; }
     
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
@@ -166,6 +167,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.Alignment visible_on_attachment_drag_over;
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     private Gtk.Widget visible_on_attachment_drag_over_child;
+    private Gtk.Label compact_header;
     private Gtk.Label draft_save_label;
     
     private Gtk.Menu menu = new Gtk.Menu();
@@ -234,6 +236,18 @@ public class ComposerWidget : Gtk.EventBox {
         visible_on_attachment_drag_over = (Gtk.Alignment) builder.get_object("visible_on_attachment_drag_over");
         visible_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("visible_on_attachment_drag_over_child");
         visible_on_attachment_drag_over.remove(visible_on_attachment_drag_over_child);
+        
+        Gtk.Widget recipients = builder.get_object("recipients") as Gtk.Widget;
+        bind_property("inline-reply", recipients, "visible",
+            BindingFlags.INVERT_BOOLEAN | BindingFlags.SYNC_CREATE);
+        compact_header = builder.get_object("compact_recipients") as Gtk.Label;
+        bind_property("inline-reply", compact_header, "visible",
+            BindingFlags.SYNC_CREATE);
+        // Set the visibilities later, after show_all is called on the widget.
+        Idle.add(() => {
+            inline_reply = (compose_type != ComposeType.NEW_MESSAGE);
+            return false;
+        });
         
         from_label = (Gtk.Label) builder.get_object("from label");
         from_single = (Gtk.Label) builder.get_object("from_single");
@@ -1073,9 +1087,13 @@ public class ComposerWidget : Gtk.EventBox {
     private void validate_send_button() {
         send_button.sensitive =
             to_entry.valid_or_empty && cc_entry.valid_or_empty && bcc_entry.valid_or_empty
-         && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
-         
-         reset_draft_timer();
+            && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
+        bool tocc = !to_entry.empty && !cc_entry.empty,
+            ccbcc = !(to_entry.empty && cc_entry.empty) && !bcc_entry.empty;
+        compact_header.label = _("To: ") + to_entry.buffer.text + (tocc ? ", " : "")
+            + cc_entry.buffer.text + (ccbcc ? ", " : "") + bcc_entry.buffer.text;
+        
+        reset_draft_timer();
     }
     
     private void on_formatting_action(Gtk.Action action) {

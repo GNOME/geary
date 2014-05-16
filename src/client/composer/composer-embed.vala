@@ -58,7 +58,7 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
     }
     
     public void on_detach() {
-        composer.inline = false;
+        composer.inline = composer.inline_reply = false;
         if (composer.editor.has_focus)
             on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
@@ -103,7 +103,7 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
     
     public void vanish() {
         hide();
-        composer.inline = false;
+        composer.inline = composer.inline_reply = false;
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
         
