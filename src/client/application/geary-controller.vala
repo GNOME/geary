@@ -1850,7 +1850,8 @@ public class GearyController : Geary.BaseObject {
         Geary.Email? referred = null) {
         if (compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.inline && referred != null && referred.id.equal_to(cw.referred_id)) {
+                if (cw.state != ComposerWidget.ComposerState.DETACHED &&
+                    referred != null && referred.id.equal_to(cw.referred_id)) {
                     cw.change_compose_type(compose_type);
                     return false;
                 }
@@ -1871,7 +1872,7 @@ public class GearyController : Geary.BaseObject {
         if (response == Gtk.ResponseType.OK) {
             Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
             foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.inline)
+                if (cw.state != ComposerWidget.ComposerState.DETACHED)
                     composers_to_destroy.add(cw);
             }
             foreach(ComposerWidget cw in composers_to_destroy)
@@ -1883,7 +1884,7 @@ public class GearyController : Geary.BaseObject {
     
     public bool any_inline_composers() {
         foreach (ComposerWidget cw in composer_widgets)
-            if (cw.inline)
+            if (cw.state != ComposerWidget.ComposerState.DETACHED)
                 return true;
         return false;
     }
