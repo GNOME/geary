@@ -19,6 +19,13 @@ public class ComposerWidget : Gtk.EventBox {
         CANCEL_CLOSE
     }
     
+    public enum ComposerState {
+        DETACHED,
+        INLINE_NEW,
+        INLINE,
+        INLINE_COMPACT
+    }
+    
     public const string ACTION_UNDO = "undo";
     public const string ACTION_REDO = "redo";
     public const string ACTION_CUT = "cut";
@@ -134,8 +141,7 @@ public class ComposerWidget : Gtk.EventBox {
         set { ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active = value; }
     }
     
-    public bool inline { get; set; default = true; }
-    public bool inline_reply { get; set; }
+    public ComposerState state { get; set; }
     
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
@@ -168,7 +174,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.Alignment visible_on_attachment_drag_over;
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     private Gtk.Widget visible_on_attachment_drag_over_child;
-    private Gtk.Label compact_header;
+    private Gtk.Label compact_header_label;
     private Gtk.Label draft_save_label;
     
     private Gtk.Menu menu = new Gtk.Menu();
@@ -208,6 +214,12 @@ public class ComposerWidget : Gtk.EventBox {
         Geary.Email? referred = null, bool is_referred_draft = false) {
         this.account = account;
         this.compose_type = compose_type;
+        if (compose_type == ComposeType.NEW_MESSAGE)
+            state = ComposerState.INLINE_NEW;
+        else if (compose_type == ComposeType.FORWARD)
+            state = ComposerState.INLINE;
+        else
+            state = ComposerState.INLINE_COMPACT;
         
         setup_drag_destination(this);
         
@@ -225,8 +237,11 @@ public class ComposerWidget : Gtk.EventBox {
         send_button.clicked.connect(on_send);
         detach_button = builder.get_object("Detach") as Gtk.Button;
         detach_button.clicked.connect(on_detach);
-        bind_property("inline", detach_button, "visible",
-            BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
+        bind_property("state", detach_button, "visible", BindingFlags.SYNC_CREATE,
+            (binding, source_value, ref target_value) => {
+                target_value = (state != ComposerState.DETACHED);
+                return true;
+            });
         add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
         add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
         pending_attachments_button = builder.get_object("add_pending_attachments") as Gtk.Button;
@@ -240,14 +255,33 @@ public class ComposerWidget : Gtk.EventBox {
         visible_on_attachment_drag_over.remove(visible_on_attachment_drag_over_child);
         
         Gtk.Widget recipients = builder.get_object("recipients") as Gtk.Widget;
-        bind_property("inline-reply", recipients, "visible",
-            BindingFlags.INVERT_BOOLEAN | BindingFlags.SYNC_CREATE);
-        compact_header = builder.get_object("compact_recipients") as Gtk.Label;
-        bind_property("inline-reply", compact_header, "visible",
-            BindingFlags.SYNC_CREATE);
+        bind_property("state", recipients, "visible", BindingFlags.SYNC_CREATE,
+            (binding, source_value, ref target_value) => {
+                target_value = (state != ComposerState.INLINE_COMPACT);
+                return true;
+            });
+        Gtk.Widget compact_header = builder.get_object("compact_recipients") as Gtk.Widget;
+        bind_property("state", compact_header, "visible", BindingFlags.SYNC_CREATE,
+            (binding, source_value, ref target_value) => {
+                target_value = (state == ComposerState.INLINE_COMPACT);
+                return true;
+            });
+        string[] subject_elements = {"subject label", "subject"};
+        foreach (string name in subject_elements) {
+            Gtk.Widget widget = builder.get_object(name) as Gtk.Widget;
+            bind_property("state", widget, "visible", BindingFlags.SYNC_CREATE,
+                (binding, source_value, ref target_value) => {
+                    target_value = (state != ComposerState.INLINE);
+                    return true;
+                });
+        }
+        notify["state"].connect((s, p) => { update_from_field(); });
+        compact_header_label = builder.get_object("compact_recipients_label") as Gtk.Label;
+        Gtk.Button expand_button = builder.get_object("expand_button") as Gtk.Button;
+        expand_button.clicked.connect(() => { state = ComposerState.INLINE; });
         // Set the visibilities later, after show_all is called on the widget.
         Idle.add(() => {
-            inline_reply = (compose_type != ComposeType.NEW_MESSAGE);
+            state = state;  // Triggers visibilities
             show_attachments();
             return false;
         });
@@ -1105,8 +1139,9 @@ public class ComposerWidget : Gtk.EventBox {
             && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
         bool tocc = !to_entry.empty && !cc_entry.empty,
             ccbcc = !(to_entry.empty && cc_entry.empty) && !bcc_entry.empty;
-        compact_header.label = _("To: ") + to_entry.buffer.text + (tocc ? ", " : "")
-            + cc_entry.buffer.text + (ccbcc ? ", " : "") + bcc_entry.buffer.text;
+        if (state == ComposerState.INLINE_COMPACT)
+            compact_header_label.label = to_entry.buffer.text + (tocc ? ", " : "")
+                + cc_entry.buffer.text + (ccbcc ? ", " : "") + bcc_entry.buffer.text;
         
         reset_draft_timer();
     }
@@ -1704,6 +1739,10 @@ public class ComposerWidget : Gtk.EventBox {
             
             return;
         }
+        
+        // Don't show in inline or compact modes.
+        if (state == ComposerState.INLINE || state == ComposerState.INLINE_COMPACT)
+            return;
         
         // If there's only one account, show nothing. (From fields are hidden above.)
         if (accounts.size <= 1)
