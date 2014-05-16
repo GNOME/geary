@@ -63,10 +63,17 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
             on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
+        Gtk.Widget focus = top_window.get_focus();
         
         remove(composer);
-        new ComposerWindow(composer);
-        composer.set_focus();
+        ComposerWindow window = new ComposerWindow(composer);
+        if (focus != null) {
+            ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
+            if (focus_win != null && focus_win == window)
+                focus.grab_focus();
+        } else {
+            composer.set_focus();
+        }
         close();
     }
     
