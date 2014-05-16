@@ -1848,18 +1848,18 @@ public class GearyController : Geary.BaseObject {
     public bool should_create_new_composer(
         ComposerWidget.ComposeType compose_type = ComposerWidget.ComposeType.NEW_MESSAGE,
         Geary.Email? referred = null) {
-        if (!any_inline_composers())
-            return true;
-        
         if (compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
-                if (referred != null && referred.id.equal_to(cw.referred_id)) {
+                if (cw.inline && referred != null && referred.id.equal_to(cw.referred_id)) {
                     cw.change_compose_type(compose_type);
                     return false;
                 }
             }
             return true;
         }
+        
+        if (!any_inline_composers())
+            return true;
         
         // TODO: Remove this in favor of automatically saving drafts
         main_window.present();
