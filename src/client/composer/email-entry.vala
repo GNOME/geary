@@ -8,6 +8,7 @@
 public class EmailEntry : Gtk.Entry {
     public bool valid_or_empty { get; set; default = true; }
     public bool empty { get; set; default = true; }
+    public bool modified = false;
 
     // null or valid addresses
     public Geary.RFC822.MailboxAddresses? addresses { get; private set; default = null; }
@@ -21,6 +22,8 @@ public class EmailEntry : Gtk.Entry {
     }
 
     private void on_changed() {
+        modified = true;
+
         ((ContactEntryCompletion) get_completion()).reset_selection();
         if (Geary.String.is_empty(text.strip())) {
             addresses = null;

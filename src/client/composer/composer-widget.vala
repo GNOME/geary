@@ -200,6 +200,11 @@ public class ComposerWidget : Gtk.EventBox {
     private bool action_flag = false;
     private bool is_attachment_overlay_visible = false;
     private Gee.List<Geary.Attachment>? pending_attachments = null;
+    private string reply_to_addresses = "";
+    private string reply_cc_addresses = "";
+    private string reply_subject = "";
+    private string forward_subject = "";
+    private string reply_message_id = "";
     
     private Geary.FolderSupport.Create? drafts_folder = null;
     private Geary.EmailIdentifier? draft_id = null;
@@ -396,8 +401,14 @@ public class ComposerWidget : Gtk.EventBox {
         from_multiple.changed.connect(on_from_changed);
         
         if (referred != null) {
-           this.referred_id = referred.id;
-           switch (compose_type) {
+            this.referred_id = referred.id;
+            string? sender_address = account.information.get_mailbox_address().address;
+            reply_to_addresses = Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
+            reply_cc_addresses = Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_address);
+            reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
+            forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
+            reply_message_id = referred.message_id.value;
+            switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
                     if (referred.to != null)
                         to = referred.to.to_rfc822_string();
@@ -425,19 +436,19 @@ public class ComposerWidget : Gtk.EventBox {
                 
                 case ComposeType.REPLY:
                 case ComposeType.REPLY_ALL:
-                    string? sender_address = account.information.get_mailbox_address().address;
-                    to = Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
+                    to = reply_to_addresses;
                     if (compose_type == ComposeType.REPLY_ALL)
-                        cc = Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_address);
-                    subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
-                    in_reply_to = referred.message_id.value;
+                        cc = reply_cc_addresses;
+                    to_entry.modified = cc_entry.modified = false;
+                    subject = reply_subject;
+                    in_reply_to = reply_message_id;
                     references = Geary.RFC822.Utils.reply_references(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, true);
                     pending_attachments = referred.attachments;
                 break;
                 
                 case ComposeType.FORWARD:
-                    subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
+                    subject = forward_subject;
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, true);
                     add_attachments(referred.attachments);
                     pending_attachments = referred.attachments;
@@ -741,8 +752,42 @@ public class ComposerWidget : Gtk.EventBox {
         update_from_field();
     }
     
-    // TODO: Make this actually do something
     public void change_compose_type(ComposeType new_type) {
+        if (new_type != compose_type) {
+            bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
+            switch (new_type) {
+                case ComposeType.REPLY:
+                case ComposeType.REPLY_ALL:
+                    subject = reply_subject;
+                    if (!recipients_modified) {
+                        to = reply_to_addresses;
+                        cc = (new_type == ComposeType.REPLY_ALL ? reply_cc_addresses : "");
+                        to_entry.modified = cc_entry.modified = false;
+                    } else {
+                        to_entry.select_region(0, -1);
+                    }
+                    in_reply_to = reply_message_id;
+                break;
+                
+                case ComposeType.FORWARD:
+                    state = ComposerState.INLINE;
+                    subject = forward_subject;
+                    if (!recipients_modified) {
+                        to = "";
+                        cc = "";
+                        to_entry.modified = cc_entry.modified = false;
+                    } else {
+                        to_entry.select_region(0, -1);
+                    }
+                    in_reply_to = "";
+                break;
+                
+                default:
+                    assert_not_reached();
+            }
+            compose_type = new_type;
+        }
+        
         container.present();
         set_focus();
     }
