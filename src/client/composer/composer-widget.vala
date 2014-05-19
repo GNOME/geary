@@ -147,6 +147,13 @@ public class ComposerWidget : Gtk.EventBox {
     
     public Geary.EmailIdentifier? referred_id { get; private set; default = null; }
     
+    public bool blank {
+        get {
+            return to_entry.empty && cc_entry.empty && bcc_entry.empty &&
+                subject_entry.buffer.length == 0 && !editor.can_undo() && attachment_files.size == 0;
+        }
+    }
+    
     private ContactListStore? contact_list_store = null;
     
     private string? body_html = null;
