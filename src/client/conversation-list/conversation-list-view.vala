@@ -204,7 +204,7 @@ public class ConversationListView : Gtk.TreeView {
         }
         
         if (!get_selection().path_is_selected(path) &&
-            !GearyApplication.instance.controller.should_create_new_composer())
+            !GearyApplication.instance.controller.can_switch_conversation_view())
             return true;
         
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {

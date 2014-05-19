@@ -1815,7 +1815,8 @@ public class GearyController : Geary.BaseObject {
         if (current_account == null)
             return;
         
-        if (!should_create_new_composer(compose_type, referred))
+        bool inline;
+        if (!should_create_new_composer(compose_type, referred, out inline))
             return;
         
         ComposerWidget widget;
@@ -1842,13 +1843,20 @@ public class GearyController : Geary.BaseObject {
         composer_widgets.add(widget);
         widget.destroy.connect(on_composer_widget_destroy);
         
-        new ComposerEmbed(widget, main_window.conversation_viewer, referred);
+        if (inline) {
+            new ComposerEmbed(widget, main_window.conversation_viewer, referred);
+        } else {
+            widget.state = ComposerWidget.ComposerState.DETACHED;
+            new ComposerWindow(widget);
+        }
     }
     
-    public bool should_create_new_composer(
-        ComposerWidget.ComposeType compose_type = ComposerWidget.ComposeType.NEW_MESSAGE,
-        Geary.Email? referred = null) {
-        if (compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
+    private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
+        Geary.Email? referred, out bool inline) {
+        inline = true;
+        
+        // In we're replying, see whether we already have a reply for that message.
+        if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state != ComposerWidget.ComposerState.DETACHED &&
                     referred != null && referred.id.equal_to(cw.referred_id)) {
@@ -1859,9 +1867,27 @@ public class GearyController : Geary.BaseObject {
             return true;
         }
         
+        // If there are no inline composers, go ahead!
         if (!any_inline_composers())
             return true;
         
+        // If we're creating a new message, and there's already a new message open, focus on
+        // it if it hasn't been modified; otherwise open a new composer in a new window.
+        if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
+            foreach (ComposerWidget cw in composer_widgets) {
+                if (cw.state == ComposerWidget.ComposerState.INLINE_NEW) {
+                    if (!cw.blank) {
+                        inline = false;
+                        return true;
+                    } else {
+                        cw.change_compose_type(compose_type);  // To refocus
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
         main_window.present();
         AlertDialog dialog;
@@ -1880,6 +1906,11 @@ public class GearyController : Geary.BaseObject {
             return true;
         }
         return false;
+    }
+    
+    public bool can_switch_conversation_view() {
+        bool inline;
+        return should_create_new_composer(null, null, out inline);
     }
     
     public bool any_inline_composers() {
