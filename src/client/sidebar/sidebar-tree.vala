@@ -295,6 +295,10 @@ public class Sidebar.Tree : Gtk.TreeView {
         return name;
     }
     
+    public virtual bool accept_cursor_changed() {
+        return true;
+    }
+    
     public override void cursor_changed() {
         Gtk.TreePath? path = get_selected_path();
         if (path == null) {
@@ -306,6 +310,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         EntryWrapper? wrapper = get_wrapper_at_path(path);
         
         if (selected_wrapper != wrapper) {
+            EntryWrapper old_wrapper = selected_wrapper;
             selected_wrapper = wrapper;
             
             if (editing_disabled == 0 && wrapper != null && wrapper.entry is Sidebar.RenameableEntry)
@@ -313,8 +318,13 @@ public class Sidebar.Tree : Gtk.TreeView {
             
             if (wrapper != null && !mask_entry_selected_signal) {
                 Sidebar.SelectableEntry? selectable = wrapper.entry as Sidebar.SelectableEntry;
-                if (selectable != null)
-                    entry_selected(selectable);
+                if (selectable != null) {
+                    if (accept_cursor_changed()) {
+                        entry_selected(selectable);
+                    } else {
+                        place_cursor(old_wrapper.entry, true);
+                    }
+                }
             }
         }
         

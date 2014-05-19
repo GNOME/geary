@@ -45,6 +45,10 @@ public class FolderList.Tree : Sidebar.Tree {
             account_branch.get_entry_for_path(folder.path));
     }
     
+    public override bool accept_cursor_changed() {
+        return GearyApplication.instance.controller.can_switch_conversation_view();
+    }
+    
     private void on_entry_selected(Sidebar.SelectableEntry selectable) {
         AbstractFolderEntry? abstract_folder_entry = selectable as AbstractFolderEntry;
         if (abstract_folder_entry != null)
