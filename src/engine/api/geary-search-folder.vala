@@ -53,6 +53,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     private Geary.SpecialFolderType[] exclude_types = {
         Geary.SpecialFolderType.SPAM,
         Geary.SpecialFolderType.TRASH,
+        Geary.SpecialFolderType.DRAFTS,
         // Orphan emails (without a folder) are also excluded; see ctor.
     };
     private Geary.SearchQuery? search_query = null;
