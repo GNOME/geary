@@ -1890,12 +1890,9 @@ public class GearyController : Geary.BaseObject {
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
         main_window.present();
-        AlertDialog dialog;
-        dialog = new AlertDialog(main_window, Gtk.MessageType.QUESTION,
-            _("Closing inline composers."), null, Gtk.Stock.DISCARD, Gtk.Stock.CANCEL,
-            null, Gtk.ResponseType.NONE);
-        Gtk.ResponseType response = dialog.run();
-        if (response == Gtk.ResponseType.OK) {
+        QuestionDialog dialog = new QuestionDialog(main_window, _("Close open draft messages?"), null,
+            Stock._CLOSE, Stock._CANCEL);
+        if (dialog.run() == Gtk.ResponseType.OK) {
             Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state != ComposerWidget.ComposerState.DETACHED)
