@@ -28,11 +28,15 @@ src/client/components/monitored-spinner.vala
 src/client/components/pill-toolbar.vala
 src/client/components/status-bar.vala
 src/client/components/stock.vala
+src/client/composer/composer-container.vala
+src/client/composer/composer-embed.vala
+src/client/composer/composer-widget.vala
 src/client/composer/composer-toolbar.vala
 src/client/composer/composer-window.vala
 src/client/composer/contact-entry-completion.vala
 src/client/composer/contact-list-store.vala
 src/client/composer/email-entry.vala
+src/client/composer/scrollable-overlay.vala
 src/client/composer/webview-edit-fixer.vala
 src/client/conversation-list/conversation-list-cell-renderer.vala
 src/client/conversation-list/conversation-list-store.vala

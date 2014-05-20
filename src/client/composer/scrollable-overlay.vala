@@ -8,21 +8,13 @@ public class ScrollableOverlay : Gtk.Overlay, Gtk.Scrollable {
     
     private Gtk.Scrollable main_child;
     
-    public Gtk.Adjustment hadjustment {
-        get; set;
-    }
+    public Gtk.Adjustment hadjustment { get; set; }
     
-    public Gtk.Adjustment vadjustment {
-        get; set;
-    }
+    public Gtk.Adjustment vadjustment { get; set; }
     
-    public Gtk.ScrollablePolicy hscroll_policy {
-        get; set;
-    }
+    public Gtk.ScrollablePolicy hscroll_policy { get; set; }
     
-    public Gtk.ScrollablePolicy vscroll_policy {
-        get; set;
-    }
+    public Gtk.ScrollablePolicy vscroll_policy { get; set; }
     
     public ScrollableOverlay(Gtk.Scrollable main_child) {
         this.main_child = main_child;
@@ -45,9 +37,7 @@ public class ScrollableOverlay : Gtk.Overlay, Gtk.Scrollable {
     }
     
     private bool on_child_position(Gtk.Widget widget, Gdk.Rectangle allocation) {
-        double hscroll = hadjustment.value,
-            vscroll = vadjustment.value;
-         return ((ComposerEmbed) widget).set_position(ref allocation, hscroll, vscroll);
+         return ((ComposerEmbed) widget).set_position(ref allocation, hadjustment.value, vadjustment.value);
     }
     
     private void on_scroll() {

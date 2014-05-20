@@ -17,7 +17,6 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
     
     public ComposerEmbed(ComposerWidget composer, ConversationViewer conversation_viewer,
         Geary.Email? referred) {
-        //Object(orientation: Gtk.Orientation.VERTICAL);
         this.composer = composer;
         this.conversation_viewer = conversation_viewer;
         halign = Gtk.Align.FILL;
@@ -48,7 +47,7 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
             debug("Error creating embed element: %s", error.message);
             return;
         }
-        //pack_start(composer, true, true);
+        
         add(composer);
         composer.editor.focus_in_event.connect(on_focus_in);
         composer.editor.focus_out_event.connect(on_focus_out);
