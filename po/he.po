@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-09 22:21+0300\n"
-"PO-Revision-Date: 2014-04-09 22:22+0300\n"
+"POT-Creation-Date: 2014-05-21 12:58+0300\n"
+"PO-Revision-Date: 2014-05-21 13:00+0300\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gnome.org>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -378,7 +378,7 @@ msgstr "יצירת הודעה חדשה (Ctrl+מ, מ)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:323
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1567
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
 msgid "_Reply"
 msgstr "לה_שיב"
 
@@ -396,7 +396,7 @@ msgstr "להשיב לכולם (Ctrl+Shift+ר, Shift+ר)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:334
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1577
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1582
 msgid "_Forward"
 msgstr "ה_עברה"
 
@@ -605,14 +605,20 @@ msgstr "הקובץ כבר קיים תחת „%s”. החלפתו תגרום לא
 msgid "_Replace"
 msgstr "ה_חלפה"
 
-#: ../src/client/application/geary-controller.vala:1929
+#. Find out what to do with the inline composers.
+#. TODO: Remove this in favor of automatically saving drafts
+#: ../src/client/application/geary-controller.vala:1893
+msgid "Close open draft messages?"
+msgstr "סגירת טיוטות פתוחות?"
+
+#: ../src/client/application/geary-controller.vala:2000
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "האם ברצונך למחוק הודעה זו לצמיתות?"
 msgstr[1] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 msgstr[2] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 
-#: ../src/client/application/geary-controller.vala:1931
+#: ../src/client/application/geary-controller.vala:2002
 msgid "Delete"
 msgstr "מחיקה"
 
@@ -696,7 +702,7 @@ msgstr "_הסרה"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1035
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1040
 msgid "Select _All"
 msgstr "בחירת ה_כול"
 
@@ -704,94 +710,90 @@ msgstr "בחירת ה_כול"
 msgid "_Keep"
 msgstr "_שמירה"
 
-#: ../src/client/composer/composer-window.vala:40
-msgid "New Message"
-msgstr "הודעה חדשה"
-
-#: ../src/client/composer/composer-window.vala:41
+#: ../src/client/composer/composer-widget.vala:53
 msgid "Saved"
 msgstr "נשמר"
 
-#: ../src/client/composer/composer-window.vala:42
+#: ../src/client/composer/composer-widget.vala:54
 msgid "Saving"
 msgstr "נשמר"
 
-#: ../src/client/composer/composer-window.vala:43
+#: ../src/client/composer/composer-widget.vala:55
 msgid "Error saving"
 msgstr "שגיאת בשמירה"
 
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-window.vala:90
+#: ../src/client/composer/composer-widget.vala:102
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr "מצורף|מכתב נלווה"
 
-#: ../src/client/composer/composer-window.vala:683
+#: ../src/client/composer/composer-widget.vala:809
 msgid "Do you want to discard the unsaved message?"
 msgstr "האם למחוק את ההודעה שלא נשמרה?"
 
-#: ../src/client/composer/composer-window.vala:686
-#: ../src/client/composer/composer-window.vala:690
+#: ../src/client/composer/composer-widget.vala:812
+#: ../src/client/composer/composer-widget.vala:816
 msgid "Do you want to discard this message?"
 msgstr "האם למחוק הודעה זו?"
 
-#: ../src/client/composer/composer-window.vala:770
+#: ../src/client/composer/composer-widget.vala:897
 msgid "Send message with an empty subject and body?"
 msgstr "האם לשלוח את ההודעה ללא כותרת ותוכן?"
 
-#: ../src/client/composer/composer-window.vala:772
+#: ../src/client/composer/composer-widget.vala:899
 msgid "Send message with an empty subject?"
 msgstr "האם לשלוח את ההודעה ללא כותרת?"
 
-#: ../src/client/composer/composer-window.vala:774
+#: ../src/client/composer/composer-widget.vala:901
 msgid "Send message with an empty body?"
 msgstr "האם לשלוח את ההודעה ללא תוכן?"
 
-#: ../src/client/composer/composer-window.vala:776
+#: ../src/client/composer/composer-widget.vala:903
 msgid "Send message without an attachment?"
 msgstr "האם לשלוח את ההודעה ללא קובץ מצורף?"
 
-#: ../src/client/composer/composer-window.vala:967
+#: ../src/client/composer/composer-widget.vala:1081
 msgid "Cannot add attachment"
 msgstr "לא ניתן לצרף את הקובץ המבוקש"
 
-#: ../src/client/composer/composer-window.vala:978
+#: ../src/client/composer/composer-widget.vala:1092
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "‏„%s” לא נמצא."
 
-#: ../src/client/composer/composer-window.vala:985
+#: ../src/client/composer/composer-widget.vala:1099
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "‏„%s” היא תיקייה."
 
-#: ../src/client/composer/composer-window.vala:992
+#: ../src/client/composer/composer-widget.vala:1106
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "‏„%s” הוא קובץ ריק."
 
-#: ../src/client/composer/composer-window.vala:1006
+#: ../src/client/composer/composer-widget.vala:1120
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "לא ניתן לפתוח את „%s” לקריאה."
 
-#: ../src/client/composer/composer-window.vala:1013
+#: ../src/client/composer/composer-widget.vala:1127
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "‏„%s” כבר מצורף למכתב."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-window.vala:1022
+#: ../src/client/composer/composer-widget.vala:1136
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-window.vala:1284
+#: ../src/client/composer/composer-widget.vala:1412
 msgid "Select Color"
 msgstr "בחר צבע"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-window.vala:1679
+#: ../src/client/composer/composer-widget.vala:1836
 msgid "_From:"
 msgstr "_מאת:"
 
@@ -799,21 +801,31 @@ msgstr "_מאת:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-window.vala:1695
-#: ../src/client/conversation-viewer/conversation-viewer.vala:628
-#: ../ui/composer.glade.h:41
+#: ../src/client/composer/composer-widget.vala:1852
+#: ../src/client/conversation-viewer/conversation-viewer.vala:633
+#: ../ui/composer.glade.h:42
 msgid "From:"
 msgstr "מאת:"
+
+#. Copyright 2011-2014 Yorba Foundation
+#. *
+#. * This software is licensed under the GNU Lesser General Public License
+#. * (version 2.1 or later).  See the COPYING file in this distribution.
+#.
+#. Window for sending messages.
+#: ../src/client/composer/composer-window.vala:10
+msgid "New Message"
+msgstr "הודעה חדשה"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "אני"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:255
+#: ../src/client/conversation-viewer/conversation-viewer.vala:260
 msgid "No conversations selected."
 msgstr "לא נבחרה אף תכתובת."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:257
+#: ../src/client/conversation-viewer/conversation-viewer.vala:262
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
@@ -821,51 +833,51 @@ msgstr[0] "נבחרה תכתובת אחת."
 msgstr[1] "נבחרו %u תכתובות."
 msgstr[2] "נבחרו שתי תכתובות."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:286
+#: ../src/client/conversation-viewer/conversation-viewer.vala:291
 msgid "No search results found."
 msgstr "לא מצאו תוצאות בחיפוש."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:288
+#: ../src/client/conversation-viewer/conversation-viewer.vala:293
 msgid "No conversations in folder."
 msgstr "אין תכתובות בתיקייה."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:527
+#: ../src/client/conversation-viewer/conversation-viewer.vala:532
 msgid "This message contains remote images."
 msgstr "הודעה זו מכילה תמונות מרוחקות."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:527
+#: ../src/client/conversation-viewer/conversation-viewer.vala:532
 msgid "Show Images"
 msgstr "הצגת תמונות"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:528
+#: ../src/client/conversation-viewer/conversation-viewer.vala:533
 msgid "Always Show From Sender"
 msgstr "תמיד להציג תמונות משולח זה"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:552
+#: ../src/client/conversation-viewer/conversation-viewer.vala:557
 msgid "Edit Draft"
 msgstr "עריכת טיוטה"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:631
+#: ../src/client/conversation-viewer/conversation-viewer.vala:636
 msgid "To:"
 msgstr "אל:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:634
+#: ../src/client/conversation-viewer/conversation-viewer.vala:639
 msgid "Cc:"
 msgstr "עותק:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:637
+#: ../src/client/conversation-viewer/conversation-viewer.vala:642
 msgid "Bcc:"
 msgstr "עותק מוסתר:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:640
+#: ../src/client/conversation-viewer/conversation-viewer.vala:645
 msgid "Subject:"
 msgstr "נושא:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:643
+#: ../src/client/conversation-viewer/conversation-viewer.vala:648
 msgid "Date:"
 msgstr "תאריך:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:850
+#: ../src/client/conversation-viewer/conversation-viewer.vala:855
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
@@ -873,64 +885,64 @@ msgstr[0] "הודעה אחת שנקראה"
 msgstr[1] "%u הודעות שנקראו"
 msgstr[2] "שתי הודעות שנקראו"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:982
+#: ../src/client/conversation-viewer/conversation-viewer.vala:987
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "ההודעה נשלחה בהצלחה, אך לא ניתן לשמור אותה אל  %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1008
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1013
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "ה_עתקה"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1016
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
 msgid "Copy _Email Address"
 msgstr "העתקת כתובת _דוא״ל"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1026
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "ה_עתקת קישור"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1029
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1034
 msgid "Select _Message"
 msgstr "_בחירת הודעה"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1041
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1046
 msgid "_Inspect"
 msgstr "_בחינה"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1267
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1272
 msgid "This link appears to go to"
 msgstr "הקישור מראה לאן ללכת"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1268
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1273
 msgid "but actually goes to"
 msgstr "אך למעשה הולך ל־"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1323
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1328
 msgid " (Invalid?)"
 msgstr " (לא חוקי?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1515
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1520
 msgid "_Save As..."
 msgstr "_שמירה בשם…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1520
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1525
 msgid "Save All A_ttachments..."
 msgstr "שמירת _כל הקבצים המצורפים…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1539
 msgid "_Save Image As..."
 msgstr "שמירת _תמונה בשם…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1557
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1562
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "שמירת ה_קובץ המצורף…"
@@ -938,41 +950,41 @@ msgstr[1] "שמירת הק_בצים המצורפים…"
 msgstr[2] "שמירת הק_בצים המצורפים…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1577
 msgid "Reply to _All"
 msgstr "להשיב ל_כולם"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1589
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1594
 msgid "_Mark as Read"
 msgstr "סימון כ_נקרא"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1593
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1598
 msgid "_Mark as Unread"
 msgstr "סימון כ_לא נקרא"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1599
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1604
 msgid "Mark Unread From _Here"
 msgstr "סימון כלא נקרא מ_כאן"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1614
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1619
 msgid "_View Source"
 msgstr "צפייה ב_מקור"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1908
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1913
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "ללא שם"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2038
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2043
 msgid "Failed to open default text editor."
 msgstr "פתיחת עורך הטקסט נכשלה."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:296
+#: ../src/client/conversation-viewer/conversation-web-view.vala:287
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "‏%s - מפקח תכתובת"
@@ -1156,7 +1168,7 @@ msgid "%A"
 msgstr "‏%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:742
+#: ../src/engine/rfc822/rfc822-message.vala:741
 msgid "(no subject)"
 msgstr "(ללא נושא)"
 
@@ -1542,44 +1554,52 @@ msgstr "_רוחב קבוע"
 msgid "Fixed Width"
 msgstr "רוחב קבוע"
 
+#: ../ui/composer.glade.h:35
+msgid "Edit recipients"
+msgstr "עריכת נמענים"
+
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:37
 msgid "_To:"
 msgstr "_אל:"
 
-#: ../ui/composer.glade.h:37
+#: ../ui/composer.glade.h:38
 msgid "_Cc:"
 msgstr "_עותק:"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:39
 msgid "_Subject:"
 msgstr "_נושא:"
 
-#: ../ui/composer.glade.h:39
+#: ../ui/composer.glade.h:40
 msgid "_Bcc:"
 msgstr "עותק _מוסתר:"
 
-#: ../ui/composer.glade.h:42
+#: ../ui/composer.glade.h:43
 msgid "Drop files here"
 msgstr "יש לגרור קבצים לכאן"
 
-#: ../ui/composer.glade.h:43
+#: ../ui/composer.glade.h:44
 msgid "To add them as attachments"
 msgstr "כדי להוסיף אותם כקבצים מצורפים"
 
-#: ../ui/composer.glade.h:44
+#: ../ui/composer.glade.h:45
 msgid "_Attach File"
 msgstr "_צירוף קובץ"
 
-#: ../ui/composer.glade.h:45
+#: ../ui/composer.glade.h:46
 msgid "_Include Original Attachments"
 msgstr "_כולל קבצים מצורפים מקוריים"
 
-#: ../ui/composer.glade.h:46
+#: ../ui/composer.glade.h:47
 msgid "C_lose"
 msgstr "_סגירה"
 
-#: ../ui/composer.glade.h:47
+#: ../ui/composer.glade.h:48
+msgid "Detach"
+msgstr "ניתוק"
+
+#: ../ui/composer.glade.h:49
 msgid "_Send"
 msgstr "_שליחה"
 
