@@ -1785,7 +1785,7 @@ public class GearyController : Geary.BaseObject {
         
         // Safely destroy windows.
         foreach(ComposerWidget cw in composers_to_destroy)
-            ((ComposerContainer) cw.parent).close();
+            ((ComposerContainer) cw.parent).close_container();
         
         // If we cancelled the quit we can bail here.
         if (quit_cancelled) {
@@ -1899,7 +1899,7 @@ public class GearyController : Geary.BaseObject {
                     composers_to_destroy.add(cw);
             }
             foreach(ComposerWidget cw in composers_to_destroy)
-                ((ComposerContainer) cw.parent).close();
+                ((ComposerContainer) cw.parent).close_container();
             return true;
         }
         return false;

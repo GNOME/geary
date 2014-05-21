@@ -834,7 +834,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     private void on_close() {
         if (should_close() == CloseStatus.DO_CLOSE)
-            container.close();
+            container.close_container();
     }
     
     private void on_detach() {
@@ -933,7 +933,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
         
         yield delete_draft_async();
-        container.close(); // Only close window after draft is deleted; this closes the drafts folder.
+        container.close_container(); // Only close window after draft is deleted; this closes the drafts folder.
     }
     
     private void on_drafts_opened(Geary.Folder.OpenState open_state, int count) {
@@ -1018,7 +1018,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Do the save.
         yield save_async(null);
         
-        container.close();
+        container.close_container();
     }
     
     private async void delete_and_exit() {
@@ -1027,7 +1027,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Do the delete.
         yield delete_draft_async();
         
-        container.close();
+        container.close_container();
     }
     
     private async void delete_draft_async() {

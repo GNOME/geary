@@ -73,7 +73,7 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
         } else {
             composer.set_focus();
         }
-        close();
+        close_container();
     }
     
     public bool set_position(ref Gdk.Rectangle allocation, double hscroll, double vscroll) {
@@ -132,7 +132,7 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
         }
     }
     
-    public void close() {
+    public void close_container() {
         if (visible)
             vanish();
         conversation_viewer.compose_overlay.remove(this);
