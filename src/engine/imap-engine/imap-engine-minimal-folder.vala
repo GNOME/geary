@@ -55,7 +55,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         _special_folder_type = special_folder_type;
         _properties.add(local_folder.get_properties());
         
-        opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
+        opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
         
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
@@ -544,8 +544,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         // to ensure this isn't running when open_remote_async() is called again (due to a connection
         // reestablishment), stop this monitoring from running *before* launching close_internal_async
         // ... in essence, guard against reentrancy, which is possible
-        if (!opening_monitor.is_in_progress)
-            opening_monitor.notify_start();
+        opening_monitor.notify_start();
         
         // following blocks of code are fairly tricky because if the remote open fails need to
         // carefully back out and possibly retry

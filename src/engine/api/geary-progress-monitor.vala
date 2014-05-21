@@ -69,6 +69,52 @@ public abstract class Geary.ProgressMonitor : BaseObject {
 }
 
 /**
+ * A reentrant {@link ProgressMonitor}.
+ *
+ * This is not thread-safe; it's designed for single-threaded asynchronous (non-blocking) use.
+ */
+
+public class Geary.ReentrantProgressMonitor : Geary.ProgressMonitor {
+    private int start_count = 0;
+    
+    public ReentrantProgressMonitor(ProgressType type) {
+        this.progress_type = type;
+    }
+    
+    /**
+     * @inheritDoc
+     *
+     * Unlike the base class implementation, this may be called multiple times successively without
+     * a problem, but each must be matched by a {@link notify_finish} to completely stop the
+     * monitor.
+     *
+     * This is not thread-safe; it's designed for single-threaded asynchronous (non-blocking) use.
+     */
+    public override void notify_start() {
+        if (start_count++ == 0)
+            base.notify_start();
+    }
+    
+    /**
+     * @inheritDoc
+     *
+     * Unlike the base class implementation, this may be called multiple times successively as
+     * long as they were matched by a prior {@link notify_start}.
+     *
+     * This is not thread-safe; it's designed for single-threaded asynchronous (non-blocking) use.
+     */
+    public override void notify_finish() {
+        bool finished = (--start_count == 0);
+        
+        // prevent underflow before signalling
+        start_count = start_count.clamp(0, int.MAX);
+        
+        if (finished)
+            base.notify_finish();
+    }
+}
+
+/**
  * Captures the progress of a single action.
  */
 public class Geary.SimpleProgressMonitor : Geary.ProgressMonitor {
