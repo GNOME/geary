@@ -471,7 +471,7 @@ public class ComposerWidget : Gtk.EventBox {
         editor.undo.connect(update_actions);
         editor.redo.connect(update_actions);
         editor.selection_changed.connect(update_actions);
-        editor.key_press_event.connect(on_key_press);
+        editor.key_press_event.connect(on_editor_key_press);
         editor.user_changed_contents.connect(reset_draft_timer);
         
         // only do this after setting body_html
@@ -1582,14 +1582,20 @@ public class ComposerWidget : Gtk.EventBox {
         editor.settings.enable_spell_checking = GearyApplication.instance.config.spell_check;
     }
     
+    // This overrides the keypress handling for the *widget*; the WebView editor's keypress overrides
+    // are handled by on_editor_key_press
     public override bool key_press_event(Gdk.EventKey event) {
         update_actions();
         
         switch (Gdk.keyval_name(event.keyval)) {
             case "Return":
             case "KP_Enter":
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 && send_button.sensitive) {
-                    on_send();
+                // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent the Enter leaking through
+                // to the controls, but only send if send is available
+                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                    if (send_button.sensitive)
+                        on_send();
+                    
                     return true;
                 }
             break;
@@ -1684,7 +1690,15 @@ public class ComposerWidget : Gtk.EventBox {
         return false;
     }
     
-    private bool on_key_press(Gdk.EventKey event) {
+    private bool on_editor_key_press(Gdk.EventKey event) {
+        // widget's keypress override doesn't receive non-modifier keys when the editor processes
+        // them, regardless if true or false is called; this deals with that issue (specifically
+        // so Ctrl+Enter will send the message)
+        if (event.is_modifier == 0) {
+            if (key_press_event(event))
+                return true;
+        }
+        
         if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0)
             return false;
         
