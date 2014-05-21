@@ -970,7 +970,11 @@ public class ComposerWidget : Gtk.EventBox {
     
     // Save to the draft folder, if available.
     // Note that drafts are NOT "linkified."
-    private bool save_draft() {
+    private bool on_save_draft_timeout() {
+        // since all control paths return false, this is not rescheduled by the event loop, so
+        // kill the timeout id
+        draft_save_timeout_id = 0;
+        
         if (in_draft_save)
             return false;
         
@@ -984,8 +988,9 @@ public class ComposerWidget : Gtk.EventBox {
         if (drafts_folder == null || !can_save())
             return;
         
+        cancel_draft_timer();
+        
         draft_save_label.label = DRAFT_SAVING_TEXT;
-        draft_save_timeout_id = 0;
         
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.DRAFT);
@@ -1006,10 +1011,7 @@ public class ComposerWidget : Gtk.EventBox {
     // Used while waiting for draft to save before closing widget.
     private void make_gui_insensitive() {
         container.vanish();
-        
-        // Halt draft timer.
-        if (draft_save_timeout_id != 0)
-            Source.remove(draft_save_timeout_id);
+        cancel_draft_timer();
     }
     
     private async void save_and_exit() {
@@ -1731,11 +1733,19 @@ public class ComposerWidget : Gtk.EventBox {
             return;
         
         draft_save_label.label = "";
-        if (draft_save_timeout_id != 0)
-            Source.remove(draft_save_timeout_id);
+        cancel_draft_timer();
         
         if (drafts_folder != null)
-            draft_save_timeout_id = Timeout.add(DRAFT_TIMEOUT_MSEC, save_draft);
+            draft_save_timeout_id = Timeout.add(DRAFT_TIMEOUT_MSEC, on_save_draft_timeout);
+    }
+    
+    // Cancels the draft save timeout
+    private void cancel_draft_timer() {
+        if (draft_save_timeout_id == 0)
+            return;
+        
+        Source.remove(draft_save_timeout_id);
+        draft_save_timeout_id = 0;
     }
     
     private void update_actions() {
