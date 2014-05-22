@@ -42,6 +42,7 @@ public class ConversationWebView : StylishWebView {
         navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         web_inspector.inspect_web_view.connect(activate_inspector);
+        document_font_changed.connect(on_document_font_changed);
         
         // Load the HTML into WebKit.
         // Note: load_finished signal MUST be hooked up before this call.
@@ -125,6 +126,7 @@ public class ConversationWebView : StylishWebView {
             debug("Unable to load message-viewer document from files: %s", error.message);
         }
         
+        on_document_font_changed();
         load_user_style();
         
         // Grab the HTML container.
@@ -141,6 +143,30 @@ public class ConversationWebView : StylishWebView {
         set_icon_src("#email_template .attachment.icon", "mail-attachment-symbolic");
         set_icon_src("#email_template .close_show_images", "close-symbolic");
         set_icon_src("#link_warning_template .close_link_warning", "close-symbolic");
+    }
+    
+    private void on_document_font_changed() {
+        string document_css = "";
+        if (document_font != null) {
+            string font_family = Pango.FontDescription.from_string(document_font).get_family();
+            document_css = @".email .body { font-family: $font_family; font-size: medium; }\n";
+        }
+        
+        WebKit.DOM.Document document = get_dom_document();
+        WebKit.DOM.Element style_element = document.get_element_by_id("default_fonts");
+        if (style_element == null)  // Not yet loaded
+            return;
+        
+        ulong n = style_element.child_nodes.length;
+        try {
+            for (int i = 0; i < n; i++)
+                style_element.remove_child(style_element.first_child);
+            
+            WebKit.DOM.Text text_node = document.create_text_node(document_css);
+            style_element.append_child(text_node);
+        } catch (Error error) {
+            debug("Error updating default font style: %s", error.message);
+        }
     }
     
     private void load_user_style() {

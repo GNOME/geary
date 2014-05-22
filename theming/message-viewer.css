@@ -217,8 +217,6 @@ body:not(.nohide) .email.hide .header_container .avatar {
     overflow-x: auto;
     overflow-y: hidden;
     position: relative;  /* in case anything inside is positioned */
-    font-family: initial;
-    font-size: medium;
 }
 
 .email .remote_images {
