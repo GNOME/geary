@@ -70,7 +70,7 @@ public class ComposerWidget : Gtk.EventBox {
             font-family: monospace !important;
             font-weight: normal;
             font-style: normal;
-            font-size: 10pt;
+            font-size: medium !important;
             color: black;
             text-decoration: none;
         }
@@ -461,7 +461,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (account.information.use_email_signature)
             add_signature();
         
-        editor = new WebKit.WebView();
+        editor = new StylishWebView();
         edit_fixer = new WebViewEditFixer(editor);
 
         editor.editable = true;
@@ -517,7 +517,7 @@ public class ComposerWidget : Gtk.EventBox {
         html_item2 = new Gtk.CheckMenuItem();
         html_item2.related_action = ui.get_action("ui/htmlcompose");
         
-        WebKit.WebSettings s = new WebKit.WebSettings();
+        WebKit.WebSettings s = editor.settings;
         s.enable_spell_checking = GearyApplication.instance.config.spell_check;
         s.auto_load_images = false;
         s.enable_scripts = false;

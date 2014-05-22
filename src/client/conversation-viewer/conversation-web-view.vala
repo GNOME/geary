@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationWebView : WebKit.WebView {
+public class ConversationWebView : StylishWebView {
     private const string[] always_loaded_prefixes = {
         "http://www.gravatar.com/avatar/",
         "data:"
@@ -29,7 +29,7 @@ public class ConversationWebView : WebKit.WebView {
         set_border_width(0);
         allow_prefix = random_string(10) + ":";
         
-        WebKit.WebSettings config = new WebKit.WebSettings();
+        WebKit.WebSettings config = settings;
         config.enable_scripts = false;
         config.enable_java_applet = false;
         config.enable_plugins = false;

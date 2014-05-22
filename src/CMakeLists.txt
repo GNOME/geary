@@ -321,6 +321,7 @@ client/components/monitored-spinner.vala
 client/components/pill-toolbar.vala
 client/components/status-bar.vala
 client/components/stock.vala
+client/components/stylish-webview.vala
 
 client/composer/composer-container.vala
 client/composer/composer-embed.vala

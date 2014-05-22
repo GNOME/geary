@@ -21,7 +21,7 @@ public class Configuration {
     
     public Settings settings { get; private set; }
     
-    private Settings gnome_interface;
+    public Settings gnome_interface;
     private Settings? indicator_datetime;
     
     public int window_width {
