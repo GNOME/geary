@@ -94,8 +94,8 @@ public class AttachmentDialog : Gtk.FileChooserDialog {
         int larger_half = extra_space - smaller_half;
         
         // pad the image manually (avoids rounding errors)
-        preview_image.set_margin_left(PREVIEW_PADDING + smaller_half);
-        preview_image.set_margin_right(PREVIEW_PADDING + larger_half);
+        preview_image.set_margin_start(PREVIEW_PADDING + smaller_half);
+        preview_image.set_margin_end(PREVIEW_PADDING + larger_half);
         
         // show the preview
         preview_image.set_from_pixbuf(pixbuf);

@@ -24,8 +24,8 @@ public class AccountDialog : Gtk.Dialog {
         set_modal(true);
         set_titlebar (headerbar);
         get_content_area().margin_top = MARGIN;
-        get_content_area().margin_left = MARGIN;
-        get_content_area().margin_right = MARGIN;
+        get_content_area().margin_start = MARGIN;
+        get_content_area().margin_end = MARGIN;
         get_content_area().margin_bottom = MARGIN;
         
         // Add pages to stack.

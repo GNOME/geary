@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="3.10"/>
+  <requires lib="gtk+" version="3.14"/>
   <object class="GtkDialog" id="dialog">
     <property name="can_focus">False</property>
     <property name="border_width">12</property>
@@ -31,7 +31,7 @@
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_right">5</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="label" translatable="yes">Reading</property>
@@ -51,8 +51,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>
@@ -70,8 +70,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>
@@ -89,8 +89,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>
@@ -106,7 +106,7 @@
               <object class="GtkLabel" id="label3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_right">5</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="label" translatable="yes">Composer</property>
@@ -126,8 +126,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>
@@ -143,7 +143,7 @@
               <object class="GtkLabel" id="label4">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_right">5</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="label" translatable="yes">Notifications</property>
@@ -163,8 +163,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>
@@ -182,8 +182,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>
@@ -202,8 +202,8 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Geary will run in the background and notify of new mail</property>
-                <property name="margin_left">12</property>
-                <property name="margin_right">5</property>
+                <property name="margin_start">12</property>
+                <property name="margin_end">5</property>
                 <property name="margin_top">5</property>
                 <property name="margin_bottom">5</property>
                 <property name="use_underline">True</property>

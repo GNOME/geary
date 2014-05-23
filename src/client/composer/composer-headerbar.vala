@@ -30,9 +30,9 @@ public class ComposerHeaderbar : PillHeaderbar {
         Gtk.Button detach_button = create_toolbar_button(null, ComposerWidget.ACTION_DETACH);
         detach_button.set_relief(Gtk.ReliefStyle.NONE);
         if (rtl)
-            detach_button.set_margin_left(6);
+            detach_button.set_margin_start(6);
         else
-            detach_button.set_margin_right(6);
+            detach_button.set_margin_end(6);
         detach_start.pack_start(detach_button);
         detach_start.pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL));
         
@@ -40,9 +40,9 @@ public class ComposerHeaderbar : PillHeaderbar {
         detach_button = create_toolbar_button(null, ComposerWidget.ACTION_DETACH);
         detach_button.set_relief(Gtk.ReliefStyle.NONE);
         if (rtl)
-            detach_button.set_margin_right(6);
+            detach_button.set_margin_end(6);
         else
-            detach_button.set_margin_left(6);
+            detach_button.set_margin_start(6);
         detach_end.pack_end(detach_button);
         detach_end.pack_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
         

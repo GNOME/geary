@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.16.1 -->
 <interface>
-  <requires lib="gtk+" version="3.10"/>
+  <requires lib="gtk+" version="3.14"/>
   <object class="GtkDialog" id="CertificateWarningDialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Untrusted Connection</property>
@@ -12,8 +12,8 @@
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox1">
         <property name="can_focus">False</property>
-        <property name="margin_left">12</property>
-        <property name="margin_right">12</property>
+        <property name="margin_start">12</property>
+        <property name="margin_end">12</property>
         <property name="margin_top">12</property>
         <property name="margin_bottom">12</property>
         <property name="orientation">vertical</property>
@@ -139,7 +139,7 @@
               <object class="GtkLabel" id="warnings_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">16</property>
+                <property name="margin_start">16</property>
                 <property name="xalign">0</property>
                 <property name="label">(empty)</property>
                 <property name="wrap">True</property>
