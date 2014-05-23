@@ -3,10 +3,10 @@
 <application>
 <id type="desktop">geary.desktop</id>
 <licence>CC0</licence>
-<summary>Lightweight email client</summary>
+<summary>Lightweight mail client</summary>
 <description>
 <p>
-Geary is a new email application for GNOME designed to let you manage your email
+Geary is a mail application for GNOME designed to let you manage your email
 quickly and effortlessly. Its interface is based on conversations, so you can
 read an entire discussion without having to click from message to message.
 Geary is still in development and has a limited but growing set of features.
@@ -20,13 +20,13 @@ Geary is designed to integrate with the GNOME desktop and is completely free.
 <li>As-you-type searching</li>
 <li>Desktop notifications</li>
 <li>Multiple account support</li>
-<li>HTML composer that saves drafts to the server</li>
+<li>Inline HTML composer that saves drafts to the server</li>
 <li>Works with Gmail, Yahoo! Mail, Outlook.com (experimental), and other popular IMAP servers</li>
 </ul>
 </description>
-<url type="homepage">http://www.yorba.org/projects/geary/</url>
+<url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
 <screenshots>
-<screenshot type="default">http://www.yorba.org/wp-content/uploads/2013/03/geary_main.png</screenshot>
+<screenshot type="default">http://yorba.org/geary/geary.png</screenshot>
 </screenshots>
 <updatecontact>geary@yorba.org</updatecontact>
 </application>
