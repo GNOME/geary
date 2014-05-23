@@ -2,7 +2,8 @@
 <!-- Copyright 2013-2014 Yorba Foundation <geary@yorba.org> -->
 <application>
 <id type="desktop">geary.desktop</id>
-<licence>CC0</licence>
+<metadata_license>CC0</metadata_license>
+<project_license>LGPL-2.1+</project_license>
 <summary>Lightweight mail client</summary>
 <description>
 <p>
