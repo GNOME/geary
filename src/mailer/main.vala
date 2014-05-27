@@ -36,6 +36,13 @@ async void main_async() throws Error {
                 composed_email.body_text = contents;
             }
             
+            if (!Geary.String.is_empty(arg_html)) {
+                string contents;
+                FileUtils.get_contents(arg_html, out contents);
+                
+                composed_email.body_html = contents;
+            }
+            
             msg = new Geary.RFC822.Message.from_composed_email(composed_email, null);
         }
         
@@ -73,6 +80,7 @@ string arg_from;
 string arg_to;
 int arg_count = 1;
 string? arg_file = null;
+string? arg_html = null;
 string? arg_full_file = null;
 const OptionEntry[] options = {
     { "debug",    0,    0,  OptionArg.NONE,     ref arg_debug,  "Output debugging information", null },
@@ -86,6 +94,7 @@ const OptionEntry[] options = {
     { "to",     't',    0,  OptionArg.STRING,   ref arg_to,     "To (recipient)",       "<email>" },
     { "count",  'c',    0,  OptionArg.INT,      ref arg_count,  "Number of emails to send (not applied for file-full)", null },
     { "file-body",'i',  0,  OptionArg.STRING,   ref arg_file,   "File to send as body (must be RFC 822 ready!)", "<filename>"},
+    { "html-body",'m',  0,  OptionArg.STRING,   ref arg_html,   "HTML file to be sent as body", "<filename>" },
     { "file-full",0,    0,  OptionArg.STRING,   ref arg_full_file, "File to send as full message (headers and body, must be RFC822 ready!, --from and --to ignored)", "<filename>"},
     { null }
 };
