@@ -80,18 +80,13 @@ public class MainToolbar : PillToolbar {
         search_entry.key_press_event.connect(on_search_key_press);
         on_search_entry_changed(); // set initial state
         search_entry.has_focus = true;
+        add_end(search_upgrade_progress_bar);
         add_end(search_entry);
         
         // Search upgrade progress bar.
         search_upgrade_progress_bar.margin_top = 3;
         search_upgrade_progress_bar.margin_bottom = 3;
         search_upgrade_progress_bar.show_text = true;
-        
-        // Set the progress bar's width to match the search entry's width.
-        int minimum_width = 0;
-        int natural_width = 0;
-        search_entry.get_preferred_width(out minimum_width, out natural_width);
-        search_upgrade_progress_bar.width_request = minimum_width;
         
         // Application button.  If we exported an app menu, we don't need this.
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
@@ -157,6 +152,12 @@ public class MainToolbar : PillToolbar {
     }
     
     private void on_search_upgrade_start() {
+        // Set the progress bar's width to match the search entry's width.
+        int minimum_width = 0;
+        int natural_width = 0;
+        search_entry.get_preferred_width(out minimum_width, out natural_width);
+        search_upgrade_progress_bar.width_request = minimum_width;
+        
         search_entry.hide();
         search_upgrade_progress_bar.show();
     }
