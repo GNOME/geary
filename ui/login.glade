@@ -111,10 +111,13 @@
           <object class="GtkLabel" id="label: email">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xalign">0</property>
-            <property name="label" translatable="yes">E_mail address:</property>
+            <property name="xalign">1</property>
+            <property name="label" translatable="yes">E_mail address</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: email</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -127,10 +130,13 @@
           <object class="GtkLabel" id="label: password">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xalign">0</property>
-            <property name="label" translatable="yes">_Password:</property>
+            <property name="xalign">1</property>
+            <property name="label" translatable="yes">_Password</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: password</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -156,10 +162,13 @@
           <object class="GtkLabel" id="label: service">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xalign">0</property>
-            <property name="label" translatable="yes">S_ervice:</property>
+            <property name="xalign">1</property>
+            <property name="label" translatable="yes">S_ervice</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">combo: service</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -172,10 +181,13 @@
           <object class="GtkLabel" id="label: real_name">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xalign">0</property>
-            <property name="label" translatable="yes">N_ame:</property>
+            <property name="xalign">1</property>
+            <property name="label" translatable="yes">N_ame</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: real_name</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -225,11 +237,14 @@
           <object class="GtkLabel" id="label: nickname">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="xalign">0</property>
+            <property name="xalign">1</property>
             <property name="xpad">1</property>
-            <property name="label" translatable="yes">N_ickname:</property>
+            <property name="label" translatable="yes">N_ickname</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: nickname</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -320,11 +335,14 @@
               <object class="GtkLabel" id="label: host">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">Se_rver:</property>
+                <property name="label" translatable="yes">Se_rver</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap host</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -353,11 +371,14 @@
               <object class="GtkLabel" id="label: port">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">P_ort:</property>
+                <property name="label" translatable="yes">P_ort</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap port</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -375,6 +396,9 @@
                 <property name="width_chars">5</property>
                 <property name="text">993</property>
                 <property name="invisible_char_set">True</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">3</property>
@@ -420,11 +444,14 @@
               <object class="GtkLabel" id="label: smtp host">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">Ser_ver:</property>
+                <property name="label" translatable="yes">Ser_ver</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp host</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -437,11 +464,14 @@
               <object class="GtkLabel" id="label: smtp port">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">Por_t:</property>
+                <property name="label" translatable="yes">Por_t</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp port</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -473,11 +503,14 @@
               <object class="GtkLabel" id="label: smtp username">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">User_name:</property>
+                <property name="label" translatable="yes">User_name</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp username</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -490,11 +523,14 @@
               <object class="GtkLabel" id="label: smtp password">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">Pass_word:</property>
+                <property name="label" translatable="yes">Pass_word</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp password</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -538,11 +574,14 @@
               <object class="GtkLabel" id="label: imap username">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">_Username:</property>
+                <property name="label" translatable="yes">_Username</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap username</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -555,11 +594,14 @@
               <object class="GtkLabel" id="label: imap password">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">_Password:</property>
+                <property name="label" translatable="yes">_Password</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap password</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -604,12 +646,15 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_top">2</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">Encr_yption:</property>
+                <property name="label" translatable="yes">Encr_yption</property>
                 <property name="use_underline">True</property>
                 <property name="justify">center</property>
                 <property name="mnemonic_widget">combo: imap encryption</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -623,12 +668,15 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_top">2</property>
-                <property name="xalign">0</property>
+                <property name="xalign">1</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">Encrypt_ion:</property>
+                <property name="label" translatable="yes">Encrypt_ion</property>
                 <property name="use_underline">True</property>
                 <property name="justify">fill</property>
                 <property name="mnemonic_widget">combo: smtp encryption</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -823,8 +871,11 @@
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
                 <property name="xpad">12</property>
-                <property name="label" translatable="yes">_Download mail:</property>
+                <property name="label" translatable="yes">_Download mail</property>
                 <property name="use_underline">True</property>
+            <style>
+              <class name="dim-label"/>
+            </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
