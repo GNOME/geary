@@ -16,9 +16,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-21 12:58+0300\n"
-"PO-Revision-Date: 2014-05-21 13:00+0300\n"
-"Last-Translator: Yosef Or Boczko <yoseforb@gnome.org>\n"
+"POT-Creation-Date: 2014-05-27 23:55+0300\n"
+"PO-Revision-Date: 2014-05-27 23:55+0300\n"
+"Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -680,7 +680,7 @@ msgid "_Cancel"
 msgstr "_ביטול"
 
 #: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/preferences.glade.h:1
+#: ../ui/preferences.glade.h:2
 msgid "_Close"
 msgstr "_סגירה"
 
@@ -752,48 +752,48 @@ msgstr "האם לשלוח את ההודעה ללא תוכן?"
 msgid "Send message without an attachment?"
 msgstr "האם לשלוח את ההודעה ללא קובץ מצורף?"
 
-#: ../src/client/composer/composer-widget.vala:1081
+#: ../src/client/composer/composer-widget.vala:1083
 msgid "Cannot add attachment"
 msgstr "לא ניתן לצרף את הקובץ המבוקש"
 
-#: ../src/client/composer/composer-widget.vala:1092
+#: ../src/client/composer/composer-widget.vala:1094
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "‏„%s” לא נמצא."
 
-#: ../src/client/composer/composer-widget.vala:1099
+#: ../src/client/composer/composer-widget.vala:1101
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "‏„%s” היא תיקייה."
 
-#: ../src/client/composer/composer-widget.vala:1106
+#: ../src/client/composer/composer-widget.vala:1108
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "‏„%s” הוא קובץ ריק."
 
-#: ../src/client/composer/composer-widget.vala:1120
+#: ../src/client/composer/composer-widget.vala:1122
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "לא ניתן לפתוח את „%s” לקריאה."
 
-#: ../src/client/composer/composer-widget.vala:1127
+#: ../src/client/composer/composer-widget.vala:1129
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "‏„%s” כבר מצורף למכתב."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1136
+#: ../src/client/composer/composer-widget.vala:1138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1412
+#: ../src/client/composer/composer-widget.vala:1414
 msgid "Select Color"
 msgstr "בחר צבע"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1836
+#: ../src/client/composer/composer-widget.vala:1860
 msgid "_From:"
 msgstr "_מאת:"
 
@@ -801,7 +801,7 @@ msgstr "_מאת:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1852
+#: ../src/client/composer/composer-widget.vala:1876
 #: ../src/client/conversation-viewer/conversation-viewer.vala:633
 #: ../ui/composer.glade.h:42
 msgid "From:"
@@ -1755,35 +1755,39 @@ msgstr "ססמה:"
 msgid "_Remember password"
 msgstr "שמירת ה_ססמה"
 
-#: ../ui/preferences.glade.h:2
+#: ../ui/preferences.glade.h:1
+msgid "Preferences"
+msgstr "העדפות"
+
+#: ../ui/preferences.glade.h:3
 msgid "Reading"
 msgstr "קריאה"
 
-#: ../ui/preferences.glade.h:3
+#: ../ui/preferences.glade.h:4
 msgid "_Automatically select next message"
 msgstr "_בחירת ההודעה הבאה אוטומטית"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences.glade.h:5
 msgid "_Display conversation preview"
 msgstr "הצגת תצוגה מ_קדימה של שיחה"
 
-#: ../ui/preferences.glade.h:5
+#: ../ui/preferences.glade.h:6
 msgid "Composer"
 msgstr "חיבור הודעות"
 
-#: ../ui/preferences.glade.h:6
+#: ../ui/preferences.glade.h:7
 msgid "Enable _spell checking"
 msgstr "הפעלת בדיקת _איות"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:8
 msgid "Notifications"
 msgstr "התרעות"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:9
 msgid "_Play notification sounds"
 msgstr "ה_שמעת צלילי התרעה"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences.glade.h:10
 msgid "Show _notifications for new mail"
 msgstr "הצגת התרעות על _קבלת דואר חדש"
 
