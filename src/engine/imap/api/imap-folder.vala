@@ -125,8 +125,17 @@ private class Geary.Imap.Folder : BaseObject {
             
             if (select_err != null)
                 throw select_err;
-            else
-                throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(), response.to_string());
+            
+            switch (response.status) {
+                case Status.BAD:
+                case Status.NO:
+                    throw new ImapError.NOT_SUPPORTED("Server disallowed SELECT %s: %s", path.to_string(),
+                        response.to_string());
+                
+                default:
+                    throw new ImapError.SERVER_ERROR("Unable to SELECT %s: %s", path.to_string(),
+                        response.to_string());
+            }
         }
         
         // if at end of SELECT command accepts_user_flags is still UNKKNOWN, treat as TRUE because,
