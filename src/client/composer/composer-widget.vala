@@ -795,7 +795,8 @@ public class ComposerWidget : Gtk.EventBox {
     
     private bool can_save() {
         return (drafts_folder != null && drafts_folder.get_open_state() == Geary.Folder.OpenState.BOTH
-            && !drafts_folder.properties.create_never_returns_id && editor.can_undo());
+            && !drafts_folder.properties.create_never_returns_id && editor.can_undo()
+            && account.information.save_drafts);
     }
 
     public CloseStatus should_close() {
@@ -944,6 +945,9 @@ public class ComposerWidget : Gtk.EventBox {
     // Returns the drafts folder for the current From account.
     private async void open_drafts_folder_async(Cancellable cancellable) throws Error {
         yield close_drafts_folder_async(cancellable);
+        
+        if (!account.information.save_drafts)
+            return;
         
         Geary.FolderSupport.Create? folder = (yield account.get_required_special_folder_async(
             Geary.SpecialFolderType.DRAFTS, cancellable)) as Geary.FolderSupport.Create;

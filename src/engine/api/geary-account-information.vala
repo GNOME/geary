@@ -32,6 +32,7 @@ public class Geary.AccountInformation : BaseObject {
     private const string SENT_MAIL_FOLDER_KEY = "sent_mail_folder";
     private const string SPAM_FOLDER_KEY = "spam_folder";
     private const string TRASH_FOLDER_KEY = "trash_folder";
+    private const string SAVE_DRAFTS_KEY = "save_drafts";
     
     //
     // "Retired" keys
@@ -96,6 +97,8 @@ public class Geary.AccountInformation : BaseObject {
     public bool imap_remember_password { get; set; default = true; }
     public Geary.Credentials? smtp_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool smtp_remember_password { get; set; default = true; }
+    
+    public bool save_drafts { get; set; default = true; }
     
     private bool _save_sent_mail = true;
     
@@ -165,6 +168,8 @@ public class Geary.AccountInformation : BaseObject {
                 key_file, GROUP, SPAM_FOLDER_KEY));
             trash_folder_path = build_folder_path(get_string_list_value(
                 key_file, GROUP, TRASH_FOLDER_KEY));
+            
+            save_drafts = get_bool_value(key_file, GROUP, SAVE_DRAFTS_KEY, true);
         }
     }
     
@@ -195,6 +200,7 @@ public class Geary.AccountInformation : BaseObject {
         sent_mail_folder_path = from.sent_mail_folder_path;
         spam_folder_path = from.spam_folder_path;
         trash_folder_path = from.trash_folder_path;
+        save_drafts = from.save_drafts;
     }
     
     /**
@@ -604,6 +610,8 @@ public class Geary.AccountInformation : BaseObject {
             ? spam_folder_path.as_list().to_array() : new string[] {}));
         key_file.set_string_list(GROUP, TRASH_FOLDER_KEY, (trash_folder_path != null
             ? trash_folder_path.as_list().to_array() : new string[] {}));
+        
+        key_file.set_boolean(GROUP, SAVE_DRAFTS_KEY, save_drafts);
         
         string data = key_file.to_data();
         string new_etag;

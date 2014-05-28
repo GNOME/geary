@@ -126,7 +126,12 @@ public class AddEditPage : Gtk.Box {
         get { return check_smtp_noauth.active; }
         set { check_smtp_noauth.active = value; }
     }
-
+    
+    public bool save_drafts { 
+        get { return check_save_drafts.active; }
+        set { check_save_drafts.active = value; }
+    }
+    
     // these are tied to the values in the Glade file
     private enum Encryption {
         NONE = 0,
@@ -168,7 +173,9 @@ public class AddEditPage : Gtk.Box {
     private Gtk.ComboBox combo_smtp_encryption;
     private Gtk.CheckButton check_smtp_use_imap_credentials;
     private Gtk.CheckButton check_smtp_noauth;
-
+    
+    private Gtk.CheckButton check_save_drafts;
+    
     private string smtp_username_store;
     private string smtp_password_store;
     
@@ -245,6 +252,7 @@ public class AddEditPage : Gtk.Box {
         combo_smtp_encryption = (Gtk.ComboBox) builder.get_object("combo: smtp encryption");
         check_smtp_use_imap_credentials = (Gtk.CheckButton) builder.get_object("check: use imap credentials");
         check_smtp_noauth = (Gtk.CheckButton) builder.get_object("check: smtp no authentication");
+        check_save_drafts = (Gtk.CheckButton) builder.get_object("check: save_drafts"); 
 
         // Build list of service providers.
         foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers())
@@ -270,6 +278,7 @@ public class AddEditPage : Gtk.Box {
         entry_smtp_password.changed.connect(on_changed);
         check_smtp_use_imap_credentials.toggled.connect(on_changed);
         check_smtp_noauth.toggled.connect(on_changed);
+        check_save_drafts.toggled.connect(on_changed);
         
         entry_email.changed.connect(on_email_changed);
         entry_password.changed.connect(on_password_changed);
@@ -313,6 +322,7 @@ public class AddEditPage : Gtk.Box {
             info.default_smtp_use_imap_credentials,
             info.default_smtp_server_noauth,
             info.prefetch_period_days,
+            info.save_drafts,
             result);
     }
     
@@ -340,6 +350,7 @@ public class AddEditPage : Gtk.Box {
         bool initial_default_smtp_use_imap_credentials = false,
         bool initial_default_smtp_noauth = false,
         int prefetch_period_days = Geary.AccountInformation.DEFAULT_PREFETCH_PERIOD_DAYS,
+        bool initial_save_drafts = true,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         
         // Set defaults
@@ -371,6 +382,8 @@ public class AddEditPage : Gtk.Box {
         smtp_starttls = initial_default_smtp_starttls;
         smtp_use_imap_credentials = initial_default_smtp_use_imap_credentials;
         smtp_noauth = initial_default_smtp_noauth;
+        
+        save_drafts = initial_save_drafts;
         
         set_validation_result(result);
         
@@ -594,6 +607,7 @@ public class AddEditPage : Gtk.Box {
         account_information.default_smtp_use_imap_credentials = smtp_use_imap_credentials;
         account_information.default_smtp_server_noauth = smtp_noauth;
         account_information.prefetch_period_days = get_storage_length();
+        account_information.save_drafts = save_drafts;
         
         if (smtp_noauth)
             account_information.smtp_credentials = null;
@@ -620,6 +634,7 @@ public class AddEditPage : Gtk.Box {
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
         storage_container.visible = mode == PageMode.EDIT;
         check_save_sent_mail.visible = mode == PageMode.EDIT;
+        check_save_drafts.visible = mode == PageMode.EDIT;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.
