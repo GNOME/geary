@@ -16,9 +16,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-27 23:55+0300\n"
-"PO-Revision-Date: 2014-05-27 23:55+0300\n"
-"Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
+"POT-Creation-Date: 2014-05-28 14:52+0300\n"
+"PO-Revision-Date: 2014-05-28 14:54+0300\n"
+"Last-Translator: Yosef Or Boczko <yoseforb@gnome.org>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
@@ -78,89 +78,89 @@ msgstr "משתמשים"
 msgid "First Last"
 msgstr "שם פרטי שם משפחה"
 
-#: ../src/client/accounts/add-edit-page.vala:202
+#: ../src/client/accounts/add-edit-page.vala:209
 msgid "Welcome to Geary."
 msgstr "ברוך בואך ל־Geary."
 
-#: ../src/client/accounts/add-edit-page.vala:202
+#: ../src/client/accounts/add-edit-page.vala:209
 msgid "Enter your account information to get started."
 msgstr "נא להזין את פרטי החשבון שלך כדי להתחיל."
 
-#: ../src/client/accounts/add-edit-page.vala:223
+#: ../src/client/accounts/add-edit-page.vala:230
 msgid "2 weeks back"
 msgstr "שבועיים אחורנית"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:224
+#: ../src/client/accounts/add-edit-page.vala:231
 msgid "1 month back"
 msgstr "חודש אחד אחורנית"
 
-#: ../src/client/accounts/add-edit-page.vala:225
+#: ../src/client/accounts/add-edit-page.vala:232
 msgid "3 months back"
 msgstr "שלושה חודשים אחורנית"
 
-#: ../src/client/accounts/add-edit-page.vala:226
+#: ../src/client/accounts/add-edit-page.vala:233
 msgid "6 months back"
 msgstr "שישה חודשים אחורנית"
 
-#: ../src/client/accounts/add-edit-page.vala:227
+#: ../src/client/accounts/add-edit-page.vala:234
 msgid "1 year back"
 msgstr "שנה אחת אחורנית"
 
-#: ../src/client/accounts/add-edit-page.vala:228
+#: ../src/client/accounts/add-edit-page.vala:235
 msgid "2 years back"
 msgstr "שנתיים אחורנית"
 
-#: ../src/client/accounts/add-edit-page.vala:229
+#: ../src/client/accounts/add-edit-page.vala:236
 msgid "4 years back"
 msgstr "ארבע שנים אחורנית"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:231
+#: ../src/client/accounts/add-edit-page.vala:238
 msgid "Everything"
 msgstr "הכל"
 
-#: ../src/client/accounts/add-edit-page.vala:630
+#: ../src/client/accounts/add-edit-page.vala:645
 msgid "Remem_ber passwords"
 msgstr "זכירת סס_מאות"
 
-#: ../src/client/accounts/add-edit-page.vala:637 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:652 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "זכירת _ססמה"
 
-#: ../src/client/accounts/add-edit-page.vala:671
+#: ../src/client/accounts/add-edit-page.vala:686
 msgid "Unable to validate:\n"
 msgstr "לא ניתן לאמת לאמת:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:673
+#: ../src/client/accounts/add-edit-page.vala:688
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; כינוי חשבון לא חוקי.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:676
+#: ../src/client/accounts/add-edit-page.vala:691
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; כתובת דוא״ל זה כבר נוסף ל־Geary.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:680
+#: ../src/client/accounts/add-edit-page.vala:695
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; IMAP בעיית חיבור.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:683
+#: ../src/client/accounts/add-edit-page.vala:698
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "&#8226; שם משתמש או ססמת ה־IMAP שגויים.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:686
+#: ../src/client/accounts/add-edit-page.vala:701
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; SMTP בעיית חיבור.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:689
+#: ../src/client/accounts/add-edit-page.vala:704
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; שם משתמש או ססמת SMTP אינם נכונים.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:693
+#: ../src/client/accounts/add-edit-page.vala:708
 msgid "        &#8226; Connection error.\n"
 msgstr "&#8226; בעיית חיבור.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:697
+#: ../src/client/accounts/add-edit-page.vala:712
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; שם משתמש או ססמה אינם נכונים.\n"
 
@@ -243,172 +243,160 @@ msgid "Unrecognized command line option \"%s\"\n"
 msgstr "הפרמטרים לשורת הפקודה אינם מוכרים: „%s”\n"
 
 #: ../src/client/application/geary-controller.vala:46
-msgid "_Delete"
-msgstr "_מחיקה"
-
-#: ../src/client/application/geary-controller.vala:47
 msgid "Delete conversation (Shift+Delete)"
 msgstr "מחיקת שיחה (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:48
+#: ../src/client/application/geary-controller.vala:47
 msgid "Delete conversations (Shift+Delete)"
 msgstr "מחיקת שיחות (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:51
-msgid "_Trash"
-msgstr "א_שפה"
-
-#: ../src/client/application/geary-controller.vala:52
+#: ../src/client/application/geary-controller.vala:50
 msgid "Move conversation to trash (Delete, Backspace)"
 msgstr "הזזת שיחה לאשפה (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:53
+#: ../src/client/application/geary-controller.vala:51
 msgid "Move conversations to trash (Delete, Backspace)"
 msgstr "הזזת שיחות לאשפה (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:56
-msgid "_Archive"
-msgstr "תיוק ב_ארכיון"
-
-#: ../src/client/application/geary-controller.vala:57
+#: ../src/client/application/geary-controller.vala:54
 msgid "Archive conversation (A)"
 msgstr "תיוק שיחה בארכיון (ש)"
 
-#: ../src/client/application/geary-controller.vala:58
+#: ../src/client/application/geary-controller.vala:55
 msgid "Archive conversations (A)"
 msgstr "תיוק שיחות בארכיון (A)"
 
-#: ../src/client/application/geary-controller.vala:61
+#: ../src/client/application/geary-controller.vala:58
 msgid "Mark as S_pam"
 msgstr "סימון כ_דואר זבל"
 
-#: ../src/client/application/geary-controller.vala:62
+#: ../src/client/application/geary-controller.vala:59
 msgid "Mark as not S_pam"
 msgstr "סימון כלא דואר ז_בל"
 
-#: ../src/client/application/geary-controller.vala:64
-#: ../src/client/application/geary-controller.vala:275
+#: ../src/client/application/geary-controller.vala:61
+#: ../src/client/application/geary-controller.vala:272
 msgid "Mark conversation"
 msgstr "סימון שיחה"
 
-#: ../src/client/application/geary-controller.vala:65
+#: ../src/client/application/geary-controller.vala:62
 msgid "Mark conversations"
 msgstr "סימון שיחות"
 
-#: ../src/client/application/geary-controller.vala:66
+#: ../src/client/application/geary-controller.vala:63
 msgid "Add label to conversation"
 msgstr "הוסף תווית לשיחה"
 
-#: ../src/client/application/geary-controller.vala:67
+#: ../src/client/application/geary-controller.vala:64
 msgid "Add label to conversations"
 msgstr "הוסף תווית לשיחות"
 
-#: ../src/client/application/geary-controller.vala:68
-#: ../src/client/application/geary-controller.vala:314
+#: ../src/client/application/geary-controller.vala:65
+#: ../src/client/application/geary-controller.vala:311
 msgid "Move conversation"
 msgstr "הזזת שיחה"
 
-#: ../src/client/application/geary-controller.vala:69
+#: ../src/client/application/geary-controller.vala:66
 msgid "Move conversations"
 msgstr "הזזת שיחות"
 
-#: ../src/client/application/geary-controller.vala:251
+#: ../src/client/application/geary-controller.vala:248
 msgid "A_ccounts"
 msgstr "_חשבונות"
 
-#: ../src/client/application/geary-controller.vala:256
+#: ../src/client/application/geary-controller.vala:253
 #: ../src/client/components/stock.vala:27
 msgid "_Preferences"
 msgstr "הע_דפות"
 
-#: ../src/client/application/geary-controller.vala:260
+#: ../src/client/application/geary-controller.vala:257
 #: ../src/client/components/stock.vala:25
 msgid "_Help"
 msgstr "_עזרה"
 
-#: ../src/client/application/geary-controller.vala:264
+#: ../src/client/application/geary-controller.vala:261
 #: ../src/client/components/stock.vala:21
 msgid "_About"
 msgstr "על _אודות"
 
-#: ../src/client/application/geary-controller.vala:268
+#: ../src/client/application/geary-controller.vala:265
 msgid "_Donate"
 msgstr "_תרומה"
 
-#: ../src/client/application/geary-controller.vala:272
+#: ../src/client/application/geary-controller.vala:269
 #: ../src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "י_ציאה"
 
-#: ../src/client/application/geary-controller.vala:277
+#: ../src/client/application/geary-controller.vala:274
 msgid "_Mark as..."
 msgstr "_סימון בתור…"
 
-#: ../src/client/application/geary-controller.vala:283
+#: ../src/client/application/geary-controller.vala:280
 msgid "Mark as _Read"
 msgstr "סימון כ_נקרא"
 
-#: ../src/client/application/geary-controller.vala:289
+#: ../src/client/application/geary-controller.vala:286
 msgid "Mark as _Unread"
 msgstr "סימון כ_לא נקרא"
 
-#: ../src/client/application/geary-controller.vala:295
+#: ../src/client/application/geary-controller.vala:292
 msgid "_Star"
 msgstr "הוספת _כוכב"
 
-#: ../src/client/application/geary-controller.vala:300
+#: ../src/client/application/geary-controller.vala:297
 msgid "U_nstar"
 msgstr "ה_סרת כוכב"
 
-#: ../src/client/application/geary-controller.vala:310
+#: ../src/client/application/geary-controller.vala:307
 msgid "Add label"
 msgstr "הוספת תווית"
 
-#: ../src/client/application/geary-controller.vala:311
+#: ../src/client/application/geary-controller.vala:308
 msgid "_Label"
 msgstr "_תווית"
 
-#: ../src/client/application/geary-controller.vala:315
+#: ../src/client/application/geary-controller.vala:312
 msgid "_Move"
 msgstr "ה_עברה"
 
-#: ../src/client/application/geary-controller.vala:319
+#: ../src/client/application/geary-controller.vala:316
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "יצירת הודעה חדשה (Ctrl+מ, מ)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:323
+#: ../src/client/application/geary-controller.vala:320
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1572
 msgid "_Reply"
 msgstr "לה_שיב"
 
-#: ../src/client/application/geary-controller.vala:324
+#: ../src/client/application/geary-controller.vala:321
 msgid "Reply (Ctrl+R, R)"
 msgstr "להשיב (Ctrl+ר, ר)"
 
-#: ../src/client/application/geary-controller.vala:328
+#: ../src/client/application/geary-controller.vala:325
 msgid "R_eply All"
 msgstr "להשיב ל_כולם"
 
-#: ../src/client/application/geary-controller.vala:329
+#: ../src/client/application/geary-controller.vala:326
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "להשיב לכולם (Ctrl+Shift+ר, Shift+ר)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:334
+#: ../src/client/application/geary-controller.vala:331
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1582
 msgid "_Forward"
 msgstr "ה_עברה"
 
-#: ../src/client/application/geary-controller.vala:335
+#: ../src/client/application/geary-controller.vala:332
 msgid "Forward (Ctrl+L, F)"
 msgstr "העברה (Ctrl+ך, כ)"
 
-#: ../src/client/application/geary-controller.vala:618
+#: ../src/client/application/geary-controller.vala:615
 msgid "Your settings are insecure"
 msgstr "ההגדרות שלך אינן בטוחות"
 
-#: ../src/client/application/geary-controller.vala:619
+#: ../src/client/application/geary-controller.vala:616
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -418,17 +406,17 @@ msgstr ""
 "או TLS. משמעות הדבר ששם המשתמש והססמה שלך יכולים להיקרא ע״י תכניות מעקב ברשת "
 "שלך. האם להתחבר לחשבון?"
 
-#: ../src/client/application/geary-controller.vala:620
+#: ../src/client/application/geary-controller.vala:617
 msgid "Co_ntinue"
 msgstr "לה_משיך"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:698
+#: ../src/client/application/geary-controller.vala:695
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "שגיאה בשליחת דוא״ל"
 
-#: ../src/client/application/geary-controller.vala:699
+#: ../src/client/application/geary-controller.vala:696
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -438,12 +426,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:703
+#: ../src/client/application/geary-controller.vala:700
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "שגיאה בשמירת דוא״ל שנשלח"
 
-#: ../src/client/application/geary-controller.vala:704
+#: ../src/client/application/geary-controller.vala:701
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -451,19 +439,19 @@ msgstr ""
 "‏Geary נתקל בשגיאה בשמירת הודעה שנשלחה לדואר יוצא. ההודעה תישאר בתיקייה "
 "בהמתנה לשליחה עד שתמחק."
 
-#: ../src/client/application/geary-controller.vala:773
+#: ../src/client/application/geary-controller.vala:770
 msgid "Labels"
 msgstr "תוויות"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:785
+#: ../src/client/application/geary-controller.vala:782
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "לא ניתן לפתוח מסד הנתונים עבור %s"
 
-#: ../src/client/application/geary-controller.vala:786
+#: ../src/client/application/geary-controller.vala:783
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -486,20 +474,20 @@ msgstr ""
 "יצירה מחדש של מסד הנתונים תמחק את כל הדוא״ל המקומי ואת כל הקבצים המצורפים "
 "שלו. <b> הדואר על השרת שלך לא יושפע.</b>"
 
-#: ../src/client/application/geary-controller.vala:788
+#: ../src/client/application/geary-controller.vala:785
 msgid "_Rebuild"
 msgstr "י_צירה מחדש"
 
-#: ../src/client/application/geary-controller.vala:788
+#: ../src/client/application/geary-controller.vala:785
 msgid "E_xit"
 msgstr "י_ציאה"
 
-#: ../src/client/application/geary-controller.vala:797
+#: ../src/client/application/geary-controller.vala:794
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr "לא ניתן ליצור מחדש מסד נתונים עבור „%s”"
 
-#: ../src/client/application/geary-controller.vala:798
+#: ../src/client/application/geary-controller.vala:795
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -511,14 +499,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:820
-#: ../src/client/application/geary-controller.vala:830
-#: ../src/client/application/geary-controller.vala:841
+#: ../src/client/application/geary-controller.vala:817
+#: ../src/client/application/geary-controller.vala:827
+#: ../src/client/application/geary-controller.vala:838
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "לא ניתן לפתוח תיבת דואר מקומית עבור %s"
 
-#: ../src/client/application/geary-controller.vala:821
+#: ../src/client/application/geary-controller.vala:818
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -535,7 +523,7 @@ msgstr ""
 "יש לבדוק אם יש לך הרשאות קריאה/כתיבה לכל הקבצים בתיקייה:\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:831
+#: ../src/client/application/geary-controller.vala:828
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -548,7 +536,7 @@ msgstr ""
 "\n"
 "יש להתקין שוב את הגרסה  האחרונה של Geary."
 
-#: ../src/client/application/geary-controller.vala:842
+#: ../src/client/application/geary-controller.vala:839
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -559,26 +547,26 @@ msgstr ""
 "\n"
 "יש לבדוק את חיבור הרשת שלך ולהפעיל מחדש את Geary."
 
-#: ../src/client/application/geary-controller.vala:1335
+#: ../src/client/application/geary-controller.vala:1333
 #, c-format
 msgid "About %s"
 msgstr "על אודות %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1338
+#: ../src/client/application/geary-controller.vala:1336
 msgid "translator-credits"
 msgstr ""
 "דוביקס <dovix2003@gmail.com>\n"
 "ירון שהרבני <sh.yaron@gmail.com>\n"
 "יוסף אור בוצ׳קו <yoseforb@gnome.org>"
 
-#: ../src/client/application/geary-controller.vala:1602
+#: ../src/client/application/geary-controller.vala:1600
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "האם אכן לפתוח את „%s”?"
 
-#: ../src/client/application/geary-controller.vala:1603
+#: ../src/client/application/geary-controller.vala:1601
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -586,39 +574,39 @@ msgstr ""
 "קבצים מצורפים עלולים לגרום נזק למערכת שלך. כדאי לפתוח אך ורק קבצים המגיעים "
 "ממקור אמין."
 
-#: ../src/client/application/geary-controller.vala:1604
+#: ../src/client/application/geary-controller.vala:1602
 msgid "Don't _ask me again"
 msgstr "_לא לשאול אותי שוב"
 
-#: ../src/client/application/geary-controller.vala:1622
+#: ../src/client/application/geary-controller.vala:1620
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "קובץ בשם „%s” כבר קיים. האם להחליף אותו?"
 
-#: ../src/client/application/geary-controller.vala:1624
+#: ../src/client/application/geary-controller.vala:1622
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "הקובץ כבר קיים תחת „%s”. החלפתו תגרום לאיבוד התוכן הקיים."
 
-#: ../src/client/application/geary-controller.vala:1627
+#: ../src/client/application/geary-controller.vala:1625
 msgid "_Replace"
 msgstr "ה_חלפה"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:1893
+#: ../src/client/application/geary-controller.vala:1891
 msgid "Close open draft messages?"
 msgstr "סגירת טיוטות פתוחות?"
 
-#: ../src/client/application/geary-controller.vala:2000
+#: ../src/client/application/geary-controller.vala:1998
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "האם ברצונך למחוק הודעה זו לצמיתות?"
 msgstr[1] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 msgstr[2] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 
-#: ../src/client/application/geary-controller.vala:2002
+#: ../src/client/application/geary-controller.vala:2000
 msgid "Delete"
 msgstr "מחיקה"
 
@@ -648,22 +636,26 @@ msgstr "לא נמצא"
 msgid "Search"
 msgstr "חיפוש"
 
-#. Spacer.
 #. Search bar.
-#: ../src/client/components/main-toolbar.vala:84
+#: ../src/client/components/main-toolbar.vala:78
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "חיפוש בכל חשבונות הדואר עם צירוף מקשים (Ctrl+ד)"
 
-#: ../src/client/components/main-toolbar.vala:205
+#: ../src/client/components/main-toolbar.vala:196
 #, c-format
 msgid "Indexing %s account"
 msgstr "מפתוּח חשבון %s"
 
-#: ../src/client/components/main-toolbar.vala:212
+#: ../src/client/components/main-toolbar.vala:207
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "חיפוש בחשבון %s"
+
+#: ../src/client/components/main-window.vala:302
+#, c-format
+msgid "%s (%d)"
+msgstr "%s (%d)"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
@@ -727,73 +719,73 @@ msgstr "שגיאת בשמירה"
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr "מצורף|מכתב נלווה"
 
-#: ../src/client/composer/composer-widget.vala:809
+#: ../src/client/composer/composer-widget.vala:810
 msgid "Do you want to discard the unsaved message?"
 msgstr "האם למחוק את ההודעה שלא נשמרה?"
 
-#: ../src/client/composer/composer-widget.vala:812
-#: ../src/client/composer/composer-widget.vala:816
+#: ../src/client/composer/composer-widget.vala:813
+#: ../src/client/composer/composer-widget.vala:817
 msgid "Do you want to discard this message?"
 msgstr "האם למחוק הודעה זו?"
 
-#: ../src/client/composer/composer-widget.vala:897
+#: ../src/client/composer/composer-widget.vala:898
 msgid "Send message with an empty subject and body?"
 msgstr "האם לשלוח את ההודעה ללא כותרת ותוכן?"
 
-#: ../src/client/composer/composer-widget.vala:899
+#: ../src/client/composer/composer-widget.vala:900
 msgid "Send message with an empty subject?"
 msgstr "האם לשלוח את ההודעה ללא כותרת?"
 
-#: ../src/client/composer/composer-widget.vala:901
+#: ../src/client/composer/composer-widget.vala:902
 msgid "Send message with an empty body?"
 msgstr "האם לשלוח את ההודעה ללא תוכן?"
 
-#: ../src/client/composer/composer-widget.vala:903
+#: ../src/client/composer/composer-widget.vala:904
 msgid "Send message without an attachment?"
 msgstr "האם לשלוח את ההודעה ללא קובץ מצורף?"
 
-#: ../src/client/composer/composer-widget.vala:1083
+#: ../src/client/composer/composer-widget.vala:1087
 msgid "Cannot add attachment"
 msgstr "לא ניתן לצרף את הקובץ המבוקש"
 
-#: ../src/client/composer/composer-widget.vala:1094
+#: ../src/client/composer/composer-widget.vala:1098
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "‏„%s” לא נמצא."
 
-#: ../src/client/composer/composer-widget.vala:1101
+#: ../src/client/composer/composer-widget.vala:1105
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "‏„%s” היא תיקייה."
 
-#: ../src/client/composer/composer-widget.vala:1108
+#: ../src/client/composer/composer-widget.vala:1112
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "‏„%s” הוא קובץ ריק."
 
-#: ../src/client/composer/composer-widget.vala:1122
+#: ../src/client/composer/composer-widget.vala:1126
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "לא ניתן לפתוח את „%s” לקריאה."
 
-#: ../src/client/composer/composer-widget.vala:1129
+#: ../src/client/composer/composer-widget.vala:1133
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "‏„%s” כבר מצורף למכתב."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1138
+#: ../src/client/composer/composer-widget.vala:1142
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1414
+#: ../src/client/composer/composer-widget.vala:1418
 msgid "Select Color"
 msgstr "בחר צבע"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1860
+#: ../src/client/composer/composer-widget.vala:1864
 msgid "_From:"
 msgstr "_מאת:"
 
@@ -801,7 +793,7 @@ msgstr "_מאת:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1876
+#: ../src/client/composer/composer-widget.vala:1880
 #: ../src/client/conversation-viewer/conversation-viewer.vala:633
 #: ../ui/composer.glade.h:42
 msgid "From:"
@@ -1005,7 +997,7 @@ msgid "Please enter your password"
 msgstr "נא להזין את הססמה שלך"
 
 #. Label displaying total number of email messages in a folder
-#: ../src/client/folder-list/folder-list-folder-entry.vala:30
+#: ../src/client/folder-list/folder-list-folder-entry.vala:32
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
@@ -1014,7 +1006,7 @@ msgstr[1] "%d הודעות"
 msgstr[2] "שתי הודעות"
 
 #. / Label displaying number of unread email messages in a folder
-#: ../src/client/folder-list/folder-list-folder-entry.vala:37
+#: ../src/client/folder-list/folder-list-folder-entry.vala:39
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
@@ -1025,7 +1017,7 @@ msgstr[2] "%d לא נקראו"
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
-#: ../src/client/folder-list/folder-list-folder-entry.vala:43
+#: ../src/client/folder-list/folder-list-folder-entry.vala:45
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
@@ -1252,7 +1244,7 @@ msgstr "בהמתנה לשליחה"
 msgid "Archive"
 msgstr "ארכיון"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:25
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
 msgid "None"
 msgstr "כלום"
 
@@ -1628,24 +1620,24 @@ msgid "Password"
 msgstr "ססמה"
 
 #: ../ui/login.glade.h:2
-msgid "E_mail address:"
-msgstr "כתובת _דוא״ל:"
+msgid "E_mail address"
+msgstr "כתובת _דוא״ל"
 
 #: ../ui/login.glade.h:3
-msgid "_Password:"
-msgstr "_ססמה:"
+msgid "_Password"
+msgstr "_ססמה"
 
 #: ../ui/login.glade.h:4
-msgid "S_ervice:"
-msgstr "ש_רות:"
+msgid "S_ervice"
+msgstr "ש_רות"
 
 #: ../ui/login.glade.h:5
-msgid "N_ame:"
-msgstr "_שם:"
+msgid "N_ame"
+msgstr "_שם"
 
 #: ../ui/login.glade.h:7
-msgid "N_ickname:"
-msgstr "_כינוי:"
+msgid "N_ickname"
+msgstr "_כינוי"
 
 #: ../ui/login.glade.h:8
 msgid "Work, Home, etc."
@@ -1656,87 +1648,91 @@ msgid "_Save sent mail"
 msgstr "_שמירת דואר יוצא"
 
 #: ../ui/login.glade.h:10
+msgid "Save dra_fts on server"
+msgstr "שמירת _טיוטה על השרת"
+
+#: ../ui/login.glade.h:11
 msgid "IMAP settings"
 msgstr "הגדרות IMAP"
 
-#: ../ui/login.glade.h:11
-msgid "Se_rver:"
-msgstr "_שרת:"
-
 #: ../ui/login.glade.h:12
-msgid "P_ort:"
-msgstr "_פתחה:"
+msgid "Se_rver"
+msgstr "_שרת"
 
 #: ../ui/login.glade.h:13
-msgid "Ser_ver:"
-msgstr "ש_רת:"
+msgid "P_ort"
+msgstr "_פתחה"
 
 #: ../ui/login.glade.h:14
-msgid "Por_t:"
-msgstr "_פתחה:"
+msgid "Ser_ver"
+msgstr "ש_רת"
 
 #: ../ui/login.glade.h:15
+msgid "Por_t"
+msgstr "_פתחה"
+
+#: ../ui/login.glade.h:16
 msgid "SMTP settings"
 msgstr "הגדרות SMTP"
 
-#: ../ui/login.glade.h:16
-msgid "User_name:"
-msgstr "שם מ_שתמש:"
-
 #: ../ui/login.glade.h:17
-msgid "Pass_word:"
-msgstr "_ססמה:"
+msgid "User_name"
+msgstr "שם מ_שתמש"
 
 #: ../ui/login.glade.h:18
+msgid "Pass_word"
+msgstr "_ססמה"
+
+#: ../ui/login.glade.h:19
 msgid "SMTP username"
 msgstr "שם משתמש SMTP"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:20
 msgid "SMTP password"
 msgstr "ססמת SMTP"
 
-#: ../ui/login.glade.h:20
-msgid "_Username:"
-msgstr "שם _משתמש:"
-
 #: ../ui/login.glade.h:21
+msgid "_Username"
+msgstr "שם _משתמש"
+
+#: ../ui/login.glade.h:22
 msgid "IMAP username"
 msgstr "שם משתמש IMAP"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:23
 msgid "IMAP password"
 msgstr "ססמת IMAP"
 
-#: ../ui/login.glade.h:23
-msgid "Encr_yption:"
-msgstr "ה_צפנה:"
-
 #: ../ui/login.glade.h:24
-msgid "Encrypt_ion:"
-msgstr "ה_צפנה:"
+msgid "Encr_yption"
+msgstr "ה_צפנה"
 
-#: ../ui/login.glade.h:26
+#: ../ui/login.glade.h:25
+msgid "Encrypt_ion"
+msgstr "ה_צפנה"
+
+#: ../ui/login.glade.h:27
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:28
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:29
 msgid "No authentication re_quired"
 msgstr "לא נדרש אי_מות"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:30
 msgid "Use IMAP cre_dentials"
 msgstr "שימוש ב_אישורי IMAP"
 
-#: ../ui/login.glade.h:30
+#: ../ui/login.glade.h:31
 msgid "Storage"
 msgstr "אחסון"
 
-#: ../ui/login.glade.h:31
-msgid "_Download mail:"
+#: ../ui/login.glade.h:32
+msgid "_Download mail"
 msgstr "הורדת _דוא״ל"
 
 #: ../ui/password-dialog.glade.h:1
@@ -1818,6 +1814,15 @@ msgstr "כתובת דוא״ל:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary upgrade in progress."
 msgstr "‏Geary בתהליך שדרוג."
+
+#~ msgid "_Delete"
+#~ msgstr "_מחיקה"
+
+#~ msgid "_Trash"
+#~ msgstr "א_שפה"
+
+#~ msgid "_Archive"
+#~ msgstr "תיוק ב_ארכיון"
 
 #~ msgid "Unable to login to email server"
 #~ msgstr "לא ניתן להתחבר לשרת הדוא״ל"
