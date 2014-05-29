@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ComposerEmbed : Gtk.Bin, ComposerContainer {
+public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     
     private ComposerWidget composer;
     private ConversationViewer conversation_viewer;
@@ -49,11 +49,25 @@ public class ComposerEmbed : Gtk.Bin, ComposerContainer {
         }
         
         add(composer);
+        realize.connect(update_style);
         composer.editor.focus_in_event.connect(on_focus_in);
         composer.editor.focus_out_event.connect(on_focus_out);
         conversation_viewer.compose_overlay.add_overlay(this);
         show();
         present();
+    }
+    
+    private void update_style() {
+        Gdk.RGBA window_background = top_window.get_style_context()
+            .get_background_color(Gtk.StateFlags.NORMAL);
+        Gdk.RGBA background = get_style_context().get_background_color(Gtk.StateFlags.NORMAL);
+        
+        if (background == window_background)
+            return;
+        
+        get_style_context().changed.disconnect(update_style);
+        override_background_color(Gtk.StateFlags.NORMAL, window_background);
+        get_style_context().changed.connect(update_style);
     }
     
     public void on_detach() {
