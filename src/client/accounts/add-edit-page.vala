@@ -49,7 +49,21 @@ public class AddEditPage : Gtk.Box {
         get { return check_remember_password.active; }
         set { check_remember_password.active = value; }
     }
+
+    public bool use_email_signature {
+        get { return check_use_email_signature.active; }
+        set { check_use_email_signature.active = value;}
+    }
     
+    public string email_signature {
+        owned get {
+            return textview_email_signature.buffer.text;
+        }
+        set {
+            textview_email_signature.buffer.text = value ?? "";
+        }
+    }
+
     public bool save_sent_mail {
         get { return check_save_sent_mail.active; }
         set { check_save_sent_mail.active = value; }
@@ -155,6 +169,11 @@ public class AddEditPage : Gtk.Box {
     private Gtk.ComboBoxText combo_service;
     private Gtk.CheckButton check_remember_password;
     private Gtk.CheckButton check_save_sent_mail;
+
+    // Signature
+    private Gtk.Box composer_container;
+    private Gtk.CheckButton check_use_email_signature;
+    private Gtk.TextView textview_email_signature;
     
     private Gtk.Alignment other_info;
     
@@ -218,9 +237,7 @@ public class AddEditPage : Gtk.Box {
         entry_password = (Gtk.Entry) builder.get_object("entry: password");
         check_remember_password = (Gtk.CheckButton) builder.get_object("check: remember_password");
         check_save_sent_mail = (Gtk.CheckButton) builder.get_object("check: save_sent_mail");
-        
         label_error = (Gtk.Label) builder.get_object("label: error");
-        
         other_info = (Gtk.Alignment) builder.get_object("container: other_info");
         
         // Storage options.
@@ -236,6 +253,11 @@ public class AddEditPage : Gtk.Box {
         combo_storage_length.append("1461", _("4 years back"));
         combo_storage_length.append(".", "."); // Separator
         combo_storage_length.append("-1", _("Everything"));
+
+        // composer options
+        composer_container = (Gtk.Box) builder.get_object("composer container");
+        check_use_email_signature = (Gtk.CheckButton) builder.get_object("check: use_email_signature");
+        textview_email_signature = (Gtk.TextView) builder.get_object("textview: email_signature");        
         
         // IMAP info widgets.
         entry_imap_host = (Gtk.Entry) builder.get_object("entry: imap host");
@@ -293,6 +315,8 @@ public class AddEditPage : Gtk.Box {
         entry_smtp_port.insert_text.connect(on_port_insert_text);
         
         entry_nickname.insert_text.connect(on_nickname_insert_text);
+
+        check_use_email_signature.toggled.connect(() => on_use_signature_changed());
         
         // Reset the "first update" flag when the window is mapped.
         map.connect(() => { first_ui_update = true; });
@@ -323,6 +347,8 @@ public class AddEditPage : Gtk.Box {
             info.default_smtp_server_noauth,
             info.prefetch_period_days,
             info.save_drafts,
+            info.use_email_signature,
+            info.email_signature,
             result);
     }
     
@@ -351,6 +377,8 @@ public class AddEditPage : Gtk.Box {
         bool initial_default_smtp_noauth = false,
         int prefetch_period_days = Geary.AccountInformation.DEFAULT_PREFETCH_PERIOD_DAYS,
         bool initial_save_drafts = true,
+        bool initial_use_email_signature = false,
+        string? initial_email_signature = null,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         
         // Set defaults
@@ -364,6 +392,8 @@ public class AddEditPage : Gtk.Box {
         set_service_provider((Geary.ServiceProvider) initial_service_provider);
         combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
         combo_smtp_encryption.active = Encryption.NONE;
+        use_email_signature = initial_use_email_signature;
+        email_signature = initial_email_signature;
         
         // Set defaults for IMAP info
         imap_host = initial_default_imap_host ?? "";
@@ -520,6 +550,15 @@ public class AddEditPage : Gtk.Box {
         }
     }
     
+    private void on_use_signature_changed() {
+        if(check_use_email_signature.active == true) {
+            textview_email_signature.sensitive = true;
+        } else {
+            textview_email_signature.buffer.text = "";
+            textview_email_signature.sensitive = false;
+        }
+    }
+
     private uint16 get_default_smtp_port() {
         switch (combo_smtp_encryption.active) {
             case Encryption.SSL:
@@ -608,6 +647,8 @@ public class AddEditPage : Gtk.Box {
         account_information.default_smtp_server_noauth = smtp_noauth;
         account_information.prefetch_period_days = get_storage_length();
         account_information.save_drafts = save_drafts;
+        account_information.use_email_signature = use_email_signature;
+        account_information.email_signature = email_signature;
         
         if (smtp_noauth)
             account_information.smtp_credentials = null;
@@ -635,6 +676,7 @@ public class AddEditPage : Gtk.Box {
         storage_container.visible = mode == PageMode.EDIT;
         check_save_sent_mail.visible = mode == PageMode.EDIT;
         check_save_drafts.visible = mode == PageMode.EDIT;
+        composer_container.visible = mode == PageMode.EDIT;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.

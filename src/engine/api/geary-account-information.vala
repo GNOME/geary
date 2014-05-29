@@ -33,6 +33,8 @@ public class Geary.AccountInformation : BaseObject {
     private const string SPAM_FOLDER_KEY = "spam_folder";
     private const string TRASH_FOLDER_KEY = "trash_folder";
     private const string SAVE_DRAFTS_KEY = "save_drafts";
+    private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
+    private const string EMAIL_SIGNATURE_KEY = "email_signature";
     
     //
     // "Retired" keys
@@ -87,6 +89,8 @@ public class Geary.AccountInformation : BaseObject {
     public bool default_smtp_server_starttls { get; set; }
     public bool default_smtp_use_imap_credentials { get; set; }
     public bool default_smtp_server_noauth { get; set; }
+    public bool use_email_signature { get; set; }
+    public string email_signature {get; set; } 
     
     public Geary.FolderPath? drafts_folder_path { get; set; default = null; }
     public Geary.FolderPath? sent_mail_folder_path { get; set; default = null; }
@@ -133,6 +137,8 @@ public class Geary.AccountInformation : BaseObject {
                 DEFAULT_PREFETCH_PERIOD_DAYS);
             save_sent_mail = get_bool_value(key_file, GROUP, SAVE_SENT_MAIL_KEY, true);
             ordinal = get_int_value(key_file, GROUP, ORDINAL_KEY, default_ordinal++);
+            use_email_signature = get_bool_value(key_file, GROUP, USE_EMAIL_SIGNATURE_KEY);
+            email_signature = get_escaped_string(key_file, GROUP, EMAIL_SIGNATURE_KEY);
             
             if (ordinal >= default_ordinal)
                 default_ordinal = ordinal + 1;
@@ -201,6 +207,8 @@ public class Geary.AccountInformation : BaseObject {
         spam_folder_path = from.spam_folder_path;
         trash_folder_path = from.trash_folder_path;
         save_drafts = from.save_drafts;
+        use_email_signature = from.use_email_signature;
+        email_signature = from.email_signature;
     }
     
     /**
@@ -514,6 +522,16 @@ public class Geary.AccountInformation : BaseObject {
         
         return def;
     }
+
+    private string get_escaped_string(KeyFile key_file, string group, string key, string def = "") {
+        try {
+            return key_file.get_string(group, key);
+        } catch (KeyFileError err) {
+            // ignore
+        }
+
+        return def;
+    }
     
     private Gee.List<string> get_string_list_value(KeyFile key_file, string group, string key) {
         try {
@@ -587,6 +605,8 @@ public class Geary.AccountInformation : BaseObject {
         key_file.set_boolean(GROUP, SMTP_REMEMBER_PASSWORD_KEY, smtp_remember_password);
         key_file.set_integer(GROUP, PREFETCH_PERIOD_DAYS_KEY, prefetch_period_days);
         key_file.set_boolean(GROUP, SAVE_SENT_MAIL_KEY, save_sent_mail);
+        key_file.set_boolean(GROUP, USE_EMAIL_SIGNATURE_KEY, use_email_signature);
+        key_file.set_string(GROUP, EMAIL_SIGNATURE_KEY, email_signature);
         
         if (service_provider == ServiceProvider.OTHER) {
             key_file.set_value(GROUP, IMAP_HOST, default_imap_server_host);

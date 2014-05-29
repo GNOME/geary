@@ -457,6 +457,10 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         
+        // only add signature if the option is actually set
+        if (account.information.use_email_signature)
+            add_signature();
+        
         editor = new WebKit.WebView();
         edit_fixer = new WebViewEditFixer(editor);
 
@@ -791,6 +795,38 @@ public class ComposerWidget : Gtk.EventBox {
         
         container.present();
         set_focus();
+    }
+    
+    private void add_signature() {
+        string? signature = null;
+        
+        // If use signature is enabled but no contents are on settings then we'll use ~/.signature, if any
+        // otherwise use whatever the user has input in settings dialog
+        if (account.information.use_email_signature && Geary.String.is_empty_or_whitespace(account.information.email_signature)) {
+            File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
+            if (!signature_file.query_exists())
+                return;
+            
+            try {
+                FileUtils.get_contents(signature_file.get_path(), out signature);
+                if (Geary.String.is_empty_or_whitespace(signature))
+                    return;
+            } catch (Error error) {
+                debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
+                return;
+            }
+        } else {
+            signature = account.information.email_signature;
+            if(Geary.String.is_empty_or_whitespace(signature))
+                return;
+        }
+        
+        signature = Geary.HTML.escape_markup(signature);
+        
+        if (body_html == null)
+            body_html = Geary.HTML.preserve_whitespace("\n\n" + signature);
+        else
+            body_html = Geary.HTML.preserve_whitespace("\n\n" + signature) + body_html;
     }
     
     private bool can_save() {

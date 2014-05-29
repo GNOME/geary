@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.16.1 -->
 <interface>
-  <requires lib="gtk+" version="3.0"/>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkTextBuffer" id="buffer: email_signature"/>
   <object class="GtkBox" id="container">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -76,7 +82,6 @@
             <property name="invisible_char">•</property>
             <property name="activates_default">True</property>
             <property name="width_chars">0</property>
-            <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text">email@example.com</property>
@@ -96,7 +101,6 @@
             <property name="visibility">False</property>
             <property name="invisible_char">•</property>
             <property name="activates_default">True</property>
-            <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text" translatable="yes">Password</property>
@@ -205,7 +209,6 @@
             <property name="hexpand">True</property>
             <property name="invisible_char">•</property>
             <property name="activates_default">True</property>
-            <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
           </object>
@@ -262,7 +265,6 @@
             <property name="max_length">255</property>
             <property name="invisible_char">•</property>
             <property name="activates_default">True</property>
-            <property name="invisible_char_set">True</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
             <property name="placeholder_text" translatable="yes">Work, Home, etc.</property>
@@ -293,21 +295,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="check: save_drafts">
-            <property name="label" translatable="yes">Save dra_fts on server</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="use_underline">True</property>
-            <property name="xalign">0</property>
-            <property name="draw_indicator">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">7</property>
-            <property name="width">1</property>
-            <property name="height">1</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>
@@ -433,7 +421,6 @@
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="invisible_char_set">True</property>
                 <property name="placeholder_text">smtp.example.com</property>
               </object>
               <packing>
@@ -451,7 +438,6 @@
                 <property name="activates_default">True</property>
                 <property name="width_chars">5</property>
                 <property name="text">587</property>
-                <property name="invisible_char_set">True</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
@@ -710,8 +696,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="active">1</property>
-                <property name="entry_text_column">0</property>
-                <property name="id_column">1</property>
                 <items>
                   <item translatable="yes">None</item>
                   <item translatable="yes">SSL/TLS</item>
@@ -730,8 +714,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="active">2</property>
-                <property name="entry_text_column">0</property>
-                <property name="id_column">1</property>
                 <items>
                   <item translatable="yes">None</item>
                   <item translatable="yes">SSL/TLS</item>
@@ -893,9 +875,9 @@
                 <property name="xpad">12</property>
                 <property name="label" translatable="yes">_Download mail</property>
                 <property name="use_underline">True</property>
-            <style>
-              <class name="dim-label"/>
-            </style>
+                <style>
+                  <class name="dim-label"/>
+                </style>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -909,8 +891,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="active">0</property>
-                <property name="entry_text_column">0</property>
-                <property name="id_column">1</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -925,6 +905,96 @@
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="composer container">
+        <property name="can_focus">False</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="label: composer">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">8</property>
+            <property name="xalign">0</property>
+            <property name="xpad">4</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">Composer</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="check: save_drafts">
+            <property name="label" translatable="yes">Save dra_fts on server</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="margin_left">12</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="check: use_email_signature">
+            <property name="label" translatable="yes">Si_gn emails:</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="margin_left">12</property>
+            <property name="use_underline">True</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow2">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_left">12</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTextView" id="textview: email_signature">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="wrap_mode">word</property>
+                <property name="buffer">buffer: email_signature</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
       <packing>
