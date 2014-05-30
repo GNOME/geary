@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-29 18:25+0200\n"
-"PO-Revision-Date: 2014-05-29 18:29+0200\n"
+"POT-Creation-Date: 2014-05-30 19:42+0200\n"
+"PO-Revision-Date: 2014-05-30 19:44+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -82,89 +82,89 @@ msgstr "Konta"
 msgid "First Last"
 msgstr "Imię Nazwisko"
 
-#: ../src/client/accounts/add-edit-page.vala:209
+#: ../src/client/accounts/add-edit-page.vala:228
 msgid "Welcome to Geary."
 msgstr "Witamy w programie Geary."
 
-#: ../src/client/accounts/add-edit-page.vala:209
+#: ../src/client/accounts/add-edit-page.vala:228
 msgid "Enter your account information to get started."
 msgstr "Proszę wprowadzić informacje o koncie, aby rozpocząć."
 
-#: ../src/client/accounts/add-edit-page.vala:230
+#: ../src/client/accounts/add-edit-page.vala:247
 msgid "2 weeks back"
 msgstr "ostatnich 2 tygodni"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:231
+#: ../src/client/accounts/add-edit-page.vala:248
 msgid "1 month back"
 msgstr "ostatniego miesiąca"
 
-#: ../src/client/accounts/add-edit-page.vala:232
+#: ../src/client/accounts/add-edit-page.vala:249
 msgid "3 months back"
 msgstr "ostatnich 3 miesięcy"
 
-#: ../src/client/accounts/add-edit-page.vala:233
+#: ../src/client/accounts/add-edit-page.vala:250
 msgid "6 months back"
 msgstr "ostatnich 6 miesięcy"
 
-#: ../src/client/accounts/add-edit-page.vala:234
+#: ../src/client/accounts/add-edit-page.vala:251
 msgid "1 year back"
 msgstr "ostatniego roku"
 
-#: ../src/client/accounts/add-edit-page.vala:235
+#: ../src/client/accounts/add-edit-page.vala:252
 msgid "2 years back"
 msgstr "ostatnich 2 lat"
 
-#: ../src/client/accounts/add-edit-page.vala:236
+#: ../src/client/accounts/add-edit-page.vala:253
 msgid "4 years back"
 msgstr "ostatnich 4 lat"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:238
+#: ../src/client/accounts/add-edit-page.vala:255
 msgid "Everything"
 msgstr "Wszystko"
 
-#: ../src/client/accounts/add-edit-page.vala:645
+#: ../src/client/accounts/add-edit-page.vala:687
 msgid "Remem_ber passwords"
 msgstr "_Zapamiętywanie haseł"
 
-#: ../src/client/accounts/add-edit-page.vala:652 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:694 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "_Zapamiętanie hasła"
 
-#: ../src/client/accounts/add-edit-page.vala:686
+#: ../src/client/accounts/add-edit-page.vala:728
 msgid "Unable to validate:\n"
 msgstr "Nie można sprawdzić:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:688
+#: ../src/client/accounts/add-edit-page.vala:730
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Nieprawidłowa etykieta konta.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:691
+#: ../src/client/accounts/add-edit-page.vala:733
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; Już dodano podany adres e-mail.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:695
+#: ../src/client/accounts/add-edit-page.vala:737
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; Błąd połączenia IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:698
+#: ../src/client/accounts/add-edit-page.vala:740
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:701
+#: ../src/client/accounts/add-edit-page.vala:743
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; Błąd połączenia SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:704
+#: ../src/client/accounts/add-edit-page.vala:746
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:708
+#: ../src/client/accounts/add-edit-page.vala:750
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Błąd połączenia.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:712
+#: ../src/client/accounts/add-edit-page.vala:754
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło.\n"
 
@@ -426,8 +426,8 @@ msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
 msgstr ""
-"Program Geary napotkał błąd wysyłając wiadomość e-mail. Jeśli problem będzie "
-"się powtarzał, proszę ręcznie usunąć wiadomość e-mail ze skrzynki nadawczej."
+"Program Geary napotkał błąd wysyłając wiadomość. Jeśli problem będzie się "
+"powtarzał, proszę ręcznie usunąć wiadomość ze skrzynki nadawczej."
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
@@ -740,73 +740,73 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: ../src/client/composer/composer-widget.vala:810
+#: ../src/client/composer/composer-widget.vala:846
 msgid "Do you want to discard the unsaved message?"
 msgstr "Porzucić niezapisaną wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:813
-#: ../src/client/composer/composer-widget.vala:817
+#: ../src/client/composer/composer-widget.vala:849
+#: ../src/client/composer/composer-widget.vala:853
 msgid "Do you want to discard this message?"
 msgstr "Porzucić tą wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:898
+#: ../src/client/composer/composer-widget.vala:934
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: ../src/client/composer/composer-widget.vala:900
+#: ../src/client/composer/composer-widget.vala:936
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: ../src/client/composer/composer-widget.vala:902
+#: ../src/client/composer/composer-widget.vala:938
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: ../src/client/composer/composer-widget.vala:904
+#: ../src/client/composer/composer-widget.vala:940
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: ../src/client/composer/composer-widget.vala:1087
+#: ../src/client/composer/composer-widget.vala:1123
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: ../src/client/composer/composer-widget.vala:1098
+#: ../src/client/composer/composer-widget.vala:1134
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Nie można odnaleźć \"%s\"."
 
-#: ../src/client/composer/composer-widget.vala:1105
+#: ../src/client/composer/composer-widget.vala:1141
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "\"%s\" jest katalogiem."
 
-#: ../src/client/composer/composer-widget.vala:1112
+#: ../src/client/composer/composer-widget.vala:1148
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "\"%s\" jest pustym plikiem."
 
-#: ../src/client/composer/composer-widget.vala:1126
+#: ../src/client/composer/composer-widget.vala:1162
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Nie można otworzyć \"%s\" do odczytania."
 
-#: ../src/client/composer/composer-widget.vala:1133
+#: ../src/client/composer/composer-widget.vala:1169
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Do wiadomości już załączono \"%s\"."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1142
+#: ../src/client/composer/composer-widget.vala:1178
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1418
+#: ../src/client/composer/composer-widget.vala:1454
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1864
+#: ../src/client/composer/composer-widget.vala:1900
 msgid "_From:"
 msgstr "_Od:"
 
@@ -814,7 +814,7 @@ msgstr "_Od:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1880
+#: ../src/client/composer/composer-widget.vala:1916
 #: ../src/client/conversation-viewer/conversation-viewer.vala:633
 #: ../ui/composer.glade.h:42
 msgid "From:"
@@ -1265,7 +1265,7 @@ msgstr "Nadane"
 msgid "Archive"
 msgstr "Archiwum"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:25
 msgid "None"
 msgstr "Brak"
 
@@ -1675,92 +1675,100 @@ msgid "_Save sent mail"
 msgstr "_Zapisywanie wysłanych wiadomości"
 
 #: ../ui/login.glade.h:10
-msgid "Save dra_fts on server"
-msgstr "Zapisywanie sz_kiców na serwerze"
-
-#: ../ui/login.glade.h:11
 msgid "IMAP settings"
 msgstr "Ustawienia IMAP"
 
-#: ../ui/login.glade.h:12
+#: ../ui/login.glade.h:11
 msgid "Se_rver"
 msgstr "Se_rwer"
 
-#: ../ui/login.glade.h:13
+#: ../ui/login.glade.h:12
 msgid "P_ort"
 msgstr "P_ort"
 
-#: ../ui/login.glade.h:14
+#: ../ui/login.glade.h:13
 msgid "Ser_ver"
 msgstr "Ser_wer"
 
-#: ../ui/login.glade.h:15
+#: ../ui/login.glade.h:14
 msgid "Por_t"
 msgstr "Por_t"
 
-#: ../ui/login.glade.h:16
+#: ../ui/login.glade.h:15
 msgid "SMTP settings"
 msgstr "Ustawienia SMTP"
 
-#: ../ui/login.glade.h:17
+#: ../ui/login.glade.h:16
 msgid "User_name"
 msgstr "_Nazwa użytkownika"
 
-#: ../ui/login.glade.h:18
+#: ../ui/login.glade.h:17
 msgid "Pass_word"
 msgstr "Ha_sło"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:18
 msgid "SMTP username"
 msgstr "Nazwa użytkownika SMTP"
 
-#: ../ui/login.glade.h:20
+#: ../ui/login.glade.h:19
 msgid "SMTP password"
 msgstr "Hasło SMTP"
 
-#: ../ui/login.glade.h:21
+#: ../ui/login.glade.h:20
 msgid "_Username"
 msgstr "Nazwa _użytkownika"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:21
 msgid "IMAP username"
 msgstr "Nazwa użytkownika IMAP"
 
-#: ../ui/login.glade.h:23
+#: ../ui/login.glade.h:22
 msgid "IMAP password"
 msgstr "Hasło IMAP"
 
-#: ../ui/login.glade.h:24
+#: ../ui/login.glade.h:23
 msgid "Encr_yption"
 msgstr "_Szyfrowanie"
 
-#: ../ui/login.glade.h:25
+#: ../ui/login.glade.h:24
 msgid "Encrypt_ion"
 msgstr "S_zyfrowanie"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:26
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:27
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:28
 msgid "No authentication re_quired"
 msgstr "Bez _wymagania uwierzytelniania"
 
-#: ../ui/login.glade.h:30
+#: ../ui/login.glade.h:29
 msgid "Use IMAP cre_dentials"
 msgstr "Używanie _danych logowania IMAP"
 
-#: ../ui/login.glade.h:31
+#: ../ui/login.glade.h:30
 msgid "Storage"
 msgstr "Przechowywanie"
 
-#: ../ui/login.glade.h:32
+#: ../ui/login.glade.h:31
 msgid "_Download mail"
 msgstr "_Pobieranie wiadomości"
+
+#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
+msgid "Composer"
+msgstr "Tworzenie"
+
+#: ../ui/login.glade.h:33
+msgid "Save dra_fts on server"
+msgstr "Zapisywanie sz_kiców na serwerze"
+
+#: ../ui/login.glade.h:34
+msgid "Si_gn emails:"
+msgstr "_Podpisywanie wiadomości:"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
@@ -1794,10 +1802,6 @@ msgstr "_Automatyczne wybieranie następnej wiadomości"
 msgid "_Display conversation preview"
 msgstr "_Wyświetlanie podglądu wątku"
 
-#: ../ui/preferences.glade.h:6
-msgid "Composer"
-msgstr "Tworzenie"
-
 #: ../ui/preferences.glade.h:7
 msgid "Enable _spell checking"
 msgstr "Sprawdzanie p_isowni"
@@ -1827,7 +1831,7 @@ msgid ""
 "This will not affect email on the server."
 msgstr ""
 "Cała poczta powiązana z tym kontem zostanie usunięta z komputera. Poczta na "
-"serwerze nie zostanie ."
+"serwerze nie zostanie usunięta."
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
