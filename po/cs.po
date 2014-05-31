@@ -656,7 +656,7 @@ msgstr "Prohledat účet %s"
 #: ../src/client/components/main-window.vala:302
 #, c-format
 msgid "%s (%d)"
-msgstr "%s (%s)"
+msgstr "%s (%d)"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
