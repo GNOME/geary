@@ -5,7 +5,7 @@
  */
 
 // Draws the main toolbar.
-public class MainToolbar : PillToolbar {
+public class MainToolbar : PillHeaderbar {
     private const string ICON_CLEAR_NAME = "edit-clear-symbolic";
     private const string ICON_CLEAR_RTL_NAME = "edit-clear-rtl-symbolic";
     private const string DEFAULT_SEARCH_TEXT = _("Search");

@@ -496,6 +496,8 @@
       <object class="GtkAlignment" id="toolbar area">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="left_padding">6</property>
+        <property name="right_padding">6</property>
         <child>
           <placeholder/>
         </child>

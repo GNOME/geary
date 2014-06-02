@@ -5,27 +5,35 @@
  */
 
 /**
- * Class for creating a Nautilus-style "pill" toolbar.  Use only as directed.
+ * Interface for creating a Nautilus-style "pill" toolbar.  Use only as directed.
+ *
+ * Subclasses should inherit from some Gtk.Container and provide pack_start() and
+ * pack_end() methods with the correct signature.  They also need to have action_group
+ * and size properties and call initialize() in their constructors.
  */
-public class PillToolbar : Gtk.HeaderBar {
-    private Gtk.ActionGroup action_group;
-    private Gtk.SizeGroup size = new Gtk.SizeGroup(Gtk.SizeGroupMode.VERTICAL);
+public interface PillBar : Gtk.Container {
+    protected abstract Gtk.ActionGroup action_group { get; set; }
+    protected abstract Gtk.SizeGroup size { get; set; }
     
-    public PillToolbar(Gtk.ActionGroup toolbar_action_group) {
+    public abstract void pack_start(Gtk.Widget widget);
+    public abstract void pack_end(Gtk.Widget widget);
+    
+    protected virtual void initialize(Gtk.ActionGroup toolbar_action_group) {
         action_group = toolbar_action_group;
+        size = new Gtk.SizeGroup(Gtk.SizeGroupMode.VERTICAL);
     }
     
-    public void add_start(Gtk.Widget *widget) {
+    public virtual void add_start(Gtk.Widget widget) {
         pack_start(widget);
         size.add_widget(widget);
     }
     
-    public void add_end(Gtk.Widget *widget) {
+    public virtual void add_end(Gtk.Widget widget) {
         pack_end(widget);
         size.add_widget(widget);
     }
     
-    protected void setup_button(Gtk.Button b, string? icon_name, string action_name,
+    protected virtual void setup_button(Gtk.Button b, string? icon_name, string action_name,
         bool show_label = false) {
         b.related_action = action_group.get_action(action_name);
         b.tooltip_text = b.related_action.tooltip;
@@ -45,7 +53,7 @@ public class PillToolbar : Gtk.HeaderBar {
     /**
      * Given an icon and action, creates a button that triggers the action.
      */
-    public Gtk.Button create_toolbar_button(string? icon_name, string action_name, bool show_label = false) {
+    public virtual Gtk.Button create_toolbar_button(string? icon_name, string action_name, bool show_label = false) {
         Gtk.Button b = new Gtk.Button();
         setup_button(b, icon_name, action_name, show_label);
         
@@ -55,7 +63,7 @@ public class PillToolbar : Gtk.HeaderBar {
     /**
      * Given an icon and action, creates a toggle button that triggers the action.
      */
-    public Gtk.Button create_toggle_button(string? icon_name, string action_name) {
+    public virtual Gtk.Button create_toggle_button(string? icon_name, string action_name) {
         Gtk.ToggleButton b = new Gtk.ToggleButton();
         setup_button(b, icon_name, action_name);
         
@@ -65,7 +73,7 @@ public class PillToolbar : Gtk.HeaderBar {
     /**
      * Given an icon, menu, and action, creates a button that triggers the menu and the action.
      */
-    public Gtk.MenuButton create_menu_button(string? icon_name, Gtk.Menu? menu, string action_name) {
+    public virtual Gtk.MenuButton create_menu_button(string? icon_name, Gtk.Menu? menu, string action_name) {
         Gtk.MenuButton b = new Gtk.MenuButton();
         setup_button(b, icon_name, action_name);
         b.popup = menu;
@@ -78,7 +86,7 @@ public class PillToolbar : Gtk.HeaderBar {
      * toolbar.  Optionally adds spacers "before" and "after" the buttons (those terms depending
      * on Gtk.TextDirection)
      */
-    public Gtk.Box create_pill_buttons(Gee.Collection<Gtk.Button> buttons,
+    public virtual Gtk.Box create_pill_buttons(Gee.Collection<Gtk.Button> buttons,
         bool before_spacer = true, bool after_spacer = false) {
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         box.valign = Gtk.Align.CENTER;
@@ -93,6 +101,39 @@ public class PillToolbar : Gtk.HeaderBar {
             box.add(button);
                 
         return box;
+    }
+}
+
+/**
+ * A pill-style header bar.
+ */
+public class PillHeaderbar : Gtk.HeaderBar, PillBar {
+    protected Gtk.ActionGroup action_group { get; set; }
+    protected Gtk.SizeGroup size { get; set; }
+    
+    public PillHeaderbar(Gtk.ActionGroup toolbar_action_group) {
+        initialize(toolbar_action_group);
+    }
+}
+
+/**
+ * A pill-style toolbar.
+ */
+public class PillToolbar : Gtk.Box, PillBar {
+    protected Gtk.ActionGroup action_group { get; set; }
+    protected Gtk.SizeGroup size { get; set; }
+    
+    public PillToolbar(Gtk.ActionGroup toolbar_action_group) {
+        Object(orientation: Gtk.Orientation.HORIZONTAL, spacing: 6);
+        initialize(toolbar_action_group);
+    }
+    
+    public new void pack_start(Gtk.Widget widget) {
+        base.pack_start(widget, false, false, 0);
+    }
+    
+    public new void pack_end(Gtk.Widget widget) {
+        base.pack_end(widget, false, false, 0);
     }
 }
 
