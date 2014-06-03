@@ -43,17 +43,19 @@ public class GearyController : Geary.BaseObject {
     
     public const int MIN_CONVERSATION_COUNT = 50;
     
-    private const string DELETE_MESSAGE_LABEL = _("Delete");
+    private const string DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
     private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
     
-    private const string TRASH_MESSAGE_LABEL = _("Trash");
+    // This refers to the action ("move email to the trash"), not the Trash folder itself
+    private const string TRASH_MESSAGE_LABEL = _("_Trash");
     private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_ICON_NAME = "user-trash-symbolic";
     
-    private const string ARCHIVE_MESSAGE_LABEL = _("Archive");
+    // This refers to the action ("archive an email"), not the Archive folder itself
+    private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
     private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (A)");
     private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
     private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-symbolic";
