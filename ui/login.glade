@@ -117,6 +117,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">1</property>
+            <property name="xpad">6</property>
             <property name="label" translatable="yes">E_mail address</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: email</property>
@@ -136,6 +137,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">1</property>
+            <property name="xpad">6</property>
             <property name="label" translatable="yes">_Password</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: password</property>
@@ -168,6 +170,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">1</property>
+            <property name="xpad">6</property>
             <property name="label" translatable="yes">S_ervice</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">combo: service</property>
@@ -187,6 +190,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">1</property>
+            <property name="xpad">6</property>
             <property name="label" translatable="yes">N_ame</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: real_name</property>
@@ -242,7 +246,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">1</property>
-            <property name="xpad">1</property>
+            <property name="xpad">6</property>
             <property name="label" translatable="yes">N_ickname</property>
             <property name="use_underline">True</property>
             <property name="mnemonic_widget">entry: nickname</property>
@@ -345,7 +349,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">Se_rver</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap host</property>
@@ -381,7 +385,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">P_ort</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap port</property>
@@ -451,7 +455,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">Ser_ver</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp host</property>
@@ -471,7 +475,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">Por_t</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp port</property>
@@ -510,7 +514,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">User_name</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp username</property>
@@ -530,7 +534,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">Pass_word</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: smtp password</property>
@@ -581,7 +585,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">_Username</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap username</property>
@@ -601,7 +605,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">_Password</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">entry: imap password</property>
@@ -653,7 +657,7 @@
                 <property name="can_focus">False</property>
                 <property name="margin_top">2</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">Encr_yption</property>
                 <property name="use_underline">True</property>
                 <property name="justify">center</property>
@@ -675,7 +679,7 @@
                 <property name="can_focus">False</property>
                 <property name="margin_top">2</property>
                 <property name="xalign">1</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">Encrypt_ion</property>
                 <property name="use_underline">True</property>
                 <property name="justify">fill</property>
@@ -872,7 +876,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
-                <property name="xpad">12</property>
+                <property name="xpad">6</property>
                 <property name="label" translatable="yes">_Download mail</property>
                 <property name="use_underline">True</property>
                 <style>
