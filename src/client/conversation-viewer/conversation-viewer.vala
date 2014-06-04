@@ -296,6 +296,8 @@ public class ConversationViewer : Gtk.Box {
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation>? conversations,
         Geary.Folder? current_folder) {
         cancel_load();
+        // Clear the URL overlay
+        on_hovering_over_link(null, null);
         if (current_conversation != null) {
             current_conversation.appended.disconnect(on_conversation_appended);
             current_conversation.trimmed.disconnect(on_conversation_trimmed);
