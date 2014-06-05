@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-06-05 17:47+0200\n"
-"PO-Revision-Date: 2014-06-05 17:48+0200\n"
+"PO-Revision-Date: 2014-06-05 17:49+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -275,7 +275,7 @@ msgstr "Przenieś wątki do kosza (Delete, Backspace)"
 #. This refers to the action ("archive an email"), not the Archive folder itself
 #: ../src/client/application/geary-controller.vala:58
 msgid "_Archive"
-msgstr "Z_archiwizuj"
+msgstr "_Archiwizuj"
 
 #: ../src/client/application/geary-controller.vala:59
 msgid "Archive conversation (A)"
