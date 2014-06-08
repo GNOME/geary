@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: geary-0.5.2\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-03-21 06:06+0000\n"
+"POT-Creation-Date: 2014-04-03 21:31+0000\n"
 "PO-Revision-Date: 2014-03-21 08:43+0100\n"
 "Last-Translator: Mattias Eriksson <snaggen@gmail.com>\n"
 "Language-Team: Swedish (https://l10n.gnome.org/vertimus/geary/master/po/sv)\n"
@@ -448,8 +448,9 @@ msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
-"Geary råkade ut för ett fel vid sparande av ett skickat e-postmeddelande till \"Skickad "
-"e-post\". Meddelandet kommer att ligga kvar i utkorgen tills du tar bort det."
+"Geary råkade ut för ett fel vid sparande av ett skickat e-postmeddelande "
+"till \"Skickad e-post\". Meddelandet kommer att ligga kvar i utkorgen tills "
+"du tar bort det."
 
 #: ../src/client/application/geary-controller.vala:773
 msgid "Labels"
@@ -483,8 +484,8 @@ msgstr ""
 "\n"
 "Geary kan bygga om databasen och synkronisera med servern vid avslut.\n"
 "\n"
-"Att bygga om databasen medför att alla lokala e-postmeddelanden och bifogade filer "
-"förstörs. <b>E-post på din server är inte berörda av felet.</b>"
+"Att bygga om databasen medför att alla lokala e-postmeddelanden och bifogade "
+"filer förstörs. <b>E-post på din server är inte berörda av felet.</b>"
 
 #: ../src/client/application/geary-controller.vala:788
 msgid "_Rebuild"
@@ -574,7 +575,8 @@ msgstr "Om %s"
 #. / For example: Yamada Taro <yamada.taro@example.com>
 #: ../src/client/application/geary-controller.vala:1338
 msgid "translator-credits"
-msgstr "Joachim Johansson <joachim.j@gmail.com>\n"
+msgstr ""
+"Joachim Johansson <joachim.j@gmail.com>\n"
 "Mattias Eriksson <snaggen@gmail.com>\n"
 "\n"
 "Skicka synpunkter på översättningen till\n"
@@ -798,7 +800,6 @@ msgstr "Välj färg"
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #: ../src/client/composer/composer-window.vala:1660
-#| msgid "From:"
 msgid "_From:"
 msgstr "_Från:"
 
@@ -963,7 +964,7 @@ msgstr "Markera olästa _härifrån"
 #. View original message source.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1614
 msgid "_View Source"
-msgstr "_Visa källkod"
+msgstr "_Visa källa"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
@@ -1548,12 +1549,10 @@ msgid "_Cc:"
 msgstr "_Cc:"
 
 #: ../ui/composer.glade.h:38
-#| msgid "Subject:"
 msgid "_Subject:"
 msgstr "_Ämne:"
 
 #: ../ui/composer.glade.h:39
-#| msgid "Bcc:"
 msgid "_Bcc:"
 msgstr "_Bcc:"
 
@@ -1574,7 +1573,6 @@ msgid "_Include Original Attachments"
 msgstr "_Inkludera bifogade filer från original"
 
 #: ../ui/composer.glade.h:46
-#| msgid "_Close"
 msgid "C_lose"
 msgstr "S_täng"
 
@@ -1707,7 +1705,6 @@ msgid "No authentication re_quired"
 msgstr "Ingen autentisering _krävs"
 
 #: ../ui/login.glade.h:29
-#| msgid "IMAP Credentials"
 msgid "Use IMAP cre_dentials"
 msgstr "Använ_d autentiseringsuppgifter för IMAP"
 
