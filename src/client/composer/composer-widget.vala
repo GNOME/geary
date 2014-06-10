@@ -457,8 +457,8 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         
-        // only add signature if the option is actually set
-        if (account.information.use_email_signature)
+        // only add signature if the option is actually set and if this is not a draft
+        if (account.information.use_email_signature && !is_referred_draft)
             add_signature();
         
         editor = new StylishWebView();
