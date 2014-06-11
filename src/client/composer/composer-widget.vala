@@ -65,7 +65,7 @@ public class ComposerWidget : Gtk.EventBox {
         <html><head><title></title>
         <style>
         body {
-            margin: 10px !important;
+            margin: 0px !important;
             padding: 0 !important;
             background-color: white !important;
             font-size: medium !important;
@@ -80,6 +80,15 @@ public class ComposerWidget : Gtk.EventBox {
         }
         body.plain a {
             cursor: text;
+        }
+        #message-body {
+            box-sizing: border-box;
+            padding: 10px;
+            outline: 0px solid transparent;
+            min-height: 100%;
+        }
+        .embedded #message-body {
+            min-height: 200px;
         }
         blockquote {
             margin-top: 0px;
@@ -97,7 +106,9 @@ public class ComposerWidget : Gtk.EventBox {
             margin: 0;
         }
         </style>
-        </head><body id="message-body"></body></html>""";
+        </head><body>
+        <div id="message-body" contenteditable="true"></div>
+        </body></html>""";
     
     private const int DRAFT_TIMEOUT_MSEC = 2000; // 2 seconds
     
@@ -262,12 +273,6 @@ public class ComposerWidget : Gtk.EventBox {
                 });
         }
         notify["state"].connect((s, p) => { update_from_field(); });
-        // Set the visibilities later, after show_all is called on the widget.
-        Idle.add(() => {
-            state = state;  // Triggers visibilities
-            show_attachments();
-            return false;
-        });
         
         from_label = (Gtk.Label) builder.get_object("from label");
         from_single = (Gtk.Label) builder.get_object("from_single");
@@ -444,7 +449,6 @@ public class ComposerWidget : Gtk.EventBox {
         editor = new StylishWebView();
         edit_fixer = new WebViewEditFixer(editor);
 
-        editor.editable = true;
         editor.load_finished.connect(on_load_finished);
         editor.hovering_over_link.connect(on_hovering_over_link);
         editor.context_menu.connect(on_context_menu);
@@ -595,10 +599,11 @@ public class ComposerWidget : Gtk.EventBox {
                 debug("Failed to load prefilled body: %s", e.message);
             }
         }
+        body.focus();  // Focus within the HTML document
 
         protect_blockquote_styles();
         
-        set_focus();
+        set_focus();  // Focus in the GTK widget hierarchy
         
         // Ensure the editor is in correct mode re HTML
         on_compose_as_html();
@@ -731,7 +736,10 @@ public class ComposerWidget : Gtk.EventBox {
     
     public override void show_all() {
         base.show_all();
+        // Now, hide elements that we don't want shown
         update_from_field();
+        state = state;  // Triggers visibilities
+        show_attachments();
     }
     
     public void change_compose_type(ComposeType new_type) {
@@ -1554,11 +1562,13 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private string get_html() {
-        return editor.get_dom_document().get_body().get_inner_html();
+        return ((WebKit.DOM.HTMLElement) editor.get_dom_document().get_element_by_id(BODY_ID))
+            .get_inner_html();
     }
     
     private string get_text() {
-        return html_to_flowed_text(editor.get_dom_document());
+        return html_to_flowed_text((WebKit.DOM.HTMLElement) editor.get_dom_document()
+            .get_element_by_id(BODY_ID));
     }
     
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,

@@ -293,11 +293,11 @@ public string decorate_quotes(string text) throws Error {
 }
 
 // This will modify/reset the DOM
-public string html_to_flowed_text(WebKit.DOM.Document doc) {
-    string saved_doc = doc.get_body().get_inner_html();
+public string html_to_flowed_text(WebKit.DOM.HTMLElement el) {
+    string saved_doc = el.get_inner_html();
     WebKit.DOM.NodeList blockquotes;
     try {
-        blockquotes = doc.query_selector_all("blockquote");
+        blockquotes = el.query_selector_all("blockquote");
     } catch (Error error) {
         debug("Error selecting blockquotes: %s", error.message);
         return "";
@@ -326,11 +326,11 @@ public string html_to_flowed_text(WebKit.DOM.Document doc) {
     }
     
     // Reassemble plain text out of parts, replace non-breaking space with regular space
-    string doctext = resolve_nesting(doc.get_body().get_inner_text(), bqtexts).replace("\xc2\xa0", " ");
+    string doctext = resolve_nesting(el.get_inner_text(), bqtexts).replace("\xc2\xa0", " ");
     
     // Reassemble DOM
     try {
-        doc.get_body().set_inner_html(saved_doc);
+        el.set_inner_html(saved_doc);
     } catch (Error error) {
         debug("Error resetting DOM: %s", error.message);
     }

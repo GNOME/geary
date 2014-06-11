@@ -43,6 +43,7 @@ public class ConversationWebView : StylishWebView {
         new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         web_inspector.inspect_web_view.connect(activate_inspector);
         document_font_changed.connect(on_document_font_changed);
+        scroll_event.connect(on_scroll_event);
         
         // Load the HTML into WebKit.
         // Note: load_finished signal MUST be hooked up before this call.
@@ -55,7 +56,7 @@ public class ConversationWebView : StylishWebView {
         return false;
     }
     
-    public override bool scroll_event(Gdk.EventScroll event) {
+    private bool on_scroll_event(Gdk.EventScroll event) {
         if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
             double dir = 0;
             if (event.direction == Gdk.ScrollDirection.UP)

@@ -37,7 +37,8 @@ public class ScrollableOverlay : Gtk.Overlay, Gtk.Scrollable {
     }
     
     private bool on_child_position(Gtk.Widget widget, Gdk.Rectangle allocation) {
-         return ((ComposerEmbed) widget).set_position(ref allocation, hadjustment.value, vadjustment.value);
+        return ((ComposerEmbed) widget).set_position(ref allocation, hadjustment.value,
+            vadjustment.value, get_allocated_height());
     }
     
     private void on_scroll() {
