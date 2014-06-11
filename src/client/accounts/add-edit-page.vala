@@ -554,7 +554,6 @@ public class AddEditPage : Gtk.Box {
         if(check_use_email_signature.active == true) {
             textview_email_signature.sensitive = true;
         } else {
-            textview_email_signature.buffer.text = "";
             textview_email_signature.sensitive = false;
         }
     }
