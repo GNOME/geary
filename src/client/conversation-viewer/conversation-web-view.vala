@@ -57,10 +57,18 @@ public class ConversationWebView : StylishWebView {
     
     public override bool scroll_event(Gdk.EventScroll event) {
         if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            if (event.direction == Gdk.ScrollDirection.UP) {
+            double dir = 0;
+            if (event.direction == Gdk.ScrollDirection.UP)
+                dir = -1;
+            else if (event.direction == Gdk.ScrollDirection.DOWN)
+                dir = 1;
+            else if (event.direction == Gdk.ScrollDirection.SMOOTH)
+                dir = event.delta_y;
+            
+            if (dir < 0) {
                 zoom_in();
                 return true;
-            } else if (event.direction == Gdk.ScrollDirection.DOWN) {
+            } else if (dir > 0) {
                 zoom_out();
                 return true;
             }
