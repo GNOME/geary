@@ -126,6 +126,23 @@ public inline static uint int64_hash(int64 value) {
 }
 
 /**
+ * To be used as hash_func for Gee collections.
+ */
+public uint int64_hash_func(int64? n) {
+    return hash_memory((uint8 *) n, sizeof(int64));
+}
+
+/**
+ * To be used as equal_func for Gee collections.
+ */
+public bool int64_equal_func(int64? a, int64? b) {
+    int64 *bia = (int64 *) a;
+    int64 *bib = (int64 *) b;
+    
+    return (*bia) == (*bib);
+}
+
+/**
  * A rotating-XOR hash that can be used to hash memory buffers of any size.
  */
 public static uint hash_memory(void *ptr, size_t bytes) {

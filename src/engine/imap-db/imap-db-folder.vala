@@ -21,6 +21,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int LIST_EMAIL_WITH_MESSAGE_CHUNK_COUNT = 10;
     private const int LIST_EMAIL_METADATA_COUNT = 100;
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
+    private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
     
     [Flags]
     public enum ListFlags {
@@ -180,45 +181,57 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Map<Geary.Email, bool> create_or_merge_email_async(Gee.Collection<Geary.Email> emails,
         Cancellable? cancellable) throws Error {
         Gee.HashMap<Geary.Email, bool> results = new Gee.HashMap<Geary.Email, bool>();
-        Gee.ArrayList<Geary.EmailIdentifier> complete_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        Gee.Collection<Contact> updated_contacts = new Gee.ArrayList<Contact>();
-        int total_unread_change = 0;
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            foreach (Geary.Email email in emails) {
-                Gee.Collection<Contact>? contacts_this_email = null;
-                Geary.Email.Field pre_fields;
-                Geary.Email.Field post_fields;
-                int unread_change = 0;
-                bool created = do_create_or_merge_email(cx, email, out pre_fields,
-                    out post_fields, out contacts_this_email, ref unread_change, cancellable);
-                
-                if (contacts_this_email != null)
-                    updated_contacts.add_all(contacts_this_email);
-                
-                results.set(email, created);
-                
-                // in essence, only fire the "email-completed" signal if the local version didn't
-                // have all the fields but after the create/merge now does
-                if (post_fields.is_all_set(Geary.Email.Field.ALL) && !pre_fields.is_all_set(Geary.Email.Field.ALL))
-                    complete_ids.add(email.id);
-                
-                // Update unread count in DB.
-                do_add_to_unread_count(cx, unread_change, cancellable);
-                
-                total_unread_change += unread_change;
-            }
+        
+        Gee.ArrayList<Geary.Email> list = traverse<Geary.Email>(emails).to_array_list();
+        int index = 0;
+        while (index < list.size) {
+            int stop = Numeric.int_ceiling(index + CREATE_MERGE_EMAIL_CHUNK_COUNT, list.size);
+            Gee.List<Geary.Email> slice = list.slice(index, stop);
             
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        if (updated_contacts.size > 0)
-            contact_store.update_contacts(updated_contacts);
-        
-        // Update the email_unread properties.
-        properties.set_status_unseen((properties.email_unread + total_unread_change).clamp(0, int.MAX));
-        
-        if (complete_ids.size > 0)
-            email_complete(complete_ids);
+            Gee.ArrayList<Geary.EmailIdentifier> complete_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+            Gee.Collection<Contact> updated_contacts = new Gee.ArrayList<Contact>();
+            int total_unread_change = 0;
+            yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                foreach (Geary.Email email in slice) {
+                    Gee.Collection<Contact>? contacts_this_email = null;
+                    Geary.Email.Field pre_fields;
+                    Geary.Email.Field post_fields;
+                    int unread_change = 0;
+                    bool created = do_create_or_merge_email(cx, email, out pre_fields,
+                        out post_fields, out contacts_this_email, ref unread_change, cancellable);
+                    
+                    if (contacts_this_email != null)
+                        updated_contacts.add_all(contacts_this_email);
+                    
+                    results.set(email, created);
+                    
+                    // in essence, only fire the "email-completed" signal if the local version didn't
+                    // have all the fields but after the create/merge now does
+                    if (post_fields.is_all_set(Geary.Email.Field.ALL) && !pre_fields.is_all_set(Geary.Email.Field.ALL))
+                        complete_ids.add(email.id);
+                    
+                    // Update unread count in DB.
+                    do_add_to_unread_count(cx, unread_change, cancellable);
+                    
+                    total_unread_change += unread_change;
+                }
+                
+                return Db.TransactionOutcome.COMMIT;
+            }, cancellable);
+            
+            if (updated_contacts.size > 0)
+                contact_store.update_contacts(updated_contacts);
+            
+            // Update the email_unread properties.
+            properties.set_status_unseen((properties.email_unread + total_unread_change).clamp(0, int.MAX));
+            
+            if (complete_ids.size > 0)
+                email_complete(complete_ids);
+            
+            index = stop;
+            if (index < list.size)
+                yield Scheduler.sleep_ms_async(100);
+        }
         
         return results;
     }
@@ -269,12 +282,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 SELECT MessageLocationTable.message_id, ordering, remove_marker
                 FROM MessageLocationTable
             """);
-            if (only_incomplete) {
-                sql.append("""
-                    INNER JOIN MessageTable
-                    ON MessageTable.id = MessageLocationTable.message_id
-                """);
-            }
             
             sql.append("WHERE folder_id = ? ");
             
@@ -283,25 +290,31 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             else
                 sql.append("AND ordering <= ? ");
             
-            if (only_incomplete)
-                sql.append_printf("AND fields != %d ", Geary.Email.Field.ALL);
-            
             if (oldest_to_newest)
                 sql.append("ORDER BY ordering ASC ");
             else
                 sql.append("ORDER BY ordering DESC ");
             
-            sql.append("LIMIT ?");
-            
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, start_uid.value);
-            stmt.bind_int(2, count);
             
             locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
             
+            if (locations.size > count)
+                locations = locations.slice(0, count);
+            
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
+        
+        // remove complete locations (emails with all fields downloaded)
+        if (only_incomplete && locations.size > 0) {
+            yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+                do_remove_complete_locations(cx, locations, cancellable);
+                
+                return Db.TransactionOutcome.SUCCESS;
+            }, cancellable);
+        }
         
         // Next, read in email in chunks
         return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
@@ -389,16 +402,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 FROM MessageLocationTable
             """);
             
-            if (only_incomplete) {
-                sql.append("""
-                    INNER JOIN MessageTable
-                    ON MessageTable.id = MessageLocationTable.message_id
-                """);
-            }
-            
             sql.append("WHERE folder_id = ? AND ordering >= ? AND ordering <= ? ");
-            if (only_incomplete)
-                sql.append_printf(" AND fields != %d ", Geary.Email.Field.ALL);
             
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
@@ -406,6 +410,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_int64(2, end_uid.value);
             
             locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
+            
+            if (only_incomplete)
+                do_remove_complete_locations(cx, locations, cancellable);
             
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -436,13 +443,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 FROM MessageLocationTable
             """);
             
-            if (only_incomplete) {
-                sql.append("""
-                    INNER JOIN MessageTable
-                    ON MessageTable.id = MessageLocationTable.message_id
-                """);
-            }
-            
             if (locs.size != 1) {
                 sql.append("WHERE ordering IN (");
                 bool first = true;
@@ -458,15 +458,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 sql.append_printf("WHERE ordering = '%s' ", locs[0].uid.to_string());
             }
             
-            if (only_incomplete)
-                sql.append_printf(" AND fields != %d ", Geary.Email.Field.ALL);
-            
             sql.append("AND folder_id = ? ");
             
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             
             locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
+            
+            if (only_incomplete)
+                do_remove_complete_locations(cx, locations, cancellable);
             
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -2040,6 +2040,42 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         } while (results.next(cancellable));
         
         return locations;
+    }
+    
+    // Use a separate step to strip out complete emails because original implementation (using an
+    // INNER JOIN) was horribly slow under load
+    private void do_remove_complete_locations(Db.Connection cx, Gee.List<LocationIdentifier>? locations,
+        Cancellable? cancellable) throws Error {
+        if (locations == null || locations.size == 0)
+            return;
+        
+        StringBuilder sql = new StringBuilder("""
+            SELECT id FROM MessageTable WHERE fields <> ?
+        """);
+        
+        Db.Statement stmt = cx.prepare(sql.str);
+        stmt.bind_int(0, Geary.Email.Field.ALL);
+        
+        Db.Result results = stmt.exec(cancellable);
+        
+        Gee.HashSet<int64?> incomplete_locations = new Gee.HashSet<int64?>(Collection.int64_hash_func,
+            Collection.int64_equal_func);
+        while (!results.finished) {
+            incomplete_locations.add(results.int64_at(0));
+            results.next(cancellable);
+        }
+        
+        if (incomplete_locations.size == 0) {
+            locations.clear();
+            
+            return;
+        }
+        
+        Gee.Iterator<LocationIdentifier> iter = locations.iterator();
+        while (iter.next()) {
+            if (!incomplete_locations.contains(iter.get().message_id))
+                iter.remove();
+        }
     }
     
     private LocationIdentifier? do_get_location_for_id(Db.Connection cx, ImapDB.EmailIdentifier id,
