@@ -99,15 +99,12 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
         else
             active_sem.acquire();
         
-        schedule_id = Timeout.add_seconds(start_delay_sec, on_start_prefetch);
-    }
-    
-    private bool on_start_prefetch() {
-        do_prefetch_async.begin();
-        
-        schedule_id = 0;
-        
-        return false;
+        schedule_id = Timeout.add_seconds(start_delay_sec, () => {
+            schedule_id = 0;
+            do_prefetch_async.begin();
+            
+            return false;
+        });
     }
     
     private async void do_prepare_all_local_async() {
