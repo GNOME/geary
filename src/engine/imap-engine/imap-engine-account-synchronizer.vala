@@ -6,7 +6,7 @@
 
 private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private const int FETCH_DATE_RECEIVED_CHUNK_COUNT = 25;
-    private const int SYNC_DELAY_SEC = 15;
+    private const int SYNC_DELAY_SEC = 2;
     
     public GenericAccount account { get; private set; }
     
@@ -30,6 +30,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         account.closed.connect(on_account_closed);
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.folders_contents_altered.connect(on_folders_contents_altered);
+        account.email_sent.connect(on_email_sent);
     }
     
     ~AccountSynchronizer() {
@@ -37,6 +38,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         account.closed.disconnect(on_account_closed);
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         account.folders_contents_altered.disconnect(on_folders_contents_altered);
+        account.email_sent.disconnect(on_email_sent);
     }
     
     public async void stop_async() {
@@ -107,6 +109,16 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     
     private void on_folders_contents_altered(Gee.Collection<Folder> altered) {
         delayed_send_all(altered, false);
+    }
+    
+    private void on_email_sent() {
+        try {
+            Folder? sent_mail = account.get_special_folder(SpecialFolderType.SENT);
+            if (sent_mail != null)
+                send_all(iterate<Folder>(sent_mail).to_array_list(), false);
+        } catch (Error err) {
+            debug("Unable to retrieve Sent Mail from %s: %s", account.to_string(), err.message);
+        }
     }
     
     private void delayed_send_all(Gee.Collection<Folder> folders, bool reason_available) {
@@ -183,19 +195,20 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             case SpecialFolderType.INBOX:
                 return -60;
             
-            case SpecialFolderType.ALL_MAIL:
+            case SpecialFolderType.SENT:
                 return -50;
             
-            case SpecialFolderType.SENT:
+            case SpecialFolderType.DRAFTS:
                 return -40;
             
-            case SpecialFolderType.FLAGGED:
+            case SpecialFolderType.ALL_MAIL:
+            case SpecialFolderType.ARCHIVE:
                 return -30;
             
-            case SpecialFolderType.IMPORTANT:
+            case SpecialFolderType.FLAGGED:
                 return -20;
             
-            case SpecialFolderType.DRAFTS:
+            case SpecialFolderType.IMPORTANT:
                 return -10;
             
             case SpecialFolderType.SPAM:
@@ -359,7 +372,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                     break;
                 }
                 
-                current_epoch = current_epoch.add_months(-3);
+                current_epoch = current_epoch.add_months(-1);
                 
                 // if past max_epoch, then just pull in everything and be done with it
                 if (current_epoch.compare(max_epoch) < 0) {
