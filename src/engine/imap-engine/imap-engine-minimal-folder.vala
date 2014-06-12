@@ -8,7 +8,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
     private const int DEFAULT_REESTABLISH_DELAY_MSEC = 10;
-    private const int MAX_REESTABLISH_DELAY_MSEC = 1000;
+    private const int MAX_REESTABLISH_DELAY_MSEC = 30000;
     
     public override Account account { get { return _account; } }
     
@@ -818,7 +818,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
     private static async void close_remote_folder_async(owned MinimalFolder folder,
         owned Imap.Folder? remote_folder, Folder.CloseReason remote_reason, bool force_reestablish) {
         // force the remote closed; if due to a remote disconnect and plan on reopening, *still*
-        // need to do this
+        // need to do this ... don't set remote_folder to null, as that will make some code paths
+        // think the folder is closing or closed when in fact it will be re-opening in a moment
         try {
             if (remote_folder != null)
                 yield remote_folder.close_async(null);
@@ -835,12 +836,21 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 folder.reestablish_delay_msec);
             
             yield Scheduler.sleep_ms_async(folder.reestablish_delay_msec);
-            // double now, reset to init value when cleanly opened
-            folder.reestablish_delay_msec = (folder.reestablish_delay_msec * 2).clamp(
-                DEFAULT_REESTABLISH_DELAY_MSEC, MAX_REESTABLISH_DELAY_MSEC);
             
             try {
-                yield folder.open_async(OpenFlags.NO_DELAY, null);
+                if (folder.open_count > 0) {
+                    // double now, reset to init value when cleanly opened
+                    folder.reestablish_delay_msec = (folder.reestablish_delay_msec * 2).clamp(
+                        DEFAULT_REESTABLISH_DELAY_MSEC, MAX_REESTABLISH_DELAY_MSEC);
+                    
+                    // since open_async() increments open_count, artificially decrement here to
+                    // prevent driving the value up
+                    folder.open_count--;
+                    
+                    yield folder.open_async(OpenFlags.NO_DELAY, null);
+                } else {
+                    debug("%s: Not reestablishing broken connection, folder was closed", folder.to_string());
+                }
             } catch (Error err) {
                 debug("Error reestablishing broken connection to %s: %s", folder.to_string(), err.message);
             }
@@ -1329,7 +1339,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), before_uid.previous(true))));
         }
         
-        debug("find_earliest_email_async: %s", criteria.to_string());
+        debug("%s: find_earliest_email_async: %s", to_string(), criteria.to_string());
         
         Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
         ServerSearchEmail op = new ServerSearchEmail(this, criteria, Geary.Email.Field.NONE,
@@ -1352,7 +1362,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 earliest_id = email_id;
         }
         
-        debug("find_earliest_email_async: found %s",
+        debug("%s: find_earliest_email_async: found %s", to_string(),
             earliest_id != null ? earliest_id.to_string() : "(null)");
         
         return earliest_id;
