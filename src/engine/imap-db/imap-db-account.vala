@@ -1472,7 +1472,7 @@ private class Geary.ImapDB.Account : BaseObject {
         unread_status, Cancellable? cancellable) throws Error {
         Gee.Map<Geary.FolderPath, int> unread_change = new Gee.HashMap<Geary.FolderPath, int>();
         
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             foreach (ImapDB.EmailIdentifier id in unread_status.keys) {
                 Gee.Set<Geary.FolderPath>? paths = do_find_email_folders(
                     cx, id.message_id, true, cancellable);

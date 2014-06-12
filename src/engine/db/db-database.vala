@@ -17,9 +17,7 @@
  */
 
 public class Geary.Db.Database : Geary.Db.Context {
-    // Dealing with BUSY signal is a bear, and so for now concurrency is turned off
-    // http://redmine.yorba.org/issues/6460
-    public const int DEFAULT_MAX_CONCURRENCY = 1;
+    public const int DEFAULT_MAX_CONCURRENCY = 4;
     
     public File db_file { get; private set; }
     public DatabaseFlags flags { get; private set; }
@@ -42,7 +40,6 @@ public class Geary.Db.Database : Geary.Db.Context {
     private Connection? master_connection = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
-    private Gee.LinkedList<Connection>? cx_pool = null;
     private unowned PrepareConnection? prepare_cb = null;
     
     public Database(File db_file) {
@@ -83,9 +80,6 @@ public class Geary.Db.Database : Geary.Db.Context {
                 thread_pool = new ThreadPool<TransactionAsyncJob>.with_owned_data(on_async_job,
                     DEFAULT_MAX_CONCURRENCY, true);
             }
-            
-            if (cx_pool == null)
-                cx_pool = new Gee.LinkedList<Connection>();
         } else {
             warning("SQLite not thread-safe: asynchronous queries will not be available");
         }
@@ -274,22 +268,15 @@ public class Geary.Db.Database : Geary.Db.Context {
     
     // This method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
-        // go to connection pool before creating a connection -- *never* use master connection for
-        // threaded operations
+        // *never* use master connection for threaded operations
         Connection? cx = null;
-        lock (cx_pool) {
-            cx = cx_pool.poll();
-        }
-        
         Error? open_err = null;
-        if (cx == null) {
-            try {
-                cx = open_connection();
-            } catch (Error err) {
-                open_err = err;
-                debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
-                    db_file.get_path(), err.message);
-            }
+        try {
+            cx = open_connection();
+        } catch (Error err) {
+            open_err = err;
+            debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
+                db_file.get_path(), err.message);
         }
         
         if (cx != null)
@@ -300,10 +287,6 @@ public class Geary.Db.Database : Geary.Db.Context {
         lock (outstanding_async_jobs) {
             assert(outstanding_async_jobs > 0);
             --outstanding_async_jobs;
-        }
-        
-        lock (cx_pool) {
-            cx_pool.offer(cx);
         }
     }
     
