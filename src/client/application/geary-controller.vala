@@ -1844,6 +1844,7 @@ public class GearyController : Geary.BaseObject {
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.
         composer_widgets.add(widget);
+        debug(@"Creating composer of type $compose_type; $(composer_widgets.size) composers total");
         widget.destroy.connect(on_composer_widget_destroy);
         
         if (inline) {
@@ -1922,6 +1923,8 @@ public class GearyController : Geary.BaseObject {
     
     private void on_composer_widget_destroy(Gtk.Widget sender) {
         composer_widgets.remove((ComposerWidget) sender);
+        debug(@"Destroying composer of type $(((ComposerWidget) sender).compose_type); "
+            + @"$(composer_widgets.size) composers remaining");
         
         if (waiting_to_close.remove((ComposerWidget) sender)) {
             // If we just removed the last window in the waiting to close list, it's time to exit!
