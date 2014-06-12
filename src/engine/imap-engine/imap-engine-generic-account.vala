@@ -37,7 +37,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         search_upgrade_monitor = local.search_index_monitor;
         db_upgrade_monitor = local.upgrade_monitor;
-        opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
+        opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
         sending_monitor = local.sending_monitor;
         
         if (outbox_path == null) {
@@ -102,6 +102,22 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
         
+        opening_monitor.notify_start();
+        
+        Error? throw_err = null;
+        try {
+            yield internal_open_async(cancellable);
+        } catch (Error err) {
+            throw_err = err;
+        }
+        
+        opening_monitor.notify_finish();
+        
+        if (throw_err != null)
+            throw throw_err;
+    }
+    
+    private async void internal_open_async(Cancellable? cancellable) throws Error {
         // To prevent spurious connection failures, we make sure we have the
         // IMAP password before attempting a connection.  This might have to be
         // reworked when we allow passwordless logins.
@@ -354,7 +370,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     private bool on_refresh_folders() {
         in_refresh_enumerate = true;
-        opening_monitor.notify_start();
         enumerate_folders_async.begin(refresh_cancellable, on_refresh_completed);
         
         refresh_folder_timeout_id = 0;
@@ -363,7 +378,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private void on_refresh_completed(Object? source, AsyncResult result) {
-        opening_monitor.notify_finish();
         try {
             enumerate_folders_async.end(result);
         } catch (Error err) {
