@@ -12,16 +12,16 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-01-12 16:02+0000\n"
-"PO-Revision-Date: 2014-01-12 09:14+0300\n"
-"Last-Translator: Dimitris Spingos (Δημήτρης Σπίγγος) <dmtrs32@gmail.com>\n"
+"POT-Creation-Date: 2014-06-07 05:02+0000\n"
+"PO-Revision-Date: 2014-06-13 14:45+0200\n"
+"Last-Translator: Tom Tryfonidis <tomtryf@gmail.com>\n"
 "Language-Team: www.gnome.gr\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Virtaal 0.7.1\n"
+"X-Generator: Poedit 1.6.4\n"
 "X-Project-Style: gnome\n"
 
 #: ../desktop/geary.desktop.in.h:1
@@ -31,11 +31,11 @@ msgstr "Geary"
 #: ../desktop/geary.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
-msgstr "Πελάτης ταχυδρομείου"
+msgstr "Πελάτης αλληλογραφίας"
 
 #: ../desktop/geary.desktop.in.h:3
 msgid "Geary Mail"
-msgstr "Geary ταχυδρομείο"
+msgstr "Αλληλογραφία Geary"
 
 #: ../desktop/geary.desktop.in.h:4
 msgid "Send and receive email"
@@ -43,7 +43,7 @@ msgstr "Αποστολή και λήψη ηλεκτρονικού ταχυδρο
 
 #: ../desktop/geary.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "μήνυμα;ηλεκτρονικό ταχυδρομείο;αλληλογραφία;"
+msgstr "μήνυμα;ηλεκτρονικό ταχυδρομείο;αλληλογραφία;Email;E-mail;Mail;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
@@ -64,7 +64,7 @@ msgstr "_Προσθήκη"
 msgid "Accounts"
 msgstr "Λογαριασμοί"
 
-#. Copyright 2011-2013 Yorba Foundation
+#. Copyright 2011-2014 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -75,89 +75,97 @@ msgstr "Λογαριασμοί"
 msgid "First Last"
 msgstr "Όνομα επώνυμο"
 
-#: ../src/client/accounts/add-edit-page.vala:190
+#: ../src/client/accounts/add-edit-page.vala:228
 msgid "Welcome to Geary."
 msgstr "Καλώς ήρθατε στο Geary."
 
-#: ../src/client/accounts/add-edit-page.vala:190
+#: ../src/client/accounts/add-edit-page.vala:228
 msgid "Enter your account information to get started."
 msgstr "Εισάγετε τα στοιχεία του λογαριασμού σας για να ξεκινήσετε."
 
-#: ../src/client/accounts/add-edit-page.vala:210
+#: ../src/client/accounts/add-edit-page.vala:247
 msgid "2 weeks back"
 msgstr "πριν 2 εβδομάδες"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:211
+#: ../src/client/accounts/add-edit-page.vala:248
 msgid "1 month back"
 msgstr "πριν 1 μήνα"
 
-#: ../src/client/accounts/add-edit-page.vala:212
+#: ../src/client/accounts/add-edit-page.vala:249
 msgid "3 months back"
 msgstr "πριν 3 μήνες"
 
-#: ../src/client/accounts/add-edit-page.vala:213
+#: ../src/client/accounts/add-edit-page.vala:250
 msgid "6 months back"
 msgstr "πριν 6 μήνες"
 
-#: ../src/client/accounts/add-edit-page.vala:214
+#: ../src/client/accounts/add-edit-page.vala:251
 msgid "1 year back"
 msgstr "πριν 1 χρόνο"
 
+#: ../src/client/accounts/add-edit-page.vala:252
+msgid "2 years back"
+msgstr "πριν 2 χρόνια"
+
+#: ../src/client/accounts/add-edit-page.vala:253
+msgid "4 years back"
+msgstr "πριν 4 χρόνια"
+
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:216
+#: ../src/client/accounts/add-edit-page.vala:255
 msgid "Everything"
 msgstr "Όλα"
 
-#: ../src/client/accounts/add-edit-page.vala:583
+#: ../src/client/accounts/add-edit-page.vala:687
 msgid "Remem_ber passwords"
 msgstr "Απο_μνημόνευση κωδικών πρόσβασης"
 
-#: ../src/client/accounts/add-edit-page.vala:590 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:694 ../ui/login.glade.h:6
 msgid "Remem_ber password"
-msgstr "Απο_μνημόνευση κωδικών πρόσβασης"
+msgstr "Απο_μνημόνευση κωδικού πρόσβασης"
 
-#: ../src/client/accounts/add-edit-page.vala:619
+#: ../src/client/accounts/add-edit-page.vala:728
 msgid "Unable to validate:\n"
 msgstr "Δεν ήταν δυνατή η επικύρωση:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:621
+#: ../src/client/accounts/add-edit-page.vala:730
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Μη έγκυρο ψευδώνυμο λογαριασμού.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:624
+#: ../src/client/accounts/add-edit-page.vala:733
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr ""
 "        &#8226; Η διεύθυνση ηλεκτρονικού ταχυδρομείου είναι ήδη καταχωρημένη "
 "στο Geary.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:628
+#: ../src/client/accounts/add-edit-page.vala:737
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; Σφάλμα σύνδεσης IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:631
+#: ../src/client/accounts/add-edit-page.vala:740
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; Λάθος όνομα χρήστη ή κωδικός πρόσβασης IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:634
+#: ../src/client/accounts/add-edit-page.vala:743
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; Σφάλμα σύνδεσης SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:637
+#: ../src/client/accounts/add-edit-page.vala:746
 msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr "        &#8226; Λάθος όνομα χρήστη ή συνθηματικό για το SMTP.\n"
+msgstr "        &#8226; Λάθος όνομα χρήστη ή κωδικός πρόσβασης για το SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:641
+#: ../src/client/accounts/add-edit-page.vala:750
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Σφάλμα σύνδεσης.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:645
+#: ../src/client/accounts/add-edit-page.vala:754
 msgid "        &#8226; Username or password incorrect.\n"
-msgstr "        &#8226; Λάθος όνομα χρήστη ή συνθηματικό.\n"
+msgstr "        &#8226; Λάθος όνομα χρήστη ή κωδικός πρόσβασης.\n"
 
 #: ../src/client/application/geary-application.vala:19
-msgid "Copyright 2011-2013 Yorba Foundation"
-msgstr "Πνευματική ιδιοκτησία 2011-2013 Ίδρυμα Yorba"
+msgid "Copyright 2011-2014 Yorba Foundation"
+msgstr "Πνευματική ιδιοκτησία 2011-2014 Ίδρυμα Yorba"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
@@ -165,7 +173,7 @@ msgstr "Επισκεφθείτε την ιστοσελίδα Yorba"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Output debugging information"
-msgstr "Έξοδος πληροφορίας αποσφαλμάτωσης"
+msgstr "Εμφάνιση πληροφοριών αποσφαλμάτωσης"
 
 #: ../src/client/application/geary-args.vala:11
 msgid "Log conversation monitoring"
@@ -212,209 +220,217 @@ msgstr "Να επιτρέπεται η επιθεώρηση του WebView"
 msgid "Display program version"
 msgstr "Εμφάνιση έκδοσης του προγράμματος"
 
+#. This gives a command-line hint on how to open new composer windows with mailto:
 #: ../src/client/application/geary-args.vala:47
+#, c-format
+msgid "Use %s to open a new composer window"
+msgstr "Χρησιμοποιήστε το % s για να ανοίξετε ένα νέο παράθυρο σύνθεσης"
+
+#: ../src/client/application/geary-args.vala:48
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Παρακαλούμε αναφέρετε σχόλια, προτάσεις και σφάλματα σε:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:55
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Απέτυχε να αναλύσει τις επιλογές της γραμμής εντολών: %s\n"
 
-#: ../src/client/application/geary-args.vala:65
+#: ../src/client/application/geary-args.vala:66
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Άγνωστος επιλογή γραμμής εντολών επιλογή \"%s\"\n"
 
-#: ../src/client/application/geary-controller.vala:44
+#: ../src/client/application/geary-controller.vala:46
 msgid "_Delete"
 msgstr "_Διαγραφή"
 
-#: ../src/client/application/geary-controller.vala:45
+#: ../src/client/application/geary-controller.vala:47
 msgid "Delete conversation (Shift+Delete)"
 msgstr "Διαγραφή συνομιλίας (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:46
+#: ../src/client/application/geary-controller.vala:48
 msgid "Delete conversations (Shift+Delete)"
 msgstr "Διαγραφή συνομιλιών (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:49
+#. This refers to the action ("move email to the trash"), not the Trash folder itself
+#: ../src/client/application/geary-controller.vala:52
 msgid "_Trash"
 msgstr "Απο_ρρίμματα"
 
-#: ../src/client/application/geary-controller.vala:50
+#: ../src/client/application/geary-controller.vala:53
 msgid "Move conversation to trash (Delete, Backspace)"
 msgstr "Μετακίνηση συνομιλίας στα απορρίμματα (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:51
+#: ../src/client/application/geary-controller.vala:54
 msgid "Move conversations to trash (Delete, Backspace)"
 msgstr "Μετακίνηση συνομιλιών στα απορρίμματα (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:54
+#. This refers to the action ("archive an email"), not the Archive folder itself
+#: ../src/client/application/geary-controller.vala:58
 msgid "_Archive"
 msgstr "_Αρχείο"
 
-#: ../src/client/application/geary-controller.vala:55
+#: ../src/client/application/geary-controller.vala:59
 msgid "Archive conversation (A)"
 msgstr "Αρχειοθέτηση συνομιλίας (Α)"
 
-#: ../src/client/application/geary-controller.vala:56
+#: ../src/client/application/geary-controller.vala:60
 msgid "Archive conversations (A)"
 msgstr "Αρχειοθέτηση συνομιλιών (Α)"
 
-#: ../src/client/application/geary-controller.vala:59
+#: ../src/client/application/geary-controller.vala:63
 msgid "Mark as S_pam"
-msgstr "Σημείωση ως ό_χληση"
+msgstr "Σημείωση ως ανεπι_θύμητα"
 
-#: ../src/client/application/geary-controller.vala:60
+#: ../src/client/application/geary-controller.vala:64
 msgid "Mark as not S_pam"
-msgstr "Σημείωση ως μη όχ_ληση"
+msgstr "Σημείωση ως μη ανεπιθύ_μητα"
 
-#: ../src/client/application/geary-controller.vala:62
-#: ../src/client/application/geary-controller.vala:272
+#: ../src/client/application/geary-controller.vala:66
+#: ../src/client/application/geary-controller.vala:277
 msgid "Mark conversation"
 msgstr "Σήμανση συνομιλίας"
 
-#: ../src/client/application/geary-controller.vala:63
+#: ../src/client/application/geary-controller.vala:67
 msgid "Mark conversations"
 msgstr "Σήμανση συνομιλιών"
 
-#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:68
 msgid "Add label to conversation"
 msgstr "Προσθήκη ετικέτας στην συνομιλία"
 
-#: ../src/client/application/geary-controller.vala:65
+#: ../src/client/application/geary-controller.vala:69
 msgid "Add label to conversations"
 msgstr "Προσθήκη ετικέτας στις συνομιλίες"
 
-#: ../src/client/application/geary-controller.vala:66
-#: ../src/client/application/geary-controller.vala:311
+#: ../src/client/application/geary-controller.vala:70
+#: ../src/client/application/geary-controller.vala:316
 msgid "Move conversation"
 msgstr "Μετακίνηση συνομιλίας"
 
-#: ../src/client/application/geary-controller.vala:67
+#: ../src/client/application/geary-controller.vala:71
 msgid "Move conversations"
 msgstr "Μετακίνηση συνομιλιών"
 
-#: ../src/client/application/geary-controller.vala:248
+#: ../src/client/application/geary-controller.vala:253
 msgid "A_ccounts"
 msgstr "Λ_ογαριασμοί"
 
-#: ../src/client/application/geary-controller.vala:253
+#: ../src/client/application/geary-controller.vala:258
 #: ../src/client/components/stock.vala:27
 msgid "_Preferences"
 msgstr "_Προτιμήσεις"
 
-#: ../src/client/application/geary-controller.vala:257
+#: ../src/client/application/geary-controller.vala:262
 #: ../src/client/components/stock.vala:25
 msgid "_Help"
 msgstr "_Βοήθεια"
 
-#: ../src/client/application/geary-controller.vala:261
+#: ../src/client/application/geary-controller.vala:266
 #: ../src/client/components/stock.vala:21
 msgid "_About"
 msgstr "Σ_χετικά με"
 
-#: ../src/client/application/geary-controller.vala:265
+#: ../src/client/application/geary-controller.vala:270
 msgid "_Donate"
 msgstr "_Δωρεά"
 
-#: ../src/client/application/geary-controller.vala:269
+#: ../src/client/application/geary-controller.vala:274
 #: ../src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "Έ_ξοδος"
 
-#: ../src/client/application/geary-controller.vala:274
+#: ../src/client/application/geary-controller.vala:279
 msgid "_Mark as..."
 msgstr "_Σήμανση ως..."
 
-#: ../src/client/application/geary-controller.vala:280
+#: ../src/client/application/geary-controller.vala:285
 msgid "Mark as _Read"
 msgstr "Σήμανση ως α_ναγνωσμένο"
 
-#: ../src/client/application/geary-controller.vala:286
+#: ../src/client/application/geary-controller.vala:291
 msgid "Mark as _Unread"
 msgstr "Σήμανση ως α_διάβαστο"
 
-#: ../src/client/application/geary-controller.vala:292
+#: ../src/client/application/geary-controller.vala:297
 msgid "_Star"
 msgstr "_Αστέρι"
 
-#: ../src/client/application/geary-controller.vala:297
+#: ../src/client/application/geary-controller.vala:302
 msgid "U_nstar"
 msgstr "Κα_τάργηση αστεριού"
 
-#: ../src/client/application/geary-controller.vala:307
+#: ../src/client/application/geary-controller.vala:312
 msgid "Add label"
 msgstr "Προσθήκη ετικέτας"
 
-#: ../src/client/application/geary-controller.vala:308
+#: ../src/client/application/geary-controller.vala:313
 msgid "_Label"
 msgstr "_Ετικέτα"
 
-#: ../src/client/application/geary-controller.vala:312
+#: ../src/client/application/geary-controller.vala:317
 msgid "_Move"
 msgstr "_Μετακίνηση"
 
-#: ../src/client/application/geary-controller.vala:316
+#: ../src/client/application/geary-controller.vala:321
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "Δημιουργία νέου μηνύματος (Ctrl+N, N)"
+msgstr "Σύνθεση νέου μηνύματος (Ctrl+N, N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:320
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1546
+#: ../src/client/application/geary-controller.vala:325
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1574
 msgid "_Reply"
 msgstr "_Απάντηση"
 
-#: ../src/client/application/geary-controller.vala:321
+#: ../src/client/application/geary-controller.vala:326
 msgid "Reply (Ctrl+R, R)"
 msgstr "Απάντηση (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:325
+#: ../src/client/application/geary-controller.vala:330
 msgid "R_eply All"
 msgstr "Α_πάντηση σε όλους"
 
-#: ../src/client/application/geary-controller.vala:326
+#: ../src/client/application/geary-controller.vala:331
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Απάντηση σε όλους (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:331
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
+#: ../src/client/application/geary-controller.vala:336
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
 msgid "_Forward"
 msgstr "_Μπροστά"
 
-#: ../src/client/application/geary-controller.vala:332
+#: ../src/client/application/geary-controller.vala:337
 msgid "Forward (Ctrl+L, F)"
 msgstr "Προώθηση (Ctrl+F, F)"
 
-#: ../src/client/application/geary-controller.vala:615
+#: ../src/client/application/geary-controller.vala:620
 msgid "Your settings are insecure"
 msgstr "Οι ρυθμίσεις σας είναι επισφαλείς"
 
-#: ../src/client/application/geary-controller.vala:616
+#: ../src/client/application/geary-controller.vala:621
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
 msgstr ""
 "Οι ρυθμίσεις σας του IMAP και/η του SMTP δεν διευκρινίζουν SSL ή TLS. Αυτό "
-"σημαίνει ότι το όνομα χρήστη και ο κωδικός πρόσβασής σας θα μπορούσε να "
+"σημαίνει ότι το όνομα χρήστη και τον κωδκό πρόσβασης σας θα μπορούσε να "
 "διαβαστεί από άλλο άτομο στο δίκτυο. Είστε βέβαιοι ότι θέλετε να το κάνετε "
 "αυτό;"
 
-#: ../src/client/application/geary-controller.vala:617
+#: ../src/client/application/geary-controller.vala:622
 msgid "Co_ntinue"
 msgstr "Συ_νεχίστε"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:689
-#: ../src/client/components/status-bar.vala:28
+#: ../src/client/application/geary-controller.vala:700
+#: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Σφάλμα κατά την αποστολή του μηνύματος"
 
-#: ../src/client/application/geary-controller.vala:690
+#: ../src/client/application/geary-controller.vala:701
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -423,19 +439,35 @@ msgstr ""
 "επιμένει, παρακαλούμε διαγράψτε χειροκίνητα το μήνυμα από τον φάκελο "
 "εξερχομένων."
 
-#: ../src/client/application/geary-controller.vala:753
+#. Displayed in the space-limited status bar when a message fails to be uploaded
+#. to Sent Mail after being sent.
+#: ../src/client/application/geary-controller.vala:705
+#: ../src/client/components/status-bar.vala:33
+msgid "Error saving sent mail"
+msgstr "Σφάλμα κατά την αποθήκευση του μηνύματος"
+
+#: ../src/client/application/geary-controller.vala:706
+msgid ""
+"Geary encountered an error saving a sent message to Sent Mail.  The message "
+"will stay in your Outbox folder until you delete it."
+msgstr ""
+"Το Geary αντιμετώπισε ένα σφάλμα κατά την αποθήκευση ενός σταλμένου "
+"μηνύματος. Το μήνυμα θα παραμείνει στο φάκελο Εξερχόμενα μέχρι να το "
+"διαγράψετε."
+
+#: ../src/client/application/geary-controller.vala:775
 msgid "Labels"
 msgstr "Ετικέτες"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:765
+#: ../src/client/application/geary-controller.vala:787
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Αδύνατο το άνοιγμα της βάσης δεδομένων για το %s"
 
-#: ../src/client/application/geary-controller.vala:766
+#: ../src/client/application/geary-controller.vala:788
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -461,20 +493,20 @@ msgstr ""
 "και τα συνημμένα της. <b>Η αλληλογραφία στον διακομιστή σας δεν θα "
 "επηρεαστεί.</b>"
 
-#: ../src/client/application/geary-controller.vala:768
+#: ../src/client/application/geary-controller.vala:790
 msgid "_Rebuild"
 msgstr "Αναδόμη_ση"
 
-#: ../src/client/application/geary-controller.vala:768
+#: ../src/client/application/geary-controller.vala:790
 msgid "E_xit"
 msgstr "Έ_ξοδος"
 
-#: ../src/client/application/geary-controller.vala:777
+#: ../src/client/application/geary-controller.vala:799
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
-msgstr "Αδύνατο τη η αναδόμηση της βάσης δεδομένων για το \"%s\""
+msgstr "Αδύνατη η αναδόμηση της βάσης δεδομένων για το \"%s\""
 
-#: ../src/client/application/geary-controller.vala:778
+#: ../src/client/application/geary-controller.vala:800
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -487,14 +519,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:800
-#: ../src/client/application/geary-controller.vala:810
-#: ../src/client/application/geary-controller.vala:821
+#: ../src/client/application/geary-controller.vala:822
+#: ../src/client/application/geary-controller.vala:832
+#: ../src/client/application/geary-controller.vala:843
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Αδύνατο το άνοιγμα του τοπικού γραμματοκιβωτίου για το %s"
 
-#: ../src/client/application/geary-controller.vala:801
+#: ../src/client/application/geary-controller.vala:823
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -514,7 +546,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:811
+#: ../src/client/application/geary-controller.vala:833
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -528,7 +560,7 @@ msgstr ""
 "\n"
 "Παρακαλούμε εγκαταστήστε την τελευταία έκδοση του Geary και ξαναδοκιμάστε."
 
-#: ../src/client/application/geary-controller.vala:822
+#: ../src/client/application/geary-controller.vala:844
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -540,27 +572,28 @@ msgstr ""
 "\n"
 "Παρακαλούμε ελέγξτε τη σύνδεση δικτύου και επανεκκινήστε το Geary."
 
-#: ../src/client/application/geary-controller.vala:1292
+#: ../src/client/application/geary-controller.vala:1338
 #, c-format
 msgid "About %s"
 msgstr "Σχετικά %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1295
+#: ../src/client/application/geary-controller.vala:1341
 msgid "translator-credits"
 msgstr ""
 "Δημήτρης Σπίγγος <dmtrs32@gmail.com>\n"
 "George Petsagourakis <petsagouris@gmail.com>\n"
 "ioza1964 <izamboukas@gmail.com>\n"
-"Petros Dias <petrosdias@gmail.com>"
+"Petros Dias <petrosdias@gmail.com>\n"
+"Μαρία Μαυρίδου <mavridou@gmail.com>"
 
-#: ../src/client/application/geary-controller.vala:1552
+#: ../src/client/application/geary-controller.vala:1605
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Είστε βέβαιοι ότι θέλετε να ανοίξετε το \"%s\";"
 
-#: ../src/client/application/geary-controller.vala:1553
+#: ../src/client/application/geary-controller.vala:1606
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -568,16 +601,16 @@ msgstr ""
 "Τα συνημμένα μπορεί να προκαλέσουν βλάβη στο σύστημά σας, αν ανοιχθούν. "
 "Ανοίξτε αρχεία που προέρχονται μόνο από αξιόπιστες πηγές."
 
-#: ../src/client/application/geary-controller.vala:1554
+#: ../src/client/application/geary-controller.vala:1607
 msgid "Don't _ask me again"
-msgstr "Μην με _ρωτάτε πάλι"
+msgstr "Να μην _ερωτηθώ ξανά"
 
-#: ../src/client/application/geary-controller.vala:1572
+#: ../src/client/application/geary-controller.vala:1625
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Ένα αρχείο με όνομα \"%s\" υπάρχει ήδη. Θέλετε να το αντικαταστήσετε;"
 
-#: ../src/client/application/geary-controller.vala:1574
+#: ../src/client/application/geary-controller.vala:1627
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
@@ -585,19 +618,39 @@ msgstr ""
 "Το αρχείο υπάρχει ήδη στο \"%s\". Η αντικατάστασή του θα αντικαταστήσει το "
 "περιεχόμενό του."
 
-#: ../src/client/application/geary-controller.vala:1577
+#: ../src/client/application/geary-controller.vala:1630
 msgid "_Replace"
 msgstr "_Αντικατάσταση"
 
+#. Find out what to do with the inline composers.
+#. TODO: Remove this in favor of automatically saving drafts
+#: ../src/client/application/geary-controller.vala:1896
+msgid "Close open draft messages?"
+msgstr "Κλείσμο ανοιγμένων πρόχειρων μηνυμάτων;"
+
+#: ../src/client/application/geary-controller.vala:2003
+msgid "Do you want to permanently delete this message?"
+msgid_plural "Do you want to permanently delete these messages?"
+msgstr[0] "Θέλετε να διαγράψετε οριστικά αυτό το μήνυμα;"
+msgstr[1] "Θέλετε να διαγράψετε οριστικά αυτά τα μηνύματα;"
+
+#: ../src/client/application/geary-controller.vala:2005
+msgid "Delete"
+msgstr "Διαγραφή"
+
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
-msgid "%i matches"
-msgstr "%i ευρήματα"
+msgid "%i match"
+msgid_plural "%i matches"
+msgstr[0] "%i ταίριασμα"
+msgstr[1] "%i ταιριάσματα"
 
 #: ../src/client/components/conversation-find-bar.vala:216
 #, c-format
-msgid "%i matches (wrapped)"
-msgstr "%i ευρήματα (από την αρχή)"
+msgid "%i match (wrapped)"
+msgid_plural "%i matches (wrapped)"
+msgstr[0] "%i ταίριασμα (από την αρχή)"
+msgstr[1] "%i ταιριάσματα (από την αρχή)"
 
 #: ../src/client/components/conversation-find-bar.vala:218
 msgid "not found"
@@ -609,26 +662,31 @@ msgstr "δεν βρέθηκε"
 msgid "Search"
 msgstr "Αναζήτηση"
 
-#. Spacer.
 #. Search bar.
-#: ../src/client/components/main-toolbar.vala:84
+#: ../src/client/components/main-toolbar.vala:78
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr ""
 "Αναζητήστε όλη την αλληλογραφία σε λογαριασμό για λέξεις-κλειδιά (Ctrl+S)"
 
-#: ../src/client/components/main-toolbar.vala:205
+#: ../src/client/components/main-toolbar.vala:196
 #, c-format
 msgid "Indexing %s account"
 msgstr "Ευρετηρίαση λογαριασμού %s"
 
-#: ../src/client/components/main-toolbar.vala:212
+#: ../src/client/components/main-toolbar.vala:207
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "Αναζήτηση λογαριασμού %s"
 
+#: ../src/client/components/main-window.vala:302
+#, c-format
+#| msgid "%s (%s)"
+msgid "%s (%d)"
+msgstr "%s (%d)"
+
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: ../src/client/components/status-bar.vala:25
+#: ../src/client/components/status-bar.vala:26
 msgid "Sending..."
 msgstr "Γίνεται η αποστολή..."
 
@@ -642,7 +700,7 @@ msgid "_Cancel"
 msgstr "_Ακύρωση"
 
 #: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/composer.glade.h:46 ../ui/preferences.glade.h:1
+#: ../ui/preferences.glade.h:2
 msgid "_Close"
 msgstr "_Κλείσιμο"
 
@@ -660,11 +718,11 @@ msgstr "_Εκτύπωση..."
 
 #: ../src/client/components/stock.vala:30 ../ui/remove_confirm.glade.h:6
 msgid "_Remove"
-msgstr "_Διαγραφή"
+msgstr "Α_φαίρεση "
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1042
 msgid "Select _All"
 msgstr "Ε_πιλογή όλων"
 
@@ -672,260 +730,282 @@ msgstr "Ε_πιλογή όλων"
 msgid "_Keep"
 msgstr "Δια_τήρηση"
 
-#: ../src/client/composer/composer-window.vala:40
-msgid "New Message"
-msgstr "Νέο μήνυμα"
-
-#: ../src/client/composer/composer-window.vala:41
+#: ../src/client/composer/composer-widget.vala:53
 msgid "Saved"
 msgstr "Αποθηκεύτηκε"
 
-#: ../src/client/composer/composer-window.vala:42
+#: ../src/client/composer/composer-widget.vala:54
 msgid "Saving"
 msgstr "Αποθηκεύεται"
 
-#: ../src/client/composer/composer-window.vala:43
+#: ../src/client/composer/composer-widget.vala:55
 msgid "Error saving"
 msgstr "Σφάλμα κατά την αποθήκευση"
 
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-window.vala:95
+#: ../src/client/composer/composer-widget.vala:102
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr "επισύναψη|περιεχόμενο|περικλείω|γράμμα εξώφυλλου"
 
-#: ../src/client/composer/composer-window.vala:681
+#: ../src/client/composer/composer-widget.vala:846
 msgid "Do you want to discard the unsaved message?"
 msgstr "Θέλετε να απορρίψετε το μη αποθηκευμένο μήνυμα;"
 
-#: ../src/client/composer/composer-window.vala:684
+#: ../src/client/composer/composer-widget.vala:849
+#: ../src/client/composer/composer-widget.vala:853
 msgid "Do you want to discard this message?"
 msgstr "Θέλετε να απορρίψετε αυτό το μήνυμα;"
 
-#: ../src/client/composer/composer-window.vala:761
+#: ../src/client/composer/composer-widget.vala:934
 msgid "Send message with an empty subject and body?"
 msgstr "Να αποσταλεί το μήνυμα με κενό θέμα και περιεχόμενο;"
 
-#: ../src/client/composer/composer-window.vala:763
+#: ../src/client/composer/composer-widget.vala:936
 msgid "Send message with an empty subject?"
 msgstr "Να αποσταλεί το μήνυμα με κενό θέμα;"
 
-#: ../src/client/composer/composer-window.vala:765
+#: ../src/client/composer/composer-widget.vala:938
 msgid "Send message with an empty body?"
 msgstr "Να αποσταλεί το μήνυμα με κενό περιεχόμενο;"
 
-#: ../src/client/composer/composer-window.vala:767
+#: ../src/client/composer/composer-widget.vala:940
 msgid "Send message without an attachment?"
 msgstr "Να αποσταλεί το μήνυμα χωρίς συνημμένο;"
 
-#: ../src/client/composer/composer-window.vala:950
+#: ../src/client/composer/composer-widget.vala:1123
 msgid "Cannot add attachment"
 msgstr "Δεν είναι δυνατή η προσθήκη συνημμένου"
 
-#: ../src/client/composer/composer-window.vala:961
+#: ../src/client/composer/composer-widget.vala:1134
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Το \"%s\" δεν ήταν δυνατό να βρεθεί."
 
-#: ../src/client/composer/composer-window.vala:968
+#: ../src/client/composer/composer-widget.vala:1141
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "Το \"%s\" είναι ένας φάκελος."
 
-#: ../src/client/composer/composer-window.vala:975
+#: ../src/client/composer/composer-widget.vala:1148
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "Το \"%s\" είναι ένα άδειο αρχείο."
 
-#: ../src/client/composer/composer-window.vala:989
+#: ../src/client/composer/composer-widget.vala:1162
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Το \"%s\" δεν ήταν δυνατό να ανοιχτεί για ανάγνωση."
 
-#: ../src/client/composer/composer-window.vala:996
+#: ../src/client/composer/composer-widget.vala:1169
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Το αρχείο \"%s\" έχει ήδη επισυναφθεί για παράδοση."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-window.vala:1005
+#: ../src/client/composer/composer-widget.vala:1178
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-window.vala:1267
+#: ../src/client/composer/composer-widget.vala:1454
 msgid "Select Color"
-msgstr "Επιλογή Χρώματος"
+msgstr "Επιλογή χρώματος"
+
+#. Composer label (with mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#: ../src/client/composer/composer-widget.vala:1900
+msgid "_From:"
+msgstr "_Από:"
+
+#. For other types of messages, just show the from account.
+#. Composer label (without mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#. Geary account mail will be sent from
+#: ../src/client/composer/composer-widget.vala:1916
+#: ../src/client/conversation-viewer/conversation-viewer.vala:635
+#: ../ui/composer.glade.h:42
+msgid "From:"
+msgstr "Από:"
+
+#. Copyright 2011-2014 Yorba Foundation
+#. *
+#. * This software is licensed under the GNU Lesser General Public License
+#. * (version 2.1 or later).  See the COPYING file in this distribution.
+#.
+#. Window for sending messages.
+#: ../src/client/composer/composer-window.vala:10
+msgid "New Message"
+msgstr "Νέο μήνυμα"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "Εγώ"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:254
+#: ../src/client/conversation-viewer/conversation-viewer.vala:260
 msgid "No conversations selected."
 msgstr "Δεν επιλέχθηκαν συνομιλίες."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:256
+#: ../src/client/conversation-viewer/conversation-viewer.vala:262
 #, c-format
-msgid "%u conversations selected."
-msgstr "%u συνομιλίες επιλέχθηκαν."
+msgid "%u conversation selected."
+msgid_plural "%u conversations selected."
+msgstr[0] "%u συνομιλία επιλέχθηκε."
+msgstr[1] "%u συνομιλίες επιλέχθηκαν."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:283
+#: ../src/client/conversation-viewer/conversation-viewer.vala:291
 msgid "No search results found."
 msgstr "Δεν υπάρχουν ευρήματα."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:285
+#: ../src/client/conversation-viewer/conversation-viewer.vala:293
 msgid "No conversations in folder."
 msgstr "Δεν υπάρχουν συνομιλίες στον φάκελο."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:534
 msgid "This message contains remote images."
 msgstr "Αυτό το μήνυμα περιέχει απομακρυσμένες εικόνες."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:524
+#: ../src/client/conversation-viewer/conversation-viewer.vala:534
 msgid "Show Images"
 msgstr "Προβολή εικόνων"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:525
+#: ../src/client/conversation-viewer/conversation-viewer.vala:535
 msgid "Always Show From Sender"
-msgstr "Να εμφανίζεται πάντοτε ο Αποστολέας"
+msgstr "Να εμφανίζεται πάντοτε ο αποστολέας"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:549
+#: ../src/client/conversation-viewer/conversation-viewer.vala:559
 msgid "Edit Draft"
-msgstr "Επεξεργασία Πρόχειρου Μηνύματος"
+msgstr "Επεξεργασία πρόχειρου μηνύματος"
 
-#. Geary account mail will be sent from
-#: ../src/client/conversation-viewer/conversation-viewer.vala:621
-#: ../ui/composer.glade.h:41
-msgid "From:"
-msgstr "Από:"
-
-#. Address(es) e-mail is to be sent to
-#: ../src/client/conversation-viewer/conversation-viewer.vala:624
-#: ../ui/composer.glade.h:36
+#: ../src/client/conversation-viewer/conversation-viewer.vala:638
 msgid "To:"
 msgstr "Προς:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:627
-#: ../ui/composer.glade.h:37
+#: ../src/client/conversation-viewer/conversation-viewer.vala:641
 msgid "Cc:"
 msgstr "Κοινοποίηση:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:630
-#: ../ui/composer.glade.h:39
+#: ../src/client/conversation-viewer/conversation-viewer.vala:644
 msgid "Bcc:"
-msgstr "Κρυφή κοινοποίηση:"
+msgstr "Κρυφή κοιν.:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
-#: ../ui/composer.glade.h:38
+#: ../src/client/conversation-viewer/conversation-viewer.vala:647
 msgid "Subject:"
 msgstr "Θέμα:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:636
+#: ../src/client/conversation-viewer/conversation-viewer.vala:650
 msgid "Date:"
 msgstr "Ημερομηνία:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:842
+#: ../src/client/conversation-viewer/conversation-viewer.vala:857
 #, c-format
-msgid "%u read messages"
-msgstr "%u αναγνωσμένα μηνύματα"
+msgid "%u read message"
+msgid_plural "%u read messages"
+msgstr[0] "%u αναγνωσμένο μήνυμα"
+msgstr[1] "%u αναγνωσμένα μηνύματα"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:989
+#, c-format
+msgid "This message was sent successfully, but could not be saved to %s."
+msgstr ""
+"Αυτό το μήνυμα στάλθηκε με επιτυχία, αλλά δεν μπόρεσε να αποθηκευτεί στο %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:988
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Αντιγραφή"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:996
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1023
 msgid "Copy _Email Address"
 msgstr "Αντιγραφή _διεύθυνσης ηλεκτρονικού ταχυδρομείου"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1001
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1028
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Αντιγραφή _σύνδεσης"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1009
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1036
 msgid "Select _Message"
 msgstr "Επιλογή _μηνύματος"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1048
 msgid "_Inspect"
 msgstr "_Επιθεώρηση"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1246
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1274
 msgid "This link appears to go to"
 msgstr "Αυτός ο σύνδεσμος φαίνεται να πηγαίνει στο"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1247
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1275
 msgid "but actually goes to"
 msgstr "στην πραγματικότητα όμως πάει στο"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1302
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
 msgid " (Invalid?)"
 msgstr " (Άκυρο;)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1494
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1522
 msgid "_Save As..."
 msgstr "_Αποθήκευση ως..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1499
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1527
 msgid "Save All A_ttachments..."
 msgstr "Αποθή_κευση όλων των συνημμένων..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1513
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1541
 msgid "_Save Image As..."
 msgstr "Αποθήκευ_ση εικόνας ως..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1564
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Αποθή_κευση συνημμένου..."
 msgstr[1] "Αποθή_κευση όλων των συνημμένων..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1551
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1579
 msgid "Reply to _All"
 msgstr "Απάντηση σε ό_λους"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1568
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
 msgid "_Mark as Read"
 msgstr "_Σήμανση ως αναγνωσμένα"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1600
 msgid "_Mark as Unread"
 msgstr "_Σήμανση ως μη αναγνωσμένα"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1578
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1606
 msgid "Mark Unread From _Here"
 msgstr "Σημειώστε αδιάβαστα από ε_δώ"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1593
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1621
 msgid "_View Source"
 msgstr "_Προβολή προέλευσης"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1898
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1915
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "Κανένα"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2045
 msgid "Failed to open default text editor."
 msgstr "Απέτυχε να ανοίξετε το προεπιλεγμένο πρόγραμμα επεξεργασίας κειμένου."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:293
+#: ../src/client/conversation-viewer/conversation-web-view.vala:313
 #, c-format
 msgid "%s - Conversation Inspector"
-msgstr "%s - Επόπτης Συνομιλίας"
+msgstr "%s - Επόπτης συνομιλίας"
 
 #: ../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -933,34 +1013,18 @@ msgstr "Επιλέξτε ένα αρχείο"
 
 #: ../src/client/dialogs/attachment-dialog.vala:23
 msgid "_Attach"
-msgstr "_Επισυνάψτε"
+msgstr "_Επισύναψη"
 
 #. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your email password"
-msgstr "Παρακαλώ εισάγετε τον κωδικό πρόσβασης ηλεκτρονικού ταχυδρομείου σας"
-
-#: ../src/client/dialogs/password-dialog.vala:17
-msgid "Unable to login to email server"
-msgstr "Δεν είναι δυνατή η σύνδεση στο διακομιστή ηλεκτρονικού ταχυδρομείου"
-
-#: ../src/client/dialogs/password-dialog.vala:124
-msgid "SSL"
-msgstr "SSL"
-
-#: ../src/client/dialogs/password-dialog.vala:126 ../ui/login.glade.h:26
-msgid "STARTTLS"
-msgstr "STARTTLS"
-
-#: ../src/client/dialogs/password-dialog.vala:128
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:24
-msgid "None"
-msgstr "Kανένας"
+msgid "Please enter your password"
+msgstr ""
+"Παρακαλούμε πληκτρολογήστε τον κωδικό πρόσβασης ηλεκτρονικού ταχυδρομείου σας"
 
 #. Label displaying total number of email messages in a folder
-#: ../src/client/folder-list/folder-list-folder-entry.vala:30
+#: ../src/client/folder-list/folder-list-folder-entry.vala:32
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
@@ -968,7 +1032,7 @@ msgstr[0] "%d μήνυμα"
 msgstr[1] "%d μηνύματα"
 
 #. / Label displaying number of unread email messages in a folder
-#: ../src/client/folder-list/folder-list-folder-entry.vala:37
+#: ../src/client/folder-list/folder-list-folder-entry.vala:39
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
@@ -978,14 +1042,14 @@ msgstr[1] "%d μη αναγνωσμένα"
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
 #. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
-#: ../src/client/folder-list/folder-list-folder-entry.vala:43
+#: ../src/client/folder-list/folder-list-folder-entry.vala:45
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
 
 #: ../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr "Κυτία εισερχόμενων"
+msgstr "Εισερχόμενα"
 
 #: ../src/client/folder-list/folder-list-search-branch.vala:44
 #, c-format
@@ -997,7 +1061,7 @@ msgstr[1] "%d αποτελέσματα"
 #: ../src/client/notification/libmessagingmenu.vala:75
 #, c-format
 msgid "%s - New Messages"
-msgstr "%s - Νέα Μηνύματα"
+msgstr "%s - Νέα μηνύματα"
 
 #: ../src/client/notification/libnotify.vala:72
 #, c-format
@@ -1094,26 +1158,26 @@ msgid_plural "%dm ago"
 msgstr[0] "πριν %dλ"
 msgstr[1] "πριν %dλ"
 
-#: ../src/client/util/util-date.vala:170
+#: ../src/client/util/util-date.vala:171
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "πριν %dω"
 msgstr[1] "πριν %dω"
 
-#: ../src/client/util/util-date.vala:177
+#: ../src/client/util/util-date.vala:178
 msgid "Yesterday"
 msgstr "Χθές"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/client/util/util-date.vala:182
+#: ../src/client/util/util-date.vala:183
 #, c-format
 msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:734
+#: ../src/engine/rfc822/rfc822-message.vala:741
 msgid "(no subject)"
 msgstr "(χωρίς θέμα)"
 
@@ -1187,7 +1251,7 @@ msgstr "Ανεπιθύμητα"
 
 #: ../src/engine/api/geary-special-folder-type.vala:45
 msgid "Trash"
-msgstr "Άχρηστα"
+msgstr "Απορρίμματα"
 
 #: ../src/engine/api/geary-special-folder-type.vala:48
 msgid "Outbox"
@@ -1197,48 +1261,100 @@ msgstr "Εξερχόμενα"
 msgid "Archive"
 msgstr "Αρχειοθέτηση"
 
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:25
+msgid "None"
+msgstr "Kανένας"
+
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
 #. / messages with attachments with a particular name.
-#: ../src/engine/imap-db/imap-db-account.vala:632
+#: ../src/engine/imap-db/imap-db-account.vala:662
 msgid "attachment"
 msgstr "συνημμένο"
 
 #. / Can be typed in the search box like bcc:johndoe@example.com to find
 #. / messages bcc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:635
+#. Fields we allow the token to be "me" as in from:me.
+#: ../src/engine/imap-db/imap-db-account.vala:665
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "bcc"
 msgstr "κρυφή κοινοποίηση"
 
 #. / Can be typed in the search box like body:word to find the word only
 #. / if it occurs in the body of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:638
+#: ../src/engine/imap-db/imap-db-account.vala:668
 msgid "body"
 msgstr "σώμα"
 
 #. / Can be typed in the search box like cc:johndoe@example.com to find
 #. / messages cc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:641
+#: ../src/engine/imap-db/imap-db-account.vala:671
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "cc"
 msgstr "κοινοποίηση"
 
 #. / Can be typed in the search box like from:johndoe@example.com to
 #. / find messages from a particular sender.
-#: ../src/engine/imap-db/imap-db-account.vala:644
+#: ../src/engine/imap-db/imap-db-account.vala:674
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "from"
 msgstr "από"
 
 #. / Can be typed in the search box like subject:word to find the word
 #. / only if it occurs in the subject of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:647
+#: ../src/engine/imap-db/imap-db-account.vala:677
 msgid "subject"
 msgstr "Θέμα"
 
 #. / Can be typed in the search box like to:johndoe@example.com to find
 #. / messages received by a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:650
+#: ../src/engine/imap-db/imap-db-account.vala:680
+#: ../src/engine/imap-db/imap-db-account.vala:684
 msgid "to"
 msgstr "προς"
+
+#. "me" can be typed like from:me or cc:me, etc. as a shorthand
+#. to find mail to or from yourself in search.
+#: ../src/engine/imap-db/imap-db-account.vala:699
+msgid "me"
+msgstr "εμένα"
+
+#. List of folder names to match for Drafts, separated by |.  Please add localized common
+#. names for the Drafts folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:521
+msgid "Drafts | Draft"
+msgstr "Πρόχειρα | Πρόχειρο | Drafts | Draft"
+
+#. List of folder names to match for Sent Mail, separated by |.  Please add localized common
+#. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:526
+msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
+msgstr ""
+"Απεσταλμένα | Απεσταλμένα μηνύματα | Απεσταλμένα μηνύματα ηλ. ταχυδρομείου | "
+"Sent | Sent Mail | Sent Email | Sent E-Mail"
+
+#. List of folder names to match for Spam, separated by |.  Please add localized common
+#. names for the Spam folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:531
+msgid ""
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
+"| Bulk E-Mail"
+msgstr ""
+"Ανεπιθύμητα | Ανεπιθύμητη αλληλογραφία | Ανεπιθύμητα μηνύματα ηλεκτρονικού "
+"ταχυδρομείου | Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk "
+"Mail | Bulk Email | Bulk E-Mail"
+
+#. List of folder names to match for Trash, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
+msgid "Trash | Rubbish | Rubbish Bin"
+msgstr ""
+"Απορρίμματα | Κάδος απορριμμάτων | Κάδος Ανακύκλωσης | Trash | Rubbish | "
+"Rubbish Bin"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1308,7 +1424,7 @@ msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
-"Υπάρχει ένα παράθυρο δημιουργίας μηνύματος ανοιχτό που είναι συνδεδεμένο με "
+"Υπάρχει ένα παράθυρο σύνθεσης μηνύματος ανοιχτό που είναι συνδεδεμένο με "
 "αυτόν τον λογαριασμό. Στείλτε το μήνυμα ή ακυρώστε το και προσπαθήστε ξανά."
 
 #: ../ui/account_list.glade.h:1
@@ -1390,23 +1506,23 @@ msgstr "Επικόλληση _με μορφοποίηση"
 
 #: ../ui/composer.glade.h:18
 msgid "Bold (Ctrl+B)"
-msgstr "Έντονη Γραφή (Ctrl+B)"
+msgstr "Έντονη γραφή (Ctrl+B)"
 
 #: ../ui/composer.glade.h:19
 msgid "Italic (Ctrl+I)"
-msgstr "Πλάγια Γραφή (Ctrl+I)"
+msgstr "Πλάγια γραφή (Ctrl+I)"
 
 #: ../ui/composer.glade.h:20
 msgid "Underline (Ctrl+U)"
-msgstr "Υπογραμμισμένη Γραφή (Ctrl+U)"
+msgstr "Υπογραμμισμένη γραφή (Ctrl+U)"
 
 #: ../ui/composer.glade.h:21
 msgid "Strikethrough (Ctrl+K)"
-msgstr "Διαγραμμισμένη Γραφή (Ctrl+K)"
+msgstr "Διαγραμμισμένη γραφή (Ctrl+K)"
 
 #: ../ui/composer.glade.h:22
 msgid "_Rich Text"
-msgstr "Κείμενο _Πλούσιας Μορφής"
+msgstr "Κείμενο _πλούσιας μορφής"
 
 #: ../ui/composer.glade.h:23
 msgid "Lar_ge"
@@ -1456,23 +1572,53 @@ msgstr "_Σταθερό πλάτος"
 msgid "Fixed Width"
 msgstr "Σταθερό πλάτος"
 
-#: ../ui/composer.glade.h:42
+#: ../ui/composer.glade.h:35
+msgid "Edit recipients"
+msgstr "Επεξεργασία παραληπτών"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:37
+msgid "_To:"
+msgstr "Πρ_ος:"
+
+#: ../ui/composer.glade.h:38
+msgid "_Cc:"
+msgstr "_Κοινοποίηση:"
+
+#: ../ui/composer.glade.h:39
+msgid "_Subject:"
+msgstr "_Θέμα:"
+
+#: ../ui/composer.glade.h:40
+msgid "_Bcc:"
+msgstr "Κρ_υφή κοιν.:"
+
+#: ../ui/composer.glade.h:43
 msgid "Drop files here"
 msgstr "Αφήστε τα αρχεία εδώ"
 
-#: ../ui/composer.glade.h:43
+#: ../ui/composer.glade.h:44
 msgid "To add them as attachments"
 msgstr "Για να τα προσθέσετε ως συνημμένα"
 
-#: ../ui/composer.glade.h:44
+#: ../ui/composer.glade.h:45
 msgid "_Attach File"
 msgstr "_Επισύναψη αρχείου"
 
-#: ../ui/composer.glade.h:45
+#: ../ui/composer.glade.h:46
 msgid "_Include Original Attachments"
 msgstr "Να _συμπεριλαμβάνονται τα αρχικά συνημμένα"
 
 #: ../ui/composer.glade.h:47
+msgid "C_lose"
+msgstr "Κ_λείσιμο"
+
+#: ../ui/composer.glade.h:48
+#| msgid "_Attach"
+msgid "Detach"
+msgstr "Απόσπαση"
+
+#: ../ui/composer.glade.h:49
 msgid "_Send"
 msgstr "Α_ποστολή"
 
@@ -1501,182 +1647,190 @@ msgid "Password"
 msgstr "Κωδικός πρόσβασης"
 
 #: ../ui/login.glade.h:2
-msgid "E_mail address:"
-msgstr "Διεύθυνση ηλεκτρονικού _ταχυδρομίου:"
+#| msgid "E_mail address:"
+msgid "E_mail address"
+msgstr "Διεύθυνση ηλεκτρονικού _ταχυδρομίου"
 
-#: ../ui/login.glade.h:3 ../ui/password-dialog.glade.h:2
-msgid "_Password:"
-msgstr "Κ_ωδικός:"
+#: ../ui/login.glade.h:3
+#| msgid "_Password:"
+msgid "_Password"
+msgstr "_Κωδικός πρόσβασης"
 
 #: ../ui/login.glade.h:4
-msgid "S_ervice:"
-msgstr "_Υπηρεσία:"
+#| msgid "S_ervice:"
+msgid "S_ervice"
+msgstr "_Υπηρεσία"
 
 #: ../ui/login.glade.h:5
-msgid "N_ame:"
-msgstr "Όν_ομα:"
+#| msgid "N_ame:"
+msgid "N_ame"
+msgstr "Όν_ομα"
 
 #: ../ui/login.glade.h:7
-msgid "N_ickname:"
-msgstr "_Ψευδώνυμο:"
+#| msgid "N_ickname:"
+msgid "N_ickname"
+msgstr "_Ψευδώνυμο"
 
 #: ../ui/login.glade.h:8
 msgid "Work, Home, etc."
 msgstr "Δουλειά, Σπίτι, κ.λπ."
 
-#: ../ui/login.glade.h:9 ../ui/password-dialog.glade.h:9
+#: ../ui/login.glade.h:9
+msgid "_Save sent mail"
+msgstr "Απο_θήκευση απεσταλμένων μηνυμάτων"
+
+#: ../ui/login.glade.h:10
 msgid "IMAP settings"
 msgstr "Ρυθμίσεις IMAP"
 
-#: ../ui/login.glade.h:10
-msgid "Se_rver:"
-msgstr "Δ_ιακομιστής:"
-
 #: ../ui/login.glade.h:11
-msgid "P_ort:"
-msgstr "Πόρτ_α:"
+#| msgid "Se_rver:"
+msgid "Se_rver"
+msgstr "Δ_ιακομιστής"
 
 #: ../ui/login.glade.h:12
-msgid "Ser_ver:"
-msgstr "Δ_ιακομιστής:"
+#| msgid "P_ort:"
+msgid "P_ort"
+msgstr "_Θύρα"
 
 #: ../ui/login.glade.h:13
-msgid "Por_t:"
-msgstr "Πόρτ_α:"
+#| msgid "Ser_ver:"
+msgid "Ser_ver"
+msgstr "Δ_ιακομιστής"
 
-#: ../ui/login.glade.h:14 ../ui/password-dialog.glade.h:13
+#: ../ui/login.glade.h:14
+#| msgid "Por_t:"
+msgid "Por_t"
+msgstr "Θύ_ρα"
+
+#: ../ui/login.glade.h:15
 msgid "SMTP settings"
 msgstr "Ρυθμίσεις SMTP"
 
-#: ../ui/login.glade.h:15
-msgid "User_name:"
-msgstr "Όνομα_χρήστη:"
-
 #: ../ui/login.glade.h:16
-msgid "Pass_word:"
-msgstr "Κ_ωδικός:"
+#| msgid "User_name:"
+msgid "User_name"
+msgstr "Όνομα_χρήστη"
 
 #: ../ui/login.glade.h:17
+#| msgid "Pass_word:"
+msgid "Pass_word"
+msgstr "Κ_ωδικός πρόσβασης"
+
+#: ../ui/login.glade.h:18
 msgid "SMTP username"
 msgstr "Όνομα χρήστη SMTP"
 
-#: ../ui/login.glade.h:18
-msgid "SMTP password"
-msgstr "Συνθηματικό SMTP"
-
 #: ../ui/login.glade.h:19
-msgid "_Username:"
-msgstr "Ό_νομα χρήστη:"
+msgid "SMTP password"
+msgstr "Κωδικός πρόσβασης SMTP"
 
 #: ../ui/login.glade.h:20
+#| msgid "_Username:"
+msgid "_Username"
+msgstr "Ό_νομα χρήστη"
+
+#: ../ui/login.glade.h:21
 msgid "IMAP username"
 msgstr "Όνομα χρήστη IMAP"
 
-#: ../ui/login.glade.h:21
-msgid "IMAP password"
-msgstr "Συνθηματικό IMAP"
-
 #: ../ui/login.glade.h:22
-msgid "Encr_yption:"
-msgstr "Κρυπ_τογράφηση:"
+msgid "IMAP password"
+msgstr "Κωδικός πρόσβασης IMAP"
 
 #: ../ui/login.glade.h:23
-msgid "Encrypt_ion:"
-msgstr "Κρυπτογράφ_ηση:"
+#| msgid "Encr_yption:"
+msgid "Encr_yption"
+msgstr "Κρυπ_τογράφηση"
 
-#: ../ui/login.glade.h:25
+#: ../ui/login.glade.h:24
+#| msgid "Encrypt_ion:"
+msgid "Encrypt_ion"
+msgstr "Κρυπτογράφ_ηση"
+
+#: ../ui/login.glade.h:26
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
 #: ../ui/login.glade.h:27
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
+#: ../ui/login.glade.h:28
 msgid "No authentication re_quired"
 msgstr "Δεν απαιτείται π_ιστοποίηση"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:29
+msgid "Use IMAP cre_dentials"
+msgstr "Χρήση _διαπιστευτηρίων IMAP"
+
+#: ../ui/login.glade.h:30
 msgid "Storage"
 msgstr "Αποθήκευση"
 
-#: ../ui/login.glade.h:29
-msgid "_Download mail:"
-msgstr "_Μεταφόρτωση αλληλογραφίας:"
+#: ../ui/login.glade.h:31
+#| msgid "_Download mail:"
+msgid "_Download mail"
+msgstr "_Λήψη αλληλογραφίας"
+
+#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
+msgid "Composer"
+msgstr "Συνθέτης"
+
+#: ../ui/login.glade.h:33
+msgid "Save dra_fts on server"
+msgstr "Αποθήκευση πρόχειρων στον διακομιστή"
+
+#: ../ui/login.glade.h:34
+msgid "Si_gn emails:"
+msgstr "Υπο_γραφή μηνυμάτων αλληλογραφίας:"
 
 #: ../ui/password-dialog.glade.h:1
+msgid "SMTP Credentials"
+msgstr "Διαπιστευτήρια SMTP"
+
+#: ../ui/password-dialog.glade.h:2
 msgid "Username:"
 msgstr "Όνομα χρήστη:"
 
 #: ../ui/password-dialog.glade.h:3
-msgid "IMAP Credentials"
-msgstr "Διαπιστευτήρια IMAP"
+msgid "Password:"
+msgstr "Κωδικός πρόσβασης:"
 
 #: ../ui/password-dialog.glade.h:4
-msgid "SMTP Credentials"
-msgstr "Διαπιστευτήρια SMTP"
+msgid "_Remember password"
+msgstr "Α_πομνημόνευση κωδικού πρόσβασης"
 
-#: ../ui/password-dialog.glade.h:5
-msgid "Password:"
-msgstr "Κωδικός:"
-
-#: ../ui/password-dialog.glade.h:6
-msgid "Service:"
-msgstr "Υπηρεσία:"
-
-#: ../ui/password-dialog.glade.h:7
-msgid "Real name:"
-msgstr "Πραγματικό όνομα:"
-
-#: ../ui/password-dialog.glade.h:8
-msgid "General"
-msgstr "Γενικά"
-
-#: ../ui/password-dialog.glade.h:10
-msgid "Server:"
-msgstr "Διακομιστής:"
-
-#: ../ui/password-dialog.glade.h:11
-msgid "Port:"
-msgstr "Πόρτα:"
-
-#: ../ui/password-dialog.glade.h:12
-msgid "SSL/TLS encryption:"
-msgstr "Κρυπτογράφηση SSL/TLS:"
-
-#: ../ui/password-dialog.glade.h:14
-msgid "_Details"
-msgstr "_Λεπτομέρειες"
-
-#: ../ui/password-dialog.glade.h:15
-msgid "_Remember passwords"
-msgstr "Α_πομνημόνευση κωδικών πρόσβασης"
-
-#: ../ui/preferences.glade.h:2
-msgid "Reading"
-msgstr "Διάβασμα"
+#: ../ui/preferences.glade.h:1
+#| msgid "_Preferences"
+msgid "Preferences"
+msgstr "Προτιμήσεις"
 
 #: ../ui/preferences.glade.h:3
+msgid "Reading"
+msgstr "Aνάγνωση"
+
+#: ../ui/preferences.glade.h:4
 msgid "_Automatically select next message"
 msgstr "_Αυτόματη επιλογή επόμενου μηνύματας"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences.glade.h:5
 msgid "_Display conversation preview"
 msgstr "Να ε_μφανίζεται η προεπισκόπηση συνομιλίας"
 
-#: ../ui/preferences.glade.h:5
-msgid "Composer"
-msgstr "Συγγραφή"
-
-#: ../ui/preferences.glade.h:6
+#: ../ui/preferences.glade.h:7
 msgid "Enable _spell checking"
 msgstr "Ενεργοποίηση _ορθογράφου"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:8
 msgid "Notifications"
 msgstr "Ειδοποιήσεις"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:9
 msgid "_Play notification sounds"
 msgstr "Α_ναπαραγωγή ήχων ειδοποίησης"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences.glade.h:10
 msgid "Show _notifications for new mail"
 msgstr "Εμφάνιση ειδοποιήσεων για _νέα μηνύματα"
 
@@ -1707,6 +1861,33 @@ msgstr "Διεύθυνση ηλεκτρονικού ταχυδρομείου:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary upgrade in progress."
 msgstr "Η αναβάθμιση του Geary σε εξέλιξη."
+
+#~ msgid "Unable to login to email server"
+#~ msgstr "Δεν είναι δυνατή η σύνδεση στο διακομιστή ηλεκτρονικού ταχυδρομείου"
+
+#~ msgid "SSL"
+#~ msgstr "SSL"
+
+#~ msgid "Service:"
+#~ msgstr "Υπηρεσία:"
+
+#~ msgid "Real name:"
+#~ msgstr "Πραγματικό όνομα:"
+
+#~ msgid "General"
+#~ msgstr "Γενικά"
+
+#~ msgid "Server:"
+#~ msgstr "Διακομιστής:"
+
+#~ msgid "Port:"
+#~ msgstr "Πόρτα:"
+
+#~ msgid "SSL/TLS encryption:"
+#~ msgstr "Κρυπτογράφηση SSL/TLS:"
+
+#~ msgid "_Details"
+#~ msgstr "_Λεπτομέρειες"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "Αρχειοθέτηση συνομιλίας (Delete, Backspace, A)"
