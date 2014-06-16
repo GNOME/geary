@@ -17,8 +17,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-06-12 05:06+0000\n"
-"PO-Revision-Date: 2014-06-12 17:56+0200\n"
+"POT-Creation-Date: 2014-06-12 20:10+0000\n"
+"PO-Revision-Date: 2014-06-12 11:32-0600\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: ../desktop/geary.desktop.in.h:1
 msgid "Geary"
@@ -85,7 +85,7 @@ msgstr "Bienvenido a Geary."
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Enter your account information to get started."
-msgstr "Introduzca la información de su cuenta para empezar. "
+msgstr "Proporcione la información de su cuenta para empezar."
 
 #: ../src/client/accounts/add-edit-page.vala:247
 msgid "2 weeks back"
@@ -617,17 +617,17 @@ msgstr "_Reemplazar"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:1896
+#: ../src/client/application/geary-controller.vala:1897
 msgid "Close open draft messages?"
 msgstr "¿Quiere cerrar los mensajes en borrador abiertos?"
 
-#: ../src/client/application/geary-controller.vala:2003
+#: ../src/client/application/geary-controller.vala:2006
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "¿Quiere eliminar permanentemente este mensaje?"
 msgstr[1] "¿Quiere eliminar permanentemente estos mensajes?"
 
-#: ../src/client/application/geary-controller.vala:2005
+#: ../src/client/application/geary-controller.vala:2008
 msgid "Delete"
 msgstr "Eliminar"
 
@@ -672,10 +672,9 @@ msgid "Search %s account"
 msgstr "Buscar la cuenta %s"
 
 #: ../src/client/components/main-window.vala:302
-#, fuzzy, c-format
-#| msgid "%s (%s)"
+#, c-format
 msgid "%s (%d)"
-msgstr "%s (%s)"
+msgstr "%s (%d)"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
@@ -1312,14 +1311,14 @@ msgstr "yo"
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:521
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:535
 msgid "Drafts | Draft"
 msgstr "Borradores | Borrador | Drafts | Draft"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:526
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:540
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Enviados | Correo enviado | Bandeja de salida | Sent | Sent Mail | Sent "
@@ -1328,7 +1327,7 @@ msgstr ""
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:531
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:545
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1339,7 +1338,7 @@ msgstr ""
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:550
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Papelera | Eliminados | Trash | Rubbish | Rubbish Bin"
 
@@ -1632,34 +1631,24 @@ msgid "Password"
 msgstr "Contraseña"
 
 #: ../ui/login.glade.h:2
-#, fuzzy
-#| msgid "E_mail address:"
 msgid "E_mail address"
-msgstr "_Dirección de correo electrónico:"
+msgstr "_Dirección de correo electrónico"
 
 #: ../ui/login.glade.h:3
-#, fuzzy
-#| msgid "_Password:"
 msgid "_Password"
-msgstr "_Contraseña:"
+msgstr "_Contraseña"
 
 #: ../ui/login.glade.h:4
-#, fuzzy
-#| msgid "S_ervice:"
 msgid "S_ervice"
-msgstr "S_ervicio:"
+msgstr "S_ervicio"
 
 #: ../ui/login.glade.h:5
-#, fuzzy
-#| msgid "N_ame:"
 msgid "N_ame"
-msgstr "N_ombre:"
+msgstr "N_ombre"
 
 #: ../ui/login.glade.h:7
-#, fuzzy
-#| msgid "N_ickname:"
 msgid "N_ickname"
-msgstr "_Apodo:"
+msgstr "_Apodo"
 
 #: ../ui/login.glade.h:8
 msgid "Work, Home, etc."
@@ -1674,44 +1663,32 @@ msgid "IMAP settings"
 msgstr "Configuración IMAP"
 
 #: ../ui/login.glade.h:11
-#, fuzzy
-#| msgid "Se_rver:"
 msgid "Se_rver"
-msgstr "Se_rvidor:"
+msgstr "Se_rvidor"
 
 #: ../ui/login.glade.h:12
-#, fuzzy
-#| msgid "P_ort:"
 msgid "P_ort"
-msgstr "P_uerto:"
+msgstr "P_uerto"
 
 #: ../ui/login.glade.h:13
-#, fuzzy
-#| msgid "Ser_ver:"
 msgid "Ser_ver"
-msgstr "Ser_vidor:"
+msgstr "Ser_vidor"
 
 #: ../ui/login.glade.h:14
-#, fuzzy
-#| msgid "Por_t:"
 msgid "Por_t"
-msgstr "Pue_rto:"
+msgstr "Pue_rto"
 
 #: ../ui/login.glade.h:15
 msgid "SMTP settings"
 msgstr "Configuración de SMTP"
 
 #: ../ui/login.glade.h:16
-#, fuzzy
-#| msgid "User_name:"
 msgid "User_name"
-msgstr "_Nombre de usuario:"
+msgstr "_Nombre de usuario"
 
 #: ../ui/login.glade.h:17
-#, fuzzy
-#| msgid "Pass_word:"
 msgid "Pass_word"
-msgstr "_Contraseña:"
+msgstr "_Contraseña"
 
 #: ../ui/login.glade.h:18
 msgid "SMTP username"
@@ -1722,10 +1699,8 @@ msgid "SMTP password"
 msgstr "Contraseña de SMTP"
 
 #: ../ui/login.glade.h:20
-#, fuzzy
-#| msgid "_Username:"
 msgid "_Username"
-msgstr "Nombre de _usuario:"
+msgstr "Nombre de _usuario"
 
 #: ../ui/login.glade.h:21
 msgid "IMAP username"
@@ -1736,16 +1711,12 @@ msgid "IMAP password"
 msgstr "Contraseña de IMAP"
 
 #: ../ui/login.glade.h:23
-#, fuzzy
-#| msgid "Encr_yption:"
 msgid "Encr_yption"
-msgstr "Ci_frado:"
+msgstr "Ci_frado"
 
 #: ../ui/login.glade.h:24
-#, fuzzy
-#| msgid "Encrypt_ion:"
 msgid "Encrypt_ion"
-msgstr "Cifra_do:"
+msgstr "Cifra_do"
 
 #: ../ui/login.glade.h:26
 msgid "SSL/TLS"
@@ -1768,10 +1739,8 @@ msgid "Storage"
 msgstr "Almacenamiento"
 
 #: ../ui/login.glade.h:31
-#, fuzzy
-#| msgid "_Download mail:"
 msgid "_Download mail"
-msgstr "_Descargar correo:"
+msgstr "_Descargar correo"
 
 #: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
 msgid "Composer"
@@ -1779,11 +1748,11 @@ msgstr "Compositor"
 
 #: ../ui/login.glade.h:33
 msgid "Save dra_fts on server"
-msgstr ""
+msgstr "Guardar _borradores en el servidor"
 
 #: ../ui/login.glade.h:34
 msgid "Si_gn emails:"
-msgstr ""
+msgstr "_Firmar los mensajes:"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
@@ -1802,10 +1771,8 @@ msgid "_Remember password"
 msgstr "_Recordar la contraseña"
 
 #: ../ui/preferences.glade.h:1
-#, fuzzy
-#| msgid "_Preferences"
 msgid "Preferences"
-msgstr "_Preferencias"
+msgstr "Preferencias"
 
 #: ../ui/preferences.glade.h:3
 msgid "Reading"
