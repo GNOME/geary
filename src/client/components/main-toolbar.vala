@@ -85,6 +85,8 @@ public class MainToolbar : PillHeaderbar {
         search_upgrade_progress_bar.margin_top = 3;
         search_upgrade_progress_bar.margin_bottom = 3;
         search_upgrade_progress_bar.show_text = true;
+        search_upgrade_progress_bar.visible = false;
+        search_upgrade_progress_bar.no_show_all = true;
         
         // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if !GTK_3_12
