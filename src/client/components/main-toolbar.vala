@@ -68,10 +68,10 @@ public class MainToolbar : PillHeaderbar {
         insert.clear();
         insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
         insert.add(trash_buttons[0] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        add_end(create_pill_buttons(insert));
+        Gtk.Box trash_archive = create_pill_buttons(insert);
         insert.clear();
         insert.add(trash_buttons[1] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        add_end(create_pill_buttons(insert, false));
+        Gtk.Box trash = create_pill_buttons(insert, false);
         
         // Search bar.
         search_entry.width_chars = 28;
@@ -80,13 +80,19 @@ public class MainToolbar : PillHeaderbar {
         search_entry.key_press_event.connect(on_search_key_press);
         on_search_entry_changed(); // set initial state
         search_entry.has_focus = true;
-        add_end(search_upgrade_progress_bar);
-        add_end(search_entry);
         
         // Search upgrade progress bar.
         search_upgrade_progress_bar.margin_top = 3;
         search_upgrade_progress_bar.margin_bottom = 3;
         search_upgrade_progress_bar.show_text = true;
+        
+        // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
+#if !GTK_3_12
+        add_end(trash_archive);
+        add_end(trash);
+        add_end(search_upgrade_progress_bar);
+        add_end(search_entry);
+#endif
         
         // Application button.  If we exported an app menu, we don't need this.
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
@@ -94,6 +100,14 @@ public class MainToolbar : PillHeaderbar {
             insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
             add_end(create_pill_buttons(insert));
         }
+        
+        // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
+#if GTK_3_12
+        add_end(search_entry);
+        add_end(search_upgrade_progress_bar);
+        add_end(trash);
+        add_end(trash_archive);
+#endif
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
     }

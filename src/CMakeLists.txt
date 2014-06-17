@@ -503,6 +503,15 @@ else ()
     message(FATAL_ERROR "WebKitGTK not installed / unknown version detected")
 endif ()
 
+if (GTK312X_FOUND)
+    message(STATUS "GTK+ 3.12 support: ON")
+    
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        -D GTK_3_12
+    )
+endif ()
+
 if (NO_FATAL_WARNINGS)
     message(STATUS "Vala fatal warnings: OFF")
 else ()
