@@ -35,7 +35,13 @@ public class FolderMenu : Gtk.Menu {
         
         show_all();
     }
-
+    
+    public void enable_disable_folder(Geary.Folder folder, bool sensitive) {
+        int index = folder_list.index_of(folder);
+        if (index >= 0)
+            get_children().nth_data(index).sensitive = sensitive;
+    }
+    
     public void remove_folder(Geary.Folder folder) {
         int index = folder_list.index_of(folder);
         folder_list.remove(folder);

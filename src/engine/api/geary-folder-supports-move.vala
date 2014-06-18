@@ -15,6 +15,9 @@ public interface Geary.FolderSupport.Move : Geary.Folder {
     /**
      * Moves messages to another folder.
      *
+     * If the destination is this {@link Folder}, the operation will not move the message in any
+     * way but will return success.
+     *
      * The {@link Geary.Folder} must be opened prior to attempting this operation.
      */
     public abstract async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,

@@ -1296,6 +1296,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         check_open("copy_email_async");
         check_ids("copy_email_async", to_copy);
         
+        // watch for copying to this folder, which is treated as a no-op
+        if (destination.equal_to(path))
+            return;
+        
         CopyEmail copy = new CopyEmail(this, (Gee.List<ImapDB.EmailIdentifier>) to_copy, destination);
         replay_queue.schedule(copy);
         yield copy.wait_for_ready_async(cancellable);
@@ -1305,6 +1309,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("move_email_async");
         check_ids("move_email_async", to_move);
+        
+        // watch for moving to this folder, which is treated as a no-op
+        if (destination.equal_to(path))
+            return;
         
         MoveEmail move = new MoveEmail(this, (Gee.List<ImapDB.EmailIdentifier>) to_move, destination);
         replay_queue.schedule(move);

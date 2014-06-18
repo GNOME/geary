@@ -16,6 +16,9 @@ public interface Geary.FolderSupport.Copy : Geary.Folder {
     /**
      * Copies messages into another folder.
      *
+     * If the destination is this {@link Folder}, the operation will not make a copy of the message
+     * but will return success.
+     *
      * The Folder must be opened prior to attempting this operation.
      */
     public abstract async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,

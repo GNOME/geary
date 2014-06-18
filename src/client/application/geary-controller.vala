@@ -1028,7 +1028,14 @@ public class GearyController : Geary.BaseObject {
             yield current_folder.close_async();
         }
         
+        // re-enable copy/move to the last selected folder
+        if (current_folder != null) {
+            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, true);
+            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, true);
+        }
+        
         current_folder = folder;
+        
         if (current_account != folder.account) {
             current_account = folder.account;
             account_selected(current_account);
@@ -1055,6 +1062,12 @@ public class GearyController : Geary.BaseObject {
         foreach(Geary.Folder f in current_folder.account.list_folders()) {
             main_window.main_toolbar.copy_folder_menu.add_folder(f);
             main_window.main_toolbar.move_folder_menu.add_folder(f);
+        }
+        
+        // disable copy/move to the new folder
+        if (current_folder != null) {
+            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
+            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
         }
         
         update_ui();
