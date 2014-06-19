@@ -339,6 +339,7 @@ public string html_to_flowed_text(WebKit.DOM.Document doc) {
     string[] lines = doctext.split("\n");
     GLib.StringBuilder flowed = new GLib.StringBuilder.sized(doctext.length);
     foreach (string line in lines) {
+        line = line.chomp();
         int quote_level = 0;
         while (line[quote_level] == Geary.RFC822.Utils.QUOTE_MARKER)
             quote_level += 1;
