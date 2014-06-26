@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-06-26 23:40+0300\n"
-"PO-Revision-Date: 2014-06-26 23:42+0300\n"
+"PO-Revision-Date: 2014-06-26 23:46+0300\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -174,7 +174,7 @@ msgstr "ביקור באתר Yorba"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
-msgstr "הפעלת Geary עם חלון ראשי מוסתר"
+msgstr "Start Geary with hidden main window"
 
 #: ../src/client/application/geary-args.vala:11
 msgid "Output debugging information"
