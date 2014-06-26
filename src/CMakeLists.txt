@@ -291,6 +291,7 @@ engine/util/util-trillian.vala
 )
 
 set(CLIENT_SRC
+client/application/autostart-manager.vala
 client/application/geary-action-adapter.vala
 client/application/geary-application.vala
 client/application/geary-args.vala

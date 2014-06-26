@@ -96,6 +96,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
     
     private bool on_delete_event() {
+        if (Args.hidden_startup || GearyApplication.instance.config.startup_notifications)
+            return hide_on_delete();
+        
         GearyApplication.instance.exit();
         
         return true;

@@ -16,6 +16,7 @@ public class Configuration {
     public const string SPELL_CHECK_KEY = "spell-check";
     public const string PLAY_SOUNDS_KEY = "play-sounds";
     public const string SHOW_NOTIFICATIONS_KEY = "show-notifications";
+    public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     
@@ -62,6 +63,11 @@ public class Configuration {
 
     public bool show_notifications {
         get { return settings.get_boolean(SHOW_NOTIFICATIONS_KEY); }
+    }
+
+    public bool startup_notifications {
+        get { return settings.get_boolean(STARTUP_NOTIFICATIONS_KEY); }
+        set { set_boolean(STARTUP_NOTIFICATIONS_KEY, value); }
     }
     
     private const string CLOCK_FORMAT_KEY = "clock-format";

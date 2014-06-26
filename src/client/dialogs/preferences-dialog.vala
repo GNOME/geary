@@ -21,9 +21,12 @@ public class PreferencesDialog : Object {
         config.bind(Configuration.SPELL_CHECK_KEY, builder.get_object("spell_check"), "active");
         config.bind(Configuration.PLAY_SOUNDS_KEY, builder.get_object("play_sounds"), "active");
         config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, builder.get_object("show_notifications"), "active");
+        config.bind(Configuration.STARTUP_NOTIFICATIONS_KEY, builder.get_object("startup_notifications"), "active");
     }
     
     public void run() {
+        // Sync startup notification option with file state
+        GearyApplication.instance.controller.autostart_manager.sync_with_config();
         dialog.show_all();
         dialog.run();
         dialog.destroy();

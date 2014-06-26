@@ -59,6 +59,11 @@
         <summary>show notifications for new mail</summary>
         <description>True to show notification bubbles.</description>
     </key>
+    <key name="startup-notifications" type="b">
+        <default>false</default>
+        <summary>notify of new mail at startup</summary>
+        <description>True to notify of new mail at startup.</description>
+    </key>
     <key name="ask-open-attachment" type="b">
         <default>true</default>
         <summary>ask when opening an attachment</summary>

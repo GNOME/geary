@@ -7,6 +7,7 @@
 namespace Args {
 
 private const OptionEntry[] options = {
+    { "hidden", 0, 0, OptionArg.NONE, ref hidden_startup, N_("Start Geary with hidden main window"), null },
     { "debug", 'd', 0, OptionArg.NONE, ref log_debug, N_("Output debugging information"), null },
     { "log-conversations", 0, 0, OptionArg.NONE, ref log_conversations, N_("Log conversation monitoring"), null },
     { "log-deserializer", 0, 0, OptionArg.NONE, ref log_deserializer, N_("Log network deserialization"), null },
@@ -26,6 +27,7 @@ private const OptionEntry[] options = {
     { null }
 };
 
+public bool hidden_startup = false;
 public bool log_debug = false;
 public bool log_network = false;
 public bool log_serializer = false;
