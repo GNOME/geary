@@ -674,37 +674,6 @@ private class Geary.Imap.Folder : BaseObject {
             null, cancellable);
     }
     
-    // TODO: Support MOVE extension
-    public async void move_email_async(MessageSet msg_set, Geary.FolderPath destination,
-        Cancellable? cancellable) throws Error {
-        check_open();
-        
-        Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
-        
-        // Don't use copy_email_async followed by remove_email_async; this needs to be one
-        // set of commands executed in order without releasing the cmd_mutex; this is especially
-        // vital if positional addressing is used
-        cmds.add(new CopyCommand(msg_set, new MailboxSpecifier.from_folder_path(destination, null)));
-        
-        Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
-        flags.add(MessageFlag.DELETED);
-        cmds.add(new StoreCommand(msg_set, flags, true, false));
-        
-        // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
-        // for us).  See:
-        // http://redmine.yorba.org/issues/7532
-        //
-        // However, current client implementation doesn't properly close INBOX when application
-        // shuts down, which means deleted messages return at application start.  See:
-        // http://redmine.yorba.org/issues/6865
-        if (msg_set.is_uid && session.capabilities.supports_uidplus())
-            cmds.add(new ExpungeCommand.uid(msg_set));
-        else
-            cmds.add(new ExpungeCommand());
-        
-        yield exec_commands_async(cmds, null, null, cancellable);
-    }
-    
     public async Gee.SortedSet<Imap.UID>? search_async(SearchCriteria criteria, Cancellable? cancellable)
         throws Error {
         check_open();

@@ -59,11 +59,18 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        if (moved_ids.size > 0) {
-            yield engine.remote_folder.move_email_async(
-                new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(moved_ids).to_array()),
-                destination, cancellable);
-        }
+        if (moved_ids.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
+        // don't use Cancellable throughout I/O operations in order to assure transaction completes
+        // fully
+        if (cancellable != null && cancellable.is_cancelled())
+            throw new IOError.CANCELLED("Move email to %s cancelled", engine.remote_folder.to_string());
+        
+        Imap.MessageSet msg_set = new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(moved_ids).to_array());
+        
+        yield engine.remote_folder.copy_email_async(msg_set, destination, null);
+        yield engine.remote_folder.remove_email_async(msg_set, null);
         
         return ReplayOperation.Status.COMPLETED;
     }
