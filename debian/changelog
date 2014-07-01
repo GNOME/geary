@@ -1,3 +1,18 @@
+geary (0.6.1-1~saucy1) saucy; urgency=low
+
+  * Copy and move message bug fixes (esp. to prevent lost emails)
+  * Prevent STARTTLS BAD_IDENTITY when connecting to server
+  * Prevent failure when deleting Outbox message
+  * Don't save draft messages on server when UIDPLUS not available
+  * Correct severe database command error (statement too long)
+  * Fix bug when launching Geary with file URIs for attachments
+  * Prevent the IMAP account synchronizer from deadlocking
+  * Fix server compatibility issues (mail.ru, netcourrier.com)
+  * Italian translation of help documentation
+  * Improved translations
+
+ -- Jim Nelson <jim@yorba.org>  Tue, 01 Jul 2014 14:53:19 -0700
+
 geary (0.6.0-1~saucy1) saucy; urgency=low
 
   * Basic search operators
