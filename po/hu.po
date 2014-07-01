@@ -11,7 +11,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2014-04-19 19:10+0000\n"
-"PO-Revision-Date: 2014-07-01 18:56+0200\n"
+"PO-Revision-Date: 2014-07-01 18:57+0200\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "geary/language/hu_HU/)\n"
@@ -1626,7 +1626,7 @@ msgstr "Jelszó"
 
 #: ../ui/login.glade.h:2
 msgid "E_mail address:"
-msgstr ""
+msgstr "_E-mail cím:"
 
 #: ../ui/login.glade.h:3
 msgid "_Password:"
@@ -1634,7 +1634,7 @@ msgstr "_Jelszó:"
 
 #: ../ui/login.glade.h:4
 msgid "S_ervice:"
-msgstr ""
+msgstr "_Szolgáltatás:"
 
 #: ../ui/login.glade.h:5
 msgid "N_ame:"
