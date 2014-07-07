@@ -1234,9 +1234,18 @@ public class ComposerWidget : Gtk.EventBox {
             && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
         bool tocc = !to_entry.empty && !cc_entry.empty,
             ccbcc = !(to_entry.empty && cc_entry.empty) && !bcc_entry.empty;
-        if (state == ComposerState.INLINE_COMPACT)
+        if (state == ComposerState.INLINE_COMPACT) {
             compact_header_label.label = to_entry.buffer.text + (tocc ? ", " : "")
                 + cc_entry.buffer.text + (ccbcc ? ", " : "") + bcc_entry.buffer.text;
+            StringBuilder tooltip = new StringBuilder();
+            foreach(Geary.RFC822.MailboxAddress addr in to_entry.addresses)
+                tooltip.append(_("To: ") + addr.get_full_address() + "\n");
+            foreach(Geary.RFC822.MailboxAddress addr in cc_entry.addresses)
+                tooltip.append(_("Cc: ") + addr.get_full_address() + "\n");
+            foreach(Geary.RFC822.MailboxAddress addr in bcc_entry.addresses)
+                tooltip.append(_("Bcc: ") + addr.get_full_address() + "\n");
+            compact_header_label.tooltip_text = tooltip.str.slice(0, -1);  // Remove trailing \n
+        }
         
         reset_draft_timer();
     }
