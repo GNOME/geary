@@ -53,8 +53,11 @@ public enum Default {
  * https://en.gravatar.com/site/implement/images/
  */
 public string get_image_uri(Geary.RFC822.MailboxAddress addr, Default def, int size = DEFAULT_SIZE) {
-    return "http://www.gravatar.com/avatar/%s?d=%s&s=%d".printf(
-        Checksum.compute_for_string(ChecksumType.MD5, addr.address), def.to_param(), size);
+    // Gravatar spec for preparing address and hashing:
+    // http://en.gravatar.com/site/implement/hash/
+    string md5 = Checksum.compute_for_string(ChecksumType.MD5, addr.address.strip().down());
+    
+    return "http://www.gravatar.com/avatar/%s?d=%s&s=%d".printf(md5, def.to_param(), size);
 }
 
 }
