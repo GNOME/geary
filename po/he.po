@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-06-26 23:40+0300\n"
-"PO-Revision-Date: 2014-06-26 23:46+0300\n"
+"POT-Creation-Date: 2014-07-09 01:04+0300\n"
+"PO-Revision-Date: 2014-07-09 01:06+0300\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -797,13 +797,25 @@ msgstr "‏„%s” כבר מצורף למכתב."
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1454
+#: ../src/client/composer/composer-widget.vala:1242
+msgid "To: "
+msgstr "אל: "
+
+#: ../src/client/composer/composer-widget.vala:1244
+msgid "Cc: "
+msgstr "עותק: "
+
+#: ../src/client/composer/composer-widget.vala:1246
+msgid "Bcc: "
+msgstr "עותק מוסתר: "
+
+#: ../src/client/composer/composer-widget.vala:1463
 msgid "Select Color"
 msgstr "בחר צבע"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1900
+#: ../src/client/composer/composer-widget.vala:1909
 msgid "_From:"
 msgstr "_מאת:"
 
@@ -811,7 +823,7 @@ msgstr "_מאת:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1916
+#: ../src/client/composer/composer-widget.vala:1925
 #: ../src/client/conversation-viewer/conversation-viewer.vala:635
 #: ../ui/composer.glade.h:42
 msgid "From:"
@@ -1407,7 +1419,7 @@ msgstr "אל: %s\n"
 #: ../src/engine/rfc822/rfc822-utils.vala:223
 #, c-format
 msgid "Cc: %s\n"
-msgstr "העתק: %s\n"
+msgstr "עותק: %s\n"
 
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
