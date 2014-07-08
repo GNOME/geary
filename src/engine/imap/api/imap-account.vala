@@ -273,8 +273,10 @@ private class Geary.Imap.Account : BaseObject {
         MailboxInformation? mailbox_info = path_to_mailbox.get(path);
         if (mailbox_info == null)
             throw_not_found(path);
-        if (mailbox_info.attrs.is_no_select)
-            throw new EngineError.UNSUPPORTED("Can't fetch unseen count for unselectable folder %s", path);
+        if (mailbox_info.attrs.is_no_select) {
+            throw new EngineError.UNSUPPORTED("Can't fetch unseen count for unselectable folder %s",
+                path.to_string());
+        }
         
         StatusData data = yield fetch_status_async(path, { StatusDataType.UNSEEN }, cancellable);
         return data.unseen;
